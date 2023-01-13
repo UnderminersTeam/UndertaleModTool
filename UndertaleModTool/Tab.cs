@@ -365,6 +365,33 @@ namespace UndertaleModTool
                     };
                     break;
 
+                case UndertaleFontEditor fontEditor:
+                    UndertaleFont.Glyph glyph = null;
+                    if (fontEditor.GlyphsGrid.SelectedItem is not null)
+                    {
+                        glyph = fontEditor.GlyphsGrid.SelectedItem as UndertaleFont.Glyph;
+                        if (glyph is null)
+                        {
+                            Debug.WriteLine("Can't save the selected glyph of the font editor - \"SelectedItem\" is not a glyph.");
+                            return;
+                        }
+                    }
+                    
+                    ScrollViewer glyphsViewer = MainWindow.FindVisualChild<ScrollViewer>(fontEditor.GlyphsGrid);
+                    if (glyphsViewer is null)
+                    {
+                        Debug.WriteLine("Can't save the scroll position of the font editor glyphs - \"ScrollViewer\" is not found.");
+                        return;
+                    }
+
+                    LastContentState = new FontTabState()
+                    {
+                        MainScrollPosition = mainScrollPos,
+                        SelectedGlyph = glyph,
+                        GlyphsScrollPosition = glyphsViewer.VerticalOffset
+                    };
+                    break;
+
                 default:
                     LastContentState = new()
                     {
@@ -399,17 +426,13 @@ namespace UndertaleModTool
                 return;
             }
 
-            if (LastContentState.MainScrollPosition != 0)
+            ScrollViewer mainScrollViewer = MainWindow.GetNearestParent<ScrollViewer>(dataEditor);
+            if (mainScrollViewer is null)
             {
-                ScrollViewer mainScrollViewer = MainWindow.GetNearestParent<ScrollViewer>(dataEditor);
-                if (mainScrollViewer is null)
-                {
-                    mainWindow.ShowWarning("The last tab content state can't be restored - \"ScrollViewer\" is not found.");
-                    return;
-                }
-
-                mainScrollViewer.ScrollToVerticalOffset(LastContentState.MainScrollPosition);
+                mainWindow.ShowWarning("The last tab content state can't be restored - \"ScrollViewer\" is not found.");
+                return;
             }
+            mainScrollViewer.ScrollToVerticalOffset(LastContentState.MainScrollPosition);
 
             // if "LastContentState" is an instance of "TabContentState" (e.g. not "CodeTabState")
             if (!LastContentState.GetType().IsSubclassOf(typeof(TabContentState)))
@@ -521,6 +544,20 @@ namespace UndertaleModTool
                     treeObjViewer.UpdateLayout();
                     break;
 
+                case FontTabState fontTabState:
+                    var fontEditor = editor as UndertaleFontEditor;
+
+                    ScrollViewer glyphsViewer = MainWindow.FindVisualChild<ScrollViewer>(fontEditor.GlyphsGrid);
+                    if (glyphsViewer is null)
+                    {
+                        Debug.WriteLine("Can't restore the scroll position of the font editor glyphs - \"ScrollViewer\" is not found.");
+                        return;
+                    }
+                    glyphsViewer.ScrollToVerticalOffset(fontTabState.GlyphsScrollPosition);
+
+                    fontEditor.GlyphsGrid.SelectedItem = fontTabState.SelectedGlyph;
+                    break;
+
                 default:
                     Debug.WriteLine($"The content state of a tab \"{this}\" is unknown?");
                     break;
@@ -606,6 +643,16 @@ namespace UndertaleModTool
 
         /// <summary>The selected room object.</summary>
         public object SelectedObject;
+    }
+
+    /// <summary>Stores the information about the tab with a font.</summary>
+    public class FontTabState : TabContentState
+    {
+        /// <summary>The selected font glyph.</summary>
+        public UndertaleFont.Glyph SelectedGlyph;
+
+        /// <summary>The scroll position of the glyphs grid.</summary>
+        public double GlyphsScrollPosition;
     }
 
 
