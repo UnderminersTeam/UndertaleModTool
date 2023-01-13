@@ -15,6 +15,7 @@ using UndertaleModLib;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
+using static UndertaleModLib.Models.UndertaleRoom;
 
 namespace UndertaleModTool
 {
@@ -337,7 +338,31 @@ namespace UndertaleModTool
                     break;
 
                 case UndertaleRoomEditor roomEditor:
+                    ScrollViewer roomPreviewViewer = roomEditor.RoomGraphicsScroll;
+                    (double Left, double Top) previewScrollPos = (roomPreviewViewer.HorizontalOffset, roomPreviewViewer.VerticalOffset);
 
+                    bool[] objTreeItemsStates = new bool[5]
+                    {
+                        roomEditor.BGItems.IsExpanded,
+                        roomEditor.ViewItems.IsExpanded,
+                        roomEditor.GameObjItems.IsExpanded,
+                        roomEditor.TileItems.IsExpanded,
+                        roomEditor.LayerItems.IsExpanded
+                    };
+                    ScrollViewer treeObjViewer = MainWindow.FindVisualChild<ScrollViewer>(roomEditor.RoomObjectsTree);
+                    (double Left, double Top) treeScrollPos = (treeObjViewer.HorizontalOffset, treeObjViewer.VerticalOffset);
+                    object selectedObj = roomEditor.RoomObjectsTree.SelectedItem;
+                    if (selectedObj is TreeViewItem item)
+                        selectedObj = item.DataContext;
+
+                    LastContentState = new RoomTabState()
+                    {
+                        RoomPreviewScrollPosition = previewScrollPos,
+                        RoomPreviewTransform = roomEditor.RoomGraphics.LayoutTransform,
+                        ObjectTreeItemsStates = objTreeItemsStates,
+                        ObjectsTreeScrollPosition = treeScrollPos,
+                        SelectedObject = selectedObj
+                    };
                     break;
 
                 default:
@@ -351,7 +376,7 @@ namespace UndertaleModTool
 
         /// <summary>Restores the last tab content state.</summary>
         /// <param name="dataEditor">A reference to the object editor of main window.</param>
-        public async Task RestoreTabContentState(ContentControl dataEditor)
+        public void RestoreTabContentState(ContentControl dataEditor)
         {
             if (dataEditor is null
                 || dataEditor.Content is null
@@ -362,8 +387,8 @@ namespace UndertaleModTool
             UserControl editor;
             try
             {
-                // Wait until the new editor will be loaded
-                await mainWindow.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
+                // Wait until the new editor layout will be loaded
+                dataEditor.UpdateLayout();
 
                 var contPres = VisualTreeHelper.GetChild(dataEditor, 0);
                 editor = (UserControl)VisualTreeHelper.GetChild(contPres, 0);
@@ -404,7 +429,96 @@ namespace UndertaleModTool
                     break;
 
                 case RoomTabState roomTabState:
+                    var roomEditor = editor as UndertaleRoomEditor;
 
+                    roomEditor.RoomGraphics.LayoutTransform = roomTabState.RoomPreviewTransform;
+                    roomEditor.RoomGraphics.UpdateLayout();
+
+                    ScrollViewer roomPreviewViewer = roomEditor.RoomGraphicsScroll;
+                    roomPreviewViewer.ScrollToHorizontalOffset(roomTabState.RoomPreviewScrollPosition.Left);
+                    roomPreviewViewer.ScrollToVerticalOffset(roomTabState.RoomPreviewScrollPosition.Top);
+
+                    // (Sadly, arrays don't support destructuring like tuples)
+                    roomEditor.BGItems.IsExpanded = roomTabState.ObjectTreeItemsStates[0];
+                    roomEditor.ViewItems.IsExpanded = roomTabState.ObjectTreeItemsStates[1];
+                    roomEditor.GameObjItems.IsExpanded = roomTabState.ObjectTreeItemsStates[2];
+                    roomEditor.TileItems.IsExpanded = roomTabState.ObjectTreeItemsStates[3];
+                    roomEditor.LayerItems.IsExpanded = roomTabState.ObjectTreeItemsStates[4];
+                    roomEditor.RoomRootItem.UpdateLayout();
+
+                    // Select the object
+                    if (roomTabState.SelectedObject is not UndertaleRoom)
+                    {
+                        TreeViewItem objList = null;
+                        Layer layer = null;
+                        switch (roomTabState.SelectedObject)
+                        {
+                            case Background:
+                                objList = roomEditor.BGItems;
+                                break;
+
+                            case View:
+                                objList = roomEditor.ViewItems;
+                                break;
+
+                            case GameObject gameObj:
+                                var room = roomEditor.DataContext as UndertaleRoom;
+                                if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
+                                {
+                                    layer = room.Layers
+                                                .FirstOrDefault(l => l.LayerType is LayerType.Instances
+                                                    && (l.InstancesData.Instances?.Any(x => x.InstanceID == gameObj.InstanceID) ?? false));
+                                    objList = roomEditor.LayerItems.ItemContainerGenerator.ContainerFromItem(layer) as TreeViewItem;
+                                }
+                                else
+                                    objList = roomEditor.GameObjItems;
+                                break;
+
+                            case Tile tile:
+                                room = roomEditor.DataContext as UndertaleRoom;
+                                if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
+                                {
+                                    layer = room.Layers
+                                                .FirstOrDefault(l => l.LayerType is LayerType.Assets
+                                                    && (l.AssetsData.LegacyTiles?.Any(x => x.InstanceID == tile.InstanceID) ?? false));
+                                    objList = roomEditor.LayerItems.ItemContainerGenerator.ContainerFromItem(layer) as TreeViewItem;
+                                }
+                                else
+                                    objList = roomEditor.TileItems;
+                                break;
+
+                            case Layer:
+                                objList = roomEditor.LayerItems;
+                                break;
+
+                            case SpriteInstance spr:
+                                room = roomEditor.DataContext as UndertaleRoom;
+                                layer = room.Layers
+                                            .FirstOrDefault(l => l.LayerType is LayerType.Assets
+                                                && (l.AssetsData.Sprites?.Any(x => x.Name == spr.Name) ?? false));
+                                objList = roomEditor.LayerItems.ItemContainerGenerator.ContainerFromItem(layer) as TreeViewItem;
+                                break;
+                        }
+                        if (objList is null)
+                            return;
+
+                        objList.IsExpanded = true;
+                        objList.BringIntoView();
+                        objList.UpdateLayout();
+
+                        TreeViewItem objItem = objList?.ItemContainerGenerator.ContainerFromItem(roomTabState.SelectedObject) as TreeViewItem;
+                        if (objItem is null)
+                            return;
+                        objItem.IsSelected = true;
+                        objItem.Focus();
+
+                        roomEditor.RoomRootItem.UpdateLayout();
+                    }
+
+                    ScrollViewer treeObjViewer = MainWindow.FindVisualChild<ScrollViewer>(roomEditor.RoomObjectsTree);
+                    treeObjViewer.ScrollToHorizontalOffset(roomTabState.ObjectsTreeScrollPosition.Left);
+                    treeObjViewer.ScrollToVerticalOffset(roomTabState.ObjectsTreeScrollPosition.Top);
+                    treeObjViewer.UpdateLayout();
                     break;
 
                 default:
@@ -476,6 +590,22 @@ namespace UndertaleModTool
     {
         /// <summary>The scroll position of the room editor preview.</summary>
         public (double Left, double Top) RoomPreviewScrollPosition;
+
+        /// <summary>The scale of the room editor preview.</summary>
+        public Transform RoomPreviewTransform;
+
+        /// <summary>The scroll position of the room objects tree.</summary>
+        public (double Left, double Top) ObjectsTreeScrollPosition;
+
+        /// <summary>The states of the room objects tree items.</summary>
+        /// <remarks>
+        /// An order of the states is following:
+        /// Backgrounds, views, game objects, tiles, layers.
+        /// </remarks>
+        public bool[] ObjectTreeItemsStates;
+
+        /// <summary>The selected room object.</summary>
+        public object SelectedObject;
     }
 
 

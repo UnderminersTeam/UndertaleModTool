@@ -3297,7 +3297,7 @@ result in loss of work.");
                     CurrentTab = newTab;
 
                     if (tabIsChanged)
-                        _ = CurrentTab.RestoreTabContentState(DataEditor);
+                        CurrentTab.RestoreTabContentState(DataEditor);
                 }
             }
         }
@@ -3340,7 +3340,7 @@ result in loss of work.");
 
                 UpdateObjectLabel(CurrentTab.CurrentObject);
 
-                _ = CurrentTab.RestoreTabContentState(DataEditor);
+                CurrentTab.RestoreTabContentState(DataEditor);
             }
         }
 

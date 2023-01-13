@@ -147,6 +147,10 @@ namespace UndertaleModTool
                 ScrollViewer viewer = MainWindow.FindVisualChild<ScrollViewer>(RoomObjectsTree);
                 viewer.ScrollToVerticalOffset(0);
                 viewer.ScrollToHorizontalOffset(0);
+
+                RoomGraphics.ClearValue(LayoutTransformProperty);
+                RoomGraphicsScroll.ScrollToVerticalOffset(0);
+                RoomGraphicsScroll.ScrollToHorizontalOffset(0);
             }
 
             UndertaleCachedImageLoader.Reset();
