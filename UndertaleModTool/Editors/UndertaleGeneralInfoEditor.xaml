@@ -143,8 +143,9 @@
                 <TextBox Grid.Row="20" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.DebuggerPort}"/>
 
                 <TextBlock Grid.Row="21" Grid.Column="0" Margin="3">Room order</TextBlock>
-                <Expander Grid.Row="21" Grid.Column="1" Margin="3" Header="List">
-                    <DataGrid ItemsSource="{Binding GeneralInfo.RoomOrder}" MaxHeight="369" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+                <Expander Grid.Row="21" Grid.Column="1" Margin="3" Header="List" Name="RoomListExpander">
+                    <DataGrid ItemsSource="{Binding GeneralInfo.RoomOrder}" MaxHeight="369" Name="RoomListGrid"
+                              AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
                               ScrollViewer.CanContentScroll="True"
                               VirtualizingPanel.IsVirtualizing="True"
                               VirtualizingPanel.VirtualizationMode="Recycling">

@@ -392,6 +392,32 @@ namespace UndertaleModTool
                     };
                     break;
 
+                case UndertaleGeneralInfoEditor genInfoEditor:
+                    object room = null;
+                    double roomListPos = 0;
+                    if (genInfoEditor.RoomListExpander.IsExpanded)
+                    {
+                        room = genInfoEditor.RoomListGrid.SelectedItem;
+
+                        ScrollViewer roomListViewer = MainWindow.FindVisualChild<ScrollViewer>(genInfoEditor.RoomListGrid);
+                        if (roomListViewer is null)
+                        {
+                            Debug.WriteLine("Can't save the scroll position of the global info editor room list - \"ScrollViewer\" is not found.");
+                            return;
+                        }
+
+                        roomListPos = roomListViewer.VerticalOffset;
+                    }
+
+                    LastContentState = new GeneralInfoTabState()
+                    {
+                        MainScrollPosition = mainScrollPos,
+                        SelectedRoom = room,
+                        RoomListScrollPosition = roomListPos,
+                        IsRoomListExpanded = genInfoEditor.RoomListExpander.IsExpanded
+                    };
+                    break;
+
                 default:
                     LastContentState = new()
                     {
@@ -558,6 +584,25 @@ namespace UndertaleModTool
                     fontEditor.GlyphsGrid.SelectedItem = fontTabState.SelectedGlyph;
                     break;
 
+                case GeneralInfoTabState genInfoTabState:
+                    var genInfoEditor = editor as UndertaleGeneralInfoEditor;
+
+                    genInfoEditor.RoomListExpander.IsExpanded = genInfoTabState.IsRoomListExpanded;
+                    genInfoEditor.UpdateLayout();
+                    if (genInfoTabState.IsRoomListExpanded)
+                    {
+                        ScrollViewer roomListViewer = MainWindow.FindVisualChild<ScrollViewer>(genInfoEditor.RoomListGrid);
+                        if (roomListViewer is null)
+                        {
+                            Debug.WriteLine("Can't restore the scroll position of the general info editor room list - \"ScrollViewer\" is not found.");
+                            return;
+                        }
+                        roomListViewer.ScrollToVerticalOffset(genInfoTabState.RoomListScrollPosition);
+
+                        genInfoEditor.RoomListGrid.SelectedItem = genInfoTabState.SelectedRoom;
+                    }
+                    break;
+
                 default:
                     Debug.WriteLine($"The content state of a tab \"{this}\" is unknown?");
                     break;
@@ -653,6 +698,19 @@ namespace UndertaleModTool
 
         /// <summary>The scroll position of the glyphs grid.</summary>
         public double GlyphsScrollPosition;
+    }
+
+    /// <summary>Stores the information about the tab with a general info.</summary>
+    public class GeneralInfoTabState : TabContentState
+    {
+        /// <summary>The selected room.</summary>
+        public object SelectedRoom;
+
+        /// <summary>The scroll position of the room list grid.</summary>
+        public double RoomListScrollPosition;
+
+        /// <summary>Whether the room list is expanded.</summary>
+        public bool IsRoomListExpanded;
     }
 
 
