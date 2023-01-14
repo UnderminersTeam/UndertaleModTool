@@ -418,6 +418,24 @@ namespace UndertaleModTool
                     };
                     break;
 
+                case UndertaleGlobalInitEditor globalInitEditor:
+                    object script = globalInitEditor.ScriptsGrid.SelectedItem;
+
+                    ScrollViewer scriptsViewer = MainWindow.FindVisualChild<ScrollViewer>(globalInitEditor.ScriptsGrid);
+                    if (scriptsViewer is null)
+                    {
+                        Debug.WriteLine("Can't save the scroll position of the font editor glyphs - \"ScrollViewer\" is not found.");
+                        return;
+                    }
+
+                    LastContentState = new GlobalInitTabState()
+                    {
+                        MainScrollPosition = mainScrollPos,
+                        SelectedScript = script,
+                        ScriptListScrollPosition = scriptsViewer.VerticalOffset
+                    };
+                    break;
+
                 default:
                     LastContentState = new()
                     {
@@ -603,6 +621,20 @@ namespace UndertaleModTool
                     }
                     break;
 
+                case GlobalInitTabState globalInitTabState:
+                    var globalInitEditor = editor as UndertaleGlobalInitEditor;
+
+                    ScrollViewer scriptsViewer = MainWindow.FindVisualChild<ScrollViewer>(globalInitEditor.ScriptsGrid);
+                    if (scriptsViewer is null)
+                    {
+                        Debug.WriteLine("Can't restore the scroll position of the global init editor scripts - \"ScrollViewer\" is not found.");
+                        return;
+                    }
+                    scriptsViewer.ScrollToVerticalOffset(globalInitTabState.ScriptListScrollPosition);
+
+                    globalInitEditor.ScriptsGrid.SelectedItem = globalInitTabState.SelectedScript;
+                    break;
+
                 default:
                     Debug.WriteLine($"The content state of a tab \"{this}\" is unknown?");
                     break;
@@ -711,6 +743,16 @@ namespace UndertaleModTool
 
         /// <summary>Whether the room list is expanded.</summary>
         public bool IsRoomListExpanded;
+    }
+
+    /// <summary>Stores the information about the tab with global init scripts.</summary>
+    public class GlobalInitTabState : TabContentState
+    {
+        /// <summary>The selected script.</summary>
+        public object SelectedScript;
+
+        /// <summary>The scroll position of the script list grid.</summary>
+        public double ScriptListScrollPosition;
     }
 
 
