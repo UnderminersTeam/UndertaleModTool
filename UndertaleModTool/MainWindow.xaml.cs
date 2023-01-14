@@ -3552,6 +3552,16 @@ result in loss of work.");
         {
             Tab.SetTabTitleBinding(null, null, sender as TextBlock);
         }
+
+        private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            ScrollViewer viewer = sender as ScrollViewer;
+
+            // Prevent receiving the mouse wheel event if there is nowhere to scroll.
+            if (viewer.ComputedVerticalScrollBarVisibility != Visibility.Visible
+                && e.Source == viewer)
+                e.Handled = true;
+        }
     }
 
     public class GeneralInfoEditor
