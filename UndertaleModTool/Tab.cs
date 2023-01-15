@@ -436,6 +436,35 @@ namespace UndertaleModTool
                     };
                     break;
 
+                case UndertaleSpriteEditor spriteEditor:
+                    object texture = spriteEditor.TextureList.SelectedItem;
+
+                    ScrollViewer texturesViewer = MainWindow.FindVisualChild<ScrollViewer>(spriteEditor.TextureList);
+                    if (texturesViewer is null)
+                    {
+                        Debug.WriteLine("Can't save the scroll position of the sprite editor textures - \"ScrollViewer\" is not found.");
+                        return;
+                    }
+
+                    object mask = spriteEditor.MaskList.SelectedItem;
+
+                    ScrollViewer masksViewer = MainWindow.FindVisualChild<ScrollViewer>(spriteEditor.MaskList);
+                    if (masksViewer is null)
+                    {
+                        Debug.WriteLine("Can't save the scroll position of the sprite editor masks - \"ScrollViewer\" is not found.");
+                        return;
+                    }
+
+                    LastContentState = new SpriteTabState()
+                    {
+                        MainScrollPosition = mainScrollPos,
+                        SelectedTexture = texture,
+                        TextureListScrollPosition = texturesViewer.VerticalOffset,
+                        SelectedMask = mask,
+                        MaskListScrollPosition = masksViewer.VerticalOffset
+                    };
+                    break;
+
                 default:
                     LastContentState = new()
                     {
@@ -635,6 +664,30 @@ namespace UndertaleModTool
                     globalInitEditor.ScriptsGrid.SelectedItem = globalInitTabState.SelectedScript;
                     break;
 
+                case SpriteTabState spriteTabState:
+                    var spriteEditor = editor as UndertaleSpriteEditor;
+
+                    ScrollViewer texturesViewer = MainWindow.FindVisualChild<ScrollViewer>(spriteEditor.TextureList);
+                    if (texturesViewer is null)
+                    {
+                        Debug.WriteLine("Can't restore the scroll position of the sprite editor textures - \"ScrollViewer\" is not found.");
+                        return;
+                    }
+                    texturesViewer.ScrollToVerticalOffset(spriteTabState.TextureListScrollPosition);
+
+                    spriteEditor.TextureList.SelectedItem = spriteTabState.SelectedTexture;
+
+                    ScrollViewer masksViewer = MainWindow.FindVisualChild<ScrollViewer>(spriteEditor.MaskList);
+                    if (masksViewer is null)
+                    {
+                        Debug.WriteLine("Can't restore the scroll position of the sprite editor masks - \"ScrollViewer\" is not found.");
+                        return;
+                    }
+                    masksViewer.ScrollToVerticalOffset(spriteTabState.MaskListScrollPosition);
+
+                    spriteEditor.MaskList.SelectedItem = spriteTabState.SelectedMask;
+                    break;
+
                 default:
                     Debug.WriteLine($"The content state of a tab \"{this}\" is unknown?");
                     break;
@@ -753,6 +806,22 @@ namespace UndertaleModTool
 
         /// <summary>The scroll position of the script list grid.</summary>
         public double ScriptListScrollPosition;
+    }
+
+    /// <summary>Stores the information about the tab with a sprite.</summary>
+    public class SpriteTabState : TabContentState
+    {
+        /// <summary>The selected sprite texture.</summary>
+        public object SelectedTexture;
+
+        /// <summary>The scroll position of the textures grid.</summary>
+        public double TextureListScrollPosition;
+
+        /// <summary>The selected sprite mask.</summary>
+        public object SelectedMask;
+
+        /// <summary>The scroll position of the masks grid.</summary>
+        public double MaskListScrollPosition;
     }
 
 
