@@ -491,6 +491,41 @@ namespace UndertaleModTool
                     };
                     break;
 
+                case UndertaleTextureGroupInfoEditor textureGroupEditor:
+                    var lists = new (Expander, DataGrid)[5]
+                    {
+                        (textureGroupEditor.TextureListExpander, textureGroupEditor.TextureListGrid),
+                        (textureGroupEditor.SpriteListExpander, textureGroupEditor.SpriteListGrid),
+                        (textureGroupEditor.SpineSprListExpander, textureGroupEditor.SpineSprListGrid),
+                        (textureGroupEditor.FontListExpander, textureGroupEditor.FontListGrid),
+                        (textureGroupEditor.TilesetListExpander, textureGroupEditor.TilesetListGrid)
+                    };
+                    var stateList = new (bool IsExpanded, double ScrollPos, object SelectedItem)[5];
+                    for (int i = 0; i < stateList.Length; i++)
+                    {
+                        var list = lists[i];
+                        if (list.Item1.IsExpanded)
+                        {
+                            stateList[i].IsExpanded = list.Item1.IsExpanded;
+                            stateList[i].SelectedItem = list.Item2.SelectedItem;
+
+                            ScrollViewer viewer = MainWindow.FindVisualChild<ScrollViewer>(list.Item2);
+                            if (viewer is null)
+                            {
+                                Debug.WriteLine("Can't save the scroll positions of the texture group info editor room lists - \"ScrollViewer\" is not found.");
+                                return;
+                            }
+
+                            stateList[i].ScrollPos = viewer.VerticalOffset;
+                        }
+                    }
+
+                    LastContentState = new TextureGroupTabState()
+                    {
+                        MainScrollPosition = mainScrollPos,
+                        GroupListsStates = stateList
+                    };
+                    break;
 
                 default:
                     LastContentState = new()
@@ -734,6 +769,39 @@ namespace UndertaleModTool
                     
                     break;
 
+                case TextureGroupTabState textureGroupTabState:
+                    var textureGroupEditor = editor as UndertaleTextureGroupInfoEditor;
+
+                    var lists = new (Expander, DataGrid)[5]
+                    {
+                        (textureGroupEditor.TextureListExpander, textureGroupEditor.TextureListGrid),
+                        (textureGroupEditor.SpriteListExpander, textureGroupEditor.SpriteListGrid),
+                        (textureGroupEditor.SpineSprListExpander, textureGroupEditor.SpineSprListGrid),
+                        (textureGroupEditor.FontListExpander, textureGroupEditor.FontListGrid),
+                        (textureGroupEditor.TilesetListExpander, textureGroupEditor.TilesetListGrid)
+                    };
+
+                    for (int i = 0; i < lists.Length; i++)
+                    {
+                        var list = lists[i];
+                        var (isExpanded, scrollPos, selectedItem) = textureGroupTabState.GroupListsStates[i]; 
+
+                        list.Item1.IsExpanded = isExpanded;
+                        list.Item1.UpdateLayout();
+                        if (isExpanded)
+                        {
+                            ScrollViewer viewer = MainWindow.FindVisualChild<ScrollViewer>(list.Item2);
+                            if (viewer is null)
+                            {
+                                Debug.WriteLine("Can't restore the scroll position of the tile set editor tiles - \"ScrollViewer\" is not found.");
+                                return;
+                            }
+                            viewer.ScrollToVerticalOffset(scrollPos);
+
+                            list.Item2.SelectedItem = selectedItem;
+                        }
+                    }
+                    break;
 
                 default:
                     Debug.WriteLine($"The content state of a tab \"{this}\" is unknown?");
@@ -880,6 +948,18 @@ namespace UndertaleModTool
         /// <summary>The scroll position of the tile list grid.</summary>
         public double TileListScrollPosition;
     }
+
+    /// <summary>Stores the information about the tab with a texture group.</summary>
+    public class TextureGroupTabState : TabContentState
+    {
+        /// <summary>The states of the texture group lists.</summary>
+        /// <remarks>
+        /// An order of the states is following:
+        /// Texture pages, sprites, spine sprites, fonts, tilesets.
+        /// </remarks>
+        public (bool IsExpanded, double ScrollPos, object SelectedItem)[] GroupListsStates;
+    }
+
 
     /// <summary>A converter that generates the tab title from the tab reference.</summary>
     public class TabTitleConverter : IMultiValueConverter
