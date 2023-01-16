@@ -465,6 +465,33 @@ namespace UndertaleModTool
                     };
                     break;
 
+                case UndertaleBackgroundEditor backgroundEditor:
+                    object tile = null;
+                    double scrollPos = -1;
+
+                    if (mainWindow.IsGMS2 == Visibility.Visible)
+                    {
+                        tile = backgroundEditor.TileIdList.SelectedItem;
+
+                        ScrollViewer tilesViewer = MainWindow.FindVisualChild<ScrollViewer>(backgroundEditor.TileIdList);
+                        if (tilesViewer is null)
+                        {
+                            Debug.WriteLine("Can't save the scroll position of the tile set editor tiles - \"ScrollViewer\" is not found.");
+                            return;
+                        }
+
+                        scrollPos = tilesViewer.VerticalOffset;
+                    }
+
+                    LastContentState = new TileSetTabState()
+                    {
+                        MainScrollPosition = mainScrollPos,
+                        SelectedTile = tile,
+                        TileListScrollPosition = scrollPos
+                    };
+                    break;
+
+
                 default:
                     LastContentState = new()
                     {
@@ -688,6 +715,25 @@ namespace UndertaleModTool
                     spriteEditor.MaskList.SelectedItem = spriteTabState.SelectedMask;
                     break;
 
+                case TileSetTabState tileSetTabState:
+                    var backgroundEditor = editor as UndertaleBackgroundEditor;
+
+                    if (tileSetTabState.TileListScrollPosition != -1)
+                    {
+                        ScrollViewer tilesViewer = MainWindow.FindVisualChild<ScrollViewer>(backgroundEditor.TileIdList);
+                        if (tilesViewer is null)
+                        {
+                            Debug.WriteLine("Can't restore the scroll position of the tile set editor tiles - \"ScrollViewer\" is not found.");
+                            return;
+                        }
+                        tilesViewer.ScrollToVerticalOffset(tileSetTabState.TileListScrollPosition);
+
+                        backgroundEditor.TileIdList.SelectedItem = tileSetTabState.SelectedTile;
+                    }
+                    
+                    break;
+
+
                 default:
                     Debug.WriteLine($"The content state of a tab \"{this}\" is unknown?");
                     break;
@@ -824,6 +870,15 @@ namespace UndertaleModTool
         public double MaskListScrollPosition;
     }
 
+    /// <summary>Stores the information about the tab with a tile set (or a background).</summary>
+    public class TileSetTabState : TabContentState
+    {
+        /// <summary>The selected tile.</summary>
+        public object SelectedTile;
+
+        /// <summary>The scroll position of the tile list grid.</summary>
+        public double TileListScrollPosition;
+    }
 
     /// <summary>A converter that generates the tab title from the tab reference.</summary>
     public class TabTitleConverter : IMultiValueConverter
