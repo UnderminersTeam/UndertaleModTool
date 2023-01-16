@@ -255,9 +255,9 @@ namespace UndertaleModTool
         }
 
         /// <summary>Saves the current tab content state.</summary>
-        /// <param name="dataEditor">A reference to the object editor of main window.</param>
-        public void SaveTabContentState(ContentControl dataEditor)
+        public void SaveTabContentState()
         {
+            ContentControl dataEditor = mainWindow.DataEditor;
             if (dataEditor is null
                 || dataEditor.Content is null
                 || dataEditor.Content is DescriptionView)
@@ -502,9 +502,10 @@ namespace UndertaleModTool
         }
 
         /// <summary>Restores the last tab content state.</summary>
-        /// <param name="dataEditor">A reference to the object editor of main window.</param>
-        public void RestoreTabContentState(ContentControl dataEditor)
+        public void RestoreTabContentState()
         {
+            ContentControl dataEditor = mainWindow.DataEditor;
+
             if (dataEditor is null
                 || dataEditor.Content is null
                 || dataEditor.Content is DescriptionView

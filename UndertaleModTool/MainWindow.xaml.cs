@@ -3212,6 +3212,9 @@ result in loss of work.");
                 CurrentTab.History.Add(obj);
                 CurrentTab.HistoryPosition++;
             }
+
+            if (DataEditor.IsLoaded)
+                GetNearestParent<ScrollViewer>(DataEditor)?.ScrollToTop();
         }
 
         public void CloseTab(bool addDefaultTab = true) // close the current tab
@@ -3237,7 +3240,7 @@ result in loss of work.");
                 if (Tabs.Count == 0)
                 {
                     if (!closingTab.AutoClose)
-                        CurrentTab.SaveTabContentState(DataEditor);
+                        CurrentTab.SaveTabContentState();
 
                     CurrentTabIndex = -1;
                     CurrentTab = null;
@@ -3275,7 +3278,7 @@ result in loss of work.");
                                 currIndex -= 1;
 
                             tabIsChanged = true;
-                            CurrentTab.SaveTabContentState(DataEditor);
+                            CurrentTab.SaveTabContentState();
                         }
                     }
                     else if (currIndex > tabIndex)
@@ -3297,7 +3300,7 @@ result in loss of work.");
                     CurrentTab = newTab;
 
                     if (tabIsChanged)
-                        CurrentTab.RestoreTabContentState(DataEditor);
+                        CurrentTab.RestoreTabContentState();
                 }
             }
         }
@@ -3327,7 +3330,7 @@ result in loss of work.");
         {
             if (TabController.SelectedIndex >= 0)
             {
-                CurrentTab?.SaveTabContentState(DataEditor);
+                CurrentTab?.SaveTabContentState();
 
                 ScrollToTab(CurrentTabIndex);
 
@@ -3340,7 +3343,7 @@ result in loss of work.");
 
                 UpdateObjectLabel(CurrentTab.CurrentObject);
 
-                CurrentTab.RestoreTabContentState(DataEditor);
+                CurrentTab.RestoreTabContentState();
             }
         }
 
