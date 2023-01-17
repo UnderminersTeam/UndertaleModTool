@@ -178,7 +178,7 @@ namespace UndertaleModTool
             DisassemblyEditor.TextArea.SelectionCornerRadius = 0;
         }
 
-        private void DataUserControl_Unloaded(object sender, RoutedEventArgs e)
+        private void UndertaleCodeEditor_Unloaded(object sender, RoutedEventArgs e)
         {
             OverriddenDecompPos = default;
             OverriddenDisasmPos = default;
@@ -205,6 +205,35 @@ namespace UndertaleModTool
             noMatchesTT.IsOpen = false;
         }
 
+        private void UndertaleCodeEditor_Loaded(object sender, RoutedEventArgs e)
+        {
+            FillInCodeViewer();
+        }
+        private void FillInCodeViewer(bool overrideFirst = false)
+        {
+            UndertaleCode code = DataContext as UndertaleCode;
+            if (DisassemblyTab.IsSelected && code != CurrentDisassembled)
+            {
+                if (!overrideFirst)
+                {
+                    DisassembleCode(code, !DisassembledYet);
+                    DisassembledYet = true;
+                }
+                else
+                    DisassembleCode(code, true);
+            }
+            if (DecompiledTab.IsSelected && code != CurrentDecompiled)
+            {
+                if (!overrideFirst)
+                {
+                    _ = DecompileCode(code, !DecompiledYet);
+                    DecompiledYet = true;
+                }
+                else
+                    _ = DecompileCode(code, true);
+            }
+        }
+
         private async void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             UndertaleCode code = this.DataContext as UndertaleCode;
@@ -212,20 +241,21 @@ namespace UndertaleModTool
             Directory.CreateDirectory(TempPath);
             if (code == null)
                 return;
+
             DecompiledSearchPanel.Close();
             DisassemblySearchPanel.Close();
+
             await DecompiledLostFocusBody(sender, null);
             DisassemblyEditor_LostFocus(sender, null);
-            if (DisassemblyTab.IsSelected && code != CurrentDisassembled)
+
+            if (!IsLoaded)
             {
-                DisassembleCode(code, !DisassembledYet);
-                DisassembledYet = true;
+                // If it's not loaded, then "FillInCodeViewer()" will be executed on load.
+                // This prevents a bug with freezing on code opening.
+                return;
             }
-            if (DecompiledTab.IsSelected && code != CurrentDecompiled)
-            {
-                _ = DecompileCode(code, !DecompiledYet);
-                DecompiledYet = true;
-            }
+
+            FillInCodeViewer();
         }
 
         private async void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -277,16 +307,7 @@ namespace UndertaleModTool
                 MainWindow.CodeEditorDecompile = Unstated;
             }
             else
-            {
-                if (DisassemblyTab.IsSelected && code != CurrentDisassembled)
-                {
-                    DisassembleCode(code, true);
-                }
-                if (DecompiledTab.IsSelected && code != CurrentDecompiled)
-                {
-                    _ = DecompileCode(code, true);
-                }
-            }
+                FillInCodeViewer(true);
         }
 
         public static readonly RoutedEvent CtrlKEvent = EventManager.RegisterRoutedEvent(

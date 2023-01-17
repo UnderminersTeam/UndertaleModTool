@@ -2147,7 +2147,31 @@ namespace UndertaleModTool
             {
                 Focus();
 
-                CodeEditorDecompile = editorDecompile;
+                if (Selected == code)
+                {
+                    #pragma warning disable CA1416
+                    var codeEditor = FindVisualChild<UndertaleCodeEditor>(DataEditor);
+                    if (codeEditor is null)
+                    {
+                        Debug.WriteLine("Cannot select the code editor mode tab - its instance is not found.");
+                    }
+                    else
+                    {
+                        if (editorDecompile == CodeEditorMode.Decompile
+                            && !codeEditor.DecompiledTab.IsSelected)
+                        {
+                            codeEditor.CodeModeTabs.SelectedItem = codeEditor.DecompiledTab;
+                        }
+                        else if (editorDecompile == CodeEditorMode.DontDecompile
+                            && !codeEditor.DisassemblyTab.IsSelected)
+                        {
+                            codeEditor.CodeModeTabs.SelectedItem = codeEditor.DisassemblyTab;
+                        }
+                    }
+                    #pragma warning restore CA1416
+                }
+                else
+                    CodeEditorDecompile = editorDecompile;
 
                 HighlightObject(code);
                 ChangeSelection(code);
