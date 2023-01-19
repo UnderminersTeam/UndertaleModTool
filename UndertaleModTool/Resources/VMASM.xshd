@@ -17,12 +17,12 @@
         </Rule>
 
         <Rule color="Label">
-			^(?:\:|\>).*|(?:^|\n)\..*
-		</Rule>
+            ^(?:\:|\>).*|(?:^|\n)\..*
+        </Rule>
 
         <Rule color="String">
-			\"(?:\\.|[^"\\])*\"@\d+
-		</Rule>
+            \"(?:\\.|[^"\\])*\"@\d+
+        </Rule>
         
         <Rule color="Label">
             \[[0-9a-zA-Z_\-]+\]
@@ -43,8 +43,8 @@
 
         <!-- Addresses -->
         <Rule foreground="#E0B0B0">
-			(?:^|\n)\d+(?=:)
-		</Rule>
+            (?:^|\n)\d+(?=:)
+        </Rule>
 
         <!-- Various other things -->
         <Rule foreground="#59c259">
