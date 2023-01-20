@@ -8,6 +8,7 @@ using ICSharpCode.AvalonEdit.Rendering;
 using ICSharpCode.AvalonEdit.Search;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -64,6 +65,11 @@ namespace UndertaleModTool
         public SearchPanel DisassemblySearchPanel;
 
         public static RoutedUICommand Compile = new RoutedUICommand("Compile code", "Compile", typeof(UndertaleCodeEditor));
+
+        private static readonly Dictionary<string, UndertaleNamedResource> NamedObjDict = new();
+        private static readonly Dictionary<string, UndertaleNamedResource> ScriptsDict = new();
+        private static readonly Dictionary<string, UndertaleNamedResource> FunctionsDict = new();
+        private static readonly Dictionary<string, UndertaleNamedResource> CodeDict = new();
 
         public UndertaleCodeEditor()
         {
@@ -228,6 +234,8 @@ namespace UndertaleModTool
             if (code == null)
                 return;
 
+            FillObjectDicts();
+
             // compile/disassemble previously edited code (save changes)
             if (DecompiledTab.IsSelected && DecompiledFocused && DecompiledChanged &&
                 CurrentDecompiled is not null && CurrentDecompiled != code)
@@ -306,6 +314,67 @@ namespace UndertaleModTool
         public async Task SaveChanges()
         {
             await CompileCommandBody(null, null);
+        }
+
+        private static void FillObjectDicts()
+        {
+            var data = mainWindow.Data;
+            var objLists = new IEnumerable[] {
+                data.Sounds,
+                data.Sprites,
+                data.Backgrounds,
+                data.Paths,
+                data.Scripts,
+                data.Fonts,
+                data.GameObjects,
+                data.Rooms,
+                data.Extensions,
+                data.Shaders,
+                data.Timelines,
+                data.AnimationCurves,
+                data.Sequences,
+                data.AudioGroups
+            };
+
+            NamedObjDict.Clear();
+            ScriptsDict.Clear();
+            FunctionsDict.Clear();
+            CodeDict.Clear();
+
+            foreach (var list in objLists)
+            {
+                if (list is null)
+                    continue;
+
+                foreach (var obj in list)
+                {
+                    if (obj is not UndertaleNamedResource namedObj)
+                        return;
+
+                    NamedObjDict[namedObj.Name.Content] = namedObj;
+                }
+            }
+            foreach (var scr in data.Scripts)
+            {
+                if (scr is null)
+                    continue;
+
+                ScriptsDict[scr.Name.Content] = scr;
+            }
+            foreach (var func in data.Functions)
+            {
+                if (func is null)
+                    continue;
+
+                FunctionsDict[func.Name.Content] = func;
+            }
+            foreach (var code in data.Code)
+            {
+                if (code is null)
+                    continue;
+
+                CodeDict[code.Name.Content] = code;
+            }
         }
 
         private void DisassembleCode(UndertaleCode code, bool first)
@@ -1056,22 +1125,25 @@ namespace UndertaleModTool
                 {
                     val = null;
                     if (!data.GMS2_3) // in GMS2.3 every custom "function" is in fact a member variable and scripts are never referenced directly
-                        val = data.Scripts.ByName(nameText);
+                        ScriptsDict.TryGetValue(nameText, out val);
                     if (val == null)
                     {
-                        val = data.Functions.ByName(nameText);
+                        FunctionsDict.TryGetValue(nameText, out val);
                         if (data.GMS2_3)
                         {
                             if (val != null)
                             {
-                                if (data.Code.ByName(val.Name.Content) != null)
+                                if (CodeDict.TryGetValue(val.Name.Content, out _))
                                     val = null; // in GMS2.3 every custom "function" is in fact a member variable, and the names in functions make no sense (they have the gml_Script_ prefix)
                             }
                             else
                             {
                                 // Resolve 2.3 sub-functions for their parent entry
                                 if (data.KnownSubFunctions?.TryGetValue(nameText, out UndertaleFunction f) == true)
-                                    val = data.Scripts.ByName(f.Name.Content).Code?.ParentEntry;
+                                {
+                                    ScriptsDict.TryGetValue(f.Name.Content, out val);
+                                    val = (val as UndertaleScript)?.Code?.ParentEntry;
+                                }
                             }
                         }
                     }
@@ -1088,7 +1160,7 @@ namespace UndertaleModTool
                 }
                 else
                 {
-                    val = data.ByName(nameText);
+                    NamedObjDict.TryGetValue(nameText, out val);
                     if (data.GMS2_3 & val is UndertaleScript)
                         val = null; // in GMS2.3 scripts are never referenced directly
                 }
