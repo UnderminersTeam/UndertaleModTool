@@ -8,6 +8,7 @@ using ICSharpCode.AvalonEdit.Rendering;
 using ICSharpCode.AvalonEdit.Search;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -64,6 +65,11 @@ namespace UndertaleModTool
         public SearchPanel DisassemblySearchPanel;
 
         public static RoutedUICommand Compile = new RoutedUICommand("Compile code", "Compile", typeof(UndertaleCodeEditor));
+
+        private static readonly Dictionary<string, UndertaleNamedResource> NamedObjDict = new();
+        private static readonly Dictionary<string, UndertaleNamedResource> ScriptsDict = new();
+        private static readonly Dictionary<string, UndertaleNamedResource> FunctionsDict = new();
+        private static readonly Dictionary<string, UndertaleNamedResource> CodeDict = new();
 
         public UndertaleCodeEditor()
         {
@@ -131,12 +137,13 @@ namespace UndertaleModTool
 
             DecompiledEditor.Options.ConvertTabsToSpaces = true;
 
-            DecompiledEditor.TextArea.TextView.ElementGenerators.Add(new NumberGenerator());
-            DecompiledEditor.TextArea.TextView.ElementGenerators.Add(new NameGenerator());
+            TextArea textArea = DecompiledEditor.TextArea;
+            textArea.TextView.ElementGenerators.Add(new NumberGenerator(this, textArea));
+            textArea.TextView.ElementGenerators.Add(new NameGenerator(this, textArea));
 
-            DecompiledEditor.TextArea.TextView.Options.HighlightCurrentLine = true;
-            DecompiledEditor.TextArea.TextView.CurrentLineBackground = new SolidColorBrush(Color.FromRgb(60, 60, 60));
-            DecompiledEditor.TextArea.TextView.CurrentLineBorder = new Pen() { Thickness = 0 };
+            textArea.TextView.Options.HighlightCurrentLine = true;
+            textArea.TextView.CurrentLineBackground = new SolidColorBrush(Color.FromRgb(60, 60, 60));
+            textArea.TextView.CurrentLineBorder = new Pen() { Thickness = 0 };
 
             DecompiledEditor.Document.TextChanged += (s, e) =>
             {
@@ -144,10 +151,10 @@ namespace UndertaleModTool
                 DecompiledChanged = true;
             };
 
-            DecompiledEditor.TextArea.SelectionBrush = new SolidColorBrush(Color.FromRgb(100, 100, 100));
-            DecompiledEditor.TextArea.SelectionForeground = null;
-            DecompiledEditor.TextArea.SelectionBorder = null;
-            DecompiledEditor.TextArea.SelectionCornerRadius = 0;
+            textArea.SelectionBrush = new SolidColorBrush(Color.FromRgb(100, 100, 100));
+            textArea.SelectionForeground = null;
+            textArea.SelectionBorder = null;
+            textArea.SelectionCornerRadius = 0;
 
             // Disassembly editor styling and functionality
             DisassemblySearchPanel = SearchPanel.Install(DisassemblyEditor.TextArea);
@@ -162,18 +169,19 @@ namespace UndertaleModTool
                 }
             }
 
-            DisassemblyEditor.TextArea.TextView.ElementGenerators.Add(new NameGenerator());
+            textArea = DisassemblyEditor.TextArea;
+            textArea.TextView.ElementGenerators.Add(new NameGenerator(this, textArea));
 
-            DisassemblyEditor.TextArea.TextView.Options.HighlightCurrentLine = true;
-            DisassemblyEditor.TextArea.TextView.CurrentLineBackground = new SolidColorBrush(Color.FromRgb(60, 60, 60));
-            DisassemblyEditor.TextArea.TextView.CurrentLineBorder = new Pen() { Thickness = 0 };
+            textArea.TextView.Options.HighlightCurrentLine = true;
+            textArea.TextView.CurrentLineBackground = new SolidColorBrush(Color.FromRgb(60, 60, 60));
+            textArea.TextView.CurrentLineBorder = new Pen() { Thickness = 0 };
 
             DisassemblyEditor.Document.TextChanged += (s, e) => DisassemblyChanged = true;
 
-            DisassemblyEditor.TextArea.SelectionBrush = new SolidColorBrush(Color.FromRgb(100, 100, 100));
-            DisassemblyEditor.TextArea.SelectionForeground = null;
-            DisassemblyEditor.TextArea.SelectionBorder = null;
-            DisassemblyEditor.TextArea.SelectionCornerRadius = 0;
+            textArea.SelectionBrush = new SolidColorBrush(Color.FromRgb(100, 100, 100));
+            textArea.SelectionForeground = null;
+            textArea.SelectionBorder = null;
+            textArea.SelectionCornerRadius = 0;
         }
 
         private void SearchPanel_LostFocus(object sender, RoutedEventArgs e)
@@ -225,6 +233,8 @@ namespace UndertaleModTool
             UndertaleCode code = this.DataContext as UndertaleCode;
             if (code == null)
                 return;
+
+            FillObjectDicts();
 
             // compile/disassemble previously edited code (save changes)
             if (DecompiledTab.IsSelected && DecompiledFocused && DecompiledChanged &&
@@ -304,6 +314,67 @@ namespace UndertaleModTool
         public async Task SaveChanges()
         {
             await CompileCommandBody(null, null);
+        }
+
+        private static void FillObjectDicts()
+        {
+            var data = mainWindow.Data;
+            var objLists = new IEnumerable[] {
+                data.Sounds,
+                data.Sprites,
+                data.Backgrounds,
+                data.Paths,
+                data.Scripts,
+                data.Fonts,
+                data.GameObjects,
+                data.Rooms,
+                data.Extensions,
+                data.Shaders,
+                data.Timelines,
+                data.AnimationCurves,
+                data.Sequences,
+                data.AudioGroups
+            };
+
+            NamedObjDict.Clear();
+            ScriptsDict.Clear();
+            FunctionsDict.Clear();
+            CodeDict.Clear();
+
+            foreach (var list in objLists)
+            {
+                if (list is null)
+                    continue;
+
+                foreach (var obj in list)
+                {
+                    if (obj is not UndertaleNamedResource namedObj)
+                        return;
+
+                    NamedObjDict[namedObj.Name.Content] = namedObj;
+                }
+            }
+            foreach (var scr in data.Scripts)
+            {
+                if (scr is null)
+                    continue;
+
+                ScriptsDict[scr.Name.Content] = scr;
+            }
+            foreach (var func in data.Functions)
+            {
+                if (func is null)
+                    continue;
+
+                FunctionsDict[func.Name.Content] = func;
+            }
+            foreach (var code in data.Code)
+            {
+                if (code is null)
+                    continue;
+
+                CodeDict[code.Name.Content] = code;
+            }
         }
 
         private void DisassembleCode(UndertaleCode code, bool first)
@@ -796,22 +867,51 @@ namespace UndertaleModTool
             }
         }
 
-        // Based on https://stackoverflow.com/questions/28379206/custom-hyperlinks-using-avalonedit
         public class NumberGenerator : VisualLineElementGenerator
         {
-            readonly static Regex regex = new Regex(@"-?\d+\.?");
+            private readonly IHighlighter highlighterInst;
+            private readonly UndertaleCodeEditor codeEditorInst;
 
-            public NumberGenerator()
+            // <offset, length>
+            private readonly Dictionary<int, int> lineNumberSections = new();
+
+            public NumberGenerator(UndertaleCodeEditor codeEditorInst, TextArea textAreaInst)
             {
+                this.codeEditorInst = codeEditorInst;
+
+                highlighterInst = textAreaInst.GetService(typeof(IHighlighter)) as IHighlighter;
             }
 
-            Match FindMatch(int startOffset, Regex r)
+            public override void StartGeneration(ITextRunConstructionContext context)
             {
-                // fetch the end offset of the VisualLine being generated
-                int endOffset = CurrentContext.VisualLine.LastDocumentLine.EndOffset;
-                TextDocument document = CurrentContext.Document;
-                string relevantText = document.GetText(startOffset, endOffset - startOffset);
-                return r.Match(relevantText);
+                lineNumberSections.Clear();
+
+                var docLine = context.VisualLine.FirstDocumentLine;
+                if (docLine.Length != 0)
+                {
+                    int line = docLine.LineNumber;
+                    var highlighter = highlighterInst;
+                    
+                    HighlightedLine highlighted;
+                    try
+                    {
+                        highlighted = highlighter.HighlightLine(line);
+                    }
+                    catch
+                    {
+                        Debug.WriteLine($"(NumberGenerator) Code editor line {line} highlight error.");
+                        base.StartGeneration(context);
+                        return;
+                    }
+
+                    foreach (var section in highlighted.Sections)
+                    {
+                        if (section.Color.Name == "Number")
+                            lineNumberSections[section.Offset] = section.Length;
+                    }
+                }
+
+                base.StartGeneration(context);
             }
 
             /// Gets the first offset >= startOffset where the generator wants to construct
@@ -819,39 +919,10 @@ namespace UndertaleModTool
             /// Return -1 to signal no interest.
             public override int GetFirstInterestedOffset(int startOffset)
             {
-                Match m = FindMatch(startOffset, regex);
-
-                var textArea = CurrentContext.TextView.GetService(typeof(TextArea)) as TextArea;
-                var highlighter = textArea.GetService(typeof(IHighlighter)) as IHighlighter;
-                int line = CurrentContext.Document.GetLocation(startOffset).Line;
-                HighlightedLine highlighted = null;
-                try
+                foreach (var section in lineNumberSections)
                 {
-                    highlighted = highlighter.HighlightLine(line);
-                }
-                catch
-                {
-                }
-
-                while (m.Success)
-                {
-                    int res = startOffset + m.Index;
-                    int currLine = CurrentContext.Document.GetLocation(res).Line;
-                    if (currLine != line)
-                    {
-                        line = currLine;
-                        highlighted = highlighter.HighlightLine(line);
-                    }
-
-                    foreach (var section in highlighted.Sections)
-                    {
-                        if (section.Color.Name == "Number" &&
-                            section.Offset == res)
-                            return res;
-                    }
-
-                    startOffset += m.Length;
-                    m = FindMatch(startOffset, regex);
+                    if (startOffset <= section.Key)
+                        return section.Key;
                 }
 
                 return -1;
@@ -861,132 +932,160 @@ namespace UndertaleModTool
             /// May return null if no element should be constructed.
             public override VisualLineElement ConstructElement(int offset)
             {
-                Match m = FindMatch(offset, regex);
+                int numLength = -1;
+                if (!lineNumberSections.TryGetValue(offset, out numLength))
+                    return null;
 
-                if (m.Success && m.Index == 0)
+                var doc = CurrentContext.Document;
+                string numText = doc.GetText(offset, numLength); 
+
+                var line = new ClickVisualLineText(numText, CurrentContext.VisualLine, numLength);
+                
+                line.Clicked += (text) =>
                 {
-                    var line = new ClickVisualLineText(m.Value, CurrentContext.VisualLine, m.Length);
-                    var doc = CurrentContext.Document;
-                    var textArea = CurrentContext.TextView.GetService(typeof(TextArea)) as TextArea;
-                    var editor = textArea.GetService(typeof(TextEditor)) as TextEditor;
-                    var parent = VisualTreeHelper.GetParent(editor);
-                    do
+                    if (int.TryParse(text, out int id))
                     {
-                        if ((parent as FrameworkElement) is UserControl)
-                            break;
-                        parent = VisualTreeHelper.GetParent(parent);
-                    } while (parent != null);
-                    line.Clicked += (text) =>
-                    {
-                        if (text.EndsWith("."))
-                            return;
-                        if (int.TryParse(text, out int id))
+                        codeEditorInst.DecompiledFocused = true;
+                        UndertaleData data = mainWindow.Data;
+
+                        List<UndertaleObject> possibleObjects = new List<UndertaleObject>();
+                        if (id >= 0)
                         {
-                            (parent as UndertaleCodeEditor).DecompiledFocused = true;
-                            UndertaleData data = mainWindow.Data;
-
-                            List<UndertaleObject> possibleObjects = new List<UndertaleObject>();
-                            if (id >= 0)
-                            {
-                                if (id < data.Sprites.Count)
-                                    possibleObjects.Add(data.Sprites[id]);
-                                if (id < data.Rooms.Count)
-                                    possibleObjects.Add(data.Rooms[id]);
-                                if (id < data.GameObjects.Count)
-                                    possibleObjects.Add(data.GameObjects[id]);
-                                if (id < data.Backgrounds.Count)
-                                    possibleObjects.Add(data.Backgrounds[id]);
-                                if (id < data.Scripts.Count)
-                                    possibleObjects.Add(data.Scripts[id]);
-                                if (id < data.Paths.Count)
-                                    possibleObjects.Add(data.Paths[id]);
-                                if (id < data.Fonts.Count)
-                                    possibleObjects.Add(data.Fonts[id]);
-                                if (id < data.Sounds.Count)
-                                    possibleObjects.Add(data.Sounds[id]);
-                                if (id < data.Shaders.Count)
-                                    possibleObjects.Add(data.Shaders[id]);
-                                if (id < data.Timelines.Count)
-                                    possibleObjects.Add(data.Timelines[id]);
-                            }
-
-                            ContextMenu contextMenu = new ContextMenu();
-                            foreach (UndertaleObject obj in possibleObjects)
-                            {
-                                MenuItem item = new MenuItem();
-                                item.Header = obj.ToString().Replace("_", "__");
-                                item.Click += (sender2, ev2) =>
-                                {
-                                    if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
-                                        mainWindow.ChangeSelection(obj);
-                                    else
-                                    {
-                                        doc.Replace(line.ParentVisualLine.StartOffset + line.RelativeTextOffset,
-                                                    text.Length, (obj as UndertaleNamedResource).Name.Content, null);
-                                        (parent as UndertaleCodeEditor).DecompiledChanged = true;
-                                    }
-                                };
-                                contextMenu.Items.Add(item);
-                            }
-                            if (id > 0x00050000)
-                            {
-                                MenuItem item = new MenuItem();
-                                item.Header = "0x" + id.ToString("X6") + " (color)";
-                                item.Click += (sender2, ev2) =>
-                                {
-                                    if (!((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift))
-                                    {
-                                        doc.Replace(line.ParentVisualLine.StartOffset + line.RelativeTextOffset,
-                                                    text.Length, "0x" + id.ToString("X6"), null);
-                                        (parent as UndertaleCodeEditor).DecompiledChanged = true;
-                                    }
-                                };
-                                contextMenu.Items.Add(item);
-                            }
-                            BuiltinList list = mainWindow.Data.BuiltinList;
-                            var myKey = list.Constants.FirstOrDefault(x => x.Value == (double)id).Key;
-                            if (myKey != null)
-                            {
-                                MenuItem item = new MenuItem();
-                                item.Header = myKey.Replace("_", "__") + " (constant)";
-                                item.Click += (sender2, ev2) =>
-                                {
-                                    if (!((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift))
-                                    {
-                                        doc.Replace(line.ParentVisualLine.StartOffset + line.RelativeTextOffset,
-                                                    text.Length, myKey, null);
-                                        (parent as UndertaleCodeEditor).DecompiledChanged = true;
-                                    }
-                                };
-                                contextMenu.Items.Add(item);
-                            }
-                            contextMenu.Items.Add(new MenuItem() { Header = id + " (number)", IsEnabled = false });
-
-                            contextMenu.IsOpen = true;
+                            if (id < data.Sprites.Count)
+                                possibleObjects.Add(data.Sprites[id]);
+                            if (id < data.Rooms.Count)
+                                possibleObjects.Add(data.Rooms[id]);
+                            if (id < data.GameObjects.Count)
+                                possibleObjects.Add(data.GameObjects[id]);
+                            if (id < data.Backgrounds.Count)
+                                possibleObjects.Add(data.Backgrounds[id]);
+                            if (id < data.Scripts.Count)
+                                possibleObjects.Add(data.Scripts[id]);
+                            if (id < data.Paths.Count)
+                                possibleObjects.Add(data.Paths[id]);
+                            if (id < data.Fonts.Count)
+                                possibleObjects.Add(data.Fonts[id]);
+                            if (id < data.Sounds.Count)
+                                possibleObjects.Add(data.Sounds[id]);
+                            if (id < data.Shaders.Count)
+                                possibleObjects.Add(data.Shaders[id]);
+                            if (id < data.Timelines.Count)
+                                possibleObjects.Add(data.Timelines[id]);
                         }
-                    };
-                    return line;
-                }
 
-                return null;
+                        ContextMenu contextMenu = new ContextMenu();
+                        foreach (UndertaleObject obj in possibleObjects)
+                        {
+                            MenuItem item = new MenuItem();
+                            item.Header = obj.ToString().Replace("_", "__");
+                            item.Click += (sender2, ev2) =>
+                            {
+                                if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+                                    mainWindow.ChangeSelection(obj);
+                                else
+                                {
+                                    doc.Replace(line.ParentVisualLine.StartOffset + line.RelativeTextOffset,
+                                                text.Length, (obj as UndertaleNamedResource).Name.Content, null);
+                                    codeEditorInst.DecompiledChanged = true;
+                                }
+                            };
+                            contextMenu.Items.Add(item);
+                        }
+                        if (id > 0x00050000)
+                        {
+                            MenuItem item = new MenuItem();
+                            item.Header = "0x" + id.ToString("X6") + " (color)";
+                            item.Click += (sender2, ev2) =>
+                            {
+                                if (!((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift))
+                                {
+                                    doc.Replace(line.ParentVisualLine.StartOffset + line.RelativeTextOffset,
+                                                text.Length, "0x" + id.ToString("X6"), null);
+                                    codeEditorInst.DecompiledChanged = true;
+                                }
+                            };
+                            contextMenu.Items.Add(item);
+                        }
+                        BuiltinList list = mainWindow.Data.BuiltinList;
+                        var myKey = list.Constants.FirstOrDefault(x => x.Value == (double)id).Key;
+                        if (myKey != null)
+                        {
+                            MenuItem item = new MenuItem();
+                            item.Header = myKey.Replace("_", "__") + " (constant)";
+                            item.Click += (sender2, ev2) =>
+                            {
+                                if (!((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift))
+                                {
+                                    doc.Replace(line.ParentVisualLine.StartOffset + line.RelativeTextOffset,
+                                                text.Length, myKey, null);
+                                    codeEditorInst.DecompiledChanged = true;
+                                }
+                            };
+                            contextMenu.Items.Add(item);
+                        }
+                        contextMenu.Items.Add(new MenuItem() { Header = id + " (number)", IsEnabled = false });
+
+                        contextMenu.IsOpen = true;
+                    }
+                };
+
+                return line;
             }
         }
 
         public class NameGenerator : VisualLineElementGenerator
         {
-            readonly static Regex regex = new Regex(@"[_a-zA-Z][_a-zA-Z0-9]*");
+            private readonly IHighlighter highlighterInst;
+            private readonly TextEditor textEditorInst;
+            private readonly UndertaleCodeEditor codeEditorInst;
 
-            public NameGenerator()
+            private static readonly SolidColorBrush FunctionBrush = new(Color.FromRgb(0xFF, 0xB8, 0x71));
+            private static readonly SolidColorBrush GlobalBrush = new(Color.FromRgb(0xF9, 0x7B, 0xF9));
+            private static readonly SolidColorBrush ConstantBrush = new(Color.FromRgb(0xFF, 0x80, 0x80));
+            private static readonly SolidColorBrush InstanceBrush = new(Color.FromRgb(0x58, 0xE3, 0x5A));
+            private static readonly SolidColorBrush LocalBrush = new(Color.FromRgb(0xFF, 0xF8, 0x99));
+
+            // <offset, length>
+            private readonly Dictionary<int, int> lineNameSections = new();
+
+            public NameGenerator(UndertaleCodeEditor codeEditorInst, TextArea textAreaInst)
             {
+                this.codeEditorInst = codeEditorInst;
+
+                highlighterInst = textAreaInst.GetService(typeof(IHighlighter)) as IHighlighter;
+                textEditorInst = textAreaInst.GetService(typeof(TextEditor)) as TextEditor;
             }
 
-            Match FindMatch(int startOffset, Regex r)
+            public override void StartGeneration(ITextRunConstructionContext context)
             {
-                // fetch the end offset of the VisualLine being generated
-                int endOffset = CurrentContext.VisualLine.LastDocumentLine.EndOffset;
-                TextDocument document = CurrentContext.Document;
-                string relevantText = document.GetText(startOffset, endOffset - startOffset);
-                return r.Match(relevantText);
+                lineNameSections.Clear();
+
+                var docLine = context.VisualLine.FirstDocumentLine;
+                if (docLine.Length != 0)
+                {
+                    int line = docLine.LineNumber;
+                    var highlighter = highlighterInst;
+
+                    HighlightedLine highlighted;
+                    try
+                    {
+                        highlighted = highlighter.HighlightLine(line);
+                    }
+                    catch
+                    {
+                        Debug.WriteLine($"(NameGenerator) Code editor line {line} highlight error.");
+                        base.StartGeneration(context);
+                        return;
+                    }
+
+                    foreach (var section in highlighted.Sections)
+                    {
+                        if (section.Color.Name == "Identifier" || section.Color.Name == "Function")
+                            lineNameSections[section.Offset] = section.Length;
+                    }
+                }
+
+                base.StartGeneration(context);
             }
 
             /// Gets the first offset >= startOffset where the generator wants to construct
@@ -994,42 +1093,12 @@ namespace UndertaleModTool
             /// Return -1 to signal no interest.
             public override int GetFirstInterestedOffset(int startOffset)
             {
-                Match m = FindMatch(startOffset, regex);
-
-                var textArea = CurrentContext.TextView.GetService(typeof(TextArea)) as TextArea;
-                var highlighter = textArea.GetService(typeof(IHighlighter)) as IHighlighter;
-                int line = CurrentContext.Document.GetLocation(startOffset).Line;
-                HighlightedLine highlighted = null;
-                try
+                foreach (var section in lineNameSections)
                 {
-                    highlighted = highlighter.HighlightLine(line);
-                }
-                catch
-                {
+                    if (startOffset <= section.Key)
+                        return section.Key;
                 }
 
-                while (m.Success)
-                {
-                    int res = startOffset + m.Index;
-                    int currLine = CurrentContext.Document.GetLocation(res).Line;
-                    if (currLine != line)
-                    {
-                        line = currLine;
-                        highlighted = highlighter.HighlightLine(line);
-                    }
-
-                    foreach (var section in highlighted.Sections)
-                    {
-                        if (section.Color.Name == "Identifier" || section.Color.Name == "Function")
-                        {
-                            if (section.Offset == res)
-                                return res;
-                        }
-                    }
-
-                    startOffset += m.Length;
-                    m = FindMatch(startOffset, regex);
-                }
                 return -1;
             }
 
@@ -1037,107 +1106,99 @@ namespace UndertaleModTool
             /// May return null if no element should be constructed.
             public override VisualLineElement ConstructElement(int offset)
             {
-                Match m = FindMatch(offset, regex);
+                int nameLength = -1;
+                if (!lineNameSections.TryGetValue(offset, out nameLength))
+                    return null;
 
-                if (m.Success && m.Index == 0)
+                var doc = CurrentContext.Document;
+                string nameText = doc.GetText(offset, nameLength);
+
+                UndertaleData data = mainWindow.Data;
+                bool func = (offset + nameLength + 1 < CurrentContext.VisualLine.LastDocumentLine.EndOffset) &&
+                            (doc.GetCharAt(offset + nameLength) == '(');
+                UndertaleNamedResource val = null;
+
+                var editor = textEditorInst;
+
+                // Process the content of this identifier/function
+                if (func)
                 {
-                    UndertaleData data = mainWindow.Data;
-                    bool func = (offset + m.Length + 1 < CurrentContext.VisualLine.LastDocumentLine.EndOffset) &&
-                                (CurrentContext.Document.GetCharAt(offset + m.Length) == '(');
-                    UndertaleNamedResource val = null;
-
-                    var doc = CurrentContext.Document;
-                    var textArea = CurrentContext.TextView.GetService(typeof(TextArea)) as TextArea;
-                    var editor = textArea.GetService(typeof(TextEditor)) as TextEditor;
-                    var parent = VisualTreeHelper.GetParent(editor);
-                    do
+                    val = null;
+                    if (!data.GMS2_3) // in GMS2.3 every custom "function" is in fact a member variable and scripts are never referenced directly
+                        ScriptsDict.TryGetValue(nameText, out val);
+                    if (val == null)
                     {
-                        if ((parent as FrameworkElement) is UserControl)
-                            break;
-                        parent = VisualTreeHelper.GetParent(parent);
-                    } while (parent != null);
-
-                    // Process the content of this identifier/function
-                    if (func)
-                    {
-                        val = null;
-                        if (!data.GMS2_3) // in GMS2.3 every custom "function" is in fact a member variable and scripts are never referenced directly
-                            val = data.Scripts.ByName(m.Value);
-                        if (val == null)
+                        FunctionsDict.TryGetValue(nameText, out val);
+                        if (data.GMS2_3)
                         {
-                            val = data.Functions.ByName(m.Value);
-                            if (data.GMS2_3)
+                            if (val != null)
                             {
-                                if (val != null)
+                                if (CodeDict.TryGetValue(val.Name.Content, out _))
+                                    val = null; // in GMS2.3 every custom "function" is in fact a member variable, and the names in functions make no sense (they have the gml_Script_ prefix)
+                            }
+                            else
+                            {
+                                // Resolve 2.3 sub-functions for their parent entry
+                                if (data.KnownSubFunctions?.TryGetValue(nameText, out UndertaleFunction f) == true)
                                 {
-                                    if (data.Code.ByName(val.Name.Content) != null)
-                                        val = null; // in GMS2.3 every custom "function" is in fact a member variable, and the names in functions make no sense (they have the gml_Script_ prefix)
-                                }
-                                else
-                                {
-                                    // Resolve 2.3 sub-functions for their parent entry
-                                    UndertaleFunction f = null;
-                                    if (data.KnownSubFunctions?.TryGetValue(m.Value, out f) == true)
-                                        val = data.Scripts.ByName(f.Name.Content).Code?.ParentEntry;
+                                    ScriptsDict.TryGetValue(f.Name.Content, out val);
+                                    val = (val as UndertaleScript)?.Code?.ParentEntry;
                                 }
                             }
                         }
-                        if (val == null)
-                        {
-                            if (data.BuiltinList.Functions.ContainsKey(m.Value))
-                            {
-                                var res = new ColorVisualLineText(m.Value, CurrentContext.VisualLine, m.Length,
-                                                                  new SolidColorBrush(Color.FromRgb(0xFF, 0xB8, 0x71)));
-                                res.Bold = true;
-                                return res;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        val = data.ByName(m.Value);
-                        if (data.GMS2_3 & val is UndertaleScript)
-                            val = null; // in GMS2.3 scripts are never referenced directly
                     }
                     if (val == null)
                     {
-                        if (offset >= 7)
+                        if (data.BuiltinList.Functions.ContainsKey(nameText))
                         {
-                            if (CurrentContext.Document.GetText(offset - 7, 7) == "global.")
-                            {
-                                return new ColorVisualLineText(m.Value, CurrentContext.VisualLine, m.Length,
-                                                                new SolidColorBrush(Color.FromRgb(0xF9, 0x7B, 0xF9)));
-                            }
+                            var res = new ColorVisualLineText(nameText, CurrentContext.VisualLine, nameLength,
+                                                              FunctionBrush);
+                            res.Bold = true;
+                            return res;
                         }
-                        if (data.BuiltinList.Constants.ContainsKey(m.Value))
-                            return new ColorVisualLineText(m.Value, CurrentContext.VisualLine, m.Length,
-                                                            new SolidColorBrush(Color.FromRgb(0xFF, 0x80, 0x80)));
-                        if (data.BuiltinList.GlobalNotArray.ContainsKey(m.Value) ||
-                            data.BuiltinList.Instance.ContainsKey(m.Value) ||
-                            data.BuiltinList.GlobalArray.ContainsKey(m.Value))
-                            return new ColorVisualLineText(m.Value, CurrentContext.VisualLine, m.Length,
-                                                            new SolidColorBrush(Color.FromRgb(0x58, 0xE3, 0x5A)));
-                        if ((parent as UndertaleCodeEditor).CurrentLocals.Contains(m.Value))
-                            return new ColorVisualLineText(m.Value, CurrentContext.VisualLine, m.Length,
-                                                            new SolidColorBrush(Color.FromRgb(0xFF, 0xF8, 0x99)));
-                        return null;
                     }
-
-                    var line = new ClickVisualLineText(m.Value, CurrentContext.VisualLine, m.Length,
-                                                        func ? new SolidColorBrush(Color.FromRgb(0xFF, 0xB8, 0x71)) :
-                                                               new SolidColorBrush(Color.FromRgb(0xFF, 0x80, 0x80)));
-                    if (func)
-                        line.Bold = true;
-                    line.Clicked += async (text) =>
+                }
+                else
+                {
+                    NamedObjDict.TryGetValue(nameText, out val);
+                    if (data.GMS2_3 & val is UndertaleScript)
+                        val = null; // in GMS2.3 scripts are never referenced directly
+                }
+                if (val == null)
+                {
+                    if (offset >= 7)
                     {
-                        await (parent as UndertaleCodeEditor).SaveChanges();
-                        mainWindow.ChangeSelection(val);
-                    };
-
-                    return line;
+                        if (doc.GetText(offset - 7, 7) == "global.")
+                        {
+                            return new ColorVisualLineText(nameText, CurrentContext.VisualLine, nameLength,
+                                                           GlobalBrush);
+                        }
+                    }
+                    if (data.BuiltinList.Constants.ContainsKey(nameText))
+                        return new ColorVisualLineText(nameText, CurrentContext.VisualLine, nameLength,
+                                                       ConstantBrush);
+                    if (data.BuiltinList.GlobalNotArray.ContainsKey(nameText) ||
+                        data.BuiltinList.Instance.ContainsKey(nameText) ||
+                        data.BuiltinList.GlobalArray.ContainsKey(nameText))
+                        return new ColorVisualLineText(nameText, CurrentContext.VisualLine, nameLength,
+                                                       InstanceBrush);
+                    if (codeEditorInst.CurrentLocals.Contains(nameText) == true)
+                        return new ColorVisualLineText(nameText, CurrentContext.VisualLine, nameLength,
+                                                       LocalBrush);
+                    return null;
                 }
 
-                return null;
+                var line = new ClickVisualLineText(nameText, CurrentContext.VisualLine, nameLength,
+                                                   func ? FunctionBrush : ConstantBrush);
+                if (func)
+                    line.Bold = true;
+                line.Clicked += async (text) =>
+                {
+                    await codeEditorInst?.SaveChanges();
+                    mainWindow.ChangeSelection(val);
+                };
+
+                return line;
             }
         }
 
