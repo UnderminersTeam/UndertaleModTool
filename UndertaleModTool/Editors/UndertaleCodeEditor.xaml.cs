@@ -1192,8 +1192,9 @@ namespace UndertaleModTool
                                                    func ? FunctionBrush : ConstantBrush);
                 if (func)
                     line.Bold = true;
-                line.Clicked += (text) =>
+                line.Clicked += async (text) =>
                 {
+                    await codeEditorInst?.SaveChanges();
                     mainWindow.ChangeSelection(val);
                 };
 
