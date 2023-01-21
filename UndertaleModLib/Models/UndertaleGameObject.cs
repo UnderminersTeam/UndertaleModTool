@@ -35,6 +35,8 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     public UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _parentId = new();
     public UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _textureMaskId = new();
 
+    private static readonly int eventTypesLength = Enum.GetValues(typeof(EventType)).Length;
+
     /// <summary>
     /// The name of the game object.
     /// </summary>
@@ -158,7 +160,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// </summary>
     public UndertaleGameObject()
     {
-        for (int i = 0; i < Enum.GetValues(typeof(EventType)).Length; i++)
+        for (int i = 0; i < eventTypesLength; i++)
             Events.Add(new UndertalePointerList<Event>());
     }
 
