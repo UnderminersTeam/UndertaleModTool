@@ -1128,8 +1128,9 @@ namespace UndertaleModTool
                                                                new SolidColorBrush(Color.FromRgb(0xFF, 0x80, 0x80)));
                     if (func)
                         line.Bold = true;
-                    line.Clicked += (text) =>
+                    line.Clicked += async (text) =>
                     {
+                        await (parent as UndertaleCodeEditor).SaveChanges();
                         mainWindow.ChangeSelection(val);
                     };
 
