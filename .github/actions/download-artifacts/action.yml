@@ -1,0 +1,9 @@
+﻿name: "Download artifacts"
+description: "Download artifacts in parallel"
+inputs:
+  names:
+    description: "Artifact names in groups, each group will be downloaded in parallel"
+    required: true
+runs:
+  using: "node16"
+  main: "dist/index.js"

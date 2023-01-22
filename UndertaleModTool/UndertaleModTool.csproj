@@ -14,6 +14,10 @@
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
         <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
         <StartupObject>UndertaleModTool.Program</StartupObject>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(CiBuild)' == 'true'">
+        <NoWarn>$(NoWarn);1591</NoWarn>
     </PropertyGroup>
     <ItemGroup>
       <None Remove="Resources\tabs_left_button.png" />
@@ -30,7 +34,7 @@
         <Resource Include="Resources\X_Down.png" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\UndertaleModLib\UndertaleModLib.csproj" />
+        <ProjectReference Include="..\UndertaleModLib\UndertaleModLib.csproj" Properties="CiBuild=$(CiBuild)" />
     </ItemGroup>
     <ItemGroup>
         <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">

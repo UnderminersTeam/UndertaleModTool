@@ -1,0 +1,14 @@
+﻿name: Build for PR
+
+on:
+  # TODO: enable before pr merge
+  #pull_request:
+
+jobs:
+  build:
+    name: Build
+    uses: ./.github/workflows/build.yml
+    with:
+      gui-single-file-config: "[ false ]"
+      gui-bundled-config: "[ false ]"
+      cli-bundled: "[ false ]"

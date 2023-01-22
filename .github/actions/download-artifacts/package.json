@@ -1,0 +1,7 @@
+{
+  "name": "download-artifacts",
+  "dependencies": {
+    "@actions/artifact": "^1.1.0",
+    "@actions/core": "^1.10.0"
+  }
+}

@@ -1,0 +1,73 @@
+name: Publish CI release
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build
+    uses: ./.github/workflows/build.yml
+    with:
+      gui-bundled-config: "[ true ]"
+      cli-bundled-config: "[ true ]"
+
+  publish:
+    name: Publish
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Download artifacts
+      uses: ./.github/actions/download-artifacts
+      with:
+        names: GUI-win-x64-bundled GUI-win-x64-bundled-singleFile CLI-win-x64-bundled,CLI-osx-x64-bundled,CLI-linux-x64-bundled
+
+    - name: Zip GUI-win-x64-bundled
+      uses: vimtor/action-zip@v1
+      with:
+        files: GUI-win-x64-bundled
+        dest: GUI-win-x64-bundled.zip
+
+    - name: Zip GUI-win-x64-bundled-singleFile
+      uses: vimtor/action-zip@v1
+      with:
+        files: GUI-win-x64-bundled-singleFile
+        dest: GUI-win-x64-bundled-singleFile.zip
+
+    - name: Zip CLI-win-x64-bundled
+      uses: vimtor/action-zip@v1
+      with:
+        files: CLI-win-x64-bundled
+        dest: CLI-win-x64-bundled.zip
+
+    - name: Zip CLI-osx-x64-bundled
+      uses: vimtor/action-zip@v1
+      with:
+        files: CLI-osx-x64-bundled
+        dest: CLI-osx-x64-bundled.zip
+
+    - name: Zip CLI-linux-x64-bundled
+      uses: vimtor/action-zip@v1
+      with:
+        files: CLI-linux-x64-bundled
+        dest: CLI-linux-x64-bundled.zip
+
+    - name: Update release
+      uses: IsaacShelton/update-existing-release@v1.3.1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        files: >
+          GUI-win-x64-bundled.zip
+          GUI-win-x64-bundled-singleFile.zip
+          CLI-win-x64-bundled.zip
+          CLI-osx-x64-bundled.zip
+          CLI-linux-x64-bundled.zip
+        release: Bleeding Edge
+        tag: bleeding-edge
+        body: |
+          This is an automatically updating **bleeding edge** build of UndertaleModTool. There *will* be bugs!
+          If you encounter any, please make an issue on GitHub or join the Underminers Discord for more help!
+        prerelease: false
