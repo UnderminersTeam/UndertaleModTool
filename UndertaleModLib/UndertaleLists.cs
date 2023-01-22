@@ -186,16 +186,20 @@ namespace UndertaleModLib
                     throw new UndertaleSerializationException(e.Message + "\nwhile reading pointer to item " + (i + 1) + " of " + count + " in a list of " + typeof(T).FullName, e);
                 }
             }
-            if (Count > 0 && reader.Position != reader.GetAddressForUndertaleObject(this[0]))
+            if (Count > 0)
             {
-                int skip = (int)reader.GetAddressForUndertaleObject(this[0]) - (int)reader.Position;
-                if (skip > 0)
+                uint pos = reader.GetAddressForUndertaleObject(this[0]);
+                if (reader.Position != pos)
                 {
-                    //Console.WriteLine("Skip " + skip + " bytes of blobs");
-                    reader.Position = reader.Position + (uint)skip;
+                    uint skip = pos - reader.Position;
+                    if (skip > 0)
+                    {
+                        //Console.WriteLine("Skip " + skip + " bytes of blobs");
+                        reader.Position += skip;
+                    }
+                    else
+                        throw new IOException("First list item starts inside the pointer list?!?!");
                 }
-                else
-                    throw new IOException("First list item starts inside the pointer list?!?!");
             }
             for (uint i = 0; i < count; i++)
             {
