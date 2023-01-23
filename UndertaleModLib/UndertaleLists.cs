@@ -126,14 +126,9 @@ namespace UndertaleModLib
 
     public class UndertaleSimpleListShort<T> : UndertaleListBase<T>, UndertaleObject where T : UndertaleObject, new()
     {
-        public UndertaleSimpleListShort()
+        private void EnsureShortCount()
         {
-            base.CollectionChanged += EnsureShortCount;
-        }
-
-        private void EnsureShortCount(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.NewItems != null && e.NewItems.Count > Int16.MaxValue)
+            if (Count > Int16.MaxValue)
                 throw new InvalidOperationException("Count of short SimpleList exceeds maximum number allowed.");
         }
 
@@ -165,6 +160,7 @@ namespace UndertaleModLib
                 try
                 {
                     internalList.Add(reader.ReadUndertaleObject<T>());
+                    EnsureShortCount();
                 }
                 catch (UndertaleSerializationException e)
                 {
