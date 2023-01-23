@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using static UndertaleModLib.Models.UndertaleGeneralInfo;
@@ -94,7 +95,7 @@ public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.Re
 public class UndertaleCodeLocals : UndertaleNamedResource, IDisposable
 {
     public UndertaleString Name { get; set; }
-    public ObservableCollection<LocalVar> Locals { get; } = new ObservableCollection<LocalVar>();
+    public ObservableCollection<LocalVar> Locals { get; private set; } = new ObservableCollection<LocalVar>();
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
@@ -112,11 +113,10 @@ public class UndertaleCodeLocals : UndertaleNamedResource, IDisposable
     {
         uint count = reader.ReadUInt32();
         Name = reader.ReadUndertaleString();
-        Locals.Clear();
+        List<LocalVar> newLocals = new((int)count);
         for (uint i = 0; i < count; i++)
-        {
-            Locals.Add(reader.ReadUndertaleObject<LocalVar>());
-        }
+            newLocals.Add(reader.ReadUndertaleObject<LocalVar>());
+        Locals = new(newLocals);
         Util.DebugUtil.Assert(Locals.Count == count);
     }
 

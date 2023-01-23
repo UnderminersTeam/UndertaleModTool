@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
@@ -188,7 +189,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
     /// <summary>
     /// The collision masks of the sprite.
     /// </summary>
-    public ObservableCollection<MaskEntry> CollisionMasks { get; } = new ObservableCollection<MaskEntry>();
+    public ObservableCollection<MaskEntry> CollisionMasks { get; private set; } = new ObservableCollection<MaskEntry>();
 
     // Special sprite types (always used in GMS2)
     public uint SVersion { get; set; } = 1;
@@ -645,15 +646,17 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
 
     private void ReadMaskData(UndertaleReader reader)
     {
-        uint MaskCount = reader.ReadUInt32();
+        uint maskCount = reader.ReadUInt32();
         uint len = (Width + 7) / 8 * Height;
-        CollisionMasks.Clear();
+        List<MaskEntry> newMasks = new((int)maskCount);
         uint total = 0;
-        for (uint i = 0; i < MaskCount; i++)
+        for (uint i = 0; i < maskCount; i++)
         {
-            CollisionMasks.Add(new MaskEntry(reader.ReadBytes((int)len)));
+            newMasks.Add(new MaskEntry(reader.ReadBytes((int)len)));
             total += len;
         }
+
+        CollisionMasks = new(newMasks);
 
         while (total % 4 != 0)
         {
@@ -661,7 +664,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                 throw new IOException("Mask padding");
             total++;
         }
-        Util.DebugUtil.Assert(total == CalculateMaskDataSize(Width, Height, MaskCount));
+        Util.DebugUtil.Assert(total == CalculateMaskDataSize(Width, Height, maskCount));
     }
 
     public uint CalculateMaskDataSize(uint width, uint height, uint maskcount)
