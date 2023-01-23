@@ -161,7 +161,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     public UndertaleGameObject()
     {
         for (int i = 0; i < eventTypesLength; i++)
-            Events.Add(new UndertalePointerList<Event>());
+            Events.internalList.Add(new UndertalePointerList<Event>());
     }
 
     /// <inheritdoc />
