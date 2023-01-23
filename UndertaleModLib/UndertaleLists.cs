@@ -33,17 +33,18 @@ namespace UndertaleModLib
         /// <inheritdoc />
         public abstract void Unserialize(UndertaleReader reader);
 
-        public void SetCapacity(uint capacity)
+        public void SetCapacity(int capacity)
         {
             try
             {
-                internalList.Capacity = (int)capacity;
+                internalList.Capacity = capacity;
             }
             catch (Exception e)
             {
                 throw new UndertaleSerializationException($"{e.Message}\nwhile trying to \"SetCapacity()\" of \"UndertalePointerList<{typeof(T).FullName}>\".");
             }
         }
+        public void SetCapacity(uint capacity) => SetCapacity((int)capacity);
     }
 
     public class UndertaleSimpleList<T> : UndertaleListBase<T>, UndertaleObject where T : UndertaleObject, new()

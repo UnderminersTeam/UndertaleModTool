@@ -225,6 +225,8 @@ namespace UndertaleModLib
         internal override void UnserializeChunk(UndertaleReader reader)
         {
             uint count = reader.ReadUInt32();
+            List.SetCapacity(count);
+
             for (int i = 0; i < count; i++)
                 Align &= (reader.ReadUInt32() % Alignment == 0);
             for (int i = 0; i < count; i++)

@@ -255,6 +255,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     /// </summary>
     public UndertaleRoom()
     {
+        Backgrounds.SetCapacity(8);
+        Views.SetCapacity(8);
         for (int i = 0; i < 8; i++)
             Backgrounds.internalList.Add(new Background());
         for (int i = 0; i < 8; i++)
