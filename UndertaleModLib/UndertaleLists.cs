@@ -3,14 +3,53 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.IO;
+using System.Reflection;
 using UndertaleModLib.Models;
 
 namespace UndertaleModLib
 {
-    public class UndertaleSimpleList<T> : ObservableCollection<T>, UndertaleObject where T : UndertaleObject, new()
+    public abstract class UndertaleListBase<T> : ObservableCollection<T>
+    {
+        public readonly List<T> internalList;
+
+        public UndertaleListBase()
+        {
+            try
+            {
+                FieldInfo itemsField = typeof(Collection<T>)
+                                       .GetField("items", BindingFlags.NonPublic | BindingFlags.Instance);
+                internalList = (List<T>)itemsField.GetValue(this);
+
+            }
+            catch (Exception e)
+            {
+                throw new UndertaleSerializationException($"{e.Message}\nwhile trying to initialize \"UndertalePointerList<{typeof(T).FullName}>\".");
+            }
+        }
+
+        /// <inheritdoc />
+        public abstract void Serialize(UndertaleWriter writer);
+
+        /// <inheritdoc />
+        public abstract void Unserialize(UndertaleReader reader);
+
+        public void SetCapacity(uint capacity)
+        {
+            try
+            {
+                internalList.Capacity = (int)capacity;
+            }
+            catch (Exception e)
+            {
+                throw new UndertaleSerializationException($"{e.Message}\nwhile trying to \"SetCapacity()\" of \"UndertalePointerList<{typeof(T).FullName}>\".");
+            }
+        }
+    }
+
+    public class UndertaleSimpleList<T> : UndertaleListBase<T>, UndertaleObject where T : UndertaleObject, new()
     {
         /// <inheritdoc />
-        public void Serialize(UndertaleWriter writer)
+        public override void Serialize(UndertaleWriter writer)
         {
             writer.Write((uint)Count);
             for (int i = 0; i < Count; i++)
@@ -27,15 +66,16 @@ namespace UndertaleModLib
         }
 
         /// <inheritdoc />
-        public void Unserialize(UndertaleReader reader)
+        public override void Unserialize(UndertaleReader reader)
         {
             uint count = reader.ReadUInt32();
             Clear();
+            SetCapacity(count);
             for (uint i = 0; i < count; i++)
             {
                 try
                 {
-                    Add(reader.ReadUndertaleObject<T>());
+                    internalList.Add(reader.ReadUndertaleObject<T>());
                 }
                 catch (UndertaleSerializationException e)
                 {
@@ -45,10 +85,10 @@ namespace UndertaleModLib
         }
     }
 
-    public class UndertaleSimpleListString : ObservableCollection<UndertaleString>, UndertaleObject
+    public class UndertaleSimpleListString : UndertaleListBase<UndertaleString>, UndertaleObject
     {
         /// <inheritdoc />
-        public void Serialize(UndertaleWriter writer)
+        public override void Serialize(UndertaleWriter writer)
         {
             writer.Write((uint)Count);
             for (int i = 0; i < Count; i++)
@@ -65,15 +105,16 @@ namespace UndertaleModLib
         }
 
         /// <inheritdoc />
-        public void Unserialize(UndertaleReader reader)
+        public override void Unserialize(UndertaleReader reader)
         {
             uint count = reader.ReadUInt32();
             Clear();
+            SetCapacity(count);
             for (uint i = 0; i < count; i++)
             {
                 try
                 {
-                    Add(reader.ReadUndertaleString());
+                    internalList.Add(reader.ReadUndertaleString());
                 }
                 catch (UndertaleSerializationException e)
                 {
@@ -83,7 +124,7 @@ namespace UndertaleModLib
         }
     }
 
-    public class UndertaleSimpleListShort<T> : ObservableCollection<T>, UndertaleObject where T : UndertaleObject, new()
+    public class UndertaleSimpleListShort<T> : UndertaleListBase<T>, UndertaleObject where T : UndertaleObject, new()
     {
         public UndertaleSimpleListShort()
         {
@@ -97,7 +138,7 @@ namespace UndertaleModLib
         }
 
         /// <inheritdoc />
-        public void Serialize(UndertaleWriter writer)
+        public override void Serialize(UndertaleWriter writer)
         {
             writer.Write((ushort)Count);
             for (int i = 0; i < Count; i++)
@@ -114,15 +155,16 @@ namespace UndertaleModLib
         }
 
         /// <inheritdoc />
-        public void Unserialize(UndertaleReader reader)
+        public override void Unserialize(UndertaleReader reader)
         {
             ushort count = reader.ReadUInt16();
             Clear();
+            SetCapacity(count);
             for (ushort i = 0; i < count; i++)
             {
                 try
                 {
-                    Add(reader.ReadUndertaleObject<T>());
+                    internalList.Add(reader.ReadUndertaleObject<T>());
                 }
                 catch (UndertaleSerializationException e)
                 {
@@ -132,10 +174,10 @@ namespace UndertaleModLib
         }
     }
 
-    public class UndertalePointerList<T> : ObservableCollection<T>, UndertaleObject where T : UndertaleObject, new()
+    public class UndertalePointerList<T> : UndertaleListBase<T>, UndertaleObject where T : UndertaleObject, new()
     {
         /// <inheritdoc />
-        public void Serialize(UndertaleWriter writer)
+        public override void Serialize(UndertaleWriter writer)
         {
             writer.Write((uint)Count);
             foreach (T obj in this)
@@ -155,13 +197,15 @@ namespace UndertaleModLib
             {
                 try
                 {
-                    (this[i] as PrePaddedObject)?.SerializePrePadding(writer);
+                    T obj = this[i];
 
-                    writer.WriteUndertaleObject<T>(this[i]);
+                    (obj as PrePaddedObject)?.SerializePrePadding(writer);
+
+                    writer.WriteUndertaleObject<T>(obj);
 
                     // The last object does NOT get padding (TODO: at least in AUDO)
                     if (i != Count - 1)
-                        (this[i] as PaddedObject)?.SerializePadding(writer);
+                        (obj as PaddedObject)?.SerializePadding(writer);
                 }
                 catch (UndertaleSerializationException e)
                 {
@@ -171,15 +215,16 @@ namespace UndertaleModLib
         }
 
         /// <inheritdoc />
-        public void Unserialize(UndertaleReader reader)
+        public override void Unserialize(UndertaleReader reader)
         {
             uint count = reader.ReadUInt32();
             Clear();
+            SetCapacity(count);
             for (uint i = 0; i < count; i++)
             {
                 try
                 {
-                    Add(reader.ReadUndertaleObjectPointer<T>());
+                    internalList.Add(reader.ReadUndertaleObjectPointer<T>());
                 }
                 catch (UndertaleSerializationException e)
                 {
@@ -205,10 +250,14 @@ namespace UndertaleModLib
             {
                 try
                 {
-                    (this[(int)i] as PrePaddedObject)?.UnserializePrePadding(reader);
-                    reader.ReadUndertaleObject(this[(int)i]);
+                    T obj = this[(int)i];
+
+                    (obj as PrePaddedObject)?.UnserializePrePadding(reader);
+
+                    reader.ReadUndertaleObject(obj);
+
                     if (i != count - 1)
-                        (this[(int)i] as PaddedObject)?.UnserializePadding(reader);
+                        (obj as PaddedObject)?.UnserializePadding(reader);
                 }
                 catch (UndertaleSerializationException e)
                 {
@@ -225,42 +274,49 @@ namespace UndertaleModLib
         {
             uint count = reader.ReadUInt32();
             Clear();
-            List<uint> pointers = new List<uint>();
+            SetCapacity(count);
+            List<uint> pointers = new((int)count);
             for (uint i = 0; i < count; i++)
             {
                 try
                 {
                     uint ptr = reader.ReadUInt32();
                     pointers.Add(ptr);
-                    Add(reader.GetUndertaleObjectAtAddress<T>(ptr));
+                    internalList.Add(reader.GetUndertaleObjectAtAddress<T>(ptr));
                 }
                 catch (UndertaleSerializationException e)
                 {
                     throw new UndertaleSerializationException(e.Message + "\nwhile reading pointer to item " + (i + 1) + " of " + count + " in a list of " + typeof(T).FullName, e);
                 }
             }
-            if (Count > 0 && reader.Position != reader.GetAddressForUndertaleObject(this[0]))
+            if (Count > 0)
             {
-                int skip = (int)reader.GetAddressForUndertaleObject(this[0]) - (int)reader.Position;
-                if (skip > 0)
+                uint pos = reader.GetAddressForUndertaleObject(this[0]);
+                if (reader.Position != pos)
                 {
-                    //Console.WriteLine("Skip " + skip + " bytes of blobs");
-                    reader.Position = reader.Position + (uint)skip;
+                    uint skip = pos - reader.Position;
+                    if (skip > 0)
+                    {
+                        //Console.WriteLine("Skip " + skip + " bytes of blobs");
+                        reader.Position += skip;
+                    }
+                    else
+                        throw new IOException("First list item starts inside the pointer list?!?!");
                 }
-                else
-                    throw new IOException("First list item starts inside the pointer list?!?!");
             }
             for (uint i = 0; i < count; i++)
             {
                 try
                 {
-                    (this[(int)i] as PrePaddedObject)?.UnserializePrePadding(reader);
+                    T obj = this[(int)i];
+
+                    (obj as PrePaddedObject)?.UnserializePrePadding(reader);
                     if ((i + 1) < count)
-                        reader.ReadUndertaleObject(this[(int)i], (int)(pointers[(int)i + 1] - reader.Position));
+                        reader.ReadUndertaleObject(obj, (int)(pointers[(int)i + 1] - reader.Position));
                     else
-                        reader.ReadUndertaleObject(this[(int)i], (int)(endPosition - reader.Position));
+                        reader.ReadUndertaleObject(obj, (int)(endPosition - reader.Position));
                     if (i != count - 1)
-                        (this[(int)i] as PaddedObject)?.UnserializePadding(reader);
+                        (obj as PaddedObject)?.UnserializePadding(reader);
                 }
                 catch (UndertaleSerializationException e)
                 {
