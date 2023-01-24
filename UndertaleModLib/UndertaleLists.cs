@@ -10,7 +10,7 @@ namespace UndertaleModLib
 {
     public abstract class UndertaleListBase<T> : ObservableCollection<T>
     {
-        public readonly List<T> internalList;
+        private readonly List<T> internalList;
 
         public UndertaleListBase()
         {
@@ -45,6 +45,11 @@ namespace UndertaleModLib
             }
         }
         public void SetCapacity(uint capacity) => SetCapacity((int)capacity);
+
+        public void AddDirect(T item)
+        {
+            internalList.Add(item);
+        }
     }
 
     public class UndertaleSimpleList<T> : UndertaleListBase<T>, UndertaleObject where T : UndertaleObject, new()
@@ -76,7 +81,7 @@ namespace UndertaleModLib
             {
                 try
                 {
-                    internalList.Add(reader.ReadUndertaleObject<T>());
+                    AddDirect(reader.ReadUndertaleObject<T>());
                 }
                 catch (UndertaleSerializationException e)
                 {
@@ -115,7 +120,7 @@ namespace UndertaleModLib
             {
                 try
                 {
-                    internalList.Add(reader.ReadUndertaleString());
+                    AddDirect(reader.ReadUndertaleString());
                 }
                 catch (UndertaleSerializationException e)
                 {
@@ -160,7 +165,7 @@ namespace UndertaleModLib
             {
                 try
                 {
-                    internalList.Add(reader.ReadUndertaleObject<T>());
+                    AddDirect(reader.ReadUndertaleObject<T>());
                     EnsureShortCount();
                 }
                 catch (UndertaleSerializationException e)
@@ -221,7 +226,7 @@ namespace UndertaleModLib
             {
                 try
                 {
-                    internalList.Add(reader.ReadUndertaleObjectPointer<T>());
+                    AddDirect(reader.ReadUndertaleObjectPointer<T>());
                 }
                 catch (UndertaleSerializationException e)
                 {
@@ -279,7 +284,7 @@ namespace UndertaleModLib
                 {
                     uint ptr = reader.ReadUInt32();
                     pointers.Add(ptr);
-                    internalList.Add(reader.GetUndertaleObjectAtAddress<T>(ptr));
+                    AddDirect(reader.GetUndertaleObjectAtAddress<T>(ptr));
                 }
                 catch (UndertaleSerializationException e)
                 {

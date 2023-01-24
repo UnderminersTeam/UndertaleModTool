@@ -237,7 +237,7 @@ namespace UndertaleModLib
                         if (reader.ReadByte() != 0)
                             throw new IOException("AlignUpdatedListChunk padding error");
                 }
-                List.internalList.Add(reader.ReadUndertaleObject<T>());
+                List.AddDirect(reader.ReadUndertaleObject<T>());
             }
         }
     }
