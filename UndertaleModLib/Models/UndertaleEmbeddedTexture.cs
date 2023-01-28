@@ -155,12 +155,11 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
 
         if (writer.undertaleData.GM2022_3)
         {
-            uint length = writer.Position - objStartPos;
+            uint length = objEndPos - objStartPos;
             _textureBlockSize = length;
             // Move to the placeholder zero value written in Serialize
             writer.Position = _textureBlockSizeLocation;
-            // Write texture data size
-            writer.Write(length);
+            writer.Write(_textureBlockSize);
             writer.Position = objEndPos;
         }
     }
