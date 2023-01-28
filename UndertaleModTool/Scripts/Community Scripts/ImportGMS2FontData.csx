@@ -174,11 +174,12 @@ foreach (var glyph in glyphs)
     font.Glyphs.Add(glyph);
 
 // TODO: Does this always exist?
+glyphs = font.Glyphs.ToList();
 foreach (JObject kerningPair in fontData["kerningPairs"]?.Values<JObject>())
 {
     // Why do I need to do this. Thanks YoYo
     var first = (ushort)kerningPair["first"];
-    var glyph = font.Glyphs.ToList().Find(x => x.Character == first);
+    var glyph = glyphs.Find(x => x.Character == first);
     glyph.Kerning.Add(new UndertaleFont.Glyph.GlyphKerning()
     {
         Other = (short)kerningPair["second"],

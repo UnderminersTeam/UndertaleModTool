@@ -142,6 +142,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
     {
         // If external, don't serialize blob
         // Has sanity check for data being null as well, although the external flag should be set
+        // This will leave TextureBlockSize at 0 too
         if (_textureData == null || TextureExternal)
             return;
 
@@ -149,18 +150,18 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         while (writer.Position % 0x80 != 0)
             writer.Write((byte)0);
 
-        var objStartPos = writer.Position;
+        var texStartPos = writer.Position;
         writer.WriteUndertaleObject(_textureData);
-        var objEndPos = writer.Position;
+        var texEndPos = writer.Position;
 
         if (writer.undertaleData.GM2022_3)
         {
-            uint length = objEndPos - objStartPos;
+            uint length = texStartPos - texEndPos;
             _textureBlockSize = length;
             // Move to the placeholder zero value written in Serialize
             writer.Position = _textureBlockSizeLocation;
             writer.Write(_textureBlockSize);
-            writer.Position = objEndPos;
+            writer.Position = texEndPos;
         }
     }
 
