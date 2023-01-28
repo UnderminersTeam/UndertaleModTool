@@ -99,7 +99,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         if (writer.undertaleData.GM2022_3)
         {
             // Write a placeholder for the texture blob size,
-            // so we can overwrite this with the actual value later
+            // so we can write an actual value later
             _textureBlockSizeLocation = writer.Position;
             writer.Write((uint)0);
         }
