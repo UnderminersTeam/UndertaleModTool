@@ -36,8 +36,8 @@ using (StreamReader file = File.OpenText(importFile))
     }
 }
 
-string fontPath = Path.GetFullPath(importFile);
-string yyFilename = Path.GetFileName(importFile);
+string fontPath = Path.GetDirectoryName(importFile);
+string yyFilename = Path.GetFileNameWithoutExtension(importFile);
 string fontName = (string)fontData["name"] ?? yyFilename;
 string fontTexturePath = Path.Combine(fontPath, yyFilename + ".png");
 // Failsafe to use font name
@@ -81,13 +81,13 @@ else if (attemptToFixFontNotAppearing)
     // Try to find the texgroup that the font belongs to
     // Scariest LINQ query I've ever written (yet)
     fontTexGroup = Data.TextureGroupInfo
-        .Where(t => t.Fonts.Exists(f => f.Resource == font))
+        .Where(t => t.Fonts.ToList().Exists(f => f.Resource == font))
         .DefaultIfEmpty(fontTexGroup)
         .FirstOrDefault();
     if (fontTexGroup == null)
         throw new ScriptException("Existing font doesn't belong to any texture group AND the default texture group doesn't exist??? (this shouldn't happen)");
     // Failsafe - put it in Default if it's not in there
-    if (!fontTexGroup.Fonts.Exists(f => f.Resource == font))
+    if (!fontTexGroup.Fonts.ToList().Exists(f => f.Resource == font))
         fontTexGroup.Fonts.Add(new UndertaleResourceById<UndertaleFont, UndertaleChunkFONT>() { Resource = font });
 }
 
@@ -134,22 +134,23 @@ font.AntiAliasing = (byte)fontData["AntiAlias"];
 font.ScaleX = 1;
 font.ScaleY = 1;
 // Ascender is GM2022.2+
-font.Ascender = (uint)fontData["ascender"]?;
-font.AscenderOffset = (int)fontData["ascenderOffset"]?;
+if (fontData.ContainsKey("ascender"))
+    font.Ascender = (uint)fontData["ascender"];
+if (fontData.ContainsKey("ascenderOffset"))
+    font.AscenderOffset = (int)fontData["ascenderOffset"];
 
 // FIXME: Too complicated?
 List<int> charRangesUppersAndLowers = new();
 foreach (JObject range in fontData["ranges"].Values<JObject>())
 {
-    charRangesUppersAndLowers.Add(range["upper"]);
-    charRangesUppersAndLowers.Add(range["lower"]);
+    charRangesUppersAndLowers.Add((int)range["upper"]);
+    charRangesUppersAndLowers.Add((int)range["lower"]);
 }
 charRangesUppersAndLowers.Sort();
 // FIXME: Check the range by ourselves if ranges don't have it probably
 font.RangeStart = (ushort)charRangesUppersAndLowers.DefaultIfEmpty(0).FirstOrDefault();
 font.RangeEnd = (uint)charRangesUppersAndLowers.DefaultIfEmpty(0xFFFF).LastOrDefault();
 
-font.Glyphs.Clear();
 List<UndertaleFont.Glyph> glyphs = new();
 // From what I've seen, the keys of the objects in glyphs is just the character property of the object itself but in string form 
 foreach (KeyValuePair<string, JToken> glyphKVEntry in (JObject)fontData["glyphs"])
@@ -168,14 +169,16 @@ foreach (KeyValuePair<string, JToken> glyphKVEntry in (JObject)fontData["glyphs"
 }
 // Sort glyphs like UndertaleFontEditor to be safe
 glyphs.Sort((x, y) => x.Character.CompareTo(y.Character));
-font.Glyphs.AddRange(glyphs);
+font.Glyphs.Clear();
+foreach (var glyph in glyphs)
+    font.Glyphs.Add(glyph);
 
 // TODO: Does this always exist?
 foreach (JObject kerningPair in fontData["kerningPairs"]?.Values<JObject>())
 {
     // Why do I need to do this. Thanks YoYo
     var first = (ushort)kerningPair["first"];
-    var glyph = font.Glyphs.Find(x => x.Character == first);
+    var glyph = font.Glyphs.ToList().Find(x => x.Character == first);
     glyph.Kerning.Add(new UndertaleFont.Glyph.GlyphKerning()
     {
         Other = (short)kerningPair["second"],
