@@ -651,6 +651,7 @@ namespace UndertaleModLib
             else
                 varLength = 12;
             List.Clear();
+            List.Capacity = (int)(Length / varLength);
             while (reader.Position + varLength <= startPosition + Length)
                 List.Add(reader.ReadUndertaleObject<UndertaleVariable>());
         }
