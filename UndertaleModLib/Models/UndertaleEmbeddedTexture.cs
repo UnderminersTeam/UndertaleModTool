@@ -456,9 +456,9 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
             {
                 // PNG is big endian and BinaryRead can't handle that (damn)
                 uint len = (uint)reader.ReadByte() << 24 | (uint)reader.ReadByte() << 16 | (uint)reader.ReadByte() << 8 | (uint)reader.ReadByte();
-                string type = Encoding.UTF8.GetString(reader.ReadBytes(4));
+                uint type = reader.ReadUInt32();
                 reader.Position += len + 4;
-                if (type == "IEND")
+                if (type == 0x444e4549) // 0x444e4549 -> "IEND"
                     break;
             }
 
