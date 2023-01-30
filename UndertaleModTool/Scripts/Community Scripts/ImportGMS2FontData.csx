@@ -81,13 +81,13 @@ else if (attemptToFixFontNotAppearing)
     // Try to find the texgroup that the font belongs to
     // Scariest LINQ query I've ever written (yet)
     fontTexGroup = Data.TextureGroupInfo
-        .Where(t => t.Fonts.ToList().Exists(f => f.Resource == font))
+        .Where(t => t.Fonts.Any(f => f.Resource == font))
         .DefaultIfEmpty(fontTexGroup)
         .FirstOrDefault();
     if (fontTexGroup == null)
         throw new ScriptException("Existing font doesn't belong to any texture group AND the default texture group doesn't exist??? (this shouldn't happen)");
     // Failsafe - put it in Default if it's not in there
-    if (!fontTexGroup.Fonts.ToList().Exists(f => f.Resource == font))
+    if (!fontTexGroup.Fonts.Any(f => f.Resource == font))
         fontTexGroup.Fonts.Add(new UndertaleResourceById<UndertaleFont, UndertaleChunkFONT>() { Resource = font });
 }
 
