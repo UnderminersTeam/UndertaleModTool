@@ -36,7 +36,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
     public uint GeneratedMips { get; set; }
 
     /// <summary>
-    /// Size of the texture block in bytes. Only appears in later 2022 versions of GameMaker.
+    /// Size of the texture attached to this texture page in bytes. Only appears in GM 2022.3+.
     /// </summary>
     private uint _textureBlockSize { get; set; }
 
@@ -142,7 +142,10 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
     {
         // If external, don't serialize blob
         // Has sanity check for data being null as well, although the external flag should be set
-        // This will leave TextureBlockSize at 0 too
+        // FIXME: Implement external texture writing.
+        // This will also leave TextureBlockSize at 0. When we implement the above,
+        // we should write the texture's actual size to that value to be accurate to GM's compiler.
+        // (behavior observed in a VM game built with Runtime 2022.11.1.75)
         if (_textureData == null || TextureExternal)
             return;
 
