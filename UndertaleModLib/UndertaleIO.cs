@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UndertaleModLib.Compiler;
@@ -177,6 +178,8 @@ namespace UndertaleModLib
                 FilePath = fs.Name;
                 Directory = Path.GetDirectoryName(FilePath);
             }
+
+            FillUnserializeCountDictionaries();
         }
 
         // TODO: This would be more useful if it reported location like the exceptions did
@@ -205,6 +208,10 @@ namespace UndertaleModLib
         {
             return UndertaleChunk.Unserialize(this);
         }
+        public uint CountChunkChildObjects()
+        {
+            return UndertaleChunk.CountChunkChildObjects(this);
+        }
 
         private List<UndertaleResourceRef> resUpdate = new List<UndertaleResourceRef>();
         internal UndertaleData undertaleData;
@@ -223,6 +230,21 @@ namespace UndertaleModLib
             data.FORM = new UndertaleChunkFORM();
             DebugUtil.Assert(data.FORM.Name == name);
             data.FORM.Length = length;
+
+            uint startPos = Position;
+            uint poolSize = 0;
+            try
+            {
+                poolSize = data.FORM.UnserializeObjectCount(this);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+            }
+
+            InitializePools(poolSize);
+
+            Position = startPos;
 
             var lenReader = EnsureLengthFromHere(data.FORM.Length);
             data.FORM.UnserializeChunk(this);
@@ -255,9 +277,82 @@ namespace UndertaleModLib
             throw new IOException("Invalid boolean value: " + a);
         }
 
-        private Dictionary<uint, UndertaleObject> objectPool = new Dictionary<uint, UndertaleObject>();
-        private Dictionary<UndertaleObject, uint> objectPoolRev = new Dictionary<UndertaleObject, uint>();
+        private Dictionary<uint, UndertaleObject> objectPool;
+        private Dictionary<UndertaleObject, uint> objectPoolRev;
         private HashSet<uint> unreadObjects = new HashSet<uint>();
+
+        private readonly Dictionary<Type, Func<UndertaleReader, uint>> unserializeFuncDict = new();
+        private readonly Dictionary<Type, uint> staticObjCountDict = new();
+
+        private void FillUnserializeCountDictionaries()
+        {
+            Assembly currAssem = Assembly.GetExecutingAssembly();
+            Type[] allTypes = currAssem.GetExportedTypes();
+
+            Type utObjectType = typeof(UndertaleObject);
+            BindingFlags flag = BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy;
+            Type delegateType = typeof(Func<UndertaleReader, uint>);
+            Type staticObjCountType = typeof(IStaticChildObjCount);
+
+            allTypes = allTypes.Where(t => t.IsAssignableTo(utObjectType)).ToArray();
+            foreach (Type t in allTypes)
+            {
+                MethodInfo mi = t.GetMethod("UnserializeChildObjectCount", flag);
+                if (mi is null)
+                    continue;
+
+                var func = Delegate.CreateDelegate(delegateType, mi) as Func<UndertaleReader, uint>;
+                if (func is null)
+                {
+                    Debug.WriteLine($"Can't create a delegate from MethodInfo of type \"{t.FullName}\"");
+                    continue;
+                }
+
+                unserializeFuncDict[t] = func;
+            }
+
+            foreach (Type t in allTypes)
+            {
+                if (t.IsAssignableTo(staticObjCountType))
+                {
+                    FieldInfo fi = t.GetField("ChildObjectCount", flag);
+                    if (fi is null)
+                    {
+                        Debug.WriteLine($"Can't get \"ChildObjectCount\" field of \"{t.FullName}\"");
+                        continue;
+                    }
+
+                    object res = fi.GetValue(null);
+                    if (res is null)
+                    {
+                        Debug.WriteLine($"Can't get value of \"ChildObjectCount\" of \"{t.FullName}\"");
+                        continue;
+                    }
+
+                    staticObjCountDict[t] = (uint)res;
+                }
+            }
+        }
+        public Func<UndertaleReader, uint> GetUnserializeCountFunc(Type objType)
+        {
+            if (!unserializeFuncDict.TryGetValue(objType, out var res))
+            {
+                Debug.WriteLine($"\"UndertaleReader.unserializeFuncDict\" doesn't contain a method for \"{objType.FullName}\".");
+                return null;
+            }
+
+            return res;
+        }
+        public uint GetStaticChildCount(Type objType)
+        {
+            if (!staticObjCountDict.TryGetValue(objType, out uint res))
+            {
+                Debug.WriteLine($"\"UndertaleReader.staticObjCountDict\" doesn't contain type \"{objType.FullName}\".");
+                return 0;
+            }
+
+            return res;
+        }
 
         public Dictionary<uint, UndertaleObject> GetOffsetMap()
         {
@@ -267,6 +362,31 @@ namespace UndertaleModLib
         public Dictionary<UndertaleObject, uint> GetOffsetMapRev()
         {
             return objectPoolRev;
+        }
+
+        public void InitializePools(uint objCount)
+        {
+            if (objCount == 0)
+            {
+                objectPool = new();
+                objectPoolRev = new();
+            }
+            else
+            {
+                int objCountInt = (int)objCount;
+                objectPool = new(objCountInt);
+                objectPoolRev = new(objCountInt);
+            }
+        }
+
+        public uint GetChildObjectCount<T>() where T : UndertaleObject
+        {
+            Type t = typeof(T);
+            if (!unserializeFuncDict.TryGetValue(t, out var func))
+                throw new UndertaleSerializationException(
+                    $"\"UndertaleReader.unserializeFuncDict\" doesn't contain a method for \"{t.FullName}\".");
+
+            return func(this);
         }
 
         public T GetUndertaleObjectAtAddress<T>(uint address) where T : UndertaleObject, new()

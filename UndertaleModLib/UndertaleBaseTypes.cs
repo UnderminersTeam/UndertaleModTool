@@ -20,6 +20,18 @@ namespace UndertaleModLib
         /// </summary>
         /// <param name="reader">Where to deserialize from.</param>
         void Unserialize(UndertaleReader reader);
+
+        /*
+         * As for C# 10, it's impossible to inherit static methods from an interface :(
+         * (so this method is for inheriting XML commentary only)
+         */
+        /// <summary>
+        /// Deserializes the total child object count of this object from specified <see cref="UndertaleReader"/>.
+        /// </summary>
+        /// <param name="reader">Where to deserialize from.</param>
+        /// <returns>The object count.</returns>
+        static uint UnserializeChildObjectCount(UndertaleReader reader) => 0;
+        
     }
 
     public interface UndertaleObjectLenCheck : UndertaleObject
@@ -106,5 +118,10 @@ namespace UndertaleModLib
         /// <returns><see langword="true"/> if <paramref name="filter"/> occurs within this object, or if
         /// <paramref name="filter"/> is the empty string (""); otherwise, false.</returns>
         bool SearchMatches(string filter);
+    }
+
+    public interface IStaticChildObjCount
+    {
+        public static readonly uint ChildObjectCount = 0;
     }
 }

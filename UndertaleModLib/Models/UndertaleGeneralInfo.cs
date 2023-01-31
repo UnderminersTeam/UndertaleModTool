@@ -451,6 +451,17 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         reader.Bytecode14OrLower = BytecodeVersion <= 14;
     }
 
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        reader.Position++;                            // "IsDebuggerDisabled"
+        bool readDebugPort = reader.ReadByte() >= 14; // "BytecodeVersion" >= 14
+        reader.Position += (uint)(122 + (readDebugPort ? 4 : 0));
+
+        // "RoomOrder"
+        return 1 + UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM>.UnserializeChildObjectCount(reader);
+    }
+
     /// <summary>
     /// Generates "info number" used for GMS2 UIDs.
     /// </summary>
@@ -631,7 +642,7 @@ public class UndertaleOptions : UndertaleObject, IDisposable
     /// A class for game constants.
     /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class Constant : UndertaleObject, IDisposable
+    public class Constant : UndertaleObject, IStaticChildObjCount, IDisposable
     {
         /// <summary>
         /// The name of the constant.
@@ -792,6 +803,21 @@ public class UndertaleOptions : UndertaleObject, IDisposable
             if (reader.ReadBoolean()) Info |= OptionsFlags.CreationEventOrder;
             Constants = reader.ReadUndertaleObject<UndertaleSimpleList<Constant>>();
         }
+    }
+
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        uint count = 0;
+        bool newFormat = reader.ReadInt32() == int.MinValue;
+        reader.Position -= 4;
+
+        reader.Position += newFormat ? 60u : 140u;
+
+        // "Constants"
+        count += 1 + UndertaleSimpleList<Constant>.UnserializeChildObjectCount(reader);
+
+        return count;
     }
 
     /// <inheritdoc/>

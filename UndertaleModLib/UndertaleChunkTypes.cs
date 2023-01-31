@@ -17,6 +17,7 @@ namespace UndertaleModLib
 
         internal abstract void SerializeChunk(UndertaleWriter writer);
         internal abstract void UnserializeChunk(UndertaleReader reader);
+        internal abstract uint UnserializeObjectCount(UndertaleReader reader);
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -79,7 +80,8 @@ namespace UndertaleModLib
                 }
 
                 UndertaleChunk chunk = (UndertaleChunk)Activator.CreateInstance(type);
-                Util.DebugUtil.Assert(chunk.Name == name);
+                Util.DebugUtil.Assert(chunk.Name == name,
+                                      $"Chunk name mismatch: expected \"{name}\", got \"{chunk.Name}\".");
                 chunk.Length = length;
 
                 reader.SubmitMessage("Reading chunk " + chunk.Name);
@@ -124,6 +126,41 @@ namespace UndertaleModLib
                 throw new UndertaleSerializationException(e.Message + "\nat " + reader.Position.ToString("X8") + " while reading chunk " + name, e);
             }
         }
+        public static uint CountChunkChildObjects(UndertaleReader reader)
+        {
+            string name = "(unknown)";
+            try
+            {
+                name = reader.ReadChars(4);
+                uint length = reader.ReadUInt32();
+
+                Type type = Type.GetType(typeof(UndertaleChunk).FullName + name);
+                if (type == null)
+                    throw new IOException("Unknown chunk " + name + "!!!");
+
+                UndertaleChunk chunk = (UndertaleChunk)Activator.CreateInstance(type);
+                Util.DebugUtil.Assert(chunk.Name == name,
+                                      $"Chunk name mismatch: expected \"{name}\", got \"{chunk.Name}\".");
+                chunk.Length = length;
+
+                uint chunkStart = reader.Position;
+
+                reader.SubmitMessage("Counting objects of chunk " + chunk.Name);
+                uint count = chunk.UnserializeObjectCount(reader);
+
+                reader.Position = chunkStart + chunk.Length;
+
+                return count;
+            }
+            catch (UndertaleSerializationException e)
+            {
+                throw new UndertaleSerializationException(e.Message + " in chunk " + name, e);
+            }
+            catch (Exception e)
+            {
+                throw new UndertaleSerializationException(e.Message + "\nat " + reader.Position.ToString("X8") + " while counting objects of chunk " + name, e);
+            }
+        }
     }
 
     public interface IUndertaleSingleChunk
@@ -156,6 +193,8 @@ namespace UndertaleModLib
             Object = reader.ReadUndertaleObject<T>();
         }
 
+        internal override uint UnserializeObjectCount(UndertaleReader reader) => 1;
+
         public UndertaleObject GetObject() => Object;
 
         public override string ToString()
@@ -177,6 +216,11 @@ namespace UndertaleModLib
         internal override void UnserializeChunk(UndertaleReader reader)
         {
             List.Unserialize(reader);
+        }
+
+        internal override uint UnserializeObjectCount(UndertaleReader reader)
+        {
+            return reader.ReadUInt32();
         }
 
         public IList GetList() => List;
@@ -256,6 +300,11 @@ namespace UndertaleModLib
             List.Unserialize(reader);
         }
 
+        internal override uint UnserializeObjectCount(UndertaleReader reader)
+        {
+            return reader.ReadUInt32();
+        }
+
         public IList GetList() => List;
     }
 
@@ -268,5 +317,7 @@ namespace UndertaleModLib
         internal override void UnserializeChunk(UndertaleReader reader)
         {
         }
+
+        internal override uint UnserializeObjectCount(UndertaleReader reader) => 0;
     }
 }

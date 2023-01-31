@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UndertaleModLib.Models;
@@ -96,16 +97,45 @@ namespace UndertaleModLib
                 }
             }
         }
+
+        internal override uint UnserializeObjectCount(UndertaleReader reader)
+        {
+            uint totalCount = 0;
+            uint startPos = reader.Position;
+
+            while (reader.Position < startPos + Length)
+                totalCount += reader.CountChunkChildObjects();
+
+            return totalCount;
+        }
     }
 
     public class UndertaleChunkGEN8 : UndertaleSingleChunk<UndertaleGeneralInfo>
     {
         public override string Name => "GEN8";
+
+        internal override uint UnserializeObjectCount(UndertaleReader reader)
+        {
+            uint count = 1;
+
+            count += UndertaleGeneralInfo.UnserializeChildObjectCount(reader);
+
+            return count;
+        }
     }
 
     public class UndertaleChunkOPTN : UndertaleSingleChunk<UndertaleOptions>
     {
         public override string Name => "OPTN";
+
+        internal override uint UnserializeObjectCount(UndertaleReader reader)
+        {
+            uint count = 1;
+
+            count += UndertaleOptions.UnserializeChildObjectCount(reader);
+
+            return count;
+        }
     }
 
     public class UndertaleChunkLANG : UndertaleSingleChunk<UndertaleLanguage>
@@ -655,6 +685,12 @@ namespace UndertaleModLib
             while (reader.Position + varLength <= startPosition + Length)
                 List.Add(reader.ReadUndertaleObject<UndertaleVariable>());
         }
+
+        internal override uint UnserializeObjectCount(UndertaleReader reader)
+        {
+            int varLength = reader.Bytecode14OrLower ? 12 : 20;
+            return Length / (uint)varLength;
+        }
     }
 
     public class UndertaleChunkFUNC : UndertaleChunk
@@ -698,6 +734,7 @@ namespace UndertaleModLib
             {
                 uint startPosition = reader.Position;
                 Functions.Clear();
+                Functions.SetCapacity(Length / 12);
                 while (reader.Position + 12 <= startPosition + Length)
                     Functions.Add(reader.ReadUndertaleObject<UndertaleFunction>());
             }
@@ -706,6 +743,21 @@ namespace UndertaleModLib
                 Functions = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleFunction>>();
                 CodeLocals = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleCodeLocals>>();
             }
+        }
+
+        internal override uint UnserializeObjectCount(UndertaleReader reader)
+        {
+            uint count = 0;
+
+            if (!reader.Bytecode14OrLower)
+            {
+                count += reader.GetChildObjectCount<UndertaleSimpleList<UndertaleFunction>>();
+                count += reader.GetChildObjectCount<UndertaleSimpleList<UndertaleCodeLocals>>();
+            }
+            else
+                count = Length / 12;
+
+            return count;
         }
     }
 

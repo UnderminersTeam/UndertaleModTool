@@ -44,6 +44,11 @@ namespace UndertaleModLib
                 }
             }
         }
+
+        internal override uint UnserializeObjectCount(UndertaleReader reader)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class UndertaleDebugChunkSCPT : UndertaleListChunk<UndertaleScriptSource>

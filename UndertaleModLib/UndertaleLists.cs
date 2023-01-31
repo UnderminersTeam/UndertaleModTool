@@ -8,7 +8,7 @@ using UndertaleModLib.Models;
 
 namespace UndertaleModLib
 {
-    public abstract class UndertaleListBase<T> : ObservableCollection<T>
+    public abstract class UndertaleListBase<T> : ObservableCollection<T>, UndertaleObject
     {
         private readonly List<T> internalList;
 
@@ -52,7 +52,7 @@ namespace UndertaleModLib
         }
     }
 
-    public class UndertaleSimpleList<T> : UndertaleListBase<T>, UndertaleObject where T : UndertaleObject, new()
+    public class UndertaleSimpleList<T> : UndertaleListBase<T> where T : UndertaleObject, new()
     {
         /// <inheritdoc />
         public override void Serialize(UndertaleWriter writer)
@@ -89,9 +89,41 @@ namespace UndertaleModLib
                 }
             }
         }
+
+        /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+        public static uint UnserializeChildObjectCount(UndertaleReader reader)
+        {
+            uint count = reader.ReadUInt32();
+
+            Type t = typeof(T);
+            if (t.IsAssignableTo(typeof(UndertaleResourceRef)))
+                return count;
+
+            if (t.IsAssignableTo(typeof(IStaticChildObjCount)))
+            {
+                uint subCount = reader.GetStaticChildCount(t);
+
+                return count + count * subCount;
+            }
+
+            var unserializeFunc = reader.GetUnserializeCountFunc(t);
+            for (uint i = 0; i < count; i++)
+            {
+                try
+                {
+                    count += unserializeFunc(reader);
+                }
+                catch (UndertaleSerializationException e)
+                {
+                    throw new UndertaleSerializationException(e.Message + "\nwhile reading child object count of item " + (i + 1) + " of " + count + " in a list of " + typeof(T).FullName, e);
+                }
+            }
+
+            return count;
+        }
     }
 
-    public class UndertaleSimpleListString : UndertaleListBase<UndertaleString>, UndertaleObject
+    public class UndertaleSimpleListString : UndertaleListBase<UndertaleString>
     {
         /// <inheritdoc />
         public override void Serialize(UndertaleWriter writer)
@@ -128,9 +160,15 @@ namespace UndertaleModLib
                 }
             }
         }
+
+        /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+        public static uint UnserializeChildObjectCount(UndertaleReader reader)
+        {
+            return reader.ReadUInt32();
+        }
     }
 
-    public class UndertaleSimpleListShort<T> : UndertaleListBase<T>, UndertaleObject where T : UndertaleObject, new()
+    public class UndertaleSimpleListShort<T> : UndertaleListBase<T> where T : UndertaleObject, new()
     {
         private void EnsureShortCount()
         {
@@ -174,9 +212,38 @@ namespace UndertaleModLib
                 }
             }
         }
+
+        /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+        public static uint UnserializeChildObjectCount(UndertaleReader reader)
+        {
+            uint count = reader.ReadUInt32();
+
+            Type t = typeof(T);
+            if (t.IsAssignableTo(typeof(IStaticChildObjCount)))
+            {
+                uint subCount = reader.GetStaticChildCount(t);
+
+                return count * subCount;
+            }
+
+            var unserializeFunc = reader.GetUnserializeCountFunc(t);
+            for (uint i = 0; i < count; i++)
+            {
+                try
+                {
+                    count += unserializeFunc(reader);
+                }
+                catch (UndertaleSerializationException e)
+                {
+                    throw new UndertaleSerializationException(e.Message + "\nwhile reading child object count of item " + (i + 1) + " of " + count + " in a list of " + typeof(T).FullName, e);
+                }
+            }
+
+            return count;
+        }
     }
 
-    public class UndertalePointerList<T> : UndertaleListBase<T>, UndertaleObject where T : UndertaleObject, new()
+    public class UndertalePointerList<T> : UndertaleListBase<T> where T : UndertaleObject, new()
     {
         /// <inheritdoc />
         public override void Serialize(UndertaleWriter writer)
@@ -267,11 +334,40 @@ namespace UndertaleModLib
                 }
             }
         }
+
+        /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+        public static uint UnserializeChildObjectCount(UndertaleReader reader)
+        {
+            uint count = reader.ReadUInt32();
+
+            Type t = typeof(T);
+            if (t.IsAssignableTo(typeof(IStaticChildObjCount)))
+            {
+                uint subCount = reader.GetStaticChildCount(t);
+
+                return count * subCount;
+            }
+
+            var unserializeFunc = reader.GetUnserializeCountFunc(t);
+            for (uint i = 0; i < count; i++)
+            {
+                try
+                {
+                    count += unserializeFunc(reader);
+                }
+                catch (UndertaleSerializationException e)
+                {
+                    throw new UndertaleSerializationException(e.Message + "\nwhile reading child object count of item " + (i + 1) + " of " + count + " in a list of " + typeof(T).FullName, e);
+                }
+            }
+
+            return count;
+        }
     }
 
     public class UndertalePointerListLenCheck<T> : UndertalePointerList<T>, UndertaleObjectEndPos where T : UndertaleObjectLenCheck, new()
     {
-        /// <inheritdoc />
+        /// <inheritdoc cref="UndertalePointerList{T}.Unserialize(UndertaleReader)" />
         public void Unserialize(UndertaleReader reader, uint endPosition)
         {
             uint count = reader.ReadUInt32();
