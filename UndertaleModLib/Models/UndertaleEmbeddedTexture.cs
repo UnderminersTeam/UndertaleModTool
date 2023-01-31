@@ -98,10 +98,10 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
             writer.Write(GeneratedMips);
         if (writer.undertaleData.GM2022_3)
         {
-            // Write a placeholder for the texture blob size,
-            // so we can write an actual value later
+            // We're going to overwrite this later with the actual size
+            // of our texture block, so save the position
             _textureBlockSizeLocation = writer.Position;
-            writer.Write((uint)0);
+            writer.Write(_textureBlockSize);
         }
         if (writer.undertaleData.GM2022_9)
         {
@@ -142,9 +142,9 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
     {
         // If external, don't serialize blob
         // Has sanity check for data being null as well, although the external flag should be set
-        // FIXME: Implement external texture writing.
-        // This will also leave TextureBlockSize at 0. When we implement the above,
-        // we should write the texture's actual size to that value to be accurate to GM's compiler.
+        // FIXME: Implement external texture writing
+        // When we implement the above, we should also write the texture's actual size to
+        // TextureBlockSize because GM does it
         // (behavior observed in a VM game built with Runtime 2022.11.1.75)
         if (_textureData == null || TextureExternal)
             return;
@@ -155,15 +155,16 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
 
         var texStartPos = writer.Position;
         writer.WriteUndertaleObject(_textureData);
-        var texEndPos = writer.Position;
 
         if (writer.undertaleData.GM2022_3)
         {
-            _textureBlockSize = texStartPos - texEndPos;
-            // Move to the placeholder zero value written in Serialize
+            _textureBlockSize = texStartPos - writer.Position;
+            // Write the actual size of the texture block in
+            // the place of _textureBlockSize
+            var posBackup = writer.Position;
             writer.Position = _textureBlockSizeLocation;
             writer.Write(_textureBlockSize);
-            writer.Position = texEndPos;
+            writer.Position = posBackup;
         }
     }
 
