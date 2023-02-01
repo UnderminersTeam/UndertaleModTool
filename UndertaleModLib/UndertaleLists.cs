@@ -94,14 +94,23 @@ namespace UndertaleModLib
         public static uint UnserializeChildObjectCount(UndertaleReader reader)
         {
             uint count = reader.ReadUInt32();
+            if (count == 0)
+                return 0;
 
             Type t = typeof(T);
             if (t.IsAssignableTo(typeof(UndertaleResourceRef)))
+            {
+                // UndertaleResourceById<> = 4 bytes
+                reader.Position += count * 4;
+
                 return count;
+            }
 
             if (t.IsAssignableTo(typeof(IStaticChildObjCount)))
             {
-                uint subCount = reader.GetStaticChildCount(t);
+                (uint subCount, uint subSize) = reader.GetStaticChildProperties(t);
+
+                reader.Position += subCount * subSize;
 
                 return count + count * subCount;
             }
@@ -164,7 +173,9 @@ namespace UndertaleModLib
         /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
         public static uint UnserializeChildObjectCount(UndertaleReader reader)
         {
-            return reader.ReadUInt32();
+            uint count = reader.ReadUInt32();
+            reader.Position += count * 4;
+            return count;
         }
     }
 
@@ -217,13 +228,17 @@ namespace UndertaleModLib
         public static uint UnserializeChildObjectCount(UndertaleReader reader)
         {
             uint count = reader.ReadUInt32();
+            if (count == 0)
+                return 0;
 
             Type t = typeof(T);
             if (t.IsAssignableTo(typeof(IStaticChildObjCount)))
             {
-                uint subCount = reader.GetStaticChildCount(t);
+                (uint subCount, uint subSize) = reader.GetStaticChildProperties(t);
 
-                return count * subCount;
+                reader.Position += subCount * subSize;
+
+                return count + count * subCount;
             }
 
             var unserializeFunc = reader.GetUnserializeCountFunc(t);
@@ -339,13 +354,17 @@ namespace UndertaleModLib
         public static uint UnserializeChildObjectCount(UndertaleReader reader)
         {
             uint count = reader.ReadUInt32();
+            if (count == 0)
+                return 0;
 
             Type t = typeof(T);
             if (t.IsAssignableTo(typeof(IStaticChildObjCount)))
             {
-                uint subCount = reader.GetStaticChildCount(t);
+                (uint subCount, uint subSize) = reader.GetStaticChildProperties(t);
 
-                return count * subCount;
+                reader.Position += subCount * subSize;
+
+                return count + count * subCount;
             }
 
             var unserializeFunc = reader.GetUnserializeCountFunc(t);

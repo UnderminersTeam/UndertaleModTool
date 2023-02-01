@@ -282,12 +282,12 @@ namespace UndertaleModLib
         private HashSet<uint> unreadObjects = new HashSet<uint>();
 
         private readonly Dictionary<Type, Func<UndertaleReader, uint>> unserializeFuncDict = new();
-        private readonly Dictionary<Type, uint> staticObjCountDict = new();
+        private readonly Dictionary<Type, (uint Count, uint Size)> staticObjPropDict = new();
 
         private void FillUnserializeCountDictionaries()
         {
             Assembly currAssem = Assembly.GetExecutingAssembly();
-            Type[] allTypes = currAssem.GetExportedTypes();
+            Type[] allTypes = currAssem.GetTypes();
 
             Type utObjectType = typeof(UndertaleObject);
             BindingFlags flag = BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy;
@@ -328,8 +328,24 @@ namespace UndertaleModLib
                         Debug.WriteLine($"Can't get value of \"ChildObjectCount\" of \"{t.FullName}\"");
                         continue;
                     }
+                    uint count = (uint)res;
 
-                    staticObjCountDict[t] = (uint)res;
+                    fi = t.GetField("ChildObjectsSize", flag);
+                    if (fi is null)
+                    {
+                        Debug.WriteLine($"Can't get \"ChildObjectsSize\" field of \"{t.FullName}\"");
+                        continue;
+                    }
+
+                    res = fi.GetValue(null);
+                    if (res is null)
+                    {
+                        Debug.WriteLine($"Can't get value of \"ChildObjectsSize\" of \"{t.FullName}\"");
+                        continue;
+                    }
+                    uint size = (uint)res;
+
+                    staticObjPropDict[t] = (count, size);
                 }
             }
         }
@@ -343,12 +359,12 @@ namespace UndertaleModLib
 
             return res;
         }
-        public uint GetStaticChildCount(Type objType)
+        public (uint Count, uint Size) GetStaticChildProperties(Type objType)
         {
-            if (!staticObjCountDict.TryGetValue(objType, out uint res))
+            if (!staticObjPropDict.TryGetValue(objType, out (uint, uint) res))
             {
-                Debug.WriteLine($"\"UndertaleReader.staticObjCountDict\" doesn't contain type \"{objType.FullName}\".");
-                return 0;
+                Debug.WriteLine($"\"UndertaleReader.staticObjPropDict\" doesn't contain type \"{objType.FullName}\".");
+                return default;
             }
 
             return res;

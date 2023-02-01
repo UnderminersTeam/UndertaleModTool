@@ -644,6 +644,7 @@ public class UndertaleOptions : UndertaleObject, IDisposable
     [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class Constant : UndertaleObject, IStaticChildObjCount, IDisposable
     {
+        public static readonly uint ChildObjectsSize = 8;
         /// <summary>
         /// The name of the constant.
         /// </summary>

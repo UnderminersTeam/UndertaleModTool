@@ -141,6 +141,11 @@ namespace UndertaleModLib
     public class UndertaleChunkLANG : UndertaleSingleChunk<UndertaleLanguage>
     {
         public override string Name => "LANG";
+
+        internal override uint UnserializeObjectCount(UndertaleReader reader)
+        {
+            return 1;
+        }
     }
 
     public class UndertaleChunkEXTN : UndertaleListChunk<UndertaleExtension>
@@ -1104,6 +1109,22 @@ namespace UndertaleModLib
 
             base.UnserializeChunk(reader);
         }
+
+        internal override uint UnserializeObjectCount(UndertaleReader reader)
+        {
+            uint count = 1;
+
+            // Padding
+            while (reader.Position % 4 != 0)
+                if (reader.ReadByte() != 0)
+                    throw new IOException("Padding error!");
+
+            reader.Position += 4;
+
+            count += UndertaleTags.UnserializeChildObjectCount(reader);
+
+            return count;
+        }
     }
 
     // GMS2.3.6+ only
@@ -1168,6 +1189,20 @@ namespace UndertaleModLib
                     throw new IOException("Padding error!");
 
             base.UnserializeChunk(reader);
+        }
+
+        internal override uint UnserializeObjectCount(UndertaleReader reader)
+        {
+            uint count = 1;
+
+            // Padding
+            while (reader.Position % 4 != 0)
+                if (reader.ReadByte() != 0)
+                    throw new IOException("Padding error!");
+
+            count += UndertaleFeatureFlags.UnserializeChildObjectCount(reader);
+
+            return count;
         }
     }
 }

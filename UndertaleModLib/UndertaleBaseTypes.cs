@@ -123,5 +123,6 @@ namespace UndertaleModLib
     public interface IStaticChildObjCount
     {
         public static readonly uint ChildObjectCount = 0;
+        public static readonly uint ChildObjectsSize = 0;
     }
 }

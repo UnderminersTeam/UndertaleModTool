@@ -60,6 +60,17 @@ public class UndertaleTags : UndertaleObject, IDisposable
             AssetTags[t.ID] = t.Tags;
     }
 
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        uint count = 0;
+
+        count += 1 + UndertaleSimpleListString.UnserializeChildObjectCount(reader);
+        count += 1 + UndertalePointerList<TempAssetTags>.UnserializeChildObjectCount(reader);
+
+        return count;
+    }
+
     /// <inheritdoc/>
     public void Dispose()
     {
@@ -86,6 +97,13 @@ public class UndertaleTags : UndertaleObject, IDisposable
         {
             ID = reader.ReadInt32();
             Tags = reader.ReadUndertaleObject<UndertaleSimpleListString>();
+        }
+
+        /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+        public static uint UnserializeChildObjectCount(UndertaleReader reader)
+        {
+            reader.Position += 4;
+            return UndertaleSimpleListString.UnserializeChildObjectCount(reader);
         }
 
         /// <inheritdoc/>
