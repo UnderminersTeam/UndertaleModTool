@@ -113,29 +113,11 @@ namespace UndertaleModLib
     public class UndertaleChunkGEN8 : UndertaleSingleChunk<UndertaleGeneralInfo>
     {
         public override string Name => "GEN8";
-
-        internal override uint UnserializeObjectCount(UndertaleReader reader)
-        {
-            uint count = 1;
-
-            count += UndertaleGeneralInfo.UnserializeChildObjectCount(reader);
-
-            return count;
-        }
     }
 
     public class UndertaleChunkOPTN : UndertaleSingleChunk<UndertaleOptions>
     {
         public override string Name => "OPTN";
-
-        internal override uint UnserializeObjectCount(UndertaleReader reader)
-        {
-            uint count = 1;
-
-            count += UndertaleOptions.UnserializeChildObjectCount(reader);
-
-            return count;
-        }
     }
 
     public class UndertaleChunkLANG : UndertaleSingleChunk<UndertaleLanguage>
@@ -1112,8 +1094,6 @@ namespace UndertaleModLib
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
-            uint count = 1;
-
             // Padding
             while (reader.Position % 4 != 0)
                 if (reader.ReadByte() != 0)
@@ -1121,9 +1101,7 @@ namespace UndertaleModLib
 
             reader.Position += 4;
 
-            count += UndertaleTags.UnserializeChildObjectCount(reader);
-
-            return count;
+            return base.UnserializeObjectCount(reader);
         }
     }
 
@@ -1193,16 +1171,12 @@ namespace UndertaleModLib
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
-            uint count = 1;
-
             // Padding
             while (reader.Position % 4 != 0)
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error!");
 
-            count += UndertaleFeatureFlags.UnserializeChildObjectCount(reader);
-
-            return count;
+            return base.UnserializeObjectCount(reader);
         }
     }
 }

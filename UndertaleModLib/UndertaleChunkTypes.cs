@@ -193,7 +193,14 @@ namespace UndertaleModLib
             Object = reader.ReadUndertaleObject<T>();
         }
 
-        internal override uint UnserializeObjectCount(UndertaleReader reader) => 1;
+        internal override uint UnserializeObjectCount(UndertaleReader reader)
+        {
+            uint count = 1;
+
+            count += reader.GetChildObjectCount<T>();
+
+            return count;
+        }
 
         public UndertaleObject GetObject() => Object;
 
