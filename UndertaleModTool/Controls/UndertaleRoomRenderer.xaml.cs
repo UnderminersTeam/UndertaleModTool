@@ -43,8 +43,7 @@ namespace UndertaleModTool
         }
 
         private bool bgGridDisabled;
-        private Pen gridPen;
-        private Brush initialGridBrush;
+        private Brush gridOpacMask;
 
         public UndertaleRoomRenderer()
         {
@@ -85,13 +84,10 @@ namespace UndertaleModTool
 
                 if (!displayGrid && !bgGridDisabled)
                 {
-                    if (gridPen is null)
-                    {
-                        gridPen = ((roomCanvas.Background as DrawingBrush).Drawing as GeometryDrawing).Pen;
-                        initialGridBrush = gridPen.Brush;
-                    }
+                    if (gridOpacMask is null)
+                        gridOpacMask = roomCanvas.OpacityMask;
 
-                    gridPen.Brush = null;
+                    roomCanvas.OpacityMask = null;
                     bgGridDisabled = true;
                 }
 
@@ -106,7 +102,7 @@ namespace UndertaleModTool
                 if (!displayGrid && last)
                 {
                     visualOffProp.SetValue(roomCanvas, prevOffset);
-                    gridPen.Brush = initialGridBrush;
+                    roomCanvas.OpacityMask = gridOpacMask;
                 }
             }));
         }
