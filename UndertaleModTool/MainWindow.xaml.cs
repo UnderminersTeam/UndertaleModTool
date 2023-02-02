@@ -432,14 +432,10 @@ namespace UndertaleModTool
         private Task scriptSetupTask;
 
         // Version info
-        public static string Edition = "";
+        public static string Edition = "(Git: " + GitVersion.GetGitVersion().Substring(0, 7) + ")";
 
-        // On debug, build with git versions. Otherwise, use the provided release version.
-#if DEBUG
-        public static string Version = GitVersion.GetGitVersion();
-#else
-        public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString() + (Edition != "" ? "-" + Edition : "");
-#endif
+        // On all builds, build with git and release versions.
+        public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString() + (Edition != "" ? " - " + Edition : "");
 
         public MainWindow()
         {
