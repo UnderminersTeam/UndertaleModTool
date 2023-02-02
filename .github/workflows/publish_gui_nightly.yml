@@ -45,7 +45,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-          path: GUI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip
+          path: GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip
 
   build_cli:
 
@@ -87,7 +87,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-          path: CLI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}.zip
+          path: CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}.zip
 
   upload:
 
