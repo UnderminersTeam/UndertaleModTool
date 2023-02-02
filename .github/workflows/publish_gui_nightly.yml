@@ -12,7 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest]
-        configuration: [Debug]
+        configuration: [Debug, Release]
         bundled: [true]
         singlefile: [true, false]
 
@@ -41,7 +41,7 @@ jobs:
         cp ./LICENSE.txt ./${{ matrix.os }}
     - name: Create zip for nightly release Windows GUI
       run: |
-        7z a -tzip GUI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip ${{ matrix.os }} -mx0 
+        7z a -tzip GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip ${{ matrix.os }} -mx0 
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
@@ -83,7 +83,7 @@ jobs:
         cp ./LICENSE.txt ./CLI-${{ matrix.os }}/
     - name: Create zip for nightly release CLI
       run: |
-        7z a -tzip CLI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}.zip CLI-${{ matrix.os }} -mx0 
+        7z a -tzip CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}.zip CLI-${{ matrix.os }} -mx0 
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:

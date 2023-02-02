@@ -48,6 +48,7 @@ using System.Net;
 using System.Globalization;
 using System.Windows.Controls.Primitives;
 using System.Runtime.CompilerServices;
+using System.Diagnostics.Metrics;
 
 namespace UndertaleModTool
 {
@@ -434,8 +435,12 @@ namespace UndertaleModTool
         // Version info
         public static string Edition = "(Git: " + GitVersion.GetGitVersion().Substring(0, 7) + ")";
 
-        // On all builds, build with git and release versions.
+        // On debug, build with git versions and provided release version. Otherwise, use the provided release version only.
+#if DEBUG
         public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString() + (Edition != "" ? " - " + Edition : "");
+#else
+        public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+#endif
 
         public MainWindow()
         {
