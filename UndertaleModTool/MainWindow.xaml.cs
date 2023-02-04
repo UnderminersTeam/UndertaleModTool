@@ -2767,8 +2767,7 @@ namespace UndertaleModTool
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
 
             // remove the invalid characters (everything within square brackets) from the version string.
-            // Probably needs to be expanded later, these are just the ones I know of.
-            Regex invalidChars = new Regex(@"[  ()]");
+            Regex invalidChars = new Regex(@"Git:|[ (),/:;<=>?@[\]{}]");
             string version = invalidChars.Replace(Version, "");
             httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("UndertaleModTool", version));
 
