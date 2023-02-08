@@ -606,6 +606,23 @@ namespace UndertaleModLib
             }
             base.UnserializeChunk(reader);
         }
+
+        internal override uint UnserializeObjectCount(UndertaleReader reader)
+        {
+            if (Length == 0)
+                return 0;
+
+            if (reader.undertaleData.UnsupportedBytecodeVersion)
+                return 1 + reader.ReadUInt32();
+
+            reader.GMS2BytecodeAddresses = new((int)reader.ReadUInt32());
+            reader.Position -= 4;
+
+            uint count = base.UnserializeObjectCount(reader);
+            reader.GMS2BytecodeAddresses.Clear();
+
+            return count;
+        }
     }
 
     [PropertyChanged.AddINotifyPropertyChangedInterface]
@@ -738,11 +755,11 @@ namespace UndertaleModLib
 
             if (!reader.Bytecode14OrLower)
             {
-                count += reader.GetChildObjectCount<UndertaleSimpleList<UndertaleFunction>>();
-                count += reader.GetChildObjectCount<UndertaleSimpleList<UndertaleCodeLocals>>();
+                count += 1 + UndertaleSimpleList<UndertaleFunction>.UnserializeChildObjectCount(reader);
+                count += 1 + UndertaleSimpleList<UndertaleCodeLocals>.UnserializeChildObjectCount(reader);
             }
             else
-                count = Length / 12;
+                count = 1 + Length / 12;
 
             return count;
         }
@@ -770,6 +787,8 @@ namespace UndertaleModLib
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error in STRG");
         }
+
+        // There's no need to check padding in "UnserializeObjectCount()"
     }
 
     public class UndertaleChunkTXTR : UndertaleListChunk<UndertaleEmbeddedTexture>
@@ -914,6 +933,17 @@ namespace UndertaleModLib
                 List[index].Name = new UndertaleString("EmbeddedSound " + index.ToString());
             }
         }
+
+        internal override uint UnserializeObjectCount(UndertaleReader reader)
+        {
+            uint count = 1;
+
+            // Though "UndertaleEmbeddedAudio" has dynamic child objects size, 
+            // there's still no need to unserialize the count for each object.
+            count += reader.ReadUInt32();
+
+            return count;
+        }
     }
 
     // GMS2 only
@@ -1015,6 +1045,23 @@ namespace UndertaleModLib
                 throw new IOException("Expected ACRV version 1");
 
             base.UnserializeChunk(reader);
+        }
+
+        internal override uint UnserializeObjectCount(UndertaleReader reader)
+        {
+            uint count = 1;
+
+            // Padding
+            while (reader.Position % 4 != 0)
+                if (reader.ReadByte() != 0)
+                    throw new IOException("Padding error!");
+
+            if (reader.ReadUInt32() != 1)
+                throw new IOException("Expected ACRV version 1");
+
+            count += base.UnserializeObjectCount(reader);
+
+            return count;
         }
     }
 

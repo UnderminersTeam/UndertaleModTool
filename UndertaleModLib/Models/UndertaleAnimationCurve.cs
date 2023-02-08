@@ -117,6 +117,14 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
             Points = reader.ReadUndertaleObject<UndertaleSimpleList<Point>>();
         }
 
+        /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+        public static uint UnserializeChildObjectCount(UndertaleReader reader)
+        {
+            reader.Position += 12;
+
+            return reader.ReadUInt32();
+        }
+
         /// <inheritdoc/>
         public void Dispose()
         {
@@ -126,8 +134,10 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
             Points = null;
         }
 
-        public class Point : UndertaleObject
+        public class Point : UndertaleObject, IStaticChildObjectsSize
         {
+            public static readonly uint ChildObjectsSize = 0;
+
             public float X;
             public float Value;
 

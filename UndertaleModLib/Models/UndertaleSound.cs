@@ -184,8 +184,11 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, ID
 /// Audio group entry in a data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleAudioGroup : UndertaleNamedResource, IDisposable
+public class UndertaleAudioGroup : UndertaleNamedResource, IStaticChildObjectsSize, IDisposable
 {
+    /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+    public static readonly uint ChildObjectsSize = 4;
+
     /// <summary>
     /// The name of the audio group.
     /// </summary>

@@ -1016,6 +1016,10 @@ namespace UndertaleModTool
                         data = UndertaleIO.Read(stream, warning =>
                         {
                             this.ShowWarning(warning, "Loading warning");
+
+                            if (warning.Contains("unserializeCountError.txt"))
+                                return;
+
                             hadWarnings = true;
                         }, message =>
                         {

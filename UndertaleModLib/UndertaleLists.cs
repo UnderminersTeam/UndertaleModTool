@@ -97,6 +97,8 @@ namespace UndertaleModLib
             if (count == 0)
                 return 0;
 
+            uint totalCount = 0;
+
             Type t = typeof(T);
             if (t.IsAssignableTo(typeof(UndertaleResourceRef)))
             {
@@ -106,9 +108,13 @@ namespace UndertaleModLib
                 return count;
             }
 
-            if (t.IsAssignableTo(typeof(IStaticChildObjCount)))
+            if (t.IsAssignableTo(typeof(IStaticChildObjectsSize)))
             {
-                (uint subCount, uint subSize) = reader.GetStaticChildProperties(t);
+                uint subSize = reader.GetStaticChildObjectsSize(t);
+                uint subCount = 1;
+
+                if (t.IsAssignableTo(typeof(IStaticChildObjCount)))
+                    subCount = reader.GetStaticChildCount(t);
 
                 reader.Position += subCount * subSize;
 
@@ -120,7 +126,7 @@ namespace UndertaleModLib
             {
                 try
                 {
-                    count += unserializeFunc(reader);
+                    totalCount += 1 + unserializeFunc(reader);
                 }
                 catch (UndertaleSerializationException e)
                 {
@@ -128,7 +134,7 @@ namespace UndertaleModLib
                 }
             }
 
-            return count;
+            return totalCount;
         }
     }
 
@@ -231,10 +237,16 @@ namespace UndertaleModLib
             if (count == 0)
                 return 0;
 
+            uint totalCount = 0;
+
             Type t = typeof(T);
-            if (t.IsAssignableTo(typeof(IStaticChildObjCount)))
+            if (t.IsAssignableTo(typeof(IStaticChildObjectsSize)))
             {
-                (uint subCount, uint subSize) = reader.GetStaticChildProperties(t);
+                uint subSize = reader.GetStaticChildObjectsSize(t);
+                uint subCount = 1;
+
+                if (t.IsAssignableTo(typeof(IStaticChildObjCount)))
+                    subCount = reader.GetStaticChildCount(t);
 
                 reader.Position += subCount * subSize;
 
@@ -246,7 +258,7 @@ namespace UndertaleModLib
             {
                 try
                 {
-                    count += unserializeFunc(reader);
+                    totalCount += 1 + unserializeFunc(reader);
                 }
                 catch (UndertaleSerializationException e)
                 {
@@ -254,7 +266,7 @@ namespace UndertaleModLib
                 }
             }
 
-            return count;
+            return totalCount;
         }
     }
 
@@ -357,14 +369,34 @@ namespace UndertaleModLib
             if (count == 0)
                 return 0;
 
-            Type t = typeof(T);
-            if (t.IsAssignableTo(typeof(IStaticChildObjCount)))
-            {
-                (uint subCount, uint subSize) = reader.GetStaticChildProperties(t);
+            uint totalCount = 0;
 
-                reader.Position += subCount * subSize;
+            Type t = typeof(T);
+            if (t.IsAssignableTo(typeof(IStaticChildObjectsSize)))
+            {
+                uint subSize = reader.GetStaticChildObjectsSize(t);
+                uint subCount = 1;
+
+                if (t.IsAssignableTo(typeof(IStaticChildObjCount)))
+                    subCount = reader.GetStaticChildCount(t);
+
+                reader.Position += subCount * 4 + subCount * subSize;
 
                 return count + count * subCount;
+            }
+
+            uint[] pointers = reader.utListPtrsPool.Rent((int)count);
+            for (uint i = 0; i < count; i++)
+                pointers[i] = reader.ReadUInt32();
+
+            uint pos = pointers[0];
+            if (reader.Position != pos)
+            {
+                uint skip = pos - reader.Position;
+                if (skip > 0)
+                    reader.Position += skip;
+                else
+                    throw new IOException("First list item starts inside the pointer list?!?!");
             }
 
             var unserializeFunc = reader.GetUnserializeCountFunc(t);
@@ -372,15 +404,19 @@ namespace UndertaleModLib
             {
                 try
                 {
-                    count += unserializeFunc(reader);
+                    reader.Position = pointers[i];
+                    totalCount += 1 + unserializeFunc(reader);
                 }
                 catch (UndertaleSerializationException e)
                 {
+                    reader.utListPtrsPool.Return(pointers);
                     throw new UndertaleSerializationException(e.Message + "\nwhile reading child object count of item " + (i + 1) + " of " + count + " in a list of " + typeof(T).FullName, e);
                 }
             }
 
-            return count;
+            reader.utListPtrsPool.Return(pointers);
+
+            return totalCount;
         }
     }
 

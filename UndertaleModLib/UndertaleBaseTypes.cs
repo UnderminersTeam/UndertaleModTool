@@ -122,7 +122,18 @@ namespace UndertaleModLib
 
     public interface IStaticChildObjCount
     {
+        /// <summary>
+        /// The total child object count of the current object type.
+        /// Used for the object count unserialization.
+        /// </summary>
         public static readonly uint ChildObjectCount = 0;
+    }
+    public interface IStaticChildObjectsSize
+    {
+        /// <summary>
+        /// The summary child objects size of the current object type.
+        /// Used for the object count unserialization.
+        /// </summary>
         public static readonly uint ChildObjectsSize = 0;
     }
 }

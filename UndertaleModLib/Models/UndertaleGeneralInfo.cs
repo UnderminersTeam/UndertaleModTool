@@ -454,9 +454,15 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
     public static uint UnserializeChildObjectCount(UndertaleReader reader)
     {
-        reader.Position++;                            // "IsDebuggerDisabled"
-        bool readDebugPort = reader.ReadByte() >= 14; // "BytecodeVersion" >= 14
-        reader.Position += (uint)(122 + (readDebugPort ? 4 : 0));
+        reader.Position++; // "IsDebuggerDisabled"
+        byte bytecodeVer = reader.ReadByte();
+        bool readDebugPort = bytecodeVer >= 14;
+        reader.undertaleData.UnsupportedBytecodeVersion = bytecodeVer < 13 || bytecodeVer > 17;
+        reader.Bytecode14OrLower = bytecodeVer <= 14;
+
+        reader.Position += 42;
+        reader.GMS2 = reader.ReadUInt32() >= 2; // "Major" >= 2
+        reader.Position += (uint)(76 + (readDebugPort ? 4 : 0));
 
         // "RoomOrder"
         return 1 + UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM>.UnserializeChildObjectCount(reader);
@@ -642,7 +648,7 @@ public class UndertaleOptions : UndertaleObject, IDisposable
     /// A class for game constants.
     /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class Constant : UndertaleObject, IStaticChildObjCount, IDisposable
+    public class Constant : UndertaleObject, IStaticChildObjectsSize, IDisposable
     {
         public static readonly uint ChildObjectsSize = 8;
         /// <summary>

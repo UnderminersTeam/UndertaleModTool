@@ -109,7 +109,41 @@ public class UndertaleInstruction : UndertaleObject
             _ => throw new IOException("Unknown opcode " + op.ToString().ToUpper()),
         };
     }
-
+    private static byte ConvertInstructionKind(byte kind)
+    {
+        kind = kind switch
+        {
+            0x03 => 0x07,
+            0x04 => 0x08,
+            0x05 => 0x09,
+            0x06 => 0x0A,
+            0x07 => 0x0B,
+            0x08 => 0x0C,
+            0x09 => 0x0D,
+            0x0A => 0x0E,
+            0x0B => 0x0F,
+            0x0C => 0x10,
+            0x0D => 0x11,
+            0x0E => 0x12,
+            0x0F => 0x13,
+            0x10 => 0x14,
+            0x11 or 0x12 or 0x13 or 0x14 or 0x16 => 0x15,
+            0xDA => 0xD9,
+            0x41 => 0x45,
+            0x82 => 0x86,
+            0xB7 => 0xB6,
+            0xB8 => 0xB7,
+            0xB9 => 0xB8,
+            0x9D => 0x9C,
+            0x9E => 0x9D,
+            0x9F => 0x9E,
+            0xBB => 0xBA,
+            0xBC => 0xBB,
+            _ => kind
+        };
+        
+        return kind;
+    }
 
     public enum DataType : byte
     {
@@ -543,92 +577,7 @@ public class UndertaleInstruction : UndertaleObject
         if (reader.Bytecode14OrLower)
         {
             // Convert opcode to our enum
-            switch (kind)
-            {
-                case 0x03:
-                    kind = 0x07;
-                    break;
-                case 0x04:
-                    kind = 0x08;
-                    break;
-                case 0x05:
-                    kind = 0x09;
-                    break;
-                case 0x06:
-                    kind = 0x0A;
-                    break;
-                case 0x07:
-                    kind = 0x0B;
-                    break;
-                case 0x08:
-                    kind = 0x0C;
-                    break;
-                case 0x09:
-                    kind = 0x0D;
-                    break;
-                case 0x0A:
-                    kind = 0x0E;
-                    break;
-                case 0x0B:
-                    kind = 0x0F;
-                    break;
-                case 0x0C:
-                    kind = 0x10;
-                    break;
-                case 0x0D:
-                    kind = 0x11;
-                    break;
-                case 0x0E:
-                    kind = 0x12;
-                    break;
-                case 0x0F:
-                    kind = 0x13;
-                    break;
-                case 0x10:
-                    kind = 0x14;
-                    break;
-                case 0x11:
-                case 0x12:
-                case 0x13:
-                case 0x14:
-                //  case 0x15:
-                case 0x16:
-                    kind = 0x15;
-                    break;
-                case 0xDA:
-                    kind = 0xD9;
-                    break;
-                case 0x41:
-                    kind = 0x45;
-                    break;
-                case 0x82:
-                    kind = 0x86;
-                    break;
-                case 0xB7:
-                    kind = 0xB6;
-                    break;
-                case 0xB8:
-                    kind = 0xB7;
-                    break;
-                case 0xB9:
-                    kind = 0xB8;
-                    break;
-                case 0x9D:
-                    kind = 0x9C;
-                    break;
-                case 0x9E:
-                    kind = 0x9D;
-                    break;
-                case 0x9F:
-                    kind = 0x9E;
-                    break;
-                case 0xBB:
-                    kind = 0xBA;
-                    break;
-                case 0xBC:
-                    kind = 0xBB;
-                    break;
-            }
+            kind = ConvertInstructionKind(kind);
         }
         Kind = (Opcode)kind;
         reader.Position = instructionStartAddress;
@@ -657,7 +606,7 @@ public class UndertaleInstruction : UndertaleObject
                 if (reader.Bytecode14OrLower && Kind == Opcode.Cmp)
                     ComparisonKind = (ComparisonType)(reader.ReadByte() - 0x10);
                 else
-                    reader.ReadByte();
+                    reader.Position++;
 
                 if (Kind == Opcode.And || Kind == Opcode.Or)
                 {
@@ -674,7 +623,7 @@ public class UndertaleInstruction : UndertaleObject
                     JumpOffset = reader.ReadInt24();
                     if (JumpOffset == -1048576) // magic? encoded in little endian as 00 00 F0, which is like below
                         JumpOffsetPopenvExitMagic = true;
-                    reader.ReadByte();
+                    reader.Position++;
                     break;
                 }
 
@@ -696,7 +645,7 @@ public class UndertaleInstruction : UndertaleObject
                 }
 
                 //if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
-                reader.ReadByte();
+                reader.Position++;
             }
                 break;
 
@@ -707,7 +656,7 @@ public class UndertaleInstruction : UndertaleObject
                 Type1 = (DataType)(TypePair & 0xf);
                 Type2 = (DataType)(TypePair >> 4);
                 //if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
-                reader.ReadByte();
+                reader.Position++;
                 if (Type1 == DataType.Int16)
                 {
                     // Special scenario - the swap instruction
@@ -749,7 +698,7 @@ public class UndertaleInstruction : UndertaleObject
                     }
                 }
                 //if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
-                reader.ReadByte();
+                reader.Position++;
                 switch (Type1)
                 {
                     case DataType.Double:
@@ -786,7 +735,7 @@ public class UndertaleInstruction : UndertaleObject
                 ArgumentsCount = reader.ReadUInt16();
                 Type1 = (DataType)reader.ReadByte();
                 //if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
-                reader.ReadByte();
+                reader.Position++;
                 Function = reader.ReadUndertaleObject<Reference<UndertaleFunction>>();
             }
                 break;
@@ -802,6 +751,77 @@ public class UndertaleInstruction : UndertaleObject
             default:
                 throw new IOException("Unknown opcode " + Kind.ToString().ToUpper());
         }
+    }
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        uint instructionStartAddress = reader.Position;
+        reader.Position += 3; // skip for now, we'll read them later
+        byte kind = reader.ReadByte();
+        if (reader.Bytecode14OrLower)
+        {
+            // Convert opcode to our enum
+            kind = ConvertInstructionKind(kind);
+        }
+        Opcode Kind = (Opcode)kind;
+        reader.Position = instructionStartAddress;
+        switch (GetInstructionType(Kind))
+        {
+            case InstructionType.SingleTypeInstruction:
+            case InstructionType.DoubleTypeInstruction:
+            case InstructionType.ComparisonInstruction:
+            case InstructionType.GotoInstruction:
+            case InstructionType.BreakInstruction:
+                reader.Position += 4;
+                break;
+
+            case InstructionType.PopInstruction:
+                reader.Position += 2; // "TypeInst"
+                int type1 = reader.ReadByte() & 0xf;
+                if (type1 != 0x0f)
+                {
+                    reader.Position += 1 + 4;
+                    return 1; // "Destination"
+                }
+                else
+                    reader.Position++;
+                break;
+
+            case InstructionType.PushInstruction:
+                {
+                    reader.Position += 2;
+                    DataType Type1 = (DataType)reader.ReadByte();
+                    reader.Position++;
+                    switch (Type1)
+                    {
+                        case DataType.Double:
+                        case DataType.Int64:
+                            reader.Position += 8;
+                            break;
+
+                        case DataType.Float:
+                        case DataType.Int32:
+                        case DataType.Boolean:
+                            reader.Position += 4;
+                            break;
+
+                        case DataType.Variable:
+                        case DataType.String:
+                            reader.Position += 4;
+                            return 1;
+                    }
+                }
+                break;
+
+            case InstructionType.CallInstruction:
+                reader.Position += 8;
+                return 1; // "Function"
+
+            default:
+                throw new IOException("Unknown opcode " + Kind.ToString().ToUpper());
+        }
+
+        return 0;
     }
 
     /// <inheritdoc />
@@ -1076,7 +1096,6 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
             writer.Write(BytecodeRelativeAddress);
             writer.Write(Offset);
         }
-
     }
 
     /// <inheritdoc />
@@ -1133,6 +1152,62 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
             reader.Position = here;
             Offset = reader.ReadUInt32();
         }
+    }
+
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        uint count = 0;
+
+        reader.Position += 4; // "Name"
+        uint length = reader.ReadUInt32();
+
+        if (reader.Bytecode14OrLower)
+        {
+            uint here = reader.Position;
+            uint stop = here + length;
+
+            // Get instructions count
+            uint instrCount = 0;
+            while (reader.Position < stop)
+                instrCount += 1 + UndertaleInstruction.UnserializeChildObjectCount(reader);
+
+            count += instrCount;
+        }
+        else
+        {
+            reader.Position += 4;
+
+            int bytecodeRelativeAddress = reader.ReadInt32();
+            uint bytecodeAbsoluteAddress = (uint)((int)reader.Position - 4 + bytecodeRelativeAddress);
+
+            if (length == 0 || reader.GMS2BytecodeAddresses.Contains(bytecodeAbsoluteAddress))
+            {
+                reader.Position += 4; // "Offset"
+                return count;
+            }
+
+            reader.GMS2BytecodeAddresses.Add(bytecodeAbsoluteAddress);
+
+            uint here = reader.Position;
+            reader.Position = bytecodeAbsoluteAddress;
+
+            // Get instructions count
+            uint instrCount = 0;
+            int instrCount1 = 0;
+            while (reader.Position < bytecodeAbsoluteAddress + length)
+            {
+                instrCount1++;
+                instrCount += 1 + UndertaleInstruction.UnserializeChildObjectCount(reader);
+            }
+
+            reader.Position = here;
+            reader.Position += 4; // "Offset"
+
+            count += instrCount;
+        }
+
+        return count;
     }
 
     public void UpdateAddresses()

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -201,6 +202,7 @@ namespace UndertaleModLib
 
         public string LastChunkName;
         public List<string> AllChunkNames;
+        public bool GMS2 = false;
         public bool GMS2_3 = false;
         public bool Bytecode14OrLower = false;
 
@@ -231,6 +233,7 @@ namespace UndertaleModLib
             DebugUtil.Assert(data.FORM.Name == name);
             data.FORM.Length = length;
 
+            Exception countExc = null;
             uint startPos = Position;
             uint poolSize = 0;
             try
@@ -239,8 +242,10 @@ namespace UndertaleModLib
             }
             catch (Exception e)
             {
+                countExc = e;
                 Debug.WriteLine(e);
             }
+            utListPtrsPool = null;
 
             InitializePools(poolSize);
 
@@ -254,10 +259,25 @@ namespace UndertaleModLib
             foreach (UndertaleResourceRef res in resUpdate)
                 res.PostUnserialize(this);
             resUpdate.Clear();
-
+                 
             data.BuiltinList = new BuiltinList(data);
             Decompiler.AssetTypeResolver.InitializeTypes(data);
             UndertaleEmbeddedTexture.FindAllTextureInfo(data);
+
+            if (countExc is not null)
+            {
+                try
+                {
+                    string fileDir = Path.GetDirectoryName(Environment.ProcessPath);
+                    File.WriteAllText(Path.Combine(fileDir, "unserializeCountError.txt"),
+                                      countExc.ToString() + "\n" + countExc.Message + "\n" + countExc.StackTrace);
+
+                    SubmitWarning("Warning - there was an error while trying to unserialize total object count.\n" +
+                                  "The error log is saved to \"unserializeCountError.txt\"." +
+                                  "Please report that error to UndertaleModTool GitHub.");
+                }
+                catch { }
+            }
 
             return data;
         }
@@ -282,7 +302,11 @@ namespace UndertaleModLib
         private HashSet<uint> unreadObjects = new HashSet<uint>();
 
         private readonly Dictionary<Type, Func<UndertaleReader, uint>> unserializeFuncDict = new();
-        private readonly Dictionary<Type, (uint Count, uint Size)> staticObjPropDict = new();
+        private readonly Dictionary<Type, uint> staticObjCountDict = new();
+        private readonly Dictionary<Type, uint> staticObjSizeDict = new();
+        public HashSet<uint> GMS2BytecodeAddresses;
+
+        public ArrayPool<uint> utListPtrsPool = ArrayPool<uint>.Create(100000, 17);
 
         private void FillUnserializeCountDictionaries()
         {
@@ -293,6 +317,7 @@ namespace UndertaleModLib
             BindingFlags flag = BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy;
             Type delegateType = typeof(Func<UndertaleReader, uint>);
             Type staticObjCountType = typeof(IStaticChildObjCount);
+            Type staticObjSizeType = typeof(IStaticChildObjectsSize);
 
             allTypes = allTypes.Where(t => t.IsAssignableTo(utObjectType)).ToArray();
             foreach (Type t in allTypes)
@@ -313,23 +338,30 @@ namespace UndertaleModLib
 
             foreach (Type t in allTypes)
             {
+                FieldInfo fi;
+                object res;
+
                 if (t.IsAssignableTo(staticObjCountType))
                 {
-                    FieldInfo fi = t.GetField("ChildObjectCount", flag);
+                    fi = t.GetField("ChildObjectCount", flag);
                     if (fi is null)
                     {
                         Debug.WriteLine($"Can't get \"ChildObjectCount\" field of \"{t.FullName}\"");
                         continue;
                     }
 
-                    object res = fi.GetValue(null);
+                    res = fi.GetValue(null);
                     if (res is null)
                     {
                         Debug.WriteLine($"Can't get value of \"ChildObjectCount\" of \"{t.FullName}\"");
                         continue;
                     }
-                    uint count = (uint)res;
 
+                    staticObjCountDict[t] = (uint)res;
+                }
+
+                if (t.IsAssignableTo(staticObjSizeType))
+                {
                     fi = t.GetField("ChildObjectsSize", flag);
                     if (fi is null)
                     {
@@ -343,9 +375,8 @@ namespace UndertaleModLib
                         Debug.WriteLine($"Can't get value of \"ChildObjectsSize\" of \"{t.FullName}\"");
                         continue;
                     }
-                    uint size = (uint)res;
 
-                    staticObjPropDict[t] = (count, size);
+                    staticObjSizeDict[t] = (uint)res;
                 }
             }
         }
@@ -354,17 +385,27 @@ namespace UndertaleModLib
             if (!unserializeFuncDict.TryGetValue(objType, out var res))
             {
                 Debug.WriteLine($"\"UndertaleReader.unserializeFuncDict\" doesn't contain a method for \"{objType.FullName}\".");
-                return null;
+                return new(_ => { return 0; });
             }
 
             return res;
         }
-        public (uint Count, uint Size) GetStaticChildProperties(Type objType)
+        public uint GetStaticChildCount(Type objType)
         {
-            if (!staticObjPropDict.TryGetValue(objType, out (uint, uint) res))
+            if (!staticObjCountDict.TryGetValue(objType, out uint res))
             {
-                Debug.WriteLine($"\"UndertaleReader.staticObjPropDict\" doesn't contain type \"{objType.FullName}\".");
-                return default;
+                Debug.WriteLine($"\"UndertaleReader.staticObjCountDict\" doesn't contain type \"{objType.FullName}\".");
+                return 0;
+            }
+
+            return res;
+        }
+        public uint GetStaticChildObjectsSize(Type objType)
+        {
+            if (!staticObjSizeDict.TryGetValue(objType, out uint res))
+            {
+                Debug.WriteLine($"\"UndertaleReader.staticObjSizeDict\" doesn't contain type \"{objType.FullName}\".");
+                return 0;
             }
 
             return res;
@@ -380,7 +421,7 @@ namespace UndertaleModLib
             return objectPoolRev;
         }
 
-        public void InitializePools(uint objCount)
+        public void InitializePools(uint objCount = 0)
         {
             if (objCount == 0)
             {
@@ -397,6 +438,7 @@ namespace UndertaleModLib
 
         public uint GetChildObjectCount<T>() where T : UndertaleObject
         {
+            // TODO: add support for "UndertaleList"s
             Type t = typeof(T);
             if (!unserializeFuncDict.TryGetValue(t, out var func))
                 throw new UndertaleSerializationException(

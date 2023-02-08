@@ -227,7 +227,11 @@ namespace UndertaleModLib
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
-            return reader.ReadUInt32();
+            uint count = 1;
+
+            count += UndertalePointerList<T>.UnserializeChildObjectCount(reader);
+
+            return count;
         }
 
         public IList GetList() => List;
@@ -290,6 +294,20 @@ namespace UndertaleModLib
                 }
                 List.AddDirect(reader.ReadUndertaleObject<T>());
             }
+        }
+
+        internal override uint UnserializeObjectCount(UndertaleReader reader)
+        {
+            uint count = reader.ReadUInt32();
+            if (count == 0)
+                return 0;
+
+            Type t = typeof(T);
+            if (t != typeof(UndertaleBackground) && t != typeof(UndertaleString))
+                throw new InvalidOperationException(
+                    "\"UndertaleAlignUpdatedListChunk<T>\" supports the count unserialization only for backgrounds and strings.");
+
+            return 1 + count;
         }
     }
 
