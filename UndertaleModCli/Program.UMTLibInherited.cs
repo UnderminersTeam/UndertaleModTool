@@ -988,7 +988,7 @@ public partial class Program : IScriptInterface
 
     public void ReassignGUIDs(string guid, uint objectIndex)
     {
-        int eventIdx = (int)Enum.Parse(typeof(EventType), "Collision");
+        int eventIdx = Convert.ToInt32(EventType.Collision);
         for (var i = 0; i < Data.GameObjects.Count; i++)
         {
             UndertaleGameObject obj = Data.GameObjects[i];
@@ -1069,7 +1069,7 @@ public partial class Program : IScriptInterface
 
     public List<uint> GetCollisionValueFromCodeNameGUID(string codeName)
     {
-        int eventIdx = (int)Enum.Parse(typeof(EventType), "Collision");
+        int eventIdx = Convert.ToInt32(EventType.Collision);
         List<uint> possibleValues = new List<uint>();
         for (var i = 0; i < Data.GameObjects.Count; i++)
         {
@@ -1102,7 +1102,7 @@ public partial class Program : IScriptInterface
 
     public List<uint> GetCollisionValueFromGUID(string guid)
     {
-        int eventIdx = (int)Enum.Parse(typeof(EventType), "Collision");
+        int eventIdx = Convert.ToInt32(EventType.Collision);
         List<uint> possibleValues = new List<uint>();
         for (var i = 0; i < Data.GameObjects.Count; i++)
         {
