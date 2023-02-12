@@ -204,6 +204,7 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
 
     /// <summary>
     /// The major version of the data file.
+    /// If greater than 1, serialization produces "2.0.0.0" due to the flag no longer updating in data.win
     /// </summary>
     public uint Major { get; set; } = 1;
 
@@ -305,72 +306,6 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     /// </summary>
     public bool InfoTimestampOffset { get; set; } = true;
 
-    /// <summary>
-    /// Enum for versions past GMS2.
-    /// GameMaker no longer updates the version constants in General Info,
-    /// so it falls to UTMT to detect these versions.
-    /// </summary>
-    public enum GMS2Versions
-    {
-        /// <summary>
-        /// Whether the data file is from version GMS2
-        /// </summary>
-        GMS2,
-        /// <summary>
-        /// Whether the data file is from version GMS2.2.1
-        /// </summary>
-        GMS2_2_1,
-        /// <summary>
-        /// Whether the data file is from version GMS2.2.2.302
-        /// </summary>
-        GMS2_2_2_302,
-        /// <summary>
-        /// Whether the data file is from version GMS2.3
-        /// </summary>
-        GMS2_3,
-        /// <summary>
-        /// Whether the data file is from version GMS2.3.1
-        /// </summary>
-        GMS2_3_1,
-        /// <summary>
-        /// Whether the data file is from version GMS2.3.2
-        /// </summary>
-        GMS2_3_2,
-        /// <summary>
-        /// Whether the data file is from version GMS2.3.6
-        /// </summary>
-        GMS2_3_6,
-        /// <summary>
-        /// Whether the data file is from version GMS2022.1
-        /// </summary>
-        GMS2022_1,
-        /// <summary>
-        /// Whether the data file is from version GMS2022.2
-        /// </summary>
-        GMS2022_2,
-        /// <summary>
-        /// Whether the data file is from version GM2022.3
-        /// </summary>
-        GM2022_3,
-        /// <summary>
-        /// Whether the data file is from version GM2022.5
-        /// </summary>
-        GM2022_5,
-        /// <summary>
-        /// Whether the data file is from version GM2022.6
-        /// </summary>
-        GM2022_6,
-        /// <summary>
-        /// Whether the data file is from version GM2022.8
-        /// </summary>
-        GM2022_8
-    }
-
-    /// <summary>
-    /// Tracks the game version beyond GMS2.
-    /// </summary>
-    public GMS2Versions GMS2Version { get; set; } = GMS2Versions.GMS2;
-
     /// <inheritdoc/>
     /// <exception cref="IOException">If <see cref="LicenseMD5"/> or <see cref="GMS2GameGUID"/> has an invalid length.</exception>
     public void Serialize(UndertaleWriter writer)
@@ -385,10 +320,22 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         writer.Write(GameID);
         writer.Write(DirectPlayGuid.ToByteArray());
         writer.WriteUndertaleString(Name);
-        writer.Write(Major);
-        writer.Write(Minor);
-        writer.Write(Release);
-        writer.Write(Build);
+        if (Major == 1)
+        {
+            writer.Write(Major);
+            writer.Write(Minor);
+            writer.Write(Release);
+            writer.Write(Build);
+        }
+        else
+        {
+            // The version number here is no longer updated,
+            // but it's still useful for the tool
+            writer.Write((uint)2);
+            writer.Write((uint)0);
+            writer.Write((uint)0);
+            writer.Write((uint)0);
+        }
         writer.Write(DefaultWindowWidth);
         writer.Write(DefaultWindowHeight);
         writer.Write((uint)Info);
@@ -446,14 +393,6 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     /// <inheritdoc />
     public void Unserialize(UndertaleReader reader)
     {
-        if (GMS2Version < GMS2Versions.GM2022_8 && reader.AllChunkNames.Contains("FEAT"))
-            GMS2Version = GMS2Versions.GM2022_8;
-        if (GMS2Version < GMS2Versions.GMS2_3_6 && reader.AllChunkNames.Contains("FEDS"))
-            GMS2Version = GMS2Versions.GMS2_3_6;
-        if (GMS2Version < GMS2Versions.GMS2_3 && reader.GMS2_3)
-            GMS2Version = GMS2Versions.GMS2_3;
-        if (GMS2Version < GMS2Versions.GMS2_2_1 && reader.AllChunkNames.Contains("TGIN"))
-            GMS2Version = GMS2Versions.GMS2_2_1;
         IsDebuggerDisabled = reader.ReadByte() != 0;
         BytecodeVersion = reader.ReadByte();
         Unknown = reader.ReadUInt16();
@@ -469,6 +408,24 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         Minor = reader.ReadUInt32();
         Release = reader.ReadUInt32();
         Build = reader.ReadUInt32();
+
+        // Some GMS2+ version detection. The rest is spread around, mostly in UndertaleChunks.cs
+        if (reader.AllChunkNames.Contains("FEAT")) // 2022.8
+        {
+            Major = 2022; Minor = 8; Release = 0; Build = 0;
+        }
+        else if (reader.AllChunkNames.Contains("FEDS")) // 2.3.6
+        {
+            Major = 2; Minor = 3; Release = 6; Build = 0;
+        }
+        else if (reader.GMS2_3) // 2.3
+        {
+            Major = 2; Minor = 3; Release = 0; Build = 0;
+        }
+        else if (reader.AllChunkNames.Contains("TGIN")) // 2.2.1
+        {
+            Major = 2; Minor = 2; Release = 1; Build = 0;
+        }
         DefaultWindowWidth = reader.ReadUInt32();
         DefaultWindowHeight = reader.ReadUInt32();
         Info = (InfoFlags)reader.ReadUInt32();
@@ -552,10 +509,7 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     /// <inheritdoc />
     public override string ToString()
     {
-        if (Major == 2)
-            return DisplayName + " (" + Enum.GetName(typeof(GMS2Versions), GMS2Version).Replace("_", ".") + ", bytecode " + BytecodeVersion + ")";
-        else
-            return DisplayName + " (GMS " + Major + "." + Minor + "." + Release + "." + Build + ", bytecode " + BytecodeVersion + ")";
+        return DisplayName + " (GMS " + Major + "." + Minor + "." + Release + "." + Build + ", bytecode " + BytecodeVersion + ")";
     }
 
     /// <inheritdoc/>

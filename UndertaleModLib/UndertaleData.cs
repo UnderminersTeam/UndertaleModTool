@@ -441,47 +441,13 @@ namespace UndertaleModLib
         /// <param name="build">The build version.</param>
         public void SetGMS2Version(uint major, uint minor = 0, uint release = 0, uint build = 0)
         {
-            if (major == 2022)
-            {
-                if (minor >= 8)
-                    GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMS2Versions.GM2022_8;
-                else if (minor >= 6)
-                    GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMS2Versions.GM2022_6;
-                else if (minor >= 5)
-                    GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMS2Versions.GM2022_5;
-                else if (minor >= 3)
-                    GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMS2Versions.GM2022_3;
-                else if (minor >= 2)
-                    GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMS2Versions.GMS2022_2;
-                else if (minor >= 1)
-                    GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMS2Versions.GMS2022_1;
-            }
-            else if (major == 2)
-            {
-                if (minor >= 3)
-                {
-                    if (release >= 6)
-                        GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMS2Versions.GMS2_3_6;
-                    else if (release >= 2)
-                        GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMS2Versions.GMS2_3_2;
-                    else if (release >= 1)
-                        GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMS2Versions.GMS2_3_1;
-                    else
-                        GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMS2Versions.GMS2_3;
-                }
-                // 2.2.0 has no changes and no enum value, so only enter this with 2.2.1+
-                else if (minor >= 2 && release >= 1)
-                {
-                    if (release >= 2 && build >= 302)
-                        GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMS2Versions.GMS2_2_2_302;
-                    else
-                        GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMS2Versions.GMS2_2_1;
-                }
-                else
-                    GeneralInfo.GMS2Version = UndertaleGeneralInfo.GMS2Versions.GMS2;
-            }
-            else
+            if (major != 2 && major != 2022 && major != 2023)
                 throw new Exception("Attempted to set a version of GameMaker " + major + " using SetGMS2Version");
+
+            GeneralInfo.Major = major;
+            GeneralInfo.Minor = minor;
+            GeneralInfo.Release = release;
+            GeneralInfo.Build = build;
         }
 
         /// <summary>
@@ -498,24 +464,6 @@ namespace UndertaleModLib
             uint gameMinor = GeneralInfo.Minor;
             uint gameRelease = GeneralInfo.Release;
             uint gameBuild = GeneralInfo.Build;
-            // If GMS2Version is set, we increase the version values to match.
-            switch (GeneralInfo.GMS2Version)
-            {
-                case UndertaleGeneralInfo.GMS2Versions.GMS2:         break;
-                case UndertaleGeneralInfo.GMS2Versions.GMS2_2_1:     gameMajor = 2; gameMinor = 2; gameRelease = 1; break;
-                case UndertaleGeneralInfo.GMS2Versions.GMS2_2_2_302: gameMajor = 2; gameMinor = 2; gameRelease = 2; gameBuild = 302; break;
-                case UndertaleGeneralInfo.GMS2Versions.GMS2_3:       gameMajor = 2; gameMinor = 3; gameRelease = 0; break;
-                case UndertaleGeneralInfo.GMS2Versions.GMS2_3_1:     gameMajor = 2; gameMinor = 3; gameRelease = 1; break;
-                case UndertaleGeneralInfo.GMS2Versions.GMS2_3_2:     gameMajor = 2; gameMinor = 3; gameRelease = 2; break;
-                case UndertaleGeneralInfo.GMS2Versions.GMS2_3_6:     gameMajor = 2; gameMinor = 3; gameRelease = 6; break;
-                // Fortunately, 2022 is larger than 2 and therefore still valid.
-                case UndertaleGeneralInfo.GMS2Versions.GMS2022_1:    gameMajor = 2022; gameMinor = 1; break;
-                case UndertaleGeneralInfo.GMS2Versions.GMS2022_2:    gameMajor = 2022; gameMinor = 2; break;
-                case UndertaleGeneralInfo.GMS2Versions.GM2022_3:     gameMajor = 2022; gameMinor = 3; break;
-                case UndertaleGeneralInfo.GMS2Versions.GM2022_5:     gameMajor = 2022; gameMinor = 5; break;
-                case UndertaleGeneralInfo.GMS2Versions.GM2022_6:     gameMajor = 2022; gameMinor = 6; break;
-                case UndertaleGeneralInfo.GMS2Versions.GM2022_8:     gameMajor = 2022; gameMinor = 8; break;
-            }
 
             if (gameMajor != major)
                 return (gameMajor > major);
