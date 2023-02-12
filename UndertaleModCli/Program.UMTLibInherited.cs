@@ -918,7 +918,7 @@ public partial class Program : IScriptInterface
                 if (!(skipPortions))
                 {
                     obj = Data.GameObjects.ByName(objName);
-                    int eventIdx = (int)Enum.Parse(typeof(EventType), methodName);
+                    int eventIdx = Convert.ToInt32(Enum.Parse(typeof(EventType), methodName));
                     bool duplicate = false;
                     try
                     {
