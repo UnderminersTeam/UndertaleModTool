@@ -65,6 +65,24 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
         Channels = reader.ReadUndertaleObject<UndertaleSimpleList<Channel>>();
     }
 
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        return UnserializeChildObjectCount(reader, true);
+    }
+
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    /// <param name="reader">Where to deserialize from.</param>
+    /// <param name="includeName">Whether to include <see cref="Name"/> in the deserialization.</param>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader, bool includeName)
+    {
+        if (includeName)
+            reader.Position += 4; // "Name"
+        reader.Position += 4;     // "GraphType"
+
+        return 1 + UndertaleSimpleList<Channel>.UnserializeChildObjectCount(reader);
+    }
+
     /// <inheritdoc />
     public override string ToString()
     {
@@ -122,7 +140,14 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
         {
             reader.Position += 12;
 
-            return reader.ReadUInt32();
+            // "Points"
+            uint count = reader.ReadUInt32();
+            if (reader.undertaleData.GMS2_3_1)
+                reader.Position += 24 * count;
+            else
+                reader.Position += 12 * count;
+
+            return count;
         }
 
         /// <inheritdoc/>
@@ -134,10 +159,8 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
             Points = null;
         }
 
-        public class Point : UndertaleObject, IStaticChildObjectsSize
+        public class Point : UndertaleObject
         {
-            public static readonly uint ChildObjectsSize = 0;
-
             public float X;
             public float Value;
 
@@ -168,18 +191,6 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
             {
                 X = reader.ReadSingle();
                 Value = reader.ReadSingle();
-
-                if (reader.ReadUInt32() != 0) // in 2.3 a int with the value of 0 would be set here,
-                {                             // it cannot be version 2.3 if this value isn't 0
-                    reader.undertaleData.GMS2_3_1 = true;
-                    reader.Position -= 4;
-                }
-                else
-                {
-                    if (reader.ReadUInt32() == 0)              // At all points (besides the first one)
-                        reader.undertaleData.GMS2_3_1 = true; // if BezierX0 equals to 0 (the above check)
-                    reader.Position -= 8;                        // then BezierY0 equals to 0 as well (the current check)
-                }
 
                 if (reader.undertaleData.GMS2_3_1)
                 {

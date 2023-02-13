@@ -54,6 +54,15 @@ public class UndertaleSpineTextureEntry : UndertaleObject, IDisposable
         TexBlob = reader.ReadBytes(reader.ReadInt32());
     }
 
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        reader.Position += 8;                        // Size
+        reader.Position += (uint)reader.ReadInt32(); // "TexBlob"
+
+        return 0;
+    }
+
     /// <inheritdoc />
     public override string ToString()
     {
@@ -287,8 +296,11 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
     }
 
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class TextureEntry : UndertaleObject, IDisposable
+    public class TextureEntry : UndertaleObject, IStaticChildObjectsSize, IDisposable
     {
+        /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+        public static readonly uint ChildObjectsSize = 4;
+
         public UndertaleTexturePageItem Texture { get; set; }
 
         /// <inheritdoc />
@@ -579,7 +591,8 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                         SpineCacheVersion = reader.ReadInt32();
                         Util.DebugUtil.Assert(SpineCacheVersion == 1, "Invalid Spine cache format version number, expected 1, got " + SpineCacheVersion);
                     }
-                    Util.DebugUtil.Assert(SpineVersion == 3 || SpineVersion == 2 || SpineVersion == 1, "Invalid Spine format version number, expected 3, 2 or 1, got " + SpineVersion);
+                    Util.DebugUtil.Assert(SpineVersion <= 3 && SpineVersion >= 1,
+                                          "Invalid Spine format version number, expected 3, 2 or 1, got " + SpineVersion);
                     int jsonLength = reader.ReadInt32();
                     int atlasLength = reader.ReadInt32();
                     int textures = reader.ReadInt32(); // count in v2(and newer) and size in bytes in v1.
@@ -601,7 +614,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                             atlas.PageWidth = atlasWidth;
                             atlas.PageHeight = atlasHeight;
                             atlas.TexBlob = reader.ReadBytes(textures);
-                            SpineTextures.Add(atlas);
+                            SpineTextures.InternalAdd(atlas);
                             break;
                         }
                         case 2:
@@ -610,11 +623,13 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                             SpineJSON = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(jsonLength)));
                             SpineAtlas = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(atlasLength)));
 
+                            SpineTextures.SetCapacity(textures);
+
                             // the length is stored before json and atlases so we can't use ReadUndertaleObjectList
                             // same goes for serialization.
                             for (int t = 0; t < textures; t++)
                             {
-                                SpineTextures.Add(reader.ReadUndertaleObject<UndertaleSpineTextureEntry>());
+                                SpineTextures.InternalAdd(reader.ReadUndertaleObject<UndertaleSpineTextureEntry>());
                             }
 
                             break;
@@ -627,7 +642,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
             if (sequenceOffset != 0)
             {
                 if (reader.ReadInt32() != 1)
-                    throw new IOException("Expected 1");
+                    throw new UndertaleSerializationException("Sequence data unserialization error - expected 1");
                 V2Sequence = reader.ReadUndertaleObject<UndertaleSequence>();
             }
 
@@ -642,6 +657,125 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
             Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
             ReadMaskData(reader);
         }
+    }
+
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        reader.Align(4);
+
+        uint count = 0;
+
+        reader.Position += 4; // "Name"
+        uint width = reader.ReadUInt32();
+        uint height = reader.ReadUInt32();
+
+        reader.Position += 44;
+
+        if (reader.ReadInt32() == -1)
+        {
+            int sequenceOffset = 0;
+            int nineSliceOffset = 0;
+
+            uint sVersion = reader.ReadUInt32();
+            SpriteType sSpriteType = (SpriteType)reader.ReadUInt32();
+            if (reader.GMS2)
+            {
+                reader.Position += 8; // playback speed values
+
+                if (sVersion >= 2)
+                {
+                    sequenceOffset = reader.ReadInt32();
+                    if (sVersion >= 3)
+                    {
+                        reader.undertaleData.GMS2_3_1 = true;
+                        reader.undertaleData.GMS2_3_2 = true;
+                        nineSliceOffset = reader.ReadInt32();
+                    }
+                }
+            }
+
+            switch (sSpriteType)
+            {
+                case SpriteType.Normal:
+                    count += 1 + UndertaleSimpleList<TextureEntry>.UnserializeChildObjectCount(reader);
+                    SkipMaskData(reader, width, height);
+                    break;
+
+                case SpriteType.SWF:
+                    int swfVersion = reader.ReadInt32();
+                    if (swfVersion == 8)
+                        count += 1 + UndertaleSimpleList<TextureEntry>.UnserializeChildObjectCount(reader);
+
+                    // "YYSWF" classes are not in the pool
+                    return count;
+
+                case SpriteType.Spine:
+                {
+                    reader.Align(4);
+
+                    int spineVersion = reader.ReadInt32();
+                    if (spineVersion >= 3)
+                        reader.Position += 4; // "SpineCacheVersion"
+                    Util.DebugUtil.Assert(spineVersion <= 3 && spineVersion >= 1,
+                                          "Invalid Spine format version number, expected 3, 2 or 1, got " + spineVersion);
+
+                    int jsonLength = reader.ReadInt32();
+                    int atlasLength = reader.ReadInt32();
+                    int textures = reader.ReadInt32();
+
+                    switch (spineVersion)
+                    {
+                        case 1:
+                        {
+                            reader.Position += 8; // atlas size
+                            reader.Position += (uint)jsonLength;
+                            reader.Position += (uint)atlasLength;
+
+                            reader.Position += (uint)textures;
+                        }
+                            break;
+
+                        case 2:
+                        case 3:
+                        {
+                            reader.Position += (uint)jsonLength;
+                            reader.Position += (uint)atlasLength;
+
+                            // TODO: make this return count instead if spine sprite
+                            // couldn't have sequence or nine slices data.
+                            for (int i = 0; i < textures; i++)
+                                UndertaleSpineTextureEntry.UnserializeChildObjectCount(reader);
+
+                            count += (uint)textures;
+                        }
+                            break;
+                    }
+                }
+                    break;
+            }
+
+            if (sequenceOffset != 0)
+            {
+                if (reader.ReadInt32() != 1)
+                    throw new UndertaleSerializationException($"Sequence data count unserialization error - expected 1");
+                count += 1 + UndertaleSequence.UnserializeChildObjectCount(reader);
+            }
+
+            if (nineSliceOffset != 0)
+            {
+                reader.Position += NineSlice.ChildObjectsSize;
+                count++;
+            }
+        }
+        else
+        {
+            reader.Position -= 4;
+            UndertaleSimpleList<TextureEntry>.UnserializeChildObjectCount(reader);
+            SkipMaskData(reader, width, height);
+        }
+
+        return count;
     }
 
     private void ReadMaskData(UndertaleReader reader)
@@ -666,6 +800,25 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
         }
         Util.DebugUtil.Assert(total == CalculateMaskDataSize(Width, Height, maskCount));
     }
+    private static void SkipMaskData(UndertaleReader reader, uint width, uint height)
+    {
+        uint maskCount = reader.ReadUInt32();
+        uint len = (width + 7) / 8 * height;
+
+        uint total = 0;
+        for (uint i = 0; i < maskCount; i++)
+        {
+            reader.Position += len; // "new MaskEntry()"
+            total += len;
+        }
+
+        // Skip padding
+        while (total % 4 != 0)
+        {
+            reader.Position++;
+            total++;
+        }
+    }
 
     public uint CalculateMaskDataSize(uint width, uint height, uint maskcount)
     {
@@ -684,12 +837,16 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
     /// <inheritdoc />
     public void UnserializePrePadding(UndertaleReader reader)
     {
+        // If you are modifying this, you must also modify "UnserializeChildObjectCount()"
         reader.Align(4);
     }
 
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class NineSlice : UndertaleObject
+    public class NineSlice : UndertaleObject, IStaticChildObjectsSize
     {
+        /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+        public static readonly uint ChildObjectsSize = 40;
+
         public int Left { get; set; }
         public int Top { get; set; }
         public int Right { get; set; }

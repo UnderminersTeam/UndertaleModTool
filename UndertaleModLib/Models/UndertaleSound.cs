@@ -7,8 +7,11 @@ namespace UndertaleModLib.Models;
 /// <summary>
 /// Sound entry in a data file.
 /// </summary>
-public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, IDisposable
+public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, IStaticChildObjectsSize, IDisposable
 {
+    /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+    public static readonly uint ChildObjectsSize = 36;
+
     /// <summary>
     /// Audio entry flags a sound entry can use.
     /// </summary>

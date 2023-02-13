@@ -1194,12 +1194,8 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
 
             // Get instructions count
             uint instrCount = 0;
-            int instrCount1 = 0;
             while (reader.Position < bytecodeAbsoluteAddress + length)
-            {
-                instrCount1++;
                 instrCount += 1 + UndertaleInstruction.UnserializeChildObjectCount(reader);
-            }
 
             reader.Position = here;
             reader.Position += 4; // "Offset"

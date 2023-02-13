@@ -103,6 +103,20 @@ namespace UndertaleModLib
             uint totalCount = 0;
             uint startPos = reader.Position;
 
+            while (reader.Position < reader.Length)
+            {
+                string chunkName = reader.ReadChars(4);
+                if (chunkName == "SEQN")
+                {
+                    reader.GMS2_3 = true;
+                    break;
+                }
+
+                uint length = reader.ReadUInt32();
+                reader.Position += length;
+            }
+            reader.Position = startPos;
+
             while (reader.Position < startPos + Length)
                 totalCount += reader.CountChunkChildObjects();
 
@@ -135,77 +149,81 @@ namespace UndertaleModLib
         public override string Name => "EXTN";
         public List<byte[]> productIdData = new List<byte[]>();
 
-        internal override void UnserializeChunk(UndertaleReader reader)
+        private void CheckFor2022_6(UndertaleReader reader)
         {
-            if (reader.undertaleData.GMS2_3)
+            bool definitely2022_6 = true;
+            uint returnPosition = reader.Position;
+
+            int extCount = reader.ReadInt32();
+            if (extCount > 0)
             {
-                // Check for 2022.6, if possible
-                bool definitely2022_6 = true;
-                uint returnPosition = reader.Position;
+                uint firstExtPtr = reader.ReadUInt32();
+                uint firstExtEndPtr = (extCount >= 2) ? reader.ReadUInt32() /* second ptr */ : (returnPosition + this.Length);
 
-                int extCount = reader.ReadInt32();
-                if (extCount > 0)
+                reader.Position = firstExtPtr + 12;
+                uint newPointer1 = reader.ReadUInt32();
+                uint newPointer2 = reader.ReadUInt32();
+
+                if (newPointer1 != reader.Position)
+                    definitely2022_6 = false; // first pointer mismatch
+                else if (newPointer2 <= reader.Position || newPointer2 >= (returnPosition + this.Length))
+                    definitely2022_6 = false; // second pointer out of bounds
+                else
                 {
-                    uint firstExtPtr = reader.ReadUInt32();
-                    uint firstExtEndPtr = (extCount >= 2) ? reader.ReadUInt32() /* second ptr */ : (returnPosition + this.Length);
-
-                    reader.Position = firstExtPtr + 12;
-                    uint newPointer1 = reader.ReadUInt32();
-                    uint newPointer2 = reader.ReadUInt32();
-
-                    if (newPointer1 != reader.Position)
-                        definitely2022_6 = false; // first pointer mismatch
-                    else if (newPointer2 <= reader.Position || newPointer2 >= (returnPosition + this.Length))
-                        definitely2022_6 = false; // second pointer out of bounds
-                    else
+                    // Check ending position
+                    reader.Position = newPointer2;
+                    uint optionCount = reader.ReadUInt32();
+                    if (optionCount > 0)
                     {
-                        // Check ending position
-                        reader.Position = newPointer2;
-                        uint optionCount = reader.ReadUInt32();
-                        if (optionCount > 0)
+                        long newOffsetCheck = reader.Position + (4 * (optionCount - 1));
+                        if (newOffsetCheck >= (returnPosition + this.Length))
                         {
-                            long newOffsetCheck = reader.Position + (4 * (optionCount - 1));
+                            // Option count would place us out of bounds
+                            definitely2022_6 = false;
+                        }
+                        else
+                        {
+                            reader.Position += (4 * (optionCount - 1));
+                            newOffsetCheck = reader.ReadUInt32() + 12; // jump past last option
                             if (newOffsetCheck >= (returnPosition + this.Length))
                             {
-                                // Option count would place us out of bounds
+                                // Pointer list element would place us out of bounds
                                 definitely2022_6 = false;
                             }
                             else
                             {
-                                reader.Position += (4 * (optionCount - 1));
-                                newOffsetCheck = reader.ReadUInt32() + 12; // jump past last option
-                                if (newOffsetCheck >= (returnPosition + this.Length))
-                                {
-                                    // Pointer list element would place us out of bounds
-                                    definitely2022_6 = false;
-                                }
-                                else
-                                {
-                                    reader.Position = (uint)newOffsetCheck;
-                                }
+                                reader.Position = (uint)newOffsetCheck;
                             }
-                        }
-                        if (definitely2022_6)
-                        {
-                            if (extCount == 1)
-                            {
-                                reader.Position += 16; // skip GUID data (only one of them)
-                                if (reader.Position % 16 != 0)
-                                    reader.Position += 16 - (reader.Position % 16); // align to chunk end
-                            }
-                            if (reader.Position != firstExtEndPtr)
-                                definitely2022_6 = false;
                         }
                     }
+                    if (definitely2022_6)
+                    {
+                        if (extCount == 1)
+                        {
+                            reader.Position += 16; // skip GUID data (only one of them)
+                            if (reader.Position % 16 != 0)
+                                reader.Position += 16 - (reader.Position % 16); // align to chunk end
+                        }
+                        if (reader.Position != firstExtEndPtr)
+                            definitely2022_6 = false;
+                    }
                 }
-                else
-                    definitely2022_6 = false;
-
-                reader.Position = returnPosition;
-
-                if (definitely2022_6)
-                    reader.undertaleData.GM2022_6 = true;
             }
+            else
+                definitely2022_6 = false;
+
+            reader.Position = returnPosition;
+
+            if (definitely2022_6)
+                reader.undertaleData.GM2022_6 = true;
+
+            reader.CheckedFor2022_6 = true;
+        }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            if (reader.undertaleData.GMS2_3 && !reader.CheckedFor2022_6)
+                CheckFor2022_6(reader);
 
             base.UnserializeChunk(reader);
 
@@ -237,6 +255,14 @@ namespace UndertaleModLib
 
                 writer.Write(data);
             }
+        }
+
+        internal override uint UnserializeObjectCount(UndertaleReader reader)
+        {
+            if (reader.GMS2_3)
+                CheckFor2022_6(reader);
+
+            return base.UnserializeObjectCount(reader);
         }
     }
 
@@ -685,15 +711,21 @@ namespace UndertaleModLib
             else
                 varLength = 12;
             List.Clear();
-            List.Capacity = (int)(Length / varLength);
+            List.Capacity = (int)(Length / varLength) - 1;
             while (reader.Position + varLength <= startPosition + Length)
                 List.Add(reader.ReadUndertaleObject<UndertaleVariable>());
         }
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
+            if (Length == 0)
+                return 0;
+
+            if (reader.undertaleData.UnsupportedBytecodeVersion)
+                return 0;
+
             int varLength = reader.Bytecode14OrLower ? 12 : 20;
-            return Length / (uint)varLength;
+            return Length / (uint)varLength - 1;
         }
     }
 
@@ -738,7 +770,7 @@ namespace UndertaleModLib
             {
                 uint startPosition = reader.Position;
                 Functions.Clear();
-                Functions.SetCapacity(Length / 12);
+                Functions.SetCapacity((Length / 12) - 1);
                 while (reader.Position + 12 <= startPosition + Length)
                     Functions.Add(reader.ReadUndertaleObject<UndertaleFunction>());
             }
@@ -759,7 +791,7 @@ namespace UndertaleModLib
                 count += 1 + UndertaleSimpleList<UndertaleCodeLocals>.UnserializeChildObjectCount(reader);
             }
             else
-                count = 1 + Length / 12;
+                count = (Length / 12) - 1;
 
             return count;
         }
@@ -1018,6 +1050,37 @@ namespace UndertaleModLib
     {
         public override string Name => "ACRV";
 
+        private void CheckForGMS2_3_1(UndertaleReader reader)
+        {
+            uint count = reader.ReadUInt32();
+            if (count == 0)
+            {
+                reader.CheckedForGMS2_3_1 = true;
+                return;
+            }
+
+            uint returnTo = reader.Position;
+
+            reader.Position = reader.ReadUInt32(); // go to the first "Point"
+            reader.Position += 8;
+
+            if (reader.ReadUInt32() != 0) // in 2.3 a int with the value of 0 would be set here,
+            {                             // it cannot be version 2.3 if this value isn't 0
+                reader.undertaleData.GMS2_3_1 = true;
+                reader.Position -= 4;
+            }
+            else
+            {
+                if (reader.ReadUInt32() == 0)              // At all points (besides the first one)
+                    reader.undertaleData.GMS2_3_1 = true;  // if BezierX0 equals to 0 (the above check)
+                reader.Position -= 8;                      // then BezierY0 equals to 0 as well (the current check)
+            }
+
+            reader.Position = returnTo;
+
+            reader.CheckedForGMS2_3_1 = true;
+        }
+
         internal override void SerializeChunk(UndertaleWriter writer)
         {
             if (writer.undertaleData.GeneralInfo.Major < 2)
@@ -1044,6 +1107,9 @@ namespace UndertaleModLib
             if (reader.ReadUInt32() != 1)
                 throw new IOException("Expected ACRV version 1");
 
+            if (!reader.undertaleData.GMS2_3_1 && !reader.CheckedForGMS2_3_1)
+                CheckForGMS2_3_1(reader);
+
             base.UnserializeChunk(reader);
         }
 
@@ -1058,6 +1124,9 @@ namespace UndertaleModLib
 
             if (reader.ReadUInt32() != 1)
                 throw new IOException("Expected ACRV version 1");
+
+            if (!reader.undertaleData.GMS2_3_1)
+                CheckForGMS2_3_1(reader);
 
             count += base.UnserializeObjectCount(reader);
 
@@ -1102,6 +1171,27 @@ namespace UndertaleModLib
                 throw new IOException("Expected SEQN version 1, got " + version.ToString());
 
             base.UnserializeChunk(reader);
+        }
+
+        internal override uint UnserializeObjectCount(UndertaleReader reader)
+        {
+            if (!reader.GMS2)
+                throw new InvalidOperationException();
+
+            // Apparently SEQN can be empty
+            if (Length == 0)
+                return 0;
+
+            // Padding
+            while (reader.Position % 4 != 0)
+                if (reader.ReadByte() != 0)
+                    throw new IOException("Padding error!");
+
+            uint version = reader.ReadUInt32();
+            if (version != 1)
+                throw new IOException("Expected SEQN version 1, got " + version.ToString());
+
+            return base.UnserializeObjectCount(reader);
         }
     }
 

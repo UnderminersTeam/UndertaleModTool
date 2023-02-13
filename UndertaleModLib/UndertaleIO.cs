@@ -26,8 +26,11 @@ namespace UndertaleModLib
         int SerializeById(UndertaleWriter writer);
     }
 
-    public class UndertaleResourceById<T, ChunkT> : UndertaleResourceRef, IDisposable where T : UndertaleResource, new() where ChunkT : UndertaleListChunk<T>
+    public class UndertaleResourceById<T, ChunkT> : UndertaleResourceRef, IStaticChildObjectsSize, IDisposable where T : UndertaleResource, new() where ChunkT : UndertaleListChunk<T>
     {
+        /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+        public static readonly uint ChildObjectsSize = 4;
+
         public int CachedId { get; set; } = -1;
         public T Resource { get; set; }
 
@@ -205,6 +208,8 @@ namespace UndertaleModLib
         public bool GMS2 = false;
         public bool GMS2_3 = false;
         public bool Bytecode14OrLower = false;
+        public bool CheckedForGMS2_3_1 = false;
+        public bool CheckedFor2022_6 = false;
 
         public UndertaleChunk ReadUndertaleChunk()
         {
@@ -233,17 +238,19 @@ namespace UndertaleModLib
             DebugUtil.Assert(data.FORM.Name == name);
             data.FORM.Length = length;
 
-            Exception countExc = null;
             uint startPos = Position;
             uint poolSize = 0;
-            try
+            if (!ProcessCountExc()) // process an exception from "FillUnserializeCountDictionaries()"
             {
-                poolSize = data.FORM.UnserializeObjectCount(this);
-            }
-            catch (Exception e)
-            {
-                countExc = e;
-                Debug.WriteLine(e);
+                try
+                {
+                    poolSize = data.FORM.UnserializeObjectCount(this);
+                }
+                catch (Exception e)
+                {
+                    countUnserializeExc = e;
+                    Debug.WriteLine(e);
+                }
             }
             utListPtrsPool = null;
 
@@ -259,25 +266,12 @@ namespace UndertaleModLib
             foreach (UndertaleResourceRef res in resUpdate)
                 res.PostUnserialize(this);
             resUpdate.Clear();
-                 
+
             data.BuiltinList = new BuiltinList(data);
             Decompiler.AssetTypeResolver.InitializeTypes(data);
             UndertaleEmbeddedTexture.FindAllTextureInfo(data);
 
-            if (countExc is not null)
-            {
-                try
-                {
-                    string fileDir = Path.GetDirectoryName(Environment.ProcessPath);
-                    File.WriteAllText(Path.Combine(fileDir, "unserializeCountError.txt"),
-                                      countExc.ToString() + "\n" + countExc.Message + "\n" + countExc.StackTrace);
-
-                    SubmitWarning("Warning - there was an error while trying to unserialize total object count.\n" +
-                                  "The error log is saved to \"unserializeCountError.txt\"." +
-                                  "Please report that error to UndertaleModTool GitHub.");
-                }
-                catch { }
-            }
+            ProcessCountExc();
 
             return data;
         }
@@ -301,91 +295,155 @@ namespace UndertaleModLib
         private Dictionary<UndertaleObject, uint> objectPoolRev;
         private HashSet<uint> unreadObjects = new HashSet<uint>();
 
+        private Exception countUnserializeExc = null;
         private readonly Dictionary<Type, Func<UndertaleReader, uint>> unserializeFuncDict = new();
         private readonly Dictionary<Type, uint> staticObjCountDict = new();
         private readonly Dictionary<Type, uint> staticObjSizeDict = new();
         public HashSet<uint> GMS2BytecodeAddresses;
 
+        private readonly BindingFlags publicStaticFlags
+            = BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy;
+        private readonly Type[] readerArgType = { typeof(UndertaleReader) };
+        private readonly Type delegateType = typeof(Func<UndertaleReader, uint>);
+        private readonly Func<UndertaleReader, uint> blankCountFunc = new(_ => { return 0; });
+
         public ArrayPool<uint> utListPtrsPool = ArrayPool<uint>.Create(100000, 17);
 
-        private void FillUnserializeCountDictionaries()
+        private bool ProcessCountExc()
         {
-            Assembly currAssem = Assembly.GetExecutingAssembly();
-            Type[] allTypes = currAssem.GetTypes();
-
-            Type utObjectType = typeof(UndertaleObject);
-            BindingFlags flag = BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy;
-            Type delegateType = typeof(Func<UndertaleReader, uint>);
-            Type staticObjCountType = typeof(IStaticChildObjCount);
-            Type staticObjSizeType = typeof(IStaticChildObjectsSize);
-
-            allTypes = allTypes.Where(t => t.IsAssignableTo(utObjectType)).ToArray();
-            foreach (Type t in allTypes)
+            if (countUnserializeExc is not null)
             {
-                MethodInfo mi = t.GetMethod("UnserializeChildObjectCount", flag);
-                if (mi is null)
-                    continue;
-
-                var func = Delegate.CreateDelegate(delegateType, mi) as Func<UndertaleReader, uint>;
-                if (func is null)
+                try
                 {
-                    Debug.WriteLine($"Can't create a delegate from MethodInfo of type \"{t.FullName}\"");
-                    continue;
-                }
+                    string fileDir = Path.GetDirectoryName(Environment.ProcessPath);
+                    File.WriteAllText(Path.Combine(fileDir, "unserializeCountError.txt"),
+                                      countUnserializeExc.ToString() + "\n"
+                                      + countUnserializeExc.Message + "\n"
+                                      + countUnserializeExc.StackTrace);
 
-                unserializeFuncDict[t] = func;
+                    SubmitWarning("Warning - there was an error while trying to unserialize total object count.\n" +
+                                  "The error log is saved to \"unserializeCountError.txt\"." +
+                                  "Please report that error to UndertaleModTool GitHub.");
+                }
+                catch { }
+
+                countUnserializeExc = null;
+
+                return true;
             }
 
-            foreach (Type t in allTypes)
+            return false;
+        }
+        private void FillUnserializeCountDictionaries()
+        {
+            try
             {
-                FieldInfo fi;
-                object res;
+                Assembly currAssem = Assembly.GetExecutingAssembly();
+                Type[] allTypes = currAssem.GetTypes();
 
-                if (t.IsAssignableTo(staticObjCountType))
+                Type utObjectType = typeof(UndertaleObject);
+                Type staticObjCountType = typeof(IStaticChildObjCount);
+                Type staticObjSizeType = typeof(IStaticChildObjectsSize);
+
+                allTypes = allTypes.Where(t => t.IsAssignableTo(utObjectType)).ToArray();
+                foreach (Type t in allTypes)
                 {
-                    fi = t.GetField("ChildObjectCount", flag);
-                    if (fi is null)
+                    // It's not possible to call a static method of generic classes without present type argument.
+                    if (t.ContainsGenericParameters)
+                        continue;
+
+                    MethodInfo mi = t.GetMethod("UnserializeChildObjectCount", publicStaticFlags, readerArgType);
+                    if (mi is null)
+                        continue;
+
+                    var func = Delegate.CreateDelegate(delegateType, mi) as Func<UndertaleReader, uint>;
+                    if (func is null)
                     {
-                        Debug.WriteLine($"Can't get \"ChildObjectCount\" field of \"{t.FullName}\"");
+                        Debug.WriteLine($"Can't create a delegate from MethodInfo of type \"{t.FullName}\"");
                         continue;
                     }
 
-                    res = fi.GetValue(null);
-                    if (res is null)
-                    {
-                        Debug.WriteLine($"Can't get value of \"ChildObjectCount\" of \"{t.FullName}\"");
-                        continue;
-                    }
-
-                    staticObjCountDict[t] = (uint)res;
+                    unserializeFuncDict[t] = func;
                 }
 
-                if (t.IsAssignableTo(staticObjSizeType))
+                for (int i = 0; i < allTypes.Length; i++)
                 {
-                    fi = t.GetField("ChildObjectsSize", flag);
-                    if (fi is null)
-                    {
-                        Debug.WriteLine($"Can't get \"ChildObjectsSize\" field of \"{t.FullName}\"");
+                    Type t = allTypes[i];
+                    FieldInfo fi;
+                    object res;
+
+                    // It's not supported to get a static field from generic classes without present type argument.
+                    if (t.ContainsGenericParameters)
                         continue;
+
+                    if (t.IsAssignableTo(staticObjCountType))
+                    {
+                        fi = t.GetField("ChildObjectCount", publicStaticFlags);
+                        if (fi is null)
+                        {
+                            Debug.WriteLine($"Can't get \"ChildObjectCount\" field of \"{t.FullName}\"");
+                            continue;
+                        }
+
+                        res = fi.GetValue(null);
+                        if (res is null)
+                        {
+                            Debug.WriteLine($"Can't get value of \"ChildObjectCount\" of \"{t.FullName}\"");
+                            continue;
+                        }
+
+                        staticObjCountDict[t] = (uint)res;
                     }
 
-                    res = fi.GetValue(null);
-                    if (res is null)
+                    if (t.IsAssignableTo(staticObjSizeType))
                     {
-                        Debug.WriteLine($"Can't get value of \"ChildObjectsSize\" of \"{t.FullName}\"");
-                        continue;
-                    }
+                        fi = t.GetField("ChildObjectsSize", publicStaticFlags);
+                        if (fi is null)
+                        {
+                            Debug.WriteLine($"Can't get \"ChildObjectsSize\" field of \"{t.FullName}\"");
+                            continue;
+                        }
 
-                    staticObjSizeDict[t] = (uint)res;
+                        res = fi.GetValue(null);
+                        if (res is null)
+                        {
+                            Debug.WriteLine($"Can't get value of \"ChildObjectsSize\" of \"{t.FullName}\"");
+                            continue;
+                        }
+
+                        staticObjSizeDict[t] = (uint)res;
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+                countUnserializeExc = e;
             }
         }
         public Func<UndertaleReader, uint> GetUnserializeCountFunc(Type objType)
         {
             if (!unserializeFuncDict.TryGetValue(objType, out var res))
             {
-                Debug.WriteLine($"\"UndertaleReader.unserializeFuncDict\" doesn't contain a method for \"{objType.FullName}\".");
-                return new(_ => { return 0; });
+                MethodInfo mi = objType.GetMethod("UnserializeChildObjectCount", publicStaticFlags, readerArgType);
+                if (mi is null)
+                {
+                    Debug.WriteLine($"\"UndertaleReader.unserializeFuncDict\" doesn't contain a method for \"{objType.FullName}\".");
+                    return blankCountFunc;
+                }
+
+                Debug.WriteLine($"Adding a generic class method for \"{objType.FullName}\" to \"UndertaleReader.unserializeFuncDict\".");
+
+                var func = Delegate.CreateDelegate(delegateType, mi) as Func<UndertaleReader, uint>;
+                if (func is null)
+                {
+                    Debug.WriteLine($"Can't create a delegate from MethodInfo of type \"{objType.FullName}\"");
+                    return blankCountFunc;
+                }
+
+                unserializeFuncDict[objType] = func;
+
+                res = func;
             }
 
             return res;
@@ -436,16 +494,32 @@ namespace UndertaleModLib
             }
         }
 
-        public uint GetChildObjectCount<T>() where T : UndertaleObject
+        public uint GetChildObjectCount(Type t)
         {
-            // TODO: add support for "UndertaleList"s
-            Type t = typeof(T);
             if (!unserializeFuncDict.TryGetValue(t, out var func))
+            {
+                if (staticObjSizeDict.TryGetValue(t, out uint size))
+                {
+                    Position += size;
+
+                    staticObjCountDict.TryGetValue(t, out uint subCount);
+
+                    return subCount;
+                }
+
                 throw new UndertaleSerializationException(
                     $"\"UndertaleReader.unserializeFuncDict\" doesn't contain a method for \"{t.FullName}\".");
+            }
 
             return func(this);
         }
+        public uint GetChildObjectCount<T>() where T : UndertaleObject
+        {
+            Type t = typeof(T);
+
+            return GetChildObjectCount(t);
+        }
+        
 
         public T GetUndertaleObjectAtAddress<T>(uint address) where T : UndertaleObject, new()
         {

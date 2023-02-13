@@ -10,8 +10,11 @@ namespace UndertaleModLib.Models;
 /// A function entry as it's used in a GameMaker data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.ReferencedObject, IDisposable
+public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.ReferencedObject, IStaticChildObjectsSize, IDisposable
 {
+    /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+    public static readonly uint ChildObjectsSize = 12;
+
     public FunctionClassification Classification { get; set; }
 
     /// <summary>
@@ -120,14 +123,28 @@ public class UndertaleCodeLocals : UndertaleNamedResource, IDisposable
         Util.DebugUtil.Assert(Locals.Count == count);
     }
 
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        uint count = reader.ReadUInt32();
+        reader.Position += 4; // "Name"
+
+        reader.Position += count * LocalVar.ChildObjectsSize;
+
+        return count;
+    }
+
     public bool HasLocal(string varName)
     {
         return Locals.Any(local=>local.Name.Content == varName);
     }
 
     // TODO: INotifyPropertyChanged
-    public class LocalVar : UndertaleObject, IDisposable
+    public class LocalVar : UndertaleObject, IStaticChildObjectsSize, IDisposable
     {
+        /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+        public static readonly uint ChildObjectsSize = 8;
+
         public uint Index { get; set; }
         public UndertaleString Name { get; set; }
 

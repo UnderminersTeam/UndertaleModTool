@@ -46,7 +46,7 @@ namespace UndertaleModLib
         }
         public void SetCapacity(uint capacity) => SetCapacity((int)capacity);
 
-        public void AddDirect(T item)
+        public void InternalAdd(T item)
         {
             internalList.Add(item);
         }
@@ -81,7 +81,7 @@ namespace UndertaleModLib
             {
                 try
                 {
-                    AddDirect(reader.ReadUndertaleObject<T>());
+                    InternalAdd(reader.ReadUndertaleObject<T>());
                 }
                 catch (UndertaleSerializationException e)
                 {
@@ -102,7 +102,7 @@ namespace UndertaleModLib
             Type t = typeof(T);
             if (t.IsAssignableTo(typeof(UndertaleResourceRef)))
             {
-                // UndertaleResourceById<> = 4 bytes
+                // UndertaleResourceById<T, ChunkT> = 4 bytes
                 reader.Position += count * 4;
 
                 return count;
@@ -111,12 +111,12 @@ namespace UndertaleModLib
             if (t.IsAssignableTo(typeof(IStaticChildObjectsSize)))
             {
                 uint subSize = reader.GetStaticChildObjectsSize(t);
-                uint subCount = 1;
+                uint subCount = 0;
 
                 if (t.IsAssignableTo(typeof(IStaticChildObjCount)))
                     subCount = reader.GetStaticChildCount(t);
 
-                reader.Position += subCount * subSize;
+                reader.Position += count * subSize;
 
                 return count + count * subCount;
             }
@@ -167,7 +167,7 @@ namespace UndertaleModLib
             {
                 try
                 {
-                    AddDirect(reader.ReadUndertaleString());
+                    InternalAdd(reader.ReadUndertaleString());
                 }
                 catch (UndertaleSerializationException e)
                 {
@@ -181,7 +181,7 @@ namespace UndertaleModLib
         {
             uint count = reader.ReadUInt32();
             reader.Position += count * 4;
-            return count;
+            return 0;
         }
     }
 
@@ -220,7 +220,7 @@ namespace UndertaleModLib
             {
                 try
                 {
-                    AddDirect(reader.ReadUndertaleObject<T>());
+                    InternalAdd(reader.ReadUndertaleObject<T>());
                     EnsureShortCount();
                 }
                 catch (UndertaleSerializationException e)
@@ -243,12 +243,12 @@ namespace UndertaleModLib
             if (t.IsAssignableTo(typeof(IStaticChildObjectsSize)))
             {
                 uint subSize = reader.GetStaticChildObjectsSize(t);
-                uint subCount = 1;
+                uint subCount = 0;
 
                 if (t.IsAssignableTo(typeof(IStaticChildObjCount)))
                     subCount = reader.GetStaticChildCount(t);
 
-                reader.Position += subCount * subSize;
+                reader.Position += count * subSize;
 
                 return count + count * subCount;
             }
@@ -320,7 +320,7 @@ namespace UndertaleModLib
             {
                 try
                 {
-                    AddDirect(reader.ReadUndertaleObjectPointer<T>());
+                    InternalAdd(reader.ReadUndertaleObjectPointer<T>());
                 }
                 catch (UndertaleSerializationException e)
                 {
@@ -375,12 +375,12 @@ namespace UndertaleModLib
             if (t.IsAssignableTo(typeof(IStaticChildObjectsSize)))
             {
                 uint subSize = reader.GetStaticChildObjectsSize(t);
-                uint subCount = 1;
+                uint subCount = 0;
 
                 if (t.IsAssignableTo(typeof(IStaticChildObjCount)))
                     subCount = reader.GetStaticChildCount(t);
 
-                reader.Position += subCount * 4 + subCount * subSize;
+                reader.Position += count * 4 + count * subSize;
 
                 return count + count * subCount;
             }
@@ -435,7 +435,7 @@ namespace UndertaleModLib
                 {
                     uint ptr = reader.ReadUInt32();
                     pointers.Add(ptr);
-                    AddDirect(reader.GetUndertaleObjectAtAddress<T>(ptr));
+                    InternalAdd(reader.GetUndertaleObjectAtAddress<T>(ptr));
                 }
                 catch (UndertaleSerializationException e)
                 {

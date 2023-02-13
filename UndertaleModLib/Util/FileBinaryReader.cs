@@ -190,7 +190,7 @@ namespace UndertaleModLib.Util
         public string ReadGMString()
         {
 #if DEBUG
-            if (Position + 8 > Length)
+            if (Position + 5 > Length)
                 throw new IOException("Reading out of bounds");
 #endif
             int length = BinaryPrimitives.ReadInt32LittleEndian(ReadToBuffer(4));
@@ -219,6 +219,11 @@ namespace UndertaleModLib.Util
             Position++;
 #endif
             return res;
+        }
+        public void SkipGMString()
+        {
+            int length = BinaryPrimitives.ReadInt32LittleEndian(ReadToBuffer(4));
+            Position += (uint)length + 1;
         }
 
         public void Dispose()

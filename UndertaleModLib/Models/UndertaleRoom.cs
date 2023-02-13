@@ -258,9 +258,9 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         Backgrounds.SetCapacity(8);
         Views.SetCapacity(8);
         for (int i = 0; i < 8; i++)
-            Backgrounds.AddDirect(new Background());
+            Backgrounds.InternalAdd(new Background());
         for (int i = 0; i < 8; i++)
-            Views.AddDirect(new View());
+            Views.InternalAdd(new View());
         if (Flags.HasFlag(RoomEntryFlags.EnableViews))
             Views[0].Enabled = true;
     }
