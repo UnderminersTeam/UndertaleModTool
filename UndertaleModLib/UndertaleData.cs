@@ -460,22 +460,17 @@ namespace UndertaleModLib
         /// <returns>Whether the version of the data file is the same or higher than a specified version.</returns>
         public bool IsVersionAtLeast(uint major, uint minor = 0, uint release = 0, uint build = 0)
         {
-            uint gameMajor = GeneralInfo.Major;
-            uint gameMinor = GeneralInfo.Minor;
-            uint gameRelease = GeneralInfo.Release;
-            uint gameBuild = GeneralInfo.Build;
+            if (GeneralInfo.Major != major)
+                return (GeneralInfo.Major > major);
 
-            if (gameMajor != major)
-                return (gameMajor > major);
+            if (GeneralInfo.Minor != minor)
+                return (GeneralInfo.Minor > minor);
 
-            if (gameMinor != minor)
-                return (gameMinor > minor);
+            if (GeneralInfo.Release != release)
+                return (GeneralInfo.Release > release);
 
-            if (gameRelease != release)
-                return (gameRelease > release);
-
-            if (gameBuild != build)
-                return (gameBuild > build);
+            if (GeneralInfo.Build != build)
+                return (GeneralInfo.Build > build);
 
             return true; // The version is exactly what supplied.
         }
