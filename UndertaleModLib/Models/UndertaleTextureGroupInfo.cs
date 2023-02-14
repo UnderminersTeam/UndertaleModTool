@@ -124,7 +124,7 @@ public class UndertaleTextureGroupInfo : UndertaleNamedResource, IDisposable
     {
         writer.WriteUndertaleString(Name);
 
-        if (writer.undertaleData.GM2022_9)
+        if (writer.undertaleData.IsVersionAtLeast(2022, 9))
         {
             writer.WriteUndertaleString(Directory);
             writer.WriteUndertaleString(Extension);
@@ -149,7 +149,7 @@ public class UndertaleTextureGroupInfo : UndertaleNamedResource, IDisposable
     {
         Name = reader.ReadUndertaleString();
 
-        if (reader.undertaleData.GM2022_9)
+        if (reader.undertaleData.IsVersionAtLeast(2022, 9))
         {
             Directory = reader.ReadUndertaleString();
             Extension = reader.ReadUndertaleString();

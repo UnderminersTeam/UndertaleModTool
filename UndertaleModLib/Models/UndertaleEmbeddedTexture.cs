@@ -377,10 +377,16 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         /// <param name="size">Initial size of <see cref="sharedStream"/> in bytes</param>
         public static void InitSharedStream(int size) => sharedStream = new(size);
 
+        /// <inheritdoc />
+        public void Serialize(UndertaleWriter writer)
+        {
+            Serialize(writer, writer.undertaleData.IsVersionAtLeast(2022, 3), writer.undertaleData.IsVersionAtLeast(2022, 5));
+        }
+
         /// <summary>
         /// Serializes the texture to any type of writer (can be any destination file).
         /// </summary>
-        public void Serialize(FileBinaryWriter writer)
+        public void Serialize(FileBinaryWriter writer, bool gm2022_3, bool gm2022_5)
         {
             if (FormatQOI)
             {
@@ -392,20 +398,20 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
                     using Bitmap bmp = TextureWorker.GetImageFromByteArray(TextureBlob);
                     writer.Write((short)bmp.Width);
                     writer.Write((short)bmp.Height);
-                    byte[] data = QoiConverter.GetArrayFromImage(bmp, writer.undertaleData.IsVersionAtLeast(2022, 3) ? 0 : 4);
-                    using MemoryStream input = new MemoryStream(data);
+                    byte[] qoiData = QoiConverter.GetArrayFromImage(bmp, gm2022_3 ? 0 : 4);
+                    using MemoryStream input = new MemoryStream(qoiData);
                     if (sharedStream.Length != 0)
                         sharedStream.Seek(0, SeekOrigin.Begin);
                     BZip2.Compress(input, sharedStream, false, 9);
-                    if (writer.undertaleData.IsVersionAtLeast(2022, 5))
-                        writer.Write((uint)data.Length);
+                    if (gm2022_5)
+                        writer.Write((uint)qoiData.Length);
                     writer.Write(sharedStream.GetBuffer().AsSpan()[..(int)sharedStream.Position]);
                 }
                 else
                 {
                     // Encode the PNG data back to QOI
                     using Bitmap bmp = TextureWorker.GetImageFromByteArray(TextureBlob);
-                    writer.Write(QoiConverter.GetSpanFromImage(bmp, writer.undertaleData.IsVersionAtLeast(2022, 3) ? 0 : 4));
+                    writer.Write(QoiConverter.GetSpanFromImage(bmp, gm2022_3 ? 0 : 4));
                 }
             }
             else
@@ -421,7 +427,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         /// <summary>
         /// Unserializes the texture from any type of reader (can be from any source).
         /// </summary>
-        public void Unserialize(FileBinaryReader reader)
+        public void Unserialize(FileBinaryReader reader, bool gm2022_5)
         {
             sharedStream ??= new();
 
@@ -438,7 +444,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
                     FormatBZ2 = true;
 
                     // Don't really care about the width/height, so skip them, as well as header
-                    reader.Position += (uint)(reader.undertaleData.IsVersionAtLeast(2022, 5) ? 12 : 8);
+                    reader.Position += (uint)(gm2022_5 ? 12 : 8);
 
                     // Need to fully decompress and convert the QOI data to PNG for compatibility purposes (at least for now)
                     if (sharedStream.Length != 0)

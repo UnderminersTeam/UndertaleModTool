@@ -927,9 +927,9 @@ namespace UndertaleModLib
                 throw new InvalidOperationException();
             if (reader.ReadUInt32() != 1)
                 throw new IOException("Expected TGIN version 1");
-            if (reader.undertaleData.GMS2_3)
+            if (reader.undertaleData.IsVersionAtLeast(2, 3) && !reader.undertaleData.IsVersionAtLeast(2022, 9))
             {
-                // Check for 2022.8
+                // Check for 2022.9
                 uint returnPosition = reader.Position;
 
                 uint tginCount = reader.ReadUInt32();
@@ -943,7 +943,7 @@ namespace UndertaleModLib
                     // If not, then we know we're using a new format!
                     uint ptr = reader.ReadUInt32();
                     if (ptr < tginPtr || ptr >= secondTginPtr)
-                        reader.undertaleData.GM2022_9 = true;
+                        reader.undertaleData.SetGMS2Version(2022, 9);
                 }
 
                 reader.Position = returnPosition;
