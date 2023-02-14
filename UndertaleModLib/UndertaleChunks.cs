@@ -80,11 +80,6 @@ namespace UndertaleModLib
             reader.LastChunkName = lastChunk;
             reader.Position = startPos;
 
-            reader.GMS2_3 = reader.AllChunkNames.Contains("SEQN");
-            // This has to be moved to General Info deserialization (line 432), because the version flag has been moved to General Info.
-            //if (reader.GMS2_3 && !reader.undertaleData.IsVersionAtLeast(2, 3))
-            //    reader.undertaleData.SetGMS2Version(2, 3);
-
             // Now, parse the chunks
             while (reader.Position < startPos + Length)
             {

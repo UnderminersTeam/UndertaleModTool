@@ -198,7 +198,7 @@ namespace UndertaleModLib
 
         public string LastChunkName;
         public List<string> AllChunkNames;
-        public bool GMS2_3 = false;
+        //public bool GMS2_3 = false;
         public bool Bytecode14OrLower = false;
 
         public UndertaleChunk ReadUndertaleChunk()

@@ -418,7 +418,7 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         {
             Major = 2; Minor = 3; Release = 6; Build = 0;
         }
-        else if (reader.GMS2_3) // 2.3
+        else if (reader.AllChunkNames.Contains("SEQN")) // 2.3
         {
             Major = 2; Minor = 3; Release = 0; Build = 0;
         }

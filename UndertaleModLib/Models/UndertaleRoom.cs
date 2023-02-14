@@ -353,7 +353,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         if (reader.undertaleData.IsGameMaker2())
         {
             Layers = reader.ReadUndertaleObjectPointer<UndertalePointerList<Layer>>();
-            sequences = reader.GMS2_3;
+            sequences = reader.undertaleData.IsVersionAtLeast(2, 3);
             if (sequences)
                 Sequences = reader.ReadUndertaleObjectPointer<UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>>>();
         }
@@ -1652,7 +1652,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             {
                 LegacyTiles = reader.ReadUndertaleObjectPointer<UndertalePointerList<Tile>>();
                 Sprites = reader.ReadUndertaleObjectPointer<UndertalePointerList<SpriteInstance>>();
-                if (reader.GMS2_3)
+                if (reader.undertaleData.IsVersionAtLeast(2, 3))
                 {
                     Sequences = reader.ReadUndertaleObjectPointer<UndertalePointerList<SequenceInstance>>();
                     if (!reader.undertaleData.IsVersionAtLeast(2, 3, 2))
@@ -1660,7 +1660,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 }
                 reader.ReadUndertaleObject(LegacyTiles);
                 reader.ReadUndertaleObject(Sprites);
-                if (reader.GMS2_3)
+                if (reader.undertaleData.IsVersionAtLeast(2, 3))
                 {
                     reader.ReadUndertaleObject(Sequences);
                     if (!reader.undertaleData.IsVersionAtLeast(2, 3, 2))

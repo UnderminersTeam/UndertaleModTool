@@ -58,7 +58,7 @@ public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.Re
         Occurrences = reader.ReadUInt32();
         if (Occurrences > 0)
         {
-            if (reader.GMS2_3)
+            if (reader.undertaleData.IsVersionAtLeast(2, 3))
                 FirstAddress = reader.GetUndertaleObjectAtAddress<UndertaleInstruction>(reader.ReadUInt32() - 4);
             else
                 FirstAddress = reader.ReadUndertaleObjectPointer<UndertaleInstruction>();
