@@ -442,7 +442,7 @@ namespace UndertaleModLib
         public void SetGMS2Version(uint major, uint minor = 0, uint release = 0, uint build = 0)
         {
             if (major != 2 && major != 2022 && major != 2023)
-                throw new Exception("Attempted to set a version of GameMaker " + major + " using SetGMS2Version");
+                throw new NotSupportedException("Attempted to set a version of GameMaker " + major + " using SetGMS2Version");
 
             GeneralInfo.Major = major;
             GeneralInfo.Minor = minor;
