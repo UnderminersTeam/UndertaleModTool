@@ -148,7 +148,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     /// <summary>
     /// The list of game objects this room uses.
     /// </summary>
-    public UndertalePointerListLenCheck<GameObject> GameObjects { get; private set; } = new UndertalePointerListLenCheck<GameObject>();
+    public UndertalePointerList<GameObject> GameObjects { get; private set; } = new UndertalePointerList<GameObject>();
 
     /// <summary>
     /// The list of tiles this room uses.
@@ -164,6 +164,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     /// The list of sequences this room uses.
     /// </summary>
     public UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>> Sequences { get; private set; } = new UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>>();
+
+    private static bool checkedForGMS2_2_2_302;
 
     /// <summary>
     /// Calls <see cref="OnPropertyChanged(string)"/> for <see cref="BGColorLayer"/> in order to update the room background color.<br/>
@@ -238,8 +240,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             return _layers?.Where(l => l.LayerType is LayerType.Background
                                        && l.BackgroundData.Sprite is null
                                        && l.BackgroundData.Color != 0)
-                .OrderBy(l => l.LayerDepth)
-                .FirstOrDefault();
+                           .OrderBy(l => l.LayerDepth)
+                           .FirstOrDefault();
         }
     }
 
@@ -263,6 +265,34 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             Views.InternalAdd(new View());
         if (Flags.HasFlag(RoomEntryFlags.EnableViews))
             Views[0].Enabled = true;
+    }
+
+    private static void CheckForGMS2_2_2_302(UndertaleReader reader)
+    {
+        uint returnTo = reader.Position;
+        reader.Position -= 4;
+
+        uint gameObjPtr = reader.ReadUInt32();
+        uint tilePtr = reader.ReadUInt32();
+
+        reader.Position = gameObjPtr; // "GameObjects"
+        uint objCount = reader.ReadUInt32();
+        if (objCount > 0)
+        {
+            uint firstPtr = reader.ReadUInt32();
+            uint secondPtr;
+            if (objCount == 1)
+                secondPtr = tilePtr;
+            else
+                secondPtr = reader.ReadUInt32();
+
+            if (secondPtr - firstPtr == 48)
+                reader.undertaleData.GMS2_2_2_302 = true;
+        }
+
+        reader.Position = returnTo;
+
+        checkedForGMS2_2_2_302 = true;
     }
 
     /// <inheritdoc />
@@ -340,9 +370,12 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         Flags = (RoomEntryFlags)reader.ReadUInt32();
         Backgrounds = reader.ReadUndertaleObjectPointer<UndertalePointerList<Background>>();
         Views = reader.ReadUndertaleObjectPointer<UndertalePointerList<View>>();
-        GameObjects = reader.ReadUndertaleObjectPointer<UndertalePointerListLenCheck<GameObject>>();
-        uint tilePtr = reader.ReadUInt32();
-        Tiles = reader.GetUndertaleObjectAtAddress<UndertalePointerList<Tile>>(tilePtr);
+        GameObjects = reader.ReadUndertaleObjectPointer<UndertalePointerList<GameObject>>();
+
+        if (!checkedForGMS2_2_2_302)
+            CheckForGMS2_2_2_302(reader);
+        
+        Tiles = reader.ReadUndertaleObjectPointer<UndertalePointerList<Tile>>();
         World = reader.ReadBoolean();
         Top = reader.ReadUInt32();
         Left = reader.ReadUInt32();
@@ -361,7 +394,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         }
         reader.ReadUndertaleObject(Backgrounds);
         reader.ReadUndertaleObject(Views);
-        reader.ReadUndertaleObject(GameObjects, tilePtr);
+        reader.ReadUndertaleObject(GameObjects);
         reader.ReadUndertaleObject(Tiles);
         if (reader.undertaleData.GeneralInfo.Major >= 2)
         {
@@ -395,6 +428,72 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             if (sequences)
                 reader.ReadUndertaleObject(Sequences);
         }
+    }
+
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        uint count = 0;
+
+        reader.Position += 40;
+
+        count += 1; // "_creationCodeId"
+
+        uint backgroundPtr = reader.ReadUInt32();
+        uint viewsPtr = reader.ReadUInt32();
+        uint gameObjsPtr = reader.ReadUInt32();
+        if (!checkedForGMS2_2_2_302)
+            CheckForGMS2_2_2_302(reader);
+        uint tilesPtr = reader.ReadUInt32();
+        uint layersPtr = 0;
+        uint sequencesPtr = 0;
+
+        reader.Position += 32;
+
+        if (reader.GMS2)
+        {
+            layersPtr = reader.ReadUInt32();
+            if (reader.GMS2_3)
+                sequencesPtr = reader.ReadUInt32();
+        }
+
+        if (reader.undertaleData.GMS2_2_2_302)
+        {
+            //"GameObject.ImageSpeed" + "...ImageIndex"
+            GameObject.ChildObjectsSize += 8;
+        }
+
+        if (reader.BytecodeVersion >= 16)
+        {
+            // "GameObject._preCreateCode"
+
+            GameObject.ChildObjectCount += 1; 
+            GameObject.ChildObjectsSize += 4;
+        }
+
+        reader.Position = backgroundPtr;
+        count += 1 + UndertalePointerList<Background>.UnserializeChildObjectCount(reader);
+        reader.Position = viewsPtr;
+        count += 1 + UndertalePointerList<View>.UnserializeChildObjectCount(reader);
+        reader.Position = gameObjsPtr;
+        count += 1 + UndertalePointerList<GameObject>.UnserializeChildObjectCount(reader);
+        reader.Position = tilesPtr;
+        count += 1 + UndertalePointerList<Tile>.UnserializeChildObjectCount(reader);
+
+        if (reader.GMS2)
+        {
+            reader.Position = layersPtr;
+            count += 1 + UndertalePointerList<Layer>.UnserializeChildObjectCount(reader);
+
+            if (reader.GMS2_3)
+            {
+                reader.Position = sequencesPtr;
+                count += 1 + UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>>
+                             .UnserializeChildObjectCount(reader);
+            }
+        }
+
+        return count;
     }
 
     /// <summary>
@@ -529,8 +628,14 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     /// <summary>
     /// A background with properties as it's used in a room.
     /// </summary>
-    public class Background : UndertaleObject, INotifyPropertyChanged, IDisposable
+    public class Background : UndertaleObject, INotifyPropertyChanged, IStaticChildObjCount, IStaticChildObjectsSize, IDisposable
     {
+        /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
+        public static readonly uint ChildObjectCount = 1;
+
+        /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+        public static readonly uint ChildObjectsSize = 40;
+
         private UndertaleRoom _parentRoom;
 
         /// <summary>
@@ -698,8 +803,14 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     /// <summary>
     /// A view with properties as it's used in a room.
     /// </summary>
-    public class View : UndertaleObject, INotifyPropertyChanged, IDisposable
+    public class View : UndertaleObject, INotifyPropertyChanged, IStaticChildObjCount, IStaticChildObjectsSize, IDisposable
     {
+        /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
+        public static readonly uint ChildObjectCount = 1;
+
+        /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+        public static readonly uint ChildObjectsSize = 56;
+
         /// <summary>
         /// Whether this view is enabled.
         /// </summary>
@@ -825,8 +936,16 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     /// <summary>
     /// A game object with properties as it's used in a room.
     /// </summary>
-    public class GameObject : UndertaleObjectLenCheck, IRoomObject, INotifyPropertyChanged, IDisposable
+    public class GameObject : UndertaleObject, IRoomObject, INotifyPropertyChanged, IDisposable,
+                              IStaticChildObjCount, IStaticChildObjectsSize
     {
+        // It's an exception that these two variables are not readonly
+        /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
+        public static uint ChildObjectCount = 2;
+
+        /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+        public static uint ChildObjectsSize = 36;
+
         private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _objectDefinition = new();
         private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _creationCode = new();
         private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _preCreateCode = new();
@@ -987,12 +1106,6 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
-            Unserialize(reader, -1);
-        }
-
-        /// <inheritdoc />
-        public void Unserialize(UndertaleReader reader, int length)
-        {
             X = reader.ReadInt32();
             Y = reader.ReadInt32();
             _objectDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>>();
@@ -1000,9 +1113,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             _creationCode = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>>();
             ScaleX = reader.ReadSingle();
             ScaleY = reader.ReadSingle();
-            if (length == 48)
+            if (reader.undertaleData.GMS2_2_2_302)
             {
-                reader.undertaleData.GMS2_2_2_302 = true;
                 ImageSpeed = reader.ReadSingle();
                 ImageIndex = reader.ReadInt32();
             }
@@ -1031,8 +1143,15 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     /// <summary>
     /// A tile with properties as it's used in a room.
     /// </summary>
-    public class Tile : UndertaleObject, IRoomObject, INotifyPropertyChanged, IDisposable
+    public class Tile : UndertaleObject, IRoomObject, INotifyPropertyChanged, IDisposable,
+                        IStaticChildObjCount, IStaticChildObjectsSize
     {
+        /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
+        public static readonly uint ChildObjectCount = 1;
+
+        /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+        public static readonly uint ChildObjectsSize = 48;
+
         /// <summary>
         /// Whether this tile is from an asset layer.<br/>
         /// <see langword="true"/> for GameMaker Studio: 2 games, otherwise <see langword="false"/>.
@@ -1366,21 +1485,48 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 EffectProperties = reader.ReadUndertaleObject<UndertaleSimpleList<EffectProperty>>();
             }
 
-            switch (LayerType)
+            Data = LayerType switch
             {
-                case LayerType.Instances: Data = reader.ReadUndertaleObject<LayerInstancesData>(); break;
-                case LayerType.Tiles: Data = reader.ReadUndertaleObject<LayerTilesData>(); break;
-                case LayerType.Background: Data = reader.ReadUndertaleObject<LayerBackgroundData>(); break;
-                case LayerType.Assets: Data = reader.ReadUndertaleObject<LayerAssetsData>(); break;
-                case LayerType.Effect:
-                    // Because effect data is empty in 2022.1+, it would erroneously read the next object.
-                    Data =
-                        reader.undertaleData.GMS2022_1
-                        ? new LayerEffectData() { EffectType = EffectType, Properties = EffectProperties }
-                        : reader.ReadUndertaleObject<LayerEffectData>();
-                    break;
-                default: throw new Exception("Unsupported layer type " + LayerType);
+                LayerType.Instances => reader.ReadUndertaleObject<LayerInstancesData>(),
+                LayerType.Tiles => reader.ReadUndertaleObject<LayerTilesData>(),
+                LayerType.Background => reader.ReadUndertaleObject<LayerBackgroundData>(),
+                LayerType.Assets => reader.ReadUndertaleObject<LayerAssetsData>(),
+                LayerType.Effect => // Because effect data is empty in 2022.1+, it would erroneously read the next object.
+                                    reader.undertaleData.GMS2022_1 
+                                    ? new LayerEffectData() { EffectType = EffectType, Properties = EffectProperties }
+                                    : reader.ReadUndertaleObject<LayerEffectData>(),
+                _ => throw new Exception("Unsupported layer type " + LayerType)
+            };
+        }
+
+        /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+        public static uint UnserializeChildObjectCount(UndertaleReader reader)
+        {
+            uint count = 0;
+
+            reader.Position += 8;
+            LayerType layerType = (LayerType)reader.ReadUInt32();
+            reader.Position += 24;
+
+            // Effect properties
+            if (reader.undertaleData.GMS2022_1)
+            {
+                reader.Position += 8;
+                count += 1 + UndertaleSimpleList<EffectProperty>.UnserializeChildObjectCount(reader);
             }
+
+            count += layerType switch
+            {
+                LayerType.Instances => 1 + LayerInstancesData.UnserializeChildObjectCount(reader),
+                LayerType.Tiles => 1 + LayerTilesData.UnserializeChildObjectCount(reader),
+                LayerType.Background => 1 + LayerBackgroundData.UnserializeChildObjectCount(reader),
+                LayerType.Assets => 1 + LayerAssetsData.UnserializeChildObjectCount(reader),
+                LayerType.Effect => reader.undertaleData.GMS2022_1
+                                    ? 0 : 1 + LayerEffectData.UnserializeChildObjectCount(reader),
+                _ => 0
+            };
+
+            return count;
         }
 
         /// <inheritdoc />
@@ -1415,12 +1561,21 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
-                uint InstanceCount = reader.ReadUInt32();
-                InstanceIds = new uint[InstanceCount];
+                uint instanceCount = reader.ReadUInt32();
+                InstanceIds = new uint[instanceCount];
                 Instances.Clear();
-                for (uint i = 0; i < InstanceCount; i++)
+                for (uint i = 0; i < instanceCount; i++)
                     InstanceIds[i] = reader.ReadUInt32();
                 // UndertaleRoom.Unserialize resolves these IDs to objects later
+            }
+
+            /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+            public static uint UnserializeChildObjectCount(UndertaleReader reader)
+            {
+                uint instanceCount = reader.ReadUInt32();
+                reader.Position += instanceCount * 4;
+
+                return 0;
             }
 
             /// <inheritdoc/>
@@ -1521,6 +1676,19 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 }
             }
 
+            /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+            public static uint UnserializeChildObjectCount(UndertaleReader reader)
+            {
+                uint count = 0;
+
+                count += 1; // "_background"
+                uint tilesX = reader.ReadUInt32();
+                uint tilesY = reader.ReadUInt32();
+                reader.Position += tilesX * tilesY * 4;
+
+                return count;
+            }
+
             /// <inheritdoc/>
             public void Dispose()
             {
@@ -1532,8 +1700,14 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             }
         }
 
-        public class LayerBackgroundData : LayerData, INotifyPropertyChanged
+        public class LayerBackgroundData : LayerData, IStaticChildObjCount, IStaticChildObjectsSize, INotifyPropertyChanged
         {
+            /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
+            public static readonly uint ChildObjectCount = 1;
+
+            /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+            public static readonly uint ChildObjectsSize = 40;
+
             private Layer _parentLayer;
 
             private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _sprite = new(); // Apparently there's a mode where it's a background reference, but probably not necessary
@@ -1609,6 +1783,14 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 AnimationSpeedType = (AnimationSpeedType)reader.ReadUInt32();
             }
 
+            /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+            public static uint UnserializeChildObjectCount(UndertaleReader reader)
+            {
+                reader.Position += ChildObjectsSize;
+
+                return ChildObjectCount;
+            }
+
             /// <inheritdoc/>
             public void Dispose()
             {
@@ -1669,6 +1851,40 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 }
             }
 
+            /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+            public static uint UnserializeChildObjectCount(UndertaleReader reader)
+            {
+                uint count = 0;
+
+                uint legacyTilesPtr = reader.ReadUInt32();
+                uint spritesPtr = reader.ReadUInt32();
+                uint sequencesPtr = 0;
+                uint nineSlicesPtr = 0;
+                if (reader.GMS2_3)
+                {
+                    sequencesPtr = reader.ReadUInt32();
+                    if (!reader.undertaleData.GMS2_3_2)
+                        nineSlicesPtr = reader.ReadUInt32();
+                }
+
+                reader.Position = legacyTilesPtr;
+                count += 1 + UndertalePointerList<Tile>.UnserializeChildObjectCount(reader);
+                reader.Position = spritesPtr;
+                count += 1 + UndertalePointerList<SpriteInstance>.UnserializeChildObjectCount(reader);
+                if (reader.GMS2_3)
+                {
+                    reader.Position = sequencesPtr;
+                    count += 1 + UndertalePointerList<SequenceInstance>.UnserializeChildObjectCount(reader);
+                    if (!reader.undertaleData.GMS2_3_2)
+                    {
+                        reader.Position = nineSlicesPtr;
+                        count += 1 + UndertalePointerList<SpriteInstance>.UnserializeChildObjectCount(reader);
+                    }
+                }
+
+                return count;
+            }
+
             /// <inheritdoc/>
             public void Dispose()
             {
@@ -1726,6 +1942,17 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 Properties = reader.ReadUndertaleObject<UndertaleSimpleList<EffectProperty>>();
             }
 
+            /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+            public static uint UnserializeChildObjectCount(UndertaleReader reader)
+            {
+                if (reader.undertaleData.GMS2022_1)
+                    return 0;
+
+                reader.Position += 4; // "EffectType"
+
+                return 1 + UndertaleSimpleList<EffectProperty>.UnserializeChildObjectCount(reader);
+            }
+
             /// <inheritdoc/>
             public void Dispose()
             {
@@ -1744,8 +1971,11 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     }
 
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class EffectProperty : UndertaleObject, IDisposable
+    public class EffectProperty : UndertaleObject, IStaticChildObjectsSize, IDisposable
     {
+        /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+        public static readonly uint ChildObjectsSize = 12;
+
         public enum PropertyType
         {
             Real = 0,
@@ -1783,8 +2013,14 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         }
     }
 
-    public class SpriteInstance : UndertaleObject, INotifyPropertyChanged, IDisposable
+    public class SpriteInstance : UndertaleObject, INotifyPropertyChanged, IStaticChildObjCount, IStaticChildObjectsSize, IDisposable
     {
+        /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
+        public static readonly uint ChildObjectCount = 1;
+
+        /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+        public static readonly uint ChildObjectsSize = 44;
+
         private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _sprite = new();
 
         public UndertaleString Name { get; set; }
@@ -1885,8 +2121,14 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         }
     }
 
-    public class SequenceInstance : UndertaleObject, INotifyPropertyChanged, IDisposable
+    public class SequenceInstance : UndertaleObject, INotifyPropertyChanged, IStaticChildObjCount, IStaticChildObjectsSize, IDisposable
     {
+        /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
+        public static readonly uint ChildObjectCount = 1;
+
+        /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+        public static readonly uint ChildObjectsSize = 44;
+
         private UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN> _sequence = new();
 
         public UndertaleString Name { get; set; }

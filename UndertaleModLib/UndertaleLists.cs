@@ -193,6 +193,13 @@ namespace UndertaleModLib
                 throw new InvalidOperationException("Count of short SimpleList exceeds maximum number allowed.");
         }
 
+        /// <inheritdoc cref="Collection{T}.Add(T)"/>
+        public new void Add(T item)
+        {
+            base.Add(item);
+            EnsureShortCount();
+        }
+
         /// <inheritdoc />
         public override void Serialize(UndertaleWriter writer)
         {
@@ -221,7 +228,6 @@ namespace UndertaleModLib
                 try
                 {
                     InternalAdd(reader.ReadUndertaleObject<T>());
-                    EnsureShortCount();
                 }
                 catch (UndertaleSerializationException e)
                 {
@@ -233,7 +239,7 @@ namespace UndertaleModLib
         /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
         public static uint UnserializeChildObjectCount(UndertaleReader reader)
         {
-            uint count = reader.ReadUInt32();
+            ushort count = reader.ReadUInt16();
             if (count == 0)
                 return 0;
 
@@ -417,65 +423,6 @@ namespace UndertaleModLib
             reader.utListPtrsPool.Return(pointers);
 
             return totalCount;
-        }
-    }
-
-    public class UndertalePointerListLenCheck<T> : UndertalePointerList<T>, UndertaleObjectEndPos where T : UndertaleObjectLenCheck, new()
-    {
-        /// <inheritdoc cref="UndertalePointerList{T}.Unserialize(UndertaleReader)" />
-        public void Unserialize(UndertaleReader reader, uint endPosition)
-        {
-            uint count = reader.ReadUInt32();
-            Clear();
-            SetCapacity(count);
-            List<uint> pointers = new((int)count);
-            for (uint i = 0; i < count; i++)
-            {
-                try
-                {
-                    uint ptr = reader.ReadUInt32();
-                    pointers.Add(ptr);
-                    InternalAdd(reader.GetUndertaleObjectAtAddress<T>(ptr));
-                }
-                catch (UndertaleSerializationException e)
-                {
-                    throw new UndertaleSerializationException(e.Message + "\nwhile reading pointer to item " + (i + 1) + " of " + count + " in a list of " + typeof(T).FullName, e);
-                }
-            }
-            if (Count > 0)
-            {
-                uint pos = reader.GetAddressForUndertaleObject(this[0]);
-                if (reader.Position != pos)
-                {
-                    uint skip = pos - reader.Position;
-                    if (skip > 0)
-                    {
-                        //Console.WriteLine("Skip " + skip + " bytes of blobs");
-                        reader.Position += skip;
-                    }
-                    else
-                        throw new IOException("First list item starts inside the pointer list?!?!");
-                }
-            }
-            for (uint i = 0; i < count; i++)
-            {
-                try
-                {
-                    T obj = this[(int)i];
-
-                    (obj as PrePaddedObject)?.UnserializePrePadding(reader);
-                    if ((i + 1) < count)
-                        reader.ReadUndertaleObject(obj, (int)(pointers[(int)i + 1] - reader.Position));
-                    else
-                        reader.ReadUndertaleObject(obj, (int)(endPosition - reader.Position));
-                    if (i != count - 1)
-                        (obj as PaddedObject)?.UnserializePadding(reader);
-                }
-                catch (UndertaleSerializationException e)
-                {
-                    throw new UndertaleSerializationException(e.Message + "\nwhile reading item " + (i + 1) + " of " + count + " in a list of " + typeof(T).FullName, e);
-                }
-            }
         }
     }
 

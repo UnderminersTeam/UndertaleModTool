@@ -163,11 +163,22 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             Kerning = reader.ReadUndertaleObject<UndertaleSimpleListShort<GlyphKerning>>();
         }
 
+        /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+        public static uint UnserializeChildObjectCount(UndertaleReader reader)
+        {
+            reader.Position += 14;
+
+            return 1 + UndertaleSimpleListShort<GlyphKerning>.UnserializeChildObjectCount(reader);
+        }
+
         /// <summary>
         /// A class representing kerning for a glyph.
         /// </summary>
-        public class GlyphKerning : UndertaleObject
+        public class GlyphKerning : UndertaleObject, IStaticChildObjectsSize
         {
+            /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+            public static readonly uint ChildObjectsSize = 4;
+
             /// <summary>
             /// TODO: unknown?
             /// </summary>
@@ -264,6 +275,18 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
         if (reader.undertaleData.GMS2022_2)
             Ascender = reader.ReadUInt32();
         Glyphs = reader.ReadUndertaleObject<UndertalePointerList<Glyph>>();
+    }
+
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        reader.Position += 40;
+        if (reader.BytecodeVersion >= 17)
+            reader.Position += 4;
+        if (reader.undertaleData.GMS2022_2)
+            reader.Position += 4;
+
+        return 1 + UndertalePointerList<Glyph>.UnserializeChildObjectCount(reader);
     }
 
     /// <inheritdoc />

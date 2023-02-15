@@ -457,6 +457,7 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         reader.Position++; // "IsDebuggerDisabled"
         byte bytecodeVer = reader.ReadByte();
         bool readDebugPort = bytecodeVer >= 14;
+        reader.BytecodeVersion = bytecodeVer;
         reader.undertaleData.UnsupportedBytecodeVersion = bytecodeVer < 13 || bytecodeVer > 17;
         reader.Bytecode14OrLower = bytecodeVer <= 14;
 

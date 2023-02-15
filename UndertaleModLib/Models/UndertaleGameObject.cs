@@ -35,7 +35,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     public UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _parentId = new();
     public UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _textureMaskId = new();
 
-    private static readonly int eventTypesLength = Enum.GetValues(typeof(EventType)).Length;
+    public static readonly int EventTypeCount = Enum.GetValues(typeof(EventType)).Length;
 
     /// <summary>
     /// The name of the game object.
@@ -160,8 +160,8 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// </summary>
     public UndertaleGameObject()
     {
-        Events.SetCapacity(eventTypesLength);
-        for (int i = 0; i < eventTypesLength; i++)
+        Events.SetCapacity(EventTypeCount);
+        for (int i = 0; i < EventTypeCount; i++)
             Events.InternalAdd(new UndertalePointerList<Event>());
     }
 
@@ -243,6 +243,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         Awake = reader.ReadBoolean();
         Kinematic = reader.ReadBoolean();
         // Needs to be done manually because count is separated
+        PhysicsVertices.Capacity = physicsShapeVertexCount;
         for (int i = 0; i < physicsShapeVertexCount; i++)
         {
             UndertalePhysicsVertex v = new UndertalePhysicsVertex();
@@ -252,8 +253,29 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         Events = reader.ReadUndertaleObject<UndertalePointerList<UndertalePointerList<Event>>>();
     }
 
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        uint count = 0;
+
+        reader.Position += 64;
+        if (reader.undertaleData.GM2022_5)
+            reader.Position += 4; // "Managed"
+
+        int physicsShapeVertexCount = reader.ReadInt32();
+        reader.Position += 12;
+        reader.Position += (uint)physicsShapeVertexCount * UndertalePhysicsVertex.ChildObjectsSize;
+
+        count += 2; // "_sprite", "_textureMaskId"
+
+        count += 1 + UndertalePointerList<UndertalePointerList<Event>>.UnserializeChildObjectCount(reader);
+
+        return count;
+    }
+
     #region EventHandlerFor() overloads
-    //TODO: what do all these eventhandlers do? can't find any references right now.
+    // TODO: Add documentation for these methods.
+    // These methods are used by scripts for geting a code entry for a certain event of the game object.
 
     public UndertaleCode EventHandlerFor(EventType type, uint subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
     {
@@ -387,7 +409,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         {
             foreach (var subEv in ev)
                 subEv?.Dispose();
-         }
+        }
         Name = null;
         Events = new();
     }
@@ -461,6 +483,14 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
             Actions = reader.ReadUndertaleObject<UndertalePointerList<EventAction>>();
         }
 
+        /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+        public static uint UnserializeChildObjectCount(UndertaleReader reader)
+        {
+            reader.Position += 4; // "EventSubtype"
+
+            return 1 + UndertalePointerList<EventAction>.UnserializeChildObjectCount(reader);
+        }
+
         /// <inheritdoc/>
         public void Dispose()
         {
@@ -475,8 +505,13 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// <summary>
     /// An action in an event.
     /// </summary>
-    public class EventAction : UndertaleObject, INotifyPropertyChanged, IDisposable
+    public class EventAction : UndertaleObject, INotifyPropertyChanged, IStaticChildObjectsSize, IStaticChildObjCount, IDisposable
     {
+        /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
+        public static readonly uint ChildObjectCount = 1;
+        /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+        public static readonly uint ChildObjectsSize = 56;
+
         // All the unknown values seem to be provided for compatibility only - in older versions of GM:S they stored the drag and drop blocks,
         // but newer versions compile them down to GML bytecode anyway
         // Possible meaning of values: https://github.com/WarlockD/GMdsam/blob/26aefe3e90a7a7a1891cb83f468079546f32b4b7/GMdsam/GameMaker/ChunkTypes.cs#L466
@@ -557,8 +592,11 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// Class representing a physics vertex used for a <see cref="CollisionShape"/> of type <see cref="CollisionShapeFlags.Custom"/>.
     /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class UndertalePhysicsVertex : UndertaleObject
+    public class UndertalePhysicsVertex : UndertaleObject, IStaticChildObjectsSize
     {
+        /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+        public static readonly uint ChildObjectsSize = 8;
+
         /// <summary>
         /// The x position of the vertex.
         /// </summary>
