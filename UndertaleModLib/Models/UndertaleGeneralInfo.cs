@@ -515,7 +515,10 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         else
         {
             StringBuilder sb = new(DisplayName?.ToString() ?? "");
-            sb.Append(" (GMS ");
+            if (Major < 2022 || (Major == 2022 && Minor < 3))
+                sb.Append(" (GMS ");
+            else
+                sb.Append(" (GM ");
             sb.Append(Major);
             sb.Append(".");
             sb.Append(Minor);
