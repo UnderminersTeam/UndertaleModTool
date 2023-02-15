@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace UndertaleModLib.Models;
 
@@ -509,7 +510,33 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     /// <inheritdoc />
     public override string ToString()
     {
-        return DisplayName + " (GMS " + Major + "." + Minor + "." + Release + "." + Build + ", bytecode " + BytecodeVersion + ")";
+        if (Major == 1)
+            return DisplayName + " (GMS " + Major + "." + Minor + "." + Release + "." + Build + ", bytecode " + BytecodeVersion + ")";
+        else
+        {
+            StringBuilder sb = new(DisplayName?.ToString() ?? "");
+            sb.Append(" (GMS ");
+            sb.Append(Major);
+            sb.Append(".");
+            sb.Append(Minor);
+            if (Release != 0)
+            {
+                sb.Append(".");
+                sb.Append(Release);
+                if (Build != 0)
+                {
+                    sb.Append(".");
+                    sb.Append(Build);
+                }
+            }
+            if (Major < 2022)
+            {
+                sb.Append(", bytecode ");
+                sb.Append(BytecodeVersion);
+            }
+            sb.Append(")");
+            return sb.ToString();
+        }
     }
 
     /// <inheritdoc/>
