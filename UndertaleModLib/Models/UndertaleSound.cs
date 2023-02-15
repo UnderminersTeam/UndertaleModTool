@@ -7,11 +7,8 @@ namespace UndertaleModLib.Models;
 /// <summary>
 /// Sound entry in a data file.
 /// </summary>
-public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, IStaticChildObjectsSize, IDisposable
+public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, IDisposable
 {
-    /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
-    public static readonly uint ChildObjectsSize = 36;
-
     /// <summary>
     /// Audio entry flags a sound entry can use.
     /// </summary>
@@ -162,6 +159,36 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, IS
         {
             _audioFile.CachedId = reader.ReadInt32();
         }
+    }
+
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        uint count = 0;
+
+        reader.Position += 4;
+        AudioEntryFlags flags = (AudioEntryFlags)reader.ReadUInt32();
+        reader.Position += 20;
+
+        int audioGroupID = -1;
+
+        if (flags.HasFlag(AudioEntryFlags.Regular) && reader.BytecodeVersion >= 14)
+        {
+            audioGroupID = reader.ReadInt32();
+            count++;
+        }
+        else
+            reader.Position += 4; // "Preload"
+
+        if (audioGroupID == -1)
+        {
+            reader.Position += 4; // "_audioFile"
+            count++;
+        }
+        else
+            reader.Position += 4; // "_audioFile.CachedId"
+
+        return count;
     }
 
     /// <inheritdoc />
