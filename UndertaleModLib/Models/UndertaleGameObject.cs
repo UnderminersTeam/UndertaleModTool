@@ -505,7 +505,8 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// <summary>
     /// An action in an event.
     /// </summary>
-    public class EventAction : UndertaleObject, INotifyPropertyChanged, IStaticChildObjectsSize, IStaticChildObjCount, IDisposable
+    public class EventAction : UndertaleObject, INotifyPropertyChanged, IDisposable,
+                               IStaticChildObjectsSize, IStaticChildObjCount
     {
         /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
         public static readonly uint ChildObjectCount = 1;

@@ -29,11 +29,7 @@ public class UndertaleFeatureFlags : UndertaleObject, IDisposable
     /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
     public static uint UnserializeChildObjectCount(UndertaleReader reader)
     {
-        uint count = 0;
-
-        count += 1 + UndertaleSimpleListString.UnserializeChildObjectCount(reader);
-
-        return count;
+        return 1 + UndertaleSimpleListString.UnserializeChildObjectCount(reader);
     }
 
     /// <inheritdoc/>

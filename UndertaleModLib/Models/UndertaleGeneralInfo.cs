@@ -821,6 +821,7 @@ public class UndertaleOptions : UndertaleObject, IDisposable
         reader.Position -= 4;
 
         reader.Position += newFormat ? 60u : 140u;
+        count += 3; // images
 
         // "Constants"
         count += 1 + UndertaleSimpleList<Constant>.UnserializeChildObjectCount(reader);

@@ -171,6 +171,45 @@ public class UndertaleTextureGroupInfo : UndertaleNamedResource, IDisposable
         reader.ReadUndertaleObject(Tilesets);
     }
 
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        uint count = 0;
+
+        reader.Position += 4; // "Name"
+
+        if (reader.undertaleData.GM2022_9)
+            reader.Position += 12;
+
+        uint texPagesPtr = reader.ReadUInt32();
+        uint spritesPtr = reader.ReadUInt32();
+        uint spineSpritesPtr = reader.ReadUInt32();
+        uint fontsPtr = reader.ReadUInt32();
+        uint tilesetsPtr = reader.ReadUInt32();
+
+        reader.Position = texPagesPtr;
+        count += 1 + UndertaleSimpleResourcesList<UndertaleEmbeddedTexture, UndertaleChunkTXTR>
+                     .UnserializeChildObjectCount(reader);
+
+        reader.Position = spritesPtr;
+        count += 1 + UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT>
+                     .UnserializeChildObjectCount(reader);
+
+        reader.Position = spineSpritesPtr;
+        count += 1 + UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT>
+                     .UnserializeChildObjectCount(reader);
+
+        reader.Position = fontsPtr;
+        count += 1 + UndertaleSimpleResourcesList<UndertaleFont, UndertaleChunkFONT>
+                     .UnserializeChildObjectCount(reader);
+
+        reader.Position = tilesetsPtr;
+        count += 1 + UndertaleSimpleResourcesList<UndertaleBackground, UndertaleChunkBGND>
+                     .UnserializeChildObjectCount(reader);
+
+        return count;
+    }
+
     /// <inheritdoc />
     public override string ToString()
     {

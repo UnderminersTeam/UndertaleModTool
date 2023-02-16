@@ -771,7 +771,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
         else
         {
             reader.Position -= 4;
-            UndertaleSimpleList<TextureEntry>.UnserializeChildObjectCount(reader);
+            count += 1 + UndertaleSimpleList<TextureEntry>.UnserializeChildObjectCount(reader);
             SkipMaskData(reader, width, height);
         }
 

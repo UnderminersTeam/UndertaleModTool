@@ -144,4 +144,21 @@ public class UndertaleTimeline : UndertaleNamedResource, IDisposable
             Moments.Add(new UndertaleTimelineMoment(timePoints[i], timeEvent));
         }
     }
+
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        uint count = 0;
+
+        reader.Position += 4; // "Name"
+
+        int momentCount = reader.ReadInt32();
+
+        reader.Position += (uint)momentCount * 8;
+
+        for (int i = 0; i < momentCount; i++)
+            count += 1 + UndertalePointerList<UndertaleGameObject.EventAction>.UnserializeChildObjectCount(reader);
+
+        return count;
+    }
 }

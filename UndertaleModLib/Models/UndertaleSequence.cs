@@ -171,14 +171,14 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
 
                 reader.Position += (uint)(chCount * 4 + chCount * subSize);
 
-                return (uint)(chCount + chCount * subCount);
+                return (uint)chCount * subCount;
             }
 
             var unserializeFunc = reader.GetUnserializeCountFunc(t);
             for (int i = 0; i < chCount; i++)
             {
                 reader.Position += 4; // channel ID
-                count += 1 + unserializeFunc(reader);
+                count += unserializeFunc(reader);
             }
 
             return count;
@@ -629,8 +629,11 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
 
     public class StringKeyframes : TrackKeyframes<StringKeyframes.Data>
     {
-        public class Data : UndertaleObject
+        public class Data : UndertaleObject, IStaticChildObjectsSize
         {
+            /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+            public static readonly uint ChildObjectsSize = 4;
+
             public UndertaleString Value { get; set; }
 
             /// <inheritdoc />
@@ -841,5 +844,4 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
             return UndertaleSimpleList<Keyframe<RealData>>.UnserializeChildObjectCount(reader);
         }
     }
-
 }

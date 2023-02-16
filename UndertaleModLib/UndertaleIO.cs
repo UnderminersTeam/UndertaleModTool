@@ -210,13 +210,6 @@ namespace UndertaleModLib
         public byte BytecodeVersion = 0;
         public bool Bytecode14OrLower = false;
 
-        // TODO: this should be done differently
-        public bool CheckedForGMS2_3_1 = false;
-        public bool CheckedFor2022_1 = false;
-        public bool CheckedFor2022_2 = false;
-        public bool CheckedFor2022_5 = false;
-        public bool CheckedFor2022_6 = false;
-
         public UndertaleChunk ReadUndertaleChunk()
         {
             return UndertaleChunk.Unserialize(this);

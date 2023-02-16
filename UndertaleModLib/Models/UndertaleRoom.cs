@@ -436,7 +436,6 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         uint count = 0;
 
         reader.Position += 40;
-
         count += 1; // "_creationCodeId"
 
         uint backgroundPtr = reader.ReadUInt32();
@@ -628,7 +627,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     /// <summary>
     /// A background with properties as it's used in a room.
     /// </summary>
-    public class Background : UndertaleObject, INotifyPropertyChanged, IStaticChildObjCount, IStaticChildObjectsSize, IDisposable
+    public class Background : UndertaleObject, INotifyPropertyChanged, IDisposable,
+                              IStaticChildObjCount, IStaticChildObjectsSize
     {
         /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
         public static readonly uint ChildObjectCount = 1;
@@ -803,7 +803,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     /// <summary>
     /// A view with properties as it's used in a room.
     /// </summary>
-    public class View : UndertaleObject, INotifyPropertyChanged, IStaticChildObjCount, IStaticChildObjectsSize, IDisposable
+    public class View : UndertaleObject, INotifyPropertyChanged, IDisposable,
+                        IStaticChildObjCount, IStaticChildObjectsSize
     {
         /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
         public static readonly uint ChildObjectCount = 1;

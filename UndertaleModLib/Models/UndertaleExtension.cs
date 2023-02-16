@@ -146,13 +146,9 @@ public class UndertaleExtensionFunction : UndertaleObject, IDisposable
     /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
     public static uint UnserializeChildObjectCount(UndertaleReader reader)
     {
-        uint count = 0;
-
         reader.Position += 20;
 
-        count += 1 + UndertaleSimpleList<UndertaleExtensionFunctionArg>.UnserializeChildObjectCount(reader);
-
-        return count;
+        return 1 + UndertaleSimpleList<UndertaleExtensionFunctionArg>.UnserializeChildObjectCount(reader);
     }
 
     /// <inheritdoc />

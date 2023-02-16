@@ -12,8 +12,11 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
     /// The vertex shader attributes a shader can have.
     /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class VertexShaderAttribute : UndertaleObject, IDisposable
+    public class VertexShaderAttribute : UndertaleObject, IStaticChildObjectsSize, IDisposable
     {
+        /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+        public static readonly uint ChildObjectsSize = 4;
+
         /// <summary>
         /// The name of the vertex shader attribute.
         /// </summary>
@@ -428,6 +431,17 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
                 Cg_PS3_PixelData.ReadData(reader, length);
             }
         }
+    }
+
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        reader.Position += 40;
+
+        // Since shaders are stored in a pointer list, and there are no
+        // more child objects that are in the pool, then there is no
+        // need to unserializing remaining elements
+        return 1 + UndertaleSimpleList<VertexShaderAttribute>.UnserializeChildObjectCount(reader);
     }
 
     /// <summary>

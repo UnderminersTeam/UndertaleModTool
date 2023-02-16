@@ -122,6 +122,21 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         TextureExternal = (_textureData == null);
     }
 
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        reader.Position += 4; // "Scaled"
+        if (reader.GMS2)
+            reader.Position += 4; // "GeneratedMips"
+        if (reader.undertaleData.GM2022_3)
+            reader.Position += 4; // "TextureBlockSize"
+        if (reader.undertaleData.GM2022_9)
+            reader.Position += 12;
+
+        // "_textureData"
+        return 1;
+    }
+
     /// <summary>
     /// Serializes the in-file texture blob for this texture.
     /// </summary>
