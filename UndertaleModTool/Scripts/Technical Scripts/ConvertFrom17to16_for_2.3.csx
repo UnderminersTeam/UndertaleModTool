@@ -136,10 +136,10 @@ applying any changes to the game.";
             script.Name.Content = script.Name.Content.Replace("gml_Script_", "");
         }
     }
-    foreach (UndertaleFunction func in Data.Functions)
+    /* foreach (UndertaleFunction func in Data.Functions)
     {
         func.GMS2_3 = false;
-    }
+    } */
     foreach (UndertaleCode code in Data.Code)
     {
         code.Offset = 0;
