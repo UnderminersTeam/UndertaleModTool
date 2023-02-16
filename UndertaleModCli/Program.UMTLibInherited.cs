@@ -389,7 +389,7 @@ public partial class Program : IScriptInterface
             Console.Write("Path: ");
             path = RemoveQuotes(Console.ReadLine());
             directoryInfo = new DirectoryInfo(path);
-        } while (directoryInfo.Exists);
+        } while (!directoryInfo.Exists);
         return path;
     }
 
