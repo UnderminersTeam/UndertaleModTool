@@ -209,6 +209,7 @@ namespace UndertaleModLib
         public bool GMS2_3 = false;
         public byte BytecodeVersion = 0;
         public bool Bytecode14OrLower = false;
+        public int BuiltinSoundGroupID = -1;
 
         public UndertaleChunk ReadUndertaleChunk()
         {
@@ -466,6 +467,14 @@ namespace UndertaleModLib
             }
 
             return res;
+        }
+        public void SetStaticChildCount(Type objType, uint count)
+        {
+            staticObjCountDict[objType] = count;
+        }
+        public void SetStaticChildObjectsSize(Type objType, uint size)
+        {
+            staticObjSizeDict[objType] = size;
         }
 
         public Dictionary<uint, UndertaleObject> GetOffsetMap()

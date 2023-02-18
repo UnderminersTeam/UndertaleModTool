@@ -261,6 +261,8 @@ namespace UndertaleModLib
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
+            checkedFor2022_6 = false;
+
             if (reader.GMS2_3)
                 CheckFor2022_6(reader);
 
@@ -446,6 +448,8 @@ namespace UndertaleModLib
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
+            checkedFor2022_2 = false;
+
             if (reader.BytecodeVersion >= 17)
                 CheckForGM2022_2(reader);
 
@@ -511,6 +515,8 @@ namespace UndertaleModLib
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
+            checkedFor2022_5 = false;
+
             if (reader.undertaleData.GMS2_3)
                 CheckFor2022_5(reader);
 
@@ -532,7 +538,22 @@ namespace UndertaleModLib
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
+            checkedFor2022_1 = false;
+            UndertaleRoom.CheckedForGMS2_2_2_302 = false;
+
             CheckForEffectData(reader);
+
+            if (reader.BytecodeVersion >= 16)
+            {
+                // "GameObject._preCreateCode"
+
+                Type gameObjType = typeof(GameObject);
+
+                uint newValue = GameObject.ChildObjectCount + 1;
+                reader.SetStaticChildCount(gameObjType, newValue);
+                newValue = GameObject.ChildObjectsSize + 4;
+                reader.SetStaticChildObjectsSize(gameObjType, newValue);
+            }
 
             return base.UnserializeObjectCount(reader);
         }
@@ -685,7 +706,7 @@ namespace UndertaleModLib
                 return 0;
 
             if (reader.undertaleData.UnsupportedBytecodeVersion)
-                return 1 + reader.ReadUInt32();
+                return reader.ReadUInt32();
 
             reader.GMS2BytecodeAddresses = new((int)reader.ReadUInt32());
             reader.Position -= 4;
@@ -757,7 +778,7 @@ namespace UndertaleModLib
             else
                 varLength = 12;
             List.Clear();
-            List.Capacity = (int)(Length / varLength) - 1;
+            List.Capacity = (int)(Length / varLength);
             while (reader.Position + varLength <= startPosition + Length)
                 List.Add(reader.ReadUndertaleObject<UndertaleVariable>());
         }
@@ -770,8 +791,13 @@ namespace UndertaleModLib
             if (reader.undertaleData.UnsupportedBytecodeVersion)
                 return 0;
 
-            int varLength = reader.Bytecode14OrLower ? 12 : 20;
-            return Length / (uint)varLength - 1;
+            if (!reader.Bytecode14OrLower)
+            {
+                reader.Position += 12;
+                return (Length - 12) / 20;
+            }
+            else
+                return Length / 12;
         }
     }
 
@@ -816,7 +842,7 @@ namespace UndertaleModLib
             {
                 uint startPosition = reader.Position;
                 Functions.Clear();
-                Functions.SetCapacity((Length / 12) - 1);
+                Functions.SetCapacity(Length / 12);
                 while (reader.Position + 12 <= startPosition + Length)
                     Functions.Add(reader.ReadUndertaleObject<UndertaleFunction>());
             }
@@ -840,7 +866,7 @@ namespace UndertaleModLib
                 count += 1 + UndertaleSimpleList<UndertaleCodeLocals>.UnserializeChildObjectCount(reader);
             }
             else
-                count = (Length / 12) - 1;
+                count = Length / 12;
 
             return count;
         }
@@ -1010,6 +1036,8 @@ namespace UndertaleModLib
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
+            checkedFor2022_3 = false;
+
             CheckFor2022_3And5(reader);
 
             // Texture blobs are already included in the count
@@ -1040,7 +1068,7 @@ namespace UndertaleModLib
         {
             // Though "UndertaleEmbeddedAudio" has dynamic child objects size, 
             // there's still no need to unserialize the count for each object.
-            return 1 + reader.ReadUInt32();
+            return reader.ReadUInt32();
         }
     }
 
@@ -1134,6 +1162,8 @@ namespace UndertaleModLib
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
+            checkedFor2022_8 = false;
+
             if (!reader.GMS2)
                 throw new InvalidOperationException();
 
@@ -1219,7 +1249,7 @@ namespace UndertaleModLib
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
-            uint count = 1;
+            checkedForGMS2_3_1 = false;
 
             // Padding
             while (reader.Position % 4 != 0)
@@ -1232,9 +1262,7 @@ namespace UndertaleModLib
             if (!reader.undertaleData.GMS2_3_1)
                 CheckForGMS2_3_1(reader);
 
-            count += base.UnserializeObjectCount(reader);
-
-            return count;
+            return base.UnserializeObjectCount(reader);
         }
     }
 
@@ -1335,6 +1363,9 @@ namespace UndertaleModLib
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
+            if (!reader.GMS2)
+                throw new InvalidOperationException();
+
             // Padding
             while (reader.Position % 4 != 0)
                 if (reader.ReadByte() != 0)

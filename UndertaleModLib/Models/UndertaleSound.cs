@@ -170,7 +170,7 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, ID
         AudioEntryFlags flags = (AudioEntryFlags)reader.ReadUInt32();
         reader.Position += 20;
 
-        int audioGroupID = -1;
+        int audioGroupID;
 
         if (flags.HasFlag(AudioEntryFlags.Regular) && reader.BytecodeVersion >= 14)
         {
@@ -178,9 +178,12 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, ID
             count++;
         }
         else
+        {
+            audioGroupID = reader.BuiltinSoundGroupID;
             reader.Position += 4; // "Preload"
+        }
 
-        if (audioGroupID == -1)
+        if (audioGroupID == reader.BuiltinSoundGroupID)
         {
             reader.Position += 4; // "_audioFile"
             count++;

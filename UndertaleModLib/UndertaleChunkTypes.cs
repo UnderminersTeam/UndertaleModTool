@@ -227,11 +227,7 @@ namespace UndertaleModLib
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
-            uint count = 1;
-
-            count += UndertalePointerList<T>.UnserializeChildObjectCount(reader);
-
-            return count;
+            return UndertalePointerList<T>.UnserializeChildObjectCount(reader);
         }
 
         public IList GetList() => List;
@@ -307,7 +303,7 @@ namespace UndertaleModLib
                 throw new InvalidOperationException(
                     "\"UndertaleAlignUpdatedListChunk<T>\" supports the count unserialization only for backgrounds and strings.");
 
-            return 1 + count;
+            return count;
         }
     }
 

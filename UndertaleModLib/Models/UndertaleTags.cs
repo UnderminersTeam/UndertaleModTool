@@ -65,7 +65,7 @@ public class UndertaleTags : UndertaleObject, IDisposable
     {
         uint count = 0;
 
-        count += 1 + UndertaleSimpleListString.UnserializeChildObjectCount(reader);
+        count += UndertaleSimpleListString.UnserializeChildObjectCount(reader);
         count += 1 + UndertalePointerList<TempAssetTags>.UnserializeChildObjectCount(reader);
 
         return count;
@@ -103,7 +103,7 @@ public class UndertaleTags : UndertaleObject, IDisposable
         public static uint UnserializeChildObjectCount(UndertaleReader reader)
         {
             reader.Position += 4;
-            return UndertaleSimpleListString.UnserializeChildObjectCount(reader);
+            return 1 + UndertaleSimpleListString.UnserializeChildObjectCount(reader);
         }
 
         /// <inheritdoc/>

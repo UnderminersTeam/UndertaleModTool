@@ -147,7 +147,7 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
             else
                 reader.Position += 12 * count;
 
-            return count;
+            return 1 + count;
         }
 
         /// <inheritdoc/>

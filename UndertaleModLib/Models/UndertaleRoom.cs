@@ -165,7 +165,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     /// </summary>
     public UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>> Sequences { get; private set; } = new UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>>();
 
-    private static bool checkedForGMS2_2_2_302;
+    public static bool CheckedForGMS2_2_2_302;
 
     /// <summary>
     /// Calls <see cref="OnPropertyChanged(string)"/> for <see cref="BGColorLayer"/> in order to update the room background color.<br/>
@@ -287,12 +287,18 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 secondPtr = reader.ReadUInt32();
 
             if (secondPtr - firstPtr == 48)
+            {
                 reader.undertaleData.GMS2_2_2_302 = true;
+
+                //"GameObject.ImageSpeed" + "...ImageIndex"
+                uint newSize = GameObject.ChildObjectsSize + 8;
+                reader.SetStaticChildObjectsSize(typeof(GameObject), newSize);
+            }
         }
 
         reader.Position = returnTo;
 
-        checkedForGMS2_2_2_302 = true;
+        CheckedForGMS2_2_2_302 = true;
     }
 
     /// <inheritdoc />
@@ -372,7 +378,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         Views = reader.ReadUndertaleObjectPointer<UndertalePointerList<View>>();
         GameObjects = reader.ReadUndertaleObjectPointer<UndertalePointerList<GameObject>>();
 
-        if (!checkedForGMS2_2_2_302)
+        if (!CheckedForGMS2_2_2_302)
             CheckForGMS2_2_2_302(reader);
         
         Tiles = reader.ReadUndertaleObjectPointer<UndertalePointerList<Tile>>();
@@ -441,7 +447,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         uint backgroundPtr = reader.ReadUInt32();
         uint viewsPtr = reader.ReadUInt32();
         uint gameObjsPtr = reader.ReadUInt32();
-        if (!checkedForGMS2_2_2_302)
+        if (!CheckedForGMS2_2_2_302)
             CheckForGMS2_2_2_302(reader);
         uint tilesPtr = reader.ReadUInt32();
         uint layersPtr = 0;
@@ -454,20 +460,6 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             layersPtr = reader.ReadUInt32();
             if (reader.GMS2_3)
                 sequencesPtr = reader.ReadUInt32();
-        }
-
-        if (reader.undertaleData.GMS2_2_2_302)
-        {
-            //"GameObject.ImageSpeed" + "...ImageIndex"
-            GameObject.ChildObjectsSize += 8;
-        }
-
-        if (reader.BytecodeVersion >= 16)
-        {
-            // "GameObject._preCreateCode"
-
-            GameObject.ChildObjectCount += 1; 
-            GameObject.ChildObjectsSize += 4;
         }
 
         reader.Position = backgroundPtr;
@@ -940,12 +932,11 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     public class GameObject : UndertaleObject, IRoomObject, INotifyPropertyChanged, IDisposable,
                               IStaticChildObjCount, IStaticChildObjectsSize
     {
-        // It's an exception that these two variables are not readonly
         /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
-        public static uint ChildObjectCount = 2;
+        public static readonly uint ChildObjectCount = 2;
 
         /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
-        public static uint ChildObjectsSize = 36;
+        public static readonly uint ChildObjectsSize = 36;
 
         private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _objectDefinition = new();
         private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _creationCode = new();
@@ -1682,7 +1673,6 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             {
                 uint count = 0;
 
-                count += 1; // "_background"
                 uint tilesX = reader.ReadUInt32();
                 uint tilesY = reader.ReadUInt32();
                 reader.Position += tilesX * tilesY * 4;

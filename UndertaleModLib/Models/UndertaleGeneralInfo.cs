@@ -462,8 +462,19 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         reader.Bytecode14OrLower = bytecodeVer <= 14;
 
         reader.Position += 42;
-        reader.GMS2 = reader.ReadUInt32() >= 2; // "Major" >= 2
-        reader.Position += (uint)(76 + (readDebugPort ? 4 : 0));
+
+        uint major = reader.ReadUInt32();
+        reader.Position += 8;
+        uint build = reader.ReadUInt32();
+        reader.Position += (uint)(64 + (readDebugPort ? 4 : 0));
+
+        reader.GMS2 = major >= 2; // "Major" >= 2
+
+        // UndertaleData.GetBuiltinSoundGroupID()
+        if (major > 1 || (build >= 1354 || (build >= 161 && build < 1000)))
+            reader.BuiltinSoundGroupID = 0;
+        else
+            reader.BuiltinSoundGroupID = 1;
 
         // "RoomOrder"
         return 1 + UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM>.UnserializeChildObjectCount(reader);
