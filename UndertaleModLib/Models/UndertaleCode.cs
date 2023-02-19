@@ -1013,6 +1013,8 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
 
     public uint Length { get; set; }
 
+    public static int CurrCodeIndex { get; set; }
+
 
     /// <summary>
     /// The amount of local variables this code entry has. <br/>
@@ -1110,6 +1112,8 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
         else if (reader.Bytecode14OrLower)
         {
             Instructions.Clear();
+            Instructions.Capacity = reader.InstructionArraysLengths[CurrCodeIndex];
+
             uint here = reader.Position;
             uint stop = here + Length;
             while (reader.Position < stop)
@@ -1132,14 +1136,21 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
             }
             int BytecodeRelativeAddress = reader.ReadInt32();
             _bytecodeAbsoluteAddress = (uint)((int)reader.Position - 4 + BytecodeRelativeAddress);
-            uint here = reader.Position;
-            reader.Position = _bytecodeAbsoluteAddress;
+           
             if (Length > 0 && reader.GMS2_3 && reader.GetOffsetMap().TryGetValue(_bytecodeAbsoluteAddress, out var i))
             {
                 ParentEntry = (i as UndertaleInstruction).Entry;
                 ParentEntry.ChildEntries.Add(this);
+
+                Offset = reader.ReadUInt32();
+                return;
             }
+
+            uint here = reader.Position;
+            reader.Position = _bytecodeAbsoluteAddress;
+
             Instructions.Clear();
+            Instructions.Capacity = reader.InstructionArraysLengths[CurrCodeIndex];
             while (reader.Position < _bytecodeAbsoluteAddress + Length)
             {
                 uint a = (reader.Position - _bytecodeAbsoluteAddress) / 4;
@@ -1149,9 +1160,12 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
             }
             if (ParentEntry == null && Instructions.Count != 0)
                 Instructions[0].Entry = this;
+
             reader.Position = here;
             Offset = reader.ReadUInt32();
         }
+
+        CurrCodeIndex++;
     }
 
     /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
@@ -1169,10 +1183,16 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
 
             // Get instructions count
             uint instrCount = 0;
+            uint instrSubCount = 0;
             while (reader.Position < stop)
-                instrCount += 1 + UndertaleInstruction.UnserializeChildObjectCount(reader);
+            {
+                instrCount++;
+                instrSubCount += UndertaleInstruction.UnserializeChildObjectCount(reader);
+            }
 
-            count += instrCount;
+            reader.InstructionArraysLengths[CurrCodeIndex] = (int)instrCount;
+
+            count += instrCount + instrSubCount;
         }
         else
         {
@@ -1192,16 +1212,24 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
             uint here = reader.Position;
             reader.Position = bytecodeAbsoluteAddress;
 
-            // Get instructions count
+            // Get instructions counts
             uint instrCount = 0;
+            uint instrSubCount = 0;
             while (reader.Position < bytecodeAbsoluteAddress + length)
-                instrCount += 1 + UndertaleInstruction.UnserializeChildObjectCount(reader);
+            {
+                instrCount++;
+                instrSubCount += UndertaleInstruction.UnserializeChildObjectCount(reader);
+            }
+
+            reader.InstructionArraysLengths[CurrCodeIndex] = (int)instrCount;
 
             reader.Position = here;
             reader.Position += 4; // "Offset"
 
-            count += instrCount;
+            count += instrCount + instrSubCount;
         }
+
+        CurrCodeIndex++;
 
         return count;
     }
@@ -1266,6 +1294,9 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     /// <param name="instructions">The instructions to append.</param>
     public void Append(IList<UndertaleInstruction> instructions)
     {
+        if (ParentEntry is not null)
+            return;
+
         Instructions.AddRange(instructions);
         UpdateAddresses();
     }
@@ -1276,6 +1307,9 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     /// <param name="instructions">The new instructions for this code entry.</param>
     public void Replace(IList<UndertaleInstruction> instructions)
     {
+        if (ParentEntry is not null)
+            return;
+
         Instructions.Clear();
         Append(instructions);
     }
@@ -1288,6 +1322,9 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     /// <exception cref="Exception"> if the GML code does not compile or if there's an error writing the code to the profile entry.</exception>
     public void AppendGML(string gmlCode, UndertaleData data)
     {
+        if (ParentEntry is not null)
+            return;
+
         CompileContext context = Compiler.Compiler.CompileGMLText(gmlCode, data, this);
         if (!context.SuccessfulCompile || context.HasError)
         {
@@ -1323,6 +1360,9 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     /// <exception cref="Exception">If the GML code does not compile or if there's an error writing the code to the profile entry.</exception>
     public void ReplaceGML(string gmlCode, UndertaleData data)
     {
+        if (ParentEntry is not null)
+            return;
+
         CompileContext context = Compiler.Compiler.CompileGMLText(gmlCode, data, this);
         if (!context.SuccessfulCompile || context.HasError)
         {

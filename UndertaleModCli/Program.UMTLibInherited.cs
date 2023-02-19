@@ -417,6 +417,9 @@ public partial class Program : IScriptInterface
     /// <inheritdoc/>
     public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null)
     {
+        if (code.ParentEntry is not null)
+            return $"// This code entry is a reference to an anonymous function within \"{code.ParentEntry.Name.Content}\", decompile that instead.";
+
         GlobalDecompileContext decompileContext = context is null ? new(Data, false) : context;
         try
         {
@@ -437,6 +440,9 @@ public partial class Program : IScriptInterface
     /// <inheritdoc/>
     public string GetDisassemblyText(UndertaleCode code)
     {
+        if (code.ParentEntry is not null)
+            return $"; This code entry is a reference to an anonymous function within \"{code.ParentEntry.Name.Content}\", disassemble that instead.";
+
         try
         {
             return code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : "";
@@ -639,6 +645,8 @@ public partial class Program : IScriptInterface
     public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
     {
         if (code == null) throw new ArgumentNullException(nameof(code));
+        if (code.ParentEntry is not null)
+            return;
 
         EnsureDataLoaded();
 
@@ -748,6 +756,9 @@ public partial class Program : IScriptInterface
             code.Name = Data.Strings.MakeString(codeName);
             Data.Code.Add(code);
         }
+        else if (code.ParentEntry is not null)
+            return;
+
         if (Data?.GeneralInfo.BytecodeVersion > 14 && Data.CodeLocals.ByName(codeName) == null)
         {
             UndertaleCodeLocals locals = new UndertaleCodeLocals();
@@ -1155,6 +1166,9 @@ public partial class Program : IScriptInterface
     void SafeImport(string codeName, string gmlCode, bool isGML, bool destroyASM = true, bool checkDecompiler = false, bool throwOnError = false)
     {
         UndertaleCode code = Data.Code.ByName(codeName);
+        if (code?.ParentEntry is not null)
+            return;
+
         try
         {
             if (isGML)

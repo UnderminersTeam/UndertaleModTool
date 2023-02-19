@@ -300,6 +300,7 @@ namespace UndertaleModLib
         private readonly Dictionary<Type, uint> staticObjCountDict = new();
         private readonly Dictionary<Type, uint> staticObjSizeDict = new();
         public HashSet<uint> GMS2BytecodeAddresses;
+        public int[] InstructionArraysLengths;
 
         private readonly BindingFlags publicStaticFlags
             = BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy;

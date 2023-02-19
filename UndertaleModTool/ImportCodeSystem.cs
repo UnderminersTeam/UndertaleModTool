@@ -107,6 +107,9 @@ namespace UndertaleModTool
         }
         public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
         {
+            if (code.ParentEntry is not null)
+                return;
+
             EnsureDataLoaded();
 
             string passBack = "";
@@ -201,6 +204,9 @@ namespace UndertaleModTool
                 code.Name = Data.Strings.MakeString(codeName);
                 Data.Code.Add(code);
             }
+            else if (code.ParentEntry is not null)
+                return;
+
             if (Data?.GeneralInfo.BytecodeVersion > 14 && Data.CodeLocals.ByName(codeName) == null)
             {
                 UndertaleCodeLocals locals = new UndertaleCodeLocals();
@@ -410,6 +416,9 @@ namespace UndertaleModTool
         void SafeImport(string codeName, string gmlCode, bool IsGML, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false)
         {
             UndertaleCode code = Data.Code.ByName(codeName);
+            if (code?.ParentEntry is not null)
+                return;
+
             try
             {
                 if (IsGML)

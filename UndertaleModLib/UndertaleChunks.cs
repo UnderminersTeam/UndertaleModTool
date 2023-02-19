@@ -697,7 +697,11 @@ namespace UndertaleModLib
                 List = null;
                 return;
             }
+
+            UndertaleCode.CurrCodeIndex = 0;
             base.UnserializeChunk(reader);
+
+            reader.InstructionArraysLengths = null;
         }
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
@@ -708,8 +712,12 @@ namespace UndertaleModLib
             if (reader.undertaleData.UnsupportedBytecodeVersion)
                 return reader.ReadUInt32();
 
-            reader.GMS2BytecodeAddresses = new((int)reader.ReadUInt32());
+            int codeCount = (int)reader.ReadUInt32();
             reader.Position -= 4;
+
+            reader.GMS2BytecodeAddresses = new(codeCount);
+            reader.InstructionArraysLengths = new int[codeCount];
+            UndertaleCode.CurrCodeIndex = 0;
 
             uint count = base.UnserializeObjectCount(reader);
             reader.GMS2BytecodeAddresses.Clear();
