@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using UndertaleModLib.Compiler;
+using UndertaleModLib.Decompiler;
 
 namespace UndertaleModLib.Models;
 
@@ -426,6 +428,16 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         else if (reader.AllChunkNames.Contains("TGIN")) // 2.2.1
         {
             Major = 2; Minor = 2; Release = 1; Build = 0;
+        }
+        if (Major > 2 || (Major == 2 && Minor >= 3))
+        {
+            CompileContext.GMS2_3 = true;
+            DecompileContext.GMS2_3 = true;
+        }
+        else
+        {
+            CompileContext.GMS2_3 = false;
+            DecompileContext.GMS2_3 = false;
         }
         DefaultWindowWidth = reader.ReadUInt32();
         DefaultWindowHeight = reader.ReadUInt32();

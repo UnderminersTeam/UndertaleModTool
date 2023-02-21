@@ -63,13 +63,12 @@ namespace UndertaleModLib.Decompiler
         public GlobalDecompileContext GlobalContext;
         public UndertaleCode TargetCode;
         public UndertaleGameObject Object;
-        public bool GMS2_3;
+        public static bool GMS2_3;
 
         public DecompileContext(GlobalDecompileContext globalContext, UndertaleCode code, bool computeObject = true)
         {
             GlobalContext = globalContext;
             TargetCode = code;
-            GMS2_3 = globalContext.Data.IsVersionAtLeast(2, 3); // IsVersionAtLeast is relatively expensive, only do it once
 
             if (code.ParentEntry != null)
                 throw new InvalidOperationException("This code block represents a function nested inside " + code.ParentEntry.Name + " - decompile that instead");
@@ -1080,7 +1079,7 @@ namespace UndertaleModLib.Decompiler
                 {
                     if (AssetTypeResolver.return_types.ContainsKey(context.TargetCode.Name.Content))
                         Value.DoTypePropagation(context, AssetTypeResolver.return_types[context.TargetCode.Name.Content]);
-                    if (context.GlobalContext.Data != null && !context.GMS2_3)
+                    if (context.GlobalContext.Data != null && !DecompileContext.GMS2_3)
                     {
                         // We might be decompiling a legacy script - resolve it's name
                         UndertaleScript script = context.GlobalContext.Data.Scripts.FirstOrDefault(x => x.Code == context.TargetCode);
@@ -1774,7 +1773,7 @@ namespace UndertaleModLib.Decompiler
                 string name = Var.Name.Content;
                 if (ArrayIndices != null)
                 {
-                    if (context?.GMS2_3 == true)
+                    if (DecompileContext.GMS2_3 == true)
                     {
                         if (name == "argument" && context.DecompilingStruct && context.ArgumentReplacements != null && ArrayIndices.Count == 1)
                         {
@@ -2124,7 +2123,7 @@ namespace UndertaleModLib.Decompiler
                         break;
 
                     case UndertaleInstruction.Opcode.PushEnv:
-                        if (context.GMS2_3 == true)
+                        if (DecompileContext.GMS2_3 == true)
                         {
                             Expression expr = stack.Pop();
 
@@ -2451,7 +2450,7 @@ namespace UndertaleModLib.Decompiler
 
                     case UndertaleInstruction.Opcode.Break:
                         // GMS 2.3 sub-opcodes
-                        if (context.GMS2_3 == true)
+                        if (DecompileContext.GMS2_3 == true)
                         {
                             switch ((short)instr.Value)
                             {

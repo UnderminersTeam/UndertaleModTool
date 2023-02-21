@@ -16,7 +16,7 @@ namespace UndertaleModLib.Compiler
         public Dictionary<string, VariableInfo> userDefinedVariables = new Dictionary<string, VariableInfo>();
         public bool ensureFunctionsDefined = true;
         public bool ensureVariablesDefined = true;
-        public bool GMS2_3;
+        public static bool GMS2_3;
         public int LastCompiledArgumentCount = 0;
         public Dictionary<string, string> LocalVars = new Dictionary<string, string>();
         public Dictionary<string, string> GlobalVars = new Dictionary<string, string>();
@@ -35,9 +35,6 @@ namespace UndertaleModLib.Compiler
         public CompileContext(UndertaleData data, UndertaleCode oldCode)
         {
             Data = data;
-            GMS2_3 = Data.IsVersionAtLeast(2, 3); // IsVersionAtLeast is relatively expensive, only do it once
-            // actually that might still be rather slow on batch edits
-            // but who imports 100 scripts at once?
             OriginalCode = oldCode;
             OriginalReferencedLocalVars = OriginalCode?.FindReferencedLocalVars();
         }
