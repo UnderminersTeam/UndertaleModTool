@@ -142,7 +142,7 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
                 writer.Write(X);
                 writer.Write(Value);
 
-                if (writer.undertaleData.GMS2_3_1)
+                if (writer.undertaleData.IsVersionAtLeast(2, 3, 1))
                 {
                     writer.Write(BezierX0);
                     writer.Write(BezierY0);
@@ -159,19 +159,25 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
                 X = reader.ReadSingle();
                 Value = reader.ReadSingle();
 
-                if (reader.ReadUInt32() != 0) // in 2.3 a int with the value of 0 would be set here,
-                {                             // it cannot be version 2.3 if this value isn't 0
-                    reader.undertaleData.GMS2_3_1 = true;
-                    reader.Position -= 4;
-                }
-                else
+                if (!reader.undertaleData.IsVersionAtLeast(2, 3, 1))
                 {
-                    if (reader.ReadUInt32() == 0)              // At all points (besides the first one)
-                        reader.undertaleData.GMS2_3_1 = true; // if BezierX0 equals to 0 (the above check)
-                    reader.Position -= 8;                        // then BezierY0 equals to 0 as well (the current check)
+                    if (reader.ReadUInt32() != 0) // in 2.3 a int with the value of 0 would be set here,
+                    {                             // it cannot be version 2.3 if this value isn't 0
+                        reader.undertaleData.SetGMS2Version(2, 3, 1);
+                        reader.Position -= 4;
+                    }
+                    else
+                    {
+                        // At all points (besides the first one)
+                        // if BezierX0 equals to 0 (the above check)
+                        // then BezierY0 equals to 0 as well (the below check)
+                        if (reader.ReadUInt32() == 0)
+                            reader.undertaleData.SetGMS2Version(2, 3, 1);
+                        reader.Position -= 8;
+                    }
                 }
 
-                if (reader.undertaleData.GMS2_3_1)
+                if (reader.undertaleData.IsVersionAtLeast(2, 3, 1))
                 {
                     BezierX0 = reader.ReadSingle();
                     BezierY0 = reader.ReadSingle();

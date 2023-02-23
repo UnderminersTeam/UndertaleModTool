@@ -531,7 +531,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
             IsSpecialType = true;
             SVersion = reader.ReadUInt32();
             SSpriteType = (SpriteType)reader.ReadUInt32();
-            if (reader.undertaleData.GeneralInfo?.Major >= 2)
+            if (reader.undertaleData.IsGameMaker2())
             {
                 GMS2PlaybackSpeed = reader.ReadSingle();
                 GMS2PlaybackSpeedType = (AnimSpeedType)reader.ReadUInt32();
@@ -540,8 +540,8 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                     sequenceOffset = reader.ReadInt32();
                     if (SVersion >= 3)
                     {
-                        reader.undertaleData.GMS2_3_1 = true;
-                        reader.undertaleData.GMS2_3_2 = true;
+                        if (!reader.undertaleData.IsVersionAtLeast(2, 3, 2))
+                            reader.undertaleData.SetGMS2Version(2, 3, 2);
                         nineSliceOffset = reader.ReadInt32();
                     }
                 }

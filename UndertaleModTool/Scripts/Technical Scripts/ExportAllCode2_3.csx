@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 EnsureDataLoaded();
 
 bool is2_3 = false;
-if (!((Data.GMS2_3 == false) && (Data.GMS2_3_1 == false) && (Data.GMS2_3_2 == false)))
+if (Data.IsVersionAtLeast(2, 3))
 {
     is2_3 = true;
     ScriptMessage("This script is for GMS 2.3 games, because some code names get so long that Windows cannot write them adequately.");

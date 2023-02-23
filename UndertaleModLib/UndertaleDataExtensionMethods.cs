@@ -125,7 +125,7 @@ public static class UndertaleDataExtensionMethods
 			var oldId = data.VarCount1;
 			if (!bytecode14)
 			{
-				if (data.GMS2_3)
+				if (data.IsVersionAtLeast(2, 3))
 				{
 					// GMS 2.3+
 					if (!isBuiltin)
@@ -182,7 +182,7 @@ public static class UndertaleDataExtensionMethods
 		if (originalReferencedLocalVars != null)
 		{
 			UndertaleVariable refvar;
-			if (data?.GMS2_3 == true)
+			if (data?.IsVersionAtLeast(2, 3) == true)
 				refvar = originalReferencedLocalVars.Where((x) => x.Name.Content == name).FirstOrDefault();
 			else
 				refvar = originalReferencedLocalVars.Where((x) => x.Name.Content == name && x.VarID == localId).FirstOrDefault();
@@ -191,7 +191,7 @@ public static class UndertaleDataExtensionMethods
 		}
 
 		var str = strg.MakeString(name, out int id);
-		if (data?.GMS2_3 == true)
+		if (data?.IsVersionAtLeast(2, 3) == true)
 			localId = id;
 		UndertaleVariable vari = new UndertaleVariable()
 		{
