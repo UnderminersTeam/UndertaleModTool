@@ -39,6 +39,11 @@ if (debugProfiler.Instructions.Count == 0 && enable) // 1.09+, debugProfiler bla
     debugProfiler.ReplaceGML("cutsceneshow = false", Data);
     patchProfiler = true;
 }
+else if (debugProfiler.Instructions.Count == 2 && !enable)
+{
+    debugProfiler.ReplaceGML("", Data);
+    patchProfiler = true;
+}
 
 if (!patch2) // Failed to patch Chapter 2.
     throw new ScriptException("Chapter 2 Patch point not found?");
