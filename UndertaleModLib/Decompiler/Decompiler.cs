@@ -2065,17 +2065,39 @@ namespace UndertaleModLib.Decompiler
 
                     case UndertaleInstruction.Opcode.Ret:
                     case UndertaleInstruction.Opcode.Exit:
-                        ReturnStatement stmt = new ReturnStatement(instr.Kind == UndertaleInstruction.Opcode.Ret ? stack.Pop() : null);
-                        /*
-                            This shouldn't be necessary: all unused things on the stack get converted to tempvars at the end anyway, and this fixes decompilation of repeat()
-                            See #85
+                        // 2.3 scripts add exits to every script, even those that lack a return
+                        // This detects that type of exit using the next block.
+                        Block nextBlock = null;
+                        if (DecompileContext.GMS2_3)
+                        {
+                            List<uint> blockAddresses = new(blocks.Keys);
+                            blockAddresses.Sort();
+                            if (blockAddresses.Count > blockAddresses.IndexOf(block.Address ?? 0) + 1)
+                            {
+                                uint nextBlockAddress = blockAddresses[blockAddresses.IndexOf(block.Address ?? 0) + 1];
+                                nextBlock = blocks[nextBlockAddress];
+                            }
+                        }
 
-                            foreach (var expr in stack.Reverse())
-                                if (!(expr is ExpressionTempVar))
-                                    statements.Add(expr);
-                            stack.Clear();
-                        */
-                        statements.Add(stmt);
+                        if (!(DecompileContext.GMS2_3
+                            && instr.Kind == UndertaleInstruction.Opcode.Exit
+                            && nextBlock is not null
+                            && nextBlock.Instructions.Count > 0
+                            && nextBlock.Instructions[0].Kind == UndertaleInstruction.Opcode.Push
+                            && nextBlock.Instructions[0].Value.GetType() != typeof(int)))
+                        {
+                            ReturnStatement stmt = new ReturnStatement(instr.Kind == UndertaleInstruction.Opcode.Ret ? stack.Pop() : null);
+                            /*
+                                This shouldn't be necessary: all unused things on the stack get converted to tempvars at the end anyway, and this fixes decompilation of repeat()
+                                See #85
+
+                                foreach (var expr in stack.Reverse())
+                                    if (!(expr is ExpressionTempVar))
+                                        statements.Add(expr);
+                                stack.Clear();
+                            */
+                            statements.Add(stmt);
+                        }
                         end = true;
                         returned = true;
                         break;

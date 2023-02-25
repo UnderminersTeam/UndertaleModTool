@@ -1016,12 +1016,7 @@ namespace UndertaleModLib.Compiler
                         else
                         {
                             // Returns nothing, basically the same as exit
-                            // TODO: I'm pretty sure the "remaining" part is actually just because the decompiler keeps adding
-                            // returns and it's necessary to preserve 1:1 compilation
-                            // But this workaround causes issue https://github.com/krzys-h/UndertaleModTool/issues/900
-                            // So it would be fixed by cutting the "remaining" check here and removing the extra from decompilation.
-                            if (!(CompileContext.GMS2_3 && remaining == 1))
-                                AssembleExit(cw);
+                            AssembleExit(cw);
                         }
                         break;
                     case Parser.Statement.StatementKind.Exit:
