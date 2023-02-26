@@ -333,7 +333,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
                     return res;
 
                 uint returnTo = reader.Position;
-                reader.Position = reader.GetOffsetMapRev()[res];
+                reader.AbsPosition = reader.GetOffsetMapRev()[res];
                 reader.ReadUndertaleObject<UndertaleString>();
                 reader.Position = returnTo;
                 return res;
@@ -415,7 +415,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
                 uint strPtr = reader.ReadUInt32();
 
                 uint returnTo = reader.Position;
-                reader.Position = strPtr - 4;
+                reader.AbsPosition = strPtr - 4;
                 string res = reader.ReadGMString();
                 reader.Position = returnTo;
                 return res;
@@ -500,7 +500,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         /// <inheritdoc />
         public virtual void Unserialize(UndertaleReader reader)
         {
-            while (reader.Position % 4 != 0)
+            while (reader.AbsPosition % 4 != 0)
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error!");
 
@@ -511,7 +511,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
         public static uint UnserializeChildObjectCount(UndertaleReader reader)
         {
-            while (reader.Position % 4 != 0)
+            while (reader.AbsPosition % 4 != 0)
                 reader.Position++;
 
             return UndertaleSimpleList<Keyframe<T>>.UnserializeChildObjectCount(reader);
@@ -756,7 +756,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         /// <inheritdoc />
         public override void Unserialize(UndertaleReader reader)
         {
-            while (reader.Position % 4 != 0)
+            while (reader.AbsPosition % 4 != 0)
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error!");
 
@@ -769,7 +769,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
         public static new uint UnserializeChildObjectCount(UndertaleReader reader)
         {
-            while (reader.Position % 4 != 0)
+            while (reader.AbsPosition % 4 != 0)
                 reader.Position++;
 
             reader.Position += 4; // "Interpolation"
@@ -823,7 +823,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         /// <inheritdoc />
         public override void Unserialize(UndertaleReader reader)
         {
-            while (reader.Position % 4 != 0)
+            while (reader.AbsPosition % 4 != 0)
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error!");
 
@@ -836,7 +836,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
         public static new uint UnserializeChildObjectCount(UndertaleReader reader)
         {
-            while (reader.Position % 4 != 0)
+            while (reader.AbsPosition % 4 != 0)
                 reader.Position++;
 
             reader.Position += 4; // "Interpolation"

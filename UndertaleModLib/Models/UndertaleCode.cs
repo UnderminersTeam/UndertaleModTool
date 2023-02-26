@@ -1114,11 +1114,11 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
             Instructions.Clear();
             Instructions.Capacity = reader.InstructionArraysLengths[CurrCodeIndex];
 
-            uint here = reader.Position;
+            uint here = reader.AbsPosition;
             uint stop = here + Length;
-            while (reader.Position < stop)
+            while (reader.AbsPosition < stop)
             {
-                uint a = (reader.Position - here) / 4;
+                uint a = (reader.AbsPosition - here) / 4;
                 UndertaleInstruction instr = reader.ReadUndertaleObject<UndertaleInstruction>();
                 instr.Address = a;
                 Instructions.Add(instr);
@@ -1135,7 +1135,7 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
                 WeirdLocalFlag = true;
             }
             int BytecodeRelativeAddress = reader.ReadInt32();
-            _bytecodeAbsoluteAddress = (uint)((int)reader.Position - 4 + BytecodeRelativeAddress);
+            _bytecodeAbsoluteAddress = (uint)((int)reader.AbsPosition - 4 + BytecodeRelativeAddress);
            
             if (Length > 0 && reader.GMS2_3 && reader.GetOffsetMap().TryGetValue(_bytecodeAbsoluteAddress, out var i))
             {
@@ -1146,14 +1146,14 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
                 return;
             }
 
-            uint here = reader.Position;
-            reader.Position = _bytecodeAbsoluteAddress;
+            uint here = reader.AbsPosition;
+            reader.AbsPosition = _bytecodeAbsoluteAddress;
 
             Instructions.Clear();
             Instructions.Capacity = reader.InstructionArraysLengths[CurrCodeIndex];
-            while (reader.Position < _bytecodeAbsoluteAddress + Length)
+            while (reader.AbsPosition < _bytecodeAbsoluteAddress + Length)
             {
-                uint a = (reader.Position - _bytecodeAbsoluteAddress) / 4;
+                uint a = (reader.AbsPosition - _bytecodeAbsoluteAddress) / 4;
                 UndertaleInstruction instr = reader.ReadUndertaleObject<UndertaleInstruction>();
                 instr.Address = a;
                 Instructions.Add(instr);
@@ -1161,7 +1161,7 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
             if (ParentEntry == null && Instructions.Count != 0)
                 Instructions[0].Entry = this;
 
-            reader.Position = here;
+            reader.AbsPosition = here;
             Offset = reader.ReadUInt32();
         }
 

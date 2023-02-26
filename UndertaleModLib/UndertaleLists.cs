@@ -336,13 +336,13 @@ namespace UndertaleModLib
             if (Count > 0)
             {
                 uint pos = reader.GetAddressForUndertaleObject(this[0]);
-                if (reader.Position != pos)
+                if (reader.AbsPosition != pos)
                 {
-                    uint skip = pos - reader.Position;
+                    uint skip = pos - reader.AbsPosition;
                     if (skip > 0)
                     {
                         //Console.WriteLine("Skip " + skip + " bytes of blobs");
-                        reader.Position += skip;
+                        reader.AbsPosition += skip;
                     }
                     else
                         throw new IOException("First list item starts inside the pointer list?!?!");
@@ -396,11 +396,11 @@ namespace UndertaleModLib
                 pointers[i] = reader.ReadUInt32();
 
             uint pos = pointers[0];
-            if (reader.Position != pos)
+            if (reader.AbsPosition != pos)
             {
-                uint skip = pos - reader.Position;
+                uint skip = pos - reader.AbsPosition;
                 if (skip > 0)
-                    reader.Position += skip;
+                    reader.AbsPosition += skip;
                 else
                     throw new IOException("First list item starts inside the pointer list?!?!");
             }
@@ -410,7 +410,7 @@ namespace UndertaleModLib
             {
                 try
                 {
-                    reader.Position = pointers[i];
+                    reader.AbsPosition = pointers[i];
                     totalCount += 1 + unserializeFunc(reader);
                 }
                 catch (UndertaleSerializationException e)

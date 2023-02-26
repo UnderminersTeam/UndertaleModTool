@@ -7,15 +7,14 @@ using System.Text;
 namespace UndertaleModLib.Util
 {
     // Reimplemented based on DogScepter's implementation
-    public class FileBinaryReader : IDisposable
+    public class FileBinaryReader : IBinaryReader
     {
         private readonly byte[] buffer = new byte[16];
 
-        private Encoding encoding = new UTF8Encoding(false);
-        public Encoding Encoding { get => encoding; }
+        private readonly Encoding encoding = new UTF8Encoding(false);
         public Stream Stream { get; set; }
 
-        public long Length { get; private set; }
+        public long Length { get; }
 
         public uint Position
         {
@@ -33,7 +32,6 @@ namespace UndertaleModLib.Util
         {
             Length = stream.Length;
             Stream = stream;
-            Position = 0;
 
             if (stream.Position != 0)
                 stream.Seek(0, SeekOrigin.Begin);
@@ -228,7 +226,7 @@ namespace UndertaleModLib.Util
 
         public void Dispose()
         {
-            if (Stream is not null)
+            if (Stream?.CanRead == true)
             {
                 Stream.Close();
                 Stream.Dispose();

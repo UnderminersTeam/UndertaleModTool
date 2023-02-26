@@ -187,23 +187,23 @@ public class UndertaleTextureGroupInfo : UndertaleNamedResource, IDisposable
         uint fontsPtr = reader.ReadUInt32();
         uint tilesetsPtr = reader.ReadUInt32();
 
-        reader.Position = texPagesPtr;
+        reader.AbsPosition = texPagesPtr;
         count += 1 + UndertaleSimpleResourcesList<UndertaleEmbeddedTexture, UndertaleChunkTXTR>
                      .UnserializeChildObjectCount(reader);
 
-        reader.Position = spritesPtr;
+        reader.AbsPosition = spritesPtr;
         count += 1 + UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT>
                      .UnserializeChildObjectCount(reader);
 
-        reader.Position = spineSpritesPtr;
+        reader.AbsPosition = spineSpritesPtr;
         count += 1 + UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT>
                      .UnserializeChildObjectCount(reader);
 
-        reader.Position = fontsPtr;
+        reader.AbsPosition = fontsPtr;
         count += 1 + UndertaleSimpleResourcesList<UndertaleFont, UndertaleChunkFONT>
                      .UnserializeChildObjectCount(reader);
 
-        reader.Position = tilesetsPtr;
+        reader.AbsPosition = tilesetsPtr;
         count += 1 + UndertaleSimpleResourcesList<UndertaleBackground, UndertaleChunkBGND>
                      .UnserializeChildObjectCount(reader);
 

@@ -145,7 +145,7 @@ namespace UndertaleModLib
         }
     }
 
-    public class UndertaleReader : Util.FileBinaryReader
+    public class UndertaleReader : AdaptiveBinaryReader
     {
         /// <summary>
         /// function to delegate warning messages to
@@ -557,12 +557,12 @@ namespace UndertaleModLib
             try
             {
                 var expectedAddress = GetAddressForUndertaleObject(obj);
-                if (expectedAddress != Position)
+                if (expectedAddress != AbsPosition)
                 {
-                    SubmitWarning("Reading misaligned at " + Position.ToString("X8") + ", realigning back to " + expectedAddress.ToString("X8") + "\nHIGH RISK OF DATA LOSS! The file is probably corrupted, or uses unsupported features\nProceed at your own risk");
-                    Position = expectedAddress;
+                    SubmitWarning("Reading misaligned at " + AbsPosition.ToString("X8") + ", realigning back to " + expectedAddress.ToString("X8") + "\nHIGH RISK OF DATA LOSS! The file is probably corrupted, or uses unsupported features\nProceed at your own risk");
+                    AbsPosition = expectedAddress;
                 }
-                unreadObjects.Remove(Position);
+                unreadObjects.Remove(AbsPosition);
                 obj.Unserialize(this);
             }
             catch (Exception e)
@@ -573,7 +573,7 @@ namespace UndertaleModLib
 
         public T ReadUndertaleObject<T>() where T : UndertaleObject, new()
         {
-            T obj = GetUndertaleObjectAtAddress<T>(Position);
+            T obj = GetUndertaleObjectAtAddress<T>(AbsPosition);
             ReadUndertaleObject(obj);
             return obj;
         }
@@ -623,7 +623,7 @@ namespace UndertaleModLib
                     int diff = (int)expectedLength - (int)length;
                     Console.WriteLine("WARNING: File specified length " + expectedLength + ", but read only " + length + " (" + diff + " padding?)");
                     if (diff > 0)
-                        reader.Position = reader.Position + (uint)diff;
+                        reader.Position += (uint)diff;
                     else
                         throw new IOException("Read underflow");
                 }
@@ -632,7 +632,7 @@ namespace UndertaleModLib
 
         public void Align(int alignment, byte paddingbyte = 0x00)
         {
-            while ((Position & (alignment - 1)) != paddingbyte)
+            while ((AbsPosition & (alignment - 1)) != paddingbyte)
             {
                 DebugUtil.Assert(ReadByte() == paddingbyte, "Invalid alignment padding");
             }
@@ -644,7 +644,7 @@ namespace UndertaleModLib
         }
     }
 
-    public class UndertaleWriter : Util.FileBinaryWriter
+    public class UndertaleWriter : FileBinaryWriter
     {
         internal UndertaleData undertaleData;
 

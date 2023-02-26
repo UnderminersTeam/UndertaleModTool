@@ -162,22 +162,22 @@ namespace UndertaleModLib
                 uint firstExtPtr = reader.ReadUInt32();
                 uint firstExtEndPtr = (extCount >= 2) ? reader.ReadUInt32() /* second ptr */ : (returnPosition + this.Length);
 
-                reader.Position = firstExtPtr + 12;
+                reader.AbsPosition = firstExtPtr + 12;
                 uint newPointer1 = reader.ReadUInt32();
                 uint newPointer2 = reader.ReadUInt32();
 
-                if (newPointer1 != reader.Position)
+                if (newPointer1 != reader.AbsPosition)
                     definitely2022_6 = false; // first pointer mismatch
-                else if (newPointer2 <= reader.Position || newPointer2 >= (returnPosition + this.Length))
+                else if (newPointer2 <= reader.AbsPosition || newPointer2 >= (returnPosition + this.Length))
                     definitely2022_6 = false; // second pointer out of bounds
                 else
                 {
                     // Check ending position
-                    reader.Position = newPointer2;
+                    reader.AbsPosition = newPointer2;
                     uint optionCount = reader.ReadUInt32();
                     if (optionCount > 0)
                     {
-                        long newOffsetCheck = reader.Position + (4 * (optionCount - 1));
+                        long newOffsetCheck = reader.AbsPosition + (4 * (optionCount - 1));
                         if (newOffsetCheck >= (returnPosition + this.Length))
                         {
                             // Option count would place us out of bounds
@@ -194,7 +194,7 @@ namespace UndertaleModLib
                             }
                             else
                             {
-                                reader.Position = (uint)newOffsetCheck;
+                                reader.AbsPosition = (uint)newOffsetCheck;
                             }
                         }
                     }
@@ -203,10 +203,10 @@ namespace UndertaleModLib
                         if (extCount == 1)
                         {
                             reader.Position += 16; // skip GUID data (only one of them)
-                            if (reader.Position % 16 != 0)
-                                reader.Position += 16 - (reader.Position % 16); // align to chunk end
+                            if (reader.AbsPosition % 16 != 0)
+                                reader.Position += 16 - (reader.AbsPosition % 16); // align to chunk end
                         }
-                        if (reader.Position != firstExtEndPtr)
+                        if (reader.AbsPosition != firstExtEndPtr)
                             definitely2022_6 = false;
                     }
                 }
@@ -335,7 +335,7 @@ namespace UndertaleModLib
         {
             reader.Position -= 4;
             int chunkLength = reader.ReadInt32();
-            uint chunkEnd = reader.Position + (uint)chunkLength;
+            uint chunkEnd = reader.AbsPosition + (uint)chunkLength;
 
             uint beginPosition = reader.Position;
 
@@ -388,7 +388,7 @@ namespace UndertaleModLib
             if (reader.ReadUInt32() > 0) // Font count
             {
                 uint firstFontPointer = reader.ReadUInt32();
-                reader.Position = firstFontPointer + 48; // There are 48 bytes of existing metadata.
+                reader.AbsPosition = firstFontPointer + 48; // There are 48 bytes of existing metadata.
                 uint glyphsLength = reader.ReadUInt32();
                 reader.undertaleData.GMS2022_2 = true;
                 if ((glyphsLength * 4) > this.Length)
@@ -402,7 +402,7 @@ namespace UndertaleModLib
                         glyphPointers.Add(reader.ReadUInt32());
                     foreach (uint pointer in glyphPointers)
                     {
-                        if (reader.Position != pointer)
+                        if (reader.AbsPosition != pointer)
                         {
                             reader.undertaleData.GMS2022_2 = false;
                             break;
@@ -475,7 +475,7 @@ namespace UndertaleModLib
             if (reader.ReadUInt32() > 0) // Object count
             {
                 uint firstObjectPointer = reader.ReadUInt32();
-                reader.Position = firstObjectPointer + 64;
+                reader.AbsPosition = firstObjectPointer + 64;
                 uint vertexCount = reader.ReadUInt32();
 
                 // If any of these checks fail, it's 2022.5
@@ -489,7 +489,7 @@ namespace UndertaleModLib
                     {
                         uint subEventPointer = reader.ReadUInt32();
                         // Should start right after the list
-                        if (reader.Position + 56 == subEventPointer)
+                        if (reader.AbsPosition + 56 == subEventPointer)
                             reader.undertaleData.GM2022_5 = false;
                     }
                 }
@@ -574,12 +574,12 @@ namespace UndertaleModLib
                     // Advance to room data we're interested in (and grab pointer for next room)
                     reader.Position = returnTo + 4 + (4 * roomIndex);
                     uint roomPtr = (uint)reader.ReadInt32();
-                    reader.Position = roomPtr + (22 * 4);
+                    reader.AbsPosition = roomPtr + (22 * 4);
 
                     // Get the pointer for this room's layer list, as well as pointer to sequence list
                     uint layerListPtr = (uint)reader.ReadInt32();
                     int seqnPtr = reader.ReadInt32();
-                    reader.Position = layerListPtr;
+                    reader.AbsPosition = layerListPtr;
                     int layerCount = reader.ReadInt32();
                     if (layerCount >= 1)
                     {
@@ -594,25 +594,25 @@ namespace UndertaleModLib
                             nextOffset = reader.ReadInt32(); // (pointer to next element in the layer list)
 
                         // Actually perform the length checks, depending on layer data
-                        reader.Position = jumpOffset;
+                        reader.AbsPosition = jumpOffset;
                         switch ((LayerType)reader.ReadInt32())
                         {
                             case LayerType.Background:
-                                if (nextOffset - reader.Position > 16 * 4)
+                                if (nextOffset - reader.AbsPosition > 16 * 4)
                                     reader.undertaleData.GMS2022_1 = true;
                                 finished = true;
                                 break;
                             case LayerType.Instances:
                                 reader.Position += 6 * 4;
                                 int instanceCount = reader.ReadInt32();
-                                if (nextOffset - reader.Position != (instanceCount * 4))
+                                if (nextOffset - reader.AbsPosition != (instanceCount * 4))
                                     reader.undertaleData.GMS2022_1 = true;
                                 finished = true;
                                 break;
                             case LayerType.Assets:
                                 reader.Position += 6 * 4;
                                 int tileOffset = reader.ReadInt32();
-                                if (tileOffset != reader.Position + 8)
+                                if (tileOffset != reader.AbsPosition + 8)
                                     reader.undertaleData.GMS2022_1 = true;
                                 finished = true;
                                 break;
@@ -620,14 +620,14 @@ namespace UndertaleModLib
                                 reader.Position += 7 * 4;
                                 int tileMapWidth = reader.ReadInt32();
                                 int tileMapHeight = reader.ReadInt32();
-                                if (nextOffset - reader.Position != (tileMapWidth * tileMapHeight * 4))
+                                if (nextOffset - reader.AbsPosition != (tileMapWidth * tileMapHeight * 4))
                                     reader.undertaleData.GMS2022_1 = true;
                                 finished = true;
                                 break;
                             case LayerType.Effect:
                                 reader.Position += 7 * 4;
                                 int propertyCount = reader.ReadInt32();
-                                if (nextOffset - reader.Position != (propertyCount * 3 * 4))
+                                if (nextOffset - reader.AbsPosition != (propertyCount * 3 * 4))
                                     reader.undertaleData.GMS2022_1 = true;
                                 finished = true;
                                 break;
@@ -898,7 +898,7 @@ namespace UndertaleModLib
             base.UnserializeChunk(reader);
 
             // padding
-            while (reader.Position % 0x80 != 0)
+            while (reader.AbsPosition % 0x80 != 0)
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error in STRG");
         }
@@ -1037,7 +1037,7 @@ namespace UndertaleModLib
             }
 
             // padding
-            while (reader.Position % 4 != 0)
+            while (reader.AbsPosition % 4 != 0)
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error!");
         }
@@ -1130,7 +1130,7 @@ namespace UndertaleModLib
             {
                 uint tginPtr = reader.ReadUInt32();
                 uint secondTginPtr = (tginCount >= 2) ? reader.ReadUInt32() : (returnPosition + this.Length);
-                reader.Position = tginPtr + 4;
+                reader.AbsPosition = tginPtr + 4;
 
                 // Check to see if the pointer located at this address points within this object
                 // If not, then we know we're using a new format!
@@ -1242,7 +1242,7 @@ namespace UndertaleModLib
                 throw new InvalidOperationException();
 
             // Padding
-            while (reader.Position % 4 != 0)
+            while (reader.AbsPosition % 4 != 0)
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error!");
 
@@ -1260,7 +1260,7 @@ namespace UndertaleModLib
             checkedForGMS2_3_1 = false;
 
             // Padding
-            while (reader.Position % 4 != 0)
+            while (reader.AbsPosition % 4 != 0)
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error!");
 
@@ -1302,7 +1302,7 @@ namespace UndertaleModLib
                 return;
 
             // Padding
-            while (reader.Position % 4 != 0)
+            while (reader.AbsPosition % 4 != 0)
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error!");
 
@@ -1323,7 +1323,7 @@ namespace UndertaleModLib
                 return 0;
 
             // Padding
-            while (reader.Position % 4 != 0)
+            while (reader.AbsPosition % 4 != 0)
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error!");
 
@@ -1359,7 +1359,7 @@ namespace UndertaleModLib
                 throw new InvalidOperationException();
 
             // Padding
-            while (reader.Position % 4 != 0)
+            while (reader.AbsPosition % 4 != 0)
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error!");
 
@@ -1375,7 +1375,7 @@ namespace UndertaleModLib
                 throw new InvalidOperationException();
 
             // Padding
-            while (reader.Position % 4 != 0)
+            while (reader.AbsPosition % 4 != 0)
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error!");
 
@@ -1410,7 +1410,7 @@ namespace UndertaleModLib
                 throw new InvalidOperationException();
 
             // Padding
-            while (reader.Position % 4 != 0)
+            while (reader.AbsPosition % 4 != 0)
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error!");
 
@@ -1426,7 +1426,7 @@ namespace UndertaleModLib
                 throw new InvalidOperationException();
 
             // Padding
-            while (reader.Position % 4 != 0)
+            while (reader.AbsPosition % 4 != 0)
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error!");
 
@@ -1460,7 +1460,7 @@ namespace UndertaleModLib
                 throw new InvalidOperationException();
 
             // Padding
-            while (reader.Position % 4 != 0)
+            while (reader.AbsPosition % 4 != 0)
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error!");
 
@@ -1473,7 +1473,7 @@ namespace UndertaleModLib
                 throw new InvalidOperationException();
 
             // Padding
-            while (reader.Position % 4 != 0)
+            while (reader.AbsPosition % 4 != 0)
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error!");
 

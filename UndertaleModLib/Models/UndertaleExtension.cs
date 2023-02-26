@@ -382,9 +382,9 @@ public class UndertaleExtension : UndertaleNamedResource, IDisposable
             uint filesPtr = reader.ReadUInt32();
             uint optionsPtr = reader.ReadUInt32();
 
-            reader.Position = filesPtr;
+            reader.AbsPosition = filesPtr;
             count += 1 + UndertalePointerList<UndertaleExtensionFile>.UnserializeChildObjectCount(reader);
-            reader.Position = optionsPtr;
+            reader.AbsPosition = optionsPtr;
             count += 1 + UndertalePointerList<UndertaleExtensionOption>.UnserializeChildObjectCount(reader);
         }
         else

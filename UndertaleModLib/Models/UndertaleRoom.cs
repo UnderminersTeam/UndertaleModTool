@@ -275,7 +275,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         uint gameObjPtr = reader.ReadUInt32();
         uint tilePtr = reader.ReadUInt32();
 
-        reader.Position = gameObjPtr; // "GameObjects"
+        reader.AbsPosition = gameObjPtr; // "GameObjects"
         uint objCount = reader.ReadUInt32();
         if (objCount > 0)
         {
@@ -462,23 +462,23 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 sequencesPtr = reader.ReadUInt32();
         }
 
-        reader.Position = backgroundPtr;
+        reader.AbsPosition = backgroundPtr;
         count += 1 + UndertalePointerList<Background>.UnserializeChildObjectCount(reader);
-        reader.Position = viewsPtr;
+        reader.AbsPosition = viewsPtr;
         count += 1 + UndertalePointerList<View>.UnserializeChildObjectCount(reader);
-        reader.Position = gameObjsPtr;
+        reader.AbsPosition = gameObjsPtr;
         count += 1 + UndertalePointerList<GameObject>.UnserializeChildObjectCount(reader);
-        reader.Position = tilesPtr;
+        reader.AbsPosition = tilesPtr;
         count += 1 + UndertalePointerList<Tile>.UnserializeChildObjectCount(reader);
 
         if (reader.GMS2)
         {
-            reader.Position = layersPtr;
+            reader.AbsPosition = layersPtr;
             count += 1 + UndertalePointerList<Layer>.UnserializeChildObjectCount(reader);
 
             if (reader.GMS2_3)
             {
-                reader.Position = sequencesPtr;
+                reader.AbsPosition = sequencesPtr;
                 count += 1 + UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>>
                              .UnserializeChildObjectCount(reader);
             }
@@ -1858,17 +1858,17 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                         nineSlicesPtr = reader.ReadUInt32();
                 }
 
-                reader.Position = legacyTilesPtr;
+                reader.AbsPosition = legacyTilesPtr;
                 count += 1 + UndertalePointerList<Tile>.UnserializeChildObjectCount(reader);
-                reader.Position = spritesPtr;
+                reader.AbsPosition = spritesPtr;
                 count += 1 + UndertalePointerList<SpriteInstance>.UnserializeChildObjectCount(reader);
                 if (reader.GMS2_3)
                 {
-                    reader.Position = sequencesPtr;
+                    reader.AbsPosition = sequencesPtr;
                     count += 1 + UndertalePointerList<SequenceInstance>.UnserializeChildObjectCount(reader);
                     if (!reader.undertaleData.GMS2_3_2)
                     {
-                        reader.Position = nineSlicesPtr;
+                        reader.AbsPosition = nineSlicesPtr;
                         count += 1 + UndertalePointerList<SpriteInstance>.UnserializeChildObjectCount(reader);
                     }
                 }

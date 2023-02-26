@@ -166,7 +166,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         if (_textureData == null || TextureExternal)
             return;
 
-        while (reader.Position % 0x80 != 0)
+        while (reader.AbsPosition % 0x80 != 0)
             if (reader.ReadByte() != 0)
                 throw new IOException("Padding error!");
 
@@ -414,7 +414,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         /// <summary>
         /// Unserializes the texture from any type of reader (can be from any source).
         /// </summary>
-        public void Unserialize(FileBinaryReader reader, bool is_2022_5)
+        public void Unserialize(IBinaryReader reader, bool is_2022_5)
         {
             sharedStream ??= new();
 

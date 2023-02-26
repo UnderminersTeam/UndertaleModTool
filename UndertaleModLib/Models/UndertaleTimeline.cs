@@ -136,7 +136,7 @@ public class UndertaleTimeline : UndertaleNamedResource, IDisposable
         // Read the actions for each moment
         for (int i = 0; i < momentCount; i++)
         {
-            if (reader.Position != unnecessaryPointers[i])
+            if (reader.AbsPosition != unnecessaryPointers[i])
                 throw new UndertaleSerializationException("Invalid action list pointer");
 
             // Read action list and assign time point (put into list)

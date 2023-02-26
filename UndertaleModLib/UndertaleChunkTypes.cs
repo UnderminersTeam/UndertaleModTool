@@ -86,6 +86,7 @@ namespace UndertaleModLib
 
                 reader.SubmitMessage("Reading chunk " + chunk.Name);
                 var lenReader = reader.EnsureLengthFromHere(chunk.Length);
+                reader.CopyChunkToBuffer(length);
                 chunk.UnserializeChunk(reader);
 
                 if (name != "FORM" && name != reader.LastChunkName)
@@ -98,12 +99,12 @@ namespace UndertaleModLib
                     {
                         int e = reader.undertaleData.PaddingAlignException;
                         uint pad = (e == -1 ? 16 : (uint)e);
-                        while (reader.Position % pad != 0)
+                        while (reader.AbsPosition % pad != 0)
                         {
                             if (reader.ReadByte() != 0)
                             {
                                 reader.Position -= 1;
-                                if (reader.Position % 4 == 0)
+                                if (reader.AbsPosition % 4 == 0)
                                     reader.undertaleData.PaddingAlignException = 4;
                                 else
                                     reader.undertaleData.PaddingAlignException = 1;
@@ -113,6 +114,7 @@ namespace UndertaleModLib
                     }
                 }
 
+                reader.SwitchReaderType(false);
                 lenReader.ToHere();
 
                 return chunk;
@@ -123,7 +125,7 @@ namespace UndertaleModLib
             }
             catch (Exception e)
             {
-                throw new UndertaleSerializationException(e.Message + "\nat " + reader.Position.ToString("X8") + " while reading chunk " + name, e);
+                throw new UndertaleSerializationException(e.Message + "\nat " + reader.AbsPosition.ToString("X8") + " while reading chunk " + name, e);
             }
         }
         public static uint CountChunkChildObjects(UndertaleReader reader)
@@ -146,8 +148,10 @@ namespace UndertaleModLib
                 uint chunkStart = reader.Position;
 
                 reader.SubmitMessage("Counting objects of chunk " + chunk.Name);
+                reader.CopyChunkToBuffer(length);
                 uint count = chunk.UnserializeObjectCount(reader);
 
+                reader.SwitchReaderType(false);
                 reader.Position = chunkStart + chunk.Length;
 
                 return count;
@@ -158,7 +162,7 @@ namespace UndertaleModLib
             }
             catch (Exception e)
             {
-                throw new UndertaleSerializationException(e.Message + "\nat " + reader.Position.ToString("X8") + " while counting objects of chunk " + name, e);
+                throw new UndertaleSerializationException(e.Message + "\nat " + reader.AbsPosition.ToString("X8") + " while counting objects of chunk " + name, e);
             }
         }
     }
@@ -284,7 +288,7 @@ namespace UndertaleModLib
             {
                 if (Align)
                 {
-                    while (reader.Position % Alignment != 0)
+                    while (reader.AbsPosition % Alignment != 0)
                         if (reader.ReadByte() != 0)
                             throw new IOException("AlignUpdatedListChunk padding error");
                 }
