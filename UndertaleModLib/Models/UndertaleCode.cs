@@ -571,7 +571,7 @@ public class UndertaleInstruction : UndertaleObject
     /// <inheritdoc />
     public void Unserialize(UndertaleReader reader)
     {
-        uint instructionStartAddress = reader.Position;
+        long instructionStartAddress = reader.Position;
         reader.Position += 3; // skip for now, we'll read them later
         byte kind = reader.ReadByte();
         if (reader.Bytecode14OrLower)
@@ -755,7 +755,7 @@ public class UndertaleInstruction : UndertaleObject
     /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
     public static uint UnserializeChildObjectCount(UndertaleReader reader)
     {
-        uint instructionStartAddress = reader.Position;
+        long instructionStartAddress = reader.Position;
         reader.Position += 3; // skip for now, we'll read them later
         byte kind = reader.ReadByte();
         if (reader.Bytecode14OrLower)
@@ -1114,11 +1114,11 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
             Instructions.Clear();
             Instructions.Capacity = reader.InstructionArraysLengths[CurrCodeIndex];
 
-            uint here = reader.AbsPosition;
-            uint stop = here + Length;
+            long here = reader.AbsPosition;
+            long stop = here + Length;
             while (reader.AbsPosition < stop)
             {
-                uint a = (reader.AbsPosition - here) / 4;
+                uint a = (uint)(reader.AbsPosition - here) / 4;
                 UndertaleInstruction instr = reader.ReadUndertaleObject<UndertaleInstruction>();
                 instr.Address = a;
                 Instructions.Add(instr);
@@ -1146,14 +1146,14 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
                 return;
             }
 
-            uint here = reader.AbsPosition;
+            long here = reader.AbsPosition;
             reader.AbsPosition = _bytecodeAbsoluteAddress;
 
             Instructions.Clear();
             Instructions.Capacity = reader.InstructionArraysLengths[CurrCodeIndex];
             while (reader.AbsPosition < _bytecodeAbsoluteAddress + Length)
             {
-                uint a = (reader.AbsPosition - _bytecodeAbsoluteAddress) / 4;
+                uint a = (uint)(reader.AbsPosition - _bytecodeAbsoluteAddress) / 4;
                 UndertaleInstruction instr = reader.ReadUndertaleObject<UndertaleInstruction>();
                 instr.Address = a;
                 Instructions.Add(instr);
@@ -1178,8 +1178,8 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
 
         if (reader.Bytecode14OrLower)
         {
-            uint here = reader.Position;
-            uint stop = here + length;
+            long here = reader.Position;
+            long stop = here + length;
 
             // Get instructions count
             uint instrCount = 0;
@@ -1209,7 +1209,7 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
 
             reader.GMS2BytecodeAddresses.Add(bytecodeAbsoluteAddress);
 
-            uint here = reader.Position;
+            long here = reader.Position;
             reader.Position = bytecodeAbsoluteAddress;
 
             // Get instructions counts

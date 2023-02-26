@@ -11,7 +11,7 @@ namespace UndertaleModLib.Util
     {
         public abstract Stream Stream { get; set; }
         public abstract long Length { get; }
-        public abstract uint Position { get; set; }
+        public abstract long Position { get; set; }
 
         public abstract byte ReadByte();
         public virtual bool ReadBoolean() => false;
@@ -57,7 +57,7 @@ namespace UndertaleModLib.Util
         // I've done some benchmarks, and they show that
         // "if..else" is faster than using interfaces here.
         // (at least in C# 10)
-        public uint Position
+        public long Position
         {
             get
             {
@@ -74,7 +74,7 @@ namespace UndertaleModLib.Util
                     fileBinaryReader.Position = value;
             }
         }
-        public uint AbsPosition
+        public long AbsPosition
         {
             get
             {

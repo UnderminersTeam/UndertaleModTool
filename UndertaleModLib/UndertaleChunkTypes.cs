@@ -145,7 +145,7 @@ namespace UndertaleModLib
                                       $"Chunk name mismatch: expected \"{name}\", got \"{chunk.Name}\".");
                 chunk.Length = length;
 
-                uint chunkStart = reader.Position;
+                long chunkStart = reader.Position;
 
                 reader.SubmitMessage("Counting objects of chunk " + chunk.Name);
                 reader.CopyChunkToBuffer(length);

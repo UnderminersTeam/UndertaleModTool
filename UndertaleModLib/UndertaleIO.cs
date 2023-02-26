@@ -238,7 +238,7 @@ namespace UndertaleModLib
             DebugUtil.Assert(data.FORM.Name == name);
             data.FORM.Length = length;
 
-            uint startPos = Position;
+            long startPos = Position;
             uint poolSize = 0;
             if (!ProcessCountExc()) // process an exception from "FillUnserializeCountDictionaries()"
             {
@@ -433,7 +433,7 @@ namespace UndertaleModLib
                     return blankCountFunc;
                 }
 
-                Debug.WriteLine($"Adding a generic class method for \"{objType.FullName}\" to \"UndertaleReader.unserializeFuncDict\".");
+                //Debug.WriteLine($"Adding a generic class method for \"{objType.FullName}\" to \"UndertaleReader.unserializeFuncDict\".");
 
                 var func = Delegate.CreateDelegate(delegateType, mi) as Func<UndertaleReader, uint>;
                 if (func is null)
@@ -562,7 +562,7 @@ namespace UndertaleModLib
                     SubmitWarning("Reading misaligned at " + AbsPosition.ToString("X8") + ", realigning back to " + expectedAddress.ToString("X8") + "\nHIGH RISK OF DATA LOSS! The file is probably corrupted, or uses unsupported features\nProceed at your own risk");
                     AbsPosition = expectedAddress;
                 }
-                unreadObjects.Remove(AbsPosition);
+                unreadObjects.Remove((uint)AbsPosition);
                 obj.Unserialize(this);
             }
             catch (Exception e)
@@ -573,7 +573,7 @@ namespace UndertaleModLib
 
         public T ReadUndertaleObject<T>() where T : UndertaleObject, new()
         {
-            T obj = GetUndertaleObjectAtAddress<T>(AbsPosition);
+            T obj = GetUndertaleObjectAtAddress<T>((uint)AbsPosition);
             ReadUndertaleObject(obj);
             return obj;
         }

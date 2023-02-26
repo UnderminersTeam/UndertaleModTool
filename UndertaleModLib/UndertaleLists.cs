@@ -338,7 +338,7 @@ namespace UndertaleModLib
                 uint pos = reader.GetAddressForUndertaleObject(this[0]);
                 if (reader.AbsPosition != pos)
                 {
-                    uint skip = pos - reader.AbsPosition;
+                    long skip = pos - reader.AbsPosition;
                     if (skip > 0)
                     {
                         //Console.WriteLine("Skip " + skip + " bytes of blobs");
@@ -398,7 +398,7 @@ namespace UndertaleModLib
             uint pos = pointers[0];
             if (reader.AbsPosition != pos)
             {
-                uint skip = pos - reader.AbsPosition;
+                long skip = pos - reader.AbsPosition;
                 if (skip > 0)
                     reader.AbsPosition += skip;
                 else

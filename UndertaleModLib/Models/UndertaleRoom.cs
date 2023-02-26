@@ -269,7 +269,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
     private static void CheckForGMS2_2_2_302(UndertaleReader reader)
     {
-        uint returnTo = reader.Position;
+        long returnTo = reader.Position;
         reader.Position -= 4;
 
         uint gameObjPtr = reader.ReadUInt32();

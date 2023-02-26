@@ -418,7 +418,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         {
             sharedStream ??= new();
 
-            uint startAddress = reader.Position;
+            long startAddress = reader.Position;
 
             byte[] header = reader.ReadBytes(8);
             if (!header.SequenceEqual(PNGHeader))
@@ -477,7 +477,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
                     break;
             }
 
-            uint length = reader.Position - startAddress;
+            long length = reader.Position - startAddress;
             reader.Position = startAddress;
             TextureBlob = reader.ReadBytes((int)length);
         }

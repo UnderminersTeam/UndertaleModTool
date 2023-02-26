@@ -65,7 +65,7 @@ namespace UndertaleModLib
         {
             Chunks.Clear();
             ChunksTypeDict.Clear();
-            uint startPos = reader.Position;
+            long startPos = reader.Position;
 
             // First, find the last chunk in the file because of padding changes
             // (also, calculate all present chunks while we're at it)
@@ -101,7 +101,7 @@ namespace UndertaleModLib
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
             uint totalCount = 0;
-            uint startPos = reader.Position;
+            long startPos = reader.Position;
 
             while (reader.Position < reader.Length)
             {
@@ -154,13 +154,13 @@ namespace UndertaleModLib
         private void CheckFor2022_6(UndertaleReader reader)
         {
             bool definitely2022_6 = true;
-            uint returnPosition = reader.Position;
+            long returnPosition = reader.Position;
 
             int extCount = reader.ReadInt32();
             if (extCount > 0)
             {
                 uint firstExtPtr = reader.ReadUInt32();
-                uint firstExtEndPtr = (extCount >= 2) ? reader.ReadUInt32() /* second ptr */ : (returnPosition + this.Length);
+                uint firstExtEndPtr = (extCount >= 2) ? reader.ReadUInt32() /* second ptr */ : (uint)(returnPosition + this.Length);
 
                 reader.AbsPosition = firstExtPtr + 12;
                 uint newPointer1 = reader.ReadUInt32();
@@ -335,9 +335,9 @@ namespace UndertaleModLib
         {
             reader.Position -= 4;
             int chunkLength = reader.ReadInt32();
-            uint chunkEnd = reader.AbsPosition + (uint)chunkLength;
+            long chunkEnd = reader.AbsPosition + chunkLength;
 
-            uint beginPosition = reader.Position;
+            long beginPosition = reader.Position;
 
             // Figure out where the starts/ends of each shader object are
             int count = reader.ReadInt32();
@@ -346,7 +346,7 @@ namespace UndertaleModLib
             {
                 objectLocations[i] = (uint)reader.ReadInt32();
             }
-            objectLocations[count] = chunkEnd;
+            objectLocations[count] = (uint)chunkEnd;
 
             Dictionary<uint, UndertaleObject> objPool = reader.GetOffsetMap();
             Dictionary<UndertaleObject, uint> objPoolRev = reader.GetOffsetMapRev();
@@ -383,7 +383,7 @@ namespace UndertaleModLib
             * screw it, call Jacky720 when someone constructs that and you want to mod it.
             * Maybe try..catch on the whole shebang?
             */
-            uint positionToReturn = reader.Position;
+            long positionToReturn = reader.Position;
 
             if (reader.ReadUInt32() > 0) // Font count
             {
@@ -470,7 +470,7 @@ namespace UndertaleModLib
         // Simple chunk parser to check for 2022.5, assumes old format until shown otherwise
         private void CheckFor2022_5(UndertaleReader reader)
         {
-            uint positionToReturn = reader.Position;
+            long positionToReturn = reader.Position;
 
             if (reader.ReadUInt32() > 0) // Object count
             {
@@ -564,7 +564,7 @@ namespace UndertaleModLib
             // Do a length check on room layers to see if this is 2022.1 or higher
             if (!reader.undertaleData.GMS2022_1 && reader.undertaleData.GMS2_3)
             {
-                uint returnTo = reader.Position;
+                long returnTo = reader.Position;
 
                 // Iterate over all rooms until a length check is performed
                 int roomCount = reader.ReadInt32();
@@ -773,7 +773,7 @@ namespace UndertaleModLib
 
             if (reader.undertaleData.UnsupportedBytecodeVersion)
                 return;
-            uint startPosition = reader.Position;
+            long startPosition = reader.Position;
             uint varLength;
             if (!reader.Bytecode14OrLower)
             {
@@ -848,7 +848,7 @@ namespace UndertaleModLib
                 return;
             if (reader.Bytecode14OrLower)
             {
-                uint startPosition = reader.Position;
+                long startPosition = reader.Position;
                 Functions.Clear();
                 Functions.SetCapacity(Length / 12);
                 while (reader.Position + 12 <= startPosition + Length)
@@ -920,7 +920,7 @@ namespace UndertaleModLib
             }
             else if (reader.undertaleData.GMS2_3)
             {
-                uint positionToReturn = reader.Position;
+                long positionToReturn = reader.Position;
 
                 // Check for 2022.3 format
                 uint texCount = reader.ReadUInt32();
@@ -1123,13 +1123,13 @@ namespace UndertaleModLib
         private void CheckFor2022_8(UndertaleReader reader)
         {
             // Check for 2022.8
-            uint returnPosition = reader.Position;
+            long returnPosition = reader.Position;
 
             uint tginCount = reader.ReadUInt32();
             if (tginCount > 0)
             {
                 uint tginPtr = reader.ReadUInt32();
-                uint secondTginPtr = (tginCount >= 2) ? reader.ReadUInt32() : (returnPosition + this.Length);
+                uint secondTginPtr = (tginCount >= 2) ? reader.ReadUInt32() : (uint)(returnPosition + this.Length);
                 reader.AbsPosition = tginPtr + 4;
 
                 // Check to see if the pointer located at this address points within this object
@@ -1193,7 +1193,7 @@ namespace UndertaleModLib
         private static bool checkedForGMS2_3_1;
         private void CheckForGMS2_3_1(UndertaleReader reader)
         {
-            uint returnTo = reader.Position;
+            long returnTo = reader.Position;
 
             uint count = reader.ReadUInt32();
             if (count == 0)

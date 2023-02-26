@@ -513,7 +513,7 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
 
         public void Unserialize(UndertaleReader reader, bool readLength = true)
         {
-            _PointerLocation = reader.AbsPosition;
+            _PointerLocation = (uint)reader.AbsPosition;
             _Position = reader.ReadUInt32();
             if (readLength)
                 _Length = reader.ReadUInt32();
