@@ -2072,15 +2072,15 @@ namespace UndertaleModLib.Decompiler
                         {
                             List<uint> blockAddresses = new(blocks.Keys);
                             blockAddresses.Sort();
-                            if (blockAddresses.Count > blockAddresses.IndexOf(block.Address ?? 0) + 1)
+                            int nextBlockIndex = blockAddresses.IndexOf(block.Address ?? 0) + 1;
+                            if (blockAddresses.Count > nextBlockIndex)
                             {
-                                uint nextBlockAddress = blockAddresses[blockAddresses.IndexOf(block.Address ?? 0) + 1];
+                                uint nextBlockAddress = blockAddresses[nextBlockIndex];
                                 nextBlock = blocks[nextBlockAddress];
                             }
                         }
 
-                        if (!(DecompileContext.GMS2_3
-                            && instr.Kind == UndertaleInstruction.Opcode.Exit
+                        if (!(instr.Kind == UndertaleInstruction.Opcode.Exit
                             && nextBlock is not null
                             && nextBlock.Instructions.Count > 0
                             && nextBlock.Instructions[0].Kind == UndertaleInstruction.Opcode.Push
