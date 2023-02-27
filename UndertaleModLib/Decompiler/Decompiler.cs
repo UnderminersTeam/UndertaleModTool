@@ -2068,7 +2068,7 @@ namespace UndertaleModLib.Decompiler
                         // 2.3 scripts add exits to every script, even those that lack a return
                         // This detects that type of exit using the next block.
                         Block nextBlock = null;
-                        if (DecompileContext.GMS2_3)
+                        if (DecompileContext.GMS2_3 && instr.Kind == UndertaleInstruction.Opcode.Exit)
                         {
                             List<uint> blockAddresses = new(blocks.Keys);
                             blockAddresses.Sort();
@@ -2080,8 +2080,7 @@ namespace UndertaleModLib.Decompiler
                             }
                         }
 
-                        if (!(instr.Kind == UndertaleInstruction.Opcode.Exit
-                            && nextBlock is not null
+                        if (!(nextBlock is not null
                             && nextBlock.Instructions.Count > 0
                             && nextBlock.Instructions[0].Kind == UndertaleInstruction.Opcode.Push
                             && nextBlock.Instructions[0].Value.GetType() != typeof(int)))
