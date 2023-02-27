@@ -1673,6 +1673,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             {
                 uint count = 0;
 
+                reader.Position += 4; // _background
+
                 uint tilesX = reader.ReadUInt32();
                 uint tilesY = reader.ReadUInt32();
                 reader.Position += tilesX * tilesY * 4;

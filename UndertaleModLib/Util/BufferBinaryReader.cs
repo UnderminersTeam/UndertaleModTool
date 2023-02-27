@@ -9,7 +9,6 @@ namespace UndertaleModLib.Util
     // Initial implementation was based on DogScepter's implementation
     public class BufferBinaryReader : IBinaryReader
     {
-
         // A faster implementation of "MemoryStream"
         private class ChunkBuffer
         {
@@ -127,14 +126,9 @@ namespace UndertaleModLib.Util
         public long Position
         {
             get => chunkBuffer.Position;
-            set
-            {
-                if (value > chunkBuffer.Length)
-                    throw new IOException("Reading out of the chunk bounds.");
-
-                chunkBuffer.Position = (int)value;
-            }
+            set => chunkBuffer.Position = (int)value;
         }
+        public long ChunkStartPosition { get; set; }
 
         public BufferBinaryReader(Stream stream, Encoding encoding = null)
         {
@@ -142,10 +136,10 @@ namespace UndertaleModLib.Util
             Stream = stream;
 
             // Check data file length
-            if (Length < 10 * 1024 * 1024) // 10 MB
-                chunkBuffer = new(5 * 1024 * 1024);
+            if (Length < 12 * 1024 * 1024) // 12 MB
+                chunkBuffer = new(6 * 1024 * 1024);
             else
-                chunkBuffer = new(10 * 1024 * 1024);
+                chunkBuffer = new(12 * 1024 * 1024);
 
             if (stream.Position != 0)
                 stream.Seek(0, SeekOrigin.Begin);
@@ -171,6 +165,8 @@ namespace UndertaleModLib.Util
 
             Stream.Position -= length;
             chunkBuffer.Position -= (int)length;
+
+            ChunkStartPosition = Stream.Position;
         }
         private ReadOnlySpan<byte> ReadToBuffer(int count)
         {
@@ -204,7 +200,8 @@ namespace UndertaleModLib.Util
             else
             {
                 Span<byte> buf = stackalloc byte[count];
-                chunkBuffer.Read(buf);
+                if (count > 0)
+                    chunkBuffer.Read(buf);
 
                 return encoding.GetString(buf);
             }
@@ -217,7 +214,8 @@ namespace UndertaleModLib.Util
                 throw new IOException("Reading out of bounds");
 #endif
             byte[] val = new byte[count];
-            chunkBuffer.Read(val, count);
+            if (count > 0)
+                chunkBuffer.Read(val, count);
             return val;
         }
 

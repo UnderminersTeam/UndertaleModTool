@@ -250,6 +250,8 @@ namespace UndertaleModLib
                 {
                     countUnserializeExc = e;
                     Debug.WriteLine(e);
+
+                    SwitchReaderType(false);
                 }
             }
             utListPtrsPool = null;

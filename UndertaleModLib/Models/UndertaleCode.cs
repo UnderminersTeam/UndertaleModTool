@@ -1112,7 +1112,8 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
         else if (reader.Bytecode14OrLower)
         {
             Instructions.Clear();
-            Instructions.Capacity = reader.InstructionArraysLengths[CurrCodeIndex];
+            if (reader.InstructionArraysLengths is not null)
+                Instructions.Capacity = reader.InstructionArraysLengths[CurrCodeIndex];
 
             long here = reader.AbsPosition;
             long stop = here + Length;
@@ -1150,7 +1151,8 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
             reader.AbsPosition = _bytecodeAbsoluteAddress;
 
             Instructions.Clear();
-            Instructions.Capacity = reader.InstructionArraysLengths[CurrCodeIndex];
+            if (reader.InstructionArraysLengths is not null)
+                Instructions.Capacity = reader.InstructionArraysLengths[CurrCodeIndex];
             while (reader.AbsPosition < _bytecodeAbsoluteAddress + Length)
             {
                 uint a = (uint)(reader.AbsPosition - _bytecodeAbsoluteAddress) / 4;
@@ -1165,7 +1167,8 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
             Offset = reader.ReadUInt32();
         }
 
-        CurrCodeIndex++;
+        if (reader.InstructionArraysLengths is not null)
+            CurrCodeIndex++;
     }
 
     /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>

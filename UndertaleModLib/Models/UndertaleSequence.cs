@@ -332,10 +332,13 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
                 if (res.Content is not null)
                     return res;
 
+                reader.SwitchReaderType(false);
                 long returnTo = reader.Position;
-                reader.AbsPosition = reader.GetOffsetMapRev()[res];
+                reader.Position = reader.GetOffsetMapRev()[res];
                 reader.ReadUndertaleObject<UndertaleString>();
                 reader.Position = returnTo;
+                reader.SwitchReaderType(true);
+
                 return res;
             }
 
@@ -414,10 +417,13 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
             {
                 uint strPtr = reader.ReadUInt32();
 
+                reader.SwitchReaderType(false);
                 long returnTo = reader.Position;
-                reader.AbsPosition = strPtr - 4;
+                reader.Position = strPtr - 4;
                 string res = reader.ReadGMString();
                 reader.Position = returnTo;
+                reader.SwitchReaderType(true);
+
                 return res;
             }
 

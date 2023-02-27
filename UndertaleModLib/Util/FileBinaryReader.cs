@@ -22,9 +22,10 @@ namespace UndertaleModLib.Util
             get => Stream.Position;
             set
             {
+#if DEBUG
                 if (value > Length)
                     throw new IOException("Reading out of bounds.");
-
+#endif
                 Stream.Position = value;
             }
         }

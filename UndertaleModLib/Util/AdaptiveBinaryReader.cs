@@ -39,6 +39,7 @@ namespace UndertaleModLib.Util
         private readonly BufferBinaryReader bufferBinaryReader;
         private IBinaryReader _currentReader;
         private bool isUsingBufferReader = false;
+        private bool isCurrChunkTooLarge = false;
         private IBinaryReader CurrentReader
         {
             get => _currentReader;
@@ -64,7 +65,7 @@ namespace UndertaleModLib.Util
                 if (isUsingBufferReader)
                     return bufferBinaryReader.Position;
                 else
-                    return fileBinaryReader.Position;
+                    return Stream.Position;
             }
             set
             {
@@ -79,18 +80,19 @@ namespace UndertaleModLib.Util
             get
             {
                 if (isUsingBufferReader)
-                    return fileBinaryReader.Position + bufferBinaryReader.Position - 8;
+                    return bufferBinaryReader.ChunkStartPosition + bufferBinaryReader.Position - 8;
                 else
-                    return fileBinaryReader.Position;
+                    return Stream.Position;
             }
             set
             {
                 if (isUsingBufferReader)
                 {
+#if DEBUG
                     if (value > Length)
                         throw new IOException("Reading out of bounds.");
-
-                    bufferBinaryReader.Position = value - fileBinaryReader.Position + 8;
+#endif
+                    bufferBinaryReader.Position = value - bufferBinaryReader.ChunkStartPosition + 8;
                 }
                 else
                     fileBinaryReader.Position = value;
@@ -115,21 +117,32 @@ namespace UndertaleModLib.Util
 
         public void CopyChunkToBuffer(uint length)
         {
-            if (length <= 10 * 1024 * 1024)
+            if (length <= 12 * 1024 * 1024)
             {
+                isCurrChunkTooLarge = false;
                 CurrentReader = bufferBinaryReader;
                 bufferBinaryReader.CopyChunkToBuffer(length);
             }
             else
+            {
+                isCurrChunkTooLarge = true;
                 CurrentReader = fileBinaryReader;
+            }
         }
 
         public void SwitchReaderType(bool isBufferBinaryReader)
         {
             if (!isBufferBinaryReader && CurrentReader == bufferBinaryReader)
+            {
                 fileBinaryReader.Position = AbsPosition;
-
-            CurrentReader = isBufferBinaryReader ? bufferBinaryReader : fileBinaryReader;
+                CurrentReader = fileBinaryReader;
+            }
+            else if (isBufferBinaryReader && !isCurrChunkTooLarge
+                     && CurrentReader == fileBinaryReader)
+            {
+                CurrentReader = bufferBinaryReader;
+                AbsPosition = fileBinaryReader.Position;
+            }
         }
 
         public byte ReadByte()

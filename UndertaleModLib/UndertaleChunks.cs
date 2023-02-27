@@ -154,7 +154,7 @@ namespace UndertaleModLib
         private void CheckFor2022_6(UndertaleReader reader)
         {
             bool definitely2022_6 = true;
-            long returnPosition = reader.Position;
+            long returnPosition = reader.AbsPosition;
 
             int extCount = reader.ReadInt32();
             if (extCount > 0)
@@ -214,7 +214,7 @@ namespace UndertaleModLib
             else
                 definitely2022_6 = false;
 
-            reader.Position = returnPosition;
+            reader.AbsPosition = returnPosition;
 
             if (definitely2022_6)
                 reader.undertaleData.GM2022_6 = true;
@@ -946,8 +946,8 @@ namespace UndertaleModLib
                     {
                         // Go to each texture, and then to each texture's data
                         reader.Position = positionToReturn + 4 + (i * 4);
-                        reader.Position = reader.ReadUInt32() + 12; // go to texture, at an offset
-                        reader.Position = reader.ReadUInt32(); // go to texture data
+                        reader.AbsPosition = reader.ReadUInt32() + 12; // go to texture, at an offset
+                        reader.AbsPosition = reader.ReadUInt32(); // go to texture data
                         byte[] header = reader.ReadBytes(4);
                         if (header.SequenceEqual(UndertaleEmbeddedTexture.TexData.QOIAndBZip2Header))
                         {
@@ -962,7 +962,7 @@ namespace UndertaleModLib
                                 reader.undertaleData.GM2022_5 = true;
                             else
                             {
-                                reader.ReadByte();
+                                reader.Position++;
                                 if (reader.ReadUInt24() != 0x594131) // digits of pi... (block header)
                                     reader.undertaleData.GM2022_5 = true;
                                 else if (reader.ReadUInt24() != 0x595326)
@@ -1026,6 +1026,7 @@ namespace UndertaleModLib
                 CheckFor2022_3And5(reader);
 
             base.UnserializeChunk(reader);
+            reader.SwitchReaderType(false);
 
             // texture blobs
             for (int index = 0; index < List.Count; index++)
@@ -1037,7 +1038,7 @@ namespace UndertaleModLib
             }
 
             // padding
-            while (reader.AbsPosition % 4 != 0)
+            while (reader.Position % 4 != 0)
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error!");
         }
@@ -1123,7 +1124,7 @@ namespace UndertaleModLib
         private void CheckFor2022_8(UndertaleReader reader)
         {
             // Check for 2022.8
-            long returnPosition = reader.Position;
+            long returnPosition = reader.AbsPosition;
 
             uint tginCount = reader.ReadUInt32();
             if (tginCount > 0)
@@ -1139,7 +1140,7 @@ namespace UndertaleModLib
                     reader.undertaleData.GM2022_9 = true;
             }
 
-            reader.Position = returnPosition;
+            reader.AbsPosition = returnPosition;
 
             checkedFor2022_8 = true;
         }
@@ -1203,7 +1204,7 @@ namespace UndertaleModLib
                 return;
             }
 
-            reader.Position = reader.ReadUInt32(); // go to the first "Point"
+            reader.AbsPosition = reader.ReadUInt32(); // go to the first "Point"
             reader.Position += 8;
 
             if (reader.ReadUInt32() != 0) // in 2.3 a int with the value of 0 would be set here,
