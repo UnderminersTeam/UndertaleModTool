@@ -266,11 +266,15 @@ namespace UndertaleModLib
                 res.PostUnserialize(this);
             resUpdate.Clear();
 
-            data.BuiltinList = new BuiltinList(data);
-            Decompiler.AssetTypeResolver.InitializeTypes(data);
-            UndertaleEmbeddedTexture.FindAllTextureInfo(data);
+            // Skip if it's "audiogroup*.dat" file
+            if (!FilePath.EndsWith(".dat"))
+            {
+                data.BuiltinList = new BuiltinList(data);
+                Decompiler.AssetTypeResolver.InitializeTypes(data);
+                UndertaleEmbeddedTexture.FindAllTextureInfo(data);
+            }
 
-            ProcessCountExc();
+            ProcessCountExc(poolSize);
 
             return data;
         }
@@ -309,7 +313,7 @@ namespace UndertaleModLib
 
         public ArrayPool<uint> utListPtrsPool = ArrayPool<uint>.Create(100000, 17);
 
-        private bool ProcessCountExc()
+        private bool ProcessCountExc(uint poolSize = 0)
         {
             if (countUnserializeExc is not null)
             {
@@ -330,6 +334,12 @@ namespace UndertaleModLib
                 countUnserializeExc = null;
 
                 return true;
+            }
+
+            if (poolSize != 0 && poolSize != objectPool.Count)
+            {
+                SubmitWarning("Warning - the estimated object pool size differs from the actual size.\n" +
+                              "Please report this on UndertaleModTool GitHub.");
             }
 
             return false;

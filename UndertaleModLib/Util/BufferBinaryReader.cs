@@ -136,10 +136,10 @@ namespace UndertaleModLib.Util
             Stream = stream;
 
             // Check data file length
-            if (Length < 12 * 1024 * 1024) // 12 MB
-                chunkBuffer = new(6 * 1024 * 1024);
-            else
+            if (Length >= 12 * 1024 * 1024) // 12 MB
                 chunkBuffer = new(12 * 1024 * 1024);
+            else
+                chunkBuffer = new((int)Length);
 
             if (stream.Position != 0)
                 stream.Seek(0, SeekOrigin.Begin);

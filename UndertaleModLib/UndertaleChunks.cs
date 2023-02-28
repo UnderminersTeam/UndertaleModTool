@@ -117,10 +117,14 @@ namespace UndertaleModLib
             }
             reader.Position = startPos;
 
-            UndertaleChunkGEN8 gen8Chunk = new();
-            gen8Chunk.UnserializeGeneralData(reader);
-            Chunks.Add("GEN8", gen8Chunk);
-            reader.Position = startPos;
+            if (reader.AllChunkNames[0] == "GEN8")
+            {
+                UndertaleChunkGEN8 gen8Chunk = new();
+                gen8Chunk.UnserializeGeneralData(reader);
+                Chunks.Add("GEN8", gen8Chunk);
+
+                reader.Position = startPos;
+            }
 
             while (reader.Position < startPos + Length)
                 totalCount += reader.CountChunkChildObjects();
