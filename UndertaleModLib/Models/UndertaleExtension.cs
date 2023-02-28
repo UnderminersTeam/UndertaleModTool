@@ -377,7 +377,7 @@ public class UndertaleExtension : UndertaleNamedResource, IDisposable
         uint count = 0;
 
         reader.Position += 12;
-        if (reader.undertaleData.GM2022_6)
+        if (reader.undertaleData.IsVersionAtLeast(2022, 9))
         {
             uint filesPtr = reader.ReadUInt32();
             uint optionsPtr = reader.ReadUInt32();

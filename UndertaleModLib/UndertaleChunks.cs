@@ -63,7 +63,8 @@ namespace UndertaleModLib
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
-            Chunks.Clear();
+            if (Chunks.Count != 1 || Chunks.Keys.First() != "GEN8")
+                Chunks.Clear();
             ChunksTypeDict.Clear();
             long startPos = reader.Position;
 
@@ -88,7 +89,13 @@ namespace UndertaleModLib
                 if (chunk != null)
                 {
                     if (Chunks.ContainsKey(chunk.Name))
-                        throw new IOException("Duplicate chunk " + chunk.Name);
+                    {
+                        if (Chunks.Count == 1 && chunk.Name == "GEN8")
+                            Chunks.Clear();
+                        else
+                            throw new IOException("Duplicate chunk " + chunk.Name);
+                    }
+
                     Chunks.Add(chunk.Name, chunk);
                     ChunksTypeDict.Add(chunk.GetType(), chunk);
                 }
@@ -98,21 +105,21 @@ namespace UndertaleModLib
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
             uint totalCount = 0;
-            long startPos = reader.Position;
 
+            long startPos = reader.Position;
+            reader.AllChunkNames = new List<string>();
             while (reader.Position < reader.Length)
             {
                 string chunkName = reader.ReadChars(4);
-                if (chunkName == "SEQN")
-                {
-                    reader.GMS2_3 = true;
-                    reader.undertaleData.GMS2_3 = true;
-                    break;
-                }
-
+                reader.AllChunkNames.Add(chunkName);
                 uint length = reader.ReadUInt32();
                 reader.Position += length;
             }
+            reader.Position = startPos;
+
+            UndertaleChunkGEN8 gen8Chunk = new();
+            gen8Chunk.UnserializeGeneralData(reader);
+            Chunks.Add("GEN8", gen8Chunk);
             reader.Position = startPos;
 
             while (reader.Position < startPos + Length)
@@ -125,6 +132,30 @@ namespace UndertaleModLib
     public class UndertaleChunkGEN8 : UndertaleSingleChunk<UndertaleGeneralInfo>
     {
         public override string Name => "GEN8";
+
+        public void UnserializeGeneralData(UndertaleReader reader)
+        {
+            Object = new UndertaleGeneralInfo();
+
+            reader.Position += 8; // Chunk name + length
+
+            reader.Position++; // "IsDebuggerDisabled"
+            Object.BytecodeVersion = reader.ReadByte();
+            reader.undertaleData.UnsupportedBytecodeVersion
+                = Object.BytecodeVersion < 13 || Object.BytecodeVersion > 17;
+            reader.Bytecode14OrLower = Object.BytecodeVersion <= 14;
+
+            reader.Position += 42;
+
+            Object.Major = reader.ReadUInt32();
+            Object.Minor = reader.ReadUInt32();
+            Object.Release = reader.ReadUInt32();
+            Object.Build = reader.ReadUInt32();
+
+            var readVer = (Object.Major, Object.Minor, Object.Release, Object.Build);
+            var detectedVer = UndertaleGeneralInfo.TestForCommonGMSVersions(reader, readVer);
+            (Object.Major, Object.Minor, Object.Release, Object.Build) = detectedVer;
+        }
     }
 
     public class UndertaleChunkOPTN : UndertaleSingleChunk<UndertaleOptions>
@@ -560,7 +591,7 @@ namespace UndertaleModLib
 
             CheckForEffectData(reader);
 
-            if (reader.BytecodeVersion >= 16)
+            if (reader.undertaleData.GeneralInfo?.BytecodeVersion >= 16)
             {
                 // "GameObject._preCreateCode"
 
@@ -579,7 +610,7 @@ namespace UndertaleModLib
         private void CheckForEffectData(UndertaleReader reader)
         {
             // Do a length check on room layers to see if this is 2022.1 or higher
-            if (!reader.undertaleData.IsVersionAtLeast(2022, 1) && reader.undertaleData.IsVersionAtLeast(2, 3))
+            if (reader.undertaleData.IsVersionAtLeast(2, 3) && !reader.undertaleData.IsVersionAtLeast(2022, 1))
             {
                 long returnTo = reader.Position;
 
@@ -880,7 +911,7 @@ namespace UndertaleModLib
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
-            if (Length == 0 && reader.BytecodeVersion > 14)
+            if (Length == 0 && reader.undertaleData.GeneralInfo?.BytecodeVersion > 14)
                 return 0;
 
             uint count = 0;
@@ -1121,7 +1152,7 @@ namespace UndertaleModLib
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
-            if (!reader.GMS2)
+            if (!reader.undertaleData.IsGameMaker2())
                 throw new InvalidOperationException();
 
             if (reader.ReadUInt32() != 1)
@@ -1195,7 +1226,7 @@ namespace UndertaleModLib
         {
             checkedFor2022_9 = false;
 
-            if (!reader.GMS2)
+            if (!reader.undertaleData.IsGameMaker2())
                 throw new InvalidOperationException();
 
             if (reader.ReadUInt32() != 1)
@@ -1342,7 +1373,7 @@ namespace UndertaleModLib
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
-            if (!reader.GMS2)
+            if (!reader.undertaleData.IsGameMaker2())
                 throw new InvalidOperationException();
 
             // Apparently SEQN can be empty
@@ -1398,7 +1429,7 @@ namespace UndertaleModLib
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
-            if (!reader.GMS2)
+            if (!reader.undertaleData.IsGameMaker2())
                 throw new InvalidOperationException();
 
             // Padding
@@ -1449,7 +1480,7 @@ namespace UndertaleModLib
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
-            if (!reader.GMS2)
+            if (!reader.undertaleData.IsGameMaker2())
                 throw new InvalidOperationException();
 
             // Padding
@@ -1496,7 +1527,7 @@ namespace UndertaleModLib
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
-            if (!reader.GMS2)
+            if (!reader.undertaleData.IsGameMaker2())
                 throw new InvalidOperationException();
 
             // Padding

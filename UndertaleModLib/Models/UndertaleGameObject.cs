@@ -259,7 +259,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         uint count = 0;
 
         reader.Position += 64;
-        if (reader.undertaleData.GM2022_5)
+        if (reader.undertaleData.IsVersionAtLeast(2022, 5))
             reader.Position += 4; // "Managed"
 
         int physicsShapeVertexCount = reader.ReadInt32();

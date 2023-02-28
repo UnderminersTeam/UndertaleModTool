@@ -142,7 +142,7 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
 
             // "Points"
             uint count = reader.ReadUInt32();
-            if (reader.undertaleData.GMS2_3_1)
+            if (reader.undertaleData.IsVersionAtLeast(2, 3, 1))
                 reader.Position += 24 * count;
             else
                 reader.Position += 12 * count;
@@ -192,7 +192,7 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
                 X = reader.ReadSingle();
                 Value = reader.ReadSingle();
 
-                if (reader.undertaleData.GMS2_3_1)
+                if (reader.undertaleData.IsVersionAtLeast(2, 3, 1))
                 {
                     BezierX0 = reader.ReadSingle();
                     BezierY0 = reader.ReadSingle();

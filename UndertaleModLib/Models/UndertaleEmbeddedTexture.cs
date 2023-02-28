@@ -138,11 +138,11 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
     public static uint UnserializeChildObjectCount(UndertaleReader reader)
     {
         reader.Position += 4; // "Scaled"
-        if (reader.GMS2)
+        if (reader.undertaleData.IsVersionAtLeast(2, 3))
             reader.Position += 4; // "GeneratedMips"
-        if (reader.undertaleData.GM2022_3)
+        if (reader.undertaleData.IsVersionAtLeast(2022, 3))
             reader.Position += 4; // "TextureBlockSize"
-        if (reader.undertaleData.GM2022_9)
+        if (reader.undertaleData.IsVersionAtLeast(2022, 9))
             reader.Position += 12;
 
         // "_textureData"

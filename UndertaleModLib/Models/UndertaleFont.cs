@@ -281,9 +281,9 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
     public static uint UnserializeChildObjectCount(UndertaleReader reader)
     {
         reader.Position += 40;
-        if (reader.BytecodeVersion >= 17)
+        if (reader.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
             reader.Position += 4;
-        if (reader.undertaleData.GMS2022_2)
+        if (reader.undertaleData.IsVersionAtLeast(2022, 2))
             reader.Position += 4;
 
         return 1 + UndertalePointerList<Glyph>.UnserializeChildObjectCount(reader);

@@ -269,6 +269,16 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
     private static void CheckForGMS2_2_2_302(UndertaleReader reader)
     {
+        if (reader.undertaleData.IsVersionAtLeast(2, 2, 2, 302))
+        {
+            CheckedForGMS2_2_2_302 = true;
+
+            uint newSize = GameObject.ChildObjectsSize + 8;
+            reader.SetStaticChildObjectsSize(typeof(GameObject), newSize);
+
+            return;
+        }
+
         long returnTo = reader.Position;
         reader.Position -= 4;
 
@@ -288,7 +298,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
             if (secondPtr - firstPtr == 48)
             {
-                reader.undertaleData.GMS2_2_2_302 = true;
+                reader.undertaleData.SetGMS2Version(2, 2, 2, 302);
 
                 //"GameObject.ImageSpeed" + "...ImageIndex"
                 uint newSize = GameObject.ChildObjectsSize + 8;
@@ -455,10 +465,10 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
         reader.Position += 32;
 
-        if (reader.GMS2)
+        if (reader.undertaleData.IsGameMaker2())
         {
             layersPtr = reader.ReadUInt32();
-            if (reader.GMS2_3)
+            if (reader.undertaleData.IsVersionAtLeast(2, 3))
                 sequencesPtr = reader.ReadUInt32();
         }
 
@@ -471,12 +481,12 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         reader.AbsPosition = tilesPtr;
         count += 1 + UndertalePointerList<Tile>.UnserializeChildObjectCount(reader);
 
-        if (reader.GMS2)
+        if (reader.undertaleData.IsGameMaker2())
         {
             reader.AbsPosition = layersPtr;
             count += 1 + UndertalePointerList<Layer>.UnserializeChildObjectCount(reader);
 
-            if (reader.GMS2_3)
+            if (reader.undertaleData.IsVersionAtLeast(2, 3))
             {
                 reader.AbsPosition = sequencesPtr;
                 count += 1 + UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>>
@@ -1501,7 +1511,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             reader.Position += 24;
 
             // Effect properties
-            if (reader.undertaleData.GMS2022_1)
+            if (reader.undertaleData.IsVersionAtLeast(2022, 1))
             {
                 reader.Position += 8;
                 count += 1 + UndertaleSimpleList<EffectProperty>.UnserializeChildObjectCount(reader);
@@ -1853,10 +1863,10 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 uint spritesPtr = reader.ReadUInt32();
                 uint sequencesPtr = 0;
                 uint nineSlicesPtr = 0;
-                if (reader.GMS2_3)
+                if (reader.undertaleData.IsVersionAtLeast(2, 3))
                 {
                     sequencesPtr = reader.ReadUInt32();
-                    if (!reader.undertaleData.GMS2_3_2)
+                    if (!reader.undertaleData.IsVersionAtLeast(2, 3, 2))
                         nineSlicesPtr = reader.ReadUInt32();
                 }
 
@@ -1864,11 +1874,11 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 count += 1 + UndertalePointerList<Tile>.UnserializeChildObjectCount(reader);
                 reader.AbsPosition = spritesPtr;
                 count += 1 + UndertalePointerList<SpriteInstance>.UnserializeChildObjectCount(reader);
-                if (reader.GMS2_3)
+                if (reader.undertaleData.IsVersionAtLeast(2, 3))
                 {
                     reader.AbsPosition = sequencesPtr;
                     count += 1 + UndertalePointerList<SequenceInstance>.UnserializeChildObjectCount(reader);
-                    if (!reader.undertaleData.GMS2_3_2)
+                    if (!reader.undertaleData.IsVersionAtLeast(2, 3, 2))
                     {
                         reader.AbsPosition = nineSlicesPtr;
                         count += 1 + UndertalePointerList<SpriteInstance>.UnserializeChildObjectCount(reader);
@@ -1938,7 +1948,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
             public static uint UnserializeChildObjectCount(UndertaleReader reader)
             {
-                if (reader.undertaleData.GMS2022_1)
+                if (reader.undertaleData.IsVersionAtLeast(2022, 1))
                     return 0;
 
                 reader.Position += 4; // "EffectType"

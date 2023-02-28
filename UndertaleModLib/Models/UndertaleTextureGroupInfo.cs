@@ -178,7 +178,7 @@ public class UndertaleTextureGroupInfo : UndertaleNamedResource, IDisposable
 
         reader.Position += 4; // "Name"
 
-        if (reader.undertaleData.GM2022_9)
+        if (reader.undertaleData.IsVersionAtLeast(2022, 9))
             reader.Position += 12;
 
         uint texPagesPtr = reader.ReadUInt32();
