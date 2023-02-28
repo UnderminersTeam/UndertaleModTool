@@ -1138,7 +1138,7 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
             int BytecodeRelativeAddress = reader.ReadInt32();
             _bytecodeAbsoluteAddress = (uint)((int)reader.AbsPosition - 4 + BytecodeRelativeAddress);
            
-            if (Length > 0 && reader.GMS2_3 && reader.GetOffsetMap().TryGetValue(_bytecodeAbsoluteAddress, out var i))
+            if (Length > 0 && reader.undertaleData.IsVersionAtLeast(2, 3) && reader.GetOffsetMap().TryGetValue(_bytecodeAbsoluteAddress, out var i))
             {
                 ParentEntry = (i as UndertaleInstruction).Entry;
                 ParentEntry.ChildEntries.Add(this);

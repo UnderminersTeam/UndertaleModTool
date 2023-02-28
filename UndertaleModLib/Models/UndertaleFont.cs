@@ -240,7 +240,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
         writer.Write(ScaleY);
         if (writer.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
             writer.Write(AscenderOffset);
-        if (writer.undertaleData.GMS2022_2)
+        if (writer.undertaleData.IsVersionAtLeast(2022, 2))
             writer.Write(Ascender);
         writer.WriteUndertaleObject(Glyphs);
     }
@@ -272,7 +272,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
         ScaleY = reader.ReadSingle();
         if (reader.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
             AscenderOffset = reader.ReadInt32();
-        if (reader.undertaleData.GMS2022_2)
+        if (reader.undertaleData.IsVersionAtLeast(2022, 2))
             Ascender = reader.ReadUInt32();
         Glyphs = reader.ReadUndertaleObject<UndertalePointerList<Glyph>>();
     }

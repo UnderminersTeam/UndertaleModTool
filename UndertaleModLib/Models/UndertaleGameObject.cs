@@ -171,7 +171,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         writer.WriteUndertaleString(Name);
         writer.WriteUndertaleObject(_sprite);
         writer.Write(Visible);
-        if (writer.undertaleData.GM2022_5)
+        if (writer.undertaleData.IsVersionAtLeast(2022, 5))
             writer.Write(Managed);
         writer.Write(Solid);
         writer.Write(Depth);
@@ -212,7 +212,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         Name = reader.ReadUndertaleString();
         _sprite = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>>();
         Visible = reader.ReadBoolean();
-        if (reader.undertaleData.GM2022_5)
+        if (reader.undertaleData.IsVersionAtLeast(2022, 5))
             Managed = reader.ReadBoolean();
         Solid = reader.ReadBoolean();
         Depth = reader.ReadInt32();

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
+using UndertaleModLib.Compiler;
+using UndertaleModLib.Decompiler;
 
 namespace UndertaleModLib.Models;
 
@@ -204,6 +207,7 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
 
     /// <summary>
     /// The major version of the data file.
+    /// If greater than 1, serialization produces "2.0.0.0" due to the flag no longer updating in data.win
     /// </summary>
     public uint Major { get; set; } = 1;
 
@@ -319,10 +323,22 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         writer.Write(GameID);
         writer.Write(DirectPlayGuid.ToByteArray());
         writer.WriteUndertaleString(Name);
-        writer.Write(Major);
-        writer.Write(Minor);
-        writer.Write(Release);
-        writer.Write(Build);
+        if (Major == 1)
+        {
+            writer.Write(Major);
+            writer.Write(Minor);
+            writer.Write(Release);
+            writer.Write(Build);
+        }
+        else
+        {
+            // The version number here is no longer updated,
+            // but it's still useful for the tool
+            writer.Write((uint)2);
+            writer.Write((uint)0);
+            writer.Write((uint)0);
+            writer.Write((uint)0);
+        }
         writer.Write(DefaultWindowWidth);
         writer.Write(DefaultWindowHeight);
         writer.Write((uint)Info);
@@ -395,6 +411,34 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         Minor = reader.ReadUInt32();
         Release = reader.ReadUInt32();
         Build = reader.ReadUInt32();
+
+        // Some GMS2+ version detection. The rest is spread around, mostly in UndertaleChunks.cs
+        if (reader.AllChunkNames.Contains("FEAT")) // 2022.8
+        {
+            Major = 2022; Minor = 8; Release = 0; Build = 0;
+        }
+        else if (reader.AllChunkNames.Contains("FEDS")) // 2.3.6
+        {
+            Major = 2; Minor = 3; Release = 6; Build = 0;
+        }
+        else if (reader.AllChunkNames.Contains("SEQN")) // 2.3
+        {
+            Major = 2; Minor = 3; Release = 0; Build = 0;
+        }
+        else if (reader.AllChunkNames.Contains("TGIN")) // 2.2.1
+        {
+            Major = 2; Minor = 2; Release = 1; Build = 0;
+        }
+        if (Major > 2 || (Major == 2 && Minor >= 3))
+        {
+            CompileContext.GMS2_3 = true;
+            DecompileContext.GMS2_3 = true;
+        }
+        else
+        {
+            CompileContext.GMS2_3 = false;
+            DecompileContext.GMS2_3 = false;
+        }
         DefaultWindowWidth = reader.ReadUInt32();
         DefaultWindowHeight = reader.ReadUInt32();
         Info = (InfoFlags)reader.ReadUInt32();
@@ -507,7 +551,36 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     /// <inheritdoc />
     public override string ToString()
     {
-        return DisplayName + " (GMS " + Major + "." + Minor + "." + Release + "." + Build + ", bytecode " + BytecodeVersion + ")";
+        if (Major == 1)
+            return DisplayName + " (GMS " + Major + "." + Minor + "." + Release + "." + Build + ", bytecode " + BytecodeVersion + ")";
+        else
+        {
+            StringBuilder sb = new(DisplayName?.ToString() ?? "");
+            if (Major < 2022 || (Major == 2022 && Minor < 3))
+                sb.Append(" (GMS ");
+            else
+                sb.Append(" (GM ");
+            sb.Append(Major);
+            sb.Append(".");
+            sb.Append(Minor);
+            if (Release != 0)
+            {
+                sb.Append(".");
+                sb.Append(Release);
+                if (Build != 0)
+                {
+                    sb.Append(".");
+                    sb.Append(Build);
+                }
+            }
+            if (Major < 2022)
+            {
+                sb.Append(", bytecode ");
+                sb.Append(BytecodeVersion);
+            }
+            sb.Append(")");
+            return sb.ToString();
+        }
     }
 
     /// <inheritdoc/>

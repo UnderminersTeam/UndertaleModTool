@@ -175,7 +175,7 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
                 writer.Write(X);
                 writer.Write(Value);
 
-                if (writer.undertaleData.GMS2_3_1)
+                if (writer.undertaleData.IsVersionAtLeast(2, 3, 1))
                 {
                     writer.Write(BezierX0);
                     writer.Write(BezierY0);

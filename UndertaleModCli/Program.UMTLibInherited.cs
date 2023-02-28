@@ -389,7 +389,7 @@ public partial class Program : IScriptInterface
             Console.Write("Path: ");
             path = RemoveQuotes(Console.ReadLine());
             directoryInfo = new DirectoryInfo(path);
-        } while (directoryInfo.Exists);
+        } while (!directoryInfo.Exists);
         return path;
     }
 
@@ -871,7 +871,7 @@ public partial class Program : IScriptInterface
                         methodNumberStr = afterPrefix.Substring(afterPrefix.LastIndexOf("_Collision_") + s2.Length, afterPrefix.Length - (afterPrefix.LastIndexOf("_Collision_") + s2.Length));
                         methodName = "Collision";
                         // GMS 2.3+ use the object name for the one colliding, which is rather useful.
-                        if (Data.GMS2_3)
+                        if (Data.IsVersionAtLeast(2, 3))
                         {
                             if (Data.GameObjects.ByName(methodNumberStr) != null)
                             {
@@ -929,7 +929,7 @@ public partial class Program : IScriptInterface
                 if (!(skipPortions))
                 {
                     obj = Data.GameObjects.ByName(objName);
-                    int eventIdx = (int)Enum.Parse(typeof(EventType), methodName);
+                    int eventIdx = Convert.ToInt32(Enum.Parse(typeof(EventType), methodName));
                     bool duplicate = false;
                     try
                     {
@@ -999,7 +999,7 @@ public partial class Program : IScriptInterface
 
     public void ReassignGUIDs(string guid, uint objectIndex)
     {
-        int eventIdx = (int)Enum.Parse(typeof(EventType), "Collision");
+        int eventIdx = Convert.ToInt32(EventType.Collision);
         for (var i = 0; i < Data.GameObjects.Count; i++)
         {
             UndertaleGameObject obj = Data.GameObjects[i];
@@ -1080,7 +1080,7 @@ public partial class Program : IScriptInterface
 
     public List<uint> GetCollisionValueFromCodeNameGUID(string codeName)
     {
-        int eventIdx = (int)Enum.Parse(typeof(EventType), "Collision");
+        int eventIdx = Convert.ToInt32(EventType.Collision);
         List<uint> possibleValues = new List<uint>();
         for (var i = 0; i < Data.GameObjects.Count; i++)
         {
@@ -1113,7 +1113,7 @@ public partial class Program : IScriptInterface
 
     public List<uint> GetCollisionValueFromGUID(string guid)
     {
-        int eventIdx = (int)Enum.Parse(typeof(EventType), "Collision");
+        int eventIdx = Convert.ToInt32(EventType.Collision);
         List<uint> possibleValues = new List<uint>();
         for (var i = 0; i < Data.GameObjects.Count; i++)
         {
