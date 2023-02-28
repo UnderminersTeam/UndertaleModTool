@@ -424,8 +424,9 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                     layer.InstancesData.Instances.Clear();
                     foreach (var id in layer.InstancesData.InstanceIds)
                     {
-                        if (GameObjects.ByInstanceID(id) != null)
-                            layer.InstancesData.Instances.Add(GameObjects.ByInstanceID(id));
+                        GameObject gameObj = GameObjects.ByInstanceID(id);
+                        if (gameObj is not null)
+                            layer.InstancesData.Instances.Add(gameObj);
                         else
                         {
                             /* Attempt to resolve null objects.
