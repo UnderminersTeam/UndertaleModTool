@@ -2073,7 +2073,7 @@ namespace UndertaleModLib.Decompiler
                             uint[] blockAddresses = blocks.Keys.ToArray();
                             Array.Sort(blockAddresses);
                             int nextBlockIndex = Array.IndexOf(blockAddresses, block.Address ?? 0) + 1;
-                            if (blockAddresses.Count > nextBlockIndex)
+                            if (blockAddresses.Count() > nextBlockIndex)
                             {
                                 uint nextBlockAddress = blockAddresses[nextBlockIndex];
                                 nextBlock = blocks[nextBlockAddress];
