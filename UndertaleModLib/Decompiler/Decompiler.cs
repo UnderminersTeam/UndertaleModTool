@@ -2070,9 +2070,9 @@ namespace UndertaleModLib.Decompiler
                         Block nextBlock = null;
                         if (DecompileContext.GMS2_3 && instr.Kind == UndertaleInstruction.Opcode.Exit)
                         {
-                            List<uint> blockAddresses = new(blocks.Keys);
-                            blockAddresses.Sort();
-                            int nextBlockIndex = blockAddresses.IndexOf(block.Address ?? 0) + 1;
+                            uint[] blockAddresses = blocks.Keys.ToArray();
+                            Array.Sort(blockAddresses);
+                            int nextBlockIndex = Array.IndexOf(blockAddresses, block.Address ?? 0) + 1;
                             if (blockAddresses.Count > nextBlockIndex)
                             {
                                 uint nextBlockAddress = blockAddresses[nextBlockIndex];
