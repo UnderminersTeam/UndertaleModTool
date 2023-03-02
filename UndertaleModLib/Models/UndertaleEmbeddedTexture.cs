@@ -17,8 +17,15 @@ namespace UndertaleModLib.Models;
 /// An embedded texture entry in the data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
+public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
+                                        IStaticChildObjCount, IStaticChildObjectsSize
 {
+    /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
+    public static readonly uint ChildObjectCount = 1;
+
+    /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+    public static readonly uint ChildObjectsSize = 4; // minimal size
+
     /// <summary>
     /// The name of the embedded texture entry.
     /// </summary>
@@ -132,21 +139,6 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         }
         _textureData = reader.ReadUndertaleObjectPointer<TexData>();
         TextureExternal = (_textureData == null);
-    }
-
-    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
-    public static uint UnserializeChildObjectCount(UndertaleReader reader)
-    {
-        reader.Position += 4; // "Scaled"
-        if (reader.undertaleData.IsVersionAtLeast(2, 3))
-            reader.Position += 4; // "GeneratedMips"
-        if (reader.undertaleData.IsVersionAtLeast(2022, 3))
-            reader.Position += 4; // "TextureBlockSize"
-        if (reader.undertaleData.IsVersionAtLeast(2022, 9))
-            reader.Position += 12;
-
-        // "_textureData"
-        return 1;
     }
 
     /// <summary>

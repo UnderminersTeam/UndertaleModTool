@@ -812,11 +812,13 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
         }
 
         // Skip padding
+        int skipSize = 0;
         while (total % 4 != 0)
         {
-            reader.Position++;
+            skipSize++;
             total++;
         }
+        reader.Position += skipSize;
     }
 
     public uint CalculateMaskDataSize(uint width, uint height, uint maskcount)

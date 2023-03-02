@@ -280,11 +280,13 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
     /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
     public static uint UnserializeChildObjectCount(UndertaleReader reader)
     {
-        reader.Position += 40;
+        int skipSize = 40;
         if (reader.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
-            reader.Position += 4;
+            skipSize += 4; // AscenderOffset
         if (reader.undertaleData.IsVersionAtLeast(2022, 2))
-            reader.Position += 4;
+            skipSize += 4; // Ascender
+
+        reader.Position += skipSize;
 
         return 1 + UndertalePointerList<Glyph>.UnserializeChildObjectCount(reader);
     }

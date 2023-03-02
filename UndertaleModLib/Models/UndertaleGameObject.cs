@@ -258,17 +258,15 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     {
         uint count = 0;
 
-        reader.Position += 64;
         if (reader.undertaleData.IsVersionAtLeast(2022, 5))
-            reader.Position += 4; // "Managed"
+            reader.Position += 64 + 4; // + "Managed"
+        else
+            reader.Position += 64;
 
         int physicsShapeVertexCount = reader.ReadInt32();
-        reader.Position += 12;
-        reader.Position += (uint)physicsShapeVertexCount * UndertalePhysicsVertex.ChildObjectsSize;
+        reader.Position += 12 + (uint)physicsShapeVertexCount * UndertalePhysicsVertex.ChildObjectsSize;
 
-        count += 2; // "_sprite", "_textureMaskId"
-
-        count += 1 + UndertalePointerList<UndertalePointerList<Event>>.UnserializeChildObjectCount(reader);
+        count += 2 + 1 + UndertalePointerList<UndertalePointerList<Event>>.UnserializeChildObjectCount(reader);
 
         return count;
     }

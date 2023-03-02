@@ -76,9 +76,10 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
     /// <param name="includeName">Whether to include <see cref="Name"/> in the deserialization.</param>
     public static uint UnserializeChildObjectCount(UndertaleReader reader, bool includeName)
     {
-        if (includeName)
-            reader.Position += 4; // "Name"
-        reader.Position += 4;     // "GraphType"
+        if (!includeName)
+            reader.Position += 4;     // "GraphType"
+        else
+            reader.Position += 4 + 4; // + "Name"
 
         return 1 + UndertaleSimpleList<Channel>.UnserializeChildObjectCount(reader);
     }

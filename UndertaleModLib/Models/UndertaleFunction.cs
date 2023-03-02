@@ -127,9 +127,8 @@ public class UndertaleCodeLocals : UndertaleNamedResource, IDisposable
     public static uint UnserializeChildObjectCount(UndertaleReader reader)
     {
         uint count = reader.ReadUInt32();
-        reader.Position += 4; // "Name"
 
-        reader.Position += count * LocalVar.ChildObjectsSize;
+        reader.Position += 4 + count * LocalVar.ChildObjectsSize;
 
         return count;
     }
