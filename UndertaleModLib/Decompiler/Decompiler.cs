@@ -2405,7 +2405,7 @@ namespace UndertaleModLib.Decompiler
                             if (callTargetBody != null && callTargetBody.ParentEntry != null && !context.DisableAnonymousFunctionNameResolution)
                             {
                                 // Special case: this is a direct reference to a method variable
-                                // Figure out what it's actual name is
+                                // Figure out what its actual name is
 
                                 static string FindActualNameForAnonymousCodeObject(DecompileContext context, UndertaleCode anonymousCodeObject)
                                 {
@@ -2417,6 +2417,7 @@ namespace UndertaleModLib.Decompiler
                                         Dictionary<uint, Block> blocks2 = PrepareDecompileFlow(anonymousCodeObject.ParentEntry, new List<uint>() { 0 });
                                         DecompileFromBlock(childContext, blocks2, blocks2[0]);
                                         // This hack handles decompilation of code entries getting shorter, but not longer or out of place.
+                                        // Probably is no longer needed since we now update Length mostly-correctly
                                         Block lastBlock;
                                         if (!blocks2.TryGetValue(anonymousCodeObject.Length / 4, out lastBlock))
                                             lastBlock = blocks2[blocks2.Keys.Max()];
@@ -2424,7 +2425,8 @@ namespace UndertaleModLib.Decompiler
                                         foreach (Statement stmt2 in statements)
                                         {
                                             if (stmt2 is AssignmentStatement assign &&
-                                                assign.Value is FunctionDefinition funcDef)
+                                                assign.Value is FunctionDefinition funcDef &&
+                                                funcDef.FunctionBodyCodeEntry == anonymousCodeObject)
                                             {
                                                 if (funcDef.FunctionBodyEntryBlock.Address == anonymousCodeObject.Offset / 4)
                                                     return assign.Destination.Var.Name.Content;
