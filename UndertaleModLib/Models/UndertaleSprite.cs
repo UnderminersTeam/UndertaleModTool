@@ -688,7 +688,8 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                     sequenceOffset = reader.ReadInt32();
                     if (sVersion >= 3)
                     {
-                        reader.undertaleData.SetGMS2Version(2, 3, 2);
+                        if (!reader.undertaleData.IsVersionAtLeast(2, 3, 2))
+                            reader.undertaleData.SetGMS2Version(2, 3, 2);
                         nineSliceOffset = reader.ReadInt32();
                     }
                 }
