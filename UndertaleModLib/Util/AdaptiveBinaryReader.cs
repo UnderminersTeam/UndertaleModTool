@@ -29,8 +29,6 @@ namespace UndertaleModLib.Util
         public abstract ulong ReadUInt64();
         public abstract string ReadGMString();
         public abstract void SkipGMString();
-
-        public virtual void Dispose() { }
     }
 
     public class AdaptiveBinaryReader : IBinaryReader
