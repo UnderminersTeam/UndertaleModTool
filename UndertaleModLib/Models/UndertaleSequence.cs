@@ -740,8 +740,6 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
 
     // Source - https://github.com/YoYoGames/GameMaker-HTML5/blob/develop/scripts/yySequence.js#L2227
     // ("yyTextTrackKey")
-    // Without that, I would never figure out how to get "AlignmentV" and "AlignmentH"
-    // from "_alignment".
     public class TextData : UndertaleObject
     {
         private int _alignment;
