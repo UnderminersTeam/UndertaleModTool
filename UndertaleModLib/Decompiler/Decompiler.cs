@@ -2065,17 +2065,38 @@ namespace UndertaleModLib.Decompiler
 
                     case UndertaleInstruction.Opcode.Ret:
                     case UndertaleInstruction.Opcode.Exit:
-                        ReturnStatement stmt = new ReturnStatement(instr.Kind == UndertaleInstruction.Opcode.Ret ? stack.Pop() : null);
-                        /*
-                            This shouldn't be necessary: all unused things on the stack get converted to tempvars at the end anyway, and this fixes decompilation of repeat()
-                            See #85
+                        // 2.3 scripts add exits to every script, even those that lack a return
+                        // This detects that type of exit using the next block.
+                        Block nextBlock = null;
+                        if (DecompileContext.GMS2_3 && instr.Kind == UndertaleInstruction.Opcode.Exit)
+                        {
+                            uint[] blockAddresses = blocks.Keys.ToArray();
+                            Array.Sort(blockAddresses);
+                            int nextBlockIndex = Array.IndexOf(blockAddresses, block.Address ?? 0) + 1;
+                            if (blockAddresses.Length > nextBlockIndex)
+                            {
+                                uint nextBlockAddress = blockAddresses[nextBlockIndex];
+                                nextBlock = blocks[nextBlockAddress];
+                            }
+                        }
 
-                            foreach (var expr in stack.Reverse())
-                                if (!(expr is ExpressionTempVar))
-                                    statements.Add(expr);
-                            stack.Clear();
-                        */
-                        statements.Add(stmt);
+                        if (!(nextBlock is not null
+                            && nextBlock.Instructions.Count > 0
+                            && nextBlock.Instructions[0].Kind == UndertaleInstruction.Opcode.Push
+                            && nextBlock.Instructions[0].Value.GetType() != typeof(int)))
+                        {
+                            ReturnStatement stmt = new ReturnStatement(instr.Kind == UndertaleInstruction.Opcode.Ret ? stack.Pop() : null);
+                            /*
+                                This shouldn't be necessary: all unused things on the stack get converted to tempvars at the end anyway, and this fixes decompilation of repeat()
+                                See #85
+
+                                foreach (var expr in stack.Reverse())
+                                    if (!(expr is ExpressionTempVar))
+                                        statements.Add(expr);
+                                stack.Clear();
+                            */
+                            statements.Add(stmt);
+                        }
                         end = true;
                         returned = true;
                         break;
@@ -2384,7 +2405,7 @@ namespace UndertaleModLib.Decompiler
                             if (callTargetBody != null && callTargetBody.ParentEntry != null && !context.DisableAnonymousFunctionNameResolution)
                             {
                                 // Special case: this is a direct reference to a method variable
-                                // Figure out what it's actual name is
+                                // Figure out what its actual name is
 
                                 static string FindActualNameForAnonymousCodeObject(DecompileContext context, UndertaleCode anonymousCodeObject)
                                 {
@@ -2396,6 +2417,7 @@ namespace UndertaleModLib.Decompiler
                                         Dictionary<uint, Block> blocks2 = PrepareDecompileFlow(anonymousCodeObject.ParentEntry, new List<uint>() { 0 });
                                         DecompileFromBlock(childContext, blocks2, blocks2[0]);
                                         // This hack handles decompilation of code entries getting shorter, but not longer or out of place.
+                                        // Probably is no longer needed since we now update Length mostly-correctly
                                         Block lastBlock;
                                         if (!blocks2.TryGetValue(anonymousCodeObject.Length / 4, out lastBlock))
                                             lastBlock = blocks2[blocks2.Keys.Max()];
@@ -2403,7 +2425,8 @@ namespace UndertaleModLib.Decompiler
                                         foreach (Statement stmt2 in statements)
                                         {
                                             if (stmt2 is AssignmentStatement assign &&
-                                                assign.Value is FunctionDefinition funcDef)
+                                                assign.Value is FunctionDefinition funcDef &&
+                                                funcDef.FunctionBodyCodeEntry == anonymousCodeObject)
                                             {
                                                 if (funcDef.FunctionBodyEntryBlock.Address == anonymousCodeObject.Offset / 4)
                                                     return assign.Destination.Var.Name.Content;
