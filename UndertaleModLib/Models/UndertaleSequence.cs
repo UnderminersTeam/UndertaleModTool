@@ -492,6 +492,16 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
                 case "GMColourTrack":
                     count += 1 + RealKeyframes.UnserializeChildObjectCount(reader);
                     break;
+                case "GMTextTrack": // Introduced in GM 2022.2
+                    count += 1 + TextKeyframes.UnserializeChildObjectCount(reader);
+                    break;
+
+                case "GMParticleTrack":
+                    throw new NotImplementedException("GMParticleTrack not implemented, report this");
+                case "GMGroupTrack":
+                    throw new NotImplementedException("GMGroupTrack not implemented, report this");
+                case "GMClipMaskTrack":
+                    throw new NotImplementedException("GMClipMaskTrack not implemented, report this");
             }
 
             return count;
@@ -868,7 +878,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
     {
         // Source - https://github.com/YoYoGames/GameMaker-HTML5/blob/develop/scripts/yySequence.js#L2227
         // ("yyTextTrackKey")
-        public class Data : IStaticChildObjectsSize, UndertaleObject
+        public class Data : UndertaleObject, IStaticChildObjectsSize
         {
             /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
             public static readonly uint ChildObjectsSize = 16;
