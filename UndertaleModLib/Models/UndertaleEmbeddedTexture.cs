@@ -50,7 +50,11 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
     /// <summary>
     /// The texture data in the embedded image.
     /// </summary>
-    public TexData TextureData { get { return _textureData ?? (_textureData = LoadExternalTexture()); } set { _textureData = value; } }
+    public TexData TextureData
+    {
+        get => _textureData ??= LoadExternalTexture();
+        set => _textureData = value;
+    }
     private TexData _textureData = new TexData();
 
 
