@@ -17,6 +17,7 @@ using System.Windows.Shapes;
 using System.Drawing;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
+using System.Globalization;
 
 namespace UndertaleModTool
 {
@@ -110,6 +111,30 @@ namespace UndertaleModTool
             }).FirstOrDefault();
             if (tpag != null)
                 (Application.Current.MainWindow as MainWindow).ChangeSelection(tpag);
+        }
+    }
+
+    public class TextureLoadedWrapper : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            bool textureLoaded, textureExternal;
+            try
+            {
+                textureLoaded = (bool)values[0];
+                textureExternal = (bool)values[1];
+            }
+            catch
+            {
+                return null;
+            }
+
+            return (textureLoaded || !textureExternal) ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 }
