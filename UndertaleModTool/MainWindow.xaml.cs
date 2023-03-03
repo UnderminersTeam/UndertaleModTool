@@ -3322,6 +3322,7 @@ result in loss of work.");
                     }
 
                     CurrentTab = newTab;
+                    UpdateObjectLabel(CurrentTab.CurrentObject);
 
                     if (tabIsChanged)
                         CurrentTab.RestoreTabContentState();
