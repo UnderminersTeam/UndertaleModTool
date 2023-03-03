@@ -660,12 +660,12 @@ namespace UndertaleModLib.Compiler
             {
                 Statement result = new Statement(Statement.StatementKind.FunctionDef, EnsureTokenKind(TokenKind.KeywordFunction).Token);
                 Statement args = new Statement();
-                bool expression = true;
+                bool expressionMode = true;
                 Statement destination = null;
 
                 if (GetNextTokenKind() == TokenKind.ProcFunction)
                 {
-                    expression = false;
+                    expressionMode = false;
                     Statement s = remainingStageOne.Dequeue();
                     destination = new Statement(Statement.StatementKind.ExprFuncName, s.Token) { ID = s.ID };
                 }
@@ -691,7 +691,7 @@ namespace UndertaleModLib.Compiler
                 if (EnsureTokenKind(TokenKind.CloseParen) == null) return null;
 
                 result.Children.Add(ParseStatement(context));
-                if (expression)
+                if (expressionMode)
                     return result;
                 else // Whatever you call non-anonymous definitions
                 {

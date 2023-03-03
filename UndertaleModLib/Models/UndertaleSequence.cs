@@ -319,6 +319,9 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
                 case "GMColourTrack":
                     writer.WriteUndertaleObject(Keyframes as RealKeyframes);
                     break;
+                case "GMTextTrack": // Introduced in GM 2022.2
+                    writer.WriteUndertaleObject(Keyframes as TextKeyframes);
+                    break;
             }
         }
 
@@ -405,6 +408,16 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
                 case "GMColourTrack":
                     Keyframes = reader.ReadUndertaleObject<RealKeyframes>();
                     break;
+                case "GMTextTrack": // Introduced in GM 2022.2
+                    Keyframes = reader.ReadUndertaleObject<TextKeyframes>();
+                    break;
+
+                case "GMParticleTrack":
+                    throw new NotImplementedException("GMParticleTrack not implemented, report this");
+                case "GMGroupTrack":
+                    throw new NotImplementedException("GMGroupTrack not implemented, report this");
+                case "GMClipMaskTrack":
+                    throw new NotImplementedException("GMClipMaskTrack not implemented, report this");
             }
         }
 
@@ -848,6 +861,52 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
             reader.Position += 4; // "Interpolation"
 
             return UndertaleSimpleList<Keyframe<RealData>>.UnserializeChildObjectCount(reader);
+        }
+    }
+
+    
+    public class TextKeyframes : TrackKeyframes<TextKeyframes.Data>
+    {
+        // Source - https://github.com/YoYoGames/GameMaker-HTML5/blob/develop/scripts/yySequence.js#L2227
+        // ("yyTextTrackKey")
+        public class Data : IStaticChildObjectsSize, UndertaleObject
+        {
+            /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+            public static readonly uint ChildObjectsSize = 16;
+
+            private int _alignment;
+
+            public UndertaleString Text { get; set; }
+            public bool Wrap { get; set; }
+            public int AlignmentV
+            {
+                get => (_alignment >> 8) & 0xff;
+                set => _alignment = (_alignment & 0xff) | (value & 0xff) << 8;
+            }
+            public int AlignmentH
+            {
+                get => _alignment & 0xff;
+                set => _alignment = (_alignment & ~0xff) | (value & 0xff);
+            }
+            public int FontIndex { get; set; }
+
+            /// <inheritdoc />
+            public void Serialize(UndertaleWriter writer)
+            {
+                writer.WriteUndertaleString(Text);
+                writer.Write(Wrap);
+                writer.Write(_alignment);
+                writer.Write(FontIndex);
+            }
+
+            /// <inheritdoc />
+            public void Unserialize(UndertaleReader reader)
+            {
+                Text = reader.ReadUndertaleString();
+                Wrap = reader.ReadBoolean();
+                _alignment = reader.ReadInt32();
+                FontIndex = reader.ReadInt32();
+            }
         }
     }
 }
