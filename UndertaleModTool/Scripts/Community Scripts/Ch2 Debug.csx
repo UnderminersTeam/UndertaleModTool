@@ -1,16 +1,26 @@
 // Enables debug mode
 EnsureDataLoaded();
-bool enable = ScriptQuestion("Debug Manager by krzys-h and Kneesnap\nChapter 2 fix by Agent 7\n\nYes = Enable Debug\nNo = Disable Debug");
+bool enable = ScriptQuestion(@"
+Debug Manager by krzys-h and Kneesnap
+Chapter 2 fix by Agent 7
+obj_debugProfiler fix by Jacky720
+
+Yes = Enable Debug
+No = Disable Debug");
 
 var SCR_GAMESTART = Data.Scripts.ByName("SCR_GAMESTART", true)?.Code;
 var debugController = "gml_Object_obj_debugcontroller_ch1_Create_0";
+var debugProfiler = Data.Code.ByName("gml_Object_obj_debugProfiler_Create_0");
 if (SCR_GAMESTART == null)
     throw new ScriptException("Could not find SCR_GAMESTART.");
-if (debugController == null)
+if (Data.Code.ByName(debugController) == null)
     throw new ScriptException("Could not find Chapter 1 debug controller.");
+if (debugProfiler == null)
+    throw new ScriptException("Could not find debug profiler.");
 
-bool patch2 = false;
 bool patch1 = false;
+bool patch2 = false;
+bool patchProfiler = false;
 for(int i = 0; i < SCR_GAMESTART.Instructions.Count; i++) 
 {
     if (SCR_GAMESTART.Instructions[i].Kind == UndertaleInstruction.Opcode.Pop && SCR_GAMESTART.Instructions[i].Destination.Target.Name.Content == "debug") 
@@ -23,6 +33,16 @@ for(int i = 0; i < 1; i++)
 {
     ReplaceTextInGML(debugController, @"debug = ", "debug = " + (enable ? "true;" : "false;") + "//");
     patch1 = true;
+}
+if (debugProfiler.Instructions.Count == 0 && enable) // 1.09+, debugProfiler blanked
+{
+    debugProfiler.ReplaceGML("cutsceneshow = false", Data);
+    patchProfiler = true;
+}
+else if (debugProfiler.Instructions.Count == 2 && !enable)
+{
+    debugProfiler.ReplaceGML("", Data);
+    patchProfiler = true;
 }
 
 if (!patch2) // Failed to patch Chapter 2.
