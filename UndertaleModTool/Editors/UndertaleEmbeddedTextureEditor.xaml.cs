@@ -18,6 +18,7 @@ using System.Drawing;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 using System.Globalization;
+using UndertaleModLib;
 
 namespace UndertaleModTool
 {
@@ -136,6 +137,33 @@ namespace UndertaleModTool
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class GeneratedMipsWrapper : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == DependencyProperty.UnsetValue)
+                return null;
+
+            Visibility isGMS2;
+            try
+            {
+                isGMS2 = (Visibility)value;
+            }
+            catch
+            {
+                return null;
+            }
+
+            return (isGMS2 == Visibility.Visible && !UndertaleChunkTXTR.NoGeneratedMips)
+                   ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }

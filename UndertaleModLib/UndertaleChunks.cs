@@ -737,6 +737,11 @@ namespace UndertaleModLib
 
     public class UndertaleChunkTXTR : UndertaleListChunk<UndertaleEmbeddedTexture>
     {
+        public UndertaleChunkTXTR()
+        {
+            NoGeneratedMips = false;
+        }
+
         public override string Name => "TXTR";
         public static bool NoGeneratedMips { get; private set; }
 
