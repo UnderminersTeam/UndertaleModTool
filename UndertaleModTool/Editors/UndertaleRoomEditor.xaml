@@ -390,7 +390,7 @@
                             <CheckBox Grid.Row="1" Grid.Column="2" Margin="3" IsChecked="{Binding Foreground}"/>
 
                             <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Definition</TextBlock>
-                            <local:UndertaleObjectReference Grid.Row="2" Grid.Column="2" Margin="3" ObjectReference="{Binding BackgroundDefinition}" ObjectType="{x:Type undertale:UndertaleBackground}" CanRemove="False"/>
+                            <local:UndertaleObjectReference Grid.Row="2" Grid.Column="2" Margin="3" ObjectReference="{Binding BackgroundDefinition}" ObjectType="{x:Type undertale:UndertaleBackground}" CanRemove="True"/>
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Position</TextBlock>
                             <Grid Grid.Row="3" Grid.Column="2">
