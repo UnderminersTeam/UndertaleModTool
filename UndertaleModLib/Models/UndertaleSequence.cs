@@ -863,7 +863,6 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
             return UndertaleSimpleList<Keyframe<RealData>>.UnserializeChildObjectCount(reader);
         }
     }
-
     
     public class TextKeyframes : TrackKeyframes<TextKeyframes.Data>
     {
