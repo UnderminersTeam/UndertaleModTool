@@ -3556,7 +3556,13 @@ namespace UndertaleModLib.Decompiler
                         var x = caseEntries.ElementAt(i);
                         Block temp = x.Key;
 
-                        Block switchEnd = DetermineSwitchEnd(temp, caseEntries.Count > (i + 1) ? caseEntries.ElementAt(i + 1).Key : null, meetPoint);
+                        // RadixComet: New bytecode (Mostly from Pizza Tower it seems) hangs here infinitely for some scripts
+                        // RadixComet: So I'm adding a special exception that seems to bandaid the issue for now
+                        Block switchEnd = null;
+                        if (context.GlobalContext.Data.GeneralInfo.BytecodeVersion == 17)
+                            switchEnd = meetPoint;
+                        else
+                            switchEnd = DetermineSwitchEnd(temp, caseEntries.Count > (i + 1) ? caseEntries.ElementAt(i + 1).Key : null, meetPoint);
 
                         HLSwitchCaseStatement result = new HLSwitchCaseStatement(x.Value, HLDecompileBlocks(context, ref temp, blocks, loops, reverseDominators, alreadyVisited, currentLoop, switchEnd, switchEnd, false, depth + 1));
                         cases.Add(result);
@@ -3876,11 +3882,11 @@ namespace UndertaleModLib.Decompiler
 
         private static Block DetermineSwitchEnd(Block start, Block end, Block meetPoint)
         {
+
             if (end == null)
                 return meetPoint;
 
             Queue<Block> blocks = new Queue<Block>();
-
             blocks.Enqueue(start);
             while (blocks.Count > 0)
             {
