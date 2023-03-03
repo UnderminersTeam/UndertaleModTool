@@ -738,6 +738,7 @@ namespace UndertaleModLib
     public class UndertaleChunkTXTR : UndertaleListChunk<UndertaleEmbeddedTexture>
     {
         public override string Name => "TXTR";
+        public static bool NoGeneratedMips { get; private set; }
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
@@ -776,6 +777,48 @@ namespace UndertaleModLib
             // TODO: Maybe the padding is more global and every chunk is padded to 4 byte boundaries?
             while (writer.Position % 4 != 0)
                 writer.Write((byte)0);
+        }
+
+        private void CheckForGeneratedMips(UndertaleReader reader)
+        {
+            NoGeneratedMips = false;
+
+            bool atLeastGMS2_0 = reader.undertaleData.IsGameMaker2();
+            bool atLeastGMS2_2 = reader.undertaleData.IsVersionAtLeast(2, 2);
+            if (!atLeastGMS2_0 || atLeastGMS2_2)
+                return;
+
+            uint returnPos = reader.Position;
+
+            uint count = reader.ReadUInt32();
+            if (count == 0)
+            {
+                reader.Position = returnPos;
+                return;
+            }
+
+            if (count >= 2)
+            {
+                uint firstPtr = reader.ReadUInt32();
+                uint secondPtr = reader.ReadUInt32();
+
+                if (atLeastGMS2_0 && !atLeastGMS2_2) // 2 < version < 2.2
+                {
+                    if (secondPtr - firstPtr == 8) // "Scaled" + "_textureData" -> 8
+                        NoGeneratedMips = true;
+                }
+            }
+            else
+            {
+                // Go to the first texture pointer (+ minimal texture entry size)
+                reader.Position = reader.ReadUInt32() + 8;
+
+                // If there is a zero instead of texture data pointer (which cannot be zero)
+                if (reader.ReadUInt32() == 0)
+                    NoGeneratedMips = true;
+            }
+
+            reader.Position = returnPos;
         }
 
         internal override void UnserializeChunk(UndertaleReader reader)
@@ -843,6 +886,8 @@ namespace UndertaleModLib
 
                 reader.Position = positionToReturn;
             }
+
+            CheckForGeneratedMips(reader);
 
             base.UnserializeChunk(reader);
 

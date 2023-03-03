@@ -118,6 +118,9 @@ namespace UndertaleModTool
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
+            if (values.Any(v => v == DependencyProperty.UnsetValue))
+                return null;
+
             bool textureLoaded, textureExternal;
             try
             {
