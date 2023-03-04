@@ -727,20 +727,13 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                     switch (spineVersion)
                     {
                         case 1:
-                        {
-                            reader.Position += 8; // atlas size
-                            reader.Position += (uint)jsonLength;
-                            reader.Position += (uint)atlasLength;
-
-                            reader.Position += (uint)textures;
-                        }
+                            reader.Position += 8 + jsonLength + atlasLength + textures;
                             break;
 
                         case 2:
                         case 3:
                         {
-                            reader.Position += (uint)jsonLength;
-                            reader.Position += (uint)atlasLength;
+                            reader.Position += jsonLength + atlasLength;
 
                             // TODO: make this return count instead if spine sprite
                             // couldn't have sequence or nine slices data.

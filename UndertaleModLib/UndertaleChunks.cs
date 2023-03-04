@@ -534,7 +534,7 @@ namespace UndertaleModLib
                 // Bounds check on vertex data
                 if (reader.Position + 12 + vertexCount * 8 < positionToReturn + this.Length)
                 {
-                    reader.Position += (uint)(12 + vertexCount * 8);
+                    reader.Position += 12 + vertexCount * 8;
                     // A pointer list of events
                     if (reader.ReadUInt32() == UndertaleGameObject.EventTypeCount)
                     {
@@ -636,7 +636,7 @@ namespace UndertaleModLib
                     if (layerCount >= 1)
                     {
                         // Get pointer into the individual layer data (plus 8 bytes) for the first layer in the room
-                        uint jumpOffset = (uint)(reader.ReadInt32() + 8);
+                        int jumpOffset = reader.ReadInt32() + 8;
 
                         // Find the offset for the end of this layer
                         int nextOffset;
@@ -1089,6 +1089,7 @@ namespace UndertaleModLib
             }
 
             // padding
+            // (not "AbsPosition" because of "reader.SwitchReaderType(false)")
             while (reader.Position % 4 != 0)
                 if (reader.ReadByte() != 0)
                     throw new IOException("Padding error!");
