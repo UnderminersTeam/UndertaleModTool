@@ -273,7 +273,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
 
     #region EventHandlerFor() overloads
     // TODO: Add documentation for these methods.
-    // These methods are used by scripts for geting a code entry for a certain event of the game object.
+    // These methods are used by scripts for getting a code entry for a certain event of the game object.
 
     public UndertaleCode EventHandlerFor(EventType type, uint subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
     {
