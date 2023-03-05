@@ -460,6 +460,12 @@ namespace UndertaleModLib
         /// <returns>Whether the version of the data file is the same or higher than a specified version.</returns>
         public bool IsVersionAtLeast(uint major, uint minor = 0, uint release = 0, uint build = 0)
         {
+            if (GeneralInfo is null)
+            {
+                Debug.WriteLine("\"UndertaleData.IsVersionAtLeast()\" error - \"GeneralInfo\" is null.");
+                return false;
+            }
+
             if (GeneralInfo.Major != major)
                 return (GeneralInfo.Major > major);
 

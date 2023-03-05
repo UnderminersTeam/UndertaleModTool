@@ -65,6 +65,25 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
         Channels = reader.ReadUndertaleObject<UndertaleSimpleList<Channel>>();
     }
 
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        return UnserializeChildObjectCount(reader, true);
+    }
+
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    /// <param name="reader">Where to deserialize from.</param>
+    /// <param name="includeName">Whether to include <see cref="Name"/> in the deserialization.</param>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader, bool includeName)
+    {
+        if (!includeName)
+            reader.Position += 4;     // "GraphType"
+        else
+            reader.Position += 4 + 4; // + "Name"
+
+        return 1 + UndertaleSimpleList<Channel>.UnserializeChildObjectCount(reader);
+    }
+
     /// <inheritdoc />
     public override string ToString()
     {
@@ -117,6 +136,21 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
             Points = reader.ReadUndertaleObject<UndertaleSimpleList<Point>>();
         }
 
+        /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+        public static uint UnserializeChildObjectCount(UndertaleReader reader)
+        {
+            reader.Position += 12;
+
+            // "Points"
+            uint count = reader.ReadUInt32();
+            if (reader.undertaleData.IsVersionAtLeast(2, 3, 1))
+                reader.Position += 24 * count;
+            else
+                reader.Position += 12 * count;
+
+            return 1 + count;
+        }
+
         /// <inheritdoc/>
         public void Dispose()
         {
@@ -158,24 +192,6 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
             {
                 X = reader.ReadSingle();
                 Value = reader.ReadSingle();
-
-                if (!reader.undertaleData.IsVersionAtLeast(2, 3, 1))
-                {
-                    if (reader.ReadUInt32() != 0) // in 2.3 a int with the value of 0 would be set here,
-                    {                             // it cannot be version 2.3 if this value isn't 0
-                        reader.undertaleData.SetGMS2Version(2, 3, 1);
-                        reader.Position -= 4;
-                    }
-                    else
-                    {
-                        // At all points (besides the first one)
-                        // if BezierX0 equals to 0 (the above check)
-                        // then BezierY0 equals to 0 as well (the below check)
-                        if (reader.ReadUInt32() == 0)
-                            reader.undertaleData.SetGMS2Version(2, 3, 1);
-                        reader.Position -= 8;
-                    }
-                }
 
                 if (reader.undertaleData.IsVersionAtLeast(2, 3, 1))
                 {

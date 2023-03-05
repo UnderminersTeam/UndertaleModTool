@@ -12,8 +12,11 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
     /// The vertex shader attributes a shader can have.
     /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class VertexShaderAttribute : UndertaleObject, IDisposable
+    public class VertexShaderAttribute : UndertaleObject, IStaticChildObjectsSize, IDisposable
     {
+        /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+        public static readonly uint ChildObjectsSize = 4;
+
         /// <summary>
         /// The name of the vertex shader attribute.
         /// </summary>
@@ -198,7 +201,7 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
 
     private static void ReadPadding(UndertaleReader reader, int amount)
     {
-        while ((reader.Position & amount) != 0)
+        while ((reader.AbsPosition & amount) != 0)
         {
             if (reader.ReadByte() != 0)
                 throw new UndertaleSerializationException("Failed to read shader padding: should be some zero bytes");
@@ -332,7 +335,7 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
                 next = HLSL11_PixelData._Position;
             else
                 next = EntryEnd;
-            int length = (int)(next - reader.Position);
+            int length = (int)(next - reader.AbsPosition);
             HLSL11_VertexData.ReadData(reader, length);
         }
         if (!HLSL11_PixelData.IsNull)
@@ -345,7 +348,7 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
                 next = PSSL_VertexData._Position;
             else
                 next = EntryEnd;
-            int length = (int)(next - reader.Position);
+            int length = (int)(next - reader.AbsPosition);
             HLSL11_PixelData.ReadData(reader, length);
         }
 
@@ -359,7 +362,7 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
                 next = PSSL_PixelData._Position;
             else
                 next = EntryEnd;
-            int length = (int)(next - reader.Position);
+            int length = (int)(next - reader.AbsPosition);
             PSSL_VertexData.ReadData(reader, length);
         }
         if (!PSSL_PixelData.IsNull)
@@ -372,7 +375,7 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
                 next = Cg_PSVita_VertexData._Position;
             else
                 next = EntryEnd;
-            int length = (int)(next - reader.Position);
+            int length = (int)(next - reader.AbsPosition);
             PSSL_PixelData.ReadData(reader, length);
         }
 
@@ -386,7 +389,7 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
                 next = Cg_PSVita_PixelData._Position;
             else
                 next = EntryEnd;
-            int length = (int)(next - reader.Position);
+            int length = (int)(next - reader.AbsPosition);
             Cg_PSVita_VertexData.ReadData(reader, length);
         }
         if (!Cg_PSVita_PixelData.IsNull)
@@ -399,7 +402,7 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
                 next = Cg_PS3_VertexData._Position;
             else
                 next = EntryEnd;
-            int length = (int)(next - reader.Position);
+            int length = (int)(next - reader.AbsPosition);
             Cg_PSVita_PixelData.ReadData(reader, length);
         }
 
@@ -415,7 +418,7 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
                     next = Cg_PS3_PixelData._Position;
                 else
                     next = EntryEnd;
-                int length = (int)(next - reader.Position);
+                int length = (int)(next - reader.AbsPosition);
                 Cg_PS3_VertexData.ReadData(reader, length);
             }
             if (!Cg_PS3_PixelData.IsNull)
@@ -424,10 +427,21 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
 
                 // Calculate length of data
                 uint next = EntryEnd; // final possible data, nothing else to check for
-                int length = (int)(next - reader.Position);
+                int length = (int)(next - reader.AbsPosition);
                 Cg_PS3_PixelData.ReadData(reader, length);
             }
         }
+    }
+
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        reader.Position += 40;
+
+        // Since shaders are stored in a pointer list, and there are no
+        // more child objects that are in the pool, then there is no
+        // need to unserializing remaining elements
+        return 1 + UndertaleSimpleList<VertexShaderAttribute>.UnserializeChildObjectCount(reader);
     }
 
     /// <summary>
@@ -499,7 +513,7 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
 
         public void Unserialize(UndertaleReader reader, bool readLength = true)
         {
-            _PointerLocation = reader.Position;
+            _PointerLocation = (uint)reader.AbsPosition;
             _Position = reader.ReadUInt32();
             if (readLength)
                 _Length = reader.ReadUInt32();
