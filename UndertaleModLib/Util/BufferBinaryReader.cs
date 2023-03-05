@@ -33,7 +33,7 @@ namespace UndertaleModLib.Util
                 if (n <= 0)
                 {
 #if DEBUG
-                    throw new IOException("Reading out of bounds");
+                    throw new IOException("Reading out of chunk bounds");
 #else
                     return 0;
 #endif
@@ -57,7 +57,7 @@ namespace UndertaleModLib.Util
                 if (n <= 0)
                 {
 #if DEBUG
-                    throw new IOException("Reading out of bounds");
+                    throw new IOException("Reading out of chunk bounds");
 #else
                     return 0;
 #endif
@@ -75,7 +75,7 @@ namespace UndertaleModLib.Util
                 if (newPos > _length)
                 {
 #if DEBUG
-                    throw new IOException("Reading out of bounds");
+                    throw new IOException("Reading out of chunk bounds");
 #else
                     return 0;
 #endif
@@ -188,7 +188,7 @@ namespace UndertaleModLib.Util
         {
 #if DEBUG
             if (chunkBuffer.Position + count > _length)
-                throw new IOException("Reading out of bounds");
+                throw new IOException("Reading out of chunk bounds");
 #endif
             if (count > 1024)
             {
@@ -211,7 +211,7 @@ namespace UndertaleModLib.Util
         {
 #if DEBUG
             if (chunkBuffer.Position + count > _length)
-                throw new IOException("Reading out of bounds");
+                throw new IOException("Reading out of chunk bounds");
 #endif
             byte[] val = new byte[count];
             if (count > 0)
@@ -275,12 +275,12 @@ namespace UndertaleModLib.Util
         {
 #if DEBUG
             if (chunkBuffer.Position + 5 > _length)
-                throw new IOException("Reading out of bounds");
+                throw new IOException("Reading out of chunk bounds");
 #endif
             int length = BinaryPrimitives.ReadInt32LittleEndian(ReadToBuffer(4));
 #if DEBUG
             if (chunkBuffer.Position + length + 1 >= _length)
-                throw new IOException("Reading out of bounds");
+                throw new IOException("Reading out of chunk bounds");
 #endif
             string res;
             if (length > 1024)
