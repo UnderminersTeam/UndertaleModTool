@@ -792,7 +792,7 @@ public partial class Program : IScriptInterface
     private static string RemoveQuotes(string s)
 
     {
-        return s.TrimStart('"').TrimEnd('"');
+        return s.Trim('"', '\'');
     }
 
     /// <summary>

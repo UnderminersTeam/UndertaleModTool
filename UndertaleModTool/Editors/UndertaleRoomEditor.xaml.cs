@@ -1307,7 +1307,7 @@ namespace UndertaleModTool
                 layer.AssetsData.Sequences ??= new UndertalePointerList<SequenceInstance>();
 
                 // if it's needed to set "NineSlices"
-                if (!data.GMS2_3_2)
+                if (!data.IsVersionAtLeast(2, 3, 2))
                     layer.AssetsData.NineSlices ??= new UndertalePointerList<SpriteInstance>();
             }
             else if (layer.LayerType == LayerType.Tiles)

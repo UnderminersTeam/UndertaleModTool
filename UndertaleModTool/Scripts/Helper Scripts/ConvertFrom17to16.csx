@@ -2,7 +2,7 @@
 
 EnsureDataLoaded();
 
-if (!((Data.GMS2_3 == false) && (Data.GMS2_3_1 == false) && (Data.GMS2_3_2 == false)))
+if (Data.IsVersionAtLeast(2, 3))
 {
     bool x = RunUMTScript(Path.Combine(ExePath, "Scripts", "Helper Scripts", "ConvertFrom17to16_for_2.3.csx"));
     if (x == false)
@@ -20,7 +20,7 @@ if (Data?.GeneralInfo.BytecodeVersion >= 17)
     Data.GeneralInfo.BytecodeVersion = 16;
     if (Data.FORM.Chunks.ContainsKey("TGIN"))
         Data.FORM.Chunks.Remove("TGIN");
-    Data.GMS2_2_2_302 = false;
+    Data.SetGMS2Version(2);
     ScriptMessage("Downgraded from 17 to 16 successfully. Save the game to apply the changes.");
 }
 else

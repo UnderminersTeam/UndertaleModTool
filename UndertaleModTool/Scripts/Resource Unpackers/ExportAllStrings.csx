@@ -13,12 +13,12 @@ if (exportFolder == null)
     throw new ScriptException("The export folder was not set.");
 
 //Overwrite Check One
-if (File.Exists(exportFolder + "strings.txt"))
+if (File.Exists(exportFolder + "\\strings.txt"))
 {
     bool overwriteCheckOne = ScriptQuestion(@"A 'strings.txt' file already exists.
 Would you like to overwrite it?");
     if (overwriteCheckOne)
-        File.Delete(exportFolder + "strings.txt");
+        File.Delete(exportFolder + "\\strings.txt");
     if (!overwriteCheckOne)
     {
         ScriptError("A 'strings.txt' file already exists. Please remove it and try again.", "Error: Export already exists.");
@@ -26,7 +26,7 @@ Would you like to overwrite it?");
     }
 }
 
-using (StreamWriter writer = new StreamWriter(exportFolder + "strings.txt"))
+using (StreamWriter writer = new StreamWriter(exportFolder + "\\strings.txt"))
 {
     foreach (var str in Data.Strings)
     {

@@ -48,6 +48,7 @@ using System.Net;
 using System.Globalization;
 using System.Windows.Controls.Primitives;
 using System.Runtime.CompilerServices;
+using System.Diagnostics.Metrics;
 
 namespace UndertaleModTool
 {
@@ -172,6 +173,14 @@ namespace UndertaleModTool
                 }
 
                 title = "String - " + stringFirstLine;
+            }
+            else if (obj is UndertaleExtensionFile file)
+            {
+                title = $"Extension file - {file.Filename}";
+            }
+            else if (obj is UndertaleExtensionFunction func)
+            {
+                title = $"Extension function - {func.Name}";
             }
             else if (obj is UndertaleChunkVARI)
             {
@@ -432,13 +441,13 @@ namespace UndertaleModTool
         private Task scriptSetupTask;
 
         // Version info
-        public static string Edition = "";
+        public static string Edition = "(Git: " + GitVersion.GetGitVersion().Substring(0, 7) + ")";
 
-        // On debug, build with git versions. Otherwise, use the provided release version.
+        // On debug, build with git versions and provided release version. Otherwise, use the provided release version only.
 #if DEBUG
-        public static string Version = GitVersion.GetGitVersion();
+        public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString() + (Edition != "" ? " - " + Edition : "");
 #else
-        public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString() + (Edition != "" ? "-" + Edition : "");
+        public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 #endif
 
         private static readonly Color darkColor = Color.FromArgb(255, 51, 51, 51);
@@ -2811,8 +2820,7 @@ namespace UndertaleModTool
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
 
             // remove the invalid characters (everything within square brackets) from the version string.
-            // Probably needs to be expanded later, these are just the ones I know of.
-            Regex invalidChars = new Regex(@"[  ()]");
+            Regex invalidChars = new Regex(@"Git:|[ (),/:;<=>?@[\]{}]");
             string version = invalidChars.Replace(Version, "");
             httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("UndertaleModTool", version));
 

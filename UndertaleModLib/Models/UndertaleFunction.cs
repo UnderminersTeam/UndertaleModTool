@@ -42,7 +42,7 @@ public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.Re
         if (Occurrences > 0)
         {
             uint addr = writer.GetAddressForUndertaleObject(FirstAddress);
-            if (writer.undertaleData.GMS2_3)
+            if (writer.undertaleData.IsVersionAtLeast(2, 3))
                 writer.Write((addr == 0) ? 0 : (addr + 4)); // in GMS 2.3, it points to the actual reference rather than the instruction
             else
                 writer.Write(addr);
@@ -58,7 +58,7 @@ public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.Re
         Occurrences = reader.ReadUInt32();
         if (Occurrences > 0)
         {
-            if (reader.GMS2_3)
+            if (reader.undertaleData.IsVersionAtLeast(2, 3))
                 FirstAddress = reader.GetUndertaleObjectAtAddress<UndertaleInstruction>(reader.ReadUInt32() - 4);
             else
                 FirstAddress = reader.ReadUndertaleObjectPointer<UndertaleInstruction>();

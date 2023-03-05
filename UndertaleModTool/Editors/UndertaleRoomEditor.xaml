@@ -196,11 +196,20 @@
                                 <MenuItem Header="New Assets layer" Click="MenuItem_NewLayerAssets_Click"/>
                             </ContextMenu>
                         </TreeViewItem.ContextMenu>
+                        <TreeViewItem.Resources>
+                            <Style x:Key="LayerItemStyle" TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsVisible, Mode=OneWay}" Value="False">
+                                        <Setter Property="Foreground" Value="LightGray"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TreeViewItem.Resources>
                         <TreeViewItem.ItemTemplateSelector>
                             <local:LayerDataTemplateSelector>
                                 <local:LayerDataTemplateSelector.InstancesDataTemplate>
                                     <HierarchicalDataTemplate ItemsSource="{Binding InstancesData.Instances, Mode=OneWay}" ItemTemplateSelector="{x:Null}">
-                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}">
+                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">
                                             <TextBlock.ContextMenu>
                                                 <ContextMenu>
                                                     <MenuItem Header="New Object Instance" Click="MenuItem_NewGMS2ObjectInstance_Click"/>
@@ -211,7 +220,7 @@
                                 </local:LayerDataTemplateSelector.InstancesDataTemplate>
                                 <local:LayerDataTemplateSelector.TilesDataTemplate>
                                     <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
-                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}"/>
+                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}"  Style="{StaticResource LayerItemStyle}"/>
                                     </HierarchicalDataTemplate>
                                 </local:LayerDataTemplateSelector.TilesDataTemplate>
                                 <local:LayerDataTemplateSelector.AssetsDataTemplate>
@@ -226,7 +235,7 @@
                                                 <Binding Path="AssetsData.Sprites"/>
                                             </MultiBinding>
                                         </HierarchicalDataTemplate.ItemsSource>
-                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}">
+                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">
                                             <TextBlock.ContextMenu>
                                                 <ContextMenu>
                                                     <MenuItem Header="New Legacy Tile" Click="MenuItem_NewLegacyTile_Click"/>
@@ -238,12 +247,12 @@
                                 </local:LayerDataTemplateSelector.AssetsDataTemplate>
                                 <local:LayerDataTemplateSelector.BackgroundDataTemplate>
                                     <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
-                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" />
+                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}" />
                                     </HierarchicalDataTemplate>
                                 </local:LayerDataTemplateSelector.BackgroundDataTemplate>
                                 <local:LayerDataTemplateSelector.EffectDataTemplate>
                                     <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
-                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" />
+                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}" />
                                     </HierarchicalDataTemplate>
                                 </local:LayerDataTemplateSelector.EffectDataTemplate>
                             </local:LayerDataTemplateSelector>
@@ -390,7 +399,7 @@
                             <CheckBox Grid.Row="1" Grid.Column="2" Margin="3" IsChecked="{Binding Foreground}"/>
 
                             <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Definition</TextBlock>
-                            <local:UndertaleObjectReference Grid.Row="2" Grid.Column="2" Margin="3" ObjectReference="{Binding BackgroundDefinition}" ObjectType="{x:Type undertale:UndertaleBackground}" CanRemove="False"/>
+                            <local:UndertaleObjectReference Grid.Row="2" Grid.Column="2" Margin="3" ObjectReference="{Binding BackgroundDefinition}" ObjectType="{x:Type undertale:UndertaleBackground}" CanRemove="True"/>
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Position</TextBlock>
                             <Grid Grid.Row="3" Grid.Column="2">
