@@ -952,9 +952,10 @@ namespace UndertaleModLib
                 {
                     reader.Position += 4; // Skip "tginCount"
 
+                    uint firstEntryPtr = reader.ReadUInt32();
                     // Go to the the 4th list pointer of the first TGIN entry.
                     // (either to "Fonts" or "SpineTextures" depending on the version)
-                    reader.Position = reader.ReadUInt32() + 16 + 12; // +16 = "TexturePages" pointer
+                    reader.Position = firstEntryPtr + 16 + (sizeof(uint) * 3); // +16 = "TexturePages" pointer
                     uint fourthPtr = reader.ReadUInt32();
 
                     // If there's a "TexturePages" count instead of the 5th list pointer.
