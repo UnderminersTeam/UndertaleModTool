@@ -927,6 +927,7 @@ namespace UndertaleModLib
                 // Check for 2022.9
                 uint returnPosition = reader.Position;
 
+                bool isGM2022_9 = false;
                 uint tginCount = reader.ReadUInt32();
                 if (tginCount > 0)
                 {
@@ -938,11 +939,34 @@ namespace UndertaleModLib
                     // If not, then we know we're using a new format!
                     uint ptr = reader.ReadUInt32();
                     if (ptr < tginPtr || ptr >= secondTginPtr)
+                    {
+                        isGM2022_9 = true;
                         reader.undertaleData.SetGMS2Version(2022, 9);
+                    }
+                }
+
+                reader.Position = returnPosition;
+
+                // Check for 2023.1
+                if (isGM2022_9)
+                {
+                    reader.Position += 4; // Skip "tginCount"
+
+                    // Go to the the 4th list pointer of the first TGIN entry.
+                    // (either to "Fonts" or "SpineTextures" depending on the version)
+                    reader.Position = reader.ReadUInt32() + 16 + 12; // +16 = "TexturePages" pointer
+                    uint fourthPtr = reader.ReadUInt32();
+
+                    // If there's a "TexturePages" count instead of the 5th list pointer.
+                    // The count can't be greater than the pointer.
+                    // (the list could be either "Tilesets" or "Fonts").
+                    if (reader.ReadUInt32() <= fourthPtr)
+                        reader.undertaleData.SetGMS2Version(2023, 1);
                 }
 
                 reader.Position = returnPosition;
             }
+
             base.UnserializeChunk(reader);
         }
     }
