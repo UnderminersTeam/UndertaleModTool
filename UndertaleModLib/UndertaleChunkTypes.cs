@@ -89,6 +89,7 @@ namespace UndertaleModLib
                 reader.CopyChunkToBuffer(length);
                 chunk.UnserializeChunk(reader);
 
+                reader.SwitchReaderType(false);
                 if (name != "FORM" && name != reader.LastChunkName)
                 {
                     UndertaleGeneralInfo generalInfo = name == "GEN8" ? ((UndertaleChunkGEN8)chunk).Object : reader.undertaleData.GeneralInfo;
@@ -99,12 +100,12 @@ namespace UndertaleModLib
                     {
                         int e = reader.undertaleData.PaddingAlignException;
                         uint pad = (e == -1 ? 16 : (uint)e);
-                        while (reader.AbsPosition % pad != 0)
+                        while (reader.Position % pad != 0)
                         {
                             if (reader.ReadByte() != 0)
                             {
                                 reader.Position -= 1;
-                                if (reader.AbsPosition % 4 == 0)
+                                if (reader.Position % 4 == 0)
                                     reader.undertaleData.PaddingAlignException = 4;
                                 else
                                     reader.undertaleData.PaddingAlignException = 1;
@@ -114,7 +115,6 @@ namespace UndertaleModLib
                     }
                 }
 
-                reader.SwitchReaderType(false);
                 lenReader.ToHere();
 
                 return chunk;
