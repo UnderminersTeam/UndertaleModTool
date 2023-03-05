@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
 
 EnsureDataLoaded();
 
@@ -16,7 +17,10 @@ if (Directory.Exists(codeFolder))
 
 Directory.CreateDirectory(codeFolder);
 
-SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
+List<UndertaleCode> toDump = Data.Code.Where(c => c.ParentEntry is null)
+                                      .ToList();
+
+SetProgressBar(null, "Code Entries", 0, toDump.Count);
 StartProgressBarUpdater();
 
 int failed = 0;
@@ -34,7 +38,7 @@ string GetFolder(string path)
 
 void DumpCode()
 {
-    foreach(UndertaleCode code in Data.Code)
+    foreach(UndertaleCode code in toDump)
     {
         string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
         if (code.ParentEntry == null)

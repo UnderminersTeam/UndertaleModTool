@@ -161,6 +161,39 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, ID
         }
     }
 
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        uint count = 0;
+
+        reader.Position += 4;
+        AudioEntryFlags flags = (AudioEntryFlags)reader.ReadUInt32();
+        reader.Position += 20;
+
+        int audioGroupID;
+
+        if (flags.HasFlag(AudioEntryFlags.Regular) && reader.undertaleData.GeneralInfo?.BytecodeVersion >= 14)
+        {
+            audioGroupID = reader.ReadInt32();
+            count++;
+        }
+        else
+        {
+            audioGroupID = reader.undertaleData.GetBuiltinSoundGroupID();
+            reader.Position += 4; // "Preload"
+        }
+
+        if (audioGroupID == reader.undertaleData.GetBuiltinSoundGroupID())
+        {
+            reader.Position += 4; // "_audioFile"
+            count++;
+        }
+        else
+            reader.Position += 4; // "_audioFile.CachedId"
+
+        return count;
+    }
+
     /// <inheritdoc />
     public override string ToString()
     {
@@ -184,8 +217,11 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, ID
 /// Audio group entry in a data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleAudioGroup : UndertaleNamedResource, IDisposable
+public class UndertaleAudioGroup : UndertaleNamedResource, IStaticChildObjectsSize, IDisposable
 {
+    /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+    public static readonly uint ChildObjectsSize = 4;
+
     /// <summary>
     /// The name of the audio group.
     /// </summary>
