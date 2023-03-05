@@ -17,8 +17,15 @@ namespace UndertaleModLib.Models;
 /// An embedded texture entry in the data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
+public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
+                                        IStaticChildObjCount, IStaticChildObjectsSize
 {
+    /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
+    public static readonly uint ChildObjectCount = 1;
+
+    /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+    public static readonly uint ChildObjectsSize = 4; // minimal size
+
     /// <summary>
     /// The name of the embedded texture entry.
     /// </summary>
@@ -183,7 +190,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         if (_textureData == null || TextureExternal)
             return;
 
-        while (reader.Position % 0x80 != 0)
+        while (reader.AbsPosition % 0x80 != 0)
             if (reader.ReadByte() != 0)
                 throw new IOException("Padding error!");
 
@@ -431,11 +438,11 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         /// <summary>
         /// Unserializes the texture from any type of reader (can be from any source).
         /// </summary>
-        public void Unserialize(FileBinaryReader reader, bool gm2022_5)
+        public void Unserialize(IBinaryReader reader, bool gm2022_5)
         {
             sharedStream ??= new();
 
-            uint startAddress = reader.Position;
+            long startAddress = reader.Position;
 
             byte[] header = reader.ReadBytes(8);
             if (!header.SequenceEqual(PNGHeader))
@@ -488,13 +495,13 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
             {
                 // PNG is big endian and BinaryRead can't handle that (damn)
                 uint len = (uint)reader.ReadByte() << 24 | (uint)reader.ReadByte() << 16 | (uint)reader.ReadByte() << 8 | (uint)reader.ReadByte();
-                string type = Encoding.UTF8.GetString(reader.ReadBytes(4));
+                uint type = reader.ReadUInt32();
                 reader.Position += len + 4;
-                if (type == "IEND")
+                if (type == 0x444e4549) // 0x444e4549 -> "IEND"
                     break;
             }
 
-            uint length = reader.Position - startAddress;
+            long length = reader.Position - startAddress;
             reader.Position = startAddress;
             TextureBlob = reader.ReadBytes((int)length);
         }

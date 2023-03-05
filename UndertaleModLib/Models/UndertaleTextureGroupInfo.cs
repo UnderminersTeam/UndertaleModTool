@@ -175,6 +175,50 @@ public class UndertaleTextureGroupInfo : UndertaleNamedResource, IDisposable
         reader.ReadUndertaleObject(Tilesets);
     }
 
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        uint count = 0;
+
+        reader.Position += 4; // "Name"
+
+        if (reader.undertaleData.IsVersionAtLeast(2022, 9))
+            reader.Position += 12;
+
+        uint texPagesPtr = reader.ReadUInt32();
+        uint spritesPtr = reader.ReadUInt32();
+        uint spineSpritesPtr = 0;
+        if (!reader.undertaleData.IsVersionAtLeast(2023, 1))
+            spineSpritesPtr = reader.ReadUInt32();
+        uint fontsPtr = reader.ReadUInt32();
+        uint tilesetsPtr = reader.ReadUInt32();
+
+        reader.AbsPosition = texPagesPtr;
+        count += 1 + UndertaleSimpleResourcesList<UndertaleEmbeddedTexture, UndertaleChunkTXTR>
+                     .UnserializeChildObjectCount(reader);
+
+        reader.AbsPosition = spritesPtr;
+        count += 1 + UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT>
+                     .UnserializeChildObjectCount(reader);
+
+        if (!reader.undertaleData.IsVersionAtLeast(2023, 1))
+        {
+            reader.AbsPosition = spineSpritesPtr;
+            count += 1 + UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT>
+                         .UnserializeChildObjectCount(reader);
+        }
+
+        reader.AbsPosition = fontsPtr;
+        count += 1 + UndertaleSimpleResourcesList<UndertaleFont, UndertaleChunkFONT>
+                     .UnserializeChildObjectCount(reader);
+
+        reader.AbsPosition = tilesetsPtr;
+        count += 1 + UndertaleSimpleResourcesList<UndertaleBackground, UndertaleChunkBGND>
+                     .UnserializeChildObjectCount(reader);
+
+        return count;
+    }
+
     /// <inheritdoc />
     public override string ToString()
     {

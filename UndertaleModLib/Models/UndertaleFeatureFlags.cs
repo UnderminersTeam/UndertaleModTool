@@ -26,6 +26,12 @@ public class UndertaleFeatureFlags : UndertaleObject, IDisposable
         List.Unserialize(reader);
     }
 
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        return UndertaleSimpleListString.UnserializeChildObjectCount(reader);
+    }
+
     /// <inheritdoc/>
     public void Dispose()
     {
