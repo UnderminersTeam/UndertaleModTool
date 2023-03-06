@@ -451,15 +451,18 @@ namespace UndertaleModTool
         public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 #endif
 
-        private static readonly Color darkColor = Color.FromArgb(255, 51, 51, 51);
-        private static readonly Color darkLightColor = Color.FromArgb(255, 64, 64, 64);
+        private static readonly Color darkColor = Color.FromArgb(255, 32, 32, 32);
+        private static readonly Color darkLightColor = Color.FromArgb(255, 48, 48, 48);
+        private static readonly Color whiteColor = Color.FromArgb(255, 222, 222, 222);
         private static readonly Dictionary<ResourceKey, object> appDarkStyle = new()
         {
-            { SystemColors.WindowTextBrushKey, new SolidColorBrush(Colors.White) },
-            { SystemColors.ControlTextBrushKey, new SolidColorBrush(Colors.White) },
+            { SystemColors.WindowTextBrushKey, new SolidColorBrush(whiteColor) },
+            { SystemColors.ControlTextBrushKey, new SolidColorBrush(whiteColor) },
             { SystemColors.WindowBrushKey, new SolidColorBrush(darkColor) },
             { SystemColors.ControlBrushKey, new SolidColorBrush(darkColor) },
-            { SystemColors.ControlLightLightBrushKey, new SolidColorBrush(darkLightColor) }
+            { SystemColors.ControlLightLightBrushKey, new SolidColorBrush(darkLightColor) },
+            { SystemColors.MenuTextBrushKey, new SolidColorBrush(whiteColor) },
+            { SystemColors.MenuBrushKey, new SolidColorBrush(darkLightColor) },
         };
 
         public MainWindow()
@@ -490,6 +493,7 @@ namespace UndertaleModTool
             });
 
             Application.Current.Resources["CustomTextBrush"] = SystemColors.ControlTextBrush;
+            Application.Current.Resources[SystemColors.GrayTextBrushKey] = Brushes.LightGray;
         }
 
         private void SetIDString(string str)
@@ -764,7 +768,11 @@ namespace UndertaleModTool
                 Windows.TextInput.TextBoxBGColor = System.Drawing.Color.FromArgb(darkLightColor.R,
                                                                                  darkLightColor.G,
                                                                                  darkLightColor.B);
-                Windows.TextInput.TextColor = System.Drawing.Color.White;
+                Windows.TextInput.TextColor = System.Drawing.Color.FromArgb(whiteColor.R,
+                                                                            whiteColor.G,
+                                                                            whiteColor.B);
+
+                resources[SystemColors.GrayTextBrushKey] = SystemColors.GrayTextBrush;
             }
             else
             {
@@ -774,6 +782,8 @@ namespace UndertaleModTool
                 Windows.TextInput.BGColor = System.Drawing.SystemColors.Control;
                 Windows.TextInput.TextBoxBGColor = System.Drawing.SystemColors.Window;
                 Windows.TextInput.TextColor = System.Drawing.SystemColors.ControlText;
+
+                resources[SystemColors.GrayTextBrushKey] = Brushes.LightGray;
             }
 
             if (!isStartup)
@@ -2251,6 +2261,17 @@ namespace UndertaleModTool
             catch (Exception err)
             {
                 item.Items.Add(new MenuItem {Header = err.ToString(), IsEnabled = false});
+            }
+
+            item.UpdateLayout();
+            Popup popup = FindVisualChild<Popup>(item);
+            var content = popup?.Child as Border;
+            if (content is not null)
+            {
+                if (Settings.Instance.EnableDarkMode)
+                    content.Background = appDarkStyle[SystemColors.MenuBrushKey] as SolidColorBrush;
+                else
+                    content.Background = SystemColors.MenuBrush;
             }
 
             // If we're at the complete root, we need to add the "Run other script" button as well

@@ -121,7 +121,8 @@
                                         <Style TargetType="TextBlock">
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding Enabled, Mode=OneWay}" Value="False">
-                                                    <Setter Property="Foreground"  Value="LightGray"/>
+                                                    <Setter Property="Foreground"
+                                                            Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -138,7 +139,8 @@
                                         <Style TargetType="TextBlock">
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding Enabled, Mode=OneWay}" Value="False">
-                                                    <Setter Property="Foreground"  Value="LightGray"/>
+                                                    <Setter Property="Foreground"
+                                                            Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -160,7 +162,8 @@
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}" Value="False">
                                         <DataTrigger.Setters>
-                                            <Setter Property="Foreground"  Value="LightGray"/>
+                                            <Setter Property="Foreground"
+                                                    Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
                                             <Setter Property="ContextMenu" Value="{x:Null}"/>
                                         </DataTrigger.Setters>
                                     </DataTrigger>
@@ -200,7 +203,8 @@
                             <Style x:Key="LayerItemStyle" TargetType="TextBlock">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsVisible, Mode=OneWay}" Value="False">
-                                        <Setter Property="Foreground" Value="LightGray"/>
+                                        <Setter Property="Foreground"
+                                                Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>

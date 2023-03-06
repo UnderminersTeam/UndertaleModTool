@@ -67,8 +67,10 @@
     </Window.InputBindings>
     <Grid>
         <DockPanel>
-            <Menu DockPanel.Dock="Top">
-                <MenuItem Header="_File">
+            <Menu DockPanel.Dock="Top"
+                  Foreground="{DynamicResource {x:Static SystemColors.MenuTextBrushKey}}"
+                  Background="{DynamicResource {x:Static SystemColors.MenuBrushKey}}">
+                <local:MenuItemDark Header="_File">
                     <MenuItem Header="_New" Command="New" InputGestureText="Ctrl+N"/>
                     <MenuItem Header="_Open" Command="Open" InputGestureText="Ctrl+O"/>
                     <MenuItem Header="_Save" Command="Save" InputGestureText="Ctrl+S">
@@ -106,14 +108,14 @@
                     <Separator/>
                     <MenuItem Header="S_ettings" Command="Properties"/>
                     <MenuItem Header="_Close" Command="Close" InputGestureText="Ctrl+Q"/>
-                </MenuItem>
-                <MenuItem Name="RootScriptItem" Header="_Scripts" SubmenuOpened="RootMenuItem_SubmenuOpened">
+                </local:MenuItemDark>
+                <local:MenuItemDark x:Name="RootScriptItem" Header="_Scripts" SubmenuOpened="RootMenuItem_SubmenuOpened">
                     <MenuItem Header="(...loading...)" IsEnabled="False"/>
-                </MenuItem>
-                <MenuItem Header="_Help">
+                </local:MenuItemDark>
+                <local:MenuItemDark Header="_Help">
                     <MenuItem Header="_GitHub" Click="MenuItem_GitHub_Click"/>
                     <MenuItem Header="_About" Click="MenuItem_About_Click"/>
-                </MenuItem>
+                </local:MenuItemDark>
             </Menu>
             <Grid DockPanel.Dock="Bottom">
                 <TextBox x:Name="CommandBox" AcceptsReturn="True" PreviewKeyDown="CommandBox_PreviewKeyDown" Margin="0,0,35,0"/>
