@@ -1184,9 +1184,10 @@ namespace UndertaleModLib
         public override string Name => "TGIN";
 
         private static bool checkedFor2022_9;
-        private void CheckFor2022_9(UndertaleReader reader)
+        private void CheckFor2022_9And2023(UndertaleReader reader)
         {
-            if (!reader.undertaleData.IsVersionAtLeast(2, 3) || reader.undertaleData.IsVersionAtLeast(2022, 9))
+            if (!reader.undertaleData.IsVersionAtLeast(2, 3)
+                || reader.undertaleData.IsVersionAtLeast(2022, 9) || reader.undertaleData.IsVersionAtLeast(2023, 1))
             {
                 checkedFor2022_9 = true;
                 return;
@@ -1195,6 +1196,7 @@ namespace UndertaleModLib
             // Check for 2022.9
             long returnPosition = reader.AbsPosition;
 
+            bool isGM2022_9 = false;
             uint tginCount = reader.ReadUInt32();
             if (tginCount > 0)
             {
@@ -1206,7 +1208,30 @@ namespace UndertaleModLib
                 // If not, then we know we're using a new format!
                 uint ptr = reader.ReadUInt32();
                 if (ptr < tginPtr || ptr >= secondTginPtr)
+                {
+                    isGM2022_9 = true;
                     reader.undertaleData.SetGMS2Version(2022, 9);
+                }
+            }
+
+            reader.AbsPosition = returnPosition;
+
+            // Check for 2023.1
+            if (isGM2022_9)
+            {
+                reader.Position += 4; // Skip "tginCount"
+
+                uint firstEntryPtr = reader.ReadUInt32();
+                // Go to the the 4th list pointer of the first TGIN entry.
+                // (either to "Fonts" or "SpineTextures" depending on the version)
+                reader.AbsPosition = firstEntryPtr + 16 + (sizeof(uint) * 3); // +16 = "TexturePages" pointer
+                uint fourthPtr = reader.ReadUInt32();
+
+                // If there's a "TexturePages" count instead of the 5th list pointer.
+                // The count can't be greater than the pointer.
+                // (the list could be either "Tilesets" or "Fonts").
+                if (reader.ReadUInt32() <= fourthPtr)
+                    reader.undertaleData.SetGMS2Version(2023, 1);
             }
 
             reader.AbsPosition = returnPosition;
@@ -1233,7 +1258,7 @@ namespace UndertaleModLib
                 throw new IOException("Expected TGIN version 1");
 
             if (!checkedFor2022_9)
-                CheckFor2022_9(reader);
+                CheckFor2022_9And2023(reader);
 
             base.UnserializeChunk(reader);
         }
@@ -1248,7 +1273,7 @@ namespace UndertaleModLib
             if (reader.ReadUInt32() != 1)
                 throw new IOException("Expected TGIN version 1");
 
-            CheckFor2022_9(reader);
+            CheckFor2022_9And2023(reader);
 
             return base.UnserializeObjectCount(reader);
         }
