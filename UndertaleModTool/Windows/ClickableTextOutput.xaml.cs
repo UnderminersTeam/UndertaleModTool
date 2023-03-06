@@ -51,6 +51,14 @@ namespace UndertaleModTool.Windows
             this.editorDecompile = editorDecompile ? CodeEditorMode.Decompile : CodeEditorMode.DontDecompile;
             this.failedList = failedList;
         }
+        private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (!IsVisible || IsLoaded)
+                return;
+
+            if (Settings.Instance.EnableDarkMode)
+                MainWindow.SetDarkTitleBarForWindow(this, true, false);
+        }
 
         public void GenerateResults()
         {

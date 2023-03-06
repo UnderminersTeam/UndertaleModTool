@@ -49,6 +49,7 @@ using System.Globalization;
 using System.Windows.Controls.Primitives;
 using System.Runtime.CompilerServices;
 using System.Diagnostics.Metrics;
+using System.Windows.Interop;
 
 namespace UndertaleModTool
 {
@@ -502,6 +503,14 @@ namespace UndertaleModTool
 
         public static readonly string[] IFF_EXTENSIONS = new string[] { ".win", ".unx", ".ios", ".droid", ".3ds", ".symbian" };
 
+        // "attr" is actually "DwmWindowAttribute", but I only need the one value from it
+        [DllImport("dwmapi.dll", PreserveSig = true)]
+        public static extern int DwmSetWindowAttribute(IntPtr hwnd, uint attr, ref int attrValue, int attrSize);
+        public const uint DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
         private void UpdateTree()
         {
             foreach (var child in (MainTree.Items[0] as TreeViewItem).Items)
@@ -522,13 +531,23 @@ namespace UndertaleModTool
             return path.IndexOf(temp, StringComparison.OrdinalIgnoreCase) == 0;
         }
         */
+        private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            // This event is used because on initialization the window handle is null,
+            // and on "Window_Loaded" the dark mode for title bar is rendered incorrectly.
+
+            if (!IsVisible || IsLoaded)
+                return;
+
+            Settings.Load();
+            if (Settings.Instance.EnableDarkMode)
+            {
+                SetDarkMode(true, true);
+                SetDarkTitleBarForWindow(this, true, false);
+            }
+        }
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            Settings.Load();
-
-            if (Settings.Instance.EnableDarkMode)
-                SetDarkMode(true);
-
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 try
@@ -730,10 +749,10 @@ namespace UndertaleModTool
             }
         }
 
-        public static void SetDarkMode(bool enable)
+        public static void SetDarkMode(bool enable, bool isStartup = false)
         {
             var resources = Application.Current.Resources;
-
+            
             if (enable)
             {
                 foreach (var pair in appDarkStyle)
@@ -755,6 +774,61 @@ namespace UndertaleModTool
                 Windows.TextInput.BGColor = System.Drawing.SystemColors.Control;
                 Windows.TextInput.TextBoxBGColor = System.Drawing.SystemColors.Window;
                 Windows.TextInput.TextColor = System.Drawing.SystemColors.ControlText;
+            }
+
+            if (!isStartup)
+                SetDarkTitleBarForWindows(enable);
+        }
+        private static void SetDarkTitleBarForWindows(bool enable)
+        {
+            Window activeWindow = null;
+            foreach (Window w in Application.Current.Windows)
+            {
+                if (w.IsActive)
+                {
+                    activeWindow = w;
+                    break;
+                }
+            }
+
+            foreach (Window w in Application.Current.Windows)
+                SetDarkTitleBarForWindow(w, enable);
+
+            activeWindow?.Activate();
+        }
+        public static void SetDarkTitleBarForWindow(Window w, bool enable, bool isNotLoaded = true)
+        {
+            try
+            {
+                int enableValue = enable ? 1 : 0;
+                IntPtr handle = new WindowInteropHelper(w).Handle;
+                if (handle == IntPtr.Zero)
+                    throw new InvalidOperationException("The window handle is null.");
+
+                _ = DwmSetWindowAttribute(handle, DWMWA_USE_IMMERSIVE_DARK_MODE, ref enableValue, sizeof(int));
+                if (isNotLoaded)
+                    _ = SetWindowPos(handle, IntPtr.Zero, 0, 0, 0, 0, 0x0001 | 0x0002); // SWP_NOSIZE | SWP_NOMOVE
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"SetDarkTitleBarForWindow() error for window \"{w}\" - {ex.GetType()}: {ex.Message}");
+            }
+        }
+        public static void SetDarkTitleBarForWindow(System.Windows.Forms.Form form, bool enable, bool isNotLoaded = true)
+        {
+            try
+            {
+                int enableValue = enable ? 1 : 0;
+                if (form.Handle == IntPtr.Zero)
+                    throw new InvalidOperationException("The window handle is null.");
+
+                _ = DwmSetWindowAttribute(form.Handle, DWMWA_USE_IMMERSIVE_DARK_MODE, ref enableValue, sizeof(int));
+                if (isNotLoaded)
+                    _ = SetWindowPos(form.Handle, IntPtr.Zero, 0, 0, 0, 0, 0x0001 | 0x0002); // SWP_NOSIZE | SWP_NOMOVE
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"SetDarkTitleBarForWindow() error for window \"{form}\" - {ex.GetType()}: {ex.Message}");
             }
         }
 

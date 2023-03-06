@@ -90,6 +90,8 @@ namespace UndertaleModTool.Windows
             label1.ForeColor = TextColor;
             button1.ForeColor = TextColor;
             richTextBox1.ForeColor = TextColor;
+            if (Settings.Instance.EnableDarkMode)
+                MainWindow.SetDarkTitleBarForWindow(this, true, false);
         }
 
         private void TextInput_Load(object sender, EventArgs e)
