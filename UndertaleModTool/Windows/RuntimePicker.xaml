@@ -31,6 +31,6 @@
             </ListView.View>
         </ListView>
 
-        <local:Button Grid.Row="2" Grid.Column="3" Margin="3" Content="Continue" Click="Button_Click"/>
+        <local:ButtonDark Grid.Row="2" Grid.Column="3" Margin="3" Content="Continue" Click="Button_Click"/>
     </Grid>
 </Window>

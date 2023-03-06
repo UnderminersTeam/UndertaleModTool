@@ -39,11 +39,11 @@
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Kind</TextBlock>
 
-        <local:ComboBox ItemsSource="{Binding Source={StaticResource ExtensionKind}}" SelectedItem="{Binding Kind}"
+        <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource ExtensionKind}}" SelectedItem="{Binding Kind}"
                         Grid.Row="3" Grid.Column="1" Margin="3"/>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Functions</TextBlock>
-        <local:DataGrid Grid.Row="4" Grid.Column="1" Margin="3" ItemsSource="{Binding Functions}" x:Name="FunctionsList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" AddingNewItem="DataGrid_AddingNewItem" IsSynchronizedWithCurrentItem="True">
+        <local:DataGridDark Grid.Row="4" Grid.Column="1" Margin="3" ItemsSource="{Binding Functions}" x:Name="FunctionsList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" AddingNewItem="DataGrid_AddingNewItem" IsSynchronizedWithCurrentItem="True">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                 <Style TargetType="{x:Type DataGridCell}">
@@ -78,6 +78,6 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
-        </local:DataGrid>
+        </local:DataGridDark>
     </Grid>
 </local:DataUserControl>

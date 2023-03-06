@@ -11,7 +11,7 @@
     <StackPanel>
         <TextBlock Text="Game End scripts" FontWeight="Bold"/>
         <Separator/>
-        <local:DataGrid Grid.Row="20" Grid.Column="1" Margin="3" ItemsSource="{Binding GameEnds}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow">
+        <local:DataGridDark Grid.Row="20" Grid.Column="1" Margin="3" ItemsSource="{Binding GameEnds}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                 <Style TargetType="{x:Type DataGridCell}">
@@ -46,6 +46,6 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
-        </local:DataGrid>
+        </local:DataGridDark>
     </StackPanel>
 </local:DataUserControl>

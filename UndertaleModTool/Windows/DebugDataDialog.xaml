@@ -20,13 +20,13 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0" Margin="3,3,3,18">The debugger is enabled. Do you want to generate debugger data?</TextBlock>
-        <local:Button Grid.Row="1" Margin="3" Click="Button1_Click">Decompiled</local:Button>
+        <local:ButtonDark Grid.Row="1" Margin="3" Click="Button1_Click">Decompiled</local:ButtonDark>
         <TextBlock Grid.Row="2" Margin="3" TextWrapping="Wrap">Decompile whole source code when saving for display in the debugger</TextBlock>
         <TextBlock Grid.Row="3" FontStyle="Italic" Foreground="DarkGray" Margin="3">NOTE: no breakpoint support yet! Except for the script entry point</TextBlock>
-        <local:Button Grid.Row="4" Margin="3" Click="Button2_Click">Disassembly, partial breakpoints</local:Button>
+        <local:ButtonDark Grid.Row="4" Margin="3" Click="Button2_Click">Disassembly, partial breakpoints</local:ButtonDark>
         <TextBlock Grid.Row="5" Margin="3" TextWrapping="Wrap">Full disassembly, but you can set breakpoints only on B, BR, BT, POP, POPZ, RET and EXIT. This is still a lot more than that poor GM:S debugger was designed to handle, so allow up to 5 minutes for it to load the data file (yes, seriously)</TextBlock>
-        <local:Button Grid.Row="6" Margin="3" Click="Button3_Click">Disassembly, full breakpoints</local:Button>
+        <local:ButtonDark Grid.Row="6" Margin="3" Click="Button3_Click">Disassembly, full breakpoints</local:ButtonDark>
         <TextBlock Grid.Row="7" Margin="3" TextWrapping="Wrap">Gave up after like 15 minutes of waiting, don't even try this</TextBlock>
-        <local:Button Grid.Row="8" Margin="3" Click="Button4_Click">No debug data</local:Button>
+        <local:ButtonDark Grid.Row="8" Margin="3" Click="Button4_Click">No debug data</local:ButtonDark>
     </Grid>
 </Window>

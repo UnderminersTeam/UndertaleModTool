@@ -24,8 +24,8 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <local:Button Grid.Row="2" Grid.Column="0" Margin="3,3" VerticalAlignment="Center" Visibility="{Binding CancelButtonVisibility}" Content="{Binding CancelButtonTitle}" Click="CancelButton_Click"></local:Button>
-            <local:Button Grid.Row="2" Grid.Column="1" Margin="3,3" VerticalAlignment="Center" Content="{Binding ButtonTitle}" Click="Button_Click"></local:Button>
+            <local:ButtonDark Grid.Row="2" Grid.Column="0" Margin="3,3" VerticalAlignment="Center" Visibility="{Binding CancelButtonVisibility}" Content="{Binding CancelButtonTitle}" Click="CancelButton_Click"></local:ButtonDark>
+            <local:ButtonDark Grid.Row="2" Grid.Column="1" Margin="3,3" VerticalAlignment="Center" Content="{Binding ButtonTitle}" Click="Button_Click"></local:ButtonDark>
         </Grid>
         
     </Grid>

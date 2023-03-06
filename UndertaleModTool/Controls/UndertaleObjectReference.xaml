@@ -17,7 +17,7 @@
                  ToolTip="This is an object reference. Drag and drop an object of matching type from the tree on the left to change it!"
                  PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" PreviewMouseDoubleClick="TextBox_MouseDoubleClick"
                  Text="{Binding ObjectReference, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-        <local:Button Grid.Column="1" x:Name="DetailsButton" Click="Details_Click">
+        <local:ButtonDark Grid.Column="1" x:Name="DetailsButton" Click="Details_Click">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Setter Property="Content" Value=" ... " />
@@ -39,8 +39,8 @@
                     </Style.Triggers>
                 </Style>
             </Button.Style>
-        </local:Button>
-        <local:Button Grid.Column="2" x:Name="RemoveButton" Click="Remove_Click" Content=" X " ToolTip="Remove reference">
+        </local:ButtonDark>
+        <local:ButtonDark Grid.Column="2" x:Name="RemoveButton" Click="Remove_Click" Content=" X " ToolTip="Remove reference">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Style.Triggers>
@@ -57,6 +57,6 @@
                     </Style.Triggers>
                 </Style>
             </Button.Style>
-        </local:Button>
+        </local:ButtonDark>
     </Grid>
 </UserControl>

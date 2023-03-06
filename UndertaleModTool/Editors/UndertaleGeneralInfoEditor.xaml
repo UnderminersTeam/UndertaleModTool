@@ -144,10 +144,10 @@
 
                 <TextBlock Grid.Row="21" Grid.Column="0" Margin="3">Room order</TextBlock>
                 <Expander Grid.Row="21" Grid.Column="1" Margin="3" Header="List">
-                    <local:DataGrid ItemsSource="{Binding GeneralInfo.RoomOrder}" MaxHeight="369" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
-                                    ScrollViewer.CanContentScroll="True"
-                                    VirtualizingPanel.IsVirtualizing="True"
-                                    VirtualizingPanel.VirtualizationMode="Recycling">
+                    <local:DataGridDark ItemsSource="{Binding GeneralInfo.RoomOrder}" MaxHeight="369" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+                                        ScrollViewer.CanContentScroll="True"
+                                        VirtualizingPanel.IsVirtualizing="True"
+                                        VirtualizingPanel.VirtualizationMode="Recycling">
                         <DataGrid.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                             <Style TargetType="{x:Type DataGridCell}">
@@ -182,10 +182,10 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                         </DataGrid.Columns>
-                    </local:DataGrid>
+                    </local:DataGridDark>
                 </Expander>
 
-                <local:Button Grid.Row="22" Grid.Column="1" Margin="3" Content="Sync with room list" Click="SyncRoomList_Click"/>
+                <local:ButtonDark Grid.Row="22" Grid.Column="1" Margin="3" Content="Sync with room list" Click="SyncRoomList_Click"/>
 
                 <Grid Grid.Row="23" Grid.ColumnSpan="2" Margin="0" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
                     <Grid.ColumnDefinitions>
@@ -283,7 +283,7 @@
                 <TextBox Grid.Row="12" Grid.Column="1" Margin="3" Text="{Binding Options.LoadAlpha}"/>
 
                 <TextBlock Grid.Row="13" Grid.Column="0" Margin="3">Constants</TextBlock>
-                <local:DataGrid Grid.Row="13" Grid.Column="1" Margin="3" ItemsSource="{Binding Options.Constants}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
+                <local:DataGridDark Grid.Row="13" Grid.Column="1" Margin="3" ItemsSource="{Binding Options.Constants}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
                     <DataGrid.Resources>
                         <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                         <Style TargetType="{x:Type DataGridCell}">
@@ -325,7 +325,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
-                </local:DataGrid>
+                </local:DataGridDark>
             </Grid>
         </StackPanel>
 

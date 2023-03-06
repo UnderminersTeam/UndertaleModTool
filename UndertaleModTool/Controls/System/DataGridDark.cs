@@ -6,10 +6,10 @@ namespace UndertaleModTool
     /// <summary>
     /// A standard data grid which compatible with the dark mode.
     /// </summary>
-    public partial class DataGrid : System.Windows.Controls.DataGrid
+    public partial class DataGridDark : System.Windows.Controls.DataGrid
     {
         /// <summary>Initializes a new instance of the data grid.</summary>
-        public DataGrid()
+        public DataGridDark()
         {
             Loaded += DataGrid_Loaded;
         }

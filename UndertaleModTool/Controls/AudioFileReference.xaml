@@ -59,7 +59,7 @@
                 </Style>
             </TextBox.Style>
         </TextBox>
-        <local:Button Grid.Column="2" Click="Details_Click" Content=" ... " ToolTip="Open referenced object">
+        <local:ButtonDark Grid.Column="2" Click="Details_Click" Content=" ... " ToolTip="Open referenced object">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Style.Triggers>
@@ -69,8 +69,8 @@
                     </Style.Triggers>
                 </Style>
             </Button.Style>
-        </local:Button>
-        <local:Button Grid.Column="3" Click="Remove_Click" Content=" X " ToolTip="Remove reference">
+        </local:ButtonDark>
+        <local:ButtonDark Grid.Column="3" Click="Remove_Click" Content=" X " ToolTip="Remove reference">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Style.Triggers>
@@ -82,6 +82,6 @@
                     </Style.Triggers>
                 </Style>
             </Button.Style>
-        </local:Button>
+        </local:ButtonDark>
     </Grid>
 </UserControl>

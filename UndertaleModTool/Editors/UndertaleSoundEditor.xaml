@@ -65,8 +65,8 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <local:Button Grid.Row="11" Grid.Column="0" x:Name="Play" Click="Play_Click" Margin="3,0">Play</local:Button>
-            <local:Button Grid.Row="11" Grid.Column="1" x:Name="Stop" Click="Stop_Click" Margin="3,0">Stop</local:Button>
+            <local:ButtonDark Grid.Row="11" Grid.Column="0" x:Name="Play" Click="Play_Click" Margin="3,0">Play</local:ButtonDark>
+            <local:ButtonDark Grid.Row="11" Grid.Column="1" x:Name="Stop" Click="Stop_Click" Margin="3,0">Stop</local:ButtonDark>
         </Grid>
     </Grid>
 </local:DataUserControl>

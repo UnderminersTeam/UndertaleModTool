@@ -11,10 +11,10 @@
     <DockPanel MaxHeight="{Binding ViewportHeight, Mode=OneWay, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
         <TextBlock Text="Global initialization scripts" FontWeight="Bold" DockPanel.Dock="Top"/>
         <Separator DockPanel.Dock="Top"/>
-        <local:DataGrid DockPanel.Dock="Top" Margin="3" ItemsSource="{Binding GlobalInits}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
-                        ScrollViewer.CanContentScroll="True"
-                        VirtualizingPanel.IsVirtualizing="True"
-                        VirtualizingPanel.VirtualizationMode="Recycling">
+        <local:DataGridDark DockPanel.Dock="Top" Margin="3" ItemsSource="{Binding GlobalInits}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+                            ScrollViewer.CanContentScroll="True"
+                            VirtualizingPanel.IsVirtualizing="True"
+                            VirtualizingPanel.VirtualizationMode="Recycling">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                 <Style TargetType="{x:Type DataGridCell}">
@@ -49,6 +49,6 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
-        </local:DataGrid>
+        </local:DataGridDark>
     </DockPanel>
 </local:DataUserControl>

@@ -45,6 +45,6 @@
                 </Paragraph>
             </FlowDocument>
         </RichTextBox>
-        <local:Button Content="Done" FontSize="16" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="35" Click="Button_Click"/>
+        <local:ButtonDark Content="Done" FontSize="16" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="35" Click="Button_Click"/>
     </Grid>
 </Window>
