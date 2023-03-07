@@ -92,6 +92,8 @@ namespace UndertaleModTool.Windows
             richTextBox1.ForeColor = TextColor;
             textCommandsMenu.ForeColor = TextColor;
             textCommandsMenu.BackColor = TextBoxBGColor;
+            textCopyMenu.ForeColor = TextColor;
+            textCopyMenu.BackColor = TextBoxBGColor;
             if (Settings.Instance.EnableDarkMode)
                 MainWindow.SetDarkTitleBarForWindow(this, true, false);
         }
@@ -109,7 +111,7 @@ namespace UndertaleModTool.Windows
 
             if (richTextBox1.ReadOnly)
             {
-                richTextBox1.BackColor = SystemColors.Window; //restore color to default one.
+                richTextBox1.BackColor = TextBoxBGColor; //restore color to default one.
                 richTextBox1.ContextMenuStrip = textCopyMenu;
             }
         }

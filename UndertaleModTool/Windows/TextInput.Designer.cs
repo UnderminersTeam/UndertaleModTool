@@ -128,6 +128,7 @@ namespace UndertaleModTool.Windows
             this.textCopyMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.copyMenuItem1,
             this.copyAllMenuItem1});
+            this.textCopyMenu.ShowImageMargin = false;
             this.textCopyMenu.Name = "textCopyMenu";
             this.textCopyMenu.Size = new System.Drawing.Size(118, 48);
             this.textCopyMenu.Opening += new System.ComponentModel.CancelEventHandler(this.textCopyMenu_Opening);
@@ -175,7 +176,7 @@ namespace UndertaleModTool.Windows
         private System.Windows.Forms.ToolStripMenuItem copyMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cutMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pasteMenuItem;
-        private System.Windows.Forms.ContextMenuStrip textCopyMenu;
+        public System.Windows.Forms.ContextMenuStrip textCopyMenu;
         private System.Windows.Forms.ToolStripMenuItem copyMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem copyAllMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem copyAllMenuItem;
