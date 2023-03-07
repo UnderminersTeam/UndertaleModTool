@@ -34,10 +34,10 @@
                 <CommandBinding Command="Copy" Executed="OnCopyCommand"/>
             </Control.CommandBindings>
             <RichTextBox.ContextMenu>
-                <ContextMenu Name="textCommandsMenu">
+                <local:ContextMenuDark x:Name="textCommandsMenu">
                     <MenuItem Name="copyMenuItem" Header="Copy" Click="copyMenuItem_Click"/>
                     <MenuItem Name="copyAllMenuItem" Header="Copy all" Click="copyAllMenuItem_Click"/>
-                </ContextMenu>
+                </local:ContextMenuDark>
             </RichTextBox.ContextMenu>
             <FlowDocument>
                 <Paragraph>

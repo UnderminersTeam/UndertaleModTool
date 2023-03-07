@@ -171,7 +171,7 @@ namespace UndertaleModTool.Windows
         private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.ContextMenuStrip textCommandsMenu;
+        public System.Windows.Forms.ContextMenuStrip textCommandsMenu;
         private System.Windows.Forms.ToolStripMenuItem copyMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cutMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pasteMenuItem;

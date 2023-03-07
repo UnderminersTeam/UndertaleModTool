@@ -228,17 +228,17 @@
                           VirtualizingStackPanel.IsVirtualizing="True"
                           VirtualizingStackPanel.VirtualizationMode="Recycling">
                     <TreeView.Resources>
-                        <ContextMenu x:Key="AddMenu">
+                        <local:ContextMenuDark x:Key="AddMenu">
                             <MenuItem Header="Add" Click="MenuItem_Add_Click"/>
-                        </ContextMenu>
-                        <ContextMenu x:Key="UndertaleResourceMenu">
+                        </local:ContextMenuDark>
+                        <local:ContextMenuDark x:Key="UndertaleResourceMenu">
                             <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>
                             <MenuItem Header="Copy name to clipboard" Click="MenuItem_CopyName_Click"/>
                             <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
-                        </ContextMenu>
-                        <ContextMenu x:Key="StandaloneTabMenu">
+                        </local:ContextMenuDark>
+                        <local:ContextMenuDark x:Key="StandaloneTabMenu">
                             <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>
-                        </ContextMenu>
+                        </local:ContextMenuDark>
 
                         <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#D4D4D4"/>
                         <Style TargetType="{x:Type TreeViewItem}">

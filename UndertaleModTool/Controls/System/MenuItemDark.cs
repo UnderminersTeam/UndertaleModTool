@@ -23,10 +23,7 @@ namespace UndertaleModTool
             var content = popup?.Child as Border;
             if (content is null)
                 return;
-            popup.Tag = "PopupDark";
-            content.Tag = "Dark";
 
-            // Change text color of dropdown items
             content.SetResourceReference(BackgroundProperty, SystemColors.MenuBrushKey);
         }
     }
