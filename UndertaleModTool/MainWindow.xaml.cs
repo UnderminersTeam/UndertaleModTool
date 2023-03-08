@@ -462,7 +462,7 @@ namespace UndertaleModTool
             { SystemColors.ControlBrushKey, new SolidColorBrush(darkColor) },
             { SystemColors.ControlLightLightBrushKey, new SolidColorBrush(darkLightColor) },
             { SystemColors.MenuTextBrushKey, new SolidColorBrush(whiteColor) },
-            { SystemColors.MenuBrushKey, new SolidColorBrush(darkLightColor) },
+            { SystemColors.MenuBrushKey, new SolidColorBrush(darkLightColor) }
         };
 
         public MainWindow()
@@ -493,7 +493,6 @@ namespace UndertaleModTool
             });
 
             Application.Current.Resources["CustomTextBrush"] = SystemColors.ControlTextBrush;
-            Application.Current.Resources[SystemColors.GrayTextBrushKey] = Brushes.LightGray;
         }
 
         private void SetIDString(string str)
@@ -756,6 +755,9 @@ namespace UndertaleModTool
         public static void SetDarkMode(bool enable, bool isStartup = false)
         {
             var resources = Application.Current.Resources;
+
+            var mainWindow = Application.Current.MainWindow as MainWindow;
+            mainWindow.TabController.SetDarkMode(enable);
             
             if (enable)
             {
@@ -1922,11 +1924,17 @@ namespace UndertaleModTool
                 }
             }
         }
-        public static childItem FindVisualChild<childItem>(DependencyObject obj) where childItem : DependencyObject
+        public static childItem FindVisualChild<childItem>(DependencyObject obj, string name = null) where childItem : FrameworkElement
         {
             foreach (childItem child in FindVisualChildren<childItem>(obj))
             {
-                return child;
+                if (!String.IsNullOrEmpty(name))
+                {
+                    if (child.Name == name)
+                        return child;
+                }
+                else
+                    return child;
             }
 
             return null;

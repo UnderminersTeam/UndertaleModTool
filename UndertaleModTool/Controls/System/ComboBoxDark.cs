@@ -9,7 +9,7 @@ namespace UndertaleModTool
     /// <summary>
     /// A standard combo box which compatible with the dark mode.
     /// </summary>
-    public partial class ComboBoxDark : System.Windows.Controls.ComboBox
+    public partial class ComboBoxDark : ComboBox
     {
         // Setting "Foreground" implicitly breaks internal "IsEnabled" style trigger,
         // so this has to be handled manually.
