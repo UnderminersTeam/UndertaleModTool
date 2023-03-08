@@ -13,6 +13,7 @@
     <local:NullToVisibilityConverter x:Key="NotNullToVisibilityConverter" local:nullValue="Collapsed" local:notNullValue="Visible"/>
     <local:BooleanToVisibilityConverter x:Key="BooleanTrueToVisibilityConverter" local:trueValue="Visible" local:falseValue="Collapsed"/>
     <local:BooleanToVisibilityConverter x:Key="BooleanFalseToVisibilityConverter" local:trueValue="Collapsed" local:falseValue="Visible"/>
+    <local:IsGM2023Converter x:Key="IsGM2023Converter"/>
   </UserControl.Resources>
 
   <StackPanel>
@@ -144,8 +145,10 @@
               </Expander>
 
               <!--Spine Sprite List-->
-              <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Spine Sprites</TextBlock>
-              <Expander Grid.Row="3" Grid.Column="1" Margin="3" Header="List">
+              <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="Spine Sprites"
+                         Visibility="{Binding DataContext.Data, Mode=OneTime, Converter={StaticResource IsGM2023Converter}, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}"/>
+              <Expander Grid.Row="3" Grid.Column="1" Margin="3" Header="List"
+                        Visibility="{Binding DataContext.Data, Mode=OneTime, Converter={StaticResource IsGM2023Converter}, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
                 <local:DataGridDark ItemsSource="{Binding SpineSprites}" MaxHeight="370" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
                                     ScrollViewer.CanContentScroll="True"
                                     VirtualizingPanel.IsVirtualizing="True"

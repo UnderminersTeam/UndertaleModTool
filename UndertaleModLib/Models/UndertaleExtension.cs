@@ -53,8 +53,11 @@ public enum UndertaleExtensionVarType : uint
 /// A class representing an argument for <see cref="UndertaleExtensionFunction"/>s.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleExtensionFunctionArg : UndertaleObject
+public class UndertaleExtensionFunctionArg : UndertaleObject, IStaticChildObjectsSize
 {
+    /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+    public static readonly uint ChildObjectsSize = 4;
+
     /// <summary>
     /// The variable type of this argument.
     /// </summary>
@@ -140,6 +143,14 @@ public class UndertaleExtensionFunction : UndertaleObject, IDisposable
         Arguments = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleExtensionFunctionArg>>();
     }
 
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        reader.Position += 20;
+
+        return 1 + UndertaleSimpleList<UndertaleExtensionFunctionArg>.UnserializeChildObjectCount(reader);
+    }
+
     /// <inheritdoc />
     public override string ToString()
     {
@@ -186,6 +197,18 @@ public class UndertaleExtensionFile : UndertaleObject, IDisposable
         Functions = reader.ReadUndertaleObject<UndertalePointerList<UndertaleExtensionFunction>>();
     }
 
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        uint count = 0;
+
+        reader.Position += 16;
+
+        count += 1 + UndertalePointerList<UndertaleExtensionFunction>.UnserializeChildObjectCount(reader);
+
+        return count;
+    }
+
     /// <inheritdoc />
     public override string ToString()
     {
@@ -218,8 +241,11 @@ public class UndertaleExtensionFile : UndertaleObject, IDisposable
 
 
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleExtensionOption : UndertaleObject, IDisposable
+public class UndertaleExtensionOption : UndertaleObject, IStaticChildObjectsSize, IDisposable
 {
+    /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+    public static readonly uint ChildObjectsSize = 12;
+
     public enum OptionKind : uint
     {
         Boolean = 0,
@@ -343,5 +369,27 @@ public class UndertaleExtension : UndertaleNamedResource, IDisposable
         {
             Files = reader.ReadUndertaleObject<UndertalePointerList<UndertaleExtensionFile>>();
         }
+    }
+
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        uint count = 0;
+
+        reader.Position += 12;
+        if (reader.undertaleData.IsVersionAtLeast(2022, 6))
+        {
+            uint filesPtr = reader.ReadUInt32();
+            uint optionsPtr = reader.ReadUInt32();
+
+            reader.AbsPosition = filesPtr;
+            count += 1 + UndertalePointerList<UndertaleExtensionFile>.UnserializeChildObjectCount(reader);
+            reader.AbsPosition = optionsPtr;
+            count += 1 + UndertalePointerList<UndertaleExtensionOption>.UnserializeChildObjectCount(reader);
+        }
+        else
+            count += 1 + UndertalePointerList<UndertaleExtensionFile>.UnserializeChildObjectCount(reader);
+
+        return count;
     }
 }

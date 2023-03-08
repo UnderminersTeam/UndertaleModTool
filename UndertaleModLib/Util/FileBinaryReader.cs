@@ -7,33 +7,33 @@ using System.Text;
 namespace UndertaleModLib.Util
 {
     // Reimplemented based on DogScepter's implementation
-    public class FileBinaryReader : IDisposable
+    public class FileBinaryReader : IBinaryReader
     {
         private readonly byte[] buffer = new byte[16];
 
-        private Encoding encoding = new UTF8Encoding(false);
-        public Encoding Encoding { get => encoding; }
+        private readonly Encoding encoding = new UTF8Encoding(false);
         public Stream Stream { get; set; }
 
-        public long Length { get; private set; }
+        private readonly long _length;
+        public long Length { get => _length; }
 
-        public uint Position
+        public long Position
         {
-            get => (uint)Stream.Position;
+            get => Stream.Position;
             set
             {
+#if DEBUG
                 if (value > Length)
                     throw new IOException("Reading out of bounds.");
-
+#endif
                 Stream.Position = value;
             }
         }
 
         public FileBinaryReader(Stream stream, Encoding encoding = null)
         {
-            Length = stream.Length;
+            _length = stream.Length;
             Stream = stream;
-            Position = 0;
 
             if (stream.Position != 0)
                 stream.Seek(0, SeekOrigin.Begin);
@@ -51,7 +51,7 @@ namespace UndertaleModLib.Util
         public byte ReadByte()
         {
 #if DEBUG
-            if (Position + 1 > Length)
+            if (Stream.Position + 1 > _length)
                 throw new IOException("Reading out of bounds");
 #endif
             return (byte)Stream.ReadByte();
@@ -65,7 +65,7 @@ namespace UndertaleModLib.Util
         public string ReadChars(int count)
         {
 #if DEBUG
-            if (Position + count > Length)
+            if (Stream.Position + count > _length)
                 throw new IOException("Reading out of bounds");
 #endif
             if (count > 1024)
@@ -87,7 +87,7 @@ namespace UndertaleModLib.Util
         public byte[] ReadBytes(int count)
         {
 #if DEBUG
-            if (Position + count > Length)
+            if (Stream.Position + count > _length)
                 throw new IOException("Reading out of bounds");
 #endif
             byte[] val = new byte[count];
@@ -98,7 +98,7 @@ namespace UndertaleModLib.Util
         public short ReadInt16()
         {
 #if DEBUG
-            if (Position + 2 > Length)
+            if (Stream.Position + 2 > _length)
                 throw new IOException("Reading out of bounds");
 #endif
             return BinaryPrimitives.ReadInt16LittleEndian(ReadToBuffer(2));
@@ -107,7 +107,7 @@ namespace UndertaleModLib.Util
         public ushort ReadUInt16()
         {
 #if DEBUG
-            if (Position + 2 > Length)
+            if (Stream.Position + 2 > _length)
                 throw new IOException("Reading out of bounds");
 #endif
             return BinaryPrimitives.ReadUInt16LittleEndian(ReadToBuffer(2));
@@ -116,7 +116,7 @@ namespace UndertaleModLib.Util
         public int ReadInt24()
         {
 #if DEBUG
-            if (Position + 3 > Length)
+            if (Stream.Position + 3 > _length)
                 throw new IOException("Reading out of bounds");
 #endif
             ReadToBuffer(3);
@@ -126,7 +126,7 @@ namespace UndertaleModLib.Util
         public uint ReadUInt24()
         {
 #if DEBUG
-            if (Position + 3 > Length)
+            if (Stream.Position + 3 > _length)
                 throw new IOException("Reading out of bounds");
 #endif
             ReadToBuffer(3);
@@ -136,7 +136,7 @@ namespace UndertaleModLib.Util
         public int ReadInt32()
         {
 #if DEBUG
-            if (Position + 4 > Length)
+            if (Stream.Position + 4 > _length)
                 throw new IOException("Reading out of bounds");
 #endif
             return BinaryPrimitives.ReadInt32LittleEndian(ReadToBuffer(4));
@@ -145,7 +145,7 @@ namespace UndertaleModLib.Util
         public uint ReadUInt32()
         {
 #if DEBUG
-            if (Position + 4 > Length)
+            if (Stream.Position + 4 > _length)
                 throw new IOException("Reading out of bounds");
 #endif
             return BinaryPrimitives.ReadUInt32LittleEndian(ReadToBuffer(4));
@@ -154,7 +154,7 @@ namespace UndertaleModLib.Util
         public float ReadSingle()
         {
 #if DEBUG
-            if (Position + 4 > Length)
+            if (Stream.Position + 4 > _length)
                 throw new IOException("Reading out of bounds");
 #endif
             return BitConverter.Int32BitsToSingle(BinaryPrimitives.ReadInt32LittleEndian(ReadToBuffer(4)));
@@ -163,7 +163,7 @@ namespace UndertaleModLib.Util
         public double ReadDouble()
         {
 #if DEBUG
-            if (Position + 8 > Length)
+            if (Stream.Position + 8 > _length)
                 throw new IOException("Reading out of bounds");
 #endif
             return BitConverter.Int64BitsToDouble(BinaryPrimitives.ReadInt64LittleEndian(ReadToBuffer(8)));
@@ -172,7 +172,7 @@ namespace UndertaleModLib.Util
         public long ReadInt64()
         {
 #if DEBUG
-            if (Position + 8 > Length)
+            if (Stream.Position + 8 > _length)
                 throw new IOException("Reading out of bounds");
 #endif
             return BinaryPrimitives.ReadInt64LittleEndian(ReadToBuffer(8));
@@ -181,7 +181,7 @@ namespace UndertaleModLib.Util
         public ulong ReadUInt64()
         {
 #if DEBUG
-            if (Position + 8 > Length)
+            if (Stream.Position + 8 > _length)
                 throw new IOException("Reading out of bounds");
 #endif
             return BinaryPrimitives.ReadUInt64LittleEndian(ReadToBuffer(8));
@@ -190,12 +190,12 @@ namespace UndertaleModLib.Util
         public string ReadGMString()
         {
 #if DEBUG
-            if (Position + 8 > Length)
+            if (Stream.Position + 5 > _length)
                 throw new IOException("Reading out of bounds");
 #endif
             int length = BinaryPrimitives.ReadInt32LittleEndian(ReadToBuffer(4));
 #if DEBUG
-            if (Position + length + 1 >= Length)
+            if (Stream.Position + length + 1 >= _length)
                 throw new IOException("Reading out of bounds");
 #endif
             string res;
@@ -220,10 +220,15 @@ namespace UndertaleModLib.Util
 #endif
             return res;
         }
+        public void SkipGMString()
+        {
+            int length = BinaryPrimitives.ReadInt32LittleEndian(ReadToBuffer(4));
+            Position += (uint)length + 1;
+        }
 
         public void Dispose()
         {
-            if (Stream is not null)
+            if (Stream?.CanRead == true)
             {
                 Stream.Close();
                 Stream.Dispose();

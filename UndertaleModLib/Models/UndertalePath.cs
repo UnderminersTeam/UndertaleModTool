@@ -39,8 +39,11 @@ public class UndertalePath : UndertaleNamedResource, IDisposable
     /// A point in a <see cref="UndertalePath"/>.
     /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class PathPoint : UndertaleObject
+    public class PathPoint : UndertaleObject, IStaticChildObjectsSize
     {
+        /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+        public static readonly uint ChildObjectsSize = 12;
+
         /// <summary>
         /// The X position of the <see cref="PathPoint"/>.
         /// </summary>
@@ -91,6 +94,14 @@ public class UndertalePath : UndertaleNamedResource, IDisposable
         IsClosed = reader.ReadBoolean();
         Precision = reader.ReadUInt32();
         Points = reader.ReadUndertaleObject<UndertaleSimpleList<PathPoint>>();
+    }
+
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        reader.Position += 16;
+
+        return 1 + UndertaleSimpleList<PathPoint>.UnserializeChildObjectCount(reader);
     }
 
     /// <inheritdoc />
