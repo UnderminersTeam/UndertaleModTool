@@ -72,6 +72,8 @@ namespace UndertaleModTool
                 Border innerBd = MainWindow.FindVisualChild<Border>(this, "innerBorder");
                 innerBd?.SetResourceReference(BackgroundProperty, SystemColors.WindowBrushKey);
             }
+
+            SetDarkMode(Settings.Instance.EnableDarkMode);
         }
 
         public void SetDarkMode(bool enable)

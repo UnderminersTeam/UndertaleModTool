@@ -3842,7 +3842,7 @@ result in loss of work.");
         // source - https://stackoverflow.com/a/10738247/12136394
         private void TabItem_PreviewMouseMove(object sender, MouseEventArgs e)
         {
-            if (e.Source is not TabItem tabItem || e.OriginalSource is Button)
+            if (e.Source is not TabItemDark tabItem || e.OriginalSource is Button)
                 return;
 
             if (Mouse.PrimaryDevice.LeftButton == MouseButtonState.Pressed)
@@ -3853,8 +3853,8 @@ result in loss of work.");
         }
         private void TabItem_Drop(object sender, DragEventArgs e)
         {
-            if (e.Source is TabItem tabItemTarget &&
-                e.Data.GetData(typeof(TabItem)) is TabItem tabItemSource &&
+            if (e.Source is TabItemDark tabItemTarget &&
+                e.Data.GetData(typeof(TabItemDark)) is TabItemDark tabItemSource &&
                 !tabItemTarget.Equals(tabItemSource))
             {
                 int sourceIndex = tabItemSource.TabIndex;
