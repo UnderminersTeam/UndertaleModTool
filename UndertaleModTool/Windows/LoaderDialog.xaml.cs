@@ -63,6 +63,14 @@ namespace UndertaleModTool
 
             (Application.Current.MainWindow as MainWindow).FileMessageEvent += ReportProgress;
         }
+        private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (!IsVisible || IsLoaded)
+                return;
+
+            if (Settings.Instance.EnableDarkMode)
+                MainWindow.SetDarkTitleBarForWindow(this, true, false);
+        }
 
         protected override void OnClosing(CancelEventArgs e)
         {

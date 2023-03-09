@@ -39,6 +39,14 @@ namespace UndertaleModTool
             this.DataContext = this;
             InitializeComponent();
         }
+        private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (!IsVisible || IsLoaded)
+                return;
+
+            if (Settings.Instance.EnableDarkMode)
+                MainWindow.SetDarkTitleBarForWindow(this, true, false);
+        }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {

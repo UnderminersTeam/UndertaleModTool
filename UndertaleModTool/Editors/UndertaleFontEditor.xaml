@@ -93,10 +93,10 @@
         </Viewbox>
 
         <TextBlock Grid.Row="11" Grid.Column="0" Margin="3,30,3,3">Glyphs:</TextBlock>
-        <DataGrid Grid.Row="12" Grid.ColumnSpan="2" MaxHeight="370" Margin="3" ItemsSource="{Binding Glyphs, Mode=OneWay}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
-                  ScrollViewer.CanContentScroll="True"
-                  VirtualizingPanel.IsVirtualizing="True"
-                  VirtualizingPanel.VirtualizationMode="Recycling">
+        <local:DataGridDark Grid.Row="12" Grid.ColumnSpan="2" MaxHeight="370" Margin="3" ItemsSource="{Binding Glyphs, Mode=OneWay}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
+                            ScrollViewer.CanContentScroll="True"
+                            VirtualizingPanel.IsVirtualizing="True"
+                            VirtualizingPanel.VirtualizationMode="Recycling">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                 <Style TargetType="{x:Type DataGridCell}">
@@ -163,12 +163,12 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
-        </DataGrid>
+        </local:DataGridDark>
 
         <TextBlock Grid.Row="13" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" TextWrapping="Wrap" HorizontalAlignment="Center">
             Note that the glyphs need to be specified in ascending order.<LineBreak/>
             Press the button below to sort them appropriately.
         </TextBlock>
-        <Button Grid.Row="14" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" Click="Button_Sort_Click">Sort glyphs</Button>
+        <local:ButtonDark Grid.Row="14" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" Click="Button_Sort_Click">Sort glyphs</local:ButtonDark>
     </Grid>
 </local:DataUserControl>

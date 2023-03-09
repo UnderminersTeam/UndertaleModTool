@@ -49,6 +49,7 @@ using System.Globalization;
 using System.Windows.Controls.Primitives;
 using System.Runtime.CompilerServices;
 using System.Diagnostics.Metrics;
+using System.Windows.Interop;
 
 namespace UndertaleModTool
 {
@@ -450,6 +451,24 @@ namespace UndertaleModTool
         public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 #endif
 
+        private static readonly Color darkColor = Color.FromArgb(255, 32, 32, 32);
+        private static readonly Color darkLightColor = Color.FromArgb(255, 48, 48, 48);
+        private static readonly Color whiteColor = Color.FromArgb(255, 222, 222, 222);
+        private static readonly SolidColorBrush grayTextBrush = new(Color.FromArgb(255, 179, 179, 179));
+        private static readonly SolidColorBrush inactiveSelectionBrush = new(Color.FromArgb(255, 212, 212, 212));
+        private static readonly Dictionary<ResourceKey, object> appDarkStyle = new()
+        {
+            { SystemColors.WindowTextBrushKey, new SolidColorBrush(whiteColor) },
+            { SystemColors.ControlTextBrushKey, new SolidColorBrush(whiteColor) },
+            { SystemColors.WindowBrushKey, new SolidColorBrush(darkColor) },
+            { SystemColors.ControlBrushKey, new SolidColorBrush(darkColor) },
+            { SystemColors.ControlLightLightBrushKey, new SolidColorBrush(darkLightColor) },
+            { SystemColors.MenuTextBrushKey, new SolidColorBrush(whiteColor) },
+            { SystemColors.MenuBrushKey, new SolidColorBrush(darkLightColor) },
+            { SystemColors.GrayTextBrushKey, new SolidColorBrush(Color.FromArgb(255, 136, 136, 136)) },
+            { SystemColors.InactiveSelectionHighlightBrushKey, new SolidColorBrush(Color.FromArgb(255, 112, 112, 112)) }
+        };
+
         public MainWindow()
         {
             InitializeComponent();
@@ -476,6 +495,11 @@ namespace UndertaleModTool
                                                 typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly)
                                 .WithEmitDebugInformation(true); //when script throws an exception, add a exception location (line number)
             });
+
+            var resources = Application.Current.Resources;
+            resources["CustomTextBrush"] = SystemColors.ControlTextBrush;
+            resources[SystemColors.GrayTextBrushKey] = grayTextBrush;
+            resources[SystemColors.InactiveSelectionHighlightBrushKey] = inactiveSelectionBrush;
         }
 
         private void SetIDString(string str)
@@ -488,6 +512,14 @@ namespace UndertaleModTool
         const long SHCNE_ASSOCCHANGED = 0x08000000;
 
         public static readonly string[] IFF_EXTENSIONS = new string[] { ".win", ".unx", ".ios", ".droid", ".3ds", ".symbian" };
+
+        // "attr" is actually "DwmWindowAttribute", but I only need the one value from it
+        [DllImport("dwmapi.dll", PreserveSig = true)]
+        private static extern int DwmSetWindowAttribute(IntPtr hwnd, uint attr, ref int attrValue, int attrSize);
+        private const uint DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
         private void UpdateTree()
         {
@@ -509,9 +541,23 @@ namespace UndertaleModTool
             return path.IndexOf(temp, StringComparison.OrdinalIgnoreCase) == 0;
         }
         */
+        private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            // This event is used because on initialization the window handle is null,
+            // and on "Window_Loaded" the dark mode for title bar is rendered incorrectly.
+
+            if (!IsVisible || IsLoaded)
+                return;
+
+            Settings.Load();
+            if (Settings.Instance.EnableDarkMode)
+            {
+                SetDarkMode(true, true);
+                SetDarkTitleBarForWindow(this, true, false);
+            }
+        }
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            Settings.Load();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 try
@@ -710,6 +756,97 @@ namespace UndertaleModTool
                     throw new Exception("errrrr");
                 OpenInTab(Data.EmbeddedAudio[Int32.Parse(thingToOpen[1])], false, "Embedded Audio");
                 Activate();
+            }
+        }
+
+        public static void SetDarkMode(bool enable, bool isStartup = false)
+        {
+            var resources = Application.Current.Resources;
+
+            var mainWindow = Application.Current.MainWindow as MainWindow;
+            mainWindow.TabController.SetDarkMode(enable);
+            
+            if (enable)
+            {
+                foreach (var pair in appDarkStyle)
+                    resources[pair.Key] = pair.Value;
+
+                Windows.TextInput.BGColor = System.Drawing.Color.FromArgb(darkColor.R,
+                                                                          darkColor.G,
+                                                                          darkColor.B);
+                Windows.TextInput.TextBoxBGColor = System.Drawing.Color.FromArgb(darkLightColor.R,
+                                                                                 darkLightColor.G,
+                                                                                 darkLightColor.B);
+                Windows.TextInput.TextColor = System.Drawing.Color.FromArgb(whiteColor.R,
+                                                                            whiteColor.G,
+                                                                            whiteColor.B);
+            }
+            else
+            {
+                foreach (ResourceKey key in appDarkStyle.Keys)
+                    resources.Remove(key);
+
+                resources[SystemColors.GrayTextBrushKey] = grayTextBrush;
+                resources[SystemColors.InactiveSelectionHighlightBrushKey] = inactiveSelectionBrush;
+
+                Windows.TextInput.BGColor = System.Drawing.SystemColors.Control;
+                Windows.TextInput.TextBoxBGColor = System.Drawing.SystemColors.Window;
+                Windows.TextInput.TextColor = System.Drawing.SystemColors.ControlText;
+            }
+
+            if (!isStartup)
+                SetDarkTitleBarForWindows(enable);
+        }
+        private static void SetDarkTitleBarForWindows(bool enable)
+        {
+            Window activeWindow = null;
+            foreach (Window w in Application.Current.Windows)
+            {
+                if (w.IsActive)
+                {
+                    activeWindow = w;
+                    break;
+                }
+            }
+
+            foreach (Window w in Application.Current.Windows)
+                SetDarkTitleBarForWindow(w, enable);
+
+            activeWindow?.Activate();
+        }
+        public static void SetDarkTitleBarForWindow(Window w, bool enable, bool isNotLoaded = true)
+        {
+            try
+            {
+                int enableValue = enable ? 1 : 0;
+                IntPtr handle = new WindowInteropHelper(w).Handle;
+                if (handle == IntPtr.Zero)
+                    throw new InvalidOperationException("The window handle is null.");
+
+                _ = DwmSetWindowAttribute(handle, DWMWA_USE_IMMERSIVE_DARK_MODE, ref enableValue, sizeof(int));
+                if (isNotLoaded)
+                    _ = SetWindowPos(handle, IntPtr.Zero, 0, 0, 0, 0, 0x0001 | 0x0002); // SWP_NOSIZE | SWP_NOMOVE
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"SetDarkTitleBarForWindow() error for window \"{w}\" - {ex.GetType()}: {ex.Message}");
+            }
+        }
+        public static void SetDarkTitleBarForWindow(System.Windows.Forms.Form form, bool enable, bool isNotLoaded = true)
+        {
+            try
+            {
+                int enableValue = enable ? 1 : 0;
+                if (form.Handle == IntPtr.Zero)
+                    throw new InvalidOperationException("The window handle is null.");
+
+                _ = DwmSetWindowAttribute(form.Handle, DWMWA_USE_IMMERSIVE_DARK_MODE, ref enableValue, sizeof(int));
+                if (isNotLoaded)
+                    _ = SetWindowPos(form.Handle, IntPtr.Zero, 0, 0, 0, 0, 0x0001 | 0x0002); // SWP_NOSIZE | SWP_NOMOVE
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"SetDarkTitleBarForWindow() error for window \"{form}\" - {ex.GetType()}: {ex.Message}");
             }
         }
 
@@ -1798,11 +1935,17 @@ namespace UndertaleModTool
                 }
             }
         }
-        public static childItem FindVisualChild<childItem>(DependencyObject obj) where childItem : DependencyObject
+        public static childItem FindVisualChild<childItem>(DependencyObject obj, string name = null) where childItem : FrameworkElement
         {
             foreach (childItem child in FindVisualChildren<childItem>(obj))
             {
-                return child;
+                if (!String.IsNullOrEmpty(name))
+                {
+                    if (child.Name == name)
+                        return child;
+                }
+                else
+                    return child;
             }
 
             return null;
@@ -2137,6 +2280,17 @@ namespace UndertaleModTool
             catch (Exception err)
             {
                 item.Items.Add(new MenuItem {Header = err.ToString(), IsEnabled = false});
+            }
+
+            item.UpdateLayout();
+            Popup popup = FindVisualChild<Popup>(item);
+            var content = popup?.Child as Border;
+            if (content is not null)
+            {
+                if (Settings.Instance.EnableDarkMode)
+                    content.Background = appDarkStyle[SystemColors.MenuBrushKey] as SolidColorBrush;
+                else
+                    content.Background = SystemColors.MenuBrush;
             }
 
             // If we're at the complete root, we need to add the "Run other script" button as well
@@ -3694,7 +3848,7 @@ result in loss of work.");
         // source - https://stackoverflow.com/a/10738247/12136394
         private void TabItem_PreviewMouseMove(object sender, MouseEventArgs e)
         {
-            if (e.Source is not TabItem tabItem || e.OriginalSource is Button)
+            if (e.Source is not TabItemDark tabItem || e.OriginalSource is Button)
                 return;
 
             if (Mouse.PrimaryDevice.LeftButton == MouseButtonState.Pressed)
@@ -3705,8 +3859,8 @@ result in loss of work.");
         }
         private void TabItem_Drop(object sender, DragEventArgs e)
         {
-            if (e.Source is TabItem tabItemTarget &&
-                e.Data.GetData(typeof(TabItem)) is TabItem tabItemSource &&
+            if (e.Source is TabItemDark tabItemTarget &&
+                e.Data.GetData(typeof(TabItemDark)) is TabItemDark tabItemSource &&
                 !tabItemTarget.Equals(tabItemSource))
             {
                 int sourceIndex = tabItemSource.TabIndex;

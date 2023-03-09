@@ -59,10 +59,10 @@
               <!--Texture Page List-->
               <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Texture Pages</TextBlock>
               <Expander Grid.Row="1" Grid.Column="1" Margin="3" Header="List">
-                <DataGrid ItemsSource="{Binding TexturePages}" MaxHeight="370" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
-                          ScrollViewer.CanContentScroll="True"
-                          VirtualizingPanel.IsVirtualizing="True"
-                          VirtualizingPanel.VirtualizationMode="Recycling">
+                <local:DataGridDark ItemsSource="{Binding TexturePages}" MaxHeight="370" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+                                    ScrollViewer.CanContentScroll="True"
+                                    VirtualizingPanel.IsVirtualizing="True"
+                                    VirtualizingPanel.VirtualizationMode="Recycling">
                   <DataGrid.Resources>
                     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                     <Style TargetType="{x:Type DataGridCell}">
@@ -97,16 +97,16 @@
                       </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                   </DataGrid.Columns>
-                </DataGrid>
+                </local:DataGridDark>
               </Expander>
 
               <!--Sprite List-->
               <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Sprites</TextBlock>
               <Expander Grid.Row="2" Grid.Column="1" Margin="3" Header="List">
-                <DataGrid ItemsSource="{Binding Sprites}" MaxHeight="370" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
-                          ScrollViewer.CanContentScroll="True"
-                          VirtualizingPanel.IsVirtualizing="True"
-                          VirtualizingPanel.VirtualizationMode="Recycling">
+                <local:DataGridDark ItemsSource="{Binding Sprites}" MaxHeight="370" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+                                    ScrollViewer.CanContentScroll="True"
+                                    VirtualizingPanel.IsVirtualizing="True"
+                                    VirtualizingPanel.VirtualizationMode="Recycling">
                   <DataGrid.Resources>
                     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                     <Style TargetType="{x:Type DataGridCell}">
@@ -141,7 +141,7 @@
                       </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                   </DataGrid.Columns>
-                </DataGrid>
+                </local:DataGridDark>
               </Expander>
 
               <!--Spine Sprite List-->
@@ -149,10 +149,10 @@
                          Visibility="{Binding DataContext.Data, Mode=OneTime, Converter={StaticResource IsGM2023Converter}, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}"/>
               <Expander Grid.Row="3" Grid.Column="1" Margin="3" Header="List"
                         Visibility="{Binding DataContext.Data, Mode=OneTime, Converter={StaticResource IsGM2023Converter}, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
-                <DataGrid ItemsSource="{Binding SpineSprites}" MaxHeight="370" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
-                          ScrollViewer.CanContentScroll="True"
-                          VirtualizingPanel.IsVirtualizing="True"
-                          VirtualizingPanel.VirtualizationMode="Recycling">
+                <local:DataGridDark ItemsSource="{Binding SpineSprites}" MaxHeight="370" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+                                    ScrollViewer.CanContentScroll="True"
+                                    VirtualizingPanel.IsVirtualizing="True"
+                                    VirtualizingPanel.VirtualizationMode="Recycling">
                   <DataGrid.Resources>
                     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                     <Style TargetType="{x:Type DataGridCell}">
@@ -187,16 +187,16 @@
                       </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                   </DataGrid.Columns>
-                </DataGrid>
+                </local:DataGridDark>
               </Expander>
 
               <!--Font List-->
               <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Fonts</TextBlock>
               <Expander Grid.Row="4" Grid.Column="1" Margin="3" Header="List">
-                <DataGrid ItemsSource="{Binding Fonts}" MaxHeight="370" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
-                          ScrollViewer.CanContentScroll="True"
-                          VirtualizingPanel.IsVirtualizing="True"
-                          VirtualizingPanel.VirtualizationMode="Recycling">
+                <local:DataGridDark ItemsSource="{Binding Fonts}" MaxHeight="370" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+                                    ScrollViewer.CanContentScroll="True"
+                                    VirtualizingPanel.IsVirtualizing="True"
+                                    VirtualizingPanel.VirtualizationMode="Recycling">
                   <DataGrid.Resources>
                     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                     <Style TargetType="{x:Type DataGridCell}">
@@ -231,16 +231,16 @@
                       </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                   </DataGrid.Columns>
-                </DataGrid>
+                </local:DataGridDark>
               </Expander>
 
               <!--Tileset List-->
               <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Tilesets</TextBlock>
               <Expander Grid.Row="5" Grid.Column="1" Margin="3" Header="List">
-                <DataGrid ItemsSource="{Binding Tilesets}" MaxHeight="370" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
-                          ScrollViewer.CanContentScroll="True"
-                          VirtualizingPanel.IsVirtualizing="True"
-                          VirtualizingPanel.VirtualizationMode="Recycling">
+                <local:DataGridDark ItemsSource="{Binding Tilesets}" MaxHeight="370" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+                                    ScrollViewer.CanContentScroll="True"
+                                    VirtualizingPanel.IsVirtualizing="True"
+                                    VirtualizingPanel.VirtualizationMode="Recycling">
                   <DataGrid.Resources>
                     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                     <Style TargetType="{x:Type DataGridCell}">
@@ -275,7 +275,7 @@
                       </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                   </DataGrid.Columns>
-                </DataGrid>
+                </local:DataGridDark>
               </Expander>
             </Grid>
         </StackPanel>

@@ -17,9 +17,56 @@ namespace UndertaleModTool.Windows
         public bool AllowMultiline { get; }
         public string DefaultValue { get; }
         public string ReturnString { get; set; }
+
+        private static Color bgColor, textBoxBGColor, textColor;
+        public static Color BGColor
+        {
+            get => bgColor;
+            set
+            {
+                bgColor = value;
+                foreach (Form f in Application.OpenForms)
+                {
+                    if (f is TextInput inp)
+                        inp.BackColor = value;
+                }
+            }
+        }
+        public static Color TextBoxBGColor
+        {
+            get => textBoxBGColor;
+            set
+            {
+                textBoxBGColor = value;
+                foreach (Form f in Application.OpenForms)
+                {
+                    if (f is TextInput inp)
+                        inp.richTextBox1.BackColor = value;
+                }
+            }
+        }
+        public static Color TextColor
+        {
+            get => textColor;
+            set
+            {
+                textColor = value;
+                foreach (Form f in Application.OpenForms)
+                {
+                    if (f is TextInput inp)
+                    {
+                        inp.label1.ForeColor = value;
+                        inp.button1.ForeColor = value;
+                        inp.richTextBox1.ForeColor = value;
+                    }
+                }
+            }
+        }
+
         public TextInput(string message, string title, string defaultValue, bool allowMultiline, bool readOnly = false)
         {
             InitializeComponent();
+
             Icon = new Icon(App.GetResourceStream(new Uri("pack://application:,,,/icon.ico")).Stream); // "UndertaleModTool/icon.ico"
             Message = message;
             Title = title;
@@ -36,6 +83,19 @@ namespace UndertaleModTool.Windows
             richTextBox1.ReadOnly = readOnly;
 
             label1.AutoSize = false;
+
+            // dark mode related
+            BackColor = BGColor;
+            richTextBox1.BackColor = TextBoxBGColor;
+            label1.ForeColor = TextColor;
+            button1.ForeColor = TextColor;
+            richTextBox1.ForeColor = TextColor;
+            textCommandsMenu.ForeColor = TextColor;
+            textCommandsMenu.BackColor = TextBoxBGColor;
+            textCopyMenu.ForeColor = TextColor;
+            textCopyMenu.BackColor = TextBoxBGColor;
+            if (Settings.Instance.EnableDarkMode)
+                MainWindow.SetDarkTitleBarForWindow(this, true, false);
         }
 
         private void TextInput_Load(object sender, EventArgs e)
@@ -51,7 +111,7 @@ namespace UndertaleModTool.Windows
 
             if (richTextBox1.ReadOnly)
             {
-                richTextBox1.BackColor = SystemColors.Window; //restore color to default one.
+                richTextBox1.BackColor = TextBoxBGColor; //restore color to default one.
                 richTextBox1.ContextMenuStrip = textCopyMenu;
             }
         }

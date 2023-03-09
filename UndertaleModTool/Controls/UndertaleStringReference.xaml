@@ -43,7 +43,7 @@
                 </Style>
             </TextBox.Style>
         </TextBox>
-        <Button Grid.Column="1" Click="Details_Click" Content=" ... " ToolTip="Open referenced object">
+        <local:ButtonDark Grid.Column="1" Click="Details_Click" Content=" ... " ToolTip="Open referenced object">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Style.Triggers>
@@ -53,6 +53,6 @@
                     </Style.Triggers>
                 </Style>
             </Button.Style>
-        </Button>
+        </local:ButtonDark>
     </Grid>
 </UserControl>

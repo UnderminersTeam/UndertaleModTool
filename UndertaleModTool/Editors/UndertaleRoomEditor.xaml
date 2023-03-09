@@ -109,7 +109,6 @@
                             </TextBlock.Text>
                         </TextBlock>
                     </DataTemplate>
-                    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#D4D4D4"/>
                 </TreeView.Resources>
 
                 <TreeViewItem Header="{Binding Name.Content}" Name="RoomRootItem" IsExpanded="True">
@@ -121,7 +120,8 @@
                                         <Style TargetType="TextBlock">
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding Enabled, Mode=OneWay}" Value="False">
-                                                    <Setter Property="Foreground"  Value="LightGray"/>
+                                                    <Setter Property="Foreground"
+                                                            Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -138,7 +138,8 @@
                                         <Style TargetType="TextBlock">
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding Enabled, Mode=OneWay}" Value="False">
-                                                    <Setter Property="Foreground"  Value="LightGray"/>
+                                                    <Setter Property="Foreground"
+                                                            Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -150,9 +151,9 @@
                     <!-- GameObjItems header changes depending on GMS version -->
                     <TreeViewItem Name="GameObjItems" Header="Game objects" ItemsSource="{Binding GameObjects, Mode=OneWay}">
                         <TreeViewItem.Resources>
-                            <ContextMenu x:Key="cm">
+                            <local:ContextMenuDark x:Key="cm">
                                 <MenuItem Header="New Object Instance" Click="MenuItem_NewObjectInstance_Click"/>
-                            </ContextMenu>
+                            </local:ContextMenuDark>
                         </TreeViewItem.Resources>
                         <TreeViewItem.Style>
                             <Style TargetType="{x:Type TreeViewItem}">
@@ -160,7 +161,8 @@
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}" Value="False">
                                         <DataTrigger.Setters>
-                                            <Setter Property="Foreground"  Value="LightGray"/>
+                                            <Setter Property="Foreground"
+                                                    Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
                                             <Setter Property="ContextMenu" Value="{x:Null}"/>
                                         </DataTrigger.Setters>
                                     </DataTrigger>
@@ -182,25 +184,26 @@
                             </HierarchicalDataTemplate>
                         </TreeViewItem.ItemTemplate>
                         <TreeViewItem.ContextMenu>
-                            <ContextMenu>
+                            <local:ContextMenuDark>
                                 <MenuItem Header="New Tile" Click="MenuItem_NewGMS1Tile_Click"/>
-                            </ContextMenu>
+                            </local:ContextMenuDark>
                         </TreeViewItem.ContextMenu>
                     </TreeViewItem>
                     <TreeViewItem Name="LayerItems" Header="Layers" ItemsSource="{Binding Layers, Mode=OneWay}" IsExpanded="True" Visibility="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}, ConverterParameter=invert}">
                         <TreeViewItem.ContextMenu>
-                            <ContextMenu>
+                            <local:ContextMenuDark>
                                 <MenuItem Header="New Instances layer" Click="MenuItem_NewLayerInstances_Click"/>
                                 <MenuItem Header="New Tiles layer" Click="MenuItem_NewLayerTiles_Click"/>
                                 <MenuItem Header="New Background layer" Click="MenuItem_NewLayerBackground_Click"/>
                                 <MenuItem Header="New Assets layer" Click="MenuItem_NewLayerAssets_Click"/>
-                            </ContextMenu>
+                            </local:ContextMenuDark>
                         </TreeViewItem.ContextMenu>
                         <TreeViewItem.Resources>
                             <Style x:Key="LayerItemStyle" TargetType="TextBlock">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsVisible, Mode=OneWay}" Value="False">
-                                        <Setter Property="Foreground" Value="LightGray"/>
+                                        <Setter Property="Foreground"
+                                                Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -211,9 +214,9 @@
                                     <HierarchicalDataTemplate ItemsSource="{Binding InstancesData.Instances, Mode=OneWay}" ItemTemplateSelector="{x:Null}">
                                         <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">
                                             <TextBlock.ContextMenu>
-                                                <ContextMenu>
+                                                <local:ContextMenuDark>
                                                     <MenuItem Header="New Object Instance" Click="MenuItem_NewGMS2ObjectInstance_Click"/>
-                                                </ContextMenu>
+                                                </local:ContextMenuDark>
                                             </TextBlock.ContextMenu>
                                         </TextBlock>
                                     </HierarchicalDataTemplate>
@@ -237,10 +240,10 @@
                                         </HierarchicalDataTemplate.ItemsSource>
                                         <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">
                                             <TextBlock.ContextMenu>
-                                                <ContextMenu>
+                                                <local:ContextMenuDark>
                                                     <MenuItem Header="New Legacy Tile" Click="MenuItem_NewLegacyTile_Click"/>
                                                     <MenuItem Header="New Sprite Instance" Click="MenuItem_NewSprite_Click"/>
-                                                </ContextMenu>
+                                                </local:ContextMenuDark>
                                             </TextBlock.ContextMenu>
                                         </TextBlock>
                                     </HierarchicalDataTemplate>
@@ -825,8 +828,8 @@
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <Button Grid.Column="0" Margin="3" Click="TileDataExport_Click">Export</Button>
-                                                <Button Grid.Column="1" Margin="3" Click="TileDataImport_Click">Import</Button>
+                                                <local:ButtonDark Grid.Column="0" Margin="3" Click="TileDataExport_Click">Export</local:ButtonDark>
+                                                <local:ButtonDark Grid.Column="1" Margin="3" Click="TileDataImport_Click">Import</local:ButtonDark>
                                             </Grid>
                                         </Grid>
                                     </DataTemplate>
@@ -892,7 +895,7 @@
                                                 </Grid.ColumnDefinitions>
 
                                                 <TextBox Grid.Column="0" Text="{Binding AnimationSpeed}"/>
-                                                <ComboBox Grid.Column="1" ItemsSource="{Binding Source={StaticResource AnimationSpeedType}}" SelectedItem="{Binding AnimationSpeedType}" />
+                                                <local:ComboBoxDark Grid.Column="1" ItemsSource="{Binding Source={StaticResource AnimationSpeedType}}" SelectedItem="{Binding AnimationSpeedType}" />
                                             </Grid>
                                         </Grid>
                                     </DataTemplate>
@@ -969,7 +972,7 @@
                                 </Grid.ColumnDefinitions>
 
                                 <TextBox Grid.Column="0" Text="{Binding AnimationSpeed}"/>
-                                <ComboBox Grid.Column="1" ItemsSource="{Binding Source={StaticResource AnimationSpeedType}}" SelectedItem="{Binding AnimationSpeedType}" />
+                                <local:ComboBoxDark Grid.Column="1" ItemsSource="{Binding Source={StaticResource AnimationSpeedType}}" SelectedItem="{Binding AnimationSpeedType}" />
                             </Grid>
 
                             <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Frame index</TextBlock>
@@ -1361,6 +1364,6 @@
                 </ItemsControl.Resources>
             </ItemsControl>
         </ScrollViewer>
-        <Button Grid.Column="0" Grid.Row="3" Content="Save as PNG" Click="ExportAsPNG_Click"/>
+        <local:ButtonDark Grid.Column="0" Grid.Row="3" Content="Save as PNG" Click="ExportAsPNG_Click"/>
     </Grid>
 </local:DataUserControl>
