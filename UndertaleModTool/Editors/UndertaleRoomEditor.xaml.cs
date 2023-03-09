@@ -129,7 +129,8 @@ namespace UndertaleModTool
 
         private void UndertaleRoomEditor_Loaded(object sender, RoutedEventArgs e)
         {
-            RoomRootItem.IsSelected = true;
+            if (ObjectEditor.Content is null)
+                RoomRootItem.IsSelected = true;
         }
         private void UndertaleRoomEditor_Unloaded(object sender, RoutedEventArgs e)
         {
