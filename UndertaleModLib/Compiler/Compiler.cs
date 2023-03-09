@@ -16,6 +16,7 @@ namespace UndertaleModLib.Compiler
         public Dictionary<string, VariableInfo> userDefinedVariables = new Dictionary<string, VariableInfo>();
         public bool ensureFunctionsDefined = true;
         public bool ensureVariablesDefined = true;
+        public static bool GMS2_3;
         public int LastCompiledArgumentCount = 0;
         public Dictionary<string, string> LocalVars = new Dictionary<string, string>();
         public Dictionary<string, string> GlobalVars = new Dictionary<string, string>();
@@ -86,7 +87,7 @@ namespace UndertaleModLib.Compiler
             AddAssetsFromList(Data?.Paths);
             AddAssetsFromList(Data?.Fonts);
             AddAssetsFromList(Data?.Timelines);
-            if (!(Data?.GMS2_3 ?? false))
+            if (!GMS2_3)
                 AddAssetsFromList(Data?.Scripts);
             AddAssetsFromList(Data?.Shaders);
             AddAssetsFromList(Data?.Rooms);

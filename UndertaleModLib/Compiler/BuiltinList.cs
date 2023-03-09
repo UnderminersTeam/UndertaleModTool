@@ -1104,7 +1104,7 @@ namespace UndertaleModLib.Compiler
             Functions["array_equals"] = new FunctionInfo(this, 2);
             Functions["array_create"] = new FunctionInfo(this, -1);
             Functions["array_copy"] = new FunctionInfo(this, 5);
-            if (data?.GMS2_3 == true)
+            if (data?.IsVersionAtLeast(2, 3) == true)
             {
                 Functions["method"] = new FunctionInfo(this, 2);
                 Functions["method_get_self"] = new FunctionInfo(this, 1);
@@ -2090,7 +2090,7 @@ namespace UndertaleModLib.Compiler
             Functions["buffer_async_group_begin"] = new FunctionInfo(this, 1);
             Functions["buffer_async_group_end"] = new FunctionInfo(this, 0);
             Functions["buffer_async_group_option"] = new FunctionInfo(this, 2);
-            Functions["buffer_get_surface"] = new FunctionInfo(this, (data.GMS2_3_1 ? 3 : 5)); // be more robust here
+            Functions["buffer_get_surface"] = new FunctionInfo(this, (data.IsVersionAtLeast(2, 3, 1) ? 3 : 5)); // be more robust here
             Functions["buffer_set_surface"] = new FunctionInfo(this, 5);
             Functions["buffer_set_network_safe"] = new FunctionInfo(this, 2);
             Functions["buffer_create_from_vertex_buffer"] = new FunctionInfo(this, 3);

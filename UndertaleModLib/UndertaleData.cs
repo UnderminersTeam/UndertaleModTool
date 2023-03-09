@@ -290,56 +290,6 @@ namespace UndertaleModLib
         public bool ShortCircuit = true;
 
         /// <summary>
-        /// Whether the data file is from version GMS2.2.2.302
-        /// </summary>
-        public bool GMS2_2_2_302 = false;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2.3
-        /// </summary>
-        public bool GMS2_3 = false;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2.3.1
-        /// </summary>
-        public bool GMS2_3_1 = false;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2.3.2
-        /// </summary>
-        public bool GMS2_3_2 = false;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2022.1.
-        /// </summary>
-        public bool GMS2022_1 = false;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2022.2.
-        /// </summary>
-        public bool GMS2022_2 = false;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2022.3.
-        /// </summary>
-        public bool GM2022_3 = false;
-        
-        /// <summary>
-        /// Whether the data file is from version GMS2022.5.
-        /// </summary>
-        public bool GM2022_5 = false;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2022.6.
-        /// </summary>
-        public bool GM2022_6 = false;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2022.9.
-        /// </summary>
-        public bool GM2022_9 = false;
-
-        /// <summary>
         /// Some info for the editor to store data on.
         /// </summary>
         public readonly ToolInfo ToolInfo = new ToolInfo();
@@ -470,7 +420,7 @@ namespace UndertaleModLib
         /// <returns><see langword="true"/> if yes, <see langword="false"/> if not.</returns>
         public bool IsGameMaker2()
         {
-            return IsVersionAtLeast(2, 0, 0, 0);
+            return IsVersionAtLeast(2);
         }
 
 
@@ -483,6 +433,24 @@ namespace UndertaleModLib
         }
 
         /// <summary>
+        /// Sets the GMS2+ version flag in GeneralInfo.
+        /// </summary>
+        /// <param name="major">The major version.</param>
+        /// <param name="minor">The minor version.</param>
+        /// <param name="release">The release version.</param>
+        /// <param name="build">The build version.</param>
+        public void SetGMS2Version(uint major, uint minor = 0, uint release = 0, uint build = 0)
+        {
+            if (major != 2 && major != 2022 && major != 2023)
+                throw new NotSupportedException("Attempted to set a version of GameMaker " + major + " using SetGMS2Version");
+
+            GeneralInfo.Major = major;
+            GeneralInfo.Minor = minor;
+            GeneralInfo.Release = release;
+            GeneralInfo.Build = build;
+        }
+
+        /// <summary>
         /// Reports whether the version of the data file is the same or higher than a specified version.
         /// </summary>
         /// <param name="major">The major version.</param>
@@ -490,8 +458,14 @@ namespace UndertaleModLib
         /// <param name="release">The release version.</param>
         /// <param name="build">The build version.</param>
         /// <returns>Whether the version of the data file is the same or higher than a specified version.</returns>
-        public bool IsVersionAtLeast(uint major, uint minor, uint release, uint build)
+        public bool IsVersionAtLeast(uint major, uint minor = 0, uint release = 0, uint build = 0)
         {
+            if (GeneralInfo is null)
+            {
+                Debug.WriteLine("\"UndertaleData.IsVersionAtLeast()\" error - \"GeneralInfo\" is null.");
+                return false;
+            }
+
             if (GeneralInfo.Major != major)
                 return (GeneralInfo.Major > major);
 

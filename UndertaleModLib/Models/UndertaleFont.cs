@@ -163,11 +163,22 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             Kerning = reader.ReadUndertaleObject<UndertaleSimpleListShort<GlyphKerning>>();
         }
 
+        /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+        public static uint UnserializeChildObjectCount(UndertaleReader reader)
+        {
+            reader.Position += 14;
+
+            return 1 + UndertaleSimpleListShort<GlyphKerning>.UnserializeChildObjectCount(reader);
+        }
+
         /// <summary>
         /// A class representing kerning for a glyph.
         /// </summary>
-        public class GlyphKerning : UndertaleObject
+        public class GlyphKerning : UndertaleObject, IStaticChildObjectsSize
         {
+            /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+            public static readonly uint ChildObjectsSize = 4;
+
             /// <summary>
             /// TODO: unknown?
             /// </summary>
@@ -229,7 +240,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
         writer.Write(ScaleY);
         if (writer.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
             writer.Write(AscenderOffset);
-        if (writer.undertaleData.GMS2022_2)
+        if (writer.undertaleData.IsVersionAtLeast(2022, 2))
             writer.Write(Ascender);
         writer.WriteUndertaleObject(Glyphs);
     }
@@ -261,9 +272,23 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
         ScaleY = reader.ReadSingle();
         if (reader.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
             AscenderOffset = reader.ReadInt32();
-        if (reader.undertaleData.GMS2022_2)
+        if (reader.undertaleData.IsVersionAtLeast(2022, 2))
             Ascender = reader.ReadUInt32();
         Glyphs = reader.ReadUndertaleObject<UndertalePointerList<Glyph>>();
+    }
+
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        int skipSize = 40;
+        if (reader.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
+            skipSize += 4; // AscenderOffset
+        if (reader.undertaleData.IsVersionAtLeast(2022, 2))
+            skipSize += 4; // Ascender
+
+        reader.Position += skipSize;
+
+        return 1 + UndertalePointerList<Glyph>.UnserializeChildObjectCount(reader);
     }
 
     /// <inheritdoc />

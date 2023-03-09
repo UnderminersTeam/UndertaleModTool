@@ -124,7 +124,7 @@ public class UndertaleTextureGroupInfo : UndertaleNamedResource, IDisposable
     {
         writer.WriteUndertaleString(Name);
 
-        if (writer.undertaleData.GM2022_9)
+        if (writer.undertaleData.IsVersionAtLeast(2022, 9))
         {
             writer.WriteUndertaleString(Directory);
             writer.WriteUndertaleString(Extension);
@@ -133,13 +133,15 @@ public class UndertaleTextureGroupInfo : UndertaleNamedResource, IDisposable
 
         writer.WriteUndertaleObjectPointer(TexturePages);
         writer.WriteUndertaleObjectPointer(Sprites);
-        writer.WriteUndertaleObjectPointer(SpineSprites);
+        if (!writer.undertaleData.IsVersionAtLeast(2023, 1))
+            writer.WriteUndertaleObjectPointer(SpineSprites);
         writer.WriteUndertaleObjectPointer(Fonts);
         writer.WriteUndertaleObjectPointer(Tilesets);
 
         writer.WriteUndertaleObject(TexturePages);
         writer.WriteUndertaleObject(Sprites);
-        writer.WriteUndertaleObject(SpineSprites);
+        if (!writer.undertaleData.IsVersionAtLeast(2023, 1))
+            writer.WriteUndertaleObject(SpineSprites);
         writer.WriteUndertaleObject(Fonts);
         writer.WriteUndertaleObject(Tilesets);
     }
@@ -149,7 +151,7 @@ public class UndertaleTextureGroupInfo : UndertaleNamedResource, IDisposable
     {
         Name = reader.ReadUndertaleString();
 
-        if (reader.undertaleData.GM2022_9)
+        if (reader.undertaleData.IsVersionAtLeast(2022, 9))
         {
             Directory = reader.ReadUndertaleString();
             Extension = reader.ReadUndertaleString();
@@ -159,16 +161,62 @@ public class UndertaleTextureGroupInfo : UndertaleNamedResource, IDisposable
         // Read the pointers
         TexturePages = reader.ReadUndertaleObjectPointer<UndertaleSimpleResourcesList<UndertaleEmbeddedTexture, UndertaleChunkTXTR>>();
         Sprites = reader.ReadUndertaleObjectPointer<UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT>>();
-        SpineSprites = reader.ReadUndertaleObjectPointer<UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT>>();
+        if (!reader.undertaleData.IsVersionAtLeast(2023, 1))
+            SpineSprites = reader.ReadUndertaleObjectPointer<UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT>>();
         Fonts = reader.ReadUndertaleObjectPointer<UndertaleSimpleResourcesList<UndertaleFont, UndertaleChunkFONT>>();
         Tilesets = reader.ReadUndertaleObjectPointer<UndertaleSimpleResourcesList<UndertaleBackground, UndertaleChunkBGND>>();
 
         // Read the objects, throwing an error if the pointers are invalid
         reader.ReadUndertaleObject(TexturePages);
         reader.ReadUndertaleObject(Sprites);
-        reader.ReadUndertaleObject(SpineSprites);
+        if (!reader.undertaleData.IsVersionAtLeast(2023, 1)) 
+            reader.ReadUndertaleObject(SpineSprites);
         reader.ReadUndertaleObject(Fonts);
         reader.ReadUndertaleObject(Tilesets);
+    }
+
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        uint count = 0;
+
+        reader.Position += 4; // "Name"
+
+        if (reader.undertaleData.IsVersionAtLeast(2022, 9))
+            reader.Position += 12;
+
+        uint texPagesPtr = reader.ReadUInt32();
+        uint spritesPtr = reader.ReadUInt32();
+        uint spineSpritesPtr = 0;
+        if (!reader.undertaleData.IsVersionAtLeast(2023, 1))
+            spineSpritesPtr = reader.ReadUInt32();
+        uint fontsPtr = reader.ReadUInt32();
+        uint tilesetsPtr = reader.ReadUInt32();
+
+        reader.AbsPosition = texPagesPtr;
+        count += 1 + UndertaleSimpleResourcesList<UndertaleEmbeddedTexture, UndertaleChunkTXTR>
+                     .UnserializeChildObjectCount(reader);
+
+        reader.AbsPosition = spritesPtr;
+        count += 1 + UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT>
+                     .UnserializeChildObjectCount(reader);
+
+        if (!reader.undertaleData.IsVersionAtLeast(2023, 1))
+        {
+            reader.AbsPosition = spineSpritesPtr;
+            count += 1 + UndertaleSimpleResourcesList<UndertaleSprite, UndertaleChunkSPRT>
+                         .UnserializeChildObjectCount(reader);
+        }
+
+        reader.AbsPosition = fontsPtr;
+        count += 1 + UndertaleSimpleResourcesList<UndertaleFont, UndertaleChunkFONT>
+                     .UnserializeChildObjectCount(reader);
+
+        reader.AbsPosition = tilesetsPtr;
+        count += 1 + UndertaleSimpleResourcesList<UndertaleBackground, UndertaleChunkBGND>
+                     .UnserializeChildObjectCount(reader);
+
+        return count;
     }
 
     /// <inheritdoc />

@@ -6,7 +6,8 @@ if (Data?.GeneralInfo.BytecodeVersion == 16)
         return;
     }
     Data.GeneralInfo.BytecodeVersion = 17;
-    Data.GMS2_2_2_302 = true;
+    if (!Data.IsVersionAtLeast(2, 2, 2, 302))
+        Data.SetGMS2Version(2, 2, 2, 302);
     Data.FORM.Chunks["TGIN"] = new UndertaleChunkTGIN();
     String[] order = {"GEN8", "OPTN", "LANG", "EXTN", "SOND", "AGRP", "SPRT", "BGND", "PATH", "SCPT", "GLOB", "SHDR", "FONT", "TMLN", "OBJT", "ROOM", "DAFL", "EMBI", "TPAG", "TGIN", "CODE", "VARI", "FUNC", "STRG", "TXTR", "AUDO"};
     Dictionary<string, UndertaleChunk> newChunks = new Dictionary<string, UndertaleChunk>();

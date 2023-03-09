@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
              d:DesignHeight="20" d:DesignWidth="300">
@@ -16,7 +17,7 @@
                  ToolTip="This is an object reference. Drag and drop an object of matching type from the tree on the left to change it!"
                  PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" PreviewMouseDoubleClick="TextBox_MouseDoubleClick"
                  Text="{Binding ObjectReference, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-        <Button Grid.Column="1" Name="DetailsButton" Click="Details_Click">
+        <local:ButtonDark Grid.Column="1" x:Name="DetailsButton" Click="Details_Click">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Setter Property="Content" Value=" ... " />
@@ -38,8 +39,8 @@
                     </Style.Triggers>
                 </Style>
             </Button.Style>
-        </Button>
-        <Button Grid.Column="2" Name="RemoveButton" Click="Remove_Click" Content=" X " ToolTip="Remove reference">
+        </local:ButtonDark>
+        <local:ButtonDark Grid.Column="2" x:Name="RemoveButton" Click="Remove_Click" Content=" X " ToolTip="Remove reference">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Style.Triggers>
@@ -56,6 +57,6 @@
                     </Style.Triggers>
                 </Style>
             </Button.Style>
-        </Button>
+        </local:ButtonDark>
     </Grid>
 </UserControl>

@@ -9,6 +9,7 @@
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleEmbeddedTexture}">
     <UserControl.Resources>
         <local:BooleanToVisibilityConverter x:Key="BoolFalseToVisConverter" local:trueValue="Collapsed" local:falseValue="Visible"/>
+        <local:TextureLoadedWrapper x:Key="TextureLoadedWrapper"/>
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -39,7 +40,14 @@
             <TextBox Grid.Column="1" Name="TexHeight" Margin="3" Text="{Binding TextureData.Height, Mode=OneWay}" IsReadOnly="True"/>
         </Grid>
 
-        <TextBlock Grid.Row="3" Grid.Column="4" Margin="3" Foreground="Red" Visibility="{Binding TextureLoaded, Mode=OneWay, Converter={StaticResource BoolFalseToVisConverter}}">Warning: Texture failed to load!</TextBlock>
+        <TextBlock Grid.Row="3" Grid.Column="4" Margin="3" Foreground="Red" Text="Warning: Texture failed to load!">
+            <TextBlock.Visibility>
+                <MultiBinding Converter="{StaticResource TextureLoadedWrapper}" Mode="OneWay">
+                    <Binding Path="TextureLoaded" Mode="OneWay"/>
+                    <Binding Path="TextureExternal" Mode="OneWay"/>
+                </MultiBinding>
+            </TextBlock.Visibility>
+        </TextBlock>
         
         <Grid Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="3">
             <Grid.ColumnDefinitions>
@@ -71,8 +79,8 @@
                 </Border>
             </Viewbox>
 
-            <Button Grid.Row="1" Grid.Column="0" Content="Import" Click="Import_Click"/>
-            <Button Grid.Row="1" Grid.Column="3" Content="Export" Click="Export_Click"/>
+            <local:ButtonDark Grid.Row="1" Grid.Column="0" Content="Import" Click="Import_Click"/>
+            <local:ButtonDark Grid.Row="1" Grid.Column="3" Content="Export" Click="Export_Click"/>
         </Grid>
     </Grid>
 </local:DataUserControl>

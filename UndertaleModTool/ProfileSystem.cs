@@ -23,6 +23,9 @@ namespace UndertaleModTool
         }
         public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null)
         {
+            if (code.ParentEntry is not null)
+                return $"// This code entry is a reference to an anonymous function within \"{code.ParentEntry.Name.Content}\", decompile that instead.";
+
             GlobalDecompileContext DECOMPILE_CONTEXT = context is null ? new(Data, false) : context;
             try
             {
@@ -36,6 +39,9 @@ namespace UndertaleModTool
 
         public string GetDisassemblyText(UndertaleCode code)
         {
+            if (code.ParentEntry is not null)
+                return $"; This code entry is a reference to an anonymous function within \"{code.ParentEntry.Name.Content}\", disassemble that instead.";
+
             try
             {
                 return code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : "";

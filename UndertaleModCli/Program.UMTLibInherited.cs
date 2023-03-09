@@ -389,7 +389,7 @@ public partial class Program : IScriptInterface
             Console.Write("Path: ");
             path = RemoveQuotes(Console.ReadLine());
             directoryInfo = new DirectoryInfo(path);
-        } while (directoryInfo.Exists);
+        } while (!directoryInfo.Exists);
         return path;
     }
 
@@ -417,6 +417,9 @@ public partial class Program : IScriptInterface
     /// <inheritdoc/>
     public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null)
     {
+        if (code.ParentEntry is not null)
+            return $"// This code entry is a reference to an anonymous function within \"{code.ParentEntry.Name.Content}\", decompile that instead.";
+
         GlobalDecompileContext decompileContext = context is null ? new(Data, false) : context;
         try
         {
@@ -437,6 +440,9 @@ public partial class Program : IScriptInterface
     /// <inheritdoc/>
     public string GetDisassemblyText(UndertaleCode code)
     {
+        if (code.ParentEntry is not null)
+            return $"; This code entry is a reference to an anonymous function within \"{code.ParentEntry.Name.Content}\", disassemble that instead.";
+
         try
         {
             return code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : "";
@@ -639,6 +645,8 @@ public partial class Program : IScriptInterface
     public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
     {
         if (code == null) throw new ArgumentNullException(nameof(code));
+        if (code.ParentEntry is not null)
+            return;
 
         EnsureDataLoaded();
 
@@ -748,6 +756,9 @@ public partial class Program : IScriptInterface
             code.Name = Data.Strings.MakeString(codeName);
             Data.Code.Add(code);
         }
+        else if (code.ParentEntry is not null)
+            return;
+
         if (Data?.GeneralInfo.BytecodeVersion > 14 && Data.CodeLocals.ByName(codeName) == null)
         {
             UndertaleCodeLocals locals = new UndertaleCodeLocals();
@@ -860,7 +871,7 @@ public partial class Program : IScriptInterface
                         methodNumberStr = afterPrefix.Substring(afterPrefix.LastIndexOf("_Collision_") + s2.Length, afterPrefix.Length - (afterPrefix.LastIndexOf("_Collision_") + s2.Length));
                         methodName = "Collision";
                         // GMS 2.3+ use the object name for the one colliding, which is rather useful.
-                        if (Data.GMS2_3)
+                        if (Data.IsVersionAtLeast(2, 3))
                         {
                             if (Data.GameObjects.ByName(methodNumberStr) != null)
                             {
@@ -918,7 +929,7 @@ public partial class Program : IScriptInterface
                 if (!(skipPortions))
                 {
                     obj = Data.GameObjects.ByName(objName);
-                    int eventIdx = (int)Enum.Parse(typeof(EventType), methodName);
+                    int eventIdx = Convert.ToInt32(Enum.Parse(typeof(EventType), methodName));
                     bool duplicate = false;
                     try
                     {
@@ -988,7 +999,7 @@ public partial class Program : IScriptInterface
 
     public void ReassignGUIDs(string guid, uint objectIndex)
     {
-        int eventIdx = (int)Enum.Parse(typeof(EventType), "Collision");
+        int eventIdx = Convert.ToInt32(EventType.Collision);
         for (var i = 0; i < Data.GameObjects.Count; i++)
         {
             UndertaleGameObject obj = Data.GameObjects[i];
@@ -1069,7 +1080,7 @@ public partial class Program : IScriptInterface
 
     public List<uint> GetCollisionValueFromCodeNameGUID(string codeName)
     {
-        int eventIdx = (int)Enum.Parse(typeof(EventType), "Collision");
+        int eventIdx = Convert.ToInt32(EventType.Collision);
         List<uint> possibleValues = new List<uint>();
         for (var i = 0; i < Data.GameObjects.Count; i++)
         {
@@ -1102,7 +1113,7 @@ public partial class Program : IScriptInterface
 
     public List<uint> GetCollisionValueFromGUID(string guid)
     {
-        int eventIdx = (int)Enum.Parse(typeof(EventType), "Collision");
+        int eventIdx = Convert.ToInt32(EventType.Collision);
         List<uint> possibleValues = new List<uint>();
         for (var i = 0; i < Data.GameObjects.Count; i++)
         {
@@ -1155,6 +1166,9 @@ public partial class Program : IScriptInterface
     void SafeImport(string codeName, string gmlCode, bool isGML, bool destroyASM = true, bool checkDecompiler = false, bool throwOnError = false)
     {
         UndertaleCode code = Data.Code.ByName(codeName);
+        if (code?.ParentEntry is not null)
+            return;
+
         try
         {
             if (isGML)

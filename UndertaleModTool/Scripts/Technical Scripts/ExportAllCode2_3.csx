@@ -3,11 +3,12 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
 
 EnsureDataLoaded();
 
 bool is2_3 = false;
-if (!((Data.GMS2_3 == false) && (Data.GMS2_3_1 == false) && (Data.GMS2_3_2 == false)))
+if (Data.IsVersionAtLeast(2, 3))
 {
     is2_3 = true;
     ScriptMessage("This script is for GMS 2.3 games, because some code names get so long that Windows cannot write them adequately.");
@@ -28,7 +29,10 @@ if (Directory.Exists(codeFolder))
 
 Directory.CreateDirectory(codeFolder);
 
-SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
+List<UndertaleCode> toDump = Data.Code.Where(c => c.ParentEntry is null)
+                                      .ToList();
+
+SetProgressBar(null, "Code Entries", 0, toDump.Count);
 StartProgressBarUpdater();
 
 int failed = 0;
@@ -48,16 +52,16 @@ void DumpCode()
     //Because 2.3 code names get way too long, we're gonna convert it to an index based system, starting with a lookup system
     string index_path = Path.Combine(codeFolder, "LookUpTable.txt");
     string index_text = "This is zero indexed, index 0 starts at line 2.";
-    for (var i = 0; i < Data.Code.Count; i++)
+    for (var i = 0; i < toDump.Count; i++)
     {
-        UndertaleCode code = Data.Code[i];
+        UndertaleCode code = toDump[i];
         index_text += "\n";
         index_text += code.Name.Content;
     }
     File.WriteAllText(index_path, index_text);
-    for (var i = 0; i < Data.Code.Count; i++)
+    for (var i = 0; i < toDump.Count; i++)
     {
-        UndertaleCode code = Data.Code[i];
+        UndertaleCode code = toDump[i];
         string path = Path.Combine(codeFolder, i.ToString() + ".gml");
         try
         {

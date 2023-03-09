@@ -106,7 +106,7 @@ namespace UndertaleModTool
                     // says, this isn't working so it's just
                     // hardcoded in the XML for now
                     /*
-                    if(mainWindow.Data.GMS2_3)
+                    if(mainWindow.Data.IsVersionAtLeast(2, 3))
                     {
                         HighlightingColor color = null;
                         foreach (var rule in def.MainRuleSet.Rules)
@@ -843,7 +843,7 @@ namespace UndertaleModTool
 
             code.Replace(compileContext.ResultAssembly);
 
-            if (!mainWindow.Data.GMS2_3)
+            if (!mainWindow.Data.IsVersionAtLeast(2, 3))
             {
                 try
                 {
@@ -1230,12 +1230,12 @@ namespace UndertaleModTool
                 if (func)
                 {
                     val = null;
-                    if (!data.GMS2_3) // in GMS2.3 every custom "function" is in fact a member variable and scripts are never referenced directly
+                    if (!data.IsVersionAtLeast(2, 3)) // in GMS2.3 every custom "function" is in fact a member variable and scripts are never referenced directly
                         ScriptsDict.TryGetValue(nameText, out val);
                     if (val == null)
                     {
                         FunctionsDict.TryGetValue(nameText, out val);
-                        if (data.GMS2_3)
+                        if (data.IsVersionAtLeast(2, 3))
                         {
                             if (val != null)
                             {
@@ -1267,7 +1267,7 @@ namespace UndertaleModTool
                 else
                 {
                     NamedObjDict.TryGetValue(nameText, out val);
-                    if (data.GMS2_3 & val is UndertaleScript)
+                    if (data.IsVersionAtLeast(2, 3) & val is UndertaleScript)
                         val = null; // in GMS2.3 scripts are never referenced directly
                 }
                 if (val == null)
