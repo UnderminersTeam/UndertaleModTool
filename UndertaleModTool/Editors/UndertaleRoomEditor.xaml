@@ -28,7 +28,7 @@
         <local:TileLayerTemplateSelector x:Key="TileLayerTemplateSelector"/>
         <local:TileRectanglesConverter x:Key="TileRectanglesConverter"/>
         <local:CachedImageLoaderWithIndex x:Key="CachedImageLoaderWithIndex"/>
-        <local:DataFieldOneTimeConverter x:Key="DataFieldOneTimeConverter"/>
+        <local:IsGMS2_2_2_302Converter x:Key="IsGMS2_2_2_302Converter"/>
         <local:NegateNumberConverter x:Key="NegateNumberConverter"/>
         <local:ParentGridHeightConverter x:Key="ParentGridHeightConverter"/>
         <CompositeCollection x:Key="AllObjectsGMS1">
@@ -577,7 +577,7 @@
                             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Rotation</TextBlock>
                             <TextBox Grid.Row="6" Grid.Column="2" Margin="3" Text="{Binding Rotation}"/>
 
-                            <Grid Grid.Row="7" Grid.ColumnSpan="3" Visibility="{Binding Data, ConverterParameter=GMS2_2_2_302, Mode=OneTime, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}, Converter={StaticResource DataFieldOneTimeConverter}}">
+                            <Grid Grid.Row="7" Grid.ColumnSpan="3" Visibility="{Binding Data, Mode=OneTime, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}, Converter={StaticResource IsGMS2_2_2_302Converter}}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" SharedSizeGroup="FirstColumn"/>
                                     <ColumnDefinition Width="5"/>
