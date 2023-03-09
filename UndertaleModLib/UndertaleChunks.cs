@@ -960,13 +960,7 @@ namespace UndertaleModLib
 
     public class UndertaleChunkTXTR : UndertaleListChunk<UndertaleEmbeddedTexture>
     {
-        public UndertaleChunkTXTR()
-        {
-            NoGeneratedMips = false;
-        }
-
         public override string Name => "TXTR";
-        public static bool NoGeneratedMips { get; private set; }
 
         private static bool checkedFor2022_3;
         private void CheckFor2022_3And5(UndertaleReader reader)
@@ -1077,16 +1071,18 @@ namespace UndertaleModLib
                 writer.Write((byte)0);
         }
 
-        private void CheckForGeneratedMips(UndertaleReader reader)
+        // GMS 2.0.6.96 is the oldest available runtime version,
+        // so this actually could be some other version between GMS 2.0 - 2.0.6.
+        // (the oldest copy of "Zeus-Runtime.rss" on web.archive.org has this version as first one)
+        private void CheckForGMS2_0_6(UndertaleReader reader)
         {
-            NoGeneratedMips = false;
-
             bool atLeastGMS2_0 = reader.undertaleData.IsGameMaker2();
             bool atLeastGMS2_2 = reader.undertaleData.IsVersionAtLeast(2, 2);
-            if (!atLeastGMS2_0 || atLeastGMS2_2)
+            if (!atLeastGMS2_0 || atLeastGMS2_2 || reader.undertaleData.IsVersionAtLeast(2, 0, 6))
                 return;
 
             long returnPos = reader.Position;
+            bool noGeneratedMips = false;
 
             uint count = reader.ReadUInt32();
             if (count == 0)
@@ -1103,7 +1099,7 @@ namespace UndertaleModLib
                 if (atLeastGMS2_0 && !atLeastGMS2_2) // 2 < version < 2.2
                 {
                     if (secondPtr - firstPtr == 8) // "Scaled" + "_textureData" -> 8
-                        NoGeneratedMips = true;
+                        noGeneratedMips = true;
                 }
             }
             else
@@ -1113,8 +1109,11 @@ namespace UndertaleModLib
 
                 // If there is a zero instead of texture data pointer (which cannot be zero)
                 if (reader.ReadUInt32() == 0)
-                    NoGeneratedMips = true;
+                    noGeneratedMips = true;
             }
+
+            if (!noGeneratedMips)
+                reader.undertaleData.SetGMS2Version(2, 0, 6);
 
             reader.Position = returnPos;
         }
@@ -1124,7 +1123,7 @@ namespace UndertaleModLib
             if (!checkedFor2022_3)
                 CheckFor2022_3And5(reader);
 
-            CheckForGeneratedMips(reader);
+            CheckForGMS2_0_6(reader);
 
             base.UnserializeChunk(reader);
             reader.SwitchReaderType(false);
@@ -1152,7 +1151,7 @@ namespace UndertaleModLib
             CheckFor2022_3And5(reader);
 
             uint txtrSize = UndertaleEmbeddedTexture.ChildObjectsSize;
-            if (!NoGeneratedMips && reader.undertaleData.IsGameMaker2())
+            if (reader.undertaleData.IsVersionAtLeast(2, 0, 6))
                 txtrSize += 4; // "GeneratedMips"
             if (reader.undertaleData.IsVersionAtLeast(2022, 3))
                 txtrSize += 4; // "TextureBlockSize"

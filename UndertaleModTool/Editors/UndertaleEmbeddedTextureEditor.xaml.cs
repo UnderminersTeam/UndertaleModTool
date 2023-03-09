@@ -146,21 +146,10 @@ namespace UndertaleModTool
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == DependencyProperty.UnsetValue)
-                return null;
+            if (value is not UndertaleData data)
+                return Visibility.Collapsed;
 
-            Visibility isGMS2;
-            try
-            {
-                isGMS2 = (Visibility)value;
-            }
-            catch
-            {
-                return null;
-            }
-
-            return (isGMS2 == Visibility.Visible && !UndertaleChunkTXTR.NoGeneratedMips)
-                   ? Visibility.Visible : Visibility.Collapsed;
+            return data.IsVersionAtLeast(2, 0, 6) ? Visibility.Visible : Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

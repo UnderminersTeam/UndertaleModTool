@@ -105,8 +105,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
     public void Serialize(UndertaleWriter writer)
     {
         writer.Write(Scaled);
-        if (!UndertaleChunkTXTR.NoGeneratedMips
-            && writer.undertaleData.IsGameMaker2())
+        if (writer.undertaleData.IsVersionAtLeast(2, 0, 6))
             writer.Write(GeneratedMips);
         if (writer.undertaleData.IsVersionAtLeast(2022, 3))
         {
@@ -131,8 +130,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
     public void Unserialize(UndertaleReader reader)
     {
         Scaled = reader.ReadUInt32();
-        if (!UndertaleChunkTXTR.NoGeneratedMips
-            && reader.undertaleData.IsGameMaker2())
+        if (reader.undertaleData.IsVersionAtLeast(2, 0, 6))
             GeneratedMips = reader.ReadUInt32();
         if (reader.undertaleData.IsVersionAtLeast(2022, 3))
             _textureBlockSize = reader.ReadUInt32();

@@ -29,9 +29,9 @@
         <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding Scaled}"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3"
-                   Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, Converter={StaticResource GeneratedMipsWrapper}, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">Generated mips</TextBlock>
+                   Visibility="{Binding Data, Mode=OneTime, Converter={StaticResource GeneratedMipsWrapper}, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">Generated mips</TextBlock>
         <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GeneratedMips}"
-                 Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, Converter={StaticResource GeneratedMipsWrapper}, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}"/>
+                 Visibility="{Binding Data, Mode=OneTime, Converter={StaticResource GeneratedMipsWrapper}, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Size</TextBlock>
         <Grid Grid.Row="2" Grid.Column="1">
