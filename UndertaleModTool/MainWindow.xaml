@@ -240,7 +240,6 @@
                             <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>
                         </local:ContextMenuDark>
 
-                        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#D4D4D4"/>
                         <Style TargetType="{x:Type TreeViewItem}">
                             <EventSetter Event="TreeViewItem.DragOver" Handler="TreeView_DragOver"/>
                             <EventSetter Event="TreeViewItem.Drop" Handler="TreeView_Drop"/>

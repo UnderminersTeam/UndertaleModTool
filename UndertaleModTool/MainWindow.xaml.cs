@@ -454,6 +454,8 @@ namespace UndertaleModTool
         private static readonly Color darkColor = Color.FromArgb(255, 32, 32, 32);
         private static readonly Color darkLightColor = Color.FromArgb(255, 48, 48, 48);
         private static readonly Color whiteColor = Color.FromArgb(255, 222, 222, 222);
+        private static readonly SolidColorBrush grayTextBrush = new(Color.FromArgb(255, 179, 179, 179));
+        private static readonly SolidColorBrush inactiveSelectionBrush = new(Color.FromArgb(255, 212, 212, 212));
         private static readonly Dictionary<ResourceKey, object> appDarkStyle = new()
         {
             { SystemColors.WindowTextBrushKey, new SolidColorBrush(whiteColor) },
@@ -462,7 +464,9 @@ namespace UndertaleModTool
             { SystemColors.ControlBrushKey, new SolidColorBrush(darkColor) },
             { SystemColors.ControlLightLightBrushKey, new SolidColorBrush(darkLightColor) },
             { SystemColors.MenuTextBrushKey, new SolidColorBrush(whiteColor) },
-            { SystemColors.MenuBrushKey, new SolidColorBrush(darkLightColor) }
+            { SystemColors.MenuBrushKey, new SolidColorBrush(darkLightColor) },
+            { SystemColors.GrayTextBrushKey, new SolidColorBrush(Color.FromArgb(255, 136, 136, 136)) },
+            { SystemColors.InactiveSelectionHighlightBrushKey, new SolidColorBrush(Color.FromArgb(255, 112, 112, 112)) }
         };
 
         public MainWindow()
@@ -492,7 +496,10 @@ namespace UndertaleModTool
                                 .WithEmitDebugInformation(true); //when script throws an exception, add a exception location (line number)
             });
 
-            Application.Current.Resources["CustomTextBrush"] = SystemColors.ControlTextBrush;
+            var resources = Application.Current.Resources;
+            resources["CustomTextBrush"] = SystemColors.ControlTextBrush;
+            resources[SystemColors.GrayTextBrushKey] = grayTextBrush;
+            resources[SystemColors.InactiveSelectionHighlightBrushKey] = inactiveSelectionBrush;
         }
 
         private void SetIDString(string str)
@@ -508,11 +515,11 @@ namespace UndertaleModTool
 
         // "attr" is actually "DwmWindowAttribute", but I only need the one value from it
         [DllImport("dwmapi.dll", PreserveSig = true)]
-        public static extern int DwmSetWindowAttribute(IntPtr hwnd, uint attr, ref int attrValue, int attrSize);
-        public const uint DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+        private static extern int DwmSetWindowAttribute(IntPtr hwnd, uint attr, ref int attrValue, int attrSize);
+        private const uint DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
 
         [DllImport("user32.dll", SetLastError = true)]
-        static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
         private void UpdateTree()
         {
@@ -773,19 +780,18 @@ namespace UndertaleModTool
                 Windows.TextInput.TextColor = System.Drawing.Color.FromArgb(whiteColor.R,
                                                                             whiteColor.G,
                                                                             whiteColor.B);
-
-                resources[SystemColors.GrayTextBrushKey] = SystemColors.GrayTextBrush;
             }
             else
             {
                 foreach (ResourceKey key in appDarkStyle.Keys)
                     resources.Remove(key);
 
+                resources[SystemColors.GrayTextBrushKey] = grayTextBrush;
+                resources[SystemColors.InactiveSelectionHighlightBrushKey] = inactiveSelectionBrush;
+
                 Windows.TextInput.BGColor = System.Drawing.SystemColors.Control;
                 Windows.TextInput.TextBoxBGColor = System.Drawing.SystemColors.Window;
                 Windows.TextInput.TextColor = System.Drawing.SystemColors.ControlText;
-
-                resources[SystemColors.GrayTextBrushKey] = Brushes.LightGray;
             }
 
             if (!isStartup)
