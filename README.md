@@ -78,7 +78,6 @@ All contributions are welcome! If you find a bug, a data file that does not load
 
 * Work on the profile system
 * Decompiler improvements
-* Dark mode / theming support
 * Add support for latest versions of GameMaker (notably, 2.3) - decompiler cannot function in most cases currently
 * Eventually, making the GUI cross-platform if possible
 
