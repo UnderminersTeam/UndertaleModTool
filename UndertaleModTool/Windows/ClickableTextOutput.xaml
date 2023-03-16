@@ -23,7 +23,6 @@
             </RichTextBox.Background>
             <RichTextBox.Resources>
                 <Style TargetType="Hyperlink">
-                    <Setter Property="Foreground" Value="#FF0000EE"/>
                     <EventSetter Event="Click" Handler="Hyperlink_Click"/>
                 </Style>
                 <Style TargetType="Paragraph">
