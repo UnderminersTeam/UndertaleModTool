@@ -973,10 +973,10 @@ namespace UndertaleModTool
                                 possibleObjects.Add(data.Timelines[id]);
                         }
 
-                        ContextMenu contextMenu = new ContextMenu();
+                        ContextMenuDark contextMenu = new();
                         foreach (UndertaleObject obj in possibleObjects)
                         {
-                            MenuItem item = new MenuItem();
+                            MenuItemDark item = new();
                             item.Header = obj.ToString().Replace("_", "__");
                             item.Click += (sender2, ev2) =>
                             {
@@ -993,7 +993,7 @@ namespace UndertaleModTool
                         }
                         if (id > 0x00050000)
                         {
-                            MenuItem item = new MenuItem();
+                            MenuItemDark item = new();
                             item.Header = "0x" + id.ToString("X6") + " (color)";
                             item.Click += (sender2, ev2) =>
                             {
@@ -1010,7 +1010,7 @@ namespace UndertaleModTool
                         var myKey = list.Constants.FirstOrDefault(x => x.Value == (double)id).Key;
                         if (myKey != null)
                         {
-                            MenuItem item = new MenuItem();
+                            MenuItemDark item = new();
                             item.Header = myKey.Replace("_", "__") + " (constant)";
                             item.Click += (sender2, ev2) =>
                             {
@@ -1023,7 +1023,7 @@ namespace UndertaleModTool
                             };
                             contextMenu.Items.Add(item);
                         }
-                        contextMenu.Items.Add(new MenuItem() { Header = id + " (number)", IsEnabled = false });
+                        contextMenu.Items.Add(new MenuItemDark() { Header = id + " (number)", IsEnabled = false });
 
                         contextMenu.IsOpen = true;
                     }
