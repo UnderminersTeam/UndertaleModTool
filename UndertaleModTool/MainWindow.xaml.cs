@@ -2086,6 +2086,8 @@ namespace UndertaleModTool
                 {
                     FinishedMessageEnabled = true;
                 }
+
+                GC.Collect();
                 CommandBox.IsEnabled = true;
             }
         }
@@ -2705,6 +2707,8 @@ namespace UndertaleModTool
                 ScriptErrorMessage = exc.Message;
                 ScriptErrorType = "Exception";
             }
+
+            GC.Collect();
             scriptText = null;
         }
 
