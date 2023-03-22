@@ -284,8 +284,9 @@ namespace UndertaleModTool
                     bool isDecompiledOpen = codeEditor.CodeModeTabs.SelectedIndex == 0;
                     
                     var textEditor = codeEditor.DecompiledEditor;
-                    (int, int) decompCodePos;
+                    (int, int, double) decompCodePos;
                     int linePos, columnPos;
+                    double codeScrollPos;
                     // If the overridden position wasn't read
                     if (UndertaleCodeEditor.OverriddenDecompPos != default)
                     {
@@ -297,17 +298,18 @@ namespace UndertaleModTool
                         var caret = textEditor.TextArea.Caret;
                         linePos = caret.Line;
                         columnPos = caret.Column;
+                        codeScrollPos = textEditor.VerticalOffset;
 
                         int lineLen = textEditor.Document.GetLineByNumber(linePos).Length;
                         // If caret is at the end of line
                         if (lineLen == columnPos - 1)
                             columnPos = -1;
 
-                        decompCodePos = (linePos, columnPos);
+                        decompCodePos = (linePos, columnPos, codeScrollPos);
                     }
 
                     textEditor = codeEditor.DisassemblyEditor;
-                    (int, int) disasmCodePos;
+                    (int, int, double) disasmCodePos;
                     if (UndertaleCodeEditor.OverriddenDisasmPos != default)
                     {
                         disasmCodePos = UndertaleCodeEditor.OverriddenDisasmPos;
@@ -318,23 +320,26 @@ namespace UndertaleModTool
                         var caret = textEditor.TextArea.Caret;
                         linePos = caret.Line;
                         columnPos = caret.Column;
+                        codeScrollPos = textEditor.VerticalOffset;
 
                         int lineLen = textEditor.Document.GetLineByNumber(linePos).Length;
                         // If caret is at the end of line
                         if (lineLen == columnPos - 1)
                             columnPos = -1;
 
-                        disasmCodePos = (linePos, columnPos);
+                        disasmCodePos = (linePos, columnPos, codeScrollPos);
                     }
-                    #pragma warning restore CA1416
 
                     LastContentState = new CodeTabState()
                     {
                         MainScrollPosition = mainScrollPos,
                         DecompiledCodePosition = decompCodePos,
                         DisassemblyCodePosition = disasmCodePos,
+                        DecompiledScrollPos = codeEditor.DecompiledEditor.VerticalOffset,
+                        DisassemblyScrollPos = codeEditor.DisassemblyEditor.VerticalOffset,
                         IsDecompiledOpen = isDecompiledOpen
                     };
+                    #pragma warning restore CA1416
                     break;
 
                 case UndertaleRoomEditor roomEditor:
@@ -855,10 +860,16 @@ namespace UndertaleModTool
     public class CodeTabState : TabContentState
     {
         /// <summary>The decompiled code position.</summary>
-        public (int Line, int Column) DecompiledCodePosition;
+        public (int Line, int Column, double ScrollPos) DecompiledCodePosition;
 
         /// <summary>The disassembly code position.</summary>
-        public (int Line, int Column) DisassemblyCodePosition;
+        public (int Line, int Column, double ScrollPos) DisassemblyCodePosition;
+
+        /// <summary>The scroll position of decompiled code.</summary>
+        public double DecompiledScrollPos;
+
+        /// <summary>The scroll position of disassembly code.</summary>
+        public double DisassemblyScrollPos;
 
         /// <summary>Whether the "Decompiled" tab is open.</summary>
         public bool IsDecompiledOpen;

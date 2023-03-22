@@ -57,14 +57,14 @@ namespace UndertaleModTool
         public bool DecompiledYet = false;
         public bool DecompiledSkipped = false;
         public SearchPanel DecompiledSearchPanel;
-        public static (int Line, int Column) OverriddenDecompPos;
+        public static (int Line, int Column, double ScrollPos) OverriddenDecompPos;
 
         public bool DisassemblyFocused = false;
         public bool DisassemblyChanged = false;
         public bool DisassembledYet = false;
         public bool DisassemblySkipped = false;
         public SearchPanel DisassemblySearchPanel;
-        public static (int Line, int Column) OverriddenDisasmPos;
+        public static (int Line, int Column, double ScrollPos) OverriddenDisasmPos;
 
         public static RoutedUICommand Compile = new RoutedUICommand("Compile code", "Compile", typeof(UndertaleCodeEditor));
 
@@ -354,14 +354,14 @@ namespace UndertaleModTool
                 CodeModeTabs.SelectedItem = DisassemblyTab;
 
             TextEditor textEditor = DecompiledEditor;
-            (int linePos, int columnPos) = tabState.DecompiledCodePosition;
-            RestoreCaretPosition(textEditor, linePos, columnPos);
+            (int linePos, int columnPos, double scrollPos) = tabState.DecompiledCodePosition;
+            RestoreCaretPosition(textEditor, linePos, columnPos, scrollPos);
 
             textEditor = DisassemblyEditor;
-            (linePos, columnPos) = tabState.DisassemblyCodePosition;
-            RestoreCaretPosition(textEditor, linePos, columnPos);
+            (linePos, columnPos, scrollPos) = tabState.DisassemblyCodePosition;
+            RestoreCaretPosition(textEditor, linePos, columnPos, scrollPos);
         }
-        private static void RestoreCaretPosition(TextEditor textEditor, int linePos, int columnPos)
+        private static void RestoreCaretPosition(TextEditor textEditor, int linePos, int columnPos, double scrollPos)
         {
             if (linePos <= textEditor.LineCount)
             {
@@ -373,6 +373,7 @@ namespace UndertaleModTool
                     textEditor.TextArea.Caret.Column = lineLen + 1;
 
                 textEditor.ScrollToLine(linePos);
+                textEditor.ScrollToVerticalOffset(scrollPos);
             }
             else
             {
@@ -450,16 +451,19 @@ namespace UndertaleModTool
 
             int currLine = 1;
             int currColumn = 1;
+            double scrollPos = 0;
             if (!first)
             {
                 var caret = DisassemblyEditor.TextArea.Caret;
                 currLine = caret.Line;
                 currColumn = caret.Column;
+                scrollPos = DisassemblyEditor.VerticalOffset;
             }
             else if (OverriddenDisasmPos != default)
             {
                 currLine = OverriddenDisasmPos.Line;
                 currColumn = OverriddenDisasmPos.Column;
+                scrollPos = OverriddenDisasmPos.ScrollPos;
 
                 OverriddenDisasmPos = default;
             }
@@ -483,7 +487,7 @@ namespace UndertaleModTool
             DisassemblyEditor.Document.BeginUpdate();
             DisassemblyEditor.Document.Text = text;
 
-            RestoreCaretPosition(DisassemblyEditor, currLine, currColumn);
+            RestoreCaretPosition(DisassemblyEditor, currLine, currColumn, scrollPos);
 
             DisassemblyEditor.Document.EndUpdate();
 
@@ -559,16 +563,19 @@ namespace UndertaleModTool
 
             int currLine = 1;
             int currColumn = 1;
+            double scrollPos = 0;
             if (!first)
             {
                 var caret = DecompiledEditor.TextArea.Caret;
                 currLine = caret.Line;
                 currColumn = caret.Column;
+                scrollPos = DecompiledEditor.VerticalOffset;
             }
             else if (OverriddenDecompPos != default)
             {
                 currLine = OverriddenDecompPos.Line;
                 currColumn = OverriddenDecompPos.Column;
+                scrollPos = OverriddenDecompPos.ScrollPos;
 
                 OverriddenDecompPos = default;
             }
@@ -715,7 +722,7 @@ namespace UndertaleModTool
                                     CurrentLocals.Add(local.Name.Content);
                             }
 
-                            RestoreCaretPosition(DecompiledEditor, currLine, currColumn);
+                            RestoreCaretPosition(DecompiledEditor, currLine, currColumn, scrollPos);
 
                             if (existingDialog is not null)                      //if code was edited (and compiles after it)
                             {
