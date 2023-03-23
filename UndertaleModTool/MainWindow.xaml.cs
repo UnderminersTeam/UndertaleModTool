@@ -3515,9 +3515,9 @@ result in loss of work.");
             return false;
         }
 
-        public void ChangeSelection(object newsel)
+        public void ChangeSelection(object newsel, bool inNewTab = false)
         {
-            OpenInTab(newsel);
+            OpenInTab(newsel, inNewTab);
         }
 
         private void TabController_SelectionChanged(object sender, SelectionChangedEventArgs e)

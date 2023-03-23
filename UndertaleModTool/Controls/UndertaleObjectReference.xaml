@@ -7,6 +7,11 @@
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
              d:DesignHeight="20" d:DesignWidth="300">
+    <UserControl.Resources>
+        <local:ContextMenuDark x:Key="contextMenu">
+            <local:MenuItemDark Header="Open in new tab" Click="OpenInNewTabItem_Click"/>
+        </local:ContextMenuDark>
+    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -15,9 +20,9 @@
         </Grid.ColumnDefinitions>
         <TextBox Grid.Column="0" Name="ObjectText" IsReadOnly="True" Cursor="Arrow" AllowDrop="True"
                  ToolTip="This is an object reference. Drag and drop an object of matching type from the tree on the left to change it!"
-                 PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" PreviewMouseDoubleClick="TextBox_MouseDoubleClick"
+                 PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" PreviewMouseDoubleClick="TextBox_MouseDoubleClick" PreviewMouseDown="Details_MouseDown"
                  Text="{Binding ObjectReference, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-        <local:ButtonDark Grid.Column="1" x:Name="DetailsButton" Click="Details_Click">
+        <local:ButtonDark Grid.Column="1" x:Name="DetailsButton" Click="Details_Click" MouseDown="Details_MouseDown">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Setter Property="Content" Value=" ... " />

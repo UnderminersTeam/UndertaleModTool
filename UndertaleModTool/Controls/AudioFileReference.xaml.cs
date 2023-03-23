@@ -28,7 +28,23 @@ namespace UndertaleModTool
             DependencyProperty.Register("AudioReference", typeof(UndertaleEmbeddedAudio),
                 typeof(AudioFileReference),
                 new FrameworkPropertyMetadata(null,
-                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (sender, e) =>
+                    {
+                        var inst = sender as AudioFileReference;
+                        if (inst is null)
+                            return;
+
+                        if (e.NewValue is null)
+                            inst.ObjectText.ContextMenu = null;
+                        else
+                        {
+                            try
+                            {
+                                inst.ObjectText.ContextMenu = inst.Resources["contextMenu"] as ContextMenu;
+                            }
+                            catch { }
+                        }
+                    }));
 
         public static readonly DependencyProperty GroupReferenceProperty =
             DependencyProperty.Register("GroupReference", typeof(UndertaleAudioGroup),
@@ -77,6 +93,15 @@ namespace UndertaleModTool
         {
             OpenReference();
         }
+        private void Details_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Middle && e.ButtonState == MouseButtonState.Pressed)
+                OpenReference(true);
+        }
+        private void OpenInNewTabItem_Click(object sender, RoutedEventArgs e)
+        {
+            OpenReference(true);
+        }
 
         private void Remove_Click(object sender, RoutedEventArgs e)
         {
@@ -88,7 +113,7 @@ namespace UndertaleModTool
             OpenReference();
         }
 
-        private void OpenReference()
+        private void OpenReference(bool inNewTab = false)
         {
             if (GroupID != 0 && AudioID != -1)
             {
@@ -99,7 +124,7 @@ namespace UndertaleModTool
             if (AudioReference == null)
                 return;
 
-            (Application.Current.MainWindow as MainWindow).ChangeSelection(AudioReference);
+            (Application.Current.MainWindow as MainWindow).ChangeSelection(AudioReference, inNewTab);
         }
 
         private void TextBox_DragOver(object sender, DragEventArgs e)

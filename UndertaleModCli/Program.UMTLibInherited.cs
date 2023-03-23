@@ -371,7 +371,7 @@ public partial class Program : IScriptInterface
     }
 
     /// <inheritdoc/>
-    public void ChangeSelection(object newSelection)
+    public void ChangeSelection(object newSelection, bool inNewTab = false)
     {
         //this does *not* make sense, as CLI does not have any selections
         //however, since Selection is a public object, it could potentially be used by scripts

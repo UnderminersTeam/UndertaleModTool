@@ -16,7 +16,6 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using UndertaleModLib;
 using UndertaleModLib.Models;
-using UndertaleModLib.Decompiler;
 using UndertaleModLib.Scripting;
 
 namespace UndertaleModTool
@@ -26,11 +25,29 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertaleObjectReference : UserControl
     {
+        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+
         public static DependencyProperty ObjectReferenceProperty =
             DependencyProperty.Register("ObjectReference", typeof(object),
                 typeof(UndertaleObjectReference),
                 new FrameworkPropertyMetadata(null,
-                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (sender, e) =>
+                    {
+                        var inst = sender as UndertaleObjectReference;
+                        if (inst is null)
+                            return;
+
+                        if (e.NewValue is null)
+                            inst.ObjectText.ContextMenu = null;
+                        else
+                        {
+                            try
+                            {
+                                inst.ObjectText.ContextMenu = inst.Resources["contextMenu"] as ContextMenu;
+                            }
+                            catch { }
+                        }
+                    }));
 
         public static DependencyProperty ObjectTypeProperty =
             DependencyProperty.Register("ObjectType", typeof(Type),
@@ -100,8 +117,6 @@ namespace UndertaleModTool
         {
             if (ObjectReference is null)
             {
-                MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
-
                 if (mainWindow.Selected is null)
                 {
                     mainWindow.ShowError("Nothing currently selected! This is currently unsupported.");
@@ -122,8 +137,21 @@ namespace UndertaleModTool
             }
             else
             {
-                (Application.Current.MainWindow as MainWindow).ChangeSelection(ObjectReference);
+                mainWindow.ChangeSelection(ObjectReference);
             }
+        }
+
+        private void Details_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (ObjectReference is null)
+                return;
+
+            if (e.ChangedButton == MouseButton.Middle && e.ButtonState == MouseButtonState.Pressed)
+                mainWindow.ChangeSelection(ObjectReference, true);
+        }
+        private void OpenInNewTabItem_Click(object sender, RoutedEventArgs e)
+        {
+            mainWindow.ChangeSelection(ObjectReference, true);
         }
 
         private void Remove_Click(object sender, RoutedEventArgs e)
@@ -135,7 +163,7 @@ namespace UndertaleModTool
         {
             if (ObjectReference != null)
             {
-                (Application.Current.MainWindow as MainWindow).ChangeSelection(ObjectReference);
+                mainWindow.ChangeSelection(ObjectReference);
             }
         }
 
