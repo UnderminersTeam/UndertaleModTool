@@ -44,8 +44,11 @@ namespace UndertaleModTool
         {
             if (value is not ulong timestamp)
                 return "(error)";
-            DateTime dateTime = DateTimeOffset.FromUnixTimeSeconds((long)timestamp).LocalDateTime;
-            return dateTime.ToString();
+            DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds((long)timestamp);
+            if (parameter is string par && par == "GMT")
+                return "GMT+0: " + dateTimeOffset.UtcDateTime.ToString();
+            else
+                return dateTimeOffset.LocalDateTime.ToString();
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
