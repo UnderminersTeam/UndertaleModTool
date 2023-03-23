@@ -93,7 +93,8 @@
         </Viewbox>
 
         <TextBlock Grid.Row="11" Grid.Column="0" Margin="3,30,3,3">Glyphs:</TextBlock>
-        <local:DataGridDark Grid.Row="12" Grid.ColumnSpan="2" MaxHeight="370" Margin="3" ItemsSource="{Binding Glyphs, Mode=OneWay}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
+        <local:DataGridDark Grid.Row="12" Grid.ColumnSpan="2" MaxHeight="370" Margin="3" x:Name="GlyphsGrid" ItemsSource="{Binding Glyphs, Mode=OneWay}"
+                            AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
                             ScrollViewer.CanContentScroll="True"
                             VirtualizingPanel.IsVirtualizing="True"
                             VirtualizingPanel.VirtualizationMode="Recycling">

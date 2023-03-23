@@ -129,7 +129,8 @@ namespace UndertaleModTool
 
         private void UndertaleRoomEditor_Loaded(object sender, RoutedEventArgs e)
         {
-            RoomRootItem.IsSelected = true;
+            if (ObjectEditor.Content is null)
+                RoomRootItem.IsSelected = true;
         }
         private void UndertaleRoomEditor_Unloaded(object sender, RoutedEventArgs e)
         {
@@ -147,6 +148,10 @@ namespace UndertaleModTool
                 ScrollViewer viewer = MainWindow.FindVisualChild<ScrollViewer>(RoomObjectsTree);
                 viewer.ScrollToVerticalOffset(0);
                 viewer.ScrollToHorizontalOffset(0);
+
+                RoomGraphics.ClearValue(LayoutTransformProperty);
+                RoomGraphicsScroll.ScrollToVerticalOffset(0);
+                RoomGraphicsScroll.ScrollToHorizontalOffset(0);
             }
 
             UndertaleCachedImageLoader.Reset();

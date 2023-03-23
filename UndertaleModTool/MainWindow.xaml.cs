@@ -53,243 +53,6 @@ using System.Windows.Interop;
 
 namespace UndertaleModTool
 {
-    public class Tab : INotifyPropertyChanged
-    {
-        public static readonly BitmapImage ClosedIcon = new(new Uri(@"/Resources/X.png", UriKind.RelativeOrAbsolute));
-        public static readonly BitmapImage ClosedHoverIcon = new(new Uri(@"/Resources/X_Down.png", UriKind.RelativeOrAbsolute));
-
-        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private object _currentObject;
-
-        [PropertyChanged.DoNotNotify] // Prevents "PropertyChanged.Invoke()" injection on compile
-        public object CurrentObject
-        {
-            get => _currentObject;
-            set
-            {
-                object prevObj = _currentObject;
-                _currentObject = value;
-
-                SetTabTitleBinding(value, prevObj);
-
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentObject)));
-                mainWindow.RaiseOnSelectedChanged();
-            }
-        }
-        public string TabTitle { get; set; } = "Untitled";
-        public bool IsCustomTitle { get; set; }
-        public int TabIndex { get; set; }
-        public bool AutoClose { get; set; } = false;
-
-        public ObservableCollection<object> History { get; } = new();
-        public int HistoryPosition { get; set; }
-
-        public Tab(object obj, int tabIndex, string tabTitle = null)
-        {
-            CurrentObject = obj;
-            TabIndex = tabIndex;
-            AutoClose = obj is DescriptionView;
-
-            IsCustomTitle = tabTitle is not null;
-            if (IsCustomTitle)
-            {
-                if (tabTitle.Length > 64)
-                    TabTitle = tabTitle[..64] + "...";
-                else
-                    TabTitle = tabTitle;
-            }
-        }
-
-        public static string GetTitleForObject(object obj)
-        {
-            if (obj is null)
-                return null;
-
-            string title = null;
-
-            if (obj is DescriptionView view)
-            {
-                if (view.Heading.Contains("Welcome"))
-                {
-                    title = "Welcome!";
-                }
-                else
-                {
-                    title = view.Heading;
-                }
-            }
-            else if (obj is UndertaleNamedResource namedRes)
-            {
-                string content = namedRes.Name?.Content;
-
-                string header = obj switch
-                {
-                    UndertaleAudioGroup => "Audio Group",
-                    UndertaleSound => "Sound",
-                    UndertaleSprite => "Sprite",
-                    UndertaleBackground => "Background",
-                    UndertalePath => "Path",
-                    UndertaleScript => "Script",
-                    UndertaleShader => "Shader",
-                    UndertaleFont => "Font",
-                    UndertaleTimeline => "Timeline",
-                    UndertaleGameObject => "Game Object",
-                    UndertaleRoom => "Room",
-                    UndertaleExtension => "Extension",
-                    UndertaleTexturePageItem => "Texture Page Item",
-                    UndertaleCode => "Code",
-                    UndertaleVariable => "Variable",
-                    UndertaleFunction => "Function",
-                    UndertaleCodeLocals => "Code Locals",
-                    UndertaleEmbeddedTexture => "Embedded Texture",
-                    UndertaleEmbeddedAudio => "Embedded Audio",
-                    UndertaleTextureGroupInfo => "Texture Group Info",
-                    UndertaleEmbeddedImage => "Embedded Image",
-                    UndertaleSequence => "Sequence",
-                    UndertaleAnimationCurve => "Animation Curve",
-                    _ => null
-                };
-
-                if (header is not null)
-                    title = header + " - " + content;
-                else
-                    Debug.WriteLine($"Could not handle type {obj.GetType()}");
-            }
-            else if (obj is UndertaleString str)
-            {
-                string stringFirstLine = str.Content;
-                if (stringFirstLine is not null)
-                {
-                    if (stringFirstLine.Length == 0)
-                        stringFirstLine = "(empty string)";
-                    else
-                    {
-                        int stringLength = StringTitleConverter.NewLineRegex.Match(stringFirstLine).Index;
-                        if (stringLength != 0)
-                            stringFirstLine = stringFirstLine[..stringLength] + " ...";
-                    }
-                }
-
-                title = "String - " + stringFirstLine;
-            }
-            else if (obj is UndertaleExtensionFile file)
-            {
-                title = $"Extension file - {file.Filename}";
-            }
-            else if (obj is UndertaleExtensionFunction func)
-            {
-                title = $"Extension function - {func.Name}";
-            }
-            else if (obj is UndertaleChunkVARI)
-            {
-                title = "Variables Overview";
-            }
-            else if (obj is GeneralInfoEditor)
-            {
-                title = "General Info";
-            }
-            else if (obj is GlobalInitEditor)
-            {
-                title = "Global Init";
-            }
-            else if (obj is GameEndEditor)
-            {
-                title = "Game End";
-            }
-            else
-            {
-                Debug.WriteLine($"Could not handle type {obj.GetType()}");
-            }
-
-            if (title is not null)
-            {
-                // "\t" is displayed as 8 spaces.
-                // So, replace all "\t" with spaces,
-                // in order to properly shorten the title.
-                title = title.Replace("\t", "        ");
-
-                if (title.Length > 64)
-                    title = title[..64] + "...";
-            }
-
-            return title;
-        }
-
-        public static void SetTabTitleBinding(object obj, object prevObj, TextBlock textBlock = null)
-        {
-            if (textBlock is null)
-            {
-                var cont = mainWindow.TabController.ItemContainerGenerator.ContainerFromIndex(mainWindow.CurrentTabIndex);
-                textBlock = MainWindow.FindVisualChild<TextBlock>(cont);
-            }
-            else
-                obj = (textBlock.DataContext as Tab)?.CurrentObject;
-
-            if (obj is null || textBlock is null)
-                return;
-
-            bool objNamed = obj is UndertaleNamedResource;
-            bool objString = obj is UndertaleString;
-
-            if (prevObj is not null)
-            {
-                bool pObjNamed = prevObj is UndertaleNamedResource;
-                bool pObjString = prevObj is UndertaleString;
-
-                // If both objects have the same type (one of above)
-                // or both objects are not "UndertaleNamedResource",
-                // then there's no need to change the binding
-                if (pObjNamed && objNamed || pObjString && objString || !(pObjNamed || objNamed))
-                    return;
-            }
-
-            MultiBinding binding = new()
-            {
-                Converter = TabTitleConverter.Instance,
-                Mode = BindingMode.OneWay
-            };
-            binding.Bindings.Add(new Binding() { Mode = BindingMode.OneTime });
-
-            // These bindings are only for notification
-            binding.Bindings.Add(new Binding("CurrentObject") { Mode = BindingMode.OneWay });
-            if (objNamed)
-                binding.Bindings.Add(new Binding("CurrentObject.Name.Content") { Mode = BindingMode.OneWay });
-            else if (objString)
-                binding.Bindings.Add(new Binding("CurrentObject.Content") { Mode = BindingMode.OneWay });
-
-            textBlock.SetBinding(TextBlock.TextProperty, binding);
-        }
-
-        public override string ToString()
-        {
-            // for ease of debugging
-            return GetType().FullName + " - {" + CurrentObject?.ToString() + '}';
-        }
-    }
-    public class TabTitleConverter : IMultiValueConverter
-    {
-        public static TabTitleConverter Instance { get; } = new();
-
-        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (values[0] is not Tab tab)
-                return null;
-
-            if (!tab.IsCustomTitle)
-                tab.TabTitle = Tab.GetTitleForObject(tab.CurrentObject);
-
-            return tab.TabTitle;
-        }
-
-        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
     /// <summary>
     /// Logika interakcji dla klasy MainWindow.xaml
     /// </summary>
@@ -369,6 +132,8 @@ namespace UndertaleModTool
             Left,
             Right
         }
+
+        // TODO: move this to the code editor
         public static CodeEditorMode CodeEditorDecompile { get; set; } = CodeEditorMode.Unstated;
 
         private int progressValue;
@@ -2544,7 +2309,31 @@ namespace UndertaleModTool
             {
                 Focus();
 
-                CodeEditorDecompile = editorDecompile;
+                if (Selected == code)
+                {
+                    #pragma warning disable CA1416
+                    var codeEditor = FindVisualChild<UndertaleCodeEditor>(DataEditor);
+                    if (codeEditor is null)
+                    {
+                        Debug.WriteLine("Cannot select the code editor mode tab - its instance is not found.");
+                    }
+                    else
+                    {
+                        if (editorDecompile == CodeEditorMode.Decompile
+                            && !codeEditor.DecompiledTab.IsSelected)
+                        {
+                            codeEditor.CodeModeTabs.SelectedItem = codeEditor.DecompiledTab;
+                        }
+                        else if (editorDecompile == CodeEditorMode.DontDecompile
+                            && !codeEditor.DisassemblyTab.IsSelected)
+                        {
+                            codeEditor.CodeModeTabs.SelectedItem = codeEditor.DisassemblyTab;
+                        }
+                    }
+                    #pragma warning restore CA1416
+                }
+                else
+                    CodeEditorDecompile = editorDecompile;
 
                 HighlightObject(code);
                 ChangeSelection(code);
@@ -3610,6 +3399,9 @@ result in loss of work.");
                 CurrentTab.History.Add(obj);
                 CurrentTab.HistoryPosition++;
             }
+
+            if (DataEditor.IsLoaded)
+                GetNearestParent<ScrollViewer>(DataEditor)?.ScrollToTop();
         }
 
         public void CloseTab(bool addDefaultTab = true) // close the current tab
@@ -3634,6 +3426,9 @@ result in loss of work.");
 
                 if (Tabs.Count == 0)
                 {
+                    if (!closingTab.AutoClose)
+                        CurrentTab.SaveTabContentState();
+
                     CurrentTabIndex = -1;
                     CurrentTab = null;
 
@@ -3650,6 +3445,8 @@ result in loss of work.");
                 }
                 else
                 {
+                    bool tabIsChanged = false;
+
                     for (int i = tabIndex; i < Tabs.Count; i++)
                         Tabs[i].TabIndex = i;
 
@@ -3662,8 +3459,14 @@ result in loss of work.");
                             // switch to the last tab
                             currIndex = Tabs.Count - 1;
                         }
-                        else if (currIndex != 0)
-                            currIndex -= 1;
+                        else
+                        {
+                            if (currIndex != 0)
+                                currIndex -= 1;
+
+                            tabIsChanged = true;
+                            CurrentTab.SaveTabContentState();
+                        }
                     }
                     else if (currIndex > tabIndex)
                     {
@@ -3673,7 +3476,19 @@ result in loss of work.");
                     TabController.SelectionChanged += TabController_SelectionChanged;
 
                     CurrentTabIndex = currIndex;
-                    CurrentTab = Tabs[CurrentTabIndex];
+                    Tab newTab = Tabs[CurrentTabIndex];
+
+                    if (tabIsChanged)
+                    {
+                        if (closingTab.CurrentObject != newTab.CurrentObject)
+                            newTab.PrepareCodeEditor();
+                    }
+
+                    CurrentTab = newTab;
+                    UpdateObjectLabel(CurrentTab.CurrentObject);
+
+                    if (tabIsChanged)
+                        CurrentTab.RestoreTabContentState();
                 }
             }
         }
@@ -3703,10 +3518,20 @@ result in loss of work.");
         {
             if (TabController.SelectedIndex >= 0)
             {
+                CurrentTab?.SaveTabContentState();
+
                 ScrollToTab(CurrentTabIndex);
 
-                CurrentTab = Tabs[CurrentTabIndex];
+                Tab newTab = Tabs[CurrentTabIndex];
+
+                if (CurrentTab?.CurrentObject != newTab.CurrentObject)
+                    newTab.PrepareCodeEditor();
+
+                CurrentTab = newTab;
+
                 UpdateObjectLabel(CurrentTab.CurrentObject);
+
+                CurrentTab.RestoreTabContentState();
             }
         }
 
@@ -3917,6 +3742,16 @@ result in loss of work.");
         private void TabTitleText_Initialized(object sender, EventArgs e)
         {
             Tab.SetTabTitleBinding(null, null, sender as TextBlock);
+        }
+
+        private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            ScrollViewer viewer = sender as ScrollViewer;
+
+            // Prevent receiving the mouse wheel event if there is nowhere to scroll.
+            if (viewer.ComputedVerticalScrollBarVisibility != Visibility.Visible
+                && e.Source == viewer)
+                e.Handled = true;
         }
     }
 

@@ -57,12 +57,14 @@ namespace UndertaleModTool
         public bool DecompiledYet = false;
         public bool DecompiledSkipped = false;
         public SearchPanel DecompiledSearchPanel;
+        public static (int Line, int Column, double ScrollPos) OverriddenDecompPos;
 
         public bool DisassemblyFocused = false;
         public bool DisassemblyChanged = false;
         public bool DisassembledYet = false;
         public bool DisassemblySkipped = false;
         public SearchPanel DisassemblySearchPanel;
+        public static (int Line, int Column, double ScrollPos) OverriddenDisasmPos;
 
         public static RoutedUICommand Compile = new RoutedUICommand("Compile code", "Compile", typeof(UndertaleCodeEditor));
 
@@ -184,6 +186,12 @@ namespace UndertaleModTool
             textArea.SelectionCornerRadius = 0;
         }
 
+        private void UndertaleCodeEditor_Unloaded(object sender, RoutedEventArgs e)
+        {
+            OverriddenDecompPos = default;
+            OverriddenDisasmPos = default;
+        }
+
         private void SearchPanel_LostFocus(object sender, RoutedEventArgs e)
         {
             SearchPanel panel = sender as SearchPanel;
@@ -205,6 +213,35 @@ namespace UndertaleModTool
             noMatchesTT.IsOpen = false;
         }
 
+        private void UndertaleCodeEditor_Loaded(object sender, RoutedEventArgs e)
+        {
+            FillInCodeViewer();
+        }
+        private void FillInCodeViewer(bool overrideFirst = false)
+        {
+            UndertaleCode code = DataContext as UndertaleCode;
+            if (DisassemblyTab.IsSelected && code != CurrentDisassembled)
+            {
+                if (!overrideFirst)
+                {
+                    DisassembleCode(code, !DisassembledYet);
+                    DisassembledYet = true;
+                }
+                else
+                    DisassembleCode(code, true);
+            }
+            if (DecompiledTab.IsSelected && code != CurrentDecompiled)
+            {
+                if (!overrideFirst)
+                {
+                    _ = DecompileCode(code, !DecompiledYet);
+                    DecompiledYet = true;
+                }
+                else
+                    _ = DecompileCode(code, true);
+            }
+        }
+
         private async void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             UndertaleCode code = this.DataContext as UndertaleCode;
@@ -212,20 +249,21 @@ namespace UndertaleModTool
             Directory.CreateDirectory(TempPath);
             if (code == null)
                 return;
+
             DecompiledSearchPanel.Close();
             DisassemblySearchPanel.Close();
+
             await DecompiledLostFocusBody(sender, null);
             DisassemblyEditor_LostFocus(sender, null);
-            if (DisassemblyTab.IsSelected && code != CurrentDisassembled)
+
+            if (!IsLoaded)
             {
-                DisassembleCode(code, !DisassembledYet);
-                DisassembledYet = true;
+                // If it's not loaded, then "FillInCodeViewer()" will be executed on load.
+                // This prevents a bug with freezing on code opening.
+                return;
             }
-            if (DecompiledTab.IsSelected && code != CurrentDecompiled)
-            {
-                _ = DecompileCode(code, !DecompiledYet);
-                DecompiledYet = true;
-            }
+
+            FillInCodeViewer();
         }
 
         private async void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -242,7 +280,6 @@ namespace UndertaleModTool
             {
                 DecompiledSkipped = true;
                 await DecompiledLostFocusBody(sender, null);
-
             }
             else if (DisassemblyTab.IsSelected && DisassemblyFocused && DisassemblyChanged &&
                      CurrentDisassembled is not null && CurrentDisassembled != code)
@@ -256,6 +293,8 @@ namespace UndertaleModTool
 
             DecompiledYet = false;
             DisassembledYet = false;
+            CurrentDecompiled = null;
+            CurrentDisassembled = null;
 
             if (MainWindow.CodeEditorDecompile != Unstated) //if opened from the code search results "link"
             {
@@ -278,16 +317,7 @@ namespace UndertaleModTool
                 MainWindow.CodeEditorDecompile = Unstated;
             }
             else
-            {
-                if (DisassemblyTab.IsSelected && code != CurrentDisassembled)
-                {
-                    DisassembleCode(code, true);
-                }
-                if (DecompiledTab.IsSelected && code != CurrentDecompiled)
-                {
-                    _ = DecompileCode(code, true);
-                }
-            }
+                FillInCodeViewer(true);
         }
 
         public static readonly RoutedEvent CtrlKEvent = EventManager.RegisterRoutedEvent(
@@ -316,6 +346,42 @@ namespace UndertaleModTool
             await CompileCommandBody(null, null);
         }
 
+        public void RestoreState(CodeTabState tabState)
+        {
+            if (tabState.IsDecompiledOpen)
+                CodeModeTabs.SelectedItem = DecompiledTab;
+            else
+                CodeModeTabs.SelectedItem = DisassemblyTab;
+
+            TextEditor textEditor = DecompiledEditor;
+            (int linePos, int columnPos, double scrollPos) = tabState.DecompiledCodePosition;
+            RestoreCaretPosition(textEditor, linePos, columnPos, scrollPos);
+
+            textEditor = DisassemblyEditor;
+            (linePos, columnPos, scrollPos) = tabState.DisassemblyCodePosition;
+            RestoreCaretPosition(textEditor, linePos, columnPos, scrollPos);
+        }
+        private static void RestoreCaretPosition(TextEditor textEditor, int linePos, int columnPos, double scrollPos)
+        {
+            if (linePos <= textEditor.LineCount)
+            {
+                int lineLen = textEditor.Document.GetLineByNumber(linePos).Length;
+                textEditor.TextArea.Caret.Line = linePos;
+                if (columnPos != -1)
+                    textEditor.TextArea.Caret.Column = columnPos;
+                else
+                    textEditor.TextArea.Caret.Column = lineLen + 1;
+
+                textEditor.ScrollToLine(linePos);
+                textEditor.ScrollToVerticalOffset(scrollPos);
+            }
+            else
+            {
+                textEditor.CaretOffset = textEditor.Text.Length;
+                textEditor.ScrollToEnd();
+            }
+        }
+        
         private static void FillObjectDicts()
         {
             var data = mainWindow.Data;
@@ -383,6 +449,25 @@ namespace UndertaleModTool
 
             string text;
 
+            int currLine = 1;
+            int currColumn = 1;
+            double scrollPos = 0;
+            if (!first)
+            {
+                var caret = DisassemblyEditor.TextArea.Caret;
+                currLine = caret.Line;
+                currColumn = caret.Column;
+                scrollPos = DisassemblyEditor.VerticalOffset;
+            }
+            else if (OverriddenDisasmPos != default)
+            {
+                currLine = OverriddenDisasmPos.Line;
+                currColumn = OverriddenDisasmPos.Column;
+                scrollPos = OverriddenDisasmPos.ScrollPos;
+
+                OverriddenDisasmPos = default;
+            }
+
             DisassemblyEditor.TextArea.ClearSelection();
             if (code.ParentEntry != null)
             {
@@ -401,6 +486,9 @@ namespace UndertaleModTool
 
             DisassemblyEditor.Document.BeginUpdate();
             DisassemblyEditor.Document.Text = text;
+
+            RestoreCaretPosition(DisassemblyEditor, currLine, currColumn, scrollPos);
+
             DisassemblyEditor.Document.EndUpdate();
 
             if (first)
@@ -472,7 +560,28 @@ namespace UndertaleModTool
         private async Task DecompileCode(UndertaleCode code, bool first, LoaderDialog existingDialog = null)
         {
             DecompiledEditor.IsReadOnly = true;
+
+            int currLine = 1;
+            int currColumn = 1;
+            double scrollPos = 0;
+            if (!first)
+            {
+                var caret = DecompiledEditor.TextArea.Caret;
+                currLine = caret.Line;
+                currColumn = caret.Column;
+                scrollPos = DecompiledEditor.VerticalOffset;
+            }
+            else if (OverriddenDecompPos != default)
+            {
+                currLine = OverriddenDecompPos.Line;
+                currColumn = OverriddenDecompPos.Column;
+                scrollPos = OverriddenDecompPos.ScrollPos;
+
+                OverriddenDecompPos = default;
+            }
+
             DecompiledEditor.TextArea.ClearSelection();
+
             if (code.ParentEntry != null)
             {
                 DecompiledEditor.Text = "// This code entry is a reference to an anonymous function within " + code.ParentEntry.Name.Content + ", view it there";
@@ -613,6 +722,8 @@ namespace UndertaleModTool
                                     CurrentLocals.Add(local.Name.Content);
                             }
 
+                            RestoreCaretPosition(DecompiledEditor, currLine, currColumn, scrollPos);
+
                             if (existingDialog is not null)                      //if code was edited (and compiles after it)
                             {
                                 dataa.GMLCacheChanged.Add(code.Name.Content);
@@ -621,10 +732,12 @@ namespace UndertaleModTool
                                 openSaveDialog = mainWindow.IsSaving;
                             }
                         }
+
                         DecompiledEditor.Document.EndUpdate();
                         DecompiledEditor.IsReadOnly = false;
                         if (first)
                             DecompiledEditor.Document.UndoStack.ClearAll();
+
                         DecompiledChanged = false;
 
                         CurrentDecompiled = code;

@@ -537,7 +537,7 @@
                             </local:ButtonDark>
                         </StackPanel>
                     </Grid>
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
                         <ContentControl Margin="10" Content="{Binding Selected, Mode=OneWay}" Name="DataEditor">
                             <ContentControl.Resources>
                                 <DataTemplate DataType="{x:Type local:DescriptionView}">

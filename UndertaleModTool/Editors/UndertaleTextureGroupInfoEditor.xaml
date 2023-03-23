@@ -58,8 +58,9 @@
 
               <!--Texture Page List-->
               <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Texture Pages</TextBlock>
-              <Expander Grid.Row="1" Grid.Column="1" Margin="3" Header="List">
-                <local:DataGridDark ItemsSource="{Binding TexturePages}" MaxHeight="370" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+              <Expander Grid.Row="1" Grid.Column="1" Margin="3" Name="TextureListExpander" Header="List">
+                <local:DataGridDark ItemsSource="{Binding TexturePages}" MaxHeight="370" x:Name="TextureListGrid"
+                                    AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
                                     ScrollViewer.CanContentScroll="True"
                                     VirtualizingPanel.IsVirtualizing="True"
                                     VirtualizingPanel.VirtualizationMode="Recycling">
@@ -102,8 +103,9 @@
 
               <!--Sprite List-->
               <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Sprites</TextBlock>
-              <Expander Grid.Row="2" Grid.Column="1" Margin="3" Header="List">
-                <local:DataGridDark ItemsSource="{Binding Sprites}" MaxHeight="370" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+              <Expander Grid.Row="2" Grid.Column="1" Margin="3" Name="SpriteListExpander" Header="List">
+                <local:DataGridDark ItemsSource="{Binding Sprites}" MaxHeight="370" x:Name="SpriteListGrid"
+                                    AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
                                     ScrollViewer.CanContentScroll="True"
                                     VirtualizingPanel.IsVirtualizing="True"
                                     VirtualizingPanel.VirtualizationMode="Recycling">
@@ -145,11 +147,10 @@
               </Expander>
 
               <!--Spine Sprite List-->
-              <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="Spine Sprites"
-                         Visibility="{Binding DataContext.Data, Mode=OneTime, Converter={StaticResource IsGM2023Converter}, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}"/>
-              <Expander Grid.Row="3" Grid.Column="1" Margin="3" Header="List"
-                        Visibility="{Binding DataContext.Data, Mode=OneTime, Converter={StaticResource IsGM2023Converter}, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
-                <local:DataGridDark ItemsSource="{Binding SpineSprites}" MaxHeight="370" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+              <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Spine Sprites</TextBlock>
+              <Expander Grid.Row="3" Grid.Column="1" Margin="3" Name="SpineSprListExpander" Header="List">
+                <local:DataGridDark ItemsSource="{Binding SpineSprites}" MaxHeight="370" x:Name="SpineSprListGrid"
+                                    AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
                                     ScrollViewer.CanContentScroll="True"
                                     VirtualizingPanel.IsVirtualizing="True"
                                     VirtualizingPanel.VirtualizationMode="Recycling">
@@ -192,8 +193,9 @@
 
               <!--Font List-->
               <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Fonts</TextBlock>
-              <Expander Grid.Row="4" Grid.Column="1" Margin="3" Header="List">
-                <local:DataGridDark ItemsSource="{Binding Fonts}" MaxHeight="370" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+              <Expander Grid.Row="4" Grid.Column="1" Margin="3" Name="FontListExpander" Header="List">
+                <local:DataGridDark ItemsSource="{Binding Fonts}" MaxHeight="370" x:Name="FontListGrid"
+                                    AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
                                     ScrollViewer.CanContentScroll="True"
                                     VirtualizingPanel.IsVirtualizing="True"
                                     VirtualizingPanel.VirtualizationMode="Recycling">
@@ -236,8 +238,9 @@
 
               <!--Tileset List-->
               <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Tilesets</TextBlock>
-              <Expander Grid.Row="5" Grid.Column="1" Margin="3" Header="List">
-                <local:DataGridDark ItemsSource="{Binding Tilesets}" MaxHeight="370" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+              <Expander Grid.Row="5" Grid.Column="1" Margin="3" Name="TilesetListExpander" Header="List">
+                <local:DataGridDark ItemsSource="{Binding Tilesets}" MaxHeight="370" x:Name="TilesetListGrid"
+                                    AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
                                     ScrollViewer.CanContentScroll="True"
                                     VirtualizingPanel.IsVirtualizing="True"
                                     VirtualizingPanel.VirtualizationMode="Recycling">
