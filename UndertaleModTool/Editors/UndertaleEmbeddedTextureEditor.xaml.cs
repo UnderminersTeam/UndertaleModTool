@@ -100,18 +100,23 @@ namespace UndertaleModTool
             }
         }
 
-        private void Image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void Image_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (e.ChangedButton == MouseButton.Right)
+                return;
+
             var pos = e.GetPosition(sender as IInputElement);
             var tex = this.DataContext as UndertaleEmbeddedTexture;
-            var tpag = (Application.Current.MainWindow as MainWindow).Data.TexturePageItems.Where((x) =>
+            var tpag = mainWindow.Data.TexturePageItems.Where((x) =>
             {
                 if (x.TexturePage != tex)
                     return false;
                 return pos.X > x.SourceX && pos.X < x.SourceX + x.SourceWidth && pos.Y > x.SourceY && pos.Y < x.SourceY + x.SourceHeight;
             }).FirstOrDefault();
             if (tpag != null)
-                (Application.Current.MainWindow as MainWindow).ChangeSelection(tpag);
+                mainWindow.ChangeSelection(tpag, e.ChangedButton == MouseButton.Middle);
+            else
+                mainWindow.ShowWarning("Cannot find a texture page item located at the click position.");
         }
     }
 

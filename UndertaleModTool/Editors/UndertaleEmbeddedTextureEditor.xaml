@@ -62,9 +62,14 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Viewbox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Stretch="Uniform" StretchDirection="DownOnly"
+            <TextBlock Grid.Row="0" Grid.ColumnSpan="3" Margin="3" HorizontalAlignment="Center" Foreground="DarkGray" FontStyle="Italic" TextWrapping="Wrap" TextAlignment="Center">
+                Hint: You can open a texture page item by clicking on its region below.<LineBreak/>
+                The middle (wheel) mouse button will open it in a new tab.
+            </TextBlock>
+            <Viewbox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Stretch="Uniform" StretchDirection="DownOnly"
                      SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
                 <Border>
                     <Border.Background>
@@ -78,12 +83,12 @@
                         </DrawingBrush>
                     </Border.Background>
 
-                    <Image Source="{Binding TextureData.TextureBlob, Mode=OneWay}" MouseLeftButtonDown="Image_MouseLeftButtonDown"/>
+                    <Image Source="{Binding TextureData.TextureBlob, Mode=OneWay}" MouseDown="Image_MouseDown" Cursor="Hand"/>
                 </Border>
             </Viewbox>
 
-            <local:ButtonDark Grid.Row="1" Grid.Column="0" Content="Import" Click="Import_Click"/>
-            <local:ButtonDark Grid.Row="1" Grid.Column="3" Content="Export" Click="Export_Click"/>
+            <local:ButtonDark Grid.Row="2" Grid.Column="0" Margin="0,2" Content="Import" Click="Import_Click"/>
+            <local:ButtonDark Grid.Row="2" Grid.Column="3" Margin="0,2" Content="Export" Click="Export_Click"/>
         </Grid>
     </Grid>
 </local:DataUserControl>
