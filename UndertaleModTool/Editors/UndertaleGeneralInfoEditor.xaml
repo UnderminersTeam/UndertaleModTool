@@ -15,6 +15,7 @@
         <local:BooleanToVisibilityConverter x:Key="BooleanFalseToVisibilityConverter" local:trueValue="Collapsed" local:falseValue="Visible"/>
         <local:ByteArrayConverter x:Key="byteArrayConverter"/>
         <local:ByteGUIDArrayConverter x:Key="byteGUIDArrayConverter"/>
+        <local:TimestampDateTimeConverter x:Key="TimestampDateTimeConverter"/>
     </UserControl.Resources>
 
     <StackPanel>
@@ -125,7 +126,7 @@
                 <TextBox Grid.Row="14" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.LicenseCRC32, StringFormat={}{0:X8}}"/>
 
                 <TextBlock Grid.Row="15" Grid.Column="0" Margin="3">Timestamp</TextBlock>
-                <TextBox Grid.Row="15" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.Timestamp}"/>
+                <TextBox Grid.Row="15" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.Timestamp, Converter={StaticResource TimestampDateTimeConverter}}"/>
 
                 <TextBlock Grid.Row="16" Grid.Column="0" Margin="3">Display name</TextBlock>
                 <local:UndertaleStringReference Grid.Row="16" Grid.Column="1" Margin="3" ObjectReference="{Binding GeneralInfo.DisplayName}"/>
