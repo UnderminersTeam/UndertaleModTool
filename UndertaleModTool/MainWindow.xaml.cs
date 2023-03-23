@@ -3418,6 +3418,12 @@ result in loss of work.");
 
                 int currIndex = CurrentTabIndex;
 
+                // Getting rid of the XAML binding error.
+                // See https://stackoverflow.com/a/21001501/12136394
+                var item = TabController.ItemContainerGenerator.ContainerFromIndex(tabIndex) as TabItem;
+                if (item is not null)
+                    item.Template = null;
+
                 // "CurrentTabIndex" changes here (bound to "TabController.SelectedIndex")
                 Tabs.RemoveAt(tabIndex);
 
