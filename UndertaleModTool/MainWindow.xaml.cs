@@ -2301,7 +2301,7 @@ namespace UndertaleModTool
             updater.Dispose();
         }
 
-        public void OpenCodeFile(string name, CodeEditorMode editorDecompile)
+        public void OpenCodeFile(string name, CodeEditorMode editorDecompile, bool inNewTab = false)
         {
             UndertaleCode code = Data.Code.ByName(name);
 
@@ -2336,7 +2336,7 @@ namespace UndertaleModTool
                     CodeEditorDecompile = editorDecompile;
 
                 HighlightObject(code);
-                ChangeSelection(code);
+                ChangeSelection(code, inNewTab);
             }
             else
             {
