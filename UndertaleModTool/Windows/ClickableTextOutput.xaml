@@ -7,6 +7,11 @@
         xmlns:local="clr-namespace:UndertaleModTool"
         mc:Ignorable="d"
         Title="ClickableTextOutput" Height="540" Width="536" MinHeight="160" MinWidth="210">
+    <Window.Resources>
+        <local:ContextMenuDark x:Key="linkContextMenu" Placement="MousePoint">
+            <local:MenuItemDark Header="Open in new tab" Click="OpenInNewTabItem_Click"/>
+        </local:ContextMenuDark>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="25*"/>
@@ -16,15 +21,14 @@
         <Grid.Background>
             <DynamicResource ResourceKey="{x:Static SystemColors.ControlBrushKey}"/>
         </Grid.Background>
-        <Label x:Name="FillingLabel" Content="Displaying the results, please wait..." HorizontalAlignment="Center" VerticalAlignment="Top" Visibility="Hidden" FontSize="14" FontStyle="Normal" Margin="0,-3,0,0" Grid.RowSpan="2"/>
-        <RichTextBox x:Name="OutTextBox" Margin="10,25,10,0" FontSize="14" IsDocumentEnabled="True" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Grid.RowSpan="2">
+        <Label x:Name="FillingLabel" Content="Displaying the results, please wait..." HorizontalAlignment="Center" VerticalAlignment="Top" Visibility="Hidden" FontSize="14" FontStyle="Normal"
+               Margin="0,-3,0,0" Grid.RowSpan="2"/>
+        <RichTextBox x:Name="OutTextBox" Margin="10,25,10,0" FontSize="14" IsDocumentEnabled="True" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                     Grid.RowSpan="2" PreviewMouseDown="OutTextBox_PreviewMouseDown">
             <RichTextBox.Background>
                 <DynamicResource ResourceKey="{x:Static SystemColors.ControlLightLightBrushKey}"/>
             </RichTextBox.Background>
             <RichTextBox.Resources>
-                <Style TargetType="Hyperlink">
-                    <EventSetter Event="Click" Handler="Hyperlink_Click"/>
-                </Style>
                 <Style TargetType="Paragraph">
                     <Setter Property="Margin" Value="0"/>
                 </Style>

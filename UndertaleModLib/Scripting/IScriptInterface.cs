@@ -515,7 +515,8 @@ namespace UndertaleModLib.Scripting
         /// Changes the currently selected in the GUI.
         /// </summary>
         /// <param name="newSelection">The new object that should now be selected.</param>
-        void ChangeSelection(object newSelection);
+        /// <param name="inNewTab">Whether the object should be open in a new tab.</param>
+        void ChangeSelection(object newSelection, bool inNewTab = false);
 
         /// <summary>
         /// Used to prompt the user for a directory.

@@ -1119,14 +1119,43 @@ namespace UndertaleModTool
         private void RoomObjectsTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             object sel = (sender as TreeView).SelectedItem;
-            if (sel is GameObject)
-                mainWindow.ChangeSelection((sel as GameObject).ObjectDefinition);
-            if (sel is Background)
-                mainWindow.ChangeSelection((sel as Background).BackgroundDefinition);
-            if (sel is Tile)
-                mainWindow.ChangeSelection((sel as Tile).ObjectDefinition);
-            if (sel is SpriteInstance)
-                mainWindow.ChangeSelection((sel as SpriteInstance).Sprite);
+            if (sel is GameObject gameObj)
+                mainWindow.ChangeSelection(gameObj.ObjectDefinition);
+            if (sel is Background bg)
+                mainWindow.ChangeSelection(bg.BackgroundDefinition);
+            if (sel is Tile tile)
+                mainWindow.ChangeSelection(tile.ObjectDefinition);
+            if (sel is SpriteInstance sprInst)
+                mainWindow.ChangeSelection(sprInst.Sprite);
+        }
+        private async void RoomObjectsTree_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton != MouseButton.Middle)
+                return;
+
+            TreeViewItem treeViewItem = MainWindow.VisualUpwardSearch<TreeViewItem>(e.OriginalSource as DependencyObject);
+            treeViewItem?.Focus();
+
+            RoomObjectsTree.UpdateLayout();
+            ObjectEditor.UpdateLayout();
+            await Task.Run(async () =>
+            {
+                // Added a little delay in order to see that selection was changed
+                await Task.Delay(25);
+
+                Dispatcher.Invoke(() =>
+                {
+                    object sel = (sender as TreeView).SelectedItem;
+                    if (sel is GameObject gameObj)
+                        mainWindow.ChangeSelection(gameObj.ObjectDefinition, true);
+                    if (sel is Background bg)
+                        mainWindow.ChangeSelection(bg.BackgroundDefinition, true);
+                    if (sel is Tile tile)
+                        mainWindow.ChangeSelection(tile.ObjectDefinition, true);
+                    if (sel is SpriteInstance sprInst)
+                        mainWindow.ChangeSelection(sprInst.Sprite, true);
+                });
+            });
         }
 
         private UndertaleObject copied;
@@ -1670,6 +1699,7 @@ namespace UndertaleModTool
             canvas.CurrentLayer = layer;
             ObjElemDict[layer] = canvas;
         }
+
         private void LayerCanvas_Unloaded(object sender, RoutedEventArgs e)
         {
             LayerCanvas canvas = sender as LayerCanvas;

@@ -23,11 +23,29 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertaleStringReference : UserControl
     {
+        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+
         public static DependencyProperty ObjectReferenceProperty =
             DependencyProperty.Register("ObjectReference", typeof(UndertaleString),
                 typeof(UndertaleStringReference),
                 new FrameworkPropertyMetadata(null,
-                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (sender, e) =>
+                    {
+                        var inst = sender as UndertaleStringReference;
+                        if (inst is null)
+                            return;
+
+                        if (e.NewValue is null)
+                            inst.ObjectText.ContextMenu = null;
+                        else
+                        {
+                            try
+                            {
+                                inst.ObjectText.ContextMenu = inst.Resources["contextMenu"] as ContextMenu;
+                            }
+                            catch { }
+                        }
+                    }));
 
         public UndertaleString ObjectReference
         {
@@ -42,7 +60,19 @@ namespace UndertaleModTool
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {
-            (Application.Current.MainWindow as MainWindow).ChangeSelection(ObjectReference);
+            mainWindow.ChangeSelection(ObjectReference);
+        }
+        private void Details_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (ObjectReference is null)
+                return;
+
+            if (e.ChangedButton == MouseButton.Middle && e.ButtonState == MouseButtonState.Pressed)
+                mainWindow.ChangeSelection(ObjectReference, true);
+        }
+        private void OpenInNewTabItem_Click(object sender, RoutedEventArgs e)
+        {
+            mainWindow.ChangeSelection(ObjectReference, true);
         }
 
         private void Remove_Click(object sender, RoutedEventArgs e)

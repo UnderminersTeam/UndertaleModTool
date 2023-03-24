@@ -21,6 +21,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -34,6 +35,7 @@ using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 using static UndertaleModTool.MainWindow.CodeEditorMode;
+using Input = System.Windows.Input;
 
 namespace UndertaleModTool
 {
@@ -1054,7 +1056,7 @@ namespace UndertaleModTool
 
                 var line = new ClickVisualLineText(numText, CurrentContext.VisualLine, numLength);
                 
-                line.Clicked += (text) =>
+                line.Clicked += (text, inNewTab) =>
                 {
                     if (int.TryParse(text, out int id))
                     {
@@ -1091,9 +1093,19 @@ namespace UndertaleModTool
                         {
                             MenuItemDark item = new();
                             item.Header = obj.ToString().Replace("_", "__");
-                            item.Click += (sender2, ev2) =>
+                            item.PreviewMouseDown += (sender2, ev2) =>
                             {
-                                if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+                                if (ev2.ChangedButton != Input.MouseButton.Left
+                                    && ev2.ChangedButton != Input.MouseButton.Middle)
+                                    return;
+
+                                if (ev2.ChangedButton == Input.MouseButton.Middle)
+                                {
+                                    mainWindow.Focus();
+                                    mainWindow.ChangeSelection(obj, true);
+                                    
+                                }
+                                else if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
                                     mainWindow.ChangeSelection(obj);
                                 else
                                 {
@@ -1158,6 +1170,8 @@ namespace UndertaleModTool
             private static readonly SolidColorBrush InstanceBrush = new(Color.FromRgb(0x58, 0xE3, 0x5A));
             private static readonly SolidColorBrush LocalBrush = new(Color.FromRgb(0xFF, 0xF8, 0x99));
 
+            private static ContextMenuDark contextMenu;
+
             // <offset, length>
             private readonly Dictionary<int, int> lineNameSections = new();
 
@@ -1167,6 +1181,20 @@ namespace UndertaleModTool
 
                 highlighterInst = textAreaInst.GetService(typeof(IHighlighter)) as IHighlighter;
                 textEditorInst = textAreaInst.GetService(typeof(TextEditor)) as TextEditor;
+
+                var menuItem = new MenuItemDark()
+                {
+                    Header = "Open in new tab"
+                };
+                menuItem.Click += (sender, _) =>
+                {
+                    mainWindow.ChangeSelection((sender as FrameworkElement).DataContext, true);
+                };
+                contextMenu = new()
+                {
+                    Items = { menuItem },
+                    Placement = PlacementMode.MousePoint
+                };
             }
 
             public override void StartGeneration(ITextRunConstructionContext context)
@@ -1305,10 +1333,17 @@ namespace UndertaleModTool
                                                    func ? FunctionBrush : ConstantBrush);
                 if (func)
                     line.Bold = true;
-                line.Clicked += async (text) =>
+                line.Clicked += async (text, button) =>
                 {
                     await codeEditorInst?.SaveChanges();
-                    mainWindow.ChangeSelection(val);
+
+                    if (button == Input.MouseButton.Right)
+                    {
+                        contextMenu.DataContext = val;
+                        contextMenu.IsOpen = true;
+                    }
+                    else
+                        mainWindow.ChangeSelection(val, button == Input.MouseButton.Middle);
                 };
 
                 return line;
@@ -1352,7 +1387,7 @@ namespace UndertaleModTool
         public class ClickVisualLineText : VisualLineText
         {
 
-            public delegate void ClickHandler(string text);
+            public delegate void ClickHandler(string text, Input.MouseButton button);
 
             public event ClickHandler Clicked;
 
@@ -1404,12 +1439,12 @@ namespace UndertaleModTool
             {
                 if (e.Handled)
                     return;
-                if ((e.ChangedButton == System.Windows.Input.MouseButton.Left && LinkIsClickable()) ||
-                     e.ChangedButton == System.Windows.Input.MouseButton.Middle)
+                if ((e.ChangedButton == Input.MouseButton.Left && LinkIsClickable())
+                    || e.ChangedButton == Input.MouseButton.Middle || e.ChangedButton == Input.MouseButton.Right)
                 {
                     if (Clicked != null)
                     {
-                        Clicked(Text);
+                        Clicked(Text, e.ChangedButton);
                         e.Handled = true;
                     }
                 }
