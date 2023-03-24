@@ -116,7 +116,7 @@ namespace UndertaleModTool
             if (tpag != null)
                 mainWindow.ChangeSelection(tpag, e.ChangedButton == MouseButton.Middle);
             else
-                mainWindow.ShowWarning("Cannot find a texture page item located at the click position.");
+                mainWindow.ShowWarning("Cannot find a texture page item at this position.");
         }
     }
 
