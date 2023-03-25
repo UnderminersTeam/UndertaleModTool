@@ -596,7 +596,7 @@ namespace UndertaleModTool
                 if (existingDialog != null)
                 {
                     dialog = existingDialog;
-                    dialog.Message = "Decompiling, please wait...";
+                    dialog.Message = "Decompiling, please wait... This can take a while on complex scripts.";
                 }
                 else
                 {
@@ -638,7 +638,7 @@ namespace UndertaleModTool
                         string path = Path.Combine(TempPath, code.Name.Content + ".gml");
                         if (!SettingsWindow.ProfileModeEnabled || !File.Exists(path))
                         {
-                            decompiled = Decompiler.Decompile(code, context);
+                            decompiled = Decompiler.Decompile(code, context, (msg) => { dialog.Message = msg; });
                         }
                         else
                             decompiled = File.ReadAllText(path);

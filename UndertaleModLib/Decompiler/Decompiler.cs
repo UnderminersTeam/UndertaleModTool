@@ -3769,11 +3769,11 @@ namespace UndertaleModLib.Decompiler
             return result;
         }
 
-        public static string Decompile(UndertaleCode code, GlobalDecompileContext globalContext)
+        public static string Decompile(UndertaleCode code, GlobalDecompileContext globalContext, Action<string> msgDelegate = null)
         {
             globalContext.DecompilerWarnings.Clear();
             DecompileContext context = new DecompileContext(globalContext, code);
-            BuildSubFunctionCache(globalContext.Data);
+            BuildSubFunctionCache(globalContext.Data, msgDelegate);
             try
             {
                 if (globalContext.Data != null && globalContext.Data.ToolInfo.ProfileMode)
@@ -3820,12 +3820,15 @@ namespace UndertaleModLib.Decompiler
             return MakeLocalVars(context, decompiledCode) + decompiledCode;
         }
 
-        public static void BuildSubFunctionCache(UndertaleData data)
+        public static void BuildSubFunctionCache(UndertaleData data, Action<string> msgDelegate = null)
         {
             // Find all functions defined in GlobalScripts
             // Use the cache so this only gets calculated once
             if (data == null || !data.IsVersionAtLeast(2, 3) || data.KnownSubFunctions != null)
                 return;
+
+            if (msgDelegate is not null)
+                msgDelegate("Building the cache of all sub-functions...");
             HashSet<string> codeNames = new(data.Code.Select(c => c.Name?.Content));
             foreach (var func in data.Functions)
             {
@@ -3837,6 +3840,7 @@ namespace UndertaleModLib.Decompiler
             Parallel.ForEach(data.GlobalInitScripts, globalScript =>
             {
                 UndertaleCode scriptCode = globalScript.Code;
+                Debug.WriteLine(scriptCode.Name.Content);
                 try
                 {
                     DecompileContext childContext = new DecompileContext(globalDecompileContext, scriptCode, false);
@@ -3861,6 +3865,9 @@ namespace UndertaleModLib.Decompiler
                     Debug.WriteLine(e.ToString());
                 }
             });
+
+            if (msgDelegate is not null)
+                msgDelegate("Decompiling, please wait... This can take a while on complex scripts.");
         }
 
         private static void DoTypePropagation(DecompileContext context, Dictionary<uint, Block> blocks)
