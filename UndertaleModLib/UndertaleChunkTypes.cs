@@ -345,4 +345,20 @@ namespace UndertaleModLib
 
         internal override uint UnserializeObjectCount(UndertaleReader reader) => 0;
     }
+
+    public abstract class UndertaleUnsupportedChunk : UndertaleChunk
+    {
+        public byte[] RawData;
+        internal override void SerializeChunk(UndertaleWriter writer)
+        {
+            writer.Write(RawData);
+        }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            RawData = reader.ReadBytes((int)Length);
+        }
+
+        internal override uint UnserializeObjectCount(UndertaleReader reader) => 0;
+    }
 }

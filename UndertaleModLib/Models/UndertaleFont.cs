@@ -75,9 +75,16 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
     public float ScaleY { get; set; }
 
     /// <summary>
-    /// TODO: currently unknown, needs investigation. GMS2022.2 specific?
+    /// TODO: currently unknown, needs investigation. GM 2022.2 specific?
     /// </summary>
     public uint Ascender { get; set; }
+
+    /// <summary>
+    /// A spread value that's used for SDF rendering.
+    /// Introduced in GM 2023.2.
+    /// </summary>
+    /// <value><c>0</c> if SDF is disabled for this font.</value>
+    public uint SDFSpread { get; set; }
 
     /// <summary>
     /// The glyphs that this font uses.
@@ -242,6 +249,8 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             writer.Write(AscenderOffset);
         if (writer.undertaleData.IsVersionAtLeast(2022, 2))
             writer.Write(Ascender);
+        if (writer.undertaleData.IsVersionAtLeast(2023, 2))
+            writer.Write(SDFSpread);
         writer.WriteUndertaleObject(Glyphs);
     }
 
@@ -274,6 +283,8 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             AscenderOffset = reader.ReadInt32();
         if (reader.undertaleData.IsVersionAtLeast(2022, 2))
             Ascender = reader.ReadUInt32();
+        if (reader.undertaleData.IsVersionAtLeast(2023, 2))
+            SDFSpread = reader.ReadUInt32();
         Glyphs = reader.ReadUndertaleObject<UndertalePointerList<Glyph>>();
     }
 
@@ -285,6 +296,8 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             skipSize += 4; // AscenderOffset
         if (reader.undertaleData.IsVersionAtLeast(2022, 2))
             skipSize += 4; // Ascender
+        if (reader.undertaleData.IsVersionAtLeast(2023, 2))
+            skipSize += 4; // SDFSpread
 
         reader.Position += skipSize;
 

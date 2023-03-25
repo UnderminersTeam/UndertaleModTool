@@ -315,7 +315,9 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         (uint Major, uint Minor, uint Release, uint Build) detectedVer = readVersion;
 
         // Some GMS2+ version detection. The rest is spread around, mostly in UndertaleChunks.cs
-        if (reader.AllChunkNames.Contains("FEAT"))      // 2022.8
+        if (reader.AllChunkNames.Contains("PSEM"))      // 2023.2
+            detectedVer = (2023, 2, 0, 0);
+        else if (reader.AllChunkNames.Contains("FEAT")) // 2022.8
             detectedVer = (2022, 8, 0, 0);
         else if (reader.AllChunkNames.Contains("FEDS")) // 2.3.6
             detectedVer = (2, 3, 6, 0);
