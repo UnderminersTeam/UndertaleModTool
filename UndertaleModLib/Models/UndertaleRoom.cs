@@ -1812,6 +1812,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             public UndertalePointerList<SpriteInstance> Sprites { get; set; }
             public UndertalePointerList<SequenceInstance> Sequences { get; set; }
             public UndertalePointerList<SpriteInstance> NineSlices { get; set; } // Removed in 2.3.2, before never used
+            public UndertalePointerList<ParticleSystemInstance> ParticleSystems { get; set; }
 
             /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
@@ -1823,6 +1824,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                     writer.WriteUndertaleObjectPointer(Sequences);
                     if (!writer.undertaleData.IsVersionAtLeast(2, 3, 2))
                         writer.WriteUndertaleObjectPointer(NineSlices);
+                    if (writer.undertaleData.IsVersionAtLeast(2023, 2))
+                        writer.WriteUndertaleObjectPointer(ParticleSystems);
                 }
                 writer.WriteUndertaleObject(LegacyTiles);
                 writer.WriteUndertaleObject(Sprites);
@@ -1831,6 +1834,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                     writer.WriteUndertaleObject(Sequences);
                     if (!writer.undertaleData.IsVersionAtLeast(2, 3, 2))
                         writer.WriteUndertaleObject(NineSlices);
+                    if (writer.undertaleData.IsVersionAtLeast(2023, 2))
+                        writer.WriteUndertaleObject(ParticleSystems);
                 }
             }
 
@@ -1844,6 +1849,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                     Sequences = reader.ReadUndertaleObjectPointer<UndertalePointerList<SequenceInstance>>();
                     if (!reader.undertaleData.IsVersionAtLeast(2, 3, 2))
                         NineSlices = reader.ReadUndertaleObjectPointer<UndertalePointerList<SpriteInstance>>();
+                    if (reader.undertaleData.IsVersionAtLeast(2023, 2))
+                        ParticleSystems = reader.ReadUndertaleObjectPointer<UndertalePointerList<ParticleSystemInstance>>();
                 }
                 reader.ReadUndertaleObject(LegacyTiles);
                 reader.ReadUndertaleObject(Sprites);
@@ -1852,6 +1859,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                     reader.ReadUndertaleObject(Sequences);
                     if (!reader.undertaleData.IsVersionAtLeast(2, 3, 2))
                         reader.ReadUndertaleObject(NineSlices);
+                    if (reader.undertaleData.IsVersionAtLeast(2023, 2))
+                        reader.ReadUndertaleObject(ParticleSystems);
                 }
             }
 
@@ -1864,11 +1873,14 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 uint spritesPtr = reader.ReadUInt32();
                 uint sequencesPtr = 0;
                 uint nineSlicesPtr = 0;
+                uint partSystemsPtr = 0;
                 if (reader.undertaleData.IsVersionAtLeast(2, 3))
                 {
                     sequencesPtr = reader.ReadUInt32();
                     if (!reader.undertaleData.IsVersionAtLeast(2, 3, 2))
                         nineSlicesPtr = reader.ReadUInt32();
+                    if (reader.undertaleData.IsVersionAtLeast(2023, 2))
+                        partSystemsPtr = reader.ReadUInt32();
                 }
 
                 reader.AbsPosition = legacyTilesPtr;
@@ -1883,6 +1895,11 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                     {
                         reader.AbsPosition = nineSlicesPtr;
                         count += 1 + UndertalePointerList<SpriteInstance>.UnserializeChildObjectCount(reader);
+                    }
+                    if (reader.undertaleData.IsVersionAtLeast(2023, 2))
+                    {
+                        reader.AbsPosition = partSystemsPtr;
+                        count += 1 + UndertalePointerList<ParticleSystemInstance>.UnserializeChildObjectCount(reader);
                     }
                 }
 
@@ -2194,6 +2211,36 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
             _sequence.Dispose();
             Name = null;
+        }
+    }
+
+    // It's not fully implemented yet
+    public class ParticleSystemInstance : UndertaleObject, INotifyPropertyChanged, IStaticChildObjCount, IStaticChildObjectsSize, IDisposable
+    {
+        /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
+        public static readonly uint ChildObjectCount = 0;
+
+        /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+        public static readonly uint ChildObjectsSize = 32;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private byte[] rawData;
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            writer.Write(rawData);
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            rawData = reader.ReadBytes((int)ChildObjectsSize);
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
         }
     }
 }
