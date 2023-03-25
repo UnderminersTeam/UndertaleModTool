@@ -1586,14 +1586,14 @@ namespace UndertaleModLib
         }
     }
 
-    // GMS2022.8+ only
+    // GM2022.8+ only
     public class UndertaleChunkFEAT : UndertaleSingleChunk<UndertaleFeatureFlags>
     {
         public override string Name => "FEAT";
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
-            if (writer.undertaleData.GeneralInfo.Major < 2)
+            if (!writer.undertaleData.IsGameMaker2())
                 throw new InvalidOperationException();
 
             while (writer.Position % 4 != 0)
@@ -1604,7 +1604,7 @@ namespace UndertaleModLib
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
-            if (reader.undertaleData.GeneralInfo.Major < 2)
+            if (!reader.undertaleData.IsGameMaker2())
                 throw new InvalidOperationException();
 
             // Padding
@@ -1627,5 +1627,15 @@ namespace UndertaleModLib
 
             return base.UnserializeObjectCount(reader);
         }
+    }
+
+    // GM2023.2+ only
+    public class UndertaleChunkPSEM : UndertaleUnsupportedChunk
+    {
+        public override string Name => "PSEM";
+    }
+    public class UndertaleChunkPSYS : UndertaleUnsupportedChunk
+    {
+        public override string Name => "PSYS";
     }
 }

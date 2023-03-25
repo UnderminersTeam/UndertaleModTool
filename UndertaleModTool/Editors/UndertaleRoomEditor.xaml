@@ -109,6 +109,10 @@
                             </TextBlock.Text>
                         </TextBlock>
                     </DataTemplate>
+                    <DataTemplate DataType="{x:Type undertale:UndertaleRoom+ParticleSystemInstance}">
+                        <TextBlock Text="ParticleSystemInstance (unsupported)"
+                                   Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                    </DataTemplate>
                 </TreeView.Resources>
 
                 <TreeViewItem Header="{Binding Name.Content}" Name="RoomRootItem" IsExpanded="True">
@@ -236,6 +240,9 @@
                                                 </MultiBinding.Converter>
                                                 <Binding Path="AssetsData.LegacyTiles"/>
                                                 <Binding Path="AssetsData.Sprites"/>
+                                                <Binding Path="AssetsData.Sequences"/>
+                                                <Binding Path="AssetsData.NineSlices"/>
+                                                <Binding Path="AssetsData.ParticleSystems"/>
                                             </MultiBinding>
                                         </HierarchicalDataTemplate.ItemsSource>
                                         <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">

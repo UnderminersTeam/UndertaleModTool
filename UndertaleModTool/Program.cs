@@ -17,7 +17,7 @@ namespace UndertaleModTool
     {
         public static string GetExecutableDirectory()
         {
-            return Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+            return Path.GetDirectoryName(Environment.ProcessPath);
         }
 
         // https://stackoverflow.com/questions/1025843/merging-dlls-into-a-single-exe-with-wpf

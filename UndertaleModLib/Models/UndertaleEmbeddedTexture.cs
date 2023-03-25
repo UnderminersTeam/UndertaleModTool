@@ -169,7 +169,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
 
         if (writer.undertaleData.IsVersionAtLeast(2022, 3))
         {
-            _textureBlockSize = texStartPos - writer.Position;
+            _textureBlockSize = writer.Position - texStartPos;
             // Write the actual size of the texture block in
             // the place of _textureBlockSize
             var posBackup = writer.Position;
