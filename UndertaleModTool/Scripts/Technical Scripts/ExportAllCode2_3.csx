@@ -59,7 +59,11 @@ void DumpCode()
     File.WriteAllText(indexPath, indexText.ToString());
 
     if (Data.KnownSubFunctions is null) // if we run script before opening any code
-        Decompiler.BuildSubFunctionCache(Data);
+    {
+        SetProgressBar(null, "Building the cache of all sub-functions...", 0, 0);
+        await Task.Run(() => Decompiler.BuildSubFunctionCache(Data));
+        SetProgressBar(null, "Code Entries", 0, toDump.Count);
+    }
 
     Parallel.For(0, toDump.Count - 1, (i, _) =>
     {
