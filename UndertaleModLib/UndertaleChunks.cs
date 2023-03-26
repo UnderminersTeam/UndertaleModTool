@@ -98,6 +98,9 @@ namespace UndertaleModLib
 
                     Chunks.Add(chunk.Name, chunk);
                     ChunksTypeDict.Add(chunk.GetType(), chunk);
+
+                    if (reader.ReadOnlyGEN8 && chunk.Name == "GEN8")
+                        return;
                 }
             }
         }
