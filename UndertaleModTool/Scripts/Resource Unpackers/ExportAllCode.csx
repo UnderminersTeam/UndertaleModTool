@@ -65,7 +65,11 @@ async Task DumpCode()
         if (Data.GMLCacheFailed.Count > 0)
         {
             if (Data.KnownSubFunctions is null) //if we run script before opening any code
-                Decompiler.BuildSubFunctionCache(Data);
+            {
+                SetProgressBar(null, "Building the cache of all sub-functions...", 0, 0);
+                await Task.Run(() => Decompiler.BuildSubFunctionCache(Data));
+                SetProgressBar(null, "Code Entries", 0, Data.GMLCache.Count + Data.GMLCacheFailed.Count);
+            }   
 
             await Task.Run(() => Parallel.ForEach(Data.GMLCacheFailed, (codeName) => DumpCode(Data.Code.ByName(codeName))));
         }
@@ -73,7 +77,11 @@ async Task DumpCode()
     else
     {
         if (Data.KnownSubFunctions is null) //if we run script before opening any code
-            Decompiler.BuildSubFunctionCache(Data);
+        {
+            SetProgressBar(null, "Building the cache of all sub-functions...", 0, 0);
+            await Task.Run(() => Decompiler.BuildSubFunctionCache(Data));
+            SetProgressBar(null, "Code Entries", 0, toDump.Count);
+        }
 
         await Task.Run(() => Parallel.ForEach(toDump, DumpCode));
     }
