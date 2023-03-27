@@ -231,8 +231,9 @@
                         <local:ContextMenuDark x:Key="AddMenu">
                             <MenuItem Header="Add" Click="MenuItem_Add_Click"/>
                         </local:ContextMenuDark>
-                        <local:ContextMenuDark x:Key="UndertaleResourceMenu">
+                        <local:ContextMenuDark x:Key="UndertaleResourceMenu" Opened="MenuItem_ContextMenuOpened">
                             <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>
+                            <MenuItem Header="Find all references" Click="MenuItem_FindAllReferences_Click"/>
                             <MenuItem Header="Copy name to clipboard" Click="MenuItem_CopyName_Click"/>
                             <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
                         </local:ContextMenuDark>
