@@ -56,7 +56,8 @@ namespace UndertaleModTool.Windows
                 TypesList.Items.Add(new CheckBox()
                 {
                     DataContext = typePair.Item1,
-                    Content = typePair.Item2
+                    Content = typePair.Item2,
+                    IsChecked = true
                 });
             }
 
@@ -83,13 +84,13 @@ namespace UndertaleModTool.Windows
 
         private void SearchButton_Click(object sender, RoutedEventArgs e)
         {
-            List<Type> typesList = new();
+            List<(Type, string)> typesList = new();
             foreach (var item in TypesList.Items)
             {
                 if (item is CheckBox checkBox && checkBox.IsChecked == true)
                 {
                     if (checkBox.DataContext is Type t)
-                        typesList.Add(t);
+                        typesList.Add((t, checkBox.Content as string));
                 }
             }
 
@@ -99,7 +100,8 @@ namespace UndertaleModTool.Windows
                 return;
             }
 
-            FindReferencesResults dialog = new(sourceObj, new UndertaleResource[0][], data);
+            var results = UndertaleResourceReferenceMethodsMap.GetReferencesOfObject(sourceObj, data);
+            FindReferencesResults dialog = new(sourceObj, results);
             dialog.Show();
 
             Close();

@@ -16,14 +16,14 @@
         <Rectangle Margin="10,0,20,0" Height="2" Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
 
         <TextBox Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged"
-                 Margin="10,15,20,0" FontSize="16">
+                 Margin="10,15,20,0" FontSize="14">
             <!-- Source - https://stackoverflow.com/a/7433840/12136394 -->
             <TextBox.Style>
                 <Style TargetType="TextBox">
                     <Style.Resources>
                         <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
                             <VisualBrush.Visual>
-                                <Label Content="Filter by name..." Foreground="Gray" FontSize="16"/>
+                                <Label Content="Filter by name..." Foreground="Gray" FontSize="14"/>
                             </VisualBrush.Visual>
                         </VisualBrush>
                     </Style.Resources>
@@ -41,12 +41,12 @@
                 </Style>
             </TextBox.Style>
         </TextBox>
-        <TreeView Name="ResultsTree" Height="350" Margin="10,5,20,0" FontSize="16">
+        <TreeView Name="ResultsTree" Height="350" Margin="10,5,20,0" FontSize="14">
             <TreeView.Background>
                 <DynamicResource ResourceKey="{x:Static SystemColors.ControlLightLightBrushKey}"/>
             </TreeView.Background>
         </TreeView>
 
-        <local:ButtonDark Content="Done" FontSize="18" Width="134" Height="40" Click="DoneButton_Click" Margin="0,25,0,0"/>
+        <local:ButtonDark Content="Done" FontSize="18" Width="134" Height="40" Click="DoneButton_Click" Margin="0,20,0,0"/>
     </StackPanel>
 </Window>
