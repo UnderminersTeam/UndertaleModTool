@@ -14,7 +14,7 @@
         <Label Content="Where to search the references?" HorizontalAlignment="Left" Margin="10,10,0,0" FontSize="22"/>
         <Rectangle Margin="10,0,20,0" Height="2" Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
 
-        <ItemsControl Name="TypesList" Margin="10,10,20,0" Height="350">
+        <ItemsControl Name="TypesList" Margin="10,15,20,0" Height="350">
             <ItemsControl.Background>
                 <DynamicResource ResourceKey="{x:Static SystemColors.ControlLightLightBrushKey}"/>
             </ItemsControl.Background>

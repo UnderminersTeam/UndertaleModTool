@@ -45,6 +45,7 @@ namespace UndertaleModTool.Windows
             }
         };
 
+
         public static (Type, string)[] GetTypeMapForVersion(Type type, (uint, uint, uint) version)
         {
             if (!typeMap.TryGetValue(type, out TypesForVersion[] typesForVer))

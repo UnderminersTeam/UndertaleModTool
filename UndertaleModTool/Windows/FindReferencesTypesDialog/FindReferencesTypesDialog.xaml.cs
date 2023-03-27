@@ -21,6 +21,7 @@ namespace UndertaleModTool.Windows
     /// </summary>
     public partial class FindReferencesTypesDialog : Window
     {
+        private readonly UndertaleResource sourceObj;
         private readonly UndertaleData data;
 
         private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -59,6 +60,7 @@ namespace UndertaleModTool.Windows
                 });
             }
 
+            sourceObj = obj;
             this.data = data;
         }
 
@@ -97,7 +99,8 @@ namespace UndertaleModTool.Windows
                 return;
             }
 
-
+            FindReferencesResults dialog = new(sourceObj, new UndertaleResource[0][], data);
+            dialog.Show();
 
             Close();
         }
