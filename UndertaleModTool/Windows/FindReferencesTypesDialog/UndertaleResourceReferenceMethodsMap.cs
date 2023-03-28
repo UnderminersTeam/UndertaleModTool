@@ -169,8 +169,37 @@ namespace UndertaleModTool.Windows
                         Version = (2, 2, 1),
                         Predicate = (obj) =>
                         {
-                            var textGroups = data.TextureGroupInfo.Where(x => x.Sprites.Any(s => s.Resource == obj)
-                                                                              || x.SpineSprites.Any(s => s.Resource == obj));
+                            var textGroups = data.TextureGroupInfo.Where(x => x.Tilesets.Any(s => s.Resource == obj));
+                            if (textGroups.Any())
+                                return new (string, object[])[] { ("Texture groups", textGroups.ToArray()) };
+                            else
+                                return null;
+                        }
+                    }
+                }
+            },
+            {
+                typeof(UndertaleEmbeddedTexture),
+                new[]
+                {
+                    new PredicateForVersion()
+                    {
+                        Version = (1, 0, 0),
+                        Predicate = (obj) =>
+                        {
+                            var pageItems = data.TexturePageItems.Where(x => x.TexturePage == obj);
+                            if (pageItems.Any())
+                                return new (string, object[])[] { ("Texture page items", pageItems.ToArray()) };
+                            else
+                                return null;
+                        }
+                    },
+                    new PredicateForVersion()
+                    {
+                        Version = (2, 2, 1),
+                        Predicate = (obj) =>
+                        {
+                            var textGroups = data.TextureGroupInfo.Where(x => x.TexturePages.Any(s => s.Resource == obj));
                             if (textGroups.Any())
                                 return new (string, object[])[] { ("Texture groups", textGroups.ToArray()) };
                             else
@@ -180,6 +209,7 @@ namespace UndertaleModTool.Windows
                 }
             }
         };
+
 
         public static (string, object[])[] GetReferencesOfObject(UndertaleResource obj, UndertaleData data)
         {

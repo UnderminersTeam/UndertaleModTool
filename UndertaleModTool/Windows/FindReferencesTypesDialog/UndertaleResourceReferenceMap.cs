@@ -81,6 +81,28 @@ namespace UndertaleModTool.Windows
                         }
                     }
                 }
+            },
+            {
+                typeof(UndertaleEmbeddedTexture),
+                new[]
+                {
+                    new TypesForVersion
+                    {
+                        Version = (1, 0, 0),
+                        Types = new[]
+                        {
+                            (typeof(UndertaleTexturePageItem), "Texture page items")
+                        }
+                    },
+                    new TypesForVersion
+                    {
+                        Version = (2, 2, 1),
+                        Types = new[]
+                        {
+                            (typeof(UndertaleTextureGroupInfo), "Texture groups")
+                        }
+                    },
+                }
             }
         };
 
