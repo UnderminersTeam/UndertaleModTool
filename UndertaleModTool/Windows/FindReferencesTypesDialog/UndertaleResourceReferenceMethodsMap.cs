@@ -105,6 +105,79 @@ namespace UndertaleModTool.Windows
                         }
                     }
                 }
+            },
+            {
+                typeof(UndertaleBackground),
+                new[]
+                {
+                    new PredicateForVersion()
+                    {
+                        Version = (1, 0, 0),
+                        Predicate = (obj) =>
+                        {
+                            if (data.IsGameMaker2())
+                                return null;
+
+                            IEnumerable<(string, object[])> outList = Enumerable.Empty<(string, object[])>();
+
+                            List<ChildInstance> backgrounds = new();
+                            List<ChildInstance> tiles = new();
+                            foreach (var room in data.Rooms)
+                            {
+                                foreach (var bg in room.Backgrounds)
+                                    if (bg.BackgroundDefinition == obj)
+                                        backgrounds.Add(new(room, bg));
+
+                                foreach (var tile in room.Tiles)
+                                    if (tile.BackgroundDefinition == obj)
+                                        tiles.Add(new(room, tile));
+                            }
+                            if (backgrounds.Count > 0)
+                                outList = outList.Append(("Room tiles", tiles.ToArray()));
+                            if (tiles.Count > 0)
+                                outList = outList.Append(("Room sprite instances", tiles.ToArray()));
+
+                            if (outList == Enumerable.Empty<(string, object[])>())
+                                return null;
+                            return outList.ToArray();
+                        }
+                    },
+                    new PredicateForVersion()
+                    {
+                        Version = (2, 0, 0),
+                        Predicate = (obj) =>
+                        {
+                            List<ChildInstance> tileLayers = new();
+                            foreach (var room in data.Rooms)
+                            {
+                                foreach (var layer in room.Layers)
+                                {
+                                    if (layer.TilesData is not null
+                                        && layer.TilesData.Background == obj)
+                                        tileLayers.Add(new(room, layer));
+
+                                }
+                            }
+                            if (tileLayers.Count > 0)
+                                return new (string, object[])[] { ("Room tile layers", tileLayers.ToArray()) };
+                            else
+                                return null;
+                        }
+                    },
+                    new PredicateForVersion()
+                    {
+                        Version = (2, 2, 1),
+                        Predicate = (obj) =>
+                        {
+                            var textGroups = data.TextureGroupInfo.Where(x => x.Sprites.Any(s => s.Resource == obj)
+                                                                              || x.SpineSprites.Any(s => s.Resource == obj));
+                            if (textGroups.Any())
+                                return new (string, object[])[] { ("Texture groups", textGroups.ToArray()) };
+                            else
+                                return null;
+                        }
+                    }
+                }
             }
         };
 
