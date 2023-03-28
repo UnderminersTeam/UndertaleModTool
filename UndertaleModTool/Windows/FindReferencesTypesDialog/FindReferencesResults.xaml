@@ -3,10 +3,19 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:UndertaleModTool"
+        xmlns:utmt="clr-namespace:UndertaleModTool"
+        xmlns:local="clr-namespace:UndertaleModTool.Windows"
+        xmlns:scol="clr-namespace:System.Collections;assembly=mscorlib"
         mc:Ignorable="d"
         Title="The references of game object &quot;&quot;" Height="588" Width="497" IsVisibleChanged="Window_IsVisibleChanged"
         WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <local:ChildInstanceNameConverter x:Key="ChildInstanceNameConverter"/>
+        <HierarchicalDataTemplate x:Key="ChildInstTemplate">
+            <TextBlock Text="{Binding ., Mode=OneTime, Converter={StaticResource ChildInstanceNameConverter}}" />
+        </HierarchicalDataTemplate>
+        <utmt:ImplementsInterfaceConverter x:Key="ImplementsInterfaceConverter"/>
+    </Window.Resources>
     <StackPanel>
         <StackPanel.Background>
             <DynamicResource ResourceKey="{x:Static SystemColors.ControlBrushKey}"/>
@@ -41,12 +50,29 @@
                 </Style>
             </TextBox.Style>
         </TextBox>
-        <TreeView Name="ResultsTree" Height="350" Margin="10,5,20,0" FontSize="14">
+        <TreeView Name="ResultsTree" Height="350" Margin="10,5,20,0" FontSize="14"
+                  SelectedItemChanged="ResultsTree_SelectedItemChanged" MouseDown="ResultsTree_MouseDown"
+                  MouseDoubleClick="ResultsTree_MouseDoubleClick" KeyUp="ResultsTree_KeyUp" PreviewMouseRightButtonDown="ResultsTree_PreviewMouseRightButtonDown"
+                  VirtualizingStackPanel.IsVirtualizing="True"
+                  VirtualizingStackPanel.VirtualizationMode="Recycling">
             <TreeView.Background>
                 <DynamicResource ResourceKey="{x:Static SystemColors.ControlLightLightBrushKey}"/>
             </TreeView.Background>
+            <TreeView.Resources>
+                <utmt:ContextMenuDark x:Key="UndertaleResourceMenu">
+                    <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>
+                </utmt:ContextMenuDark>
+                <Style TargetType="TreeViewItem">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ., Converter={StaticResource ImplementsInterfaceConverter}, ConverterParameter={x:Type scol:IEnumerable}}" Value="False">
+                            <!-- If the data context is not a enumerable -->
+                            <Setter Property="ContextMenu" Value="{StaticResource UndertaleResourceMenu}"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TreeView.Resources>
         </TreeView>
 
-        <local:ButtonDark Content="Done" FontSize="18" Width="134" Height="40" Click="DoneButton_Click" Margin="0,20,0,0"/>
+        <utmt:ButtonDark Content="Done" FontSize="18" Width="134" Height="40" Click="DoneButton_Click" Margin="0,20,0,0"/>
     </StackPanel>
 </Window>

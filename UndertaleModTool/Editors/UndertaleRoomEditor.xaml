@@ -83,7 +83,7 @@
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+GameObject}">
                         <TextBlock>
                             <TextBlock.Text>
-                                <MultiBinding Mode="OneWay" StringFormat="{}Instance {0} of {1} (UndertaleRoom+GameObject)">
+                                <MultiBinding Mode="OneWay" StringFormat="{}Instance {0} of {1}">
                                     <Binding Path="InstanceID" Mode="OneWay"/>
                                     <Binding Path="ObjectDefinition.Name.Content" Mode="OneWay" TargetNullValue="?" FallbackValue="EmptyInstance"/>
                                 </MultiBinding>
@@ -93,7 +93,7 @@
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Tile}">
                         <TextBlock>
                             <TextBlock.Text>
-                                <MultiBinding Mode="OneWay" StringFormat="{}Tile {0} of {1} (UndertaleRoom+Tile)">
+                                <MultiBinding Mode="OneWay" StringFormat="{}Tile {0} of {1}">
                                     <Binding Path="InstanceID" Mode="OneWay"/>
                                     <Binding Path="ObjectDefinition.Name.Content" Mode="OneWay" TargetNullValue="?" FallbackValue="EmptyTile"/>
                                 </MultiBinding>
@@ -103,8 +103,9 @@
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+SpriteInstance}">
                         <TextBlock>
                             <TextBlock.Text>
-                                <MultiBinding Mode="OneWay" StringFormat="{}{0} (UndertaleRoom+SpriteInstance)">
-                                    <Binding Path="Name.Content" Mode="OneWay" TargetNullValue="?" FallbackValue="EmptySprite"/>
+                                <MultiBinding Mode="OneWay" StringFormat="{}Sprite {0} of {1}">
+                                    <Binding Path="Name.Content" Mode="OneWay" TargetNullValue="?" FallbackValue="EmptyName"/>
+                                    <Binding Path="Sprite.Name.Content" Mode="OneWay" TargetNullValue="?" FallbackValue="EmptySprite"/>
                                 </MultiBinding>
                             </TextBlock.Text>
                         </TextBlock>

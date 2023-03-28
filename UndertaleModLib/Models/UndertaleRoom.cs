@@ -1129,7 +1129,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
         public override string ToString()
         {
-            return "Instance " + InstanceID + " of " + (ObjectDefinition?.Name?.Content ?? "?") + " (UndertaleRoom+GameObject)";
+            return "Instance " + InstanceID + " of " + (ObjectDefinition?.Name?.Content ?? "?");
         }
 
         /// <inheritdoc/>
@@ -1325,7 +1325,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         /// <inheritdoc />
         public override string ToString()
         {
-            return "Tile " + InstanceID + " of " + (ObjectDefinition?.Name?.Content ?? "?") + " (UndertaleRoom+Tile)";
+            return "Tile " + InstanceID + " of " + (ObjectDefinition?.Name?.Content ?? "?");
         }
 
         /// <inheritdoc/>
@@ -1535,7 +1535,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         /// <inheritdoc />
         public override string ToString()
         {
-            return GetType().FullName + " - \"" + LayerName?.Content + '\"';
+            return "Layer " + LayerName?.Content;
         }
 
         /// <inheritdoc/>
@@ -2129,7 +2129,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         /// <inheritdoc />
         public override string ToString()
         {
-            return "Sprite " + Name?.Content + " of " + (Sprite?.Name?.Content ?? "?") + " (UndertaleRoom+SpriteInstance)";
+            return "Sprite " + Name?.Content + " of " + (Sprite?.Name?.Content ?? "?");
         }
 
         /// <inheritdoc/>
@@ -2201,7 +2201,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         /// <inheritdoc />
         public override string ToString()
         {
-            return "Sequence " + Name?.Content + " of " + (Sequence?.Name?.Content ?? "?") + " (UndertaleRoom+SequenceInstance)";
+            return "Sequence " + Name?.Content + " of " + (Sequence?.Name?.Content ?? "?");
         }
 
         /// <inheritdoc/>

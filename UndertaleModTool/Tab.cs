@@ -602,13 +602,19 @@ namespace UndertaleModTool
                     roomPreviewViewer.ScrollToHorizontalOffset(roomTabState.RoomPreviewScrollPosition.Left);
                     roomPreviewViewer.ScrollToVerticalOffset(roomTabState.RoomPreviewScrollPosition.Top);
 
+                    bool fromReferencesResults = false;
                     // (Sadly, arrays don't support destructuring like tuples)
-                    roomEditor.BGItems.IsExpanded = roomTabState.ObjectTreeItemsStates[0];
-                    roomEditor.ViewItems.IsExpanded = roomTabState.ObjectTreeItemsStates[1];
-                    roomEditor.GameObjItems.IsExpanded = roomTabState.ObjectTreeItemsStates[2];
-                    roomEditor.TileItems.IsExpanded = roomTabState.ObjectTreeItemsStates[3];
-                    roomEditor.LayerItems.IsExpanded = roomTabState.ObjectTreeItemsStates[4];
-                    roomEditor.RoomRootItem.UpdateLayout();
+                    if (roomTabState.ObjectTreeItemsStates is not null)
+                    {
+                        fromReferencesResults = true;
+
+                        roomEditor.BGItems.IsExpanded = roomTabState.ObjectTreeItemsStates[0];
+                        roomEditor.ViewItems.IsExpanded = roomTabState.ObjectTreeItemsStates[1];
+                        roomEditor.GameObjItems.IsExpanded = roomTabState.ObjectTreeItemsStates[2];
+                        roomEditor.TileItems.IsExpanded = roomTabState.ObjectTreeItemsStates[3];
+                        roomEditor.LayerItems.IsExpanded = roomTabState.ObjectTreeItemsStates[4];
+                        roomEditor.RoomRootItem.UpdateLayout();
+                    }
 
                     // Select the object
                     if (roomTabState.SelectedObject is not UndertaleRoom)
@@ -629,6 +635,12 @@ namespace UndertaleModTool
                                 var room = roomEditor.DataContext as UndertaleRoom;
                                 if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
                                 {
+                                    if (fromReferencesResults)
+                                    {
+                                        roomEditor.LayerItems.IsExpanded = true;
+                                        roomEditor.RoomRootItem.UpdateLayout();
+                                    }
+
                                     layer = room.Layers
                                                 .FirstOrDefault(l => l.LayerType is LayerType.Instances
                                                     && (l.InstancesData.Instances?.Any(x => x.InstanceID == gameObj.InstanceID) ?? false));
@@ -642,6 +654,12 @@ namespace UndertaleModTool
                                 room = roomEditor.DataContext as UndertaleRoom;
                                 if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
                                 {
+                                    if (fromReferencesResults)
+                                    {
+                                        roomEditor.LayerItems.IsExpanded = true;
+                                        roomEditor.RoomRootItem.UpdateLayout();
+                                    }
+
                                     layer = room.Layers
                                                 .FirstOrDefault(l => l.LayerType is LayerType.Assets
                                                     && (l.AssetsData.LegacyTiles?.Any(x => x.InstanceID == tile.InstanceID) ?? false));
@@ -656,6 +674,12 @@ namespace UndertaleModTool
                                 break;
 
                             case SpriteInstance spr:
+                                if (fromReferencesResults)
+                                {
+                                    roomEditor.LayerItems.IsExpanded = true;
+                                    roomEditor.RoomRootItem.UpdateLayout();
+                                }
+
                                 room = roomEditor.DataContext as UndertaleRoom;
                                 layer = room.Layers
                                             .FirstOrDefault(l => l.LayerType is LayerType.Assets

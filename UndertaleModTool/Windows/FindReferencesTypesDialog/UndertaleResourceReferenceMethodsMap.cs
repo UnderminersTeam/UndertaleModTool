@@ -14,6 +14,18 @@ namespace UndertaleModTool.Windows
         public Func<UndertaleResource, (string, object[])[]> Predicate { get; set; }
     }
 
+    public class ChildInstance
+    {
+        public UndertaleResource Parent { get; set; }
+        public object Child { get; set; }
+
+        public ChildInstance(UndertaleResource parent, object child)
+        {
+            Parent = parent;
+            Child = child;
+        }
+    }
+
     public static class UndertaleResourceReferenceMethodsMap
     {
         private static UndertaleData data;
@@ -43,9 +55,9 @@ namespace UndertaleModTool.Windows
                         {
                             IEnumerable<(string, object[])> outList = Enumerable.Empty<(string, object[])>();
 
-                            List<(UndertaleRoom, UndertaleRoom.Tile)> tiles = new();
-                            List<(UndertaleRoom, UndertaleRoom.SpriteInstance)> sprInstances = new();
-                            List<UndertaleRoom.Layer> bgLayers = new();
+                            List<ChildInstance> tiles = new();
+                            List<ChildInstance> sprInstances = new();
+                            List<ChildInstance> bgLayers = new();
                             foreach (var room in data.Rooms)
                             {
                                 foreach (var layer in room.Layers)
@@ -54,16 +66,16 @@ namespace UndertaleModTool.Windows
                                     {
                                         foreach (var tile in layer.AssetsData.LegacyTiles)
                                             if (tile.SpriteDefinition == obj)
-                                                tiles.Add((room, tile));
+                                                tiles.Add(new(room, tile));
 
                                         foreach (var sprInst in layer.AssetsData.Sprites)
                                             if (sprInst.Sprite == obj)
-                                                sprInstances.Add((room, sprInst));
+                                                sprInstances.Add(new(room, sprInst));
                                     }
 
                                     if (layer.BackgroundData is not null
                                         && layer.BackgroundData.Sprite == obj)
-                                        bgLayers.Add(layer);
+                                        bgLayers.Add(new(room, layer));
 
                                 }
                             }
