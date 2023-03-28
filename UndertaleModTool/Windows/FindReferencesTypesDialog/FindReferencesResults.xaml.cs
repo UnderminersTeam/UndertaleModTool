@@ -26,6 +26,7 @@ namespace UndertaleModTool.Windows
     {
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
         private object highlighted;
+        private readonly UndertaleData data;
 
         private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
@@ -36,9 +37,11 @@ namespace UndertaleModTool.Windows
                 MainWindow.SetDarkTitleBarForWindow(this, true, false);
         }
 
-        public FindReferencesResults(UndertaleResource sourceObj, (string, object[])[] results)
+        public FindReferencesResults(UndertaleResource sourceObj, UndertaleData data, (string, object[])[] results)
         {
             InitializeComponent();
+
+            this.data = data;
 
             string sourceObjName;
             if (sourceObj is UndertaleNamedResource namedObj)
@@ -126,10 +129,48 @@ namespace UndertaleModTool.Windows
 
         }
 
+        private void MenuItem_ContextMenuOpened(object sender, RoutedEventArgs e)
+        {
+            var menu = sender as ContextMenu;
+            foreach (var item in menu.Items)
+            {
+                var menuItem = item as MenuItem;
+                if ((menuItem.Header as string) == "Find all references")
+                {
+                    Type objType = menu.DataContext is ChildInstance inst
+                                   ? inst.Child.GetType() : menu.DataContext.GetType();
+                    menuItem.Visibility = UndertaleResourceReferenceMap.IsTypeReferenceable(objType)
+                                          ? Visibility.Visible : Visibility.Collapsed;
+
+                    break;
+                }
+            }
+        }
         private void MenuItem_OpenInNewTab_Click(object sender, RoutedEventArgs e)
         {
             Open(highlighted, true);
         }
+        private void MenuItem_FindAllReferences_Click(object sender, RoutedEventArgs e)
+        {
+            UndertaleResource res = null;
+
+            var obj = (sender as FrameworkElement)?.DataContext;
+            if (obj is UndertaleResource res1)
+                res = res1;
+            else if (obj is ChildInstance inst && inst.Child is UndertaleResource res2)
+                res = res2;
+
+            if (res is null)
+            {
+                this.ShowError("The selected object is not an \"UndertaleResource\".");
+                return;
+            }
+
+            FindReferencesTypesDialog dialog = new(res, data);
+            dialog.ShowDialog();
+        }
+
+
         private void ResultsTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (e.OriginalSource is not TextBlock textBlock)

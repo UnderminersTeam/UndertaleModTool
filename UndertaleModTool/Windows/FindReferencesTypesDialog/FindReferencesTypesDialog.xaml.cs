@@ -101,7 +101,7 @@ namespace UndertaleModTool.Windows
             }
 
             var results = UndertaleResourceReferenceMethodsMap.GetReferencesOfObject(sourceObj, data);
-            FindReferencesResults dialog = new(sourceObj, results);
+            FindReferencesResults dialog = new(sourceObj, data, results);
             dialog.Show();
 
             Close();
