@@ -1921,8 +1921,21 @@ namespace UndertaleModTool
                 return;
             }
 
-            FindReferencesTypesDialog dialog = new(obj, Data);
-            dialog.ShowDialog();
+            FindReferencesTypesDialog dialog = null;
+            try
+            {
+                dialog = new(obj, Data);
+                dialog.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                this.ShowError("An error occured in the object references related window.\n" +
+                               $"Please report this on GitHub.\n\n{ex}");
+            }
+            finally
+            {
+                dialog?.Close();
+            }
         }
         private void MenuItem_CopyName_Click(object sender, RoutedEventArgs e)
         {

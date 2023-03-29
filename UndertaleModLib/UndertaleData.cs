@@ -275,6 +275,12 @@ namespace UndertaleModLib
         public UndertaleFeatureFlags FeatureFlags => FORM.FEAT?.Object;
 
         /// <summary>
+        /// The filter effects stored in the data file.
+        /// </summary>
+        public IList<UndertaleFilterEffect> FilterEffects => FORM.FEDS?.List;
+
+
+        /// <summary>
         /// Whether this is an unsupported bytecode version.
         /// </summary>
         public bool UnsupportedBytecodeVersion = false;

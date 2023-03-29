@@ -52,13 +52,20 @@ namespace UndertaleModTool.Windows
             Title = $"The references of game object \"{sourceObjName}\"";
             label.Text = $"The search results for the game object\n\"{sourceObjName}\".";
 
-            ProcessResults(results);
+            if (results is null)
+                ResultsTree.Background = new VisualBrush(new Label()
+                {
+                    Content = "No references found.",
+                    FontSize = 16
+                }) { Stretch = Stretch.None };
+            else
+                ProcessResults(results);
         }
 
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             foreach (var child in ResultsTree.Items)
-                ((child as TreeViewItem).ItemsSource as ICollectionView)?.Refresh();
+                ((child as TreeViewItem)?.ItemsSource as ICollectionView)?.Refresh();
         }
 
         private void DoneButton_Click(object sender, RoutedEventArgs e)
@@ -96,10 +103,18 @@ namespace UndertaleModTool.Windows
                 });
                 if (result.Item2[0] is UndertaleNamedResource)
                     item.ItemTemplate = namedResTemplate;
-                else if (result.Item2[0] is ChildInstance)
+                else if (result.Item2[0] is GeneralInfoEditor)
                 {
-                    item.ItemTemplate = TryFindResource("ChildInstTemplate") as HierarchicalDataTemplate;
+                    ResultsTree.Items.Add(new TextBlock()
+                    {
+                        Text = "General Info",
+                        DataContext = result.Item2[0],
+                        ContextMenu = TryFindResource("StandaloneTabMenu") as ContextMenu
+                    });
+                    continue;
                 }
+                else if (result.Item2[0] is object[])
+                    item.ItemTemplate = TryFindResource("ChildInstTemplate") as HierarchicalDataTemplate;
 
                 ResultsTree.Items.Add(item);
 
@@ -111,14 +126,14 @@ namespace UndertaleModTool.Windows
         {
             mainWindow.Focus();
 
-            if (obj is ChildInstance inst)
+            if (obj is object[] inst)
             {
-                if (inst.Parent is UndertaleRoom room)
+                if (inst[^1] is UndertaleRoom room)
                 {
                     mainWindow.ChangeSelection(room, inNewTab);
                     mainWindow.CurrentTab.LastContentState = new RoomTabState()
                     {
-                        SelectedObject = inst.Child,
+                        SelectedObject = inst[0],
                         ObjectTreeItemsStates = new[] { false, false, false, false, true }
                     };
                     mainWindow.CurrentTab.RestoreTabContentState();
@@ -137,8 +152,8 @@ namespace UndertaleModTool.Windows
                 var menuItem = item as MenuItem;
                 if ((menuItem.Header as string) == "Find all references")
                 {
-                    Type objType = menu.DataContext is ChildInstance inst
-                                   ? inst.Child.GetType() : menu.DataContext.GetType();
+                    Type objType = menu.DataContext is object[] inst
+                                   ? inst[^1].GetType() : menu.DataContext.GetType();
                     menuItem.Visibility = UndertaleResourceReferenceMap.IsTypeReferenceable(objType)
                                           ? Visibility.Visible : Visibility.Collapsed;
 
@@ -157,7 +172,7 @@ namespace UndertaleModTool.Windows
             var obj = (sender as FrameworkElement)?.DataContext;
             if (obj is UndertaleResource res1)
                 res = res1;
-            else if (obj is ChildInstance inst && inst.Child is UndertaleResource res2)
+            else if (obj is object[] inst && inst[^1] is UndertaleResource res2)
                 res = res2;
 
             if (res is null)
@@ -166,8 +181,21 @@ namespace UndertaleModTool.Windows
                 return;
             }
 
-            FindReferencesTypesDialog dialog = new(res, data);
-            dialog.ShowDialog();
+            FindReferencesTypesDialog dialog = null;
+            try
+            {
+                dialog = new(res, data);
+                dialog.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                this.ShowError("An error occured in the object references related window.\n" +
+                               $"Please report this on GitHub.\n\n{ex}");
+            }
+            finally
+            {
+                dialog?.Close();
+            }
         }
 
 
@@ -189,6 +217,14 @@ namespace UndertaleModTool.Windows
         {
             if (e.NewValue is TreeViewItem)
                 return;
+            if (e.NewValue is TextBlock block)
+            {
+                if (block.DataContext is GeneralInfoEditor or GlobalInitEditor or GameEndEditor)
+                {
+                    highlighted = block.DataContext;
+                    return;
+                }
+            }
 
             highlighted = e.NewValue;
         }
@@ -227,20 +263,22 @@ namespace UndertaleModTool.Windows
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is ChildInstance inst)
+            if (value is object[] inst)
             {
-                string parent, child;
-                if (inst.Parent is UndertaleNamedResource parentNamed)
-                    parent = parentNamed.Name.Content;
-                else
-                    parent = inst.Parent.ToString();
+                StringBuilder sb = new();
+                for (int i = 0; i < inst.Length; i++)
+                {
+                    var link = inst[i];
+                    if (link is UndertaleNamedResource namedObj)
+                        sb.Append(namedObj.Name);
+                    else
+                        sb.Append(link.ToString());
 
-                if (inst.Child is UndertaleNamedResource childNamed)
-                    child = childNamed.Name.Content;
-                else
-                    child = inst.Child.ToString();
+                    if (i != inst.Length - 1)
+                        sb.Append(" — ");
+                }
 
-                return $"{parent} — {child}";
+                return sb.ToString();
             }
 
             return null;

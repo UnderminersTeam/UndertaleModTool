@@ -5,7 +5,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:utmt="clr-namespace:UndertaleModTool"
         xmlns:local="clr-namespace:UndertaleModTool.Windows"
-        xmlns:scol="clr-namespace:System.Collections;assembly=mscorlib"
         mc:Ignorable="d"
         Title="The references of game object &quot;&quot;" Height="588" Width="497" IsVisibleChanged="Window_IsVisibleChanged"
         WindowStartupLocation="CenterOwner">
@@ -14,17 +13,26 @@
         <HierarchicalDataTemplate x:Key="ChildInstTemplate">
             <TextBlock Text="{Binding ., Mode=OneTime, Converter={StaticResource ChildInstanceNameConverter}}" />
         </HierarchicalDataTemplate>
-        <utmt:ImplementsInterfaceConverter x:Key="ImplementsInterfaceConverter"/>
+        <utmt:ContextMenuDark x:Key="StandaloneTabMenu">
+            <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>
+        </utmt:ContextMenuDark>
     </Window.Resources>
-    <StackPanel>
-        <StackPanel.Background>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*" MinHeight="60"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.Background>
             <DynamicResource ResourceKey="{x:Static SystemColors.ControlBrushKey}"/>
-        </StackPanel.Background>
-        <TextBlock Name="label" Text="The search results for the game object&#x0a;&quot;&quot;." HorizontalAlignment="Left" Padding="5" Margin="10,10,0,0"
+        </Grid.Background>
+        <TextBlock Grid.Row="0" Name="label" Text="The search results for the game object&#x0a;&quot;&quot;." HorizontalAlignment="Left" Padding="5" Margin="10,10,0,0"
                    FontSize="22" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="70"/>
-        <Rectangle Margin="10,0,20,0" Height="2" Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+        <Rectangle Grid.Row="1" Margin="10,0,20,0" Height="2" Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
 
-        <TextBox Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged"
+        <TextBox Grid.Row="2" Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged"
                  Margin="10,15,20,0" FontSize="14">
             <!-- Source - https://stackoverflow.com/a/7433840/12136394 -->
             <TextBox.Style>
@@ -50,7 +58,7 @@
                 </Style>
             </TextBox.Style>
         </TextBox>
-        <TreeView Name="ResultsTree" Height="350" Margin="10,5,20,0" FontSize="14"
+        <TreeView Grid.Row="3" Name="ResultsTree" Margin="10,5,20,0" FontSize="14"
                   SelectedItemChanged="ResultsTree_SelectedItemChanged" MouseDown="ResultsTree_MouseDown"
                   MouseDoubleClick="ResultsTree_MouseDoubleClick" KeyUp="ResultsTree_KeyUp" PreviewMouseRightButtonDown="ResultsTree_PreviewMouseRightButtonDown"
                   VirtualizingStackPanel.IsVirtualizing="True"
@@ -65,8 +73,8 @@
                 </utmt:ContextMenuDark>
                 <Style TargetType="TreeViewItem">
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding ., Converter={StaticResource ImplementsInterfaceConverter}, ConverterParameter={x:Type scol:IEnumerable}}" Value="False">
-                            <!-- If the data context is not a enumerable -->
+                        <DataTrigger Binding="{Binding Items.Count, RelativeSource={RelativeSource Self}}" Value="0">
+                            <!-- If the data context is not a string -->
                             <Setter Property="ContextMenu" Value="{StaticResource UndertaleResourceMenu}"/>
                         </DataTrigger>
                     </Style.Triggers>
@@ -74,6 +82,6 @@
             </TreeView.Resources>
         </TreeView>
 
-        <utmt:ButtonDark Content="Done" FontSize="18" Width="134" Height="40" Click="DoneButton_Click" Margin="0,20,0,0"/>
-    </StackPanel>
+        <utmt:ButtonDark Grid.Row="4" Content="Done" FontSize="18" Width="134" Height="40" Click="DoneButton_Click" Margin="0,20,0,20"/>
+    </Grid>
 </Window>

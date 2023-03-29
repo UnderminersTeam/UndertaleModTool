@@ -44,7 +44,7 @@ namespace UndertaleModTool.Windows
             }
 
             var ver = (data.GeneralInfo.Major, data.GeneralInfo.Minor, data.GeneralInfo.Release);
-            (Type, string)[] sourceTypes = UndertaleResourceReferenceMap.GetTypeMapForVersion(obj.GetType(), ver);
+            (Type, string)[] sourceTypes = UndertaleResourceReferenceMap.GetTypeMapForVersion(obj.GetType(), ver, data.GeneralInfo.BytecodeVersion);
             if (sourceTypes is null)
             {
                 this.ShowError($"Cannot get the source types for object of type \"{obj.GetType()}\".");
@@ -84,13 +84,13 @@ namespace UndertaleModTool.Windows
 
         private void SearchButton_Click(object sender, RoutedEventArgs e)
         {
-            List<(Type, string)> typesList = new();
+            HashSet<Type> typesList = new();
             foreach (var item in TypesList.Items)
             {
                 if (item is CheckBox checkBox && checkBox.IsChecked == true)
                 {
                     if (checkBox.DataContext is Type t)
-                        typesList.Add((t, checkBox.Content as string));
+                        typesList.Add(t);
                 }
             }
 
@@ -100,7 +100,7 @@ namespace UndertaleModTool.Windows
                 return;
             }
 
-            var results = UndertaleResourceReferenceMethodsMap.GetReferencesOfObject(sourceObj, data);
+            var results = UndertaleResourceReferenceMethodsMap.GetReferencesOfObject(sourceObj, data, typesList);
             FindReferencesResults dialog = new(sourceObj, data, results);
             dialog.Show();
 

@@ -1535,7 +1535,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         /// <inheritdoc />
         public override string ToString()
         {
-            return "Layer " + LayerName?.Content;
+            return $"Layer \"{LayerName?.Content}\"";
         }
 
         /// <inheritdoc/>
@@ -2129,7 +2129,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         /// <inheritdoc />
         public override string ToString()
         {
-            return "Sprite " + Name?.Content + " of " + (Sprite?.Name?.Content ?? "?");
+            return "Sprite \"" + Name?.Content + "\" of " + (Sprite?.Name?.Content ?? "?");
         }
 
         /// <inheritdoc/>
