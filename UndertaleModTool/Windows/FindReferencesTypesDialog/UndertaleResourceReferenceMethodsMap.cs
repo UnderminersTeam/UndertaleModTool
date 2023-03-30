@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using UndertaleModLib;
 using UndertaleModLib.Models;
-using static UndertaleModLib.Models.UndertaleRoom;
 using static UndertaleModLib.Models.UndertaleSequence;
 
 namespace UndertaleModTool.Windows
@@ -212,6 +211,60 @@ namespace UndertaleModTool.Windows
                             var textGroups = data.TextureGroupInfo.Where(x => x.TexturePages.Any(s => s.Resource == obj));
                             if (textGroups.Any())
                                 return new (string, object[])[] { ("Texture groups", textGroups.ToArray()) };
+                            else
+                                return null;
+                        }
+                    }
+                }
+            },
+            {
+                typeof(UndertaleTexturePageItem),
+                new[]
+                {
+                    new PredicateForVersion()
+                    {
+                        Version = (1, 0, 0),
+                        Predicate = (obj, types) =>
+                        {
+                            IEnumerable<(string, object[])> outList = Enumerable.Empty<(string, object[])>();
+
+                            if (types.Contains(typeof(UndertaleSprite)))
+                            {
+                                var sprites = data.Sprites.Where(x => x.Textures.Any(t => t.Texture == obj));
+                                if (sprites.Any())
+                                    outList = outList.Append(("Sprites", sprites.ToArray()));
+                            }
+
+                            if (types.Contains(typeof(UndertaleBackground)))
+                            {
+                                var backgrounds = data.Backgrounds.Where(x => x.Texture == obj);
+                                if (backgrounds.Any())
+                                    outList = outList.Append((data.IsGameMaker2() ? "Tile sets" : "Backgrounds", backgrounds.ToArray()));
+                            }
+
+                            if (types.Contains(typeof(UndertaleFont)))
+                            {
+                                var fonts = data.Fonts.Where(x => x.Texture == obj);
+                                if (fonts.Any())
+                                    outList = outList.Append(("Fonts", fonts.ToArray()));
+                            }
+
+                            if (outList == Enumerable.Empty<(string, object[])>())
+                                return null;
+                            return outList.ToArray();
+                        }
+                    },
+                    new PredicateForVersion()
+                    {
+                        Version = (2, 0, 0),
+                        Predicate = (obj, types) =>
+                        {
+                            if (!types.Contains(typeof(UndertaleEmbeddedImage)))
+                                return null;
+
+                            var embImages = data.EmbeddedImages.Where(x => x.TextureEntry == obj);
+                            if (embImages.Any())
+                                return new (string, object[])[] { ("Embedded images", embImages.ToArray()) };
                             else
                                 return null;
                         }

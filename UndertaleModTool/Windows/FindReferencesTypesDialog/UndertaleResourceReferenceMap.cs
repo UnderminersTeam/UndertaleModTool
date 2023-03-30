@@ -105,6 +105,31 @@ namespace UndertaleModTool.Windows
                 }
             },
             {
+                typeof(UndertaleTexturePageItem),
+                new[]
+                {
+                    new TypesForVersion()
+                    {
+                        Version = (1, 0, 0),
+                        Types = new[]
+                        {
+                            (typeof(UndertaleSprite), "Sprites"),
+                            (typeof(UndertaleBackground), "Backgrounds"),
+                            (typeof(UndertaleFont), "Fonts")
+                        }
+                    },
+                    new TypesForVersion()
+                    {
+                        Version = (2, 0, 0),
+                        Types = new[]
+                        {
+                            (typeof(UndertaleBackground), "Tile sets"),
+                            (typeof(UndertaleEmbeddedImage), "Embedded images")
+                        }
+                    }
+                }
+            },
+            {
                 typeof(UndertaleString),
                 new[]
                 {
