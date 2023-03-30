@@ -361,12 +361,20 @@ namespace UndertaleModTool
             }
 
             var args = Environment.GetCommandLineArgs();
+            bool isLaunch = false;
+            bool isSpecialLaunch = false;
             if (args.Length > 1)
             {
+                if (args.Length > 2)
+                {
+                    isLaunch = args[2] == "launch";
+                    isSpecialLaunch = args[2] == "special_launch";
+                }
+
                 string arg = args[1];
                 if (File.Exists(arg))
                 {
-                    await LoadFile(arg, true);
+                    await LoadFile(arg, true, isLaunch || isSpecialLaunch);
                 }
                 else if (arg == "deleteTempFolder") // if was launched from UndertaleModToolUpdater
                 {
@@ -416,10 +424,8 @@ namespace UndertaleModTool
                         }
                     });
                 }
-            }
-            if (args.Length > 2)
-            {
-                if (args[2] == "special_launch")
+
+                if (isSpecialLaunch)
                 {
                     RuntimePicker picker = new RuntimePicker();
                     picker.Owner = this;
@@ -429,7 +435,7 @@ namespace UndertaleModTool
                     Process.Start(runtime.Path, "-game \"" + FilePath + "\"");
                     Environment.Exit(0);
                 }
-                else if (args[2] == "launch")
+                else if (isLaunch)
                 {
                     string gameExeName = Data?.GeneralInfo?.FileName?.Content;
                     if (gameExeName == null || FilePath == null)
@@ -902,7 +908,7 @@ namespace UndertaleModTool
                 GC.Collect();
             }
         }
-        private async Task LoadFile(string filename, bool preventClose = false)
+        private async Task LoadFile(string filename, bool preventClose = false, bool onlyGeneralInfo = false)
         {
             LoaderDialog dialog = new LoaderDialog("Loading", "Loading, please wait...");
             dialog.PreventClose = preventClose;
@@ -936,7 +942,7 @@ namespace UndertaleModTool
                         }, message =>
                         {
                             FileMessageEvent?.Invoke(message);
-                        });
+                        }, onlyGeneralInfo);
                     }
 
                     UndertaleEmbeddedTexture.TexData.ClearSharedStream();
@@ -944,6 +950,18 @@ namespace UndertaleModTool
                 catch (Exception e)
                 {
                     this.ShowError("An error occured while trying to load:\n" + e.Message, "Load error");
+                }
+
+                if (onlyGeneralInfo)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        dialog.Hide();
+                        Data = data;
+                        FilePath = filename;
+                    });
+
+                    return;
                 }
 
                 Dispatcher.Invoke(async () =>
