@@ -595,19 +595,23 @@ namespace UndertaleModTool
                 case RoomTabState roomTabState:
                     var roomEditor = editor as UndertaleRoomEditor;
 
-                    roomEditor.RoomGraphics.LayoutTransform = roomTabState.RoomPreviewTransform;
-                    roomEditor.RoomGraphics.UpdateLayout();
+                    bool fromReferencesResults = true;
+                    if (roomTabState.ObjectTreeItemsStates is not null)
+                    {
+                        fromReferencesResults = false;
+
+                        roomEditor.RoomGraphics.LayoutTransform = roomTabState.RoomPreviewTransform;
+                        roomEditor.RoomGraphics.UpdateLayout();
+                    }  
 
                     ScrollViewer roomPreviewViewer = roomEditor.RoomGraphicsScroll;
                     roomPreviewViewer.ScrollToHorizontalOffset(roomTabState.RoomPreviewScrollPosition.Left);
                     roomPreviewViewer.ScrollToVerticalOffset(roomTabState.RoomPreviewScrollPosition.Top);
 
-                    bool fromReferencesResults = false;
+                    
                     // (Sadly, arrays don't support destructuring like tuples)
                     if (roomTabState.ObjectTreeItemsStates is not null)
                     {
-                        fromReferencesResults = true;
-
                         roomEditor.BGItems.IsExpanded = roomTabState.ObjectTreeItemsStates[0];
                         roomEditor.ViewItems.IsExpanded = roomTabState.ObjectTreeItemsStates[1];
                         roomEditor.GameObjItems.IsExpanded = roomTabState.ObjectTreeItemsStates[2];
@@ -699,14 +703,19 @@ namespace UndertaleModTool
                             return;
                         objItem.IsSelected = true;
                         objItem.Focus();
+                        if (fromReferencesResults)
+                            objItem.BringIntoView();
 
                         roomEditor.RoomRootItem.UpdateLayout();
                     }
 
-                    ScrollViewer treeObjViewer = MainWindow.FindVisualChild<ScrollViewer>(roomEditor.RoomObjectsTree);
-                    treeObjViewer.ScrollToHorizontalOffset(roomTabState.ObjectsTreeScrollPosition.Left);
-                    treeObjViewer.ScrollToVerticalOffset(roomTabState.ObjectsTreeScrollPosition.Top);
-                    treeObjViewer.UpdateLayout();
+                    if (!fromReferencesResults)
+                    {
+                        ScrollViewer treeObjViewer = MainWindow.FindVisualChild<ScrollViewer>(roomEditor.RoomObjectsTree);
+                        treeObjViewer.ScrollToHorizontalOffset(roomTabState.ObjectsTreeScrollPosition.Left);
+                        treeObjViewer.ScrollToVerticalOffset(roomTabState.ObjectsTreeScrollPosition.Top);
+                        treeObjViewer.UpdateLayout();
+                    }
                     break;
 
                 case FontTabState fontTabState:

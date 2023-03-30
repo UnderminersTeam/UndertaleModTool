@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UndertaleModLib;
 using UndertaleModLib.Models;
+using static UndertaleModLib.Models.UndertaleRoom;
 using static UndertaleModLib.Models.UndertaleSequence;
 
 namespace UndertaleModTool.Windows
@@ -413,25 +414,6 @@ namespace UndertaleModTool.Windows
                                 return null;
                         }
                     },
-                    /*new PredicateForVersion()
-                    {
-                        Version = (2, 0, 0),
-                        Predicate = (obj, types) =>
-                        {
-                            IEnumerable<(string, object[])> outList = Enumerable.Empty<(string, object[])>();
-
-                            if (types.Contains(typeof(Undertale)))
-                            {
-                                var  = data..Where(x => x.Name == obj);
-                                if (.Any())
-                                    outList = outList.Append(("", .ToArray()));
-                            }
-
-                            if (outList == Enumerable.Empty<(string, object[])>())
-                                return null;
-                            return outList.ToArray();
-                        }
-                    },*/
                     new PredicateForVersion()
                     {
                         Version = (2, 0, 0),
@@ -668,11 +650,11 @@ namespace UndertaleModTool.Windows
                                 {
                                     if (track.Keyframes is TextKeyframes textKeyframes)
                                     {
-                                        foreach (var data in textKeyframes.List)
+                                        foreach (var keyframe in textKeyframes.List)
                                         {
-                                            foreach (var textPair in data.Channels)
+                                            foreach (var textPair in keyframe.Channels)
                                                 if (textPair.Value.Text == obj)
-                                                    textKeyframesList.Add(new object[] { textPair.Key, data, seq });
+                                                    textKeyframesList.Add(new object[] { textPair.Key, keyframe, seq });
                                         }
                                     }
                                 }
@@ -684,9 +666,120 @@ namespace UndertaleModTool.Windows
                         }
                     }
                 }
+            },
+            {
+                typeof(UndertaleGameObject),
+                new[]
+                {
+                    new PredicateForVersion()
+                    {
+                        Version = (1, 0, 0),
+                        Predicate = (obj, types) =>
+                        {
+                            if (!types.Contains(typeof(UndertaleRoom.GameObject)))
+                                return null;
+
+                            List<object[]> objInstances = new();
+                            if (data.IsGameMaker2())
+                            {
+                                foreach (var room in data.Rooms)
+                                {
+                                    foreach (var layer in room.Layers)
+                                    {
+                                        if (layer.InstancesData is not null)
+                                        {
+                                            foreach (var inst in layer.InstancesData.Instances)
+                                                if (inst.ObjectDefinition == obj)
+                                                    objInstances.Add(new object[] { inst, layer, room });
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                foreach (var room in data.Rooms)
+                                {
+                                    foreach (var inst in room.GameObjects)
+                                        if (inst.ObjectDefinition == obj)
+                                            objInstances.Add(new object[] { inst, room });
+                                }
+                            }
+                            
+                            if (objInstances.Count > 0)
+                                return new (string, object[])[] { ("Room object instance", objInstances.ToArray()) };
+                            else
+                                return null;
+                        }
+                    },
+                    new PredicateForVersion()
+                    {
+                        Version = (2, 3, 0),
+                        Predicate = (obj, types) =>
+                        {
+                            if (!types.Contains(typeof(InstanceKeyframes)))
+                                return null;
+
+                            List<object[]> instKeyframesList = new();
+                            foreach (var seq in data.Sequences)
+                            {
+                                foreach (var track in seq.Tracks)
+                                {
+                                    if (track.Keyframes is InstanceKeyframes instKeyframes)
+                                    {
+                                        foreach (var keyframe in instKeyframes.List)
+                                        {
+                                            foreach (var instPair in keyframe.Channels)
+                                                if (instPair.Value.Resource.Resource == obj)
+                                                    instKeyframesList.Add(new object[] { instPair.Key, keyframe, seq });
+                                        }
+                                    }
+                                }
+                            }
+                            if (instKeyframesList.Count > 0)
+                                return new (string, object[])[] { ("Sequence object instance keyframes", instKeyframesList.ToArray()) };
+                            else
+                                return null;
+                        }
+                    }
+                }
             }
         };
 
+
+/*new PredicateForVersion()
+{
+    Version = (2, 0, 0),
+    Predicate = (obj, types) =>
+    {
+        IEnumerable<(string, object[])> outList = Enumerable.Empty<(string, object[])>();
+
+        if (types.Contains(typeof(Undertale)))
+        {
+            var  = data..Where(x => x.Name == obj);
+            if (.Any())
+                outList = outList.Append(("", .ToArray()));
+        }
+
+        if (outList == Enumerable.Empty<(string, object[])>())
+            return null;
+        return outList.ToArray();
+    }
+}*/
+/*new PredicateForVersion()
+{
+    Version = (2, 2, 1),
+    Predicate = (obj, types) =>
+    {
+        if (!types.Contains(typeof(UndertaleTextureGroupInfo)))
+            return null;
+
+        var textGroups = data.TextureGroupInfo.Where(x => x.Name == obj);
+        if (textGroups.Any())
+            return new (string, object[])[] { ("Texture groups", textGroups.ToArray()) };
+        else
+            return null;
+    }
+}*/
 
         public static (string, object[])[] GetReferencesOfObject(UndertaleResource obj, UndertaleData data, HashSet<Type> types)
         {

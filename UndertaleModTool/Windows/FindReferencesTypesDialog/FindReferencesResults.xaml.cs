@@ -124,6 +124,12 @@ namespace UndertaleModTool.Windows
 
         private void Open(object obj, bool inNewTab = false)
         {
+            if (data.FORM is null)
+            {
+                this.ShowError($"The object reference is stale - a different game data was loaded.");
+                return;
+            }
+
             mainWindow.Focus();
 
             if (obj is object[] inst)
@@ -133,15 +139,13 @@ namespace UndertaleModTool.Windows
                     mainWindow.ChangeSelection(room, inNewTab);
                     mainWindow.CurrentTab.LastContentState = new RoomTabState()
                     {
-                        SelectedObject = inst[0],
-                        ObjectTreeItemsStates = new[] { false, false, false, false, true }
+                        SelectedObject = inst[0]
                     };
                     mainWindow.CurrentTab.RestoreTabContentState();
                 }
             }
             else
                 mainWindow.ChangeSelection(obj, inNewTab);
-
         }
 
         private void MenuItem_ContextMenuOpened(object sender, RoutedEventArgs e)

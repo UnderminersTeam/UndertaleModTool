@@ -2232,7 +2232,7 @@ namespace UndertaleModTool
                 {
                     foreach (string resType in resTypes)
                     {
-                        IEnumerable resListCollection = Data[resType] as IEnumerable;
+                        IEnumerable resListCollection = Data[resType];
                         if (resListCollection is not null)
                         {
                             BindingOperations.EnableCollectionSynchronization(resListCollection, bindingLock);
@@ -2247,7 +2247,7 @@ namespace UndertaleModTool
                     {
                         if (syncBindings.Contains(resType))
                         {
-                            BindingOperations.DisableCollectionSynchronization(Data[resType] as IEnumerable);
+                            BindingOperations.DisableCollectionSynchronization(Data[resType]);
 
                             syncBindings.Remove(resType);
                         }
@@ -2258,7 +2258,7 @@ namespace UndertaleModTool
             {
                 if (enable)
                 {
-                    IEnumerable resListCollection = Data[resourceType] as IEnumerable;
+                    IEnumerable resListCollection = Data[resourceType];
                     if (resListCollection is not null)
                     {
                         BindingOperations.EnableCollectionSynchronization(resListCollection, bindingLock);
@@ -2268,7 +2268,7 @@ namespace UndertaleModTool
                 }
                 else if (syncBindings.Contains(resourceType))
                 {
-                    BindingOperations.DisableCollectionSynchronization(Data[resourceType] as IEnumerable);
+                    BindingOperations.DisableCollectionSynchronization(Data[resourceType]);
 
                     syncBindings.Remove(resourceType);
                 }
@@ -2279,7 +2279,7 @@ namespace UndertaleModTool
             if (syncBindings.Count <= 0) return;
 
             foreach (string resType in syncBindings)
-                BindingOperations.DisableCollectionSynchronization(Data[resType] as IEnumerable);
+                BindingOperations.DisableCollectionSynchronization(Data[resType]);
 
             syncBindings.Clear();
         }
@@ -3257,7 +3257,7 @@ result in loss of work.");
             IList resList;
             try
             {
-                resList = Data[res.GetType()] as IList;
+                resList = Data[res.GetType()];
             }
             catch (Exception ex)
             {
@@ -3296,7 +3296,7 @@ result in loss of work.");
                 mainTreeViewer.UpdateLayout();
 
                 double firstElemOffset = mainTreeViewer.VerticalOffset + (resPanel.Children[0] as TreeViewItem).TransformToAncestor(mainTreeViewer).Transform(new Point(0, 0)).Y;
-                mainTreeViewer.ScrollToVerticalOffset(firstElemOffset + ((resList.IndexOf(obj) + 1) * 16) - (mainTreeViewer.ViewportHeight / 2));
+                mainTreeViewer.ScrollToVerticalOffset(firstElemOffset + ((resList.IndexOf(res) + 1) * 16) - (mainTreeViewer.ViewportHeight / 2));
             }
             mainTreeViewer.UpdateLayout();
 
