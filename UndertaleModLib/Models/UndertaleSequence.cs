@@ -100,6 +100,12 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
     }
 
     /// <inheritdoc/>
+    public override string ToString()
+    {
+        return $"Sequence \"{Name.Content}\"";
+    }
+
+    /// <inheritdoc/>
     public void Dispose()
     {
         GC.SuppressFinalize(this);
@@ -243,10 +249,40 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
 
     public class Track : UndertaleObject
     {
+        public enum TrackBuiltinName : int
+        {
+            Gain = 5,
+            Pitch = 6,
+            Falloff = 7,
+            Rotation = 8,
+            BlendAdd = 9,
+            BlendMultiply = 10,
+            Mask = 12,
+            Subject = 13,
+            Position = 14,
+            Scale = 15,
+            Origin = 16,
+            ImageSpeed = 17,
+            ImageIndex = 18,
+            ImageAngle = Rotation,
+            ImageBlend = BlendMultiply,
+            FrameSize = 20,
+            CharacterSpacing = 21,
+            LineSpacing = 22,
+            ParagraphSpacing = 23
+        }
+
+        [Flags]
+        public enum TrackTraits : int
+        {
+            None,
+            ChildrenIgnoreOrigin
+        }
+
         public UndertaleString ModelName { get; set; } // Such as GMInstanceTrack, GMRealTrack, etc.
         public UndertaleString Name { get; set; } // An asset or property name
-        public int BuiltinName { get; set; }
-        public int Traits { get; set; }
+        public TrackBuiltinName BuiltinName { get; set; }
+        public TrackTraits Traits { get; set; }
         public bool IsCreationTrack { get; set; }
         public List<int> Tags { get; set; }
         public List<Track> Tracks { get; set; } // Sub-tracks
@@ -260,8 +296,8 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         {
             writer.WriteUndertaleString(ModelName);
             writer.WriteUndertaleString(Name);
-            writer.Write(BuiltinName);
-            writer.Write(Traits);
+            writer.Write((int)BuiltinName);
+            writer.Write((int)Traits);
             writer.Write(IsCreationTrack);
 
             writer.Write(Tags.Count);
@@ -350,8 +386,8 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
 
             ModelName = ForceReadString();
             Name = reader.ReadUndertaleString();
-            BuiltinName = reader.ReadInt32();
-            Traits = reader.ReadInt32();
+            BuiltinName = (TrackBuiltinName)reader.ReadInt32();
+            Traits = (TrackTraits)reader.ReadInt32();
             IsCreationTrack = reader.ReadBoolean();
 
             int tagCount = reader.ReadInt32();
@@ -418,8 +454,6 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
                     Keyframes = reader.ReadUndertaleObject<ParticleKeyframes>();
                     break;
 
-                case "GMGroupTrack":
-                    throw new NotImplementedException("GMGroupTrack not implemented, report this");
                 case "GMClipMaskTrack":
                     throw new NotImplementedException("GMClipMaskTrack not implemented, report this");
             }
@@ -503,13 +537,25 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
                     count += 1 + ParticleKeyframes.UnserializeChildObjectCount(reader);
                     break;
 
-                case "GMGroupTrack":
-                    throw new NotImplementedException("GMGroupTrack not implemented, report this");
                 case "GMClipMaskTrack":
                     throw new NotImplementedException("GMClipMaskTrack not implemented, report this");
             }
 
             return count;
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            if (BuiltinName != 0)
+            {
+                if (ModelName.Content == "GMColourTrack")
+                    return $"Sequence sub-track - \"Color\" (mode \"{BuiltinName}\")";
+                else
+                    return $"Sequence sub-track - \"{BuiltinName}\"";
+            }
+            else
+                return $"Sequence track \"{Name.Content}\"";
         }
     }
 
