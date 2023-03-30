@@ -458,7 +458,7 @@ namespace UndertaleModTool
                         Process.Start(gameExePath, "-game \"" + FilePath + "\" -debugoutput \"" + Path.ChangeExtension(FilePath, ".gamelog.txt") + "\"");
                     Environment.Exit(0);
                 }
-                else
+                else if (args.Length > 2)
                 {
                     _ = ListenChildConnection(args[2]);
                 }
