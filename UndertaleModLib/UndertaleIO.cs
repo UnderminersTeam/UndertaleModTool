@@ -581,7 +581,7 @@ namespace UndertaleModLib
             }
             catch (Exception e)
             {
-                throw new UndertaleSerializationException(e.Message + "\nat " + Position.ToString("X8") + " while reading object " + typeof(T).FullName, e);
+                throw new UndertaleSerializationException(e.Message + "\nat " + AbsPosition.ToString("X8") + " while reading object " + typeof(T).FullName, e);
             }
         }
 

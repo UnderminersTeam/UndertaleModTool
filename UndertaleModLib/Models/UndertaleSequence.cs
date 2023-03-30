@@ -454,8 +454,6 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
                     Keyframes = reader.ReadUndertaleObject<ParticleKeyframes>();
                     break;
 
-                case "GMGroupTrack":
-                    throw new NotImplementedException("GMGroupTrack not implemented, report this");
                 case "GMClipMaskTrack":
                     throw new NotImplementedException("GMClipMaskTrack not implemented, report this");
             }
@@ -539,8 +537,6 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
                     count += 1 + ParticleKeyframes.UnserializeChildObjectCount(reader);
                     break;
 
-                case "GMGroupTrack":
-                    throw new NotImplementedException("GMGroupTrack not implemented, report this");
                 case "GMClipMaskTrack":
                     throw new NotImplementedException("GMClipMaskTrack not implemented, report this");
             }
