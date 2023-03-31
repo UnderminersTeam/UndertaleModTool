@@ -82,6 +82,19 @@
             </TreeView.Resources>
         </TreeView>
 
-        <utmt:ButtonDark Grid.Row="4" Content="Done" FontSize="18" Width="134" Height="40" Click="DoneButton_Click" Margin="0,20,0,20"/>
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,20">
+            <utmt:ButtonDark Content="Export results" FontSize="18" Width="144" Height="40" Click="ExportButton_Click" Margin="0,0,10,0">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Items.Count, ElementName=ResultsTree, Mode=OneWay}" Value="0">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </utmt:ButtonDark>
+            <utmt:ButtonDark Content="Done" FontSize="18" Width="134" Height="40" Click="DoneButton_Click"/>
+        </StackPanel>
     </Grid>
 </Window>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,7 +14,6 @@ using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 
@@ -26,6 +26,7 @@ namespace UndertaleModTool.Windows
     {
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
         private object highlighted;
+        private string sourceObjName;
         private readonly UndertaleData data;
 
         private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -46,11 +47,14 @@ namespace UndertaleModTool.Windows
             string sourceObjName;
             if (sourceObj is UndertaleNamedResource namedObj)
                 sourceObjName = namedObj.Name.Content;
+            else if (sourceObj is UndertaleString str)
+                sourceObjName = str.Content;
             else
                 sourceObjName = sourceObj.GetType().Name;
+            this.sourceObjName = sourceObjName;
 
-            Title = $"The references of game object \"{sourceObjName}\"";
-            label.Text = $"The search results for the game object\n\"{sourceObjName}\".";
+            Title = $"The references of game asset \"{sourceObjName}\"";
+            label.Text = $"The search results for the game asset\n\"{sourceObjName}\".";
 
             if (results is null)
                 ResultsTree.Background = new VisualBrush(new Label()
@@ -68,6 +72,10 @@ namespace UndertaleModTool.Windows
                 ((child as TreeViewItem)?.ItemsSource as ICollectionView)?.Refresh();
         }
 
+        private void ExportButton_Click(object sender, RoutedEventArgs e)
+        {
+            ExportResults();
+        }
         private void DoneButton_Click(object sender, RoutedEventArgs e)
         {
             Close();
@@ -120,6 +128,57 @@ namespace UndertaleModTool.Windows
 
                 item.IsExpanded = true;
             }
+        }
+
+        private void ExportResults()
+        {
+            string initContent = Title + ":\n";
+            initContent += new string('-', initContent.Length - 1) + "\n\n";
+            StringBuilder sb = new(initContent);
+
+            foreach (var item in ResultsTree.Items)
+            {
+                if (item is TreeViewItem treeItem)
+                {
+                    if (treeItem.Items.IsEmpty)
+                        continue;
+
+                    sb.AppendLine((treeItem.Header as string) + ':');
+
+                    foreach (var childItem in treeItem.Items)
+                    {
+                        string itemName;
+                        if (childItem is object[] inst)
+                            itemName = ChildInstanceNameConverter.Instance.Convert(inst, null, null, null) as string;
+                        else if (childItem is UndertaleNamedResource namedRes)
+                            itemName = namedRes.Name.Content;
+                        else
+                            itemName = childItem.ToString();
+
+                        sb.AppendLine($"    {itemName}");
+                    }
+
+                    sb.Append("\n");
+                }
+                else if (item is TextBlock text)
+                    sb.AppendLine(text.Text + "\n");
+            }
+
+            if (sb.Length == initContent.Length)
+            {
+                this.ShowError("No results to export.");
+                return;
+            }
+            sb.Remove(sb.Length - 2, 2);
+
+            string folderPath = Path.GetDirectoryName(mainWindow.FilePath);
+            string filePath = Path.Combine(folderPath, $"references_of_asset_{sourceObjName}.txt");
+            if (File.Exists(filePath))
+                if (this.ShowQuestion($"File \"{filePath}\" exists.\nOverwrite?") == MessageBoxResult.No)
+                    return;
+
+            File.WriteAllText(filePath, sb.ToString());
+            this.ShowMessage($"The results were successfully saved at path\n\"{filePath}\".");
         }
 
         private void Open(object obj, bool inNewTab = false)
@@ -283,6 +342,8 @@ namespace UndertaleModTool.Windows
 
     public class ChildInstanceNameConverter : IValueConverter
     {
+        public static ChildInstanceNameConverter Instance = new();
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is object[] inst)
