@@ -1763,6 +1763,7 @@ namespace UndertaleModTool
 
     public class LayerDataTemplateSelector : DataTemplateSelector
     {
+        public DataTemplate PathDataTemplate { get; set; }
         public DataTemplate InstancesDataTemplate { get; set; }
         public DataTemplate TilesDataTemplate { get; set; }
         public DataTemplate AssetsDataTemplate { get; set; }
@@ -1775,6 +1776,8 @@ namespace UndertaleModTool
             {
                 switch ((item as Layer).LayerType)
                 {
+                    case LayerType.Path:
+                        return PathDataTemplate;
                     case LayerType.Instances:
                         return InstancesDataTemplate;
                     case LayerType.Tiles:
