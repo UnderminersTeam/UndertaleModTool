@@ -316,7 +316,7 @@ namespace UndertaleModTool.Windows
                                 if (sprites.Any())
                                     outList = outList.Append(("Sprites", sprites.ToArray()));
                             }
-                            
+
 
                             if (types.Contains(typeof(UndertaleExtension)))
                             {
@@ -599,7 +599,7 @@ namespace UndertaleModTool.Windows
                                 trackChain.Insert(0, track);
                                 if (types.Contains(typeof(Track)))
                                 {
-                                    if (track.Name == obj || track.ModelName == obj || track.GMAnimCurveString == obj) 
+                                    if (track.Name == obj || track.ModelName == obj || track.GMAnimCurveString == obj)
                                         sequenceTracks.Add(trackChain.Append(seq).ToArray());
                                 }
 
@@ -621,7 +621,7 @@ namespace UndertaleModTool.Windows
                                 foreach (var subTrack in track.Tracks)
                                     ProcessTrack(seq, subTrack, trackChain);
                             };
-                            
+
                             foreach (var seq in data.Sequences)
                             {
                                 foreach (var track in seq.Tracks)
@@ -785,7 +785,7 @@ namespace UndertaleModTool.Windows
                                             objInstances.Add(new object[] { inst, room });
                                 }
                             }
-                            
+
                             if (objInstances.Count > 0)
                                 return new (string, object[])[] { ("Room object instance", objInstances.ToArray()) };
                             else
@@ -880,6 +880,27 @@ namespace UndertaleModTool.Windows
                             if (outList == Enumerable.Empty<(string, object[])>())
                                 return null;
                             return outList.ToArray();
+                        }
+                    }
+                }
+            },
+            {
+                typeof(UndertaleEmbeddedAudio),
+                new[]
+                {
+                    new PredicateForVersion()
+                    {
+                        Version = (1, 0, 0),
+                        Predicate = (obj, types) =>
+                        {
+                            if (!types.Contains(typeof(UndertaleSound)))
+                                return null;
+
+                            var sounds = data.Sounds.Where(x => x.AudioFile == obj);
+                            if (sounds.Any())
+                                return new (string, object[])[] { ("Sounds", sounds.ToArray()) };
+                            else
+                                return null;
                         }
                     }
                 }
