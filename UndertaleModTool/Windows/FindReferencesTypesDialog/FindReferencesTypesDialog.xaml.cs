@@ -23,11 +23,18 @@ namespace UndertaleModTool.Windows
     {
         private readonly UndertaleResource sourceObj;
         private readonly UndertaleData data;
+        private readonly bool dontShowWindow = false;
 
         private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (!IsVisible || IsLoaded)
                 return;
+
+            if (dontShowWindow)
+            {
+                Close();
+                return;
+            }
 
             if (Settings.Instance.EnableDarkMode)
                 MainWindow.SetDarkTitleBarForWindow(this, true, false);
@@ -40,6 +47,7 @@ namespace UndertaleModTool.Windows
             if (data.GeneralInfo is null)
             {
                 this.ShowError("Cannot determine GameMaker version - \"General Info\" is null.");
+                dontShowWindow = true;
                 return;
             }
 
@@ -48,6 +56,7 @@ namespace UndertaleModTool.Windows
             if (sourceTypes is null)
             {
                 this.ShowError($"Cannot get the source types for object of type \"{obj.GetType()}\".");
+                dontShowWindow = true;
                 return;
             }
 
