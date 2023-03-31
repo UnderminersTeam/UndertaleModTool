@@ -427,10 +427,30 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     /// <inheritdoc />
     public void Unserialize(UndertaleReader reader)
     {
+        Func<UndertaleString> readFileNameDelegate;
+        if (reader.ReadOnlyGEN8)
+            readFileNameDelegate = () =>
+            {
+                UndertaleString res = reader.ReadUndertaleString();
+                if (res.Content is not null)
+                    return res;
+
+                reader.SwitchReaderType(false);
+                long returnTo = reader.Position;
+                reader.Position = reader.GetOffsetMapRev()[res];
+                reader.ReadUndertaleObject<UndertaleString>();
+                reader.Position = returnTo;
+                reader.SwitchReaderType(true);
+
+                return res;
+            };
+        else
+            readFileNameDelegate = reader.ReadUndertaleString;
+
         IsDebuggerDisabled = reader.ReadByte() != 0;
         BytecodeVersion = reader.ReadByte();
         Unknown = reader.ReadUInt16();
-        FileName = reader.ReadUndertaleString();
+        FileName = readFileNameDelegate();
         Config = reader.ReadUndertaleString();
         LastObj = reader.ReadUInt32();
         LastTile = reader.ReadUInt32();
@@ -442,6 +462,9 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         Minor = reader.ReadUInt32();
         Release = reader.ReadUInt32();
         Build = reader.ReadUInt32();
+
+        if (reader.ReadOnlyGEN8)
+            return;
 
         var detectedVer = TestForCommonGMSVersions(reader, (Major, Minor, Release, Build));
         (Major, Minor, Release, Build) = detectedVer;

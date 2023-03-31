@@ -160,6 +160,8 @@ namespace UndertaleModLib
         private WarningHandlerDelegate WarningHandler;
         private MessageHandlerDelegate MessageHandler;
 
+        public bool ReadOnlyGEN8 { get; set; }
+
         /// <summary>
         /// The detected absolute path of the data file, if a FileStream is passed in, or null otherwise (by default).
         /// Can also be manually changed.
@@ -173,10 +175,12 @@ namespace UndertaleModLib
         public string Directory { get; set; } = null;
 
         public UndertaleReader(Stream input,
-                               WarningHandlerDelegate warningHandler = null, MessageHandlerDelegate messageHandler = null) : base(input)
+                               WarningHandlerDelegate warningHandler = null, MessageHandlerDelegate messageHandler = null,
+                               bool onlyGeneralInfo = false) : base(input)
         {
             WarningHandler = warningHandler;
             MessageHandler = messageHandler;
+            ReadOnlyGEN8 = onlyGeneralInfo;
             if (input is FileStream fs)
             {
                 FilePath = fs.Name;
@@ -241,7 +245,8 @@ namespace UndertaleModLib
             {
                 try
                 {
-                    poolSize = data.FORM.UnserializeObjectCount(this);
+                    if (!ReadOnlyGEN8)
+                        poolSize = data.FORM.UnserializeObjectCount(this);
                 }
                 catch (Exception e)
                 {
@@ -576,7 +581,7 @@ namespace UndertaleModLib
             }
             catch (Exception e)
             {
-                throw new UndertaleSerializationException(e.Message + "\nat " + Position.ToString("X8") + " while reading object " + typeof(T).FullName, e);
+                throw new UndertaleSerializationException(e.Message + "\nat " + AbsPosition.ToString("X8") + " while reading object " + typeof(T).FullName, e);
             }
         }
 
@@ -606,6 +611,9 @@ namespace UndertaleModLib
 
         public void ThrowIfUnreadObjects()
         {
+            if (ReadOnlyGEN8)
+                return;
+
             if (unreadObjects.Count > 0)
             {
                 throw new IOException("Found pointer targets that were never read:\n" + String.Join("\n", unreadObjects.Take(10).Select((x) => "0x" + x.ToString("X8") + " (" + objectPool[x].GetType().Name + ")")) + (unreadObjects.Count > 10 ? "\n(and more, " + unreadObjects.Count + " total)" : ""));
@@ -897,9 +905,10 @@ namespace UndertaleModLib
         public static bool IsDictionaryCleared { get; set; } = true;
 
         public static UndertaleData Read(Stream stream, UndertaleReader.WarningHandlerDelegate warningHandler = null,
-                                                        UndertaleReader.MessageHandlerDelegate messageHandler = null)
+                                                        UndertaleReader.MessageHandlerDelegate messageHandler = null,
+                                                        bool onlyGeneralInfo = false)
         {
-            UndertaleReader reader = new UndertaleReader(stream, warningHandler, messageHandler);
+            UndertaleReader reader = new UndertaleReader(stream, warningHandler, messageHandler, onlyGeneralInfo);
             var data = reader.ReadUndertaleData();
             reader.ThrowIfUnreadObjects();
             return data;
