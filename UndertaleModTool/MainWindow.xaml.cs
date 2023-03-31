@@ -3826,6 +3826,21 @@ result in loss of work.");
                 && e.Source == viewer)
                 e.Handled = true;
         }
+
+        public bool HasEditorForAsset(object asset)
+        {
+            if (asset is null)
+                return false;
+
+            Type objType = asset.GetType();
+            foreach (var key in DataEditor.Resources.Keys)
+            {
+                if (key is DataTemplateKey templateKey && (templateKey.DataType as Type) == objType)
+                    return true;
+            }
+
+            return false;
+        }
     }
 
     public class GeneralInfoEditor

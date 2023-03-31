@@ -587,32 +587,47 @@ namespace UndertaleModTool.Windows
                                     outList = outList.Append(("Sequences", sequences.ToArray()));
                             }
 
+
                             List<object[]> sequenceTracks = new();
                             List<object[]> seqBroadMessages = new();
                             List<object[]> sequenceMoments = new();
                             List<object[]> seqStringKeyframes = new();
+
+                            void ProcessTrack(UndertaleSequence seq, Track track, List<object> trackChain)
+                            {
+                                trackChain = new(trackChain);
+                                trackChain.Insert(0, track);
+                                if (types.Contains(typeof(Track)))
+                                {
+                                    if (track.Name == obj || track.ModelName == obj || track.GMAnimCurveString == obj) 
+                                        sequenceTracks.Add(trackChain.Append(seq).ToArray());
+                                }
+
+                                if (types.Contains(typeof(StringKeyframes)))
+                                {
+                                    if (track.Keyframes is StringKeyframes strKeyframes)
+                                    {
+                                        foreach (var data in strKeyframes.List)
+                                        {
+                                            foreach (var strPair in data.Channels)
+                                            {
+                                                if (strPair.Value.Value == obj)
+                                                    seqStringKeyframes.Add(new object[] { strPair.Key }.Concat(trackChain).Append(seq).ToArray());
+                                            }
+                                        }
+                                    }
+                                }
+
+                                foreach (var subTrack in track.Tracks)
+                                    ProcessTrack(seq, subTrack, trackChain);
+                            };
+                            
                             foreach (var seq in data.Sequences)
                             {
                                 foreach (var track in seq.Tracks)
                                 {
-                                    if (types.Contains(typeof(Track)))
-                                    {
-                                        if (track.Name == obj || track.ModelName == obj || track.GMAnimCurveString == obj)
-                                            sequenceTracks.Add(new object[] { track, seq });
-                                    }
-
-                                    if (types.Contains(typeof(StringKeyframes)))
-                                    {
-                                        if (track.Keyframes is StringKeyframes strKeyframes)
-                                        {
-                                            foreach (var data in strKeyframes.List)
-                                            {
-                                                foreach (var strPair in data.Channels)
-                                                    if (strPair.Value.Value == obj)
-                                                        seqStringKeyframes.Add(new object[] { strPair.Key, data, seq });
-                                            }
-                                        }
-                                    }
+                                    List<object> trackChain = new();
+                                    ProcessTrack(seq, track, trackChain);
                                 }
 
                                 if (types.Contains(typeof(BroadcastMessage)))
@@ -678,7 +693,7 @@ namespace UndertaleModTool.Windows
                                 foreach (var layer in room.Layers)
                                 {
                                     foreach (var prop in layer.EffectProperties)
-                                        if (prop.Name == obj)
+                                        if (prop.Name == obj || prop.Value == obj)
                                             effectProps.Add(new object[] { prop, layer, room });
                                 }
                             }
@@ -697,19 +712,32 @@ namespace UndertaleModTool.Windows
                                 return null;
 
                             List<object[]> textKeyframesList = new();
+
+                            void ProcessTrack(UndertaleSequence seq, Track track, List<object> trackChain)
+                            {
+                                trackChain = new(trackChain);
+                                trackChain.Insert(0, track);
+
+                                if (track.Keyframes is TextKeyframes textKeyframes)
+                                {
+                                    foreach (var keyframe in textKeyframes.List)
+                                    {
+                                        foreach (var textPair in keyframe.Channels)
+                                            if (textPair.Value.Text == obj)
+                                                textKeyframesList.Add(new object[] { textPair.Key }.Concat(trackChain).Append(seq).ToArray());
+                                    }
+                                }
+
+                                foreach (var subTrack in track.Tracks)
+                                    ProcessTrack(seq, subTrack, trackChain);
+                            };
+
                             foreach (var seq in data.Sequences)
                             {
                                 foreach (var track in seq.Tracks)
                                 {
-                                    if (track.Keyframes is TextKeyframes textKeyframes)
-                                    {
-                                        foreach (var keyframe in textKeyframes.List)
-                                        {
-                                            foreach (var textPair in keyframe.Channels)
-                                                if (textPair.Value.Text == obj)
-                                                    textKeyframesList.Add(new object[] { textPair.Key, keyframe, seq });
-                                        }
-                                    }
+                                    List<object> trackChain = new();
+                                    ProcessTrack(seq, track, trackChain);
                                 }
                             }
                             if (textKeyframesList.Count > 0)
@@ -773,25 +801,85 @@ namespace UndertaleModTool.Windows
                                 return null;
 
                             List<object[]> instKeyframesList = new();
+
+                            void ProcessTrack(UndertaleSequence seq, Track track, List<object> trackChain)
+                            {
+                                trackChain = new(trackChain);
+                                trackChain.Insert(0, track);
+
+                                if (track.Keyframes is InstanceKeyframes instKeyframes)
+                                {
+                                    foreach (var keyframe in instKeyframes.List)
+                                    {
+                                        foreach (var instPair in keyframe.Channels)
+                                            if (instPair.Value.Resource.Resource == obj)
+                                                instKeyframesList.Add(new object[] { instPair.Key }.Concat(trackChain).Append(seq).ToArray());
+                                    }
+                                }
+
+                                foreach (var subTrack in track.Tracks)
+                                    ProcessTrack(seq, subTrack, trackChain);
+                            };
+
                             foreach (var seq in data.Sequences)
                             {
                                 foreach (var track in seq.Tracks)
                                 {
-                                    if (track.Keyframes is InstanceKeyframes instKeyframes)
-                                    {
-                                        foreach (var keyframe in instKeyframes.List)
-                                        {
-                                            foreach (var instPair in keyframe.Channels)
-                                                if (instPair.Value.Resource.Resource == obj)
-                                                    instKeyframesList.Add(new object[] { instPair.Key, keyframe, seq });
-                                        }
-                                    }
+                                    List<object> trackChain = new();
+                                    ProcessTrack(seq, track, trackChain);
                                 }
                             }
                             if (instKeyframesList.Count > 0)
                                 return new (string, object[])[] { ("Sequence object instance keyframes", instKeyframesList.ToArray()) };
                             else
                                 return null;
+                        }
+                    }
+                }
+            },
+            {
+                typeof(UndertaleCode),
+                new[]
+                {
+                    new PredicateForVersion()
+                    {
+                        Version = (1, 0, 0),
+                        Predicate = (obj, types) =>
+                        {
+                            IEnumerable<(string, object[])> outList = Enumerable.Empty<(string, object[])>();
+
+                            if (types.Contains(typeof(UndertaleGameObject)))
+                            {
+                                var gameObjects = data.GameObjects.Where(x => x.Events.Any(
+                                                                            e => e.Any(se => se.Actions.Any(
+                                                                                a => a.CodeId == obj))));
+                                if (gameObjects.Any())
+                                    outList = outList.Append(("Game objects", gameObjects.ToArray()));
+                            }
+
+                            if (types.Contains(typeof(UndertaleRoom)))
+                            {
+                                var rooms = data.Rooms.Where(x => x.CreationCodeId == obj);
+                                if (rooms.Any())
+                                    outList = outList.Append(("Rooms", rooms.ToArray()));
+                            }
+
+                            if (types.Contains(typeof(UndertaleGlobalInit)))
+                            {
+                                bool matches = data.GlobalInitScripts?.Any(x => x.Code == obj) == true;
+                                if (matches)
+                                    outList = outList.Append(("Global init",
+                                                              new object[] { new GlobalInitEditor(data.GlobalInitScripts) }));
+
+                                matches = data.GameEndScripts?.Any(x => x.Code == obj) == true;
+                                if (matches)
+                                    outList = outList.Append(("Game end scripts",
+                                                              new object[] { new GameEndEditor(data.GameEndScripts) }));
+                            }
+
+                            if (outList == Enumerable.Empty<(string, object[])>())
+                                return null;
+                            return outList.ToArray();
                         }
                     }
                 }

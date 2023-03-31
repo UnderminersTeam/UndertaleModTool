@@ -103,11 +103,11 @@ namespace UndertaleModTool.Windows
                 });
                 if (result.Item2[0] is UndertaleNamedResource)
                     item.ItemTemplate = namedResTemplate;
-                else if (result.Item2[0] is GeneralInfoEditor)
+                else if (result.Item2[0] is GeneralInfoEditor or GlobalInitEditor or GameEndEditor)
                 {
                     ResultsTree.Items.Add(new TextBlock()
                     {
-                        Text = "General Info",
+                        Text = result.Item1,
                         DataContext = result.Item2[0],
                         ContextMenu = TryFindResource("StandaloneTabMenu") as ContextMenu
                     });
@@ -130,12 +130,12 @@ namespace UndertaleModTool.Windows
                 return;
             }
 
-            mainWindow.Focus();
-
             if (obj is object[] inst)
             {
                 if (inst[^1] is UndertaleRoom room)
                 {
+                    mainWindow.Focus();
+
                     mainWindow.ChangeSelection(room, inNewTab);
                     mainWindow.CurrentTab.LastContentState = new RoomTabState()
                     {
@@ -143,9 +143,27 @@ namespace UndertaleModTool.Windows
                     };
                     mainWindow.CurrentTab.RestoreTabContentState();
                 }
+                else
+                {
+                    if (!mainWindow.HasEditorForAsset(inst[^1]))
+                    {
+                        this.ShowError("The type of this object reference doesn't have an editor/viewer.");
+                        return;
+                    }
+                }
             }
             else
+            {
+                if (!mainWindow.HasEditorForAsset(obj))
+                {
+                    this.ShowError("The type of this object reference doesn't have an editor/viewer.");
+                    return;
+                }
+
+                mainWindow.Focus();
+
                 mainWindow.ChangeSelection(obj, inNewTab);
+            } 
         }
 
         private void MenuItem_ContextMenuOpened(object sender, RoutedEventArgs e)

@@ -250,6 +250,22 @@ namespace UndertaleModTool.Windows
                         }
                     },
                 }
+            },
+            {
+                typeof(UndertaleCode),
+                new[]
+                {
+                    new TypesForVersion()
+                    {
+                        Version = (1, 0, 0),
+                        Types = new[]
+                        {
+                            (typeof(UndertaleGameObject), "Game objects"),
+                            (typeof(UndertaleRoom), "Rooms"),
+                            (typeof(UndertaleGlobalInit), "Global initialization and game end scripts")
+                        }
+                    }
+                }
             }
         };
 
