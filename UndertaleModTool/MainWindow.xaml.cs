@@ -327,7 +327,7 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    string procFileName = Process.GetCurrentProcess().MainModule.FileName;
+                    string procFileName = Environment.ProcessPath;
                     var HKCU_Classes = Registry.CurrentUser.OpenSubKey(@"Software\Classes", true);
                     var UndertaleModTool_app = HKCU_Classes.CreateSubKey(@"UndertaleModTool");
 
@@ -492,7 +492,7 @@ namespace UndertaleModTool
             string key = Guid.NewGuid().ToString();
 
             string dir = Path.GetDirectoryName(FilePath);
-            Process.Start(Process.GetCurrentProcess().MainModule.FileName, "\"" + Path.Combine(dir, filename) + "\" " + key);
+            Process.Start(Environment.ProcessPath, "\"" + Path.Combine(dir, filename) + "\" " + key);
 
             var server = new NamedPipeServerStream(key);
             server.WaitForConnection();
