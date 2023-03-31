@@ -904,6 +904,27 @@ namespace UndertaleModTool.Windows
                         }
                     }
                 }
+            },
+            {
+                typeof(UndertaleAudioGroup),
+                new[]
+                {
+                    new PredicateForVersion()
+                    {
+                        Version = (1, 0, 0),
+                        Predicate = (obj, types) =>
+                        {
+                            if (!types.Contains(typeof(UndertaleSound)))
+                                return null;
+
+                            var sounds = data.Sounds.Where(x => x.AudioGroup == obj);
+                            if (sounds.Any())
+                                return new (string, object[])[] { ("Sounds", sounds.ToArray()) };
+                            else
+                                return null;
+                        }
+                    }
+                }
             }
         };
 

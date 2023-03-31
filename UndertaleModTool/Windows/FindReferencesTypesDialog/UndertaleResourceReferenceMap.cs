@@ -280,6 +280,20 @@ namespace UndertaleModTool.Windows
                         }
                     }
                 }
+            },
+            {
+                typeof(UndertaleAudioGroup),
+                new[]
+                {
+                    new TypesForVersion()
+                    {
+                        Version = (1, 0, 0),
+                        Types = new[]
+                        {
+                            (typeof(UndertaleSound), "Sounds")
+                        }
+                    }
+                }
             }
         };
 
