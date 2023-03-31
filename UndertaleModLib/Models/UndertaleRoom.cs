@@ -1345,6 +1345,14 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     public enum LayerType
     {
         /// <summary>
+        /// The layer is a path layer.
+        /// </summary>
+        /// <remarks>
+        /// It's unknown why this layer is saved in the game data,
+        /// it doesn't have any data in it (<see href="Data"/> is <see langword="null"/>).
+        /// </remarks>
+        Path = 0,
+        /// <summary>
         /// The layer is a background layer.
         /// </summary>
         Background = 1,
@@ -1459,6 +1467,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
             switch (LayerType)
             {
+                case LayerType.Path: break;
                 case LayerType.Instances: writer.WriteUndertaleObject(InstancesData); break;
                 case LayerType.Tiles: writer.WriteUndertaleObject(TilesData); break;
                 case LayerType.Background: writer.WriteUndertaleObject(BackgroundData); break;
@@ -1490,6 +1499,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
             Data = LayerType switch
             {
+                LayerType.Path => null,
                 LayerType.Instances => reader.ReadUndertaleObject<LayerInstancesData>(),
                 LayerType.Tiles => reader.ReadUndertaleObject<LayerTilesData>(),
                 LayerType.Background => reader.ReadUndertaleObject<LayerBackgroundData>(),

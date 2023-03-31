@@ -214,6 +214,11 @@
                         </TreeViewItem.Resources>
                         <TreeViewItem.ItemTemplateSelector>
                             <local:LayerDataTemplateSelector>
+                                <local:LayerDataTemplateSelector.PathDataTemplate>
+                                    <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
+                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}"/>
+                                    </HierarchicalDataTemplate>
+                                </local:LayerDataTemplateSelector.PathDataTemplate>
                                 <local:LayerDataTemplateSelector.InstancesDataTemplate>
                                     <HierarchicalDataTemplate ItemsSource="{Binding InstancesData.Instances, Mode=OneWay}" ItemTemplateSelector="{x:Null}">
                                         <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">
@@ -227,7 +232,7 @@
                                 </local:LayerDataTemplateSelector.InstancesDataTemplate>
                                 <local:LayerDataTemplateSelector.TilesDataTemplate>
                                     <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
-                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}"  Style="{StaticResource LayerItemStyle}"/>
+                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}"/>
                                     </HierarchicalDataTemplate>
                                 </local:LayerDataTemplateSelector.TilesDataTemplate>
                                 <local:LayerDataTemplateSelector.AssetsDataTemplate>
@@ -793,8 +798,12 @@
 
                             <Separator Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="3"/>
 
-                            <ContentControl Name="LayerDataContent" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="3" Content="{Binding Data, Mode=OneTime}">
+                            <ContentControl Name="LayerDataContent" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="3" Content="{Binding Data, TargetNullValue=(null), Mode=OneTime}">
                                 <ContentControl.Resources>
+                                    <DataTemplate DataType="{x:Type sys:String}">
+                                        <TextBlock Margin="3" Text="Empty layer data."/>
+                                    </DataTemplate>
+
                                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerInstancesData}">
                                         <TextBlock Margin="3" Text="Contains GameObject instances, listed in the tree on the left"/>
                                     </DataTemplate>
