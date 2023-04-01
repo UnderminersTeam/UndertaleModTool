@@ -132,6 +132,12 @@ namespace UndertaleModTool.Windows
 
         private void ExportResults()
         {
+            if (data.FORM is null)
+            {
+                this.ShowError($"The object references are stale - a different game data was loaded.");
+                return;
+            }
+
             string initContent = Title + ":\n";
             initContent += new string('-', initContent.Length - 1) + "\n\n";
             StringBuilder sb = new(initContent);
@@ -151,7 +157,7 @@ namespace UndertaleModTool.Windows
                         if (childItem is object[] inst)
                             itemName = ChildInstanceNameConverter.Instance.Convert(inst, null, null, null) as string;
                         else if (childItem is UndertaleNamedResource namedRes)
-                            itemName = namedRes.Name.Content;
+                            itemName = namedRes.Name?.Content;
                         else
                             itemName = childItem.ToString();
 
