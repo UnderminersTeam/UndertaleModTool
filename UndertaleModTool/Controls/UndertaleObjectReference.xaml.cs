@@ -17,6 +17,7 @@ using System.Windows.Shapes;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 using UndertaleModLib.Scripting;
+using UndertaleModTool.Windows;
 
 namespace UndertaleModTool
 {
@@ -37,16 +38,20 @@ namespace UndertaleModTool
                         if (inst is null)
                             return;
 
-                        if (e.NewValue is null)
-                            inst.ObjectText.ContextMenu = null;
-                        else
+                        if (e.NewValue is not null)
                         {
                             try
                             {
-                                inst.ObjectText.ContextMenu = inst.Resources["contextMenu"] as ContextMenu;
+                                if (inst.Resources["contextMenu"] is not ContextMenu menu)
+                                    return;
+
+                                menu.DataContext = inst.ObjectReference;
+                                inst.ObjectText.ContextMenu = menu;
                             }
                             catch { }
                         }
+                        else
+                            inst.ObjectText.ContextMenu = null;
                     }));
 
         public static DependencyProperty ObjectTypeProperty =
@@ -152,6 +157,47 @@ namespace UndertaleModTool
         private void OpenInNewTabItem_Click(object sender, RoutedEventArgs e)
         {
             mainWindow.ChangeSelection(ObjectReference, true);
+        }
+        private void MenuItem_ContextMenuOpened(object sender, RoutedEventArgs e)
+        {
+            var menu = sender as ContextMenu;
+            foreach (var item in menu.Items)
+            {
+                var menuItem = item as MenuItem;
+                if ((menuItem.Header as string) == "Find all references")
+                {
+                    Type objType = menu.DataContext.GetType();
+                    menuItem.Visibility = UndertaleResourceReferenceMap.IsTypeReferenceable(objType)
+                                          ? Visibility.Visible : Visibility.Collapsed;
+
+                    break;
+                }
+            }
+        }
+        private void FindAllReferencesItem_Click(object sender, RoutedEventArgs e)
+        {
+            var obj = (sender as FrameworkElement)?.DataContext;
+            if (obj is not UndertaleResource res)
+            {
+                mainWindow.ShowError("The selected object is not an \"UndertaleResource\".");
+                return;
+            }
+
+            FindReferencesTypesDialog dialog = null;
+            try
+            {
+                dialog = new(res, mainWindow.Data);
+                dialog.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                mainWindow.ShowError("An error occured in the object references related window.\n" +
+                                     $"Please report this on GitHub.\n\n{ex}");
+            }
+            finally
+            {
+                dialog?.Close();
+            }
         }
 
         private void Remove_Click(object sender, RoutedEventArgs e)
