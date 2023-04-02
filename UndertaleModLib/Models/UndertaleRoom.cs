@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -422,6 +423,20 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 if (layer.InstancesData != null)
                 {
                     layer.InstancesData.Instances.Clear();
+                    if (GameObjects.Count > 0 && layer.InstancesData.InstanceIds.Length > 0
+                        && layer.InstancesData.InstanceIds[0] > GameObjects[^1].InstanceID)
+                    {
+                        // Make sure it's not a false positive
+                        uint firstLayerInstID = layer.InstancesData.InstanceIds.OrderBy(x => x).First();
+                        uint lastInstID = GameObjects.OrderBy(x => x.InstanceID).Last().InstanceID;
+                        if (firstLayerInstID > lastInstID)
+                        {
+                            Debug.WriteLine($"The first instance ID ({firstLayerInstID}) " +
+                                            $"of layer (ID {layer.LayerId}) is greater than the last game object ID ({lastInstID}) ?");
+                            continue;
+                        }
+                    }
+
                     foreach (var id in layer.InstancesData.InstanceIds)
                     {
                         GameObject gameObj = GameObjects.ByInstanceID(id);
@@ -1562,6 +1577,11 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         {
             internal uint[] InstanceIds { get; private set; } // 100000, 100001, 100002, 100003 - instance ids from GameObjects list in the room
             public ObservableCollection<GameObject> Instances { get; private set; } = new();
+
+            public bool AreInstancesUnresolved()
+            {
+                return InstanceIds.Length > 0 && Instances.Count == 0;
+            }
 
             /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
