@@ -798,12 +798,15 @@
 
                             <Separator Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="3"/>
 
-                            <ContentControl Name="LayerDataContent" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="3" Content="{Binding Data, TargetNullValue=(null), Mode=OneTime}">
+                            <ContentControl Name="LayerDataContent" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="3">
+                                <ContentControl.Content>
+                                    <Binding Path="Data" Mode="OneTime">
+                                        <Binding.TargetNullValue>
+                                            <TextBlock Margin="3" Text="Empty layer data."/>
+                                        </Binding.TargetNullValue>
+                                    </Binding>
+                                </ContentControl.Content>
                                 <ContentControl.Resources>
-                                    <DataTemplate DataType="{x:Type sys:String}">
-                                        <TextBlock Margin="3" Text="Empty layer data."/>
-                                    </DataTemplate>
-
                                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerInstancesData}">
                                         <TextBlock Margin="3" Text="Contains GameObject instances, listed in the tree on the left"/>
                                     </DataTemplate>
