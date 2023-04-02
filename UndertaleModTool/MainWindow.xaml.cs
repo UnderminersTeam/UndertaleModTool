@@ -2157,6 +2157,9 @@ namespace UndertaleModTool
         private async void MenuItem_RunBuiltinScript_Item_Click(object sender, RoutedEventArgs e)
         {
             string path = (string)(sender as MenuItem).CommandParameter;
+            if (!File.Exists(path))
+                path = Path.Combine(Program.GetExecutableDirectory(), path);
+
             if (File.Exists(path))
                 await RunScript(path);
             else
