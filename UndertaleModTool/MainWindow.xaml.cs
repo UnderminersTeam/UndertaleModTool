@@ -1645,7 +1645,14 @@ namespace UndertaleModTool
                         effects |= DragDropEffects.Copy;
                     }*/
 
-                    DragDrop.DoDragDrop(MainTree, data, effects);
+                    try
+                    {
+                        DragDrop.DoDragDrop(MainTree, data, effects);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Error on handling \"MainTree\" drag&drop:\n{ex}");
+                    }
                 }
             }
         }
