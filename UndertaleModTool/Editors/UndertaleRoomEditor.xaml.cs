@@ -187,6 +187,14 @@ namespace UndertaleModTool
                         }
                         else if (layer.LayerType == LayerType.Instances)
                         {
+                            if (layer.InstancesData.AreInstancesUnresolved())
+                            {
+                                _ = mainWindow.Dispatcher.InvokeAsync(() =>
+                                {
+                                    mainWindow.ShowWarning($"The instances list of layer \"{layer.LayerName.Content}\" is empty, but the layer has the instances ID.");
+                                }, DispatcherPriority.ContextIdle);
+                            }
+
                             foreach (GameObject obj in layer.InstancesData.Instances)
                                 roomObjDict.TryAdd(obj.InstanceID, layer);
                         }
