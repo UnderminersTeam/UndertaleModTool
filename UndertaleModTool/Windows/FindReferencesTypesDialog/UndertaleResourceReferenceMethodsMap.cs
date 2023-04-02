@@ -1,23 +1,37 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 using static UndertaleModLib.Models.UndertaleSequence;
 
 namespace UndertaleModTool.Windows
 {
+    public class HashSetOverride<T> : HashSet<T>
+    {
+        private readonly bool containsEverything;
+        public HashSetOverride(bool containsEverything = false)
+        {
+            this.containsEverything = containsEverything;
+        }
+        public new bool Contains(T item) => containsEverything || base.Contains(item);
+    }
+
     public class PredicateForVersion
     {
         public (uint Major, uint Minor, uint Release) Version { get; set; }
-        public Func<UndertaleResource, HashSet<Type>, (string, object[])[]> Predicate { get; set; }
+        public Func<UndertaleResource, HashSetOverride<Type>, Dictionary<string, object[]>> Predicate { get; set; }
     }
 
     public static class UndertaleResourceReferenceMethodsMap
     {
         private static UndertaleData data;
+        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
 
         private static readonly Dictionary<Type, PredicateForVersion[]> typeMap = new()
         {
@@ -35,7 +49,7 @@ namespace UndertaleModTool.Windows
 
                             var gameObjects = data.GameObjects.Where(x => x.Sprite == obj);
                             if (gameObjects.Any())
-                                return new(string, object[])[] {("Game objects", gameObjects.ToArray()) };
+                                return new() { { "Game objects", gameObjects.ToArray() } };
                             else
                                 return null;
                         }
@@ -45,7 +59,7 @@ namespace UndertaleModTool.Windows
                         Version = (2, 0, 0),
                         Predicate = (obj, types) =>
                         {
-                            IEnumerable<(string, object[])> outList = Enumerable.Empty<(string, object[])>();
+                            Dictionary<string, object[]> outDict = new();
 
                             List<object[]> tiles = new();
                             List<object[]> sprInstances = new();
@@ -80,15 +94,15 @@ namespace UndertaleModTool.Windows
                                 }
                             }
                             if (tiles.Count > 0)
-                                outList = outList.Append(("Room tiles", tiles.ToArray()));
+                                outDict["Room tiles"] = tiles.ToArray();
                             if (sprInstances.Count > 0)
-                                outList = outList.Append(("Room sprite instances", sprInstances.ToArray()));
+                                outDict["Room sprite instances"] = sprInstances.ToArray();
                             if (bgLayers.Count > 0)
-                                outList = outList.Append(("Room background layers", bgLayers.ToArray()));
+                                outDict["Room background layers"] = bgLayers.ToArray();
 
-                            if (outList == Enumerable.Empty<(string, object[])>())
+                            if (outDict.Count == 0)
                                 return null;
-                            return outList.ToArray();
+                            return outDict;
                         }
                     },
                     new PredicateForVersion()
@@ -102,7 +116,7 @@ namespace UndertaleModTool.Windows
                             var textGroups = data.TextureGroupInfo.Where(x => x.Sprites.Any(s => s.Resource == obj)
                                                                               || (x.SpineSprites?.Any(s => s.Resource == obj) == true));
                             if (textGroups.Any())
-                                return new (string, object[])[] { ("Texture groups", textGroups.ToArray()) };
+                                return new() { { "Texture groups", textGroups.ToArray() } };
                             else
                                 return null;
                         }
@@ -121,7 +135,7 @@ namespace UndertaleModTool.Windows
                             if (data.IsGameMaker2())
                                 return null;
 
-                            IEnumerable<(string, object[])> outList = Enumerable.Empty<(string, object[])>();
+                            Dictionary<string, object[]> outDict = new();
 
                             List<object[]> backgrounds = new();
                             List<object[]> tiles = new();
@@ -136,13 +150,13 @@ namespace UndertaleModTool.Windows
                                         tiles.Add(new object[] { tile, room });
                             }
                             if (backgrounds.Count > 0)
-                                outList = outList.Append(("Room tiles", tiles.ToArray()));
+                                outDict["Room tiles"] = tiles.ToArray();
                             if (tiles.Count > 0)
-                                outList = outList.Append(("Room sprite instances", tiles.ToArray()));
+                                outDict["Room sprite instances"] = tiles.ToArray();
 
-                            if (outList == Enumerable.Empty<(string, object[])>())
+                            if (outDict.Count == 0)
                                 return null;
-                            return outList.ToArray();
+                            return outDict;
                         }
                     },
                     new PredicateForVersion()
@@ -162,7 +176,7 @@ namespace UndertaleModTool.Windows
                                 }
                             }
                             if (tileLayers.Count > 0)
-                                return new (string, object[])[] { ("Room tile layers", tileLayers.ToArray()) };
+                                return new() { { "Room tile layers", tileLayers.ToArray() } };
                             else
                                 return null;
                         }
@@ -177,7 +191,7 @@ namespace UndertaleModTool.Windows
 
                             var textGroups = data.TextureGroupInfo.Where(x => x.Tilesets.Any(s => s.Resource == obj));
                             if (textGroups.Any())
-                                return new (string, object[])[] { ("Texture groups", textGroups.ToArray()) };
+                                return new() { { "Texture groups", textGroups.ToArray() } };
                             else
                                 return null;
                         }
@@ -195,7 +209,7 @@ namespace UndertaleModTool.Windows
                         {
                             var pageItems = data.TexturePageItems.Where(x => x.TexturePage == obj);
                             if (pageItems.Any())
-                                return new (string, object[])[] { ("Texture page items", pageItems.ToArray()) };
+                                return new() { { "Texture page items", pageItems.ToArray() } };
                             else
                                 return null;
                         }
@@ -210,7 +224,7 @@ namespace UndertaleModTool.Windows
 
                             var textGroups = data.TextureGroupInfo.Where(x => x.TexturePages.Any(s => s.Resource == obj));
                             if (textGroups.Any())
-                                return new (string, object[])[] { ("Texture groups", textGroups.ToArray()) };
+                                return new() { { "Texture groups", textGroups.ToArray() } };
                             else
                                 return null;
                         }
@@ -226,32 +240,32 @@ namespace UndertaleModTool.Windows
                         Version = (1, 0, 0),
                         Predicate = (obj, types) =>
                         {
-                            IEnumerable<(string, object[])> outList = Enumerable.Empty<(string, object[])>();
+                            Dictionary<string, object[]> outDict = new();
 
                             if (types.Contains(typeof(UndertaleSprite)))
                             {
                                 var sprites = data.Sprites.Where(x => x.Textures.Any(t => t.Texture == obj));
                                 if (sprites.Any())
-                                    outList = outList.Append(("Sprites", sprites.ToArray()));
+                                    outDict["Sprites"] = sprites.ToArray();
                             }
 
                             if (types.Contains(typeof(UndertaleBackground)))
                             {
                                 var backgrounds = data.Backgrounds.Where(x => x.Texture == obj);
                                 if (backgrounds.Any())
-                                    outList = outList.Append((data.IsGameMaker2() ? "Tile sets" : "Backgrounds", backgrounds.ToArray()));
+                                    outDict[data.IsGameMaker2() ? "Tile sets" : "Backgrounds"] = backgrounds.ToArray();
                             }
 
                             if (types.Contains(typeof(UndertaleFont)))
                             {
                                 var fonts = data.Fonts.Where(x => x.Texture == obj);
                                 if (fonts.Any())
-                                    outList = outList.Append(("Fonts", fonts.ToArray()));
+                                    outDict["Fonts"] = fonts.ToArray();
                             }
 
-                            if (outList == Enumerable.Empty<(string, object[])>())
+                            if (outDict.Count == 0)
                                 return null;
-                            return outList.ToArray();
+                            return outDict;
                         }
                     },
                     new PredicateForVersion()
@@ -264,7 +278,7 @@ namespace UndertaleModTool.Windows
 
                             var embImages = data.EmbeddedImages.Where(x => x.TextureEntry == obj);
                             if (embImages.Any())
-                                return new (string, object[])[] { ("Embedded images", embImages.ToArray()) };
+                                return new() { { "Embedded images", embImages.ToArray() } };
                             else
                                 return null;
                         }
@@ -280,41 +294,41 @@ namespace UndertaleModTool.Windows
                         Version = (1, 0, 0),
                         Predicate = (obj, types) =>
                         {
-                            IEnumerable<(string, object[])> outList = Enumerable.Empty<(string, object[])>();
+                            Dictionary<string, object[]> outDict = new();
 
                             if (types.Contains(typeof(UndertaleBackground)))
                             {
                                 var backgrounds = data.Backgrounds.Where(x => x.Name == obj);
                                 if (backgrounds.Any())
-                                    outList = outList.Append((data.IsGameMaker2() ? "Tile sets" : "Backgrounds", backgrounds.ToArray()));
+                                    outDict[data.IsGameMaker2() ? "Tile sets" : "Backgrounds"] = backgrounds.ToArray();
                             }
 
                             if (types.Contains(typeof(UndertaleCode)))
                             {
                                 var codeEntries = data.Code.Where(x => x.Name == obj);
                                 if (codeEntries.Any())
-                                    outList = outList.Append(("Code entries", codeEntries.ToArray()));
+                                    outDict["Code entries"] = codeEntries.ToArray();
                             }
 
                             if (types.Contains(typeof(UndertaleSound)))
                             {
                                 var sounds = data.Sounds.Where(x => x.Name == obj || x.Type == obj || x.File == obj);
                                 if (sounds.Any())
-                                    outList = outList.Append(("Sounds", sounds.ToArray()));
+                                    outDict["Sounds"] = sounds.ToArray();
                             }
 
                             if (types.Contains(typeof(UndertaleAudioGroup)))
                             {
                                 var audioGroups = data.AudioGroups.Where(x => x.Name == obj);
                                 if (audioGroups.Any())
-                                    outList = outList.Append(("Audio groups", audioGroups.ToArray()));
+                                    outDict["Audio groups"] = audioGroups.ToArray();
                             }
 
                             if (types.Contains(typeof(UndertaleSprite)))
                             {
                                 var sprites = data.Sprites.Where(x => x.Name == obj);
                                 if (sprites.Any())
-                                    outList = outList.Append(("Sprites", sprites.ToArray()));
+                                    outDict["Sprites"] = sprites.ToArray();
                             }
 
 
@@ -322,7 +336,7 @@ namespace UndertaleModTool.Windows
                             {
                                 var extensions = data.Extensions.Where(x => x.Name == obj || x.ClassName == obj || x.FolderName == obj);
                                 if (extensions.Any())
-                                    outList = outList.Append(("Extensions", extensions.ToArray()));
+                                    outDict["Extensions"] = extensions.ToArray();
                             }
 
                             if (types.Contains(typeof(UndertaleExtensionOption)))
@@ -335,7 +349,7 @@ namespace UndertaleModTool.Windows
                                             extnOptions.Add(new object[] { option, extn });
                                 }
                                 if (extnOptions.Count > 0)
-                                    outList = outList.Append(("Extension options", extnOptions.ToArray()));
+                                    outDict["Extension options"] = extnOptions.ToArray();
                             }
 
                             List<object[]> extnFunctions = new();
@@ -359,29 +373,29 @@ namespace UndertaleModTool.Windows
                                 }
                             }
                             if (extnFunctions.Count > 0)
-                                outList = outList.Append(("Extension functions", extnFunctions.ToArray()));
+                                outDict["Extension functions"] = extnFunctions.ToArray();
                             if (extnFiles.Count > 0)
-                                outList = outList.Append(("Extension files", extnFiles.ToArray()));
+                                outDict["Extension files"] = extnFiles.ToArray();
 
                             if (types.Contains(typeof(UndertaleFont)))
                             {
                                 var fonts = data.Fonts.Where(x => x.Name == obj || x.DisplayName == obj);
                                 if (fonts.Any())
-                                    outList = outList.Append(("Fonts", fonts.ToArray()));
+                                    outDict["Fonts"] = fonts.ToArray();
                             }
 
                             if (types.Contains(typeof(UndertaleFunction)))
                             {
                                 var functions = data.Functions.Where(x => x.Name == obj);
                                 if (functions.Any())
-                                    outList = outList.Append(("Functions", functions.ToArray()));
+                                    outDict["Functions"] = functions.ToArray();
                             }
 
                             if (types.Contains(typeof(UndertaleGameObject)))
                             {
                                 var gameObjects = data.GameObjects.Where(x => x.Name == obj);
                                 if (gameObjects.Any())
-                                    outList = outList.Append(("Game objects", gameObjects.ToArray()));
+                                    outDict["Game objects"] = gameObjects.ToArray();
                             }
 
                             if (types.Contains(typeof(UndertaleGeneralInfo)))
@@ -389,14 +403,14 @@ namespace UndertaleModTool.Windows
                                 bool genInfoMatches = data.GeneralInfo.Name == obj || data.GeneralInfo.FileName == obj
                                                       || data.GeneralInfo.Config == obj || data.GeneralInfo.DisplayName == obj;
                                 if (genInfoMatches)
-                                    outList = outList.Append(("General Info", new object[] { new GeneralInfoEditor(data.GeneralInfo, data.Options, data.Language) }));
+                                    outDict["General Info"] = new object[] { new GeneralInfoEditor(data.GeneralInfo, data.Options, data.Language) };
                             }
 
                             if (types.Contains(typeof(UndertaleOptions.Constant)))
                             {
                                 bool constantsMatches = data.Options.Constants.Any(x => x.Name == obj || x.Value == obj);
                                 if (constantsMatches)
-                                    outList = outList.Append(("Game options constants", new object[] { new GeneralInfoEditor(data.GeneralInfo, data.Options, data.Language) }));
+                                    outDict["Game options constants"] = new object[] { new GeneralInfoEditor(data.GeneralInfo, data.Options, data.Language) };
                             }
 
                             if (types.Contains(typeof(UndertaleLanguage)))
@@ -405,28 +419,28 @@ namespace UndertaleModTool.Windows
                                                     || data.Language.Languages.Any(x => x.Name == obj || x.Region == obj
                                                                                         || x.Entries.Any(e => e == obj));
                                 if (langsMatches)
-                                    outList = outList.Append(("Languages", new object[] { new GeneralInfoEditor(data.GeneralInfo, data.Options, data.Language) }));
+                                    outDict["Languages"] = new object[] { new GeneralInfoEditor(data.GeneralInfo, data.Options, data.Language) };
                             }
 
                             if (types.Contains(typeof(UndertalePath)))
                             {
                                 var paths = data.Paths.Where(x => x.Name == obj);
                                 if (paths.Any())
-                                    outList = outList.Append(("Paths", paths.ToArray()));
+                                    outDict["Paths"] = paths.ToArray();
                             }
 
                             if (types.Contains(typeof(UndertaleRoom)))
                             {
                                 var rooms = data.Rooms.Where(x => x.Name == obj || x.Caption == obj);
                                 if (rooms.Any())
-                                    outList = outList.Append(("Rooms", rooms.ToArray()));
+                                    outDict["Rooms"] = rooms.ToArray();
                             }
 
                             if (types.Contains(typeof(UndertaleScript)))
                             {
                                 var scripts = data.Scripts.Where(x => x.Name == obj);
                                 if (scripts.Any())
-                                    outList = outList.Append(("Scripts", scripts.ToArray()));
+                                    outDict["Scripts"] = scripts.ToArray();
                             }
 
                             if (types.Contains(typeof(UndertaleShader)))
@@ -436,19 +450,19 @@ namespace UndertaleModTool.Windows
                                                                       || x.GLSL_ES_Fragment == obj || x.GLSL_Fragment == obj || x.HLSL9_Fragment == obj
                                                                       || x.VertexShaderAttributes.Any(a => a.Name == obj));
                                 if (shaders.Any())
-                                    outList = outList.Append(("Shaders", shaders.ToArray()));
+                                    outDict["Shaders"] = shaders.ToArray();
                             }
 
                             if (types.Contains(typeof(UndertaleTimeline)))
                             {
                                 var timelines = data.Timelines.Where(x => x.Name == obj);
                                 if (timelines.Any())
-                                    outList = outList.Append(("Timelines", timelines.ToArray()));
+                                    outDict["Timelines"] = timelines.ToArray();
                             }
 
-                            if (outList == Enumerable.Empty<(string, object[])>())
+                            if (outDict.Count == 0)
                                 return null;
-                            return outList.ToArray();
+                            return outDict;
                         }
                     },
                     new PredicateForVersion()
@@ -462,7 +476,7 @@ namespace UndertaleModTool.Windows
 
                             var codeLocals = data.CodeLocals.Where(x => x.Name == obj || x.Locals.Any(l => l.Name == obj));
                             if (codeLocals.Any())
-                                return new (string, object[])[] { ("Code locals", codeLocals.ToArray()) };
+                                return new() { { "Code locals", codeLocals.ToArray() } };
                             else
                                 return null;
                         }
@@ -472,13 +486,13 @@ namespace UndertaleModTool.Windows
                         Version = (2, 0, 0),
                         Predicate = (obj, types) =>
                         {
-                            IEnumerable<(string, object[])> outList = Enumerable.Empty<(string, object[])>();
+                            Dictionary<string, object[]> outDict = new();
 
                             if (types.Contains(typeof(UndertaleEmbeddedImage)))
                             {
                                 var embImages = data.EmbeddedImages.Where(x => x.Name == obj);
                                 if (embImages.Any())
-                                    outList = outList.Append(("Embedded images", embImages.ToArray()));
+                                    outDict["Embedded images"] = embImages.ToArray();
                             }
 
                             List<object[]> layers = new();
@@ -509,13 +523,13 @@ namespace UndertaleModTool.Windows
                                         sprInstances.Add(new object[] { tile, room });
                             }
                             if (layers.Count > 0)
-                                outList = outList.Append(("Room layers", layers.ToArray()));
+                                outDict["Room layers"] = layers.ToArray();
                             if (sprInstances.Count > 0)
-                                outList = outList.Append(("Room sprite instances", sprInstances.ToArray()));
+                                outDict["Room sprite instances"] = sprInstances.ToArray();
 
-                            if (outList == Enumerable.Empty<(string, object[])>())
+                            if (outDict.Count == 0)
                                 return null;
-                            return outList.ToArray();
+                            return outDict;
                         }
                     },
                     new PredicateForVersion()
@@ -528,7 +542,7 @@ namespace UndertaleModTool.Windows
 
                             var textGroups = data.TextureGroupInfo.Where(x => x.Name == obj);
                             if (textGroups.Any())
-                                return new (string, object[])[] { ("Texture groups", textGroups.ToArray()) };
+                                return new() { { "Texture groups", textGroups.ToArray() } };
                             else
                                 return null;
                         }
@@ -538,13 +552,13 @@ namespace UndertaleModTool.Windows
                         Version = (2, 3, 0),
                         Predicate = (obj, types) =>
                         {
-                            IEnumerable<(string, object[])> outList = Enumerable.Empty<(string, object[])>();
+                            Dictionary<string, object[]> outDict = new();
 
                             if (types.Contains(typeof(UndertaleAnimationCurve)))
                             {
                                 var animCurves = data.AnimationCurves.Where(x => x.Name == obj);
                                 if (animCurves.Any())
-                                    outList = outList.Append(("Animation curves", animCurves.ToArray()));
+                                    outDict["Animation curves"] = animCurves.ToArray();
                             }
                             if (types.Contains(typeof(UndertaleAnimationCurve.Channel)))
                             {
@@ -557,7 +571,7 @@ namespace UndertaleModTool.Windows
                                 }
 
                                 if (animCurveChannels.Count > 0)
-                                    outList = outList.Append(("Animation curve channels", animCurveChannels.ToArray()));
+                                    outDict["Animation curve channels"] = animCurveChannels.ToArray();
                             }
 
                             if (types.Contains(typeof(UndertaleRoom.SequenceInstance)))
@@ -576,7 +590,7 @@ namespace UndertaleModTool.Windows
                                     }
                                 }
                                 if (seqInstances.Count > 0)
-                                    outList = outList.Append(("Room sequence instances", seqInstances.ToArray()));
+                                    outDict["Room sequence instances"] = seqInstances.ToArray();
                             }
 
                             if (types.Contains(typeof(UndertaleSequence)))
@@ -584,7 +598,7 @@ namespace UndertaleModTool.Windows
                                 var sequences = data.Sequences.Where(x => x.Name == obj
                                                                           || x.FunctionIDs.Values.Any(i => i == obj));
                                 if (sequences.Any())
-                                    outList = outList.Append(("Sequences", sequences.ToArray()));
+                                    outDict["Sequences"] = sequences.ToArray();
                             }
 
 
@@ -651,17 +665,17 @@ namespace UndertaleModTool.Windows
                                 }
                             }
                             if (sequenceTracks.Count > 0)
-                                outList = outList.Append(("Sequence tracks", sequenceTracks.ToArray()));
+                                outDict["Sequence tracks"] = sequenceTracks.ToArray();
                             if (seqBroadMessages.Count > 0)
-                                outList = outList.Append(("Sequence broadcast messages", seqBroadMessages.ToArray()));
+                                outDict["Sequence broadcast messages"] = seqBroadMessages.ToArray();
                             if (sequenceMoments.Count > 0)
-                                outList = outList.Append(("Sequence moments", sequenceMoments.ToArray()));
+                                outDict["Sequence moments"] = sequenceMoments.ToArray();
                             if (seqStringKeyframes.Count > 0)
-                                outList = outList.Append(("Sequence string keyframes", seqStringKeyframes.ToArray()));
+                                outDict["Sequence string keyframes"] = seqStringKeyframes.ToArray();
 
-                            if (outList == Enumerable.Empty<(string, object[])>())
+                            if (outDict.Count == 0)
                                 return null;
-                            return outList.ToArray();
+                            return outDict;
                         }
                     },
                     new PredicateForVersion()
@@ -674,7 +688,7 @@ namespace UndertaleModTool.Windows
 
                             var filterEffects = data.FilterEffects.Where(x => x.Name == obj || x.Value == obj);
                             if (filterEffects.Any())
-                                return new (string, object[])[] { ("Filter effects", filterEffects.ToArray()) };
+                                return new() { { "Filter effects", filterEffects.ToArray() } };
                             else
                                 return null;
                         }
@@ -698,7 +712,7 @@ namespace UndertaleModTool.Windows
                                 }
                             }
                             if (effectProps.Count > 0)
-                                return new (string, object[])[] { ("Room effect properties", effectProps.ToArray()) };
+                                return new() { { "Room effect properties", effectProps.ToArray() } };
                             else
                                 return null;
                         }
@@ -741,7 +755,7 @@ namespace UndertaleModTool.Windows
                                 }
                             }
                             if (textKeyframesList.Count > 0)
-                                return new (string, object[])[] { ("Sequence text keyframes", textKeyframesList.ToArray()) };
+                                return new() { { "Sequence text keyframes", textKeyframesList.ToArray() } };
                             else
                                 return null;
                         }
@@ -787,7 +801,7 @@ namespace UndertaleModTool.Windows
                             }
 
                             if (objInstances.Count > 0)
-                                return new (string, object[])[] { ("Room object instance", objInstances.ToArray()) };
+                                return new() { { "Room object instance", objInstances.ToArray() } };
                             else
                                 return null;
                         }
@@ -830,7 +844,7 @@ namespace UndertaleModTool.Windows
                                 }
                             }
                             if (instKeyframesList.Count > 0)
-                                return new (string, object[])[] { ("Sequence object instance keyframes", instKeyframesList.ToArray()) };
+                                return new() { { "Sequence object instance keyframes", instKeyframesList.ToArray() } };
                             else
                                 return null;
                         }
@@ -846,7 +860,7 @@ namespace UndertaleModTool.Windows
                         Version = (1, 0, 0),
                         Predicate = (obj, types) =>
                         {
-                            IEnumerable<(string, object[])> outList = Enumerable.Empty<(string, object[])>();
+                            Dictionary<string, object[]> outDict = new();
 
                             if (types.Contains(typeof(UndertaleGameObject)))
                             {
@@ -854,32 +868,37 @@ namespace UndertaleModTool.Windows
                                                                             e => e.Any(se => se.Actions.Any(
                                                                                 a => a.CodeId == obj))));
                                 if (gameObjects.Any())
-                                    outList = outList.Append(("Game objects", gameObjects.ToArray()));
+                                    outDict["Game objects"] = gameObjects.ToArray();
                             }
 
                             if (types.Contains(typeof(UndertaleRoom)))
                             {
                                 var rooms = data.Rooms.Where(x => x.CreationCodeId == obj);
                                 if (rooms.Any())
-                                    outList = outList.Append(("Rooms", rooms.ToArray()));
+                                    outDict["Rooms"] = rooms.ToArray();
                             }
 
                             if (types.Contains(typeof(UndertaleGlobalInit)))
                             {
                                 bool matches = data.GlobalInitScripts?.Any(x => x.Code == obj) == true;
                                 if (matches)
-                                    outList = outList.Append(("Global init",
-                                                              new object[] { new GlobalInitEditor(data.GlobalInitScripts) }));
+                                    outDict["Global init"] = new object[] { new GlobalInitEditor(data.GlobalInitScripts) };
 
                                 matches = data.GameEndScripts?.Any(x => x.Code == obj) == true;
                                 if (matches)
-                                    outList = outList.Append(("Game end scripts",
-                                                              new object[] { new GameEndEditor(data.GameEndScripts) }));
+                                    outDict["Game end scripts"] = new object[] { new GameEndEditor(data.GameEndScripts) };
                             }
 
-                            if (outList == Enumerable.Empty<(string, object[])>())
+                            if (types.Contains(typeof(UndertaleScript)))
+                            {
+                                var scripts = data.Scripts.Where(x => x.Code == obj);
+                                if (scripts.Any())
+                                    outDict["Scripts"] = scripts.ToArray();
+                            }
+
+                            if (outDict.Count == 0)
                                 return null;
-                            return outList.ToArray();
+                            return outDict;
                         }
                     }
                 }
@@ -898,7 +917,7 @@ namespace UndertaleModTool.Windows
 
                             var sounds = data.Sounds.Where(x => x.AudioFile == obj);
                             if (sounds.Any())
-                                return new (string, object[])[] { ("Sounds", sounds.ToArray()) };
+                                return new() { { "Sounds", sounds.ToArray() } };
                             else
                                 return null;
                         }
@@ -919,7 +938,7 @@ namespace UndertaleModTool.Windows
 
                             var sounds = data.Sounds.Where(x => x.AudioGroup == obj);
                             if (sounds.Any())
-                                return new (string, object[])[] { ("Sounds", sounds.ToArray()) };
+                                return new() { { "Sounds", sounds.ToArray() } };
                             else
                                 return null;
                         }
@@ -929,42 +948,8 @@ namespace UndertaleModTool.Windows
         };
 
 
-/*new PredicateForVersion()
-{
-    Version = (2, 0, 0),
-    Predicate = (obj, types) =>
-    {
-        IEnumerable<(string, object[])> outList = Enumerable.Empty<(string, object[])>();
 
-        if (types.Contains(typeof(Undertale)))
-        {
-            var  = data..Where(x => x.Name == obj);
-            if (.Any())
-                outList = outList.Append(("", .ToArray()));
-        }
-
-        if (outList == Enumerable.Empty<(string, object[])>())
-            return null;
-        return outList.ToArray();
-    }
-}*/
-/*new PredicateForVersion()
-{
-    Version = (2, 2, 1),
-    Predicate = (obj, types) =>
-    {
-        if (!types.Contains(typeof(UndertaleTextureGroupInfo)))
-            return null;
-
-        var textGroups = data.TextureGroupInfo.Where(x => x.Name == obj);
-        if (textGroups.Any())
-            return new (string, object[])[] { ("Texture groups", textGroups.ToArray()) };
-        else
-            return null;
-    }
-}*/
-
-        public static (string, object[])[] GetReferencesOfObject(UndertaleResource obj, UndertaleData data, HashSet<Type> types)
+        public static Dictionary<string, List<object>> GetReferencesOfObject(UndertaleResource obj, UndertaleData data, HashSetOverride<Type> types)
         {
             if (obj is null)
                 return null;
@@ -975,7 +960,7 @@ namespace UndertaleModTool.Windows
             UndertaleResourceReferenceMethodsMap.data = data;
 
             var ver = (data.GeneralInfo.Major, data.GeneralInfo.Minor, data.GeneralInfo.Release);
-            IEnumerable<(string, object[])> outList = Enumerable.Empty<(string, object[])>();
+            Dictionary<string, List<object>> outDict = new();
             foreach (var predicateForVer in predicatesForVer)
             {
                 bool isAtLeast = false;
@@ -987,15 +972,116 @@ namespace UndertaleModTool.Windows
                 if (isAtLeast)
                 {
                     var result = predicateForVer.Predicate(obj, types);
-                    if (result is not null)
-                        outList = outList.Concat(result);
+                    if (result is null)
+                        continue;
+
+                    foreach (var entry in result)
+                        outDict.Add(entry.Key, new(entry.Value));
                 }  
             }
 
-            if (outList == Enumerable.Empty<(string, object[])>())
+            if (outDict.Count == 0)
                 return null;
 
-            return outList.ToArray();
+            return outDict;
+        }
+
+        public static async Task<Dictionary<string, List<object>>> GetUnreferencedObjects(UndertaleData data, Dictionary<Type, string> typesDict)
+        {
+            UndertaleResourceReferenceMethodsMap.data = data;
+
+            var ver = (data.GeneralInfo.Major, data.GeneralInfo.Minor, data.GeneralInfo.Release);
+
+            Dictionary<string, List<object>> outDict = new();
+
+            List<(IList, string)> assetLists = new();
+            foreach (var typePair in typesDict)
+            {
+                if (data[typePair.Key] is not IList resList)
+                    continue;
+
+                assetLists.Add((resList, typePair.Value));
+            }
+            List<(UndertaleResource, string)> assets = new(assetLists.Select(x => x.Item1.Count).Sum());
+            foreach (var list in assetLists)
+                assets.AddRange(list.Item1.Cast<UndertaleResource>()
+                                          .Select(x => (x, list.Item2)));
+
+            mainWindow.InitializeProgressDialog("Searching in progress...", "Please wait...");
+            mainWindow.SetProgressBar(null, "Assets", 0, assets.Count);
+            mainWindow.StartProgressBarUpdater();
+
+            var assetsPart = Partitioner.Create(0, assets.Count);
+
+            List<Dictionary<string, List<object>>> dicts = new();
+
+            await Task.Run(() =>
+            {
+                Parallel.ForEach(assetsPart, (range) =>
+                {
+                    var resultDict = new Dictionary<string, List<object>>();
+
+                    for (int i = range.Item1; i < range.Item2; i++)
+                    {
+                        var asset = assets[i];
+                        var assetReferences = GetReferencesOfObject(asset.Item1, data, new HashSetOverride<Type>(true));
+                        if (assetReferences is null)
+                        {
+                            if (resultDict.TryGetValue(asset.Item2, out var list))
+                            {
+                                list.Add(asset.Item1);
+                            }
+                            else
+                            {
+                                resultDict[asset.Item2] = new() { asset.Item1 };
+                            }
+                        }
+
+                        mainWindow.IncrementProgressParallel();
+                    }
+
+                    dicts.Add(resultDict);
+                });
+            });
+
+            Dictionary<string, int> outArrSizes = new();
+            foreach (var dict in dicts)
+            {
+                foreach (var pair in dict)
+                {
+                    outArrSizes.TryGetValue(pair.Key, out int count);
+                    outArrSizes[pair.Key] = count + pair.Value.Count;
+                }
+            }
+            foreach (var dict in dicts)
+            {
+                foreach (var pair in dict)
+                {
+                    if (outDict.TryGetValue(pair.Key, out var list))
+                    {
+                        if (pair.Value is not null)
+                            list.AddRange(pair.Value);
+                    }
+                    else
+                    {
+                        int size = outArrSizes[pair.Key];
+                        if (size == 0)
+                            continue;
+
+                        list = new(size);
+                        outDict[pair.Key] = list;
+
+                        list.AddRange(pair.Value);
+                    }
+                }
+            }
+
+            await mainWindow.StopProgressBarUpdater();
+            mainWindow.HideProgressBar();
+
+            if (outDict.Count == 0)
+                return null;
+            return outDict;
         }
     }
 }

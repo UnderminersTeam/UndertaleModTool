@@ -1911,6 +1911,25 @@ namespace UndertaleModTool
             }
         }
 
+        private void MenuItem_FindUnreferencedAssets_Click(object sender, RoutedEventArgs e)
+        {
+            FindReferencesTypesDialog dialog = null;
+            try
+            {
+                dialog = new(Data);
+                dialog.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                this.ShowError("An error occured in the object references related window.\n" +
+                               $"Please report this on GitHub.\n\n{ex}");
+            }
+            finally
+            {
+                dialog?.Close();
+            }
+        }
+
         private void MenuItem_ContextMenuOpened(object sender, RoutedEventArgs e)
         {
             var menu = sender as ContextMenu;
@@ -2496,14 +2515,21 @@ namespace UndertaleModTool
             return excText;
         }
 
+        public void InitializeProgressDialog(string title, string msg)
+        {
+            scriptDialog ??= new LoaderDialog(title, msg)
+            {
+                Owner = this,
+                PreventClose = true
+            };
+        }
+
         public async Task RunScript(string path)
         {
             ScriptExecutionSuccess = true;
             ScriptErrorMessage = "";
             ScriptErrorType = "";
-            scriptDialog = new LoaderDialog("Script in progress...", "Please wait...");
-            scriptDialog.Owner = this;
-            scriptDialog.PreventClose = true;
+            InitializeScriptDialog();
             this.IsEnabled = false; // Prevent interaction while the script is running.
 
             await RunScriptNow(path); // Runs the script now.

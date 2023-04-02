@@ -38,7 +38,7 @@ namespace UndertaleModTool.Windows
                 MainWindow.SetDarkTitleBarForWindow(this, true, false);
         }
 
-        public FindReferencesResults(UndertaleResource sourceObj, UndertaleData data, (string, object[])[] results)
+        public FindReferencesResults(UndertaleResource sourceObj, UndertaleData data, Dictionary<string, List<object>> results)
         {
             InitializeComponent();
 
@@ -65,6 +65,25 @@ namespace UndertaleModTool.Windows
             else
                 ProcessResults(results);
         }
+        public FindReferencesResults(UndertaleData data, Dictionary<string, List<object>> results)
+        {
+            InitializeComponent();
+
+            this.data = data;
+
+            Title = "The unreferenced game assets";
+            label.Text = "The search results for the unreferenced game assets.";
+
+            if (results is null)
+                ResultsTree.Background = new VisualBrush(new Label()
+                {
+                    Content = "No unreferenced assets found.",
+                    FontSize = 16
+                })
+                { Stretch = Stretch.None };
+            else
+                ProcessResults(results);
+        }
 
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -81,7 +100,7 @@ namespace UndertaleModTool.Windows
             Close();
         }
 
-        private void ProcessResults((string, object[])[] results)
+        private void ProcessResults(Dictionary<string, List<object>> results)
         {
             var filterConv = new FilteredViewConverter();
             BindingOperations.SetBinding(filterConv, FilteredViewConverter.FilterProperty, new Binding("Text")
@@ -101,27 +120,27 @@ namespace UndertaleModTool.Windows
             {
                 var item = new TreeViewItem()
                 {
-                    Header = result.Item1,
-                    DataContext = result.Item2
+                    Header = result.Key,
+                    DataContext = result.Value
                 };
                 item.SetBinding(TreeView.ItemsSourceProperty, new Binding(".")
                 {
                     Converter = filterConv,
                     Mode = BindingMode.OneWay
                 });
-                if (result.Item2[0] is UndertaleNamedResource)
+                if (result.Value[0] is UndertaleNamedResource)
                     item.ItemTemplate = namedResTemplate;
-                else if (result.Item2[0] is GeneralInfoEditor or GlobalInitEditor or GameEndEditor)
+                else if (result.Value[0] is GeneralInfoEditor or GlobalInitEditor or GameEndEditor)
                 {
                     ResultsTree.Items.Add(new TextBlock()
                     {
-                        Text = result.Item1,
-                        DataContext = result.Item2[0],
+                        Text = result.Key,
+                        DataContext = result.Value[0],
                         ContextMenu = TryFindResource("StandaloneTabMenu") as ContextMenu
                     });
                     continue;
                 }
-                else if (result.Item2[0] is object[])
+                else if (result.Value[0] is object[])
                     item.ItemTemplate = TryFindResource("ChildInstTemplate") as HierarchicalDataTemplate;
 
                 ResultsTree.Items.Add(item);
@@ -178,7 +197,8 @@ namespace UndertaleModTool.Windows
             sb.Remove(sb.Length - 2, 2);
 
             string folderPath = Path.GetDirectoryName(mainWindow.FilePath);
-            string filePath = Path.Combine(folderPath, $"references_of_asset_{sourceObjName}.txt");
+            string filePath = Path.Combine(folderPath, sourceObjName is null
+                                                       ? "unreferenced_assets.txt" : $"references_of_asset_{sourceObjName}.txt");
             if (File.Exists(filePath))
                 if (this.ShowQuestion($"File \"{filePath}\" exists.\nOverwrite?") == MessageBoxResult.No)
                     return;

@@ -6,7 +6,7 @@
         xmlns:utmt="clr-namespace:UndertaleModTool"
         xmlns:local="clr-namespace:UndertaleModTool.Windows"
         mc:Ignorable="d"
-        Title="The references of game object &quot;&quot;" Height="588" Width="497" IsVisibleChanged="Window_IsVisibleChanged"
+        Title="The references of game object &quot;&quot;" Height="588" Width="450" IsVisibleChanged="Window_IsVisibleChanged"
         WindowStartupLocation="CenterOwner">
     <Window.Resources>
         <local:ChildInstanceNameConverter x:Key="ChildInstanceNameConverter"/>

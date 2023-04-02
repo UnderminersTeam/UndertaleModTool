@@ -262,7 +262,8 @@ namespace UndertaleModTool.Windows
                         {
                             (typeof(UndertaleGameObject), "Game objects"),
                             (typeof(UndertaleRoom), "Rooms"),
-                            (typeof(UndertaleGlobalInit), "Global initialization and game end scripts")
+                            (typeof(UndertaleGlobalInit), "Global initialization and game end scripts"),
+                            (typeof(UndertaleScript), "Scripts")
                         }
                     }
                 }
@@ -297,6 +298,18 @@ namespace UndertaleModTool.Windows
             }
         };
 
+        private static readonly Dictionary<Type, string> referenceableTypes = new()
+        {
+            { typeof(UndertaleSprite), "Sprites" },
+            { typeof(UndertaleBackground), "Backgrounds" },
+            { typeof(UndertaleEmbeddedTexture), "Embedded textures" },
+            { typeof(UndertaleTexturePageItem), "Texture page items" },
+            { typeof(UndertaleString), "Strings" },
+            { typeof(UndertaleGameObject), "Game objects" },
+            { typeof(UndertaleCode), "Code entries" },
+            { typeof(UndertaleEmbeddedAudio), "Embedded audio" },
+            { typeof(UndertaleAudioGroup), "Audio groups" }
+        };
 
         public static (Type, string)[] GetTypeMapForVersion(Type type, (uint, uint, uint) version, byte bytecodeVersion)
         {
@@ -320,6 +333,14 @@ namespace UndertaleModTool.Windows
                 return null;
 
             return outTypes.Where(x => x.Item2 is not null).ToArray();
+        }
+
+        public static Dictionary<Type, string> GetReferenceableTypes((uint, uint, uint) version)
+        {
+            referenceableTypes[typeof(UndertaleBackground)] = version.CompareTo((2, 0, 0)) >= 0
+                                                              ? "Tile sets" : "Backgrounds";
+
+            return referenceableTypes;
         }
 
         public static bool IsTypeReferenceable(Type type)

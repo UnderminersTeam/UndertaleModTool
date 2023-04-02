@@ -73,6 +73,32 @@ namespace UndertaleModTool.Windows
             sourceObj = obj;
             this.data = data;
         }
+        public FindReferencesTypesDialog(UndertaleData data)
+        {
+            InitializeComponent();
+
+            if (data.GeneralInfo is null)
+            {
+                this.ShowError("Cannot determine GameMaker version - \"General Info\" is null.");
+                dontShowWindow = true;
+                return;
+            }
+
+            var ver = (data.GeneralInfo.Major, data.GeneralInfo.Minor, data.GeneralInfo.Release);
+            var sourceTypes = UndertaleResourceReferenceMap.GetReferenceableTypes(ver);
+
+            foreach (var typePair in sourceTypes)
+            {
+                TypesList.Items.Add(new CheckBox()
+                {
+                    DataContext = typePair.Key,
+                    Content = typePair.Value,
+                    IsChecked = true
+                });
+            }
+
+            this.data = data;
+        }
 
         private void SelectAllButton_Click(object sender, RoutedEventArgs e)
         {
@@ -91,27 +117,53 @@ namespace UndertaleModTool.Windows
             }
         }
 
-        private void SearchButton_Click(object sender, RoutedEventArgs e)
+        private async void SearchButton_Click(object sender, RoutedEventArgs e)
         {
-            HashSet<Type> typesList = new();
-            foreach (var item in TypesList.Items)
+            if (sourceObj is not null)
             {
-                if (item is CheckBox checkBox && checkBox.IsChecked == true)
+                HashSetOverride<Type> typesList = new();
+                foreach (var item in TypesList.Items)
                 {
-                    if (checkBox.DataContext is Type t)
-                        typesList.Add(t);
+                    if (item is CheckBox checkBox && checkBox.IsChecked == true)
+                    {
+                        if (checkBox.DataContext is Type t)
+                            typesList.Add(t);
+                    }
                 }
-            }
 
-            if (typesList.Count == 0)
+                if (typesList.Count == 0)
+                {
+                    this.ShowError("At least one type should be selected.");
+                    return;
+                }
+
+                var results = UndertaleResourceReferenceMethodsMap.GetReferencesOfObject(sourceObj, data, typesList);
+                FindReferencesResults dialog = new(sourceObj, data, results);
+                dialog.Show();
+            }
+            else
             {
-                this.ShowError("At least one type should be selected.");
-                return;
-            }
+                Dictionary<Type, string> typesDict = new();
+                foreach (var item in TypesList.Items)
+                {
+                    if (item is CheckBox checkBox && checkBox.IsChecked == true)
+                    {
+                        if (checkBox.DataContext is Type t)
+                            typesDict[t] = checkBox.Content as string;
+                    }
+                }
 
-            var results = UndertaleResourceReferenceMethodsMap.GetReferencesOfObject(sourceObj, data, typesList);
-            FindReferencesResults dialog = new(sourceObj, data, results);
-            dialog.Show();
+                if (typesDict.Count == 0)
+                {
+                    this.ShowError("At least one type should be selected.");
+                    return;
+                }
+
+                Hide();
+                var results = await UndertaleResourceReferenceMethodsMap.GetUnreferencedObjects(data, typesDict);
+                FindReferencesResults dialog = new(data, results);
+                dialog.Show();
+            }
 
             Close();
         }

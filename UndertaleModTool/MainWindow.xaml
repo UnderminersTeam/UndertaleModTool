@@ -112,6 +112,19 @@
                 <local:MenuItemDark x:Name="RootScriptItem" Header="_Scripts" SubmenuOpened="RootMenuItem_SubmenuOpened">
                     <MenuItem Header="(...loading...)" IsEnabled="False"/>
                 </local:MenuItemDark>
+                <local:MenuItemDark Header="_Find">
+                    <MenuItem Header="Find unreferenced _assets" Name="FindUnreferencedAssetsItem" Click="MenuItem_FindUnreferencedAssets_Click">
+                        <MenuItem.Style>
+                            <Style TargetType="MenuItem">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Data, Mode=OneWay}" Value="{x:Null}">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </MenuItem.Style>
+                    </MenuItem>
+                </local:MenuItemDark>
                 <local:MenuItemDark Header="_Help">
                     <MenuItem Header="_GitHub" Click="MenuItem_GitHub_Click"/>
                     <MenuItem Header="_About" Click="MenuItem_About_Click"/>
