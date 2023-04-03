@@ -269,9 +269,9 @@ uint[] GetStringUsageCount()
     UpdateProgress("Checking strings in GeneralInfo");
     if (Data.GeneralInfo != null)
     {
-        if (Data.GeneralInfo.Filename != null)
+        if (Data.GeneralInfo.FileName != null)
         {
-            stringsUsageCountArray[Data.Strings.IndexOf(Data.GeneralInfo.Filename)] += 1;
+            stringsUsageCountArray[Data.Strings.IndexOf(Data.GeneralInfo.FileName)] += 1;
         }
         if (Data.GeneralInfo.Config != null)
         {
