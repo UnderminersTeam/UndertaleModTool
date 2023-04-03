@@ -339,6 +339,15 @@ namespace UndertaleModTool.Windows
                             if (types.Contains(typeof(UndertaleSprite)))
                             {
                                 var sprites = data.Sprites.Where(x => x.Name == obj);
+
+                                if (data.IsVersionAtLeast(2, 3, 0))
+                                {
+                                    sprites = sprites.Concat(data.Sprites.Where(x => x.V2Sequence is not null
+                                                                                     && x.V2Sequence.Tracks.Count != 0
+                                                                                     && (x.V2Sequence.Tracks[0].Name == obj
+                                                                                         || x.V2Sequence.Tracks[0].ModelName == obj)));
+                                }
+
                                 if (sprites.Any())
                                     outDict["Sprites"] = sprites.ToArray();
                             }
@@ -596,7 +605,7 @@ namespace UndertaleModTool.Windows
                                         if (layer.AssetsData is not null)
                                         {
                                             foreach (var seqInst in layer.AssetsData.Sequences)
-                                                if (seqInst.Sequence == obj)
+                                                if (seqInst.Sequence.Name == obj)
                                                     seqInstances.Add(new object[] { seqInst, layer, room });
                                         }
                                     }

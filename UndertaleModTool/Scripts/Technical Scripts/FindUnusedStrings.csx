@@ -498,6 +498,17 @@ uint[] GetStringUsageCount()
             {
                 stringsUsageCountArray[Data.Strings.IndexOf(obj.Name)] += 1;
             }
+
+            if (obj.V2Sequence is not null && obj.V2Sequence.Tracks.Count != 0)
+            {
+                UndertaleString name = obj.V2Sequence.Tracks[0].Name;
+                if (name is not null)
+                    stringsUsageCountArray[Data.Strings.IndexOf(name)] += 1;
+
+                name = obj.V2Sequence.Tracks[0].ModelName;
+                if (name is not null)
+                    stringsUsageCountArray[Data.Strings.IndexOf(name)] += 1;
+            }
         }
     }
     UpdateProgress("Checking strings in Texture Group Info");
