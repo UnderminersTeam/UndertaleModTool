@@ -130,6 +130,8 @@ namespace UndertaleModTool.Windows
                 });
                 if (result.Value[0] is UndertaleNamedResource)
                     item.ItemTemplate = namedResTemplate;
+                else if (result.Value[0] is UndertaleString)
+                    item.ItemTemplate = TryFindResource("StringTemplate") as HierarchicalDataTemplate;
                 else if (result.Value[0] is GeneralInfoEditor or GlobalInitEditor or GameEndEditor)
                 {
                     ResultsTree.Items.Add(new TextBlock()
@@ -177,6 +179,8 @@ namespace UndertaleModTool.Windows
                             itemName = ChildInstanceNameConverter.Instance.Convert(inst, null, null, null) as string;
                         else if (childItem is UndertaleNamedResource namedRes)
                             itemName = namedRes.Name?.Content;
+                        else if (childItem is UndertaleString str)
+                            itemName = StringTitleConverter.Instance.Convert(str.Content, null, null, null) as string;
                         else
                             itemName = childItem.ToString();
 
@@ -271,6 +275,23 @@ namespace UndertaleModTool.Windows
         private void MenuItem_OpenInNewTab_Click(object sender, RoutedEventArgs e)
         {
             Open(highlighted, true);
+        }
+        private void MenuItem_CopyName_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem item && item.DataContext is not null)
+            {
+                string itemName;
+                if (item.DataContext is object[] inst)
+                    itemName = ChildInstanceNameConverter.Instance.Convert(inst, null, null, null) as string;
+                else if (item.DataContext is UndertaleNamedResource namedRes)
+                    itemName = namedRes.Name?.Content;
+                else if (item.DataContext is UndertaleString str)
+                    itemName = StringTitleConverter.Instance.Convert(str.Content, null, null, null) as string;
+                else
+                    itemName = item.DataContext.ToString();
+
+                Clipboard.SetText(itemName);
+            }
         }
         private void MenuItem_FindAllReferences_Click(object sender, RoutedEventArgs e)
         {

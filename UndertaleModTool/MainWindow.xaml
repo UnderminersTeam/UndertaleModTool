@@ -126,10 +126,12 @@
                     <MenuItem Header="Find unreferenced _assets" Name="FindUnreferencedAssetsItem" Click="MenuItem_FindUnreferencedAssets_Click"/>
                     <Separator/>
                     <MenuItem Header="(script links)" FontStyle="Italic" IsEnabled="False"/>
-                    <MenuItem Header="Find _code (&quot;Search.csx&quot;)"
+                    <MenuItem Header="Search in _code (&quot;Search.csx&quot;)"
                               Click="MenuItem_RunBuiltinScript_Item_Click" CommandParameter="Scripts\Builtin Scripts\Search.csx"/>
-                    <MenuItem Header="Find code _assembly (&quot;SearchASM.csx&quot;)"
+                    <MenuItem Header="Search in _assembly (&quot;SearchASM.csx&quot;)"
                               Click="MenuItem_RunBuiltinScript_Item_Click" CommandParameter="Scripts\Builtin Scripts\SearchASM.csx"/>
+                    <MenuItem Header="Search in _specific code (&quot;SearchLimited.csx&quot;)"
+                              Click="MenuItem_RunBuiltinScript_Item_Click" CommandParameter="Scripts\Builtin Scripts\SearchLimited.csx"/>
                 </local:MenuItemDark>
                 <local:MenuItemDark Header="_Help">
                     <MenuItem Header="_GitHub" Click="MenuItem_GitHub_Click"/>

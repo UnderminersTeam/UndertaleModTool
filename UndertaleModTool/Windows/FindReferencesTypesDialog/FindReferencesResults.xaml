@@ -10,8 +10,12 @@
         WindowStartupLocation="CenterOwner">
     <Window.Resources>
         <local:ChildInstanceNameConverter x:Key="ChildInstanceNameConverter"/>
+        <utmt:StringTitleConverter x:Key="StringTitleConverter"/>
         <HierarchicalDataTemplate x:Key="ChildInstTemplate">
             <TextBlock Text="{Binding ., Mode=OneTime, Converter={StaticResource ChildInstanceNameConverter}}" />
+        </HierarchicalDataTemplate>
+        <HierarchicalDataTemplate x:Key="StringTemplate">
+            <TextBlock Text="{Binding Content, Mode=OneWay, Converter={StaticResource StringTitleConverter}}" />
         </HierarchicalDataTemplate>
         <utmt:ContextMenuDark x:Key="StandaloneTabMenu">
             <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>
@@ -69,6 +73,7 @@
             <TreeView.Resources>
                 <utmt:ContextMenuDark x:Key="UndertaleResourceMenu" Opened="MenuItem_ContextMenuOpened">
                     <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>
+                    <MenuItem Header="Copy name to clipboard" Click="MenuItem_CopyName_Click"/>
                     <MenuItem Header="Find all references" Click="MenuItem_FindAllReferences_Click"/>
                 </utmt:ContextMenuDark>
                 <Style TargetType="TreeViewItem">
