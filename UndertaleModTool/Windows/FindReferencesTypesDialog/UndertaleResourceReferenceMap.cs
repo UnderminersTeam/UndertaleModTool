@@ -139,7 +139,7 @@ namespace UndertaleModTool.Windows
                         Types = new[]
                         {
                             (typeof(UndertaleBackground), "Backgrounds"),
-                            (typeof(UndertaleCode), "Code entries"),
+                            (typeof(UndertaleCode), "Code entries (name and contents)"),
                             (typeof(UndertaleSound), "Sounds"),
                             (typeof(UndertaleAudioGroup), "Audio groups"),
                             (typeof(UndertaleSprite), "Sprites"),

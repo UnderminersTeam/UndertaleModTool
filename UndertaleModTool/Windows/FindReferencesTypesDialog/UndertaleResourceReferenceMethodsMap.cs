@@ -32,6 +32,7 @@ namespace UndertaleModTool.Windows
     {
         private static UndertaleData data;
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+        private static Dictionary<UndertaleCode, List<UndertaleString>> stringReferences;
 
         private static readonly Dictionary<Type, PredicateForVersion[]> typeMap = new()
         {
@@ -306,8 +307,19 @@ namespace UndertaleModTool.Windows
                             if (types.Contains(typeof(UndertaleCode)))
                             {
                                 var codeEntries = data.Code.Where(x => x.Name == obj);
+                                IEnumerable<UndertaleCode> stringRefs;
+                                if (stringReferences is not null)
+                                    stringRefs = stringReferences.Where(x => x.Value.Any(x => x == obj))
+                                                                 .Select(x => x.Key);
+                                else
+                                    stringRefs = data.Code.Where(x => x.Instructions.Any(
+                                                                        i => i.Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG> strPtr
+                                                                             && strPtr.Resource == obj));
+
+                                codeEntries = codeEntries.Concat(stringRefs);
+
                                 if (codeEntries.Any())
-                                    outDict["Code entries"] = codeEntries.ToArray();
+                                    outDict["Code entries (name and contents)"] = codeEntries.ToArray();
                             }
 
                             if (types.Contains(typeof(UndertaleSound)))
@@ -1007,77 +1019,101 @@ namespace UndertaleModTool.Windows
                 assets.AddRange(list.Item1.Cast<UndertaleResource>()
                                           .Select(x => (x, list.Item2)));
 
-            mainWindow.InitializeProgressDialog("Searching in progress...", "Please wait...");
-            mainWindow.SetProgressBar(null, "Assets", 0, assets.Count);
-            mainWindow.StartProgressBarUpdater();
-
-            var assetsPart = Partitioner.Create(0, assets.Count);
-
-            List<Dictionary<string, List<object>>> dicts = new();
-
-            await Task.Run(() =>
+            stringReferences = new();
+            foreach (var code in data.Code)
             {
-                Parallel.ForEach(assetsPart, (range) =>
+                var strings = new List<UndertaleString>();
+                foreach (var inst in code.Instructions)
                 {
-                    var resultDict = new Dictionary<string, List<object>>();
+                    if (inst.Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG> strPtr)
+                        strings.Add(strPtr.Resource);
+                }
 
-                    for (int i = range.Item1; i < range.Item2; i++)
+                if (strings.Count != 0)
+                    stringReferences[code] = strings;
+            }
+
+            mainWindow.IsEnabled = false;
+            try
+            {
+                mainWindow.InitializeProgressDialog("Searching in progress...", "Please wait...");
+                mainWindow.SetProgressBar(null, "Assets", 0, assets.Count);
+                mainWindow.StartProgressBarUpdater();
+
+                var assetsPart = Partitioner.Create(0, assets.Count);
+
+                List<Dictionary<string, List<object>>> dicts = new();
+
+                await Task.Run(() =>
+                {
+                    Parallel.ForEach(assetsPart, (range) =>
                     {
-                        var asset = assets[i];
-                        var assetReferences = GetReferencesOfObject(asset.Item1, data, new HashSetOverride<Type>(true));
-                        if (assetReferences is null)
+                        var resultDict = new Dictionary<string, List<object>>();
+
+                        for (int i = range.Item1; i < range.Item2; i++)
                         {
-                            if (resultDict.TryGetValue(asset.Item2, out var list))
+                            var asset = assets[i];
+                            var assetReferences = GetReferencesOfObject(asset.Item1, data, new HashSetOverride<Type>(true));
+                            if (assetReferences is null)
                             {
-                                list.Add(asset.Item1);
+                                if (resultDict.TryGetValue(asset.Item2, out var list))
+                                {
+                                    list.Add(asset.Item1);
+                                }
+                                else
+                                {
+                                    resultDict[asset.Item2] = new() { asset.Item1 };
+                                }
                             }
-                            else
-                            {
-                                resultDict[asset.Item2] = new() { asset.Item1 };
-                            }
+
+                            mainWindow.IncrementProgressParallel();
                         }
 
-                        mainWindow.IncrementProgressParallel();
-                    }
-
-                    dicts.Add(resultDict);
+                        dicts.Add(resultDict);
+                    });
                 });
-            });
 
-            Dictionary<string, int> outArrSizes = new();
-            foreach (var dict in dicts)
-            {
-                foreach (var pair in dict)
+                Dictionary<string, int> outArrSizes = new();
+                foreach (var dict in dicts)
                 {
-                    outArrSizes.TryGetValue(pair.Key, out int count);
-                    outArrSizes[pair.Key] = count + pair.Value.Count;
-                }
-            }
-            foreach (var dict in dicts)
-            {
-                foreach (var pair in dict)
-                {
-                    if (outDict.TryGetValue(pair.Key, out var list))
+                    foreach (var pair in dict)
                     {
-                        if (pair.Value is not null)
+                        outArrSizes.TryGetValue(pair.Key, out int count);
+                        outArrSizes[pair.Key] = count + pair.Value.Count;
+                    }
+                }
+                foreach (var dict in dicts)
+                {
+                    foreach (var pair in dict)
+                    {
+                        if (outDict.TryGetValue(pair.Key, out var list))
+                        {
+                            if (pair.Value is not null)
+                                list.AddRange(pair.Value);
+                        }
+                        else
+                        {
+                            int size = outArrSizes[pair.Key];
+                            if (size == 0)
+                                continue;
+
+                            list = new(size);
+                            outDict[pair.Key] = list;
+
                             list.AddRange(pair.Value);
-                    }
-                    else
-                    {
-                        int size = outArrSizes[pair.Key];
-                        if (size == 0)
-                            continue;
-
-                        list = new(size);
-                        outDict[pair.Key] = list;
-
-                        list.AddRange(pair.Value);
+                        }
                     }
                 }
-            }
 
-            await mainWindow.StopProgressBarUpdater();
-            mainWindow.HideProgressBar();
+                await mainWindow.StopProgressBarUpdater();
+                mainWindow.HideProgressBar();
+            }
+            catch
+            {
+                mainWindow.IsEnabled = true;
+                throw;
+            }
+            mainWindow.IsEnabled = true;
 
             if (outDict.Count == 0)
                 return null;

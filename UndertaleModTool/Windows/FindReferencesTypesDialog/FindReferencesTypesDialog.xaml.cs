@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using UndertaleModLib;
+using UndertaleModLib.Models;
 
 namespace UndertaleModTool.Windows
 {
@@ -157,6 +158,16 @@ namespace UndertaleModTool.Windows
                 {
                     this.ShowError("At least one type should be selected.");
                     return;
+                }
+
+                if (typesDict.Count > 1 && typesDict.ContainsKey(typeof(UndertaleString))
+                    && data.Strings.Count > 5000)
+                {
+                    var res = this.ShowQuestion("You have selected the \"Strings\" when there are a lot of strings.\n" +
+                                                "That could make the search process noticeably longer.\n" +
+                                                "Do you want to proceed?");
+                    if (res != MessageBoxResult.Yes)
+                        return;
                 }
 
                 Hide();
