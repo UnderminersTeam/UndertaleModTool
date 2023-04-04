@@ -6,7 +6,7 @@
         xmlns:utmt="clr-namespace:UndertaleModTool"
         xmlns:local="clr-namespace:UndertaleModTool.Windows"
         mc:Ignorable="d"
-        Title="The references of game object &quot;&quot;" Height="588" Width="450" IsVisibleChanged="Window_IsVisibleChanged"
+        Title="The references of game object &quot;&quot;" Height="600" Width="450" IsVisibleChanged="Window_IsVisibleChanged"
         WindowStartupLocation="CenterOwner">
     <Window.Resources>
         <local:ChildInstanceNameConverter x:Key="ChildInstanceNameConverter"/>
@@ -27,6 +27,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*" MinHeight="60"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.Background>
@@ -87,7 +88,10 @@
             </TreeView.Resources>
         </TreeView>
 
-        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,20">
+        <TextBlock Grid.Row="4" Text="Note: the results may be not 100% complete.&#x0a;Use one of the search scripts in the &quot;Find&quot; menu if necessary."
+                   Margin="10,0,20,0" FontStyle="Italic" Foreground="Gray"/>
+
+        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,20">
             <utmt:ButtonDark Content="Export results" FontSize="18" Width="144" Height="40" Click="ExportButton_Click" Margin="0,0,10,0">
                 <Button.Style>
                     <Style TargetType="Button">
