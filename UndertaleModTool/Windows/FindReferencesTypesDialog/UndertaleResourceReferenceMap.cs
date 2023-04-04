@@ -296,6 +296,34 @@ namespace UndertaleModTool.Windows
                         }
                     }
                 }
+            },
+            {
+                typeof(UndertaleFunction),
+                new[]
+                {
+                    new TypesForVersion()
+                    {
+                        Version = (1, 0, 0),
+                        Types = new[]
+                        {
+                            (typeof(UndertaleCode), "Code")
+                        }
+                    }
+                }
+            },
+            {
+                typeof(UndertaleVariable),
+                new[]
+                {
+                    new TypesForVersion()
+                    {
+                        Version = (1, 0, 0),
+                        Types = new[]
+                        {
+                            (typeof(UndertaleCode), "Code")
+                        }
+                    }
+                }
             }
         };
 
@@ -308,8 +336,10 @@ namespace UndertaleModTool.Windows
             { typeof(UndertaleString), "Strings" },
             { typeof(UndertaleGameObject), "Game objects" },
             { typeof(UndertaleCode), "Code entries" },
+            { typeof(UndertaleFunction), "Functions" },
+            { typeof(UndertaleVariable), "Variables" },
             { typeof(UndertaleEmbeddedAudio), "Embedded audio" },
-            { typeof(UndertaleAudioGroup), "Audio groups" }
+            { typeof(UndertaleAudioGroup), "Audio groups" },
         };
         
         public static readonly HashSet<Type> CodeTypes = new()

@@ -40,6 +40,8 @@ namespace UndertaleModTool.Windows
         private static UndertaleData data;
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
         private static Dictionary<UndertaleCode, HashSet<UndertaleString>> stringReferences;
+        private static Dictionary<UndertaleCode, HashSet<UndertaleFunction>> funcReferences;
+        private static Dictionary<UndertaleCode, HashSet<UndertaleVariable>> variReferences;
 
         private static readonly Dictionary<Type, PredicateForVersion[]> typeMap = new()
         {
@@ -1137,6 +1139,70 @@ namespace UndertaleModTool.Windows
                         }
                     }
                 }
+            },
+            {
+                typeof(UndertaleFunction),
+                new[]
+                {
+                    new PredicateForVersion()
+                    {
+                        Version = (1, 0, 0),
+                        Predicate = (objSrc, types, checkOne) =>
+                        {
+                            if (!types.Contains(typeof(UndertaleCode)))
+                                return null;
+
+                            if (objSrc is not UndertaleFunction obj)
+                                return null;
+
+                            IEnumerable<UndertaleCode> funcRefs;
+                            if (funcReferences is not null)
+                                funcRefs = funcReferences.Where(x => x.Value.Contains(obj))
+                                                         .Select(x => x.Key);
+                            else
+                                funcRefs = data.Code.Where(x => x.Instructions.Any(
+                                                                  i => i.Function?.Target == obj
+                                                                       || i.Value is UndertaleInstruction.Reference<UndertaleFunction> funcRef
+                                                                          && funcRef.Target == obj));
+                            if (funcRefs.Any())
+                                return new() { { "Code", checkOne ? funcRefs.ToEmptyArray() : funcRefs.ToArray() } };
+                            else
+                                return null;
+                        }
+                    }
+                }
+            },
+            {
+                typeof(UndertaleVariable),
+                new[]
+                {
+                    new PredicateForVersion()
+                    {
+                        Version = (1, 0, 0),
+                        Predicate = (objSrc, types, checkOne) =>
+                        {
+                            if (!types.Contains(typeof(UndertaleCode)))
+                                return null;
+
+                            if (objSrc is not UndertaleVariable obj)
+                                return null;
+
+                            IEnumerable<UndertaleCode> variRefs;
+                            if (variReferences is not null)
+                                variRefs = variReferences.Where(x => x.Value.Contains(obj))
+                                                         .Select(x => x.Key);
+                            else
+                                variRefs = data.Code.Where(x => x.Instructions.Any(
+                                                                  i => i.Destination?.Target == obj
+                                                                       || i.Value is UndertaleInstruction.Reference<UndertaleVariable> varRef
+                                                                          && varRef.Target == obj));
+                            if (variRefs.Any())
+                                return new() { { "Code", checkOne ? variRefs.ToEmptyArray() : variRefs.ToArray() } };
+                            else
+                                return null;
+                        }
+                    }
+                }
             }
         };
 
@@ -1201,17 +1267,35 @@ namespace UndertaleModTool.Windows
                                           .Select(x => (x, list.Item2)));
 
             stringReferences = new();
+            funcReferences = new();
+            variReferences = new();
             foreach (var code in data.Code)
             {
                 var strings = new HashSet<UndertaleString>();
+                var functions = new HashSet<UndertaleFunction>();
+                var variables = new HashSet<UndertaleVariable>();
                 foreach (var inst in code.Instructions)
                 {
                     if (inst.Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG> strPtr)
                         strings.Add(strPtr.Resource);
+
+                    if (inst.Destination?.Target is not null)
+                        variables.Add(inst.Destination.Target);
+                    if (inst.Value is UndertaleInstruction.Reference<UndertaleVariable> varRef && varRef.Target is not null)
+                        variables.Add(varRef.Target);
+
+                    if (inst.Function?.Target is not null)
+                        functions.Add(inst.Function.Target);
+                    if (inst.Value is UndertaleInstruction.Reference<UndertaleFunction> funcRef && funcRef.Target is not null)
+                        functions.Add(funcRef.Target);
                 }
 
                 if (strings.Count != 0)
                     stringReferences[code] = strings;
+                if (functions.Count != 0)
+                    funcReferences[code] = functions;
+                if (variables.Count != 0)
+                    variReferences[code] = variables;
             }
 
             mainWindow.IsEnabled = false;
@@ -1294,11 +1378,15 @@ namespace UndertaleModTool.Windows
             {
                 mainWindow.IsEnabled = true;
                 stringReferences = null;
+                funcReferences = null;
+                variReferences = null;
 
                 throw;
             }
             mainWindow.IsEnabled = true;
             stringReferences = null;
+            funcReferences = null;
+            variReferences = null;
 
             if (outDict.Count == 0)
                 return null;

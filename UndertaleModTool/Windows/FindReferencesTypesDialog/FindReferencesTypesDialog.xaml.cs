@@ -89,7 +89,7 @@ namespace UndertaleModTool.Windows
 
             foreach (var typePair in sourceTypes)
             {
-                if (data.Code is null && typePair.Key == typeof(UndertaleCode))
+                if (data.Code is null && UndertaleResourceReferenceMap.CodeTypes.Contains(typePair.Key))
                     continue;
 
                 TypesList.Items.Add(new CheckBox()
