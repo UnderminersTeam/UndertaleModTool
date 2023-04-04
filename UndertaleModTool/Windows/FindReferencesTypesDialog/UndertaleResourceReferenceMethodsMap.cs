@@ -32,7 +32,7 @@ namespace UndertaleModTool.Windows
     {
         private static UndertaleData data;
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
-        private static Dictionary<UndertaleCode, List<UndertaleString>> stringReferences;
+        private static Dictionary<UndertaleCode, HashSet<UndertaleString>> stringReferences;
 
         private static readonly Dictionary<Type, PredicateForVersion[]> typeMap = new()
         {
@@ -62,44 +62,69 @@ namespace UndertaleModTool.Windows
                         {
                             Dictionary<string, object[]> outDict = new();
 
-                            List<object[]> tiles = new();
-                            List<object[]> sprInstances = new();
-                            List<object[]> bgLayers = new();
-                            foreach (var room in data.Rooms)
+                            if (types.Contains(typeof(UndertaleRoom.Tile)))
                             {
-                                foreach (var layer in room.Layers)
+                                IEnumerable<object[]> GetTiles()
                                 {
-                                    if (layer.AssetsData is not null)
+                                    foreach (var room in data.Rooms)
                                     {
-                                        if (types.Contains(typeof(UndertaleRoom.Tile)))
+                                        foreach (var layer in room.Layers)
                                         {
-                                            foreach (var tile in layer.AssetsData.LegacyTiles)
-                                                if (tile.SpriteDefinition == obj)
-                                                    tiles.Add(new object[] { tile, layer, room });
-                                        }
-
-                                        if (types.Contains(typeof(UndertaleRoom.SpriteInstance)))
-                                        {
-                                            foreach (var sprInst in layer.AssetsData.Sprites)
-                                                if (sprInst.Sprite == obj)
-                                                    sprInstances.Add(new object[] { sprInst, layer, room });
+                                            if (layer.AssetsData is not null)
+                                            {
+                                                foreach (var tile in layer.AssetsData.LegacyTiles)
+                                                    if (tile.SpriteDefinition == obj)
+                                                        yield return new object[] { tile, layer, room };
+                                            }
                                         }
                                     }
+                                };
 
-                                    if (types.Contains(typeof(UndertaleRoom.Layer)))
-                                    {
-                                        if (layer.BackgroundData is not null
-                                            && layer.BackgroundData.Sprite == obj)
-                                            bgLayers.Add(new object[] { layer, room });
-                                    }
-                                }
+                                var tiles = GetTiles();
+                                if (tiles.Any())
+                                    outDict["Room tiles"] = checkOne ? tiles.ToEmptyArray() : tiles.ToArray();
                             }
-                            if (tiles.Count > 0)
-                                outDict["Room tiles"] = checkOne ? tiles.ToEmptyArray() : tiles.ToArray();
-                            if (sprInstances.Count > 0)
-                                outDict["Room sprite instances"] = checkOne ? sprInstances.ToEmptyArray() : sprInstances.ToArray();
-                            if (bgLayers.Count > 0)
-                                outDict["Room background layers"] = checkOne ? bgLayers.ToEmptyArray() : bgLayers.ToArray();
+                            if (types.Contains(typeof(UndertaleRoom.SpriteInstance)))
+                            {
+                                IEnumerable<object[]> GetSprInstances()
+                                {
+                                    foreach (var room in data.Rooms)
+                                    {
+                                        foreach (var layer in room.Layers)
+                                        {
+                                            if (layer.AssetsData is not null)
+                                            {
+                                                foreach (var sprInst in layer.AssetsData.Sprites)
+                                                    if (sprInst.Sprite == obj)
+                                                        yield return new object[] { sprInst, layer, room };
+                                            }
+                                        }
+                                    }
+                                };
+
+                                var sprInstances = GetSprInstances();
+                                if (sprInstances.Any())
+                                    outDict["Room sprite instances"] = checkOne ? sprInstances.ToEmptyArray() : sprInstances.ToArray();
+                            }
+                            if (types.Contains(typeof(UndertaleRoom.Layer)))
+                            {
+                                IEnumerable<object[]> GetBgLayers()
+                                {
+                                    foreach (var room in data.Rooms)
+                                    {
+                                        foreach (var layer in room.Layers)
+                                        {
+                                            if (layer.BackgroundData is not null
+                                                && layer.BackgroundData.Sprite == obj)
+                                                yield return new object[] { layer, room };
+                                        }
+                                    }
+                                };
+
+                                var bgLayers = GetBgLayers();
+                                if (bgLayers.Any())
+                                    outDict["Room background layers"] = checkOne ? bgLayers.ToEmptyArray() : bgLayers.ToArray();
+                            }
 
                             if (outDict.Count == 0)
                                 return null;
@@ -138,22 +163,38 @@ namespace UndertaleModTool.Windows
 
                             Dictionary<string, object[]> outDict = new();
 
-                            List<object[]> backgrounds = new();
-                            List<object[]> tiles = new();
-                            foreach (var room in data.Rooms)
+                            if (types.Contains(typeof(UndertaleRoom.Background)))
                             {
-                                foreach (var bg in room.Backgrounds)
-                                    if (bg.BackgroundDefinition == obj)
-                                        backgrounds.Add(new object[] { bg, room });
+                                IEnumerable<object[]> GetBackgrounds()
+                                {
+                                    foreach (var room in data.Rooms)
+                                    {
+                                        foreach (var bg in room.Backgrounds)
+                                            if (bg.BackgroundDefinition == obj)
+                                                yield return new object[] { bg, room };
+                                    }
+                                }
 
-                                foreach (var tile in room.Tiles)
-                                    if (tile.BackgroundDefinition == obj)
-                                        tiles.Add(new object[] { tile, room });
+                                var backgrounds = GetBackgrounds();
+                                if (backgrounds.Any())
+                                    outDict["Room backgrounds"] = checkOne ? backgrounds.ToEmptyArray() : backgrounds.ToArray();
                             }
-                            if (backgrounds.Count > 0)
-                                outDict["Room tiles"] = checkOne ? tiles.ToEmptyArray() : tiles.ToArray();
-                            if (tiles.Count > 0)
-                                outDict["Room sprite instances"] = checkOne ? tiles.ToEmptyArray() : tiles.ToArray();
+                            if (types.Contains(typeof(UndertaleRoom.Tile)))
+                            {
+                                IEnumerable<object[]> GetTiles()
+                                {
+                                    foreach (var room in data.Rooms)
+                                    {
+                                        foreach (var tile in room.Tiles)
+                                            if (tile.BackgroundDefinition == obj)
+                                                yield return new object[] { tile, room };
+                                    }
+                                }
+
+                                var tiles = GetTiles();
+                                if (tiles.Any())
+                                    outDict["Room tiles"] = checkOne ? tiles.ToEmptyArray() : tiles.ToArray();
+                            }
 
                             if (outDict.Count == 0)
                                 return null;
@@ -165,18 +206,25 @@ namespace UndertaleModTool.Windows
                         Version = (2, 0, 0),
                         Predicate = (obj, types, checkOne) =>
                         {
-                            List<object[]> tileLayers = new();
-                            foreach (var room in data.Rooms)
-                            {
-                                foreach (var layer in room.Layers)
-                                {
-                                    if (layer.TilesData is not null
-                                        && layer.TilesData.Background == obj)
-                                        tileLayers.Add(new object[] { layer, room });
+                            if (!types.Contains(typeof(UndertaleRoom.Layer)))
+                                return null;
 
+                            IEnumerable<object[]> GetTileLayers()
+                            {
+                                foreach (var room in data.Rooms)
+                                {
+                                    foreach (var layer in room.Layers)
+                                    {
+                                        if (layer.TilesData is not null
+                                            && layer.TilesData.Background == obj)
+                                            yield return new object[] { layer, room };
+
+                                    }
                                 }
                             }
-                            if (tileLayers.Count > 0)
+
+                            var tileLayers = GetTileLayers();
+                            if (tileLayers.Any())
                                 return new() { { "Room tile layers", checkOne ? tileLayers.ToEmptyArray() : tileLayers.ToArray() } };
                             else
                                 return null;
@@ -293,8 +341,11 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (1, 0, 0),
-                        Predicate = (obj, types, checkOne) =>
+                        Predicate = (objSrc, types, checkOne) =>
                         {
+                            if (objSrc is not UndertaleString obj)
+                                return null;
+
                             Dictionary<string, object[]> outDict = new();
 
                             if (types.Contains(typeof(UndertaleBackground)))
@@ -309,7 +360,7 @@ namespace UndertaleModTool.Windows
                                 var codeEntries = data.Code.Where(x => x.Name == obj);
                                 IEnumerable<UndertaleCode> stringRefs;
                                 if (stringReferences is not null)
-                                    stringRefs = stringReferences.Where(x => x.Value.Any(x => x == obj))
+                                    stringRefs = stringReferences.Where(x => x.Value.Contains(obj))
                                                                  .Select(x => x.Key);
                                 else
                                     stringRefs = data.Code.Where(x => x.Instructions.Any(
@@ -359,44 +410,57 @@ namespace UndertaleModTool.Windows
                                 if (extensions.Any())
                                     outDict["Extensions"] = checkOne ? extensions.ToEmptyArray() : extensions.ToArray();
                             }
-
                             if (types.Contains(typeof(UndertaleExtensionOption)))
                             {
-                                List<object[]> extnOptions = new();
-                                foreach (var extn in data.Extensions)
+                                IEnumerable<object[]> GetExtnOptions()
                                 {
-                                    foreach (var option in extn.Options)
-                                        if (option.Name == obj || option.Value == obj)
-                                            extnOptions.Add(new object[] { option, extn });
+                                    foreach (var extn in data.Extensions)
+                                    {
+                                        foreach (var option in extn.Options)
+                                            if (option.Name == obj || option.Value == obj)
+                                                yield return new object[] { option, extn };
+                                    }
                                 }
-                                if (extnOptions.Count > 0)
+
+                                var extnOptions = GetExtnOptions();
+                                if (extnOptions.Any())
                                     outDict["Extension options"] = checkOne ? extnOptions.ToEmptyArray() : extnOptions.ToArray();
                             }
-
-                            List<object[]> extnFunctions = new();
-                            List<object[]> extnFiles = new();
-                            foreach (var extn in data.Extensions)
+                            if (types.Contains(typeof(UndertaleExtensionFile)))
                             {
-                                foreach (var file in extn.Files)
+                                IEnumerable<object[]> GetExtnFiles()
                                 {
-                                    if (types.Contains(typeof(UndertaleExtensionFile)))
+                                    foreach (var extn in data.Extensions)
                                     {
-                                        if (file.Filename == obj || file.InitScript == obj || file.CleanupScript == obj)
-                                            extnFiles.Add(new object[] { file, extn });
-                                    }
-
-                                    if (types.Contains(typeof(UndertaleExtensionFunction)))
-                                    {
-                                        foreach (var func in file.Functions)
-                                            if (func.Name == obj || func.ExtName == obj)
-                                                extnFunctions.Add(new object[] { func, file, extn });
+                                        foreach (var file in extn.Files)
+                                            if (file.Filename == obj || file.InitScript == obj || file.CleanupScript == obj)
+                                                yield return new object[] { file, extn };
                                     }
                                 }
+
+                                var extnFiles = GetExtnFiles();
+                                if (extnFiles.Any())
+                                    outDict["Extension files"] = checkOne ? extnFiles.ToEmptyArray() : extnFiles.ToArray();
                             }
-                            if (extnFunctions.Count > 0)
-                                outDict["Extension functions"] = checkOne ? extnFunctions.ToEmptyArray() : extnFunctions.ToArray();
-                            if (extnFiles.Count > 0)
-                                outDict["Extension files"] = checkOne ? extnFiles.ToEmptyArray() : extnFiles.ToArray();
+                            if (types.Contains(typeof(UndertaleExtensionFunction)))
+                            {
+                                IEnumerable<object[]> GetExtnFunctions()
+                                {
+                                    foreach (var extn in data.Extensions)
+                                    {
+                                        foreach (var file in extn.Files)
+                                        {
+                                            foreach (var func in file.Functions)
+                                                if (func.Name == obj || func.ExtName == obj)
+                                                    yield return new object[] { func, file, extn };
+                                        }
+                                    }
+                                }
+
+                                var extnFunctions = GetExtnFunctions();
+                                if (extnFunctions.Any())
+                                    outDict["Extension functions"] = checkOne ? extnFunctions.ToEmptyArray() : extnFunctions.ToArray();
+                            }
 
                             if (types.Contains(typeof(UndertaleFont)))
                             {
@@ -516,37 +580,42 @@ namespace UndertaleModTool.Windows
                                     outDict["Embedded images"] = checkOne ? embImages.ToEmptyArray() : embImages.ToArray();
                             }
 
-                            List<object[]> layers = new();
-                            List<object[]> sprInstances = new();
-                            foreach (var room in data.Rooms)
+                            if (types.Contains(typeof(UndertaleRoom.Layer)))
                             {
-                                foreach (var layer in room.Layers)
+                                IEnumerable<object[]> GetLayers()
                                 {
-                                    if (types.Contains(typeof(UndertaleRoom.Layer)))
-                                    {
-                                        if (layer.LayerName == obj || layer.EffectType == obj)
-                                            layers.Add(new object[] { layer, room });
-                                    }
+                                    foreach (var room in data.Rooms)
+                                        foreach (var layer in room.Layers)
+                                            if (layer.LayerName == obj || layer.EffectType == obj)
+                                                yield return new object[] { layer, room };
+                                }
 
-                                    if (layer.AssetsData is not null)
+                                var layers = GetLayers();
+                                if (layers.Any())
+                                    outDict["Room layers"] = checkOne ? layers.ToEmptyArray() : layers.ToArray();
+                            }
+                            if (types.Contains(typeof(UndertaleRoom.SpriteInstance)))
+                            {
+                                IEnumerable<object[]> GetSprInstances()
+                                {
+                                    foreach (var room in data.Rooms)
                                     {
-                                        if (types.Contains(typeof(UndertaleRoom.SpriteInstance)))
+                                        foreach (var layer in room.Layers)
                                         {
-                                            foreach (var sprInst in layer.AssetsData.Sprites)
-                                                if (sprInst.Name == obj)
-                                                    sprInstances.Add(new object[] { sprInst, layer, room });
+                                            if (layer.AssetsData is not null)
+                                            {
+                                                foreach (var sprInst in layer.AssetsData.Sprites)
+                                                    if (sprInst.Name == obj)
+                                                        yield return new object[] { sprInst, layer, room };
+                                            }
                                         }
                                     }
                                 }
 
-                                foreach (var tile in room.Tiles)
-                                    if (tile.BackgroundDefinition == obj)
-                                        sprInstances.Add(new object[] { tile, room });
-                            }
-                            if (layers.Count > 0)
-                                outDict["Room layers"] = checkOne ? layers.ToEmptyArray() : layers.ToArray();
-                            if (sprInstances.Count > 0)
-                                outDict["Room sprite instances"] = checkOne ? sprInstances.ToEmptyArray() : sprInstances.ToArray();
+                                var sprInstances = GetSprInstances();
+                                if (sprInstances.Any())
+                                    outDict["Room sprite instances"] = checkOne ? sprInstances.ToEmptyArray() : sprInstances.ToArray();
+                            }                            
 
                             if (outDict.Count == 0)
                                 return null;
@@ -571,8 +640,11 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (2, 3, 0),
-                        Predicate = (obj, types, checkOne) =>
+                        Predicate = (objSrc, types, checkOne) =>
                         {
+                            if (objSrc is not UndertaleString obj)
+                                return null;
+
                             Dictionary<string, object[]> outDict = new();
 
                             if (types.Contains(typeof(UndertaleAnimationCurve)))
@@ -583,34 +655,41 @@ namespace UndertaleModTool.Windows
                             }
                             if (types.Contains(typeof(UndertaleAnimationCurve.Channel)))
                             {
-                                List<object[]> animCurveChannels = new();
-                                foreach (var curve in data.AnimationCurves)
+                                IEnumerable<object[]> GetAnimCurveChannels()
                                 {
-                                    foreach (var ch in curve.Channels)
-                                        if (ch.Name == obj)
-                                            animCurveChannels.Add(new object[] { ch, curve });
+                                    foreach (var curve in data.AnimationCurves)
+                                    {
+                                        foreach (var ch in curve.Channels)
+                                            if (ch.Name == obj)
+                                                yield return new object[] { ch, curve };
+                                    }
                                 }
 
-                                if (animCurveChannels.Count > 0)
+                                var animCurveChannels = GetAnimCurveChannels();
+                                if (animCurveChannels.Any())
                                     outDict["Animation curve channels"] = checkOne ? animCurveChannels.ToEmptyArray() : animCurveChannels.ToArray();
                             }
 
                             if (types.Contains(typeof(UndertaleRoom.SequenceInstance)))
                             {
-                                List<object[]> seqInstances = new();
-                                foreach (var room in data.Rooms)
+                                IEnumerable<object[]> GetSeqInstances()
                                 {
-                                    foreach (var layer in room.Layers)
+                                    foreach (var room in data.Rooms)
                                     {
-                                        if (layer.AssetsData is not null)
+                                        foreach (var layer in room.Layers)
                                         {
-                                            foreach (var seqInst in layer.AssetsData.Sequences)
-                                                if (seqInst.Sequence.Name == obj)
-                                                    seqInstances.Add(new object[] { seqInst, layer, room });
+                                            if (layer.AssetsData is not null)
+                                            {
+                                                foreach (var seqInst in layer.AssetsData.Sequences)
+                                                    if (seqInst.Sequence.Name == obj)
+                                                        yield return new object[] { seqInst, layer, room };
+                                            }
                                         }
                                     }
                                 }
-                                if (seqInstances.Count > 0)
+
+                                var seqInstances = GetSeqInstances();
+                                if (seqInstances.Any())
                                     outDict["Room sequence instances"] = checkOne ? seqInstances.ToEmptyArray() : seqInstances.ToArray();
                             }
 
@@ -622,12 +701,9 @@ namespace UndertaleModTool.Windows
                                     outDict["Sequences"] = checkOne ? sequences.ToEmptyArray() : sequences.ToArray();
                             }
 
-
+                            // TODO: make these "IEnumerable<object[]>"
                             List<object[]> sequenceTracks = new();
-                            List<object[]> seqBroadMessages = new();
-                            List<object[]> sequenceMoments = new();
                             List<object[]> seqStringKeyframes = new();
-
                             void ProcessTrack(UndertaleSequence seq, Track track, List<object> trackChain)
                             {
                                 trackChain = new(trackChain);
@@ -656,7 +732,6 @@ namespace UndertaleModTool.Windows
                                 foreach (var subTrack in track.Tracks)
                                     ProcessTrack(seq, subTrack, trackChain);
                             };
-
                             foreach (var seq in data.Sequences)
                             {
                                 foreach (var track in seq.Tracks)
@@ -664,35 +739,50 @@ namespace UndertaleModTool.Windows
                                     List<object> trackChain = new();
                                     ProcessTrack(seq, track, trackChain);
                                 }
-
-                                if (types.Contains(typeof(BroadcastMessage)))
-                                {
-                                    foreach (var keyframe in seq.BroadcastMessages)
-                                    {
-                                        foreach (var msgPair in keyframe.Channels)
-                                            if (msgPair.Value.Messages.Any(x => x == obj))
-                                                seqBroadMessages.Add(new object[] { msgPair.Key, keyframe, seq });
-                                    }
-                                }
-
-                                if (types.Contains(typeof(Moment)))
-                                {
-                                    foreach (var keyframe in seq.Moments)
-                                    {
-                                        foreach (var momentPair in keyframe.Channels)
-                                            if (momentPair.Value.Event == obj)
-                                                sequenceMoments.Add(new object[] { momentPair.Key, keyframe, seq });
-                                    }
-                                }
                             }
                             if (sequenceTracks.Count > 0)
                                 outDict["Sequence tracks"] = checkOne ? sequenceTracks.ToEmptyArray() : sequenceTracks.ToArray();
-                            if (seqBroadMessages.Count > 0)
-                                outDict["Sequence broadcast messages"] = checkOne ? seqBroadMessages.ToEmptyArray() : seqBroadMessages.ToArray();
-                            if (sequenceMoments.Count > 0)
-                                outDict["Sequence moments"] = checkOne ? sequenceMoments.ToEmptyArray() : sequenceMoments.ToArray();
                             if (seqStringKeyframes.Count > 0)
                                 outDict["Sequence string keyframes"] = checkOne ? seqStringKeyframes.ToEmptyArray() : seqStringKeyframes.ToArray();
+
+                            if (types.Contains(typeof(BroadcastMessage)))
+                            {
+                                IEnumerable<object[]> GetSeqBroadMessages()
+                                {
+                                    foreach (var seq in data.Sequences)
+                                    {
+                                        foreach (var keyframe in seq.BroadcastMessages)
+                                        {
+                                            foreach (var msgPair in keyframe.Channels)
+                                                if (msgPair.Value.Messages.Contains(obj))
+                                                    yield return new object[] { msgPair.Key, keyframe, seq };
+                                        }
+                                    }
+                                }
+
+                                var seqBroadMessages = GetSeqBroadMessages();
+                                if (seqBroadMessages.Any())
+                                    outDict["Sequence broadcast messages"] = checkOne ? seqBroadMessages.ToEmptyArray() : seqBroadMessages.ToArray();
+                            }
+                            if (types.Contains(typeof(Moment)))
+                            {
+                                IEnumerable<object[]> GetSequenceMoments()
+                                {
+                                    foreach (var seq in data.Sequences)
+                                    {
+                                        foreach (var keyframe in seq.Moments)
+                                        {
+                                            foreach (var momentPair in keyframe.Channels)
+                                                if (momentPair.Value.Event == obj)
+                                                    yield return new object[] { momentPair.Key, keyframe, seq };
+                                        }
+                                    }
+                                }
+
+                                var sequenceMoments = GetSequenceMoments();
+                                if (sequenceMoments.Any())
+                                    outDict["Sequence moments"] = checkOne ? sequenceMoments.ToEmptyArray() : sequenceMoments.ToArray();
+                            }
 
                             if (outDict.Count == 0)
                                 return null;
@@ -722,17 +812,21 @@ namespace UndertaleModTool.Windows
                             if (!types.Contains(typeof(UndertaleRoom.EffectProperty)))
                                 return null;
 
-                            List<object[]> effectProps = new();
-                            foreach (var room in data.Rooms)
+                            IEnumerable<object[]> GetEffectProps()
                             {
-                                foreach (var layer in room.Layers)
+                                foreach (var room in data.Rooms)
                                 {
-                                    foreach (var prop in layer.EffectProperties)
-                                        if (prop.Name == obj || prop.Value == obj)
-                                            effectProps.Add(new object[] { prop, layer, room });
+                                    foreach (var layer in room.Layers)
+                                    {
+                                        foreach (var prop in layer.EffectProperties)
+                                            if (prop.Name == obj || prop.Value == obj)
+                                                yield return new object[] { prop, layer, room };
+                                    }
                                 }
                             }
-                            if (effectProps.Count > 0)
+
+                            var effectProps = GetEffectProps();
+                            if (effectProps.Any())
                                 return new() { { "Room effect properties", checkOne ? effectProps.ToEmptyArray() : effectProps.ToArray() } };
                             else
                                 return null;
@@ -746,8 +840,8 @@ namespace UndertaleModTool.Windows
                             if (!types.Contains(typeof(TextKeyframes)))
                                 return null;
 
+                            // TODO: make this "IEnumerable<object[]>"
                             List<object[]> textKeyframesList = new();
-
                             void ProcessTrack(UndertaleSequence seq, Track track, List<object> trackChain)
                             {
                                 trackChain = new(trackChain);
@@ -795,33 +889,36 @@ namespace UndertaleModTool.Windows
                             if (!types.Contains(typeof(UndertaleRoom.GameObject)))
                                 return null;
 
-                            List<object[]> objInstances = new();
-                            if (data.IsGameMaker2())
+                            IEnumerable<object[]> GetObjInstances()
                             {
-                                foreach (var room in data.Rooms)
+                                if (data.IsGameMaker2())
                                 {
-                                    foreach (var layer in room.Layers)
+                                    foreach (var room in data.Rooms)
                                     {
-                                        if (layer.InstancesData is not null)
+                                        foreach (var layer in room.Layers)
                                         {
-                                            foreach (var inst in layer.InstancesData.Instances)
-                                                if (inst.ObjectDefinition == obj)
-                                                    objInstances.Add(new object[] { inst, layer, room });
+                                            if (layer.InstancesData is not null)
+                                            {
+                                                foreach (var inst in layer.InstancesData.Instances)
+                                                    if (inst.ObjectDefinition == obj)
+                                                        yield return new object[] { inst, layer, room };
+                                            }
                                         }
                                     }
                                 }
-                            }
-                            else
-                            {
-                                foreach (var room in data.Rooms)
+                                else
                                 {
-                                    foreach (var inst in room.GameObjects)
-                                        if (inst.ObjectDefinition == obj)
-                                            objInstances.Add(new object[] { inst, room });
+                                    foreach (var room in data.Rooms)
+                                    {
+                                        foreach (var inst in room.GameObjects)
+                                            if (inst.ObjectDefinition == obj)
+                                                yield return new object[] { inst, room };
+                                    }
                                 }
                             }
 
-                            if (objInstances.Count > 0)
+                            var objInstances = GetObjInstances();
+                            if (objInstances.Any())
                                 return new() { { "Room object instance", checkOne ? objInstances.ToEmptyArray() : objInstances.ToArray() } };
                             else
                                 return null;
@@ -835,8 +932,8 @@ namespace UndertaleModTool.Windows
                             if (!types.Contains(typeof(InstanceKeyframes)))
                                 return null;
 
+                            // TODO: make this "IEnumerable<object[]>"
                             List<object[]> instKeyframesList = new();
-
                             void ProcessTrack(UndertaleSequence seq, Track track, List<object> trackChain)
                             {
                                 trackChain = new(trackChain);
@@ -1031,7 +1128,7 @@ namespace UndertaleModTool.Windows
             stringReferences = new();
             foreach (var code in data.Code)
             {
-                var strings = new List<UndertaleString>();
+                var strings = new HashSet<UndertaleString>();
                 foreach (var inst in code.Instructions)
                 {
                     if (inst.Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG> strPtr)
