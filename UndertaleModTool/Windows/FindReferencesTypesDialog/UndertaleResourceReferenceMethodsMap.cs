@@ -43,9 +43,12 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (1, 0, 0),
-                        Predicate = (obj, types, checkOne) =>
+                        Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(UndertaleGameObject)))
+                                return null;
+
+                            if (objSrc is not UndertaleSprite obj)
                                 return null;
 
                             var gameObjects = data.GameObjects.Where(x => x.Sprite == obj);
@@ -58,8 +61,11 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (2, 0, 0),
-                        Predicate = (obj, types, checkOne) =>
+                        Predicate = (objSrc, types, checkOne) =>
                         {
+                            if (objSrc is not UndertaleSprite obj)
+                                return null;
+
                             Dictionary<string, object[]> outDict = new();
 
                             if (types.Contains(typeof(UndertaleRoom.Tile)))
@@ -134,9 +140,12 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (2, 2, 1),
-                        Predicate = (obj, types, checkOne) =>
+                        Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(UndertaleTextureGroupInfo)))
+                                return null;
+
+                            if (objSrc is not UndertaleSprite obj)
                                 return null;
 
                             var textGroups = data.TextureGroupInfo.Where(x => x.Sprites.Any(s => s.Resource == obj)
@@ -156,9 +165,12 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (1, 0, 0),
-                        Predicate = (obj, types, checkOne) =>
+                        Predicate = (objSrc, types, checkOne) =>
                         {
                             if (data.IsGameMaker2())
+                                return null;
+
+                            if (objSrc is not UndertaleBackground obj)
                                 return null;
 
                             Dictionary<string, object[]> outDict = new();
@@ -204,9 +216,12 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (2, 0, 0),
-                        Predicate = (obj, types, checkOne) =>
+                        Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(UndertaleRoom.Layer)))
+                                return null;
+
+                            if (objSrc is not UndertaleBackground obj)
                                 return null;
 
                             IEnumerable<object[]> GetTileLayers()
@@ -233,9 +248,12 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (2, 2, 1),
-                        Predicate = (obj, types, checkOne) =>
+                        Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(UndertaleTextureGroupInfo)))
+                                return null;
+
+                            if (objSrc is not UndertaleBackground obj)
                                 return null;
 
                             var textGroups = data.TextureGroupInfo.Where(x => x.Tilesets.Any(s => s.Resource == obj));
@@ -254,8 +272,11 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (1, 0, 0),
-                        Predicate = (obj, types, checkOne) =>
+                        Predicate = (objSrc, types, checkOne) =>
                         {
+                            if (objSrc is not UndertaleEmbeddedTexture obj)
+                                return null;
+
                             var pageItems = data.TexturePageItems.Where(x => x.TexturePage == obj);
                             if (pageItems.Any())
                                 return new() { { "Texture page items", checkOne ? pageItems.ToEmptyArray() : pageItems.ToArray() } };
@@ -266,9 +287,12 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (2, 2, 1),
-                        Predicate = (obj, types, checkOne) =>
+                        Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(UndertaleTextureGroupInfo)))
+                                return null;
+
+                            if (objSrc is not UndertaleEmbeddedTexture obj)
                                 return null;
 
                             var textGroups = data.TextureGroupInfo.Where(x => x.TexturePages.Any(s => s.Resource == obj));
@@ -287,9 +311,12 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (1, 0, 0),
-                        Predicate = (obj, types, checkOne) =>
+                        Predicate = (objSrc, types, checkOne) =>
                         {
                             Dictionary<string, object[]> outDict = new();
+
+                            if (objSrc is not UndertaleTexturePageItem obj)
+                                return null;
 
                             if (types.Contains(typeof(UndertaleSprite)))
                             {
@@ -320,9 +347,12 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (2, 0, 0),
-                        Predicate = (obj, types, checkOne) =>
+                        Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(UndertaleEmbeddedImage)))
+                                return null;
+
+                            if (objSrc is not UndertaleTexturePageItem obj)
                                 return null;
 
                             var embImages = data.EmbeddedImages.Where(x => x.TextureEntry == obj);
@@ -500,9 +530,9 @@ namespace UndertaleModTool.Windows
 
                             if (types.Contains(typeof(UndertaleLanguage)))
                             {
-                                bool langsMatches = data.Language.EntryIDs.Any(x => x == obj)
+                                bool langsMatches = data.Language.EntryIDs.Contains(obj)
                                                     || data.Language.Languages.Any(x => x.Name == obj || x.Region == obj
-                                                                                        || x.Entries.Any(e => e == obj));
+                                                                                        || x.Entries.Contains(obj));
                                 if (langsMatches)
                                     outDict["Languages"] = new object[] { new GeneralInfoEditor(data.GeneralInfo, data.Options, data.Language) };
                             }
@@ -554,9 +584,12 @@ namespace UndertaleModTool.Windows
                     {
                         // Bytecode version 15
                         Version = (15, uint.MaxValue, uint.MaxValue),
-                        Predicate = (obj, types, checkOne) =>
+                        Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(UndertaleCodeLocals)))
+                                return null;
+
+                            if (objSrc is not UndertaleString obj)
                                 return null;
 
                             var codeLocals = data.CodeLocals.Where(x => x.Name == obj || x.Locals.Any(l => l.Name == obj));
@@ -569,8 +602,11 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (2, 0, 0),
-                        Predicate = (obj, types, checkOne) =>
+                        Predicate = (objSrc, types, checkOne) =>
                         {
+                            if (objSrc is not UndertaleString obj)
+                                return null;
+
                             Dictionary<string, object[]> outDict = new();
 
                             if (types.Contains(typeof(UndertaleEmbeddedImage)))
@@ -625,9 +661,12 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (2, 2, 1),
-                        Predicate = (obj, types, checkOne) =>
+                        Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(UndertaleTextureGroupInfo)))
+                                return null;
+
+                            if (objSrc is not UndertaleString obj)
                                 return null;
 
                             var textGroups = data.TextureGroupInfo.Where(x => x.Name == obj);
@@ -696,7 +735,7 @@ namespace UndertaleModTool.Windows
                             if (types.Contains(typeof(UndertaleSequence)))
                             {
                                 var sequences = data.Sequences.Where(x => x.Name == obj
-                                                                          || x.FunctionIDs.Values.Any(i => i == obj));
+                                                                          || x.FunctionIDs.ContainsValue(obj));
                                 if (sequences.Any())
                                     outDict["Sequences"] = checkOne ? sequences.ToEmptyArray() : sequences.ToArray();
                             }
@@ -792,9 +831,12 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (2, 3, 6),
-                        Predicate = (obj, types, checkOne) =>
+                        Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(UndertaleFilterEffect)))
+                                return null;
+
+                            if (objSrc is not UndertaleString obj)
                                 return null;
 
                             var filterEffects = data.FilterEffects.Where(x => x.Name == obj || x.Value == obj);
@@ -807,9 +849,12 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (2022, 1, 0),
-                        Predicate = (obj, types, checkOne) =>
+                        Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(UndertaleRoom.EffectProperty)))
+                                return null;
+
+                            if (objSrc is not UndertaleString obj)
                                 return null;
 
                             IEnumerable<object[]> GetEffectProps()
@@ -835,9 +880,12 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (2022, 2, 0),
-                        Predicate = (obj, types, checkOne) =>
+                        Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(TextKeyframes)))
+                                return null;
+
+                            if (objSrc is not UndertaleString obj)
                                 return null;
 
                             // TODO: make this "IEnumerable<object[]>"
@@ -884,9 +932,12 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (1, 0, 0),
-                        Predicate = (obj, types, checkOne) =>
+                        Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(UndertaleRoom.GameObject)))
+                                return null;
+
+                            if (objSrc is not UndertaleGameObject obj)
                                 return null;
 
                             IEnumerable<object[]> GetObjInstances()
@@ -927,9 +978,12 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (2, 3, 0),
-                        Predicate = (obj, types, checkOne) =>
+                        Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(InstanceKeyframes)))
+                                return null;
+
+                            if (objSrc is not UndertaleGameObject obj)
                                 return null;
 
                             // TODO: make this "IEnumerable<object[]>"
@@ -976,8 +1030,11 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (1, 0, 0),
-                        Predicate = (obj, types, checkOne) =>
+                        Predicate = (objSrc, types, checkOne) =>
                         {
+                            if (objSrc is not UndertaleCode obj)
+                                return null;
+
                             Dictionary<string, object[]> outDict = new();
 
                             if (types.Contains(typeof(UndertaleGameObject)))
@@ -1028,9 +1085,12 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (1, 0, 0),
-                        Predicate = (obj, types, checkOne) =>
+                        Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(UndertaleSound)))
+                                return null;
+
+                            if (objSrc is not UndertaleEmbeddedAudio obj)
                                 return null;
 
                             var sounds = data.Sounds.Where(x => x.AudioFile == obj);
@@ -1049,9 +1109,12 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (1, 0, 0),
-                        Predicate = (obj, types, checkOne) =>
+                        Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(UndertaleSound)))
+                                return null;
+
+                            if (objSrc is not UndertaleAudioGroup obj)
                                 return null;
 
                             var sounds = data.Sounds.Where(x => x.AudioGroup == obj);
