@@ -12,20 +12,27 @@ using static UndertaleModLib.Models.UndertaleSequence;
 
 namespace UndertaleModTool.Windows
 {
-    public class HashSetOverride<T> : HashSet<T>
+    public class HashSetTypesOverride : HashSet<Type>
     {
-        private readonly bool containsEverything;
-        public HashSetOverride(bool containsEverything = false)
+        private readonly bool containsEverything, isYYC;
+        public HashSetTypesOverride(bool containsEverything = false, bool isYYC = false)
         {
             this.containsEverything = containsEverything;
+            this.isYYC = isYYC;
         }
-        public new bool Contains(T item) => containsEverything || base.Contains(item);
+        public new bool Contains(Type item)
+        {
+            if (!containsEverything)
+                return base.Contains(item);
+
+            return !isYYC || !UndertaleResourceReferenceMap.CodeTypes.Contains(item);
+        } 
     }
 
     public class PredicateForVersion
     {
         public (uint Major, uint Minor, uint Release) Version { get; set; }
-        public Func<UndertaleResource, HashSetOverride<Type>, bool, Dictionary<string, object[]>> Predicate { get; set; }
+        public Func<UndertaleResource, HashSetTypesOverride, bool, Dictionary<string, object[]>> Predicate { get; set; }
     }
 
     public static class UndertaleResourceReferenceMethodsMap
@@ -1135,7 +1142,7 @@ namespace UndertaleModTool.Windows
 
 
 
-        public static Dictionary<string, List<object>> GetReferencesOfObject(UndertaleResource obj, UndertaleData data, HashSetOverride<Type> types, bool checkOne = false)
+        public static Dictionary<string, List<object>> GetReferencesOfObject(UndertaleResource obj, UndertaleData data, HashSetTypesOverride types, bool checkOne = false)
         {
             if (obj is null)
                 return null;
@@ -1227,7 +1234,8 @@ namespace UndertaleModTool.Windows
                         for (int i = range.Item1; i < range.Item2; i++)
                         {
                             var asset = assets[i];
-                            var assetReferences = GetReferencesOfObject(asset.Item1, data, new HashSetOverride<Type>(true), true);
+                            var assetReferences = GetReferencesOfObject(asset.Item1, data,
+                                                                        new HashSetTypesOverride(true, data.Code is null), true);
                             if (assetReferences is null)
                             {
                                 if (resultDict.TryGetValue(asset.Item2, out var list))
@@ -1285,9 +1293,12 @@ namespace UndertaleModTool.Windows
             catch
             {
                 mainWindow.IsEnabled = true;
+                stringReferences = null;
+
                 throw;
             }
             mainWindow.IsEnabled = true;
+            stringReferences = null;
 
             if (outDict.Count == 0)
                 return null;

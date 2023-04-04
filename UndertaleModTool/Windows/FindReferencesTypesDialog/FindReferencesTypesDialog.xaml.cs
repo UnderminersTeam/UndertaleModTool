@@ -52,8 +52,7 @@ namespace UndertaleModTool.Windows
                 return;
             }
 
-            var ver = (data.GeneralInfo.Major, data.GeneralInfo.Minor, data.GeneralInfo.Release);
-            (Type, string)[] sourceTypes = UndertaleResourceReferenceMap.GetTypeMapForVersion(obj.GetType(), ver, data.GeneralInfo.BytecodeVersion);
+            (Type, string)[] sourceTypes = UndertaleResourceReferenceMap.GetTypeMapForVersion(obj.GetType(), data);
             if (sourceTypes is null)
             {
                 this.ShowError($"Cannot get the source types for object of type \"{obj.GetType()}\".");
@@ -90,6 +89,9 @@ namespace UndertaleModTool.Windows
 
             foreach (var typePair in sourceTypes)
             {
+                if (data.Code is null && typePair.Key == typeof(UndertaleCode))
+                    continue;
+
                 TypesList.Items.Add(new CheckBox()
                 {
                     DataContext = typePair.Key,
@@ -122,7 +124,7 @@ namespace UndertaleModTool.Windows
         {
             if (sourceObj is not null)
             {
-                HashSetOverride<Type> typesList = new();
+                HashSetTypesOverride typesList = new();
                 foreach (var item in TypesList.Items)
                 {
                     if (item is CheckBox checkBox && checkBox.IsChecked == true)

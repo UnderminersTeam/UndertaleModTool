@@ -311,11 +311,23 @@ namespace UndertaleModTool.Windows
             { typeof(UndertaleEmbeddedAudio), "Embedded audio" },
             { typeof(UndertaleAudioGroup), "Audio groups" }
         };
+        
+        public static readonly HashSet<Type> CodeTypes = new()
+        {
+            typeof(UndertaleCode),
+            typeof(UndertaleScript),
+            typeof(UndertaleCodeLocals),
+            typeof(UndertaleVariable),
+            typeof(UndertaleFunction)
+        };
 
-        public static (Type, string)[] GetTypeMapForVersion(Type type, (uint, uint, uint) version, byte bytecodeVersion)
+        public static (Type, string)[] GetTypeMapForVersion(Type type, UndertaleData data)
         {
             if (!typeMap.TryGetValue(type, out TypesForVersion[] typesForVer))
                 return null;
+
+            var version = (data.GeneralInfo.Major, data.GeneralInfo.Minor, data.GeneralInfo.Release);
+            byte bytecodeVersion = data.GeneralInfo.BytecodeVersion;
 
             IEnumerable<(Type, string)> outTypes = Enumerable.Empty<(Type, string)>();
             foreach (var typeForVer in typesForVer)
@@ -333,7 +345,9 @@ namespace UndertaleModTool.Windows
             if (outTypes == Enumerable.Empty<(Type, string)>())
                 return null;
 
-            return outTypes.Where(x => x.Item2 is not null).ToArray();
+            return outTypes.Where(x => x.Item2 is not null
+                                       && !(data.Code is null && CodeTypes.Contains(x.Item1)))
+                           .ToArray();
         }
 
         public static Dictionary<Type, string> GetReferenceableTypes((uint, uint, uint) version)
