@@ -1599,6 +1599,8 @@ namespace UndertaleModTool
                 // Gets the clicked visual element by the mouse position (relative to "MainTree").
                 // This is used instead of "VisualTreeHelper.HitTest()" because that ignores the visibility of elements,
                 // which led to "ghost" hits on empty space.
+
+                // Updated: why I simply didn't use "e.OriginalSource"?
                 DependencyObject obj = MainTree.InputHitTest(e.GetPosition(MainTree)) as DependencyObject;
                 if (obj is not TextBlock)
                     return;
@@ -1916,9 +1918,68 @@ namespace UndertaleModTool
             }
         }
 
+        private void MenuItem_FindUnreferencedAssets_Click(object sender, RoutedEventArgs e)
+        {
+            FindReferencesTypesDialog dialog = null;
+            try
+            {
+                dialog = new(Data);
+                dialog.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                this.ShowError("An error occured in the object references related window.\n" +
+                               $"Please report this on GitHub.\n\n{ex}");
+            }
+            finally
+            {
+                dialog?.Close();
+            }
+        }
+
+        private void MenuItem_ContextMenuOpened(object sender, RoutedEventArgs e)
+        {
+            var menu = sender as ContextMenu;
+            foreach (var item in menu.Items)
+            {
+                var menuItem = item as MenuItem;
+                if ((menuItem.Header as string) == "Find all references")
+                {
+                    menuItem.Visibility = UndertaleResourceReferenceMap.IsTypeReferenceable(menu.DataContext?.GetType())
+                                          ? Visibility.Visible : Visibility.Collapsed;
+
+                    break;
+                }
+            }
+        }
         private void MenuItem_OpenInNewTab_Click(object sender, RoutedEventArgs e)
         {
             OpenInTab(Highlighted, true);
+        }
+        private void MenuItem_FindAllReferences_Click(object sender, RoutedEventArgs e)
+        {
+            var obj = (sender as FrameworkElement)?.DataContext as UndertaleResource;
+            if (obj is null)
+            {
+                this.ShowError("The selected object is not an \"UndertaleResource\".");
+                return;
+            }
+
+            FindReferencesTypesDialog dialog = null;
+            try
+            {
+                dialog = new(obj, Data);
+                dialog.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                this.ShowError("An error occured in the object references related window.\n" +
+                               $"Please report this on GitHub.\n\n{ex}");
+            }
+            finally
+            {
+                dialog?.Close();
+            }
         }
         private void MenuItem_CopyName_Click(object sender, RoutedEventArgs e)
         {
@@ -2103,6 +2164,9 @@ namespace UndertaleModTool
         private async void MenuItem_RunBuiltinScript_Item_Click(object sender, RoutedEventArgs e)
         {
             string path = (string)(sender as MenuItem).CommandParameter;
+            if (!File.Exists(path))
+                path = Path.Combine(Program.GetExecutableDirectory(), path);
+
             if (File.Exists(path))
                 await RunScript(path);
             else
@@ -2215,7 +2279,7 @@ namespace UndertaleModTool
                 {
                     foreach (string resType in resTypes)
                     {
-                        IEnumerable resListCollection = Data[resType] as IEnumerable;
+                        IEnumerable resListCollection = Data[resType];
                         if (resListCollection is not null)
                         {
                             BindingOperations.EnableCollectionSynchronization(resListCollection, bindingLock);
@@ -2230,7 +2294,7 @@ namespace UndertaleModTool
                     {
                         if (syncBindings.Contains(resType))
                         {
-                            BindingOperations.DisableCollectionSynchronization(Data[resType] as IEnumerable);
+                            BindingOperations.DisableCollectionSynchronization(Data[resType]);
 
                             syncBindings.Remove(resType);
                         }
@@ -2241,7 +2305,7 @@ namespace UndertaleModTool
             {
                 if (enable)
                 {
-                    IEnumerable resListCollection = Data[resourceType] as IEnumerable;
+                    IEnumerable resListCollection = Data[resourceType];
                     if (resListCollection is not null)
                     {
                         BindingOperations.EnableCollectionSynchronization(resListCollection, bindingLock);
@@ -2251,7 +2315,7 @@ namespace UndertaleModTool
                 }
                 else if (syncBindings.Contains(resourceType))
                 {
-                    BindingOperations.DisableCollectionSynchronization(Data[resourceType] as IEnumerable);
+                    BindingOperations.DisableCollectionSynchronization(Data[resourceType]);
 
                     syncBindings.Remove(resourceType);
                 }
@@ -2262,7 +2326,7 @@ namespace UndertaleModTool
             if (syncBindings.Count <= 0) return;
 
             foreach (string resType in syncBindings)
-                BindingOperations.DisableCollectionSynchronization(Data[resType] as IEnumerable);
+                BindingOperations.DisableCollectionSynchronization(Data[resType]);
 
             syncBindings.Clear();
         }
@@ -2461,14 +2525,21 @@ namespace UndertaleModTool
             return excText;
         }
 
+        public void InitializeProgressDialog(string title, string msg)
+        {
+            scriptDialog ??= new LoaderDialog(title, msg)
+            {
+                Owner = this,
+                PreventClose = true
+            };
+        }
+
         public async Task RunScript(string path)
         {
             ScriptExecutionSuccess = true;
             ScriptErrorMessage = "";
             ScriptErrorType = "";
-            scriptDialog = new LoaderDialog("Script in progress...", "Please wait...");
-            scriptDialog.Owner = this;
-            scriptDialog.PreventClose = true;
+            InitializeScriptDialog();
             this.IsEnabled = false; // Prevent interaction while the script is running.
 
             await RunScriptNow(path); // Runs the script now.
@@ -3240,7 +3311,7 @@ result in loss of work.");
             IList resList;
             try
             {
-                resList = Data[res.GetType()] as IList;
+                resList = Data[res.GetType()];
             }
             catch (Exception ex)
             {
@@ -3279,7 +3350,7 @@ result in loss of work.");
                 mainTreeViewer.UpdateLayout();
 
                 double firstElemOffset = mainTreeViewer.VerticalOffset + (resPanel.Children[0] as TreeViewItem).TransformToAncestor(mainTreeViewer).Transform(new Point(0, 0)).Y;
-                mainTreeViewer.ScrollToVerticalOffset(firstElemOffset + ((resList.IndexOf(obj) + 1) * 16) - (mainTreeViewer.ViewportHeight / 2));
+                mainTreeViewer.ScrollToVerticalOffset(firstElemOffset + ((resList.IndexOf(res) + 1) * 16) - (mainTreeViewer.ViewportHeight / 2));
             }
             mainTreeViewer.UpdateLayout();
 
@@ -3790,6 +3861,21 @@ result in loss of work.");
             if (viewer.ComputedVerticalScrollBarVisibility != Visibility.Visible
                 && e.Source == viewer)
                 e.Handled = true;
+        }
+
+        public bool HasEditorForAsset(object asset)
+        {
+            if (asset is null)
+                return false;
+
+            Type objType = asset.GetType();
+            foreach (var key in DataEditor.Resources.Keys)
+            {
+                if (key is DataTemplateKey templateKey && (templateKey.DataType as Type) == objType)
+                    return true;
+            }
+
+            return false;
         }
     }
 

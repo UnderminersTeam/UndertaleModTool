@@ -448,6 +448,8 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
                     Keyframes = reader.ReadUndertaleObject<RealKeyframes>();
                     break;
                 case "GMTextTrack":     // Introduced in GM 2022.2
+                    if (!reader.undertaleData.IsVersionAtLeast(2022, 2))
+                        reader.undertaleData.SetGMS2Version(2022, 2);
                     Keyframes = reader.ReadUndertaleObject<TextKeyframes>();
                     break;
                 case "GMParticleTrack": // Introduced in GM 2023.2

@@ -47,11 +47,16 @@ namespace UndertaleModLib
         public UndertaleChunkSTRG STRG => Chunks.GetValueOrDefault("STRG") as UndertaleChunkSTRG;
         public UndertaleChunkTXTR TXTR => Chunks.GetValueOrDefault("TXTR") as UndertaleChunkTXTR;
         public UndertaleChunkAUDO AUDO => Chunks.GetValueOrDefault("AUDO") as UndertaleChunkAUDO;
-        // GMS2.3+ for the below chunks
+        // GMS 2.3+ for the below chunks
         public UndertaleChunkACRV ACRV => Chunks.GetValueOrDefault("ACRV") as UndertaleChunkACRV;
         public UndertaleChunkSEQN SEQN => Chunks.GetValueOrDefault("SEQN") as UndertaleChunkSEQN;
         public UndertaleChunkTAGS TAGS => Chunks.GetValueOrDefault("TAGS") as UndertaleChunkTAGS;
         public UndertaleChunkFEAT FEAT => Chunks.GetValueOrDefault("FEAT") as UndertaleChunkFEAT;
+        // GMS 2.3.6+
+        public UndertaleChunkFEDS FEDS => Chunks.GetValueOrDefault("FEDS") as UndertaleChunkFEDS;
+        // GM 2023.2+
+        public UndertaleChunkPSEM PSEM => Chunks.GetValueOrDefault("PSEM") as UndertaleChunkPSEM;
+        public UndertaleChunkPSYS PSYS => Chunks.GetValueOrDefault("PSYS") as UndertaleChunkPSYS;
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {

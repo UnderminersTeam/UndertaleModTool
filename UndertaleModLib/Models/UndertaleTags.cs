@@ -31,7 +31,7 @@ public class UndertaleTags : UndertaleObject, IDisposable
             UndertaleAnimationCurve => ResourceType.AnimCurve,
             _ => throw new ArgumentException("Invalid resource type!")
         };
-        IList list = data[resource.GetType()] as IList;
+        IList list = data[resource.GetType()];
 
         int offset = resource is UndertaleScript ? 100000 : 0;
 

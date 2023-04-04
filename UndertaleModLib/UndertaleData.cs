@@ -25,18 +25,26 @@ namespace UndertaleModLib
         /// </summary>
         /// <param name="resourceTypeName">The resource name to get.</param>
         /// <exception cref="MissingMemberException"> if the data file does not contain a property with that name.</exception>
-        public object this[string resourceTypeName]
+        public IList this[string resourceTypeName]
         {
             get
             {
+                // Prevent recursion
+                if (resourceTypeName == "Item")
+                    return null;
+
                 var property = GetType().GetProperty(resourceTypeName);
                 if (property is null)
                     throw new MissingMemberException($"\"UndertaleData\" doesn't contain a property named \"{resourceTypeName}\".");
 
-                return property.GetValue(this, null);
+                return property.GetValue(this, null) as IList;
             }
             set
             {
+                // Prevent recursion
+                if (resourceTypeName == "Item")
+                    return;
+                
                 var property = GetType().GetProperty(resourceTypeName);
                 if (property is null)
                     throw new MissingMemberException($"\"UndertaleData\" doesn't contain a property named \"{resourceTypeName}\".");
@@ -51,10 +59,14 @@ namespace UndertaleModLib
         /// <param name="resourceType">The resource type to get.</param>
         /// <exception cref="NotSupportedException"> if the type is not an <see cref="UndertaleNamedResource"/>.</exception>
         /// <exception cref="MissingMemberException"> if the data file does not contain a property of that type.</exception>
-        public object this[Type resourceType]
+        public IList this[Type resourceType]
         {
             get
             {
+                // Prevent recursion
+                if (resourceType == typeof(UndertaleResource))
+                    return null;
+
                 if (!typeof(UndertaleResource).IsAssignableFrom(resourceType))
                     throw new NotSupportedException($"\"{resourceType.FullName}\" is not an UndertaleResource.");
 
@@ -63,7 +75,7 @@ namespace UndertaleModLib
                 if (property is null)
                     throw new MissingMemberException($"\"UndertaleData\" doesn't contain a resource list of type \"{resourceType.FullName}\".");
 
-                return property.GetValue(this, null);
+                return property.GetValue(this, null) as IList;
             }
             set
             {
@@ -273,6 +285,12 @@ namespace UndertaleModLib
         /// The feature flags stored in the data file.
         /// </summary>
         public UndertaleFeatureFlags FeatureFlags => FORM.FEAT?.Object;
+
+        /// <summary>
+        /// The filter effects stored in the data file.
+        /// </summary>
+        public IList<UndertaleFilterEffect> FilterEffects => FORM.FEDS?.List;
+
 
         /// <summary>
         /// Whether this is an unsupported bytecode version.
@@ -605,6 +623,10 @@ namespace UndertaleModLib
             // Clear all object lists (sprites, code, etc.)
             foreach (PropertyInfo dataListProperty in AllListProperties)
             {
+                // If it's an indexer property
+                if (dataListProperty.Name == "Item")
+                    continue;
+
                 // If list is null
                 if (dataListProperty.GetValue(this) is not IList list)
                     continue;

@@ -7,8 +7,9 @@
              mc:Ignorable="d" 
              d:DesignHeight="20" d:DesignWidth="300">
     <UserControl.Resources>
-        <local:ContextMenuDark x:Key="contextMenu">
-            <local:MenuItemDark Header="Open in new tab" Click="OpenInNewTabItem_Click"/>
+        <local:ContextMenuDark x:Key="contextMenu" Opened="MenuItem_ContextMenuOpened">
+            <MenuItem Header="Open in new tab" Click="OpenInNewTabItem_Click"/>
+            <MenuItem Header="Find all references" Click="FindAllReferencesItem_Click"/>
         </local:ContextMenuDark>
     </UserControl.Resources>
     <Grid>
