@@ -140,6 +140,8 @@ namespace UndertaleModTool.Windows
                         {
                             (typeof(UndertaleBackground), "Backgrounds"),
                             (typeof(UndertaleCode), "Code entries (name and contents)"),
+                            (typeof(UndertaleVariable), "Variables"),
+                            (typeof(UndertaleFunction), "Functions"),
                             (typeof(UndertaleSound), "Sounds"),
                             (typeof(UndertaleAudioGroup), "Audio groups"),
                             (typeof(UndertaleSprite), "Sprites"),
@@ -148,7 +150,6 @@ namespace UndertaleModTool.Windows
                             (typeof(UndertaleExtensionOption), "Extension options"),
                             (typeof(UndertaleExtensionFunction), "Extension functions"),
                             (typeof(UndertaleFont), "Fonts"),
-                            (typeof(UndertaleFunction), "Functions"),
                             (typeof(UndertaleGameObject), "Game objects"),
                             (typeof(UndertaleGeneralInfo), "General info"),
                             (typeof(UndertaleOptions.Constant), "Game options constants"),

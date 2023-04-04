@@ -402,6 +402,18 @@ namespace UndertaleModTool.Windows
                                 if (codeEntries.Any())
                                     outDict["Code entries (name and contents)"] = checkOne ? codeEntries.ToEmptyArray() : codeEntries.ToArray();
                             }
+                            if (types.Contains(typeof(UndertaleFunction)))
+                            {
+                                var functions = data.Functions.Where(x => x.Name == obj);
+                                if (functions.Any())
+                                    outDict["Functions"] = checkOne ? functions.ToEmptyArray() : functions.ToArray();
+                            }
+                            if (types.Contains(typeof(UndertaleVariable)))
+                            {
+                                var variables = data.Variables.Where(x => x.Name == obj);
+                                if (variables.Any())
+                                    outDict["Variables"] = checkOne ? variables.ToEmptyArray() : variables.ToArray();
+                            }
 
                             if (types.Contains(typeof(UndertaleSound)))
                             {
@@ -497,13 +509,6 @@ namespace UndertaleModTool.Windows
                                 var fonts = data.Fonts.Where(x => x.Name == obj || x.DisplayName == obj);
                                 if (fonts.Any())
                                     outDict["Fonts"] = checkOne ? fonts.ToEmptyArray() : fonts.ToArray();
-                            }
-
-                            if (types.Contains(typeof(UndertaleFunction)))
-                            {
-                                var functions = data.Functions.Where(x => x.Name == obj);
-                                if (functions.Any())
-                                    outDict["Functions"] = checkOne ? functions.ToEmptyArray() : functions.ToArray();
                             }
 
                             if (types.Contains(typeof(UndertaleGameObject)))
