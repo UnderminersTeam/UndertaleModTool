@@ -1580,7 +1580,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
             public bool AreInstancesUnresolved()
             {
-                return InstanceIds.Length > 0 && Instances.Count == 0;
+                return InstanceIds?.Length > 0 && Instances?.Count == 0;
             }
 
             /// <inheritdoc />
