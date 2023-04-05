@@ -31,7 +31,7 @@
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Flags</TextBlock>
-        <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding Flags}"/>
+        <local:TextBoxDark Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding Flags}"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Type</TextBlock>
         <local:UndertaleStringReference Grid.Row="2" Grid.Column="1" Margin="3" ObjectReference="{Binding Type}"/>
@@ -40,13 +40,13 @@
         <local:UndertaleStringReference Grid.Row="3" Grid.Column="1" Margin="3" ObjectReference="{Binding File}"/>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Effects</TextBlock>
-        <TextBox Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding Effects}"/>
+        <local:TextBoxDark Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding Effects}"/>
 
         <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Volume</TextBlock>
-        <TextBox Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding Volume}"/>
+        <local:TextBoxDark Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding Volume}"/>
 
         <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Pitch</TextBlock>
-        <TextBox Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding Pitch}"/>
+        <local:TextBoxDark Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding Pitch}"/>
 
         <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Audio group</TextBlock>
         <local:UndertaleObjectReference Grid.Row="7" Grid.Column="1" Margin="3" ObjectReference="{Binding AudioGroup}" ObjectType="{x:Type undertale:UndertaleAudioGroup}"/>

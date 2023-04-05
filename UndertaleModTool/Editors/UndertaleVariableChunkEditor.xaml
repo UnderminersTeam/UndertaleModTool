@@ -25,12 +25,12 @@
         <Separator Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Instance/global variable count</TextBlock>
-        <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding InstanceVarCount}"/>
+        <local:TextBoxDark Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding InstanceVarCount}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Instance/global variable count (again)</TextBlock>
-        <TextBox Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding InstanceVarCountAgain}"/>
+        <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding InstanceVarCountAgain}"/>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Max local variable count</TextBlock>
-        <TextBox Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding MaxLocalVarCount}"/>
+        <local:TextBoxDark Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding MaxLocalVarCount}"/>
     </Grid>
 </local:DataUserControl>

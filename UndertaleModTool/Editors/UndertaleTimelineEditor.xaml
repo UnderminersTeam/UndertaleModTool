@@ -51,7 +51,7 @@
                 <DataGridTemplateColumn Header="Step" Width="1*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBox Text="{Binding Step, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0"/>
+                            <local:TextBoxDark Text="{Binding Step, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

@@ -325,12 +325,12 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding Width}"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding Height}"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding Width}"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding Height}"/>
                             </Grid>
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Speed</TextBlock>
-                            <TextBox Grid.Row="3" Grid.Column="2" Margin="3" Text="{Binding Speed}"/>
+                            <local:TextBoxDark Grid.Row="3" Grid.Column="2" Margin="3" Text="{Binding Speed}"/>
 
                             <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Persistent</TextBlock>
                             <CheckBox Grid.Row="4" Grid.Column="2" Margin="3" IsChecked="{Binding Persistent}"/>
@@ -345,10 +345,10 @@
                             <local:UndertaleObjectReference Grid.Row="7" Grid.Column="2" Margin="3" ObjectReference="{Binding CreationCodeId}" ObjectType="{x:Type undertale:UndertaleCode}"  ObjectEventType="{x:Static undertale:EventType.Create}" ObjectEventSubtype="0"/>
 
                             <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Flags</TextBlock>
-                            <TextBox Grid.Row="8" Grid.Column="2" Margin="3" Text="{Binding Flags, Converter={StaticResource IsGMS2Converter}, ConverterParameter=flags}"/>
+                            <local:TextBoxDark Grid.Row="8" Grid.Column="2" Margin="3" Text="{Binding Flags, Converter={StaticResource IsGMS2Converter}, ConverterParameter=flags}"/>
 
                             <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">World</TextBlock>
-                            <TextBox Grid.Row="9" Grid.Column="2" Margin="3" Text="{Binding World}"/>
+                            <local:TextBoxDark Grid.Row="9" Grid.Column="2" Margin="3" Text="{Binding World}"/>
 
                             <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Top/Left/Right/Bottom</TextBlock>
                             <Grid Grid.Row="10" Grid.Column="2">
@@ -358,10 +358,10 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding Top}"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding Left}"/>
-                                <TextBox Grid.Column="2" Margin="3" Text="{Binding Right}"/>
-                                <TextBox Grid.Column="3" Margin="3" Text="{Binding Bottom}"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding Top}"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding Left}"/>
+                                <local:TextBoxDark Grid.Column="2" Margin="3" Text="{Binding Right}"/>
+                                <local:TextBoxDark Grid.Column="3" Margin="3" Text="{Binding Bottom}"/>
                             </Grid>
 
                             <TextBlock Grid.Row="11" Grid.Column="0" Margin="3">Gravity</TextBlock>
@@ -370,18 +370,18 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding GravityX}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding GravityY}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding GravityX}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding GravityY}" ToolTip="Y"/>
                             </Grid>
 
                             <TextBlock Grid.Row="12" Grid.Column="0" Margin="3">Grid Width</TextBlock>
-                            <TextBox Grid.Row="12" Grid.Column="2" Margin="3" Text="{Binding GridWidth}"/>
+                            <local:TextBoxDark Grid.Row="12" Grid.Column="2" Margin="3" Text="{Binding GridWidth}"/>
 
                             <TextBlock Grid.Row="13" Grid.Column="0" Margin="3">Grid Height</TextBlock>
-                            <TextBox Grid.Row="13" Grid.Column="2" Margin="3" Text="{Binding GridHeight}"/>
+                            <local:TextBoxDark Grid.Row="13" Grid.Column="2" Margin="3" Text="{Binding GridHeight}"/>
 
                             <TextBlock Grid.Row="14" Grid.Column="0" Margin="3">Grid Thickness</TextBlock>
-                            <TextBox Grid.Row="14" Grid.Column="2" Margin="3" Text="{Binding GridThicknessPx}"/>
+                            <local:TextBoxDark Grid.Row="14" Grid.Column="2" Margin="3" Text="{Binding GridThicknessPx}"/>
                         </Grid>
                     </DataTemplate>
 
@@ -423,8 +423,8 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding X}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding Y}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding X}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding Y}" ToolTip="Y"/>
                             </Grid>
 
                             <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Tiling</TextBlock>
@@ -443,8 +443,8 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding SpeedX}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding SpeedY}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding SpeedX}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding SpeedY}" ToolTip="Y"/>
                             </Grid>
 
                             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Stretch</TextBlock>
@@ -485,10 +485,10 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding ViewX}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding ViewY}" ToolTip="Y"/>
-                                <TextBox Grid.Column="2" Margin="3" Text="{Binding ViewWidth}" ToolTip="Width"/>
-                                <TextBox Grid.Column="3" Margin="3" Text="{Binding ViewHeight}" ToolTip="Height"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding ViewX}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding ViewY}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="2" Margin="3" Text="{Binding ViewWidth}" ToolTip="Width"/>
+                                <local:TextBoxDark Grid.Column="3" Margin="3" Text="{Binding ViewHeight}" ToolTip="Height"/>
                             </Grid>
 
                             <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Port pos/size</TextBlock>
@@ -499,10 +499,10 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding PortX}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding PortY}" ToolTip="Y"/>
-                                <TextBox Grid.Column="2" Margin="3" Text="{Binding PortWidth}" ToolTip="Width"/>
-                                <TextBox Grid.Column="3" Margin="3" Text="{Binding PortHeight}" ToolTip="Height"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding PortX}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding PortY}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="2" Margin="3" Text="{Binding PortWidth}" ToolTip="Width"/>
+                                <local:TextBoxDark Grid.Column="3" Margin="3" Text="{Binding PortHeight}" ToolTip="Height"/>
                             </Grid>
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Border</TextBlock>
@@ -511,8 +511,8 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding BorderX}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding BorderY}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding BorderX}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding BorderY}" ToolTip="Y"/>
                             </Grid>
 
                             <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Speed</TextBlock>
@@ -521,8 +521,8 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding SpeedX}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding SpeedY}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding SpeedX}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding SpeedY}" ToolTip="Y"/>
                             </Grid>
 
                             <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Follows object</TextBlock>
@@ -561,15 +561,15 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding X}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding Y}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding X}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding Y}" ToolTip="Y"/>
                             </Grid>
 
                             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Definition</TextBlock>
                             <local:UndertaleObjectReference Grid.Row="1" Grid.Column="2" Margin="3" ObjectReference="{Binding ObjectDefinition}" ObjectType="{x:Type undertale:UndertaleGameObject}" CanRemove="False"/>
 
                             <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Instance ID</TextBlock>
-                            <TextBox Grid.Row="2" Grid.Column="2" Margin="3" Text="{Binding InstanceID}"/>
+                            <local:TextBoxDark Grid.Row="2" Grid.Column="2" Margin="3" Text="{Binding InstanceID}"/>
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Creation code</TextBlock>
                             <local:UndertaleObjectReference Grid.Row="3" Grid.Column="2" Margin="3" ObjectReference="{Binding CreationCode}" ObjectType="{x:Type undertale:UndertaleCode}" ObjectEventType="{x:Static undertale:EventType.Create}" ObjectEventSubtype="0"/>
@@ -580,15 +580,15 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding ScaleX}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding ScaleY}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding ScaleX}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding ScaleY}" ToolTip="Y"/>
                             </Grid>
 
                             <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Color</TextBlock>
                             <local:ColorPicker Grid.Row="5" Grid.Column="2" Margin="3" Color="{Binding Color}"/>
 
                             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Rotation</TextBlock>
-                            <TextBox Grid.Row="6" Grid.Column="2" Margin="3" Text="{Binding Rotation}"/>
+                            <local:TextBoxDark Grid.Row="6" Grid.Column="2" Margin="3" Text="{Binding Rotation}"/>
 
                             <Grid Grid.Row="7" Grid.ColumnSpan="3" Visibility="{Binding Data, Mode=OneTime, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}, Converter={StaticResource IsGMS2_2_2_302Converter}}">
                                 <Grid.ColumnDefinitions>
@@ -601,10 +601,10 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Frame index</TextBlock>
-                                <TextBox Grid.Row="0" Grid.Column="2" Margin="3" Text="{Binding ImageIndex}"/>
+                                <local:TextBoxDark Grid.Row="0" Grid.Column="2" Margin="3" Text="{Binding ImageIndex}"/>
 
                                 <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Image speed</TextBlock>
-                                <TextBox Grid.Row="1" Grid.Column="2" Margin="3" Text="{Binding ImageSpeed}"/>
+                                <local:TextBoxDark Grid.Row="1" Grid.Column="2" Margin="3" Text="{Binding ImageSpeed}"/>
                             </Grid>
 
                             <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Pre Create code</TextBlock>
@@ -644,8 +644,8 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding X}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding Y}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding X}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding Y}" ToolTip="Y"/>
                             </Grid>
 
                             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Definition</TextBlock>
@@ -676,10 +676,10 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding SourceX}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding SourceY}" ToolTip="Y"/>
-                                <TextBox Grid.Column="2" Margin="3" Text="{Binding Width}" ToolTip="Width"/>
-                                <TextBox Grid.Column="3" Margin="3" Text="{Binding Height}" ToolTip="Height"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding SourceX}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding SourceY}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="2" Margin="3" Text="{Binding Width}" ToolTip="Width"/>
+                                <local:TextBoxDark Grid.Column="3" Margin="3" Text="{Binding Height}" ToolTip="Height"/>
                             </Grid>
 
                             <TextBlock Grid.Row="3" Grid.Column="2" Margin="3" HorizontalAlignment="Center" Foreground="DarkGray" FontStyle="Italic" TextWrapping="Wrap">
@@ -710,10 +710,10 @@
                             </Viewbox>
 
                             <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Depth</TextBlock>
-                            <TextBox Grid.Row="5" Grid.Column="2" Margin="3" Text="{Binding TileDepth}"/>
+                            <local:TextBoxDark Grid.Row="5" Grid.Column="2" Margin="3" Text="{Binding TileDepth}"/>
 
                             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Instance ID</TextBlock>
-                            <TextBox Grid.Row="6" Grid.Column="2" Margin="3" Text="{Binding InstanceID}"/>
+                            <local:TextBoxDark Grid.Row="6" Grid.Column="2" Margin="3" Text="{Binding InstanceID}"/>
 
                             <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Scale</TextBlock>
                             <Grid Grid.Row="7" Grid.Column="2">
@@ -721,8 +721,8 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding ScaleX}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding ScaleY}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding ScaleX}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding ScaleY}" ToolTip="Y"/>
                             </Grid>
 
                             <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Color</TextBlock>
@@ -766,13 +766,13 @@
                             <local:UndertaleStringReference Grid.Row="0" Grid.Column="2" Margin="3" ObjectReference="{Binding LayerName}"/>
 
                             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Layer id</TextBlock>
-                            <TextBox Grid.Row="1" Grid.Column="2" Margin="3" Text="{Binding LayerId}"/>
+                            <local:TextBoxDark Grid.Row="1" Grid.Column="2" Margin="3" Text="{Binding LayerId}"/>
 
                             <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Layer type</TextBlock>
                             <TextBlock Grid.Row="2" Grid.Column="2" Margin="3" Text="{Binding LayerType}" FontWeight="Bold"/>
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Depth</TextBlock>
-                            <TextBox Grid.Row="3" Grid.Column="2" Margin="3" Text="{Binding LayerDepth}"/>
+                            <local:TextBoxDark Grid.Row="3" Grid.Column="2" Margin="3" Text="{Binding LayerDepth}"/>
 
                             <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Visibility="{Binding LayerType, Mode=OneTime, Converter={StaticResource LayerTypeConverter}}">Offset</TextBlock>
                             <Grid Grid.Row="4" Grid.Column="2" Visibility="{Binding LayerType, Mode=OneTime, Converter={StaticResource LayerTypeConverter}}">
@@ -780,8 +780,8 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding XOffset}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding YOffset}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding XOffset}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding YOffset}" ToolTip="Y"/>
                             </Grid>
 
                             <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Visibility="{Binding LayerType, Mode=OneTime, Converter={StaticResource LayerTypeConverter}}">Speed</TextBlock>
@@ -790,8 +790,8 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding HSpeed}" ToolTip="Horizontal"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding VSpeed}" ToolTip="Vertical"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding HSpeed}" ToolTip="Horizontal"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding VSpeed}" ToolTip="Vertical"/>
                             </Grid>
 
                             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Visible</TextBlock>
@@ -835,8 +835,8 @@
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <TextBox Grid.Column="0" Margin="3" Text="{Binding TilesX}" ToolTip="Horizontal"/>
-                                                <TextBox Grid.Column="1" Margin="3" Text="{Binding TilesY}" ToolTip="Vertical"/>
+                                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding TilesX}" ToolTip="Horizontal"/>
+                                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding TilesY}" ToolTip="Vertical"/>
                                             </Grid>
 
                                             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Tile set</TextBlock>
@@ -905,7 +905,7 @@
                                             <local:ColorPicker Grid.Row="5" Grid.Column="2" Margin="3" Color="{Binding Color}"/>
 
                                             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">First frame</TextBlock>
-                                            <TextBox Grid.Row="6" Grid.Column="2" Margin="3" Text="{Binding FirstFrame}"/>
+                                            <local:TextBoxDark Grid.Row="6" Grid.Column="2" Margin="3" Text="{Binding FirstFrame}"/>
 
                                             <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Animation speed</TextBlock>
                                             <Grid Grid.Row="7" Grid.Column="2" Margin="3">
@@ -914,7 +914,7 @@
                                                     <ColumnDefinition Width="1*"/>
                                                 </Grid.ColumnDefinitions>
 
-                                                <TextBox Grid.Column="0" Text="{Binding AnimationSpeed}"/>
+                                                <local:TextBoxDark Grid.Column="0" Text="{Binding AnimationSpeed}"/>
                                                 <local:ComboBoxDark Grid.Column="1" ItemsSource="{Binding Source={StaticResource AnimationSpeedType}}" SelectedItem="{Binding AnimationSpeedType}" />
                                             </Grid>
                                         </Grid>
@@ -967,8 +967,8 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding X}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding Y}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding X}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding Y}" ToolTip="Y"/>
                             </Grid>
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Scale</TextBlock>
@@ -977,8 +977,8 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding ScaleX}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding ScaleY}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding ScaleX}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding ScaleY}" ToolTip="Y"/>
                             </Grid>
 
                             <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Color</TextBlock>
@@ -991,15 +991,15 @@
                                     <ColumnDefinition Width="1*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <TextBox Grid.Column="0" Text="{Binding AnimationSpeed}"/>
+                                <local:TextBoxDark Grid.Column="0" Text="{Binding AnimationSpeed}"/>
                                 <local:ComboBoxDark Grid.Column="1" ItemsSource="{Binding Source={StaticResource AnimationSpeedType}}" SelectedItem="{Binding AnimationSpeedType}" />
                             </Grid>
 
                             <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Frame index</TextBlock>
-                            <TextBox Grid.Row="7" Grid.Column="2" Margin="3" Text="{Binding FrameIndex}"/>
+                            <local:TextBoxDark Grid.Row="7" Grid.Column="2" Margin="3" Text="{Binding FrameIndex}"/>
 
                             <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Rotation</TextBlock>
-                            <TextBox Grid.Row="8" Grid.Column="2" Margin="3" Text="{Binding Rotation}"/>
+                            <local:TextBoxDark Grid.Row="8" Grid.Column="2" Margin="3" Text="{Binding Rotation}"/>
                         </Grid>
                     </DataTemplate>
                 </ContentControl.Resources>

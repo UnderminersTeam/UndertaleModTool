@@ -139,7 +139,7 @@
                 </local:MenuItemDark>
             </Menu>
             <Grid DockPanel.Dock="Bottom">
-                <TextBox x:Name="CommandBox" AcceptsReturn="True" PreviewKeyDown="CommandBox_PreviewKeyDown" Margin="0,0,35,0"/>
+                <local:TextBoxDark x:Name="CommandBox" AcceptsReturn="True" PreviewKeyDown="CommandBox_PreviewKeyDown" Margin="0,0,35,0"/>
                 <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" VerticalContentAlignment="Top" Name="ObjectLabel"/>
             </Grid>
             <Grid>
@@ -216,7 +216,7 @@
                         </local:ButtonDark>
                     </StackPanel>
 
-                    <TextBox Grid.Row="1" Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged">
+                    <local:TextBoxDark Grid.Row="1" x:Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged">
                         <!-- Source - https://stackoverflow.com/a/7433840/12136394 -->
                         <TextBox.Style>
                             <Style TargetType="TextBox">
@@ -240,7 +240,7 @@
                                 </Style.Triggers>
                             </Style>
                         </TextBox.Style>
-                    </TextBox>
+                    </local:TextBoxDark>
                 </Grid>
                 <TreeView Grid.Column="0" Grid.Row="1" Name="MainTree" Margin="5" DataContext="{Binding Data}" AllowDrop="True"
                           SelectedItemChanged="TreeView_SelectedItemChanged"

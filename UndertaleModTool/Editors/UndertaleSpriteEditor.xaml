@@ -60,8 +60,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Margin="3" Text="{Binding Width}"/>
-            <TextBox Grid.Column="1" Margin="3" Text="{Binding Height}"/>
+            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding Width}"/>
+            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding Height}"/>
         </Grid>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Margin Left/Right/Bottom/Top</TextBlock>
@@ -72,10 +72,10 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Margin="3" Text="{Binding MarginLeft}"/>
-            <TextBox Grid.Column="1" Margin="3" Text="{Binding MarginRight}"/>
-            <TextBox Grid.Column="2" Margin="3" Text="{Binding MarginBottom}"/>
-            <TextBox Grid.Column="3" Margin="3" Text="{Binding MarginTop}"/>
+            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding MarginLeft}"/>
+            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding MarginRight}"/>
+            <local:TextBoxDark Grid.Column="2" Margin="3" Text="{Binding MarginBottom}"/>
+            <local:TextBoxDark Grid.Column="3" Margin="3" Text="{Binding MarginTop}"/>
         </Grid>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Transparent</TextBlock>
@@ -88,7 +88,7 @@
         <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding Preload}"/>
 
         <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Bounding box mode</TextBlock>
-        <TextBox Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding BBoxMode}"/>
+        <local:TextBoxDark Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding BBoxMode}"/>
 
         <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">SepMasks</TextBlock>
         <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource SepMaskType}}" SelectedItem="{Binding Path=SepMasks}"
@@ -100,8 +100,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Margin="3" Text="{Binding OriginXWrapper}"/>
-            <TextBox Grid.Column="1" Margin="3" Text="{Binding OriginYWrapper}"/>
+            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding OriginXWrapper}"/>
+            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding OriginYWrapper}"/>
         </Grid>
 
         <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Textures</TextBlock>
@@ -280,7 +280,7 @@
             </Grid.RowDefinitions>
             
             <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Version</TextBlock>
-            <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding SVersion}"/>
+            <local:TextBoxDark Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding SVersion}"/>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Type</TextBlock>
             <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource SpriteType}}" SelectedItem="{Binding Path=SSpriteType}"
@@ -297,7 +297,7 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Playback speed</TextBlock>
-                <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GMS2PlaybackSpeed}"/>
+                <local:TextBoxDark Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GMS2PlaybackSpeed}"/>
 
                 <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Playback speed type</TextBlock>
                 <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource AnimSpeedType}}" SelectedItem="{Binding Path=GMS2PlaybackSpeedType}"

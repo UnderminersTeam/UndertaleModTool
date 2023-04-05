@@ -14,7 +14,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0" VerticalAlignment="Center" Text="{Binding Message}"/>
-        <TextBox Grid.Row="1" VerticalAlignment="Center" AcceptsReturn="{Binding IsMultiline}" Text="{Binding InputText}"></TextBox>
+        <local:TextBoxDark Grid.Row="1" VerticalAlignment="Center" AcceptsReturn="{Binding IsMultiline}" Text="{Binding InputText}"/>
 
         <Grid Grid.Row="2" Name="Buttons">
             <Grid.ColumnDefinitions>

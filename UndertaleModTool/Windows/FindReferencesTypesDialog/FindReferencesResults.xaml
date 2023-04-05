@@ -37,8 +37,8 @@
                    FontSize="22" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="70"/>
         <Rectangle Grid.Row="1" Margin="10,0,20,0" Height="2" Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
 
-        <TextBox Grid.Row="2" Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged"
-                 Margin="10,15,20,0" FontSize="14">
+        <utmt:TextBoxDark Grid.Row="2" x:Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged"
+                          Margin="10,15,20,0" FontSize="14">
             <!-- Source - https://stackoverflow.com/a/7433840/12136394 -->
             <TextBox.Style>
                 <Style TargetType="TextBox">
@@ -62,7 +62,7 @@
                     </Style.Triggers>
                 </Style>
             </TextBox.Style>
-        </TextBox>
+        </utmt:TextBoxDark>
         <TreeView Grid.Row="3" Name="ResultsTree" Margin="10,5,20,0" FontSize="14"
                   SelectedItemChanged="ResultsTree_SelectedItemChanged" MouseDown="ResultsTree_MouseDown"
                   MouseDoubleClick="ResultsTree_MouseDoubleClick" KeyUp="ResultsTree_KeyUp" PreviewMouseRightButtonDown="ResultsTree_PreviewMouseRightButtonDown"

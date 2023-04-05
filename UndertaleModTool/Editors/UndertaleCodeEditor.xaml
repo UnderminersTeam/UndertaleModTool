@@ -31,13 +31,13 @@
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Locals count</TextBlock>
-        <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding LocalsCount}"/>
+        <local:TextBoxDark Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding LocalsCount}"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Arguments count</TextBlock>
-        <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding ArgumentsCount}"/>
+        <local:TextBoxDark Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding ArgumentsCount}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Offset</TextBlock>
-        <TextBox Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Offset}"/>
+        <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Offset}"/>
 
         <TabControl x:Name="CodeModeTabs" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" SelectionChanged="TabControl_SelectionChanged">
             <TabItem Header="Decompiled" Name="DecompiledTab">
