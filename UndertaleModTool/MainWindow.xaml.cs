@@ -2044,7 +2044,8 @@ namespace UndertaleModTool
                     if (obj is UndertaleScript)
                     {
                         UndertaleCode code = new UndertaleCode();
-                        code.Name = Data.Strings.MakeString("gml_Script_" + newname);
+                        string prefix = Data.IsVersionAtLeast(2, 3) ? "gml_GlobalScript_" : "gml_Script_";
+                        code.Name = Data.Strings.MakeString(prefix + newname);
                         Data.Code.Add(code);
                         if (Data?.GeneralInfo.BytecodeVersion > 14)
                         {
