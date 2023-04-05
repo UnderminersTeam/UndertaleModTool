@@ -3,4 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:UndertaleModTool"
              StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <local:ContextMenuDark x:Key="textBoxContextMenu">
+            <MenuItem Command="ApplicationCommands.Cut" />
+            <MenuItem Command="ApplicationCommands.Copy" />
+            <MenuItem Command="ApplicationCommands.Paste" />
+        </local:ContextMenuDark>
+    </Application.Resources>
 </Application>

@@ -43,7 +43,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Text="{Binding EmSize}"/>
+            <local:TextBoxDark Grid.Column="0" Text="{Binding EmSize}"/>
             <TextBlock Grid.Column="1" Text=" em"/>
         </Grid>
 
@@ -60,16 +60,16 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Margin="3" Text="{Binding RangeStart}"/>
+            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding RangeStart}"/>
             <TextBlock Grid.Column="1" Margin="3" Text=" - "/>
-            <TextBox Grid.Column="2" Margin="3" Text="{Binding RangeEnd}"/>
+            <local:TextBoxDark Grid.Column="2" Margin="3" Text="{Binding RangeEnd}"/>
         </Grid>
 
         <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Charset</TextBlock>
-        <TextBox Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding Charset}"/>
+        <local:TextBoxDark Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding Charset}"/>
 
         <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Anti Aliasing</TextBlock>
-        <TextBox Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding AntiAliasing}"/>
+        <local:TextBoxDark Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding AntiAliasing}"/>
 
         <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Texture</TextBlock>
         <local:UndertaleObjectReference Grid.Row="8" Grid.Column="1" Margin="3" ObjectReference="{Binding Texture}" ObjectType="{x:Type undertale:UndertaleTexturePageItem}"/>
@@ -80,12 +80,12 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Margin="3" Text="{Binding ScaleX}"/>
-            <TextBox Grid.Column="1" Margin="3" Text="{Binding ScaleY}"/>
+            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding ScaleX}"/>
+            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding ScaleY}"/>
         </Grid>
 
         <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">SDF spread value</TextBlock>
-        <TextBox Grid.Row="10" Grid.Column="1" Margin="3" Text="{Binding SDFSpread}"/>
+        <local:TextBoxDark Grid.Row="10" Grid.Column="1" Margin="3" Text="{Binding SDFSpread}"/>
 
         <Viewbox Grid.Row="11" Grid.Column="1" Stretch="Uniform" StretchDirection="DownOnly">
             <Border>
@@ -131,7 +131,7 @@
                 <DataGridTemplateColumn Header="Char" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBox Text="{Binding Character, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0" />
+                            <local:TextBoxDark Text="{Binding Character, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -145,10 +145,10 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Text="{Binding SourceX, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
-                                <TextBox Grid.Column="1" Text="{Binding SourceY, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
-                                <TextBox Grid.Column="2" Text="{Binding SourceWidth, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
-                                <TextBox Grid.Column="3" Text="{Binding SourceHeight, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                <local:TextBoxDark Grid.Column="0" Text="{Binding SourceX, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                <local:TextBoxDark Grid.Column="1" Text="{Binding SourceY, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                <local:TextBoxDark Grid.Column="2" Text="{Binding SourceWidth, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                <local:TextBoxDark Grid.Column="3" Text="{Binding SourceHeight, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                             </Grid>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
@@ -156,14 +156,14 @@
                 <DataGridTemplateColumn Header="Shift" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBox Text="{Binding Shift, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                            <local:TextBoxDark Text="{Binding Shift, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Offset" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBox Text="{Binding Offset, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                            <local:TextBoxDark Text="{Binding Offset, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

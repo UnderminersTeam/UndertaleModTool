@@ -55,34 +55,34 @@
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Unknown Always 2</TextBlock>
-            <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GMS2UnknownAlways2}"/>
+            <local:TextBoxDark Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GMS2UnknownAlways2}"/>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Tile Width</TextBlock>
-            <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GMS2TileWidth}"/>
+            <local:TextBoxDark Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GMS2TileWidth}"/>
 
             <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Tile Height</TextBlock>
-            <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding GMS2TileHeight}"/>
+            <local:TextBoxDark Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding GMS2TileHeight}"/>
 
             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Output Border X</TextBlock>
-            <TextBox Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding GMS2OutputBorderX}"/>
+            <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding GMS2OutputBorderX}"/>
 
             <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Output Border Y</TextBlock>
-            <TextBox Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding GMS2OutputBorderY}"/>
+            <local:TextBoxDark Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding GMS2OutputBorderY}"/>
 
             <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Tile Columns</TextBlock>
-            <TextBox Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding GMS2TileColumns}"/>
+            <local:TextBoxDark Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding GMS2TileColumns}"/>
 
             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Items/frames per tile</TextBlock>
-            <TextBox Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding GMS2ItemsPerTileCount}"/>
+            <local:TextBoxDark Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding GMS2ItemsPerTileCount}"/>
 
             <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Tile Count</TextBlock>
-            <TextBox Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding GMS2TileCount}"/>
+            <local:TextBoxDark Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding GMS2TileCount}"/>
 
             <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Unknown Always Zero</TextBlock>
-            <TextBox Grid.Row="8" Grid.Column="1" Margin="3" Text="{Binding GMS2UnknownAlwaysZero}"/>
+            <local:TextBoxDark Grid.Row="8" Grid.Column="1" Margin="3" Text="{Binding GMS2UnknownAlwaysZero}"/>
 
             <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Frame Time (microseconds)</TextBlock>
-            <TextBox Grid.Row="9" Grid.Column="1" Margin="3" Text="{Binding GMS2FrameLength}"/>
+            <local:TextBoxDark Grid.Row="9" Grid.Column="1" Margin="3" Text="{Binding GMS2FrameLength}"/>
 
             <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Tile IDs</TextBlock>
             <local:DataGridDark Grid.Row="10" Grid.Column="1" x:Name="TileIdList" ItemsSource="{Binding GMS2TileIds}" MaxHeight="279" Margin="0,0,0,3" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True"
@@ -116,7 +116,7 @@
                     <DataGridTemplateColumn Header="ID" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBox Margin="20,0,0,0" Text="{Binding ID, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                <local:TextBoxDark Margin="20,0,0,0" Text="{Binding ID, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

@@ -37,10 +37,10 @@
         <local:UndertaleStringReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding ExtName}"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">ID</TextBlock>
-        <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding ID}"/>
+        <local:TextBoxDark Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding ID}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Kind</TextBlock>
-        <TextBox Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Kind}"/>
+        <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Kind}"/>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Return Type</TextBlock>
         <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource VarType}}" SelectedItem="{Binding RetType}"
