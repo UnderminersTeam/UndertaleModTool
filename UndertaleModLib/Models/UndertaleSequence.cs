@@ -455,9 +455,8 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
                 case "GMParticleTrack": // Introduced in GM 2023.2
                     Keyframes = reader.ReadUndertaleObject<ParticleKeyframes>();
                     break;
-
-                case "GMClipMaskTrack":
-                    throw new NotImplementedException("GMClipMaskTrack not implemented, report this");
+                
+                // "GMGroupTrack" and "GMClipMaskTrack" have null keyframes
             }
         }
 
@@ -539,8 +538,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
                     count += 1 + ParticleKeyframes.UnserializeChildObjectCount(reader);
                     break;
 
-                case "GMClipMaskTrack":
-                    throw new NotImplementedException("GMClipMaskTrack not implemented, report this");
+                // "GMGroupTrack" and "GMClipMaskTrack" have null keyframes
             }
 
             return count;
