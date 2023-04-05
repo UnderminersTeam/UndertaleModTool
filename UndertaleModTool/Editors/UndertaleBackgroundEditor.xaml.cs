@@ -12,6 +12,8 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertaleBackgroundEditor : DataUserControl
     {
+        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+
         public UndertaleBackgroundEditor()
         {
             InitializeComponent();
@@ -46,13 +48,20 @@ namespace UndertaleModTool
             e.Handled = true;
 
             int tileIndex = bg.GMS2TileIds.FindIndex(x => x.ID == tileID);
+            if (tileIndex == -1)
+                return;
 
             ScrollViewer tileListViewer = MainWindow.FindVisualChild<ScrollViewer>(TileIdList);
+            if (tileListViewer is null)
+            {
+                mainWindow.ShowError("Cannot find the tile ID list scroll viewer.");
+                return;
+            }
             tileListViewer.ScrollToVerticalOffset(tileIndex + 1 - (tileListViewer.ViewportHeight / 2)); // DataGrid offset is logical
             tileListViewer.UpdateLayout();
 
-            ScrollViewer dataEditorViewer = (Application.Current.MainWindow as MainWindow).DataEditor.Parent as ScrollViewer;
-            double initOffset = dataEditorViewer.VerticalOffset;
+            ScrollViewer dataEditorViewer = mainWindow.DataEditor.Parent as ScrollViewer;
+            double initOffset = dataEditorViewer?.VerticalOffset ?? 0;
 
             TileIdList.SelectedIndex = tileIndex;
             (TileIdList.ItemContainerGenerator.ContainerFromIndex(tileIndex) as DataGridRow)?.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
@@ -64,7 +73,7 @@ namespace UndertaleModTool
         private void DataUserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (IsLoaded)
-                MainWindow.FindVisualChild<ScrollViewer>(TileIdList).ScrollToVerticalOffset(0);
+                MainWindow.FindVisualChild<ScrollViewer>(TileIdList)?.ScrollToTop();
         }
     }
 }
