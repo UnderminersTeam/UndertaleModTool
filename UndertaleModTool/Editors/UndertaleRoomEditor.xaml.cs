@@ -1658,12 +1658,53 @@ namespace UndertaleModTool
                     return;
                 }
 
+                char delimChar = ';';
+                Func<string, uint> numParseFunc = (x) => UInt32.Parse(x);
+                if (tileDataLines[0].Count(x => x == ',') > 1)
+                {
+                    var res = mainWindow.ShowQuestion("Was the data exported from \"Tiled\"?");
+                    if (res == MessageBoxResult.Yes)
+                    {
+                        delimChar = ',';
+                        numParseFunc = (x) =>
+                        {
+                            uint val;
+                            unchecked { val = (uint)Int32.Parse(x); }
+                            if (val == uint.MaxValue)
+                                return 0;
+
+                            uint id = val & 0x0FFFFFFF;
+                            uint flags = val & 0xF0000000;
+                            flags = flags switch
+                            {
+                                0 => 0,
+                                2147483648 => 1, // RotateNoneFlipX
+                                1073741824 => 2, // RotateNoneFlipY
+                                3221225472 => 3, // RotateNoneFlipXY
+                                2684354560 => 4, // Rotate90FlipNone
+                                3758096384 => 5, // Rotate270FlipY
+                                536870912 => 6,  // Rotate90FlipY
+                                1610612736 => 7, // Rotate270FlipNone
+                                _ => throw new InvalidDataException($"{flags} is not a valid tile flag value.")
+                            };
+                            flags <<= 28;
+
+                            return (id | flags);
+                        };
+                    }
+                    else
+                    {
+                        mainWindow.ShowError("The file has invalid data.");
+                        return;
+                    }
+                }
+
                 for (int i = 0; i < tileDataLines.Length; i++)
                 {
                     uint[] dataRow;
                     try
                     {
-                        dataRow = tileDataLines[i].Split(';').Select(x => UInt32.Parse(x)).ToArray();
+                        dataRow = tileDataLines[i].Split(delimChar).Select(numParseFunc).ToArray();
                     }
                     catch (Exception ex)
                     {
@@ -2331,11 +2372,11 @@ namespace UndertaleModTool
                                     angle = 90;
                                     break;
                                 case 5:
-                                    angle = 90;
+                                    angle = 270;
                                     scaleY = -1;
                                     break;
                                 case 6:
-                                    angle = 270;
+                                    angle = 90;
                                     scaleY = -1;
                                     break;
                                 case 7:
