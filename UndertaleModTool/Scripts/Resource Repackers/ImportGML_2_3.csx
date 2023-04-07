@@ -130,7 +130,6 @@ await Task.Run(() => {
             locals.Locals.Add(argsLocal);
 
             code.LocalsCount = 1;
-            code.GenerateLocalVarDefinitions(code.FindReferencedLocalVars(), locals); // Dunno if we actually need this line, but it seems to work?
             Data.CodeLocals.Add(locals);
         }
         if (doParse)

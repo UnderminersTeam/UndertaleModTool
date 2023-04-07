@@ -28,11 +28,20 @@ string DonorDataPath = PromptLoadFile(null, null);
 if (DonorDataPath == null)
     throw new ScriptException("The donor data path was not set.");
 
+bool compContextState = CompileContext.GMS2_3;
+bool decompContextState = DecompileContext.GMS2_3;
+
 using (var stream = new FileStream(DonorDataPath, FileMode.Open, FileAccess.Read))
     DonorData = UndertaleIO.Read(stream, warning => ScriptMessage("A warning occured while trying to load " + DonorDataPath + ":\n" + warning));
 var DonorDataEmbeddedTexturesCount = DonorData.EmbeddedTextures.Count;
 DonorData.BuiltinList = new BuiltinList(DonorData);
 AssetTypeResolver.InitializeTypes(DonorData);
+
+
+CompileContext.GMS2_3 = compContextState;
+DecompileContext.GMS2_3 = decompContextState;
+
+bool donorIs2_3 = DonorData.IsVersionAtLeast(2, 3);
 
 int copiedGameObjectsCount = 0;
 List<string> splitStringsList = GetSplitStringsList("game object");
@@ -129,7 +138,13 @@ for (var j = 0; j < splitStringsList.Count; j++)
                                 string codeToCopy = "";
                                 try
                                 {
+                                    CompileContext.GMS2_3 = donorIs2_3;
+                                    DecompileContext.GMS2_3 = donorIs2_3;
+
                                     codeToCopy = (donorACT.CodeId != null ? Decompiler.Decompile(donorACT.CodeId, DECOMPILE_CONTEXT.Value) : "");
+
+                                    CompileContext.GMS2_3 = compContextState;
+                                    DecompileContext.GMS2_3 = decompContextState;
                                 }
                                 catch (Exception e)
                                 {
@@ -167,7 +182,6 @@ for (var j = 0; j < splitStringsList.Count; j++)
                                         nativelocals.Locals.Add(argsLocal);
                                     }
                                     nativeACT.CodeId.LocalsCount = (uint)nativelocals.Locals.Count;
-                                    nativeACT.CodeId.GenerateLocalVarDefinitions(nativeACT.CodeId.FindReferencedLocalVars(), nativelocals); // Dunno if we actually need this line, but it seems to work?
                                 }
                             }
                             nativeACT.ArgumentCount = donorACT.ArgumentCount;
