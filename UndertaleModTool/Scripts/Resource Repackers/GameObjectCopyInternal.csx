@@ -126,7 +126,6 @@ for (var j = 0; j < splitStringsList.Count; j++)
                                         nativelocals.Locals.Add(argsLocal);
                                     }
                                     nativeACT.CodeId.LocalsCount = (uint)nativelocals.Locals.Count;
-                                    nativeACT.CodeId.GenerateLocalVarDefinitions(nativeACT.CodeId.FindReferencedLocalVars(), nativelocals); // Dunno if we actually need this line, but it seems to work?
                                 }
                             }
                             nativeACT.ArgumentCount = donorACT.ArgumentCount;

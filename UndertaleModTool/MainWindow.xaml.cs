@@ -2056,7 +2056,6 @@ namespace UndertaleModTool
                             argsLocal.Index = 0;
                             locals.Locals.Add(argsLocal);
                             code.LocalsCount = 1;
-                            code.GenerateLocalVarDefinitions(code.FindReferencedLocalVars(), locals);
                             Data.CodeLocals.Add(locals);
                         }
                         (obj as UndertaleScript).Code = code;
@@ -2070,7 +2069,6 @@ namespace UndertaleModTool
                         argsLocal.Index = 0;
                         locals.Locals.Add(argsLocal);
                         (obj as UndertaleCode).LocalsCount = 1;
-                        (obj as UndertaleCode).GenerateLocalVarDefinitions((obj as UndertaleCode).FindReferencedLocalVars(), locals);
                         Data.CodeLocals.Add(locals);
                     }
                 }
@@ -2562,7 +2560,7 @@ namespace UndertaleModTool
 
                 ScriptPath = path;
 
-                string compatScriptText = Regex.Replace(scriptText, @"\bDecompileContext\b", "GlobalDecompileContext", RegexOptions.None);
+                string compatScriptText = Regex.Replace(scriptText, @"\bDecompileContext(?!\.)\b", "GlobalDecompileContext", RegexOptions.None);
                 object result = await CSharpScript.EvaluateAsync(compatScriptText, scriptOptions, this, typeof(IScriptInterface));
 
                 if (FinishedMessageEnabled)
