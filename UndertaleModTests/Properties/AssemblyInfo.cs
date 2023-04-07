@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("UndertaleModTests")]
-[assembly: AssemblyCopyright("Copyright ©  2018-2022")]
+[assembly: AssemblyCopyright("Copyright ©  2018-2023")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
