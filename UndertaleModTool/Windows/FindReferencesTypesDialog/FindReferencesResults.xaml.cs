@@ -378,7 +378,8 @@ namespace UndertaleModTool.Windows
 
                 item.IsSelected = true;
 
-                if (item.DataContext is Array)
+                // If it's a list header (e.g. "Sounds")
+                if (item.DataContext?.GetType().IsGenericType == true)
                     return;
 
                 Open(highlighted, true);
