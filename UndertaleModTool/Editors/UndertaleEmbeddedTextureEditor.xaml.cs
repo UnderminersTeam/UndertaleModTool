@@ -19,6 +19,7 @@ using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 using System.Globalization;
 using UndertaleModLib;
+using UndertaleModTool.Windows;
 
 namespace UndertaleModTool
 {
@@ -28,10 +29,68 @@ namespace UndertaleModTool
     public partial class UndertaleEmbeddedTextureEditor : DataUserControl
     {
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+        private readonly ContextMenuDark pageContextMenu = new();
+        private bool isMenuOpen;
+        private UndertaleTexturePageItem[] items;
+        private UndertaleTexturePageItem hoveredItem;
 
         public UndertaleEmbeddedTextureEditor()
         {
             InitializeComponent();
+
+            var newTabItem = new MenuItem()
+            {
+                Header = "Open in new tab"
+            };
+            newTabItem.Click += OpenInNewTabItem_Click;
+            var referencesItem = new MenuItem()
+            {
+                Header = "Find all references of this page item"
+            };
+            referencesItem.Click += FindAllItemReferencesItem_Click;
+            pageContextMenu.Items.Add(newTabItem);
+            pageContextMenu.Items.Add(referencesItem);
+
+            pageContextMenu.Closed += PageContextMenu_Closed;
+        }
+
+        private void OpenInNewTabItem_Click(object sender, RoutedEventArgs e)
+        {
+            mainWindow.ChangeSelection(hoveredItem, true);
+        }
+        private void FindAllItemReferencesItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (hoveredItem is null)
+                return;
+
+            FindReferencesTypesDialog dialog = null;
+            try
+            {
+                dialog = new(hoveredItem, mainWindow.Data);
+                dialog.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                mainWindow.ShowError("An error occured in the object references related window.\n" +
+                                     $"Please report this on GitHub.\n\n{ex}");
+            }
+            finally
+            {
+                dialog?.Close();
+            }
+        }
+        private void PageContextMenu_Closed(object sender, RoutedEventArgs e)
+        {
+            isMenuOpen = false;
+            Grid_MouseLeave(null, null);
+        }
+
+        private void DataUserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (DataContext is not UndertaleEmbeddedTexture texturePage)
+                return;
+
+            items = mainWindow.Data.TexturePageItems.Where(x => x.TexturePage == texturePage).ToArray();
         }
 
         private void Import_Click(object sender, RoutedEventArgs e)
@@ -100,23 +159,58 @@ namespace UndertaleModTool
             }
         }
 
-        private void Image_MouseDown(object sender, MouseButtonEventArgs e)
+        private void Grid_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Right)
+            if (hoveredItem is null)
                 return;
 
-            var pos = e.GetPosition(sender as IInputElement);
-            var tex = this.DataContext as UndertaleEmbeddedTexture;
-            var tpag = mainWindow.Data.TexturePageItems.Where((x) =>
+            if (e.ChangedButton == MouseButton.Right)
             {
-                if (x.TexturePage != tex)
-                    return false;
-                return pos.X > x.SourceX && pos.X < x.SourceX + x.SourceWidth && pos.Y > x.SourceY && pos.Y < x.SourceY + x.SourceHeight;
-            }).FirstOrDefault();
-            if (tpag != null)
-                mainWindow.ChangeSelection(tpag, e.ChangedButton == MouseButton.Middle);
-            else
-                mainWindow.ShowWarning("Cannot find a texture page item at this position.");
+                isMenuOpen = true;
+                pageContextMenu.IsOpen = true;
+                return;
+            }
+            
+            mainWindow.ChangeSelection(hoveredItem, e.ChangedButton == MouseButton.Middle);
+        }
+
+        private void Grid_MouseMove(object sender, MouseEventArgs e)
+        {
+            var prevItem = hoveredItem;
+            hoveredItem = null;
+
+            var pos = e.GetPosition(sender as IInputElement);
+            foreach (var item in items)
+            {
+                if (pos.X > item.SourceX && pos.X < item.SourceX + item.SourceWidth
+                    && pos.Y > item.SourceY && pos.Y < item.SourceY + item.SourceHeight)
+                {
+                    hoveredItem = item;
+                    break;
+                }
+            }
+
+            if (hoveredItem is null)
+            {
+                PageItemBorder.Width = PageItemBorder.Height = 0;
+                return;
+            }
+
+            if (prevItem == hoveredItem)
+                return;
+
+            PageItemBorder.Width = hoveredItem.SourceWidth;
+            PageItemBorder.Height = hoveredItem.SourceHeight;
+            Canvas.SetLeft(PageItemBorder, hoveredItem.SourceX);
+            Canvas.SetTop(PageItemBorder, hoveredItem.SourceY);
+        }
+        private void Grid_MouseLeave(object sender, MouseEventArgs e)
+        {
+            if (isMenuOpen)
+                return;
+
+            PageItemBorder.Width = PageItemBorder.Height = 0;
+            hoveredItem = null;
         }
     }
 
