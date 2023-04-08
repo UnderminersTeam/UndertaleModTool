@@ -324,6 +324,20 @@ namespace UndertaleModTool.Windows
                         }
                     }
                 }
+            },
+            {
+                typeof(ValueTuple<UndertaleBackground, UndertaleBackground.TileID>),
+                new[]
+                {
+                    new TypesForVersion()
+                    {
+                        Version = (2, 0, 0),
+                        Types = new[]
+                        {
+                            (typeof(UndertaleRoom.Layer), "Room tile layer")
+                        }
+                    }
+                }
             }
         };
 

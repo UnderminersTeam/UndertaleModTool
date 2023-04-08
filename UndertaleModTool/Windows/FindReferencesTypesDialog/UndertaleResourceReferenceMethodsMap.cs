@@ -32,7 +32,7 @@ namespace UndertaleModTool.Windows
     public class PredicateForVersion
     {
         public (uint Major, uint Minor, uint Release) Version { get; set; }
-        public Func<UndertaleResource, HashSetTypesOverride, bool, Dictionary<string, object[]>> Predicate { get; set; }
+        public Func<object, HashSetTypesOverride, bool, Dictionary<string, object[]>> Predicate { get; set; }
     }
 
     public static class UndertaleResourceReferenceMethodsMap
@@ -1203,12 +1203,60 @@ namespace UndertaleModTool.Windows
                         }
                     }
                 }
+            },
+            {
+                typeof(ValueTuple<UndertaleBackground, UndertaleBackground.TileID>),
+                new[]
+                {
+                    new PredicateForVersion()
+                    {
+                        Version = (2, 0, 0),
+                        Predicate = (objSrc, types, checkOne) =>
+                        {
+                            if (!types.Contains(typeof(UndertaleRoom.Layer)))
+                                return null;
+
+                            if (objSrc is not ValueTuple<UndertaleBackground, UndertaleBackground.TileID> obj)
+                                return null;
+
+                            IEnumerable<object[]> GetTileLayers()
+                            {
+                                uint tileId = obj.Item2.ID;
+
+                                foreach (var room in data.Rooms)
+                                {
+                                    foreach (var layer in room.Layers)
+                                    {
+                                        if (layer.TilesData is not null)
+                                        {
+                                            if (layer.TilesData.Background != obj.Item1)
+                                                continue;
+
+                                            // Flatten 2-dimensional array and extract the actual tile IDs
+                                            var allTileIDs = layer.TilesData.TileData.SelectMany(x => x)
+                                                                                     .Select(x => x & 0x0FFFFFFF);
+                                            if (allTileIDs.Contains(tileId))
+                                                yield return new object[] { layer, room };
+                                                    
+                                        }
+                                    }
+                                }
+                            }
+                            var tileLayers = GetTileLayers();
+
+                            if (tileLayers.Any())
+                                return new() { { "Room tile layers", checkOne ? tileLayers.ToEmptyArray() : tileLayers.ToArray() } };
+                            else
+                                return null;
+                        }
+                    }
+                }
             }
         };
 
 
 
-        public static Dictionary<string, List<object>> GetReferencesOfObject(UndertaleResource obj, UndertaleData data, HashSetTypesOverride types, bool checkOne = false)
+        public static Dictionary<string, List<object>> GetReferencesOfObject(object obj, UndertaleData data, HashSetTypesOverride types, bool checkOne = false)
         {
             if (obj is null)
                 return null;

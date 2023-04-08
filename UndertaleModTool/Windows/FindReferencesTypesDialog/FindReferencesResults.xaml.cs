@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -38,7 +39,7 @@ namespace UndertaleModTool.Windows
                 MainWindow.SetDarkTitleBarForWindow(this, true, false);
         }
 
-        public FindReferencesResults(UndertaleResource sourceObj, UndertaleData data, Dictionary<string, List<object>> results)
+        public FindReferencesResults(object sourceObj, UndertaleData data, Dictionary<string, List<object>> results)
         {
             InitializeComponent();
 
@@ -49,6 +50,8 @@ namespace UndertaleModTool.Windows
                 sourceObjName = namedObj.Name.Content;
             else if (sourceObj is UndertaleString str)
                 sourceObjName = str.Content;
+            else if (sourceObj is ValueTuple<UndertaleBackground, UndertaleBackground.TileID> tileTuple)
+                sourceObjName = $"Tile {tileTuple.Item2} of {tileTuple.Item1.Name.Content}";
             else
                 sourceObjName = sourceObj.GetType().Name;
             this.sourceObjName = sourceObjName;
@@ -200,6 +203,12 @@ namespace UndertaleModTool.Windows
             }
             sb.Remove(sb.Length - 2, 2);
 
+            if (sourceObjName is not null)
+            {
+                string invalidCharsRegex = '[' + String.Join("", Path.GetInvalidFileNameChars()) + ']';
+                sourceObjName = Regex.Replace(sourceObjName, invalidCharsRegex, "_");
+            }
+                    
             string folderPath = Path.GetDirectoryName(mainWindow.FilePath);
             string filePath = Path.Combine(folderPath, sourceObjName is null
                                                        ? "unreferenced_assets.txt" : $"references_of_asset_{sourceObjName}.txt");
