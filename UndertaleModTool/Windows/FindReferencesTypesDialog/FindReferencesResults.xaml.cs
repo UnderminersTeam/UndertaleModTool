@@ -51,7 +51,7 @@ namespace UndertaleModTool.Windows
             else if (sourceObj is UndertaleString str)
                 sourceObjName = str.Content;
             else if (sourceObj is ValueTuple<UndertaleBackground, UndertaleBackground.TileID> tileTuple)
-                sourceObjName = $"Tile {tileTuple.Item2} of {tileTuple.Item1.Name.Content}";
+                sourceObjName = $"Tile {tileTuple.Item2.ID} of {tileTuple.Item1.Name.Content}";
             else
                 sourceObjName = sourceObj.GetType().Name;
             this.sourceObjName = sourceObjName;
