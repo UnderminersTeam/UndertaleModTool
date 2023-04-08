@@ -126,7 +126,7 @@
 
         <Viewbox Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Stretch="Uniform" StretchDirection="DownOnly">
             <Canvas Name="BGTexture" Width="{Binding Texture.BoundingWidth, Mode=OneWay}" Height="{Binding Texture.BoundingHeight, Mode=OneWay}"
-                    MouseLeftButtonDown="BGTexture_MouseLeftButtonDown">
+                    MouseLeftButtonDown="BGTexture_MouseLeftButtonDown" PreviewMouseRightButtonDown="BGTexture_PreviewMouseRightButtonDown">
                 <Border>
                     <Border.Background>
                         <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
