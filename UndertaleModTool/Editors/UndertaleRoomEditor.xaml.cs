@@ -146,12 +146,18 @@ namespace UndertaleModTool
                 RoomRootItem.IsSelected = true;
 
                 ScrollViewer viewer = MainWindow.FindVisualChild<ScrollViewer>(RoomObjectsTree);
-                viewer.ScrollToVerticalOffset(0);
-                viewer.ScrollToHorizontalOffset(0);
+                if (viewer is not null)
+                {
+                    viewer.ScrollToTop();
+                    viewer.ScrollToLeftEnd();
+                }
 
                 RoomGraphics.ClearValue(LayoutTransformProperty);
-                RoomGraphicsScroll.ScrollToVerticalOffset(0);
-                RoomGraphicsScroll.ScrollToHorizontalOffset(0);
+                _ = Dispatcher.InvokeAsync(() =>
+                {
+                    RoomGraphicsScroll.ScrollToTop();
+                    RoomGraphicsScroll.ScrollToLeftEnd();
+                }, DispatcherPriority.ContextIdle);
             }
 
             UndertaleCachedImageLoader.Reset();
@@ -711,9 +717,8 @@ namespace UndertaleModTool
         private void Canvas_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             e.Handled = true;
-            var element = sender as ItemsControl;
             var mousePos = e.GetPosition(RoomGraphics);
-            var transform = element.LayoutTransform as MatrixTransform;
+            var transform = RoomGraphics.LayoutTransform as MatrixTransform;
             var matrix = transform.Matrix;
             var scale = e.Delta >= 0 ? 1.1 : (1.0 / 1.1); // choose appropriate scaling factor
 
@@ -721,7 +726,7 @@ namespace UndertaleModTool
             {
                 matrix.ScaleAtPrepend(scale, scale, mousePos.X, mousePos.Y);
             }
-            element.LayoutTransform = new MatrixTransform(matrix);
+            RoomGraphics.LayoutTransform = new MatrixTransform(matrix);
         }
 
         private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)

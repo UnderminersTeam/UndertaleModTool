@@ -20,6 +20,7 @@ using UndertaleModLib.Util;
 using System.Globalization;
 using UndertaleModLib;
 using UndertaleModTool.Windows;
+using System.Windows.Threading;
 
 namespace UndertaleModTool
 {
@@ -56,17 +57,17 @@ namespace UndertaleModTool
 
         private void OpenInNewTabItem_Click(object sender, RoutedEventArgs e)
         {
-            mainWindow.ChangeSelection(hoveredItem, true);
+            mainWindow.ChangeSelection((sender as FrameworkElement)?.DataContext, true);
         }
         private void FindAllItemReferencesItem_Click(object sender, RoutedEventArgs e)
         {
-            if (hoveredItem is null)
+            if ((sender as FrameworkElement)?.DataContext is not UndertaleTexturePageItem item)
                 return;
 
             FindReferencesTypesDialog dialog = null;
             try
             {
-                dialog = new(hoveredItem, mainWindow.Data);
+                dialog = new(item, mainWindow.Data);
                 dialog.ShowDialog();
             }
             catch (Exception ex)
@@ -85,12 +86,38 @@ namespace UndertaleModTool
             Grid_MouseLeave(null, null);
         }
 
-        private void DataUserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private void ScaleTextureToFit()
         {
-            if (DataContext is not UndertaleEmbeddedTexture texturePage)
+            var scrollPres = MainWindow.FindVisualChild<ScrollContentPresenter>(TextureScroll);
+            if (scrollPres is null)
                 return;
 
-            items = mainWindow.Data.TexturePageItems.Where(x => x.TexturePage == texturePage).ToArray();
+            double initScale = 1;
+            if (DataContext is UndertaleEmbeddedTexture texturePage)
+            {
+                int textureWidth = texturePage.TextureData?.Width ?? 1;
+                if (textureWidth < scrollPres.ActualWidth)
+                    initScale = scrollPres.ActualWidth / textureWidth;
+            }
+
+            TextureViewbox.LayoutTransform = new MatrixTransform(initScale, 0, 0, initScale, 0, 0);
+            TextureViewbox.UpdateLayout();
+            TextureScroll.ScrollToTop();
+            TextureScroll.ScrollToLeftEnd();
+        }
+        private void DataUserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (DataContext is UndertaleEmbeddedTexture texturePage)
+                items = mainWindow.Data.TexturePageItems.Where(x => x.TexturePage == texturePage).ToArray();
+
+            if (!IsLoaded)
+                return;
+            // "UpdateLayout()" doesn't work here
+            _ = Dispatcher.InvokeAsync(ScaleTextureToFit, DispatcherPriority.ContextIdle);
+        }
+        private void DataUserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            ScaleTextureToFit();
         }
 
         private void Import_Click(object sender, RoutedEventArgs e)
@@ -167,6 +194,7 @@ namespace UndertaleModTool
             if (e.ChangedButton == MouseButton.Right)
             {
                 isMenuOpen = true;
+                pageContextMenu.DataContext = hoveredItem;
                 pageContextMenu.IsOpen = true;
                 return;
             }
@@ -211,6 +239,44 @@ namespace UndertaleModTool
 
             PageItemBorder.Width = PageItemBorder.Height = 0;
             hoveredItem = null;
+        }
+
+        private void TextureScroll_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            if (e.ExtentHeightChange != 0 || e.ExtentWidthChange != 0)
+            {
+                double xMousePositionOnScrollViewer = Mouse.GetPosition(TextureScroll).X;
+                double yMousePositionOnScrollViewer = Mouse.GetPosition(TextureScroll).Y;
+                double offsetX = e.HorizontalOffset + xMousePositionOnScrollViewer;
+                double offsetY = e.VerticalOffset + yMousePositionOnScrollViewer;
+
+                double oldExtentWidth = e.ExtentWidth - e.ExtentWidthChange;
+                double oldExtentHeight = e.ExtentHeight - e.ExtentHeightChange;
+
+                double relx = offsetX / oldExtentWidth;
+                double rely = offsetY / oldExtentHeight;
+
+                offsetX = Math.Max(relx * e.ExtentWidth - xMousePositionOnScrollViewer, 0);
+                offsetY = Math.Max(rely * e.ExtentHeight - yMousePositionOnScrollViewer, 0);
+
+                TextureScroll.ScrollToHorizontalOffset(offsetX);
+                TextureScroll.ScrollToVerticalOffset(offsetY);
+            }
+        }
+
+        private void TextureViewbox_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            e.Handled = true;
+            var mousePos = e.GetPosition(TextureViewbox);
+            var transform = TextureViewbox.LayoutTransform as MatrixTransform;
+            var matrix = transform.Matrix;
+            var scale = e.Delta >= 0 ? 1.1 : (1.0 / 1.1); // choose appropriate scaling factor
+
+            if ((matrix.M11 > 0.2 || (matrix.M11 <= 0.2 && scale > 1)) && (matrix.M11 < 3 || (matrix.M11 >= 3 && scale < 1)))
+            {
+                matrix.ScaleAtPrepend(scale, scale, mousePos.X, mousePos.Y);
+            }
+            TextureViewbox.LayoutTransform = new MatrixTransform(matrix);
         }
     }
 
