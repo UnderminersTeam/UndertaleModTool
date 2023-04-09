@@ -51,7 +51,7 @@ namespace UndertaleModTool.Windows
             else if (sourceObj is UndertaleString str)
                 sourceObjName = str.Content;
             else if (sourceObj is ValueTuple<UndertaleBackground, UndertaleBackground.TileID> tileTuple)
-                sourceObjName = $"Tile {tileTuple.Item2} of {tileTuple.Item1.Name.Content}";
+                sourceObjName = $"Tile {tileTuple.Item2.ID} of {tileTuple.Item1.Name.Content}";
             else
                 sourceObjName = sourceObj.GetType().Name;
             this.sourceObjName = sourceObjName;
@@ -378,7 +378,8 @@ namespace UndertaleModTool.Windows
 
                 item.IsSelected = true;
 
-                if (item.DataContext is Array)
+                // If it's a list header (e.g. "Sounds")
+                if (item.DataContext?.GetType().IsGenericType == true)
                     return;
 
                 Open(highlighted, true);

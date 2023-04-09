@@ -1,12 +1,13 @@
 ﻿<local:DataUserControl x:Class="UndertaleModTool.UndertaleEmbeddedTextureEditor"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:UndertaleModTool"
-             xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleEmbeddedTexture}">
+                       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                       xmlns:local="clr-namespace:UndertaleModTool"
+                       xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+                       mc:Ignorable="d" 
+                       d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleEmbeddedTexture}"
+                       DataContextChanged="DataUserControl_DataContextChanged" Loaded="DataUserControl_Loaded" Unloaded="DataUserControl_Unloaded">
     <UserControl.Resources>
         <local:BooleanToVisibilityConverter x:Key="BoolFalseToVisConverter" local:trueValue="Collapsed" local:falseValue="Visible"/>
         <local:TextureLoadedWrapper x:Key="TextureLoadedWrapper"/>
@@ -66,26 +67,37 @@
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" Grid.ColumnSpan="3" Margin="3" HorizontalAlignment="Center" Foreground="DarkGray" FontStyle="Italic" TextWrapping="Wrap" TextAlignment="Center">
-                Hint: You can open a texture page item by clicking on its region below.<LineBreak/>
-                The middle (wheel) mouse button will open it in a new tab.
+                Hint: This image is mouse interactable (3 mouse buttons and mouse wheel).
             </TextBlock>
-            <Viewbox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Stretch="Uniform" StretchDirection="DownOnly"
-                     SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
-                <Border>
-                    <Border.Background>
-                        <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
-                            <DrawingBrush.Drawing>
-                                <DrawingGroup>
-                                    <GeometryDrawing Geometry="M0,0 L20,0 20,20, 0,20Z" Brush="White"/>
-                                    <GeometryDrawing Geometry="M0,10 L20,10 20,20, 10,20 10,0 0,0Z" Brush="LightGray"/>
-                                </DrawingGroup>
-                            </DrawingBrush.Drawing>
-                        </DrawingBrush>
-                    </Border.Background>
+            <ScrollViewer Name="TextureScroll" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" MaxHeight="450"
+                          HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" ScrollChanged="TextureScroll_ScrollChanged">
+                <ScrollViewer.Background>
+                    <DynamicResource ResourceKey="{x:Static SystemColors.MenuBrushKey}"/>
+                </ScrollViewer.Background>
+                <Viewbox Name="TextureViewbox" Stretch="Uniform" StretchDirection="DownOnly"
+                         SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor" MouseWheel="TextureViewbox_MouseWheel">
+                    <Border>
+                        <Border.Background>
+                            <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
+                                <DrawingBrush.Drawing>
+                                    <DrawingGroup>
+                                        <GeometryDrawing Geometry="M0,0 L20,0 20,20, 0,20Z" Brush="White"/>
+                                        <GeometryDrawing Geometry="M0,10 L20,10 20,20, 10,20 10,0 0,0Z" Brush="LightGray"/>
+                                    </DrawingGroup>
+                                </DrawingBrush.Drawing>
+                            </DrawingBrush>
+                        </Border.Background>
 
-                    <Image Source="{Binding TextureData.TextureBlob, Mode=OneWay}" MouseDown="Image_MouseDown" Cursor="Hand"/>
-                </Border>
-            </Viewbox>
+                        <Grid Cursor="Hand" MouseDown="Grid_MouseDown" MouseMove="Grid_MouseMove" MouseLeave="Grid_MouseLeave">
+                            <Image Source="{Binding TextureData.TextureBlob, Mode=OneWay}"/>
+                            <Canvas>
+                                <Border Name="PageItemBorder" Background="LightBlue" BorderThickness="2" BorderBrush="Blue" Opacity="0.65"
+                                        Width="0" Height="0"/>
+                            </Canvas>
+                        </Grid>
+                    </Border>
+                </Viewbox>
+            </ScrollViewer>
 
             <local:ButtonDark Grid.Row="2" Grid.Column="0" Margin="0,2" Content="Import" Click="Import_Click"/>
             <local:ButtonDark Grid.Row="2" Grid.Column="3" Margin="0,2" Content="Export" Click="Export_Click"/>
