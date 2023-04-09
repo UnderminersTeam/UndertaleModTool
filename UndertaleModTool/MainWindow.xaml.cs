@@ -3791,7 +3791,14 @@ result in loss of work.");
             if (Mouse.PrimaryDevice.LeftButton == MouseButtonState.Pressed)
             {
                 CurrentTabIndex = tabItem.TabIndex;
-                DragDrop.DoDragDrop(tabItem, tabItem, DragDropEffects.All);
+                try
+                {
+                    DragDrop.DoDragDrop(tabItem, tabItem, DragDropEffects.All);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error on handling \"TabItem\" drag&drop:\n{ex}");
+                }
             }
         }
         private void TabItem_Drop(object sender, DragEventArgs e)
