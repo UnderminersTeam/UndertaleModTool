@@ -87,7 +87,7 @@
                     <Grid Cursor="Hand" MouseDown="Grid_MouseDown" MouseMove="Grid_MouseMove" MouseLeave="Grid_MouseLeave">
                         <Image Source="{Binding TextureData.TextureBlob, Mode=OneWay}"/>
                         <Canvas>
-                            <Border Name="PageItemBorder" Background="LightBlue" BorderThickness="2" BorderBrush="LightSkyBlue" Opacity="0.8"/>
+                            <Border Name="PageItemBorder" Background="LightBlue" BorderThickness="2" BorderBrush="Blue" Opacity="0.65"/>
                         </Canvas>
                     </Grid>
                 </Border>
