@@ -20,6 +20,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Source position/size</TextBlock>
@@ -63,7 +64,10 @@
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Texture</TextBlock>
         <local:UndertaleObjectReference Grid.Row="3" Grid.Column="1" Margin="3" ObjectReference="{Binding TexturePage}" ObjectType="{x:Type undertale:UndertaleEmbeddedTexture}"/>
 
-        <Viewbox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Stretch="Uniform" StretchDirection="DownOnly" Margin="0,0,0,20">
+        <local:ButtonDark Grid.Row="4" Grid.ColumnSpan="3" Width="230" Margin="3"
+                          Click="FindReferencesButton_Click">Find all references of this page item</local:ButtonDark>
+
+        <Viewbox Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Stretch="Uniform" StretchDirection="DownOnly" Margin="3">
             <Border>
                 <Border.Background>
                     <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
@@ -80,7 +84,7 @@
             </Border>
         </Viewbox>
 
-        <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Margin="3">
+        <Grid Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Margin="3,3,3,25">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -91,7 +95,7 @@
             <local:ButtonDark Grid.Column="3" Content="Export" Click="Export_Click"/>
         </Grid>
 
-        <Viewbox Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Stretch="Uniform" StretchDirection="DownOnly"
+        <Viewbox Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Stretch="Uniform" StretchDirection="DownOnly"
                  SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
             <Grid>
                 <Grid.ColumnDefinitions>
