@@ -48,7 +48,7 @@ namespace UndertaleModTool
             newTabItem.Click += OpenInNewTabItem_Click;
             var referencesItem = new MenuItem()
             {
-                Header = "Find all references of this page item"
+                Header = "Find all references to this page item"
             };
             referencesItem.Click += FindAllItemReferencesItem_Click;
             pageContextMenu.Items.Add(newTabItem);

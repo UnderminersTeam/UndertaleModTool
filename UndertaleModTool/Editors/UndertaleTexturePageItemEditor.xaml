@@ -65,7 +65,7 @@
         <local:UndertaleObjectReference Grid.Row="3" Grid.Column="1" Margin="3" ObjectReference="{Binding TexturePage}" ObjectType="{x:Type undertale:UndertaleEmbeddedTexture}"/>
 
         <local:ButtonDark Grid.Row="4" Grid.ColumnSpan="3" Width="230" Margin="3"
-                          Click="FindReferencesButton_Click">Find all references of this page item</local:ButtonDark>
+                          Click="FindReferencesButton_Click">Find all references to this page item</local:ButtonDark>
 
         <Viewbox Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Stretch="Uniform" StretchDirection="DownOnly" Margin="3">
             <Border>
