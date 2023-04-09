@@ -67,8 +67,7 @@
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" Grid.ColumnSpan="3" Margin="3" HorizontalAlignment="Center" Foreground="DarkGray" FontStyle="Italic" TextWrapping="Wrap" TextAlignment="Center">
-                Hint: You can open a texture page item by clicking on its region below.<LineBreak/>
-                The middle (wheel) mouse button will open it in a new tab.
+                Hint: This image is mouse interactable (3 mouse buttons and mouse wheel).
             </TextBlock>
             <ScrollViewer Name="TextureScroll" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" MaxHeight="450"
                           HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" ScrollChanged="TextureScroll_ScrollChanged">
