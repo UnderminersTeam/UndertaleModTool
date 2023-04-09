@@ -540,6 +540,18 @@ namespace UndertaleModTool
                     };
                     break;
 
+                case UndertaleEmbeddedTextureEditor textureEditor:
+                    ScrollViewer texturePreviewViewer = textureEditor.TextureScroll;
+                    (double Left, double Top) texturePrevScrollPos = (texturePreviewViewer.HorizontalOffset, texturePreviewViewer.VerticalOffset);
+
+                    LastContentState = new TexturePageTabState()
+                    {
+                        MainScrollPosition = mainScrollPos,
+                        TexturePreviewScrollPosition = texturePrevScrollPos,
+                        TexturePreviewTransform = textureEditor.TextureViewbox.LayoutTransform
+                    };
+                    break;
+
                 default:
                     LastContentState = new()
                     {
@@ -849,6 +861,12 @@ namespace UndertaleModTool
                     }
                     break;
 
+                case TexturePageTabState texturePageTabState:
+                    UndertaleEmbeddedTextureEditor.OverriddenPreviewState = (texturePageTabState.TexturePreviewTransform,
+                                                                             texturePageTabState.TexturePreviewScrollPosition.Left,
+                                                                             texturePageTabState.TexturePreviewScrollPosition.Top);
+                    break;
+
                 default:
                     Debug.WriteLine($"The content state of a tab \"{this}\" is unknown?");
                     break;
@@ -1010,6 +1028,16 @@ namespace UndertaleModTool
         /// Texture pages, sprites, spine sprites, fonts, tilesets.
         /// </remarks>
         public (bool IsExpanded, double ScrollPos, object SelectedItem)[] GroupListsStates;
+    }
+
+    /// <summary>Stores the information about the tab with a texture page.</summary>
+    public class TexturePageTabState : TabContentState
+    {
+        /// <summary>The scroll position of the embedded texture editor preview.</summary>
+        public (double Left, double Top) TexturePreviewScrollPosition;
+
+        /// <summary>The scale of the embedded texture editor preview.</summary>
+        public Transform TexturePreviewTransform;
     }
 
 

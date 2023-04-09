@@ -35,6 +35,8 @@ namespace UndertaleModTool
         private UndertaleTexturePageItem[] items;
         private UndertaleTexturePageItem hoveredItem;
 
+        public static (Transform Transform, double Left, double Top) OverriddenPreviewState { get; set; }
+
         public UndertaleEmbeddedTextureEditor()
         {
             InitializeComponent();
@@ -100,10 +102,25 @@ namespace UndertaleModTool
                     initScale = scrollPres.ActualWidth / textureWidth;
             }
 
-            TextureViewbox.LayoutTransform = new MatrixTransform(initScale, 0, 0, initScale, 0, 0);
+            Transform t;
+            double top, left;
+            if (OverriddenPreviewState == default)
+            {
+                t = new MatrixTransform(initScale, 0, 0, initScale, 0, 0);
+                top = 0;
+                left = 0;
+            }
+            else
+            {
+                t = OverriddenPreviewState.Transform;
+                top = OverriddenPreviewState.Top;
+                left = OverriddenPreviewState.Left;
+            }
+
+            TextureViewbox.LayoutTransform = t;
             TextureViewbox.UpdateLayout();
-            TextureScroll.ScrollToTop();
-            TextureScroll.ScrollToLeftEnd();
+            TextureScroll.ScrollToVerticalOffset(top);
+            TextureScroll.ScrollToHorizontalOffset(left);
         }
         private void DataUserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
@@ -118,6 +135,10 @@ namespace UndertaleModTool
         private void DataUserControl_Loaded(object sender, RoutedEventArgs e)
         {
             ScaleTextureToFit();
+        }
+        private void DataUserControl_Unloaded(object sender, RoutedEventArgs e)
+        {
+            OverriddenPreviewState = default;
         }
 
         private void Import_Click(object sender, RoutedEventArgs e)

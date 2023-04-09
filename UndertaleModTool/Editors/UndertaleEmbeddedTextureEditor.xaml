@@ -7,7 +7,7 @@
                        xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
                        mc:Ignorable="d" 
                        d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleEmbeddedTexture}"
-                       DataContextChanged="DataUserControl_DataContextChanged" Loaded="DataUserControl_Loaded">
+                       DataContextChanged="DataUserControl_DataContextChanged" Loaded="DataUserControl_Loaded" Unloaded="DataUserControl_Unloaded">
     <UserControl.Resources>
         <local:BooleanToVisibilityConverter x:Key="BoolFalseToVisConverter" local:trueValue="Collapsed" local:falseValue="Visible"/>
         <local:TextureLoadedWrapper x:Key="TextureLoadedWrapper"/>
