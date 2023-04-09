@@ -40,22 +40,70 @@
                             Grid.Row="1" Grid.Column="1" Margin="3"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">GLSL ES vertex source</TextBlock>
-        <local:UndertaleStringReference Grid.Row="2" Grid.Column="1" Margin="3" Height="40" ObjectReference="{Binding GLSL_ES_Vertex}"/>
+        <Expander Grid.Row="2" Grid.Column="1" Margin="3" Header="Code">
+            <avalonEdit:TextEditor xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+                DataContext="{Binding GLSL_ES_Vertex}"
+                FontFamily="Consolas" WordWrap="True" FontSize="10pt"
+                Padding="4" Background="#222222" Foreground="#C0C0C0" MaxHeight="300"
+                BorderBrush="#FFABADB3" BorderThickness="1"
+                LineNumbersForeground="#DBDBDB" ShowLineNumbers="True"
+                Loaded="TextEditor_Loaded" LostFocus="TextEditor_LostFocus"/>
+        </Expander>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">GLSL ES fragment source</TextBlock>
-        <local:UndertaleStringReference Grid.Row="3" Grid.Column="1" Margin="3" Height="40" ObjectReference="{Binding GLSL_ES_Fragment}"/>
+        <Expander Grid.Row="3" Grid.Column="1" Margin="3" Header="Code">
+            <avalonEdit:TextEditor xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+                DataContext="{Binding GLSL_ES_Fragment}"
+                FontFamily="Consolas" WordWrap="True" FontSize="10pt"
+                Padding="4" Background="#222222" Foreground="#C0C0C0" MaxHeight="300"
+                BorderBrush="#FFABADB3" BorderThickness="1"
+                LineNumbersForeground="#DBDBDB" ShowLineNumbers="True"
+                Loaded="TextEditor_Loaded" LostFocus="TextEditor_LostFocus"/>
+        </Expander>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">GLSL vertex source</TextBlock>
-        <local:UndertaleStringReference Grid.Row="4" Grid.Column="1" Margin="3" Height="40" ObjectReference="{Binding GLSL_Vertex}"/>
+        <Expander Grid.Row="4" Grid.Column="1" Margin="3" Header="Code">
+            <avalonEdit:TextEditor xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+                DataContext="{Binding GLSL_Vertex}"
+                FontFamily="Consolas" WordWrap="True" FontSize="10pt"
+                Padding="4" Background="#222222" Foreground="#C0C0C0" MaxHeight="300"
+                BorderBrush="#FFABADB3" BorderThickness="1"
+                LineNumbersForeground="#DBDBDB" ShowLineNumbers="True"
+                Loaded="TextEditor_Loaded" LostFocus="TextEditor_LostFocus"/>
+        </Expander>
 
         <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">GLSL fragment source</TextBlock>
-        <local:UndertaleStringReference Grid.Row="5" Grid.Column="1" Margin="3" Height="40" ObjectReference="{Binding GLSL_Fragment}"/>
+        <Expander Grid.Row="5" Grid.Column="1" Margin="3" Header="Code">
+            <avalonEdit:TextEditor xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+                DataContext="{Binding GLSL_Fragment}"
+                FontFamily="Consolas" WordWrap="True" FontSize="10pt"
+                Padding="4" Background="#222222" Foreground="#C0C0C0" MaxHeight="300"
+                BorderBrush="#FFABADB3" BorderThickness="1"
+                LineNumbersForeground="#DBDBDB" ShowLineNumbers="True"
+                Loaded="TextEditor_Loaded" LostFocus="TextEditor_LostFocus"/>
+        </Expander>
 
         <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">HLSL9 vertex source</TextBlock>
-        <local:UndertaleStringReference Grid.Row="6" Grid.Column="1" Margin="3" Height="40" ObjectReference="{Binding HLSL9_Vertex}"/>
+        <Expander Grid.Row="6" Grid.Column="1" Margin="3" Header="Code">
+            <avalonEdit:TextEditor xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+                DataContext="{Binding HLSL9_Vertex}"
+                FontFamily="Consolas" WordWrap="True" FontSize="10pt"
+                Padding="4" Background="#222222" Foreground="#C0C0C0" MaxHeight="300"
+                BorderBrush="#FFABADB3" BorderThickness="1"
+                LineNumbersForeground="#DBDBDB" ShowLineNumbers="True"
+                Loaded="TextEditor_Loaded" LostFocus="TextEditor_LostFocus"/>
+        </Expander>
 
         <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">HLSL9 fragment source</TextBlock>
-        <local:UndertaleStringReference Grid.Row="7" Grid.Column="1" Margin="3" Height="40" ObjectReference="{Binding HLSL9_Fragment}"/>
+        <Expander Grid.Row="7" Grid.Column="1" Margin="3" Header="Code">
+            <avalonEdit:TextEditor xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+                DataContext="{Binding HLSL9_Fragment}"
+                FontFamily="Consolas" WordWrap="True" FontSize="10pt"
+                Padding="4" Background="#222222" Foreground="#C0C0C0" MaxHeight="300"
+                BorderBrush="#FFABADB3" BorderThickness="1"
+                LineNumbersForeground="#DBDBDB" ShowLineNumbers="True"
+                Loaded="TextEditor_Loaded" LostFocus="TextEditor_LostFocus"/>
+        </Expander>
 
         <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Vertex shader attributes</TextBlock>
         <local:DataGridDark Grid.Row="8" Grid.Column="1" Margin="3" ItemsSource="{Binding VertexShaderAttributes}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
