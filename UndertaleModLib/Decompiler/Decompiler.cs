@@ -259,7 +259,7 @@ namespace UndertaleModLib.Decompiler
                     UndertaleInstruction.Opcode.Not => "~",
                     UndertaleInstruction.Opcode.Shl => "<<",
                     UndertaleInstruction.Opcode.Shr => ">>",
-                    _ => op.ToString().ToUpper(),
+                    _ => op.ToString().ToUpper(CultureInfo.InvariantCulture),
                 };
             }
 
@@ -274,7 +274,7 @@ namespace UndertaleModLib.Decompiler
                     UndertaleInstruction.ComparisonType.NEQ => "!=",
                     UndertaleInstruction.ComparisonType.GTE => ">=",
                     UndertaleInstruction.ComparisonType.GT => ">",
-                    _ => op.ToString().ToUpper(),
+                    _ => op.ToString().ToUpper(CultureInfo.InvariantCulture),
                 };
             }
 
@@ -381,7 +381,7 @@ namespace UndertaleModLib.Decompiler
                 {
                     int? val = ConvertToInt(Value);
                     if (val != null && val < 0 && val >= -16)
-                        return ((UndertaleInstruction.InstanceType)Value).ToString().ToLower();
+                        return ((UndertaleInstruction.InstanceType)Value).ToString().ToLower(CultureInfo.InvariantCulture);
                 }
                 else switch (AssetType) // Need to put else because otherwise it gets terribly unoptimized with GameObject type
                 {
@@ -638,7 +638,7 @@ namespace UndertaleModLib.Decompiler
                 if (Opcode == UndertaleInstruction.Opcode.Not && Type == UndertaleInstruction.DataType.Boolean)
                     op = "!"; // This is a logical negation instead, see #93
                 string arg = Argument.ToString(context);
-                if (arg.Contains(" "))
+                if (arg.Contains(' ', StringComparison.InvariantCulture))
                     return String.Format("({0}({1}))", op, arg);
                 return String.Format("({0}{1})", op, arg);
             }
@@ -1089,7 +1089,7 @@ namespace UndertaleModLib.Decompiler
                     }
 
                     string cleanVal = Value.ToString(context);
-                    if (cleanVal.EndsWith("\n"))
+                    if (cleanVal.EndsWith("\n", StringComparison.InvariantCulture))
                         cleanVal = cleanVal.Substring(0, cleanVal.Length - 1);
 
                     return "return " + cleanVal + ";";
@@ -1128,7 +1128,7 @@ namespace UndertaleModLib.Decompiler
                     {
                         try
                         {
-                            if (Destination.Var.Name.Content.StartsWith("___struct___"))
+                            if (Destination.Var.Name.Content.StartsWith("___struct___", StringComparison.InvariantCulture))
                             {
                                 Expression val = Value;
                                 while (val is ExpressionCast cast)
@@ -1528,9 +1528,9 @@ namespace UndertaleModLib.Decompiler
                     else
                         constructor = Arguments[0].ToString(context);
 
-                    if (constructor.StartsWith("gml_Script_"))
+                    if (constructor.StartsWith("gml_Script_", StringComparison.InvariantCulture))
                         constructor = constructor.Substring(11);
-                    if (constructor.EndsWith(context.TargetCode.Name.Content))
+                    if (constructor.EndsWith(context.TargetCode.Name.Content, StringComparison.InvariantCulture))
                         constructor = constructor.Substring(0, constructor.Length - context.TargetCode.Name.Content.Length - 1);
 
                     if (AssetTypeResolver.builtin_funcs.TryGetValue(constructor, out AssetIDType[] types))
@@ -1820,7 +1820,7 @@ namespace UndertaleModLib.Decompiler
                             if (constant.AssetType == AssetIDType.GameObject && val < 0)
                             {
                                 UndertaleInstruction.InstanceType instanceType = (UndertaleInstruction.InstanceType)val;
-                                prefix = (instanceType == UndertaleInstruction.InstanceType.Global || instanceType == UndertaleInstruction.InstanceType.Other) ? prefix.ToLower() : "";
+                                prefix = (instanceType == UndertaleInstruction.InstanceType.Global || instanceType == UndertaleInstruction.InstanceType.Other) ? prefix.ToLower(CultureInfo.InvariantCulture) : "";
                             }
                         }
                     }
@@ -3132,7 +3132,7 @@ namespace UndertaleModLib.Decompiler
                 if (IsForLoop)
                 {
                     string conditionStr = Condition.ToString(context); // Cut off parenthesis for the condition.
-                    if (conditionStr.StartsWith("(") && conditionStr.EndsWith(")"))
+                    if (conditionStr.StartsWith("(", StringComparison.InvariantCulture) && conditionStr.EndsWith(")", StringComparison.InvariantCulture))
                         conditionStr = conditionStr.Substring(1, conditionStr.Length - 2);
 
                     return "for (" + InitializeStatement.ToString(context) + "; " + conditionStr + "; " + StepStatement.ToString(context) + ")\n" + context.Indentation + Block.ToString(context);
@@ -3517,7 +3517,7 @@ namespace UndertaleModLib.Decompiler
                                 (!(cmp.Argument1 is ExpressionTempVar) || (cmp.Argument1 as ExpressionTempVar).Var.Var != switchTempVar))
                                 throw new Exception("Malformed switch statement: bad condition var (" + cmp.Argument1.ToString(context) + ")");
                             if (cmp.Opcode != UndertaleInstruction.ComparisonType.EQ)
-                                throw new Exception("Malformed switch statement: bad contition type (" + cmp.Opcode.ToString().ToUpper() + ")");
+                                throw new Exception("Malformed switch statement: bad contition type (" + cmp.Opcode.ToString().ToUpper(CultureInfo.InvariantCulture) + ")");
                             caseExpr = cmp.Argument2;
                         }
 
@@ -3951,7 +3951,7 @@ namespace UndertaleModLib.Decompiler
                 sb.Append("    block_" + pair.Key + " [label=\"");
                 sb.Append("[" + block.ToString() + ", Exit: " + block.conditionalExit + (block.nextBlockTrue != null ? ", T: " + block.nextBlockTrue.Address : "") + (block.nextBlockFalse != null ? ", F: " + block.nextBlockFalse.Address : "") + "]\n");
                 foreach (var instr in block.Instructions)
-                    sb.Append(instr.ToString().Replace("\"", "\\\"") + "\\n");
+                    sb.Append(instr.ToString().Replace("\"", "\\\"", StringComparison.InvariantCulture) + "\\n");
                 sb.Append('"');
                 sb.Append(pair.Key == 0 ? ", color=\"blue\"" : "");
                 sb.AppendLine(", shape=\"box\"];");

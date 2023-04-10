@@ -48,8 +48,8 @@ namespace UndertaleModLib.Decompiler
                 return res;
 
             string str = value.ToString("r", CultureInfo.InvariantCulture);
-            int x = str.IndexOf('E');
-            int x_lower = str.IndexOf('e');
+            int x = str.IndexOf('E', StringComparison.InvariantCulture);
+            int x_lower = str.IndexOf('e', StringComparison.InvariantCulture);
             if ((x < 0) && (x_lower < 0))
                 return str;
             else
