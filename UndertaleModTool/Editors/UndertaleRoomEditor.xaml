@@ -88,6 +88,11 @@
                                     <Binding Path="ObjectDefinition.Name.Content" Mode="OneWay" TargetNullValue="?" FallbackValue="EmptyInstance"/>
                                 </MultiBinding>
                             </TextBlock.Text>
+                            <TextBlock.ContextMenu>
+                                <local:ContextMenuDark>
+                                    <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
+                                </local:ContextMenuDark>
+                            </TextBlock.ContextMenu>
                         </TextBlock>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Tile}">

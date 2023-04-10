@@ -1482,6 +1482,31 @@ namespace UndertaleModTool
         {
             AddGMS1Tile(this.DataContext as UndertaleRoom);
         }
+        private void MenuItem_Delete_Click(Object sender, RoutedEventArgs e)
+        {
+            UndertaleRoom room = this.DataContext as UndertaleRoom;
+            MenuItem menuitem = sender as MenuItem;
+            UndertaleObject obj = menuitem.DataContext as UndertaleObject;
+
+            // We need to check before deleting the object but can only clear the editor after deleting the object
+            bool clearEditor = (obj == (ObjectEditor.Content as UndertaleObject));
+
+            if (obj is GameObject gameObj)
+            {
+                if (mainWindow.IsGMS2 == Visibility.Visible)
+                {
+                    foreach (var layer in room.Layers)
+                        if (layer.InstancesData != null)
+                            layer.InstancesData.Instances.Remove(gameObj);
+                    roomObjDict.Remove(gameObj.InstanceID, out _);
+                }
+
+                room.GameObjects.Remove(gameObj);
+            }
+
+            if (clearEditor)
+                ObjectEditor.Content = null;
+        }
 
         public static void GenerateSpriteCache(UndertaleRoom room)
         {
