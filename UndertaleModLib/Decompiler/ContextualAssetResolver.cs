@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Models;
 
@@ -33,7 +34,7 @@ namespace UndertaleModLib.Decompiler
                 {
                     foreach (var constant in data.Options.Constants)
                     {
-                        if (!constant.Name.Content.StartsWith("@@"))
+                        if (!constant.Name.Content.StartsWith("@@", StringComparison.InvariantCulture))
                             macros[constant.Value.Content] = constant.Name.Content;
                     }
                 }
@@ -44,25 +45,25 @@ namespace UndertaleModLib.Decompiler
 
             Func<string, Enum_EventType> GetEventTypeFromSubtype = (string subtype) =>
             {
-                if (subtype.Contains("gesture"))
+                if (subtype.Contains("gesture", StringComparison.InvariantCulture))
                     return Enum_EventType.ev_gesture;
-                if (subtype.Contains("gui") || subtype.Contains("draw")) // DrawGUI events are apparently just prefixed with ev_gui...
+                if (subtype.Contains("gui", StringComparison.InvariantCulture) || subtype.Contains("draw", StringComparison.InvariantCulture)) // DrawGUI events are apparently just prefixed with ev_gui...
                     return Enum_EventType.ev_draw;
-                if (subtype.Contains("step"))
+                if (subtype.Contains("step", StringComparison.InvariantCulture))
                     return Enum_EventType.ev_step;
                 // End me
-                if (subtype.Contains("user") || subtype.Contains("game_") ||
-                   subtype.Contains("room_") || subtype.Contains("animation_end") ||
-                   subtype.Contains("lives") || subtype.Contains("end_of_path") ||
-                   subtype.Contains("health") || subtype.Contains("close_button") ||
-                   subtype.Contains("outside") || subtype.Contains("boundary"))
+                if (subtype.Contains("user", StringComparison.InvariantCulture) || subtype.Contains("game_", StringComparison.InvariantCulture) ||
+                   subtype.Contains("room_", StringComparison.InvariantCulture) || subtype.Contains("animation_end", StringComparison.InvariantCulture) ||
+                   subtype.Contains("lives", StringComparison.InvariantCulture) || subtype.Contains("end_of_path", StringComparison.InvariantCulture) ||
+                   subtype.Contains("health", StringComparison.InvariantCulture) || subtype.Contains("close_button", StringComparison.InvariantCulture) ||
+                   subtype.Contains("outside", StringComparison.InvariantCulture) || subtype.Contains("boundary", StringComparison.InvariantCulture))
                     return Enum_EventType.ev_other;
 
                 // ev_close_button is handled above and the various joystick events are 
                 // skipped in the loop
-                if (subtype.Contains("button") || subtype.Contains("mouse") ||
-                    subtype.Contains("global") || subtype.Contains("press") ||
-                    subtype.Contains("release"))
+                if (subtype.Contains("button", StringComparison.InvariantCulture) || subtype.Contains("mouse", StringComparison.InvariantCulture) ||
+                    subtype.Contains("global", StringComparison.InvariantCulture) || subtype.Contains("press", StringComparison.InvariantCulture) ||
+                    subtype.Contains("release", StringComparison.InvariantCulture))
                     return Enum_EventType.ev_mouse;
 
 
@@ -89,13 +90,13 @@ namespace UndertaleModLib.Decompiler
             // This is going to get bulky really quickly
             foreach (string constant in constants.Keys)
             {
-                if (constant.StartsWith("vk_"))
+                if (constant.StartsWith("vk_", StringComparison.InvariantCulture))
                     GetDictForEventType(Enum_EventType.ev_keyboard)[(int)constants[constant]] = constant;
-                else if (constant.StartsWith("bm_") && !constant.Contains("colour"))
+                else if (constant.StartsWith("bm_") && !constant.Contains("colour", StringComparison.InvariantCulture))
                     blend_modes[(int)constants[constant]] = constant;
-                else if (constant.StartsWith("gp_"))
+                else if (constant.StartsWith("gp_", StringComparison.InvariantCulture))
                     gamepad_controls[(int)constants[constant]] = constant;
-                else if (constant.StartsWith("ev_") && !Enum.IsDefined(typeof(Enum_EventType), constant) && !constant.Contains("joystick"))
+                else if (constant.StartsWith("ev_") && !Enum.IsDefined(typeof(Enum_EventType), constant) && !constant.Contains("joystick", StringComparison.InvariantCulture))
                     GetDictForEventType(GetEventTypeFromSubtype(constant))[(int)constants[constant]] = constant;
             }
 
@@ -237,7 +238,7 @@ namespace UndertaleModLib.Decompiler
                             case 9:
                                 {
                                     if (val < 0)
-                                        return ((UndertaleInstruction.InstanceType)self.Value).ToString().ToLower();
+                                        return ((UndertaleInstruction.InstanceType)self.Value).ToString().ToLower(CultureInfo.InvariantCulture);
                                     else if (val < data.GameObjects.Count)
                                         return data.GameObjects[val.Value].Name.Content;
                                     

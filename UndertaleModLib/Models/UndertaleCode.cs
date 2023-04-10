@@ -106,7 +106,7 @@ public class UndertaleInstruction : UndertaleObject
             Opcode.Call => InstructionType.CallInstruction,
             Opcode.Break => InstructionType.BreakInstruction,
 
-            _ => throw new IOException("Unknown opcode " + op.ToString().ToUpper()),
+            _ => throw new IOException("Unknown opcode " + op.ToString().ToUpper(CultureInfo.InvariantCulture)),
         };
     }
     private static byte ConvertInstructionKind(byte kind)
@@ -271,7 +271,7 @@ public class UndertaleInstruction : UndertaleObject
         {
             if (typeof(T) == typeof(UndertaleVariable) && Type != VariableType.Normal)
             {
-                return String.Format("[{0}]{1}{2}", Type.ToString().ToLower(), ((Target as UndertaleVariable)?.InstanceType.ToString().ToLower() ?? "null") + ".", Target?.ToString() ?? "(null)");
+                return String.Format("[{0}]{1}{2}", Type.ToString().ToLower(CultureInfo.InvariantCulture), ((Target as UndertaleVariable)?.InstanceType.ToString().ToLower(CultureInfo.InvariantCulture) ?? "null") + ".", Target?.ToString() ?? "(null)");
             }
             else
                 return String.Format("{0}", Target?.ToString() ?? "(null)");
@@ -564,7 +564,7 @@ public class UndertaleInstruction : UndertaleObject
                 break;
 
             default:
-                throw new IOException("Unknown opcode " + Kind.ToString().ToUpper());
+                throw new IOException("Unknown opcode " + Kind.ToString().ToUpper(CultureInfo.InvariantCulture));
         }
     }
 
@@ -590,17 +590,17 @@ public class UndertaleInstruction : UndertaleObject
                 Extra = reader.ReadByte();
 #if DEBUG
                 if (Extra != 0 && Kind != Opcode.Dup && Kind != Opcode.CallV)
-                    throw new IOException("Invalid padding in " + Kind.ToString().ToUpper());
+                    throw new IOException("Invalid padding in " + Kind.ToString().ToUpper(CultureInfo.InvariantCulture));
 #endif
                 ComparisonKind = (ComparisonType)reader.ReadByte();
                 //if (!bytecode14 && (Kind == Opcode.Cmp) != ((byte)ComparisonKind != 0))
-                //    throw new IOException("Got unexpected comparison type in " + Kind.ToString().ToUpper() + " (should be only in CMP)");
+                //    throw new IOException("Got unexpected comparison type in " + Kind.ToString().ToUpper(CultureInfo.InvariantCulture) + " (should be only in CMP)");
                 byte TypePair = reader.ReadByte();
                 Type1 = (DataType)(TypePair & 0xf);
                 Type2 = (DataType)(TypePair >> 4);
 #if DEBUG
                 if (GetInstructionType(Kind) == InstructionType.SingleTypeInstruction && Type2 != (byte)0)
-                    throw new IOException("Second type should be 0 in " + Kind.ToString().ToUpper());
+                    throw new IOException("Second type should be 0 in " + Kind.ToString().ToUpper(CultureInfo.InvariantCulture));
 #endif
                 //if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
                 if (reader.Bytecode14OrLower && Kind == Opcode.Cmp)
@@ -749,7 +749,7 @@ public class UndertaleInstruction : UndertaleObject
                 break;
 
             default:
-                throw new IOException("Unknown opcode " + Kind.ToString().ToUpper());
+                throw new IOException("Unknown opcode " + Kind.ToString().ToUpper(CultureInfo.InvariantCulture));
         }
     }
     /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
@@ -818,7 +818,7 @@ public class UndertaleInstruction : UndertaleObject
                 return 1; // "Function"
 
             default:
-                throw new IOException("Unknown opcode " + Kind.ToString().ToUpper());
+                throw new IOException("Unknown opcode " + Kind.ToString().ToUpper(CultureInfo.InvariantCulture));
         }
 
         return 0;
@@ -841,12 +841,12 @@ public class UndertaleInstruction : UndertaleObject
         {
             if (!Assembler.BreakIDToName.TryGetValue((short)Value, out kind))
             {
-                kind = kind.ToLower();
+                kind = kind.ToLower(CultureInfo.InvariantCulture);
                 unknownBreak = true;
             }
         }
         else
-            kind = kind.ToLower();
+            kind = kind.ToLower(CultureInfo.InvariantCulture);
         sb.Append(kind);
 
         switch (GetInstructionType(Kind))
@@ -912,7 +912,7 @@ public class UndertaleInstruction : UndertaleObject
                 {
                     if (Type1 == DataType.Variable && TypeInst != InstanceType.Undefined)
                     {
-                        sb.Append(TypeInst.ToString().ToLower());
+                        sb.Append(TypeInst.ToString().ToLower(CultureInfo.InvariantCulture));
                         sb.Append('.');
                     }
                     sb.Append(Destination);
@@ -924,7 +924,7 @@ public class UndertaleInstruction : UndertaleObject
                 sb.Append(' ');
                 if (Type1 == DataType.Variable && TypeInst != InstanceType.Undefined)
                 {
-                    sb.Append(TypeInst.ToString().ToLower());
+                    sb.Append(TypeInst.ToString().ToLower(CultureInfo.InvariantCulture));
                     sb.Append('.');
                 }
                 sb.Append((Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString());
@@ -978,7 +978,7 @@ public static class UndertaleInstructionUtil
             UndertaleInstruction.DataType.Variable => "v",
             UndertaleInstruction.DataType.String => "s",
             UndertaleInstruction.DataType.Int16 => "e",
-            _ => type.ToString().ToLower(),
+            _ => type.ToString().ToLower(CultureInfo.InvariantCulture),
         };
     }
 

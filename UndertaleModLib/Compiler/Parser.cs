@@ -396,7 +396,7 @@ namespace UndertaleModLib.Compiler
             {
                 if (context != null)
                 {
-                    if (msg.EndsWith("."))
+                    if (msg.EndsWith(".", StringComparison.InvariantCulture))
                         msg = msg.Remove(msg.Length - 1);
 
                     if (context.Location != null)
@@ -478,7 +478,7 @@ namespace UndertaleModLib.Compiler
                         // Convert number literals to their raw numerical value
                         Lexer.Token t = tokens[i];
                         ExpressionConstant constant = null;
-                        if (t.Content[0] == '$' || t.Content.StartsWith("0x"))
+                        if (t.Content[0] == '$' || t.Content.StartsWith("0x", StringComparison.InvariantCulture))
                         {
                             long val;
                             try

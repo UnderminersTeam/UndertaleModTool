@@ -49,9 +49,9 @@ namespace UndertaleModLib.Compiler
                     EOF = (Text.Length == 0);
 
                     // Add another line to the end
-                    if (!Text.EndsWith("\n"))
+                    if (!Text.EndsWith("\n", StringComparison.InvariantCulture))
                     {
-                        if (Text.Contains("\r"))
+                        if (Text.Contains('\r', StringComparison.InvariantCulture))
                         {
                             Text += "\r\n";
                         }
