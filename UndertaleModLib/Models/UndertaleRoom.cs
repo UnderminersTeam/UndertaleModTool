@@ -451,6 +451,12 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                              * If you can get two broken objects in a row... it'll probably crash.
                              */
                             int foundIndex = GameObjects.IndexOf(GameObjects.ByInstanceID(id - 1));
+                            if (GameObjects.Count - 1 <= foundIndex)
+                            {
+                                Debug.WriteLine($"The object instance with ID {id} of a layer (ID {layer.LayerId}) is not found.");
+                                continue;
+                            }
+                            
                             layer.InstancesData.Instances.Add(GameObjects[foundIndex + 1]);
                         }
                     }
