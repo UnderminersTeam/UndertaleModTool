@@ -998,81 +998,8 @@ namespace UndertaleModTool
         {
             if (e.Key == Key.Delete)
             {
-                UndertaleRoom room = this.DataContext as UndertaleRoom;
                 UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
-
-                if (selectedObj is Background bg)
-                {
-                    bg.Enabled = false;
-                    bg.BackgroundDefinition = null;
-
-                    ObjectEditor.Content = null;
-                }
-                else if (selectedObj is View view)
-                {
-                    view.Enabled = false;
-
-                    ObjectEditor.Content = null;
-                }
-                else if (selectedObj is Tile tile)
-                {
-                    if (mainWindow.IsGMS2 == Visibility.Visible)
-                    {
-                        foreach (var layer in room.Layers)
-                            if (layer.AssetsData != null)
-                                layer.AssetsData.LegacyTiles.Remove(tile);
-                        roomObjDict.Remove(tile.InstanceID, out _);
-                    }
-
-                    room.Tiles.Remove(tile);
-
-                    ObjectEditor.Content = null;
-                }
-                else if (selectedObj is GameObject gameObj)
-                {
-                    if (mainWindow.IsGMS2 == Visibility.Visible)
-                    {
-                        foreach (var layer in room.Layers)
-                            if (layer.InstancesData != null)
-                                layer.InstancesData.Instances.Remove(gameObj);
-                        roomObjDict.Remove(gameObj.InstanceID, out _);
-                    }
-
-                    room.GameObjects.Remove(gameObj);
-
-                    ObjectEditor.Content = null;
-                }
-                else if (selectedObj is SpriteInstance sprInst)
-                {
-                    foreach (var layer in room.Layers)
-                        if (layer.AssetsData != null)
-                            layer.AssetsData.Sprites.Remove(sprInst);
-
-                    sprInstDict.Remove(sprInst, out _);
-
-                    ObjectEditor.Content = null;
-                }
-                else if (selectedObj is Layer layer)
-                {
-                    if (layer.InstancesData != null)
-                        foreach (var go in layer.InstancesData.Instances)
-                            room.GameObjects.Remove(go);
-
-                    foreach (var pair in roomObjDict)
-                        if (pair.Value == layer)
-                            roomObjDict.Remove(pair.Key, out _);
-
-                    foreach (var pair in sprInstDict)
-                        if (pair.Value == layer)
-                            sprInstDict.Remove(pair.Key, out _);
-
-                    room.Layers.Remove(layer);
-
-                    if (layer.LayerType == LayerType.Background)
-                        room.UpdateBGColorLayer();
-
-                    ObjectEditor.Content = null;
-                }
+                DeleteItem(selectedObj);
             }
 
             int dir = 0;
@@ -1436,6 +1363,78 @@ namespace UndertaleModTool
             SelectObject(tile);
         }
 
+        private void DeleteItem(UndertaleObject obj)
+        {
+            UndertaleRoom room = this.DataContext as UndertaleRoom;
+
+            // We need to check before deleting the object but can only clear the editor after deleting the object
+            bool clearEditor = (obj == (ObjectEditor.Content as UndertaleObject));
+
+            if (obj is Background bg)
+            {
+                bg.Enabled = false;
+                bg.BackgroundDefinition = null;
+            }
+            else if (obj is View view)
+            {
+                view.Enabled = false;
+            }
+            else if (obj is Tile tile)
+            {
+                if (mainWindow.IsGMS2 == Visibility.Visible)
+                {
+                    foreach (var layer in room.Layers)
+                        if (layer.AssetsData != null)
+                            layer.AssetsData.LegacyTiles.Remove(tile);
+                    roomObjDict.Remove(tile.InstanceID, out _);
+                }
+
+                room.Tiles.Remove(tile);
+            }
+            else if (obj is GameObject gameObj)
+            {
+                if (mainWindow.IsGMS2 == Visibility.Visible)
+                {
+                    foreach (var layer in room.Layers)
+                        if (layer.InstancesData != null)
+                            layer.InstancesData.Instances.Remove(gameObj);
+                    roomObjDict.Remove(gameObj.InstanceID, out _);
+                }
+
+                room.GameObjects.Remove(gameObj);
+            }
+            else if (obj is SpriteInstance sprInst)
+            {
+                foreach (var layer in room.Layers)
+                    if (layer.AssetsData != null)
+                        layer.AssetsData.Sprites.Remove(sprInst);
+
+                sprInstDict.Remove(sprInst, out _);
+            }
+            else if (obj is Layer layer)
+            {
+                if (layer.InstancesData != null)
+                    foreach (var go in layer.InstancesData.Instances)
+                        room.GameObjects.Remove(go);
+
+                foreach (var pair in roomObjDict)
+                    if (pair.Value == layer)
+                        roomObjDict.Remove(pair.Key, out _);
+
+                foreach (var pair in sprInstDict)
+                    if (pair.Value == layer)
+                        sprInstDict.Remove(pair.Key, out _);
+
+                room.Layers.Remove(layer);
+
+                if (layer.LayerType == LayerType.Background)
+                    room.UpdateBGColorLayer();
+            }
+
+            if (clearEditor)
+                ObjectEditor.Content = null;
+        }
+
         private void MenuItem_NewLayerInstances_Click(object sender, RoutedEventArgs e)
         {
             AddLayer<Layer.LayerInstancesData>(LayerType.Instances, "NewInstancesLayer");
@@ -1484,28 +1483,9 @@ namespace UndertaleModTool
         }
         private void MenuItem_Delete_Click(Object sender, RoutedEventArgs e)
         {
-            UndertaleRoom room = this.DataContext as UndertaleRoom;
             MenuItem menuitem = sender as MenuItem;
-            UndertaleObject obj = menuitem.DataContext as UndertaleObject;
-
-            // We need to check before deleting the object but can only clear the editor after deleting the object
-            bool clearEditor = (obj == (ObjectEditor.Content as UndertaleObject));
-
-            if (obj is GameObject gameObj)
-            {
-                if (mainWindow.IsGMS2 == Visibility.Visible)
-                {
-                    foreach (var layer in room.Layers)
-                        if (layer.InstancesData != null)
-                            layer.InstancesData.Instances.Remove(gameObj);
-                    roomObjDict.Remove(gameObj.InstanceID, out _);
-                }
-
-                room.GameObjects.Remove(gameObj);
-            }
-
-            if (clearEditor)
-                ObjectEditor.Content = null;
+            if (menuitem.DataContext is UndertaleObject obj)
+                DeleteItem(obj);
         }
 
         public static void GenerateSpriteCache(UndertaleRoom room)
