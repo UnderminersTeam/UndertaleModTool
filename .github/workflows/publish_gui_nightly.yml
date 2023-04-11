@@ -127,7 +127,7 @@ jobs:
       with:
         script: |
           // Wait 5 seconds
-          await new Promise(r => setTimeout(r, 5000));
+          await new Promise(r => setTimeout(r, 10000));
 
           const {owner, repo} = context.repo;
           const listReleasesResponse = await github.repos.listReleases({
