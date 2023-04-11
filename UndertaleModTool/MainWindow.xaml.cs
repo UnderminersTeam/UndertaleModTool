@@ -2953,7 +2953,7 @@ namespace UndertaleModTool
                 string artifactName = (string)currentArtifact["name"];
 
                 // If the tool ever becomes cross platform this needs to check the OS
-                if (artifactName.Equals($"GUI-windows-latest-Release-isBundled-{isBundled.ToString().ToLower()}-isSingleFile-{isSingleFile.ToString().ToLower()}.zip"))
+                if (artifactName.Equals($"GUI-windows-latest-Release-isBundled-{isBundled.ToString().ToLower()}-isSingleFile-{isSingleFile.ToString().ToLower()}"))
                     artifact = currentArtifact;
             }
             if (artifact is null)
