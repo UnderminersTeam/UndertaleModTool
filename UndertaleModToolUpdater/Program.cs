@@ -63,7 +63,7 @@ namespace UndertaleModToolUpdater
             File.Delete(basePath + "Update.zip");
 
             Console.WriteLine("Replacing files with update...");
-            MoveDirectory(basePath + "Update", appPath);
+            MoveDirectory(basePath + $"Update{Path.DirectorySeparatorChar}windows-latest", appPath);
 
             Console.WriteLine("Finished updating, launching UTMT...");
 
