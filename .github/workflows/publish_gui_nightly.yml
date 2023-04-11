@@ -49,6 +49,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
+          name: GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}
           path: GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip
 
   build_cli:
@@ -91,6 +92,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
+          name: CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}
           path: CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}.zip
 
   upload:
@@ -119,3 +121,36 @@ jobs:
           This is an automatically updating **bleeding edge** build of UndertaleModTool. There *will* be bugs! If you encounter any, please make an issue on GitHub or join the Underminers Discord for more help!
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Check and fix the release
+    - uses: actions/github-script@v3
+      with:
+        script: |
+          // Wait 5 seconds
+          await new Promise(r => setTimeout(r, 5000));
+
+          const {owner, repo} = context.repo;
+          const listReleasesResponse = await github.repos.listReleases({
+            owner,
+            repo
+          });
+          
+          if (listReleasesResponse.status !== 200)
+            throw new Error("Error listing releases");
+          
+          for (let release of listReleasesResponse.data) {
+            if (release.tag_name !== "bleeding-edge")
+              continue;
+            
+            if (!release.draft) {
+              console.log("Found published bleeding edge release - no need to do anything.");
+              return;
+            }
+            
+            let release_id = release.id;
+            console.warn("Found the bleeding edge release that is draft.\nTrying to publish...");
+            await github.repos.updateRelease({owner, repo, release_id, draft: false});
+            console.log("The draft release was published successfully.");
+            return;
+          }
+
+          throw new Error("The bleeding edge release was not found.");
