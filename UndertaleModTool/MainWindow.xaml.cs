@@ -3045,8 +3045,8 @@ namespace UndertaleModTool
                     }
 
                     // Unzip double-zipped update
-                    ZipFile.ExtractToDirectory(tempFolder + "UndertaleModTool\\Update.zip.zip", tempFolder + "UndertaleModTool\\Update.zip", true);
-                    File.Delete(tempFolder + "UndertaleModTool\\Update.zip.zip");
+                    ZipFile.ExtractToDirectory(tempFolder + "\\Update.zip.zip", tempFolder + "UndertaleModTool\\Update.zip", true);
+                    File.Delete(tempFolder + "\\Update.zip.zip");
 
                     string updaterFolder = Path.Combine(ExePath, "Updater");
                     if (!File.Exists(Path.Combine(updaterFolder, "UndertaleModToolUpdater.exe")))
@@ -3108,7 +3108,7 @@ namespace UndertaleModTool
                 });
 
                 // The Artifact is already zipped then zipped again by the download archive
-                webClient.DownloadFileAsync(new Uri(downloadUrl), Path.GetTempPath() + "UndertaleModTool\\Update.zip.zip");
+                webClient.DownloadFileAsync(new Uri(downloadUrl), tempFolder + "\\Update.zip.zip");
             }
         }
 
