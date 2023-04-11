@@ -103,6 +103,11 @@
                                     <Binding Path="ObjectDefinition.Name.Content" Mode="OneWay" TargetNullValue="?" FallbackValue="EmptyTile"/>
                                 </MultiBinding>
                             </TextBlock.Text>
+                            <TextBlock.ContextMenu>
+                                <local:ContextMenuDark>
+                                    <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
+                                </local:ContextMenuDark>
+                            </TextBlock.ContextMenu>
                         </TextBlock>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+SpriteInstance}">
@@ -113,6 +118,11 @@
                                     <Binding Path="Sprite.Name.Content" Mode="OneWay" TargetNullValue="?" FallbackValue="EmptySprite"/>
                                 </MultiBinding>
                             </TextBlock.Text>
+                            <TextBlock.ContextMenu>
+                                <local:ContextMenuDark>
+                                    <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
+                                </local:ContextMenuDark>
+                            </TextBlock.ContextMenu>
                         </TextBlock>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+ParticleSystemInstance}">
@@ -154,6 +164,11 @@
                                             </Style.Triggers>
                                         </Style>
                                     </TextBlock.Style>
+                                    <TextBlock.ContextMenu>
+                                        <local:ContextMenuDark>
+                                            <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
+                                        </local:ContextMenuDark>
+                                    </TextBlock.ContextMenu>
                                 </TextBlock>
                             </HierarchicalDataTemplate>
                         </TreeViewItem.ItemTemplate>
@@ -231,6 +246,7 @@
                                             <TextBlock.ContextMenu>
                                                 <local:ContextMenuDark>
                                                     <MenuItem Header="New Object Instance" Click="MenuItem_NewGMS2ObjectInstance_Click"/>
+                                                    <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
                                                 </local:ContextMenuDark>
                                             </TextBlock.ContextMenu>
                                         </TextBlock>
@@ -238,7 +254,13 @@
                                 </local:LayerDataTemplateSelector.InstancesDataTemplate>
                                 <local:LayerDataTemplateSelector.TilesDataTemplate>
                                     <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
-                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}"/>
+                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">
+                                            <TextBlock.ContextMenu>
+                                                <local:ContextMenuDark>
+                                                    <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
+                                                </local:ContextMenuDark>
+                                            </TextBlock.ContextMenu>
+                                        </TextBlock>
                                     </HierarchicalDataTemplate>
                                 </local:LayerDataTemplateSelector.TilesDataTemplate>
                                 <local:LayerDataTemplateSelector.AssetsDataTemplate>
@@ -261,6 +283,7 @@
                                                 <local:ContextMenuDark>
                                                     <MenuItem Header="New Legacy Tile" Click="MenuItem_NewLegacyTile_Click"/>
                                                     <MenuItem Header="New Sprite Instance" Click="MenuItem_NewSprite_Click"/>
+                                                    <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
                                                 </local:ContextMenuDark>
                                             </TextBlock.ContextMenu>
                                         </TextBlock>
@@ -268,7 +291,13 @@
                                 </local:LayerDataTemplateSelector.AssetsDataTemplate>
                                 <local:LayerDataTemplateSelector.BackgroundDataTemplate>
                                     <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
-                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}" />
+                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">
+                                            <TextBlock.ContextMenu>
+                                                <local:ContextMenuDark>
+                                                    <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
+                                                </local:ContextMenuDark>
+                                            </TextBlock.ContextMenu>
+                                        </TextBlock>
                                     </HierarchicalDataTemplate>
                                 </local:LayerDataTemplateSelector.BackgroundDataTemplate>
                                 <local:LayerDataTemplateSelector.EffectDataTemplate>
