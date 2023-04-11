@@ -726,9 +726,13 @@ namespace UndertaleModTool
             try
             {
                 DependencyObject child = VisualTreeHelper.GetChild(DataEditor, 0);
-                codeEditor = VisualTreeHelper.GetChild(child, 0) as UndertaleCodeEditor;
-                if (codeEditor is null)
+                var editor = VisualTreeHelper.GetChild(child, 0);
+                if (editor is null)
                     return SaveResult.Error;
+
+                codeEditor = editor as UndertaleCodeEditor;
+                if (codeEditor is null)
+                    return result;
             }
             catch (Exception ex)
             {
