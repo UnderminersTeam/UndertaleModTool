@@ -90,7 +90,7 @@
                             </TextBlock.Text>
                             <TextBlock.ContextMenu>
                                 <local:ContextMenuDark>
-                                    <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
+                                    <MenuItem Header="Delete object" Click="MenuItem_Delete_Click"/>
                                 </local:ContextMenuDark>
                             </TextBlock.ContextMenu>
                         </TextBlock>
@@ -105,7 +105,7 @@
                             </TextBlock.Text>
                             <TextBlock.ContextMenu>
                                 <local:ContextMenuDark>
-                                    <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
+                                    <MenuItem Header="Delete tile" Click="MenuItem_Delete_Click"/>
                                 </local:ContextMenuDark>
                             </TextBlock.ContextMenu>
                         </TextBlock>
@@ -120,28 +120,41 @@
                             </TextBlock.Text>
                             <TextBlock.ContextMenu>
                                 <local:ContextMenuDark>
-                                    <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
+                                    <MenuItem Header="Delete sprite instance" Click="MenuItem_Delete_Click"/>
                                 </local:ContextMenuDark>
                             </TextBlock.ContextMenu>
                         </TextBlock>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+ParticleSystemInstance}">
                         <TextBlock Text="ParticleSystemInstance (unsupported)"
-                                   Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                   Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}">
+                            <TextBlock.ContextMenu>
+                                <local:ContextMenuDark>
+                                    <MenuItem Header="Delete particle system instance" Click="MenuItem_Delete_Click"/>
+                                </local:ContextMenuDark>
+                            </TextBlock.ContextMenu>
+                        </TextBlock>
                     </DataTemplate>
                 </TreeView.Resources>
 
                 <TreeViewItem Header="{Binding Name.Content}" Name="RoomRootItem" IsExpanded="True">
                     <TreeViewItem Name="BGItems" Header="Backgrounds" ItemsSource="{Binding Backgrounds, Mode=OneWay}" Visibility="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}" IsExpanded="True">
+                        <TreeViewItem.Resources>
+                            <local:ContextMenuDark x:Key="bgContextMenu">
+                                <MenuItem Header="Delete background" Click="MenuItem_Delete_Click"/>
+                            </local:ContextMenuDark>
+                        </TreeViewItem.Resources>
                         <TreeViewItem.ItemTemplate>
                             <HierarchicalDataTemplate>
                                 <TextBlock Text="{Binding BackgroundDefinition, Mode=OneWay, TargetNullValue='(no name)'}">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
+                                            <Setter Property="ContextMenu" Value="{StaticResource bgContextMenu}"/>
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding Enabled, Mode=OneWay}" Value="False">
                                                     <Setter Property="Foreground"
                                                             Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                                    <Setter Property="ContextMenu" Value="{x:Null}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -151,24 +164,26 @@
                         </TreeViewItem.ItemTemplate>
                     </TreeViewItem>
                     <TreeViewItem Name="ViewItems" Header="Views" ItemsSource="{Binding Views, Mode=OneWay}" IsExpanded="True">
+                        <TreeViewItem.Resources>
+                            <local:ContextMenuDark x:Key="viewContextMenu">
+                                <MenuItem Header="Delete view" Click="MenuItem_Delete_Click"/>
+                            </local:ContextMenuDark>
+                        </TreeViewItem.Resources>
                         <TreeViewItem.ItemTemplate>
                             <HierarchicalDataTemplate>
                                 <TextBlock Text="View">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
+                                            <Setter Property="ContextMenu" Value="{StaticResource viewContextMenu}"/>
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding Enabled, Mode=OneWay}" Value="False">
                                                     <Setter Property="Foreground"
                                                             Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                                    <Setter Property="ContextMenu" Value="{x:Null}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </TextBlock.Style>
-                                    <TextBlock.ContextMenu>
-                                        <local:ContextMenuDark>
-                                            <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
-                                        </local:ContextMenuDark>
-                                    </TextBlock.ContextMenu>
                                 </TextBlock>
                             </HierarchicalDataTemplate>
                         </TreeViewItem.ItemTemplate>
@@ -205,6 +220,11 @@
                                             <Binding Path="ObjectDefinition.Name.Content" TargetNullValue="?" FallbackValue="EmptyTile"/>
                                         </MultiBinding>
                                     </TextBlock.Text>
+                                    <TextBlock.ContextMenu>
+                                        <local:ContextMenuDark>
+                                            <MenuItem Header="Delete tile" Click="MenuItem_Delete_Click"/>
+                                        </local:ContextMenuDark>
+                                    </TextBlock.ContextMenu>
                                 </TextBlock>
                             </HierarchicalDataTemplate>
                         </TreeViewItem.ItemTemplate>
@@ -246,7 +266,7 @@
                                             <TextBlock.ContextMenu>
                                                 <local:ContextMenuDark>
                                                     <MenuItem Header="New Object Instance" Click="MenuItem_NewGMS2ObjectInstance_Click"/>
-                                                    <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
+                                                    <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click"/>
                                                 </local:ContextMenuDark>
                                             </TextBlock.ContextMenu>
                                         </TextBlock>
@@ -257,7 +277,7 @@
                                         <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">
                                             <TextBlock.ContextMenu>
                                                 <local:ContextMenuDark>
-                                                    <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
+                                                    <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click"/>
                                                 </local:ContextMenuDark>
                                             </TextBlock.ContextMenu>
                                         </TextBlock>
@@ -283,7 +303,7 @@
                                                 <local:ContextMenuDark>
                                                     <MenuItem Header="New Legacy Tile" Click="MenuItem_NewLegacyTile_Click"/>
                                                     <MenuItem Header="New Sprite Instance" Click="MenuItem_NewSprite_Click"/>
-                                                    <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
+                                                    <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click"/>
                                                 </local:ContextMenuDark>
                                             </TextBlock.ContextMenu>
                                         </TextBlock>
@@ -294,7 +314,7 @@
                                         <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">
                                             <TextBlock.ContextMenu>
                                                 <local:ContextMenuDark>
-                                                    <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
+                                                    <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click"/>
                                                 </local:ContextMenuDark>
                                             </TextBlock.ContextMenu>
                                         </TextBlock>
@@ -302,7 +322,13 @@
                                 </local:LayerDataTemplateSelector.BackgroundDataTemplate>
                                 <local:LayerDataTemplateSelector.EffectDataTemplate>
                                     <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
-                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}" />
+                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">
+                                            <TextBlock.ContextMenu>
+                                                <local:ContextMenuDark>
+                                                    <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click"/>
+                                                </local:ContextMenuDark>
+                                            </TextBlock.ContextMenu>
+                                        </TextBlock>
                                     </HierarchicalDataTemplate>
                                 </local:LayerDataTemplateSelector.EffectDataTemplate>
                             </local:LayerDataTemplateSelector>

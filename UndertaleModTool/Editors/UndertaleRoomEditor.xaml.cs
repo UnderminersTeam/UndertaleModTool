@@ -1411,6 +1411,12 @@ namespace UndertaleModTool
 
                 sprInstDict.Remove(sprInst, out _);
             }
+            else if (obj is ParticleSystemInstance partSysInst)
+            {
+                foreach (var layer in room.Layers)
+                    if (layer.AssetsData != null)
+                        layer.AssetsData.ParticleSystems.Remove(partSysInst);
+            }
             else if (obj is Layer layer)
             {
                 if (layer.InstancesData != null)
