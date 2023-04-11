@@ -722,22 +722,32 @@ namespace UndertaleModTool
         {
             SaveResult result = SaveResult.NotSaved;
 
-            DependencyObject child = VisualTreeHelper.GetChild(DataEditor, 0);
-            if (child is not null && VisualTreeHelper.GetChild(child, 0) is UndertaleCodeEditor codeEditor)
+            UndertaleCodeEditor codeEditor;
+            try
             {
-                #pragma warning disable CA1416
-                if (codeEditor.DecompiledChanged || codeEditor.DisassemblyChanged)
-                {
-                    IsSaving = true;
-
-                    await codeEditor.SaveChanges();
-                    //"IsSaving" should became false on success
-
-                    result = IsSaving ? SaveResult.Error : SaveResult.Saved;
-                    IsSaving = false;
-                }
-                #pragma warning restore CA1416
+                DependencyObject child = VisualTreeHelper.GetChild(DataEditor, 0);
+                codeEditor = VisualTreeHelper.GetChild(child, 0) as UndertaleCodeEditor;
+                if (codeEditor is null)
+                    return SaveResult.Error;
             }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                return SaveResult.Error;
+            }
+            
+            #pragma warning disable CA1416
+            if (codeEditor.DecompiledChanged || codeEditor.DisassemblyChanged)
+            {
+                IsSaving = true;
+
+                await codeEditor.SaveChanges();
+                //"IsSaving" should became false on success
+
+                result = IsSaving ? SaveResult.Error : SaveResult.Saved;
+                IsSaving = false;
+            }
+            #pragma warning restore CA1416
 
             return result;
         }
@@ -754,8 +764,11 @@ namespace UndertaleModTool
                 if (!CanSafelySave)
                     this.ShowWarning("Errors occurred during loading. High chance of data loss! Proceed at your own risk.");
 
-                if (await SaveCodeChanges() == SaveResult.NotSaved)
+                var result = await SaveCodeChanges();
+                if (result == SaveResult.NotSaved)
                     _ = DoSaveDialog();
+                else if (result == SaveResult.Error)
+                    this.ShowError("The changes in code editor weren't saved due to some error in \"SaveCodeChanges()\".");
             }
         }
         private async void DataWindow_Closing(object sender, CancelEventArgs e)
@@ -787,7 +800,10 @@ namespace UndertaleModTool
                                 if (saveRes == SaveResult.NotSaved)
                                     _ = DoSaveDialog();
                                 else if (saveRes == SaveResult.Error)
+                                {
+                                    this.ShowError("The changes in code editor weren't saved due to some error in \"SaveCodeChanges()\".");
                                     return;
+                                }
                             }
                         }
                         else
