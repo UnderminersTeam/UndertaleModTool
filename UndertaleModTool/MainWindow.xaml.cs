@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -2881,7 +2882,7 @@ namespace UndertaleModTool
             bool isBundled = !Regex.Match(assemblyLocation, @"C:\\Program Files( \(x86\))*\\dotnet\\shared\\").Success;
 
             string baseUrl = "https://api.github.com/repos/krzys-h/UndertaleModTool/actions/";
-            string detectedActionName = "Publish GUI";
+            string detectedActionName = "Publish continuous release of UndertaleModTool";
 
             // Fetch the latest workflow run
             var result = await HttpGetAsync(baseUrl + "runs?branch=master&status=success&per_page=20");
@@ -2951,7 +2952,8 @@ namespace UndertaleModTool
                 var currentArtifact = (JObject) artifactList[index];
                 string artifactName = (string)currentArtifact["name"];
 
-                if (artifactName.Contains($"isBundled-{isBundled.ToString().ToLower()}-isSingleFile-{isSingleFile.ToString().ToLower()}"))
+                // If the tool ever becomes cross platform this needs to check the OS
+                if (artifactName.Equals($"GUI-windows-latest-Release-isBundled-{isBundled.ToString().ToLower()}-isSingleFile-{isSingleFile.ToString().ToLower()}.zip"))
                     artifact = currentArtifact;
             }
             if (artifact is null)
@@ -3042,6 +3044,10 @@ namespace UndertaleModTool
                         return;
                     }
 
+                    // Unzip double-zipped update
+                    ZipFile.ExtractToDirectory(tempFolder + "UndertaleModTool\\Update.zip.zip", tempFolder + "UndertaleModTool\\Update.zip", true);
+                    File.Delete(tempFolder + "UndertaleModTool\\Update.zip.zip");
+
                     string updaterFolder = Path.Combine(ExePath, "Updater");
                     if (!File.Exists(Path.Combine(updaterFolder, "UndertaleModToolUpdater.exe")))
                     {
@@ -3101,7 +3107,8 @@ namespace UndertaleModTool
                     ended = true;
                 });
 
-                webClient.DownloadFileAsync(new Uri(downloadUrl), Path.GetTempPath() + "UndertaleModTool\\Update.zip");
+                // The Artifact is already zipped then zipped again by the download archive
+                webClient.DownloadFileAsync(new Uri(downloadUrl), Path.GetTempPath() + "UndertaleModTool\\Update.zip.zip");
             }
         }
 
