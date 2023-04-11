@@ -122,7 +122,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Check and fix the release
-    - uses: actions/github-script@v3
+      uses: actions/github-script@v3
       with:
         script: |
           // Wait 5 seconds
