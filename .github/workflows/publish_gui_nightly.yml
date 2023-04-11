@@ -117,7 +117,7 @@ jobs:
         prerelease: false
         fail_on_unmatched_files: true
         files: |
-          *
+          */*
         body: | 
           This is an automatically updating **bleeding edge** build of UndertaleModTool. There *will* be bugs! If you encounter any, please make an issue on GitHub or join the Underminers Discord for more help!
       env:
