@@ -51,6 +51,7 @@ using System.Windows.Controls.Primitives;
 using System.Runtime.CompilerServices;
 using System.Diagnostics.Metrics;
 using System.Windows.Interop;
+using System.Xml.XPath;
 
 namespace UndertaleModTool
 {
@@ -2880,6 +2881,7 @@ namespace UndertaleModTool
             string assemblyLocation = AppDomain.CurrentDomain.GetAssemblies()
                                       .First(x => x.GetName().Name.StartsWith("System.Collections")).Location; // any of currently used assemblies
             bool isBundled = !Regex.Match(assemblyLocation, @"C:\\Program Files( \(x86\))*\\dotnet\\shared\\").Success;
+            string patchName = $"GUI-windows-latest-Release-isBundled-{isBundled.ToString().ToLower()}-isSingleFile-{isSingleFile.ToString().ToLower()}";
 
             string baseUrl = "https://api.github.com/repos/krzys-h/UndertaleModTool/actions/";
             string detectedActionName = "Publish continuous release of UndertaleModTool";
@@ -2953,7 +2955,7 @@ namespace UndertaleModTool
                 string artifactName = (string)currentArtifact["name"];
 
                 // If the tool ever becomes cross platform this needs to check the OS
-                if (artifactName.Equals($"GUI-windows-latest-Release-isBundled-{isBundled.ToString().ToLower()}-isSingleFile-{isSingleFile.ToString().ToLower()}"))
+                if (artifactName.Equals(patchName))
                     artifact = currentArtifact;
             }
             if (artifact is null)
@@ -3045,8 +3047,9 @@ namespace UndertaleModTool
                     }
 
                     // Unzip double-zipped update
-                    ZipFile.ExtractToDirectory(tempFolder + "\\Update.zip.zip", tempFolder + "UndertaleModTool\\Update.zip", true);
-                    File.Delete(tempFolder + "\\Update.zip.zip");
+                    ZipFile.ExtractToDirectory(Path.Combine(tempFolder, "Update.zip.zip"), tempFolder, true);
+                    File.Move(Path.Combine(tempFolder, $"{patchName}.zip"), Path.Combine(tempFolder, "Update.zip"));
+                    File.Delete(Path.Combine(tempFolder, "Update.zip.zip"));
 
                     string updaterFolder = Path.Combine(ExePath, "Updater");
                     if (!File.Exists(Path.Combine(updaterFolder, "UndertaleModToolUpdater.exe")))
@@ -3108,7 +3111,7 @@ namespace UndertaleModTool
                 });
 
                 // The Artifact is already zipped then zipped again by the download archive
-                webClient.DownloadFileAsync(new Uri(downloadUrl), tempFolder + "\\Update.zip.zip");
+                webClient.DownloadFileAsync(new Uri(downloadUrl), Path.Combine(tempFolder, "Update.zip.zip"));
             }
         }
 
