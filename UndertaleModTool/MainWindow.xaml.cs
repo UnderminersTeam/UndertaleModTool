@@ -2972,7 +2972,6 @@ namespace UndertaleModTool
 
             string tempFolder = Path.Combine(Path.GetTempPath(), "UndertaleModTool");
             Directory.CreateDirectory(tempFolder); // We're about to download, so make sure the download dir actually exists
-            File.WriteAllText(Path.Combine(tempFolder, "detectedActionName.txt"), detectedActionName); // for debugging purposes (will be removed later)
 
             // It's time to download; let's use a cool progress bar
             scriptDialog = new("Downloading", "Downloading new version...")
