@@ -87,7 +87,7 @@
         <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">SDF spread value</TextBlock>
         <local:TextBoxDark Grid.Row="10" Grid.Column="1" Margin="3" Text="{Binding SDFSpread}"/>
 
-        <Viewbox Grid.Row="11" Grid.Column="1" Stretch="Uniform" StretchDirection="DownOnly">
+        <Viewbox Grid.Row="11" Grid.ColumnSpan="2" Margin="3,30,3,3" Stretch="Uniform" StretchDirection="DownOnly">
             <Border>
                 <Border.Background>
                     <SolidColorBrush Color="Black"/>
@@ -96,7 +96,7 @@
             </Border>
         </Viewbox>
 
-        <TextBlock Grid.Row="12" Grid.Column="0" Margin="3,30,3,3">Glyphs:</TextBlock>
+        <TextBlock Grid.Row="12" Grid.Column="0" Margin="3">Glyphs:</TextBlock>
         <local:DataGridDark Grid.Row="13" Grid.ColumnSpan="2" MaxHeight="370" Margin="3" x:Name="GlyphsGrid" ItemsSource="{Binding Glyphs, Mode=OneWay}"
                             AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
                             ScrollViewer.CanContentScroll="True"
