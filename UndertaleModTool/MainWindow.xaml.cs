@@ -51,7 +51,6 @@ using System.Windows.Controls.Primitives;
 using System.Runtime.CompilerServices;
 using System.Diagnostics.Metrics;
 using System.Windows.Interop;
-using System.Xml.XPath;
 
 namespace UndertaleModTool
 {
