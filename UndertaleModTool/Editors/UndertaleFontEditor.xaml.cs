@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -80,6 +81,34 @@ namespace UndertaleModTool
                 dataEditorViewer.UpdateLayout();
                 dataEditorViewer.ScrollToVerticalOffset(initOffset);
             }
+        }
+    }
+
+    public class CharConverter : IValueConverter
+    {
+        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is not ushort charNum)
+                return "(error)";
+
+            return System.Convert.ToChar(charNum);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is not string charStr || charStr.Length == 0)
+                return new ValidationResult(false, null);
+
+            uint charNum = charStr[0];
+            if (charNum > ushort.MaxValue)
+            {
+                mainWindow.ShowError("The character code is greater than the maximum (65535)");
+                return new ValidationResult(false, null);
+            }
+
+            return (ushort)charNum;
         }
     }
 }
