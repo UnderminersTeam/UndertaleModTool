@@ -166,7 +166,7 @@
                     <TreeViewItem Name="ViewItems" Header="Views" ItemsSource="{Binding Views, Mode=OneWay}" IsExpanded="True">
                         <TreeViewItem.Resources>
                             <local:ContextMenuDark x:Key="viewContextMenu">
-                                <MenuItem Header="Delete view" Click="MenuItem_Delete_Click"/>
+                                <MenuItem Header="Disable view" Click="MenuItem_Delete_Click"/>
                             </local:ContextMenuDark>
                         </TreeViewItem.Resources>
                         <TreeViewItem.ItemTemplate>
