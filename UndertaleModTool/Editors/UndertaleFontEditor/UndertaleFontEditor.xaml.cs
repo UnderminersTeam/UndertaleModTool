@@ -82,6 +82,11 @@ namespace UndertaleModTool
                 dataEditorViewer.ScrollToVerticalOffset(initOffset);
             }
         }
+
+        private void EditRectangleButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 
     public class CharConverter : IValueConverter
