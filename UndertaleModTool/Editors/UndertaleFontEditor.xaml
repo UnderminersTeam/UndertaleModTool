@@ -29,6 +29,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
@@ -87,8 +88,11 @@
         <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">SDF spread value</TextBlock>
         <local:TextBoxDark Grid.Row="10" Grid.Column="1" Margin="3" Text="{Binding SDFSpread}"/>
 
-        <Viewbox Grid.Row="11" Grid.ColumnSpan="2" Margin="3,30,3,3" Stretch="Uniform" StretchDirection="DownOnly">
-            <Grid>
+        <TextBlock Grid.Row="11" Grid.ColumnSpan="2" Margin="3,30,3,3" HorizontalAlignment="Center" Foreground="DarkGray" FontStyle="Italic" TextWrapping="Wrap" TextAlignment="Center">
+                Hint: You can click on any glyph here to highlight it in the "Glyphs".
+        </TextBlock>
+        <Viewbox Grid.Row="12" Grid.ColumnSpan="2" Margin="3" Stretch="Uniform" StretchDirection="DownOnly">
+            <Grid MouseDown="Grid_MouseDown" Cursor="Hand">
                 <Grid.Background>
                     <SolidColorBrush Color="Black"/>
                 </Grid.Background>
@@ -108,8 +112,8 @@
             </Grid>
         </Viewbox>
 
-        <TextBlock Grid.Row="12" Grid.Column="0" Margin="3">Glyphs:</TextBlock>
-        <local:DataGridDark Grid.Row="13" Grid.ColumnSpan="2" MaxHeight="370" Margin="3" x:Name="GlyphsGrid" ItemsSource="{Binding Glyphs, Mode=OneWay}"
+        <TextBlock Grid.Row="13" Grid.Column="0" Margin="3">Glyphs:</TextBlock>
+        <local:DataGridDark Grid.Row="14" Grid.ColumnSpan="2" MaxHeight="370" Margin="3" x:Name="GlyphsGrid" ItemsSource="{Binding Glyphs, Mode=OneWay}"
                             AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
                             ScrollViewer.CanContentScroll="True"
                             VirtualizingPanel.IsVirtualizing="True"
@@ -182,10 +186,10 @@
             </DataGrid.Columns>
         </local:DataGridDark>
 
-        <TextBlock Grid.Row="14" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" TextWrapping="Wrap" HorizontalAlignment="Center">
+        <TextBlock Grid.Row="15" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" TextWrapping="Wrap" HorizontalAlignment="Center">
             Note that the glyphs need to be specified in ascending order.<LineBreak/>
             Press the button below to sort them appropriately.
         </TextBlock>
-        <local:ButtonDark Grid.Row="15" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" Click="Button_Sort_Click">Sort glyphs</local:ButtonDark>
+        <local:ButtonDark Grid.Row="16" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" Click="Button_Sort_Click">Sort glyphs</local:ButtonDark>
     </Grid>
 </local:DataUserControl>
