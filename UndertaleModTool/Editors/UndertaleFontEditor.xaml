@@ -88,12 +88,24 @@
         <local:TextBoxDark Grid.Row="10" Grid.Column="1" Margin="3" Text="{Binding SDFSpread}"/>
 
         <Viewbox Grid.Row="11" Grid.ColumnSpan="2" Margin="3,30,3,3" Stretch="Uniform" StretchDirection="DownOnly">
-            <Border>
-                <Border.Background>
+            <Grid>
+                <Grid.Background>
                     <SolidColorBrush Color="Black"/>
-                </Border.Background>
+                </Grid.Background>
                 <local:UndertaleTexturePageItemDisplay DataContext="{Binding Texture, Mode=OneWay}"/>
-            </Border>
+
+                <Canvas Name="GlyphsOverlayCanvas" UseLayoutRounding="True" SnapsToDevicePixels="True">
+                    <Rectangle Name="GlyphRectangle" Stroke="#FFB23131" Panel.ZIndex="50" StrokeThickness="1"
+                           Canvas.Left="{Binding SelectedItem.SourceX, ElementName=GlyphsGrid, Mode=OneWay, TargetNullValue=-1, FallbackValue=-1}"
+                           Canvas.Top="{Binding SelectedItem.SourceY, ElementName=GlyphsGrid, Mode=OneWay, TargetNullValue=-1, FallbackValue=-1}"
+                           Width="{Binding SelectedItem.SourceWidth, ElementName=GlyphsGrid, Mode=OneWay, TargetNullValue=0, FallbackValue=0}"
+                           Height="{Binding SelectedItem.SourceHeight, ElementName=GlyphsGrid, Mode=OneWay, TargetNullValue=0, FallbackValue=0}">
+                        <Rectangle.Fill>
+                            <SolidColorBrush Color="Red" Opacity=".1"/>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                </Canvas>
+            </Grid>
         </Viewbox>
 
         <TextBlock Grid.Row="12" Grid.Column="0" Margin="3">Glyphs:</TextBlock>
