@@ -74,6 +74,7 @@
         <Grid Grid.Column="0" Grid.Row="0" Margin="0,0,0,8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
@@ -337,7 +338,14 @@
                 </TreeViewItem>
             </TreeView>
 
-            <ScrollViewer Grid.Column="1" Margin="3,0,0,0" Name="ObjectEditor" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible">
+            <StackPanel Grid.Column="1">
+                <local:ButtonDark FontFamily="Marlett" FontSize="14" Content="5" Margin="0,0,0,2"
+                                  ToolTip="Move item up"/>
+                <local:ButtonDark FontFamily="Marlett" FontSize="14" Content="6"
+                                  ToolTip="Move item down"/>
+            </StackPanel>
+            
+            <ScrollViewer Grid.Column="2" Margin="3,0,0,0" Name="ObjectEditor" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible">
                 <ContentControl.Resources>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom}">
                         <Grid IsSharedSizeScope="True">
