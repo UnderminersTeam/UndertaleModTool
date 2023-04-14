@@ -347,10 +347,11 @@
             </TreeView>
 
             <StackPanel Grid.Column="1">
-                <local:ButtonDark FontFamily="Marlett" FontSize="14" Content="5" Margin="0,0,0,2" ToolTip="Move item up"
-                                  Click="TreeViewMoveUpButton_Click"/>
-                <local:ButtonDark FontFamily="Marlett" FontSize="14" Content="6" ToolTip="Move item down"
-                                  Click="TreeViewMoveDownButton_Click"/>
+                <!-- Using PreviewMouseLeftButtonUp is a terrible way of doing this, but I couldn't find anything better -->
+                <local:RepeatButtonDark FontFamily="Marlett" FontSize="14" Content="5" Margin="0,0,0,2" ToolTip="Move item up"
+                                  Click="TreeViewMoveUpButton_Click" PreviewMouseLeftButtonUp="TreeViewMoveButton_MouseLeftButtonUp"/>
+                <local:RepeatButtonDark FontFamily="Marlett" FontSize="14" Content="6" ToolTip="Move item down"
+                                  Click="TreeViewMoveDownButton_Click" PreviewMouseLeftButtonUp="TreeViewMoveButton_MouseLeftButtonUp"/>
             </StackPanel>
             
             <ScrollViewer Grid.Column="2" Margin="3,0,0,0" Name="ObjectEditor" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible">

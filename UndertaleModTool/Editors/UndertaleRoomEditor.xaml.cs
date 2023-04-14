@@ -756,7 +756,7 @@ namespace UndertaleModTool
         }
 
         private UndertaleObject selectedObject;
-        private void SelectObject(UndertaleObject obj)
+        private void SelectObject(UndertaleObject obj, bool focus = true)
         {
             // TODO: enable virtualizing of RoomObjectsTree and make this method work with it
 
@@ -860,7 +860,8 @@ namespace UndertaleModTool
                 if (resListView.ItemContainerGenerator.ContainerFromItem(obj1) is TreeViewItem resItem)
                 {
                     resItem.IsSelected = true;
-                    resItem.Focus();
+                    if (focus)
+                        resItem.Focus();
 
                     mainTreeViewer.UpdateLayout();
                     mainTreeViewer.ScrollToHorizontalOffset(0);
@@ -1051,13 +1052,21 @@ namespace UndertaleModTool
         private void TreeViewMoveUpButton_Click(object sender, RoutedEventArgs e)
         {
             UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
-            MoveItem(selectedObj, -1);
+            // If the button loses focus it cannot held
+            MoveItem(selectedObj, -1, false);
         }
 
         private void TreeViewMoveDownButton_Click(object sender, RoutedEventArgs e)
         {
             UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
-            MoveItem(selectedObj, 1);
+            // If the button loses focus it cannot held
+            MoveItem(selectedObj, 1, false);
+        }
+
+        private void TreeViewMoveButton_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
+            SelectObject(selectedObj);
         }
 
         private UndertaleObject copied;
@@ -1403,7 +1412,7 @@ namespace UndertaleModTool
                 ObjectEditor.Content = null;
         }
 
-        private void MoveItem(UndertaleObject obj, int dir)
+        private void MoveItem(UndertaleObject obj, int dir, bool focus = true)
         {
             UndertaleRoom room = this.DataContext as UndertaleRoom;
             Layer layer = null;
@@ -1446,7 +1455,7 @@ namespace UndertaleModTool
                 }
             }
 
-            SelectObject(obj);
+            SelectObject(obj, focus);
         }
 
         private void MenuItem_NewLayerInstances_Click(object sender, RoutedEventArgs e)
