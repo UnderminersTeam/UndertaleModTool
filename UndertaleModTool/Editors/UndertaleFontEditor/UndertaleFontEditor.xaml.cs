@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using UndertaleModLib.Models;
+using UndertaleModTool.Editors.UndertaleFontEditor;
 
 namespace UndertaleModTool
 {
@@ -85,7 +86,14 @@ namespace UndertaleModTool
 
         private void EditRectangleButton_Click(object sender, RoutedEventArgs e)
         {
+            if (GlyphsGrid.SelectedItem is not UndertaleFont.Glyph glyph)
+            {
+                mainWindow.ShowError("No glyph selected.");
+                return;
+            }
 
+            var window = new EditGlyphRectangleWindow(DataContext as UndertaleFont, glyph);
+            window.Show();
         }
     }
 
