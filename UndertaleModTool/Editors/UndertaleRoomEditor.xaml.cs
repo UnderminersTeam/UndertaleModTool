@@ -996,64 +996,14 @@ namespace UndertaleModTool
 
         private void RoomObjectsTree_KeyDown(object sender, KeyEventArgs e)
         {
+            UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
+
             if (e.Key == Key.Delete)
-            {
-                UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
                 DeleteItem(selectedObj);
-            }
-
-            int dir = 0;
-            if (e.Key == Key.OemMinus)
-                dir = -1;
+            else if (e.Key == Key.OemMinus)
+                MoveItem(selectedObj, -1);
             else if (e.Key == Key.OemPlus)
-                dir = 1;
-
-            if (dir != 0)
-            {
-                UndertaleRoom room = this.DataContext as UndertaleRoom;
-                UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
-                Layer layer = null;
-                if (room.Layers.Count > 0)
-                    layer = selectedObj switch
-                    {
-                        Tile or GameObject => roomObjDict[(selectedObj as IRoomObject).InstanceID],
-                        SpriteInstance spr => sprInstDict[spr],
-                        _ => null
-                    };
-
-                IList list = selectedObj switch
-                {
-                    Tile => layer is null ? room.Tiles : layer.AssetsData.LegacyTiles,
-                    GameObject => layer is null ? room.GameObjects : layer.InstancesData.Instances,
-                    SpriteInstance => layer.AssetsData.Sprites,
-                    _ => null
-                };
-                if (list is null)
-                {
-                    Debug.WriteLine($"Can't change object position - list of selected object not found.");
-                    return;
-                }
-
-                int index = list.IndexOf(selectedObj);
-                if ((dir == -1 && index > 0) || (dir == 1 && index < list.Count - 1))
-                {
-                    int prevIndex = index + dir;
-                    var prevIndexObj = list[prevIndex];
-                    list[prevIndex] = selectedObj;
-                    list[index] = prevIndexObj;
-
-                    if (layer is not null)
-                    {
-                        // swap back objects in "ObjectDict"
-                        var rect = ObjElemDict[selectedObj];
-                        var rectPrev = ObjElemDict[prevIndexObj as UndertaleObject];
-                        ObjElemDict[selectedObj] = rectPrev;
-                        ObjElemDict[prevIndexObj as UndertaleObject] = rect;
-                    }
-                }
-
-                SelectObject(selectedObj);
-            }
+                MoveItem(selectedObj, 1);
         }
 
         private void RoomObjectsTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -1096,6 +1046,18 @@ namespace UndertaleModTool
                         mainWindow.ChangeSelection(sprInst.Sprite, true);
                 });
             });
+        }
+
+        private void TreeViewMoveUpButton_Click(object sender, RoutedEventArgs e)
+        {
+            UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
+            MoveItem(selectedObj, -1);
+        }
+
+        private void TreeViewMoveDownButton_Click(object sender, RoutedEventArgs e)
+        {
+            UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
+            MoveItem(selectedObj, 1);
         }
 
         private UndertaleObject copied;
@@ -1439,6 +1401,52 @@ namespace UndertaleModTool
 
             if (clearEditor)
                 ObjectEditor.Content = null;
+        }
+
+        private void MoveItem(UndertaleObject obj, int dir)
+        {
+            UndertaleRoom room = this.DataContext as UndertaleRoom;
+            Layer layer = null;
+            if (room.Layers.Count > 0)
+                layer = obj switch
+                {
+                    Tile or GameObject => roomObjDict[(obj as IRoomObject).InstanceID],
+                    SpriteInstance spr => sprInstDict[spr],
+                    _ => null
+                };
+
+            IList list = obj switch
+            {
+                Tile => layer is null ? room.Tiles : layer.AssetsData.LegacyTiles,
+                GameObject => layer is null ? room.GameObjects : layer.InstancesData.Instances,
+                SpriteInstance => layer.AssetsData.Sprites,
+                _ => null
+            };
+            if (list is null)
+            {
+                Debug.WriteLine($"Can't change object position - list of selected object not found.");
+                return;
+            }
+
+            int index = list.IndexOf(obj);
+            if ((dir == -1 && index > 0) || (dir == 1 && index < list.Count - 1))
+            {
+                int prevIndex = index + dir;
+                var prevIndexObj = list[prevIndex];
+                list[prevIndex] = obj;
+                list[index] = prevIndexObj;
+
+                if (layer is not null)
+                {
+                    // swap back objects in "ObjectDict"
+                    var rect = ObjElemDict[obj];
+                    var rectPrev = ObjElemDict[prevIndexObj as UndertaleObject];
+                    ObjElemDict[obj] = rectPrev;
+                    ObjElemDict[prevIndexObj as UndertaleObject] = rect;
+                }
+            }
+
+            SelectObject(obj);
         }
 
         private void MenuItem_NewLayerInstances_Click(object sender, RoutedEventArgs e)

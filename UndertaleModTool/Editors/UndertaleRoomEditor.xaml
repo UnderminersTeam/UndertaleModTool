@@ -339,10 +339,10 @@
             </TreeView>
 
             <StackPanel Grid.Column="1">
-                <local:ButtonDark FontFamily="Marlett" FontSize="14" Content="5" Margin="0,0,0,2"
-                                  ToolTip="Move item up"/>
-                <local:ButtonDark FontFamily="Marlett" FontSize="14" Content="6"
-                                  ToolTip="Move item down"/>
+                <local:ButtonDark FontFamily="Marlett" FontSize="14" Content="5" Margin="0,0,0,2" ToolTip="Move item up"
+                                  Click="TreeViewMoveUpButton_Click"/>
+                <local:ButtonDark FontFamily="Marlett" FontSize="14" Content="6" ToolTip="Move item down"
+                                  Click="TreeViewMoveDownButton_Click"/>
             </StackPanel>
             
             <ScrollViewer Grid.Column="2" Margin="3,0,0,0" Name="ObjectEditor" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible">
