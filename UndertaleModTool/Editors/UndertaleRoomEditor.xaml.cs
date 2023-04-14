@@ -1498,8 +1498,25 @@ namespace UndertaleModTool
         private void MenuItem_Delete_Click(Object sender, RoutedEventArgs e)
         {
             MenuItem menuitem = sender as MenuItem;
-            if (menuitem.DataContext is UndertaleObject obj)
-                DeleteItem(obj);
+            DeleteItem(menuitem.DataContext as UndertaleObject);
+        }
+
+        private void MenuItem_Copy_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuitem = sender as MenuItem;
+            copied = menuitem.DataContext as UndertaleObject;
+        }
+
+        private void MenuItem_Paste_Click(object sender, RoutedEventArgs e)
+        {
+            UndertaleRoom room = this.DataContext as UndertaleRoom;
+            MenuItem menuitem = sender as MenuItem;
+            Layer layer = mainWindow.IsGMS2 == Visibility.Visible ?
+                menuitem.DataContext as Layer : null;
+
+            UndertaleObject newObj = AddObjectCopy(room, layer, copied, true);
+            if (newObj is not null)
+                SelectObject(newObj);
         }
 
         public static void GenerateSpriteCache(UndertaleRoom room)

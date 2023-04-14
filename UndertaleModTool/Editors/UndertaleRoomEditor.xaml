@@ -91,6 +91,7 @@
                             </TextBlock.Text>
                             <TextBlock.ContextMenu>
                                 <local:ContextMenuDark>
+                                    <MenuItem Header="Copy object" Click="MenuItem_Copy_Click"/>
                                     <MenuItem Header="Delete object" Click="MenuItem_Delete_Click"/>
                                 </local:ContextMenuDark>
                             </TextBlock.ContextMenu>
@@ -106,6 +107,7 @@
                             </TextBlock.Text>
                             <TextBlock.ContextMenu>
                                 <local:ContextMenuDark>
+                                    <MenuItem Header="Copy tile" Click="MenuItem_Copy_Click"/>
                                     <MenuItem Header="Delete tile" Click="MenuItem_Delete_Click"/>
                                 </local:ContextMenuDark>
                             </TextBlock.ContextMenu>
@@ -121,6 +123,7 @@
                             </TextBlock.Text>
                             <TextBlock.ContextMenu>
                                 <local:ContextMenuDark>
+                                    <MenuItem Header="Copy sprite instance" Click="MenuItem_Copy_Click"/>
                                     <MenuItem Header="Delete sprite instance" Click="MenuItem_Delete_Click"/>
                                 </local:ContextMenuDark>
                             </TextBlock.ContextMenu>
@@ -194,6 +197,7 @@
                         <TreeViewItem.Resources>
                             <local:ContextMenuDark x:Key="cm">
                                 <MenuItem Header="New Object Instance" Click="MenuItem_NewObjectInstance_Click"/>
+                                <MenuItem Header="Paste" Click="MenuItem_Paste_Click"/>
                             </local:ContextMenuDark>
                         </TreeViewItem.Resources>
                         <TreeViewItem.Style>
@@ -224,6 +228,7 @@
                                     <TextBlock.ContextMenu>
                                         <local:ContextMenuDark>
                                             <MenuItem Header="Delete tile" Click="MenuItem_Delete_Click"/>
+                                            <MenuItem Header="Copy tile" Click="MenuItem_Copy_Click"/>
                                         </local:ContextMenuDark>
                                     </TextBlock.ContextMenu>
                                 </TextBlock>
@@ -232,6 +237,7 @@
                         <TreeViewItem.ContextMenu>
                             <local:ContextMenuDark>
                                 <MenuItem Header="New Tile" Click="MenuItem_NewGMS1Tile_Click"/>
+                                <MenuItem Header="Paste" Click="MenuItem_Paste_Click"/>
                             </local:ContextMenuDark>
                         </TreeViewItem.ContextMenu>
                     </TreeViewItem>
@@ -267,6 +273,7 @@
                                             <TextBlock.ContextMenu>
                                                 <local:ContextMenuDark>
                                                     <MenuItem Header="New Object Instance" Click="MenuItem_NewGMS2ObjectInstance_Click"/>
+                                                    <MenuItem Header="Paste" Click="MenuItem_Paste_Click"/>
                                                     <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click"/>
                                                 </local:ContextMenuDark>
                                             </TextBlock.ContextMenu>
@@ -304,6 +311,7 @@
                                                 <local:ContextMenuDark>
                                                     <MenuItem Header="New Legacy Tile" Click="MenuItem_NewLegacyTile_Click"/>
                                                     <MenuItem Header="New Sprite Instance" Click="MenuItem_NewSprite_Click"/>
+                                                    <MenuItem Header="Paste" Click="MenuItem_Paste_Click"/>
                                                     <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click"/>
                                                 </local:ContextMenuDark>
                                             </TextBlock.ContextMenu>
