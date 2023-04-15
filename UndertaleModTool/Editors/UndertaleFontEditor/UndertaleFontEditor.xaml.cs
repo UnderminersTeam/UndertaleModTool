@@ -41,6 +41,19 @@ namespace UndertaleModTool
             font.Glyphs.Clear();
             foreach (var glyph in copy)
                 font.Glyphs.Add(glyph);
+
+            mainWindow.ShowMessage("The glyphs were sorted successfully.");
+        }
+        private void Button_UpdateRange_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not UndertaleFont font)
+                return;
+
+            var characters = font.Glyphs.Select(x => x.Character);
+            font.RangeStart = characters.Min();
+            font.RangeEnd = characters.Max();
+
+            mainWindow.ShowMessage("The range was updated successfully.");
         }
 
         private void Grid_MouseDown(object sender, MouseButtonEventArgs e)

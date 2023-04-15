@@ -10,12 +10,21 @@
     <Grid>
         <Grid.Resources>
             <local:CharConverter x:Key="CharConverter"/>
+            <Style x:Key="glyphsOperationButtonStyle" TargetType="Button">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Glyphs.Count, Mode=OneWay, FallbackValue=0}" Value="0">
+                        <Setter Property="IsEnabled" Value="False"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
         </Grid.Resources>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -228,10 +237,19 @@
             </DataGrid.Columns>
         </local:DataGridDark>
 
-        <TextBlock Grid.Row="16" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" TextWrapping="Wrap" HorizontalAlignment="Center">
+        <TextBlock Grid.Row="16" Grid.ColumnSpan="2" Margin="3" TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center">
             Note that the glyphs need to be specified in ascending order.<LineBreak/>
             Press the button below to sort them appropriately.
         </TextBlock>
-        <local:ButtonDark Grid.Row="17" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" Click="Button_Sort_Click">Sort glyphs</local:ButtonDark>
+        <local:ButtonDark Grid.Row="17" Grid.ColumnSpan="2" Margin="3" Click="Button_Sort_Click"
+                          Content="Sort glyphs" Width="200" FontSize="14" Style="{StaticResource glyphsOperationButtonStyle}"/>
+
+        <TextBlock Grid.Row="18" Grid.ColumnSpan="2" Margin="3,6,3,3" TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center">
+            Also, if you have added new characters or changed the character<LineBreak/>
+            of an existing glyph, you should update the font range.<LineBreak/>
+            Press the button below to do that.
+        </TextBlock>
+        <local:ButtonDark Grid.Row="19" Grid.ColumnSpan="2" Margin="3" Click="Button_UpdateRange_Click"
+                          Content="Update range" Width="200" FontSize="14" Style="{StaticResource glyphsOperationButtonStyle}"/>
     </Grid>
 </local:DataUserControl>
