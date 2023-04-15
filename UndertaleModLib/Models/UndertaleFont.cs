@@ -209,6 +209,38 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
                 Other = reader.ReadInt16();
                 Amount = reader.ReadInt16();
             }
+
+            /// <summary>
+            /// Makes a copy of this <see cref="GlyphKerning"/>.
+            /// </summary>
+            /// <returns>The copy.</returns>
+            public GlyphKerning Clone()
+            {
+                return new GlyphKerning() { Amount = this.Amount, Other = this.Other };
+            }
+        }
+
+        /// <summary>
+        /// Makes a copy of this <see cref="Glyph"/>.
+        /// </summary>
+        /// <returns>The copy.</returns>
+        public Glyph Clone()
+        {
+            var kerning = new UndertaleSimpleListShort<GlyphKerning>();
+            foreach (var kern in Kerning)
+                kerning.InternalAdd(kern.Clone());
+
+            return new Glyph()
+            {
+                Character = this.Character,
+                SourceX = this.SourceX,
+                SourceY = this.SourceY,
+                SourceWidth = this.SourceWidth,
+                SourceHeight = this.SourceHeight,
+                Shift = this.Shift,
+                Offset = this.Offset,
+                Kerning = kerning
+            };
         }
 
         /// <inheritdoc/>
@@ -218,6 +250,8 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
 
             Kerning = new();
         }
+
+        
     }
 
     /// <inheritdoc />

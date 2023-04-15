@@ -7,18 +7,19 @@
         xmlns:utmt="clr-namespace:UndertaleModTool"
         xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
         mc:Ignorable="d"
-        Title="Edit a font glyph rectangle" Name="editGlyphRectangleWindow" Height="450" Width="800"
-        Loaded="Window_Loaded" IsVisibleChanged="Window_IsVisibleChanged">
+        Title="Edit a font glyph rectangle" Name="editGlyphRectangleWindow" Height="575" Width="800"
+        Loaded="Window_Loaded" IsVisibleChanged="Window_IsVisibleChanged" DataContext="{Binding RelativeSource={RelativeSource Self}}">
     <Grid>
         <Grid.Resources>
             <utmt:EqualityConverter x:Key="EqualityConverter"/>
         </Grid.Resources>
         <Grid.RowDefinitions>
+            <RowDefinition Height="16px"/>
+            <RowDefinition Height="450px"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="350px"/>
         </Grid.RowDefinitions>
 
-        <ScrollViewer Name="TextureScroll" Grid.Row="1" Grid.Column="0" Margin="3"
+        <ScrollViewer Name="TextureScroll" Grid.Row="1" Margin="3"
                       HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible"
                       PreviewMouseWheel="TextureScroll_MouseWheel" ScrollChanged="TextureScroll_ScrollChanged">
             <ScrollViewer.Background>
@@ -26,18 +27,18 @@
             </ScrollViewer.Background>
             <Viewbox Grid.Row="1" Name="TextureViewbox"
                      Stretch="Uniform" StretchDirection="DownOnly"
-                     SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor" UseLayoutRounding="True">
+                     SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor" UseLayoutRounding="True"
+                     MouseLeftButtonDown="TextureViewbox_MouseLeftButtonDown" MouseMove="TextureViewbox_MouseMove" MouseLeftButtonUp="TextureViewbox_MouseLeftButtonUp">
                 <Grid>
                     <Grid.Background>
                         <SolidColorBrush Color="Black"/>
                     </Grid.Background>
 
-                    <utmt:UndertaleTexturePageItemDisplay DataContext="{Binding Texture, Mode=OneWay}" DisplayBorder="False"/>
+                    <utmt:UndertaleTexturePageItemDisplay DataContext="{Binding Font.Texture, Mode=OneWay}" DisplayBorder="False"/>
                     <ItemsControl ItemsSource="{Binding Glyphs, Mode=OneWay}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <Canvas IsItemsHost="True"
-                                        MouseLeftButtonDown="Canvas_MouseLeftButtonDown" MouseMove="Canvas_MouseMove"/>
+                                <Canvas IsItemsHost="True" Loaded="Canvas_Loaded"/>
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemContainerStyle>
@@ -54,7 +55,7 @@
                             
                             <DataTemplate x:Key="selectedGlyphTemplate">
                                 <Rectangle Width="{Binding SourceWidth, Mode=OneWay}" Height="{Binding SourceHeight, Mode=OneWay}"
-                                           StrokeThickness="1">
+                                           StrokeThickness="1" Panel.ZIndex="1">
                                     <Rectangle.Stroke>
                                         <SolidColorBrush Color="OrangeRed" Opacity="0.5"/>
                                     </Rectangle.Stroke>
@@ -65,7 +66,7 @@
                             </DataTemplate>
                             <DataTemplate x:Key="glyphTemplate">
                                 <Rectangle Width="{Binding SourceWidth, Mode=OneWay}" Height="{Binding SourceHeight, Mode=OneWay}"
-                                           StrokeThickness="1">
+                                           StrokeThickness="1" Panel.ZIndex="0">
                                     <Rectangle.Stroke>
                                         <SolidColorBrush Color="Yellow" Opacity="0.25"/>
                                     </Rectangle.Stroke>
@@ -99,6 +100,8 @@
                 </Grid>
             </Viewbox>
         </ScrollViewer>
-        
+
+        <utmt:ButtonDark Grid.Row="2" Margin="3,13,3,3" Click="SaveButton_Click" Width="150" Height="40"
+                         FontSize="16">Save changes</utmt:ButtonDark>
     </Grid>
 </Window>

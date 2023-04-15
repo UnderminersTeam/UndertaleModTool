@@ -63,6 +63,15 @@ namespace UndertaleModTool
                 }
             }
         }
+        private void ScrollGlyphIntoView(UndertaleFont.Glyph glyph)
+        {
+            if (DataContext is not UndertaleFont font)
+                return;
+
+            int index = font.Glyphs.IndexOf(glyph);
+            if (index != -1)
+                ScrollGlyphIntoView(index);
+        }
         private void ScrollGlyphIntoView(int glyphIndex)
         {
             ScrollViewer glyphListViewer = MainWindow.FindVisualChild<ScrollViewer>(GlyphsGrid);
@@ -93,7 +102,11 @@ namespace UndertaleModTool
             }
 
             var window = new EditGlyphRectangleWindow(DataContext as UndertaleFont, glyph);
-            window.Show();
+            if (window.ShowDialog() == true)
+            {
+                GlyphsGrid.SelectedItem = window.SelectedGlyph;
+                ScrollGlyphIntoView(window.SelectedGlyph);
+            }
         }
     }
 
