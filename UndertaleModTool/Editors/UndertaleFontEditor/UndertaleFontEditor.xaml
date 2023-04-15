@@ -116,8 +116,41 @@
             </Grid>
         </Viewbox>
 
-        <local:ButtonDark Grid.Row="13" Grid.ColumnSpan="2" Margin="3" HorizontalAlignment="Center" Width="250"
-                          Content="Edit a selected glyph rectangle" Click="EditRectangleButton_Click"/>
+        <StackPanel Grid.Row="13" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
+            <local:ButtonDark Margin="3" Width="230" Click="EditRectangleButton_Click">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedItem, ElementName=GlyphsGrid, Mode=OneWay}"
+                                         Value="{x:Null}">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <Button.Content>
+                    <TextBlock>
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Text" Value="Edit a selected glyph rectangle"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedItem.SourceWidth, ElementName=GlyphsGrid, Mode=OneWay, FallbackValue=-1}"
+                                                 Value="0">
+                                        <Setter Property="Text" Value="Select a region of an empty glyph"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedItem.SourceHeight, ElementName=GlyphsGrid, Mode=OneWay, FallbackValue=-1}"
+                                                 Value="0">
+                                        <Setter Property="Text" Value="Select a region of an empty glyph"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Button.Content>
+            </local:ButtonDark>
+
+            <local:ButtonDark Margin="3" Width="200" Content="Create an empty glyph" Click="CreateGlyphButton_Click"/>
+        </StackPanel>
 
         <TextBlock Grid.Row="14" Grid.Column="0" Margin="3">Glyphs:</TextBlock>
         <local:DataGridDark Grid.Row="15" Grid.ColumnSpan="2" MaxHeight="370" Margin="3" x:Name="GlyphsGrid" ItemsSource="{Binding Glyphs, Mode=OneWay}"

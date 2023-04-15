@@ -15,10 +15,15 @@
             <utmt:CharConverter x:Key="CharConverter"/>
         </Grid.Resources>
         <Grid.RowDefinitions>
-            <RowDefinition Height="16px"/>
-            <RowDefinition Height="450px"/>
+            <RowDefinition Height="42px"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Margin="3" FontStyle="Italic" FontSize="14" Foreground="Gray" HorizontalAlignment="Center">
+            Double-click an inactive rectangle to switch to it.<LineBreak/>
+            Drag mouse on desired region if it's an empty character.
+        </TextBlock>
 
         <ScrollViewer Name="TextureScroll" Grid.Row="1" Margin="3"
                       HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible"
@@ -29,7 +34,7 @@
             <Viewbox Grid.Row="1" Name="TextureViewbox"
                      Stretch="Uniform" StretchDirection="DownOnly"
                      SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor" UseLayoutRounding="True"
-                     MouseLeftButtonDown="TextureViewbox_MouseLeftButtonDown" MouseMove="TextureViewbox_MouseMove" MouseLeftButtonUp="TextureViewbox_MouseLeftButtonUp">
+                     MouseLeftButtonDown="TextureViewbox_MouseLeftButtonDown" MouseLeftButtonUp="TextureViewbox_MouseLeftButtonUp">
                 <Grid>
                     <Grid.Background>
                         <SolidColorBrush Color="Black"/>
@@ -101,7 +106,7 @@
                             </Style>
                             
                             <DataTemplate DataType="{x:Type undertale:UndertaleFont+Glyph}">
-                                <ContentControl Name="RectangleContent" Content="{Binding}"
+                                <ContentControl Name="RectangleContent" Content="{Binding .}"
                                                 Style="{StaticResource contentControlStyle}"/>
                             </DataTemplate>
                         </ItemsControl.Resources>
@@ -110,7 +115,7 @@
             </Viewbox>
         </ScrollViewer>
 
-        <utmt:ButtonDark Grid.Row="2" Margin="3,13,3,3" Click="SaveButton_Click" Width="150" Height="40"
-                         FontSize="16">Save changes</utmt:ButtonDark>
+        <utmt:ButtonDark Grid.Row="2" Margin="3,9,3,12" Click="SaveButton_Click" Width="160" Height="50"
+                         FontSize="18">Save changes</utmt:ButtonDark>
     </Grid>
 </Window>

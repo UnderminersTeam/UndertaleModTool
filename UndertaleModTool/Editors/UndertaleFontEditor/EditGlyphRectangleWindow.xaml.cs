@@ -27,7 +27,8 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
         public UndertaleFont.Glyph[] Glyphs { get; set; }
         public UndertaleFont.Glyph SelectedGlyph { get; set; }
         private Rectangle selectedRect;
-        
+
+        private bool isNewCharacter;
         private bool dragInProgress = false;
         private Point initPoint;
         private HitType initType;
@@ -60,6 +61,15 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
                 this.ShowError("Cannot find the selected glyph.");
                 Close();
             }
+
+            if (SelectedGlyph.SourceWidth == 0 || SelectedGlyph.SourceHeight == 0)
+            {
+                isNewCharacter = true;
+                TextureViewbox.MouseMove += TextureViewbox_MouseMove_New;
+                TextureViewbox.Cursor = Cursors.Cross;
+            }
+            else
+                TextureViewbox.MouseMove += TextureViewbox_MouseMove;
         }
 
         private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -133,6 +143,13 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
         {
             canvas = sender as Canvas;
             UpdateSelectedRect();
+
+            if (isNewCharacter)
+            {
+                ToolTipService.SetIsEnabled(selectedRect, false);
+                selectedRect.SetCurrentValue(WidthProperty, (double)1);
+                selectedRect.SetCurrentValue(HeightProperty, (double)1);
+            }
         }
 
         private void UpdateSelectedRect()
@@ -153,25 +170,51 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
 
         private void TextureViewbox_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.OriginalSource is not Rectangle rect
-                || rect.DataContext is not UndertaleFont.Glyph glyph)
-                return;
-
-            if (e.ClickCount >= 2)
+            if (!isNewCharacter)
             {
-                SelectedGlyph = glyph;
-                UpdateSelectedRect();
-                return;
+                if (e.OriginalSource is not Rectangle rect
+                    || rect.DataContext is not UndertaleFont.Glyph glyph)
+                    return;
+
+                if (e.ClickCount >= 2)
+                {
+                    SelectedGlyph = glyph;
+                    UpdateSelectedRect();
+
+                    if (isNewCharacter)
+                    {
+                        isNewCharacter = false;
+                        TextureViewbox.MouseMove -= TextureViewbox_MouseMove_New;
+                        TextureViewbox.MouseMove += TextureViewbox_MouseMove;
+                    }
+                    return;
+                }
             }
 
             if (canvas is null)
                 return;
             initPoint = e.GetPosition(canvas);
-            initType = GetHitType(selectedRect, initPoint);
+            if (isNewCharacter)
+            {
+                SelectedGlyph.SourceX = (ushort)Math.Round(initPoint.X);
+                SelectedGlyph.SourceY = (ushort)Math.Round(initPoint.Y);
+            }
+            else
+                initType = GetHitType(selectedRect, initPoint);
+
             dragInProgress = true;
         }
         private void TextureViewbox_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
+            if (isNewCharacter)
+            {
+                isNewCharacter = false;
+                TextureViewbox.MouseMove -= TextureViewbox_MouseMove_New;
+                TextureViewbox.MouseMove += TextureViewbox_MouseMove;
+                TextureViewbox.Cursor = Cursors.Arrow;
+                ToolTipService.SetIsEnabled(selectedRect, true);
+            } 
+
             dragInProgress = false;
         }
         private void TextureViewbox_MouseMove(object sender, MouseEventArgs e)
@@ -241,9 +284,9 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
                     SelectedGlyph.SourceX = (ushort)Math.Round(newX);
                 if (!outOfTop && !outOfBottom)
                     SelectedGlyph.SourceY = (ushort)Math.Round(newY);
-                if (newWidth >= 0 && !outOfRight)
+                if (newWidth > 0 && !outOfRight)
                     SelectedGlyph.SourceWidth = (ushort)Math.Round(newWidth);
-                if (newHeight >= 0 && !outOfBottom)
+                if (newHeight > 0 && !outOfBottom)
                     SelectedGlyph.SourceHeight = (ushort)Math.Round(newHeight);
 
                 if (outOfLeft)
@@ -264,6 +307,31 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
                 canvas.Cursor = GetCursorForType(hitType);
             }
         }
+        private void TextureViewbox_MouseMove_New(object sender, MouseEventArgs e)
+        {
+            var pos = e.GetPosition(canvas);
+
+            if (dragInProgress)
+            {
+                double offsetX = pos.X - initPoint.X;
+                double offsetY = pos.Y - initPoint.Y;
+
+                if (offsetX < 1 || offsetY < 1)
+                    return;
+
+                bool outOfRight = SelectedGlyph.SourceX + offsetX > Font.Texture.BoundingWidth;
+                bool outOfBottom = SelectedGlyph.SourceY + offsetY > Font.Texture.BoundingHeight;
+                if (!outOfRight)
+                    SelectedGlyph.SourceWidth = (ushort)Math.Round(offsetX);
+                if (!outOfBottom)
+                    SelectedGlyph.SourceHeight = (ushort)Math.Round(offsetY);
+            }
+            else
+            {
+                SelectedGlyph.SourceX = (ushort)Math.Round(pos.X);
+                SelectedGlyph.SourceY = (ushort)Math.Round(pos.Y);
+            }
+        }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
@@ -275,7 +343,7 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
         }
     }
 
-
+    // Based on http://csharphelper.com/howtos/howto_wpf_resize_rectangle.html
     internal class RectangleHelper
     {
         public enum HitType

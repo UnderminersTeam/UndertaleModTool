@@ -32,7 +32,8 @@ namespace UndertaleModTool
 
         private void Button_Sort_Click(object sender, RoutedEventArgs e)
         {
-            UndertaleFont font = this.DataContext as UndertaleFont;
+            if (DataContext is not UndertaleFont font)
+                return;
 
             // There is no way to sort an ObservableCollection in place so we have to do this
             var copy = font.Glyphs.ToList();
@@ -107,6 +108,26 @@ namespace UndertaleModTool
                 GlyphsGrid.SelectedItem = window.SelectedGlyph;
                 ScrollGlyphIntoView(window.SelectedGlyph);
             }
+        }
+        private void CreateGlyphButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not UndertaleFont font)
+                return;
+
+            int index = font.Glyphs.Count - 1;
+            if (font.Glyphs[index].SourceWidth == 0
+                || font.Glyphs[index].SourceHeight == 0)
+            {
+                mainWindow.ShowWarning("The last glyph has zero size.\n"+
+                                       "You can use the button on the left to fix that.");
+                return;
+            }
+
+            font.Glyphs.Add(new());
+            index++;
+
+            GlyphsGrid.SelectedIndex = index;
+            ScrollGlyphIntoView(index);
         }
     }
 
