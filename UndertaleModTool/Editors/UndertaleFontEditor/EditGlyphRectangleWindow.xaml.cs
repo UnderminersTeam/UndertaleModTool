@@ -177,7 +177,6 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
         private void TextureViewbox_MouseMove(object sender, MouseEventArgs e)
         {
             var pos = e.GetPosition(canvas);
-            var hitType = GetHitType(selectedRect, pos);
 
             if (dragInProgress)
             {
@@ -188,7 +187,7 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
                 double newY = SelectedGlyph.SourceY;
                 double newWidth = SelectedGlyph.SourceWidth;
                 double newHeight = SelectedGlyph.SourceHeight;
-                
+
                 switch (initType)
                 {
                     case HitType.Body:
@@ -234,20 +233,36 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
                 if (Math.Abs(offsetX) < 1 && Math.Abs(offsetY) < 1)
                     return;
 
-                if (newX >= 0)
+                bool outOfLeft = newX < 0;
+                bool outOfTop = newY < 0;
+                bool outOfRight = newX + newWidth > Font.Texture.BoundingWidth;
+                bool outOfBottom = newY + newHeight > Font.Texture.BoundingHeight;
+                if (!outOfLeft && !outOfRight)
                     SelectedGlyph.SourceX = (ushort)Math.Round(newX);
-                if (newY >= 0)
+                if (!outOfTop && !outOfBottom)
                     SelectedGlyph.SourceY = (ushort)Math.Round(newY);
-                if (newWidth >= 0)
+                if (newWidth >= 0 && !outOfRight)
                     SelectedGlyph.SourceWidth = (ushort)Math.Round(newWidth);
-                if (newHeight >= 0)
+                if (newHeight >= 0 && !outOfBottom)
                     SelectedGlyph.SourceHeight = (ushort)Math.Round(newHeight);
+
+                if (outOfLeft)
+                    SelectedGlyph.SourceX = 0;
+                if (outOfRight)
+                    SelectedGlyph.SourceX = (ushort)(Font.Texture.BoundingWidth - SelectedGlyph.SourceWidth);
+                if (outOfTop)
+                    SelectedGlyph.SourceY = 0;
+                if (outOfBottom)
+                    SelectedGlyph.SourceY = (ushort)(Font.Texture.BoundingHeight - SelectedGlyph.SourceHeight);
 
                 initPoint.X = Math.Round(pos.X);
                 initPoint.Y = Math.Round(pos.Y);
             }
             else
+            {
+                var hitType = GetHitType(selectedRect, pos);
                 canvas.Cursor = GetCursorForType(hitType);
+            }
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)

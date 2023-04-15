@@ -250,8 +250,6 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
 
             Kerning = new();
         }
-
-        
     }
 
     /// <inheritdoc />

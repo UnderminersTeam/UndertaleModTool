@@ -12,6 +12,7 @@
     <Grid>
         <Grid.Resources>
             <utmt:EqualityConverter x:Key="EqualityConverter"/>
+            <utmt:CharConverter x:Key="CharConverter"/>
         </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="16px"/>
@@ -55,7 +56,11 @@
                             
                             <DataTemplate x:Key="selectedGlyphTemplate">
                                 <Rectangle Width="{Binding SourceWidth, Mode=OneWay}" Height="{Binding SourceHeight, Mode=OneWay}"
-                                           StrokeThickness="1" Panel.ZIndex="1">
+                                           StrokeThickness="1" Panel.ZIndex="1"
+                                           ToolTipService.InitialShowDelay="500" ToolTipService.BetweenShowDelay="500">
+                                    <Rectangle.ToolTip>
+                                        <TextBlock Text="{Binding Character, Mode=OneWay, Converter={StaticResource CharConverter}}"/>
+                                    </Rectangle.ToolTip>
                                     <Rectangle.Stroke>
                                         <SolidColorBrush Color="OrangeRed" Opacity="0.5"/>
                                     </Rectangle.Stroke>
@@ -66,7 +71,11 @@
                             </DataTemplate>
                             <DataTemplate x:Key="glyphTemplate">
                                 <Rectangle Width="{Binding SourceWidth, Mode=OneWay}" Height="{Binding SourceHeight, Mode=OneWay}"
-                                           StrokeThickness="1" Panel.ZIndex="0">
+                                           StrokeThickness="1" Panel.ZIndex="0"
+                                           ToolTipService.InitialShowDelay="500" ToolTipService.BetweenShowDelay="500">
+                                    <Rectangle.ToolTip>
+                                        <TextBlock Text="{Binding Character, Mode=OneWay, Converter={StaticResource CharConverter}}"/>
+                                    </Rectangle.ToolTip>
                                     <Rectangle.Stroke>
                                         <SolidColorBrush Color="Yellow" Opacity="0.25"/>
                                     </Rectangle.Stroke>
