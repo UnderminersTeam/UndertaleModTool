@@ -2444,20 +2444,4 @@ namespace UndertaleModTool
             throw new NotImplementedException();
         }
     }
-
-    public class IsGMS2_2_2_302Converter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value is not UndertaleData data)
-                return Visibility.Collapsed;
-
-            return data.IsVersionAtLeast(2, 2, 2, 302) ? Visibility.Visible : Visibility.Collapsed;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
 }
