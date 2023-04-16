@@ -756,6 +756,12 @@ namespace UndertaleModTool
         }
 
         private UndertaleObject selectedObject;
+
+        /// <summary>
+        /// Selects the given object inside the TreeView.
+        /// </summary>
+        /// <param name="obj">the object to select.</param>
+        /// <param name="focus">whether to focus on the object after selcting it.</param>
         private void SelectObject(UndertaleObject obj, bool focus = true)
         {
             // TODO: enable virtualizing of RoomObjectsTree and make this method work with it
@@ -1334,6 +1340,10 @@ namespace UndertaleModTool
             SelectObject(tile);
         }
 
+        /// <summary>
+        /// Deletes the given object from the room.
+        /// </summary>
+        /// <param name="obj">the object to delete.</param>
         private void DeleteItem(UndertaleObject obj)
         {
             UndertaleRoom room = this.DataContext as UndertaleRoom;
@@ -1412,6 +1422,12 @@ namespace UndertaleModTool
                 ObjectEditor.Content = null;
         }
 
+        /// <summary>
+        /// Moves the given object up and down the list in the TreeView.
+        /// </summary>
+        /// <param name="obj">the object to move.</param>
+        /// <param name="dist">distance to move it. positive - down, negetive - up.</param>
+        /// <param name="focus">whether to focus on the element after moving it.</param>
         private void MoveItem(UndertaleObject obj, int dist, bool focus = true)
         {
             UndertaleRoom room = this.DataContext as UndertaleRoom;
