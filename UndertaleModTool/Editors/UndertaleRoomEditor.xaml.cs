@@ -1412,7 +1412,7 @@ namespace UndertaleModTool
                 ObjectEditor.Content = null;
         }
 
-        private void MoveItem(UndertaleObject obj, int dir, bool focus = true)
+        private void MoveItem(UndertaleObject obj, int dist, bool focus = true)
         {
             UndertaleRoom room = this.DataContext as UndertaleRoom;
             Layer layer = null;
@@ -1438,20 +1438,20 @@ namespace UndertaleModTool
             }
 
             int index = list.IndexOf(obj);
-            if ((dir == -1 && index > 0) || (dir == 1 && index < list.Count - 1))
+            int newIndex = Math.Clamp(index + dist, 0, list.Count - 1);
+            if (newIndex != index)
             {
-                int prevIndex = index + dir;
-                var prevIndexObj = list[prevIndex];
-                list[prevIndex] = obj;
-                list[index] = prevIndexObj;
+                var prevObj = list[newIndex];
+                list[newIndex] = obj;
+                list[index] = prevObj;
 
                 if (layer is not null)
                 {
                     // swap back objects in "ObjectDict"
                     var rect = ObjElemDict[obj];
-                    var rectPrev = ObjElemDict[prevIndexObj as UndertaleObject];
+                    var rectPrev = ObjElemDict[prevObj as UndertaleObject];
                     ObjElemDict[obj] = rectPrev;
-                    ObjElemDict[prevIndexObj as UndertaleObject] = rect;
+                    ObjElemDict[prevObj as UndertaleObject] = rect;
                 }
             }
 
