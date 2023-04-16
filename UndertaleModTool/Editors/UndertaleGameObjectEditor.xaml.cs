@@ -36,18 +36,6 @@ namespace UndertaleModTool
             UndertaleGameObject.Event obj = new UndertaleGameObject.Event();
             obj.Actions.Add(new UndertaleGameObject.EventAction());
             e.NewItem = obj;
-
-            _ = Task.Run(() =>
-            {
-                Dispatcher.Invoke(() =>
-                {
-                    // re-focus focused element when grid is updated
-                    FrameworkElement elem = Keyboard.FocusedElement as FrameworkElement;
-                    (sender as DataGrid).MoveFocus(new TraversalRequest(FocusNavigationDirection.Up));
-                    elem?.Focus();
-                },
-                DispatcherPriority.ContextIdle);
-            });
         }
 
         // mouse wheel scrolling fix

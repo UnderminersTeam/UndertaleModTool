@@ -141,7 +141,7 @@
         </Viewbox>
 
         <StackPanel Grid.Row="15" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
-            <local:ButtonDark Margin="3" Width="230" Click="EditRectangleButton_Click">
+            <local:ButtonDark Margin="3" Width="220" Click="EditRectangleButton_Click">
                 <Button.Style>
                     <Style TargetType="Button">
                         <Style.Triggers>
@@ -176,81 +176,209 @@
             <local:ButtonDark Margin="3" Width="200" Content="Create an empty glyph" Click="CreateGlyphButton_Click"/>
         </StackPanel>
 
-        <TextBlock Grid.Row="16" Grid.Column="0" Margin="3">Glyphs:</TextBlock>
-        <local:DataGridDark Grid.Row="17" Grid.ColumnSpan="2" MaxHeight="370" Margin="3" x:Name="GlyphsGrid" ItemsSource="{Binding Glyphs, Mode=OneWay}"
-                            AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
-                            ScrollViewer.CanContentScroll="True"
-                            VirtualizingPanel.IsVirtualizing="True"
-                            VirtualizingPanel.VirtualizationMode="Recycling">
-            <DataGrid.Resources>
-                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
-                <Style TargetType="{x:Type DataGridCell}">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="{x:Type DataGridCell}">
-                                <Grid Background="{TemplateBinding Background}">
-                                    <ContentPresenter VerticalAlignment="Center" />
+        <TextBlock Name="GlyphsLabel" Grid.Row="16" Grid.ColumnSpan="2" Margin="3" HorizontalAlignment="Left">Glyphs:</TextBlock>
+        <Grid Grid.Row="17" Grid.ColumnSpan="2" MaxHeight="370" Margin="3">
+            <local:DataGridDark x:Name="GlyphsGrid" ItemsSource="{Binding Glyphs, Mode=OneWay}"
+                                AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
+                                ScrollViewer.CanContentScroll="True"
+                                VirtualizingPanel.IsVirtualizing="True"
+                                VirtualizingPanel.VirtualizationMode="Recycling">
+                <DataGrid.Resources>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
+                    <Style TargetType="{x:Type DataGridCell}">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                    <Grid Background="{TemplateBinding Background}">
+                                        <ContentPresenter VerticalAlignment="Center" />
+                                    </Grid>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate>
+                                            <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                    <Style x:Key="kerningButtonStyle" TargetType="Button">
+                        <Setter Property="Content" Value="Edit"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Kerning.Count, Mode=OneWay, FallbackValue=0}"
+                                         Value="0">
+                                <Setter Property="Content" Value="Add"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.Resources>
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Char" Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <local:TextBoxDark Text="{Binding Character, Mode=TwoWay, UpdateSourceTrigger=LostFocus, Converter={StaticResource CharConverter}}"
+                                                   Margin="20,0,0,0" MaxLength="1"
+                                                   ToolTip="{Binding Character, Mode=OneWay}" ToolTipService.InitialShowDelay="250">
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Character, Mode=OneWay}" Value="0">
+                                                    <Setter Property="ToolTipService.IsEnabled" Value="False"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBox.Style>
+                                </local:TextBoxDark>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Source position/size" Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <local:TextBoxDark Grid.Column="0" Text="{Binding SourceX, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                    <local:TextBoxDark Grid.Column="1" Text="{Binding SourceY, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                    <local:TextBoxDark Grid.Column="2" Text="{Binding SourceWidth, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                    <local:TextBoxDark Grid.Column="3" Text="{Binding SourceHeight, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                                 </Grid>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate>
-                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </DataGrid.Resources>
-            <DataGrid.Columns>
-                <DataGridTemplateColumn Header="Char" Width="*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <local:TextBoxDark Text="{Binding Character, Mode=TwoWay, UpdateSourceTrigger=LostFocus, Converter={StaticResource CharConverter}}"
-                                               Margin="20,0,0,0" MaxLength="1"
-                                               ToolTip="{Binding Character, Mode=OneWay}" ToolTipService.InitialShowDelay="250"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Source position/size" Width="*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <local:TextBoxDark Grid.Column="0" Text="{Binding SourceX, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
-                                <local:TextBoxDark Grid.Column="1" Text="{Binding SourceY, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
-                                <local:TextBoxDark Grid.Column="2" Text="{Binding SourceWidth, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
-                                <local:TextBoxDark Grid.Column="3" Text="{Binding SourceHeight, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
-                            </Grid>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Shift" Width="*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <local:TextBoxDark Text="{Binding Shift, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Offset" Width="*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <local:TextBoxDark Text="{Binding Offset, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </local:DataGridDark>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Width="*">
+                        <DataGridTemplateColumn.Header>
+                            <StackPanel Orientation="Horizontal" ToolTipService.InitialShowDelay="250"
+                                    ToolTip="The number of pixels to shift right when advancing to the next character.">
+                                <TextBlock Text="Shift" Margin="0,0,3,0"/>
+                                <TextBlock Text="(?)" Foreground="Gray" FontSize="11"/>
+                            </StackPanel>
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <local:TextBoxDark Text="{Binding Shift, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Width="*">
+                        <DataGridTemplateColumn.Header>
+                            <StackPanel Orientation="Horizontal" ToolTipService.InitialShowDelay="250"
+                                    ToolTip="The number of pixels to horizontally offset the rendering of the glyph.">
+                                <TextBlock Text="Offset" Margin="0,0,3,0"/>
+                                <TextBlock Text="(?)" Foreground="Gray" FontSize="11"/>
+                            </StackPanel>
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <local:TextBoxDark Text="{Binding Offset, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Kerning" Width="60">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <local:ButtonDark Click="EditKerningButton_Click" Style="{StaticResource kerningButtonStyle}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </local:DataGridDark>
+
+            <Border Name="GlyphKerningBorder" BorderBrush="#FFABADB3" BorderThickness="1" Visibility="Collapsed">
+                <Border.CommandBindings>
+                    <CommandBinding Command="NavigationCommands.BrowseBack" Executed="Command_GoBack" />
+                </Border.CommandBindings>
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="2">
+                        <local:ButtonDark Click="KerningBackButton_Click" Width="40" Height="19">
+                            <Image Name="BackButtonImage" Stretch="None">
+                                <Image.Style>
+                                    <Style TargetType="Image">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="False">
+                                                <Setter Property="Source" Value="/Resources/arrow_blue.png" />
+                                            </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Source" Value="/Resources/arrow_red.png" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Style>
+                            </Image>
+                        </local:ButtonDark>
+                        <TextBlock Text="Go back" Margin="3,-1,0,0" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <local:DataGridDark x:Name="GlyphKerningGrid" IsEnabled="False" Visibility="{Binding Visibility, Mode=OneWay, ElementName=GlyphKerningBorder}"
+                                        AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
+                                        ScrollViewer.CanContentScroll="True"
+                                        VirtualizingPanel.IsVirtualizing="True"
+                                        VirtualizingPanel.VirtualizationMode="Recycling">
+                        <DataGrid.Resources>
+                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
+                            <Style TargetType="{x:Type DataGridCell}">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                            <Grid Background="{TemplateBinding Background}">
+                                                <ContentPresenter VerticalAlignment="Center" />
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate>
+                                                    <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Preceeding char" Width="Auto">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <local:TextBoxDark Text="{Binding Character, Mode=TwoWay, UpdateSourceTrigger=LostFocus, Converter={StaticResource CharConverter}}"
+                                                           MaxLength="1" ToolTip="{Binding Character, Mode=OneWay}" ToolTipService.InitialShowDelay="250">
+                                            <TextBox.Style>
+                                                <Style TargetType="TextBox">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Character, Mode=OneWay}" Value="0">
+                                                            <Setter Property="ToolTipService.IsEnabled" Value="False"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBox.Style>
+                                        </local:TextBoxDark>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Add. shift" Width="Auto">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <local:TextBoxDark Text="{Binding ShiftModifier, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </local:DataGridDark>
+                </StackPanel>
+            </Border>
+        </Grid>
 
         <TextBlock Grid.Row="18" Grid.ColumnSpan="2" Margin="3" TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center">
             Note that the glyphs need to be specified in ascending order.<LineBreak/>

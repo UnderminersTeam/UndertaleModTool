@@ -198,12 +198,12 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             /// <summary>
             /// The code point of the preceeding character.
             /// </summary>
-            public short Character;
+            public short Character { get; set; }
 
             /// <summary>
             /// An amount of pixels to add to the existing <see cref="Shift"/>.
             /// </summary>
-            public short ShiftModifier;
+            public short ShiftModifier { get; set; }
 
             /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)

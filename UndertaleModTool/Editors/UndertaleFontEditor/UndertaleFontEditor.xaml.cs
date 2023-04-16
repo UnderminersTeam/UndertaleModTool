@@ -142,17 +142,67 @@ namespace UndertaleModTool
             GlyphsGrid.SelectedIndex = index;
             ScrollGlyphIntoView(index);
         }
+
+        private void EditKerningButton_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as Button)?.DataContext is not UndertaleFont.Glyph glyph)
+                return;
+
+            GlyphsGrid.Visibility = Visibility.Collapsed;
+            GlyphsGrid.IsEnabled = false;
+
+            GlyphKerningGrid.SetBinding(DataGrid.ItemsSourceProperty,
+                                        new Binding() { Source = glyph.Kerning });
+            GlyphKerningBorder.Visibility = Visibility.Visible;
+            GlyphKerningGrid.IsEnabled = true;
+
+            char? ch = (char?)CharConverter.Instance.Convert(glyph.Character, null, null, null);
+            ch ??= default;
+            GlyphsLabel.Text = $"Kerning of glyph '{ch}' (code - {glyph.Character}):";
+        }
+
+        private void KerningBackButton_Click(object sender, RoutedEventArgs e)
+        {
+            BindingOperations.ClearBinding(GlyphKerningGrid, DataGrid.ItemsSourceProperty);
+            GlyphKerningBorder.Visibility = Visibility.Collapsed;
+            GlyphKerningGrid.IsEnabled = false;
+
+            GlyphsGrid.Visibility = Visibility.Visible;
+            GlyphsGrid.IsEnabled = true;
+
+            GlyphsLabel.Text = "Glyphs:";
+        }
+        private void Command_GoBack(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (GlyphKerningGrid.IsEnabled)
+                KerningBackButton_Click(null, null);
+        }
     }
 
     public class CharConverter : IValueConverter
     {
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+        public static readonly CharConverter Instance = new();
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is not ushort charNum)
-                return "(error)";
+            {
+                if (value is not short charNum1)
+                    return "(error)";
 
+                try
+                {
+                    charNum = (ushort)charNum1;
+                }
+                catch
+                {
+                    return "(error)";
+                }
+            }
+
+            if (charNum == 0)
+                return null;
             return System.Convert.ToChar(charNum);
         }
 
