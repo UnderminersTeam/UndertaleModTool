@@ -10,6 +10,7 @@
     <Grid>
         <Grid.Resources>
             <local:CharConverter x:Key="CharConverter"/>
+            <local:IsVersionAtLeastConverter x:Key="IsVersionAtLeastConverter"/>
             <Style x:Key="glyphsOperationButtonStyle" TargetType="Button">
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding Glyphs.Count, Mode=OneWay, FallbackValue=0}" Value="0">
@@ -23,6 +24,8 @@
             <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -98,13 +101,25 @@
             <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding ScaleY}"/>
         </Grid>
 
-        <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">SDF spread value</TextBlock>
-        <local:TextBoxDark Grid.Row="10" Grid.Column="1" Margin="3" Text="{Binding SDFSpread}"/>
+        <TextBlock Grid.Row="10" Grid.Column="0" Margin="3" Text="Ascender"
+                   Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2022.2}"/>
+        <local:TextBoxDark Grid.Row="10" Grid.Column="1" Margin="3" Text="{Binding Ascender}"
+                           Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2022.2}"/>
 
-        <TextBlock Grid.Row="11" Grid.ColumnSpan="2" Margin="3,30,3,3" HorizontalAlignment="Center" Foreground="DarkGray" FontStyle="Italic" TextWrapping="Wrap" TextAlignment="Center">
+        <TextBlock Grid.Row="11" Grid.Column="0" Margin="3" Text="Ascender offset"
+                   Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2022.2}"/>
+        <local:TextBoxDark Grid.Row="11" Grid.Column="1" Margin="3" Text="{Binding AscenderOffset}"
+                           Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2022.2}"/>
+
+        <TextBlock Grid.Row="12" Grid.Column="0" Margin="3" Text="SDF spread value"
+                   Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2023.2}"/>
+        <local:TextBoxDark Grid.Row="12" Grid.Column="1" Margin="3" Text="{Binding SDFSpread}"
+                           Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2023.2}"/>
+
+        <TextBlock Grid.Row="13" Grid.ColumnSpan="2" Margin="3,30,3,3" HorizontalAlignment="Center" Foreground="DarkGray" FontStyle="Italic" TextWrapping="Wrap" TextAlignment="Center">
                 Hint: You can click on any glyph here to highlight it in the "Glyphs".
         </TextBlock>
-        <Viewbox Grid.Row="12" Grid.ColumnSpan="2" Margin="3" Stretch="Uniform" StretchDirection="DownOnly">
+        <Viewbox Grid.Row="14" Grid.ColumnSpan="2" Margin="3" Stretch="Uniform" StretchDirection="DownOnly">
             <Grid MouseDown="Grid_MouseDown" Cursor="Hand">
                 <Grid.Background>
                     <SolidColorBrush Color="Black"/>
@@ -125,7 +140,7 @@
             </Grid>
         </Viewbox>
 
-        <StackPanel Grid.Row="13" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="15" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
             <local:ButtonDark Margin="3" Width="230" Click="EditRectangleButton_Click">
                 <Button.Style>
                     <Style TargetType="Button">
@@ -161,8 +176,8 @@
             <local:ButtonDark Margin="3" Width="200" Content="Create an empty glyph" Click="CreateGlyphButton_Click"/>
         </StackPanel>
 
-        <TextBlock Grid.Row="14" Grid.Column="0" Margin="3">Glyphs:</TextBlock>
-        <local:DataGridDark Grid.Row="15" Grid.ColumnSpan="2" MaxHeight="370" Margin="3" x:Name="GlyphsGrid" ItemsSource="{Binding Glyphs, Mode=OneWay}"
+        <TextBlock Grid.Row="16" Grid.Column="0" Margin="3">Glyphs:</TextBlock>
+        <local:DataGridDark Grid.Row="17" Grid.ColumnSpan="2" MaxHeight="370" Margin="3" x:Name="GlyphsGrid" ItemsSource="{Binding Glyphs, Mode=OneWay}"
                             AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
                             ScrollViewer.CanContentScroll="True"
                             VirtualizingPanel.IsVirtualizing="True"
@@ -237,19 +252,19 @@
             </DataGrid.Columns>
         </local:DataGridDark>
 
-        <TextBlock Grid.Row="16" Grid.ColumnSpan="2" Margin="3" TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center">
+        <TextBlock Grid.Row="18" Grid.ColumnSpan="2" Margin="3" TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center">
             Note that the glyphs need to be specified in ascending order.<LineBreak/>
             Press the button below to sort them appropriately.
         </TextBlock>
-        <local:ButtonDark Grid.Row="17" Grid.ColumnSpan="2" Margin="3" Click="Button_Sort_Click"
+        <local:ButtonDark Grid.Row="19" Grid.ColumnSpan="2" Margin="3" Click="Button_Sort_Click"
                           Content="Sort glyphs" Width="200" FontSize="14" Style="{StaticResource glyphsOperationButtonStyle}"/>
 
-        <TextBlock Grid.Row="18" Grid.ColumnSpan="2" Margin="3,6,3,3" TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center">
+        <TextBlock Grid.Row="20" Grid.ColumnSpan="2" Margin="3,6,3,3" TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center">
             Also, if you have added new characters or changed the character<LineBreak/>
             of an existing glyph, you should update the font range.<LineBreak/>
             Press the button below to do that.
         </TextBlock>
-        <local:ButtonDark Grid.Row="19" Grid.ColumnSpan="2" Margin="3" Click="Button_UpdateRange_Click"
+        <local:ButtonDark Grid.Row="21" Grid.ColumnSpan="2" Margin="3" Click="Button_UpdateRange_Click"
                           Content="Update range" Width="200" FontSize="14" Style="{StaticResource glyphsOperationButtonStyle}"/>
     </Grid>
 </local:DataUserControl>
