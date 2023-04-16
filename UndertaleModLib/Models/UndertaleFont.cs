@@ -196,7 +196,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             public static readonly uint ChildObjectsSize = 4;
 
             /// <summary>
-            /// The code point of character for the glyph.
+            /// The code point of the preceeding character.
             /// </summary>
             public short Character;
 
