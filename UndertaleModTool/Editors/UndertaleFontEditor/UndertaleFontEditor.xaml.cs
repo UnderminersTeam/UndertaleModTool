@@ -115,11 +115,24 @@ namespace UndertaleModTool
                 return;
             }
 
-            var window = new EditGlyphRectangleWindow(DataContext as UndertaleFont, glyph);
-            if (window.ShowDialog() == true)
+            EditGlyphRectangleWindow dialog = null;
+            try
             {
-                GlyphsGrid.SelectedItem = window.SelectedGlyph;
-                ScrollGlyphIntoView(window.SelectedGlyph);
+                dialog = new(DataContext as UndertaleFont, glyph);
+                if (dialog.ShowDialog() == true)
+                {
+                    GlyphsGrid.SelectedItem = dialog.SelectedGlyph;
+                    ScrollGlyphIntoView(dialog.SelectedGlyph);
+                }
+            }
+            catch (Exception ex)
+            {
+                mainWindow.ShowError("An error occured in the glyph rectangle editor window.\n" +
+                                     $"Please report this on GitHub.\n\n{ex}");
+            }
+            finally
+            {
+                dialog?.Close();
             }
         }
         private void CreateGlyphButton_Click(object sender, RoutedEventArgs e)
