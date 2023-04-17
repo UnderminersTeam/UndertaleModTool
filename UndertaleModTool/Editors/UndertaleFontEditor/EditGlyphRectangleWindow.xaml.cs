@@ -32,6 +32,7 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
         private bool dragInProgress = false;
         private Point initPoint;
         private HitType initType;
+        private short initShift;
         private Canvas canvas;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -198,6 +199,7 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
             {
                 SelectedGlyph.SourceX = (ushort)Math.Round(initPoint.X);
                 SelectedGlyph.SourceY = (ushort)Math.Round(initPoint.Y);
+                initShift = SelectedGlyph.Shift;
             }
             else
                 initType = GetHitType(selectedRect, initPoint);
@@ -230,6 +232,7 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
                 double newY = SelectedGlyph.SourceY;
                 double newWidth = SelectedGlyph.SourceWidth;
                 double newHeight = SelectedGlyph.SourceHeight;
+                double newShift = SelectedGlyph.Shift;
 
                 switch (initType)
                 {
@@ -242,27 +245,33 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
                         newY += offsetY;
                         newWidth -= offsetX;
                         newHeight -= offsetY;
+                        newShift -= offsetX;
                         break;
                     case HitType.UR:
                         newY += offsetY;
                         newWidth += offsetX;
                         newHeight -= offsetY;
+                        newShift += offsetX;
                         break;
                     case HitType.LR:
                         newWidth += offsetX;
                         newHeight += offsetY;
+                        newShift += offsetX;
                         break;
                     case HitType.LL:
                         newX += offsetX;
                         newWidth -= offsetX;
                         newHeight += offsetY;
+                        newShift -= offsetX;
                         break;
                     case HitType.L:
                         newX += offsetX;
                         newWidth -= offsetX;
+                        newShift -= offsetX;
                         break;
                     case HitType.R:
                         newWidth += offsetX;
+                        newShift += offsetX;
                         break;
                     case HitType.B:
                         newHeight += offsetY;
@@ -298,6 +307,8 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
                 if (outOfBottom)
                     SelectedGlyph.SourceY = (ushort)(Font.Texture.BoundingHeight - SelectedGlyph.SourceHeight);
 
+                SelectedGlyph.Shift = (short)Math.Round(newShift);
+
                 initPoint.X = Math.Round(pos.X);
                 initPoint.Y = Math.Round(pos.Y);
             }
@@ -325,6 +336,8 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
                     SelectedGlyph.SourceWidth = (ushort)Math.Round(offsetX);
                 if (!outOfBottom)
                     SelectedGlyph.SourceHeight = (ushort)Math.Round(offsetY);
+
+                SelectedGlyph.Shift = (short)(initShift + (short)Math.Round(offsetX));
             }
             else
             {
