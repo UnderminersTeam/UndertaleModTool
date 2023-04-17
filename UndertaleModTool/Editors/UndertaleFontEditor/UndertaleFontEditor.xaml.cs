@@ -141,12 +141,15 @@ namespace UndertaleModTool
                 return;
 
             int index = font.Glyphs.Count - 1;
-            if (font.Glyphs[index].SourceWidth == 0
-                || font.Glyphs[index].SourceHeight == 0)
+            if (index >= 0)
             {
-                mainWindow.ShowWarning("The last glyph has zero size.\n"+
-                                       "You can use the button on the left to fix that.");
-                return;
+                if (font.Glyphs[index].SourceWidth == 0
+                || font.Glyphs[index].SourceHeight == 0)
+                {
+                    mainWindow.ShowWarning("The last glyph has zero size.\n" +
+                                           "You can use the button on the left to fix that.");
+                    return;
+                }
             }
 
             font.Glyphs.Add(new());

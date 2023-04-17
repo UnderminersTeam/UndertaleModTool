@@ -159,7 +159,7 @@
                                                 <BeginStoryboard.Storyboard>
                                                     <Storyboard RepeatBehavior="Forever">
                                                         <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity"
-                                                                                                   Duration="0:0:2">
+                                                                                       Duration="0:0:2">
                                                             <DiscreteDoubleKeyFrame Value="1" KeyTime="0:0:0" />
                                                             <DiscreteDoubleKeyFrame Value="0" KeyTime="0:0:1" />
                                                         </DoubleAnimationUsingKeyFrames>
@@ -347,7 +347,7 @@
                     <DataGridTemplateColumn Header="Kerning" Width="60">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <local:ButtonDark Click="EditKerningButton_Click" Style="{StaticResource kerningButtonStyle}"/>
+                                <local:ButtonDark Margin="0,-1" Click="EditKerningButton_Click" Style="{StaticResource kerningButtonStyle}"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
