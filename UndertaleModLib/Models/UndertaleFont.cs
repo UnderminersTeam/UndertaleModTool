@@ -67,12 +67,12 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
     /// <summary>
     /// The x scale this font uses.
     /// </summary>
-    public float ScaleX { get; set; }
+    public float ScaleX { get; set; } = 1;
 
     /// <summary>
     /// The y scale this font uses.
     /// </summary>
-    public float ScaleY { get; set; }
+    public float ScaleY { get; set; } = 1;
 
     /// <summary>
     /// TODO: currently unknown, needs investigation.

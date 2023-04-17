@@ -115,6 +115,12 @@ namespace UndertaleModTool
                 return;
             }
 
+            if (DataContext is UndertaleFont font && font.Texture is null)
+            {
+                mainWindow.ShowError("The font has no texture.");
+                return;
+            }
+
             EditGlyphRectangleWindow dialog = null;
             try
             {
