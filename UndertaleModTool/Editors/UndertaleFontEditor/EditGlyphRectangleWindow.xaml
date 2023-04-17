@@ -60,19 +60,72 @@
                             </Style>
                             
                             <DataTemplate x:Key="selectedGlyphTemplate">
-                                <Rectangle Width="{Binding SourceWidth, Mode=OneWay}" Height="{Binding SourceHeight, Mode=OneWay}"
-                                           StrokeThickness="1" Panel.ZIndex="1"
-                                           ToolTipService.InitialShowDelay="500" ToolTipService.BetweenShowDelay="500">
-                                    <Rectangle.ToolTip>
-                                        <TextBlock Text="{Binding Character, Mode=OneWay, Converter={StaticResource CharConverter}}"/>
-                                    </Rectangle.ToolTip>
-                                    <Rectangle.Stroke>
-                                        <SolidColorBrush Color="OrangeRed" Opacity="0.5"/>
-                                    </Rectangle.Stroke>
-                                    <Rectangle.Fill>
-                                        <SolidColorBrush Color="Red" Opacity="0.1"/>
-                                    </Rectangle.Fill>
-                                </Rectangle>
+                                <Grid>
+                                    <Grid.Resources>
+                                        <Style TargetType="Rectangle">
+                                            <Setter Property="VerticalAlignment" Value="Top"/>
+                                            <Setter Property="HorizontalAlignment" Value="Left"/>
+                                        </Style>
+                                    </Grid.Resources>
+                                    <Rectangle Width="{Binding SourceWidth, Mode=OneWay}" Height="{Binding SourceHeight, Mode=OneWay}"
+                                               StrokeThickness="1" Panel.ZIndex="1"
+                                               ToolTipService.InitialShowDelay="500" ToolTipService.BetweenShowDelay="500">
+                                        <Rectangle.ToolTip>
+                                            <TextBlock Text="{Binding Character, Mode=OneWay, Converter={StaticResource CharConverter}}"/>
+                                        </Rectangle.ToolTip>
+                                        <Rectangle.Stroke>
+                                            <SolidColorBrush Color="OrangeRed" Opacity="0.5"/>
+                                        </Rectangle.Stroke>
+                                        <Rectangle.Fill>
+                                            <SolidColorBrush Color="Red" Opacity="0.1"/>
+                                        </Rectangle.Fill>
+                                    </Rectangle>
+
+                                    <Grid Panel.ZIndex="2">
+                                        <Grid.Style>
+                                            <Style TargetType="Grid">
+                                                <Style.Triggers>
+                                                    <EventTrigger RoutedEvent="Loaded">
+                                                        <BeginStoryboard>
+                                                            <BeginStoryboard.Storyboard>
+                                                                <Storyboard RepeatBehavior="Forever">
+                                                                    <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity"
+                                                                                                   Duration="0:0:2">
+                                                                        <DiscreteDoubleKeyFrame Value="1" KeyTime="0:0:0" />
+                                                                        <DiscreteDoubleKeyFrame Value="0" KeyTime="0:0:1" />
+                                                                    </DoubleAnimationUsingKeyFrames>
+                                                                </Storyboard>
+                                                            </BeginStoryboard.Storyboard>
+                                                        </BeginStoryboard>
+                                                    </EventTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Grid.Style>
+                                        <Rectangle Width="1" Height="{Binding SourceHeight, Mode=OneWay}" Stroke="Blue">
+                                            <Rectangle.RenderTransform>
+                                                <TransformGroup>
+                                                    <TranslateTransform X="{Binding Offset, Mode=OneWay}"/>
+                                                </TransformGroup>
+                                            </Rectangle.RenderTransform>
+                                        </Rectangle>
+                                        <Rectangle Width="{Binding Shift, Mode=OneWay}" Height="1" Stroke="LawnGreen">
+                                            <Rectangle.RenderTransform>
+                                                <TransformGroup>
+                                                    <TranslateTransform Y="-1"/>
+                                                    <TranslateTransform Y="{Binding SourceHeight, Mode=OneWay}"/>
+                                                </TransformGroup>
+                                            </Rectangle.RenderTransform>
+                                        </Rectangle>
+                                        <Rectangle Width="1" Height="1" Stroke="#FF3E8080">
+                                            <Rectangle.RenderTransform>
+                                                <TransformGroup>
+                                                    <TranslateTransform Y="-1"/>
+                                                    <TranslateTransform Y="{Binding SourceHeight, Mode=OneWay}"/>
+                                                </TransformGroup>
+                                            </Rectangle.RenderTransform>
+                                        </Rectangle>
+                                    </Grid>
+                                </Grid>
                             </DataTemplate>
                             <DataTemplate x:Key="glyphTemplate">
                                 <Rectangle Width="{Binding SourceWidth, Mode=OneWay}" Height="{Binding SourceHeight, Mode=OneWay}"

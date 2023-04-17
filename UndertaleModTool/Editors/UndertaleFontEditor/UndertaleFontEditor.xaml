@@ -117,7 +117,7 @@
                            Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2023.2}"/>
 
         <TextBlock Grid.Row="13" Grid.ColumnSpan="2" Margin="3,30,3,3" HorizontalAlignment="Center" Foreground="DarkGray" FontStyle="Italic" TextWrapping="Wrap" TextAlignment="Center">
-                Hint: You can click on any glyph here to highlight it in the "Glyphs".
+            Hint: You can click on any glyph here to highlight it in the "Glyphs".
         </TextBlock>
         <Viewbox Grid.Row="14" Grid.ColumnSpan="2" Margin="3" Stretch="Uniform" StretchDirection="DownOnly">
             <Grid MouseDown="Grid_MouseDown" Cursor="Hand">
@@ -126,16 +126,75 @@
                 </Grid.Background>
                 <local:UndertaleTexturePageItemDisplay DataContext="{Binding Texture, Mode=OneWay}"/>
 
-                <Canvas Name="GlyphsOverlayCanvas" SnapsToDevicePixels="True">
-                    <Rectangle Name="GlyphRectangle" Stroke="#FFB23131" Panel.ZIndex="50" StrokeThickness="1"
-                               Canvas.Left="{Binding SelectedItem.SourceX, ElementName=GlyphsGrid, Mode=OneWay, TargetNullValue=-1, FallbackValue=-1}"
-                               Canvas.Top="{Binding SelectedItem.SourceY, ElementName=GlyphsGrid, Mode=OneWay, TargetNullValue=-1, FallbackValue=-1}"
-                               Width="{Binding SelectedItem.SourceWidth, ElementName=GlyphsGrid, Mode=OneWay, TargetNullValue=0, FallbackValue=0}"
-                               Height="{Binding SelectedItem.SourceHeight, ElementName=GlyphsGrid, Mode=OneWay, TargetNullValue=0, FallbackValue=0}">
-                        <Rectangle.Fill>
-                            <SolidColorBrush Color="Red" Opacity="0.2"/>
-                        </Rectangle.Fill>
-                    </Rectangle>
+                <Canvas Name="GlyphsOverlayCanvas" SnapsToDevicePixels="True"
+                        DataContext="{Binding SelectedItem, ElementName=GlyphsGrid, Mode=OneWay}">
+                    <Grid Canvas.Left="{Binding SourceX, Mode=OneWay, FallbackValue=-1}"
+                          Canvas.Top="{Binding SourceY, Mode=OneWay, FallbackValue=-1}">
+                        <Grid.Resources>
+                            <Style TargetType="Rectangle">
+                                <Setter Property="VerticalAlignment" Value="Top"/>
+                                <Setter Property="HorizontalAlignment" Value="Left"/>
+                                <Style.Triggers>
+                                    <Trigger Property="DataContext" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Hidden"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Resources>
+
+                        <Rectangle Name="GlyphRectangle" Stroke="#FFB23131" StrokeThickness="1"
+                               Width="{Binding SourceWidth, Mode=OneWay, FallbackValue=0}"
+                               Height="{Binding SourceHeight, Mode=OneWay, FallbackValue=0}">
+                            <Rectangle.Fill>
+                                <SolidColorBrush Color="Red" Opacity="0.2"/>
+                            </Rectangle.Fill>
+                        </Rectangle>
+
+                        <Grid Panel.ZIndex="1">
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Style.Triggers>
+                                        <EventTrigger RoutedEvent="Loaded">
+                                            <BeginStoryboard>
+                                                <BeginStoryboard.Storyboard>
+                                                    <Storyboard RepeatBehavior="Forever">
+                                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity"
+                                                                                                   Duration="0:0:2">
+                                                            <DiscreteDoubleKeyFrame Value="1" KeyTime="0:0:0" />
+                                                            <DiscreteDoubleKeyFrame Value="0" KeyTime="0:0:1" />
+                                                        </DoubleAnimationUsingKeyFrames>
+                                                    </Storyboard>
+                                                </BeginStoryboard.Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                            <Rectangle Width="1" Height="{Binding SourceHeight, Mode=OneWay, FallbackValue=0}" Stroke="Blue">
+                                <Rectangle.RenderTransform>
+                                    <TransformGroup>
+                                        <TranslateTransform X="{Binding Offset, Mode=OneWay, FallbackValue=0}"/>
+                                    </TransformGroup>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Width="{Binding Shift, Mode=OneWay, FallbackValue=0}" Height="1" Stroke="LawnGreen">
+                                <Rectangle.RenderTransform>
+                                    <TransformGroup>
+                                        <TranslateTransform Y="-1"/>
+                                        <TranslateTransform Y="{Binding SourceHeight, Mode=OneWay, FallbackValue=0}"/>
+                                    </TransformGroup>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Width="1" Height="1" Stroke="#FF3E8080">
+                                <Rectangle.RenderTransform>
+                                    <TransformGroup>
+                                        <TranslateTransform Y="-1"/>
+                                        <TranslateTransform Y="{Binding SourceHeight, Mode=OneWay, FallbackValue=0}"/>
+                                    </TransformGroup>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                        </Grid>
+                    </Grid>
                 </Canvas>
             </Grid>
         </Viewbox>
@@ -258,9 +317,11 @@
                     <DataGridTemplateColumn Width="*">
                         <DataGridTemplateColumn.Header>
                             <StackPanel Orientation="Horizontal" ToolTipService.InitialShowDelay="250"
-                                    ToolTip="The number of pixels to shift right when advancing to the next character.">
+                                    ToolTip="The number of pixels to shift right when advancing to the next character.&#13;
+                                             It's highlighed in green on the texture above.">
                                 <TextBlock Text="Shift" Margin="0,0,3,0"/>
-                                <TextBlock Text="(?)" Foreground="Gray" FontSize="11"/>
+                                <TextBlock Text="(?)" Foreground="Gray" FontSize="11" Margin="0,0,3,0"/>
+                                <Rectangle Width="7" Height="7" Fill="LawnGreen"/>
                             </StackPanel>
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
@@ -272,9 +333,11 @@
                     <DataGridTemplateColumn Width="*">
                         <DataGridTemplateColumn.Header>
                             <StackPanel Orientation="Horizontal" ToolTipService.InitialShowDelay="250"
-                                    ToolTip="The number of pixels to horizontally offset the rendering of the glyph.">
+                                    ToolTip="The number of pixels to horizontally offset the rendering of the glyph.&#13;
+                                             It's highlighed in blue on the texture above.">
                                 <TextBlock Text="Offset" Margin="0,0,3,0"/>
-                                <TextBlock Text="(?)" Foreground="Gray" FontSize="11"/>
+                                <TextBlock Text="(?)" Foreground="Gray" FontSize="11" Margin="0,0,3,0"/>
+                                <Rectangle Width="7" Height="7" Fill="Blue"/>
                             </StackPanel>
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
