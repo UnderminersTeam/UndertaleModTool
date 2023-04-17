@@ -52,6 +52,7 @@ namespace UndertaleModTool
         public bool GridThicknessEnabled { get; set; } = false;
 
         public bool EnableDarkMode { get; set; } = false;
+        public bool ShowDebuggerOption { get; set; } = false;
 
         public static Settings Instance;
 

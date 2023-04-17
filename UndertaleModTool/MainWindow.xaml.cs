@@ -468,6 +468,9 @@ namespace UndertaleModTool
             // Copy the known code corrections into the profile, if they don't already exist.
             ApplyCorrections();
             CrashCheck();
+
+            RunGMSDebuggerItem.Visibility = Settings.Instance.ShowDebuggerOption
+                                            ? Visibility.Visible : Visibility.Collapsed;
         }
 
         public Dictionary<string, NamedPipeServerStream> childFiles = new Dictionary<string, NamedPipeServerStream>();
@@ -3230,6 +3233,11 @@ result in loss of work.");
         private async void Command_RunDebug(object sender, ExecutedRoutedEventArgs e)
         {
             if (Data == null)
+                return;
+
+            var result = this.ShowQuestion("Are you sure that you want to run the game with GMS debugger?\n" +
+                                           "If you want to enable a debug mode in some game, then you need to use one of the scripts.");
+            if (result != MessageBoxResult.Yes)
                 return;
 
             bool origDbg = Data.GeneralInfo.IsDebuggerDisabled;

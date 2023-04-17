@@ -21,6 +21,8 @@ namespace UndertaleModTool
     /// </summary>
     public partial class SettingsWindow : Window
     {
+        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+
         public static string GameMakerStudioPath
         {
             get => Settings.Instance.GameMakerStudioPath;
@@ -190,8 +192,20 @@ namespace UndertaleModTool
                 MainWindow.SetDarkMode(value);
 
                 if (value)
-                    Application.Current.MainWindow.ShowWarning("The message boxes (like this one) aren't compatible with the dark mode.\n" +
-                                                               "This will be fixed in future versions.");
+                    mainWindow.ShowWarning("The message boxes (like this one) aren't compatible with the dark mode.\n" +
+                                           "This will be fixed in future versions.");
+            }
+        }
+
+        public static bool ShowDebuggerOption
+        {
+            get => Settings.Instance.ShowDebuggerOption;
+            set
+            {
+                Settings.Instance.ShowDebuggerOption = value;
+                Settings.Save();
+
+                mainWindow.RunGMSDebuggerItem.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
             }
         }
 
