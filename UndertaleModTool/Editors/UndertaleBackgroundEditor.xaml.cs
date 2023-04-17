@@ -65,25 +65,8 @@ namespace UndertaleModTool
             }
         }
 
-        private bool SelectTileRegion(object sender, MouseButtonEventArgs e)
+        private bool ScrollTileIntoView(int tileIndex)
         {
-            if (!TileRectangle.IsVisible) // MainWindow.IsGMS2
-                return false;
-
-            Point pos = e.GetPosition((IInputElement)sender);
-            UndertaleBackground bg = DataContext as UndertaleBackground;
-            int x = (int)((int)pos.X / (bg.GMS2TileWidth + (2 * bg.GMS2OutputBorderX)));
-            int y = (int)((int)pos.Y / (bg.GMS2TileHeight + (2 * bg.GMS2OutputBorderY)));
-            int tileID = (int)((bg.GMS2TileColumns * y) + x);
-            if (tileID > bg.GMS2TileCount - 1)
-                return false;
-
-            e.Handled = true;
-
-            int tileIndex = bg.GMS2TileIds.FindIndex(x => x.ID == tileID);
-            if (tileIndex == -1)
-                return false;
-
             ScrollViewer tileListViewer = MainWindow.FindVisualChild<ScrollViewer>(TileIdList);
             if (tileListViewer is null)
             {
@@ -103,6 +86,27 @@ namespace UndertaleModTool
             dataEditorViewer.ScrollToVerticalOffset(initOffset);
 
             return true;
+        }
+        private bool SelectTileRegion(object sender, MouseButtonEventArgs e)
+        {
+            if (!TileRectangle.IsVisible) // MainWindow.IsGMS2
+                return false;
+
+            Point pos = e.GetPosition((IInputElement)sender);
+            UndertaleBackground bg = DataContext as UndertaleBackground;
+            int x = (int)((int)pos.X / (bg.GMS2TileWidth + (2 * bg.GMS2OutputBorderX)));
+            int y = (int)((int)pos.Y / (bg.GMS2TileHeight + (2 * bg.GMS2OutputBorderY)));
+            int tileID = (int)((bg.GMS2TileColumns * y) + x);
+            if (tileID > bg.GMS2TileCount - 1)
+                return false;
+
+            e.Handled = true;
+
+            int tileIndex = bg.GMS2TileIds.FindIndex(x => x.ID == tileID);
+            if (tileIndex == -1)
+                return false;
+
+            return ScrollTileIntoView(tileIndex);
         }
         private void BGTexture_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {

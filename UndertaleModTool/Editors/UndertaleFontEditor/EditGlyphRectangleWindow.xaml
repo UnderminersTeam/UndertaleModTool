@@ -1,0 +1,174 @@
+﻿<Window x:Class="UndertaleModTool.Editors.UndertaleFontEditor.EditGlyphRectangleWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UndertaleModTool.Editors.UndertaleFontEditor"
+        xmlns:utmt="clr-namespace:UndertaleModTool"
+        xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+        mc:Ignorable="d"
+        Title="Edit a font glyph rectangle" Name="editGlyphRectangleWindow" Height="575" Width="800"
+        Loaded="Window_Loaded" IsVisibleChanged="Window_IsVisibleChanged" DataContext="{Binding RelativeSource={RelativeSource Self}}">
+    <Grid>
+        <Grid.Resources>
+            <utmt:EqualityConverter x:Key="EqualityConverter"/>
+            <utmt:CharConverter x:Key="CharConverter"/>
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="42px"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Margin="3" FontStyle="Italic" FontSize="14" Foreground="Gray" HorizontalAlignment="Center">
+            Double-click an inactive rectangle to switch to it.<LineBreak/>
+            Drag mouse on desired region if it's an empty character.
+        </TextBlock>
+
+        <ScrollViewer Name="TextureScroll" Grid.Row="1" Margin="3"
+                      HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible"
+                      PreviewMouseWheel="TextureScroll_MouseWheel" ScrollChanged="TextureScroll_ScrollChanged">
+            <ScrollViewer.Background>
+                <DynamicResource ResourceKey="{x:Static SystemColors.MenuBrushKey}"/>
+            </ScrollViewer.Background>
+            <Viewbox Grid.Row="1" Name="TextureViewbox"
+                     Stretch="Uniform" StretchDirection="DownOnly"
+                     SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor" UseLayoutRounding="True"
+                     MouseLeftButtonDown="TextureViewbox_MouseLeftButtonDown" MouseLeftButtonUp="TextureViewbox_MouseLeftButtonUp">
+                <Grid>
+                    <Grid.Background>
+                        <SolidColorBrush Color="Black"/>
+                    </Grid.Background>
+
+                    <utmt:UndertaleTexturePageItemDisplay DataContext="{Binding Font.Texture, Mode=OneWay}" DisplayBorder="False"/>
+                    <ItemsControl ItemsSource="{Binding Glyphs, Mode=OneWay}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas IsItemsHost="True" Loaded="Canvas_Loaded"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="Canvas.Left" Value="{Binding SourceX, Mode=OneWay}"/>
+                                <Setter Property="Canvas.Top" Value="{Binding SourceY, Mode=OneWay}"/>
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+                        <ItemsControl.Resources>
+                            <Style TargetType="TextBlock">
+                                <!-- Hide "{NewItemPlaceholder}" -->
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </Style>
+                            
+                            <DataTemplate x:Key="selectedGlyphTemplate">
+                                <Grid>
+                                    <Grid.Resources>
+                                        <Style TargetType="Rectangle">
+                                            <Setter Property="VerticalAlignment" Value="Top"/>
+                                            <Setter Property="HorizontalAlignment" Value="Left"/>
+                                        </Style>
+                                    </Grid.Resources>
+                                    <Rectangle Width="{Binding SourceWidth, Mode=OneWay}" Height="{Binding SourceHeight, Mode=OneWay}"
+                                               StrokeThickness="1" Panel.ZIndex="1"
+                                               ToolTipService.InitialShowDelay="500" ToolTipService.BetweenShowDelay="500">
+                                        <Rectangle.ToolTip>
+                                            <TextBlock Text="{Binding Character, Mode=OneWay, Converter={StaticResource CharConverter}}"/>
+                                        </Rectangle.ToolTip>
+                                        <Rectangle.Stroke>
+                                            <SolidColorBrush Color="OrangeRed" Opacity="0.5"/>
+                                        </Rectangle.Stroke>
+                                        <Rectangle.Fill>
+                                            <SolidColorBrush Color="Red" Opacity="0.1"/>
+                                        </Rectangle.Fill>
+                                    </Rectangle>
+
+                                    <Grid Panel.ZIndex="2">
+                                        <Grid.Style>
+                                            <Style TargetType="Grid">
+                                                <Style.Triggers>
+                                                    <EventTrigger RoutedEvent="Loaded">
+                                                        <BeginStoryboard>
+                                                            <BeginStoryboard.Storyboard>
+                                                                <Storyboard RepeatBehavior="Forever">
+                                                                    <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Opacity"
+                                                                                                   Duration="0:0:2">
+                                                                        <DiscreteDoubleKeyFrame Value="1" KeyTime="0:0:0" />
+                                                                        <DiscreteDoubleKeyFrame Value="0" KeyTime="0:0:1" />
+                                                                    </DoubleAnimationUsingKeyFrames>
+                                                                </Storyboard>
+                                                            </BeginStoryboard.Storyboard>
+                                                        </BeginStoryboard>
+                                                    </EventTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Grid.Style>
+                                        <Rectangle Width="1" Height="{Binding SourceHeight, Mode=OneWay}" Stroke="Blue">
+                                            <Rectangle.RenderTransform>
+                                                <TransformGroup>
+                                                    <TranslateTransform X="{Binding Offset, Mode=OneWay}"/>
+                                                </TransformGroup>
+                                            </Rectangle.RenderTransform>
+                                        </Rectangle>
+                                        <Rectangle Width="{Binding Shift, Mode=OneWay}" Height="1" Stroke="LawnGreen">
+                                            <Rectangle.RenderTransform>
+                                                <TransformGroup>
+                                                    <TranslateTransform Y="-1"/>
+                                                    <TranslateTransform Y="{Binding SourceHeight, Mode=OneWay}"/>
+                                                </TransformGroup>
+                                            </Rectangle.RenderTransform>
+                                        </Rectangle>
+                                        <Rectangle Width="1" Height="1" Stroke="#FF3E8080">
+                                            <Rectangle.RenderTransform>
+                                                <TransformGroup>
+                                                    <TranslateTransform Y="-1"/>
+                                                    <TranslateTransform Y="{Binding SourceHeight, Mode=OneWay}"/>
+                                                </TransformGroup>
+                                            </Rectangle.RenderTransform>
+                                        </Rectangle>
+                                    </Grid>
+                                </Grid>
+                            </DataTemplate>
+                            <DataTemplate x:Key="glyphTemplate">
+                                <Rectangle Width="{Binding SourceWidth, Mode=OneWay}" Height="{Binding SourceHeight, Mode=OneWay}"
+                                           StrokeThickness="1" Panel.ZIndex="0"
+                                           ToolTipService.InitialShowDelay="500" ToolTipService.BetweenShowDelay="500">
+                                    <Rectangle.ToolTip>
+                                        <TextBlock Text="{Binding Character, Mode=OneWay, Converter={StaticResource CharConverter}}"/>
+                                    </Rectangle.ToolTip>
+                                    <Rectangle.Stroke>
+                                        <SolidColorBrush Color="Yellow" Opacity="0.25"/>
+                                    </Rectangle.Stroke>
+                                    <Rectangle.Fill>
+                                        <SolidColorBrush Color="Yellow" Opacity="0.05"/>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                            </DataTemplate>
+                            <Style x:Key="contentControlStyle" TargetType="ContentControl">
+                                <Setter Property="ContentTemplate" Value="{StaticResource glyphTemplate}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Value="True">
+                                        <DataTrigger.Binding>
+                                            <MultiBinding Converter="{StaticResource EqualityConverter}" Mode="OneWay">
+                                                <Binding Mode="OneTime"/>
+                                                <Binding Path="SelectedGlyph" Mode="OneWay" Source="{x:Reference editGlyphRectangleWindow}"/>
+                                            </MultiBinding>
+                                        </DataTrigger.Binding>
+                                        <Setter Property="ContentTemplate"
+                                                Value="{StaticResource selectedGlyphTemplate}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                            
+                            <DataTemplate DataType="{x:Type undertale:UndertaleFont+Glyph}">
+                                <ContentControl Name="RectangleContent" Content="{Binding .}"
+                                                Style="{StaticResource contentControlStyle}"/>
+                            </DataTemplate>
+                        </ItemsControl.Resources>
+                    </ItemsControl>
+                </Grid>
+            </Viewbox>
+        </ScrollViewer>
+
+        <utmt:ButtonDark Grid.Row="2" Margin="3,9,3,12" Click="SaveButton_Click" Width="160" Height="50"
+                         FontSize="18">Save changes</utmt:ButtonDark>
+    </Grid>
+</Window>
