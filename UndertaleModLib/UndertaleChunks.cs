@@ -1113,7 +1113,7 @@ namespace UndertaleModLib
             else
             {
                 // Go to the first texture pointer (+ minimal texture entry size)
-                reader.Position = reader.ReadUInt32() + 8;
+                reader.AbsPosition = reader.ReadUInt32() + 8;
 
                 // If there is a zero instead of texture data pointer (which cannot be zero)
                 if (reader.ReadUInt32() == 0)
