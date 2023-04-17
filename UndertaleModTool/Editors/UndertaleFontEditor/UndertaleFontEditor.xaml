@@ -317,8 +317,7 @@
                     <DataGridTemplateColumn Width="*">
                         <DataGridTemplateColumn.Header>
                             <StackPanel Orientation="Horizontal" ToolTipService.InitialShowDelay="250"
-                                    ToolTip="The number of pixels to shift right when advancing to the next character.&#13;
-                                             It's highlighed in green on the texture above.">
+                                    ToolTip="The number of pixels to shift right when advancing to the next character.&#13;It's highlighed in green on the texture above.">
                                 <TextBlock Text="Shift" Margin="0,0,3,0"/>
                                 <TextBlock Text="(?)" Foreground="Gray" FontSize="11" Margin="0,0,3,0"/>
                                 <Rectangle Width="7" Height="7" Fill="LawnGreen"/>
@@ -333,8 +332,7 @@
                     <DataGridTemplateColumn Width="*">
                         <DataGridTemplateColumn.Header>
                             <StackPanel Orientation="Horizontal" ToolTipService.InitialShowDelay="250"
-                                    ToolTip="The number of pixels to horizontally offset the rendering of the glyph.&#13;
-                                             It's highlighed in blue on the texture above.">
+                                    ToolTip="The number of pixels to horizontally offset the rendering of the glyph.&#13;It's highlighed in blue on the texture above.">
                                 <TextBlock Text="Offset" Margin="0,0,3,0"/>
                                 <TextBlock Text="(?)" Foreground="Gray" FontSize="11" Margin="0,0,3,0"/>
                                 <Rectangle Width="7" Height="7" Fill="Blue"/>
