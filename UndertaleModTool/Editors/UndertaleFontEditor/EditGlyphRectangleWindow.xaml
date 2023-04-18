@@ -27,7 +27,8 @@
 
         <ScrollViewer Name="TextureScroll" Grid.Row="1" Margin="3"
                       HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible"
-                      PreviewMouseWheel="TextureScroll_MouseWheel" ScrollChanged="TextureScroll_ScrollChanged">
+                      PreviewMouseWheel="TextureScroll_MouseWheel" ScrollChanged="TextureScroll_ScrollChanged"
+                      PreviewKeyDown="TextureScroll_PreviewKeyDown">
             <ScrollViewer.Background>
                 <DynamicResource ResourceKey="{x:Static SystemColors.MenuBrushKey}"/>
             </ScrollViewer.Background>

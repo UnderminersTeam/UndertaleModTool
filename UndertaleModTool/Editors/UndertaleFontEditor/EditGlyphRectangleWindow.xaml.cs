@@ -97,6 +97,7 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
             TextureViewbox.UpdateLayout();
             TextureScroll.ScrollToTop();
             TextureScroll.ScrollToLeftEnd();
+            TextureScroll.Focus();
         }
 
         private void TextureScroll_ScrollChanged(object sender, ScrollChangedEventArgs e)
@@ -353,6 +354,39 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
 
             DialogResult = true;
             Close();
+        }
+
+        private void TextureScroll_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (SelectedGlyph is null)
+                return;
+
+            switch (e.Key)
+            {
+                case Key.Left:
+                    if (SelectedGlyph.SourceX <= 0)
+                        return;
+                    SelectedGlyph.SourceX--;
+                    break;
+
+                case Key.Right:
+                    if (SelectedGlyph.SourceX + SelectedGlyph.SourceWidth >= Font.Texture.BoundingWidth)
+                        return;
+                    SelectedGlyph.SourceX++;
+                    break;
+
+                case Key.Up:
+                    if (SelectedGlyph.SourceY <= 0)
+                        return;
+                    SelectedGlyph.SourceY--;
+                    break;
+
+                case Key.Down:
+                    if (SelectedGlyph.SourceY + SelectedGlyph.SourceHeight >= Font.Texture.BoundingHeight)
+                        return;
+                    SelectedGlyph.SourceY++;
+                    break;
+            }
         }
     }
 
