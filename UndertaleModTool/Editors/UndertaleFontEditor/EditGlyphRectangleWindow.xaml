@@ -15,15 +15,13 @@
             <utmt:CharConverter x:Key="CharConverter"/>
         </Grid.Resources>
         <Grid.RowDefinitions>
-            <RowDefinition Height="42px"/>
+            <RowDefinition Height="40px"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Margin="3" FontStyle="Italic" FontSize="14" Foreground="Gray" HorizontalAlignment="Center">
-            Double-click an inactive rectangle to switch to it.<LineBreak/>
-            Drag mouse on desired region if it's an empty character.
-        </TextBlock>
+        <utmt:ButtonDark Grid.Row="0" Margin="3" FontSize="16" Width="100" Height="26"
+                         Content="Get help" Click="HelpButton_Click" Focusable="False"/>
 
         <ScrollViewer Name="TextureScroll" Grid.Row="1" Margin="3"
                       HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible"

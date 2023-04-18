@@ -361,6 +361,38 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
             if (SelectedGlyph is null)
                 return;
 
+            if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+            {
+                switch (e.Key)
+                {
+                    case Key.Left:
+                        if (SelectedGlyph.SourceWidth <= 1)
+                            return;
+                        SelectedGlyph.SourceWidth--;
+                        break;
+
+                    case Key.Right:
+                        if (SelectedGlyph.SourceX + SelectedGlyph.SourceWidth >= Font.Texture.BoundingWidth)
+                            return;
+                        SelectedGlyph.SourceWidth++;
+                        break;
+
+                    case Key.Up:
+                        if (SelectedGlyph.SourceHeight <= 1)
+                            return;
+                        SelectedGlyph.SourceHeight--;
+                        break;
+
+                    case Key.Down:
+                        if (SelectedGlyph.SourceY + SelectedGlyph.SourceHeight >= Font.Texture.BoundingHeight)
+                            return;
+                        SelectedGlyph.SourceHeight++;
+                        break;
+                }
+
+                return;
+            }
+
             switch (e.Key)
             {
                 case Key.Left:
@@ -387,6 +419,13 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
                     SelectedGlyph.SourceY++;
                     break;
             }
+        }
+
+        private void HelpButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.ShowMessage("1) Double-click an inactive rectangle to select it.\n" +
+                             "2) You can move the selected rectangle with the arrow keys (held Shift - resize).\n" +
+                             "3) Drag mouse on desired region if it's an empty glyph.", "Help");
         }
     }
 
