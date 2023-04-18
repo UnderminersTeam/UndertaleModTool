@@ -2921,7 +2921,7 @@ namespace UndertaleModTool
 
             DateTime currDate = File.GetLastWriteTime(Path.Combine(ExePath, "UndertaleModTool.exe"));
             DateTime lastDate = (DateTime)action["updated_at"];
-            if (lastDate.Subtract(currDate).Minutes <= 10)
+            if (lastDate.Subtract(currDate).TotalMinutes <= 10)
                 if (this.ShowQuestion("UndertaleModTool is already up to date.\nUpdate anyway?") != MessageBoxResult.Yes)
                 {
                     window.UpdateButtonEnabled = true;
