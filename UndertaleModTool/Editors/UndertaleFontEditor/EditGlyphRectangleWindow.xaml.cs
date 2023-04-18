@@ -97,6 +97,7 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
             TextureViewbox.UpdateLayout();
             TextureScroll.ScrollToTop();
             TextureScroll.ScrollToLeftEnd();
+            TextureScroll.Focus();
         }
 
         private void TextureScroll_ScrollChanged(object sender, ScrollChangedEventArgs e)
@@ -354,6 +355,78 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
             DialogResult = true;
             Close();
         }
+
+        private void TextureScroll_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (SelectedGlyph is null)
+                return;
+
+            if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+            {
+                switch (e.Key)
+                {
+                    case Key.Left:
+                        if (SelectedGlyph.SourceWidth <= 1)
+                            return;
+                        SelectedGlyph.SourceWidth--;
+                        break;
+
+                    case Key.Right:
+                        if (SelectedGlyph.SourceX + SelectedGlyph.SourceWidth >= Font.Texture.BoundingWidth)
+                            return;
+                        SelectedGlyph.SourceWidth++;
+                        break;
+
+                    case Key.Up:
+                        if (SelectedGlyph.SourceHeight <= 1)
+                            return;
+                        SelectedGlyph.SourceHeight--;
+                        break;
+
+                    case Key.Down:
+                        if (SelectedGlyph.SourceY + SelectedGlyph.SourceHeight >= Font.Texture.BoundingHeight)
+                            return;
+                        SelectedGlyph.SourceHeight++;
+                        break;
+                }
+
+                return;
+            }
+
+            switch (e.Key)
+            {
+                case Key.Left:
+                    if (SelectedGlyph.SourceX <= 0)
+                        return;
+                    SelectedGlyph.SourceX--;
+                    break;
+
+                case Key.Right:
+                    if (SelectedGlyph.SourceX + SelectedGlyph.SourceWidth >= Font.Texture.BoundingWidth)
+                        return;
+                    SelectedGlyph.SourceX++;
+                    break;
+
+                case Key.Up:
+                    if (SelectedGlyph.SourceY <= 0)
+                        return;
+                    SelectedGlyph.SourceY--;
+                    break;
+
+                case Key.Down:
+                    if (SelectedGlyph.SourceY + SelectedGlyph.SourceHeight >= Font.Texture.BoundingHeight)
+                        return;
+                    SelectedGlyph.SourceY++;
+                    break;
+            }
+        }
+
+        private void HelpButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.ShowMessage("1) Double-click an inactive rectangle to select it.\n" +
+                             "2) You can move the selected rectangle with the arrow keys (held Shift - resize).\n" +
+                             "3) Drag mouse on desired region if it's an empty glyph.", "Help");
+        }
     }
 
     // Based on http://csharphelper.com/howtos/howto_wpf_resize_rectangle.html
@@ -367,7 +440,7 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
 
         public static HitType GetHitType(Rectangle rect, Point point)
         {
-            if (rect.DataContext is not UndertaleFont.Glyph glyph)
+            if (rect?.DataContext is not UndertaleFont.Glyph glyph)
                 return HitType.None;
 
             ushort left = glyph.SourceX;
