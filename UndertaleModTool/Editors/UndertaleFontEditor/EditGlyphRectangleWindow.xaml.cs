@@ -193,9 +193,7 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
                 }
             }
 
-            if (canvas is null)
-                return;
-            initPoint = e.GetPosition(canvas);
+            initPoint = e.GetPosition(TextureViewbox);
             if (isNewCharacter)
             {
                 SelectedGlyph.SourceX = (ushort)Math.Round(initPoint.X);
@@ -222,7 +220,7 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
         }
         private void TextureViewbox_MouseMove(object sender, MouseEventArgs e)
         {
-            var pos = e.GetPosition(canvas);
+            var pos = e.GetPosition(TextureViewbox);
 
             if (dragInProgress)
             {
@@ -316,12 +314,12 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
             else
             {
                 var hitType = GetHitType(selectedRect, pos);
-                canvas.Cursor = GetCursorForType(hitType);
+                TextureViewbox.Cursor = GetCursorForType(hitType);
             }
         }
         private void TextureViewbox_MouseMove_New(object sender, MouseEventArgs e)
         {
-            var pos = e.GetPosition(canvas);
+            var pos = e.GetPosition(TextureViewbox);
 
             if (dragInProgress)
             {
