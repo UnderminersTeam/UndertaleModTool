@@ -440,7 +440,7 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
 
         public static HitType GetHitType(Rectangle rect, Point point)
         {
-            if (rect.DataContext is not UndertaleFont.Glyph glyph)
+            if (rect?.DataContext is not UndertaleFont.Glyph glyph)
                 return HitType.None;
 
             ushort left = glyph.SourceX;

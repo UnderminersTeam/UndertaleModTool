@@ -102,16 +102,15 @@
                                         </Grid.Style>
                                         <Rectangle Width="1" Height="{Binding SourceHeight, Mode=OneWay}" Stroke="Blue">
                                             <Rectangle.RenderTransform>
-                                                <TransformGroup>
-                                                    <TranslateTransform X="{Binding Offset, Mode=OneWay}"/>
-                                                </TransformGroup>
+                                                <!-- Giving names to transform elements prevents random "Cannot find governing FrameworkElement or FrameworkContentElement for target element." errors -->
+                                                <TranslateTransform x:Name="transform0" X="{Binding Offset, Mode=OneWay}"/>
                                             </Rectangle.RenderTransform>
                                         </Rectangle>
                                         <Rectangle Width="{Binding Shift, Mode=OneWay}" Height="1" Stroke="LawnGreen">
                                             <Rectangle.RenderTransform>
                                                 <TransformGroup>
                                                     <TranslateTransform Y="-1"/>
-                                                    <TranslateTransform Y="{Binding SourceHeight, Mode=OneWay}"/>
+                                                    <TranslateTransform x:Name="transform1" Y="{Binding SourceHeight, Mode=OneWay}"/>
                                                 </TransformGroup>
                                             </Rectangle.RenderTransform>
                                         </Rectangle>
@@ -119,7 +118,7 @@
                                             <Rectangle.RenderTransform>
                                                 <TransformGroup>
                                                     <TranslateTransform Y="-1"/>
-                                                    <TranslateTransform Y="{Binding SourceHeight, Mode=OneWay}"/>
+                                                    <TranslateTransform x:Name="transform2" Y="{Binding SourceHeight, Mode=OneWay}"/>
                                                 </TransformGroup>
                                             </Rectangle.RenderTransform>
                                         </Rectangle>
