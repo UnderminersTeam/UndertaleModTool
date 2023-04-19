@@ -1520,7 +1520,7 @@ namespace UndertaleModTool
         {
             AddGMS1Tile(this.DataContext as UndertaleRoom);
         }
-        private void MenuItem_Delete_Click(Object sender, RoutedEventArgs e)
+        private void MenuItem_Delete_Click(object sender, RoutedEventArgs e)
         {
             MenuItem menuitem = sender as MenuItem;
             DeleteItem(menuitem.DataContext as UndertaleObject);
