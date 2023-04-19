@@ -227,8 +227,8 @@ namespace UndertaleModTool
             { SystemColors.WindowTextBrushKey, new SolidColorBrush(whiteColor) },
             { SystemColors.ControlTextBrushKey, new SolidColorBrush(whiteColor) },
             { SystemColors.WindowBrushKey, new SolidColorBrush(darkColor) },
-            { SystemColors.ControlBrushKey, new SolidColorBrush(darkColor) },
-            { SystemColors.ControlLightLightBrushKey, new SolidColorBrush(darkLightColor) },
+            { SystemColors.ControlBrushKey, new SolidColorBrush(darkLightColor) },
+            { SystemColors.ControlLightBrushKey, new SolidColorBrush(Color.FromArgb(255, 60, 60, 60)) },
             { SystemColors.MenuTextBrushKey, new SolidColorBrush(whiteColor) },
             { SystemColors.MenuBrushKey, new SolidColorBrush(darkLightColor) },
             { SystemColors.GrayTextBrushKey, new SolidColorBrush(Color.FromArgb(255, 136, 136, 136)) },
@@ -564,8 +564,8 @@ namespace UndertaleModTool
                 resources[SystemColors.GrayTextBrushKey] = grayTextBrush;
                 resources[SystemColors.InactiveSelectionHighlightBrushKey] = inactiveSelectionBrush;
 
-                Windows.TextInput.BGColor = System.Drawing.SystemColors.Control;
-                Windows.TextInput.TextBoxBGColor = System.Drawing.SystemColors.Window;
+                Windows.TextInput.BGColor = System.Drawing.SystemColors.Window;
+                Windows.TextInput.TextBoxBGColor = System.Drawing.SystemColors.ControlLight;
                 Windows.TextInput.TextColor = System.Drawing.SystemColors.ControlText;
             }
 

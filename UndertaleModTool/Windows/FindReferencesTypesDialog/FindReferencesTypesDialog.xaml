@@ -15,16 +15,13 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Grid.Background>
-            <DynamicResource ResourceKey="{x:Static SystemColors.ControlBrushKey}"/>
-        </Grid.Background>
         <Label Grid.Row="0" Content="Where to search the references?" HorizontalAlignment="Left" Margin="10,10,0,0" FontSize="22"/>
         <Rectangle Grid.Row="1" Margin="10,0,20,0" Height="2" Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
 
         <ScrollViewer Grid.Row="2" Margin="10,15,20,0" VerticalScrollBarVisibility="Auto">
             <ItemsControl Name="TypesList">
                 <ItemsControl.Background>
-                    <DynamicResource ResourceKey="{x:Static SystemColors.ControlLightLightBrushKey}"/>
+                    <DynamicResource ResourceKey="{x:Static SystemColors.ControlLightBrushKey}"/>
                 </ItemsControl.Background>
                 <ItemsControl.Resources>
                     <Style TargetType="CheckBox">

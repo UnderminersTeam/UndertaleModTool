@@ -18,7 +18,9 @@ namespace UndertaleModTool.Windows
         public string DefaultValue { get; }
         public string ReturnString { get; set; }
 
-        private static Color bgColor, textBoxBGColor, textColor;
+        private static Color bgColor = SystemColors.Window;
+        private static Color textBoxBGColor = SystemColors.ControlLight;
+        private static Color textColor = SystemColors.ControlText;
         public static Color BGColor
         {
             get => bgColor;
@@ -56,7 +58,6 @@ namespace UndertaleModTool.Windows
                     if (f is TextInput inp)
                     {
                         inp.label1.ForeColor = value;
-                        inp.button1.ForeColor = value;
                         inp.richTextBox1.ForeColor = value;
                     }
                 }
@@ -88,7 +89,6 @@ namespace UndertaleModTool.Windows
             BackColor = BGColor;
             richTextBox1.BackColor = TextBoxBGColor;
             label1.ForeColor = TextColor;
-            button1.ForeColor = TextColor;
             richTextBox1.ForeColor = TextColor;
             textCommandsMenu.ForeColor = TextColor;
             textCommandsMenu.BackColor = TextBoxBGColor;
