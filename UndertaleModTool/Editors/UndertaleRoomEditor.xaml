@@ -346,15 +346,18 @@
                 </TreeViewItem>
             </TreeView>
 
-            <StackPanel Grid.Column="1">
-                <local:RepeatButtonDark FontFamily="Marlett" FontSize="14" Content="5" Margin="0,0,0,2"
+            <Border Grid.Column="1" BorderBrush="#828790" BorderThickness="0,1,1,1"
+                    Height="Auto" VerticalAlignment="Top" Margin="-3,0,0,0">
+                <StackPanel Margin="1,0,0,0">
+                    <local:RepeatButtonDark FontFamily="Marlett" FontSize="14" Content="5" Margin="0,0,0,2"
                                         ToolTip="Move item up (-)" ToolTipService.InitialShowDelay="250"
-                                  Click="TreeViewMoveUpButton_Click" PreviewMouseLeftButtonUp="TreeViewMoveButton_MouseLeftButtonUp"/>
-                <local:RepeatButtonDark FontFamily="Marlett" FontSize="14" Content="6"
+                                        Click="TreeViewMoveUpButton_Click" PreviewMouseLeftButtonUp="TreeViewMoveButton_MouseLeftButtonUp"/>
+                    <local:RepeatButtonDark FontFamily="Marlett" FontSize="14" Content="6"
                                         ToolTip="Move item down (+)" ToolTipService.InitialShowDelay="250"
-                                  Click="TreeViewMoveDownButton_Click" PreviewMouseLeftButtonUp="TreeViewMoveButton_MouseLeftButtonUp"/>
-            </StackPanel>
-            
+                                        Click="TreeViewMoveDownButton_Click" PreviewMouseLeftButtonUp="TreeViewMoveButton_MouseLeftButtonUp"/>
+                </StackPanel>
+            </Border>
+
             <ScrollViewer Grid.Column="2" Margin="3,0,0,0" Name="ObjectEditor" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible">
                 <ContentControl.Resources>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom}">
