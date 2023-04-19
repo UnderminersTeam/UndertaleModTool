@@ -196,8 +196,8 @@
                     <TreeViewItem Name="GameObjItems" Header="Game objects" ItemsSource="{Binding GameObjects, Mode=OneWay}">
                         <TreeViewItem.Resources>
                             <local:ContextMenuDark x:Key="cm">
-                                <MenuItem Header="New Object Instance" Click="MenuItem_NewObjectInstance_Click"/>
-                                <MenuItem Header="Paste" Click="MenuItem_Paste_Click" InputGestureText="Ctrl+V"/>
+                                <MenuItem Header="New object instance" Click="MenuItem_NewObjectInstance_Click"/>
+                                <MenuItem Header="Paste object instance" Click="MenuItem_Paste_Click" InputGestureText="Ctrl+V"/>
                             </local:ContextMenuDark>
                         </TreeViewItem.Resources>
                         <TreeViewItem.Style>
@@ -236,8 +236,8 @@
                         </TreeViewItem.ItemTemplate>
                         <TreeViewItem.ContextMenu>
                             <local:ContextMenuDark>
-                                <MenuItem Header="New Tile" Click="MenuItem_NewGMS1Tile_Click"/>
-                                <MenuItem Header="Paste" Click="MenuItem_Paste_Click" InputGestureText="Ctrl+V"/>
+                                <MenuItem Header="New tile" Click="MenuItem_NewGMS1Tile_Click"/>
+                                <MenuItem Header="Paste tile" Click="MenuItem_Paste_Click" InputGestureText="Ctrl+V"/>
                             </local:ContextMenuDark>
                         </TreeViewItem.ContextMenu>
                     </TreeViewItem>
@@ -272,8 +272,8 @@
                                         <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">
                                             <TextBlock.ContextMenu>
                                                 <local:ContextMenuDark>
-                                                    <MenuItem Header="New Object Instance" Click="MenuItem_NewGMS2ObjectInstance_Click"/>
-                                                    <MenuItem Header="Paste" Click="MenuItem_Paste_Click" InputGestureText="Ctrl+V"/>
+                                                    <MenuItem Header="New object instance" Click="MenuItem_NewGMS2ObjectInstance_Click"/>
+                                                    <MenuItem Header="Paste object instance" Click="MenuItem_Paste_Click" InputGestureText="Ctrl+V"/>
                                                     <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
                                                 </local:ContextMenuDark>
                                             </TextBlock.ContextMenu>
@@ -309,9 +309,9 @@
                                         <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">
                                             <TextBlock.ContextMenu>
                                                 <local:ContextMenuDark>
-                                                    <MenuItem Header="New Legacy Tile" Click="MenuItem_NewLegacyTile_Click"/>
-                                                    <MenuItem Header="New Sprite Instance" Click="MenuItem_NewSprite_Click"/>
-                                                    <MenuItem Header="Paste" Click="MenuItem_Paste_Click" InputGestureText="Ctrl+V"/>
+                                                    <MenuItem Header="New legacy tile" Click="MenuItem_NewLegacyTile_Click"/>
+                                                    <MenuItem Header="New sprite instance" Click="MenuItem_NewSprite_Click"/>
+                                                    <MenuItem Header="Paste asset" Click="MenuItem_Paste_Click" InputGestureText="Ctrl+V"/>
                                                     <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
                                                 </local:ContextMenuDark>
                                             </TextBlock.ContextMenu>
