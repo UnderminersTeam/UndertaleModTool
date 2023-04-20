@@ -227,8 +227,8 @@ namespace UndertaleModTool
             { SystemColors.WindowTextBrushKey, new SolidColorBrush(whiteColor) },
             { SystemColors.ControlTextBrushKey, new SolidColorBrush(whiteColor) },
             { SystemColors.WindowBrushKey, new SolidColorBrush(darkColor) },
-            { SystemColors.ControlBrushKey, new SolidColorBrush(darkColor) },
-            { SystemColors.ControlLightLightBrushKey, new SolidColorBrush(darkLightColor) },
+            { SystemColors.ControlBrushKey, new SolidColorBrush(darkLightColor) },
+            { SystemColors.ControlLightBrushKey, new SolidColorBrush(Color.FromArgb(255, 60, 60, 60)) },
             { SystemColors.MenuTextBrushKey, new SolidColorBrush(whiteColor) },
             { SystemColors.MenuBrushKey, new SolidColorBrush(darkLightColor) },
             { SystemColors.GrayTextBrushKey, new SolidColorBrush(Color.FromArgb(255, 136, 136, 136)) },
@@ -468,6 +468,9 @@ namespace UndertaleModTool
             // Copy the known code corrections into the profile, if they don't already exist.
             ApplyCorrections();
             CrashCheck();
+
+            RunGMSDebuggerItem.Visibility = Settings.Instance.ShowDebuggerOption
+                                            ? Visibility.Visible : Visibility.Collapsed;
         }
 
         public Dictionary<string, NamedPipeServerStream> childFiles = new Dictionary<string, NamedPipeServerStream>();
@@ -561,8 +564,8 @@ namespace UndertaleModTool
                 resources[SystemColors.GrayTextBrushKey] = grayTextBrush;
                 resources[SystemColors.InactiveSelectionHighlightBrushKey] = inactiveSelectionBrush;
 
-                Windows.TextInput.BGColor = System.Drawing.SystemColors.Control;
-                Windows.TextInput.TextBoxBGColor = System.Drawing.SystemColors.Window;
+                Windows.TextInput.BGColor = System.Drawing.SystemColors.Window;
+                Windows.TextInput.TextBoxBGColor = System.Drawing.SystemColors.ControlLight;
                 Windows.TextInput.TextColor = System.Drawing.SystemColors.ControlText;
             }
 
@@ -2149,7 +2152,7 @@ namespace UndertaleModTool
 
                     var subDirName = subDirectory.Name;
                     // In addition to the _ comment from above, we also need to add at least one item, so that WPF uses this as a submenuitem
-                    MenuItem subItem = new MenuItem {Header = subDirName.Replace("_", "__"), Items = {new MenuItem {Header = "(loading...)", IsEnabled = false}}};
+                    MenuItemDark subItem = new() {Header = subDirName.Replace("_", "__"), Items = {new MenuItem {Header = "(loading...)", IsEnabled = false}}};
                     subItem.SubmenuOpened += (o, args) => MenuItem_RunScript_SubmenuOpened(o, args, subDirectory.FullName);
                     item.Items.Add(subItem);
                 }
@@ -2918,7 +2921,7 @@ namespace UndertaleModTool
 
             DateTime currDate = File.GetLastWriteTime(Path.Combine(ExePath, "UndertaleModTool.exe"));
             DateTime lastDate = (DateTime)action["updated_at"];
-            if (lastDate.Subtract(currDate).Minutes <= 10)
+            if (lastDate.Subtract(currDate).TotalMinutes <= 10)
                 if (this.ShowQuestion("UndertaleModTool is already up to date.\nUpdate anyway?") != MessageBoxResult.Yes)
                 {
                     window.UpdateButtonEnabled = true;
@@ -3230,6 +3233,11 @@ result in loss of work.");
         private async void Command_RunDebug(object sender, ExecutedRoutedEventArgs e)
         {
             if (Data == null)
+                return;
+
+            var result = this.ShowQuestion("Are you sure that you want to run the game with GMS debugger?\n" +
+                                           "If you want to enable a debug mode in some game, then you need to use one of the scripts.");
+            if (result != MessageBoxResult.Yes)
                 return;
 
             bool origDbg = Data.GeneralInfo.IsDebuggerDisabled;

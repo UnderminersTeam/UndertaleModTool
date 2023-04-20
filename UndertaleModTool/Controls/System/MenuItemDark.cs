@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace UndertaleModTool
 {
@@ -25,6 +26,15 @@ namespace UndertaleModTool
                 return;
 
             content.SetResourceReference(BackgroundProperty, SystemColors.MenuBrushKey);
+        }
+
+        /// <inheritdoc/>
+        public override void OnApplyTemplate()
+        {
+            var rightArrow = MainWindow.FindVisualChild<Path>(this, "RightArrow");
+            rightArrow?.SetResourceReference(Path.FillProperty, SystemColors.MenuTextBrushKey);
+
+            base.OnApplyTemplate();
         }
     }
 }

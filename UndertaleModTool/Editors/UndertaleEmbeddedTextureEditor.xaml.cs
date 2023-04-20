@@ -327,20 +327,4 @@ namespace UndertaleModTool
             throw new NotImplementedException();
         }
     }
-
-    public class GeneratedMipsWrapper : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value is not UndertaleData data)
-                return Visibility.Collapsed;
-
-            return data.IsVersionAtLeast(2, 0, 6) ? Visibility.Visible : Visibility.Collapsed;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
 }
