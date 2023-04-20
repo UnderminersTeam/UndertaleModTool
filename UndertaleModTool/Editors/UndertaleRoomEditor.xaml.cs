@@ -1058,14 +1058,14 @@ namespace UndertaleModTool
         private void TreeViewMoveUpButton_Click(object sender, RoutedEventArgs e)
         {
             UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
-            // If the button loses focus it cannot held
+            // If the button loses focus it cannot be held
             MoveItem(selectedObj, -1, false);
         }
 
         private void TreeViewMoveDownButton_Click(object sender, RoutedEventArgs e)
         {
             UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
-            // If the button loses focus it cannot held
+            // If the button loses focus it cannot be held
             MoveItem(selectedObj, 1, false);
         }
 
@@ -1423,11 +1423,11 @@ namespace UndertaleModTool
         }
 
         /// <summary>
-        /// Moves the given object up and down the list in the TreeView.
+        /// Moves the given object up and down the list in the <see cref="TreeView"/>.
         /// </summary>
-        /// <param name="obj">the object to move.</param>
-        /// <param name="dist">distance to move it. positive - down, negetive - up.</param>
-        /// <param name="focus">whether to focus on the element after moving it.</param>
+        /// <param name="obj">The object to move.</param>
+        /// <param name="dist">Distance to move it. Positive - down, negative - up.</param>
+        /// <param name="focus">Whether to focus on the element after moving it.</param>
         private void MoveItem(UndertaleObject obj, int dist, bool focus = true)
         {
             UndertaleRoom room = this.DataContext as UndertaleRoom;
@@ -1449,7 +1449,7 @@ namespace UndertaleModTool
             };
             if (list is null)
             {
-                Debug.WriteLine($"Can't change object position - list of selected object not found.");
+                Debug.WriteLine("Can't change the object position - list for the selected object is not found.");
                 return;
             }
 
