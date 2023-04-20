@@ -1449,7 +1449,7 @@ namespace UndertaleModTool
             };
             if (list is null)
             {
-                Debug.WriteLine("Can't change the object position - list for the selected object is not found.");
+                mainWindow.ShowError("Can't change the object position - a list for the selected object is not found.");
                 return;
             }
 
