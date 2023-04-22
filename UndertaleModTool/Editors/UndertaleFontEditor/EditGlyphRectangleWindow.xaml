@@ -26,7 +26,7 @@
         <ScrollViewer Name="TextureScroll" Grid.Row="1" Margin="3"
                       HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible"
                       PreviewMouseWheel="TextureScroll_MouseWheel" ScrollChanged="TextureScroll_ScrollChanged"
-                      PreviewKeyDown="TextureScroll_PreviewKeyDown">
+                      PreviewKeyDown="TextureScroll_PreviewKeyDown" PreviewKeyUp="TextureScroll_PreviewKeyUp">
             <ScrollViewer.Background>
                 <DynamicResource ResourceKey="{x:Static SystemColors.MenuBrushKey}"/>
             </ScrollViewer.Background>
@@ -162,6 +162,17 @@
                             </DataTemplate>
                         </ItemsControl.Resources>
                     </ItemsControl>
+
+                    <Rectangle Name="GlyphTopLine" VerticalAlignment="Top" HorizontalAlignment="Stretch"
+                               StrokeThickness="1" Height="1"
+                               Visibility="Collapsed" Focusable="False">
+                        <Rectangle.Stroke>
+                            <SolidColorBrush Color="Gold" Opacity="0.6"/>
+                        </Rectangle.Stroke>
+                        <Rectangle.RenderTransform>
+                            <TranslateTransform x:Name="transform3" Y="{Binding SelectedGlyph.SourceY}"/>
+                        </Rectangle.RenderTransform>
+                    </Rectangle>
                 </Grid>
             </Viewbox>
         </ScrollViewer>

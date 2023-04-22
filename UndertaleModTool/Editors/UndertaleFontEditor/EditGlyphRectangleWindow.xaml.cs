@@ -201,7 +201,11 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
                 initShift = SelectedGlyph.Shift;
             }
             else
+            {
                 initType = GetHitType(selectedRect, initPoint);
+                if (initType == HitType.T || initType == HitType.UL || initType == HitType.UR)
+                    GlyphTopLine.Visibility = Visibility.Visible;
+            }
 
             dragInProgress = true;
         }
@@ -214,7 +218,9 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
                 TextureViewbox.MouseMove += TextureViewbox_MouseMove;
                 TextureViewbox.Cursor = Cursors.Arrow;
                 ToolTipService.SetIsEnabled(selectedRect, true);
-            } 
+            }
+            else
+                GlyphTopLine.Visibility = Visibility.Collapsed;
 
             dragInProgress = false;
         }
@@ -359,6 +365,9 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
             if (SelectedGlyph is null)
                 return;
 
+            if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
+                GlyphTopLine.Visibility = Visibility.Visible;
+
             if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
             {
                 switch (e.Key)
@@ -417,6 +426,11 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
                     SelectedGlyph.SourceY++;
                     break;
             }
+        }
+        private void TextureScroll_PreviewKeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
+                GlyphTopLine.Visibility = Visibility.Collapsed;
         }
 
         private void HelpButton_Click(object sender, RoutedEventArgs e)
