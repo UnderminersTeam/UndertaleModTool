@@ -54,8 +54,9 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Disable debugger</TextBlock>
-                <CheckBox Grid.Row="0" Grid.Column="1" Margin="3" IsChecked="{Binding GeneralInfo.IsDebuggerDisabled}"/>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Foreground="DarkRed">Disable GMS debugger</TextBlock>
+                <CheckBox Grid.Row="0" Grid.Column="1" Margin="3" IsChecked="{Binding GeneralInfo.IsDebuggerDisabled}"
+                          PreviewMouseLeftButtonDown="DebuggerCheckBox_PreviewMouseLeftButtonDown"/>
 
                 <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Bytecode version</TextBlock>
                 <local:TextBoxDark Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.BytecodeVersion}"/>

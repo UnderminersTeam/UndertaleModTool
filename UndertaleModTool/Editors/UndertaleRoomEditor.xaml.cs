@@ -46,6 +46,7 @@ namespace UndertaleModTool
         public static readonly PropertyInfo visualOffProp = typeof(Canvas).GetProperty("VisualOffset", BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
         private static readonly Regex trailingNumberRegex = new(@"\d+$", RegexOptions.Compiled);
+        private readonly Type[] movableTypes = { typeof(Layer), typeof(GameObject), typeof(Tile), typeof(SpriteInstance) };
 
         // used for the flashing animation when a room object is selected
         public static Dictionary<UndertaleObject, FrameworkElement> ObjElemDict { get; } = new();
@@ -222,15 +223,36 @@ namespace UndertaleModTool
                 currStoryboard.Remove(this);
             }
 
+            bool isMovable = false;
+
             // I can't bind it directly because then clicking on the headers makes WPF explode because it tries to attach the header as child of ObjectEditor
             // TODO: find some better workaround
             if (e.NewValue == RoomRootItem)
             {
                 ObjectEditor.Content = DataContext;
+                MoveButtonsPanel.IsEnabled = false;
             }
             else if (e.NewValue is UndertaleObject obj)
             {
                 ObjectEditor.Content = obj;
+
+                if (obj is GameObject)
+                {
+                    var room = DataContext as UndertaleRoom;
+                    if (room?.Flags.HasFlag(RoomEntryFlags.IsGMS2) == true)
+                    {
+                        // Check if the selected game object is in the "Game objects (from all layers)" list
+                        var objectItem = GameObjItems.ItemContainerGenerator.ContainerFromItem(obj) as TreeViewItem;
+                        if (objectItem?.IsSelected != true)
+                            isMovable = true;
+                    }
+                    else
+                        isMovable = true;
+                }
+                else
+                    isMovable = movableTypes.Contains(obj.GetType());
+
+                MoveButtonsPanel.IsEnabled = isMovable;
 
                 try
                 {
@@ -1058,14 +1080,14 @@ namespace UndertaleModTool
         private void TreeViewMoveUpButton_Click(object sender, RoutedEventArgs e)
         {
             UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
-            // If the button loses focus it cannot held
+            // If the button loses focus it cannot be held
             MoveItem(selectedObj, -1, false);
         }
 
         private void TreeViewMoveDownButton_Click(object sender, RoutedEventArgs e)
         {
             UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
-            // If the button loses focus it cannot held
+            // If the button loses focus it cannot be held
             MoveItem(selectedObj, 1, false);
         }
 
@@ -1343,7 +1365,7 @@ namespace UndertaleModTool
         /// <summary>
         /// Deletes the given object from the room.
         /// </summary>
-        /// <param name="obj">the object to delete.</param>
+        /// <param name="obj">The object to delete.</param>
         private void DeleteItem(UndertaleObject obj)
         {
             UndertaleRoom room = this.DataContext as UndertaleRoom;
@@ -1423,14 +1445,41 @@ namespace UndertaleModTool
         }
 
         /// <summary>
-        /// Moves the given object up and down the list in the TreeView.
+        /// Moves the given object up and down the list in the <see cref="TreeView"/>.
         /// </summary>
-        /// <param name="obj">the object to move.</param>
-        /// <param name="dist">distance to move it. positive - down, negetive - up.</param>
-        /// <param name="focus">whether to focus on the element after moving it.</param>
+        /// <param name="obj">The object to move.</param>
+        /// <param name="dist">Distance to move it. Positive - down, negative - up.</param>
+        /// <param name="focus">Whether to focus on the element after moving it.</param>
         private void MoveItem(UndertaleObject obj, int dist, bool focus = true)
         {
-            UndertaleRoom room = this.DataContext as UndertaleRoom;
+            if (obj is Layer)
+            {
+                mainWindow.ShowError("Layers don't support this feature currently, change the layer depths instead.");
+                return;
+            }
+            if (obj is View)
+            {
+                mainWindow.ShowError("Views don't support this feature.");
+                return;
+            }
+
+            if (this.DataContext is not UndertaleRoom room)
+                return;
+
+            if (obj is GameObject)
+            {
+                if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
+                {
+                    // Check if the selected game object is in the "Game objects (from all layers)" list
+                    var objectItem = GameObjItems.ItemContainerGenerator.ContainerFromItem(obj) as TreeViewItem;
+                    if (objectItem?.IsSelected == true)
+                    {
+                        mainWindow.ShowError("You should select an object in an instances layer instead.");
+                        return;
+                    }
+                }
+            }
+
             Layer layer = null;
             if (room.Layers.Count > 0)
                 layer = obj switch
@@ -1449,7 +1498,7 @@ namespace UndertaleModTool
             };
             if (list is null)
             {
-                Debug.WriteLine($"Can't change object position - list of selected object not found.");
+                mainWindow.ShowError("Can't change the object position - no list for the selected object was found.");
                 return;
             }
 
@@ -1520,7 +1569,7 @@ namespace UndertaleModTool
         {
             AddGMS1Tile(this.DataContext as UndertaleRoom);
         }
-        private void MenuItem_Delete_Click(Object sender, RoutedEventArgs e)
+        private void MenuItem_Delete_Click(object sender, RoutedEventArgs e)
         {
             MenuItem menuitem = sender as MenuItem;
             DeleteItem(menuitem.DataContext as UndertaleObject);
@@ -2487,22 +2536,6 @@ namespace UndertaleModTool
                 return h - 22; // "TabController" has predefined height
             else
                 return 0;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class IsGMS2_2_2_302Converter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value is not UndertaleData data)
-                return Visibility.Collapsed;
-
-            return data.IsVersionAtLeast(2, 2, 2, 302) ? Visibility.Visible : Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

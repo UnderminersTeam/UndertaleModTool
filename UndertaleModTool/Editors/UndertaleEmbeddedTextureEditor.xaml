@@ -11,7 +11,7 @@
     <UserControl.Resources>
         <local:BooleanToVisibilityConverter x:Key="BoolFalseToVisConverter" local:trueValue="Collapsed" local:falseValue="Visible"/>
         <local:TextureLoadedWrapper x:Key="TextureLoadedWrapper"/>
-        <local:GeneratedMipsWrapper x:Key="GeneratedMipsWrapper"/>
+        <local:IsVersionAtLeastConverter x:Key="IsVersionAtLeastConverter"/>
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -29,10 +29,10 @@
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Scaled</TextBlock>
         <local:TextBoxDark Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding Scaled}"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3"
-                   Visibility="{Binding Data, Mode=OneTime, Converter={StaticResource GeneratedMipsWrapper}, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">Generated mips</TextBlock>
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="Generated mips"
+                   Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2.0.6}"/>
         <local:TextBoxDark Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GeneratedMips}"
-                 Visibility="{Binding Data, Mode=OneTime, Converter={StaticResource GeneratedMipsWrapper}, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}"/>
+                 Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2.0.6}"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Size</TextBlock>
         <Grid Grid.Row="2" Grid.Column="1">

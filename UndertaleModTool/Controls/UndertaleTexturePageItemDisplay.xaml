@@ -10,15 +10,15 @@
     <UserControl.Resources>
         <local:UndertaleCachedImageLoader x:Key="UndertaleCachedImageLoader"/>
     </UserControl.Resources>
-    <Canvas Width="{Binding BoundingWidth, Mode=OneWay}" Height="{Binding BoundingHeight, Mode=OneWay}" SnapsToDevicePixels="True">
+    <Canvas Width="{Binding BoundingWidth, Mode=OneWay}" Height="{Binding BoundingHeight, Mode=OneWay}"
+            SnapsToDevicePixels="True">
         <Border Canvas.Left="{Binding TargetX, Mode=OneWay}" Canvas.Top="{Binding TargetY, Mode=OneWay}"
                 Width="{Binding TargetWidth, Mode=OneWay}" Height="{Binding TargetHeight, Mode=OneWay}"
-                BorderBrush="DarkCyan" BorderThickness="1" Name="RenderAreaBorder" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
+                BorderBrush="DarkCyan" BorderThickness="1" Name="RenderAreaBorder" RenderOptions.BitmapScalingMode="NearestNeighbor">
             <Border.Background>
                 <ImageBrush
                     ImageSource="{Binding ., Mode=OneWay, Converter={StaticResource UndertaleCachedImageLoader}, ConverterParameter=nocache}"
-                    TileMode="None"
-                    Stretch="UniformToFill">
+                    TileMode="None" Stretch="None">
                 </ImageBrush>
             </Border.Background>
         </Border>

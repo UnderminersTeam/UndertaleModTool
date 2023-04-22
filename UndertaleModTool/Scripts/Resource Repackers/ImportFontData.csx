@@ -98,46 +98,63 @@ public void fontUpdate(UndertaleFont newFont)
         newFont.Glyphs.Clear();
         string line;
         int head = 0;
-        while((line = reader.ReadLine()) != null)
+        bool hadError = false;
+        while ((line = reader.ReadLine()) != null)
         {
             string[] s = line.Split(';');
 
-            if (head == 1)
-            {
-                newFont.RangeStart = UInt16.Parse(s[0]);
-                head++;
-            }
+            // Skip blank lines like ";;;;;;;"
+            if (s.All(x => x.Length == 0))
+                continue;
 
-            if (head == 0)
+            try
             {
-                String namae = s[0].Replace("\"", "");
-                newFont.DisplayName = Data.Strings.MakeString(namae);
-                newFont.EmSize = UInt16.Parse(s[1]);
-                newFont.Bold = Boolean.Parse(s[2]);
-                newFont.Italic = Boolean.Parse(s[3]);
-                newFont.Charset = Byte.Parse(s[4]);
-                newFont.AntiAliasing = Byte.Parse(s[5]);
-                newFont.ScaleX = UInt16.Parse(s[6]);
-                newFont.ScaleY = UInt16.Parse(s[7]);
-                head++;
-            }
-
-            if (head > 1)
-            {
-                newFont.Glyphs.Add(new UndertaleFont.Glyph()
+                if (head == 1)
                 {
-                    Character = UInt16.Parse(s[0]),
-                    SourceX = UInt16.Parse(s[1]),
-                    SourceY = UInt16.Parse(s[2]),
-                    SourceWidth = UInt16.Parse(s[3]),
-                    SourceHeight = UInt16.Parse(s[4]),
-                    Shift = Int16.Parse(s[5]),
-                    Offset = Int16.Parse(s[6]),
-                });
-                newFont.RangeEnd = UInt32.Parse(s[0]);
+                    newFont.RangeStart = UInt16.Parse(s[0]);
+                    head++;
+                }
+
+                if (head == 0)
+                {
+                    String namae = s[0].Replace("\"", "");
+                    newFont.DisplayName = Data.Strings.MakeString(namae);
+                    newFont.EmSize = UInt16.Parse(s[1]);
+                    newFont.Bold = Boolean.Parse(s[2]);
+                    newFont.Italic = Boolean.Parse(s[3]);
+                    newFont.Charset = Byte.Parse(s[4]);
+                    newFont.AntiAliasing = Byte.Parse(s[5]);
+                    newFont.ScaleX = UInt16.Parse(s[6]);
+                    newFont.ScaleY = UInt16.Parse(s[7]);
+                    head++;
+                }
+
+                if (head > 1)
+                {
+                    newFont.Glyphs.Add(new UndertaleFont.Glyph()
+                    {
+                        Character = UInt16.Parse(s[0]),
+                        SourceX = UInt16.Parse(s[1]),
+                        SourceY = UInt16.Parse(s[2]),
+                        SourceWidth = UInt16.Parse(s[3]),
+                        SourceHeight = UInt16.Parse(s[4]),
+                        Shift = Int16.Parse(s[5]),
+                        Offset = Int16.Parse(s[6]),
+                    });
+                    newFont.RangeEnd = UInt32.Parse(s[0]);
+                }
+            }
+            catch
+            {
+                hadError = true;
             }
         }
 
+        if (hadError)
+        {
+            ScriptError($"File \"glyphs_{newFont.Name.Content}.csv\" contained some invalid data.", "Format error", false);
+            hadError = false;
+        }
     }
 }
 
@@ -348,33 +365,33 @@ public class Packer
         {
             switch (FitHeuristic)
             {
-            // Max of Width and Height ratios
-            case BestFitHeuristic.MaxOneAxis:
-                if (ti.Width <= _Node.Bounds.Width && ti.Height <= _Node.Bounds.Height)
-                {
-                    float wRatio = (float)ti.Width / (float)_Node.Bounds.Width;
-                    float hRatio = (float)ti.Height / (float)_Node.Bounds.Height;
-                    float ratio = wRatio > hRatio ? wRatio : hRatio;
-                    if (ratio > maxCriteria)
+                // Max of Width and Height ratios
+                case BestFitHeuristic.MaxOneAxis:
+                    if (ti.Width <= _Node.Bounds.Width && ti.Height <= _Node.Bounds.Height)
                     {
-                        maxCriteria = ratio;
-                        bestFit = ti;
+                        float wRatio = (float)ti.Width / (float)_Node.Bounds.Width;
+                        float hRatio = (float)ti.Height / (float)_Node.Bounds.Height;
+                        float ratio = wRatio > hRatio ? wRatio : hRatio;
+                        if (ratio > maxCriteria)
+                        {
+                            maxCriteria = ratio;
+                            bestFit = ti;
+                        }
                     }
-                }
-                break;
-            // Maximize Area coverage
-            case BestFitHeuristic.Area:
-                if (ti.Width <= _Node.Bounds.Width && ti.Height <= _Node.Bounds.Height)
-                {
-                    float textureArea = ti.Width * ti.Height;
-                    float coverage = textureArea / nodeArea;
-                    if (coverage > maxCriteria)
+                    break;
+                // Maximize Area coverage
+                case BestFitHeuristic.Area:
+                    if (ti.Width <= _Node.Bounds.Width && ti.Height <= _Node.Bounds.Height)
                     {
-                        maxCriteria = coverage;
-                        bestFit = ti;
+                        float textureArea = ti.Width * ti.Height;
+                        float coverage = textureArea / nodeArea;
+                        if (coverage > maxCriteria)
+                        {
+                            maxCriteria = coverage;
+                            bestFit = ti;
+                        }
                     }
-                }
-                break;
+                    break;
             }
         }
         return bestFit;

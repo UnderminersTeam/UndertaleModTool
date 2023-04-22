@@ -28,7 +28,7 @@
         <local:TileLayerTemplateSelector x:Key="TileLayerTemplateSelector"/>
         <local:TileRectanglesConverter x:Key="TileRectanglesConverter"/>
         <local:CachedImageLoaderWithIndex x:Key="CachedImageLoaderWithIndex"/>
-        <local:IsGMS2_2_2_302Converter x:Key="IsGMS2_2_2_302Converter"/>
+        <local:IsVersionAtLeastConverter x:Key="IsVersionAtLeastConverter"/>
         <local:NegateNumberConverter x:Key="NegateNumberConverter"/>
         <local:ParentGridHeightConverter x:Key="ParentGridHeightConverter"/>
         <CompositeCollection x:Key="AllObjectsGMS1">
@@ -196,8 +196,8 @@
                     <TreeViewItem Name="GameObjItems" Header="Game objects" ItemsSource="{Binding GameObjects, Mode=OneWay}">
                         <TreeViewItem.Resources>
                             <local:ContextMenuDark x:Key="cm">
-                                <MenuItem Header="New Object Instance" Click="MenuItem_NewObjectInstance_Click"/>
-                                <MenuItem Header="Paste" Click="MenuItem_Paste_Click" InputGestureText="Ctrl+V"/>
+                                <MenuItem Header="New object instance" Click="MenuItem_NewObjectInstance_Click"/>
+                                <MenuItem Header="Paste object instance" Click="MenuItem_Paste_Click" InputGestureText="Ctrl+V"/>
                             </local:ContextMenuDark>
                         </TreeViewItem.Resources>
                         <TreeViewItem.Style>
@@ -236,8 +236,8 @@
                         </TreeViewItem.ItemTemplate>
                         <TreeViewItem.ContextMenu>
                             <local:ContextMenuDark>
-                                <MenuItem Header="New Tile" Click="MenuItem_NewGMS1Tile_Click"/>
-                                <MenuItem Header="Paste" Click="MenuItem_Paste_Click" InputGestureText="Ctrl+V"/>
+                                <MenuItem Header="New tile" Click="MenuItem_NewGMS1Tile_Click"/>
+                                <MenuItem Header="Paste tile" Click="MenuItem_Paste_Click" InputGestureText="Ctrl+V"/>
                             </local:ContextMenuDark>
                         </TreeViewItem.ContextMenu>
                     </TreeViewItem>
@@ -272,8 +272,8 @@
                                         <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">
                                             <TextBlock.ContextMenu>
                                                 <local:ContextMenuDark>
-                                                    <MenuItem Header="New Object Instance" Click="MenuItem_NewGMS2ObjectInstance_Click"/>
-                                                    <MenuItem Header="Paste" Click="MenuItem_Paste_Click" InputGestureText="Ctrl+V"/>
+                                                    <MenuItem Header="New object instance" Click="MenuItem_NewGMS2ObjectInstance_Click"/>
+                                                    <MenuItem Header="Paste object instance" Click="MenuItem_Paste_Click" InputGestureText="Ctrl+V"/>
                                                     <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
                                                 </local:ContextMenuDark>
                                             </TextBlock.ContextMenu>
@@ -309,9 +309,9 @@
                                         <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">
                                             <TextBlock.ContextMenu>
                                                 <local:ContextMenuDark>
-                                                    <MenuItem Header="New Legacy Tile" Click="MenuItem_NewLegacyTile_Click"/>
-                                                    <MenuItem Header="New Sprite Instance" Click="MenuItem_NewSprite_Click"/>
-                                                    <MenuItem Header="Paste" Click="MenuItem_Paste_Click" InputGestureText="Ctrl+V"/>
+                                                    <MenuItem Header="New legacy tile" Click="MenuItem_NewLegacyTile_Click"/>
+                                                    <MenuItem Header="New sprite instance" Click="MenuItem_NewSprite_Click"/>
+                                                    <MenuItem Header="Paste asset" Click="MenuItem_Paste_Click" InputGestureText="Ctrl+V"/>
                                                     <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
                                                 </local:ContextMenuDark>
                                             </TextBlock.ContextMenu>
@@ -346,15 +346,18 @@
                 </TreeViewItem>
             </TreeView>
 
-            <StackPanel Grid.Column="1">
-                <local:RepeatButtonDark FontFamily="Marlett" FontSize="14" Content="5" Margin="0,0,0,2"
-                                        ToolTip="Move item up (-)" ToolTipService.InitialShowDelay="250"
-                                  Click="TreeViewMoveUpButton_Click" PreviewMouseLeftButtonUp="TreeViewMoveButton_MouseLeftButtonUp"/>
-                <local:RepeatButtonDark FontFamily="Marlett" FontSize="14" Content="6"
-                                        ToolTip="Move item down (+)" ToolTipService.InitialShowDelay="250"
-                                  Click="TreeViewMoveDownButton_Click" PreviewMouseLeftButtonUp="TreeViewMoveButton_MouseLeftButtonUp"/>
-            </StackPanel>
-            
+            <Border Grid.Column="1" BorderBrush="#828790" BorderThickness="0,1,1,1"
+                    Height="Auto" VerticalAlignment="Top" Margin="-3,0,0,0">
+                <StackPanel Name="MoveButtonsPanel" Margin="1,1,1,1">
+                    <local:RepeatButtonDark FontFamily="Marlett" FontSize="14" Content="5" Margin="0,0,0,2"
+                                            ToolTip="Move item up (-)" ToolTipService.InitialShowDelay="250"
+                                            Click="TreeViewMoveUpButton_Click" PreviewMouseLeftButtonUp="TreeViewMoveButton_MouseLeftButtonUp"/>
+                    <local:RepeatButtonDark FontFamily="Marlett" FontSize="14" Content="6"
+                                            ToolTip="Move item down (+)" ToolTipService.InitialShowDelay="250"
+                                            Click="TreeViewMoveDownButton_Click" PreviewMouseLeftButtonUp="TreeViewMoveButton_MouseLeftButtonUp"/>
+                </StackPanel>
+            </Border>
+
             <ScrollViewer Grid.Column="2" Margin="3,0,0,0" Name="ObjectEditor" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible">
                 <ContentControl.Resources>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom}">
@@ -668,7 +671,7 @@
                             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Rotation</TextBlock>
                             <local:TextBoxDark Grid.Row="6" Grid.Column="2" Margin="3" Text="{Binding Rotation}"/>
 
-                            <Grid Grid.Row="7" Grid.ColumnSpan="3" Visibility="{Binding Data, Mode=OneTime, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}, Converter={StaticResource IsGMS2_2_2_302Converter}}">
+                            <Grid Grid.Row="7" Grid.ColumnSpan="3" Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter},ConverterParameter=2.2.2.302}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" SharedSizeGroup="FirstColumn"/>
                                     <ColumnDefinition Width="5"/>
