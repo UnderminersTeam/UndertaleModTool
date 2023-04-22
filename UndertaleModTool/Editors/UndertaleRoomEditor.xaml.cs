@@ -223,7 +223,7 @@ namespace UndertaleModTool
                 currStoryboard.Remove(this);
             }
 
-            bool isMovable = movableTypes.Contains(obj.GetType());
+            bool isMovable = false;
 
             // I can't bind it directly because then clicking on the headers makes WPF explode because it tries to attach the header as child of ObjectEditor
             // TODO: find some better workaround
@@ -244,16 +244,18 @@ namespace UndertaleModTool
                 if (obj is GameObject)
                 {
                     var room = DataContext as UndertaleRoom;
-                    if (room?.Flags.HasFlag(RoomEntryFlags.IsGMS2))
+                    if (room?.Flags.HasFlag(RoomEntryFlags.IsGMS2) == true)
                     {
                         // Check if the selected game object is in the "Game objects (from all layers)" list
                         var objectItem = GameObjItems.ItemContainerGenerator.ContainerFromItem(obj) as TreeViewItem;
-                        if (objectItem?.IsSelected == true)
-                            isMovable = false;
+                        if (objectItem?.IsSelected != true)
+                            isMovable = true;
                     }
+                    else
+                        isMovable = true;
                 }
-                
-                MoveButtonsPanel.IsEnabled = isMovable;
+                else
+                    isMovable = movableTypes.Contains(obj.GetType());
 
                 try
                 {
@@ -297,6 +299,8 @@ namespace UndertaleModTool
                         layerItem.IsSelected = true;
                 }
             }
+            
+            MoveButtonsPanel.IsEnabled = isMovable;
         }
 
         private UndertaleObject movingObj;
