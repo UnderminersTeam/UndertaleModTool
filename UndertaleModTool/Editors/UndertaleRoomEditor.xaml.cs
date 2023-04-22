@@ -1364,7 +1364,7 @@ namespace UndertaleModTool
         /// <summary>
         /// Deletes the given object from the room.
         /// </summary>
-        /// <param name="obj">the object to delete.</param>
+        /// <param name="obj">The object to delete.</param>
         private void DeleteItem(UndertaleObject obj)
         {
             UndertaleRoom room = this.DataContext as UndertaleRoom;
