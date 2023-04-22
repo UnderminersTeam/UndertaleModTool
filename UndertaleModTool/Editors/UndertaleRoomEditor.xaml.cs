@@ -230,16 +230,11 @@ namespace UndertaleModTool
             if (e.NewValue == RoomRootItem)
             {
                 ObjectEditor.Content = DataContext;
+                MoveButtonsPanel.IsEnabled = false;
             }
             else if (e.NewValue is UndertaleObject obj)
             {
                 ObjectEditor.Content = obj;
-
-                if (obj is View)
-                {
-                    MoveButtonsPanel.IsEnabled = false;
-                    return;
-                }
 
                 if (obj is GameObject)
                 {
@@ -257,8 +252,13 @@ namespace UndertaleModTool
                 else
                     isMovable = movableTypes.Contains(obj.GetType());
 
+                MoveButtonsPanel.IsEnabled = isMovable;
+
                 try
                 {
+                    if (obj is View)
+                        return;
+
                     DependencyObject obj1 = null;
 
                     if (obj is Layer layer)
@@ -299,8 +299,6 @@ namespace UndertaleModTool
                         layerItem.IsSelected = true;
                 }
             }
-            
-            MoveButtonsPanel.IsEnabled = isMovable;
         }
 
         private UndertaleObject movingObj;
@@ -1500,7 +1498,7 @@ namespace UndertaleModTool
             };
             if (list is null)
             {
-                mainWindow.ShowError("Can't change the object position - a list for the selected object is not found.");
+                mainWindow.ShowError("Can't change the object position - no list for the selected object was found.");
                 return;
             }
 
