@@ -1462,6 +1462,11 @@ namespace UndertaleModTool
                 mainWindow.ShowError("Views don't support this feature.");
                 return;
             }
+            if (obj is Background)
+            {
+                mainWindow.ShowError("Backgrounds don't support this feature.");
+                return;
+            }
 
             if (this.DataContext is not UndertaleRoom room)
                 return;
