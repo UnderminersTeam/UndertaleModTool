@@ -235,6 +235,12 @@ namespace UndertaleModTool
             {
                 ObjectEditor.Content = obj;
 
+                if (obj is View)
+                {
+                    MoveButtonsPanel.IsEnabled = false;
+                    return;
+                }
+
                 if (obj is GameObject)
                 {
                     var room = DataContext as UndertaleRoom;
@@ -253,9 +259,6 @@ namespace UndertaleModTool
 
                 try
                 {
-                    if (obj is View)
-                        return;
-
                     DependencyObject obj1 = null;
 
                     if (obj is Layer layer)
@@ -1454,6 +1457,11 @@ namespace UndertaleModTool
             if (obj is Layer)
             {
                 mainWindow.ShowError("Layers don't support this feature currently, change the layer depths instead.");
+                return;
+            }
+            if (obj is View)
+            {
+                mainWindow.ShowError("Views don't support this feature.");
                 return;
             }
 
