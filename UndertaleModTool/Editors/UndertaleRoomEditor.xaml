@@ -74,6 +74,7 @@
         <Grid Grid.Column="0" Grid.Row="0" Margin="0,0,0,8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
@@ -90,7 +91,8 @@
                             </TextBlock.Text>
                             <TextBlock.ContextMenu>
                                 <local:ContextMenuDark>
-                                    <MenuItem Header="Delete object" Click="MenuItem_Delete_Click"/>
+                                    <MenuItem Header="Copy object" Click="MenuItem_Copy_Click" InputGestureText="Ctrl+C"/>
+                                    <MenuItem Header="Delete object" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
                                 </local:ContextMenuDark>
                             </TextBlock.ContextMenu>
                         </TextBlock>
@@ -105,7 +107,8 @@
                             </TextBlock.Text>
                             <TextBlock.ContextMenu>
                                 <local:ContextMenuDark>
-                                    <MenuItem Header="Delete tile" Click="MenuItem_Delete_Click"/>
+                                    <MenuItem Header="Copy tile" Click="MenuItem_Copy_Click" InputGestureText="Ctrl+C"/>
+                                    <MenuItem Header="Delete tile" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
                                 </local:ContextMenuDark>
                             </TextBlock.ContextMenu>
                         </TextBlock>
@@ -120,7 +123,8 @@
                             </TextBlock.Text>
                             <TextBlock.ContextMenu>
                                 <local:ContextMenuDark>
-                                    <MenuItem Header="Delete sprite instance" Click="MenuItem_Delete_Click"/>
+                                    <MenuItem Header="Copy sprite instance" Click="MenuItem_Copy_Click" InputGestureText="Ctrl+C"/>
+                                    <MenuItem Header="Delete sprite instance" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
                                 </local:ContextMenuDark>
                             </TextBlock.ContextMenu>
                         </TextBlock>
@@ -130,7 +134,7 @@
                                    Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}">
                             <TextBlock.ContextMenu>
                                 <local:ContextMenuDark>
-                                    <MenuItem Header="Delete particle system instance" Click="MenuItem_Delete_Click"/>
+                                    <MenuItem Header="Delete particle system instance" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
                                 </local:ContextMenuDark>
                             </TextBlock.ContextMenu>
                         </TextBlock>
@@ -141,7 +145,7 @@
                     <TreeViewItem Name="BGItems" Header="Backgrounds" ItemsSource="{Binding Backgrounds, Mode=OneWay}" Visibility="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}" IsExpanded="True">
                         <TreeViewItem.Resources>
                             <local:ContextMenuDark x:Key="bgContextMenu">
-                                <MenuItem Header="Delete background" Click="MenuItem_Delete_Click"/>
+                                <MenuItem Header="Delete background" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
                             </local:ContextMenuDark>
                         </TreeViewItem.Resources>
                         <TreeViewItem.ItemTemplate>
@@ -166,7 +170,7 @@
                     <TreeViewItem Name="ViewItems" Header="Views" ItemsSource="{Binding Views, Mode=OneWay}" IsExpanded="True">
                         <TreeViewItem.Resources>
                             <local:ContextMenuDark x:Key="viewContextMenu">
-                                <MenuItem Header="Delete view" Click="MenuItem_Delete_Click"/>
+                                <MenuItem Header="Disable view" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
                             </local:ContextMenuDark>
                         </TreeViewItem.Resources>
                         <TreeViewItem.ItemTemplate>
@@ -192,7 +196,8 @@
                     <TreeViewItem Name="GameObjItems" Header="Game objects" ItemsSource="{Binding GameObjects, Mode=OneWay}">
                         <TreeViewItem.Resources>
                             <local:ContextMenuDark x:Key="cm">
-                                <MenuItem Header="New Object Instance" Click="MenuItem_NewObjectInstance_Click"/>
+                                <MenuItem Header="New object instance" Click="MenuItem_NewObjectInstance_Click"/>
+                                <MenuItem Header="Paste object instance" Click="MenuItem_Paste_Click" InputGestureText="Ctrl+V"/>
                             </local:ContextMenuDark>
                         </TreeViewItem.Resources>
                         <TreeViewItem.Style>
@@ -222,7 +227,8 @@
                                     </TextBlock.Text>
                                     <TextBlock.ContextMenu>
                                         <local:ContextMenuDark>
-                                            <MenuItem Header="Delete tile" Click="MenuItem_Delete_Click"/>
+                                            <MenuItem Header="Delete tile" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
+                                            <MenuItem Header="Copy tile" Click="MenuItem_Copy_Click" InputGestureText="Ctrl+V"/>
                                         </local:ContextMenuDark>
                                     </TextBlock.ContextMenu>
                                 </TextBlock>
@@ -230,7 +236,8 @@
                         </TreeViewItem.ItemTemplate>
                         <TreeViewItem.ContextMenu>
                             <local:ContextMenuDark>
-                                <MenuItem Header="New Tile" Click="MenuItem_NewGMS1Tile_Click"/>
+                                <MenuItem Header="New tile" Click="MenuItem_NewGMS1Tile_Click"/>
+                                <MenuItem Header="Paste tile" Click="MenuItem_Paste_Click" InputGestureText="Ctrl+V"/>
                             </local:ContextMenuDark>
                         </TreeViewItem.ContextMenu>
                     </TreeViewItem>
@@ -265,8 +272,9 @@
                                         <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">
                                             <TextBlock.ContextMenu>
                                                 <local:ContextMenuDark>
-                                                    <MenuItem Header="New Object Instance" Click="MenuItem_NewGMS2ObjectInstance_Click"/>
-                                                    <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click"/>
+                                                    <MenuItem Header="New object instance" Click="MenuItem_NewGMS2ObjectInstance_Click"/>
+                                                    <MenuItem Header="Paste object instance" Click="MenuItem_Paste_Click" InputGestureText="Ctrl+V"/>
+                                                    <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
                                                 </local:ContextMenuDark>
                                             </TextBlock.ContextMenu>
                                         </TextBlock>
@@ -277,7 +285,7 @@
                                         <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">
                                             <TextBlock.ContextMenu>
                                                 <local:ContextMenuDark>
-                                                    <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click"/>
+                                                    <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
                                                 </local:ContextMenuDark>
                                             </TextBlock.ContextMenu>
                                         </TextBlock>
@@ -301,9 +309,10 @@
                                         <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">
                                             <TextBlock.ContextMenu>
                                                 <local:ContextMenuDark>
-                                                    <MenuItem Header="New Legacy Tile" Click="MenuItem_NewLegacyTile_Click"/>
-                                                    <MenuItem Header="New Sprite Instance" Click="MenuItem_NewSprite_Click"/>
-                                                    <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click"/>
+                                                    <MenuItem Header="New legacy tile" Click="MenuItem_NewLegacyTile_Click"/>
+                                                    <MenuItem Header="New sprite instance" Click="MenuItem_NewSprite_Click"/>
+                                                    <MenuItem Header="Paste asset" Click="MenuItem_Paste_Click" InputGestureText="Ctrl+V"/>
+                                                    <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
                                                 </local:ContextMenuDark>
                                             </TextBlock.ContextMenu>
                                         </TextBlock>
@@ -314,7 +323,7 @@
                                         <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">
                                             <TextBlock.ContextMenu>
                                                 <local:ContextMenuDark>
-                                                    <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click"/>
+                                                    <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
                                                 </local:ContextMenuDark>
                                             </TextBlock.ContextMenu>
                                         </TextBlock>
@@ -325,7 +334,7 @@
                                         <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">
                                             <TextBlock.ContextMenu>
                                                 <local:ContextMenuDark>
-                                                    <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click"/>
+                                                    <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
                                                 </local:ContextMenuDark>
                                             </TextBlock.ContextMenu>
                                         </TextBlock>
@@ -337,7 +346,19 @@
                 </TreeViewItem>
             </TreeView>
 
-            <ScrollViewer Grid.Column="1" Margin="3,0,0,0" Name="ObjectEditor" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible">
+            <Border Grid.Column="1" BorderBrush="#828790" BorderThickness="0,1,1,1"
+                    Height="Auto" VerticalAlignment="Top" Margin="-3,0,0,0">
+                <StackPanel Name="MoveButtonsPanel" Margin="1,1,1,1">
+                    <local:RepeatButtonDark FontFamily="Marlett" FontSize="14" Content="5" Margin="0,0,0,2"
+                                            ToolTip="Move item up (-)" ToolTipService.InitialShowDelay="250"
+                                            Click="TreeViewMoveUpButton_Click" PreviewMouseLeftButtonUp="TreeViewMoveButton_MouseLeftButtonUp"/>
+                    <local:RepeatButtonDark FontFamily="Marlett" FontSize="14" Content="6"
+                                            ToolTip="Move item down (+)" ToolTipService.InitialShowDelay="250"
+                                            Click="TreeViewMoveDownButton_Click" PreviewMouseLeftButtonUp="TreeViewMoveButton_MouseLeftButtonUp"/>
+                </StackPanel>
+            </Border>
+
+            <ScrollViewer Grid.Column="2" Margin="3,0,0,0" Name="ObjectEditor" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible">
                 <ContentControl.Resources>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom}">
                         <Grid IsSharedSizeScope="True">

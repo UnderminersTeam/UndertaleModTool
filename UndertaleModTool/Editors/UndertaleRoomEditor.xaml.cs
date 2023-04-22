@@ -46,6 +46,7 @@ namespace UndertaleModTool
         public static readonly PropertyInfo visualOffProp = typeof(Canvas).GetProperty("VisualOffset", BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
         private static readonly Regex trailingNumberRegex = new(@"\d+$", RegexOptions.Compiled);
+        private readonly Type[] movableTypes = { typeof(Layer), typeof(GameObject), typeof(Tile), typeof(SpriteInstance) };
 
         // used for the flashing animation when a room object is selected
         public static Dictionary<UndertaleObject, FrameworkElement> ObjElemDict { get; } = new();
@@ -222,15 +223,36 @@ namespace UndertaleModTool
                 currStoryboard.Remove(this);
             }
 
+            bool isMovable = false;
+
             // I can't bind it directly because then clicking on the headers makes WPF explode because it tries to attach the header as child of ObjectEditor
             // TODO: find some better workaround
             if (e.NewValue == RoomRootItem)
             {
                 ObjectEditor.Content = DataContext;
+                MoveButtonsPanel.IsEnabled = false;
             }
             else if (e.NewValue is UndertaleObject obj)
             {
                 ObjectEditor.Content = obj;
+
+                if (obj is GameObject)
+                {
+                    var room = DataContext as UndertaleRoom;
+                    if (room?.Flags.HasFlag(RoomEntryFlags.IsGMS2) == true)
+                    {
+                        // Check if the selected game object is in the "Game objects (from all layers)" list
+                        var objectItem = GameObjItems.ItemContainerGenerator.ContainerFromItem(obj) as TreeViewItem;
+                        if (objectItem?.IsSelected != true)
+                            isMovable = true;
+                    }
+                    else
+                        isMovable = true;
+                }
+                else
+                    isMovable = movableTypes.Contains(obj.GetType());
+
+                MoveButtonsPanel.IsEnabled = isMovable;
 
                 try
                 {
@@ -756,7 +778,13 @@ namespace UndertaleModTool
         }
 
         private UndertaleObject selectedObject;
-        private void SelectObject(UndertaleObject obj)
+
+        /// <summary>
+        /// Selects the given object inside the TreeView.
+        /// </summary>
+        /// <param name="obj">the object to select.</param>
+        /// <param name="focus">whether to focus on the object after selcting it.</param>
+        private void SelectObject(UndertaleObject obj, bool focus = true)
         {
             // TODO: enable virtualizing of RoomObjectsTree and make this method work with it
 
@@ -860,7 +888,8 @@ namespace UndertaleModTool
                 if (resListView.ItemContainerGenerator.ContainerFromItem(obj1) is TreeViewItem resItem)
                 {
                     resItem.IsSelected = true;
-                    resItem.Focus();
+                    if (focus)
+                        resItem.Focus();
 
                     mainTreeViewer.UpdateLayout();
                     mainTreeViewer.ScrollToHorizontalOffset(0);
@@ -996,64 +1025,14 @@ namespace UndertaleModTool
 
         private void RoomObjectsTree_KeyDown(object sender, KeyEventArgs e)
         {
+            UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
+
             if (e.Key == Key.Delete)
-            {
-                UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
                 DeleteItem(selectedObj);
-            }
-
-            int dir = 0;
-            if (e.Key == Key.OemMinus)
-                dir = -1;
+            else if (e.Key == Key.OemMinus)
+                MoveItem(selectedObj, -1);
             else if (e.Key == Key.OemPlus)
-                dir = 1;
-
-            if (dir != 0)
-            {
-                UndertaleRoom room = this.DataContext as UndertaleRoom;
-                UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
-                Layer layer = null;
-                if (room.Layers.Count > 0)
-                    layer = selectedObj switch
-                    {
-                        Tile or GameObject => roomObjDict[(selectedObj as IRoomObject).InstanceID],
-                        SpriteInstance spr => sprInstDict[spr],
-                        _ => null
-                    };
-
-                IList list = selectedObj switch
-                {
-                    Tile => layer is null ? room.Tiles : layer.AssetsData.LegacyTiles,
-                    GameObject => layer is null ? room.GameObjects : layer.InstancesData.Instances,
-                    SpriteInstance => layer.AssetsData.Sprites,
-                    _ => null
-                };
-                if (list is null)
-                {
-                    Debug.WriteLine($"Can't change object position - list of selected object not found.");
-                    return;
-                }
-
-                int index = list.IndexOf(selectedObj);
-                if ((dir == -1 && index > 0) || (dir == 1 && index < list.Count - 1))
-                {
-                    int prevIndex = index + dir;
-                    var prevIndexObj = list[prevIndex];
-                    list[prevIndex] = selectedObj;
-                    list[index] = prevIndexObj;
-
-                    if (layer is not null)
-                    {
-                        // swap back objects in "ObjectDict"
-                        var rect = ObjElemDict[selectedObj];
-                        var rectPrev = ObjElemDict[prevIndexObj as UndertaleObject];
-                        ObjElemDict[selectedObj] = rectPrev;
-                        ObjElemDict[prevIndexObj as UndertaleObject] = rect;
-                    }
-                }
-
-                SelectObject(selectedObj);
-            }
+                MoveItem(selectedObj, 1);
         }
 
         private void RoomObjectsTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -1096,6 +1075,26 @@ namespace UndertaleModTool
                         mainWindow.ChangeSelection(sprInst.Sprite, true);
                 });
             });
+        }
+
+        private void TreeViewMoveUpButton_Click(object sender, RoutedEventArgs e)
+        {
+            UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
+            // If the button loses focus it cannot be held
+            MoveItem(selectedObj, -1, false);
+        }
+
+        private void TreeViewMoveDownButton_Click(object sender, RoutedEventArgs e)
+        {
+            UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
+            // If the button loses focus it cannot be held
+            MoveItem(selectedObj, 1, false);
+        }
+
+        private void TreeViewMoveButton_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
+            SelectObject(selectedObj);
         }
 
         private UndertaleObject copied;
@@ -1363,6 +1362,10 @@ namespace UndertaleModTool
             SelectObject(tile);
         }
 
+        /// <summary>
+        /// Deletes the given object from the room.
+        /// </summary>
+        /// <param name="obj">The object to delete.</param>
         private void DeleteItem(UndertaleObject obj)
         {
             UndertaleRoom room = this.DataContext as UndertaleRoom;
@@ -1441,6 +1444,90 @@ namespace UndertaleModTool
                 ObjectEditor.Content = null;
         }
 
+        /// <summary>
+        /// Moves the given object up and down the list in the <see cref="TreeView"/>.
+        /// </summary>
+        /// <param name="obj">The object to move.</param>
+        /// <param name="dist">Distance to move it. Positive - down, negative - up.</param>
+        /// <param name="focus">Whether to focus on the element after moving it.</param>
+        private void MoveItem(UndertaleObject obj, int dist, bool focus = true)
+        {
+            if (obj is Layer)
+            {
+                mainWindow.ShowError("Layers don't support this feature currently, change the layer depths instead.");
+                return;
+            }
+            if (obj is View)
+            {
+                mainWindow.ShowError("Views don't support this feature.");
+                return;
+            }
+            if (obj is Background)
+            {
+                mainWindow.ShowError("Backgrounds don't support this feature.");
+                return;
+            }
+
+            if (this.DataContext is not UndertaleRoom room)
+                return;
+
+            if (obj is GameObject)
+            {
+                if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
+                {
+                    // Check if the selected game object is in the "Game objects (from all layers)" list
+                    var objectItem = GameObjItems.ItemContainerGenerator.ContainerFromItem(obj) as TreeViewItem;
+                    if (objectItem?.IsSelected == true)
+                    {
+                        mainWindow.ShowError("You should select an object in an instances layer instead.");
+                        return;
+                    }
+                }
+            }
+
+            Layer layer = null;
+            if (room.Layers.Count > 0)
+                layer = obj switch
+                {
+                    Tile or GameObject => roomObjDict[(obj as IRoomObject).InstanceID],
+                    SpriteInstance spr => sprInstDict[spr],
+                    _ => null
+                };
+
+            IList list = obj switch
+            {
+                Tile => layer is null ? room.Tiles : layer.AssetsData.LegacyTiles,
+                GameObject => layer is null ? room.GameObjects : layer.InstancesData.Instances,
+                SpriteInstance => layer.AssetsData.Sprites,
+                _ => null
+            };
+            if (list is null)
+            {
+                mainWindow.ShowError("Can't change the object position - no list for the selected object was found.");
+                return;
+            }
+
+            int index = list.IndexOf(obj);
+            int newIndex = Math.Clamp(index + dist, 0, list.Count - 1);
+            if (newIndex != index)
+            {
+                var prevObj = list[newIndex];
+                list[newIndex] = obj;
+                list[index] = prevObj;
+
+                if (layer is not null)
+                {
+                    // swap back objects in "ObjectDict"
+                    var rect = ObjElemDict[obj];
+                    var rectPrev = ObjElemDict[prevObj as UndertaleObject];
+                    ObjElemDict[obj] = rectPrev;
+                    ObjElemDict[prevObj as UndertaleObject] = rect;
+                }
+            }
+
+            SelectObject(obj, focus);
+        }
+
         private void MenuItem_NewLayerInstances_Click(object sender, RoutedEventArgs e)
         {
             AddLayer<Layer.LayerInstancesData>(LayerType.Instances, "NewInstancesLayer");
@@ -1487,11 +1574,28 @@ namespace UndertaleModTool
         {
             AddGMS1Tile(this.DataContext as UndertaleRoom);
         }
-        private void MenuItem_Delete_Click(Object sender, RoutedEventArgs e)
+        private void MenuItem_Delete_Click(object sender, RoutedEventArgs e)
         {
             MenuItem menuitem = sender as MenuItem;
-            if (menuitem.DataContext is UndertaleObject obj)
-                DeleteItem(obj);
+            DeleteItem(menuitem.DataContext as UndertaleObject);
+        }
+
+        private void MenuItem_Copy_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuitem = sender as MenuItem;
+            copied = menuitem.DataContext as UndertaleObject;
+        }
+
+        private void MenuItem_Paste_Click(object sender, RoutedEventArgs e)
+        {
+            UndertaleRoom room = this.DataContext as UndertaleRoom;
+            MenuItem menuitem = sender as MenuItem;
+            Layer layer = mainWindow.IsGMS2 == Visibility.Visible ?
+                menuitem.DataContext as Layer : null;
+
+            UndertaleObject newObj = AddObjectCopy(room, layer, copied, true);
+            if (newObj is not null)
+                SelectObject(newObj);
         }
 
         public static void GenerateSpriteCache(UndertaleRoom room)
