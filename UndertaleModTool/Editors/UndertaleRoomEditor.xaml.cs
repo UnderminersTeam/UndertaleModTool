@@ -240,7 +240,7 @@ namespace UndertaleModTool
                     var room = DataContext as UndertaleRoom;
                     if (room?.Flags.HasFlag(RoomEntryFlags.IsGMS2) == true)
                     {
-                        // Check if the selected game object is in the "Game objects" list
+                        // Check if the selected game object is in the "Game objects (from all layers)" list
                         var objectItem = GameObjItems.ItemContainerGenerator.ContainerFromItem(obj) as TreeViewItem;
                         if (objectItem?.IsSelected != true)
                             isMovable = true;
@@ -1457,7 +1457,23 @@ namespace UndertaleModTool
                 return;
             }
 
-            UndertaleRoom room = this.DataContext as UndertaleRoom;
+            if (this.DataContext is not UndertaleRoom room)
+                return;
+
+            if (obj is GameObject)
+            {
+                if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
+                {
+                    // Check if the selected game object is in the "Game objects (from all layers)" list
+                    var objectItem = GameObjItems.ItemContainerGenerator.ContainerFromItem(obj) as TreeViewItem;
+                    if (objectItem?.IsSelected == true)
+                    {
+                        mainWindow.ShowError("You should select an object in an instances layer instead.");
+                        return;
+                    }
+                }
+            }
+
             Layer layer = null;
             if (room.Layers.Count > 0)
                 layer = obj switch
