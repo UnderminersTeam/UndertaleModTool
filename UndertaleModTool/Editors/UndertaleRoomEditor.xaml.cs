@@ -46,6 +46,7 @@ namespace UndertaleModTool
         public static readonly PropertyInfo visualOffProp = typeof(Canvas).GetProperty("VisualOffset", BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
         private static readonly Regex trailingNumberRegex = new(@"\d+$", RegexOptions.Compiled);
+        private readonly Type[] movableTypes = { typeof(Layer), typeof(GameObject), typeof(Tile), typeof(SpriteInstance) };
 
         // used for the flashing animation when a room object is selected
         public static Dictionary<UndertaleObject, FrameworkElement> ObjElemDict { get; } = new();
@@ -222,6 +223,8 @@ namespace UndertaleModTool
                 currStoryboard.Remove(this);
             }
 
+            bool isMovable = false;
+
             // I can't bind it directly because then clicking on the headers makes WPF explode because it tries to attach the header as child of ObjectEditor
             // TODO: find some better workaround
             if (e.NewValue == RoomRootItem)
@@ -231,6 +234,22 @@ namespace UndertaleModTool
             else if (e.NewValue is UndertaleObject obj)
             {
                 ObjectEditor.Content = obj;
+
+                if (obj is GameObject)
+                {
+                    var room = DataContext as UndertaleRoom;
+                    if (room?.Flags.HasFlag(RoomEntryFlags.IsGMS2) == true)
+                    {
+                        // Check if the selected game object is in the "Game objects" list
+                        var objectItem = GameObjItems.ItemContainerGenerator.ContainerFromItem(obj) as TreeViewItem;
+                        if (objectItem?.IsSelected != true)
+                            isMovable = true;
+                    }
+                    else
+                        isMovable = true;
+                }
+                else
+                    isMovable = movableTypes.Contains(obj.GetType());
 
                 try
                 {
@@ -277,6 +296,8 @@ namespace UndertaleModTool
                         layerItem.IsSelected = true;
                 }
             }
+            
+            MoveButtonsPanel.IsEnabled = isMovable;
         }
 
         private UndertaleObject movingObj;
@@ -1430,6 +1451,12 @@ namespace UndertaleModTool
         /// <param name="focus">Whether to focus on the element after moving it.</param>
         private void MoveItem(UndertaleObject obj, int dist, bool focus = true)
         {
+            if (obj is Layer)
+            {
+                mainWindow.ShowError("Layers don't support this feature currently, change the layer depths instead.");
+                return;
+            }
+
             UndertaleRoom room = this.DataContext as UndertaleRoom;
             Layer layer = null;
             if (room.Layers.Count > 0)
