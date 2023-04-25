@@ -30,6 +30,49 @@ namespace UndertaleModTool
             InitializeComponent();
         }
 
+        private void MoveItem(UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM> room, int dist)
+        {
+            // TODO: enable virtualizing of RoomListGrid and make this method work with it
+
+            IList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> roomOrder = (this.DataContext as GeneralInfoEditor).GeneralInfo.RoomOrder;
+
+            int index = roomOrder.IndexOf(room);
+            if (index == -1)
+            {
+                mainWindow.ShowError("Can't change room position - room not found in room order.");
+                return;
+            }
+
+            int newIndex = Math.Clamp(index + dist, 0 , roomOrder.Count - 1);
+            if (newIndex != index)
+            {
+                UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM> prevRoom = roomOrder[newIndex];
+                roomOrder[newIndex] = roomOrder[index];
+                roomOrder[index] = prevRoom;
+            }
+
+            RoomListGrid.UpdateLayout();
+            RoomListGrid.SelectedItem = RoomListGrid.Items[newIndex];
+        }
+
+        private void RoomListGrid_KeyDown(object sender, KeyEventArgs e)
+        {
+            object selected = RoomListGrid.SelectedItem;
+            if (selected == null)
+                return;
+            UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM> room = selected as UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>;
+            
+            switch(e.Key)
+            {
+                case Key.OemMinus:
+                    MoveItem(room, -1);
+                    break;
+                case Key.OemPlus:
+                    MoveItem(room, 1);
+                    break;
+            }
+        }
+
         private void SyncRoomList_Click(object sender, RoutedEventArgs e)
         {
             IList<UndertaleRoom> rooms = mainWindow.Data.Rooms;
@@ -53,6 +96,7 @@ namespace UndertaleModTool
             if (result == MessageBoxResult.Yes)
                 checkBox.IsChecked = false;
         }
+
     }
 
     public class TimestampDateTimeConverter : IValueConverter
