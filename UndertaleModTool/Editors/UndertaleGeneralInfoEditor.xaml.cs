@@ -30,10 +30,14 @@ namespace UndertaleModTool
             InitializeComponent();
         }
 
+        private void SelectItem(UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM> room)
+        {
+            RoomListGrid.ScrollIntoView(room); // This works with a virtualized DataGrid
+            RoomListGrid.SelectedItem = room;
+        }
+
         private void MoveItem(UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM> room, int dist)
         {
-            // TODO: enable virtualizing of RoomListGrid and make this method work with it
-
             IList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> roomOrder = (this.DataContext as GeneralInfoEditor).GeneralInfo.RoomOrder;
 
             int index = roomOrder.IndexOf(room);
@@ -46,13 +50,12 @@ namespace UndertaleModTool
             int newIndex = Math.Clamp(index + dist, 0 , roomOrder.Count - 1);
             if (newIndex != index)
             {
-                UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM> prevRoom = roomOrder[newIndex];
-                roomOrder[newIndex] = roomOrder[index];
-                roomOrder[index] = prevRoom;
+                // Tuple syntax for swapping values. Looks nicer and isn't any slower.
+                // See https://www.reddit.com/r/ProgrammerTIL/comments/8ssiqb/comment/e12301f/
+                (roomOrder[newIndex], roomOrder[index]) = (roomOrder[index], roomOrder[newIndex]);
             }
 
-            RoomListGrid.UpdateLayout();
-            RoomListGrid.SelectedItem = RoomListGrid.Items[newIndex];
+            SelectItem(roomOrder[newIndex]);
         }
 
         private void RoomListGrid_KeyDown(object sender, KeyEventArgs e)
