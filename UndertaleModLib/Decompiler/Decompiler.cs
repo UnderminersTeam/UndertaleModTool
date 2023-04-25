@@ -3815,16 +3815,8 @@ namespace UndertaleModLib.Decompiler
             DoTypePropagation(context, blocks);
             context.Statements = new Dictionary<uint, List<Statement>>();
             context.Statements.Add(0, HLDecompile(context, blocks, blocks[0], blocks[code.Length / 4]));
-            try
-            {
-                foreach (UndertaleCode duplicate in code.ChildEntries)
-                    context.Statements.Add(duplicate.Offset / 4, HLDecompile(context, blocks, blocks[duplicate.Offset / 4], blocks[code.Length / 4]));
-            }
-            catch (ArgumentException)
-            {
-                // This is a duplicate function, ignore it.
-            }
-
+            foreach (UndertaleCode duplicate in code.ChildEntries)
+                context.Statements.Add(duplicate.Offset / 4, HLDecompile(context, blocks, blocks[duplicate.Offset / 4], blocks[code.Length / 4]));
 
             // Write code.
             context.IndentationLevel = 0;
