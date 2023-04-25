@@ -1275,6 +1275,12 @@ namespace UndertaleModLib.Compiler
                             endPatch.Add(cw.Emit(Opcode.B));
                             // we're accessing a subfunction here, so build the cache if needed
                             Decompiler.Decompiler.BuildSubFunctionCache(cw.compileContext.Data);
+
+                            //Attempt to find the function before rushing to create a new one
+                            var func = cw.compileContext.Data.Functions.FirstOrDefault(f => f.Name.Content == "gml_Script_" + funcDefName.Text);
+                            if (func != null)
+                                cw.compileContext.Data.KnownSubFunctions.TryAdd(funcDefName.Text, func);
+                            
                             if (cw.compileContext.Data.KnownSubFunctions.ContainsKey(funcDefName.Text))
                             {
                                 string subFunctionName = cw.compileContext.Data.KnownSubFunctions[funcDefName.Text].Name.Content;
