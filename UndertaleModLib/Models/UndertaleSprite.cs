@@ -1174,11 +1174,17 @@ public class UndertaleYYSWFGradientFillData : UndertaleObject
     public UndertaleYYSWFGradientFillType GradientFillType { get; set; }
     public UndertaleYYSWFMatrix33 TransformationMatrix { get; set; }
     public UndertaleSimpleList<UndertaleYYSWFGradientRecord> Records { get; set; }
+    /// <summary>
+    /// Unknown purpose. Probably to accomodate for new texture formats.
+    /// </summary>
+    public int? TPEIndex { get; set; }
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
     {
         writer.Write((int)GradientFillType);
+        if (TPEIndex is not null)
+            writer.Write(TPEIndex.Value);
         writer.WriteUndertaleObject(TransformationMatrix);
         writer.WriteUndertaleObject(Records);
     }
@@ -1187,6 +1193,10 @@ public class UndertaleYYSWFGradientFillData : UndertaleObject
     public void Unserialize(UndertaleReader reader)
     {
         GradientFillType = (UndertaleYYSWFGradientFillType)reader.ReadInt32();
+        if (reader.undertaleData.IsVersionAtLeast(2022, 1))
+        {
+            TPEIndex = reader.ReadInt32();
+        }
         TransformationMatrix = reader.ReadUndertaleObject<UndertaleYYSWFMatrix33>();
         Records = new UndertaleSimpleList<UndertaleYYSWFGradientRecord>();
         int count = reader.ReadInt32();
@@ -1651,6 +1661,10 @@ public class UndertaleYYSWFBitmapData : UndertaleObject
     public UndertaleYYSWFBitmapType Type { get; set; }
     public int Width { get; set; }
     public int Height { get; set; }
+    /// <summary>
+    /// Unknown purpose. Probably to accomodate for new texture formats.
+    /// </summary>
+    public int? TPEIndex { get; set; }
     public byte[] ImageData { get; set; }
     public byte[] AlphaData { get; set; }
     public byte[] ColorPaletteData { get; set; }
@@ -1663,18 +1677,25 @@ public class UndertaleYYSWFBitmapData : UndertaleObject
         writer.Write(Width);
         writer.Write(Height);
 
-        writer.Write(ImageData is null ? 0 : ImageData.Length);
-        writer.Write(AlphaData is null ? 0 : AlphaData.Length);
-        writer.Write(ColorPaletteData is null ? 0 : ColorPaletteData.Length);
+        if (TPEIndex is null)
+        {
+            writer.Write(ImageData is null ? 0 : ImageData.Length);
+            writer.Write(AlphaData is null ? 0 : AlphaData.Length);
+            writer.Write(ColorPaletteData is null ? 0 : ColorPaletteData.Length);
 
-        if (ImageData != null)
-            writer.Write(ImageData);
-        if (AlphaData != null)
-            writer.Write(AlphaData);
-        if (ColorPaletteData != null)
-            writer.Write(ColorPaletteData);
+            if (ImageData != null)
+                writer.Write(ImageData);
+            if (AlphaData != null)
+                writer.Write(AlphaData);
+            if (ColorPaletteData != null)
+                writer.Write(ColorPaletteData);
 
-        writer.Align(4);
+            writer.Align(4);
+        }
+        else
+        {
+            writer.Write(TPEIndex.Value);
+        }
     }
 
     /// <inheritdoc />
@@ -1684,18 +1705,25 @@ public class UndertaleYYSWFBitmapData : UndertaleObject
         Width = reader.ReadInt32();
         Height = reader.ReadInt32();
 
-        int iL = reader.ReadInt32();
-        int aL = reader.ReadInt32();
-        int cL = reader.ReadInt32();
+        if (reader.undertaleData.IsVersionAtLeast(2022, 1))
+        {
+            TPEIndex = reader.ReadInt32();
+        }
+        else
+        {
+            int iL = reader.ReadInt32();
+            int aL = reader.ReadInt32();
+            int cL = reader.ReadInt32();
 
-        if (iL > 0)
-            ImageData = reader.ReadBytes(iL);
-        if (aL > 0)
-            AlphaData = reader.ReadBytes(aL);
-        if (cL > 0)
-            ColorPaletteData = reader.ReadBytes(cL);
+            if (iL > 0)
+                ImageData = reader.ReadBytes(iL);
+            if (aL > 0)
+                AlphaData = reader.ReadBytes(aL);
+            if (cL > 0)
+                ColorPaletteData = reader.ReadBytes(cL);
 
-        reader.Align(4);
+            reader.Align(4);
+        }
     }
 }
 
