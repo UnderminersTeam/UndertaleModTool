@@ -549,7 +549,7 @@ namespace UndertaleModTool
                     AnimationSpeed = sprInst.AnimationSpeed,
                     AnimationSpeedType = sprInst.AnimationSpeedType,
                     FrameIndex = sprInst.FrameIndex,
-                    Rotation = sprInst.Rotation,
+                    Rotation = sprInst.Rotation
                 };
 
                 newObj = newSprInst;
@@ -559,6 +559,35 @@ namespace UndertaleModTool
                     int index = insertIndex > -1 ? insertIndex : layer.AssetsData.Sprites.Count;
                     layer.AssetsData.Sprites.Insert(index, newSprInst);
                     sprInstDict.TryAdd(newSprInst, layer);
+                }
+            }
+            else if (obj is ParticleSystemInstance partSysInst)
+            {
+                if (layer != null && layer.AssetsData == null)
+                {
+                    mainWindow.ShowError("Please select an assets layer.");
+                    return null;
+                }
+
+                var newPartSysInst = new ParticleSystemInstance
+                {
+                    Name = ParticleSystemInstance.GenerateRandomName(mainWindow.Data),
+                    ParticleSystem = partSysInst.ParticleSystem,
+                    X = (int)pos.X,
+                    Y = (int)pos.Y,
+                    ScaleX = partSysInst.ScaleX,
+                    ScaleY = partSysInst.ScaleY,
+                    Color = partSysInst.Color,
+                    Rotation = partSysInst.Rotation
+                };
+
+                newObj = newPartSysInst;
+
+                if (layer != null)
+                {
+                    int index = insertIndex > -1 ? insertIndex : layer.AssetsData.ParticleSystems.Count;
+                    layer.AssetsData.ParticleSystems.Insert(index, newPartSysInst);
+                    //partSysInstDict.TryAdd(newPartSysInst, layer);
                 }
             }
 

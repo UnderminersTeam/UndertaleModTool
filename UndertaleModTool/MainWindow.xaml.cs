@@ -1026,10 +1026,6 @@ namespace UndertaleModTool
                                 this.ShowWarning("This game is set to run with the GameMaker Studio debugger and the normal runtime will simply hang after loading if the debugger is not running. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger");
                             }
                         }
-                        if (data.IsVersionAtLeast(2023, 2))
-                        {
-                            this.ShowWarning("The particle systems that were added in GM 2023.2 are not fully supported yet.");
-                        }
                         if (Path.GetDirectoryName(FilePath) != Path.GetDirectoryName(filename))
                             CloseChildFiles();
 
