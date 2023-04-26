@@ -97,7 +97,8 @@ public static class UndertaleDataExtensionMethods
 	public static UndertaleFunction EnsureDefined(this IList<UndertaleFunction> list, string name, IList<UndertaleString> strg, bool fast = false)
 	{
 		UndertaleFunction func = fast ? null : list.ByName(name);
-		if (func == null)
+        func ??= list.ByName("gml_Script_" + name);
+        if (func == null)
 		{
 			var str = strg.MakeString(name, out int id);
 			func = new UndertaleFunction()
