@@ -108,36 +108,39 @@
         <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Sprite</TextBlock>
         <local:UndertaleObjectReference Grid.Row="7" Grid.Column="1" Margin="3" ObjectReference="{Binding Sprite}" ObjectType="{x:Type undertale:UndertaleSprite}"/>
 
-        <Viewbox Grid.Row="8" Grid.Column="1" Margin="3" Stretch="Uniform" StretchDirection="DownOnly">
-            <Border>
-                <Border.Background>
-                    <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
-                        <DrawingBrush.Drawing>
-                            <DrawingGroup>
-                                <GeometryDrawing Geometry="M0,0 L20,0 20,20, 0,20Z" Brush="White"/>
-                                <GeometryDrawing Geometry="M0,10 L20,10 20,20, 10,20 10,0 0,0Z" Brush="LightGray"/>
-                            </DrawingGroup>
-                        </DrawingBrush.Drawing>
-                    </DrawingBrush>
-                </Border.Background>
-                <local:UndertaleTexturePageItemDisplay>
-                    <local:UndertaleTexturePageItemDisplay.DataContext>
-                        <Binding Path="Sprite.Textures[0].Texture" Mode="OneWay">
-                            <Binding.FallbackValue>
-                                <x:Null/>
-                            </Binding.FallbackValue>
-                        </Binding>
-                    </local:UndertaleTexturePageItemDisplay.DataContext>
-                </local:UndertaleTexturePageItemDisplay>
-            </Border>
-        </Viewbox>
+        <ListView Grid.Row="8" Grid.Column="1" ItemsSource="{Binding Sprite.Textures, Mode=OneWay}" Background="Transparent" BorderThickness="0">
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Viewbox Stretch="Uniform" StretchDirection="DownOnly">
+                        <Border>
+                            <Border.Background>
+                                <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
+                                    <DrawingBrush.Drawing>
+                                        <DrawingGroup>
+                                            <GeometryDrawing Geometry="M0,0 L20,0 20,20, 0,20Z" Brush="White"/>
+                                            <GeometryDrawing Geometry="M0,10 L20,10 20,20, 10,20 10,0 0,0Z" Brush="LightGray"/>
+                                        </DrawingGroup>
+                                    </DrawingBrush.Drawing>
+                                </DrawingBrush>
+                            </Border.Background>
+                            <local:UndertaleTexturePageItemDisplay DataContext="{Binding Texture, Mode=OneWay}"/>
+                        </Border>
+                    </Viewbox>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
 
-        <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Texture</TextBlock>
-        <local:ComboBoxDark Grid.Row="9" Grid.Column="1" Margin="3"
+        <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Sprite frame index</TextBlock>
+        <local:TextBoxDark Grid.Row="9" Grid.Column="1" Margin="3" Text="{Binding FrameIndex}"/>
+
+        <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Texture</TextBlock>
+        <local:ComboBoxDark Grid.Row="10" Grid.Column="1" Margin="3"
                             ItemsSource="{Binding Source={StaticResource TextureEnum}}" SelectedItem="{Binding Texture}"/>
-
-        <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Head position</TextBlock>
-        <local:TextBoxDark Grid.Row="10" Grid.Column="1" Margin="3" Text="{Binding HeadPosition}"/>
 
         <TextBlock Grid.Row="11" Grid.Column="0" Margin="3">Start color</TextBlock>
         <local:ColorPicker Grid.Row="11" Grid.Column="2" Margin="3" Color="{Binding StartColor}"/>

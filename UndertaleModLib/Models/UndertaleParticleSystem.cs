@@ -15,7 +15,7 @@ public class UndertaleParticleSystem : UndertaleNamedResource, IDisposable
 
     public int DrawOrder { get; set; }
 
-    public UndertaleSimpleResourcesList<UndertaleParticleSystemEmitter, UndertaleChunkPSEM> Emitters { get; set; }
+    public UndertaleSimpleResourcesList<UndertaleParticleSystemEmitter, UndertaleChunkPSEM> Emitters { get; private set; } = new();
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
@@ -82,7 +82,7 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
 
     public EmitMode Mode { get; set; }
 
-    public int EmitCount { get; set; }
+    public int EmitCount { get; set; } = 1;
 
     public DistributionEnum Distribution { get; set; }
 
@@ -92,9 +92,9 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
 
     public float RegionY { get; set; }
 
-    public float RegionWidth { get; set; }
+    public float RegionWidth { get; set; } = 64;
 
-    public float RegionHeight { get; set; }
+    public float RegionHeight { get; set; } = 64;
 
     public float Rotation { get; set; }
 
@@ -102,35 +102,35 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
 
     public TextureEnum Texture { get; set; }
 
-    public float HeadPosition { get; set; }
+    public float FrameIndex { get; set; }
 
-    public uint StartColor { get; set; }
+    public uint StartColor { get; set; } = 0xFFFFFFFF;
 
-    public uint MidColor { get; set; }
+    public uint MidColor { get; set; } = 0xFFFFFFFF;
 
-    public uint EndColor { get; set; }
+    public uint EndColor { get; set; } = 0xFFFFFFFF;
 
     public bool AdditiveBlend { get; set; }
 
-    public float LifetimeMin { get; set; }
+    public float LifetimeMin { get; set; } = 80;
 
-    public float LifetimeMax { get; set; }
+    public float LifetimeMax { get; set; } = 80;
 
-    public float ScaleX { get; set; }
+    public float ScaleX { get; set; } = 1;
 
-    public float ScaleY { get; set; }
+    public float ScaleY { get; set; } = 1;
 
-    public float SizeMin { get; set; }
+    public float SizeMin { get; set; } = 1;
 
-    public float SizeMax { get; set; }
+    public float SizeMax { get; set; } = 1;
 
     public float SizeIncrease { get; set; }
 
     public float SizeWiggle { get; set; }
 
-    public float SpeedMin { get; set; }
+    public float SpeedMin { get; set; } = 5;
 
-    public float SpeedMax { get; set; }
+    public float SpeedMax { get; set; } = 5;
 
     public float SpeedIncrease { get; set; }
 
@@ -138,11 +138,11 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
 
     public float GravityForce { get; set; }
 
-    public float GravityDirection { get; set; }
+    public float GravityDirection { get; set; } = 270;
 
-    public float DirectionMin { get; set; }
+    public float DirectionMin { get; set; } = 80;
 
-    public float DirectionMax { get; set; }
+    public float DirectionMax { get; set; } = 100;
 
     public float DirectionIncrease { get; set; }
 
@@ -160,11 +160,11 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
 
     public UndertaleParticleSystemEmitter SpawnOnDeath { get => _spawnOnDeath.Resource; set { _spawnOnDeath.Resource = value; OnPropertyChanged(); } }
 
-    public int SpawnOnDeathCount { get; set; }
+    public int SpawnOnDeathCount { get; set; } = 1;
 
     public UndertaleParticleSystemEmitter SpawnOnUpdate { get => _spawnOnUpdate.Resource; set { _spawnOnUpdate.Resource = value; OnPropertyChanged(); } }
 
-    public int SpawnOnUpdateCount { get; set; }
+    public int SpawnOnUpdateCount { get; set; } = 1;
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
@@ -181,7 +181,7 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
         writer.Write(Rotation);
         writer.Write(_sprite.SerializeById(writer));
         writer.Write((int)Texture);
-        writer.Write(HeadPosition);
+        writer.Write(FrameIndex);
         writer.Write(StartColor);
         writer.Write(MidColor);
         writer.Write(EndColor);
@@ -232,7 +232,7 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
         _sprite = new();
         _sprite.Unserialize(reader);
         Texture = (TextureEnum)reader.ReadInt32();
-        HeadPosition = reader.ReadSingle();
+        FrameIndex = reader.ReadSingle();
         StartColor = reader.ReadUInt32();
         MidColor = reader.ReadUInt32();
         EndColor = reader.ReadUInt32();
