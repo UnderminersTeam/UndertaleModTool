@@ -145,6 +145,8 @@ namespace UndertaleModTool
                     UndertaleEmbeddedImage => "Embedded Image",
                     UndertaleSequence => "Sequence",
                     UndertaleAnimationCurve => "Animation Curve",
+                    UndertaleParticleSystem => "Particle System",
+                    UndertaleParticleSystemEmitter => "Particle System Emitter",
                     _ => null
                 };
 

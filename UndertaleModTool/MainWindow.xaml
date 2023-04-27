@@ -464,6 +464,20 @@
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
+                        <TreeViewItem Header="Particle systems" ItemsSource="{Binding ParticleSystems, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding ParticleSystems, Converter={StaticResource VisibleIfNotNull}}">
+                            <TreeViewItem.ItemTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleParticleSystem}">
+                                    <TextBlock Text="{Binding Name.Content}" />
+                                </HierarchicalDataTemplate>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
+                        <TreeViewItem Header="Particle system emitters" ItemsSource="{Binding ParticleSystemEmitters, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding ParticleSystemEmitters, Converter={StaticResource VisibleIfNotNull}}">
+                            <TreeViewItem.ItemTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleParticleSystemEmitter}">
+                                    <TextBlock Text="{Binding Name.Content}" />
+                                </HierarchicalDataTemplate>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
                     </TreeViewItem>
                 </TreeView>
 
@@ -683,6 +697,13 @@
 
                                 <DataTemplate DataType="{x:Type undertalelib:UndertaleChunkVARI}">
                                     <local:UndertaleVariableChunkEditor/>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertaleParticleSystem}">
+                                    <local:UndertaleParticleSystemEditor/>
+                                </DataTemplate>
+                                <DataTemplate DataType="{x:Type undertale:UndertaleParticleSystemEmitter}">
+                                    <local:UndertaleParticleSystemEmitterEditor/>
                                 </DataTemplate>
                             </ContentControl.Resources>
                         </ContentControl>
