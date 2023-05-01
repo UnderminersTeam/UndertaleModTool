@@ -31,6 +31,7 @@
         <local:IsVersionAtLeastConverter x:Key="IsVersionAtLeastConverter"/>
         <local:NegateNumberConverter x:Key="NegateNumberConverter"/>
         <local:ParentGridHeightConverter x:Key="ParentGridHeightConverter"/>
+        <local:ParticleSystemRectConverter x:Key="ParticleSystemRectConverter"/>
         <CompositeCollection x:Key="AllObjectsGMS1">
             <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Backgrounds}"/>
             <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Tiles}"/>
@@ -1419,6 +1420,43 @@
                                 </ImageBrush>
                             </Rectangle.Fill>
                         </Rectangle>
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type undertale:UndertaleRoom+ParticleSystemInstance}">
+                        <Canvas Background="Transparent"
+                                Opacity="{Binding Color, Mode=OneWay, Converter={StaticResource ColorToOpacityConverter}}"
+                                MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp">
+                            <Canvas.Style>
+                                <Style TargetType="Canvas" BasedOn="{StaticResource NearestNeighbor}"/>
+                            </Canvas.Style>
+                            <Canvas.RenderTransform>
+                                <TransformGroup>
+                                    <TranslateTransform X="-8" Y="-8"/>
+                                    <TranslateTransform x:Name="transform6_0" X="{Binding X, Mode=OneWay}" Y="{Binding Y, Mode=OneWay}"/>
+                                    <ScaleTransform x:Name="transform6_1" ScaleX="{Binding ScaleX, Mode=OneWay}" ScaleY="{Binding ScaleY, Mode=OneWay}"/>
+                                    <RotateTransform x:Name="transform6_2" Angle="{Binding OppositeRotation, Mode=OneWay}"
+                                                     CenterX="{Binding X, Mode=OneWay}" CenterY="{Binding Y, Mode=OneWay}"/>
+                                </TransformGroup>
+                            </Canvas.RenderTransform>
+                            <Ellipse Width="16" Height="16" Fill="Silver"/>
+
+                            <Ellipse Canvas.Left="5" Canvas.Top="5" Width="3" Height="3" Fill="White"/>
+                            <Line Canvas.Left="3.5" Canvas.Top="6.5" X2="6" Stroke="White"/>
+                            <Line Canvas.Left="6.5" Canvas.Top="3.5" Y2="6" Stroke="White"/>
+
+                            <Ellipse Canvas.Left="9" Canvas.Top="9" Width="2" Height="2" Fill="White"/>
+                            <Line Canvas.Left="8" Canvas.Top="10" X2="4" Stroke="White"/>
+                            <Line Canvas.Left="10" Canvas.Top="8" Y2="4" Stroke="White"/>
+
+                            <Border BorderBrush="DarkCyan" BorderThickness="1" Background="Transparent"
+                                    Width="{Binding ParticleSystem, Mode=OneWay, Converter={StaticResource ParticleSystemRectConverter}, ConverterParameter=width}"
+                                    Height="{Binding ParticleSystem, Mode=OneWay, Converter={StaticResource ParticleSystemRectConverter}, ConverterParameter=height}">
+                                <Border.RenderTransform>
+                                    <TranslateTransform x:Name="transform6_3"
+                                                        X="{Binding ParticleSystem, Mode=OneWay, Converter={StaticResource ParticleSystemRectConverter}, ConverterParameter=x}"
+                                                        Y="{Binding ParticleSystem, Mode=OneWay, Converter={StaticResource ParticleSystemRectConverter}, ConverterParameter=y}"/>
+                                </Border.RenderTransform>
+                            </Border>
+                        </Canvas>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerBackgroundData}">
                         <Rectangle Width="{Binding Sprite.Textures[0].Texture.SourceWidth, Mode=OneWay}" Height="{Binding Sprite.Textures[0].Texture.SourceHeight, Mode=OneWay}"

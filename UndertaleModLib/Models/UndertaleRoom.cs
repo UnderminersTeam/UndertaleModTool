@@ -2105,15 +2105,51 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             }
         }
         public float Rotation { get; set; }
+
+        /// <summary>
+        /// The opposite angle of the current rotation.
+        /// </summary>
+        /// <remarks>
+        /// This attribute is UMT-only and does not exist in GameMaker.
+        /// </remarks>
         public float OppositeRotation => 360F - Rotation;
 
+        /// <summary>
+        /// A horizontal offset relative to top-left corner of the sprite instance.
+        /// </summary>
+        /// <remarks>
+        /// Used for proper sprite instance rotation display in the room editor and for determining <see cref="XOffset"/>.<br/>
+        /// This attribute is UMT-only and does not exist in GameMaker.
+        /// </remarks>
         public int SpriteXOffset => Sprite != null
             ? (-1 * Sprite.OriginXWrapper) + (Sprite.Textures.ElementAtOrDefault(WrappedFrameIndex)?.Texture?.TargetX ?? 0)
             : 0;
+
+        /// <summary>
+        /// A vertical offset relative to top-left corner of the sprite instance.
+        /// </summary>
+        /// <remarks>
+        /// Used for proper sprite instance rotation display in the room editor and for determining <see cref="YOffset"/>.<br/>
+        /// This attribute is UMT-only and does not exist in GameMaker.
+        /// </remarks>
         public int SpriteYOffset => Sprite != null
             ? (-1 * Sprite.OriginYWrapper) + (Sprite.Textures.ElementAtOrDefault(WrappedFrameIndex)?.Texture?.TargetY ?? 0)
             : 0;
+
+        /// <summary>
+        /// A horizontal offset used for proper sprite instance position display in the room editor.
+        /// </summary>
+        /// <remarks>
+        /// This attribute is UMT-only and does not exist in GameMaker.
+        /// </remarks>
         public int XOffset => X + SpriteXOffset;
+
+        /// <summary>
+        /// A vertical offset used for proper sprite instance display in the room editor.
+        /// </summary>
+        /// <remarks>
+        /// This attribute is UMT-only and does not exist in GameMaker.
+        /// </remarks>
         public int YOffset => Y + SpriteYOffset;
 
         /// <inheritdoc />
@@ -2259,17 +2295,37 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         public static readonly uint ChildObjectsSize = 32;
 
         public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
 
         private UndertaleResourceById<UndertaleParticleSystem, UndertaleChunkPSYS> _particleSys = new();
 
         public UndertaleString Name { get; set; }
-        public UndertaleParticleSystem ParticleSystem { get => _particleSys.Resource; set { _particleSys.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ParticleSystem))); } }
+        public UndertaleParticleSystem ParticleSystem
+        {
+            get => _particleSys.Resource;
+            set
+            {
+                _particleSys.Resource = value;
+                OnPropertyChanged();
+            }
+        }
         public int X { get; set; }
         public int Y { get; set; }
         public float ScaleX { get; set; }
         public float ScaleY { get; set; }
         public uint Color { get; set; }
         public float Rotation { get; set; }
+
+        /// <summary>
+        /// The opposite angle of the current rotation.
+        /// </summary>
+        /// <remarks>
+        /// This attribute is UMT-only and does not exist in GameMaker.
+        /// </remarks>
+        public float OppositeRotation => 360F - Rotation;
 
         /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
