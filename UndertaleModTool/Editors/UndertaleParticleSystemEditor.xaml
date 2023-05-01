@@ -37,7 +37,7 @@
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Emitters</TextBlock>
         <Expander Grid.Row="3" Grid.Column="1" Margin="3" Header="List" Name="EmitterListExpander" IsExpanded="True">
-            <local:DataGridDark ItemsSource="{Binding Emitters}" MaxHeight="369" x:Name="EmitterListGrid"
+            <local:DataGridDark ItemsSource="{Binding Emitters}" x:Name="EmitterListGrid"
                                 AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
                                 ScrollViewer.CanContentScroll="True"
                                 VirtualizingPanel.IsVirtualizing="True"
