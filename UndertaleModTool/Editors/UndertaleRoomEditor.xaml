@@ -1425,9 +1425,6 @@
                         <Canvas Background="Transparent"
                                 Opacity="{Binding Color, Mode=OneWay, Converter={StaticResource ColorToOpacityConverter}}"
                                 MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp">
-                            <Canvas.Style>
-                                <Style TargetType="Canvas" BasedOn="{StaticResource NearestNeighbor}"/>
-                            </Canvas.Style>
                             <Canvas.RenderTransform>
                                 <TransformGroup>
                                     <TranslateTransform X="-8" Y="-8"/>

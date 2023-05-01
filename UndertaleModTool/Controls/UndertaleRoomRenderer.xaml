@@ -29,6 +29,7 @@
         <local:TileRectanglesConverter x:Key="TileRectanglesConverter"/>
         <local:CachedImageLoaderWithIndex x:Key="CachedImageLoaderWithIndex"/>
         <local:NegateNumberConverter x:Key="NegateNumberConverter"/>
+        <local:ParticleSystemRectConverter x:Key="ParticleSystemRectConverter"/>
         <CompositeCollection x:Key="AllObjectsGMS1">
             <CollectionContainer Collection="{Binding Source={x:Reference RoomRenderer}, Path=DataContext.Backgrounds}"/>
             <CollectionContainer Collection="{Binding Source={x:Reference RoomRenderer}, Path=DataContext.Tiles}"/>
@@ -272,6 +273,38 @@
                             </ImageBrush>
                         </Rectangle.Fill>
                     </Rectangle>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type undertale:UndertaleRoom+ParticleSystemInstance}">
+                    <Canvas Opacity="{Binding Color, Mode=OneTime, Converter={StaticResource ColorToOpacityConverter}}">
+                        <Canvas.RenderTransform>
+                            <TransformGroup>
+                                <TranslateTransform X="-8" Y="-8"/>
+                                <TranslateTransform x:Name="transform6_0" X="{Binding X, Mode=OneTime}" Y="{Binding Y, Mode=OneTime}"/>
+                                <ScaleTransform x:Name="transform6_1" ScaleX="{Binding ScaleX, Mode=OneTime}" ScaleY="{Binding ScaleY, Mode=OneTime}"/>
+                                <RotateTransform x:Name="transform6_2" Angle="{Binding OppositeRotation, Mode=OneTime}"
+                                                 CenterX="{Binding X, Mode=OneTime}" CenterY="{Binding Y, Mode=OneTime}"/>
+                            </TransformGroup>
+                        </Canvas.RenderTransform>
+                        <Ellipse Width="16" Height="16" Fill="Silver"/>
+
+                        <Ellipse Canvas.Left="5" Canvas.Top="5" Width="3" Height="3" Fill="White"/>
+                        <Line Canvas.Left="3.5" Canvas.Top="6.5" X2="6" Stroke="White"/>
+                        <Line Canvas.Left="6.5" Canvas.Top="3.5" Y2="6" Stroke="White"/>
+
+                        <Ellipse Canvas.Left="9" Canvas.Top="9" Width="2" Height="2" Fill="White"/>
+                        <Line Canvas.Left="8" Canvas.Top="10" X2="4" Stroke="White"/>
+                        <Line Canvas.Left="10" Canvas.Top="8" Y2="4" Stroke="White"/>
+
+                        <Border BorderBrush="DarkCyan" BorderThickness="1"
+                                Width="{Binding ParticleSystem, Mode=OneTime, Converter={StaticResource ParticleSystemRectConverter}, ConverterParameter=width}"
+                                Height="{Binding ParticleSystem, Mode=OneTime, Converter={StaticResource ParticleSystemRectConverter}, ConverterParameter=height}">
+                            <Border.RenderTransform>
+                                <TranslateTransform x:Name="transform6_3"
+                                                    X="{Binding ParticleSystem, Mode=OneTime, Converter={StaticResource ParticleSystemRectConverter}, ConverterParameter=x}"
+                                                    Y="{Binding ParticleSystem, Mode=OneTime, Converter={StaticResource ParticleSystemRectConverter}, ConverterParameter=y}"/>
+                            </Border.RenderTransform>
+                        </Border>
+                    </Canvas>
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerBackgroundData}">
                     <Rectangle Width="{Binding Sprite.Textures[0].Texture.SourceWidth, Mode=OneTime}" Height="{Binding Sprite.Textures[0].Texture.SourceHeight, Mode=OneTime}"
