@@ -712,6 +712,20 @@ namespace UndertaleModTool
                                                 && (l.AssetsData.Sprites?.Any(x => x.Name == spr.Name) ?? false));
                                 objList = roomEditor.LayerItems.ItemContainerGenerator.ContainerFromItem(layer) as TreeViewItem;
                                 break;
+
+                            case ParticleSystemInstance partSys:
+                                if (fromReferencesResults)
+                                {
+                                    roomEditor.LayerItems.IsExpanded = true;
+                                    roomEditor.RoomRootItem.UpdateLayout();
+                                }
+
+                                room = roomEditor.DataContext as UndertaleRoom;
+                                layer = room.Layers
+                                            .FirstOrDefault(l => l.LayerType is LayerType.Assets
+                                                && (l.AssetsData.ParticleSystems?.Any(x => x.Name == partSys.Name) ?? false));
+                                objList = roomEditor.LayerItems.ItemContainerGenerator.ContainerFromItem(layer) as TreeViewItem;
+                                break;
                         }
                         if (objList is null)
                             return;

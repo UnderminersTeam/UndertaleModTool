@@ -164,6 +164,24 @@ namespace UndertaleModTool.Windows
                             else
                                 return null;
                         }
+                    },
+                    new PredicateForVersion()
+                    {
+                        Version = (2023, 2, 0),
+                        Predicate = (objSrc, types, checkOne) =>
+                        {
+                            if (!types.Contains(typeof(UndertaleParticleSystemEmitter)))
+                                return null;
+
+                            if (objSrc is not UndertaleSprite obj)
+                                return null;
+
+                            var partSysEmitters = data.ParticleSystemEmitters.Where(x => x.Sprite == obj);
+                            if (partSysEmitters.Any())
+                                return new() { { "Particle system emitters", checkOne ? partSysEmitters.ToEmptyArray() : partSysEmitters.ToArray() } };
+                            else
+                                return null;
+                        }
                     }
                 }
             },
@@ -665,7 +683,7 @@ namespace UndertaleModTool.Windows
                                 var sprInstances = GetSprInstances();
                                 if (sprInstances.Any())
                                     outDict["Room sprite instances"] = checkOne ? sprInstances.ToEmptyArray() : sprInstances.ToArray();
-                            }                            
+                            }
 
                             if (outDict.Count == 0)
                                 return null;
@@ -935,6 +953,58 @@ namespace UndertaleModTool.Windows
                                 return new() { { "Sequence text keyframes", checkOne ? textKeyframesList.ToEmptyArray() : textKeyframesList.ToArray() } };
                             else
                                 return null;
+                        }
+                    },
+                    new PredicateForVersion()
+                    {
+                        Version = (2023, 2, 0),
+                        Predicate = (objSrc, types, checkOne) =>
+                        {
+                            if (objSrc is not UndertaleString obj)
+                                return null;
+
+                            Dictionary<string, object[]> outDict = new();
+
+                            if (types.Contains(typeof(UndertaleParticleSystem)))
+                            {
+                                var partSystems = data.ParticleSystems.Where(x => x.Name == obj);
+                                if (partSystems.Any())
+                                    outDict["Particle systems"] = checkOne ? partSystems.ToEmptyArray() : partSystems.ToArray();
+                            }
+
+                            if (types.Contains(typeof(UndertaleParticleSystemEmitter)))
+                            {
+                                var partSysEmitters = data.ParticleSystemEmitters.Where(x => x.Name == obj);
+                                if (partSysEmitters.Any())
+                                    outDict["Particle system emitters"] = checkOne ? partSysEmitters.ToEmptyArray() : partSysEmitters.ToArray();
+                            }
+
+                            if (types.Contains(typeof(UndertaleRoom.ParticleSystemInstance)))
+                            {
+                                IEnumerable<object[]> GetPartSysInstances()
+                                {
+                                    foreach (var room in data.Rooms)
+                                    {
+                                        foreach (var layer in room.Layers)
+                                        {
+                                            if (layer.AssetsData is not null)
+                                            {
+                                                foreach (var partSysInst in layer.AssetsData.ParticleSystems)
+                                                    if (partSysInst.Name == obj)
+                                                        yield return new object[] { partSysInst, layer, room };
+                                            }
+                                        }
+                                    }
+                                }
+
+                                var partSysInstances = GetPartSysInstances();
+                                if (partSysInstances.Any())
+                                    outDict["Room particle system instances"] = checkOne ? partSysInstances.ToEmptyArray() : partSysInstances.ToArray();
+                            }
+
+                            if (outDict.Count == 0)
+                                return null;
+                            return outDict;
                         }
                     }
                 }
@@ -1248,6 +1318,81 @@ namespace UndertaleModTool.Windows
                                 return new() { { "Room tile layers", checkOne ? tileLayers.ToEmptyArray() : tileLayers.ToArray() } };
                             else
                                 return null;
+                        }
+                    }
+                }
+            },
+            {
+                typeof(UndertaleParticleSystem),
+                new[]
+                {
+                    new PredicateForVersion()
+                    {
+                        Version = (2023, 2, 0),
+                        Predicate = (objSrc, types, checkOne) =>
+                        {
+                            if (!types.Contains(typeof(UndertaleRoom.ParticleSystemInstance)))
+                                return null;
+
+                            if (objSrc is not UndertaleParticleSystem obj)
+                                return null;
+
+                            IEnumerable<object[]> GetPartSysInstances()
+                            {
+                                foreach (var room in data.Rooms)
+                                {
+                                    foreach (var layer in room.Layers)
+                                    {
+                                        if (layer.AssetsData is not null)
+                                        {
+                                            foreach (var partSysInst in layer.AssetsData.ParticleSystems)
+                                                if (partSysInst.ParticleSystem == obj)
+                                                    yield return new object[] { partSysInst, layer, room };
+                                        }
+                                    }
+                                }
+                            }
+
+                            var partSysInstances = GetPartSysInstances();
+                            if (partSysInstances.Any())
+                                return new() { { "Room particle system instance", checkOne ? partSysInstances.ToEmptyArray() : partSysInstances.ToArray() } };
+                            else
+                                return null;
+                        }
+                    }
+                }
+            },
+            {
+                typeof(UndertaleParticleSystemEmitter),
+                new[]
+                {
+                    new PredicateForVersion()
+                    {
+                        Version = (2023, 2, 0),
+                        Predicate = (objSrc, types, checkOne) =>
+                        {
+                            if (objSrc is not UndertaleParticleSystemEmitter obj)
+                                return null;
+
+                            Dictionary<string, object[]> outDict = new();
+
+                            if (types.Contains(typeof(UndertaleParticleSystem)))
+                            {
+                                var partSystems = data.ParticleSystems.Where(x => x.Emitters.Any(e => e.Resource == obj));
+                                if (partSystems.Any())
+                                    outDict["Particle systems"] = checkOne ? partSystems.ToEmptyArray() : partSystems.ToArray();
+                            }
+
+                            if (types.Contains(typeof(UndertaleParticleSystemEmitter)))
+                            {
+                                var partSysEmitters = data.ParticleSystemEmitters.Where(x => x.SpawnOnDeath == obj || x.SpawnOnUpdate == obj);
+                                if (partSysEmitters.Any())
+                                    outDict["Particle system emitters"] = checkOne ? partSysEmitters.ToEmptyArray() : partSysEmitters.ToArray();
+                            }
+
+                            if (outDict.Count == 0)
+                                return null;
+                            return outDict;
                         }
                     }
                 }
