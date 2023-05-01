@@ -1638,12 +1638,94 @@ namespace UndertaleModLib
     }
 
     // GM2023.2+ only
-    public class UndertaleChunkPSEM : UndertaleUnsupportedChunk
+    public class UndertaleChunkPSEM : UndertaleListChunk<UndertaleParticleSystemEmitter>
     {
         public override string Name => "PSEM";
+
+        internal override void SerializeChunk(UndertaleWriter writer)
+        {
+            if (!writer.undertaleData.IsVersionAtLeast(2023, 2))
+                throw new InvalidOperationException();
+
+            writer.Align(4);
+
+            writer.Write((uint)1); // Version
+
+            base.SerializeChunk(writer);
+        }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            if (!reader.undertaleData.IsVersionAtLeast(2023, 2))
+                throw new InvalidOperationException();
+
+            // Padding
+            reader.Align(4);
+
+            if (reader.ReadUInt32() != 1)
+                throw new IOException("Expected PSEM version 1");
+
+            base.UnserializeChunk(reader);
+        }
+
+        internal override uint UnserializeObjectCount(UndertaleReader reader)
+        {
+            if (!reader.undertaleData.IsVersionAtLeast(2023, 2))
+                throw new InvalidOperationException();
+
+            // Padding
+            reader.Align(4);
+
+            uint version = reader.ReadUInt32();
+            if (version != 1)
+                throw new IOException("Expected PSEM version 1, got " + version.ToString());
+
+            return base.UnserializeObjectCount(reader);
+        }
     }
-    public class UndertaleChunkPSYS : UndertaleUnsupportedChunk
+    public class UndertaleChunkPSYS : UndertaleListChunk<UndertaleParticleSystem>
     {
         public override string Name => "PSYS";
+
+        internal override void SerializeChunk(UndertaleWriter writer)
+        {
+            if (!writer.undertaleData.IsVersionAtLeast(2023, 2))
+                throw new InvalidOperationException();
+
+            writer.Align(4);
+
+            writer.Write((uint)1); // Version
+
+            base.SerializeChunk(writer);
+        }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            if (!reader.undertaleData.IsVersionAtLeast(2023, 2))
+                throw new InvalidOperationException();
+
+            // Padding
+            reader.Align(4);
+
+            if (reader.ReadUInt32() != 1)
+                throw new IOException("Expected PSYS version 1");
+
+            base.UnserializeChunk(reader);
+        }
+
+        internal override uint UnserializeObjectCount(UndertaleReader reader)
+        {
+            if (!reader.undertaleData.IsVersionAtLeast(2023, 2))
+                throw new InvalidOperationException();
+
+            // Padding
+            reader.Align(4);
+
+            uint version = reader.ReadUInt32();
+            if (version != 1)
+                throw new IOException("Expected PSYS version 1, got " + version.ToString());
+
+            return base.UnserializeObjectCount(reader);
+        }
     }
 }

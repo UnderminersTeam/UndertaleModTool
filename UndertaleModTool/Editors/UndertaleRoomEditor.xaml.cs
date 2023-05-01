@@ -46,7 +46,7 @@ namespace UndertaleModTool
         public static readonly PropertyInfo visualOffProp = typeof(Canvas).GetProperty("VisualOffset", BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
         private static readonly Regex trailingNumberRegex = new(@"\d+$", RegexOptions.Compiled);
-        private readonly Type[] movableTypes = { typeof(Layer), typeof(GameObject), typeof(Tile), typeof(SpriteInstance) };
+        private readonly Type[] movableTypes = { typeof(Layer), typeof(GameObject), typeof(Tile), typeof(SpriteInstance), typeof(SequenceInstance), typeof(ParticleSystemInstance) };
 
         // used for the flashing animation when a room object is selected
         public static Dictionary<UndertaleObject, FrameworkElement> ObjElemDict { get; } = new();
@@ -70,6 +70,7 @@ namespace UndertaleModTool
 
         private ConcurrentDictionary<uint, Layer> roomObjDict = new();
         private ConcurrentDictionary<SpriteInstance, Layer> sprInstDict = new();
+        private ConcurrentDictionary<ParticleSystemInstance, Layer> partSysInstDict = new();
 
         public UndertaleRoomEditor()
         {
@@ -136,6 +137,7 @@ namespace UndertaleModTool
         private void UndertaleRoomEditor_Unloaded(object sender, RoutedEventArgs e)
         {
             ObjElemDict.Clear();
+            ParticleSystemRectConverter.ClearDict();
         }
 
         private void UndertaleRoomEditor_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -166,6 +168,7 @@ namespace UndertaleModTool
             ObjElemDict.Clear();
             roomObjDict.Clear();
             sprInstDict.Clear();
+            partSysInstDict.Clear();
 
             if (DataContext is UndertaleRoom room)
             {
@@ -191,6 +194,12 @@ namespace UndertaleModTool
 
                             foreach (Tile tile in layer.AssetsData.LegacyTiles)
                                 roomObjDict.TryAdd(tile.InstanceID, layer);
+
+                            foreach (ParticleSystemInstance partSys in layer.AssetsData.ParticleSystems)
+                                partSysInstDict.TryAdd(partSys, layer);
+
+                            var particleSystems = layer.AssetsData.ParticleSystems.Select(x => x.ParticleSystem);
+                            ParticleSystemRectConverter.Initialize(particleSystems);
                         }
                         else if (layer.LayerType == LayerType.Instances)
                         {
@@ -334,6 +343,7 @@ namespace UndertaleModTool
                 {
                     Tile or GameObject => roomObjDict[(clickedObj as IRoomObject).InstanceID],
                     SpriteInstance spr => sprInstDict[spr],
+                    ParticleSystemInstance partSys => partSysInstDict[partSys],
                     _ => null
                 };
 
@@ -344,6 +354,7 @@ namespace UndertaleModTool
                     GameObject => layer is null ? room.GameObjects : layer.InstancesData.Instances,
                     Tile => layer is null ? room.Tiles : layer.AssetsData.LegacyTiles,
                     SpriteInstance => layer.AssetsData.Sprites,
+                    ParticleSystemInstance => layer.AssetsData.ParticleSystems,
                     _ => null
                 };
                 if (collection is not null)
@@ -353,6 +364,7 @@ namespace UndertaleModTool
                     {
                         IRoomObject roomObj => new(roomObj.X, roomObj.Y),
                         SpriteInstance sprInst => new(sprInst.X, sprInst.Y),
+                        ParticleSystemInstance partSysInst => new(partSysInst.X, partSysInst.Y),
                         _ => new()
                     };
                     clickedObj = AddObjectCopy(room, layer, clickedObj, true, index, pos);
@@ -364,7 +376,7 @@ namespace UndertaleModTool
             SelectObject(clickedObj);
 
             var mousePos = e.GetPosition(roomCanvas);
-            if (clickedObj is GameObject || clickedObj is Tile || clickedObj is SpriteInstance)
+            if (clickedObj is GameObject || clickedObj is Tile || clickedObj is SpriteInstance || clickedObj is ParticleSystemInstance)
             {
                 movingObj = clickedObj;
                 if (movingObj is GameObject)
@@ -384,8 +396,8 @@ namespace UndertaleModTool
                         PreCreateCode = other.PreCreateCode
                     };
                     undoStack.Push(undoObj);
-                    hotpointX = mousePos.X - (movingObj as GameObject).X;
-                    hotpointY = mousePos.Y - (movingObj as GameObject).Y;
+                    hotpointX = mousePos.X - other.X;
+                    hotpointY = mousePos.Y - other.Y;
                 }
                 else if (movingObj is Tile)
                 {
@@ -407,8 +419,8 @@ namespace UndertaleModTool
                         Color = other.Color
                     };
                     undoStack.Push(undoObj);
-                    hotpointX = mousePos.X - (movingObj as Tile).X;
-                    hotpointY = mousePos.Y - (movingObj as Tile).Y;
+                    hotpointX = mousePos.X - other.X;
+                    hotpointY = mousePos.Y - other.Y;
                 }
                 else if (movingObj is SpriteInstance)
                 {
@@ -425,11 +437,29 @@ namespace UndertaleModTool
                         AnimationSpeed = other.AnimationSpeed,
                         AnimationSpeedType = other.AnimationSpeedType,
                         FrameIndex = other.FrameIndex,
-                        Rotation = other.Rotation,
+                        Rotation = other.Rotation
                     };
                     undoStack.Push(undoObj);
-                    hotpointX = mousePos.X - (movingObj as SpriteInstance).X;
-                    hotpointY = mousePos.Y - (movingObj as SpriteInstance).Y;
+                    hotpointX = mousePos.X - other.X;
+                    hotpointY = mousePos.Y - other.Y;
+                }
+                else if (movingObj is ParticleSystemInstance)
+                {
+                    var other = clickedObj as ParticleSystemInstance;
+                    var undoObj = new ParticleSystemInstance
+                    {
+                        Name = other.Name,
+                        ParticleSystem = other.ParticleSystem,
+                        X = other.X,
+                        Y = other.Y,
+                        ScaleX = other.ScaleX,
+                        ScaleY = other.ScaleY,
+                        Color = other.Color,
+                        Rotation = other.Rotation
+                    };
+                    undoStack.Push(undoObj);
+                    hotpointX = mousePos.X - other.X;
+                    hotpointY = mousePos.Y - other.Y;
                 }
             }
         }
@@ -549,7 +579,7 @@ namespace UndertaleModTool
                     AnimationSpeed = sprInst.AnimationSpeed,
                     AnimationSpeedType = sprInst.AnimationSpeedType,
                     FrameIndex = sprInst.FrameIndex,
-                    Rotation = sprInst.Rotation,
+                    Rotation = sprInst.Rotation
                 };
 
                 newObj = newSprInst;
@@ -559,6 +589,35 @@ namespace UndertaleModTool
                     int index = insertIndex > -1 ? insertIndex : layer.AssetsData.Sprites.Count;
                     layer.AssetsData.Sprites.Insert(index, newSprInst);
                     sprInstDict.TryAdd(newSprInst, layer);
+                }
+            }
+            else if (obj is ParticleSystemInstance partSysInst)
+            {
+                if (layer != null && layer.AssetsData == null)
+                {
+                    mainWindow.ShowError("Please select an assets layer.");
+                    return null;
+                }
+
+                var newPartSysInst = new ParticleSystemInstance
+                {
+                    Name = ParticleSystemInstance.GenerateRandomName(mainWindow.Data),
+                    ParticleSystem = partSysInst.ParticleSystem,
+                    X = (int)pos.X,
+                    Y = (int)pos.Y,
+                    ScaleX = partSysInst.ScaleX,
+                    ScaleY = partSysInst.ScaleY,
+                    Color = partSysInst.Color,
+                    Rotation = partSysInst.Rotation
+                };
+
+                newObj = newPartSysInst;
+
+                if (layer != null)
+                {
+                    int index = insertIndex > -1 ? insertIndex : layer.AssetsData.ParticleSystems.Count;
+                    layer.AssetsData.ParticleSystems.Insert(index, newPartSysInst);
+                    partSysInstDict.TryAdd(newPartSysInst, layer);
                 }
             }
 
@@ -581,6 +640,7 @@ namespace UndertaleModTool
                 {
                     Tile or GameObject => roomObjDict[(other as IRoomObject).InstanceID],
                     SpriteInstance spr => sprInstDict[spr],
+                    ParticleSystemInstance partSys => partSysInstDict[partSys],
                     _ => null
                 };
 
@@ -662,20 +722,25 @@ namespace UndertaleModTool
                 tgtX = ((tgtX + gridWidth  / 2) / gridWidth ) * gridWidth;
                 tgtY = ((tgtY + gridHeight / 2) / gridHeight) * gridHeight;
 
-                if (movingObj is GameObject)
+                if (movingObj is GameObject gameObj)
                 {
-                    (movingObj as GameObject).X = tgtX;
-                    (movingObj as GameObject).Y = tgtY;
+                    gameObj.X = tgtX;
+                    gameObj.Y = tgtY;
                 }
-                else if (movingObj is Tile)
+                else if (movingObj is Tile tile)
                 {
-                    (movingObj as Tile).X = tgtX;
-                    (movingObj as Tile).Y = tgtY;
+                    tile.X = tgtX;
+                    tile.Y = tgtY;
                 }
-                else if (movingObj is SpriteInstance)
+                else if (movingObj is SpriteInstance spr)
                 {
-                    (movingObj as SpriteInstance).X = tgtX;
-                    (movingObj as SpriteInstance).Y = tgtY;
+                    spr.X = tgtX;
+                    spr.Y = tgtY;
+                }
+                else if (movingObj is ParticleSystemInstance partSys)
+                {
+                    partSys.X = tgtX;
+                    partSys.Y = tgtY;
                 }
             }
         }
@@ -858,6 +923,15 @@ namespace UndertaleModTool
                                               .FirstOrDefault(l => l.LayerType is LayerType.Assets
                                                   && (l.AssetsData.Sprites?.Any(x => x.Name == spr.Name) ?? false));
                         resList = resLayer.AssetsData.Sprites;
+                        resListView = LayerItems.ItemContainerGenerator.ContainerFromItem(resLayer) as TreeViewItem;
+                        break;
+
+                    case ParticleSystemInstance partSys:
+                        resLayer = room.Layers.AsParallel()
+                                              .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
+                                              .FirstOrDefault(l => l.LayerType is LayerType.Assets
+                                                  && (l.AssetsData.ParticleSystems?.Any(x => x.Name == partSys.Name) ?? false));
+                        resList = resLayer.AssetsData.ParticleSystems;
                         resListView = LayerItems.ItemContainerGenerator.ContainerFromItem(resLayer) as TreeViewItem;
                         break;
                 }
@@ -1046,6 +1120,8 @@ namespace UndertaleModTool
                 mainWindow.ChangeSelection(tile.ObjectDefinition);
             if (sel is SpriteInstance sprInst)
                 mainWindow.ChangeSelection(sprInst.Sprite);
+            if (sel is ParticleSystemInstance partSys)
+                mainWindow.ChangeSelection(partSys.ParticleSystem);
         }
         private async void RoomObjectsTree_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -1073,6 +1149,8 @@ namespace UndertaleModTool
                         mainWindow.ChangeSelection(tile.ObjectDefinition, true);
                     if (sel is SpriteInstance sprInst)
                         mainWindow.ChangeSelection(sprInst.Sprite, true);
+                    if (sel is ParticleSystemInstance partSys)
+                        mainWindow.ChangeSelection(partSys.ParticleSystem, true);
                 });
             });
         }
@@ -1491,6 +1569,7 @@ namespace UndertaleModTool
                 {
                     Tile or GameObject => roomObjDict[(obj as IRoomObject).InstanceID],
                     SpriteInstance spr => sprInstDict[spr],
+                    ParticleSystemInstance partSys => partSysInstDict[partSys],
                     _ => null
                 };
 
@@ -1499,6 +1578,7 @@ namespace UndertaleModTool
                 Tile => layer is null ? room.Tiles : layer.AssetsData.LegacyTiles,
                 GameObject => layer is null ? room.GameObjects : layer.InstancesData.Instances,
                 SpriteInstance => layer.AssetsData.Sprites,
+                ParticleSystemInstance => layer.AssetsData.ParticleSystems,
                 _ => null
             };
             if (list is null)
@@ -2017,10 +2097,11 @@ namespace UndertaleModTool
                 return layer.LayerType switch
                 {
                     // TODO: implement "LayerType.Effects"
-                    LayerType.Assets => new CompositeCollection(2)
+                    LayerType.Assets => new CompositeCollection(3)
                                         {
                                           new CollectionContainer() { Collection = layer.AssetsData.LegacyTiles },
-                                          new CollectionContainer() { Collection = layer.AssetsData.Sprites }
+                                          new CollectionContainer() { Collection = layer.AssetsData.Sprites },
+                                          new CollectionContainer() { Collection = layer.AssetsData.ParticleSystems }
                                         },
                     LayerType.Background => new List<Layer.LayerBackgroundData>() { layer.BackgroundData },
                     LayerType.Instances => layer.InstancesData.Instances,
@@ -2541,6 +2622,80 @@ namespace UndertaleModTool
                 return h - 22; // "TabController" has predefined height
             else
                 return 0;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class ParticleSystemRectConverter : IValueConverter
+    {
+        private static Dictionary<UndertaleParticleSystem, Rect> partSystemsDict;
+
+        public static void Initialize(IEnumerable<UndertaleParticleSystem> particleSystems)
+        {
+            partSystemsDict = new();
+
+            foreach (var partSys in particleSystems)
+            {
+                if (partSys is null)
+                    continue;
+
+                _ = AddNewSystem(partSys);
+            }
+        }
+        public static void ClearDict() => partSystemsDict = null;
+
+        private static Rect AddNewSystem(UndertaleParticleSystem partSys)
+        {
+            Rect rect;
+            if (partSys.Emitters.Count == 0)
+            {
+                partSystemsDict[partSys] = rect;
+                return rect;
+            }
+
+            rect = new();
+            var emitters = partSys.Emitters.Select(x => x.Resource);
+
+            float minX = emitters.Select(x => x.RegionX).Min();
+            float maxX = emitters.Select(x => x.RegionX + x.RegionWidth).Max();
+            rect.Width = Math.Abs(minX - maxX);
+
+            float minY = emitters.Select(x => x.RegionY).Min();
+            float maxY = emitters.Select(x => x.RegionY + x.RegionHeight).Max();
+            rect.Height = Math.Abs(minY - maxY);
+
+            rect.X = emitters.Select(x => x.RegionX - x.RegionWidth * 0.5f).Min();
+            rect.Y = emitters.Select(x => x.RegionY - x.RegionHeight * 0.5f).Min();
+
+            partSystemsDict[partSys] = rect;
+
+            return rect;
+        }
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is not UndertaleParticleSystem partSys)
+                return 0;
+            if ((partSys.Emitters?.Count ?? 0) == 0)
+                return 0;
+            if (parameter is not string mode)
+                return 0;
+
+            if (!partSystemsDict.TryGetValue(partSys, out Rect sysRect))
+                sysRect = AddNewSystem(partSys);
+
+            return mode switch
+            {
+                "width" => sysRect.Width,
+                "height" => sysRect.Height,
+                "x" => sysRect.X + 8,
+                "y" => sysRect.Y + 8,
+                _ => 0
+            };
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

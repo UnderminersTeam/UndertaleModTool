@@ -31,6 +31,7 @@
         <local:IsVersionAtLeastConverter x:Key="IsVersionAtLeastConverter"/>
         <local:NegateNumberConverter x:Key="NegateNumberConverter"/>
         <local:ParentGridHeightConverter x:Key="ParentGridHeightConverter"/>
+        <local:ParticleSystemRectConverter x:Key="ParticleSystemRectConverter"/>
         <CompositeCollection x:Key="AllObjectsGMS1">
             <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Backgrounds}"/>
             <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Tiles}"/>
@@ -130,10 +131,16 @@
                         </TextBlock>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+ParticleSystemInstance}">
-                        <TextBlock Text="ParticleSystemInstance (unsupported)"
-                                   Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}">
+                        <TextBlock>
+                            <TextBlock.Text>
+                                <MultiBinding Mode="OneWay" StringFormat="{}Particle system {0} of {1}">
+                                    <Binding Path="Name.Content" Mode="OneWay" TargetNullValue="?" FallbackValue="EmptyName"/>
+                                    <Binding Path="ParticleSystem.Name.Content" Mode="OneWay" TargetNullValue="?" FallbackValue="EmptySystem"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
                             <TextBlock.ContextMenu>
                                 <local:ContextMenuDark>
+                                    <MenuItem Header="Copy particle system instance" Click="MenuItem_Copy_Click" InputGestureText="Ctrl+C"/>
                                     <MenuItem Header="Delete particle system instance" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
                                 </local:ContextMenuDark>
                             </TextBlock.ContextMenu>
@@ -1025,7 +1032,6 @@
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
-                                <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                             </Grid.RowDefinitions>
                             <Grid.Resources>
                                 <Style TargetType="TextBlock" BasedOn="{StaticResource Centered}"/>
@@ -1062,11 +1068,11 @@
                                 <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding ScaleY}" ToolTip="Y"/>
                             </Grid>
 
-                            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Color</TextBlock>
-                            <local:ColorPicker Grid.Row="5" Grid.Column="2" Margin="3" Color="{Binding Color}"/>
+                            <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Color</TextBlock>
+                            <local:ColorPicker Grid.Row="4" Grid.Column="2" Margin="3" Color="{Binding Color}"/>
 
-                            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Animation speed</TextBlock>
-                            <Grid Grid.Row="6" Grid.Column="2" Margin="3">
+                            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Animation speed</TextBlock>
+                            <Grid Grid.Row="5" Grid.Column="2" Margin="3">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="2*"/>
                                     <ColumnDefinition Width="1*"/>
@@ -1076,11 +1082,69 @@
                                 <local:ComboBoxDark Grid.Column="1" ItemsSource="{Binding Source={StaticResource AnimationSpeedType}}" SelectedItem="{Binding AnimationSpeedType}" />
                             </Grid>
 
-                            <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Frame index</TextBlock>
-                            <local:TextBoxDark Grid.Row="7" Grid.Column="2" Margin="3" Text="{Binding FrameIndex}"/>
+                            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Frame index</TextBlock>
+                            <local:TextBoxDark Grid.Row="6" Grid.Column="2" Margin="3" Text="{Binding FrameIndex}"/>
 
-                            <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Rotation</TextBlock>
-                            <local:TextBoxDark Grid.Row="8" Grid.Column="2" Margin="3" Text="{Binding Rotation}"/>
+                            <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Rotation</TextBlock>
+                            <local:TextBoxDark Grid.Row="7" Grid.Column="2" Margin="3" Text="{Binding Rotation}"/>
+                        </Grid>
+                    </DataTemplate>
+
+                    <DataTemplate DataType="{x:Type undertale:UndertaleRoom+ParticleSystemInstance}">
+                        <Grid IsSharedSizeScope="True">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="5"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
+                                <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
+                                <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
+                                <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
+                                <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
+                                <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
+                            </Grid.RowDefinitions>
+                            <Grid.Resources>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource Centered}"/>
+                                <Style TargetType="TextBox" BasedOn="{StaticResource Centered}"/>
+                                <Style TargetType="ComboBox" BasedOn="{StaticResource Centered}"/>
+                                <Style TargetType="local:UndertaleStringReference" BasedOn="{StaticResource Centered}"/>
+                                <Style TargetType="local:UndertaleObjectReference" BasedOn="{StaticResource Centered}"/>
+                                <Style TargetType="local:ColorPicker" BasedOn="{StaticResource Centered}"/>
+                            </Grid.Resources>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
+                            <local:UndertaleStringReference Grid.Row="0" Grid.Column="2" Margin="3" ObjectReference="{Binding Name}"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Definition</TextBlock>
+                            <local:UndertaleObjectReference Grid.Row="1" Grid.Column="2" Margin="3" ObjectReference="{Binding ParticleSystem}" ObjectType="{x:Type undertale:UndertaleParticleSystem}" CanRemove="False"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Position</TextBlock>
+                            <Grid Grid.Row="2" Grid.Column="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding X}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding Y}" ToolTip="Y"/>
+                            </Grid>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Scale</TextBlock>
+                            <Grid Grid.Row="3" Grid.Column="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding ScaleX}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding ScaleY}" ToolTip="Y"/>
+                            </Grid>
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Color</TextBlock>
+                            <local:ColorPicker Grid.Row="4" Grid.Column="2" Margin="3" Color="{Binding Color}"/>
+
+                            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Rotation</TextBlock>
+                            <local:TextBoxDark Grid.Row="5" Grid.Column="2" Margin="3" Text="{Binding Rotation}"/>
                         </Grid>
                     </DataTemplate>
                 </ContentControl.Resources>
@@ -1356,6 +1420,40 @@
                                 </ImageBrush>
                             </Rectangle.Fill>
                         </Rectangle>
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type undertale:UndertaleRoom+ParticleSystemInstance}">
+                        <Canvas Background="Transparent"
+                                Opacity="{Binding Color, Mode=OneWay, Converter={StaticResource ColorToOpacityConverter}}"
+                                MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp">
+                            <Canvas.RenderTransform>
+                                <TransformGroup>
+                                    <TranslateTransform X="-8" Y="-8"/>
+                                    <TranslateTransform x:Name="transform6_0" X="{Binding X, Mode=OneWay}" Y="{Binding Y, Mode=OneWay}"/>
+                                    <ScaleTransform x:Name="transform6_1" ScaleX="{Binding ScaleX, Mode=OneWay}" ScaleY="{Binding ScaleY, Mode=OneWay}"/>
+                                    <RotateTransform x:Name="transform6_2" Angle="{Binding OppositeRotation, Mode=OneWay}"
+                                                     CenterX="{Binding X, Mode=OneWay}" CenterY="{Binding Y, Mode=OneWay}"/>
+                                </TransformGroup>
+                            </Canvas.RenderTransform>
+                            <Ellipse Width="16" Height="16" Fill="Silver"/>
+
+                            <Ellipse Canvas.Left="5" Canvas.Top="5" Width="3" Height="3" Fill="White"/>
+                            <Line Canvas.Left="3.5" Canvas.Top="6.5" X2="6" Stroke="White"/>
+                            <Line Canvas.Left="6.5" Canvas.Top="3.5" Y2="6" Stroke="White"/>
+
+                            <Ellipse Canvas.Left="9" Canvas.Top="9" Width="2" Height="2" Fill="White"/>
+                            <Line Canvas.Left="8" Canvas.Top="10" X2="4" Stroke="White"/>
+                            <Line Canvas.Left="10" Canvas.Top="8" Y2="4" Stroke="White"/>
+
+                            <Border BorderBrush="DarkCyan" BorderThickness="1" Background="Transparent"
+                                    Width="{Binding ParticleSystem, Mode=OneWay, Converter={StaticResource ParticleSystemRectConverter}, ConverterParameter=width}"
+                                    Height="{Binding ParticleSystem, Mode=OneWay, Converter={StaticResource ParticleSystemRectConverter}, ConverterParameter=height}">
+                                <Border.RenderTransform>
+                                    <TranslateTransform x:Name="transform6_3"
+                                                        X="{Binding ParticleSystem, Mode=OneWay, Converter={StaticResource ParticleSystemRectConverter}, ConverterParameter=x}"
+                                                        Y="{Binding ParticleSystem, Mode=OneWay, Converter={StaticResource ParticleSystemRectConverter}, ConverterParameter=y}"/>
+                                </Border.RenderTransform>
+                            </Border>
+                        </Canvas>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerBackgroundData}">
                         <Rectangle Width="{Binding Sprite.Textures[0].Texture.SourceWidth, Mode=OneWay}" Height="{Binding Sprite.Textures[0].Texture.SourceHeight, Mode=OneWay}"

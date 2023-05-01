@@ -291,6 +291,16 @@ namespace UndertaleModLib
         /// </summary>
         public IList<UndertaleFilterEffect> FilterEffects => FORM.FEDS?.List;
 
+        /// <summary>
+        /// The particle systems stored in the data file.
+        /// </summary>
+        public IList<UndertaleParticleSystem> ParticleSystems => FORM.PSYS?.List;
+
+        /// <summary>
+        /// The particle system emitters stored in the data file.
+        /// </summary>
+        public IList<UndertaleParticleSystemEmitter> ParticleSystemEmitters => FORM.PSEM?.List;
+
 
         /// <summary>
         /// Whether this is an unsupported bytecode version.

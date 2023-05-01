@@ -972,25 +972,6 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
 
     public class ParticleKeyframes : TrackKeyframes<ParticleKeyframes.Data>
     {
-        // A temporary implementation, its type should be "ResourceData<UndertaleResourceById<...>>"
-        public class Data : UndertaleObject, IStaticChildObjectsSize
-        {
-            /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
-            public static readonly uint ChildObjectsSize = 4;
-
-            public int ParticleSystemIndex { get; set; }
-
-            /// <inheritdoc />
-            public void Serialize(UndertaleWriter writer)
-            {
-                writer.Write(ParticleSystemIndex);
-            }
-
-            /// <inheritdoc />
-            public void Unserialize(UndertaleReader reader)
-            {
-                ParticleSystemIndex = reader.ReadInt32();
-            }
-        }
+        public class Data : ResourceData<UndertaleResourceById<UndertaleParticleSystem, UndertaleChunkPSYS>> { }
     }
 }

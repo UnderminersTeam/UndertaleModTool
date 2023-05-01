@@ -2105,15 +2105,51 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             }
         }
         public float Rotation { get; set; }
+
+        /// <summary>
+        /// The opposite angle of the current rotation.
+        /// </summary>
+        /// <remarks>
+        /// This attribute is UMT-only and does not exist in GameMaker.
+        /// </remarks>
         public float OppositeRotation => 360F - Rotation;
 
+        /// <summary>
+        /// A horizontal offset relative to top-left corner of the sprite instance.
+        /// </summary>
+        /// <remarks>
+        /// Used for proper sprite instance rotation display in the room editor and for determining <see cref="XOffset"/>.<br/>
+        /// This attribute is UMT-only and does not exist in GameMaker.
+        /// </remarks>
         public int SpriteXOffset => Sprite != null
             ? (-1 * Sprite.OriginXWrapper) + (Sprite.Textures.ElementAtOrDefault(WrappedFrameIndex)?.Texture?.TargetX ?? 0)
             : 0;
+
+        /// <summary>
+        /// A vertical offset relative to top-left corner of the sprite instance.
+        /// </summary>
+        /// <remarks>
+        /// Used for proper sprite instance rotation display in the room editor and for determining <see cref="YOffset"/>.<br/>
+        /// This attribute is UMT-only and does not exist in GameMaker.
+        /// </remarks>
         public int SpriteYOffset => Sprite != null
             ? (-1 * Sprite.OriginYWrapper) + (Sprite.Textures.ElementAtOrDefault(WrappedFrameIndex)?.Texture?.TargetY ?? 0)
             : 0;
+
+        /// <summary>
+        /// A horizontal offset used for proper sprite instance position display in the room editor.
+        /// </summary>
+        /// <remarks>
+        /// This attribute is UMT-only and does not exist in GameMaker.
+        /// </remarks>
         public int XOffset => X + SpriteXOffset;
+
+        /// <summary>
+        /// A vertical offset used for proper sprite instance display in the room editor.
+        /// </summary>
+        /// <remarks>
+        /// This attribute is UMT-only and does not exist in GameMaker.
+        /// </remarks>
         public int YOffset => Y + SpriteYOffset;
 
         /// <inheritdoc />
@@ -2159,7 +2195,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         public static UndertaleString GenerateRandomName(UndertaleData data)
         {
             // The same format as in "GameMaker Studio: 2".
-            return data.Strings.MakeString("graphic_" + ((uint)new Random().Next(-int.MaxValue, int.MaxValue)).ToString("X8"));
+            return data.Strings.MakeString("graphic_" + ((uint)Random.Shared.Next(-int.MaxValue, int.MaxValue)).ToString("X8"));
         }
 
         /// <inheritdoc />
@@ -2250,33 +2286,91 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         }
     }
 
-    // It's not fully implemented yet
     public class ParticleSystemInstance : UndertaleObject, INotifyPropertyChanged, IStaticChildObjCount, IStaticChildObjectsSize, IDisposable
     {
         /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
-        public static readonly uint ChildObjectCount = 0;
+        public static readonly uint ChildObjectCount = 1;
 
         /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
         public static readonly uint ChildObjectsSize = 32;
 
         public event PropertyChangedEventHandler PropertyChanged;
-
-        private byte[] rawData;
-
-        public void Serialize(UndertaleWriter writer)
+        protected void OnPropertyChanged([CallerMemberName] string name = null)
         {
-            writer.Write(rawData);
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
+        private UndertaleResourceById<UndertaleParticleSystem, UndertaleChunkPSYS> _particleSys = new();
+
+        public UndertaleString Name { get; set; }
+        public UndertaleParticleSystem ParticleSystem
+        {
+            get => _particleSys.Resource;
+            set
+            {
+                _particleSys.Resource = value;
+                OnPropertyChanged();
+            }
+        }
+        public int X { get; set; }
+        public int Y { get; set; }
+        public float ScaleX { get; set; }
+        public float ScaleY { get; set; }
+        public uint Color { get; set; }
+        public float Rotation { get; set; }
+
+        /// <summary>
+        /// The opposite angle of the current rotation.
+        /// </summary>
+        /// <remarks>
+        /// This attribute is UMT-only and does not exist in GameMaker.
+        /// </remarks>
+        public float OppositeRotation => 360F - Rotation;
+
+        /// <inheritdoc />
+        public void Serialize(UndertaleWriter writer)
+        {
+            writer.WriteUndertaleString(Name);
+            writer.WriteUndertaleObject(_particleSys);
+            writer.Write(X);
+            writer.Write(Y);
+            writer.Write(ScaleX);
+            writer.Write(ScaleY);
+            writer.Write(Color);
+            writer.Write(Rotation);
+        }
+
+        /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
-            rawData = reader.ReadBytes((int)ChildObjectsSize);
+            Name = reader.ReadUndertaleString();
+            _particleSys = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleParticleSystem, UndertaleChunkPSYS>>();
+            X = reader.ReadInt32();
+            Y = reader.ReadInt32();
+            ScaleX = reader.ReadSingle();
+            ScaleY = reader.ReadSingle();
+            Color = reader.ReadUInt32();
+            Rotation = reader.ReadSingle();
+        }
+
+        public static UndertaleString GenerateRandomName(UndertaleData data)
+        {
+            return data.Strings.MakeString("particle_" + ((uint)Random.Shared.Next(-int.MaxValue, int.MaxValue)).ToString("X8"));
+        }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return "Particle system " + Name?.Content + " of " + (ParticleSystem?.Name?.Content ?? "?");
         }
 
         /// <inheritdoc/>
         public void Dispose()
         {
             GC.SuppressFinalize(this);
+
+            _particleSys.Dispose();
+            Name = null;
         }
     }
 }
