@@ -24,7 +24,7 @@
             </Border>
         </Viewbox>
 
-        <local:TextBoxDark x:Name="ColorText" Grid.Column="1" MaxLength="9" ToolTip="A, B, G, R"/>
+        <local:TextBoxDark x:Name="ColorText" Grid.Column="1" MaxLength="9" ToolTip="#AABBGGRR"/>
         <!-- "Text" binding is in the code of "ColorPicker" -->
     </Grid>
 </UserControl>

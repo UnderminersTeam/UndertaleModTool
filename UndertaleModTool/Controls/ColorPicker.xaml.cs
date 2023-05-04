@@ -59,7 +59,8 @@ namespace UndertaleModTool
             ColorText.SetBinding(TextBox.TextProperty, binding);
 
             ColorText.MaxLength = HasAlpha ? 9 : 7;
-            ColorText.ToolTip = $"{(HasAlpha ? "A, " : "")}B, G, R";
+            ColorText.ToolTip = $"#{(HasAlpha ? "AA" : "")}BBGGRR";
+            ToolTipService.SetInitialShowDelay(ColorText, 250);
         }
 
         private static void OnHasAlphaChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs e)
@@ -77,7 +78,7 @@ namespace UndertaleModTool
             colorPicker.ColorText.SetBinding(TextBox.TextProperty, binding);
 
             colorPicker.ColorText.MaxLength = hasAlpha ? 9 : 7;
-            colorPicker.ColorText.ToolTip = $"{(hasAlpha ? "A, " : "")}B, G, R";
+            colorPicker.ColorText.ToolTip = $"#{(hasAlpha ? "AA" : "")}BBGGRR";
         }
     }
 
@@ -102,33 +103,40 @@ namespace UndertaleModTool
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            uint val = System.Convert.ToUInt32(value);
-            bool hasAlpha = bool.Parse((string)parameter);
-            return "#" + (hasAlpha ? val.ToString("X8") : val.ToString("X8")[2..]);
+            try
+            {
+                uint val = System.Convert.ToUInt32(value);
+                bool hasAlpha = bool.Parse((string)parameter);
+                return "#" + (hasAlpha ? val.ToString("X8") : val.ToString("X8")[2..]);
+            }
+            catch (Exception ex)
+            {
+                return new ValidationResult(false, ex.Message);
+            }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            string val = (string)value;
-            bool hasAlpha = bool.Parse((string)parameter);
-
-            if (val[0] != '#')
-                return new ValidationResult(false, "Invalid color string");
-
-            val = val[1..];
-            if (val.Length != (hasAlpha ? 8 : 6))
-                return new ValidationResult(false, "Invalid color string");
-
-            if (!hasAlpha)
-                val = "FF" + val; // add alpha (255)
-
             try
             {
+                string val = (string)value;
+                bool hasAlpha = bool.Parse((string)parameter);
+
+                if (val[0] != '#')
+                    return new ValidationResult(false, "Invalid color string");
+
+                val = val[1..];
+                if (val.Length != (hasAlpha ? 8 : 6))
+                    return new ValidationResult(false, "Invalid color string");
+
+                if (!hasAlpha)
+                    val = "FF" + val; // add alpha (255)
+                
                 return System.Convert.ToUInt32(val, 16);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                return new ValidationResult(false, e.Message);
+                return new ValidationResult(false, ex.Message);
             }
         }
     }
