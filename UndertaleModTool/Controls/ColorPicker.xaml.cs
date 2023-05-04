@@ -59,7 +59,8 @@ namespace UndertaleModTool
             ColorText.SetBinding(TextBox.TextProperty, binding);
 
             ColorText.MaxLength = HasAlpha ? 9 : 7;
-            ColorText.ToolTip = $"{(HasAlpha ? "A, " : "")}B, G, R";
+            ColorText.ToolTip = $"#{(HasAlpha ? "AA" : "")}BBGGRR";
+            ToolTipService.SetInitialShowDelay(ColorText, 250);
         }
 
         private static void OnHasAlphaChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs e)
@@ -77,7 +78,7 @@ namespace UndertaleModTool
             colorPicker.ColorText.SetBinding(TextBox.TextProperty, binding);
 
             colorPicker.ColorText.MaxLength = hasAlpha ? 9 : 7;
-            colorPicker.ColorText.ToolTip = $"{(hasAlpha ? "A, " : "")}B, G, R";
+            colorPicker.ColorText.ToolTip = $"#{(hasAlpha ? "AA" : "")}BBGGRR";
         }
     }
 
