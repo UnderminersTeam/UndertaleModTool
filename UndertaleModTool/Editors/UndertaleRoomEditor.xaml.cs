@@ -195,11 +195,14 @@ namespace UndertaleModTool
                             foreach (Tile tile in layer.AssetsData.LegacyTiles)
                                 roomObjDict.TryAdd(tile.InstanceID, layer);
 
-                            foreach (ParticleSystemInstance partSys in layer.AssetsData.ParticleSystems)
-                                partSysInstDict.TryAdd(partSys, layer);
-
-                            var particleSystems = layer.AssetsData.ParticleSystems.Select(x => x.ParticleSystem);
-                            ParticleSystemRectConverter.Initialize(particleSystems);
+                            if ((layer.AssetsData.ParticleSystems?.Count ?? 0) > 0)
+                            {
+                                foreach (ParticleSystemInstance partSys in layer.AssetsData.ParticleSystems)
+                                    partSysInstDict.TryAdd(partSys, layer);
+                                    
+                                var particleSystems = layer.AssetsData.ParticleSystems.Select(x => x.ParticleSystem);
+                                ParticleSystemRectConverter.Initialize(particleSystems);
+                            }
                         }
                         else if (layer.LayerType == LayerType.Instances)
                         {
