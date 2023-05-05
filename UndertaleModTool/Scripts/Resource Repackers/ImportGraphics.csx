@@ -104,12 +104,19 @@ foreach (Atlas atlas in packer.Atlasses)
             {
                 // Get sprite to add this texture to
                 string spriteName;
-                int lastUnderscore, frame;
+                int lastUnderscore;
+                int frame = 0;
                 try
                 {
                     lastUnderscore = stripped.LastIndexOf('_');
-                    spriteName = stripped.Substring(0, lastUnderscore);
-                    frame = Int32.Parse(stripped.Substring(lastUnderscore + 1));
+                    if (lastUnderscore != -1)
+                    {
+                        spriteName = stripped[..lastUnderscore];
+                        Int32.TryParse(stripped.Substring(lastUnderscore + 1), out frame);
+                    }
+                    else
+                        spriteName = stripped;
+                    
                 }
                 catch (Exception e)
                 {
@@ -574,32 +581,23 @@ Pressing ""No"" will cause the program to ignore these images.");
         // Sprites can have multiple frames! Do some sprite-specific checking.
         if (spriteType == SpriteType.Sprite)
         {
+            // Allow sprites without an underscore
+            if (lastUnderscore == -1)
+                continue;
+
             try
             {
-                spriteName = stripped.Substring(0, lastUnderscore);
+                spriteName = stripped[..lastUnderscore];
             }
             catch
             {
                 throw new ScriptException("Getting the sprite name of " + FileNameWithExtension + " failed.");
             }
-            Int32 validFrameNumber = 0;
-            try
-            {
-                validFrameNumber = Int32.Parse(stripped.Substring(lastUnderscore + 1));
-            }
-            catch
-            {
-                throw new ScriptException("The index of " + FileNameWithExtension + " could not be determined.");
-            }
-            int frame = 0;
-            try
-            {
-                frame = Int32.Parse(stripped.Substring(lastUnderscore + 1));
-            }
-            catch
-            {
-                throw new ScriptException(FileNameWithExtension + " is using letters instead of numbers. The script has stopped for your own protection.");
-            }
+
+            // If sprite has no index, then assume it's a single frame sprite
+            if (!Int32.TryParse(stripped.Substring(lastUnderscore + 1), out int frame))
+                continue;
+            
             int prevframe = 0;
             if (frame != 0)
             {
