@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -27,6 +28,8 @@ namespace UndertaleModTool
     public partial class UndertaleObjectReference : UserControl
     {
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+        private static readonly Regex camelCaseRegex = new("(?<=[a-z])([A-Z])", RegexOptions.Compiled);
+        private static readonly char[] vowels = { 'a', 'o', 'u', 'e', 'i', 'y' };
 
         public static DependencyProperty ObjectReferenceProperty =
             DependencyProperty.Register("ObjectReference", typeof(object),
@@ -123,9 +126,18 @@ namespace UndertaleModTool
                 return;
             
             string typeName = ObjectType.ToString();
-            if (typeName.StartsWith("UndertaleModLib.Models."))
-                typeName = typeName["UndertaleModLib.Models.".Length..];
-            label.Content = $"(drag & drop an object of type {typeName})";
+            string n = "";
+            if (typeName.StartsWith("UndertaleModLib.Models.Undertale"))
+            {
+                // "UndertaleAudioGroup" -> "audio group"
+                typeName = typeName["UndertaleModLib.Models.Undertale".Length..];
+                typeName = camelCaseRegex.Replace(typeName, " $1").ToLowerInvariant();
+            }
+            // If the first letter is a vowel
+            if (Array.IndexOf(vowels, typeName[0]) != -1)
+                n = "n";
+                
+            label.Content = $"(drag & drop a{n} {typeName})";
         }
 
         public void ClearRemoveClickHandler()
