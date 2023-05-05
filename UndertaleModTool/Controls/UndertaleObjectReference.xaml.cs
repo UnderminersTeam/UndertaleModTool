@@ -111,6 +111,21 @@ namespace UndertaleModTool
         public UndertaleObjectReference()
         {
             InitializeComponent();
+            Loaded += UndertaleObjectReference_Loaded;
+        }
+        private void UndertaleObjectReference_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (ObjectType is null)
+                return;
+
+            var label = TryFindResource("emptyReferenceLabel") as Label;
+            if (label is null)
+                return;
+            
+            string typeName = ObjectType.ToString();
+            if (typeName.StartsWith("UndertaleModLib.Models."))
+                typeName = typeName["UndertaleModLib.Models.".Length..];
+            label.Content = $"(drag & drop an object of type {typeName})";
         }
 
         public void ClearRemoveClickHandler()

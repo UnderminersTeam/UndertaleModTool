@@ -6,12 +6,14 @@
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
-             d:DesignHeight="20" d:DesignWidth="300">
+             d:DesignHeight="20" d:DesignWidth="300"
+             Name="objectReference">
     <UserControl.Resources>
         <local:ContextMenuDark x:Key="contextMenu" Opened="MenuItem_ContextMenuOpened">
             <MenuItem Header="Open in new tab" Click="OpenInNewTabItem_Click"/>
             <MenuItem Header="Find all references" Click="FindAllReferencesItem_Click"/>
         </local:ContextMenuDark>
+        <Label x:Key="emptyReferenceLabel" Foreground="Gray" FontStyle="Italic" />
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -23,21 +25,37 @@
                            ToolTip="This is an object reference. Drag and drop an object of matching type from the tree on the left to change it!"
                            ToolTipService.InitialShowDelay="250"
                            PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" PreviewMouseDoubleClick="TextBox_MouseDoubleClick" PreviewMouseDown="Details_MouseDown"
-                           Text="{Binding ObjectReference, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                           Text="{Binding ObjectReference, ElementName=objectReference}">
+            <TextBox.Style>
+                <Style TargetType="{x:Type TextBox}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ObjectReference, ElementName=objectReference}" Value="{x:Null}">
+                            <Setter Property="Background">
+                                <Setter.Value>
+                                    <VisualBrush AlignmentX="Left" AlignmentY="Center" Stretch="None"
+                                                 Visual="{StaticResource emptyReferenceLabel}">
+                                    </VisualBrush>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBox.Style>
+        </local:TextBoxDark>
         <local:ButtonDark Grid.Column="1" x:Name="DetailsButton" Click="Details_Click" MouseDown="Details_MouseDown">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Setter Property="Content" Value=" ... " />
                     <Setter Property="ToolTip" Value="Open referenced object" />
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding ObjectReference, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="{x:Null}">
+                        <DataTrigger Binding="{Binding ObjectReference, ElementName=objectReference}" Value="{x:Null}">
                             <Setter Property="IsEnabled" Value="False"/>
                         </DataTrigger>
 
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
-                                <Condition Binding="{Binding ObjectType, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="{x:Type undertale:UndertaleCode}" />
-                                <Condition Binding="{Binding ObjectReference, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="{x:Null}" />
+                                <Condition Binding="{Binding ObjectType, ElementName=objectReference}" Value="{x:Type undertale:UndertaleCode}" />
+                                <Condition Binding="{Binding ObjectReference, ElementName=objectReference}" Value="{x:Null}" />
                             </MultiDataTrigger.Conditions>
                             <Setter Property="Content" Value=" + "/>
                             <Setter Property="ToolTip" Value="Create new code entry" />
@@ -51,12 +69,12 @@
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding CanRemove, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="False">
+                        <DataTrigger Binding="{Binding CanRemove, ElementName=objectReference}" Value="False">
                             <DataTrigger.Setters>
                                 <Setter Property="IsEnabled" Value="False"/>
                             </DataTrigger.Setters>
                         </DataTrigger>
-                        <DataTrigger Binding="{Binding ObjectReference, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="{x:Null}">
+                        <DataTrigger Binding="{Binding ObjectReference, ElementName=objectReference}" Value="{x:Null}">
                             <DataTrigger.Setters>
                                 <Setter Property="IsEnabled" Value="False"/>
                             </DataTrigger.Setters>
