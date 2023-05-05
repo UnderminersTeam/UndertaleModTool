@@ -21,6 +21,7 @@
         </Grid.ColumnDefinitions>
         <local:TextBoxDark Grid.Column="0" x:Name="ObjectText" IsReadOnly="True" Cursor="Arrow" AllowDrop="True"
                            ToolTip="This is an object reference. Drag and drop an object of matching type from the tree on the left to change it!"
+                           ToolTipService.InitialShowDelay="250"
                            PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" PreviewMouseDoubleClick="TextBox_MouseDoubleClick" PreviewMouseDown="Details_MouseDown"
                            Text="{Binding ObjectReference, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
         <local:ButtonDark Grid.Column="1" x:Name="DetailsButton" Click="Details_Click" MouseDown="Details_MouseDown">

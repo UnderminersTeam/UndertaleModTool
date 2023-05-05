@@ -31,7 +31,9 @@
                 </Style>
             </TextBox.Style>
         </local:TextBoxDark>
-        <local:TextBoxDark Grid.Column="1" x:Name="ObjectText" IsReadOnly="True" Cursor="Arrow" ToolTip="This is an object reference. Drag and drop an object of matching type from the tree on the left to change it!" AllowDrop="True"
+        <local:TextBoxDark Grid.Column="1" x:Name="ObjectText" IsReadOnly="True" Cursor="Arrow" AllowDrop="True"
+                           ToolTip="This is an object reference. Drag and drop an object of matching type from the tree on the left to change it!"
+                           ToolTipService.InitialShowDelay="250"
                            PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" PreviewMouseDoubleClick="TextBox_MouseDoubleClick" PreviewMouseDown="Details_MouseDown">
             <TextBox.Style>
                 <Style TargetType="{x:Type TextBox}">
