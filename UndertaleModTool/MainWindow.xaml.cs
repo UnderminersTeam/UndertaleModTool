@@ -2126,6 +2126,14 @@ namespace UndertaleModTool
                 if (!directory.Exists)
                 {
                     item.Items.Add(new MenuItem {Header = $"(Path {folderDir} does not exist, cannot search for files!)", IsEnabled = false});
+
+                    if (item.Name == "RootScriptItem")
+                    {
+                        var otherScripts1 = new MenuItem {Header = "Run _other script..."};
+                        otherScripts1.Click += MenuItem_RunOtherScript_Click;
+                        item.Items.Add(otherScripts1);
+                    }
+
                     return;
                 }
 
