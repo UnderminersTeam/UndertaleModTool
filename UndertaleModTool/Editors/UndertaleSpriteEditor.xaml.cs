@@ -15,7 +15,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 
@@ -42,10 +41,10 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    string dir = System.IO.Path.GetDirectoryName(dlg.FileName);
-                    string name = System.IO.Path.GetFileNameWithoutExtension(dlg.FileName);
-                    string path = System.IO.Path.Combine(dir, name);
-                    string ext = System.IO.Path.GetExtension(dlg.FileName);
+                    string dir = Path.GetDirectoryName(dlg.FileName);
+                    string name = Path.GetFileNameWithoutExtension(dlg.FileName);
+                    string path = Path.Combine(dir, name);
+                    string ext = Path.GetExtension(dlg.FileName);
 
                     if (sprite.SpineTextures.Count > 0)
                     {
@@ -56,7 +55,7 @@ namespace UndertaleModTool
                         {
                             try
                             {
-                                File.WriteAllBytes(System.IO.Path.Combine(path, tex.id + ext), tex.tex.TexBlob);
+                                File.WriteAllBytes(Path.Combine(path, tex.id + ext), tex.tex.TexBlob);
                             }
                             catch (Exception ex)
                             {
@@ -65,8 +64,8 @@ namespace UndertaleModTool
                         }
 
                         // json and atlas
-                        File.WriteAllText(System.IO.Path.Combine(path, "spine.json"), sprite.SpineJSON);
-                        File.WriteAllText(System.IO.Path.Combine(path, "spine.atlas"), sprite.SpineAtlas);
+                        File.WriteAllText(Path.Combine(path, "spine.json"), sprite.SpineJSON);
+                        File.WriteAllText(Path.Combine(path, "spine.atlas"), sprite.SpineAtlas);
                     }
                 }
                 catch (Exception ex)
@@ -98,19 +97,23 @@ namespace UndertaleModTool
             {
                 try
                 {
+                    bool includePadding = false;
+                    if (mainWindow.ShowQuestion("Include padding?") == MessageBoxResult.Yes)
+                        includePadding = true;
+
                     if (sprite.Textures.Count > 1)
                     {
-                        string dir = System.IO.Path.GetDirectoryName(dlg.FileName);
-                        string name = System.IO.Path.GetFileNameWithoutExtension(dlg.FileName);
-                        string path = System.IO.Path.Combine(dir, name);
-                        string ext = System.IO.Path.GetExtension(dlg.FileName);
+                        string dir = Path.GetDirectoryName(dlg.FileName);
+                        string name = Path.GetFileNameWithoutExtension(dlg.FileName);
+                        string path = Path.Combine(dir, name);
+                        string ext = Path.GetExtension(dlg.FileName);
 
                         Directory.CreateDirectory(path);
                         foreach (var tex in sprite.Textures.Select((tex, id) => new { id, tex }))
                         {
                             try
                             {
-                                worker.ExportAsPNG(tex.tex.Texture, System.IO.Path.Combine(path, sprite.Name.Content + "_" + tex.id + ext));
+                                worker.ExportAsPNG(tex.tex.Texture, Path.Combine(path, sprite.Name.Content + "_" + tex.id + ext), null, includePadding);
                             }
                             catch (Exception ex)
                             {
@@ -122,7 +125,7 @@ namespace UndertaleModTool
                     {
                         try
                         {
-                            worker.ExportAsPNG(sprite.Textures[0].Texture, dlg.FileName);
+                            worker.ExportAsPNG(sprite.Textures[0].Texture, dlg.FileName, null, includePadding);
                         }
                         catch (Exception ex)
                         {
