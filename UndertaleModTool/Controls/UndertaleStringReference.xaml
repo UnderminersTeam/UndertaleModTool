@@ -17,8 +17,9 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <local:TextBoxDark Grid.Column="0" x:Name="ObjectText" ToolTip="This is an string reference. Change the value here to edit this just this value of all referenced values, or drag and drop another string instance from the tree on the left to change the reference"
-                           AllowDrop="True" Text="{Binding ObjectReference.Content, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=Explicit}"
+        <local:TextBoxDark Grid.Column="0" x:Name="ObjectText" AllowDrop="True"
+                           ToolTip="This is an string reference. Change the value here to edit this just this value of all referenced values, or drag and drop another string instance from the tree on the left to change the reference"
+                           Text="{Binding ObjectReference.Content, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=Explicit}"
                            PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" LostFocus="TextBox_LostFocus" PreviewMouseDown="Details_MouseDown">
             <TextBox.Style>
                 <Style TargetType="{x:Type TextBox}">
