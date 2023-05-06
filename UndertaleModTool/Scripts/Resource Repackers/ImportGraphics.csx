@@ -14,6 +14,9 @@ EnsureDataLoaded();
 
 bool importAsSprite = false;
 
+// "(.+?)" - match everything; "?" = match as few characters as possible.
+// "(?:_(-*\d+))*" - an underscore + (optional minus + several digits);
+// "?:" = don't make a separate group for the whole part, "*" = make this part optional.
 Regex sprFrameRegex = new(@"^(.+?)(?:_(-*\d+))*$", RegexOptions.Compiled);
 string importFolder = CheckValidity();
 
