@@ -14,6 +14,10 @@ EnsureDataLoaded();
 
 bool importAsSprite = false;
 
+// "(.+?)" - match everything; "?" = match as few characters as possible.
+// "(?:_(-*\d+))*" - an underscore + (optional minus + several digits);
+// "?:" = don't make a separate group for the whole part, "*" = make this part optional.
+Regex sprFrameRegex = new(@"^(.+?)(?:_(-*\d+))*$", RegexOptions.Compiled);
 string importFolder = CheckValidity();
 
 string packDir = Path.Combine(ExePath, "Packager");
@@ -104,19 +108,12 @@ foreach (Atlas atlas in packer.Atlasses)
             {
                 // Get sprite to add this texture to
                 string spriteName;
-                int lastUnderscore;
                 int frame = 0;
                 try
                 {
-                    lastUnderscore = stripped.LastIndexOf('_');
-                    if (lastUnderscore != -1)
-                    {
-                        spriteName = stripped[..lastUnderscore];
-                        Int32.TryParse(stripped.Substring(lastUnderscore + 1), out frame);
-                    }
-                    else
-                        spriteName = stripped;
-                    
+                    var spriteParts = sprFrameRegex.Match(stripped);
+                    spriteName = spriteParts.Groups[1].Value;
+                    Int32.TryParse(spriteParts.Groups[2].Value, out frame);
                 }
                 catch (Exception e)
                 {
@@ -544,12 +541,12 @@ Do you want to continue?");
 
     //Stop the script if there's missing sprite entries or w/e.
     bool hadMessage = false;
+    string currSpriteName = null;
     string[] dirFiles = Directory.GetFiles(importFolder, "*.png", SearchOption.AllDirectories);
     foreach (string file in dirFiles)
     {
         string FileNameWithExtension = Path.GetFileName(file);
         string stripped = Path.GetFileNameWithoutExtension(file);
-        int lastUnderscore = stripped.LastIndexOf('_');
         string spriteName = "";
 
         SpriteType spriteType = GetSpriteType(file);
@@ -581,36 +578,61 @@ Pressing ""No"" will cause the program to ignore these images.");
         // Sprites can have multiple frames! Do some sprite-specific checking.
         if (spriteType == SpriteType.Sprite)
         {
-            // Allow sprites without an underscore
-            if (lastUnderscore == -1)
+            var spriteParts = sprFrameRegex.Match(stripped);
+            // Allow sprites without underscores
+            if (!spriteParts.Groups[2].Success)
                 continue;
 
-            try
-            {
-                spriteName = stripped[..lastUnderscore];
-            }
-            catch
-            {
-                throw new ScriptException("Getting the sprite name of " + FileNameWithExtension + " failed.");
-            }
+            spriteName = spriteParts.Groups[1].Value;
 
-            // If sprite has no index, then assume it's a single frame sprite
-            if (!Int32.TryParse(stripped.Substring(lastUnderscore + 1), out int frame))
+            if (!Int32.TryParse(spriteParts.Groups[2].Value, out int frame))
+                throw new ScriptException(spriteName + " has an invalid frame index.");
+            if (frame < 0)
+                throw new ScriptException(spriteName + " is using an invalid numbering scheme. The script has stopped for your own protection.");
+
+            // If it's not a first frame of the sprite
+            if (spriteName == currSpriteName)
                 continue;
             
-            int prevframe = 0;
-            if (frame != 0)
+            string[][] spriteFrames = Directory.GetFiles(importFolder, $"{spriteName}_*.png", SearchOption.AllDirectories)
+                                               .Select(x =>
+                                               {
+                                                  var match = sprFrameRegex.Match(Path.GetFileNameWithoutExtension(x));
+                                                  if (match.Groups[2].Success)
+                                                      return new string[] { match.Groups[1].Value, match.Groups[2].Value };
+                                                  else
+                                                      return null;
+                                               })
+                                               .OfType<string[]>().ToArray();
+            if (spriteFrames.Length == 1)
             {
-                prevframe = (frame - 1);
-            }
-            if (frame < 0)
+                currSpriteName = null;
+                continue;
+            }    
+            
+            int[] frameIndexes = spriteFrames.Select(x =>
             {
-                throw new ScriptException(spriteName + " is using an invalid numbering scheme. The script has stopped for your own protection.");
+                if (Int32.TryParse(x[1], out int frame))
+                    return (int?)frame;
+                else
+                    return null;
+            }).OfType<int?>().Cast<int>().OrderBy(x => x).ToArray();
+            if (frameIndexes.Length == 1)
+            {
+                currSpriteName = null;
+                continue;
             }
-            var prevFrameName = spriteName + "_" + prevframe.ToString() + ".png";
-            string[] previousFrameFiles = Directory.GetFiles(importFolder, prevFrameName, SearchOption.AllDirectories);
-            if (previousFrameFiles.Length < 1)
-                throw new ScriptException(spriteName + " is missing one or more indexes. The detected missing index is: " + prevFrameName);
+            
+            for (int i = 0; i < frameIndexes.Length - 1; i++)
+            {
+                int num = frameIndexes[i];
+                int nextNum = frameIndexes[i + 1];
+
+                if (nextNum - num > 1)
+                    throw new ScriptException(spriteName + " is missing one or more indexes.\nThe detected missing index is: " + (num + 1));
+            }
+
+            currSpriteName = spriteName;
         }
     }
     return importFolder;
