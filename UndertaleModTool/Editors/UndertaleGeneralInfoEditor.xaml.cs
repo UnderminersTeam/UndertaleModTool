@@ -104,11 +104,14 @@ namespace UndertaleModTool
 
         private void SyncRoomList_Click(object sender, RoutedEventArgs e)
         {
-            IList<UndertaleRoom> rooms = mainWindow.Data.Rooms;
-            IList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> roomOrder = (this.DataContext as GeneralInfoEditor).GeneralInfo.RoomOrder;
-            roomOrder.Clear();
-            foreach(var room in rooms)
-                roomOrder.Add(new UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>() { Resource = room });
+            if (mainWindow.ShowQuestion("Sync room order with room list?\n\nThis will undo all changes made to the room order.", MessageBoxImage.Warning, "Confirmation") == MessageBoxResult.Yes)
+            {
+                IList<UndertaleRoom> rooms = mainWindow.Data.Rooms;
+                IList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> roomOrder = (this.DataContext as GeneralInfoEditor).GeneralInfo.RoomOrder;
+                roomOrder.Clear();
+                foreach (var room in rooms)
+                    roomOrder.Add(new UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>() { Resource = room });
+            }
         }
 
         private void DebuggerCheckBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
