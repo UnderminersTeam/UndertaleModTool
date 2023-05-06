@@ -31,6 +31,10 @@ namespace UndertaleModTool
             InitializeComponent();
         }
 
+        /// <summary>
+        /// Selects the given room inside the RoomOrderList.
+        /// </summary>
+        /// <param name="room">the room to select.</param>
         private void SelectItem(object room)
         {
             RoomListGrid.ScrollIntoView(room); // This works with a virtualized DataGrid
@@ -45,6 +49,11 @@ namespace UndertaleModTool
             cell.Focus();
         }
 
+        /// <summary>
+        /// Moves the given room up and down the RoomOrderList./>.
+        /// </summary>
+        /// <param name="room">The room to move.</param>
+        /// <param name="dist">Distance to move it. Positive - down, negative - up.</param>
         private void MoveItem(UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM> room, int dist)
         {
             IList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> roomOrder = (this.DataContext as GeneralInfoEditor).GeneralInfo.RoomOrder;
@@ -69,6 +78,8 @@ namespace UndertaleModTool
 
         private void RoomListGrid_KeyDown(object sender, KeyEventArgs e)
         {
+            IList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> roomOrder = (this.DataContext as GeneralInfoEditor).GeneralInfo.RoomOrder;
+
             object selected = RoomListGrid.SelectedItem;
             if (selected == null)
                 return;
@@ -81,6 +92,12 @@ namespace UndertaleModTool
                     break;
                 case Key.OemPlus:
                     MoveItem(room, 1);
+                    break;
+                 case Key.N: // Insert new blank room
+                    int index = roomOrder.IndexOf(room);
+                    UndertaleResourceById < UndertaleRoom, UndertaleChunkROOM > newRoom = new();
+                    roomOrder.Insert(index + 1, newRoom);
+                    SelectItem(newRoom);
                     break;
             }
         }
