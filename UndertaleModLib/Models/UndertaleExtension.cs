@@ -307,6 +307,7 @@ public class UndertaleExtension : UndertaleNamedResource, IDisposable
     /// </summary>
     public UndertaleString Name { get; set; }
     public UndertaleString ClassName { get; set; }
+    public UndertaleString Version { get; set; }
 
     public UndertalePointerList<UndertaleExtensionFile> Files { get; set; } = new UndertalePointerList<UndertaleExtensionFile>();
     public UndertalePointerList<UndertaleExtensionOption> Options { get; set; } = new UndertalePointerList<UndertaleExtensionOption>();
@@ -331,6 +332,7 @@ public class UndertaleExtension : UndertaleNamedResource, IDisposable
         FolderName = null;
         Name = null;
         ClassName = null;
+        Version = null;
     }
 
     /// <inheritdoc />
@@ -338,6 +340,8 @@ public class UndertaleExtension : UndertaleNamedResource, IDisposable
     {
         writer.WriteUndertaleString(FolderName);
         writer.WriteUndertaleString(Name);
+        if (writer.undertaleData.IsVersionAtLeast(2023, 4))
+            writer.WriteUndertaleString(Version);
         writer.WriteUndertaleString(ClassName);
         if (writer.undertaleData.IsVersionAtLeast(2022, 6))
         {
@@ -357,6 +361,8 @@ public class UndertaleExtension : UndertaleNamedResource, IDisposable
     {
         FolderName = reader.ReadUndertaleString();
         Name = reader.ReadUndertaleString();
+        if (reader.undertaleData.IsVersionAtLeast(2023, 4))
+            Version = reader.ReadUndertaleString();
         ClassName = reader.ReadUndertaleString();
         if (reader.undertaleData.IsVersionAtLeast(2022, 6))
         {
@@ -376,7 +382,11 @@ public class UndertaleExtension : UndertaleNamedResource, IDisposable
     {
         uint count = 0;
 
-        reader.Position += 12;
+        if (reader.undertaleData.IsVersionAtLeast(2023, 4))
+            reader.Position += 12 + 4; // + "Version"
+        else
+            reader.Position += 12;
+        
         if (reader.undertaleData.IsVersionAtLeast(2022, 6))
         {
             uint filesPtr = reader.ReadUInt32();
