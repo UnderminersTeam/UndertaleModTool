@@ -22,9 +22,11 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertaleExtensionEditor : DataUserControl
     {
-        public int MyIndex { get => (Application.Current.MainWindow as MainWindow).Data.Extensions.IndexOf((UndertaleExtension)this.DataContext); }
+        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+
+        public int MyIndex { get => mainWindow.Data.Extensions.IndexOf((UndertaleExtension)this.DataContext); }
         // God this is so ugly, if there's a better way, please, put in a pull request
-        public byte[] ProductIdData { get => (((((Application.Current.MainWindow as MainWindow).Data?.GeneralInfo?.Major ?? 0) >= 2) || ((((Application.Current.MainWindow as MainWindow).Data?.GeneralInfo?.Major ?? 0) == 1) && ((((Application.Current.MainWindow as MainWindow).Data?.GeneralInfo?.Build ?? 0) >= 1773) || (((Application.Current.MainWindow as MainWindow).Data?.GeneralInfo?.Build ?? 0) == 1539)))) ? (Application.Current.MainWindow as MainWindow).Data.FORM.EXTN.productIdData[MyIndex] : null); set => (Application.Current.MainWindow as MainWindow).Data.FORM.EXTN.productIdData[MyIndex] = value; }
+        public byte[] ProductIdData { get => ((((mainWindow.Data?.GeneralInfo?.Major ?? 0) >= 2) || (((mainWindow.Data?.GeneralInfo?.Major ?? 0) == 1) && (((mainWindow.Data?.GeneralInfo?.Build ?? 0) >= 1773) || ((mainWindow.Data?.GeneralInfo?.Build ?? 0) == 1539)))) ? mainWindow.Data.FORM.EXTN.productIdData[MyIndex] : null); set => mainWindow.Data.FORM.EXTN.productIdData[MyIndex] = value; }
 
         public UndertaleExtensionEditor()
         {
@@ -33,16 +35,16 @@ namespace UndertaleModTool
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            int lastItem = ((Application.Current.MainWindow as MainWindow).Data.Extensions[MyIndex]).Files.Count;
+            int lastItem = (mainWindow.Data.Extensions[MyIndex]).Files.Count;
 
             UndertaleExtensionFile obj = new UndertaleExtensionFile()
             {
                 Kind = UndertaleExtensionKind.Dll,
-                Filename = (Application.Current.MainWindow as MainWindow).Data.Strings.MakeString($"NewExtensionFile{lastItem}.dll"),
+                Filename = mainWindow.Data.Strings.MakeString($"NewExtensionFile{lastItem}.dll"),
                 Functions = new UndertalePointerList<UndertaleExtensionFunction>()
             };
 
-            ((Application.Current.MainWindow as MainWindow).Data.Extensions[MyIndex]).Files.Add(obj);
+            (mainWindow.Data.Extensions[MyIndex]).Files.Add(obj);
         }
     }
 }
