@@ -1667,6 +1667,9 @@ public class UndertaleYYSWFBitmapData : UndertaleObject
     /// <summary>
     /// Unknown purpose. Probably to accomodate for new texture formats.
     /// </summary>
+    /// <remarks>
+    /// Presumably present in GM 2022.1+.
+    /// </remarks>
     public int? TPEIndex { get; set; }
     public byte[] ImageData { get; set; }
     public byte[] AlphaData { get; set; }
