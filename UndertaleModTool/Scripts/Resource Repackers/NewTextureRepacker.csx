@@ -131,7 +131,7 @@ public class TextureAtlas
 
         // Best Long Side fit.
         var bestFit = findBestFit(pWidth, pHeight,
-            split => Math.Min(pWidth - split.Width, pHeight - split.Height)
+            split => Math.Max(split.Width - pWidth, split.Height - pHeight)
         );
 
         // No space available, return null
