@@ -44,18 +44,22 @@ public static class UndertaleDataExtensionMethods
 	/// </summary>
 	/// <param name="list">The <see cref="List{T}"/> of <see cref="UndertaleString"/>.</param>
 	/// <param name="content">The string to create a <see cref="UndertaleString"/> of.</param>
+	/// <param name="createNew">Whether to create a new <see cref="UndertaleString"/> if the one with the same content exists.
 	/// <returns><paramref name="content"/> as a <see cref="UndertaleString"/>.</returns>
 	/// <exception cref="ArgumentNullException"><paramref name="content"/> is null.</exception>
-	public static UndertaleString MakeString(this IList<UndertaleString> list, string content)
+	public static UndertaleString MakeString(this IList<UndertaleString> list, string content, bool createNew = false)
 	{
 		if (content == null)
 			throw new ArgumentNullException(nameof(content));
 
-		// TODO: without reference counting the strings, this may leave unused strings in the array
-		foreach (UndertaleString str in list)
+		if (!createNew)
 		{
-			if (str.Content == content)
-				return str;
+			// TODO: without reference counting the strings, this may leave unused strings in the array
+			foreach (UndertaleString str in list)
+			{
+				if (str.Content == content)
+					return str;
+			}
 		}
 
 		UndertaleString newString = new UndertaleString(content);

@@ -255,7 +255,7 @@ public class UndertaleExtensionOption : UndertaleObject, IStaticChildObjectsSize
 
     public UndertaleString Name { get; set; }
     public UndertaleString Value { get; set; }
-    public OptionKind Kind { get; set; }
+    public OptionKind Kind { get; set; } = OptionKind.String;
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
@@ -276,7 +276,7 @@ public class UndertaleExtensionOption : UndertaleObject, IStaticChildObjectsSize
     /// <inheritdoc />
     public override string ToString()
     {
-        return Name.Content;
+        return Name?.Content;
     }
 
     /// <inheritdoc/>
