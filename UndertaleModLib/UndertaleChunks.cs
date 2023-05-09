@@ -190,7 +190,7 @@ namespace UndertaleModLib
         public override string Name => "EXTN";
         public List<byte[]> productIdData = new List<byte[]>();
 
-        private static bool checkedFor2022_6;
+        private static bool checkedFor2022_6, checkedFor2023_4;
         private void CheckFor2022_6(UndertaleReader reader)
         {
             if (!reader.undertaleData.IsVersionAtLeast(2, 3) || reader.undertaleData.IsVersionAtLeast(2022, 6))
@@ -267,11 +267,45 @@ namespace UndertaleModLib
 
             checkedFor2022_6 = true;
         }
+        private void CheckFor2023_4(UndertaleReader reader)
+        {
+            if (!reader.undertaleData.IsVersionAtLeast(2022, 6) || reader.undertaleData.IsVersionAtLeast(2023, 4))
+            {
+                checkedFor2023_4 = true;
+                return;
+            }
+
+            long returnPosition = reader.Position;
+
+            int extCount = reader.ReadInt32();
+            if (extCount > 0)
+            {
+                // Go to the first extension
+                reader.AbsPosition = reader.ReadUInt32();
+
+                // Skip the miminal amount of strings
+                reader.Position += 4 * 3;
+
+                uint filesPtr = reader.ReadUInt32();
+                uint optionsPtr = reader.ReadUInt32();
+
+                // The file list pointer should be less than the option list pointer.
+                // If it's not true, then "filesPtr" is actually a string pointer, so it's GM 2023.4+.
+                if (filesPtr > optionsPtr)
+                    reader.undertaleData.SetGMS2Version(2023, 4);
+            }
+
+            reader.Position = returnPosition;
+
+            checkedFor2023_4 = true;
+        }
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
             if (!checkedFor2022_6)
                 CheckFor2022_6(reader);
+            if (!checkedFor2023_4)
+                CheckFor2023_4(reader);
 
             base.UnserializeChunk(reader);
 
@@ -310,6 +344,7 @@ namespace UndertaleModLib
             checkedFor2022_6 = false;
 
             CheckFor2022_6(reader);
+            CheckFor2023_4(reader);
 
             return base.UnserializeObjectCount(reader);
         }
