@@ -8,7 +8,7 @@
     <Platforms>AnyCPU;x64</Platforms>
     <RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <!-- Supress all missing XML comment warnings -->
+    <!-- Suppress all missing XML comment warnings -->
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup>

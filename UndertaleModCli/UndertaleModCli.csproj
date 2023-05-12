@@ -7,7 +7,7 @@
 	  <Nullable>disable</Nullable>
 	  <RollForward>LatestMajor</RollForward>
 	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <!-- Supress all missing XML comment warnings -->
+    <!-- Suppress all missing XML comment warnings -->
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
 
