@@ -4,9 +4,11 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <Platforms>AnyCPU;x64</Platforms>
-	<Nullable>disable</Nullable>
-	<RollForward>LatestMajor</RollForward>
-	<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	  <Nullable>disable</Nullable>
+	  <RollForward>LatestMajor</RollForward>
+	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <!-- Supress all missing XML comment warnings -->
+    <NoWarn>1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
