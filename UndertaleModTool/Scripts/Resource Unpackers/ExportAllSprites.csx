@@ -43,9 +43,17 @@ async Task DumpSprites()
 
 void DumpSprite(UndertaleSprite sprite)
 {
-    for (int i = 0; i < sprite.Textures.Count; i++)
-        if (sprite.Textures[i]?.Texture != null)
-            worker.ExportAsPNG(sprite.Textures[i].Texture, texFolder + sprite.Name.Content + "_" + i + ".png", null, padded); // Include padding to make sprites look neat!
-
+    if (sprite.Textures.Count == 1)
+    {
+        if (sprite.Textures[0]?.Texture != null)
+            worker.ExportAsPNG(sprite.Textures[0].Texture, texFolder + sprite.Name.Content + ".png", null, padded); // Include padding to make sprites look neat!
+    }
+    else
+    {
+        Directory.CreateDirectory(texFolder + sprite.Name.Content + Path.DirectorySeparatorChar);
+        for (int i = 0; i < sprite.Textures.Count; i++)
+            if (sprite.Textures[i]?.Texture != null)
+                worker.ExportAsPNG(sprite.Textures[i].Texture, texFolder + sprite.Name.Content + Path.DirectorySeparatorChar + sprite.Name.Content + "_" + i + ".png", null, padded);
+    }
     IncrementProgressParallel();
 }
