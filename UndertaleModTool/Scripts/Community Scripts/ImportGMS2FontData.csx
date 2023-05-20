@@ -138,6 +138,7 @@ if (fontData.ContainsKey("ascender"))
     font.Ascender = (uint)fontData["ascender"];
 if (fontData.ContainsKey("ascenderOffset"))
     font.AscenderOffset = (int)fontData["ascenderOffset"];
+// TODO: SDFSpread
 
 // FIXME: Too complicated?
 List<int> charRangesUppersAndLowers = new();
@@ -173,7 +174,6 @@ font.Glyphs.Clear();
 foreach (var glyph in glyphs)
     font.Glyphs.Add(glyph);
 
-// TODO: Does this always exist?
 glyphs = font.Glyphs.ToList();
 foreach (JObject kerningPair in fontData["kerningPairs"]?.Values<JObject>())
 {
@@ -182,8 +182,8 @@ foreach (JObject kerningPair in fontData["kerningPairs"]?.Values<JObject>())
     var glyph = glyphs.Find(x => x.Character == first);
     glyph.Kerning.Add(new UndertaleFont.Glyph.GlyphKerning()
     {
-        Other = (short)kerningPair["second"],
-        Amount = (short)kerningPair["amount"],
+        Character = (short)kerningPair["second"],
+        ShiftModifier = (short)kerningPair["amount"],
     });
 }
 
