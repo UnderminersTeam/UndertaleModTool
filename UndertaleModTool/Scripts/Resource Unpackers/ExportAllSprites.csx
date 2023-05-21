@@ -46,7 +46,7 @@ void DumpSprite(UndertaleSprite sprite)
     if (sprite.Textures.Count == 1)
     {
         if (sprite.Textures[0]?.Texture != null)
-            worker.ExportAsPNG(sprite.Textures[0].Texture, texFolder + sprite.Name.Content + ".png", null, padded); // Include padding to make sprites look neat!
+            worker.ExportAsPNG(sprite.Textures[0].Texture, texFolder + sprite.Name.Content + "_0.png", null, padded); // Include padding to make sprites look neat!
     }
     else
     {
