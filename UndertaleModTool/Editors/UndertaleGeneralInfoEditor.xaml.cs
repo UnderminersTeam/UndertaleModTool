@@ -34,16 +34,21 @@ namespace UndertaleModTool
         /// <summary>
         /// Selects the given room inside the RoomOrderList.
         /// </summary>
-        /// <param name="room">the room to select.</param>
-        private void SelectItem(object room)
+        /// <param name="rooms">The list of rooms to select.</param>
+        /// <param name="current">The room to make currenly selected and focused</param>
+        private void SelectItems(IList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> rooms, object current)
         {
-            RoomListGrid.ScrollIntoView(room); // This works with a virtualized DataGrid
-            RoomListGrid.SelectedItem = room;
-            RoomListGrid.CurrentItem= room;
+            RoomListGrid.ScrollIntoView(current); // This works with a virtualized DataGrid
+            RoomListGrid.SelectedItems.Clear();
+            foreach (object room in rooms)
+            {
+                RoomListGrid.SelectedItems.Add(room);
+            }
+            RoomListGrid.CurrentItem= current;
             RoomListGrid.UpdateLayout();
 
             // Set focus to the selected Element
-            DataGridRow row = RoomListGrid.ItemContainerGenerator.ContainerFromItem(room) as DataGridRow;
+            DataGridRow row = RoomListGrid.ItemContainerGenerator.ContainerFromItem(current) as DataGridRow;
             DataGridCellsPresenter presenter = MainWindow.FindVisualChild<DataGridCellsPresenter>(row) as DataGridCellsPresenter;
             DataGridCell cell = presenter.ItemContainerGenerator.ContainerFromIndex(0) as DataGridCell;
             cell.Focus();
@@ -52,52 +57,58 @@ namespace UndertaleModTool
         /// <summary>
         /// Moves the given room up and down the RoomOrderList./>.
         /// </summary>
-        /// <param name="room">The room to move.</param>
-        /// <param name="dist">Distance to move it. Positive - down, negative - up.</param>
-        private void MoveItem(UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM> room, int dist)
+        /// <param name="rooms">The list of rooms to move.</param>
+        /// <param name="dist">Distance to move them. Positive - down, negative - up.</param>
+        private void MoveItem(IList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> rooms, int dist)
         {
-            IList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> roomOrder = (this.DataContext as GeneralInfoEditor).GeneralInfo.RoomOrder;
+            if (rooms.Count == 0)
+                return;
 
-            int index = roomOrder.IndexOf(room);
-            if (index == -1)
+            IList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> roomOrder = (this.DataContext as GeneralInfoEditor).GeneralInfo.RoomOrder;
+            
+            List<int> indexes = rooms.Select(room => roomOrder.IndexOf(room)).ToList();
+            if (indexes.Contains(-1))
             {
                 mainWindow.ShowError("Can't change room position - room not found in room order.");
                 return;
             }
 
-            int newIndex = Math.Clamp(index + dist, 0 , roomOrder.Count - 1);
-            if (newIndex != index)
-            {
-                // Tuple syntax for swapping values. Looks nicer and isn't any slower.
-                // See https://www.reddit.com/r/ProgrammerTIL/comments/8ssiqb/comment/e12301f/
-                (roomOrder[newIndex], roomOrder[index]) = (roomOrder[index], roomOrder[newIndex]);
-            }
+            dist = Math.Clamp(dist, -indexes.Min(), roomOrder.Count - 1 - indexes.Max());
+            if (dist == 0)
+                return;
+            
+            // If we move the rooms in the wrong order we could move a room twice
+            indexes.Sort();
+            if (dist > 0)
+                indexes.Reverse();
+            object current = RoomListGrid.CurrentItem; // In case changing the order changes CurrentItem
+            foreach(int index in indexes)
+                (roomOrder[index + dist], roomOrder[index]) = (roomOrder[index], roomOrder[index + dist]);
 
-            SelectItem(roomOrder[newIndex]);
+            SelectItems(rooms, current);
         }
 
         private void RoomListGrid_KeyDown(object sender, KeyEventArgs e)
         {
             IList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> roomOrder = (this.DataContext as GeneralInfoEditor).GeneralInfo.RoomOrder;
 
-            object selected = RoomListGrid.SelectedItem;
-            if (selected == null)
+            List<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> selected = RoomListGrid.SelectedItems.Cast<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>>().ToList();
+            if (selected.Count == 0)
                 return;
-            UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM> room = selected as UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>;
-            
-            switch(e.Key)
+
+            switch (e.Key)
             {
                 case Key.OemMinus:
-                    MoveItem(room, -1);
+                    MoveItem(selected, -1);
                     break;
                 case Key.OemPlus:
-                    MoveItem(room, 1);
+                    MoveItem(selected, 1);
                     break;
-                 case Key.N: // Insert new blank room
-                    int index = roomOrder.IndexOf(room);
-                    UndertaleResourceById < UndertaleRoom, UndertaleChunkROOM > newRoom = new();
+                 case Key.N: // Insert new blank room after selected rooms
+                    int index = selected.Select(room => roomOrder.IndexOf(room)).Max();
+                    UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM> newRoom = new();
                     roomOrder.Insert(index + 1, newRoom);
-                    SelectItem(newRoom);
+                    SelectItems(new List<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> { newRoom }, newRoom);
                     break;
             }
         }
