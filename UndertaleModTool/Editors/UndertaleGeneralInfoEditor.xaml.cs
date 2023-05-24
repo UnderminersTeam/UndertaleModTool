@@ -81,6 +81,7 @@ namespace UndertaleModTool
             indexes.Sort();
             if (dist > 0)
                 indexes.Reverse();
+
             object current = RoomListGrid.CurrentItem; // In case changing the order changes CurrentItem
             foreach(int index in indexes)
                 (roomOrder[index + dist], roomOrder[index]) = (roomOrder[index], roomOrder[index + dist]);
@@ -92,20 +93,23 @@ namespace UndertaleModTool
         {
             IList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> roomOrder = (this.DataContext as GeneralInfoEditor).GeneralInfo.RoomOrder;
 
-            List<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> selected = RoomListGrid.SelectedItems.Cast<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>>().ToList();
+            System.Collections.IList selected = RoomListGrid.SelectedItems;
+            selected.Remove(CollectionView.NewItemPlaceholder);
             if (selected.Count == 0)
                 return;
+
+            List<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> selectedRooms = selected.Cast<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>>().ToList();
 
             switch (e.Key)
             {
                 case Key.OemMinus:
-                    MoveItem(selected, -1);
+                    MoveItem(selectedRooms, -1);
                     break;
                 case Key.OemPlus:
-                    MoveItem(selected, 1);
+                    MoveItem(selectedRooms, 1);
                     break;
                  case Key.N: // Insert new blank room after selected rooms
-                    int index = selected.Select(room => roomOrder.IndexOf(room)).Max();
+                    int index = selectedRooms.Select(room => roomOrder.IndexOf(room)).Max();
                     UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM> newRoom = new();
                     roomOrder.Insert(index + 1, newRoom);
                     SelectItems(new List<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> { newRoom }, newRoom);
