@@ -99,22 +99,36 @@ namespace UndertaleModTool
                 return;
 
             List<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> selectedRooms = selected.Cast<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>>().ToList();
-
+            int dist = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift ? 5 : 1;
             switch (e.Key)
             {
                 case Key.OemMinus:
-                    MoveItem(selectedRooms, -1);
+                    MoveItem(selectedRooms, -dist);
                     break;
                 case Key.OemPlus:
-                    MoveItem(selectedRooms, 1);
-                    break;
-                 case Key.N: // Insert new blank room after selected rooms
-                    int index = selectedRooms.Select(room => roomOrder.IndexOf(room)).Max();
-                    UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM> newRoom = new();
-                    roomOrder.Insert(index + 1, newRoom);
-                    SelectItems(new List<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> { newRoom }, newRoom);
+                    MoveItem(selectedRooms, dist);
                     break;
             }
+        }
+
+        /// <summary>
+        /// Insert new blank room after selected rooms.
+        /// </summary>
+        private void Command_New(object sender, RoutedEventArgs e)
+        {
+            IList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> roomOrder = (this.DataContext as GeneralInfoEditor).GeneralInfo.RoomOrder;
+
+            System.Collections.IList selected = RoomListGrid.SelectedItems;
+            selected.Remove(CollectionView.NewItemPlaceholder);
+            if (selected.Count == 0)
+                return;
+
+            List<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> selectedRooms = selected.Cast<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>>().ToList();
+
+            int index = selectedRooms.Select(room => roomOrder.IndexOf(room)).Max();
+            UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM> newRoom = new();
+            roomOrder.Insert(index + 1, newRoom);
+            SelectItems(new List<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> { newRoom }, newRoom);
         }
 
         private void SyncRoomList_Click(object sender, RoutedEventArgs e)
@@ -143,7 +157,6 @@ namespace UndertaleModTool
             if (result == MessageBoxResult.Yes)
                 checkBox.IsChecked = false;
         }
-
     }
 
     public class TimestampDateTimeConverter : IValueConverter

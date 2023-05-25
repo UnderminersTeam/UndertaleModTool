@@ -188,6 +188,12 @@
                                 </Style.Triggers>
                             </Style>
                         </DataGrid.Resources>
+                        <DataGrid.CommandBindings>
+                            <CommandBinding Command="New" Executed="Command_New"/>
+                        </DataGrid.CommandBindings>
+                        <DataGrid.InputBindings>
+                            <KeyBinding Modifiers="Control" Key="N" Command="New"/>
+                        </DataGrid.InputBindings>
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Width="*">
                                 <DataGridTemplateColumn.CellTemplate>
