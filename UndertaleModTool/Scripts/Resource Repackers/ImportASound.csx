@@ -211,7 +211,7 @@ if (dialogRet == DialogResult.OK)
             File        = Data.Strings.MakeString(fname),
             Effects     = 0,
             Volume      = 1.0F,
-            Pitch       = 1.0F,
+            Pitch       = 0,
             AudioID     = audioID,
             AudioFile   = RaudioFile,
             AudioGroup  = groupID,
