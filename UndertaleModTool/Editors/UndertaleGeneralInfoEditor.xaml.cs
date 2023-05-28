@@ -76,15 +76,29 @@ namespace UndertaleModTool
             dist = Math.Clamp(dist, -indexes.Min(), roomOrder.Count - 1 - indexes.Max());
             if (dist == 0)
                 return;
-            
-            // If we move the rooms in the wrong order we could move a room twice
-            indexes.Sort();
-            if (dist > 0)
-                indexes.Reverse();
 
             object current = RoomListGrid.CurrentItem; // In case changing the order changes CurrentItem
-            foreach(int index in indexes)
-                (roomOrder[index + dist], roomOrder[index]) = (roomOrder[index], roomOrder[index + dist]);
+            // If we move the rooms in the wrong order we could move a room twice
+            indexes.Sort();
+            if (dist < 0)
+            {
+                for (int i = 0; i > dist; i--) // move once abs(dist) times
+                {
+                    foreach (int index in indexes)
+                    {
+                        (roomOrder[index + i - 1], roomOrder[index + i]) = (roomOrder[index + i], roomOrder[index + i - 1]);
+                    }
+                }
+            }
+            else
+            {
+                indexes.Reverse();
+                for (int i = 0; i < dist; i++) // move once dist times
+                {
+                    foreach (int index in indexes)
+                        (roomOrder[index + i + 1], roomOrder[index + i]) = (roomOrder[index + i], roomOrder[index + i + 1]);
+                }
+            }
 
             SelectItems(rooms, current);
         }

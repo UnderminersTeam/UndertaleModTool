@@ -1592,20 +1592,31 @@ namespace UndertaleModTool
 
             int index = list.IndexOf(obj);
             int newIndex = Math.Clamp(index + dist, 0, list.Count - 1);
-            if (newIndex != index)
-            {
-                var prevObj = list[newIndex];
-                list[newIndex] = obj;
-                list[index] = prevObj;
+            if (newIndex == index)
+                return;
 
-                if (layer is not null)
+            FrameworkElement prevRect = ObjElemDict[list[newIndex] as UndertaleObject];
+            if (newIndex < index)
+            {
+                for (int midIndex = index; midIndex > newIndex; midIndex--)
                 {
-                    // swap back objects in "ObjectDict"
-                    var rect = ObjElemDict[obj];
-                    var rectPrev = ObjElemDict[prevObj as UndertaleObject];
-                    ObjElemDict[obj] = rectPrev;
-                    ObjElemDict[prevObj as UndertaleObject] = rect;
+                    // swap back objects in "ObjElemDict"
+                    ObjElemDict[list[midIndex - 1] as UndertaleObject] = ObjElemDict[list[midIndex] as UndertaleObject];
+                    list[midIndex] = list[midIndex - 1];
                 }
+                list[newIndex] = obj;
+                ObjElemDict[obj] = prevRect;
+            }
+            else
+            {
+                for (int midIndex = index; midIndex < newIndex; midIndex++)
+                {
+                    // swap back objects in "ObjElemDict"
+                    ObjElemDict[list[midIndex + 1] as UndertaleObject] = ObjElemDict[list[midIndex] as UndertaleObject];
+                    list[midIndex] = list[midIndex + 1];
+                }
+                list[newIndex] = obj;
+                ObjElemDict[obj] = prevRect;
             }
 
             SelectObject(obj, focus);
