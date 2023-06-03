@@ -1385,7 +1385,21 @@ namespace UndertaleModLib.Decompiler
                             if (kvp.Key != null)
                                 sb.Append(kvp.Key);
                             else
-                                sb.Append((context.Statements[0].Last() as AssignmentStatement).Destination.Var.Name.Content);
+                            {
+                                //Attempt to find function names before going with the last functions' name
+                                bool gotFuncName = false;
+                                if (Function.Name.Content.StartsWith("gml_Script_"))
+                                {
+                                    string funcName = Function.Name.Content.Substring("gml_Script_".Length);
+                                    if (context.Statements[0].Any(x => x is AssignmentStatement && (x as AssignmentStatement).Destination.Var.Name.Content == funcName))
+                                    {
+                                        sb.Append(funcName);
+                                        gotFuncName = true;
+                                    }
+                                }
+                                if(!gotFuncName)
+                                    sb.Append((context.Statements[0].Last() as AssignmentStatement).Destination.Var.Name.Content);
+                            }
                         }
                         sb.Append("(");
                         for (int i = 0; i < FunctionBodyCodeEntry.ArgumentsCount; ++i)
@@ -3848,6 +3862,15 @@ namespace UndertaleModLib.Decompiler
                 data.KnownSubFunctions = new Dictionary<string, UndertaleFunction>();
                 GlobalDecompileContext globalDecompileContext = new GlobalDecompileContext(data, false);
 
+                foreach (var func in data.Functions)
+                {
+                    if (func.Name.Content.StartsWith("gml_Script_"))
+                    {
+                        var funcName = func.Name.Content.Substring("gml_Script_".Length);
+                        data.KnownSubFunctions.TryAdd(funcName, func);
+                    }
+                }
+
                 Parallel.ForEach(data.GlobalInitScripts, globalScript =>
                 {
                     UndertaleCode scriptCode = globalScript.Code;
@@ -3875,10 +3898,8 @@ namespace UndertaleModLib.Decompiler
                     {
                         Debug.WriteLine(e.ToString());
                     }
-
                     processingCodeList.Remove(scriptCode.Name.Content, out _);
                 });
-
                 elapsedSec = 3 * 60;
             });
 
