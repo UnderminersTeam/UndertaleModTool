@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NAudio.Wave;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -15,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Xml.Linq;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 using UndertaleModLib.Scripting;
@@ -76,7 +78,7 @@ namespace UndertaleModTool
         public static DependencyProperty ObjectEventSubtypeProperty =
             DependencyProperty.Register("ObjectEventSubtype", typeof(uint),
                 typeof(UndertaleObjectReference),
-                new FrameworkPropertyMetadata((uint) 0,
+                new FrameworkPropertyMetadata((uint)0,
                     FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
 
@@ -124,7 +126,7 @@ namespace UndertaleModTool
             var label = TryFindResource("emptyReferenceLabel") as Label;
             if (label is null)
                 return;
-            
+
             string typeName = ObjectType.ToString();
             string n = "";
             if (typeName.StartsWith("UndertaleModLib.Models.Undertale"))
@@ -136,7 +138,7 @@ namespace UndertaleModTool
             // If the first letter is a vowel
             if (Array.IndexOf(vowels, typeName[0]) != -1)
                 n = "n";
-                
+
             label.Content = $"(drag & drop a{n} {typeName})";
         }
 
@@ -161,6 +163,46 @@ namespace UndertaleModTool
 
                     ObjectReference = code;
                 }
+
+                else if (mainWindow.Selected is UndertaleRoom roomWindow)
+                {
+                    //get the name of the room and remove surrounding quotes
+                    var roomName = roomWindow.Name.ToString();
+                    roomName = roomName.Substring(1, roomName.Length - 2);
+                    //grab the ObjectEditor
+                    var roomEditor = MainWindow.FindVisualChild<UndertaleRoomEditor>((Application.Current.MainWindow as MainWindow).DataEditor);
+                    var objectEditor = roomEditor?.ObjectEditor;
+                    if (objectEditor is not null)
+                    {
+                        if (objectEditor.Content is UndertaleRoom room)
+                        {
+                            if (room != null)
+                            {
+                                AddRoomCreationCode(room, roomName, EventType.Create);
+                            }
+                        }
+                        else
+                        {
+                            if (objectEditor.Content is not null)
+                            {
+                                UndertaleRoom.GameObject gameObj = objectEditor.Content as UndertaleRoom.GameObject;
+                                if (ObjectEventType is EventType.Create)
+                                {
+                                    AddRoomCreationCode(gameObj, roomName, EventType.Create);
+                                }
+                                else if (ObjectEventType is EventType.PreCreate)
+                                {
+                                    AddRoomCreationCode(gameObj, roomName, EventType.PreCreate);
+                                }
+                            }
+                            else
+                                mainWindow.ShowError("Content is of unknown type.");
+                        }
+                    }
+                    else
+                        mainWindow.ShowError("Null Object Editor");
+                }
+
                 else
                 {
                     mainWindow.ShowError("Adding to non-objects is currently unsupported.");
@@ -258,6 +300,48 @@ namespace UndertaleModTool
                 ObjectReference = sourceItem;
             }
             e.Handled = true;
+        }
+        private void AddRoomCreationCode(object sender, string nameInsert, EventType eventType)
+        {
+            var code = new UndertaleCode()
+            {
+                LocalsCount = 1
+            };
+            mainWindow.Data.Code.Add(code);
+            UndertaleCodeLocals locals = new UndertaleCodeLocals();
+            UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
+            argsLocal.Name = mainWindow.Data.Strings.MakeString("arguments");
+            argsLocal.Index = 0;
+            locals.Locals.Add(argsLocal);
+            mainWindow.Data.CodeLocals.Add(locals);
+            if (sender is UndertaleRoom room)
+            {
+                code.Name = mainWindow.Data.Strings.MakeString("gml_RoomCC_" + nameInsert + "_Create");
+                locals.Name = code.Name;
+                room.CreationCodeId = code;
+            }
+            else if (sender is UndertaleRoom.GameObject gameObject)
+            {
+                if (eventType == EventType.Create)
+                {
+                    code.Name = mainWindow.Data.Strings.MakeString("gml_RoomCC_" + nameInsert + "_" + gameObject.InstanceID.ToString() + "_Create");
+                    locals.Name = code.Name;
+                    gameObject.CreationCode = code;
+                }
+                //this could probably be handled in one case with a ternary operator
+                else if (eventType == EventType.PreCreate)
+                {
+                    code.Name = mainWindow.Data.Strings.MakeString("gml_RoomCC_" + nameInsert + "_" + gameObject.InstanceID.ToString() + "_PreCreate");
+                    locals.Name = code.Name;
+                    gameObject.PreCreateCode = code;
+                }
+            }
+            else
+            {
+                mainWindow.ShowError("Adding creation to this object is currently unsupported.");
+                return;
+            }
+            
         }
     }
 }
