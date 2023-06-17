@@ -282,8 +282,8 @@ namespace UndertaleModTool
                     }
                     else
                         obj1 = VisualTreeHelper.GetChild(ObjElemDict[obj], 0);
-
-                    (obj1 as FrameworkElement).BringIntoView();
+                    if (obj is not Layer)
+                        (obj1 as FrameworkElement).BringIntoView();
 
                     Storyboard.SetTarget(flashAnim, obj1);
                     Storyboard.SetTargetProperty(flashAnim, new PropertyPath(OpacityProperty));
