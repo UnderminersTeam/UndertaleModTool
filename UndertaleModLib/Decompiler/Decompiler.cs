@@ -3571,7 +3571,7 @@ namespace UndertaleModLib.Decompiler
                         var x = caseEntries.ElementAt(i);
                         Block temp = x.Key;
 
-                        Block switchEnd = DetermineSwitchEnd(temp, caseEntries.Count > (i + 1) ? caseEntries.ElementAt(i + 1).Key : null, meetPoint);
+                        Block switchEnd = context.GlobalContext.Data.GeneralInfo.BytecodeVersion == 17 ? meetPoint : DetermineSwitchEnd(temp, caseEntries.Count > (i + 1) ? caseEntries.ElementAt(i + 1).Key : null, meetPoint);
 
                         HLSwitchCaseStatement result = new HLSwitchCaseStatement(x.Value, HLDecompileBlocks(context, ref temp, blocks, loops, reverseDominators, alreadyVisited, currentLoop, switchEnd, switchEnd, false, depth + 1));
                         cases.Add(result);
