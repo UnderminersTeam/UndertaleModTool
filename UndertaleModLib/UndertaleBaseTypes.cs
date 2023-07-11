@@ -87,7 +87,10 @@ namespace UndertaleModLib
 
         // GMS2.3+
         Sequence = 11,
-        AnimCurve = 12
+        AnimCurve = 12,
+
+        // GM 2023+
+        ParticleSystem = 13
     }
 
     public interface UndertaleResource : UndertaleObject
