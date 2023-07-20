@@ -64,7 +64,7 @@ namespace UndertaleModTool
         /// It does that on code compilation.
 
         private Tab _currentTab;
-
+        public string CurrentProfileName { get; set; }
         public UndertaleData Data { get; set; }
         public string FilePath { get; set; }
         public string ScriptPath { get; set; } // For the scripting interface specifically
@@ -197,11 +197,15 @@ namespace UndertaleModTool
         // Related to profile system and appdata
         public byte[] MD5PreviouslyLoaded = new byte[13];
         public byte[] MD5CurrentlyLoaded = new byte[15];
+        public byte[] remMD5 = new byte[15];
+        public String CurProfileName = "null";
+        public bool is_string = false;
         public static string AppDataFolder => Settings.AppDataFolder;
         public static string ProfilesFolder = Path.Combine(Settings.AppDataFolder, "Profiles");
         public static string CorrectionsFolder = Path.Combine(Program.GetExecutableDirectory(), "Corrections");
         public string ProfileHash = "Unknown";
         public bool CrashedWhileEditing = false;
+        public bool _ProfileModeEnabled = true;
 
         // Scripting interface-related
         private ScriptOptions scriptOptions;
@@ -237,6 +241,10 @@ namespace UndertaleModTool
 
         public MainWindow()
         {
+            if (ProfileHash != "Unknown")
+                _ProfileModeEnabled = true;
+            else
+                _ProfileModeEnabled = false;
             InitializeComponent();
             this.DataContext = this;
 
@@ -244,6 +252,9 @@ namespace UndertaleModTool
             OpenInTab(Highlighted);
 
             TitleMain = "UndertaleModTool by krzys_h v:" + Version;
+
+            if (_ProfileModeEnabled == false)
+                CurrentProfileName = "";
 
             CanSave = false;
             CanSafelySave = false;
@@ -3923,6 +3934,54 @@ result in loss of work.");
             }
 
             return false;
+        }
+
+        public void ExportProfileFolder()
+        {
+            if (CurProfileName != "null")
+            {
+                var MD5DirName = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
+                var MD5DirPath = Path.Combine(ProfilesFolder, MD5DirName);
+                var FileDir = "";
+                string[] iwishiwasbetteratnames = FilePath.Split(new char[] { '\\' });
+                var directoriesamt = iwishiwasbetteratnames.Length;
+                for (var i = 0; i < directoriesamt - 1; i++)
+                {
+                    FileDir += iwishiwasbetteratnames[i] + "\\";
+                }
+                FileDir += "Profiles\\" + MD5DirName;
+                Directory.CreateDirectory(FileDir);
+                DirectoryCopy(MD5DirPath, FileDir, true);
+                this.ShowMessage("Done!");
+                File.WriteAllText(FileDir + "\\" + CurProfileName + ".txt", "This is just to let you know the Profile's name.\nThat's all.");
+            }
+            else
+            {
+                this.ShowMessage("You have to load a Profile beforehand!");
+            }
+        }
+        public void ImportProfileFolder()
+        {
+            if (CanSave == true)
+            {
+                var FileDir = "";
+                string[] iwishiwasbetteratnames = FilePath.Split(new char[] { '\\' });
+                var directoriesamt = iwishiwasbetteratnames.Length;
+                for (var i = 0; i < directoriesamt - 1; i++)
+                {
+                    FileDir += iwishiwasbetteratnames[i] + "\\";
+                }
+                FileDir += "Profiles";
+                if (Directory.Exists(FileDir))
+                {
+                    DirectoryCopy(FileDir, ProfilesFolder, true);
+                    this.ShowMessage("Done!");
+                }
+                else
+                    this.ShowMessage("You have to export a Profile folder to your current data.win's path beforehand!");
+            }
+            else
+                this.ShowMessage("You have to open a data.win beforehand!");
         }
     }
 
