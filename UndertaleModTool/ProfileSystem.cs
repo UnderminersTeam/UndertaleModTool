@@ -254,7 +254,12 @@ namespace UndertaleModTool
                 string profDir = Path.Combine(ProfilesFolder, ProfileHash);
                 string profDirTemp = Path.Combine(profDir, "Temp");
                 string profDirMain = Path.Combine(profDir, "Main");
-
+                string[] Files = Directory.GetFiles(profDir + "\\Temp");
+                for (var i = 0; i < Files.Length; i++)
+                {
+                    File.Delete(Files[i]);
+                }
+                DirectoryCopy(Path.Combine(profDir, "Main"), Path.Combine(profDir, "Temp"), true);
                 if (SettingsWindow.ProfileModeEnabled)
                 {
                     Directory.CreateDirectory(ProfilesFolder);
@@ -448,6 +453,12 @@ an issue on GitHub.");
                     Directory.CreateDirectory(profDir);
                     Directory.CreateDirectory(Path.Combine(profDir, "Main"));
                     Directory.CreateDirectory(Path.Combine(profDir, "Temp"));
+                    string[] Files = Directory.GetFiles(profDir + "\\Main");
+                    for (var i = 0; i < Files.Length; i++)
+                    {
+                        File.Delete(Files[i]);
+                    }
+                    DirectoryCopy(Path.Combine(profDir, "Temp"), Path.Combine(profDir, "Main"), true);
                     this.ShowMessage("Profile saved successfully to " + "\"" + CurProfileName + "\"");
                 }
                 if (SettingsWindow.DeleteOldProfileOnSave && copyProfile)

@@ -3950,6 +3950,7 @@ result in loss of work.");
                     FileDir += iwishiwasbetteratnames[i] + "\\";
                 }
                 FileDir += "Profiles\\" + MD5DirName;
+                Directory.Delete(FileDir, true);
                 Directory.CreateDirectory(FileDir);
                 DirectoryCopy(MD5DirPath, FileDir, true);
                 this.ShowMessage("Done!");
@@ -3964,6 +3965,7 @@ result in loss of work.");
         {
             if (CanSave == true)
             {
+                var MD5DirName = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
                 var FileDir = "";
                 string[] iwishiwasbetteratnames = FilePath.Split(new char[] { '\\' });
                 var directoriesamt = iwishiwasbetteratnames.Length;
@@ -3974,7 +3976,15 @@ result in loss of work.");
                 FileDir += "Profiles";
                 if (Directory.Exists(FileDir))
                 {
+                    if (Directory.Exists(ProfilesFolder + "\\" + MD5DirName))
+                        Directory.Delete(ProfilesFolder + "\\" + MD5DirName, true);
                     DirectoryCopy(FileDir, ProfilesFolder, true);
+                    string[] Files = Directory.GetFiles(FileDir + "\\" + MD5DirName + "\\Main");
+                    for (var i = 0; i < Files.Length; i++)
+                    {
+                        if (Files[i].EndsWith(".gml"))
+                            ImportCodeFromFile(Files[i], true, false, false, true);
+                    }
                     this.ShowMessage("Done!");
                 }
                 else
