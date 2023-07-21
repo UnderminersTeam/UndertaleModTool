@@ -690,7 +690,7 @@ namespace UndertaleModTool
                                 {
                                     if (match.Success)
                                     {
-                                        if (gettext.TryGetValue(match.Groups[1].Value, out string text))
+                                        if (gettext.TryGetValue(match.Groups[1].Value, out string text) && !decompiled.Contains($" // {text}"))
                                             decompiledLines[i] += $" // {text}";
                                     }
                                 }
@@ -707,7 +707,7 @@ namespace UndertaleModTool
                                 {
                                     if (match.Success)
                                     {
-                                        if (gettextJSON.TryGetValue(match.Groups[^1].Value, out string text))
+                                        if (gettextJSON.TryGetValue(match.Groups[^1].Value, out string text) && !decompiled.Contains($" // {text}"))
                                             decompiledLines[i] += $" // {text}";
                                     }
                                 }
@@ -1187,7 +1187,7 @@ namespace UndertaleModTool
             private static readonly SolidColorBrush GlobalBrush = new(Color.FromRgb(0xF9, 0x7B, 0xF9));
             private static readonly SolidColorBrush ConstantBrush = new(Color.FromRgb(0xFF, 0x80, 0x80));
             private static readonly SolidColorBrush InstanceBrush = new(Color.FromRgb(0x58, 0xE3, 0x5A));
-            private static readonly SolidColorBrush LocalBrush = new(Color.FromRgb(0xFF, 0xF8, 0x99));
+            private static readonly SolidColorBrush LocalBrush = new(Color.FromRgb(0xFF, 0xF8, 0x99)); // new(Color.FromRgb(0x58, 0xF8, 0x99)); -> this color is pretty cool
 
             private static ContextMenuDark contextMenu;
 

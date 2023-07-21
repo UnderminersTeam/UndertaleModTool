@@ -228,7 +228,7 @@ namespace UndertaleModTool
                             MD5PreviouslyLoaded = MD5CurrentlyLoaded;
                             remMD5 = MD5PreviouslyLoaded;
                             String Input_text = "";
-                            if (SettingsWindow.CustomProfileName == true)
+                            if (SettingsWindow.ProfileModeEnabled && SettingsWindow.CustomProfileName == true)
                                 Input_text = SimpleTextInput("Loading Profile, please enter a Profile name.", "(Leaving this blank will name the profile with the data's MD5 hash.)", Input_text, true);
                             ProfileHash = Input_text;
                             CurProfileName = ProfileHash;
@@ -338,7 +338,7 @@ an issue on GitHub.");
             try
             {
                 String Input_text = "";
-                if (SettingsWindow.CustomProfileName == true)
+                if (SettingsWindow.ProfileModeEnabled == true && SettingsWindow.CustomProfileName == true)
                 {
                     if (this.ShowQuestion("Do you want to save to the current Profile?") == MessageBoxResult.No)
                     {
