@@ -6,7 +6,8 @@ A fork of [AwfulNasty's fork](https://github.com/AwfulNasty/UndertaleModTool/tre
 - Can open scr_player_mach3
 - Button to add creation code to rooms and objects in rooms
 - Types for some Pizza Tower stuff (like `spr_*` variables for characterspr)
-- Additional functions
+- Additional functions for structs and stuff
+- Automatic selection/creation of instance layers and grid snapping when dragging objects into rooms
 - Maybe more to come in the future!
 
 # Download
