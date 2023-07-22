@@ -16,3 +16,10 @@ None yet, you'll have to compile it yourself.
 # Compiling
 
 [Same as vanilla UTMT.](https://github.com/krzys-h/UndertaleModTool#compilation-instructions)
+
+<!--
+  commandline building:
+  dotnet publish UndertaleModTool -c Release -r win-x64 --self-contained false -p:PublishSingleFile=True --output bin/non-sc
+  dotnet publish UndertaleModTool -c Release -r win-x64 --self-contained true -p:PublishSingleFile=True --output bin/sc
+  
+-->
