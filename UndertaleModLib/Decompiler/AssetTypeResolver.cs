@@ -565,6 +565,9 @@ namespace UndertaleModLib.Decompiler
                 { "script_get_name", new[] { AssetIDType.Script } },
                 // script_execute handled separately
 
+                { "json_parse", new[] { AssetIDType.Other } },
+                { "json_stringifs", new[] { AssetIDType.Other } },
+
                 { "instance_change", new[] { AssetIDType.GameObject, AssetIDType.Boolean } },
                 { "instance_copy", new[] { AssetIDType.Boolean } },
                 { "instance_create", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
