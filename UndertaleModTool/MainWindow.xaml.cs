@@ -2770,12 +2770,12 @@ namespace UndertaleModTool
 
         private void MenuItem_GitHub_Click(object sender, RoutedEventArgs e)
         {
-            OpenBrowser("https://github.com/krzys-h/UndertaleModTool");
+            OpenBrowser("https://github.com/CST1229/UndertaleModTool/tree/super-usable");
         }
 
         private void MenuItem_About_Click(object sender, RoutedEventArgs e)
         {
-            this.ShowMessage("UndertaleModTool by krzys_h\nVersion " + Version, "About");
+            this.ShowMessage("UndertaleModTool by krzys_h, modified by CST1229 and others\nVersion " + Version, "About");
         }
 
         /// From https://github.com/AvaloniaUI/Avalonia/blob/master/src/Avalonia.Dialogs/AboutAvaloniaDialog.xaml.cs
