@@ -2087,6 +2087,7 @@ namespace UndertaleModLib.Compiler
             Functions["buffer_resize"] = new FunctionInfo(this, 2);
             Functions["buffer_md5"] = new FunctionInfo(this, 3);
             Functions["buffer_sha1"] = new FunctionInfo(this, 3);
+            Functions["buffer_crc32"] = new FunctionInfo(this, 3);
             Functions["buffer_base64_encode"] = new FunctionInfo(this, 3);
             Functions["buffer_base64_decode"] = new FunctionInfo(this, 1);
             Functions["buffer_base64_decode_ext"] = new FunctionInfo(this, 3);
