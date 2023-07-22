@@ -11,7 +11,7 @@ A fork of [AwfulNasty's fork](https://github.com/AwfulNasty/UndertaleModTool/tre
 
 # Download
 
-None yet, you'll have to compile it yourself.
+Download the latest release [here](https://github.com/CST1229/UndertaleModTool/releases/latest).
 
 # Compiling
 
