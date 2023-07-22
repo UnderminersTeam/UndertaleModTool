@@ -1072,7 +1072,18 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("checkpointroom", AssetIDType.Room);
                 builtin_vars.Add("lastroom", AssetIDType.Room);
                 builtin_vars.Add("content", AssetIDType.GameObject);
-                builtin_funcs["instance_create_unique"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject};
+                builtin_funcs["instance_create_unique"] =
+                    new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
+                builtin_funcs["draw_enemy"] =
+                    new[] { AssetIDType.Boolean, AssetIDType.Boolean, AssetIDType.Color };
+                builtin_funcs["pal_swap_init_system"] =
+                    new[] { AssetIDType.Shader };
+                builtin_funcs["pal_swap_init_system_fix"] =
+                    new[] { AssetIDType.Shader };
+                builtin_funcs["pal_swap_set"] =
+                    new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["pattern_set"] =
+                    new[] { AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
             }
 
             // Just Undertale
