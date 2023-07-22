@@ -359,6 +359,8 @@ namespace UndertaleModLib.Decompiler
 
         public static Dictionary<string, AssetIDType> return_types; // keys are script names (< GMS2.3) or member function variable names (>= GMS2.3)
 
+        public static bool PTSpriteTypes = false; // enable types for spr_* variables and stuff
+
         internal static bool AnnotateTypesForFunctionCall(string function_name, AssetIDType[] arguments, DecompileContext context)
         {
             return AnnotateTypesForFunctionCall(function_name, arguments, context, null);
@@ -480,6 +482,16 @@ namespace UndertaleModLib.Decompiler
                     return overrides[variable_name];
             }
 
+            if (PTSpriteTypes == true) {
+                if (
+                    variable_name.StartsWith("spr_") ||
+                    variable_name.EndsWith("spr") ||
+                    variable_name.EndsWith("sprite")
+                )
+                {
+                    return AssetIDType.Sprite;
+                }
+            }
 
             if (builtin_vars.ContainsKey(variable_name))
                 return builtin_vars[variable_name];
@@ -1048,6 +1060,20 @@ namespace UndertaleModLib.Decompiler
 
             // TODO: make proper file/manifest for all games to use, not just UT/DR, and also not these specific names
             string lowerName = data?.GeneralInfo?.DisplayName?.Content.ToLower(CultureInfo.InvariantCulture);
+
+            // Pizza Tower (and things like Scoutdigo)
+            PTSpriteTypes = false;
+            if (lowerName != null && lowerName.StartsWith("pizza tower", StringComparison.InvariantCulture)) {
+                PTSpriteTypes = true;
+                builtin_vars.Add("targetRoom", AssetIDType.Room);
+                builtin_vars.Add("room_index", AssetIDType.Room);
+                builtin_vars.Add("backtohubroom", AssetIDType.Room);
+                builtin_vars.Add("roomtorestart", AssetIDType.Room);
+                builtin_vars.Add("checkpointroom", AssetIDType.Room);
+                builtin_vars.Add("lastroom", AssetIDType.Room);
+                builtin_vars.Add("content", AssetIDType.GameObject);
+                builtin_funcs["instance_create_unique"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject};
+            }
 
             // Just Undertale
             if (lowerName != null && lowerName.StartsWith("undertale", StringComparison.InvariantCulture))
