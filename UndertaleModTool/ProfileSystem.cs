@@ -243,7 +243,7 @@ namespace UndertaleModTool
                                 byte[] idk = Encoding.ASCII.GetBytes(Input_text);
                                 MD5PreviouslyLoaded = idk;
                                 MD5CurrentlyLoaded = idk;
-                                ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                                ProfileHash = Input_text;
                                 is_string = true;
                             }
                             CurrentProfileName = "- Current Profile: " + "\"" + CurProfileName + "\"";
@@ -254,14 +254,20 @@ namespace UndertaleModTool
                 string profDir = Path.Combine(ProfilesFolder, ProfileHash);
                 string profDirTemp = Path.Combine(profDir, "Temp");
                 string profDirMain = Path.Combine(profDir, "Main");
-                string[] Files = Directory.GetFiles(profDir + "\\Temp");
-                for (var i = 0; i < Files.Length; i++)
-                {
-                    File.Delete(Files[i]);
-                }
-                DirectoryCopy(Path.Combine(profDir, "Main"), Path.Combine(profDir, "Temp"), true);
                 if (SettingsWindow.ProfileModeEnabled)
                 {
+                    if (Directory.Exists(profDir))
+                    {
+                        string[] Files = Directory.GetFiles(profDir + "\\Temp");
+                        if (!Directory.Exists(profDir + "\\Temp"))
+                            Directory.CreateDirectory(profDir + "\\Temp");
+                        for (var i = 0; i < Files.Length; i++)
+                        {
+                            if (File.Exists(Files[i]))
+                                File.Delete(Files[i]);
+                        }
+                        DirectoryCopy(Path.Combine(profDir, "Main"), Path.Combine(profDir, "Temp"), true);
+                    }
                     Directory.CreateDirectory(ProfilesFolder);
                     if (Directory.Exists(profDir))
                     {
@@ -356,9 +362,11 @@ an issue on GitHub.");
                 }
                 is_string = false;
                 if (Input_text != "")
+                {
                     is_string = true;
-                byte[] __name = Encoding.ASCII.GetBytes(CurProfileName);
-                MD5PreviouslyLoaded = __name;
+                    byte[] __name = Encoding.ASCII.GetBytes(CurProfileName);
+                    MD5PreviouslyLoaded = __name;
+                }
                 string deleteIfModeActive = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
                 bool copyProfile = false;
                 await Task.Run(() =>
@@ -407,10 +415,20 @@ an issue on GitHub.");
                     string MD5DirPathNewTemp;
                     bool old_is_string = is_string;
                     // Get the subdirectories for the specified directory.
-                    MD5DirNameOld = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
-                    MD5DirPathOld = Path.Combine(ProfilesFolder, MD5DirNameOld);
-                    MD5DirPathOldMain = Path.Combine(MD5DirPathOld, "Main");
-                    MD5DirPathOldTemp = Path.Combine(MD5DirPathOld, "Temp");
+                    if (!is_string)
+                    {
+                        MD5DirNameOld = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                        MD5DirPathOld = Path.Combine(ProfilesFolder, MD5DirNameOld);
+                        MD5DirPathOldMain = Path.Combine(MD5DirPathOld, "Main");
+                        MD5DirPathOldTemp = Path.Combine(MD5DirPathOld, "Temp");
+                    }
+                    else
+                    {
+                        MD5DirNameOld = CurProfileName;
+                        MD5DirPathOld = Path.Combine(ProfilesFolder, MD5DirNameOld);
+                        MD5DirPathOldMain = Path.Combine(MD5DirPathOld, "Main");
+                        MD5DirPathOldTemp = Path.Combine(MD5DirPathOld, "Temp");
+                    }
                     if ((Directory.Exists(MD5DirPathOldMain)) && (Directory.Exists(MD5DirPathOldTemp)) && copyProfile)
                     {
                         Directory.Delete(MD5DirPathOldMain, true);
@@ -418,11 +436,17 @@ an issue on GitHub.");
                     DirectoryCopy(MD5DirPathOldTemp, MD5DirPathOldMain, true);
                     if (copyProfile)
                     {
-                        MD5DirNameOld = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                        if (!is_string)
+                            MD5DirNameOld = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                        else
+                            MD5DirNameOld = CurProfileName;
                         MD5DirPathOld = Path.Combine(ProfilesFolder, MD5DirNameOld);
                         MD5DirPathOldMain = Path.Combine(MD5DirPathOld, "Main");
                         MD5DirPathOldTemp = Path.Combine(MD5DirPathOld, "Temp");
-                        MD5DirNameNew = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
+                        if (!is_string)
+                            MD5DirNameNew = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
+                        else
+                            MD5DirNameNew = Input_text;
                         MD5DirPathNew = Path.Combine(ProfilesFolder, MD5DirNameNew);
                         MD5DirPathNewTemp = Path.Combine(MD5DirPathNew, "Temp");
                         DirectoryCopy(MD5DirPathOld, MD5DirPathNew, true);
@@ -445,7 +469,7 @@ an issue on GitHub.");
                     {
                         byte[] idk = Encoding.ASCII.GetBytes(Input_text);
                         MD5PreviouslyLoaded = idk;
-                        ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                        ProfileHash = Input_text;
                         is_string = true;
                     }
                     CurrentProfileName = "- Current Profile: " + "\"" + CurProfileName + "\"";
