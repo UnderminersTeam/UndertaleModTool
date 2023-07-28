@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -439,7 +438,6 @@ namespace UndertaleModLib.Compiler
                     context.LocalVars["arguments"] = "arguments";
                 context.GlobalVars.Clear();
                 context.Enums.Clear();
-                context.LocalArgs.Clear();
                 hasError = false;
 
                 // Ensuring an EOF exists
@@ -673,15 +671,12 @@ namespace UndertaleModLib.Compiler
                 }
 
                 EnsureTokenKind(TokenKind.OpenParen);
-                var i = 0;
-                Dictionary<string, int> argsDict = new();
+
                 while (remainingStageOne.Count > 0 && !hasError && !IsNextToken(TokenKind.EOF, TokenKind.CloseParen))
                 {
-                    var token = EnsureTokenKind(TokenKind.ProcVariable);
-                    if (token == null)
-                        return null;
-                    argsDict.Add(token.Text, i);
-                    i++;
+                    Statement expr = ParseExpression(context);
+                    if (expr != null)
+                        args.Children.Add(expr);
                     if (!IsNextTokenDiscard(TokenKind.Comma))
                     {
                         if (!IsNextToken(TokenKind.CloseParen))
@@ -695,9 +690,7 @@ namespace UndertaleModLib.Compiler
 
                 if (EnsureTokenKind(TokenKind.CloseParen) == null) return null;
 
-                result.Children.Add(ParseStatement(context)); // most likely parses the body.
-                context.LocalArgs.Add(result, argsDict);
-
+                result.Children.Add(ParseStatement(context));
                 if (expressionMode)
                     return result;
                 else // Whatever you call non-anonymous definitions
