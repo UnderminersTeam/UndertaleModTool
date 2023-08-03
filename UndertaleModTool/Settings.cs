@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
+using UndertaleModLib.Decompiler;
 
 namespace UndertaleModTool
 {
@@ -21,6 +22,16 @@ namespace UndertaleModTool
         public bool AssetOrderSwappingEnabled { get; set; } = false;
         public bool ProfileModeEnabled { get; set; } = false;
         public bool UseGMLCache { get; set; } = false;
+
+
+
+        private bool _ptAutoStates = true;
+
+        public bool PTAutoStates { get => _ptAutoStates; set {
+            _ptAutoStates = value;
+            GlobalDecompileContext.PTAutoStates = value;
+        }}
+
         public bool ProfileMessageShown { get; set; } = false;
         public bool AutomaticFileAssociation { get; set; } = true;
         public bool TempRunMessageShow { get; set; } = true;

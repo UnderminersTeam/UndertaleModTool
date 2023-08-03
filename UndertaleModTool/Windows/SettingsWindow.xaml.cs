@@ -72,6 +72,15 @@ namespace UndertaleModTool
                 Settings.Save();
             }
         }
+        public static bool PTAutoStates
+        {
+            get => Settings.Instance.PTAutoStates;
+            set
+            {
+                Settings.Instance.PTAutoStates = value;
+                Settings.Save();
+            }
+        }
 
         public static bool ProfileMessageShown
         {

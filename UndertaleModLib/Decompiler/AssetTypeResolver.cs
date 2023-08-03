@@ -50,7 +50,9 @@ namespace UndertaleModLib.Decompiler
         ContextDependent, // Can be anything, depends on the function and/or other arguments
 
         TileSet, // Identical to AssetIDType.Background, used internally for GMS2 to prevent tileset functions from resolving incorrectly.
-        Layer // GMS2
+        Layer, // GMS2
+
+        PT_State // Pizza Tower states
     }
 
     public enum HAlign
@@ -360,6 +362,7 @@ namespace UndertaleModLib.Decompiler
         public static Dictionary<string, AssetIDType> return_types; // keys are script names (< GMS2.3) or member function variable names (>= GMS2.3)
 
         public static bool PTSpriteTypes = false; // enable types for spr_* variables and stuff
+        public static Dictionary<int, string> PTStates = new();
 
         internal static bool AnnotateTypesForFunctionCall(string function_name, AssetIDType[] arguments, DecompileContext context)
         {
@@ -1066,6 +1069,8 @@ namespace UndertaleModLib.Decompiler
             if (lowerName != null && lowerName.StartsWith("pizza tower", StringComparison.InvariantCulture)) {
                 PTSpriteTypes = true;
                 builtin_vars.Add("targetRoom", AssetIDType.Room);
+                builtin_vars.Add("state", AssetIDType.PT_State);
+                builtin_vars.Add("tauntstoredstate", AssetIDType.PT_State);
                 builtin_vars.Add("room_index", AssetIDType.Room);
                 builtin_vars.Add("backtohubroom", AssetIDType.Room);
                 builtin_vars.Add("roomtorestart", AssetIDType.Room);
