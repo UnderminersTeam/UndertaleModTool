@@ -1071,9 +1071,14 @@ namespace UndertaleModLib.Decompiler
             PTSpriteTypes = false;
             if (lowerName != null && lowerName.StartsWith("pizza tower", StringComparison.InvariantCulture)) {
                 PTSpriteTypes = true;
-                builtin_vars.Add("targetRoom", AssetIDType.Room);
                 builtin_vars.Add("state", AssetIDType.PT_State);
+                builtin_vars.Add("prevstate", AssetIDType.PT_State);
+                builtin_vars.Add("substate", AssetIDType.PT_State);
+                builtin_vars.Add("arenastate", AssetIDType.PT_State);
+                builtin_vars.Add("player_state", AssetIDType.PT_State);
                 builtin_vars.Add("tauntstoredstate", AssetIDType.PT_State);
+                builtin_vars.Add("ministate", AssetIDType.PT_State);
+                builtin_vars.Add("targetRoom", AssetIDType.Room);
                 builtin_vars.Add("room_index", AssetIDType.Room);
                 builtin_vars.Add("backtohubroom", AssetIDType.Room);
                 builtin_vars.Add("roomtorestart", AssetIDType.Room);
@@ -1092,6 +1097,12 @@ namespace UndertaleModLib.Decompiler
                     new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other };
                 builtin_funcs["pattern_set"] =
                     new[] { AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_sound"] =
+                    new[] { AssetIDType.Sound, AssetIDType.Sound, AssetIDType.Sound, AssetIDType.Sound };
+                builtin_funcs["scr_music"] =
+                    new[] { AssetIDType.Sound, AssetIDType.Sound, AssetIDType.Sound, AssetIDType.Sound };
+                builtin_funcs["scr_soundeffect"] =
+                    new[] { AssetIDType.Sound, AssetIDType.Sound, AssetIDType.Sound, AssetIDType.Sound };
             }
 
             // Just Undertale
