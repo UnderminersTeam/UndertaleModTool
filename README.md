@@ -24,6 +24,7 @@ A fork of [UndertaleModTool](https://github.com/krzys-h/UndertaleModTool) with a
 
 [Same as vanilla UTMT.](https://github.com/krzys-h/UndertaleModTool#compilation-instructions)
 
+made by Pizza Tower United: Community Edition's team
 <!--
   commandline building:
 
