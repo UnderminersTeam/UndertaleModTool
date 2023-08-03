@@ -46,5 +46,5 @@ jobs:
     - name: Upload ${{ matrix.os }} GUI 32Bit
       uses: actions/upload-artifact@v2
       with:
-        name: ${{ matrix.os }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}
+        name: UTMTCE-GUI32BIT-${{ matrix.os }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}
         path: ${{ matrix.os }}
