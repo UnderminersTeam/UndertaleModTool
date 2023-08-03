@@ -43,5 +43,5 @@ jobs:
     - name: Upload ${{ matrix.os }} CLI
       uses: actions/upload-artifact@v2
       with:
-        name: CLI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}
-        path: CLI-${{ matrix.os }}
+        name: CLI-UTMTCE${{ matrix.os }}-isBundled-${{ matrix.bundled }}
+        path: CLI-UTMTCE${{ matrix.os }}

@@ -49,8 +49,8 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-          name: GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}
-          path: GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip
+          name: GUI-UTMTCE${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}
+          path: GUI-UTMTCE${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip
 
   build_cli:
 
@@ -92,8 +92,8 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-          name: CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}
-          path: CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}.zip
+          name: CLI-UTMTCE${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}
+          path: CLI-UTMTCE${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}.zip
 
   upload:
 

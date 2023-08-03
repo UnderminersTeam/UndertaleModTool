@@ -42,5 +42,5 @@ jobs:
     - name: Upload ${{ matrix.os }} GUI
       uses: actions/upload-artifact@v2
       with:
-        name: GUI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}
+        name: UTMTCE-GUI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}
         path: ${{ matrix.os }}
