@@ -3,8 +3,8 @@
 A fork of [AwfulNasty's fork](https://github.com/AwfulNasty/UndertaleModTool/tree/RoomEditorChanges) of [UndertaleModTool](https://github.com/krzys-h/UndertaleModTool) that adds even more stuff, still mainly for Pizza Tower modding.
 
 ## Features
-- Stuff from the original UTMT Usable (AwfulNasty's fork): can open scr_player_mach3; button to add creation code to rooms and objects in rooms
-- Types for some Pizza Tower stuff (like `spr_*` variables for characterspr)
+- Features from the original UTMT Usable (AwfulNasty's fork): can open scr_player_mach3; button to add creation code to rooms and objects in rooms
+- Types for some Pizza Tower stuff, like `spr_*` variables for characterspr and state IDs
 - Additional functions for structs and stuff
 - Automatic selection/creation of instance layers and grid snapping when dragging objects into rooms
 - Maybe more to come in the future!
