@@ -15,7 +15,7 @@
         <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
         <StartupObject>UndertaleModTool.Program</StartupObject>
         <!-- Suppress all missing XML comment warnings -->
-        <NoWarn>1591</NoWarn>
+        <NoWarn>1591,1574,CA1416</NoWarn>
     </PropertyGroup>
     <ItemGroup>
       <None Remove="Resources\tabs_left_button.png" />

@@ -8,7 +8,7 @@
     <RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <!-- Supress all missing XML comment warnings -->
-    <NoWarn>1591</NoWarn>
+    <NoWarn>1591,1574</NoWarn>
   </PropertyGroup>
 
 </Project>

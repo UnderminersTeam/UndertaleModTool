@@ -8,7 +8,7 @@
     <RollForward>LatestMajor</RollForward>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <!-- Suppress all missing XML comment warnings -->
-    <NoWarn>1591</NoWarn>
+    <NoWarn>1591,1574</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
