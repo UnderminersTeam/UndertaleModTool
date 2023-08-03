@@ -488,16 +488,12 @@ namespace UndertaleModLib.Decompiler
                     return overrides[variable_name];
             }
 
-            if (PTSpriteTypes == true) {
-                if (
-                    variable_name.StartsWith("spr_") ||
-                    variable_name.EndsWith("spr") ||
-                    variable_name.EndsWith("sprite")
-                )
-                {
-                    return AssetIDType.Sprite;
-                }
+            
+            if (variable_name.StartsWith("spr_") || variable_name.EndsWith("spr") || variable_name.EndsWith("sprite"))
+            {
+                return AssetIDType.Sprite;
             }
+            
 
             if (builtin_vars.ContainsKey(variable_name))
                 return builtin_vars[variable_name];
