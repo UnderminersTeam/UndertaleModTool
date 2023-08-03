@@ -443,7 +443,12 @@ an issue on GitHub.");
             }
             catch (Exception exc)
             {
+#if DEBUG
+                // Error is annoying during development
+                Console.WriteLine("DirectoryCopy error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
+#else
                 this.ShowError("DirectoryCopy error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
+#endif
             }
         }
     }
