@@ -15,7 +15,7 @@ A fork of [UndertaleModTool](https://github.com/krzys-h/UndertaleModTool) with a
 
 ## Download
 
-Theres some options for getting UndertaleModTool: Community Edition
+# Theres some options for getting UndertaleModTool: Community Edition
 1: Github Actions's Artifacts
 2: Compiling it yourself with dotnet or visual studio
 3: tell someone to compile it for you
