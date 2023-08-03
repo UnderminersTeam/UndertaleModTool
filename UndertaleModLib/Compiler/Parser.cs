@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading.Tasks;
 using UndertaleModLib.Models;
 using static UndertaleModLib.Compiler.Compiler.Lexer.Token;
+using UndertaleModLib.Decompiler;
 
 namespace UndertaleModLib.Compiler
 {
@@ -460,18 +460,55 @@ namespace UndertaleModLib.Compiler
                     else if (tokens[i].Kind == TokenKind.Identifier)
                     {
                         // Convert identifiers into their proper references, at least sort of.
-                        if ((i != 0 && tokens[i - 1].Kind == TokenKind.Dot) || 
-                            !ResolveIdentifier(context, tokens[i].Content, out ExpressionConstant constant))
-                        {
-                            int ID = GetVariableID(context, tokens[i].Content, out _);
-                            if (ID >= 0 && ID < 100000)
-                                firstPass.Add(new Statement(TokenKind.ProcVariable, tokens[i], -1)); // becomes self anyway?
-                            else
-                                firstPass.Add(new Statement(TokenKind.ProcVariable, tokens[i], ID));
+                        bool runOtherIdentifierStuff = true;
+                        // Compile Pizza Tower state names
+                        if (
+                            GlobalDecompileContext.PTAutoStates && tokens.Count >= 3 &&
+                            tokens[i + 1].Kind == TokenKind.Dot &&
+                            tokens[i + 2].Kind == TokenKind.Identifier
+                        ) {
+                            if (
+                                tokens[i].Content == "states" && 
+                                AssetTypeResolver.PTStates.ContainsValue(tokens[i + 2].Content)
+                            ) {
+                                int? stateID = null;
+                                foreach (var entry in AssetTypeResolver.PTStates)
+                                {
+                                    if (!entry.Value.Equals(tokens[i + 2].Content))
+                                    {
+                                        continue;
+                                    }
+                                    stateID = entry.Key;
+                                }
+
+                                if (stateID != null) {
+                                    firstPass.Add(
+                                        new Statement(
+                                            TokenKind.ProcConstant,
+                                            tokens[i],
+                                            new ExpressionConstant((long)stateID)
+                                        )
+                                    );
+                                    i += 2;
+                                    runOtherIdentifierStuff = false;
+                                }
+                            }
                         }
-                        else
-                        {
-                            firstPass.Add(new Statement(TokenKind.ProcConstant, tokens[i], constant));
+
+                        if (runOtherIdentifierStuff) {
+                            if ((i != 0 && tokens[i - 1].Kind == TokenKind.Dot) || 
+                                !ResolveIdentifier(context, tokens[i].Content, out ExpressionConstant constant))
+                            {
+                                int ID = GetVariableID(context, tokens[i].Content, out _);
+                                if (ID >= 0 && ID < 100000)
+                                    firstPass.Add(new Statement(TokenKind.ProcVariable, tokens[i], -1)); // becomes self anyway?
+                                else
+                                    firstPass.Add(new Statement(TokenKind.ProcVariable, tokens[i], ID));
+                            }
+                            else
+                            {
+                                firstPass.Add(new Statement(TokenKind.ProcConstant, tokens[i], constant));
+                            }
                         }
                     }
                     else if (tokens[i].Kind == TokenKind.Number)

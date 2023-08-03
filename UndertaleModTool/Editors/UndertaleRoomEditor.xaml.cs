@@ -282,8 +282,8 @@ namespace UndertaleModTool
                     }
                     else
                         obj1 = VisualTreeHelper.GetChild(ObjElemDict[obj], 0);
-
-                    (obj1 as FrameworkElement).BringIntoView();
+                    if (obj is not Layer)
+                        (obj1 as FrameworkElement).BringIntoView();
 
                     Storyboard.SetTarget(flashAnim, obj1);
                     Storyboard.SetTargetProperty(flashAnim, new PropertyPath(OpacityProperty));
@@ -1037,22 +1037,35 @@ namespace UndertaleModTool
                 else if (sourceItem is UndertaleGameObject droppedObj)
                 {
                     var mousePos = e.GetPosition(roomCanvas);
+                    var snappedPos = GetGridMouseCoordinates(mousePos, room);
 
-                    if (mainWindow.IsGMS2 == Visibility.Visible && layer == null)
+                    if (
+                        (mainWindow.IsGMS2 == Visibility.Visible && layer == null) ||
+                        (layer != null && layer.InstancesData == null)
+                    )
                     {
-                        mainWindow.ShowError("Please select a layer.");
-                        return;
-                    }
-                    if (layer != null && layer.InstancesData == null)
-                    {
-                        mainWindow.ShowError("Please select an instances layer.");
-                        return;
+                        // Try to find a valid layer.
+                        // If there isn't one, create one.
+                        foreach (Layer Layer in room.Layers)
+                        {
+                            Debug.WriteLine(Layer);
+                            if (Layer.InstancesData != null) {
+                                layer = Layer;
+                                break;
+                            }
+                        }
+                        if (layer == null) {
+                            layer = AddLayer<Layer.LayerInstancesData>(LayerType.Instances, "Instances");
+                        }
                     }
 
+                    var gridWidth = room.GridWidth;
+                    var gridHeight = room.GridHeight;
                     GameObject obj = new()
                     {
-                        X = (int)mousePos.X,
-                        Y = (int)mousePos.Y,
+                        // Snap position to grid
+                        X = Convert.ToInt32(snappedPos.X),
+                        Y = Convert.ToInt32(snappedPos.Y),
                         ObjectDefinition = droppedObj,
                         InstanceID = mainWindow.Data.GeneralInfo.LastObj++
                     };
@@ -1259,14 +1272,14 @@ namespace UndertaleModTool
             }
         }
 
-        private void AddLayer<T>(LayerType type, string name) where T : Layer.LayerData, new()
+        private Layer AddLayer<T>(LayerType type, string name) where T : Layer.LayerData, new()
         {
             UndertaleRoom room = this.DataContext as UndertaleRoom;
             if (room is null)
             {
                 // (not sure if it's possible)
                 mainWindow.ShowError("Room is null.");
-                return;
+                return null;
             }
 
             var data = mainWindow.Data;
@@ -1371,6 +1384,7 @@ namespace UndertaleModTool
             }
 
             SelectObject(layer);
+            return layer;
         }
 
         private void AddObjectInstance(UndertaleRoom room)

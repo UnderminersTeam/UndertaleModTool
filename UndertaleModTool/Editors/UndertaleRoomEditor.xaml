@@ -67,10 +67,9 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="342px"/>
+            <RowDefinition Height="250px"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid Grid.Column="0" Grid.Row="0" Margin="0,0,0,8">
             <Grid.ColumnDefinitions>
@@ -391,6 +390,7 @@
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
+                                <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                             </Grid.RowDefinitions>
                             <Grid.Resources>
                                 <Style TargetType="TextBlock" BasedOn="{StaticResource Centered}"/>
@@ -470,6 +470,8 @@
 
                             <TextBlock Grid.Row="14" Grid.Column="0" Margin="3">Grid Thickness</TextBlock>
                             <local:TextBoxDark Grid.Row="14" Grid.Column="2" Margin="3" Text="{Binding GridThicknessPx}"/>
+                            
+                            <local:ButtonDark Grid.Row="15" Grid.Column="0" Grid.ColumnSpan="3" Margin="3" Content="Save as PNG" Click="ExportAsPNG_Click"/>
                         </Grid>
                     </DataTemplate>
 
@@ -1563,6 +1565,5 @@
                 </ItemsControl.Resources>
             </ItemsControl>
         </ScrollViewer>
-        <local:ButtonDark Grid.Column="0" Grid.Row="3" Content="Save as PNG" Click="ExportAsPNG_Click"/>
     </Grid>
 </local:DataUserControl>

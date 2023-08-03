@@ -25,6 +25,8 @@ namespace UndertaleModLib.Decompiler
 
         public bool EnableStringLabels;
 
+        public static bool PTAutoStates = true;
+
         public List<string> DecompilerWarnings = new List<string>();
 
         /// <summary>
@@ -355,6 +357,15 @@ namespace UndertaleModLib.Decompiler
 
             public override string ToString(DecompileContext context)
             {
+                if (
+                    GlobalDecompileContext.PTAutoStates &&
+                    AssetType == AssetIDType.PT_State &&
+                    (Value is int || Value is short || Value is long) &&
+                    AssetTypeResolver.PTStates.ContainsKey(Convert.ToInt32(Value))
+                ) {
+                    return "states." + AssetTypeResolver.PTStates.GetValueOrDefault(Convert.ToInt32(Value));
+                }
+
                 if (Value is float f) // More accurate, larger range, double to string.
                     return RoundTrip.ToRoundTrip(f);
 
@@ -3695,7 +3706,7 @@ namespace UndertaleModLib.Decompiler
                         var x = caseEntries.ElementAt(i);
                         Block temp = x.Key;
 
-                        Block switchEnd = DetermineSwitchEnd(temp, caseEntries.Count > (i + 1) ? caseEntries.ElementAt(i + 1).Key : null, meetPoint);
+                        Block switchEnd = context.GlobalContext.Data.GeneralInfo.BytecodeVersion == 17 ? meetPoint : DetermineSwitchEnd(temp, caseEntries.Count > (i + 1) ? caseEntries.ElementAt(i + 1).Key : null, meetPoint);
 
                         HLSwitchCaseStatement result = new HLSwitchCaseStatement(x.Value, HLDecompileBlocks(context, ref temp, blocks, loops, reverseDominators, alreadyVisited, currentLoop, switchEnd, switchEnd, false, depth + 1));
                         cases.Add(result);

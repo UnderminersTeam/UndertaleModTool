@@ -53,7 +53,9 @@ namespace UndertaleModLib.Decompiler
         ContextDependent, // Can be anything, depends on the function and/or other arguments
 
         TileSet, // Identical to AssetIDType.Background, used internally for GMS2 to prevent tileset functions from resolving incorrectly.
-        Layer // GMS2
+        Layer, // GMS2
+
+        PT_State // Pizza Tower states
     }
 
     public enum HAlign
@@ -362,6 +364,9 @@ namespace UndertaleModLib.Decompiler
 
         public static Dictionary<string, AssetIDType> return_types; // keys are script names (< GMS2.3) or member function variable names (>= GMS2.3)
 
+        public static bool PTSpriteTypes = false; // enable types for spr_* variables and stuff
+        public static Dictionary<int, string> PTStates = new();
+
         internal static bool AnnotateTypesForFunctionCall(string function_name, AssetIDType[] arguments, DecompileContext context)
         {
             return AnnotateTypesForFunctionCall(function_name, arguments, context, null);
@@ -483,6 +488,16 @@ namespace UndertaleModLib.Decompiler
                     return overrides[variable_name];
             }
 
+            if (PTSpriteTypes == true) {
+                if (
+                    variable_name.StartsWith("spr_") ||
+                    variable_name.EndsWith("spr") ||
+                    variable_name.EndsWith("sprite")
+                )
+                {
+                    return AssetIDType.Sprite;
+                }
+            }
 
             if (builtin_vars.ContainsKey(variable_name))
                 return builtin_vars[variable_name];
@@ -567,6 +582,9 @@ namespace UndertaleModLib.Decompiler
                 { "script_exists", new[] { AssetIDType.Script } },
                 { "script_get_name", new[] { AssetIDType.Script } },
                 // script_execute handled separately
+
+                { "json_parse", new[] { AssetIDType.Other } },
+                { "json_stringifs", new[] { AssetIDType.Other } },
 
                 { "instance_change", new[] { AssetIDType.GameObject, AssetIDType.Boolean } },
                 { "instance_copy", new[] { AssetIDType.Boolean } },
@@ -1048,6 +1066,33 @@ namespace UndertaleModLib.Decompiler
 
             // TODO: make proper file/manifest for all games to use, not just UT/DR, and also not these specific names
             string lowerName = data?.GeneralInfo?.DisplayName?.Content.ToLower(CultureInfo.InvariantCulture);
+
+            // Pizza Tower (and things like Scoutdigo)
+            PTSpriteTypes = false;
+            if (lowerName != null && lowerName.StartsWith("pizza tower", StringComparison.InvariantCulture)) {
+                PTSpriteTypes = true;
+                builtin_vars.Add("targetRoom", AssetIDType.Room);
+                builtin_vars.Add("state", AssetIDType.PT_State);
+                builtin_vars.Add("tauntstoredstate", AssetIDType.PT_State);
+                builtin_vars.Add("room_index", AssetIDType.Room);
+                builtin_vars.Add("backtohubroom", AssetIDType.Room);
+                builtin_vars.Add("roomtorestart", AssetIDType.Room);
+                builtin_vars.Add("checkpointroom", AssetIDType.Room);
+                builtin_vars.Add("lastroom", AssetIDType.Room);
+                builtin_vars.Add("content", AssetIDType.GameObject);
+                builtin_funcs["instance_create_unique"] =
+                    new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
+                builtin_funcs["draw_enemy"] =
+                    new[] { AssetIDType.Boolean, AssetIDType.Boolean, AssetIDType.Color };
+                builtin_funcs["pal_swap_init_system"] =
+                    new[] { AssetIDType.Shader };
+                builtin_funcs["pal_swap_init_system_fix"] =
+                    new[] { AssetIDType.Shader };
+                builtin_funcs["pal_swap_set"] =
+                    new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["pattern_set"] =
+                    new[] { AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+            }
 
             // Just Undertale
             if (lowerName != null && lowerName.StartsWith("undertale", StringComparison.InvariantCulture))

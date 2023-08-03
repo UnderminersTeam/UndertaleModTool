@@ -37,6 +37,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="Game Maker: Studio 1.4 path" ToolTip="Required only if you want to use the Studio runner rather than the .exe or run the game under debugger."/>
@@ -60,23 +61,26 @@
             <CheckBox Grid.Row="5" Grid.Column="2" Margin="3" Content="" IsChecked="{Binding ShowDebuggerOption}"/>
             <TextBlock Grid.Row="5" Grid.Column="2" Margin="25 2 2 2" Text="Show &quot;Run game under GMS debugger&quot; file option" ToolTip="Whether to show the option in the &quot;File&quot; menu. Disabled by default."/>
 
-            <Separator Grid.Row="6" Grid.ColumnSpan="4" Margin="10"/>
+            <CheckBox Grid.Row="6" Grid.Column="0" Margin="3" Content="" IsChecked="{Binding PTAutoStates}"/>
+            <TextBlock Grid.Row="6" Grid.Column="0" Margin="25 2 2 2" Text="Show Pizza Tower state names (experimental)" ToolTip="Shows state names instead of IDs. Pizza Tower-specific. Enabled by default."/>
 
-            <CheckBox Grid.Row="7" Grid.Column="0" Margin="3" Content="" IsChecked="{Binding EnableDarkMode}"/>
-            <TextBlock Grid.Row="7" Grid.Column="0" Margin="25 2 2 2" Text="Enable dark mode" ToolTip="Makes the program interface dark. Disabled by default."/>
+            <Separator Grid.Row="7" Grid.ColumnSpan="4" Margin="10"/>
 
-            <Separator Grid.Row="8" Grid.ColumnSpan="4" Margin="10"/>
+            <CheckBox Grid.Row="8" Grid.Column="0" Margin="3" Content="" IsChecked="{Binding EnableDarkMode}"/>
+            <TextBlock Grid.Row="8" Grid.Column="0" Margin="25 2 2 2" Text="Enable dark mode" ToolTip="Makes the program interface dark. Disabled by default."/>
 
-            <CheckBox Grid.Row="9" Grid.Column="0" Margin="3" VerticalAlignment="Center" Name="gridWidthCheckbox" Content="" IsChecked="{Binding GridWidthEnabled}"/>
-            <TextBlock Grid.Row="9" Grid.Column="0" Margin="25 2 2 2" VerticalAlignment="Center" Text="Global grid width" ToolTip="This option globally overrides the automatic assignment of a room's grid width based on the most used tile's width in that room."/>
-            <local:TextBoxDark Grid.Row="9" Grid.Column="1" Margin="3" IsEnabled="{Binding ElementName=gridWidthCheckbox, Path=IsChecked}" Text="{Binding GlobalGridWidth}"/>
+            <Separator Grid.Row="9" Grid.ColumnSpan="4" Margin="10"/>
 
-            <CheckBox Grid.Row="10" Grid.Column="0" Margin="3" VerticalAlignment="Center" Name="gridHeightCheckbox" Content="" IsChecked="{Binding GridHeightEnabled}"/>
-            <TextBlock Grid.Row="10" Grid.Column="0" Margin="25 2 2 2"  VerticalAlignment="Center" Text="Global grid height" ToolTip="This option globally overrides the automatic assignment of a room's grid height based on the most used tile's height in that room."/>
-            <local:TextBoxDark Grid.Row="10" Grid.Column="1" Margin="3" IsEnabled="{Binding ElementName=gridHeightCheckbox, Path=IsChecked}" Text="{Binding GlobalGridHeight}"/>
+            <CheckBox Grid.Row="10" Grid.Column="0" Margin="3" VerticalAlignment="Center" Name="gridWidthCheckbox" Content="" IsChecked="{Binding GridWidthEnabled}"/>
+            <TextBlock Grid.Row="10" Grid.Column="0" Margin="25 2 2 2" VerticalAlignment="Center" Text="Global grid width" ToolTip="This option globally overrides the automatic assignment of a room's grid width based on the most used tile's width in that room."/>
+            <local:TextBoxDark Grid.Row="10" Grid.Column="1" Margin="3" IsEnabled="{Binding ElementName=gridWidthCheckbox, Path=IsChecked}" Text="{Binding GlobalGridWidth}"/>
 
-            <CheckBox Grid.Row="9" Grid.Column="2" Margin="3" VerticalAlignment="Center" Name="gridThicknessCheckBox" Content="" IsChecked="{Binding GridThicknessEnabled}"/>
-            <TextBlock Grid.Row="9" Grid.Column="2" Margin="25 2 2 2" VerticalAlignment="Center" Text="Global grid thickness" ToolTip="This option globally overrides the automatic assignment of a room's grid thickness."/>
+            <CheckBox Grid.Row="11" Grid.Column="0" Margin="3" VerticalAlignment="Center" Name="gridHeightCheckbox" Content="" IsChecked="{Binding GridHeightEnabled}"/>
+            <TextBlock Grid.Row="11" Grid.Column="0" Margin="25 2 2 2"  VerticalAlignment="Center" Text="Global grid height" ToolTip="This option globally overrides the automatic assignment of a room's grid height based on the most used tile's height in that room."/>
+            <local:TextBoxDark Grid.Row="11" Grid.Column="1" Margin="3" IsEnabled="{Binding ElementName=gridHeightCheckbox, Path=IsChecked}" Text="{Binding GlobalGridHeight}"/>
+
+            <CheckBox Grid.Row="10" Grid.Column="2" Margin="3" VerticalAlignment="Center" Name="gridThicknessCheckBox" Content="" IsChecked="{Binding GridThicknessEnabled}"/>
+            <TextBlock Grid.Row="10" Grid.Column="2" Margin="25 2 2 2" VerticalAlignment="Center" Text="Global grid thickness" ToolTip="This option globally overrides the automatic assignment of a room's grid thickness."/>
             <local:TextBoxDark Grid.Row="9" Grid.Column="3" Margin="3" IsEnabled="{Binding ElementName=gridThicknessCheckBox, Path=IsChecked}" Text="{Binding GlobalGridThickness}"/>
 
             <Separator Grid.Row="13" Grid.ColumnSpan="4" Margin="10"/>

@@ -243,7 +243,7 @@ namespace UndertaleModTool
             Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open a data.win file to get started, then double click on the items on the left to view them.");
             OpenInTab(Highlighted);
 
-            TitleMain = "UndertaleModTool by krzys_h v:" + Version;
+            TitleMain = "UndertaleModTool (Super Usable)";
 
             CanSave = false;
             CanSafelySave = false;
@@ -1052,6 +1052,69 @@ namespace UndertaleModTool
                         UndertaleCodeEditor.gettext = null;
                         UndertaleCodeEditor.gettextJSON = null;
                         #pragma warning restore CA1416
+
+                        // Detect PT state names
+                        AssetTypeResolver.PTStates.Clear();
+                        UndertaleCode ptPlayerStep = Data.Code.ByName("gml_Object_obj_player_Step_0");
+                        if (ptPlayerStep == null) {
+                            ptPlayerStep = Data.Code.ByName("gml_Object_obj_player1_Step_0");
+                        }
+                        if (ptPlayerStep != null) {
+                            for (var i = 0; i < ptPlayerStep.Instructions.Count; i++) {
+                                UndertaleInstruction instr = ptPlayerStep.Instructions[i];
+                                if (
+                                    UndertaleInstruction.GetInstructionType(instr.Kind)
+                                    != UndertaleInstruction.InstructionType.PushInstruction
+                                    || !((instr.Value is int) || (instr.Value is short) || (instr.Value is long))
+                                ) continue;
+
+                                int stateID = Convert.ToInt32(instr.Value);
+                                if (AssetTypeResolver.PTStates.ContainsKey(stateID)) continue;
+
+                                UndertaleInstruction next = ptPlayerStep.Instructions[i + 1];
+                                if (next == null) continue;
+                                if (
+                                    UndertaleInstruction.GetInstructionType(next.Kind)
+                                    != UndertaleInstruction.InstructionType.ComparisonInstruction
+                                    || next.ComparisonKind != UndertaleInstruction.ComparisonType.EQ
+                                ) continue;
+                                UndertaleInstruction next2 = ptPlayerStep.Instructions[i + 2];
+                                if (next2 == null) continue;
+                                if (
+                                    next2.Kind != UndertaleInstruction.Opcode.Bt
+                                ) continue;
+
+                                UndertaleInstruction newInstr =
+                                    ptPlayerStep.GetInstructionFromAddress(next2.Address + (uint)next2.JumpOffset);
+                                
+                                if (newInstr == null) continue;
+
+                                for (
+                                    var j = ptPlayerStep.Instructions.IndexOf(newInstr);
+                                    ptPlayerStep.Instructions[j] != null &&
+                                    UndertaleInstruction.GetInstructionType(ptPlayerStep.Instructions[j].Kind) !=
+                                        UndertaleInstruction.InstructionType.GotoInstruction;
+                                    j++
+                                ) {
+                                    UndertaleInstruction thisInstr = ptPlayerStep.Instructions[j];
+                                    if (UndertaleInstruction.GetInstructionType(thisInstr.Kind)
+                                        != UndertaleInstruction.InstructionType.CallInstruction) continue;
+                                    string funcName = thisInstr.Function.Target.Name.Content;
+                                    string stateName = "";
+                                    if (funcName.StartsWith("scr_player_")) {
+                                        stateName = funcName["scr_player_".Length..];
+                                    } else if (funcName.StartsWith("gml_Script_scr_player_")) {
+                                        stateName = funcName["gml_Script_scr_player_".Length..];
+                                    } else {
+                                        continue;
+                                    }
+                                    // Hooray! We got the state!
+                                    Debug.WriteLine("found a state! " + stateName);
+                                    AssetTypeResolver.PTStates.TryAdd(stateID, stateName);
+                                    break;
+                                }
+                            }
+                        }
                     }
 
                     dialog.Hide();
@@ -2770,12 +2833,12 @@ namespace UndertaleModTool
 
         private void MenuItem_GitHub_Click(object sender, RoutedEventArgs e)
         {
-            OpenBrowser("https://github.com/krzys-h/UndertaleModTool");
+            OpenBrowser("https://github.com/CST1229/UndertaleModTool/tree/super-usable");
         }
 
         private void MenuItem_About_Click(object sender, RoutedEventArgs e)
         {
-            this.ShowMessage("UndertaleModTool by krzys_h\nVersion " + Version, "About");
+            this.ShowMessage("UndertaleModTool by krzys_h, modified by CST1229 and others\nVersion " + Version, "About");
         }
 
         /// From https://github.com/AvaloniaUI/Avalonia/blob/master/src/Avalonia.Dialogs/AboutAvaloniaDialog.xaml.cs
