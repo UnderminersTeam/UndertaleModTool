@@ -1645,11 +1645,15 @@ namespace UndertaleModLib.Decompiler
             public DirectFunctionCall(string overridenName, UndertaleFunction function, UndertaleInstruction.DataType returnType, List<Expression> args) : base(returnType, args)
             {
                 this.OverridenName = overridenName;
+                if (function == null)
+                    throw new Exception("DirectFunctionCall: Function not found; overridden name: " + overridenName);
                 this.Function = function;
             }
 
             public DirectFunctionCall(UndertaleFunction function, UndertaleInstruction.DataType returnType, List<Expression> args) : base(returnType, args)
             {
+                if (function == null)
+                    throw new Exception("DirectFunctionCall: Function not found");
                 this.Function = function;
             }
 
@@ -1808,6 +1812,10 @@ namespace UndertaleModLib.Decompiler
 
             public IndirectFunctionCall(Expression func_this, Expression func, UndertaleInstruction.DataType returnType, List<Expression> args) : base(returnType, args)
             {
+                if (func_this == null)
+                    throw new Exception("IndirectFunctionCall: FunctionThis not found");
+                if (func == null)
+                    throw new Exception("IndirectFunctionCall: Function not found");
                 this.FunctionThis = func_this;
                 this.Function = func;
             }
@@ -4024,7 +4032,7 @@ namespace UndertaleModLib.Decompiler
                             {
                                 lock (data.KnownSubFunctions)
                                 {
-                                    data.KnownSubFunctions.Add(assign.Destination.Var.Name.Content, funcDef.Function);
+                                    data.KnownSubFunctions.TryAdd(assign.Destination.Var.Name.Content, funcDef.Function);
                                 }
                             }
                         }
