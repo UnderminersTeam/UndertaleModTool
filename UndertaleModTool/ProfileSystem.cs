@@ -404,7 +404,14 @@ an issue on GitHub.");
 
                 if (!dir.Exists)
                 {
+                    
+#if DEBUG
+                // Error is annoying during development
+                Console.WriteLine("Source directory does not exist or could not be found: " + sourceDirNamec);
+                return;
+#else
                     throw new DirectoryNotFoundException("Source directory does not exist or could not be found: " + sourceDirName);
+#endif
                 }
 
                 DirectoryInfo[] dirs = dir.GetDirectories();
@@ -443,12 +450,7 @@ an issue on GitHub.");
             }
             catch (Exception exc)
             {
-#if DEBUG
-                // Error is annoying during development
-                Console.WriteLine("DirectoryCopy error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
-#else
                 this.ShowError("DirectoryCopy error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
-#endif
             }
         }
     }
