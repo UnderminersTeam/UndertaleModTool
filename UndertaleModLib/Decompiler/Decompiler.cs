@@ -2516,6 +2516,7 @@ namespace UndertaleModLib.Decompiler
                             if (instr.Function.Target is null)
                             {
                                 Debug.WriteLine(instr.Function.ToString());
+                                stack.Push(new ExpressionConstant(UndertaleInstruction.DataType.Undefined, null, false));
                                 break;
                             }
                             List<Expression> args = new List<Expression>();
