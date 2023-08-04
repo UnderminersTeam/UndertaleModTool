@@ -15,12 +15,16 @@ A fork of [UndertaleModTool](https://github.com/krzys-h/UndertaleModTool) with a
 
 ## Download
 
-You'll have to compile it yourself for now.
+- Theres some options for getting UndertaleModTool: Community Edition
+- 1: Github Actions's Artifacts
+- 2: Compiling it yourself with dotnet or visual studio
+- 3: tell someone to compile it for you
 
 ## Compiling
 
 [Same as vanilla UTMT.](https://github.com/krzys-h/UndertaleModTool#compilation-instructions)
 
+made by Pizza Tower United: Community Edition's team
 <!--
   commandline building:
 
