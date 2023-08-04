@@ -13,6 +13,7 @@
 			"args": [],
 			"cwd": "${workspaceFolder}/UndertaleModTool",
 			"console": "internalConsole",
+			"requireExactSource": false,
 			"stopAtEntry": false
 		},
 		{
