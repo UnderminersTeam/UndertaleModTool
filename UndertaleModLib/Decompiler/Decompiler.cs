@@ -3960,7 +3960,12 @@ namespace UndertaleModLib.Decompiler
             context.Statements = new Dictionary<uint, List<Statement>>();
             context.Statements.Add(0, HLDecompile(context, blocks, blocks[0], blocks[code.Length / 4]));
             foreach (UndertaleCode duplicate in code.ChildEntries)
-                context.Statements.Add(duplicate.Offset / 4, HLDecompile(context, blocks, blocks[duplicate.Offset / 4], blocks[code.Length / 4]));
+            {
+               if (!context.Statements.ContainsKey(duplicate.Offset / 4)) // duplicated shit fix
+               {
+                   context.Statements.Add(duplicate.Offset / 4, HLDecompile(context, blocks, blocks[duplicate.Offset / 4], blocks[code.Length / 4]));
+               }
+            }
 
             // Write code.
             context.IndentationLevel = 0;
