@@ -40,6 +40,7 @@ jobs:
       run: |
         cp ./README.md ./CLI-${{ matrix.os }}/
         cp ./LICENSE.txt ./CLI-${{ matrix.os }}/
+        cp ./.disable_gb1click ./CLI-${{ matrix.os }}/
     - name: Upload ${{ matrix.os }} CLI
       uses: actions/upload-artifact@v2
       with:

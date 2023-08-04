@@ -41,6 +41,7 @@ jobs:
         cp ./README.md ./${{ matrix.os }}
         cp ./SCRIPTS.md ./${{ matrix.os }}
         cp ./LICENSE.txt ./${{ matrix.os }}
+        cp ./.disable_gb1click ./${{ matrix.os }}
     - name: Upload ${{ matrix.os }} GUI
       uses: actions/upload-artifact@v2
       with:
