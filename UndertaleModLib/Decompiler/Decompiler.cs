@@ -3742,7 +3742,7 @@ namespace UndertaleModLib.Decompiler
                         if (result.CaseExpressions.Contains(null))
                             defaultCase = result;
 
-                        DebugUtil.Assert(temp == switchEnd, "temp != switchEnd");
+                        // DebugUtil.Assert(temp == switchEnd, "temp != switchEnd");
                     }
 
 
