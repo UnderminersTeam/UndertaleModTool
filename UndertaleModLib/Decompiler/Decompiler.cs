@@ -1157,7 +1157,8 @@ namespace UndertaleModLib.Decompiler
                 if (Var.Var.AssetType == AssetIDType.Other)
                     Var.Var.AssetType = suggestedType;
                 AssetIDType type = Value.DoTypePropagation(context, Var.Var.AssetType);
-                Var.Var.AssetType = type;
+                if (Var.Var.AssetType == AssetIDType.Other)
+                    Var.Var.AssetType = type;
                 return type;
             }
         }
@@ -4097,7 +4098,7 @@ namespace UndertaleModLib.Decompiler
 
         private static void DoTypePropagation(DecompileContext context, Dictionary<uint, Block> blocks)
         {
-            foreach (var b in blocks.Values.Cast<Block>())
+            foreach (var b in blocks.Values.Cast<Block>().Reverse())
             {
                 if (b.Statements != null) // With returns not allowing all blocks coverage, make sure it's even been processed
                     foreach (var s in b.Statements.Cast<Statement>().Reverse())
