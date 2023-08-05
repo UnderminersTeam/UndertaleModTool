@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu_latest]
+        os: [windows-latest]
         configuration: [Debug]
         bundled: [true, false]
         singlefile: [true, false]
