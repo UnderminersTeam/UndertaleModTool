@@ -1182,6 +1182,34 @@ namespace UndertaleModLib.Compiler
                 cw.typeStack.Push(DataType.Variable);
             }
 
+            private static void AssembleStructDef(CodeWriter cw, Parser.Statement str)
+            {
+                /* AssembleStatement:
+                push.i gml_Script____struct___utmt_test
+                conv.i.v
+                call.i @@NullObject@@(argc=0)
+                call.i method(argc=2)
+                dup.v 0
+                pushi.e (-16) -1
+                pop.v.v [stacktop](static) self.___struct___utmt_test
+                ----- new FunctionPatch:
+                call.i @@NewGMLObject@@(argc=1)
+                ----- Variable set:
+                pop.v.v self.a
+                */
+
+                AssembleStatement(cw, str.Children[0]);
+
+                cw.funcPatches.Add(new FunctionPatch()
+                {
+                    Target = cw.EmitRef(Opcode.Call, DataType.Int32),
+                    Name = "@@NewGMLObject@@",
+                    Offset = cw.offset * 4,
+                    ArgCount = 1 // TODO: variable closure stuff (argcount is probably = number of closure vars + 1)
+                });
+                cw.typeStack.Push(DataType.Variable);
+            }
+
             private static void AssembleExpression(CodeWriter cw, Parser.Statement e, Parser.Statement funcDefName = null)
             {
                 switch (e.Kind)
@@ -1267,6 +1295,9 @@ namespace UndertaleModLib.Compiler
                     case Parser.Statement.StatementKind.ExprFunctionCall:
                         AssembleFunctionCall(cw, e); // the return value in this case must be used
                         break;
+                    case Parser.Statement.StatementKind.ExprStruct:
+                        AssembleStructDef(cw, e); 
+                        break;
                     case Parser.Statement.StatementKind.ExprVariableRef:
                     case Parser.Statement.StatementKind.ExprSingleVariable:
                         AssembleVariablePush(cw, e);
@@ -1278,6 +1309,8 @@ namespace UndertaleModLib.Compiler
                                 AssemblyWriterError(cw, "Malformed function assignment.", e.Token);
                                 break;
                             }
+
+                            bool isStructDef = funcDefName.Text.StartsWith("gml_Script____struct___");
                             
                             Patch startPatch = Patch.StartHere(cw);
                             Patch endPatch = Patch.Start();
@@ -1322,8 +1355,17 @@ namespace UndertaleModLib.Compiler
                                 ArgCount = -1
                             });
                             cw.Emit(Opcode.Conv, DataType.Int32, DataType.Variable);
-                            cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-1;
-                            cw.Emit(Opcode.Conv, DataType.Int32, DataType.Variable);
+                            if (!isStructDef) {
+                                cw.funcPatches.Add(new FunctionPatch()
+                                {
+                                    Target = cw.EmitRef(Opcode.Call, DataType.Int32),
+                                    Name = "@@NullObject@@",
+                                    ArgCount = 0
+                                });
+                            } else {
+                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-1;
+                                cw.Emit(Opcode.Conv, DataType.Int32, DataType.Variable);
+                            }
                             cw.funcPatches.Add(new FunctionPatch()
                             {
                                 Target = cw.EmitRef(Opcode.Call, DataType.Int32),
@@ -2205,7 +2247,7 @@ namespace UndertaleModLib.Compiler
                         InstType = InstanceType.Self,
                         VarType = VariableType.StackTop
                     });
-                    cw.Emit(Opcode.Popz, DataType.Variable);
+                    if (!s.Text.StartsWith("___struct___")) cw.Emit(Opcode.Popz, DataType.Variable);
                 }
                 else
                 {
