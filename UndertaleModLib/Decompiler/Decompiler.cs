@@ -4066,8 +4066,13 @@ namespace UndertaleModLib.Decompiler
                 return meetPoint;
 
             Queue<Block> blocks = new Queue<Block>();
+            // Preventing the same block and its children from being queued repeatedly
+            // becomes increasingly important on large switches. The HashSet should give
+            // good performance while preventing this type of duplication.
+            HashSet<Block> usedBlocks = new HashSet<Block>(); 
 
             blocks.Enqueue(start);
+            usedBlocks.Add(start);
             while (blocks.Count > 0)
             {
                 Block test = blocks.Dequeue();
@@ -4076,10 +4081,16 @@ namespace UndertaleModLib.Decompiler
                     return end;
                 if (test == meetPoint)
                     return meetPoint;
-
-                blocks.Enqueue(test.nextBlockTrue);
-                if (test.nextBlockTrue != test.nextBlockFalse)
+                if (!usedBlocks.Contains(test.nextBlockTrue))
+                {
+                    blocks.Enqueue(test.nextBlockTrue);
+                    usedBlocks.Add(test.nextBlockTrue);
+                }
+                if (!usedBlocks.Contains(test.nextBlockFalse))
+                {
                     blocks.Enqueue(test.nextBlockFalse);
+                    usedBlocks.Add(test.nextBlockFalse);
+                }
 
             }
 
