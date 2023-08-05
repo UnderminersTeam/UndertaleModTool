@@ -110,6 +110,7 @@ namespace UndertaleModLib.Compiler
                     ExprConstant,
                     ExprBinaryOp,
                     ExprArray, // maybe?
+                    ExprStruct,
                     ExprFunctionCall,
                     ExprUnary,
                     ExprConditional,
@@ -1532,7 +1533,9 @@ namespace UndertaleModLib.Compiler
                         }
                     case TokenKind.OpenBlock:
                         // todo? maybe?
-                        ReportCodeError("Unsupported syntax.", remainingStageOne.Dequeue().Token, true);
+                        if (context.Data.IsVersionAtLeast(2, 3))
+                            return ParseStructLiteral(context);
+                        ReportCodeError("Cannot use struct literal prior to GMS2.3.", remainingStageOne.Dequeue().Token, true);
                         break;
                     case TokenKind.Increment:
                     case TokenKind.Decrement:
@@ -1586,6 +1589,90 @@ namespace UndertaleModLib.Compiler
                 }
 
                 if (EnsureTokenKind(TokenKind.CloseArray) == null) return null;
+
+                return result;
+            }
+            
+            // Example: {key: 123, key2: "asd"}
+            private static Statement ParseStructLiteral(CompileContext context)
+            {
+                Statement result = new Statement(Statement.StatementKind.ExprStruct,
+                                                EnsureTokenKind(TokenKind.OpenBlock)?.Token);
+
+                Statement nextStatement = remainingStageOne.Peek();
+                Statement procVar = null;
+                string varName = "___struct___utmt_test";
+                int ID = GetVariableID(context, varName, out _);
+                if (ID >= 0 && ID < 100000)
+                    procVar = new Statement(TokenKind.ProcVariable, nextStatement.Token, -1); // becomes self anyway?
+                else
+                    procVar = new Statement(TokenKind.ProcVariable, nextStatement.Token, ID);
+
+                Statement function = new Statement(Statement.StatementKind.FunctionDef, procVar.Token);
+                function.Text = varName;
+                Statement args = new Statement();
+                Statement destination = new Statement(Statement.StatementKind.ExprFuncName, result.Token)
+                    { ID = procVar.ID, Text = varName };
+                Statement body = new Statement();
+
+                function.Children.Add(args);
+                function.Children.Add(body);
+
+                Statement functionAssign = new Statement(Statement.StatementKind.Assign, new Lexer.Token(TokenKind.Assign));
+                functionAssign.Children.Add(destination);
+                functionAssign.Children.Add(new Statement(Statement.StatementKind.Token, functionAssign.Token));
+                functionAssign.Children.Add(function);
+
+                result.Children.Add(functionAssign);
+
+                while (!hasError && remainingStageOne.Count > 0 && !IsNextToken(TokenKind.CloseBlock, TokenKind.EOF))
+                {
+                    if (!IsNextToken(TokenKind.ProcVariable))
+                    {
+                        if (remainingStageOne.Any())
+                            ReportCodeError("Expected variable name in inline struct.", remainingStageOne.Peek().Token, true);
+                        else
+                            ReportCodeError("Malformed struct literal.", false);
+                        break;
+                    }
+                    Statement variable = remainingStageOne.Dequeue();
+                    if (context.BuiltInList.Functions.ContainsKey(variable.Text) || context.scripts.Contains(variable.Text))
+                        ReportCodeError(string.Format("Struct variable name {0} cannot be used; a function or script already has the name.", variable.Text), variable.Token, false);
+                    if (context.assetIds.ContainsKey(variable.Text))
+                        ReportCodeError(string.Format("Struct variable name {0} cannot be used; a resource already has the name.", variable.Text), variable.Token, false);
+                    if (!IsNextTokenDiscard(TokenKind.Colon))
+                    {
+                        if (remainingStageOne.Any())
+                            ReportCodeError("Expected ':' after key in inline struct.", remainingStageOne.Peek().Token, true);
+                        else
+                            ReportCodeError("Malformed struct literal.", false);
+                        break;
+                    }
+
+                    Statement a = new Statement(Statement.StatementKind.Assign, variable.Token);
+                    body.Children.Add(a);
+
+                    Statement left = new Statement(variable) { Kind = Statement.StatementKind.ExprSingleVariable };
+                    left.ID = variable.ID;
+
+                    a.Children.Add(left);
+                    a.Children.Add(new Statement(TokenKind.Assign, a.Token));
+                    a.Children.Add(ParseExpression(context));
+
+                    if (!IsNextTokenDiscard(TokenKind.Comma))
+                    {
+                        if (!IsNextToken(TokenKind.CloseBlock))
+                        {
+                            if (remainingStageOne.Any())
+                                ReportCodeError("Expected ',' or '}' after value in inline struct.", remainingStageOne.Peek().Token, true);
+                            else
+                                ReportCodeError("Malformed struct literal.", false);
+                            break;
+                        }
+                    }
+                }
+
+                if (EnsureTokenKind(TokenKind.CloseBlock) == null) return null;
 
                 return result;
             }
