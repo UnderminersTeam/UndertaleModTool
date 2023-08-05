@@ -1061,7 +1061,10 @@ namespace UndertaleModLib.Decompiler
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
                 // TODO: This should be probably able to go both ways...
-                Argument2.DoTypePropagation(context, Argument1.DoTypePropagation(context, suggestedType));
+                if (Argument1 is ExpressionConstant)
+                    Argument1.DoTypePropagation(context, Argument2.DoTypePropagation(context, suggestedType));
+                else
+                    Argument2.DoTypePropagation(context, Argument1.DoTypePropagation(context, suggestedType));
 
                 /*
                 if (Opcode != UndertaleInstruction.ComparisonType.EQ && Opcode != UndertaleInstruction.ComparisonType.NEQ)
@@ -1153,7 +1156,9 @@ namespace UndertaleModLib.Decompiler
             {
                 if (Var.Var.AssetType == AssetIDType.Other)
                     Var.Var.AssetType = suggestedType;
-                return Value.DoTypePropagation(context, Var.Var.AssetType);
+                AssetIDType type = Value.DoTypePropagation(context, Var.Var.AssetType);
+                Var.Var.AssetType = type;
+                return type;
             }
         }
 
@@ -2714,6 +2719,11 @@ namespace UndertaleModLib.Decompiler
                                     statements.Add(new CommentStatement("setowner: " + (owner ?? "<null>")));
                                     */
                                     break;
+                                case -6: // isstaticok??
+                                    stack.Push(new ExpressionConstant(UndertaleInstruction.DataType.Int32, (int)1, false));
+                                    break;
+                                case -7: // setstatic??
+                                    break;
                                 case -10: // GMS2.3+, chknullish
 
                                     // TODO: Implement nullish operator in decompiled output.
@@ -4087,7 +4097,7 @@ namespace UndertaleModLib.Decompiler
 
         private static void DoTypePropagation(DecompileContext context, Dictionary<uint, Block> blocks)
         {
-            foreach (var b in blocks.Values.Cast<Block>().Reverse())
+            foreach (var b in blocks.Values.Cast<Block>())
             {
                 if (b.Statements != null) // With returns not allowing all blocks coverage, make sure it's even been processed
                     foreach (var s in b.Statements.Cast<Statement>().Reverse())
