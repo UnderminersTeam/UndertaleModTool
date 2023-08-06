@@ -1190,9 +1190,9 @@ namespace UndertaleModLib.Compiler
                 call.i @@NullObject@@(argc=0)
                 call.i method(argc=2)
                 dup.v 0
-                pushi.e (-16) -1
-                pop.v.v [stacktop](static) self.___struct___utmt_test
-                ----- new FunctionPatch:
+                pushi.e -16
+                pop.v.v [stacktop]static.___struct___utmt_test
+                ----- new FunctionPatch (this function):
                 call.i @@NewGMLObject@@(argc=1)
                 ----- Variable set:
                 pop.v.v self.a
@@ -1374,7 +1374,11 @@ namespace UndertaleModLib.Compiler
                             });
                             cw.typeStack.Push(DataType.Variable);
                             cw.Emit(Opcode.Dup, DataType.Variable).Extra = 0;
-                            cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-1; // todo: -6 sometimes?
+                            if (!isStructDef) {
+                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-1; // todo: -6 sometimes?
+                            } else {
+                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-16;
+                            }
                         }
                         break;
                     case Parser.Statement.StatementKind.ExprBinaryOp:
@@ -2239,15 +2243,16 @@ namespace UndertaleModLib.Compiler
                 }
                 else if (s.Kind == Parser.Statement.StatementKind.ExprFuncName)
                 {
+                    bool isStructDef = s.Text.StartsWith("___struct___");
                     // Until further notice, I'm assuming this only comes up in 2.3 script definition.
                     cw.varPatches.Add(new VariablePatch()
                     {
                         Target = cw.EmitRef(Opcode.Pop, DataType.Variable, DataType.Variable),
                         Name = s.Text,
-                        InstType = InstanceType.Self,
+                        InstType = isStructDef ? InstanceType.Static : InstanceType.Self,
                         VarType = VariableType.StackTop
                     });
-                    if (!s.Text.StartsWith("___struct___")) cw.Emit(Opcode.Popz, DataType.Variable);
+                    if (!isStructDef) cw.Emit(Opcode.Popz, DataType.Variable);
                 }
                 else
                 {

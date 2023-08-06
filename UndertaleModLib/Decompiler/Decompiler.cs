@@ -1600,16 +1600,17 @@ namespace UndertaleModLib.Decompiler
                             }
                             sb.Append("\n");
                         }
-                        context.DecompilingStruct = oldDecompilingStruct;
                         context.ArgumentReplacements = oldReplacements;
                         context.IndentationLevel--;
                         sb.Append(context.Indentation);
                         sb.Append("}");
-                        if(!oldDecompilingStruct)
+                        if(!oldDecompilingStruct) {
                             sb.Append("\n");
+                        }
                     }
                     else
                         sb.Append("{}");
+                    context.DecompilingStruct = oldDecompilingStruct;
                 }
                 else
                 {

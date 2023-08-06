@@ -17,6 +17,13 @@ namespace UndertaleModLib.Compiler
             public static List<string> ErrorMessages = new List<string>();
             private static bool hasError = false; // temporary variable that clears in several places
 
+            // Struct function names that haven't been used yet.
+            private static Queue<string> usableStructNames = new();
+
+            // Not really universally unique nor does it follow the UUID spec,
+            // it just needs to be unique in the same script.
+            private static int uuidCounter = 0;
+
             public class ExpressionConstant
             {
                 public Kind kind = Kind.None;
@@ -429,7 +436,6 @@ namespace UndertaleModLib.Compiler
                     remainingStageOne.Dequeue();
                 }
             }
-
             public static Statement ParseTokens(CompileContext context, List<Lexer.Token> tokens)
             {
                 // Basic initialization
@@ -440,7 +446,16 @@ namespace UndertaleModLib.Compiler
                     context.LocalVars["arguments"] = "arguments";
                 context.GlobalVars.Clear();
                 context.Enums.Clear();
+                context.FunctionsToObliterate.Clear();
+                uuidCounter = 0;
                 hasError = false;
+
+                usableStructNames.Clear();
+                foreach (UndertaleCode child in context.OriginalCode.ChildEntries) {
+                    if (child.Name.Content.StartsWith("gml_Script____struct___")) {
+                        usableStructNames.Enqueue(child.Name.Content["gml_Script_".Length..]);
+                    }
+                }
 
                 // Ensuring an EOF exists
                 if (tokens.Count == 0 || tokens[tokens.Count - 1].Kind != TokenKind.EOF)
@@ -572,6 +587,10 @@ namespace UndertaleModLib.Compiler
                 rootBlock = ParseBlock(context, true);
                 if (hasError)
                     return null;
+                
+                // Remove any unused struct functions
+                while (usableStructNames.Count > 0)
+                    context.FunctionsToObliterate.Add(usableStructNames.Dequeue());
 
                 return rootBlock;
             }
@@ -706,6 +725,9 @@ namespace UndertaleModLib.Compiler
                 {
                     expressionMode = false;
                     Statement s = remainingStageOne.Dequeue();
+                    if (s.Text.StartsWith("___struct___")) {
+                        ReportCodeError("Function names cannot start with ___struct___ (they are reserved for structs).", s.Token, false);
+                    }
                     destination = new Statement(Statement.StatementKind.ExprFuncName, s.Token) { ID = s.ID };
                 }
 
@@ -1600,8 +1622,22 @@ namespace UndertaleModLib.Compiler
                                                 EnsureTokenKind(TokenKind.OpenBlock)?.Token);
 
                 Statement nextStatement = remainingStageOne.Peek();
-                Statement procVar = null;
-                string varName = "___struct___utmt_test";
+                Statement procVar;
+
+                string varName;
+                // Check if we can reuse any struct functions
+                if (usableStructNames.Count > 0) {
+                    varName = usableStructNames.Dequeue();
+                } else {
+                    // Create a new function
+                    int i = context.Data.Code.Count;
+                    do {
+                        varName = "___struct___utmt_" + context.OriginalCode.Name.Content +
+                            "__" + uuidCounter++.ToString();
+                        i++;
+                    } while (context.Data.KnownSubFunctions.ContainsKey(varName));
+                }
+
                 int ID = GetVariableID(context, varName, out _);
                 if (ID >= 0 && ID < 100000)
                     procVar = new Statement(TokenKind.ProcVariable, nextStatement.Token, -1); // becomes self anyway?
