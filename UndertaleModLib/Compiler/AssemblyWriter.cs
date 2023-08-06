@@ -271,6 +271,9 @@ namespace UndertaleModLib.Compiler
                                     Name = childName,
                                     Code = childEntry
                                 };
+                                // If we don't set IsConstructor, the game will crash
+                                // when creating the struct
+                                if (patch.Name.StartsWith("___struct___")) childScript.IsConstructor = true;
                                 compileContext.Data.Scripts.Add(childScript);
 
                                 UndertaleFunction childFunction = new()
@@ -1184,7 +1187,8 @@ namespace UndertaleModLib.Compiler
 
             private static void AssembleStructDef(CodeWriter cw, Parser.Statement str)
             {
-                /* AssembleStatement:
+                /* Example struct definition
+                ----- AssembleStatement:
                 push.i gml_Script____struct___utmt_test
                 conv.i.v
                 call.i @@NullObject@@(argc=0)
@@ -1198,14 +1202,23 @@ namespace UndertaleModLib.Compiler
                 pop.v.v self.a
                 */
 
-                AssembleStatement(cw, str.Children[0]);
+                List<Parser.Statement> leaked = str.Children[0].Children;
+                // Just push these leaked variables onto the stack
+                // We need to do this in reverse since function arguments 
+                // are parsed in reverse stack order
+                for (int i = leaked.Count - 1; i >= 0; i--) {
+                    Parser.Statement statement = leaked[i];
+                    AssembleExpression(cw, statement);
+                }
+
+                AssembleStatement(cw, str.Children[1]);
 
                 cw.funcPatches.Add(new FunctionPatch()
                 {
                     Target = cw.EmitRef(Opcode.Call, DataType.Int32),
                     Name = "@@NewGMLObject@@",
                     Offset = cw.offset * 4,
-                    ArgCount = 1 // TODO: variable closure stuff (argcount is probably = number of closure vars + 1)
+                    ArgCount = leaked.Count + 1
                 });
                 cw.typeStack.Push(DataType.Variable);
             }
