@@ -15,6 +15,7 @@ namespace UndertaleModLib.Compiler
     {
         public static class AssemblyWriter
         {
+            private static int uuidCounter = 0;
             public class CodeWriter
             {
                 public CompileContext compileContext;
@@ -560,6 +561,7 @@ namespace UndertaleModLib.Compiler
 
             public static CodeWriter AssembleStatement(CompileContext compileContext, Parser.Statement s)
             {
+                uuidCounter = 0;
                 CodeWriter cw = new CodeWriter(compileContext);
                 AssembleStatement(cw, s);
                 return cw;
@@ -1321,6 +1323,14 @@ namespace UndertaleModLib.Compiler
                             {
                                 AssemblyWriterError(cw, "Malformed function assignment.", e.Token);
                                 break;
+                            }
+
+                            if (funcDefName == null) {
+                                funcDefName = new Parser.Statement(e);
+                                do {
+                                    funcDefName.Text = "anon_utmt_" +
+                                        cw.compileContext.OriginalCode.Name.Content + "__" + uuidCounter++.ToString();
+                                } while (cw.compileContext.Data.Scripts.ByName(funcDefName.Text) != null);
                             }
 
                             bool isStructDef = funcDefName.Text.StartsWith("___struct___");
