@@ -1624,6 +1624,12 @@ namespace UndertaleModLib.Compiler
                 Statement nextStatement = remainingStageOne.Peek();
                 Statement procVar;
 
+                // Non-constants are passed to the function through arguments
+                // I call this leaking the variable
+                // (because the values "leak" out of the struct function in the assembly)
+                Statement leakedVars = new Statement();
+                result.Children.Add(leakedVars);
+
                 string varName;
                 // Check if we can reuse any struct functions
                 if (usableStructNames.Count > 0) {
@@ -1661,6 +1667,13 @@ namespace UndertaleModLib.Compiler
 
                 result.Children.Add(functionAssign);
 
+                // this is a total mess
+                int argumentsID = context.GetAssetIndexByName("argument");
+                Lexer.Token varToken = new Lexer.Token(TokenKind.ProcVariable);
+                varToken.Content = "argument";
+                Statement argumentsVar = new Statement(TokenKind.ProcVariable, varToken);
+                argumentsVar.ID = argumentsID;
+
                 while (!hasError && remainingStageOne.Count > 0 && !IsNextToken(TokenKind.CloseBlock, TokenKind.EOF))
                 {
                     if (!IsNextToken(TokenKind.ProcVariable))
@@ -1693,7 +1706,22 @@ namespace UndertaleModLib.Compiler
 
                     a.Children.Add(left);
                     a.Children.Add(new Statement(TokenKind.Assign, a.Token));
-                    a.Children.Add(ParseExpression(context));
+
+                    Statement expr = Optimize(context, ParseExpression(context));
+                    if (expr.Kind == Statement.StatementKind.ExprConstant) {
+                        // Constants can be inlined
+                        a.Children.Add(expr);
+                    } else {
+                        Statement argumentsAccess =
+                            new Statement(argumentsVar) { Kind = Statement.StatementKind.ExprSingleVariable };
+                        argumentsAccess.ID = argumentsVar.ID;
+                        Statement index = new Statement(Statement.StatementKind.ExprConstant, expr.Token);
+                        index.Constant = new ExpressionConstant((double)leakedVars.Children.Count);
+                        argumentsAccess.Children.Add(index);
+
+                        leakedVars.Children.Add(expr);
+                        a.Children.Add(argumentsAccess);
+                    }
 
                     if (!IsNextTokenDiscard(TokenKind.Comma))
                     {
