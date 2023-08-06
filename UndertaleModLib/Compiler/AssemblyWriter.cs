@@ -1310,7 +1310,7 @@ namespace UndertaleModLib.Compiler
                                 break;
                             }
 
-                            bool isStructDef = funcDefName.Text.StartsWith("gml_Script____struct___");
+                            bool isStructDef = funcDefName.Text.StartsWith("___struct___");
                             
                             Patch startPatch = Patch.StartHere(cw);
                             Patch endPatch = Patch.Start();
@@ -1355,7 +1355,7 @@ namespace UndertaleModLib.Compiler
                                 ArgCount = -1
                             });
                             cw.Emit(Opcode.Conv, DataType.Int32, DataType.Variable);
-                            if (!isStructDef) {
+                            if (isStructDef) {
                                 cw.funcPatches.Add(new FunctionPatch()
                                 {
                                     Target = cw.EmitRef(Opcode.Call, DataType.Int32),
@@ -1374,10 +1374,10 @@ namespace UndertaleModLib.Compiler
                             });
                             cw.typeStack.Push(DataType.Variable);
                             cw.Emit(Opcode.Dup, DataType.Variable).Extra = 0;
-                            if (!isStructDef) {
-                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-1; // todo: -6 sometimes?
-                            } else {
+                            if (isStructDef) {
                                 cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-16;
+                            } else {
+                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-1; // todo: -6 sometimes?
                             }
                         }
                         break;
