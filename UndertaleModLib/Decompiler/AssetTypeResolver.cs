@@ -1074,7 +1074,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("player_state", AssetIDType.PT_State);
                 builtin_vars.Add("tauntstoredstate", AssetIDType.PT_State);
                 builtin_vars.Add("taunt_storedstate", AssetIDType.PT_State);
-                builtin_vars.Add("storedstate", AssetIDType.PT_State
+                builtin_vars.Add("storedstate", AssetIDType.PT_State);
                 builtin_vars.Add("chosenstate", AssetIDType.PT_State);
                 builtin_vars.Add("superattackstate", AssetIDType.PT_State);
                 builtin_vars.Add("text_state", AssetIDType.PT_State);
