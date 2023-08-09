@@ -1073,7 +1073,19 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("arenastate", AssetIDType.PT_State);
                 builtin_vars.Add("player_state", AssetIDType.PT_State);
                 builtin_vars.Add("tauntstoredstate", AssetIDType.PT_State);
+                builtin_vars.Add("taunt_storedstate", AssetIDType.PT_State);
+                builtin_vars.Add("storedstate", AssetIDType.PT_State
+                builtin_vars.Add("chosenstate", AssetIDType.PT_State);
+                builtin_vars.Add("superattackstate", AssetIDType.PT_State);
+                builtin_vars.Add("text_state", AssetIDType.PT_State);
                 builtin_vars.Add("ministate", AssetIDType.PT_State);
+                builtin_vars.Add("dropstate", AssetIDType.PT_State);
+                builtin_vars.Add("verticalstate", AssetIDType.PT_State);
+                builtin_vars.Add("walkstate", AssetIDType.PT_State);
+                builtin_vars.Add("hitstate", AssetIDType.PT_State);
+                builtin_vars.Add("toppin_state", AssetIDType.PT_State);
+                builtin_vars.Add("bossintrostate", AssetIDType.PT_State);
+                builtin_vars.Add("introstate", AssetIDType.PT_State);
                 builtin_vars.Add("targetRoom", AssetIDType.Room);
                 builtin_vars.Add("room_index", AssetIDType.Room);
                 builtin_vars.Add("backtohubroom", AssetIDType.Room);
