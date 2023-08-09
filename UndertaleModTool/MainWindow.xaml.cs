@@ -1079,6 +1079,22 @@ namespace UndertaleModTool
                                 Data.Code.ByName("gml_Object_obj_noiseboss_Step_0"),
                                 new[] {"scr_noise_"}
                             );
+                            FindStateNames(
+                                Data.Code.ByName("gml_Object_obj_fakepepboss_Step_0"),
+                                new[] {"scr_fakepepboss_", "scr_boss_"}
+                            );
+                            FindStateNames(
+                                Data.Code.ByName("gml_Object_obj_pizzafaceboss_Step_0"),
+                                new[] {"scr_pizzaface_"}
+                            );
+                            FindStateNames(
+                                Data.Code.ByName("gml_Object_obj_pizzafaceboss_p2_Step_0"),
+                                new[] {"scr_pizzaface_p2_", "scr_pizzaface_"}
+                            );
+                            FindStateNames(
+                                Data.Code.ByName("gml_Object_obj_pizzafaceboss_p3_Step_0"),
+                                new[] {"scr_pizzaface_p3_"}
+                            );
                         }
                     }
 
