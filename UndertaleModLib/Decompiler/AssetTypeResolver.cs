@@ -1095,9 +1095,40 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("lastroom", AssetIDType.Room);
 
                 builtin_vars.Add("content", AssetIDType.GameObject);
-                builtin_vars.Add("playerid", AssetIDType.GameObject);
                 builtin_vars.Add("player", AssetIDType.GameObject);
                 builtin_vars.Add("targetplayer", AssetIDType.GameObject);
+                builtin_vars.Add("playerid", AssetIDType.GameObject);
+                builtin_vars.Add("_playerid", AssetIDType.GameObject);
+                builtin_vars.Add("player_id", AssetIDType.GameObject);
+                builtin_vars.Add("platformid", AssetIDType.GameObject);
+                builtin_vars.Add("objID", AssetIDType.GameObject);
+                builtin_vars.Add("objectID", AssetIDType.GameObject);
+                builtin_vars.Add("ID", AssetIDType.GameObject);
+                builtin_vars.Add("baddiegrabbedID", AssetIDType.GameObject);
+                builtin_vars.Add("pizzashieldID", AssetIDType.GameObject);
+                builtin_vars.Add("baddieID", AssetIDType.GameObject);
+                builtin_vars.Add("brickid", AssetIDType.GameObject);
+                builtin_vars.Add("attackerID", AssetIDType.GameObject);
+
+                builtin_vars.Add("object", AssetIDType.GameObject);
+                builtin_vars.Add("obj", AssetIDType.GameObject);
+                builtin_vars.Add("_obj", AssetIDType.GameObject);
+                builtin_vars.Add("closestObj", AssetIDType.GameObject);
+                builtin_vars.Add("solidObj", AssetIDType.GameObject);
+                builtin_vars.Add("bg_obj", AssetIDType.GameObject);
+
+                builtin_vars.Add("_obj_player", AssetIDType.GameObject);
+                builtin_vars.Add("obj_explosion", AssetIDType.GameObject);
+                builtin_vars.Add("my_obj_index", AssetIDType.GameObject);
+
+                builtin_vars.Add("chargeeffectid", AssetIDType.GameObject);
+                builtin_vars.Add("dashcloudid", AssetIDType.GameObject);
+                builtin_vars.Add("crazyruneffectid", AssetIDType.GameObject);
+                builtin_vars.Add("superslameffectid", AssetIDType.GameObject);
+                builtin_vars.Add("speedlineseffectid", AssetIDType.GameObject);
+
+                builtin_vars.Add("throw_sprite", AssetIDType.Sprite);
+                builtin_vars.Add("reset_timer", AssetIDType.GameObject);
 
                 builtin_funcs["instance_create_unique"] =
                     new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
