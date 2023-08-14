@@ -1086,17 +1086,42 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("toppin_state", AssetIDType.PT_State);
                 builtin_vars.Add("bossintrostate", AssetIDType.PT_State);
                 builtin_vars.Add("introstate", AssetIDType.PT_State);
+
                 builtin_vars.Add("targetRoom", AssetIDType.Room);
                 builtin_vars.Add("room_index", AssetIDType.Room);
                 builtin_vars.Add("backtohubroom", AssetIDType.Room);
                 builtin_vars.Add("roomtorestart", AssetIDType.Room);
                 builtin_vars.Add("checkpointroom", AssetIDType.Room);
                 builtin_vars.Add("lastroom", AssetIDType.Room);
+
                 builtin_vars.Add("content", AssetIDType.GameObject);
+                builtin_vars.Add("playerid", AssetIDType.GameObject);
+                builtin_vars.Add("player", AssetIDType.GameObject);
+                builtin_vars.Add("targetplayer", AssetIDType.GameObject);
+
                 builtin_funcs["instance_create_unique"] =
                     new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
+                builtin_funcs["instance_nearest_random"] =
+                    new[] { AssetIDType.GameObject, AssetIDType.Other };
+
                 builtin_funcs["draw_enemy"] =
                     new[] { AssetIDType.Boolean, AssetIDType.Boolean, AssetIDType.Color };
+
+                builtin_funcs["create_afterimage"] =
+                    new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other };
+                builtin_funcs["create_mach2effect"] =
+                    new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Boolean };
+                builtin_funcs["create_heatattack_afterimage"] =
+                    new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["create_firemouth_afterimage"] =
+                    new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["create_blue_afterimage"] =
+                    new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["create_red_afterimage"] =
+                    new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["create_blur_afterimage"] =
+                    new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other };
+
                 builtin_funcs["pal_swap_init_system"] =
                     new[] { AssetIDType.Shader };
                 builtin_funcs["pal_swap_init_system_fix"] =
@@ -1105,12 +1130,40 @@ namespace UndertaleModLib.Decompiler
                     new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other };
                 builtin_funcs["pattern_set"] =
                     new[] { AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                
                 builtin_funcs["scr_sound"] =
                     new[] { AssetIDType.Sound, AssetIDType.Sound, AssetIDType.Sound, AssetIDType.Sound };
                 builtin_funcs["scr_music"] =
                     new[] { AssetIDType.Sound, AssetIDType.Sound, AssetIDType.Sound, AssetIDType.Sound };
                 builtin_funcs["scr_soundeffect"] =
                     new[] { AssetIDType.Sound, AssetIDType.Sound, AssetIDType.Sound, AssetIDType.Sound };
+
+                builtin_funcs["declare_particle"] =
+                    new[] { AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["create_debris"] =
+                    new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Boolean };
+                builtin_funcs["create_collect"] =
+                    new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other };
+                
+                builtin_funcs["tv_do_expression"] =
+                    new[] { AssetIDType.Sprite };
+
+                builtin_funcs["scr_pauseicon_add"] =
+                    new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+
+                builtin_funcs["scr_room_goto"] =
+                    new[] { AssetIDType.Room };
+
+                builtin_funcs["add_music"] =
+                    new[] { AssetIDType.Room, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other };
+                builtin_funcs["hub_state"] =
+                    new[] { AssetIDType.Room, AssetIDType.Other, AssetIDType.Other };
+                
+                builtin_funcs["draw_background_tiled"] =
+                    new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                    
+                builtin_funcs["object_get_depth"] =
+                    new[] { AssetIDType.GameObject };
             }
 
             // Just Undertale
