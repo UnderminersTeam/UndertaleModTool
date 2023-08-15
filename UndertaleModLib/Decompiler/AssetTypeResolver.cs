@@ -55,7 +55,9 @@ namespace UndertaleModLib.Decompiler
         TileSet, // Identical to AssetIDType.Background, used internally for GMS2 to prevent tileset functions from resolving incorrectly.
         Layer, // GMS2
 
-        PT_State // Pizza Tower states
+        PT_State, // Pizza Tower states
+
+        Keep // Not really a type, makes function arguments use the outer function's type (e.g for choose())
     }
 
     public enum HAlign
@@ -411,6 +413,15 @@ namespace UndertaleModLib.Decompiler
                     }
                 }
 
+                // Keep type
+                if (function != null) {
+                    for (int i = 0; i < func_types.Length; i++)
+                    {
+                        if (func_types[i] == AssetIDType.Keep)
+                            func_types[i] = function.AssetType;
+                    }
+                }
+
                 if (overloaded)
                 {
                     // Copy the array to make sure we don't overwrite existing known types
@@ -580,7 +591,7 @@ namespace UndertaleModLib.Decompiler
                 // script_execute handled separately
 
                 { "json_parse", new[] { AssetIDType.Other } },
-                { "json_stringifs", new[] { AssetIDType.Other } },
+                { "json_stringify", new[] { AssetIDType.Other } },
 
                 { "instance_change", new[] { AssetIDType.GameObject, AssetIDType.Boolean } },
                 { "instance_copy", new[] { AssetIDType.Boolean } },
@@ -1016,6 +1027,9 @@ namespace UndertaleModLib.Decompiler
                 { "steam_create_leaderboard", new[] { AssetIDType.Other, AssetIDType.Enum_Steam_LeaderBoard_Sort, AssetIDType.Enum_Steam_LeaderBoard_Display } },
 
                 { "steam_activate_overlay", new[] { AssetIDType.Enum_Steam_Overlay } },
+
+                // hacky
+                { "choose", new[] { AssetIDType.Keep, AssetIDType.Keep, AssetIDType.Keep, AssetIDType.Keep, AssetIDType.Keep, AssetIDType.Keep, AssetIDType.Keep, AssetIDType.Keep, AssetIDType.Keep, AssetIDType.Keep } },
 
                 // Also big TODO: Implement Boolean type for all these functions
 

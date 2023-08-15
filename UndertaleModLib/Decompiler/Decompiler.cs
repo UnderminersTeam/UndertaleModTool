@@ -1630,6 +1630,7 @@ namespace UndertaleModLib.Decompiler
         {
             internal UndertaleInstruction.DataType ReturnType;
             internal List<Expression> Arguments;
+            internal AssetIDType AssetType = AssetIDType.Other;
 
             protected FunctionCall(UndertaleInstruction.DataType returnType, List<Expression> args)
             {
@@ -1768,6 +1769,8 @@ namespace UndertaleModLib.Decompiler
 
             internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
             {
+                if (AssetType == AssetIDType.Other) AssetType = suggestedType;
+
                 string funcName = OverridenName != string.Empty ? OverridenName : Function.Name.Content;
                 var script_code = context.GlobalContext.Data?.Scripts.ByName(funcName)?.Code;
                 if (script_code != null && !context.GlobalContext.ScriptArgsCache.ContainsKey(funcName))
