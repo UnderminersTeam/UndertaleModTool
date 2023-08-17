@@ -751,6 +751,19 @@ namespace UndertaleModLib.Compiler
 
                 if (EnsureTokenKind(TokenKind.CloseParen) == null) return null;
 
+                // Semi-hack, this Statement is just used as a boolean
+                // to see if a function is a constructor or not
+                Statement isConstructor = new Statement();
+                isConstructor.Text = "";
+                if (IsNextTokenDiscard(TokenKind.KeywordConstructor)) {
+                    if (context.Data.IsVersionAtLeast(2, 3)) {
+                        isConstructor.Text = "constructor";
+                    } else {
+                        ReportCodeError("Cannot use constructors prior to GMS2.3.", result.Token, true);
+                    }
+                }
+                result.Children.Add(isConstructor);
+
                 result.Children.Add(ParseStatement(context));
                 if (expressionMode)
                     return result;
@@ -1657,8 +1670,14 @@ namespace UndertaleModLib.Compiler
                     { ID = procVar.ID, Text = varName };
                 Statement body = new Statement();
 
+                // If we don't set IsConstructor, the game will crash
+                // when creating the struct
+                Statement isConstructor = new Statement();
+                isConstructor.Text = "constructor";
+
                 function.Children.Add(args);
                 function.Children.Add(body);
+                function.Children.Add(isConstructor);
 
                 Statement functionAssign = new Statement(Statement.StatementKind.Assign, new Lexer.Token(TokenKind.Assign));
                 functionAssign.Children.Add(destination);

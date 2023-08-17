@@ -270,11 +270,9 @@ namespace UndertaleModLib.Compiler
                                 UndertaleScript childScript = new()
                                 {
                                     Name = childName,
-                                    Code = childEntry
+                                    Code = childEntry,
+                                    IsConstructor = patch.isConstructor
                                 };
-                                // If we don't set IsConstructor, the game will crash
-                                // when creating the struct
-                                if (patch.Name.StartsWith("___struct___")) childScript.IsConstructor = true;
                                 compileContext.Data.Scripts.Add(childScript);
 
                                 UndertaleFunction childFunction = new()
@@ -388,6 +386,7 @@ namespace UndertaleModLib.Compiler
                 public int ArgCount;
                 public uint Offset;
                 public bool isNewFunc = false;
+                public bool isConstructor = false;
             }
 
             public class StringPatch
@@ -1319,7 +1318,7 @@ namespace UndertaleModLib.Compiler
                         break;
                     case Parser.Statement.StatementKind.FunctionDef:
                         {
-                            if (e.Children.Count != 2)
+                            if (e.Children.Count != 3)
                             {
                                 AssemblyWriterError(cw, "Malformed function assignment.", e.Token);
                                 break;
@@ -1333,6 +1332,7 @@ namespace UndertaleModLib.Compiler
                                 } while (cw.compileContext.Data.Scripts.ByName(funcDefName.Text) != null);
                             }
 
+                            bool isConstructor = e.Children[1].Text == "constructor";
                             bool isStructDef = funcDefName.Text.StartsWith("___struct___");
                             
                             Patch startPatch = Patch.StartHere(cw);
@@ -1361,12 +1361,13 @@ namespace UndertaleModLib.Compiler
                                     Name = funcDefName.Text,
                                     Offset = cw.offset * 4,
                                     ArgCount = (ushort)e.Children[0].Children.Count,
-                                    isNewFunc = true
+                                    isNewFunc = true,
+                                    isConstructor = isConstructor
                                 });
                             }
 
                             cw.loopContexts.Push(new LoopContext(endPatch, startPatch));
-                            AssembleStatement(cw, e.Children[1]); // body
+                            AssembleStatement(cw, e.Children[2]); // body
                             AssembleExit(cw);
                             cw.loopContexts.Pop();
                             endPatch.Finish(cw);
@@ -1378,7 +1379,7 @@ namespace UndertaleModLib.Compiler
                                 ArgCount = -1
                             });
                             cw.Emit(Opcode.Conv, DataType.Int32, DataType.Variable);
-                            if (isStructDef) {
+                            if (isConstructor) {
                                 cw.funcPatches.Add(new FunctionPatch()
                                 {
                                     Target = cw.EmitRef(Opcode.Call, DataType.Int32),
@@ -1399,6 +1400,8 @@ namespace UndertaleModLib.Compiler
                             cw.Emit(Opcode.Dup, DataType.Variable).Extra = 0;
                             if (isStructDef) {
                                 cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-16;
+                            } else if (isConstructor) {
+                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-6;
                             } else {
                                 cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-1; // todo: -6 sometimes?
                             }
