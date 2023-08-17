@@ -1162,8 +1162,12 @@ namespace UndertaleModLib
                     QoiConverter.InitSharedBuffer(maxSize);
                 }
             }
-            foreach (UndertaleEmbeddedTexture obj in List)
+            int i = 1;
+            foreach (UndertaleEmbeddedTexture obj in List) {
                 obj.SerializeBlob(writer);
+                writer.SubmitMessage(String.Format("Writing chunk TXTR ({0}/{1})", i, List.Count));
+                i++;
+            }
 
             // padding
             // TODO: Maybe the padding is more global and every chunk is padded to 4 byte boundaries?
@@ -1235,6 +1239,7 @@ namespace UndertaleModLib
 
                 obj.UnserializeBlob(reader);
                 obj.Name = new UndertaleString("Texture " + index.ToString());
+                reader.SubmitMessage(String.Format("Reading chunk TXTR ({0}/{1})", index + 1, List.Count));
             }
 
             // padding
