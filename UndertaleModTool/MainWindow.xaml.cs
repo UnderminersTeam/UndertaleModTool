@@ -1015,17 +1015,6 @@ namespace UndertaleModTool
                                 data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
                             }
                         }
-                        if (data.IsYYC())
-                        {
-                            this.ShowWarning("This game uses YYC (YoYo Compiler), which means the code is embedded into the game executable. This configuration is currently not fully supported; continue at your own risk.", "YYC");
-                        }
-                        if (data.GeneralInfo != null)
-                        {
-                            if (!data.GeneralInfo.IsDebuggerDisabled)
-                            {
-                                this.ShowWarning("This game is set to run with the GameMaker Studio debugger and the normal runtime will simply hang after loading if the debugger is not running. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger");
-                            }
-                        }
                         if (Path.GetDirectoryName(FilePath) != Path.GetDirectoryName(filename))
                             CloseChildFiles();
 
@@ -1099,6 +1088,18 @@ namespace UndertaleModTool
                     }
 
                     dialog.Hide();
+
+                    if (data.IsYYC())
+                    {
+                        this.ShowWarning("This game uses YYC (YoYo Compiler), which means the code is embedded into the game executable. This configuration is currently not fully supported; continue at your own risk.", "YYC");
+                    }
+                    if (data.GeneralInfo != null)
+                    {
+                        if (!data.GeneralInfo.IsDebuggerDisabled)
+                        {
+                            this.ShowWarning("This game is set to run with the GameMaker Studio debugger and the normal runtime will simply hang after loading if the debugger is not running. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger");
+                        }
+                    }
                 });
             });
             dialog.ShowDialog();
