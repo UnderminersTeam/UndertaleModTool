@@ -316,7 +316,8 @@ namespace UndertaleModLib.Compiler
                             else
                             {
                                 def = compileContext.Data.Functions.ByName(patch.Name);
-                                // This code is only reachable using a 2.3 function definition. ("push.i gml_Script_scr_stuff")
+                                // This code is only reachable using a 2.3 function definition or `new` call.
+                                // ("push.i gml_Script_scr_stuff")
                                 def ??= compileContext.Data.KnownSubFunctions.GetValueOrDefault(patch.Name);
                                 if (compileContext.ensureFunctionsDefined)
                                     def ??= compileContext.Data.Functions.EnsureDefined(patch.Name, compileContext.Data.Strings, true);
@@ -1165,7 +1166,7 @@ namespace UndertaleModLib.Compiler
             private static void AssembleFunctionCall(CodeWriter cw, Parser.Statement fc)
             {
                 // Needs to push args onto stack backwards
-                for (int i = fc.Children.Count - 1; i >= 0; i--)
+                for (int i = fc.Children.Count - 1; i >= 1; i--)
                 {
                     AssembleExpression(cw, fc.Children[i]);
 
@@ -1177,12 +1178,30 @@ namespace UndertaleModLib.Compiler
                     }
                 }
 
-                cw.funcPatches.Add(new FunctionPatch()
-                {
-                    Target = cw.EmitRef(Opcode.Call, DataType.Int32),
-                    Name = fc.Text,
-                    ArgCount = fc.Children.Count
-                });
+                if (fc.Children[0].Text == "new") {
+                    cw.funcPatches.Add(new FunctionPatch()
+                    {
+                        Target = cw.EmitRef(Opcode.Push, DataType.Int32),
+                        Name = fc.Text,
+                        Offset = cw.offset * 4,
+                        ArgCount = -1
+                    });
+                    cw.Emit(Opcode.Conv, DataType.Int32, DataType.Variable);
+                    cw.funcPatches.Add(new FunctionPatch()
+                    {
+                        Target = cw.EmitRef(Opcode.Call, DataType.Int32),
+                        Name = "@@NewGMLObject@@",
+                        Offset = cw.offset * 4,
+                        ArgCount = fc.Children.Count
+                    });
+                } else {
+                    cw.funcPatches.Add(new FunctionPatch()
+                    {
+                        Target = cw.EmitRef(Opcode.Call, DataType.Int32),
+                        Name = fc.Text,
+                        ArgCount = fc.Children.Count - 1 // "new" keyword
+                    });
+                }
                 cw.typeStack.Push(DataType.Variable);
             }
 

@@ -625,6 +625,7 @@ namespace UndertaleModLib.Compiler
                         s = ParseBlock(context);
                         break;
                     case TokenKind.ProcFunction:
+                    case TokenKind.KeywordNew:
                         s = ParseFunctionCall(context);
                         break;
                     case TokenKind.KeywordVar:
@@ -1089,6 +1090,16 @@ namespace UndertaleModLib.Compiler
 
             private static Statement ParseFunctionCall(CompileContext context, bool expression = false)
             {
+                bool isNew = false;
+                if (IsNextToken(TokenKind.KeywordNew)) {
+                    var nextStatement = remainingStageOne.Dequeue();
+                    if (CompileContext.GMS2_3) {
+                        isNew = true;
+                    } else {
+                        ReportCodeError("Cannot use constructors prior to GMS2.3.", nextStatement.Token, true);
+                    }
+                }
+
                 Statement s = EnsureTokenKind(TokenKind.ProcFunction);
 
                 // gml_pragma processing can be done here, however we don't need to do that yet really
@@ -1097,6 +1108,10 @@ namespace UndertaleModLib.Compiler
 
                 Statement result = new Statement(expression ? Statement.StatementKind.ExprFunctionCall :
                                                  Statement.StatementKind.FunctionCall, s.Token);
+                
+                Statement newStatement = new Statement();
+                newStatement.Text = isNew ? "new" : "";
+                result.Children.Add(newStatement);
 
                 // Parse the parameters/arguments
                 while (remainingStageOne.Count > 0 && !hasError && !IsNextToken(TokenKind.EOF) && !IsNextToken(TokenKind.CloseParen))
@@ -1118,9 +1133,9 @@ namespace UndertaleModLib.Compiler
 
                 // Check for proper argument count, at least for builtins
                 if (context.BuiltInList.Functions.TryGetValue(s.Text, out FunctionInfo fi) && 
-                    fi.ArgumentCount != -1 && result.Children.Count != fi.ArgumentCount)
+                    fi.ArgumentCount != -1 && (result.Children.Count - 1) != fi.ArgumentCount)
                     ReportCodeError(string.Format("Function {0} expects {1} arguments, got {2}.",
-                                                  s.Text, fi.ArgumentCount, result.Children.Count)
+                                                  s.Text, fi.ArgumentCount, (result.Children.Count - 1))
                                                   , s.Token, false);
 
                 return result;
@@ -1549,6 +1564,7 @@ namespace UndertaleModLib.Compiler
                             return new Statement(Statement.StatementKind.ExprConstant, next.Token, next.Constant);
                         }
                     case TokenKind.ProcFunction:
+                    case TokenKind.KeywordNew:
                         return ParseFunctionCall(context, true);
                     case TokenKind.KeywordFunction:
                         return ParseFunction(context);
@@ -1766,7 +1782,10 @@ namespace UndertaleModLib.Compiler
                 Statement result;
                 if (s.Kind != Statement.StatementKind.ExprVariableRef && s.Kind != Statement.StatementKind.Assign)
                 {
-                    if (s.Children.Count == 0)
+                    if (s.Children.Count == 0 || (
+                        (s.Kind == Statement.StatementKind.ExprFunctionCall || s.Kind == Statement.StatementKind.FunctionCall)
+                        && s.Children.Count == 1
+                    ))
                     {
                         // There's nothing to optimize here, don't waste time checking
                         return s;
@@ -1817,6 +1836,7 @@ namespace UndertaleModLib.Compiler
                                         {
                                             // Final set function
                                             Statement accessorFunc = new Statement(Statement.StatementKind.FunctionCall, ai.LFunc);
+                                            accessorFunc.Children.Add(new Statement() { Text = "" }); // `new`
                                             accessorFunc.Children.Add(Optimize(context, curr.Children[1]));
                                             if (curr.Children.Count == 3)
                                                 accessorFunc.Children.Add(Optimize(context, curr.Children[2]));
@@ -1908,10 +1928,12 @@ namespace UndertaleModLib.Compiler
                     case Statement.StatementKind.ExprFunctionCall:
                         // Optimize a few basic functions if possible
 
+                        var child1 = result.Children[1];
+
                         // Rule out any non-constant parameters
-                        if (child0.Kind != Statement.StatementKind.ExprConstant)
+                        if (child1.Kind != Statement.StatementKind.ExprConstant)
                             return result;
-                        for (int i = 1; i < result.Children.Count; i++)
+                        for (int i = 2; i < result.Children.Count; i++)
                         {
                             if (result.Children[i].Kind != Statement.StatementKind.ExprConstant)
                                 return result;
@@ -1925,16 +1947,16 @@ namespace UndertaleModLib.Compiler
                                     if ((context.Data?.GeneralInfo.Build >= 1763) || (context.Data?.GeneralInfo.Major >= 2) || (context.Data?.GeneralInfo.Build == 1539))
                                     {
                                         string conversion;
-                                        switch (child0.Constant.kind)
+                                        switch (child1.Constant.kind)
                                         {
                                             case ExpressionConstant.Kind.Number:
-                                                conversion = child0.Constant.valueNumber.ToString();
+                                                conversion = child1.Constant.valueNumber.ToString();
                                                 break;
                                             case ExpressionConstant.Kind.Int64:
-                                                conversion = child0.Constant.valueInt64.ToString();
+                                                conversion = child1.Constant.valueInt64.ToString();
                                                 break;
                                             case ExpressionConstant.Kind.String:
-                                                conversion = child0.Constant.valueString;
+                                                conversion = child1.Constant.valueString;
                                                 break;
                                             default:
                                                 return result; // This shouldn't happen
@@ -1950,16 +1972,16 @@ namespace UndertaleModLib.Compiler
                                     if ((context.Data?.GeneralInfo.Build >= 1763) || (context.Data?.GeneralInfo.Major >= 2) || (context.Data?.GeneralInfo.Build == 1539))
                                     {
                                         double conversion;
-                                        switch (child0.Constant.kind)
+                                        switch (child1.Constant.kind)
                                         {
                                             case ExpressionConstant.Kind.Number:
-                                                conversion = child0.Constant.valueNumber;
+                                                conversion = child1.Constant.valueNumber;
                                                 break;
                                             case ExpressionConstant.Kind.Int64:
-                                                conversion = child0.Constant.valueInt64;
+                                                conversion = child1.Constant.valueInt64;
                                                 break;
                                             case ExpressionConstant.Kind.String:
-                                                if (!double.TryParse(child0.Constant.valueString, out conversion))
+                                                if (!double.TryParse(child1.Constant.valueString, out conversion))
                                                 {
                                                     ReportCodeError("Cannot convert non-number string to a number.", child0.Token, false);
                                                 }
@@ -1975,13 +1997,13 @@ namespace UndertaleModLib.Compiler
                             case "int64":
                                 {
                                     long conversion;
-                                    switch (child0.Constant.kind)
+                                    switch (child1.Constant.kind)
                                     {
                                         case ExpressionConstant.Kind.Number:
-                                            conversion = Convert.ToInt64(child0.Constant.valueNumber);
+                                            conversion = Convert.ToInt64(child1.Constant.valueNumber);
                                             break;
                                         case ExpressionConstant.Kind.Int64:
-                                            conversion = child0.Constant.valueInt64;
+                                            conversion = child1.Constant.valueInt64;
                                             break;
                                         default:
                                             return result; // This happens if you input a string for some reason
@@ -1993,13 +2015,13 @@ namespace UndertaleModLib.Compiler
                             case "chr":
                                 {
                                     string conversion;
-                                    switch (child0.Constant.kind)
+                                    switch (child1.Constant.kind)
                                     {
                                         case ExpressionConstant.Kind.Number:
-                                            conversion = ((char)(ushort)Convert.ToInt64(child0.Constant.valueNumber)).ToString();
+                                            conversion = ((char)(ushort)Convert.ToInt64(child1.Constant.valueNumber)).ToString();
                                             break;
                                         case ExpressionConstant.Kind.Int64:
-                                            conversion = ((char)(ushort)(child0.Constant.valueInt64)).ToString();
+                                            conversion = ((char)(ushort)(child1.Constant.valueInt64)).ToString();
                                             break;
                                         default:
                                             return result; // This happens if you input a string for some reason
@@ -2011,10 +2033,10 @@ namespace UndertaleModLib.Compiler
                             case "ord":
                                 {
                                     double conversion = 0d;
-                                    if (child0.Constant.kind == ExpressionConstant.Kind.String &&
-                                        child0.Constant.valueString != "")
+                                    if (child1.Constant.kind == ExpressionConstant.Kind.String &&
+                                        child1.Constant.valueString != "")
                                     {
-                                        conversion = (double)(int)child0.Constant.valueString[0];
+                                        conversion = (double)(int)child1.Constant.valueString[0];
                                     }
                                     result = new Statement(Statement.StatementKind.ExprConstant);
                                     result.Constant = new ExpressionConstant(conversion);
