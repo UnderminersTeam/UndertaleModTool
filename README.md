@@ -16,13 +16,15 @@ A fork of [UndertaleModTool](https://github.com/krzys-h/UndertaleModTool) with a
 ## Download
 
 There are a few ways to get UTMTCE:
-- 1. Download the current release build from [GameBanana](https://gamebanana.com/tools/14193/)
+- 1: Download the current release build from [GameBanana](https://gamebanana.com/tools/14193/)
 - 2: Get the latest dev build from [Github Actions artifacts](https://github.com/XDOneDude/UndertaleModToolCE/actions/)
 - 3: [Compile it yourself](#compiling)
 
 ## Compiling
 
 [Same as vanilla UTMT.](https://github.com/krzys-h/UndertaleModTool#compilation-instructions)
+
+
 
 <!--
   commandline building:
