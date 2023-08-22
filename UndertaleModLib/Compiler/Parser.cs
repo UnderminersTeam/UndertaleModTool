@@ -1620,6 +1620,8 @@ namespace UndertaleModLib.Compiler
                 Statement result = new Statement(Statement.StatementKind.ExprFunctionCall,
                                                 EnsureTokenKind(TokenKind.OpenArray)?.Token);
 
+                accessorFunc.Children.Add(new Statement() { Text = "" }); // `new`
+
                 // It literally converts into a function call
                 result.Text = "@@NewGMLArray@@";
 
@@ -1692,8 +1694,8 @@ namespace UndertaleModLib.Compiler
                 isConstructor.Text = "constructor";
 
                 function.Children.Add(args);
-                function.Children.Add(body);
                 function.Children.Add(isConstructor);
+                function.Children.Add(body);
 
                 Statement functionAssign = new Statement(Statement.StatementKind.Assign, new Lexer.Token(TokenKind.Assign));
                 functionAssign.Children.Add(destination);
@@ -1850,6 +1852,7 @@ namespace UndertaleModLib.Compiler
                                         {
                                             // Not the final set function
                                             Statement accessorFunc = new Statement(Statement.StatementKind.ExprFunctionCall, ai.RFunc);
+                                            accessorFunc.Children.Add(new Statement() { Text = "" }); // `new`
                                             accessorFunc.Children.Add(Optimize(context, curr.Children[1]));
                                             if (curr.Children.Count == 3)
                                                 accessorFunc.Children.Add(Optimize(context, curr.Children[2]));
@@ -2117,6 +2120,7 @@ namespace UndertaleModLib.Compiler
                             if (ai != null)
                             {
                                 Statement accessorFunc = new Statement(Statement.StatementKind.ExprFunctionCall, ai.RFunc);
+                                accessorFunc.Children.Add(new Statement() { Text = "" }); // `new`
                                 accessorFunc.Children.Add(result.Children[1]);
                                 if (result.Children.Count == 3)
                                     accessorFunc.Children.Add(result.Children[2]);
@@ -2140,6 +2144,7 @@ namespace UndertaleModLib.Compiler
                                 if (ai != null)
                                 {
                                     Statement accessorFunc = new Statement(Statement.StatementKind.ExprFunctionCall, ai.RFunc);
+                                    accessorFunc.Children.Add(new Statement() { Text = "" }); // `new`
                                     accessorFunc.Children.Add(Optimize(context, curr.Children[1]));
                                     if (curr.Children.Count == 3)
                                         accessorFunc.Children.Add(Optimize(context, curr.Children[2]));
