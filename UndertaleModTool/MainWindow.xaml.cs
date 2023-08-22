@@ -1174,7 +1174,17 @@ namespace UndertaleModTool
                         if (stateName == null) continue;
                         // Hooray! We got the state!
                         Debug.WriteLine("found a state! " + stateName);
-                        AssetTypeResolver.PTStates.TryAdd(stateID, stateName);
+
+                        if (AssetTypeResolver.PTStates.ContainsKey(stateID)) break;
+
+                        string actualStateName = stateName;
+                        int dedupe = 1;
+                        while (AssetTypeResolver.PTStates.ContainsValue(actualStateName)) {
+                            dedupe++;
+                            actualStateName = stateName + dedupe.ToString();
+                        }
+
+                        AssetTypeResolver.PTStates.TryAdd(stateID, actualStateName);
                         break;
                     }
                 }
