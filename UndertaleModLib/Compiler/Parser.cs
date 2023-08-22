@@ -1620,7 +1620,7 @@ namespace UndertaleModLib.Compiler
                 Statement result = new Statement(Statement.StatementKind.ExprFunctionCall,
                                                 EnsureTokenKind(TokenKind.OpenArray)?.Token);
 
-                accessorFunc.Children.Add(new Statement() { Text = "" }); // `new`
+                result.Children.Add(new Statement() { Text = "" }); // `new`
 
                 // It literally converts into a function call
                 result.Text = "@@NewGMLArray@@";
