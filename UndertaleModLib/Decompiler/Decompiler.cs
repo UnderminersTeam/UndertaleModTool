@@ -3779,6 +3779,15 @@ namespace UndertaleModLib.Decompiler
                     }
 
                     output.Statements.Add(new HLSwitchStatement(switchExpression, cases));
+
+                    AssetIDType tempVarType = switchTempVar.AssetType;
+                    foreach (HLSwitchCaseStatement _case in cases) {
+                        foreach (Expression expr in _case.CaseExpressions) {
+                            if (expr != null) {
+                                expr.DoTypePropagation(context, tempVarType);
+                            }
+                        }
+                    }
                     continue;
                 }
 
