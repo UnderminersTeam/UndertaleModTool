@@ -14,6 +14,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Media;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -3510,6 +3511,32 @@ result in loss of work.");
                     await t;
                 }
             }
+        }
+        private bool scr_dogcheck()
+        {
+            if (Environment.UserName != "The one and only annoying dog!")
+            {
+                // Toby Fox did not autorize you to do this action
+
+                Title = "UndertaleDogTool by krzys_h v0.1.TOBYFOX";
+
+                room_dogcheck.Visibility = Visibility.Visible;
+
+                SoundPlayer player = new SoundPlayer(Application.GetResourceStream(new Uri(@"pack://application:,,,/Resources/mus_dance_of_dog.wav")).Stream);
+                player.PlayLooping();
+
+                return false;
+            }
+
+            return true;
+        }
+
+        private void MenuItem_GameMaker_Click(object sender, RoutedEventArgs e)
+        {
+            if (!scr_dogcheck())
+                return;
+
+            // TODO: Don't ever implement this
         }
 
         private void OpenInTab(object obj, bool isNewTab = false, string tabTitle = null)

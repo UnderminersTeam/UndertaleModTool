@@ -106,6 +106,7 @@
                     </MenuItem>
                     <Separator/>
                     <MenuItem Header="Generate o_ffset map" Click="MenuItem_OffsetMap_Click"/>
+                    <MenuItem Header="Export to GameMaker project" Click="MenuItem_GameMaker_Click"/>
                     <Separator/>
                     <MenuItem Header="S_ettings" Command="Properties"/>
                     <MenuItem Header="_Close" Command="Close" InputGestureText="Ctrl+Q"/>
@@ -714,5 +715,42 @@
                 </Grid>
             </Grid>
         </DockPanel>
+        <Border Background="Black" Name="room_dogcheck" Visibility="Collapsed">
+            <Grid RenderOptions.BitmapScalingMode="NearestNeighbor">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="2*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="2*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="2*"/>
+                </Grid.RowDefinitions>
+                <Image Grid.Row="1" Grid.Column="1">
+                    <Image.Triggers>
+                        <EventTrigger RoutedEvent="Loaded">
+                            <BeginStoryboard>
+                                <Storyboard RepeatBehavior="Forever">
+                                    <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Source"
+                                                   Duration="0:0:0.4">
+                                        <DiscreteObjectKeyFrame KeyTime="0:0:0.00">
+                                            <DiscreteObjectKeyFrame.Value>
+                                                <BitmapImage UriSource="Resources/spr_tobdogl/0.png"/>
+                                            </DiscreteObjectKeyFrame.Value>
+                                        </DiscreteObjectKeyFrame>
+                                        <DiscreteObjectKeyFrame KeyTime="0:0:0.2">
+                                            <DiscreteObjectKeyFrame.Value>
+                                                <BitmapImage UriSource="Resources/spr_tobdogl/1.png"/>
+                                            </DiscreteObjectKeyFrame.Value>
+                                        </DiscreteObjectKeyFrame>
+                                    </ObjectAnimationUsingKeyFrames>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Image.Triggers>
+                </Image>
+            </Grid>
+        </Border>
     </Grid>
 </Window>
