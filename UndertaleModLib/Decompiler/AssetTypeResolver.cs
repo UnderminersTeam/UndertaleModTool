@@ -57,7 +57,8 @@ namespace UndertaleModLib.Decompiler
 
         PT_State, // Pizza Tower states
 
-        Keep // Not really a type, makes function arguments use the outer function's type (e.g for choose())
+        Keep, // Not really a type, makes function arguments use the outer function's type (e.g for choose())
+        Repeat // Also a not-type, repeats the function's argument types
     }
 
     public enum HAlign
@@ -415,6 +416,9 @@ namespace UndertaleModLib.Decompiler
 
                 // Keep type
                 if (function != null) {
+                    // Copy the array to make sure we don't overwrite existing known types
+                    func_types = (AssetIDType[]) func_types.Clone();
+
                     for (int i = 0; i < func_types.Length; i++)
                     {
                         if (func_types[i] == AssetIDType.Keep)
@@ -441,8 +445,20 @@ namespace UndertaleModLib.Decompiler
                         // func_types[i] is correct, do not replace
                     }
                 }
-                for (int i = 0; i < arguments.Length && i < func_types.Length; i++)
-                    arguments[i] = func_types[i];
+                for (int i = 0; i < arguments.Length; i++) {
+                    if (i >= func_types.Length) {
+                        if (func_types.Length == 0) break;
+                        else if (func_types[func_types.Length - 1] == AssetIDType.Repeat) {
+                            arguments[i] = func_types[func_types.Length - 2];
+                        } else {
+                            break;
+                        }
+                    } else {
+                        arguments[i] = func_types[i];
+                        if (arguments[i] == AssetIDType.Repeat)
+                            arguments[i] = func_types[func_types.Length - 2];
+                    }
+                }
                 return true;
             }
             if (function_name == "script_execute")
@@ -1028,8 +1044,9 @@ namespace UndertaleModLib.Decompiler
 
                 { "steam_activate_overlay", new[] { AssetIDType.Enum_Steam_Overlay } },
 
-                // hacky
-                { "choose", new[] { AssetIDType.Keep, AssetIDType.Keep, AssetIDType.Keep, AssetIDType.Keep, AssetIDType.Keep, AssetIDType.Keep, AssetIDType.Keep, AssetIDType.Keep, AssetIDType.Keep, AssetIDType.Keep } },
+                // AssetIDType.Keep functions
+                { "choose", new[] { AssetIDType.Keep, AssetIDType.Repeat } },
+                { "@@NewGMLArray@@", new[] { AssetIDType.Keep, AssetIDType.Repeat } },
 
                 // Also big TODO: Implement Boolean type for all these functions
 
@@ -1143,6 +1160,8 @@ namespace UndertaleModLib.Decompiler
 
                 builtin_vars.Add("throw_sprite", AssetIDType.Sprite);
                 builtin_vars.Add("reset_timer", AssetIDType.GameObject);
+
+                builtin_vars.Add("room_arr", AssetIDType.Sprite);
 
                 builtin_funcs["instance_create_unique"] =
                     new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
