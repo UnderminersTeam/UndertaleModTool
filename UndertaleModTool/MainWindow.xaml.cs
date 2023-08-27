@@ -1051,7 +1051,7 @@ namespace UndertaleModTool
                             {
                                 ptPlayerStep = Data.Code.ByName("gml_Object_obj_player1_Step_0");
                             }
-                            FindStateNames(ptPlayerStep, new[] {"scr_player_", "state_player_"});
+                            FindStateNames(ptPlayerStep, new[] {"scr_player_", "state_player_", "scr_playerN_"});
                             FindStateNames(
                                 Data.Code.ByName("gml_Object_obj_cheeseslime_Step_0"),
                                 new[] {"scr_enemy_", "scr_pizzagoblin_"}
