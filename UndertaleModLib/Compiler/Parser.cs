@@ -778,6 +778,21 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
+            // GMS2.3 instance keywords
+            private static Statement ParseInstanceKeyword(CompileContext context)
+            {
+                Lexer.Token token = remainingStageOne.Dequeue().Token;
+                Statement result = new Statement(Statement.StatementKind.ExprFunctionCall, token);
+                result.Children.Add(new Statement() { Text = "" }); // `new`
+                // They literally convert into function calls
+                if (token.Kind == TokenKind.KeywordSelf) {
+                    result.Text = "@@This@@";
+                } else {
+                    result.Text = "@@Other@@";
+                }
+                return result;
+            }
+
             private static Statement ParseFor(CompileContext context)
             {
                 Statement result = new Statement(Statement.StatementKind.ForLoop, EnsureTokenKind(TokenKind.KeywordFor).Token);
@@ -1568,6 +1583,9 @@ namespace UndertaleModLib.Compiler
                         return ParseFunctionCall(context, true);
                     case TokenKind.KeywordFunction:
                         return ParseFunction(context);
+                    case TokenKind.KeywordSelf:
+                    case TokenKind.KeywordOther:
+                        return ParseInstanceKeyword(context);
                     case TokenKind.ProcVariable:
                         {
                             Statement variableRef = ParseSingleVar(context);

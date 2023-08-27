@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UndertaleModLib.Models;
+using UndertaleModLib.Compiler;
 using static UndertaleModLib.Models.UndertaleGeneralInfo;
 
 
@@ -2805,8 +2806,10 @@ namespace UndertaleModLib.Compiler
 
             // Moving on to constants
             Constants = new Dictionary<string, double>();
-            Constants["self"] = -1.0;
-            Constants["other"] = -2.0;
+            if (!CompileContext.GMS2_3) {
+                Constants["self"] = -1.0;
+                Constants["other"] = -2.0;
+            }
             Constants["all"] = -3.0;
             Constants["noone"] = -4.0;
             Constants["global"] = -5.0;
