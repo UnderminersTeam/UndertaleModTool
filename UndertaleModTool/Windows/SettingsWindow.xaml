@@ -62,7 +62,7 @@
             <TextBlock Grid.Row="5" Grid.Column="2" Margin="25 2 2 2" Text="Show &quot;Run game under GMS debugger&quot; file option" ToolTip="Whether to show the option in the &quot;File&quot; menu. Disabled by default."/>
 
             <CheckBox Grid.Row="6" Grid.Column="0" Margin="3" Content="" IsChecked="{Binding PTAutoStates}"/>
-            <TextBlock Grid.Row="6" Grid.Column="0" Margin="25 2 2 2" Text="Show Pizza Tower state names (experimental)" ToolTip="Shows state names instead of IDs. Pizza Tower-specific. Enabled by default."/>
+            <TextBlock Grid.Row="6" Grid.Column="0" Margin="25 2 2 2" Text="Show Pizza Tower state names" ToolTip="Shows state names instead of IDs. Pizza Tower-specific. Enabled by default."/>
 
             <Separator Grid.Row="7" Grid.ColumnSpan="4" Margin="10"/>
 
