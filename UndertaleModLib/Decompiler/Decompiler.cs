@@ -1261,6 +1261,8 @@ namespace UndertaleModLib.Decompiler
 
             public bool HasVarKeyword;
 
+            public bool IsScriptAssign;
+
             private bool _isStructDefinition, _checkedForDefinition;
             public bool IsStructDefinition
             {
@@ -1320,7 +1322,7 @@ namespace UndertaleModLib.Decompiler
 
                 // Someone enlighten me on structs, I'm steering clear for now.
                 // And find the "right" way to do this.
-                if (Value is FunctionDefinition functionVal && functionVal.Subtype != FunctionDefinition.FunctionType.Struct)
+                if (Value is FunctionDefinition functionVal && IsScriptAssign && functionVal.Subtype != FunctionDefinition.FunctionType.Struct)
                 {
                     functionVal.IsStatement = true;
                     return functionVal.ToString(context);
@@ -2431,7 +2433,11 @@ namespace UndertaleModLib.Decompiler
                             }
                             else
                                 Debug.Fail("Pop value is null.");
-                            statements.Add(new AssignmentStatement(target, val));
+                            AssignmentStatement result = new AssignmentStatement(target, val);
+                            if (target.VarType == UndertaleInstruction.VariableType.StackTop) {
+                                result.IsScriptAssign = true;
+                            }
+                            statements.Add(result);
                         }
                         break;
 
