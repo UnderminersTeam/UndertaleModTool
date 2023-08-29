@@ -757,11 +757,7 @@ namespace UndertaleModLib.Compiler
                 Statement isConstructor = new Statement();
                 isConstructor.Text = "";
                 if (IsNextTokenDiscard(TokenKind.KeywordConstructor)) {
-                    if (context.Data.IsVersionAtLeast(2, 3)) {
-                        isConstructor.Text = "constructor";
-                    } else {
-                        ReportCodeError("Cannot use constructors prior to GMS2.3.", result.Token, true);
-                    }
+                    isConstructor.Text = "constructor";
                 }
                 result.Children.Add(isConstructor);
 
@@ -840,66 +836,70 @@ namespace UndertaleModLib.Compiler
                 return result;
             }
 
+            private static Statement ParseAssignInner(CompileContext context, Statement left) {
+                if (left.Kind != Statement.StatementKind.Pre && left.Kind != Statement.StatementKind.Post)
+                {
+                    // hack because I don't know what I'm doing
+                    string name;
+                    if (left.Children.Count == 0 || left.Kind == Statement.StatementKind.ExprSingleVariable)
+                        name = left.Text;
+                    else
+                        name = left.Children[left.Children.Count - 1]?.Text;
+                    if (name == null)
+                        return null;
+
+                    VariableInfo vi;
+                    if ((context.BuiltInList.GlobalNotArray.TryGetValue(name, out vi) ||
+                        context.BuiltInList.GlobalArray.TryGetValue(name, out vi) ||
+                        context.BuiltInList.Instance.TryGetValue(name, out vi) ||
+                        context.BuiltInList.InstanceLimitedEvent.TryGetValue(name, out vi)
+                        ) && !vi.CanSet)
+                    {
+                        ReportCodeError("Attempt to set a read-only variable.", left.Token, false);
+                    }
+
+                    if (remainingStageOne.Count == 0)
+                    {
+                        ReportCodeError("Malformed assignment statement.", true);
+                        return null;
+                    }
+                    Statement assign = new Statement(Statement.StatementKind.Assign, remainingStageOne.Dequeue().Token);
+                    assign.Children.Add(left);
+
+                    if (assign.Token.Kind.In(
+                        TokenKind.Assign,
+                        TokenKind.AssignAnd,
+                        TokenKind.AssignDivide,
+                        TokenKind.AssignMinus,
+                        TokenKind.AssignMod,
+                        TokenKind.AssignOr,
+                        TokenKind.AssignPlus,
+                        TokenKind.AssignTimes,
+                        TokenKind.AssignXor
+                        ))
+                    {
+                        assign.Children.Add(new Statement(Statement.StatementKind.Token, assign.Token));
+                        assign.Children.Add(ParseExpression(context));
+                    }
+                    else
+                    {
+                        ReportCodeError("Expected assignment operator.", assign.Token, true);
+                    }
+
+                    return assign;
+                }
+                else
+                {
+                    return left;
+                }
+            }
+
             private static Statement ParseAssign(CompileContext context)
             {
                 Statement left = ParsePostAndRef(context);
                 if (left != null)
                 {
-                    if (left.Kind != Statement.StatementKind.Pre && left.Kind != Statement.StatementKind.Post)
-                    {
-                        // hack because I don't know what I'm doing
-                        string name;
-                        if (left.Children.Count == 0 || left.Kind == Statement.StatementKind.ExprSingleVariable)
-                            name = left.Text;
-                        else
-                            name = left.Children[left.Children.Count - 1]?.Text;
-                        if (name == null)
-                            return null;
-
-                        VariableInfo vi;
-                        if ((context.BuiltInList.GlobalNotArray.TryGetValue(name, out vi) ||
-                            context.BuiltInList.GlobalArray.TryGetValue(name, out vi) ||
-                            context.BuiltInList.Instance.TryGetValue(name, out vi) ||
-                            context.BuiltInList.InstanceLimitedEvent.TryGetValue(name, out vi)
-                            ) && !vi.CanSet)
-                        {
-                            ReportCodeError("Attempt to set a read-only variable.", left.Token, false);
-                        }
-
-                        if (remainingStageOne.Count == 0)
-                        {
-                            ReportCodeError("Malformed assignment statement.", true);
-                            return null;
-                        }
-                        Statement assign = new Statement(Statement.StatementKind.Assign, remainingStageOne.Dequeue().Token);
-                        assign.Children.Add(left);
-
-                        if (assign.Token.Kind.In(
-                            TokenKind.Assign,
-                            TokenKind.AssignAnd,
-                            TokenKind.AssignDivide,
-                            TokenKind.AssignMinus,
-                            TokenKind.AssignMod,
-                            TokenKind.AssignOr,
-                            TokenKind.AssignPlus,
-                            TokenKind.AssignTimes,
-                            TokenKind.AssignXor
-                            ))
-                        {
-                            assign.Children.Add(new Statement(Statement.StatementKind.Token, assign.Token));
-                            assign.Children.Add(ParseExpression(context));
-                        }
-                        else
-                        {
-                            ReportCodeError("Expected assignment operator.", assign.Token, true);
-                        }
-
-                        return assign;
-                    }
-                    else
-                    {
-                        return left;
-                    }
+                    return ParseAssignInner(context, left);
                 }
                 else
                 {
@@ -1152,6 +1152,12 @@ namespace UndertaleModLib.Compiler
                     ReportCodeError(string.Format("Function {0} expects {1} arguments, got {2}.",
                                                   s.Text, fi.ArgumentCount, (result.Children.Count - 1))
                                                   , s.Token, false);
+                
+                if (!expression && IsNextToken(TokenKind.Dot)) {
+                    // Actually an assignment
+                    result.Kind = Statement.StatementKind.ExprFunctionCall;
+                    return ParseAssignInner(context, ParsePostAndRefInner(context, result));
+                }
 
                 return result;
             }
@@ -1434,43 +1440,47 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
+            private static Statement ParsePostAndRefInner(CompileContext context, Statement left) {
+                // Parse chain variable reference
+                Statement result = new Statement(Statement.StatementKind.ExprVariableRef, remainingStageOne.Peek().Token);
+                bool combine = false;
+                if (left.Kind != Statement.StatementKind.ExprConstant || left.Constant.kind == ExpressionConstant.Kind.Reference /* TODO: will this ever change? */)
+                    result.Children.Add(left);
+                else
+                    combine = true;
+                while (remainingStageOne.Count > 0 && IsNextTokenDiscard(TokenKind.Dot))
+                {
+                    Statement next = ParseSingleVar(context);
+                    if (combine)
+                    {
+                        if (left.Constant.kind != ExpressionConstant.Kind.Number)
+                            ReportCodeError("Expected constant to be number in variable reference.", left.Token, false);
+                        if (next != null)
+                            next.ID = (int)left.Constant.valueNumber;
+                        combine = false;
+                    }
+                    result.Children.Add(next);
+                }
+
+                // Post increment/decrement check
+                if (remainingStageOne.Count > 0 && IsNextToken(TokenKind.Increment, TokenKind.Decrement))
+                {
+                    Statement newResult = new Statement(Statement.StatementKind.Post, remainingStageOne.Dequeue().Token);
+                    newResult.Children.Add(result);
+                    return newResult;
+                }
+                else
+                {
+                    return result;
+                }
+            }
+
             private static Statement ParsePostAndRef(CompileContext context)
             {
                 Statement left = ParseLowLevel(context);
                 if (!hasError && IsNextToken(TokenKind.Dot))
                 {
-                    // Parse chain variable reference
-                    Statement result = new Statement(Statement.StatementKind.ExprVariableRef, remainingStageOne.Peek().Token);
-                    bool combine = false;
-                    if (left.Kind != Statement.StatementKind.ExprConstant || left.Constant.kind == ExpressionConstant.Kind.Reference /* TODO: will this ever change? */)
-                        result.Children.Add(left);
-                    else
-                        combine = true;
-                    while (remainingStageOne.Count > 0 && IsNextTokenDiscard(TokenKind.Dot))
-                    {
-                        Statement next = ParseSingleVar(context);
-                        if (combine)
-                        {
-                            if (left.Constant.kind != ExpressionConstant.Kind.Number)
-                                ReportCodeError("Expected constant to be number in variable reference.", left.Token, false);
-                            if (next != null)
-                                next.ID = (int)left.Constant.valueNumber;
-                            combine = false;
-                        }
-                        result.Children.Add(next);
-                    }
-
-                    // Post increment/decrement check
-                    if (remainingStageOne.Count > 0 && IsNextToken(TokenKind.Increment, TokenKind.Decrement))
-                    {
-                        Statement newResult = new Statement(Statement.StatementKind.Post, remainingStageOne.Dequeue().Token);
-                        newResult.Children.Add(result);
-                        return newResult;
-                    }
-                    else
-                    {
-                        return result;
-                    }
+                    return ParsePostAndRefInner(context, left);
                 }
                 else
                 {
