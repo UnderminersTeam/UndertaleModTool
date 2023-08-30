@@ -2557,7 +2557,10 @@ namespace UndertaleModLib.Decompiler
                                 if (arg2 is ExpressionConstant argCode && argCode.Type == UndertaleInstruction.DataType.Int32 &&
                                     argCode.Value is UndertaleInstruction.Reference<UndertaleFunction> argCodeFunc)
                                 {
-                                    UndertaleCode functionBody = context.GlobalContext.Data.Code.First(x => x.Name.Content == argCodeFunc.Target.Name.Content);
+                                    UndertaleCode functionBody = context.GlobalContext.Data.Code.First(
+                                        x => ((x.Name.Content == argCodeFunc.Target.Name.Content)
+                                            || (x.Name.Content == "gml_Script_" + (argCodeFunc.Target.Name.Content)))
+                                    );
 
                                     FunctionDefinition.FunctionType type = FunctionDefinition.FunctionType.Function;
                                     bool processChildEntry;
