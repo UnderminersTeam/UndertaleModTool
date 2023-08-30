@@ -904,7 +904,9 @@ namespace UndertaleModLib.Compiler
                                 endPatch.Add(cw.Emit(Opcode.B));
 
                                 continueEndPatch.Finish(cw);
-                                cw.Emit(Opcode.Popz, compareType);
+                                for (int i = 0; i < cw.otherContexts.Count + 1; i++) {
+                                    cw.Emit(Opcode.Popz, compareType);
+                                }
                                 enclosingContext.UseContinue().Add(cw.Emit(Opcode.B));
                             }
 
