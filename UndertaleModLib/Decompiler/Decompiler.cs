@@ -3686,7 +3686,8 @@ namespace UndertaleModLib.Decompiler
                 }
 
                 if (output.Statements.Count >= 1 && output.Statements[output.Statements.Count - 1] is TempVarAssignmentStatement &&
-                    block.Instructions.Count >= 1 && block.Instructions[block.Instructions.Count - 1].Kind == UndertaleInstruction.Opcode.Bt &&
+                    block.Instructions.Count >= 4 && block.Instructions[block.Instructions.Count - 1].Kind == UndertaleInstruction.Opcode.Bt &&
+                    block.Instructions.Count >= 4 && block.Instructions[block.Instructions.Count - 4].Kind == UndertaleInstruction.Opcode.Dup &&
                     block.conditionalExit && block.ConditionStatement is ExpressionCompare &&
                     (block.ConditionStatement as ExpressionCompare).Opcode == UndertaleInstruction.ComparisonType.EQ)
                 {
