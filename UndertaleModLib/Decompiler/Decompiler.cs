@@ -3635,16 +3635,9 @@ namespace UndertaleModLib.Decompiler
         }
 
         // Process the base decompilation: clean up, make it readable, identify structures
-        private static BlockHLStatement HLDecompileBlocks(DecompileContext context, ref Block block,
-                                                          Dictionary<uint, Block> blocks,
-                                                          Dictionary<Block, List<Block>> loops,
-                                                          Dictionary<Block, List<Block>> reverseDominators,
-                                                          List<Block> alreadyVisited, Block currentLoop = null,
-                                                          string currentEnv = null,
-                                                          Block stopAt = null, Block breakTo = null,
-                                                          bool decompileTheLoop = false, uint depth = 0)
+        private static BlockHLStatement HLDecompileBlocks(DecompileContext context, ref Block block, Dictionary<uint, Block> blocks, Dictionary<Block, List<Block>> loops, Dictionary<Block, List<Block>> reverseDominators, List<Block> alreadyVisited, Block currentLoop = null, string currentEnv = null, Block stopAt = null, Block breakTo = null, bool decompileTheLoop = false, uint depth = 0)
         {
-            if (depth > 200)
+            if (depth > 600)
                 throw new Exception("Excessive recursion while processing blocks.");
 
             BlockHLStatement output = new BlockHLStatement();
