@@ -106,6 +106,7 @@ jobs:
     - name: Delete tag and release
       uses: dev-drprasad/delete-tag-and-release@v1.0
       with:
+        permissions: write-all
         delete_release: true # default: false
         tag_name: bleeding-edge # tag name to delete
       env:
