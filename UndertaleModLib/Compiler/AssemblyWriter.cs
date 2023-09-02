@@ -1170,16 +1170,13 @@ namespace UndertaleModLib.Compiler
                 // Needs to push args onto stack backwards
                 for (int i = fc.Children.Count - 1; i >= 1; i--)
                 {
-                    bool doConv = AssembleExpression(cw, fc.Children[i]);
+                    AssembleExpression(cw, fc.Children[i]);
 
                     // Convert to Variable data type
-                    if(doConv)
+                    var typeToConvertFrom = cw.typeStack.Pop();
+                    if (typeToConvertFrom != DataType.Variable)
                     {
-                        var typeToConvertFrom = cw.typeStack.Pop();
-                        if (typeToConvertFrom != DataType.Variable)
-                        {
-                            cw.Emit(Opcode.Conv, typeToConvertFrom, DataType.Variable);
-                        }
+                        cw.Emit(Opcode.Conv, typeToConvertFrom, DataType.Variable);
                     }
                 }
 
@@ -1248,7 +1245,7 @@ namespace UndertaleModLib.Compiler
                 cw.typeStack.Push(DataType.Variable);
             }
 
-            private static bool AssembleExpression(CodeWriter cw, Parser.Statement e, Parser.Statement funcDefName = null)
+            private static void AssembleExpression(CodeWriter cw, Parser.Statement e, Parser.Statement funcDefName = null)
             {
                 switch (e.Kind)
                 {
@@ -1274,20 +1271,6 @@ namespace UndertaleModLib.Compiler
                                     {
                                         // It's an integer
                                         long valueAsInt = (long)value.valueNumber;
-                                        switch(e.Text)
-                                        {
-                                            case "self":
-                                                //Console.WriteLine("Found self!");
-                                                cw.funcPatches.Add(new FunctionPatch()
-                                                {
-                                                    Target = cw.EmitRef(Opcode.Call, DataType.Int32),
-                                                    Name = "@@This@@",
-                                                    ArgCount = 0
-                                                });
-                                                cw.typeStack.Push(DataType.Int32);
-                                                return false;
-                                        }
-
                                         if (valueAsInt <= Int32.MaxValue && valueAsInt >= Int32.MinValue)
                                         {
                                             if (valueAsInt <= Int16.MaxValue && valueAsInt >= Int16.MinValue)
@@ -1497,7 +1480,7 @@ namespace UndertaleModLib.Compiler
                                 }
                                 endPatch.Finish(cw);
 
-                                return true;
+                                return;
                             }
                             
                             for (int i = 1; i < e.Children.Count; i++)
@@ -1716,7 +1699,6 @@ namespace UndertaleModLib.Compiler
                         cw.typeStack.Push(DataType.Variable);
                         break;
                 }
-                return true;
             }
 
             // Used to determine which types have dominance over operations- the higher the more
