@@ -1161,7 +1161,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("throw_sprite", AssetIDType.Sprite);
                 builtin_vars.Add("reset_timer", AssetIDType.GameObject);
 
-                builtin_vars.Add("room_arr", AssetIDType.Sprite);
+                builtin_vars.Add("room_arr", AssetIDType.Room);
 
                 builtin_funcs["instance_create_unique"] =
                     new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
