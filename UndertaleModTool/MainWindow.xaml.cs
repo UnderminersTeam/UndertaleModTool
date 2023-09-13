@@ -3669,8 +3669,6 @@ result in loss of work.");
             {
                 CurrentTab?.SaveTabContentState();
 
-                ScrollToTab(CurrentTabIndex);
-
                 Tab newTab = Tabs[CurrentTabIndex];
 
                 if (CurrentTab?.CurrentObject != newTab.CurrentObject)
@@ -3681,6 +3679,8 @@ result in loss of work.");
                 UpdateObjectLabel(CurrentTab.CurrentObject);
 
                 CurrentTab.RestoreTabContentState();
+
+                ScrollToTab(CurrentTabIndex);
             }
         }
 
@@ -3784,6 +3784,10 @@ result in loss of work.");
             ScrollTabs(e.Delta < 0 ? ScrollDirection.Right : ScrollDirection.Left);
             e.Handled = true;
         }
+        private void TabScrollViewer_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            initTabContPos = e.GetPosition(TabScrollViewer);
+        }
         private void TabsScrollLeftButton_Click(object sender, RoutedEventArgs e)
         {
             ScrollTabs(ScrollDirection.Left);
@@ -3823,6 +3827,7 @@ result in loss of work.");
             }
         }
 
+        private Point initTabContPos;
         // source - https://stackoverflow.com/a/10738247/12136394
         private void TabItem_PreviewMouseMove(object sender, MouseEventArgs e)
         {
@@ -3831,6 +3836,12 @@ result in loss of work.");
 
             if (Mouse.PrimaryDevice.LeftButton == MouseButtonState.Pressed)
             {
+                // Filter false mouse move events, because it sometimes
+                // triggers even on a mouse click
+                Point currPos = e.GetPosition(TabScrollViewer);
+                if (Point.Subtract(currPos, initTabContPos).X < 2)
+                    return;
+
                 CurrentTabIndex = tabItem.TabIndex;
                 try
                 {
