@@ -3757,16 +3757,12 @@ result in loss of work.");
                     tabItems.RemoveAt(tabItems.Count - 1);
                 }
 
-                TabItem currTabItem = null;
                 double offset = 0;
                 int i = 0;
                 foreach (TabItem item in tabItems)
                 {
                     if (i == tabIndex)
-                    {
-                        currTabItem = item;
                         break;
-                    }
 
                     offset += item.ActualWidth;
                     i++;
@@ -3775,8 +3771,6 @@ result in loss of work.");
                 double endOffset = TabScrollViewer.HorizontalOffset + TabScrollViewer.ViewportWidth;
                 if (offset < TabScrollViewer.HorizontalOffset || offset > endOffset)
                     TabScrollViewer.ScrollToHorizontalOffset(offset);
-                else
-                    currTabItem?.BringIntoView();
             }
         }
         private void TabScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
