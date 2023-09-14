@@ -97,7 +97,7 @@ namespace UndertaleModTool
             {
                 OnPropertyChanged();
                 OpenInTab(value);
-            }
+            } 
         }
 
         public Visibility IsGMS2 => (Data?.GeneralInfo?.Major ?? 0) >= 2 ? Visibility.Visible : Visibility.Collapsed;
@@ -243,7 +243,7 @@ namespace UndertaleModTool
             Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open a data.win file to get started, then double click on the items on the left to view them.");
             OpenInTab(Highlighted);
 
-            TitleMain = "UndertaleModTool: Community Edition";
+            TitleMain = "UndertaleModTool by krzys_h v:" + Version;
 
             CanSave = false;
             CanSafelySave = false;
@@ -540,7 +540,7 @@ namespace UndertaleModTool
 
             var mainWindow = Application.Current.MainWindow as MainWindow;
             mainWindow.TabController.SetDarkMode(enable);
-
+            
             if (enable)
             {
                 foreach (var pair in appDarkStyle)
@@ -743,8 +743,8 @@ namespace UndertaleModTool
                 Debug.WriteLine(ex);
                 return SaveResult.Error;
             }
-
-#pragma warning disable CA1416
+            
+            #pragma warning disable CA1416
             if (codeEditor.DecompiledChanged || codeEditor.DisassemblyChanged)
             {
                 IsSaving = true;
@@ -755,7 +755,7 @@ namespace UndertaleModTool
                 result = IsSaving ? SaveResult.Error : SaveResult.Saved;
                 IsSaving = false;
             }
-#pragma warning restore CA1416
+            #pragma warning restore CA1416
 
             return result;
         }
@@ -1015,6 +1015,17 @@ namespace UndertaleModTool
                                 data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
                             }
                         }
+                        if (data.IsYYC())
+                        {
+                            this.ShowWarning("This game uses YYC (YoYo Compiler), which means the code is embedded into the game executable. This configuration is currently not fully supported; continue at your own risk.", "YYC");
+                        }
+                        if (data.GeneralInfo != null)
+                        {
+                            if (!data.GeneralInfo.IsDebuggerDisabled)
+                            {
+                                this.ShowWarning("This game is set to run with the GameMaker Studio debugger and the normal runtime will simply hang after loading if the debugger is not running. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger");
+                            }
+                        }
                         if (Path.GetDirectoryName(FilePath) != Path.GetDirectoryName(filename))
                             CloseChildFiles();
 
@@ -1037,69 +1048,13 @@ namespace UndertaleModTool
                                                       ? "Tile sets"
                                                       : "Backgrounds & Tile sets";
 
-#pragma warning disable CA1416
+                        #pragma warning disable CA1416
                         UndertaleCodeEditor.gettext = null;
                         UndertaleCodeEditor.gettextJSON = null;
-#pragma warning restore CA1416
-
-                        // Detect PT state names
-                        AssetTypeResolver.PTStates.Clear();
-                        string lowerName = data?.GeneralInfo?.DisplayName?.Content.ToLower(CultureInfo.InvariantCulture);
-                        if (lowerName != null && lowerName.StartsWith("pizza tower", StringComparison.InvariantCulture)) {
-                            UndertaleCode ptPlayerStep = Data.Code.ByName("gml_Object_obj_player_Step_0");
-                            if (ptPlayerStep == null)
-                            {
-                                ptPlayerStep = Data.Code.ByName("gml_Object_obj_player1_Step_0");
-                            }
-                            FindStateNames(ptPlayerStep, new[] {"scr_player_", "state_player_", "scr_playerN_"});
-                            FindStateNames(
-                                Data.Code.ByName("gml_Object_obj_cheeseslime_Step_0"),
-                                new[] {"scr_enemy_", "scr_pizzagoblin_"}
-                            );
-                            FindStateNames(
-                                Data.Code.ByName("gml_Object_obj_pepperman_Step_0"),
-                                new[] {"scr_boss_", "scr_pepperman_", "scr_enemy_"}
-                            );
-                            FindStateNames(
-                                Data.Code.ByName("gml_Object_obj_vigilanteboss_Step_0"),
-                                new[] {"scr_vigilante_"}
-                            );
-                            FindStateNames(
-                                Data.Code.ByName("gml_Object_obj_noiseboss_Step_0"),
-                                new[] {"scr_noise_"}
-                            );
-                            FindStateNames(
-                                Data.Code.ByName("gml_Object_obj_fakepepboss_Step_0"),
-                                new[] {"scr_fakepepboss_", "scr_boss_"}
-                            );
-                            FindStateNames(
-                                Data.Code.ByName("gml_Object_obj_pizzafaceboss_Step_0"),
-                                new[] {"scr_pizzaface_"}
-                            );
-                            FindStateNames(
-                                Data.Code.ByName("gml_Object_obj_pizzafaceboss_p2_Step_0"),
-                                new[] {"scr_pizzaface_p2_", "scr_pizzaface_"}
-                            );
-                            FindStateNames(
-                                Data.Code.ByName("gml_Object_obj_pizzafaceboss_p3_Step_0"),
-                                new[] {"scr_pizzaface_p3_"}
-                            );
-                        }
+                        #pragma warning restore CA1416
                     }
 
                     dialog.Hide();
-
-                    if (data.IsYYC())
-                    {
-                        this.ShowWarning("This game uses YYC (YoYo Compiler), which means the code is embedded into the game executable. This configuration is currently not fully supported; continue at your own risk.", "YYC");
-                    }
-                    if (data.GeneralInfo != null)
-                    {
-                        if (!data.GeneralInfo.IsDebuggerDisabled)
-                        {
-                            this.ShowWarning("This game is set to run with the GameMaker Studio debugger and the normal runtime will simply hang after loading if the debugger is not running. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger");
-                        }
-                    }
                 });
             });
             dialog.ShowDialog();
@@ -1109,86 +1064,6 @@ namespace UndertaleModTool
             // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.gcsettings.largeobjectheapcompactionmode?view=net-6.0
             GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
             GC.Collect();
-        }
-
-        // Detects PT state names
-        private void FindStateNames(UndertaleCode code, string[] statePrefix)
-        {
-            if (code != null)
-            {
-                for (var i = 0; i < code.Instructions.Count; i++)
-                {
-                    UndertaleInstruction instr = code.Instructions[i];
-                    if (
-                        UndertaleInstruction.GetInstructionType(instr.Kind)
-                        != UndertaleInstruction.InstructionType.PushInstruction
-                        || !((instr.Value is int) || (instr.Value is short) || (instr.Value is long))
-                    ) continue;
-
-                    int stateID = Convert.ToInt32(instr.Value);
-                    if (AssetTypeResolver.PTStates.ContainsKey(stateID)) continue;
-
-                    UndertaleInstruction next = code.Instructions[i + 1];
-                    if (next == null) continue;
-                    if (
-                        UndertaleInstruction.GetInstructionType(next.Kind)
-                        != UndertaleInstruction.InstructionType.ComparisonInstruction
-                        || next.ComparisonKind != UndertaleInstruction.ComparisonType.EQ
-                    ) continue;
-                    UndertaleInstruction next2 = code.Instructions[i + 2];
-                    if (next2 == null) continue;
-                    if (
-                        next2.Kind != UndertaleInstruction.Opcode.Bt
-                    ) continue;
-
-                    UndertaleInstruction newInstr =
-                        code.GetInstructionFromAddress(next2.Address + (uint)next2.JumpOffset);
-
-                    if (newInstr == null) continue;
-
-                    for (
-                        var j = code.Instructions.IndexOf(newInstr);
-                        code.Instructions[j] != null &&
-                        UndertaleInstruction.GetInstructionType(code.Instructions[j].Kind) !=
-                            UndertaleInstruction.InstructionType.GotoInstruction;
-                        j++
-                    )
-                    {
-                        UndertaleInstruction thisInstr = code.Instructions[j];
-                        if (UndertaleInstruction.GetInstructionType(thisInstr.Kind)
-                            != UndertaleInstruction.InstructionType.CallInstruction) continue;
-                        string funcName = thisInstr.Function.Target.Name.Content;
-                        string stateName = null;
-                        foreach (string prefix in statePrefix) {
-                            if (funcName.StartsWith(prefix))
-                            {
-                                stateName = funcName[prefix.Length..];
-                                break;
-                            }
-                            else if (funcName.StartsWith("gml_Script_" + prefix))
-                            {
-                                stateName = funcName[("gml_Script_" + prefix).Length..];
-                                break;
-                            }
-                        }
-                        if (stateName == null) continue;
-                        // Hooray! We got the state!
-                        Debug.WriteLine("found a state! " + stateName);
-
-                        if (AssetTypeResolver.PTStates.ContainsKey(stateID)) break;
-
-                        string actualStateName = stateName;
-                        int dedupe = 1;
-                        while (AssetTypeResolver.PTStates.ContainsValue(actualStateName)) {
-                            dedupe++;
-                            actualStateName = stateName + dedupe.ToString();
-                        }
-
-                        AssetTypeResolver.PTStates.TryAdd(stateID, actualStateName);
-                        break;
-                    }
-                }
-            }
         }
 
         private async Task SaveFile(string filename, bool suppressDebug = false)
@@ -1372,9 +1247,9 @@ namespace UndertaleModTool
                     Data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
                 }
 
-#pragma warning disable CA1416
+                #pragma warning disable CA1416
                 UndertaleCodeEditor.gettextJSON = null;
-#pragma warning restore CA1416
+                #pragma warning restore CA1416
 
                 Dispatcher.Invoke(() =>
                 {
@@ -1401,8 +1276,7 @@ namespace UndertaleModTool
         }
         private async Task LoadGMLCache(string filename, LoaderDialog dialog = null)
         {
-            await Task.Run(() =>
-            {
+            await Task.Run(() => {
                 if (SettingsWindow.UseGMLCache)
                 {
                     string cacheDirPath = Path.Combine(ExePath, "GMLCache");
@@ -1491,8 +1365,7 @@ namespace UndertaleModTool
         }
         private async Task SaveGMLCache(string filename, bool updateCache = true, LoaderDialog dialog = null, bool isDifferentPath = false)
         {
-            await Task.Run(async () =>
-            {
+            await Task.Run(async () => {
                 if (SettingsWindow.UseGMLCache && Data?.GMLCache?.Count > 0 && Data.GMLCacheIsReady && (isDifferentPath || !Data.GMLCacheWasSaved || !Data.GMLCacheChanged.IsEmpty))
                 {
                     dialog?.Dispatcher.Invoke(() => dialog.ReportProgress("Saving decompiled code cache..."));
@@ -1914,7 +1787,7 @@ namespace UndertaleModTool
             object source = container.ItemsSource;
             IList list = ((source as ICollectionView)?.SourceCollection as IList) ?? (source as IList);
             bool isLast = list.IndexOf(obj) == list.Count - 1;
-            if (this.ShowQuestion("Delete " + obj + "?" + (!isLast ? "\n\nNote that the code often references objects by ID, so this operation is likely to break stuff because other items will shift up!" : ""), isLast ? MessageBoxImage.Question : MessageBoxImage.Warning, "Confirmation") == MessageBoxResult.Yes)
+            if (this.ShowQuestion("Delete " + obj + "?" + (!isLast ? "\n\nNote that the code often references objects by ID, so this operation is likely to break stuff because other items will shift up!" : ""), isLast ? MessageBoxImage.Question : MessageBoxImage.Warning, "Confirmation" ) == MessageBoxResult.Yes)
             {
                 list.Remove(obj);
                 if (obj is UndertaleCode codeObj)
@@ -1969,7 +1842,7 @@ namespace UndertaleModTool
 
                             tab.History.RemoveAt(i);
                             i--;
-                        }
+                        } 
                     }
                 }
             }
@@ -2252,11 +2125,11 @@ namespace UndertaleModTool
                 // exit out early if the path does not exist.
                 if (!directory.Exists)
                 {
-                    item.Items.Add(new MenuItem { Header = $"(Path {folderDir} does not exist, cannot search for files!)", IsEnabled = false });
+                    item.Items.Add(new MenuItem {Header = $"(Path {folderDir} does not exist, cannot search for files!)", IsEnabled = false});
 
                     if (item.Name == "RootScriptItem")
                     {
-                        var otherScripts1 = new MenuItem { Header = "Run _other script..." };
+                        var otherScripts1 = new MenuItem {Header = "Run _other script..."};
                         otherScripts1.Click += MenuItem_RunOtherScript_Click;
                         item.Items.Add(otherScripts1);
                     }
@@ -2269,7 +2142,7 @@ namespace UndertaleModTool
                 {
                     var filename = file.Name;
                     // Replace _ with __ because WPF uses _ for keyboard navigation
-                    MenuItem subitem = new MenuItem { Header = filename.Replace("_", "__") };
+                    MenuItem subitem = new MenuItem {Header = filename.Replace("_", "__")};
                     subitem.Click += MenuItem_RunBuiltinScript_Item_Click;
                     subitem.CommandParameter = file.FullName;
                     item.Items.Add(subitem);
@@ -2283,17 +2156,17 @@ namespace UndertaleModTool
 
                     var subDirName = subDirectory.Name;
                     // In addition to the _ comment from above, we also need to add at least one item, so that WPF uses this as a submenuitem
-                    MenuItemDark subItem = new() { Header = subDirName.Replace("_", "__"), Items = { new MenuItem { Header = "(loading...)", IsEnabled = false } } };
+                    MenuItemDark subItem = new() {Header = subDirName.Replace("_", "__"), Items = {new MenuItem {Header = "(loading...)", IsEnabled = false}}};
                     subItem.SubmenuOpened += (o, args) => MenuItem_RunScript_SubmenuOpened(o, args, subDirectory.FullName);
                     item.Items.Add(subItem);
                 }
 
                 if (item.Items.Count == 0)
-                    item.Items.Add(new MenuItem { Header = "(No scripts found!)", IsEnabled = false });
+                    item.Items.Add(new MenuItem {Header = "(No scripts found!)", IsEnabled = false});
             }
             catch (Exception err)
             {
-                item.Items.Add(new MenuItem { Header = err.ToString(), IsEnabled = false });
+                item.Items.Add(new MenuItem {Header = err.ToString(), IsEnabled = false});
             }
 
             item.UpdateLayout();
@@ -2310,7 +2183,7 @@ namespace UndertaleModTool
             // If we're at the complete root, we need to add the "Run other script" button as well
             if (item.Name != "RootScriptItem") return;
 
-            var otherScripts = new MenuItem { Header = "Run _other script..." };
+            var otherScripts = new MenuItem {Header = "Run _other script..."};
             otherScripts.Click += MenuItem_RunOtherScript_Click;
             item.Items.Add(otherScripts);
         }
@@ -2344,8 +2217,7 @@ namespace UndertaleModTool
         {
             if (scriptDialog != null)
             {
-                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() =>
-                {
+                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() => {
                     scriptDialog.Update(message, status, progressValue, maxValue);
                 }));
             }
@@ -2371,8 +2243,7 @@ namespace UndertaleModTool
         {
             if (scriptDialog != null)
             {
-                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() =>
-                {
+                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action) (() => {
                     scriptDialog.ReportProgress(progressValue);
                 }));
             }
@@ -2382,8 +2253,7 @@ namespace UndertaleModTool
         {
             if (scriptDialog != null)
             {
-                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() =>
-                {
+                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() => {
                     scriptDialog.ReportProgress(status);
                 }));
             }
@@ -2564,7 +2434,7 @@ namespace UndertaleModTool
 
                 if (Selected == code)
                 {
-#pragma warning disable CA1416
+                    #pragma warning disable CA1416
                     var codeEditor = FindVisualChild<UndertaleCodeEditor>(DataEditor);
                     if (codeEditor is null)
                     {
@@ -2583,7 +2453,7 @@ namespace UndertaleModTool
                             codeEditor.CodeModeTabs.SelectedItem = codeEditor.DisassemblyTab;
                         }
                     }
-#pragma warning restore CA1416
+                    #pragma warning restore CA1416
                 }
                 else
                     CodeEditorDecompile = editorDecompile;
@@ -2769,7 +2639,7 @@ namespace UndertaleModTool
             return dlg.ShowDialog() == true ? dlg.FileName : null;
         }
 
-#pragma warning disable CA1416
+        #pragma warning disable CA1416
         public string PromptChooseDirectory()
         {
             VistaFolderBrowserDialog folderBrowser = new VistaFolderBrowserDialog();
@@ -2777,13 +2647,13 @@ namespace UndertaleModTool
             return folderBrowser.ShowDialog() == true ? folderBrowser.SelectedPath + "/" : null;
         }
 
-#pragma warning disable CA1416
+        #pragma warning disable CA1416
         public void PlayInformationSound()
         {
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
                 System.Media.SystemSounds.Asterisk.Play();
         }
-#pragma warning restore CA1416
+        #pragma warning restore CA1416
 
         public void ScriptMessage(string message)
         {
@@ -2900,12 +2770,12 @@ namespace UndertaleModTool
 
         private void MenuItem_GitHub_Click(object sender, RoutedEventArgs e)
         {
-            OpenBrowser("https://github.com/XDOneDude/UndertaleModToolCE");
+            OpenBrowser("https://github.com/krzys-h/UndertaleModTool");
         }
 
         private void MenuItem_About_Click(object sender, RoutedEventArgs e)
         {
-            this.ShowMessage("UndertaleModTool Community Edition by the United Modders of Pizza Tower\nFork of UndertaleModTool by krzys_h", "About");
+            this.ShowMessage("UndertaleModTool by krzys_h\nVersion " + Version, "About");
         }
 
         /// From https://github.com/AvaloniaUI/Avalonia/blob/master/src/Avalonia.Dialogs/AboutAvaloniaDialog.xaml.cs
@@ -3001,7 +2871,7 @@ namespace UndertaleModTool
                                   "the Nightly builds if you don't have a GitHub account, or compile UTMT yourself.\n" +
                                   "For any questions or more information, ask in the Underminers Discord server.");
                 window.UpdateButtonEnabled = true;
-                return;
+                    return;
 
             }
 
@@ -3072,7 +2942,7 @@ namespace UndertaleModTool
             }
 
             var artifactInfo = JObject.Parse(await result2.Content.ReadAsStringAsync()); // And now parse them as JSON
-            var artifactList = (JArray)artifactInfo["artifacts"];                       // Grab the array of artifacts
+            var artifactList = (JArray) artifactInfo["artifacts"];                       // Grab the array of artifacts
 
             if (Environment.Is64BitOperatingSystem && !Environment.Is64BitProcess)
             {
@@ -3088,7 +2958,7 @@ namespace UndertaleModTool
             JObject artifact = null;
             for (int index = 0; index < artifactList.Count; index++)
             {
-                var currentArtifact = (JObject)artifactList[index];
+                var currentArtifact = (JObject) artifactList[index];
                 string artifactName = (string)currentArtifact["name"];
 
                 // If the tool ever becomes cross platform this needs to check the OS
@@ -3238,7 +3108,7 @@ namespace UndertaleModTool
                         {
                             UpdateProgressStatus($"Downloaded MB: {downloaded}");
                         }
-                        catch { }
+                        catch {}
 
                         Thread.Sleep(100);
                     }
