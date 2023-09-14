@@ -43,9 +43,8 @@ jobs:
         cp ./README.md ./${{ matrix.os }}
         cp ./SCRIPTS.md ./${{ matrix.os }}
         cp ./LICENSE.txt ./${{ matrix.os }}
-        cp ./.disable_gb1click ./${{ matrix.os }}
     - name: Upload ${{ matrix.os }} GUI 32Bit
       uses: actions/upload-artifact@v2
       with:
-        name: UTMTCE-GUI32BIT-${{ matrix.os }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}
+        name: ${{ matrix.os }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}
         path: ${{ matrix.os }}

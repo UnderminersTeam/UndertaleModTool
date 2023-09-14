@@ -43,15 +43,14 @@ jobs:
         cp ./README.md ./${{ matrix.os }}
         cp ./SCRIPTS.md ./${{ matrix.os }}
         cp ./LICENSE.txt ./${{ matrix.os }}
-        cp ./.disable_gb1click ./${{ matrix.os }}
     - name: Create zip for nightly release Windows GUI
       run: |
         7z a -tzip GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip ./${{ matrix.os }}/* -mx0 
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-          name: GUI-UTMTCE${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}
-          path: GUI-UTMTCE${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip
+          name: GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}
+          path: GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip
 
   build_cli:
 
@@ -93,8 +92,8 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-          name: CLI-UTMTCE${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}
-          path: CLI-UTMTCE${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}.zip
+          name: CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}
+          path: CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}.zip
 
   upload:
 
