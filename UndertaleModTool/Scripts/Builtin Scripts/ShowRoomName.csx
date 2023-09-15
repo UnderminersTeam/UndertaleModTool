@@ -2,7 +2,7 @@
 // Adds room ID and name display under the debug mode timer display
 
 EnsureDataLoaded();
-ScriptMessage("Show room name and ID in debug mode\nby krzys_h, Kneesnap\n\n\nDeltarune Ch2 Patch By GattoDev");
+ScriptMessage("Show room name and ID in debug mode\nby krzys_h, Kneesnap\n");
 Data.Functions.EnsureDefined("room_get_name", Data.Strings); // required for Deltarune
 if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
 {
