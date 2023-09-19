@@ -3833,7 +3833,7 @@ result in loss of work.");
                 // Filter false mouse move events, because it sometimes
                 // triggers even on a mouse click
                 Point currPos = e.GetPosition(TabScrollViewer);
-                if (Point.Subtract(currPos, initTabContPos).X < 2)
+                if (Math.Abs(Point.Subtract(currPos, initTabContPos).X) < 2)
                     return;
 
                 CurrentTabIndex = tabItem.TabIndex;
