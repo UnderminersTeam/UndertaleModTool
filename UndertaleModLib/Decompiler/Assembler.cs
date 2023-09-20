@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -254,15 +255,16 @@ namespace UndertaleModLib.Decompiler
 
         public static List<UndertaleInstruction> Assemble(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, UndertaleData data = null)
         {
-            var lines = source.Replace("\r", "", StringComparison.InvariantCulture).Split('\n');
+            var strReader = new StringReader(source);
             uint addr = 0;
             Dictionary<string, uint> labels = new Dictionary<string, uint>();
             Dictionary<UndertaleInstruction, string> labelTargets = new Dictionary<UndertaleInstruction, string>();
             List<UndertaleInstruction> instructions = new List<UndertaleInstruction>();
             Dictionary<string, UndertaleVariable> localvars = new Dictionary<string, UndertaleVariable>();
-            foreach (var fullline in lines)
+            string fullLine;
+            while ((fullLine = strReader.ReadLine()) is not null)
             {
-                string line = fullline;
+                string line = fullLine;
                 if (line.Length == 0)
                     continue;
 
