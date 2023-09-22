@@ -67,8 +67,7 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="322"/>
-            <RowDefinition Height="20"/>
+            <RowDefinition Height="342"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
@@ -79,12 +78,8 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="24"/>
-            </Grid.RowDefinitions>
 
-                <TreeView Grid.Column="0" Margin="0,0,3,0" SelectedItemChanged="TreeView_SelectedItemChanged" Name="RoomObjectsTree"
+            <TreeView Grid.Column="0" Margin="0,0,3,0" SelectedItemChanged="TreeView_SelectedItemChanged" Name="RoomObjectsTree"
                       KeyDown="RoomObjectsTree_KeyDown" MouseDoubleClick="RoomObjectsTree_MouseDoubleClick" MouseDown="RoomObjectsTree_MouseDown">
                 <TreeView.Resources>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+GameObject}">
@@ -1154,13 +1149,12 @@
                     </DataTemplate>
                 </ContentControl.Resources>
             </ScrollViewer>
-            <local:ButtonDark Grid.Row="1" Grid.Column="0" Content="Edit Tiles" Click="EditTiles_Click" Margin="0,0,3,0"/>
         </Grid>
 
         <GridSplitter Grid.Column="0" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" ShowsPreview="True" Width="Auto" Height="3"/>
 
         <!-- Don't forget to modify "UndertaleRoomRenderer" control as well -->
-        <ScrollViewer Name="RoomGraphicsScroll" Margin="0,8,0,0" Grid.Column="0" Grid.Row="3" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" ScrollChanged="ScrollViewer_ScrollChanged" MouseUp="RoomGraphicsScroll_MouseUp" MouseDown="RoomGraphicsScroll_MouseDown" MouseMove="RoomGraphicsScroll_MouseMove" Loaded="RoomGraphicsScroll_Loaded">
+        <ScrollViewer Name="RoomGraphicsScroll" Margin="0,8,0,0" Grid.Column="0" Grid.Row="2" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" ScrollChanged="ScrollViewer_ScrollChanged" MouseUp="RoomGraphicsScroll_MouseUp" MouseDown="RoomGraphicsScroll_MouseDown" MouseMove="RoomGraphicsScroll_MouseMove" Loaded="RoomGraphicsScroll_Loaded">
             <ItemsControl Name="RoomGraphics" Background="Gray" MouseDown="RectangleBackground_MouseDown" MouseMove="RectangleBackground_MouseMove" MouseUp="RectangleBackground_MouseUp" MouseWheel="Canvas_MouseWheel">
                 <ItemsControl.Style>
                     <Style TargetType="ItemsControl">
@@ -1569,6 +1563,6 @@
                 </ItemsControl.Resources>
             </ItemsControl>
         </ScrollViewer>
-        <local:ButtonDark Grid.Column="0" Grid.Row="4" Content="Save as PNG" Click="ExportAsPNG_Click"/>
+        <local:ButtonDark Grid.Column="0" Grid.Row="3" Content="Save as PNG" Click="ExportAsPNG_Click"/>
     </Grid>
 </local:DataUserControl>
