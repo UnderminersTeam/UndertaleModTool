@@ -1093,10 +1093,14 @@ namespace UndertaleModLib.Decompiler
 
             // TODO: make proper file/manifest for all games to use, not just UT/DR, and also not these specific names
             string lowerName = data?.GeneralInfo?.DisplayName?.Content.ToLower(CultureInfo.InvariantCulture);
+            string lowerFileName = data?.GeneralInfo?.FileName?.Content.ToLower(CultureInfo.InvariantCulture);
 
             // Pizza Tower (and things like Scoutdigo)
             PTSpriteTypes = false;
-            if (lowerName != null && lowerName.StartsWith("pizza tower", StringComparison.InvariantCulture)) {
+            if (
+                (lowerName != null && lowerName.StartsWith("pizza tower", StringComparison.InvariantCulture))
+                || (lowerFileName != null && (lowerFileName == "pizzatower_gm2" || lowerFileName == "pizzatower"))
+            ) {
                 PTSpriteTypes = true;
                 builtin_vars.Add("state", AssetIDType.PT_State);
                 builtin_vars.Add("prevstate", AssetIDType.PT_State);
