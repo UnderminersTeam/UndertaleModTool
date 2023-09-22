@@ -1043,14 +1043,9 @@ namespace UndertaleModTool
 #pragma warning restore CA1416
 
                         // Detect PT state names
-                        // TODO: move this to AssetTypeResolver
                         AssetTypeResolver.PTStates.Clear();
                         string lowerName = data?.GeneralInfo?.DisplayName?.Content.ToLower(CultureInfo.InvariantCulture);
-                        string lowerFileName = data?.GeneralInfo?.FileName?.Content.ToLower(CultureInfo.InvariantCulture);
-                        if (
-                            (lowerName != null && lowerName.StartsWith("pizza tower", StringComparison.InvariantCulture))
-                            || (lowerFileName != null && (lowerFileName == "pizzatower_gm2" || lowerFileName == "pizzatower"))
-                        ) {
+                        if (lowerName != null && lowerName.StartsWith("pizza tower", StringComparison.InvariantCulture)) {
                             UndertaleCode ptPlayerStep = Data.Code.ByName("gml_Object_obj_player_Step_0");
                             if (ptPlayerStep == null)
                             {

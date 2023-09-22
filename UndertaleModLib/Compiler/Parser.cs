@@ -19,8 +19,6 @@ namespace UndertaleModLib.Compiler
 
             // Struct function names that haven't been used yet.
             private static Queue<string> usableStructNames = new();
-            // Same, but for methods.
-            private static Queue<string> usableMethodNames = new();
 
             // Not really universally unique nor does it follow the UUID spec,
             // it just needs to be unique in the same script.
@@ -104,7 +102,6 @@ namespace UndertaleModLib.Compiler
                     SwitchDefault,
                     FunctionCall,
                     FunctionDef,
-                    ExprFunctionDef,
                     Break,
                     Continue,
                     Exit,
@@ -459,12 +456,6 @@ namespace UndertaleModLib.Compiler
                         usableStructNames.Enqueue(child.Name.Content["gml_Script_".Length..]);
                     }
                 }
-                usableMethodNames.Clear();
-                foreach (UndertaleCode child in context.OriginalCode.ChildEntries) {
-                    if (child.Name.Content.StartsWith("gml_Script_anon_")) {
-                        usableMethodNames.Enqueue(child.Name.Content["gml_Script_".Length..]);
-                    }
-                }
 
                 // Ensuring an EOF exists
                 if (tokens.Count == 0 || tokens[tokens.Count - 1].Kind != TokenKind.EOF)
@@ -597,11 +588,9 @@ namespace UndertaleModLib.Compiler
                 if (hasError)
                     return null;
                 
-                // Remove any unused functions
+                // Remove any unused struct functions
                 while (usableStructNames.Count > 0)
                     context.FunctionsToObliterate.Add(usableStructNames.Dequeue());
-                while (usableMethodNames.Count > 0)
-                    context.FunctionsToObliterate.Add(usableMethodNames.Dequeue());
 
                 return rootBlock;
             }
@@ -740,20 +729,7 @@ namespace UndertaleModLib.Compiler
                     if (s.Text.StartsWith("___struct___")) {
                         ReportCodeError("Function names cannot start with ___struct___ (they are reserved for structs).", s.Token, false);
                     }
-                    if (s.Text.StartsWith("anon_")) {
-                        ReportCodeError("Function names cannot start with anon_.", s.Token, false);
-                    }
                     destination = new Statement(Statement.StatementKind.ExprFuncName, s.Token) { ID = s.ID };
-                    result.Text = destination.Text;
-                } else {
-                    if (usableMethodNames.Count > 0) {
-                        result.Text = usableMethodNames.Dequeue();
-                    } else {
-                        do {
-                            result.Text = "anon_utmt_" +
-                                context.OriginalCode.Name.Content + "__" + uuidCounter++.ToString();
-                        } while (context.Data.Scripts.ByName("gml_Script_" + result.Text) != null);
-                    }
                 }
 
                 EnsureTokenKind(TokenKind.OpenParen);
@@ -787,10 +763,7 @@ namespace UndertaleModLib.Compiler
 
                 result.Children.Add(ParseStatement(context));
                 if (expressionMode)
-                {
-                    result.Kind = Statement.StatementKind.ExprFunctionDef;
                     return result;
-                }
                 else // Whatever you call non-anonymous definitions
                 {
                     Statement trueResult = new Statement(Statement.StatementKind.Assign, new Lexer.Token(TokenKind.Assign));

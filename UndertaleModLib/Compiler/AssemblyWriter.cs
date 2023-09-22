@@ -15,6 +15,7 @@ namespace UndertaleModLib.Compiler
     {
         public static class AssemblyWriter
         {
+            private static int uuidCounter = 0;
             public class CodeWriter
             {
                 public CompileContext compileContext;
@@ -560,6 +561,7 @@ namespace UndertaleModLib.Compiler
 
             public static CodeWriter AssembleStatement(CompileContext compileContext, Parser.Statement s)
             {
+                uuidCounter = 0;
                 CodeWriter cw = new CodeWriter(compileContext);
                 AssembleStatement(cw, s);
                 return cw;
@@ -590,7 +592,7 @@ namespace UndertaleModLib.Compiler
                             switch (s.Children[1].Token.Kind)
                             {
                                 case Lexer.Token.TokenKind.Assign:
-                                    AssembleExpression(cw, s.Children[2]); // value
+                                    AssembleExpression(cw, s.Children[2], s.Children[0]); // value
                                     AssembleStoreVariable(cw, s.Children[0], cw.typeStack.Pop()); // variable reference
                                     break;
                                 case Lexer.Token.TokenKind.AssignPlus:
@@ -1243,7 +1245,7 @@ namespace UndertaleModLib.Compiler
                 cw.typeStack.Push(DataType.Variable);
             }
 
-            private static void AssembleExpression(CodeWriter cw, Parser.Statement e)
+            private static void AssembleExpression(CodeWriter cw, Parser.Statement e, Parser.Statement funcDefName = null)
             {
                 switch (e.Kind)
                 {
@@ -1336,7 +1338,6 @@ namespace UndertaleModLib.Compiler
                         AssembleVariablePush(cw, e);
                         break;
                     case Parser.Statement.StatementKind.FunctionDef:
-                    case Parser.Statement.StatementKind.ExprFunctionDef:
                         {
                             if (e.Children.Count != 3)
                             {
@@ -1344,12 +1345,16 @@ namespace UndertaleModLib.Compiler
                                 break;
                             }
 
-                            string funcDefName = e.Text;
-
-                            bool isAnon = e.Kind == Parser.Statement.StatementKind.ExprFunctionDef;
+                            if (funcDefName == null) {
+                                funcDefName = new Parser.Statement(e);
+                                do {
+                                    funcDefName.Text = "anon_utmt_" +
+                                        cw.compileContext.OriginalCode.Name.Content + "__" + uuidCounter++.ToString();
+                                } while (cw.compileContext.Data.Scripts.ByName(funcDefName.Text) != null);
+                            }
 
                             bool isConstructor = e.Children[1].Text == "constructor";
-                            bool isStructDef = funcDefName.StartsWith("___struct___");
+                            bool isStructDef = funcDefName.Text.StartsWith("___struct___");
                             
                             Patch startPatch = Patch.StartHere(cw);
                             Patch endPatch = Patch.Start();
@@ -1358,13 +1363,13 @@ namespace UndertaleModLib.Compiler
                             Decompiler.Decompiler.BuildSubFunctionCache(cw.compileContext.Data);
 
                             //Attempt to find the function before rushing to create a new one
-                            var func = cw.compileContext.Data.Functions.FirstOrDefault(f => f.Name.Content == "gml_Script_" + funcDefName);
+                            var func = cw.compileContext.Data.Functions.FirstOrDefault(f => f.Name.Content == "gml_Script_" + funcDefName.Text);
                             if (func != null)
-                                cw.compileContext.Data.KnownSubFunctions.TryAdd(funcDefName, func);
+                                cw.compileContext.Data.KnownSubFunctions.TryAdd(funcDefName.Text, func);
                             
-                            if (cw.compileContext.Data.KnownSubFunctions.ContainsKey(funcDefName))
+                            if (cw.compileContext.Data.KnownSubFunctions.ContainsKey(funcDefName.Text))
                             {
-                                string subFunctionName = cw.compileContext.Data.KnownSubFunctions[funcDefName].Name.Content;
+                                string subFunctionName = cw.compileContext.Data.KnownSubFunctions[funcDefName.Text].Name.Content;
                                 UndertaleCode childEntry = cw.compileContext.OriginalCode.ChildEntries.ByName(subFunctionName);
                                 childEntry.Offset = cw.offset * 4;
                                 childEntry.ArgumentsCount = (ushort)e.Children[0].Children.Count;
@@ -1374,7 +1379,7 @@ namespace UndertaleModLib.Compiler
                             {
                                 cw.funcPatches.Add(new FunctionPatch()
                                 {
-                                    Name = funcDefName,
+                                    Name = funcDefName.Text,
                                     Offset = cw.offset * 4,
                                     ArgCount = (ushort)e.Children[0].Children.Count,
                                     isNewFunc = true,
@@ -1391,7 +1396,7 @@ namespace UndertaleModLib.Compiler
                             cw.funcPatches.Add(new FunctionPatch()
                             {
                                 Target = cw.EmitRef(Opcode.Push, DataType.Int32),
-                                Name = funcDefName,
+                                Name = funcDefName.Text,
                                 ArgCount = -1
                             });
                             cw.Emit(Opcode.Conv, DataType.Int32, DataType.Variable);
@@ -1413,15 +1418,13 @@ namespace UndertaleModLib.Compiler
                                 ArgCount = 2
                             });
                             cw.typeStack.Push(DataType.Variable);
-                            if (!isAnon) {
-                                cw.Emit(Opcode.Dup, DataType.Variable).Extra = 0;
-                                if (isStructDef) {
-                                    cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-16;
-                                } else if (isConstructor) {
-                                    cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-6;
-                                } else {
-                                    cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-1; // todo: -6 sometimes?
-                                }
+                            cw.Emit(Opcode.Dup, DataType.Variable).Extra = 0;
+                            if (isStructDef) {
+                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-16;
+                            } else if (isConstructor) {
+                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-6;
+                            } else {
+                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-1; // todo: -6 sometimes?
                             }
                         }
                         break;
