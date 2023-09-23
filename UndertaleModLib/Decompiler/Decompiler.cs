@@ -1328,7 +1328,10 @@ namespace UndertaleModLib.Decompiler
                     return functionVal.ToString(context);
                 }
 
-                string varPrefix = (HasVarKeyword ? "var " : "");
+                string prefix = (
+                    Destination.Var.InstanceType == UndertaleInstruction.InstanceType.Static ? "static " :
+                    (HasVarKeyword ? "var " : "")
+                );
 
                 // Check for possible ++, --, or operation equal (for single vars)
                 if (Value is ExpressionTwo two && (two.Argument1 is ExpressionVar) &&
@@ -1363,11 +1366,11 @@ namespace UndertaleModLib.Decompiler
                         if (checkEqual(Destination, v1) && two.Opcode != UndertaleInstruction.Opcode.Shl && two.Opcode != UndertaleInstruction.Opcode.Shr && two.Opcode != UndertaleInstruction.Opcode.Rem)
                         {
                             if (!(context.GlobalContext.Data?.GeneralInfo?.BytecodeVersion > 14 && v1.Opcode != UndertaleInstruction.Opcode.Push && Destination.Var.InstanceType != UndertaleInstruction.InstanceType.Self))
-                                return String.Format("{0}{1} {2}= {3}", varPrefix, varName, Expression.OperationToPrintableString(two.Opcode), two.Argument2.ToString(context));
+                                return String.Format("{0}{1} {2}= {3}", prefix, varName, Expression.OperationToPrintableString(two.Opcode), two.Argument2.ToString(context));
                         }
                     }
                 }
-                return String.Format("{0}{1}{2} {3}", varPrefix, varName, context.DecompilingStruct ? ":" : " =", Value.ToString(context));
+                return String.Format("{0}{1}{2} {3}", prefix, varName, context.DecompilingStruct ? ":" : " =", Value.ToString(context));
             }
 
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
