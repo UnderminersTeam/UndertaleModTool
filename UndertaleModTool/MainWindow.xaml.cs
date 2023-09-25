@@ -2213,14 +2213,12 @@ namespace UndertaleModTool
             }
         }
 
+        // Apparently, one null check is not enough for `scriptDialog`
         public void UpdateProgressBar(string message, string status, double progressValue, double maxValue)
         {
-            if (scriptDialog != null)
-            {
-                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() => {
-                    scriptDialog.Update(message, status, progressValue, maxValue);
-                }));
-            }
+            scriptDialog?.Dispatcher.Invoke(DispatcherPriority.Normal, () => {
+                scriptDialog?.Update(message, status, progressValue, maxValue);
+            });
         }
 
         public void SetProgressBar(string message, string status, double progressValue, double maxValue)
@@ -2236,33 +2234,28 @@ namespace UndertaleModTool
         public void SetProgressBar()
         {
             if (scriptDialog != null && !scriptDialog.IsVisible)
-                scriptDialog.Dispatcher.Invoke(scriptDialog.Show);
+                scriptDialog.Dispatcher.Invoke(() => {
+                    scriptDialog?.Show();
+                });
         }
 
         public void UpdateProgressValue(double progressValue)
         {
-            if (scriptDialog != null)
-            {
-                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action) (() => {
-                    scriptDialog.ReportProgress(progressValue);
-                }));
-            }
+            scriptDialog?.Dispatcher.Invoke(DispatcherPriority.Normal, () => {
+                scriptDialog?.ReportProgress(progressValue);
+            });
         }
 
         public void UpdateProgressStatus(string status)
         {
-            if (scriptDialog != null)
-            {
-                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() => {
-                    scriptDialog.ReportProgress(status);
-                }));
-            }
+            scriptDialog?.Dispatcher.Invoke(DispatcherPriority.Normal, () => {
+                scriptDialog?.ReportProgress(status);
+            });
         }
 
         public void HideProgressBar()
         {
-            if (scriptDialog != null)
-                scriptDialog.TryHide();
+            scriptDialog?.TryHide();
         }
 
         public void AddProgress(int amount)
@@ -2414,14 +2407,18 @@ namespace UndertaleModTool
 
             if (await Task.Run(() => !updater.Wait(2000))) //if ProgressUpdater isn't responding
                 ScriptError("Stopping the progress bar updater task is failed.\nIt's highly recommended to restart the application.",
-                    "Script error", false);
+                            "Script error", false);
             else
             {
                 cts.Dispose();
                 cts = null;
             }
 
-            updater.Dispose();
+            if (!updater.IsCompleted)
+                ScriptError("Stopping the progress bar updater task is failed.\nIt's highly recommended to restart the application.",
+                            "Script error", false);
+            else
+                updater.Dispose();
         }
 
         public void OpenCodeFile(string name, CodeEditorMode editorDecompile, bool inNewTab = false)
