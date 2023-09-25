@@ -557,6 +557,8 @@ namespace UndertaleModTool
         }
 
         public static Dictionary<string, string> gettextJSON = null;
+        private static readonly Regex gettextRegex = new("scr_gettext\\(\\\"(\\w*)\\\"\\)", RegexOptions.Compiled);
+        private static readonly Regex getlangRegex = new("scr_84_get_lang_string(\\w*)\\(\\\"(\\w*)\\\"\\)", RegexOptions.Compiled);
         private string UpdateGettextJSON(string json)
         {
             try
@@ -679,40 +681,43 @@ namespace UndertaleModTool
 
                     if (decompiled != null)
                     {
-                        string[] decompiledLines;
+                        StringReader strReader;
+                        StringBuilder strBuilder;
                         if (gettext != null && decompiled.Contains("scr_gettext"))
                         {
-                            decompiledLines = decompiled.Split('\n');
-                            for (int i = 0; i < decompiledLines.Length; i++)
+                            strReader = new(decompiled);
+                            strBuilder = new();
+                            string line;
+                            while ((line = strReader.ReadLine()) is not null)
                             {
-                                var matches = Regex.Matches(decompiledLines[i], "scr_gettext\\(\\\"(\\w*)\\\"\\)");
-                                foreach (Match match in matches)
+                                Match match = gettextRegex.Match(line);
+                                if (match.Success)
                                 {
-                                    if (match.Success)
-                                    {
-                                        if (gettext.TryGetValue(match.Groups[1].Value, out string text))
-                                            decompiledLines[i] += $" // {text}";
-                                    }
+                                    if (gettext.TryGetValue(match.Groups[1].Value, out string text))
+                                        strBuilder.Append($"{line} // {text}\n");
                                 }
+                                else
+                                    strBuilder.Append(line + '\n');
                             }
-                            decompiled = string.Join('\n', decompiledLines);
+                            decompiled = strBuilder.ToString();
                         }
                         else if (gettextJSON != null && decompiled.Contains("scr_84_get_lang_string"))
                         {
-                            decompiledLines = decompiled.Split('\n');
-                            for (int i = 0; i < decompiledLines.Length; i++)
+                            strReader = new(decompiled);
+                            strBuilder = new();
+                            string line;
+                            while ((line = strReader.ReadLine()) is not null)
                             {
-                                var matches = Regex.Matches(decompiledLines[i], "scr_84_get_lang_string(\\w*)\\(\\\"(\\w*)\\\"\\)");
-                                foreach (Match match in matches)
+                                Match match = getlangRegex.Match(line);
+                                if (match.Success)
                                 {
-                                    if (match.Success)
-                                    {
-                                        if (gettextJSON.TryGetValue(match.Groups[^1].Value, out string text))
-                                            decompiledLines[i] += $" // {text}";
-                                    }
+                                    if (gettext.TryGetValue(match.Groups[1].Value, out string text))
+                                        strBuilder.Append($"{line} // {text}\n");
                                 }
+                                else
+                                    strBuilder.Append(line + '\n');
                             }
-                            decompiled = string.Join('\n', decompiledLines);
+                            decompiled = strBuilder.ToString();
                         }
                     }
 
