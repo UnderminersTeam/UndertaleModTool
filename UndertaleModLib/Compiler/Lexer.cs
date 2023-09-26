@@ -506,6 +506,7 @@ namespace UndertaleModLib.Compiler
                     "repeat" => new Token(Token.TokenKind.KeywordRepeat, cr.GetPositionInfo(index)),
                     "exit" => new Token(Token.TokenKind.KeywordExit, cr.GetPositionInfo(index)),
                     "then" => new Token(Token.TokenKind.KeywordThen, cr.GetPositionInfo(index)),
+                    "static" => new Token(Token.TokenKind.KeywordStatic, cr.GetPositionInfo(index)),
                     "mod" => new Token(Token.TokenKind.Mod, cr.GetPositionInfo(index)),
                     "div" => new Token(Token.TokenKind.Div, cr.GetPositionInfo(index)),
                     // In GMS2.3, these keywords are special function calls instead of constants
@@ -877,7 +878,9 @@ namespace UndertaleModLib.Compiler
                     ProcFunction,
                     ProcConstant,
 
-                    Error
+                    Error,
+
+                    KeywordStatic
                 }
 
                 public Token()
