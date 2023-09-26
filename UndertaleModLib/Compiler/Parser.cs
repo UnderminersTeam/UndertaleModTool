@@ -2951,6 +2951,7 @@ namespace UndertaleModLib.Compiler
                     TokenKind.KeywordStruct,
                     TokenKind.KeywordSwitch,
                     TokenKind.KeywordThen,
+                    TokenKind.KeywordStatic,
                     TokenKind.KeywordUntil,
                     TokenKind.KeywordVar,
                     TokenKind.KeywordWhile,
