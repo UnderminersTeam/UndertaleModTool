@@ -57,6 +57,7 @@
             <Word>begin</Word>
             <Word>end</Word>
             <Word>then</Word>
+            <Word>static</Word>
             <Word>mod</Word>
             <Word>div</Word>
             <Word>@@this@@</Word>
