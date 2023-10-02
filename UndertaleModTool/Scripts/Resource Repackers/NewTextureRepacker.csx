@@ -291,12 +291,12 @@ int doItemGrouping(TPageItem item)
 //     return false;
 // }
 
-List<TextureAtlas> layoutPageItemList(List<TPageItem> items, int pageSizeWidth, int pageSizeHeght, int padding)
+List<TextureAtlas> layoutPageItemList(List<TPageItem> items, int pageSizeWidth, int pageSizeHeight, int padding)
 {
     var atlas_list = new List<TextureAtlas>();
     while (items.Count > 0)
     {
-        var atlas = new TextureAtlas(pageSizeWidth, pageSizeHeght, padding);
+        var atlas = new TextureAtlas(pageSizeWidth, pageSizeHeight, padding);
         foreach (var page in items)
         {
             // If failed to allocate atlas space, then retry with a new one
