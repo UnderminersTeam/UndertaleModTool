@@ -4052,18 +4052,23 @@ result in loss of work.");
                     FileDir += iwishiwasbetteratnames[i] + "\\";
                 }
                 FileDir += "Profiles";
-                if (Directory.Exists(FileDir))
+                if (Directory.Exists(FileDir + "\\" + MD5DirName))
                 {
                     if (Directory.Exists(ProfilesFolder + "\\" + MD5DirName))
                         Directory.Delete(ProfilesFolder + "\\" + MD5DirName, true);
                     DirectoryCopy(FileDir, ProfilesFolder, true);
-                    string[] Files = Directory.GetFiles(FileDir + "\\" + MD5DirName + "\\Main");
-                    for (var i = 0; i < Files.Length; i++)
+                    if (Directory.Exists(FileDir + "\\" + MD5DirName + "\\Main"))
                     {
-                        if (Files[i].EndsWith(".gml"))
-                            ImportCodeFromFile(Files[i], true, false, false, true);
+                        string[] Files = Directory.GetFiles(FileDir + "\\" + MD5DirName + "\\Main");
+                        for (var i = 0; i < Files.Length; i++)
+                        {
+                            if (Files[i].EndsWith(".gml"))
+                                ImportCodeFromFile(Files[i], true, false, false, true);
+                        }
+                        this.ShowMessage("Done!");
                     }
-                    this.ShowMessage("Done!");
+                    else
+                        this.ShowMessage("There's no code to import at all.");
                 }
                 else
                     this.ShowMessage("You have to export a Profile folder to your current data.win's path beforehand!");

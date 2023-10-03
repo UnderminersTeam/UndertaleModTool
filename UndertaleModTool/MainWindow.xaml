@@ -106,7 +106,7 @@
                     </MenuItem>
                     <Separator/>
                     <MenuItem Header="Generate o_ffset map" Click="MenuItem_OffsetMap_Click"/>
-                    <!--<MenuItem Header="Export to GameMaker project" Click="MenuItem_GameMaker_Click"/> that was the original code for funny dogcheck.-->
+                    <MenuItem Header="Export to GameMaker project" Click="MenuItem_GameMaker_Click"/>
                     <Separator/>
                     <MenuItem Header="S_ettings" Command="Properties"/>
                     <MenuItem Header="_Close" Command="Close" InputGestureText="Ctrl+Q"/>
