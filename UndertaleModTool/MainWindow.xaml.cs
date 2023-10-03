@@ -1045,7 +1045,12 @@ namespace UndertaleModTool
                         // Detect PT state names
                         AssetTypeResolver.PTStates.Clear();
                         string lowerName = data?.GeneralInfo?.DisplayName?.Content.ToLower(CultureInfo.InvariantCulture);
-                        if (lowerName != null && lowerName.StartsWith("pizza tower", StringComparison.InvariantCulture)) {
+                        string lowerFileName = data?.GeneralInfo?.FileName?.Content.ToLower(CultureInfo.InvariantCulture);
+                        if (
+                            (lowerName != null && lowerName.StartsWith("pizza tower", StringComparison.InvariantCulture)) ||
+                            (lowerFileName != null && lowerFileName == "pizzatower") ||
+                            (lowerFileName != null && lowerFileName == "pizzatower_gm2") 
+                        ) {
                             UndertaleCode ptPlayerStep = Data.Code.ByName("gml_Object_obj_player_Step_0");
                             if (ptPlayerStep == null)
                             {
@@ -1148,7 +1153,7 @@ namespace UndertaleModTool
 
                     for (
                         var j = code.Instructions.IndexOf(newInstr);
-                        code.Instructions[j] != null &&
+                        j < code.Instructions.Count &&
                         UndertaleInstruction.GetInstructionType(code.Instructions[j].Kind) !=
                             UndertaleInstruction.InstructionType.GotoInstruction;
                         j++
