@@ -2580,6 +2580,18 @@ namespace UndertaleModTool
             string scriptText = $"#line 1 \"{path}\"\n" + File.ReadAllText(path);
             Debug.WriteLine(path);
 
+            // since attempting to load scripts with #load in a file will lead to it using the UTMT path,
+            // we can circumvent this by hardcoding the absolute path to the script directory
+            // in all instances of #load with a relative path
+            var scriptDir = Path.GetDirectoryName(path);
+            var loadPattern = new Regex(@"(?<=^#load\s+"")(([\\""]|[^""])+)(?=""\s*$)", RegexOptions.Multiline);
+            scriptText = loadPattern.Replace(scriptText, match =>
+            {
+                if (Path.IsPathRooted(match.Value))
+                    return match.Value;
+                return Path.Combine(scriptDir, match.Value);
+            });
+
             Dispatcher.Invoke(() => CommandBox.Text = "Running " + Path.GetFileName(path) + " ...");
             try
             {
