@@ -2584,13 +2584,13 @@ namespace UndertaleModTool
             // we can circumvent this by hardcoding the absolute path to the script directory
             // in all instances of #load with a relative path
             var scriptDir = Path.GetDirectoryName(path);
-            var loadPattern = new Regex(@"(?<=^#load\s+"")(([\\""]|[^""])+)(?=""\s*$)", RegexOptions.Multiline);
-            scriptText = loadPattern.Replace(scriptText, match =>
+            var matches = Regex.Matches(scriptText, @"(?<=^#load\s+"").*\.csx(?=""\s*$)", RegexOptions.Multiline);
+            foreach (Match match in matches)
             {
                 if (Path.IsPathRooted(match.Value))
-                    return match.Value;
-                return Path.Combine(scriptDir, match.Value);
-            });
+                    continue;
+                scriptText = scriptText.Replace(match.Value, Path.Combine(scriptDir, match.Value));
+            }
 
             Dispatcher.Invoke(() => CommandBox.Text = "Running " + Path.GetFileName(path) + " ...");
             try
