@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows;
@@ -210,6 +211,37 @@ namespace UndertaleModTool
         }
 
         /// <summary>
+        /// The type of command used in "modified" imported code
+        /// </summary>
+        public enum ModifiedCommandType
+        {
+            /// <summary>
+            /// Default for when no command is currently found
+            /// </summary>
+            None,
+            /// <summary>
+            /// After command takes original code and then places new code after it
+            /// </summary>
+            After,
+            /// <summary>
+            /// Replace command takes original code and replaces it with new code
+            /// </summary>
+            Replace,
+            /// <summary>
+            /// Insert command takes a number and inserts new code AFTER that line number (0 would mean it'd be the first line, and so forth)
+            /// </summary>
+            Insert,
+            /// <summary>
+            /// Append command takes new code and add it to the end of the file
+            /// </summary>
+            Append,
+            /// <summary>
+            /// Prepend command takes new code and add it to the start of the file
+            /// </summary>
+            Prepend
+        }
+
+        /// <summary>
         /// Exception thrown when an unknown command is found in "modified" imported code
         /// </summary>
         public class ModifiedCommandException : Exception
@@ -242,21 +274,24 @@ namespace UndertaleModTool
                 
                 // ignoring the first line, since it only contains the MODIFIED tag
                 gmlCode = gmlCode.Substring(gmlCode.IndexOf('\n') + 1);
-                // these extra options are needed to properly split into lines
-                string[] lines = gmlCode.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+                string[] lines = gmlCode.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
 
                 // these two variables keep track of the text in the current command block, with original being the text in the original code and new being the text to be placed/replaced
                 List<string> originalText = new();
                 List<string> newText = new();
 
-                // booleans to keep track of the loop state
-                bool isPlace = false;
-                bool isReplace = false;
+                // if the method requires an original and new text entry, this signifies we are in the first entry
+                // otherwise it is irrelevant
                 bool inOriginalText = true;
+                
+                // only relevant if the current command is INSERT
+                int insertArgument = 0;
+
+                ModifiedCommandType currentCommand = ModifiedCommandType.None;
 
                 foreach (string line in lines)
                 {
-                    if (isPlace || isReplace)
+                    if (currentCommand != ModifiedCommandType.None)
                     {
                         if (line.StartsWith("///"))
                         {
@@ -269,17 +304,28 @@ namespace UndertaleModTool
                                 inOriginalText = true;
                                 string originalTextString = string.Join("\n", originalText);
                                 string newTextString = string.Join("\n", newText);
-                                if (isPlace)
+                                switch (currentCommand)
                                 {
-                                    int placeIndex = oldCode.IndexOf(originalTextString) + originalTextString.Length;
-                                    oldCode = oldCode.Insert(placeIndex, "\n" + newTextString);
-                                    isPlace = false;
+                                    case ModifiedCommandType.After:
+                                        int placeIndex = oldCode.IndexOf(originalTextString) + originalTextString.Length;
+                                        oldCode = oldCode.Insert(placeIndex, "\n" + newTextString);
+                                        break;
+                                    case ModifiedCommandType.Replace:
+                                        oldCode = oldCode.Replace(originalTextString, newTextString);
+                                        break;
+                                    case ModifiedCommandType.Insert:
+                                        List<string> oldCodeLines = oldCode.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None).ToList();
+                                        oldCodeLines.Insert(insertArgument, newTextString);
+                                        oldCode = string.Join("\n", oldCodeLines);
+                                        break;
+                                    case ModifiedCommandType.Append:    
+                                        oldCode = oldCode + "\n" + newTextString;
+                                        break;
+                                    case ModifiedCommandType.Prepend:
+                                        oldCode = newTextString + "\n" + oldCode;
+                                        break;
                                 }
-                                else if (isReplace)
-                                {
-                                    oldCode = oldCode.Replace(originalTextString, newTextString);
-                                    isReplace = false;
-                                }
+                                currentCommand = ModifiedCommandType.None;
                                 newText = new List<string>();
                                 originalText = new List<string>();
                             }
@@ -306,11 +352,32 @@ namespace UndertaleModTool
                         {
                             if (Regex.IsMatch(line, @"\bAFTER\b"))
                             {
-                                isPlace = true;
+                                currentCommand = ModifiedCommandType.After;
                             }
                             else if (Regex.IsMatch(line, @"\bREPLACE\b"))
                             {
-                                isReplace = true;
+                                currentCommand = ModifiedCommandType.Replace;
+                            }
+                            else if (Regex.IsMatch(line, @"\bINSERT\b"))
+                            {
+                                inOriginalText = false;
+                                currentCommand = ModifiedCommandType.Insert;
+                                Match argMatch = Regex.Match(line, @"(?<=\bINSERT\b\s*)\d+");
+                                if (argMatch.Value == "")
+                                {
+                                    throw new Exception("INSERT modified command requires a number after it.");
+                                }
+                                insertArgument = int.Parse(argMatch.Value);
+                            }
+                            else if (Regex.IsMatch(line, @"\bAPPEND\b"))
+                            {
+                                inOriginalText = false;
+                                currentCommand = ModifiedCommandType.Append;
+                            }
+                            else if (Regex.IsMatch(line, @"\bPREPEND\b"))
+                            {
+                                inOriginalText = false;
+                                currentCommand = ModifiedCommandType.Prepend;
                             }
                             else
                             {
