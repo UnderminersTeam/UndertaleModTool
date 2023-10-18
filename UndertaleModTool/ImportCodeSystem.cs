@@ -194,18 +194,133 @@ namespace UndertaleModTool
             }
         }
 
+        /// <summary>
+        /// The type of the GML code being imported
+        /// </summary>
+        public enum ImportCodeType
+        {
+            /// <summary>
+            /// Literal means that what is being imported is exactly what will be in the code after it is imported, thus, if this code already existed it will be completely replaced
+            /// </summary>
+            Literal,
+            /// <summary>
+            /// Modified code follows the shorthand syntax for replacing and inserting code into existing code
+            /// </summary>
+            Modified
+        }
+
+        /// <summary>
+        /// Exception thrown when an unknown command is found in "modified" imported code
+        /// </summary>
+        public class ModifiedCommandException : Exception
+        {
+            public ModifiedCommandException(string line) : base("Unknown command in modified code: " + line) { }
+        }
+
         void ImportCode(string codeName, string gmlCode, bool IsGML = true, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false)
         {
+            ImportCodeType codeType = gmlCode.StartsWith("/// MODIFIED") ? ImportCodeType.Modified : ImportCodeType.Literal;
             bool SkipPortions = false;
             UndertaleCode code = Data.Code.ByName(codeName);
             if (code is null)
             {
+                if (codeType == ImportCodeType.Modified)
+                {
+                    throw new Exception("Modified code cannot be imported without a base code to modify.");
+                }
                 code = new UndertaleCode();
                 code.Name = Data.Strings.MakeString(codeName);
                 Data.Code.Add(code);
             }
             else if (code.ParentEntry is not null)
                 return;
+            // apply all "modified" commands
+            else if (codeType == ImportCodeType.Modified)
+            {
+                if (Data.KnownSubFunctions is null) Decompiler.BuildSubFunctionCache(Data);
+                string oldCode = Decompiler.Decompile(code, new GlobalDecompileContext(Data, false));
+                
+                // ignoring the first line, since it only contains the MODIFIED tag
+                gmlCode = gmlCode.Substring(gmlCode.IndexOf('\n') + 1);
+                // these extra options are needed to properly split into lines
+                string[] lines = gmlCode.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+
+                // these two variables keep track of the text in the current command block, with original being the text in the original code and new being the text to be placed/replaced
+                List<string> originalText = new();
+                List<string> newText = new();
+
+                // booleans to keep track of the loop state
+                bool isPlace = false;
+                bool isReplace = false;
+                bool inOriginalText = true;
+
+                foreach (string line in lines)
+                {
+                    if (isPlace || isReplace)
+                    {
+                        if (line.StartsWith("///"))
+                        {
+                            if (Regex.IsMatch(line, @"\bCODE\b"))
+                            {
+                                inOriginalText = false;
+                            }
+                            else if (Regex.IsMatch(line, @"\bEND\b"))
+                            {
+                                inOriginalText = true;
+                                string originalTextString = string.Join("\n", originalText);
+                                string newTextString = string.Join("\n", newText);
+                                if (isPlace)
+                                {
+                                    int placeIndex = oldCode.IndexOf(originalTextString) + originalTextString.Length;
+                                    oldCode = oldCode.Insert(placeIndex, "\n" + newTextString);
+                                    isPlace = false;
+                                }
+                                else if (isReplace)
+                                {
+                                    oldCode = oldCode.Replace(originalTextString, newTextString);
+                                    isReplace = false;
+                                }
+                                newText = new List<string>();
+                                originalText = new List<string>();
+                            }
+                            else
+                            {
+                                throw new ModifiedCommandException(line);
+                            }
+                        }
+                        else
+                        {
+                            if (inOriginalText)
+                            {
+                                originalText.Add(line);
+                            }
+                            else
+                            {
+                                newText.Add(line);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (line.StartsWith("///"))
+                        {
+                            if (Regex.IsMatch(line, @"\bAFTER\b"))
+                            {
+                                isPlace = true;
+                            }
+                            else if (Regex.IsMatch(line, @"\bREPLACE\b"))
+                            {
+                                isReplace = true;
+                            }
+                            else
+                            {
+                                throw new ModifiedCommandException(line);
+                            }
+                        }
+                    }
+                }
+                gmlCode = oldCode;
+            }
 
             if (Data?.GeneralInfo.BytecodeVersion > 14 && Data.CodeLocals.ByName(codeName) == null)
             {
