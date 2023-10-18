@@ -45,9 +45,9 @@ namespace UndertaleModTool
             ImportCode(codeName, gmlCode, false, doParse, nukeProfile, checkDecompiler);
         }
 
-        public void ImportGMLFile(string fileName, bool doParse = true, bool checkDecompiler = false, bool throwOnError = false)
+        public void ImportGMLFile(string fileName, bool doParse = true, bool checkDecompiler = false, bool throwOnError = false, bool canBeModified = false)
         {
-            ImportCodeFromFile(fileName, true, doParse, true, checkDecompiler, throwOnError);
+            ImportCodeFromFile(fileName, true, doParse, true, checkDecompiler, throwOnError, canBeModified);
         }
 
         public void ImportASMFile(string fileName, bool doParse = true, bool nukeProfile = true, bool checkDecompiler = false, bool throwOnError = false)
@@ -163,7 +163,7 @@ namespace UndertaleModTool
             }
         }
 
-        void ImportCodeFromFile(string file, bool IsGML = true, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false)
+        void ImportCodeFromFile(string file, bool IsGML = true, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false, bool canBeModified = false)
         {
             try
             {
@@ -175,7 +175,7 @@ namespace UndertaleModTool
                     return;
                 string codeName = Path.GetFileNameWithoutExtension(file);
                 string gmlCode = File.ReadAllText(file);
-                ImportCode(codeName, gmlCode, IsGML, doParse, destroyASM, CheckDecompiler, throwOnError);
+                ImportCode(codeName, gmlCode, IsGML, doParse, destroyASM, CheckDecompiler, throwOnError, canBeModified);
             }
             catch (ScriptException exc) when (throwOnError && exc.Message == "*codeImportError*")
             {
@@ -249,9 +249,9 @@ namespace UndertaleModTool
             public ModifiedCommandException(string line) : base("Unknown command in modified code: " + line) { }
         }
 
-        void ImportCode(string codeName, string gmlCode, bool IsGML = true, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false)
+        void ImportCode(string codeName, string gmlCode, bool IsGML = true, bool doParse = true, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false, bool canBeModified = false)
         {
-            ImportCodeType codeType = gmlCode.StartsWith("/// MODIFIED") ? ImportCodeType.Modified : ImportCodeType.Literal;
+            ImportCodeType codeType = canBeModified && gmlCode.StartsWith("/// MODIFIED") ? ImportCodeType.Modified : ImportCodeType.Literal;
             bool SkipPortions = false;
             UndertaleCode code = Data.Code.ByName(codeName);
             if (code is null)

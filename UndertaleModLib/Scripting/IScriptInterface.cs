@@ -581,7 +581,8 @@ namespace UndertaleModLib.Scripting
         /// <param name="checkDecompiler">If this is <see langword="false"/> an empty string
         /// will be used for replacing the code entry in the case that anything fails.</param>
         /// <param name="throwOnError">Whether a <see cref="ScriptException"/> will be thrown on any errors.</param>
-        void ImportGMLFile(string fileName, bool doParse = true, bool checkDecompiler = false, bool throwOnError = false);
+        /// <param name="canBeModified">Whether the file can use the custom "modified" file syntax</param>
+        void ImportGMLFile(string fileName, bool doParse = true, bool checkDecompiler = false, bool throwOnError = false, bool canBeModified = false);
 
         /// <summary>
         /// Replaces/Imports all GM-Bytecode ASM in a specific code entry with a specified file.
