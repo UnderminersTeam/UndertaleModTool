@@ -344,9 +344,7 @@ namespace UndertaleModLib
             if (poolSize != 0 && poolSize != objectPool.Count)
             {
                 SubmitWarning("Warning - the estimated object pool size differs from the actual size.\n" +
-                              "Please report this on UndertaleModTool GitHub.\n" +
-                              "Unless you have a .win with SWF sprites,\n" +
-                              "since YYSWF objects are not pooled due to overlapping.");
+                              "Please report this on UndertaleModTool GitHub.");
             }
 
             return false;
