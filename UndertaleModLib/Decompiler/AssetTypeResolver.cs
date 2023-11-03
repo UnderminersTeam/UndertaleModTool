@@ -593,6 +593,7 @@ namespace UndertaleModLib.Decompiler
         // Properly initializes per-project/game
         public static void InitializeTypes(UndertaleData data)
         {
+            AssetTypeResolver.PTStates.Clear();
 
             ContextualAssetResolver.Initialize(data);
 
@@ -619,6 +620,7 @@ namespace UndertaleModLib.Decompiler
                 { "instance_nearest", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
                 { "instance_number", new[] { AssetIDType.GameObject } },
                 { "instance_place", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
+                { "instance_place_list", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Boolean } },
                 { "instance_position", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject } },
                 { "instance_deactivate_all", new[] { AssetIDType.Boolean } },
                 { "application_surface_enable", new[] { AssetIDType.Boolean } },
@@ -889,6 +891,8 @@ namespace UndertaleModLib.Decompiler
 
                 { "layer_script_begin", new[] { AssetIDType.Other, AssetIDType.Script } },
                 { "layer_background_create", new[] { AssetIDType.Other, AssetIDType.Sprite } },
+                { "layer_background_change", new[] { AssetIDType.Other, AssetIDType.Sprite } },
+                { "layer_background_sprite", new[] { AssetIDType.Other, AssetIDType.Sprite } },
                 { "layer_background_blend", new[] { AssetIDType.Other, AssetIDType.Color } },
                 { "layer_background_visible", new[] { AssetIDType.Other, AssetIDType.Boolean } },
                 { "layer_sprite_change", new[] { AssetIDType.Other, AssetIDType.Sprite } },
@@ -934,6 +938,7 @@ namespace UndertaleModLib.Decompiler
                 { "collision_circle", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other } },
                 { "collision_ellipse", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other } },
                 { "collision_line", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject, AssetIDType.Boolean, AssetIDType.Boolean } },
+                { "collision_line_list", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject, AssetIDType.Boolean, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Boolean } },
                 { "collision_point", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other } },
                 { "collision_rectangle", new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other } },
 
@@ -1123,12 +1128,17 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("bossintrostate", AssetIDType.PT_State);
                 builtin_vars.Add("introstate", AssetIDType.PT_State);
 
+                builtin_vars.Add("leveltorestart", AssetIDType.Room);
                 builtin_vars.Add("targetRoom", AssetIDType.Room);
+                builtin_vars.Add("targetRoom2", AssetIDType.Room);
                 builtin_vars.Add("room_index", AssetIDType.Room);
                 builtin_vars.Add("backtohubroom", AssetIDType.Room);
                 builtin_vars.Add("roomtorestart", AssetIDType.Room);
                 builtin_vars.Add("checkpointroom", AssetIDType.Room);
                 builtin_vars.Add("lastroom", AssetIDType.Room);
+                builtin_vars.Add("hub_array", AssetIDType.Room);
+                builtin_vars.Add("level_array", AssetIDType.Room);
+                builtin_vars.Add("_levelinfo", AssetIDType.Room);
 
                 builtin_vars.Add("content", AssetIDType.GameObject);
                 builtin_vars.Add("player", AssetIDType.GameObject);
@@ -1139,10 +1149,18 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("platformid", AssetIDType.GameObject);
                 builtin_vars.Add("objID", AssetIDType.GameObject);
                 builtin_vars.Add("objectID", AssetIDType.GameObject);
+                builtin_vars.Add("objectlist", AssetIDType.GameObject);
+                builtin_vars.Add("object_arr", AssetIDType.GameObject);
+                builtin_vars.Add("objdark_arr", AssetIDType.GameObject);
+                builtin_vars.Add("content_arr", AssetIDType.GameObject);
+                builtin_vars.Add("spawnpool", AssetIDType.GameObject);
+                builtin_vars.Add("spawn_arr", AssetIDType.GameObject);
+                builtin_vars.Add("dark_arr", AssetIDType.GameObject);
                 builtin_vars.Add("ID", AssetIDType.GameObject);
                 builtin_vars.Add("baddiegrabbedID", AssetIDType.GameObject);
                 builtin_vars.Add("pizzashieldID", AssetIDType.GameObject);
                 builtin_vars.Add("baddieID", AssetIDType.GameObject);
+                builtin_vars.Add("baddieid", AssetIDType.GameObject);
                 builtin_vars.Add("brickid", AssetIDType.GameObject);
                 builtin_vars.Add("attackerID", AssetIDType.GameObject);
 
@@ -1167,6 +1185,21 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("reset_timer", AssetIDType.GameObject);
 
                 builtin_vars.Add("room_arr", AssetIDType.Room);
+
+                builtin_vars.Add("bpal", AssetIDType.Sprite);
+                builtin_vars.Add("vstitle", AssetIDType.Sprite);
+                builtin_vars.Add("bg", AssetIDType.Sprite);
+                builtin_vars.Add("bg2", AssetIDType.Sprite);
+                builtin_vars.Add("bg3", AssetIDType.Sprite);
+                builtin_vars.Add("portrait1_idle", AssetIDType.Sprite);
+                builtin_vars.Add("portrait1_hurt", AssetIDType.Sprite);
+                builtin_vars.Add("portrait2_idle", AssetIDType.Sprite);
+                builtin_vars.Add("portrait2_hurt", AssetIDType.Sprite);
+                builtin_vars.Add("boss_palette", AssetIDType.Sprite);
+                builtin_vars.Add("panicspr", AssetIDType.Sprite);
+
+                builtin_vars.Add("color", AssetIDType.Color);
+                builtin_vars.Add("textcolor", AssetIDType.Color);
 
                 builtin_funcs["instance_create_unique"] =
                     new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
@@ -1230,9 +1263,83 @@ namespace UndertaleModLib.Decompiler
                 
                 builtin_funcs["draw_background_tiled"] =
                     new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_draw_granny_texture"] =
+                    new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other,
+                    AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Sprite, };
                     
                 builtin_funcs["object_get_depth"] =
                     new[] { AssetIDType.GameObject };
+
+                builtin_funcs["scr_bosscontroller_particle_anim"] =
+                    new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other,
+                    AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other };
+                builtin_funcs["scr_bosscontroller_particle_hp"] =
+                    new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other,
+                    AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["scr_boss_genericintro"] =
+                    new[] { AssetIDType.Sprite };
+                builtin_funcs["boss_update_pizzaheadKO"] =
+                    new[] { AssetIDType.Sprite, AssetIDType.Sprite };
+
+                builtin_funcs["check_slope"] = new[] { AssetIDType.GameObject };
+                builtin_funcs["try_solid"] =
+                    new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject, AssetIDType.Other };
+
+                builtin_funcs["add_rank_achievements"] =
+                    new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other,
+                    AssetIDType.Other };
+                builtin_funcs["add_boss_achievements"] =
+                    new[] { AssetIDType.Other, AssetIDType.Room, AssetIDType.Sprite, AssetIDType.Other };
+                
+                builtin_funcs["achievement_unlock"] =
+                    new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other };
+                builtin_funcs["palette_unlock"] =
+                    new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
+
+                builtin_funcs["scr_monsterinvestigate"] =
+                    new[] { AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Sprite };
+
+                builtin_funcs["timedgate_add_objects"] =
+                    new[] { AssetIDType.GameObject, AssetIDType.Other };
+
+                UndertaleCode ptPlayerStep = data.Code.ByName("gml_Object_obj_player_Step_0");
+                if (ptPlayerStep == null)
+                {
+                    ptPlayerStep = data.Code.ByName("gml_Object_obj_player1_Step_0");
+                }
+                FindStateNames(ptPlayerStep, new[] {"scr_player_", "state_player_", "scr_playerN_"});
+                FindStateNames(
+                    data.Code.ByName("gml_Object_obj_cheeseslime_Step_0"),
+                    new[] {"scr_enemy_", "scr_pizzagoblin_"}
+                );
+                FindStateNames(
+                    data.Code.ByName("gml_Object_obj_pepperman_Step_0"),
+                    new[] {"scr_boss_", "scr_pepperman_", "scr_enemy_"}
+                );
+                FindStateNames(
+                    data.Code.ByName("gml_Object_obj_vigilanteboss_Step_0"),
+                    new[] {"scr_vigilante_"}
+                );
+                FindStateNames(
+                    data.Code.ByName("gml_Object_obj_noiseboss_Step_0"),
+                    new[] {"scr_noise_"}
+                );
+                FindStateNames(
+                    data.Code.ByName("gml_Object_obj_fakepepboss_Step_0"),
+                    new[] {"scr_fakepepboss_", "scr_boss_"}
+                );
+                FindStateNames(
+                    data.Code.ByName("gml_Object_obj_pizzafaceboss_Step_0"),
+                    new[] {"scr_pizzaface_"}
+                );
+                FindStateNames(
+                    data.Code.ByName("gml_Object_obj_pizzafaceboss_p2_Step_0"),
+                    new[] {"scr_pizzaface_p2_", "scr_pizzaface_"}
+                );
+                FindStateNames(
+                    data.Code.ByName("gml_Object_obj_pizzafaceboss_p3_Step_0"),
+                    new[] {"scr_pizzaface_p3_"}
+                );
             }
 
             // Just Undertale
@@ -2185,6 +2292,84 @@ namespace UndertaleModLib.Decompiler
                 // C TIER quality
                 builtin_vars.Add("sound1", AssetIDType.Sound);
                 builtin_vars.Add("sound2", AssetIDType.Sound);
+            }
+        }
+
+        // Detects PT state names
+        public static void FindStateNames(UndertaleCode code, string[] statePrefix)
+        {
+            if (code != null)
+            {
+                for (var i = 0; i < code.Instructions.Count; i++)
+                {
+                    UndertaleInstruction instr = code.Instructions[i];
+                    if (
+                        UndertaleInstruction.GetInstructionType(instr.Kind)
+                        != UndertaleInstruction.InstructionType.PushInstruction
+                        || !((instr.Value is int) || (instr.Value is short) || (instr.Value is long))
+                    ) continue;
+
+                    int stateID = Convert.ToInt32(instr.Value);
+                    if (PTStates.ContainsKey(stateID)) continue;
+
+                    UndertaleInstruction next = code.Instructions[i + 1];
+                    if (next == null) continue;
+                    if (
+                        UndertaleInstruction.GetInstructionType(next.Kind)
+                        != UndertaleInstruction.InstructionType.ComparisonInstruction
+                        || next.ComparisonKind != UndertaleInstruction.ComparisonType.EQ
+                    ) continue;
+                    UndertaleInstruction next2 = code.Instructions[i + 2];
+                    if (next2 == null) continue;
+                    if (
+                        next2.Kind != UndertaleInstruction.Opcode.Bt
+                    ) continue;
+
+                    UndertaleInstruction newInstr =
+                        code.GetInstructionFromAddress(next2.Address + (uint)next2.JumpOffset);
+
+                    if (newInstr == null) continue;
+
+                    for (
+                        var j = code.Instructions.IndexOf(newInstr);
+                        j < code.Instructions.Count &&
+                        UndertaleInstruction.GetInstructionType(code.Instructions[j].Kind) !=
+                            UndertaleInstruction.InstructionType.GotoInstruction;
+                        j++
+                    )
+                    {
+                        UndertaleInstruction thisInstr = code.Instructions[j];
+                        if (UndertaleInstruction.GetInstructionType(thisInstr.Kind)
+                            != UndertaleInstruction.InstructionType.CallInstruction) continue;
+                        string funcName = thisInstr.Function.Target.Name.Content;
+                        string stateName = null;
+                        foreach (string prefix in statePrefix) {
+                            if (funcName.StartsWith(prefix))
+                            {
+                                stateName = funcName[prefix.Length..];
+                                break;
+                            }
+                            else if (funcName.StartsWith("gml_Script_" + prefix))
+                            {
+                                stateName = funcName[("gml_Script_" + prefix).Length..];
+                                break;
+                            }
+                        }
+                        if (stateName == null) continue;
+                        // Hooray! We got the state!
+                        if (PTStates.ContainsKey(stateID)) break;
+
+                        string actualStateName = stateName;
+                        int dedupe = 1;
+                        while (PTStates.ContainsValue(actualStateName)) {
+                            dedupe++;
+                            actualStateName = stateName + dedupe.ToString();
+                        }
+
+                        PTStates.TryAdd(stateID, actualStateName);
+                        break;
+                    }
+                }
             }
         }
     }
