@@ -1109,6 +1109,7 @@ namespace UndertaleModLib.Decompiler
             ) {
                 PTSpriteTypes = true;
                 builtin_vars.Add("state", AssetIDType.PT_State);
+                builtin_vars.Add("_state", AssetIDType.PT_State);
                 builtin_vars.Add("prevstate", AssetIDType.PT_State);
                 builtin_vars.Add("substate", AssetIDType.PT_State);
                 builtin_vars.Add("arenastate", AssetIDType.PT_State);
