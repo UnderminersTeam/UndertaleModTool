@@ -1330,7 +1330,7 @@ namespace UndertaleModLib.Decompiler
 
                 string prefix = (
                     Destination.Var.InstanceType == UndertaleInstruction.InstanceType.Static ? "static " :
-                    (HasVarKeyword ? "var " : "")
+                    ((HasVarKeyword && !context.DecompilingStruct) ? "var " : "")
                 );
 
                 // Check for possible ++, --, or operation equal (for single vars)
