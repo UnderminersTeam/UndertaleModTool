@@ -3641,7 +3641,7 @@ namespace UndertaleModLib.Decompiler
         }
 
         // Process the base decompilation: clean up, make it readable, identify structures
-        private static BlockHLStatement HLDecompileBlocks(DecompileContext context, ref Block block, Dictionary<uint, Block> blocks, Dictionary<Block, List<Block>> loops, Dictionary<Block, List<Block>> reverseDominators, List<Block> alreadyVisited, Block currentLoop = null, string currentEnv = null, Block stopAt = null, Block breakTo = null, bool decompileTheLoop = false, uint depth = 0)
+        private static BlockHLStatement HLDecompileBlocks(DecompileContext context, ref Block block, Dictionary<uint, Block> blocks, Dictionary<Block, List<Block>> loops, Dictionary<Block, List<Block>> reverseDominators, List<Block> alreadyVisited, Block currentLoop = null, Block stopAt = null, Block breakTo = null, bool decompileTheLoop = false, uint depth = 0)
         {
             if (depth > 600)
                 throw new Exception("Excessive recursion while processing blocks.");
@@ -3663,7 +3663,7 @@ namespace UndertaleModLib.Decompiler
                     }
                     else
                     {
-                        LoopHLStatement statement = new LoopHLStatement() { Block = HLDecompileBlocks(context, ref block, blocks, loops, reverseDominators, alreadyVisited, block, currentEnv, null, block.nextBlockFalse, true, depth + 1) };
+                        LoopHLStatement statement = new LoopHLStatement() { Block = HLDecompileBlocks(context, ref block, blocks, loops, reverseDominators, alreadyVisited, block, null, block.nextBlockFalse, true, depth + 1) };
                         output.Statements.Add(statement);
                         continue;
                     }
@@ -3760,7 +3760,7 @@ namespace UndertaleModLib.Decompiler
 
                         Block switchEnd = context.GlobalContext.Data.GeneralInfo.BytecodeVersion == 17 ? meetPoint : DetermineSwitchEnd(temp, caseEntries.Count > (i + 1) ? caseEntries.ElementAt(i + 1).Key : null, meetPoint);
 
-                        HLSwitchCaseStatement result = new HLSwitchCaseStatement(x.Value, HLDecompileBlocks(context, ref temp, blocks, loops, reverseDominators, alreadyVisited, currentLoop, currentEnv, switchEnd, switchEnd, false, depth + 1));
+                        HLSwitchCaseStatement result = new HLSwitchCaseStatement(x.Value, HLDecompileBlocks(context, ref temp, blocks, loops, reverseDominators, alreadyVisited, currentLoop, switchEnd, switchEnd, false, depth + 1));
                         cases.Add(result);
                         if (result.CaseExpressions.Contains(null))
                             defaultCase = result;
@@ -3783,7 +3783,7 @@ namespace UndertaleModLib.Decompiler
                             Block switchEnd = blocks[instructionId];
 
                             Block start = meetPoint;
-                            defaultCase.Block = HLDecompileBlocks(context, ref start, blocks, loops, reverseDominators, alreadyVisited, currentLoop, currentEnv, switchEnd, switchEnd, false, depth + 1);
+                            defaultCase.Block = HLDecompileBlocks(context, ref start, blocks, loops, reverseDominators, alreadyVisited, currentLoop, switchEnd, switchEnd, false, depth + 1);
                             block = start; // Start changed in HLDecompileBlocks.
                         }
                         else
@@ -3815,22 +3815,11 @@ namespace UndertaleModLib.Decompiler
                     DebugUtil.Assert(!block.conditionalExit, "Block ending with pushenv does not have a conditional exit");
                     PushEnvStatement stmt = (block.Statements.Last() as PushEnvStatement);
                     block = block.nextBlockTrue;
-                    string envCheck = stmt.ToString();
-                    BlockHLStatement with_stmt = HLDecompileBlocks(context, ref block, blocks, loops, reverseDominators, alreadyVisited, null, envCheck, stopAt, null, false, depth + 1);
-                    if (!Equals(currentEnv, envCheck)) {
-                        output.Statements.Add(new WithHLStatement()
-                        {
-                            NewEnv = stmt.NewEnv,
-                            Block = with_stmt,
-                        });
-                    } else {
-                        if (with_stmt is BlockHLStatement with_block) {
-                            foreach (Statement s in with_block.Statements)
-                                output.Statements.Add(s);
-                        } else {
-                            output.Statements.Add(with_stmt);
-                        }
-                    }
+                    output.Statements.Add(new WithHLStatement()
+                    {
+                        NewEnv = stmt.NewEnv,
+                        Block = HLDecompileBlocks(context, ref block, blocks, loops, reverseDominators, alreadyVisited, null, stopAt, null, false, depth + 1)
+                    });
                     if (block == null)
                         break;
                 }
@@ -3853,10 +3842,9 @@ namespace UndertaleModLib.Decompiler
                     cond.condition = block.ConditionStatement;
 
                     Block blTrue = block.nextBlockTrue, blFalse = block.nextBlockFalse;
-                    cond.trueBlock = HLDecompileBlocks(context, ref blTrue, blocks, loops, reverseDominators, alreadyVisited, currentLoop, currentEnv, meetPoint, breakTo, false, depth + 1);
-                    cond.falseBlock = HLDecompileBlocks(context, ref blFalse, blocks, loops, reverseDominators, alreadyVisited, currentLoop, currentEnv, meetPoint, breakTo, false, depth + 1);
-                    if (!cond.condition.IsDuplicationSafe() || cond.trueBlock.Statements.Count != 0 || cond.falseBlock.Statements.Count != 0)
-                        output.Statements.Add(cond); // Add the if statement.
+                    cond.trueBlock = HLDecompileBlocks(context, ref blTrue, blocks, loops, reverseDominators, alreadyVisited, currentLoop, meetPoint, breakTo, false, depth + 1);
+                    cond.falseBlock = HLDecompileBlocks(context, ref blFalse, blocks, loops, reverseDominators, alreadyVisited, currentLoop, meetPoint, breakTo, false, depth + 1);
+                    output.Statements.Add(cond); // Add the if statement.
                     block = meetPoint;
                 }
                 else
