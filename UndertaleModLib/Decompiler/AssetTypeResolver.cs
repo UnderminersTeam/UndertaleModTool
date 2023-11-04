@@ -1181,9 +1181,6 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("superslameffectid", AssetIDType.GameObject);
                 builtin_vars.Add("speedlineseffectid", AssetIDType.GameObject);
 
-                builtin_vars.Add("throw_sprite", AssetIDType.Sprite);
-                builtin_vars.Add("reset_timer", AssetIDType.GameObject);
-
                 builtin_vars.Add("room_arr", AssetIDType.Room);
 
                 builtin_vars.Add("bpal", AssetIDType.Sprite);
