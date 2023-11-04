@@ -144,6 +144,7 @@ namespace UndertaleModLib.Decompiler
 
         #region Local var management
         public HashSet<string> LocalVarDefines = new HashSet<string>();
+        public HashSet<string> LocalVarDefinesUsed = new HashSet<string>();
         #endregion
 
         #region GMS 2.3+ Function management
@@ -1132,8 +1133,10 @@ namespace UndertaleModLib.Decompiler
             public override string ToString(DecompileContext context)
             {
                 //TODO: why is there a GMS2Check for this? var exists in gms1.4 as well
-                if (context.GlobalContext.Data?.IsGameMaker2() ?? false && !HasVarKeyword && context.LocalVarDefines.Add(Var.Var.Name))
+                if (context.GlobalContext.Data?.IsGameMaker2() ?? false && !HasVarKeyword && context.LocalVarDefinesUsed.Add(Var.Var.Name)) {
                     HasVarKeyword = true;
+                    context.LocalVarDefines.Add(Var.Var.Name);
+                }
 
                 return String.Format("{0}{1} = {2}", (HasVarKeyword ? "var " : ""), Var.Var.Name, Value.ToString(context));
             }
@@ -1315,8 +1318,10 @@ namespace UndertaleModLib.Decompiler
                     {
                         var locals = data.CodeLocals.For(context.TargetCode);
                         // Stop decompiler from erroring on missing CodeLocals
-                        if (locals != null && locals.HasLocal(varName) && context.LocalVarDefines.Add(varName))
+                        if (locals != null && locals.HasLocal(varName) && context.LocalVarDefinesUsed.Add(varName)) {
                             HasVarKeyword = true;
+                            context.LocalVarDefines.Add(varName);
+                        }
                     }
                 }
 
@@ -1562,6 +1567,14 @@ namespace UndertaleModLib.Decompiler
                             sb.Append("constructor ");
                         sb.Append("//");
                         sb.Append(Function.Name.Content);
+
+                        // make sure that if you declare a local variable in one function
+                        // and again in another, both functions have the var keyword
+                        // instead of just the first
+                        // this doesn't account for variables declared outside
+                        // functions, but that doesn't happen that much in places with
+                        // function definitions
+                        context.LocalVarDefinesUsed.Clear();
                     }
 
                     var statements = context.Statements[FunctionBodyEntryBlock.Address.Value];
