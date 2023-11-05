@@ -81,7 +81,7 @@ public class UndertaleSpineTextureEntry : UndertaleObject, IDisposable
 /// <summary>
 /// Sprite entry in the data file.
 /// </summary>
-public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyPropertyChanged
+public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyPropertyChanged, IDisposable
 {
     /// <summary>
     /// The name of the sprite.
@@ -155,7 +155,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
     public int OriginY { get; set; }
 
     /// <summary>
-    /// A <see cref="OriginX"/> wrapper that also sets <see cref="V2Sequence.OriginX"/> accordingly.
+    /// A <see cref="OriginX"/> wrapper that also sets <see cref="V2Sequence"/> accordingly.
     /// </summary>
     /// <remarks>
     /// This attribute is used only in UndertaleModTool and doesn't exist in GameMaker.
@@ -173,7 +173,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
     }
 
     /// <summary>
-    /// A <see cref="OriginY"/> wrapper that also sets <see cref="V2Sequence.OriginY"/> accordingly.
+    /// A <see cref="OriginY"/> wrapper that also sets <see cref="V2Sequence"/> accordingly.
     /// </summary>
     /// <remarks>
     /// This attribute is used only in UndertaleModTool and doesn't exist in GameMaker.
