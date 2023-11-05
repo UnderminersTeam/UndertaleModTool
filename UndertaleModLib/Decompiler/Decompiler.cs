@@ -75,21 +75,32 @@ namespace UndertaleModLib.Decompiler
             if (code.ParentEntry != null)
                 throw new InvalidOperationException("This code block represents a function nested inside " + code.ParentEntry.Name + " - decompile that instead");
 
-            if (computeObject && globalContext.Data != null)
+            if (computeObject && globalContext.Data is not null)
             {
                 // TODO: This is expensive, move it somewhere else as a dictionary
                 // and have it update when events/objects are modified.
-                foreach (var obj in globalContext.Data.GameObjects)
-                    foreach (var event_list in obj.Events)
-                        foreach (var subevent in event_list)
-                            foreach (var ev in subevent.Actions)
-                                if (ev.CodeId == code)
-                                {
-                                    Object = obj;
-                                    goto LoopEnd;
-                                }
+                
+                // Currently using for loops on purpose, as foreach has memory issues due to IEnumerable
+                for (int i = 0; i < globalContext.Data.GameObjects.Count; i++)
+                {
+                    UndertaleGameObject obj = globalContext.Data.GameObjects[i];
+                    for (int j = 0; j < obj.Events.Count; j++)
+                    {
+                        var eventList = obj.Events[j];
+                        for (int k = 0; k < eventList.Count; k++)
+                        {
+                            UndertaleGameObject.Event subEvent = eventList[k];
+                            for (int l = 0; l < subEvent.Actions.Count; l++)
+                            {
+                                UndertaleGameObject.EventAction ev = subEvent.Actions[l];
+                                if (ev.CodeId != code) continue;
+                                Object = obj;
+                                return;
+                            }
+                        }
+                    }
+                }
             }
-        LoopEnd: return;
         }
 
         #region Struct management
@@ -3464,7 +3475,7 @@ namespace UndertaleModLib.Decompiler
 
                     Block b = blockList[i];
 
-                    IEnumerable<Block> e;
+                    Block[] e;
                     if (b.conditionalExit)
                     {
                         reverseUse2[0] = b.nextBlockTrue;
@@ -4043,7 +4054,7 @@ namespace UndertaleModLib.Decompiler
             {
                 throw new TimeoutException("The building cache process hung.\n" +
                                            "The function code entries that didn't manage to decompile:\n" +
-                                           String.Join('\n', processingCodeList.Keys) + "\n\n" + 
+                                           String.Join('\n', processingCodeList.Keys) + "\n\n" +
                                            "You should save the game data (if it's necessary) and re-open the app.\n");
             }
         }
