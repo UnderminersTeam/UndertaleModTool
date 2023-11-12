@@ -1190,7 +1190,8 @@ namespace UndertaleModLib.Compiler
                 // Just push these leaked variables onto the stack
                 // We need to do this in reverse since function arguments
                 // are parsed in reverse stack order
-                for (int i = leaked.Count - 1; i >= 0; i--) {
+                for (int i = leaked.Count - 1; i >= 0; i--)
+                {
                     Parser.Statement statement = leaked[i];
                     AssembleExpression(cw, statement);
                 }
@@ -1352,14 +1353,17 @@ namespace UndertaleModLib.Compiler
                                 ArgCount = -1
                             });
                             cw.Emit(Opcode.Conv, DataType.Int32, DataType.Variable);
-                            if (isStructDef) {
+                            if (isStructDef)
+                            {
                                 cw.funcPatches.Add(new FunctionPatch()
                                 {
                                     Target = cw.EmitRef(Opcode.Call, DataType.Int32),
                                     Name = "@@NullObject@@",
                                     ArgCount = 0
                                 });
-                            } else {
+                            } 
+                            else
+                            {
                                 cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-1;
                                 cw.Emit(Opcode.Conv, DataType.Int32, DataType.Variable);
                             }
@@ -1371,11 +1375,10 @@ namespace UndertaleModLib.Compiler
                             });
                             cw.typeStack.Push(DataType.Variable);
                             cw.Emit(Opcode.Dup, DataType.Variable).Extra = 0;
-                            if (isStructDef) {
+                            if (isStructDef)
                                 cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-16;
-                            } else {
+                            else
                                 cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-1; // todo: -6 sometimes?
-                            }
                         }
                         break;
                     case Parser.Statement.StatementKind.ExprBinaryOp:

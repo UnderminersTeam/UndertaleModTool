@@ -451,10 +451,10 @@ namespace UndertaleModLib.Compiler
                 hasError = false;
 
                 usableStructNames.Clear();
-                foreach (UndertaleCode child in context.OriginalCode.ChildEntries) {
-                    if (child.Name.Content.StartsWith("gml_Script____struct___")) {
+                foreach (UndertaleCode child in context.OriginalCode.ChildEntries)
+                {
+                    if (child.Name.Content.StartsWith("gml_Script____struct___"))
                         usableStructNames.Enqueue(child.Name.Content["gml_Script_".Length..]);
-                    }
                 }
 
                 // Ensuring an EOF exists
@@ -690,6 +690,9 @@ namespace UndertaleModLib.Compiler
                 {
                     expressionMode = false;
                     Statement s = remainingStageOne.Dequeue();
+                    // TODO: don't assume ___struct___ = a struct?
+                    // (GM does let you compile such functions, not sure if there
+                    // are any games out there that have such functions though)
                     if (s.Text.StartsWith("___struct___")) {
                         ReportCodeError("Function names cannot start with ___struct___ (they are reserved for structs).", s.Token, false);
                     }
@@ -1596,12 +1599,14 @@ namespace UndertaleModLib.Compiler
 
                 string varName;
                 // Check if we can reuse any struct functions
-                if (usableStructNames.Count > 0) {
+                if (usableStructNames.Count > 0)
                     varName = usableStructNames.Dequeue();
-                } else {
+                else
+                {
                     // Create a new function
                     int i = context.Data.Code.Count;
-                    do {
+                    do
+                    {
                         varName = "___struct___" + context.OriginalCode.Name.Content +
                             "__" + uuidCounter++.ToString();
                         i++;
@@ -1672,10 +1677,13 @@ namespace UndertaleModLib.Compiler
                     a.Children.Add(new Statement(TokenKind.Assign, a.Token));
 
                     Statement expr = Optimize(context, ParseExpression(context));
-                    if (expr.Kind == Statement.StatementKind.ExprConstant) {
+                    if (expr.Kind == Statement.StatementKind.ExprConstant)
+                    {
                         // Constants can be inlined
                         a.Children.Add(expr);
-                    } else {
+                    }
+                    else
+                    {
                         Statement argumentsAccess =
                             new Statement(argumentsVar) { Kind = Statement.StatementKind.ExprSingleVariable };
                         argumentsAccess.ID = argumentsVar.ID;
@@ -1700,7 +1708,8 @@ namespace UndertaleModLib.Compiler
                     }
                 }
 
-                if (EnsureTokenKind(TokenKind.CloseBlock) == null) return null;
+                if (EnsureTokenKind(TokenKind.CloseBlock) == null)
+                    return null;
 
                 return result;
             }
