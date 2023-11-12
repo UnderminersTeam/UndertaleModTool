@@ -16,7 +16,7 @@ EnsureDataLoaded();
 
 ScriptMessage(@"ImportGMS2FontData by Dobby233Liu
 This script can import GM font asset data to your mod
-(Designed for the data IDE v2022.8.2.108 generates)
+(Designed for the data IDE v2023.8.2.108 generates)
 Select the .yy file of the GM font asset you want to import"
 );
 
@@ -52,15 +52,18 @@ Try renaming the correct texture file to
 and putting it in the same directory as the .yy file."
     );
 
+bool tginExists = Data.TextureGroupInfo != null;
+// Default to putting the font into the default texgroup
+UndertaleTextureGroupInfo fontTexGroup;
+if (tginExists)
+    fontTexGroup = Data.TextureGroupInfo.ByName("Default");
 /*
   If true, the script will attempt to add the new font (if any) and the new font glyph texture
   that it created to a texture group
   This was an attempt to get fonts that this script creates appear in a specific 2022.3 game,
   but it was proved unnecessary as the problem was caused by something else
 */
-bool attemptToFixFontNotAppearing = false; // Data.GM2022_3;
-// Default to putting the font into the default texgroup
-UndertaleTextureGroupInfo fontTexGroup = Data.TextureGroupInfo.ByName("Default");
+bool attemptToFixFontNotAppearing = tginExists && false; // Data.GM2022_3;
 
 UndertaleFont font = Data.Fonts.ByName(fontName);
 if (font == null)
