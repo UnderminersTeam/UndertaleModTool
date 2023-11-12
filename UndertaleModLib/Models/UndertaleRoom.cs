@@ -239,7 +239,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         {
             return (_layers?.Where(l => l.LayerType is LayerType.Background
                                         && l.BackgroundData.Sprite is null
-                                        && l.BackgroundData.Color != 0)).MinBy(l => l.LayerDepth);
+                                        && l.BackgroundData.Color != 0))
+                            .MinBy(l => l.LayerDepth);
         }
     }
 
