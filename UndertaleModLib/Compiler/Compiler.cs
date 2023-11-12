@@ -56,18 +56,23 @@ namespace UndertaleModLib.Compiler
                 {
                     foreach (KeyValuePair<string, string> v in GlobalVars)
                         Data?.Variables?.EnsureDefined(v.Key, UndertaleInstruction.InstanceType.Global, false, Data.Strings, Data);
-                    if (Data is not null) {
-                        foreach (string name in FunctionsToObliterate) {
+                    if (Data is not null)
+                    {
+                        foreach (string name in FunctionsToObliterate)
+                        {
                             string scriptName = "gml_Script_" + name;
                             UndertaleScript scriptObj = Data.Scripts.ByName(scriptName);
-                            if (scriptObj is not null) Data.Scripts.Remove(scriptObj);
+                            if (scriptObj is not null)
+                                Data.Scripts.Remove(scriptObj);
                             UndertaleCode codeObj = Data.Code.ByName(scriptName);
-                            if (codeObj is not null) {
+                            if (codeObj is not null)
+                            {
                                 Data.Code.Remove(codeObj);
                                 OriginalCode.ChildEntries.Remove(codeObj);
                             }
                             UndertaleFunction functionObj = Data.Functions.ByName(scriptName);
-                            if (functionObj is not null) Data.Functions.Remove(functionObj);
+                            if (functionObj is not null)
+                                Data.Functions.Remove(functionObj);
                             Data.KnownSubFunctions.Remove(name);
                         }
                         FunctionsToObliterate.Clear();

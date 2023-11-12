@@ -693,9 +693,8 @@ namespace UndertaleModLib.Compiler
                     // TODO: don't assume ___struct___ = a struct?
                     // (GM does let you compile such functions, not sure if there
                     // are any games out there that have such functions though)
-                    if (s.Text.StartsWith("___struct___")) {
+                    if (s.Text.StartsWith("___struct___"))
                         ReportCodeError("Function names cannot start with ___struct___ (they are reserved for structs).", s.Token, false);
-                    }
                     destination = new Statement(Statement.StatementKind.ExprFuncName, s.Token) { ID = s.ID };
                 }
 
