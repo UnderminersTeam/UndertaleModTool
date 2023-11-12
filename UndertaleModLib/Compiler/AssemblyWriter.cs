@@ -271,8 +271,7 @@ namespace UndertaleModLib.Compiler
                                     Name = childName,
                                     Code = childEntry
                                 };
-                                // If we don't set IsConstructor, the game will crash
-                                // when creating the struct
+                                // If we don't set IsConstructor, the game will crash when creating the struct
                                 if (patch.Name.StartsWith("___struct___")) childScript.IsConstructor = true;
                                 compileContext.Data.Scripts.Add(childScript);
 

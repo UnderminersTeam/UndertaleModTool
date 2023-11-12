@@ -1598,9 +1598,8 @@ namespace UndertaleModLib.Decompiler
                         context.IndentationLevel--;
                         sb.Append(context.Indentation);
                         sb.Append("}");
-                        if(!oldDecompilingStruct) {
+                        if(!oldDecompilingStruct)
                             sb.Append("\n");
-                        }
                     }
                     else
                         sb.Append("{}");
