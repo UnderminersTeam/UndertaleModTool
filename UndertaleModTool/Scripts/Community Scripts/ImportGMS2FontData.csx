@@ -52,7 +52,7 @@ Try renaming the correct texture file to
 and putting it in the same directory as the .yy file."
     );
 
-bool tginExists = Data.TextureGroupInfo != null;
+bool tginExists = Data.TextureGroupInfo is not null;
 // Default to putting the font into the default texgroup
 UndertaleTextureGroupInfo fontTexGroup;
 if (tginExists)
