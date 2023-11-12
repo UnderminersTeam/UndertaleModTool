@@ -591,15 +591,15 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
             else
                 sb.Append(" (GM ");
             sb.Append(Major);
-            sb.Append(".");
+            sb.Append('.');
             sb.Append(Minor);
             if (Release != 0)
             {
-                sb.Append(".");
+                sb.Append('.');
                 sb.Append(Release);
                 if (Build != 0)
                 {
-                    sb.Append(".");
+                    sb.Append('.');
                     sb.Append(Build);
                 }
             }
@@ -608,7 +608,7 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
                 sb.Append(", bytecode ");
                 sb.Append(BytecodeVersion);
             }
-            sb.Append(")");
+            sb.Append(')');
             return sb.ToString();
         }
     }
@@ -879,7 +879,7 @@ public class UndertaleOptions : UndertaleObject, IDisposable
     /// <inheritdoc />
     public void Unserialize(UndertaleReader reader)
     {
-        NewFormat = reader.ReadInt32() == int.MinValue;
+        NewFormat = reader.ReadInt32() == Int32.MinValue;
         reader.Position -= 4;
         if (NewFormat)
         {
@@ -945,7 +945,7 @@ public class UndertaleOptions : UndertaleObject, IDisposable
     public static uint UnserializeChildObjectCount(UndertaleReader reader)
     {
         uint count = 0;
-        bool newFormat = reader.ReadInt32() == int.MinValue;
+        bool newFormat = reader.ReadInt32() == Int32.MinValue;
         reader.Position -= 4;
 
         reader.Position += newFormat ? 60u : 140u;
