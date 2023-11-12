@@ -1602,7 +1602,7 @@ namespace UndertaleModLib.Compiler
                     // Create a new function
                     int i = context.Data.Code.Count;
                     do {
-                        varName = "___struct___utmt_" + context.OriginalCode.Name.Content +
+                        varName = "___struct___" + context.OriginalCode.Name.Content +
                             "__" + uuidCounter++.ToString();
                         i++;
                     } while (context.Data.KnownSubFunctions.ContainsKey(varName));
