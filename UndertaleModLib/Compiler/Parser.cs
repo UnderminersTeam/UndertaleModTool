@@ -550,8 +550,10 @@ namespace UndertaleModLib.Compiler
                 rootBlock = ParseBlock(context, true);
                 if (hasError)
                     return null;
-                
+
                 // Remove any unused struct functions
+                // (so that struct definitions can just be added and removed at any time, like arrays)
+                // This should be safe since struct functions should only be used in one place each
                 while (usableStructNames.Count > 0)
                     context.FunctionsToObliterate.Add(usableStructNames.Dequeue());
 
@@ -1517,7 +1519,6 @@ namespace UndertaleModLib.Compiler
                             }
                         }
                     case TokenKind.OpenBlock:
-                        // todo? maybe?
                         if (context.Data.IsVersionAtLeast(2, 3))
                             return ParseStructLiteral(context);
                         ReportCodeError("Cannot use struct literal prior to GMS2.3.", remainingStageOne.Dequeue().Token, true);
@@ -1577,7 +1578,7 @@ namespace UndertaleModLib.Compiler
 
                 return result;
             }
-            
+
             // Example: {key: 123, key2: "asd"}
             private static Statement ParseStructLiteral(CompileContext context)
             {

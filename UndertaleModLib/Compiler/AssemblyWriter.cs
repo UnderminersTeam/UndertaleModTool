@@ -1187,24 +1187,9 @@ namespace UndertaleModLib.Compiler
 
             private static void AssembleStructDef(CodeWriter cw, Parser.Statement str)
             {
-                /* Example struct definition
-                ----- AssembleStatement:
-                push.i gml_Script____struct___utmt_test
-                conv.i.v
-                call.i @@NullObject@@(argc=0)
-                call.i method(argc=2)
-                dup.v 0
-                pushi.e -16
-                pop.v.v [stacktop]static.___struct___utmt_test
-                ----- new FunctionPatch (this function):
-                call.i @@NewGMLObject@@(argc=1)
-                ----- Variable set:
-                pop.v.v self.a
-                */
-
                 List<Parser.Statement> leaked = str.Children[0].Children;
                 // Just push these leaked variables onto the stack
-                // We need to do this in reverse since function arguments 
+                // We need to do this in reverse since function arguments
                 // are parsed in reverse stack order
                 for (int i = leaked.Count - 1; i >= 0; i--) {
                     Parser.Statement statement = leaked[i];
@@ -1309,7 +1294,7 @@ namespace UndertaleModLib.Compiler
                         AssembleFunctionCall(cw, e); // the return value in this case must be used
                         break;
                     case Parser.Statement.StatementKind.ExprStruct:
-                        AssembleStructDef(cw, e); 
+                        AssembleStructDef(cw, e);
                         break;
                     case Parser.Statement.StatementKind.ExprVariableRef:
                     case Parser.Statement.StatementKind.ExprSingleVariable:
