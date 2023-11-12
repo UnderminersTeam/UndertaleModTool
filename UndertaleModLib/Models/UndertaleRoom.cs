@@ -71,12 +71,12 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     /// <summary>
     /// Whether this room is persistant.
     /// </summary>
-    public bool Persistent { get; set; } = false;
+    public bool Persistent { get; set; }
 
     /// <summary>
     /// The background color of this room.
     /// </summary>
-    public uint BackgroundColor { get; set; } = 0;
+    public uint BackgroundColor { get; set; }
 
     /// <summary>
     /// Whether the display buffer should be cleared with Window Color.
@@ -172,7 +172,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     /// Calls <see cref="OnPropertyChanged(string)"/> for <see cref="BGColorLayer"/> in order to update the room background color.<br/>
     /// Only used for GameMaker: Studio 2 rooms.
     /// </summary>
-    public void UpdateBGColorLayer() => OnPropertyChanged("BGColorLayer");
+    public void UpdateBGColorLayer() => OnPropertyChanged(nameof(BGColorLayer));
 
     /// <summary>
     /// Checks whether <see cref="Layers"/> is ordered by <see cref="Layer.LayerDepth"/>.
@@ -222,7 +222,6 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
         for (int i = 0; i < orderedLayers.Length; i++)
         {
-            if (Layers[i] != orderedLayers[i])
                 Layers[i] = orderedLayers[i];
         }
     }
@@ -248,6 +247,10 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
     /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
+    
+    /// <summary>
+    /// Invoked whenever the effective value of any dependency property has been updated.
+    /// </summary>
     protected void OnPropertyChanged([CallerMemberName] string name = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
@@ -1649,7 +1652,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                         {
                             Array.Resize(ref _tileData[y], (int)value);
                         }
-                        OnPropertyChanged("TileData");
+                        OnPropertyChanged(nameof(TileData));
                     }
                 }
             }

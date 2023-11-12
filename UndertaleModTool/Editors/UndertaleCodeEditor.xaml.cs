@@ -874,30 +874,26 @@ namespace UndertaleModTool
             }
 
             code.Replace(compileContext.ResultAssembly);
-
-            if (!mainWindow.Data.IsVersionAtLeast(2, 3))
+            try
             {
-                try
+                string path = Path.Combine(TempPath, code.Name.Content + ".gml");
+                if (SettingsWindow.ProfileModeEnabled)
                 {
-                    string path = Path.Combine(TempPath, code.Name.Content + ".gml");
-                    if (SettingsWindow.ProfileModeEnabled)
-                    {
-                        // Write text, only if in the profile mode.
-                        File.WriteAllText(path, DecompiledEditor.Text);
-                    }
-                    else
-                    {
-                        // Destroy file with comments if it's been edited outside the profile mode.
-                        // We're dealing with the decompiled code only, it has to happen.
-                        // Otherwise it will cause a desync, which is more important to prevent.
-                        if (File.Exists(path))
-                            File.Delete(path);
-                    }
+                    // Write text, only if in the profile mode.
+                    File.WriteAllText(path, DecompiledEditor.Text);
                 }
-                catch (Exception exc)
+                else
                 {
-                    mainWindow.ShowError("Error during writing of GML code to profile:\n" + exc);
+                    // Destroy file with comments if it's been edited outside the profile mode.
+                    // We're dealing with the decompiled code only, it has to happen.
+                    // Otherwise it will cause a desync, which is more important to prevent.
+                    if (File.Exists(path))
+                        File.Delete(path);
                 }
+            }
+            catch (Exception exc)
+            {
+                mainWindow.ShowError("Error during writing of GML code to profile:\n" + exc);
             }
 
             // Invalidate gettext if necessary
@@ -1109,6 +1105,12 @@ namespace UndertaleModTool
                                 possibleObjects.Add(data.Shaders[id]);
                             if (id < data.Timelines.Count)
                                 possibleObjects.Add(data.Timelines[id]);
+                            if (id < (data.AnimationCurves?.Count ?? 0))
+                                possibleObjects.Add(data.AnimationCurves[id]);
+                            if (id < (data.Sequences?.Count ?? 0))
+                                possibleObjects.Add(data.Sequences[id]);
+                            if (id < (data.ParticleSystems?.Count ?? 0))
+                                possibleObjects.Add(data.ParticleSystems[id]);
                         }
 
                         ContextMenuDark contextMenu = new();

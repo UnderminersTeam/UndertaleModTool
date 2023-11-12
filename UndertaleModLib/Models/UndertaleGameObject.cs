@@ -150,6 +150,10 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
 
     /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
+    
+    /// <summary>
+    /// Invoked whenever the effective value of any dependency property has been updated.
+    /// </summary>
     protected void OnPropertyChanged([CallerMemberName] string name = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
@@ -537,6 +541,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         public bool IsNot { get; set; } // always 0
         public uint UnknownAlwaysZero { get; set; } // always 0
 
+        /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <inheritdoc />

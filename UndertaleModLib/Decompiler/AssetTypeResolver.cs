@@ -43,6 +43,9 @@ namespace UndertaleModLib.Decompiler
         GameObject, // or GameObjectInstance or InstanceType, these are all interchangable
         Script,
         Shader,
+        AnimCurve,
+        Sequence,
+        ParticleSystem,
 
         EventType, // For event_perform
 
