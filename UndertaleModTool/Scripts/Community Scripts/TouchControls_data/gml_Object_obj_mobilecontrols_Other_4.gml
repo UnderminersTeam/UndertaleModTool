@@ -5,6 +5,7 @@ virtual_key_analogp = virtual_key_add(analog_posx, analog_posy, (59 * analog_sca
 virtual_key_settings = virtual_key_add(settingsx, settingsy, (19 * button_scale), (25 * button_scale), 92)
 
 if (edit != 0) return;
+
 virtual_key_z = virtual_key_add(zx, zy, (27 * button_scale), (29 * button_scale), 90)
 virtual_key_x = virtual_key_add(xx, xy, (27 * button_scale), (29 * button_scale), 88)
 virtual_key_c = virtual_key_add(cx, cy, (27 * button_scale), (29 * button_scale), 67)
