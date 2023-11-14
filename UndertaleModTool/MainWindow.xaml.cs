@@ -2213,14 +2213,12 @@ namespace UndertaleModTool
             }
         }
 
+        // Apparently, one null check is not enough for `scriptDialog`
         public void UpdateProgressBar(string message, string status, double progressValue, double maxValue)
         {
-            if (scriptDialog != null)
-            {
-                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() => {
-                    scriptDialog.Update(message, status, progressValue, maxValue);
-                }));
-            }
+            scriptDialog?.Dispatcher.Invoke(DispatcherPriority.Normal, () => {
+                scriptDialog?.Update(message, status, progressValue, maxValue);
+            });
         }
 
         public void SetProgressBar(string message, string status, double progressValue, double maxValue)
@@ -2236,33 +2234,28 @@ namespace UndertaleModTool
         public void SetProgressBar()
         {
             if (scriptDialog != null && !scriptDialog.IsVisible)
-                scriptDialog.Dispatcher.Invoke(scriptDialog.Show);
+                scriptDialog.Dispatcher.Invoke(() => {
+                    scriptDialog?.Show();
+                });
         }
 
         public void UpdateProgressValue(double progressValue)
         {
-            if (scriptDialog != null)
-            {
-                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action) (() => {
-                    scriptDialog.ReportProgress(progressValue);
-                }));
-            }
+            scriptDialog?.Dispatcher.Invoke(DispatcherPriority.Normal, () => {
+                scriptDialog?.ReportProgress(progressValue);
+            });
         }
 
         public void UpdateProgressStatus(string status)
         {
-            if (scriptDialog != null)
-            {
-                scriptDialog.Dispatcher.Invoke(DispatcherPriority.Normal, (Action)(() => {
-                    scriptDialog.ReportProgress(status);
-                }));
-            }
+            scriptDialog?.Dispatcher.Invoke(DispatcherPriority.Normal, () => {
+                scriptDialog?.ReportProgress(status);
+            });
         }
 
         public void HideProgressBar()
         {
-            if (scriptDialog != null)
-                scriptDialog.TryHide();
+            scriptDialog?.TryHide();
         }
 
         public void AddProgress(int amount)
@@ -2414,14 +2407,18 @@ namespace UndertaleModTool
 
             if (await Task.Run(() => !updater.Wait(2000))) //if ProgressUpdater isn't responding
                 ScriptError("Stopping the progress bar updater task is failed.\nIt's highly recommended to restart the application.",
-                    "Script error", false);
+                            "Script error", false);
             else
             {
                 cts.Dispose();
                 cts = null;
             }
 
-            updater.Dispose();
+            if (!updater.IsCompleted)
+                ScriptError("Stopping the progress bar updater task is failed.\nIt's highly recommended to restart the application.",
+                            "Script error", false);
+            else
+                updater.Dispose();
         }
 
         public void OpenCodeFile(string name, CodeEditorMode editorDecompile, bool inNewTab = false)
@@ -3669,8 +3666,6 @@ result in loss of work.");
             {
                 CurrentTab?.SaveTabContentState();
 
-                ScrollToTab(CurrentTabIndex);
-
                 Tab newTab = Tabs[CurrentTabIndex];
 
                 if (CurrentTab?.CurrentObject != newTab.CurrentObject)
@@ -3681,6 +3676,8 @@ result in loss of work.");
                 UpdateObjectLabel(CurrentTab.CurrentObject);
 
                 CurrentTab.RestoreTabContentState();
+
+                ScrollToTab(CurrentTabIndex);
             }
         }
 
@@ -3757,16 +3754,12 @@ result in loss of work.");
                     tabItems.RemoveAt(tabItems.Count - 1);
                 }
 
-                TabItem currTabItem = null;
                 double offset = 0;
                 int i = 0;
                 foreach (TabItem item in tabItems)
                 {
                     if (i == tabIndex)
-                    {
-                        currTabItem = item;
                         break;
-                    }
 
                     offset += item.ActualWidth;
                     i++;
@@ -3775,14 +3768,16 @@ result in loss of work.");
                 double endOffset = TabScrollViewer.HorizontalOffset + TabScrollViewer.ViewportWidth;
                 if (offset < TabScrollViewer.HorizontalOffset || offset > endOffset)
                     TabScrollViewer.ScrollToHorizontalOffset(offset);
-                else
-                    currTabItem?.BringIntoView();
             }
         }
         private void TabScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             ScrollTabs(e.Delta < 0 ? ScrollDirection.Right : ScrollDirection.Left);
             e.Handled = true;
+        }
+        private void TabScrollViewer_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            initTabContPos = e.GetPosition(TabScrollViewer);
         }
         private void TabsScrollLeftButton_Click(object sender, RoutedEventArgs e)
         {
@@ -3823,6 +3818,7 @@ result in loss of work.");
             }
         }
 
+        private Point initTabContPos;
         // source - https://stackoverflow.com/a/10738247/12136394
         private void TabItem_PreviewMouseMove(object sender, MouseEventArgs e)
         {
@@ -3831,6 +3827,12 @@ result in loss of work.");
 
             if (Mouse.PrimaryDevice.LeftButton == MouseButtonState.Pressed)
             {
+                // Filter false mouse move events, because it sometimes
+                // triggers even on a mouse click
+                Point currPos = e.GetPosition(TabScrollViewer);
+                if (Math.Abs(Point.Subtract(currPos, initTabContPos).X) < 2)
+                    return;
+
                 CurrentTabIndex = tabItem.TabIndex;
                 try
                 {
