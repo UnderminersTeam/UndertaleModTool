@@ -29,6 +29,9 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
     /// <summary>
     /// The name of the embedded texture entry.
     /// </summary>
+    /// <remarks>
+    /// This is UTMT specific. The data file does not contain names for embedded textures.
+    /// </remarks>
     public UndertaleString Name { get; set; }
 
     /// <summary>
@@ -68,13 +71,13 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
     /// <summary>
     /// Helper variable for whether or not this texture is to be stored externally or not.
     /// </summary>
-    public bool TextureExternal { get; set; } = false;
+    public bool TextureExternal { get; set; }
 
 
     /// <summary>
     /// Helper variable for whether or not a texture was loaded yet.
     /// </summary>
-    public bool TextureLoaded { get; set; } = false;
+    public bool TextureLoaded { get; set; }
 
     /// <summary>
     /// Width of the texture. 2022.9+ only.
