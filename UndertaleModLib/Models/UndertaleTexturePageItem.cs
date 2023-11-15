@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Drawing;
+using SkiaSharp;
 using UndertaleModLib.Util;
 
 namespace UndertaleModLib.Models;
@@ -146,19 +147,18 @@ public class UndertaleTexturePageItem : UndertaleNamedResource, INotifyPropertyC
     /// </summary>
     /// <param name="replaceImage">The new image that shall be applied to this texture page item.</param>
     /// <param name="disposeImage">Whether to dispose <paramref name="replaceImage"/> afterwards.</param>
-    public void ReplaceTexture(Image replaceImage, bool disposeImage = true)
+    public void ReplaceTexture(SKBitmap replaceImage, bool disposeImage = true)
     {
-        Image finalImage = TextureWorker.ResizeImage(replaceImage, SourceWidth, SourceHeight);
+        SKBitmap finalImage = TextureWorker.ResizeImage(replaceImage, SourceWidth, SourceHeight);
 
         // Apply the image to the TexturePage.
         lock (TexturePage.TextureData)
         {
             TextureWorker worker = new TextureWorker();
-            Bitmap embImage = worker.GetEmbeddedTexture(TexturePage); // Use SetPixel if needed.
+            SKBitmap embImage = worker.GetEmbeddedTexture(TexturePage); // Use SetPixel if needed.
 
-            Graphics g = Graphics.FromImage(embImage);
-            g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
-            g.DrawImage(finalImage, SourceX, SourceY);
+            SKCanvas g = new SKCanvas(embImage);
+            g.DrawBitmap(finalImage, SourceX, SourceY);
             g.Dispose();
 
             TexturePage.TextureData.TextureBlob = TextureWorker.GetImageBytes(embImage);

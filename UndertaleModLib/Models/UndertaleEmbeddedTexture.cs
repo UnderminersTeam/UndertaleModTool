@@ -7,6 +7,8 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
+using SkiaSharp;
 using UndertaleModLib.Util;
 
 namespace UndertaleModLib.Models;
@@ -408,7 +410,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
                     writer.Write(QOIAndBZip2Header);
 
                     // Encode the PNG data back to QOI+BZip2
-                    using Bitmap bmp = TextureWorker.GetImageFromByteArray(TextureBlob);
+                    using SKBitmap bmp = TextureWorker.GetImageFromByteArray(TextureBlob);
                     writer.Write((short)bmp.Width);
                     writer.Write((short)bmp.Height);
                     byte[] qoiData = QoiConverter.GetArrayFromImage(bmp, gm2022_3 ? 0 : 4);
@@ -423,7 +425,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
                 else
                 {
                     // Encode the PNG data back to QOI
-                    using Bitmap bmp = TextureWorker.GetImageFromByteArray(TextureBlob);
+                    using SKBitmap bmp = TextureWorker.GetImageFromByteArray(TextureBlob);
                     writer.Write(QoiConverter.GetSpanFromImage(bmp, gm2022_3 ? 0 : 4));
                 }
             }
@@ -464,9 +466,9 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
                         sharedStream.Seek(0, SeekOrigin.Begin);
                     BZip2.Decompress(reader.Stream, sharedStream, false);
                     ReadOnlySpan<byte> decompressed = sharedStream.GetBuffer().AsSpan()[..(int)sharedStream.Position];
-                    using Bitmap bmp = QoiConverter.GetImageFromSpan(decompressed);
+                    using SKBitmap bmp = QoiConverter.GetImageFromSpan(decompressed);
                     sharedStream.Seek(0, SeekOrigin.Begin);
-                    bmp.Save(sharedStream, ImageFormat.Png);
+                    bmp.Encode(sharedStream, SKEncodedImageFormat.Png, 100);
                     TextureBlob = new byte[(int)sharedStream.Position];
                     sharedStream.Seek(0, SeekOrigin.Begin);
                     sharedStream.Read(TextureBlob, 0, TextureBlob.Length);
@@ -478,10 +480,10 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
                     FormatBZ2 = false;
 
                     // Need to convert the QOI data to PNG for compatibility purposes (at least for now)
-                    using Bitmap bmp = QoiConverter.GetImageFromStream(reader.Stream);
+                    using SKBitmap bmp = QoiConverter.GetImageFromStream(reader.Stream);
                     if (sharedStream.Length != 0)
                         sharedStream.Seek(0, SeekOrigin.Begin);
-                    bmp.Save(sharedStream, ImageFormat.Png);
+                    bmp.Encode(sharedStream, SKEncodedImageFormat.Png, 100);
                     TextureBlob = new byte[(int)sharedStream.Position];
                     sharedStream.Seek(0, SeekOrigin.Begin);
                     sharedStream.Read(TextureBlob, 0, TextureBlob.Length);

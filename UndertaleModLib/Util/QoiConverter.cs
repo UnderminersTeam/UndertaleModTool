@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using SkiaSharp;
 
 namespace UndertaleModLib.Util
 {
@@ -46,12 +47,12 @@ namespace UndertaleModLib.Util
         } 
 
         /// <summary>
-        /// Creates a <see cref="Bitmap"/> from a <see cref="Stream"/>.
+        /// Creates a <see cref="SKBitmap"/> from a <see cref="Stream"/>.
         /// </summary>
         /// <param name="s">The stream to create the PNG image from.</param>
         /// <returns>The QOI image as a PNG.</returns>
         /// <exception cref="Exception">If there is an invalid QOIF magic header or there was an error with stride width.</exception>
-        public static Bitmap GetImageFromStream(Stream s)
+        public static SKBitmap GetImageFromStream(Stream s)
         {
             Span<byte> header = stackalloc byte[12];
             s.Read(header);
@@ -63,19 +64,19 @@ namespace UndertaleModLib.Util
         }
 
         /// <summary>
-        /// Creates a <see cref="Bitmap"/> from a <see cref="ReadOnlySpan{TKey}"/> of <see cref="byte"/>s.
+        /// Creates a <see cref="SKBitmap"/> from a <see cref="ReadOnlySpan{TKey}"/> of <see cref="byte"/>s.
         /// </summary>
         /// <param name="bytes">The <see cref="Span{TKey}"/> of <see cref="byte"/>s to create the PNG image from.</param>
         /// <returns>The QOI image as a PNG.</returns>
         /// <exception cref="Exception">If there is an invalid QOIF magic header or there was an error with stride width.</exception>
-        public static Bitmap GetImageFromSpan(ReadOnlySpan<byte> bytes) => GetImageFromSpan(bytes, out _);
+        public static SKBitmap GetImageFromSpan(ReadOnlySpan<byte> bytes) => GetImageFromSpan(bytes, out _);
 
         /// <summary><inheritdoc cref="GetImageFromSpan(System.ReadOnlySpan{byte})"/></summary>
         /// <param name="bytes"><inheritdoc cref="GetImageFromSpan(System.ReadOnlySpan{byte})"/></param>
         /// <param name="length">The total amount of data read from the <see cref="Span{TKey}"/>.</param>
         /// <returns><inheritdoc cref="GetImageFromSpan(System.ReadOnlySpan{byte})"/></returns>
         /// <exception cref="Exception"><inheritdoc cref="GetImageFromSpan(System.ReadOnlySpan{byte})"/></exception>
-        public unsafe static Bitmap GetImageFromSpan(ReadOnlySpan<byte> bytes, out int length)
+        public unsafe static SKBitmap GetImageFromSpan(ReadOnlySpan<byte> bytes, out int length)
         {
             ReadOnlySpan<byte> header = bytes[..12];
             if (header[0] != (byte)'f' || header[1] != (byte)'i' || header[2] != (byte)'o' || header[3] != (byte)'q')
@@ -87,14 +88,12 @@ namespace UndertaleModLib.Util
 
             ReadOnlySpan<byte> pixelData = bytes.Slice(12, length);
 
-            Bitmap bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
-            bmp.SetResolution(96.0f, 96.0f);
-
-            BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
-            if (data.Stride != width * 4)
+            SKBitmap bmp = new SKBitmap(width, height);
+            
+            if (bmp.RowBytes != width * 4)
                 throw new Exception("Need to reimplement QOI conversions to account for stride, apparently");
 
-            byte* bmpPtr = (byte*)data.Scan0;
+            byte* bmpPtr = (byte*)bmp.GetPixels();
             byte* bmpEnd = bmpPtr + (4 * width * height);
 
             int pos = 0;
@@ -176,30 +175,28 @@ namespace UndertaleModLib.Util
                 *bmpPtr++ = r;
                 *bmpPtr++ = a;
             }
-
-            bmp.UnlockBits(data);
-
+            
             length += header.Length;
             return bmp;
         }
 
         /// <summary>
-        /// Creates a QOI image as a byte array from a <see cref="Bitmap"/>.
+        /// Creates a QOI image as a byte array from a <see cref="SKBitmap"/>.
         /// </summary>
-        /// <param name="bmp">The <see cref="Bitmap"/> to create the QOI image from.</param>
+        /// <param name="bmp">The <see cref="SKBitmap"/> to create the QOI image from.</param>
         /// <param name="padding">The amount of bytes of padding that should be used.</param>
         /// <returns>A QOI Image as a byte array.</returns>
         /// <exception cref="Exception">If there was an error with stride width.</exception>
-        public static byte[] GetArrayFromImage(Bitmap bmp, int padding = 4) => GetSpanFromImage(bmp, padding).ToArray();
+        public static byte[] GetArrayFromImage(SKBitmap bmp, int padding = 4) => GetSpanFromImage(bmp, padding).ToArray();
 
         /// <summary>
-        /// Creates a QOI image as a <see cref="Span{TKey}"/> from a <see cref="Bitmap"/>.
+        /// Creates a QOI image as a <see cref="Span{TKey}"/> from a <see cref="SKBitmap"/>.
         /// </summary>
-        /// <param name="bmp">The <see cref="Bitmap"/> to create the QOI image from.</param>
+        /// <param name="bmp">The <see cref="SKBitmap"/> to create the QOI image from.</param>
         /// <param name="padding">The amount of bytes of padding that should be used.</param>
         /// <returns>A QOI Image as a byte array.</returns>
         /// <exception cref="Exception">If there was an error with stride width.</exception>
-        public static unsafe Span<byte> GetSpanFromImage(Bitmap bmp, int padding = 4)
+        public static unsafe Span<byte> GetSpanFromImage(SKBitmap bmp, int padding = 4)
         {
             if (!isBufferEmpty)
                 Array.Clear(sharedBuffer);
@@ -214,11 +211,10 @@ namespace UndertaleModLib.Util
             sharedBuffer[6] = (byte)(bmp.Height & 0xff);
             sharedBuffer[7] = (byte)((bmp.Height >> 8) & 0xff);
 
-            BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
-            if (data.Stride != bmp.Width * 4)
+            if (bmp.RowBytes != bmp.Width * 4)
                 throw new Exception("Need to reimplement QOI conversions to account for stride, apparently");
 
-            byte* bmpPtr = (byte*)data.Scan0;
+            byte* bmpPtr = (byte*)bmp.GetPixels();
             byte* bmpEnd = bmpPtr + (4 * bmp.Width * bmp.Height);
 
             int resPos = HeaderSize;
@@ -310,9 +306,7 @@ namespace UndertaleModLib.Util
                 vPrev = v;
                 bmpPtr += 4;
             }
-
-            bmp.UnlockBits(data);
-
+            
             // Add padding
             resPos += padding;
 
