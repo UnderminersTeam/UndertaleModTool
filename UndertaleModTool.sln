@@ -5,8 +5,6 @@ VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModTool", "UndertaleModTool\UndertaleModTool.csproj", "{C703A485-DBFB-4601-8A26-42E64CCF812F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Test\Test.csproj", "{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModLib", "UndertaleModLib\UndertaleModLib.csproj", "{4781ADAC-9469-42C4-B357-4A0A157D7FCD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModTests", "UndertaleModTests\UndertaleModTests.csproj", "{0B51CE42-C047-4B07-A8C9-88F4E3EA6DBD}"
@@ -31,14 +29,6 @@ Global
 		{C703A485-DBFB-4601-8A26-42E64CCF812F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C703A485-DBFB-4601-8A26-42E64CCF812F}.Release|x64.ActiveCfg = Release|x64
 		{C703A485-DBFB-4601-8A26-42E64CCF812F}.Release|x64.Build.0 = Release|x64
-		{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}.Debug|x64.ActiveCfg = Debug|x64
-		{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}.Debug|x64.Build.0 = Debug|x64
-		{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}.Release|x64.ActiveCfg = Release|x64
-		{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}.Release|x64.Build.0 = Release|x64
 		{4781ADAC-9469-42C4-B357-4A0A157D7FCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4781ADAC-9469-42C4-B357-4A0A157D7FCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4781ADAC-9469-42C4-B357-4A0A157D7FCD}.Debug|x64.ActiveCfg = Debug|x64
