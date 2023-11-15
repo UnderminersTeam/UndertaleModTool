@@ -153,4 +153,9 @@
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </Content>
     </ItemGroup>
+    <ItemGroup>
+      <Compile Update="Windows\SearchInCodeInput.cs">
+        <SubType>Form</SubType>
+      </Compile>
+    </ItemGroup>
 </Project>

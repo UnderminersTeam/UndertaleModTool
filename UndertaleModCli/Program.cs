@@ -844,4 +844,12 @@ public partial class Program : IScriptInterface
             Thread.Sleep(100); //10 times per second
         }
     }
+
+    public (string searchText, bool caseSensitive, bool regexSearch) SearchInCodeInput(string titleText, string labelText, string defaultInputBoxText, bool isMultiline, bool showDialog = true)
+    {
+        Console.WriteLine();
+        Console.WriteLine("Not supported in CLI mode!");
+        Console.WriteLine();
+        return (null, false, false);
+    }
 }

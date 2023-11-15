@@ -155,7 +155,7 @@ namespace UndertaleModTests
         public string SimpleTextInput(string titleText, string labelText, string defaultInputBoxText, bool isMultiline, bool showDialog = true)
         {
             return ScriptInputDialog(titleText, labelText, defaultInputBoxText, "Cancel", "Submit", isMultiline, false);
-        }
+        }        
         public void SimpleTextOutput(string titleText, string labelText, string message, bool isMultiline)
         {
             Console.WriteLine($"SimpleTextOutput(): \"{titleText}\", \"{labelText}\", *defaultInputBoxText* (length - {message.Length}), {isMultiline}");
@@ -318,6 +318,16 @@ namespace UndertaleModTests
         public string DummyString()
         {
             return "";
+        }
+
+        public (string searchText, bool caseSensitive, bool regexSearch) SearchInCodeInput(string titleText, string labelText, string defaultInputBoxText, bool isMultiline, bool showDialog = true)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ChangeSelection(object newSelection, bool inNewTab = false)
+        {
+            throw new NotImplementedException();
         }
     }
 

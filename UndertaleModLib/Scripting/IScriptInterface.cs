@@ -279,6 +279,17 @@ namespace UndertaleModLib.Scripting
         string SimpleTextInput(string title, string label, string defaultValue, bool allowMultiline, bool showDialog = true);
 
         /// <summary>
+        /// Allows the user to input text in a simple dialog.
+        /// </summary>
+        /// <param name="titleText">A short descriptive title.</param>
+        /// <param name="labelText">A label describing what the user should input.</param>
+        /// <param name="defaultInputBoxText">The default value of the input.</param>
+        /// <param name="isMultiline">Whether to allow the input to have multiple lines.</param>
+        /// <param name="showDialog">Whether to block the parent window and only continue after the dialog is cleared.</param>
+        /// <returns>The text that the user inputted.</returns>
+        (string searchText, bool caseSensitive, bool regexSearch) SearchInCodeInput(string titleText, string labelText, string defaultInputBoxText, bool isMultiline, bool showDialog = true);
+
+        /// <summary>
         /// Shows simple output to the user.
         /// </summary>
         /// <param name="title">A short descriptive title.</param>
@@ -644,5 +655,7 @@ namespace UndertaleModLib.Scripting
         {
             return "";
         }
+
+        
     }
 }

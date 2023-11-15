@@ -25,9 +25,11 @@ int result_count = 0;
 
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
-bool case_sensitive = ScriptQuestion("Case sensitive?");
-bool regex_check = ScriptQuestion("Regex search?");
-string keyword = SimpleTextInput("Enter your search", "Search box below", "", false);
+(string keyword, bool case_sensitive, bool regex_check) searchInput = SearchInCodeInput("Enter your search", "Search box below", "", false);
+bool case_sensitive = searchInput.case_sensitive;
+bool regex_check = searchInput.regex_check;
+string keyword = searchInput.keyword;
+
 if (String.IsNullOrEmpty(keyword) || String.IsNullOrWhiteSpace(keyword))
 {
     ScriptError("Search cannot be empty or null.");
