@@ -15,7 +15,8 @@ string exportedSoundsDir = Path.Combine(winFolder, "Exported_Sounds");
 //Overwrite Folder Check One
 if (Directory.Exists(exportedSoundsDir))
 {
-    bool overwriteCheckOne = ScriptQuestion(@"A 'Exported_Sounds' folder already exists.
+    bool overwriteCheckOne = ScriptQuestion(@"An 'Exported_Sounds' folder already exists.
+
 Would you like to remove it? This may take some time.
 
 Note: If an error window stating that 'the directory is not empty' appears, please try again or delete the folder manually.
