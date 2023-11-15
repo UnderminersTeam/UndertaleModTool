@@ -1,6 +1,3 @@
-persistent = true
-control_fixture = physics_fixture_create()
-physics_fixture_set_awake(control_fixture, 1)
 if (string_lower(game_display_name) == "undertale")
 {
     settings_font = fnt_main
@@ -36,18 +33,18 @@ controls_opacity = 0.5
 if file_exists("touchconfig.ini")
 {
     ini_open("touchconfig.ini")
-    zx = ini_read_real("CONFIG", "zx", 0)
-    zy = ini_read_real("CONFIG", "zy", 0)
-    xx = ini_read_real("CONFIG", "xx", 0)
-    xy = ini_read_real("CONFIG", "xy", 0)
-    cx = ini_read_real("CONFIG", "cx", 0)
-    cy = ini_read_real("CONFIG", "cy", 0)
-    analog_posx = ini_read_real("CONFIG", "analog_posx", 0)
-    analog_posy = ini_read_real("CONFIG", "analog_posy", 0)
-    button_scale = ini_read_real("CONFIG", "button_scale", 0)
-    analog_scale = ini_read_real("CONFIG", "analog_scale", 0)
-    joystick_type = ini_read_real("CONFIG", "joystick_type", 0)
-    controls_opacity = ini_read_real("CONFIG", "controls_opacity", 0)
+    zx = ini_read_real("CONFIG", "zx", zx)
+    zy = ini_read_real("CONFIG", "zy", zy)
+    xx = ini_read_real("CONFIG", "xx", xx)
+    xy = ini_read_real("CONFIG", "xy", xy)
+    cx = ini_read_real("CONFIG", "cx", cx)
+    cy = ini_read_real("CONFIG", "cy", cy)
+    analog_posx = ini_read_real("CONFIG", "analog_posx", analog_posx)
+    analog_posy = ini_read_real("CONFIG", "analog_posy", analog_posy)
+    button_scale = ini_read_real("CONFIG", "button_scale", button_scale)
+    analog_scale = ini_read_real("CONFIG", "analog_scale", analog_scale)
+    joystick_type = ini_read_real("CONFIG", "joystick_type", joystick_type)
+    controls_opacity = ini_read_real("CONFIG", "controls_opacity", controls_opacity)
     ini_close()
 }
 
