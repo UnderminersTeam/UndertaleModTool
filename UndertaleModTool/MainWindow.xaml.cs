@@ -2713,6 +2713,29 @@ namespace UndertaleModTool
             }
         }
 
+        public (string searchText, bool caseSensitive, bool regexSearch) SearchInCodeInput(string titleText, string labelText, string defaultInputBoxText, bool isMultiline, bool showDialog = true)
+        {
+            SearchInCodeInput input = new SearchInCodeInput(labelText, titleText, defaultInputBoxText, isMultiline);
+
+            System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
+            if (showDialog)
+            {
+                result = input.ShowDialog();
+                input.Dispose();
+
+                if (result == System.Windows.Forms.DialogResult.OK)
+                    return (input.ReturnString.Replace('\v', '\n'), input.CaseSensivtive, input.RegexSearch); //values preserved after close; Shift+Enter -> '\v'
+                else
+                    return (null, false, false);
+            }
+            else //if we don't need to wait for result
+            {
+                input.Show();
+                return (null, false, false);
+                //no need to call input.Dispose(), because if form wasn't shown modally, Form.Close() (or closing it with "X") also calls Dispose()
+            }
+        }
+
         public void SimpleTextOutput(string titleText, string labelText, string message, bool isMultiline)
         {
             TextInput textOutput = new TextInput(labelText, titleText, message, isMultiline, true); //read-only mode
