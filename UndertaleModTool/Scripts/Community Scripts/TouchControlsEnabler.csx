@@ -6,10 +6,10 @@ using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
-if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2" || Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1&2" || Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "undertale")
+string display_name = Data?.GeneralInfo?.DisplayName?.Content.ToLower();
+
+if (display_name != "deltarune chapter 1 & 2" && display_name != "deltarune chapter 1&2" && display_name != "undertale")
 {
-    // nothing
-} else {
     ScriptError("Error 0: Only compatible with Undertale & Deltarune");
     return;
 }
@@ -21,305 +21,106 @@ int lastTextPageItem = Data.TexturePageItems.Count - 1;
 
 Dictionary<string, UndertaleEmbeddedTexture> textures = new Dictionary<string, UndertaleEmbeddedTexture>();
 
-UndertaleEmbeddedTexture controls = new UndertaleEmbeddedTexture()
+UndertaleEmbeddedTexture controlsTexturePage = new UndertaleEmbeddedTexture()
 {
-    Name = new UndertaleString("Texture " + ++lastTextPage),
+    Name = new UndertaleString("Texture " + Data.EmbeddedTextures.Count),
 };
-controls.TextureData.TextureBlob = File.ReadAllBytes(dataPath+"/controls.png");
-Data.EmbeddedTextures.Add(controls);
-textures.Add(Path.GetFileName(dataPath+"/controls.png"), controls);
+controlsTexturePage.TextureData.TextureBlob = File.ReadAllBytes(Path.Combine(dataPath, "controls.png"));
+Data.EmbeddedTextures.Add(controlsTexturePage);
+textures.Add(Path.GetFileName(Path.Combine(dataPath, "controls.png")), controlsTexturePage);
 
 UndertaleEmbeddedTexture black = new UndertaleEmbeddedTexture()
 {
-    Name = new UndertaleString("Texture " + ++lastTextPage),
+    Name = new UndertaleString("Texture " + Data.EmbeddedTextures.Count),
 };
-black.TextureData.TextureBlob = File.ReadAllBytes(dataPath+"/black.png");
+black.TextureData.TextureBlob = File.ReadAllBytes(Path.Combine(dataPath, "black.png"));
 Data.EmbeddedTextures.Add(black);
-textures.Add(Path.GetFileName(dataPath+"/black.png"), black);
+textures.Add(Path.GetFileName(Path.Combine(dataPath, "black.png")), black);
 
-UndertaleTexturePageItem pg_joybase1 = new UndertaleTexturePageItem()
+UndertaleTexturePageItem AddNewTexturePageItem(ushort sourceX, ushort sourceY, ushort sourceWidth, ushort sourceHeight, string texturePageName)
 {
-  Name = new UndertaleString("PageItem " + ++lastTextPageItem),
-  SourceX = 0, SourceY = 0, SourceWidth = 59, SourceHeight = 59,
-  TargetX = 0, TargetY = 0, TargetWidth = 59, TargetHeight = 59,
-  BoundingWidth = 59, BoundingHeight = 59,
-  TexturePage = textures["controls.png"]
-};
-Data.TexturePageItems.Add(pg_joybase1);
+    var name = new UndertaleString("PageItem " + Data.TexturePageItems.Count);
+    ushort targetX = 0;
+    ushort targetY = 0;
+    ushort targetWidth = sourceWidth;
+    ushort targetHeight = sourceHeight;
+    ushort boundingWidth = sourceWidth;
+    ushort boundingHeight = sourceHeight;
+    var texturePage = textures[texturePageName];
 
-UndertaleTexturePageItem pg_joybase2 = new UndertaleTexturePageItem()
-{
-  Name = new UndertaleString("PageItem " + ++lastTextPageItem),
-  SourceX = 0, SourceY = 61, SourceWidth = 59, SourceHeight = 59,
-  TargetX = 0, TargetY = 0, TargetWidth = 59, TargetHeight = 59,
-  BoundingWidth = 59, BoundingHeight = 59,
-  TexturePage = textures["controls.png"]
-};
-Data.TexturePageItems.Add(pg_joybase2);
+    UndertaleTexturePageItem tpItem = new UndertaleTexturePageItem { Name = name, SourceX = sourceX, SourceY = sourceY, SourceWidth = sourceWidth, SourceHeight = sourceHeight, TargetX = targetX, TargetY = targetY, TargetWidth = targetWidth, TargetHeight = targetHeight, BoundingWidth = boundingWidth, BoundingHeight = boundingHeight, TexturePage = texturePage };
+    Data.TexturePageItems.Add(tpItem);
+    return tpItem;
+}
 
-UndertaleTexturePageItem pg_joystick = new UndertaleTexturePageItem()
-{
-    Name = new UndertaleString("PageItem " + ++lastTextPageItem),
-    SourceX = 61, SourceY = 0, SourceWidth = 41, SourceHeight = 41,
-    TargetX = 0, TargetY = 0, TargetWidth = 41, TargetHeight = 41,
-    BoundingWidth = 41, BoundingHeight = 41,
-    TexturePage = textures["controls.png"]
-};
-Data.TexturePageItems.Add(pg_joystick);
+UndertaleTexturePageItem pg_joybase1 = AddNewTexturePageItem(0, 0, 59, 59, "controls.png");
+UndertaleTexturePageItem pg_joybase2 = AddNewTexturePageItem(0, 61, 59, 59, "controls.png");
+UndertaleTexturePageItem pg_joystick = AddNewTexturePageItem(61, 0, 41, 41, "controls.png");
+UndertaleTexturePageItem pg_joystick2 = AddNewTexturePageItem(0, 122, 41, 41, "controls.png");
+UndertaleTexturePageItem pg_settings_n = AddNewTexturePageItem(61, 43, 19, 24, "controls.png");
+UndertaleTexturePageItem pg_settings_p = AddNewTexturePageItem(83, 43, 19, 24, "controls.png");
+UndertaleTexturePageItem pg_zbutton = AddNewTexturePageItem(104, 0, 27, 29, "controls.png");
+UndertaleTexturePageItem pg_zbutton_p = AddNewTexturePageItem(104, 31, 27, 29, "controls.png");
+UndertaleTexturePageItem pg_xbutton = AddNewTexturePageItem(133, 0, 27, 29, "controls.png");
+UndertaleTexturePageItem pg_xbutton_p = AddNewTexturePageItem(133, 31, 27, 29, "controls.png");
+UndertaleTexturePageItem pg_cbutton = AddNewTexturePageItem(162, 0, 27, 29, "controls.png");
+UndertaleTexturePageItem pg_cbutton_p = AddNewTexturePageItem(162, 31, 27, 29, "controls.png");
+UndertaleTexturePageItem pg_controls_config = AddNewTexturePageItem(61, 68, 100, 13, "controls.png");
+UndertaleTexturePageItem pg_button_scale = AddNewTexturePageItem(61, 83, 79, 9, "controls.png");
+UndertaleTexturePageItem pg_analog_scale = AddNewTexturePageItem(61, 94, 79, 12, "controls.png");
+UndertaleTexturePageItem pg_analog_type = AddNewTexturePageItem(61, 108, 72, 12, "controls.png");
+UndertaleTexturePageItem pg_reset_config = AddNewTexturePageItem(61, 122, 79, 12, "controls.png");
+UndertaleTexturePageItem pg_controls_opacity = AddNewTexturePageItem(61, 136, 107, 13, "controls.png");
+UndertaleTexturePageItem pg_arrow_leftright = AddNewTexturePageItem(142, 83, 41, 9, "controls.png");
+UndertaleTexturePageItem pg_black = AddNewTexturePageItem(0, 0, 640, 480, "black.png");
 
-UndertaleTexturePageItem pg_joystick2 = new UndertaleTexturePageItem()
+UndertaleSprite AddNewUndertaleSprite(string spriteName, ushort width, ushort height)
 {
-    Name = new UndertaleString("PageItem " + ++lastTextPageItem),
-    SourceX = 0, SourceY = 122, SourceWidth = 41, SourceHeight = 41,
-    TargetX = 0, TargetY = 0, TargetWidth = 41, TargetHeight = 41,
-    BoundingWidth = 41, BoundingHeight = 41,
-    TexturePage = textures["controls.png"]
-};
-Data.TexturePageItems.Add(pg_joystick2);
+    var name = Data.Strings.MakeString(spriteName);
+    ushort marginLeft = 0;
+    int marginRight = width - 1;
+    ushort marginTop = 0;
+    int marginBottom = height - 1;
 
-UndertaleTexturePageItem pg_settings_n = new UndertaleTexturePageItem()
-{
-    Name = new UndertaleString("PageItem " + ++lastTextPageItem),
-    SourceX = 61, SourceY = 43, SourceWidth = 19, SourceHeight = 24,
-    TargetX = 0, TargetY = 0, TargetWidth = 19, TargetHeight = 24,
-    BoundingWidth = 19, BoundingHeight = 24,
-    TexturePage = textures["controls.png"]
-};
-Data.TexturePageItems.Add(pg_settings_n);
+    var sItem = new UndertaleSprite { Name = name, Width = width, Height = height, MarginLeft = marginLeft, MarginRight = marginRight, MarginTop = marginTop, MarginBottom = marginBottom };
+    return sItem;
+}
 
-UndertaleTexturePageItem pg_settings_p = new UndertaleTexturePageItem()
-{
-    Name = new UndertaleString("PageItem " + ++lastTextPageItem),
-    SourceX = 83, SourceY = 43, SourceWidth = 19, SourceHeight = 24,
-    TargetX = 0, TargetY = 0, TargetWidth = 19, TargetHeight = 24,
-    BoundingWidth = 19, BoundingHeight = 24,
-    TexturePage = textures["controls.png"]
-};
-Data.TexturePageItems.Add(pg_settings_p);
-
-UndertaleTexturePageItem pg_zbutton = new UndertaleTexturePageItem()
-{
-    Name = new UndertaleString("PageItem " + ++lastTextPageItem),
-    SourceX = 104, SourceY = 0, SourceWidth = 27, SourceHeight = 29,
-    TargetX = 0, TargetY = 0, TargetWidth = 27, TargetHeight = 29,
-    BoundingWidth = 27, BoundingHeight = 29,
-    TexturePage = textures["controls.png"]
-};
-Data.TexturePageItems.Add(pg_zbutton);
-
-UndertaleTexturePageItem pg_zbutton_p = new UndertaleTexturePageItem()
-{
-    Name = new UndertaleString("PageItem " + ++lastTextPageItem),
-    SourceX = 104, SourceY = 31, SourceWidth = 27, SourceHeight = 29,
-    TargetX = 0, TargetY = 0, TargetWidth = 27, TargetHeight = 29,
-    BoundingWidth = 27, BoundingHeight = 29,
-    TexturePage = textures["controls.png"]
-};
-Data.TexturePageItems.Add(pg_zbutton_p);
-
-UndertaleTexturePageItem pg_xbutton = new UndertaleTexturePageItem()
-{
-    Name = new UndertaleString("PageItem " + ++lastTextPageItem),
-    SourceX = 133, SourceY = 0, SourceWidth = 27, SourceHeight = 29,
-    TargetX = 0, TargetY = 0, TargetWidth = 27, TargetHeight = 29,
-    BoundingWidth = 27, BoundingHeight = 29,
-    TexturePage = textures["controls.png"]
-};
-Data.TexturePageItems.Add(pg_xbutton);
-
-UndertaleTexturePageItem pg_xbutton_p = new UndertaleTexturePageItem()
-{
-    Name = new UndertaleString("PageItem " + ++lastTextPageItem),
-    SourceX = 133, SourceY = 31, SourceWidth = 27, SourceHeight = 29,
-    TargetX = 0, TargetY = 0, TargetWidth = 27, TargetHeight = 29,
-    BoundingWidth = 27, BoundingHeight = 29,
-    TexturePage = textures["controls.png"]
-};
-Data.TexturePageItems.Add(pg_xbutton_p);
-
-UndertaleTexturePageItem pg_cbutton = new UndertaleTexturePageItem()
-{
-    Name = new UndertaleString("PageItem " + ++lastTextPageItem),
-    SourceX = 162, SourceY = 0, SourceWidth = 27, SourceHeight = 29,
-    TargetX = 0, TargetY = 0, TargetWidth = 27, TargetHeight = 29,
-    BoundingWidth = 27, BoundingHeight = 29,
-    TexturePage = textures["controls.png"]
-};
-Data.TexturePageItems.Add(pg_cbutton);
-
-UndertaleTexturePageItem pg_cbutton_p = new UndertaleTexturePageItem()
-{
-    Name = new UndertaleString("PageItem " + ++lastTextPageItem),
-    SourceX = 162, SourceY = 31, SourceWidth = 27, SourceHeight = 29,
-    TargetX = 0, TargetY = 0, TargetWidth = 27, TargetHeight = 29,
-    BoundingWidth = 27, BoundingHeight = 29,
-    TexturePage = textures["controls.png"]
-};
-Data.TexturePageItems.Add(pg_cbutton_p);
-
-UndertaleTexturePageItem pg_controls_config = new UndertaleTexturePageItem()
-{
-    Name = new UndertaleString("PageItem " + ++lastTextPageItem),
-    SourceX = 61, SourceY = 68, SourceWidth = 100, SourceHeight = 13,
-    TargetX = 0, TargetY = 0, TargetWidth = 100, TargetHeight = 13,
-    BoundingWidth = 100, BoundingHeight = 13,
-    TexturePage = textures["controls.png"]
-};
-Data.TexturePageItems.Add(pg_controls_config);
-
-UndertaleTexturePageItem pg_button_scale = new UndertaleTexturePageItem()
-{
-    Name = new UndertaleString("PageItem " + ++lastTextPageItem),
-    SourceX = 61, SourceY = 83, SourceWidth = 79, SourceHeight = 9,
-    TargetX = 0, TargetY = 0, TargetWidth = 79, TargetHeight = 9,
-    BoundingWidth = 79, BoundingHeight = 9,
-    TexturePage = textures["controls.png"]
-};
-Data.TexturePageItems.Add(pg_button_scale);
-
-UndertaleTexturePageItem pg_analog_scale = new UndertaleTexturePageItem()
-{
-    Name = new UndertaleString("PageItem " + ++lastTextPageItem),
-    SourceX = 61, SourceY = 94, SourceWidth = 79, SourceHeight = 12,
-    TargetX = 0, TargetY = 0, TargetWidth = 79, TargetHeight = 12,
-    BoundingWidth = 79, BoundingHeight = 12,
-    TexturePage = textures["controls.png"]
-};
-Data.TexturePageItems.Add(pg_analog_scale);
-
-UndertaleTexturePageItem pg_analog_type = new UndertaleTexturePageItem()
-{
-    Name = new UndertaleString("PageItem " + ++lastTextPageItem),
-    SourceX = 61, SourceY = 108, SourceWidth = 72, SourceHeight = 12,
-    TargetX = 0, TargetY = 0, TargetWidth = 72, TargetHeight = 12,
-    BoundingWidth = 72, BoundingHeight = 12,
-    TexturePage = textures["controls.png"]
-};
-Data.TexturePageItems.Add(pg_analog_type);
-
-UndertaleTexturePageItem pg_reset_config = new UndertaleTexturePageItem()
-{
-    Name = new UndertaleString("PageItem " + ++lastTextPageItem),
-    SourceX = 61, SourceY = 122, SourceWidth = 79, SourceHeight = 12,
-    TargetX = 0, TargetY = 0, TargetWidth = 79, TargetHeight = 12,
-    BoundingWidth = 79, BoundingHeight = 12,
-    TexturePage = textures["controls.png"]
-};
-Data.TexturePageItems.Add(pg_reset_config);
-
-UndertaleTexturePageItem pg_controls_opacity = new UndertaleTexturePageItem()
-{
-    Name = new UndertaleString("PageItem " + ++lastTextPageItem),
-    SourceX = 61, SourceY = 136, SourceWidth = 107, SourceHeight = 13,
-    TargetX = 0, TargetY = 0, TargetWidth = 107, TargetHeight = 13,
-    BoundingWidth = 107, BoundingHeight = 13,
-    TexturePage = textures["controls.png"]
-};
-Data.TexturePageItems.Add(pg_controls_opacity);
-
-UndertaleTexturePageItem pg_arrow_leftright = new UndertaleTexturePageItem()
-{
-    Name = new UndertaleString("PageItem " + ++lastTextPageItem),
-    SourceX = 142, SourceY = 83, SourceWidth = 41, SourceHeight = 9,
-    TargetX = 0, TargetY = 0, TargetWidth = 41, TargetHeight = 9,
-    BoundingWidth = 41, BoundingHeight = 9,
-    TexturePage = textures["controls.png"]
-};
-Data.TexturePageItems.Add(pg_arrow_leftright);
-
-UndertaleTexturePageItem pg_black = new UndertaleTexturePageItem()
-{
-    Name = new UndertaleString("PageItem " + ++lastTextPageItem),
-    SourceX = 0, SourceY = 0, SourceWidth = 640, SourceHeight = 480,
-    TargetX = 0, TargetY = 0, TargetWidth = 640, TargetHeight = 480,
-    BoundingWidth = 640, BoundingHeight = 480,
-    TexturePage = textures["black.png"]
-};
-Data.TexturePageItems.Add(pg_black);
-
-var spr_joybase = new UndertaleSprite()
-{
-    Name = Data.Strings.MakeString("spr_joybase"),
-    Width = 59,
-    Height = 59,
-    MarginLeft = 0,
-    MarginRight = 58,
-    MarginTop = 0,
-    MarginBottom = 58,
-};
+var spr_joybase = AddNewUndertaleSprite("spr_joybase", 59, 59);
+var spr_joystick = AddNewUndertaleSprite("spr_joystick", 42, 42);
+var spr_z_button = AddNewUndertaleSprite("spr_z_button", 27, 29);
+var spr_x_button = AddNewUndertaleSprite("spr_x_button", 27, 29);
+var spr_c_button = AddNewUndertaleSprite("spr_c_button", 27, 29);
+var spr_settings = AddNewUndertaleSprite("spr_settings", 19, 24);
+var spr_controls_config = AddNewUndertaleSprite("spr_controls_config", 100, 13);
+var spr_button_scale = AddNewUndertaleSprite("spr_button_scale", 79, 9);
+var spr_analog_scale = AddNewUndertaleSprite("spr_analog_scale", 79, 12);
+var spr_analog_type = AddNewUndertaleSprite("spr_analog_type", 72, 12);
+var spr_reset_config = AddNewUndertaleSprite("spr_reset_config", 79, 12);
+var spr_controls_opacity = AddNewUndertaleSprite("spr_controls_opacity", 107, 13);
+var spr_arrow_leftright = AddNewUndertaleSprite("spr_arrow_leftright", 41, 9);
+var spr_black = AddNewUndertaleSprite("spr_black", 640, 480);
 
 spr_joybase.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_joybase1 });
 spr_joybase.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_joybase2 });
-
-var spr_joystick = new UndertaleSprite()
-{
-    Name = Data.Strings.MakeString("spr_joystick"),
-    Width = 42,
-    Height = 42,
-    MarginLeft = 0,
-    MarginRight = 41,
-    MarginTop = 0,
-    MarginBottom = 41,
-};
-
 spr_joystick.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_joystick });
 spr_joystick.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_joystick2 });
-
-var spr_z_button = new UndertaleSprite()
-{
-    Name = Data.Strings.MakeString("spr_z_button"),
-    Width = 27,
-    Height = 29,
-    MarginLeft = 0,
-    MarginRight = 26,
-    MarginTop = 0,
-    MarginBottom = 28,
-};
-
 spr_z_button.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_zbutton });
 spr_z_button.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_zbutton_p });
-
-var spr_x_button = new UndertaleSprite()
-{
-    Name = Data.Strings.MakeString("spr_x_button"),
-    Width = 27,
-    Height = 29,
-    MarginLeft = 0,
-    MarginRight = 26,
-    MarginTop = 0,
-    MarginBottom = 28,
-};
-
 spr_x_button.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_xbutton });
 spr_x_button.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_xbutton_p });
-
-var spr_c_button = new UndertaleSprite()
-{
-    Name = Data.Strings.MakeString("spr_c_button"),
-    Width = 27,
-    Height = 29,
-    MarginLeft = 0,
-    MarginRight = 26,
-    MarginTop = 0,
-    MarginBottom = 28,
-};
-
 spr_c_button.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_cbutton });
 spr_c_button.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_cbutton_p });
-
-var spr_settings = new UndertaleSprite()
-{
-    Name = Data.Strings.MakeString("spr_settings"),
-    Width = 19,
-    Height = 24,
-    MarginLeft = 0,
-    MarginRight = 18,
-    MarginTop = 0,
-    MarginBottom = 23,
-};
-
 spr_settings.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_settings_n });
 spr_settings.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_settings_p });
+spr_controls_config.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_controls_config });
+spr_button_scale.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_button_scale });
+spr_analog_scale.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_analog_scale });
+spr_analog_type.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_analog_type });
+spr_reset_config.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_reset_config });
+spr_controls_opacity.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_controls_opacity });
+spr_arrow_leftright.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_arrow_leftright });
+spr_black.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_black });
 
 Data.Sprites.Add(spr_joybase);
 Data.Sprites.Add(spr_joystick);
@@ -327,126 +128,29 @@ Data.Sprites.Add(spr_z_button);
 Data.Sprites.Add(spr_x_button);
 Data.Sprites.Add(spr_c_button);
 Data.Sprites.Add(spr_settings);
-
-var spr_controls_config = new UndertaleSprite()
-{
-    Name = Data.Strings.MakeString("spr_controls_config"),
-    Width = 100,
-    Height = 13,
-    MarginLeft = 0,
-    MarginRight = 99,
-    MarginTop = 0,
-    MarginBottom = 12,
-};
-spr_controls_config.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_controls_config });
 Data.Sprites.Add(spr_controls_config);
-
-var spr_button_scale = new UndertaleSprite()
-{
-    Name = Data.Strings.MakeString("spr_button_scale"),
-    Width = 79,
-    Height = 9,
-    MarginLeft = 0,
-    MarginRight = 78,
-    MarginTop = 0,
-    MarginBottom = 8,
-};
-spr_button_scale.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_button_scale });
 Data.Sprites.Add(spr_button_scale);
-
-var spr_analog_scale = new UndertaleSprite()
-{
-    Name = Data.Strings.MakeString("spr_analog_scale"),
-    Width = 79,
-    Height = 12,
-    MarginLeft = 0,
-    MarginRight = 78,
-    MarginTop = 0,
-    MarginBottom = 11,
-};
-spr_analog_scale.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_analog_scale });
 Data.Sprites.Add(spr_analog_scale);
-
-var spr_analog_type = new UndertaleSprite()
-{
-    Name = Data.Strings.MakeString("spr_analog_type"),
-    Width = 72,
-    Height = 12,
-    MarginLeft = 0,
-    MarginRight = 71,
-    MarginTop = 0,
-    MarginBottom = 11,
-};
-spr_analog_type.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_analog_type });
 Data.Sprites.Add(spr_analog_type);
-
-var spr_reset_config = new UndertaleSprite()
-{
-    Name = Data.Strings.MakeString("spr_reset_config"),
-    Width = 79,
-    Height = 12,
-    MarginLeft = 0,
-    MarginRight = 78,
-    MarginTop = 0,
-    MarginBottom = 11,
-};
-spr_reset_config.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_reset_config });
 Data.Sprites.Add(spr_reset_config);
-
-var spr_controls_opacity = new UndertaleSprite()
-{
-    Name = Data.Strings.MakeString("spr_controls_opacity"),
-    Width = 107,
-    Height = 13,
-    MarginLeft = 0,
-    MarginRight = 106,
-    MarginTop = 0,
-    MarginBottom = 12,
-};
-spr_controls_opacity.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_controls_opacity });
 Data.Sprites.Add(spr_controls_opacity);
-
-var spr_arrow_leftright = new UndertaleSprite()
-{
-    Name = Data.Strings.MakeString("spr_arrow_leftright"),
-    Width = 41,
-    Height = 9,
-    MarginLeft = 0,
-    MarginRight = 40,
-    MarginTop = 0,
-    MarginBottom = 8,
-};
-spr_arrow_leftright.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_arrow_leftright });
 Data.Sprites.Add(spr_arrow_leftright);
-
-var spr_black = new UndertaleSprite()
-{
-    Name = Data.Strings.MakeString("spr_black"),
-    Width = 640,
-    Height = 480,
-    MarginLeft = 0,
-    MarginRight = 639,
-    MarginTop = 0,
-    MarginBottom = 479,
-};
-spr_black.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = pg_black });
 Data.Sprites.Add(spr_black);
 
-ImportGMLFile(dataPath+"/gml_Object_obj_mobilecontrols_Create_0.gml", true, false, true);
-ImportGMLFile(dataPath+"/gml_Object_obj_mobilecontrols_Draw_64.gml", true, false, true);
-ImportGMLFile(dataPath+"/gml_Object_obj_mobilecontrols_Other_4.gml", true, false, true);
+ImportGMLFile(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Create_0.gml"), true, false, true);
+ImportGMLFile(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Draw_64.gml"), true, false, true);
+ImportGMLFile(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Other_4.gml"), true, false, true);
 Data.Scripts.Add(new UndertaleScript() { Name = Data.Strings.MakeString("scr_add_keys"), Code = Data.Code.ByName("gml_Object_obj_mobilecontrols_Other_4") });
-ImportGMLFile(dataPath+"/gml_Object_obj_mobilecontrols_Step_0.gml", true, false, true);
+ImportGMLFile(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Step_0.gml"), true, false, true);
 
-if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
+var mobileControls = Data.GameObjects.ByName("obj_mobilecontrols");
+mobileControls.Persistent = true;
+
+if (display_name == "deltarune chapter 1 & 2" || display_name == "deltarune chapter 1&2")
 {
     Data.Code.ByName("gml_Object_obj_gamecontroller_Create_0").AppendGML("instance_create(0, 0, obj_mobilecontrols);", Data);
 }
-else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1&2")
-{
-    Data.Code.ByName("gml_Object_obj_gamecontroller_Create_0").AppendGML("instance_create(0, 0, obj_mobilecontrols);", Data);
-} 
-else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "undertale") 
+else if (display_name == "undertale") 
 {
     Data.Code.ByName("gml_Object_obj_time_Create_0").AppendGML("instance_create(0, 0, obj_mobilecontrols);", Data);
 }
