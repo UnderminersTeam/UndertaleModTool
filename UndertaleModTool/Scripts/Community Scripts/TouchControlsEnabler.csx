@@ -23,12 +23,7 @@ controlsTexturePage.TextureData.TextureBlob = File.ReadAllBytes(Path.Combine(dat
 Data.EmbeddedTextures.Add(controlsTexturePage);
 textures.Add(Path.GetFileName(Path.Combine(dataPath, "controls.png")), controlsTexturePage);
 
-UndertaleEmbeddedTexture black = new UndertaleEmbeddedTexture();
-black.TextureData.TextureBlob = File.ReadAllBytes(Path.Combine(dataPath, "black.png"));
-Data.EmbeddedTextures.Add(black);
-textures.Add(Path.GetFileName(Path.Combine(dataPath, "black.png")), black);
-
-UndertaleTexturePageItem AddNewTexturePageItem(ushort sourceX, ushort sourceY, ushort sourceWidth, ushort sourceHeight, string texturePageName)
+UndertaleTexturePageItem AddNewTexturePageItem(ushort sourceX, ushort sourceY, ushort sourceWidth, ushort sourceHeight)
 {
     ushort targetX = 0;
     ushort targetY = 0;
@@ -36,33 +31,33 @@ UndertaleTexturePageItem AddNewTexturePageItem(ushort sourceX, ushort sourceY, u
     ushort targetHeight = sourceHeight;
     ushort boundingWidth = sourceWidth;
     ushort boundingHeight = sourceHeight;
-    var texturePage = textures[texturePageName];
+    var texturePage = textures["controls.png"];
 
     UndertaleTexturePageItem tpItem = new UndertaleTexturePageItem { SourceX = sourceX, SourceY = sourceY, SourceWidth = sourceWidth, SourceHeight = sourceHeight, TargetX = targetX, TargetY = targetY, TargetWidth = targetWidth, TargetHeight = targetHeight, BoundingWidth = boundingWidth, BoundingHeight = boundingHeight, TexturePage = texturePage };
     Data.TexturePageItems.Add(tpItem);
     return tpItem;
 }
 
-UndertaleTexturePageItem pg_joybase1 = AddNewTexturePageItem(0, 0, 59, 59, "controls.png");
-UndertaleTexturePageItem pg_joybase2 = AddNewTexturePageItem(0, 61, 59, 59, "controls.png");
-UndertaleTexturePageItem pg_joystick = AddNewTexturePageItem(61, 0, 41, 41, "controls.png");
-UndertaleTexturePageItem pg_joystick2 = AddNewTexturePageItem(0, 122, 41, 41, "controls.png");
-UndertaleTexturePageItem pg_settings_n = AddNewTexturePageItem(61, 43, 19, 24, "controls.png");
-UndertaleTexturePageItem pg_settings_p = AddNewTexturePageItem(83, 43, 19, 24, "controls.png");
-UndertaleTexturePageItem pg_zbutton = AddNewTexturePageItem(104, 0, 27, 29, "controls.png");
-UndertaleTexturePageItem pg_zbutton_p = AddNewTexturePageItem(104, 31, 27, 29, "controls.png");
-UndertaleTexturePageItem pg_xbutton = AddNewTexturePageItem(133, 0, 27, 29, "controls.png");
-UndertaleTexturePageItem pg_xbutton_p = AddNewTexturePageItem(133, 31, 27, 29, "controls.png");
-UndertaleTexturePageItem pg_cbutton = AddNewTexturePageItem(162, 0, 27, 29, "controls.png");
-UndertaleTexturePageItem pg_cbutton_p = AddNewTexturePageItem(162, 31, 27, 29, "controls.png");
-UndertaleTexturePageItem pg_controls_config = AddNewTexturePageItem(61, 68, 100, 13, "controls.png");
-UndertaleTexturePageItem pg_button_scale = AddNewTexturePageItem(61, 83, 79, 9, "controls.png");
-UndertaleTexturePageItem pg_analog_scale = AddNewTexturePageItem(61, 94, 79, 12, "controls.png");
-UndertaleTexturePageItem pg_analog_type = AddNewTexturePageItem(61, 108, 72, 12, "controls.png");
-UndertaleTexturePageItem pg_reset_config = AddNewTexturePageItem(61, 122, 79, 12, "controls.png");
-UndertaleTexturePageItem pg_controls_opacity = AddNewTexturePageItem(61, 136, 107, 13, "controls.png");
-UndertaleTexturePageItem pg_arrow_leftright = AddNewTexturePageItem(142, 83, 41, 9, "controls.png");
-UndertaleTexturePageItem pg_black = AddNewTexturePageItem(0, 0, 640, 480, "black.png");
+UndertaleTexturePageItem pg_joybase1 = AddNewTexturePageItem(0, 0, 59, 59);
+UndertaleTexturePageItem pg_joybase2 = AddNewTexturePageItem(0, 61, 59, 59);
+UndertaleTexturePageItem pg_joystick = AddNewTexturePageItem(61, 0, 41, 41);
+UndertaleTexturePageItem pg_joystick2 = AddNewTexturePageItem(0, 122, 41, 41);
+UndertaleTexturePageItem pg_settings_n = AddNewTexturePageItem(61, 43, 19, 24);
+UndertaleTexturePageItem pg_settings_p = AddNewTexturePageItem(83, 43, 19, 24);
+UndertaleTexturePageItem pg_zbutton = AddNewTexturePageItem(104, 0, 27, 29);
+UndertaleTexturePageItem pg_zbutton_p = AddNewTexturePageItem(104, 31, 27, 29);
+UndertaleTexturePageItem pg_xbutton = AddNewTexturePageItem(133, 0, 27, 29);
+UndertaleTexturePageItem pg_xbutton_p = AddNewTexturePageItem(133, 31, 27, 29);
+UndertaleTexturePageItem pg_cbutton = AddNewTexturePageItem(162, 0, 27, 29);
+UndertaleTexturePageItem pg_cbutton_p = AddNewTexturePageItem(162, 31, 27, 29);
+UndertaleTexturePageItem pg_controls_config = AddNewTexturePageItem(61, 68, 100, 13);
+UndertaleTexturePageItem pg_button_scale = AddNewTexturePageItem(61, 83, 79, 9);
+UndertaleTexturePageItem pg_analog_scale = AddNewTexturePageItem(61, 94, 79, 12);
+UndertaleTexturePageItem pg_analog_type = AddNewTexturePageItem(61, 108, 72, 12);
+UndertaleTexturePageItem pg_reset_config = AddNewTexturePageItem(61, 122, 79, 12);
+UndertaleTexturePageItem pg_controls_opacity = AddNewTexturePageItem(61, 136, 107, 13);
+UndertaleTexturePageItem pg_arrow_leftright = AddNewTexturePageItem(142, 83, 41, 9);
+UndertaleTexturePageItem pg_black = AddNewTexturePageItem(189, 0, 640, 480);
 
 void AddNewUndertaleSprite(string spriteName, ushort width, ushort height, UndertaleTexturePageItem[] spriteTextures)
 {
