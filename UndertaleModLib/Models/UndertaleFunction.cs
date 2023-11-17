@@ -52,7 +52,7 @@ public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.Re
                 writer.Write(addr);
         }
         else
-            writer.Write((int)-1);
+            writer.Write(-1);
     }
 
     /// <inheritdoc />
