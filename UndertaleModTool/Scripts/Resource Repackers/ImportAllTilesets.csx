@@ -12,7 +12,7 @@ EnsureDataLoaded();
 // Setup root export folder.
 string winFolder = GetFolder(FilePath); // The folder data.win is located in.
 
-string subPath = winFolder + "Export_Tilesets";
+string subPath = Path.Combine(winFolder, "Export_Tilesets");
 int i = 0;
 
 string GetFolder(string path)
@@ -21,7 +21,7 @@ string GetFolder(string path)
 }
 
 // Folder Check One
-if (!Directory.Exists(winFolder + "Export_Tilesets\\"))
+if (!Directory.Exists(subPath))
 {
     ScriptError("There is no 'Export_Tilesets' folder to import.", "Error: Nothing to import.");
     return;
@@ -46,7 +46,7 @@ void ImportTileset(UndertaleBackground tileset)
 {
     try
     {
-        string path = subPath + "\\" + tileset.Name.Content + ".png";
+        string path = Path.Combine(subPath, tileset.Name.Content + ".png");
         if (File.Exists(path))
         {
             Bitmap img = new Bitmap(path);
