@@ -1864,7 +1864,12 @@ namespace UndertaleModLib.Decompiler
                 if (Function is FunctionDefinition)
                     return String.Format("{0}({1})", Function.ToString(context), argumentString.ToString());
 
-                return String.Format("{0}.{1}({2})", FunctionThis.ToString(context), Function.ToString(context), argumentString.ToString());
+                // self.variableFunction()
+                if (FunctionThis is ExpressionConstant && (FunctionThis as ExpressionConstant)?.Value == "self")
+                    return String.Format("{0}.{1}({2})", FunctionThis.ToString(context), Function.ToString(context), argumentString.ToString());
+                
+                // variable.variableFunction()
+                return String.Format("{0}({1})", Function.ToString(context), argumentString.ToString());
             }
 
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
@@ -2172,13 +2177,14 @@ namespace UndertaleModLib.Decompiler
                         if (instr.ComparisonKind != 0)
                         {
                             // This is the GMS 2.3+ stack move / swap instruction
-                            if (instr.Type1 == UndertaleInstruction.DataType.Variable)
+                            bool isVariable = instr.Type1 == UndertaleInstruction.DataType.Variable;
+                            /*if (instr.Type1 == UndertaleInstruction.DataType.Variable)
                             {
                                 // This variant seems to do literally nothing...?
                                 break;
-                            }
+                            }*/
 
-                            int bytesToTake = instr.Extra * 4;
+                            int bytesToTake = instr.Extra * (isVariable ? 16 : 4);
                             Stack<Expression> taken = new Stack<Expression>();
                             while (bytesToTake > 0)
                             {
@@ -2192,7 +2198,7 @@ namespace UndertaleModLib.Decompiler
                             int b2 = (byte)instr.ComparisonKind & 0x7F;
                             if ((b2 & 0b111) != 0)
                                 throw new InvalidOperationException("Don't know what to do with this");
-                            int bytesToMove = (b2 >> 3) * 4;
+                            int bytesToMove = (b2 >> 3) * (isVariable ? 16 : 4);
                             Stack<Expression> moved = new Stack<Expression>();
                             while (bytesToMove > 0)
                             {
