@@ -1300,44 +1300,47 @@ namespace UndertaleModLib.Decompiler
                 builtin_funcs["timedgate_add_objects"] =
                     new[] { AssetIDType.GameObject, AssetIDType.Other };
 
-                UndertaleCode ptPlayerStep = data.Code.ByName("gml_Object_obj_player_Step_0");
-                if (ptPlayerStep == null)
+                if (data.Code is not null)
                 {
-                    ptPlayerStep = data.Code.ByName("gml_Object_obj_player1_Step_0");
+                    UndertaleCode ptPlayerStep = data.Code.ByName("gml_Object_obj_player_Step_0");
+                    if (ptPlayerStep == null)
+                    {
+                        ptPlayerStep = data.Code.ByName("gml_Object_obj_player1_Step_0");
+                    }
+                    FindStateNames(ptPlayerStep, new[] {"scr_player_", "state_player_", "scr_playerN_"});
+                    FindStateNames(
+                        data.Code.ByName("gml_Object_obj_cheeseslime_Step_0"),
+                        new[] {"scr_enemy_", "scr_pizzagoblin_"}
+                    );
+                    FindStateNames(
+                        data.Code.ByName("gml_Object_obj_pepperman_Step_0"),
+                        new[] {"scr_boss_", "scr_pepperman_", "scr_enemy_"}
+                    );
+                    FindStateNames(
+                        data.Code.ByName("gml_Object_obj_vigilanteboss_Step_0"),
+                        new[] {"scr_vigilante_"}
+                    );
+                    FindStateNames(
+                        data.Code.ByName("gml_Object_obj_noiseboss_Step_0"),
+                        new[] {"scr_noise_"}
+                    );
+                    FindStateNames(
+                        data.Code.ByName("gml_Object_obj_fakepepboss_Step_0"),
+                        new[] {"scr_fakepepboss_", "scr_boss_"}
+                    );
+                    FindStateNames(
+                        data.Code.ByName("gml_Object_obj_pizzafaceboss_Step_0"),
+                        new[] {"scr_pizzaface_"}
+                    );
+                    FindStateNames(
+                        data.Code.ByName("gml_Object_obj_pizzafaceboss_p2_Step_0"),
+                        new[] {"scr_pizzaface_p2_", "scr_pizzaface_"}
+                    );
+                    FindStateNames(
+                        data.Code.ByName("gml_Object_obj_pizzafaceboss_p3_Step_0"),
+                        new[] {"scr_pizzaface_p3_"}
+                    );
                 }
-                FindStateNames(ptPlayerStep, new[] {"scr_player_", "state_player_", "scr_playerN_"});
-                FindStateNames(
-                    data.Code.ByName("gml_Object_obj_cheeseslime_Step_0"),
-                    new[] {"scr_enemy_", "scr_pizzagoblin_"}
-                );
-                FindStateNames(
-                    data.Code.ByName("gml_Object_obj_pepperman_Step_0"),
-                    new[] {"scr_boss_", "scr_pepperman_", "scr_enemy_"}
-                );
-                FindStateNames(
-                    data.Code.ByName("gml_Object_obj_vigilanteboss_Step_0"),
-                    new[] {"scr_vigilante_"}
-                );
-                FindStateNames(
-                    data.Code.ByName("gml_Object_obj_noiseboss_Step_0"),
-                    new[] {"scr_noise_"}
-                );
-                FindStateNames(
-                    data.Code.ByName("gml_Object_obj_fakepepboss_Step_0"),
-                    new[] {"scr_fakepepboss_", "scr_boss_"}
-                );
-                FindStateNames(
-                    data.Code.ByName("gml_Object_obj_pizzafaceboss_Step_0"),
-                    new[] {"scr_pizzaface_"}
-                );
-                FindStateNames(
-                    data.Code.ByName("gml_Object_obj_pizzafaceboss_p2_Step_0"),
-                    new[] {"scr_pizzaface_p2_", "scr_pizzaface_"}
-                );
-                FindStateNames(
-                    data.Code.ByName("gml_Object_obj_pizzafaceboss_p3_Step_0"),
-                    new[] {"scr_pizzaface_p3_"}
-                );
             }
 
             // Just Undertale
