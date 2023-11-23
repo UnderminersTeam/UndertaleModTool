@@ -1128,6 +1128,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("toppin_state", AssetIDType.PT_State);
                 builtin_vars.Add("bossintrostate", AssetIDType.PT_State);
                 builtin_vars.Add("introstate", AssetIDType.PT_State);
+                builtin_vars.Add("fadeoutstate", AssetIDType.PT_State);
 
                 builtin_vars.Add("leveltorestart", AssetIDType.Room);
                 builtin_vars.Add("targetRoom", AssetIDType.Room);
@@ -1141,15 +1142,6 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("level_array", AssetIDType.Room);
                 builtin_vars.Add("_levelinfo", AssetIDType.Room);
 
-                builtin_vars.Add("content", AssetIDType.GameObject);
-                builtin_vars.Add("player", AssetIDType.GameObject);
-                builtin_vars.Add("targetplayer", AssetIDType.GameObject);
-                builtin_vars.Add("playerid", AssetIDType.GameObject);
-                builtin_vars.Add("_playerid", AssetIDType.GameObject);
-                builtin_vars.Add("player_id", AssetIDType.GameObject);
-                builtin_vars.Add("platformid", AssetIDType.GameObject);
-                builtin_vars.Add("objID", AssetIDType.GameObject);
-                builtin_vars.Add("objectID", AssetIDType.GameObject);
                 builtin_vars.Add("objectlist", AssetIDType.GameObject);
                 builtin_vars.Add("object_arr", AssetIDType.GameObject);
                 builtin_vars.Add("objdark_arr", AssetIDType.GameObject);
@@ -1157,9 +1149,29 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("spawnpool", AssetIDType.GameObject);
                 builtin_vars.Add("spawn_arr", AssetIDType.GameObject);
                 builtin_vars.Add("dark_arr", AssetIDType.GameObject);
+                builtin_vars.Add("flash_arr", AssetIDType.GameObject);
+                builtin_vars.Add("collision_list", AssetIDType.GameObject);
+
+                builtin_vars.Add("content", AssetIDType.GameObject);
+                builtin_vars.Add("player", AssetIDType.GameObject);
+                builtin_vars.Add("targetplayer", AssetIDType.GameObject);
+                builtin_vars.Add("target", AssetIDType.GameObject);
+
+                builtin_vars.Add("playerid", AssetIDType.GameObject);
+                builtin_vars.Add("_playerid", AssetIDType.GameObject);
+                builtin_vars.Add("player_id", AssetIDType.GameObject);
+                builtin_vars.Add("platformid", AssetIDType.GameObject);
+                builtin_vars.Add("objID", AssetIDType.GameObject);
+                builtin_vars.Add("objectID", AssetIDType.GameObject);
+                builtin_vars.Add("spawnenemyID", AssetIDType.GameObject);
                 builtin_vars.Add("ID", AssetIDType.GameObject);
+
                 builtin_vars.Add("baddiegrabbedID", AssetIDType.GameObject);
                 builtin_vars.Add("pizzashieldID", AssetIDType.GameObject);
+                builtin_vars.Add("angryeffectid", AssetIDType.GameObject);
+                builtin_vars.Add("pizzashieldid", AssetIDType.GameObject);
+                builtin_vars.Add("superchargedeffectid", AssetIDType.GameObject);
+
                 builtin_vars.Add("baddieID", AssetIDType.GameObject);
                 builtin_vars.Add("baddieid", AssetIDType.GameObject);
                 builtin_vars.Add("brickid", AssetIDType.GameObject);
@@ -1175,6 +1187,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("_obj_player", AssetIDType.GameObject);
                 builtin_vars.Add("obj_explosion", AssetIDType.GameObject);
                 builtin_vars.Add("my_obj_index", AssetIDType.GameObject);
+                builtin_vars.Add("inst", AssetIDType.GameObject);
 
                 builtin_vars.Add("chargeeffectid", AssetIDType.GameObject);
                 builtin_vars.Add("dashcloudid", AssetIDType.GameObject);
@@ -1183,6 +1196,9 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("speedlineseffectid", AssetIDType.GameObject);
 
                 builtin_vars.Add("room_arr", AssetIDType.Room);
+                builtin_vars.Add("rm", AssetIDType.Room);
+                builtin_vars.Add("room_index", AssetIDType.Room);
+                builtin_vars.Add("levels", AssetIDType.Room);
 
                 builtin_vars.Add("bpal", AssetIDType.Sprite);
                 builtin_vars.Add("vstitle", AssetIDType.Sprite);
@@ -1195,6 +1211,13 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("portrait2_hurt", AssetIDType.Sprite);
                 builtin_vars.Add("boss_palette", AssetIDType.Sprite);
                 builtin_vars.Add("panicspr", AssetIDType.Sprite);
+                builtin_vars.Add("bossarr", AssetIDType.Sprite);
+
+                builtin_vars.Add("storedspriteindex", AssetIDType.Sprite);
+                builtin_vars.Add("icon", AssetIDType.Sprite);
+
+                builtin_vars.Add("spridle", AssetIDType.Sprite);
+                builtin_vars.Add("sprgot", AssetIDType.Sprite);
 
                 builtin_vars.Add("color", AssetIDType.Color);
                 builtin_vars.Add("textcolor", AssetIDType.Color);
@@ -1278,6 +1301,8 @@ namespace UndertaleModLib.Decompiler
                     new[] { AssetIDType.Sprite };
                 builtin_funcs["boss_update_pizzaheadKO"] =
                     new[] { AssetIDType.Sprite, AssetIDType.Sprite };
+                builtin_funcs["scr_pizzaface_p3_do_player_attack"] =
+                    new[] { AssetIDType.GameObject };
 
                 builtin_funcs["check_slope"] = new[] { AssetIDType.GameObject };
                 builtin_funcs["try_solid"] =
@@ -1299,6 +1324,9 @@ namespace UndertaleModLib.Decompiler
 
                 builtin_funcs["timedgate_add_objects"] =
                     new[] { AssetIDType.GameObject, AssetIDType.Other };
+
+                builtin_funcs["randomize_animations"] =
+                    new[] { AssetIDType.Sprite, AssetIDType.Repeat };
 
                 if (data.Code is not null)
                 {
