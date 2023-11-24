@@ -1297,6 +1297,11 @@ namespace UndertaleModLib.Decompiler
                 builtin_funcs["scr_bosscontroller_particle_hp"] =
                     new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other,
                     AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Sprite };
+                builtin_funcs["scr_bosscontroller_draw_health"] =
+                    new[] { AssetIDType.Sprite,
+                    AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other
+                    AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other,
+                    AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Sprite };
                 builtin_funcs["scr_boss_genericintro"] =
                     new[] { AssetIDType.Sprite };
                 builtin_funcs["boss_update_pizzaheadKO"] =
