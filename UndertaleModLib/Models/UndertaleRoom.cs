@@ -166,8 +166,6 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     /// </summary>
     public UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>> Sequences { get; private set; } = new UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>>();
 
-    public static bool CheckedForGMS2_2_2_302;
-
     /// <summary>
     /// Calls <see cref="OnPropertyChanged(string)"/> for <see cref="BGColorLayer"/> in order to update the room background color.<br/>
     /// Only used for GameMaker: Studio 2 rooms.
@@ -268,50 +266,6 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             Views[0].Enabled = true;
     }
 
-    private static void CheckForGMS2_2_2_302(UndertaleReader reader)
-    {
-        if (reader.undertaleData.IsVersionAtLeast(2, 2, 2, 302))
-        {
-            CheckedForGMS2_2_2_302 = true;
-
-            uint newSize = GameObject.ChildObjectsSize + 8;
-            reader.SetStaticChildObjectsSize(typeof(GameObject), newSize);
-
-            return;
-        }
-
-        long returnTo = reader.Position;
-        reader.Position -= 4;
-
-        uint gameObjPtr = reader.ReadUInt32();
-        uint tilePtr = reader.ReadUInt32();
-
-        reader.AbsPosition = gameObjPtr; // "GameObjects"
-        uint objCount = reader.ReadUInt32();
-        if (objCount > 0)
-        {
-            uint firstPtr = reader.ReadUInt32();
-            uint secondPtr;
-            if (objCount == 1)
-                secondPtr = tilePtr;
-            else
-                secondPtr = reader.ReadUInt32();
-
-            if (secondPtr - firstPtr == 48)
-            {
-                reader.undertaleData.SetGMS2Version(2, 2, 2, 302);
-
-                //"GameObject.ImageSpeed" + "...ImageIndex"
-                uint newSize = GameObject.ChildObjectsSize + 8;
-                reader.SetStaticChildObjectsSize(typeof(GameObject), newSize);
-            }
-        }
-
-        reader.Position = returnTo;
-
-        CheckedForGMS2_2_2_302 = true;
-    }
-
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
     {
@@ -388,10 +342,6 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         Backgrounds = reader.ReadUndertaleObjectPointer<UndertalePointerList<Background>>();
         Views = reader.ReadUndertaleObjectPointer<UndertalePointerList<View>>();
         GameObjects = reader.ReadUndertaleObjectPointer<UndertalePointerList<GameObject>>();
-
-        if (!CheckedForGMS2_2_2_302)
-            CheckForGMS2_2_2_302(reader);
-        
         Tiles = reader.ReadUndertaleObjectPointer<UndertalePointerList<Tile>>();
         World = reader.ReadBoolean();
         Top = reader.ReadUInt32();
@@ -479,8 +429,6 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         uint backgroundPtr = reader.ReadUInt32();
         uint viewsPtr = reader.ReadUInt32();
         uint gameObjsPtr = reader.ReadUInt32();
-        if (!CheckedForGMS2_2_2_302)
-            CheckForGMS2_2_2_302(reader);
         uint tilesPtr = reader.ReadUInt32();
         uint layersPtr = 0;
         uint sequencesPtr = 0;

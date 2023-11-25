@@ -685,15 +685,19 @@ namespace UndertaleModLib
             if (!checkedFor2022_1)
                 CheckForEffectData(reader);
 
+            if (!checkedForGMS2_2_2_302)
+                CheckForImageSpeed(reader);
+
             base.UnserializeChunk(reader);
         }
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
             checkedFor2022_1 = false;
-            UndertaleRoom.CheckedForGMS2_2_2_302 = false;
+            checkedForGMS2_2_2_302 = false;
 
             CheckForEffectData(reader);
+            CheckForImageSpeed(reader);
 
             if (reader.undertaleData.GeneralInfo?.BytecodeVersion >= 16)
             {
@@ -791,6 +795,58 @@ namespace UndertaleModLib
             }
 
             checkedFor2022_1 = true;
+        }
+
+        private static bool checkedForGMS2_2_2_302;
+        private void CheckForImageSpeed(UndertaleReader reader)
+        {
+            // Check the size of the first GameObject in a room
+            if (reader.undertaleData.IsGameMaker2() && !reader.undertaleData.IsVersionAtLeast(2, 2, 2, 302))
+            {
+                long returnTo = reader.Position;
+
+                // Iterate over all rooms until a length check is performed
+                int roomCount = reader.ReadInt32();
+                for (uint roomIndex = 0; roomIndex < roomCount; roomIndex++)
+                {
+                    // Advance to room data we're interested in (and grab pointer for next room)
+                    reader.Position = returnTo + 4 + (4 * roomIndex);
+                    uint roomPtr = (uint)reader.ReadInt32();
+                    reader.AbsPosition = roomPtr + (12 * 4);
+
+                    // Get the pointer for this room's object list, as well as pointer to tile list
+                    uint objectListPtr = (uint)reader.ReadInt32();
+                    int tileListPtr = reader.ReadInt32();
+                    reader.AbsPosition = objectListPtr;
+                    int objectCount = reader.ReadInt32();
+                    if (objectCount >= 1)
+                    {
+                        // compare position of first object to second
+                        int firstPtr = reader.ReadInt32();
+                        int secondPtr;
+                        if (objectCount == 1) // tile list starts right after, so it works as an alternate
+                            secondPtr = tileListPtr;
+                        else
+                            secondPtr = reader.ReadInt32();
+
+                        if (secondPtr - firstPtr == 48)
+                        {
+                            reader.undertaleData.SetGMS2Version(2, 2, 2, 302);
+
+                            //"GameObject.ImageSpeed" + "...ImageIndex"
+                            uint newSize = GameObject.ChildObjectsSize + 8;
+                            reader.SetStaticChildObjectsSize(typeof(GameObject), newSize);
+                        }
+                        // Check performed, one way or the other
+                        break;
+                    }
+                    // continue to next room if there are no objects
+                }
+
+                reader.Position = returnTo;
+            }
+
+            checkedForGMS2_2_2_302 = true;
         }
     }
 
