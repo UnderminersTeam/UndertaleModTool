@@ -75,7 +75,7 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, ID
     /// <summary>
     /// The pitch change of the audio entry.
     /// </summary>
-    public float Pitch { get; set; } = 0;
+    public float Pitch { get; set; }
 
     private UndertaleResourceById<UndertaleAudioGroup, UndertaleChunkAGRP> _audioGroup = new();
     private UndertaleResourceById<UndertaleEmbeddedAudio, UndertaleChunkAUDO> _audioFile = new();
@@ -102,6 +102,10 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, ID
 
     /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
+    
+    /// <summary>
+    /// Invoked whenever the effective value of any dependency property has been updated.
+    /// </summary>
     protected void OnPropertyChanged([CallerMemberName] string name = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

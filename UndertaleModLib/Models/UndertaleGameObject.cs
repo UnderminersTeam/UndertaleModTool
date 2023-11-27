@@ -150,6 +150,10 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
 
     /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
+    
+    /// <summary>
+    /// Invoked whenever the effective value of any dependency property has been updated.
+    /// </summary>
     protected void OnPropertyChanged([CallerMemberName] string name = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
@@ -277,7 +281,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
 
     public UndertaleCode EventHandlerFor(EventType type, uint subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
     {
-        Event subtypeObj = Events[(int)type].Where((x) => x.EventSubtype == subtype).FirstOrDefault();
+        Event subtypeObj = Events[(int)type].FirstOrDefault(x => x.EventSubtype == subtype);
         if (subtypeObj == null)
             Events[(int)type].Add(subtypeObj = new Event() { EventSubtype = subtype });
         EventAction action = subtypeObj.Actions.FirstOrDefault();
@@ -289,7 +293,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         UndertaleCode code = action.CodeId;
         if (code == null)
         {
-            var name = strg.MakeString("gml_Object_" + Name.Content + "_" + type.ToString() + "_" + subtype);
+            var name = strg.MakeString("gml_Object_" + Name.Content + "_" + type + "_" + subtype);
             code = new UndertaleCode()
             {
                 Name = name,
@@ -537,6 +541,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         public bool IsNot { get; set; } // always 0
         public uint UnknownAlwaysZero { get; set; } // always 0
 
+        /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <inheritdoc />

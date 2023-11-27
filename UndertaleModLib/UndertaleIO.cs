@@ -638,7 +638,7 @@ namespace UndertaleModLib
                 if (length != expectedLength)
                 {
                     int diff = (int)expectedLength - (int)length;
-                    Console.WriteLine("WARNING: File specified length " + expectedLength + ", but read only " + length + " (" + diff + " padding?)");
+                    reader.SubmitMessage("WARNING: File specified length " + expectedLength + ", but read only " + length + " (" + diff + " padding?)");
                     if (diff > 0)
                         reader.Position += (uint)diff;
                     else
