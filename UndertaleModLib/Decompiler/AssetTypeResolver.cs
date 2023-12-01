@@ -1205,6 +1205,8 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("bg", AssetIDType.Sprite);
                 builtin_vars.Add("bg2", AssetIDType.Sprite);
                 builtin_vars.Add("bg3", AssetIDType.Sprite);
+                builtin_vars.Add("playersprshadow", AssetIDType.Sprite);
+                builtin_vars.Add("bosssprshadow", AssetIDType.Sprite);
                 builtin_vars.Add("portrait1_idle", AssetIDType.Sprite);
                 builtin_vars.Add("portrait1_hurt", AssetIDType.Sprite);
                 builtin_vars.Add("portrait2_idle", AssetIDType.Sprite);
@@ -1221,6 +1223,11 @@ namespace UndertaleModLib.Decompiler
 
                 builtin_vars.Add("color", AssetIDType.Color);
                 builtin_vars.Add("textcolor", AssetIDType.Color);
+                builtin_vars.Add("bc", AssetIDType.Color);
+                builtin_vars.Add("tc", AssetIDType.Color);
+                builtin_vars.Add("gameframe_blend", AssetIDType.Color);
+
+                builtin_vars.Add("gameframe_caption_icon", AssetIDType.Sprite);
 
                 builtin_funcs["instance_create_unique"] =
                     new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
@@ -1299,7 +1306,7 @@ namespace UndertaleModLib.Decompiler
                     AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Sprite };
                 builtin_funcs["scr_bosscontroller_draw_health"] =
                     new[] { AssetIDType.Sprite,
-                    AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other
+                    AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other,
                     AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other,
                     AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Sprite };
                 builtin_funcs["scr_boss_genericintro"] =
