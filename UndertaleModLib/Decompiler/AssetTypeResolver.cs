@@ -1133,7 +1133,6 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("leveltorestart", AssetIDType.Room);
                 builtin_vars.Add("targetRoom", AssetIDType.Room);
                 builtin_vars.Add("targetRoom2", AssetIDType.Room);
-                builtin_vars.Add("room_index", AssetIDType.Room);
                 builtin_vars.Add("backtohubroom", AssetIDType.Room);
                 builtin_vars.Add("roomtorestart", AssetIDType.Room);
                 builtin_vars.Add("checkpointroom", AssetIDType.Room);
