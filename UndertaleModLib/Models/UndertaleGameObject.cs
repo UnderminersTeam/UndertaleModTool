@@ -139,14 +139,14 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// <summary>
     /// The vertices used for a <see cref="CollisionShape"/> of type <see cref="CollisionShapeFlags.Custom"/>.
     /// </summary>
-    public List<UndertalePhysicsVertex> PhysicsVertices { get; private set; } = new List<UndertalePhysicsVertex>();
+    public List<UndertalePhysicsVertex> PhysicsVertices { get; set; } = new List<UndertalePhysicsVertex>();
 
     #endregion
 
     /// <summary>
     /// All the events that this game object has.
     /// </summary>
-    public UndertalePointerList<UndertalePointerList<Event>> Events { get; private set; } = new();
+    public UndertalePointerList<UndertalePointerList<Event>> Events { get; set; } = new();
 
     /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
@@ -432,7 +432,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         /// The available actions that will be performed for this event.
         /// </summary>
         /// <remarks>This seems to always have 1 entry, it would need testing if maybe the games using drag-and-drop code are different</remarks>
-        public UndertalePointerList<EventAction> Actions { get; private set; } = new UndertalePointerList<EventAction>();
+        public UndertalePointerList<EventAction> Actions { get; set; } = new UndertalePointerList<EventAction>();
 
         //TODO: not used, condense. Also UMT specific.
         public EventSubtypeKey EventSubtypeKey

@@ -282,7 +282,7 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     /// <summary>
     /// The room order of the data file.
     /// </summary>
-    public UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM> RoomOrder { get; private set; } = new();
+    public UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM> RoomOrder { get; set; } = new();
 
     /// <summary>
     /// TODO: unknown, some sort of checksum.
@@ -768,7 +768,7 @@ public class UndertaleOptions : UndertaleObject, IDisposable
     /// <summary>
     /// A list of Constants that the game uses.
     /// </summary>
-    public UndertaleSimpleList<Constant> Constants { get; private set; } = new UndertaleSimpleList<Constant>();
+    public UndertaleSimpleList<Constant> Constants { get; set; } = new UndertaleSimpleList<Constant>();
 
     //TODO: not shown in GUI right now!!!
     public bool NewFormat { get; set; } = true;
