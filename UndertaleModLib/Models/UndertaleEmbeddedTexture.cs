@@ -1,14 +1,12 @@
 ﻿using ICSharpCode.SharpZipLib.BZip2;
 using System;
 using System.Buffers.Binary;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using UndertaleModLib.Util;
 
 namespace UndertaleModLib.Models;
@@ -121,7 +119,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
             writer.Write(IndexInGroup);
         }
         if (TextureExternal)
-            writer.Write((int)0); // Ensure null pointer is written with external texture
+            writer.Write(0); // Ensure null pointer is written with external texture
         else
             writer.WriteUndertaleObjectPointer(_textureData);
     }
@@ -246,7 +244,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
 
             // Try to find file on disk
             string path = Path.Combine(_2022_9_GameDirectory, TextureInfo.Directory.Content,
-                                       TextureInfo.Name.Content + "_" + IndexInGroup.ToString() + TextureInfo.Extension.Content);
+                                       TextureInfo.Name.Content + "_" + IndexInGroup + TextureInfo.Extension.Content);
             if (!File.Exists(path))
                 return _placeholderTexture;
 

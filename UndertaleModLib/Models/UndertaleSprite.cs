@@ -379,11 +379,11 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                 if (SVersion >= 2)
                 {
                     sequencePatchPos = writer.Position;
-                    writer.Write((int)0);
+                    writer.Write(0);
                     if (SVersion >= 3)
                     {
                         nineSlicePatchPos = writer.Position;
-                        writer.Write((int)0);
+                        writer.Write(0);
                     }
                 }
             }
@@ -458,7 +458,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                 writer.Position = sequencePatchPos;
                 writer.Write(returnTo);
                 writer.Position = returnTo;
-                writer.Write((int)1);
+                writer.Write(1);
                 writer.WriteUndertaleObject(V2Sequence);
             }
             if (nineSlicePatchPos != 0 && V3NineSlice != null)
@@ -1079,7 +1079,7 @@ public class UndertaleYYSWFCollisionMask : UndertaleObject
     }
 }
 
-public enum UndertaleYYSWFItemType : int
+public enum UndertaleYYSWFItemType
 {
     ItemInvalid,
     ItemShape,
@@ -1913,7 +1913,7 @@ public class UndertaleYYSWF : UndertaleObject
     public void Unserialize(UndertaleReader reader)
     {
         reader.Align(4);
-        int jpeglen = reader.ReadInt32() & (~int.MinValue); // the length is ORed with int.MinValue.
+        int jpeglen = reader.ReadInt32() & (~Int32.MinValue); // the length is ORed with int.MinValue.
         Version = reader.ReadInt32();
         Util.DebugUtil.Assert(Version == 8 || Version == 7, "Invalid YYSWF version data! Expected 7 or 8, got " + Version);
 
