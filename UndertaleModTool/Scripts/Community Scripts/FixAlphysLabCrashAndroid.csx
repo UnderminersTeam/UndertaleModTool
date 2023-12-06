@@ -8,7 +8,7 @@ using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
-if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() != "undertale")
+if (Data.GeneralInfo?.DisplayName?.Content.ToLower() != "undertale")
 {
     ScriptError("Error 0: Compatible with Undertale only");
     return;
