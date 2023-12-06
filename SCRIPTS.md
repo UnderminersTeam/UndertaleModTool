@@ -27,7 +27,7 @@ They are relatively self-explanatory, but there are also some helpful general-pu
 - `EditGMS2TileData.csx`: A temporary script to help edit tile data in GMS2 games.
 - `ExternalizeAllOGGs.csx`: Script to externalize all OGG sound effects from a game.
 - `FancyRoomSelect.csx`: Script to make selecting and teleporting to different rooms in a game very user-friendly.
-- `FixAlphysLabCrashAndroid`: Script that fixes a crash at Alphys's lab on Android devices.
+- `FixAlphysLabCrashAndroid.csx`: Script that fixes a crash at Alphys's lab on Android devices.
 - `ReloadDeltaruneJSON.csx`: Script to add a hotkey to Deltarune, which reloads the language JSON.
 - `TouchControlsEnabler.csx`: Adds mobile touch controls to an Undertale or Deltarune data.win.
 - `TTFFonts (Deltarune).csx`: Marks all fonts in Deltarune to be externally loaded. Does not handle Japanese text.
