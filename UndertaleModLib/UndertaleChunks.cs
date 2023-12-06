@@ -1802,6 +1802,93 @@ namespace UndertaleModLib
     public class UndertaleChunkPSEM : UndertaleListChunk<UndertaleParticleSystemEmitter>
     {
         public override string Name => "PSEM";
+        private static bool checkedPsemVersion;
+
+        private void CheckPsemVersion(UndertaleReader reader)
+        {
+            // Particle system emitters had the good grace to change three times in three versions
+            // Three versions which are only detectable by optional features
+            // This function checks for 2023.4, 2023.6, and 2023.8
+            if (reader.undertaleData.IsVersionAtLeast(2023, 8))
+            {
+                checkedPsemVersion = true;
+                return;
+            }
+
+            long positionToReturn = reader.AbsPosition;
+
+            uint count = reader.ReadUInt32();
+
+            if (count < 11) // 2023.2 automatically adds eleven, later versions don't
+            {
+                if (!reader.undertaleData.IsVersionAtLeast(2023, 4))
+                    reader.undertaleData.SetGMS2Version(2023, 4);
+            }
+
+            if (count == 0) // Nothing more to do here, unfortunately
+            {
+                reader.AbsPosition = positionToReturn;
+                checkedPsemVersion = true;
+                return;
+            }
+
+            else if (count == 1) // Special case
+            {
+                // Fortunately, consistent padding means we need no parsing here
+                if (Length == 0xF8)
+                {
+                    reader.undertaleData.SetGMS2Version(2023, 8);
+                }
+                else if (Length == 0xD8)
+                {
+                    // This check is probably unnecessary since there's no 2023.7 so it would, at worst, change from 2023.6 to 2023.6
+                    if (!reader.undertaleData.IsVersionAtLeast(2023, 6))
+                        reader.undertaleData.SetGMS2Version(2023, 6);
+                }
+                else if (Length == 0xC8)
+                {
+                    // This one is necessary, though, as it could already be 2023.6 at this point
+                    if (!reader.undertaleData.IsVersionAtLeast(2023, 4))
+                        reader.undertaleData.SetGMS2Version(2023, 4);
+                }
+                else
+                {
+                    reader.AbsPosition = positionToReturn;
+                    throw new IOException("Unrecognized PSEM size with only one element");
+                }
+
+                reader.AbsPosition = positionToReturn;
+                checkedPsemVersion = true;
+                return;
+            }
+
+            // More than one emitter
+            uint firstPtr = reader.ReadUInt32();
+            uint secondPtr = reader.ReadUInt32();
+            if (secondPtr - firstPtr == 0xEC)
+            {
+                reader.undertaleData.SetGMS2Version(2023, 8);
+            }
+            else if (secondPtr - firstPtr == 0xC0)
+            {
+                if (!reader.undertaleData.IsVersionAtLeast(2023, 6))
+                    reader.undertaleData.SetGMS2Version(2023, 6);
+            }
+            else if (secondPtr - firstPtr == 0xBC)
+            {
+                if (!reader.undertaleData.IsVersionAtLeast(2023, 4))
+                    reader.undertaleData.SetGMS2Version(2023, 4);
+            }
+            else if (secondPtr - firstPtr != 0xB0) // 2023.2
+            {
+                reader.AbsPosition = positionToReturn;
+                throw new IOException("Unrecognized PSEM size with " + count.ToString() + " elements");
+            }
+            
+
+            reader.AbsPosition = positionToReturn;
+            checkedPsemVersion = true;
+        }
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
@@ -1826,11 +1913,16 @@ namespace UndertaleModLib
             if (reader.ReadUInt32() != 1)
                 throw new IOException("Expected PSEM version 1");
 
+            if (!checkedPsemVersion)
+                CheckPsemVersion(reader);
+
             base.UnserializeChunk(reader);
         }
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
+            checkedPsemVersion = false;
+
             if (!reader.undertaleData.IsVersionAtLeast(2023, 2))
                 throw new InvalidOperationException();
 
@@ -1840,6 +1932,8 @@ namespace UndertaleModLib
             uint version = reader.ReadUInt32();
             if (version != 1)
                 throw new IOException("Expected PSEM version 1, got " + version.ToString());
+
+            CheckPsemVersion(reader);
 
             return base.UnserializeObjectCount(reader);
         }
