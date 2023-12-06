@@ -718,81 +718,88 @@ namespace UndertaleModLib
         private void CheckForEffectData(UndertaleReader reader)
         {
             // Do a length check on room layers to see if this is 2022.1 or higher
-            if (reader.undertaleData.IsVersionAtLeast(2, 3) && !reader.undertaleData.IsVersionAtLeast(2022, 1))
+            if (!reader.undertaleData.IsVersionAtLeast(2, 3) || reader.undertaleData.IsVersionAtLeast(2022, 1))
             {
-                long returnTo = reader.Position;
-
-                // Iterate over all rooms until a length check is performed
-                int roomCount = reader.ReadInt32();
-                bool finished = false;
-                for (uint roomIndex = 0; roomIndex < roomCount && !finished; roomIndex++)
-                {
-                    // Advance to room data we're interested in (and grab pointer for next room)
-                    reader.Position = returnTo + 4 + (4 * roomIndex);
-                    uint roomPtr = (uint)reader.ReadInt32();
-                    reader.AbsPosition = roomPtr + (22 * 4);
-
-                    // Get the pointer for this room's layer list, as well as pointer to sequence list
-                    uint layerListPtr = (uint)reader.ReadInt32();
-                    int seqnPtr = reader.ReadInt32();
-                    reader.AbsPosition = layerListPtr;
-                    int layerCount = reader.ReadInt32();
-                    if (layerCount >= 1)
-                    {
-                        // Get pointer into the individual layer data (plus 8 bytes) for the first layer in the room
-                        int jumpOffset = reader.ReadInt32() + 8;
-
-                        // Find the offset for the end of this layer
-                        int nextOffset;
-                        if (layerCount == 1)
-                            nextOffset = seqnPtr;
-                        else
-                            nextOffset = reader.ReadInt32(); // (pointer to next element in the layer list)
-
-                        // Actually perform the length checks, depending on layer data
-                        reader.AbsPosition = jumpOffset;
-                        switch ((LayerType)reader.ReadInt32())
-                        {
-                            case LayerType.Background:
-                                if (nextOffset - reader.AbsPosition > 16 * 4)
-                                    reader.undertaleData.SetGMS2Version(2022, 1);
-                                finished = true;
-                                break;
-                            case LayerType.Instances:
-                                reader.Position += 6 * 4;
-                                int instanceCount = reader.ReadInt32();
-                                if (nextOffset - reader.AbsPosition != (instanceCount * 4))
-                                    reader.undertaleData.SetGMS2Version(2022, 1);
-                                finished = true;
-                                break;
-                            case LayerType.Assets:
-                                reader.Position += 6 * 4;
-                                int tileOffset = reader.ReadInt32();
-                                if (tileOffset != reader.AbsPosition + 8)
-                                    reader.undertaleData.SetGMS2Version(2022, 1);
-                                finished = true;
-                                break;
-                            case LayerType.Tiles:
-                                reader.Position += 7 * 4;
-                                int tileMapWidth = reader.ReadInt32();
-                                int tileMapHeight = reader.ReadInt32();
-                                if (nextOffset - reader.AbsPosition != (tileMapWidth * tileMapHeight * 4))
-                                    reader.undertaleData.SetGMS2Version(2022, 1);
-                                finished = true;
-                                break;
-                            case LayerType.Effect:
-                                reader.Position += 7 * 4;
-                                int propertyCount = reader.ReadInt32();
-                                if (nextOffset - reader.AbsPosition != (propertyCount * 3 * 4))
-                                    reader.undertaleData.SetGMS2Version(2022, 1);
-                                finished = true;
-                                break;
-                        }
-                    }
-                }
-
-                reader.Position = returnTo;
+                checkedFor2022_1 = true;
+                return;
             }
+            long returnTo = reader.Position;
+
+            // Iterate over all rooms until a length check is performed
+            int roomCount = reader.ReadInt32();
+            for (uint roomIndex = 0; roomIndex < roomCount; roomIndex++)
+            {
+                // Advance to room data we're interested in (and grab pointer for next room)
+                reader.Position = returnTo + 4 + (4 * roomIndex);
+                uint roomPtr = (uint)reader.ReadInt32();
+                reader.AbsPosition = roomPtr + (22 * 4);
+
+                // Get the pointer for this room's layer list, as well as pointer to sequence list
+                uint layerListPtr = (uint)reader.ReadInt32();
+                int seqnPtr = reader.ReadInt32();
+                reader.AbsPosition = layerListPtr;
+                int layerCount = reader.ReadInt32();
+                if (layerCount <= 0)
+                {
+                    // No layers, try the next room
+                    continue;
+                }
+                // Get pointer into the individual layer data (plus 8 bytes) for the first layer in the room
+                int jumpOffset = reader.ReadInt32() + 8;
+
+                // Find the offset for the end of this layer
+                int nextOffset;
+                if (layerCount == 1)
+                    nextOffset = seqnPtr;
+                else
+                    nextOffset = reader.ReadInt32(); // (pointer to next element in the layer list)
+
+                // Actually perform the length checks, depending on layer data
+                reader.AbsPosition = jumpOffset;
+
+                LayerType layerType = (LayerType)reader.ReadInt32();
+                // Basically the switch's default, as each successful switch case terminates the loop
+                if (!Enum.IsDefined(layerType) || layerType == LayerType.Path)
+                    continue;
+
+                switch (layerType)
+                {
+                    case LayerType.Background:
+                        if (nextOffset - reader.AbsPosition > 16 * 4)
+                            reader.undertaleData.SetGMS2Version(2022, 1);
+                        break;
+                    case LayerType.Instances:
+                        reader.Position += 6 * 4;
+                        int instanceCount = reader.ReadInt32();
+                        if (nextOffset - reader.AbsPosition != (instanceCount * 4))
+                            reader.undertaleData.SetGMS2Version(2022, 1);
+                        break;
+                    case LayerType.Assets:
+                        reader.Position += 6 * 4;
+                        int tileOffset = reader.ReadInt32();
+                        if (tileOffset != reader.AbsPosition + 8)
+                            reader.undertaleData.SetGMS2Version(2022, 1);
+                        break;
+                    case LayerType.Tiles:
+                        reader.Position += 7 * 4;
+                        int tileMapWidth = reader.ReadInt32();
+                        int tileMapHeight = reader.ReadInt32();
+                        if (nextOffset - reader.AbsPosition != (tileMapWidth * tileMapHeight * 4))
+                            reader.undertaleData.SetGMS2Version(2022, 1);
+                        break;
+                    case LayerType.Effect:
+                        reader.Position += 7 * 4;
+                        int propertyCount = reader.ReadInt32();
+                        if (nextOffset - reader.AbsPosition != (propertyCount * 3 * 4))
+                            reader.undertaleData.SetGMS2Version(2022, 1);
+                        break;
+                }
+                // Check complete, found and tested a layer.
+                break;
+            }
+
+            reader.Position = returnTo;
+
 
             checkedFor2022_1 = true;
         }
@@ -801,50 +808,52 @@ namespace UndertaleModLib
         private void CheckForImageSpeed(UndertaleReader reader)
         {
             // Check the size of the first GameObject in a room
-            if (reader.undertaleData.IsGameMaker2() && !reader.undertaleData.IsVersionAtLeast(2, 2, 2, 302))
+            if (!reader.undertaleData.IsGameMaker2() || reader.undertaleData.IsVersionAtLeast(2, 2, 2, 302))
             {
-                long returnTo = reader.Position;
-
-                // Iterate over all rooms until a length check is performed
-                int roomCount = reader.ReadInt32();
-                for (uint roomIndex = 0; roomIndex < roomCount; roomIndex++)
-                {
-                    // Advance to room data we're interested in (and grab pointer for next room)
-                    reader.Position = returnTo + 4 + (4 * roomIndex);
-                    uint roomPtr = (uint)reader.ReadInt32();
-                    reader.AbsPosition = roomPtr + (12 * 4);
-
-                    // Get the pointer for this room's object list, as well as pointer to tile list
-                    uint objectListPtr = (uint)reader.ReadInt32();
-                    int tileListPtr = reader.ReadInt32();
-                    reader.AbsPosition = objectListPtr;
-                    int objectCount = reader.ReadInt32();
-                    if (objectCount >= 1)
-                    {
-                        // compare position of first object to second
-                        int firstPtr = reader.ReadInt32();
-                        int secondPtr;
-                        if (objectCount == 1) // tile list starts right after, so it works as an alternate
-                            secondPtr = tileListPtr;
-                        else
-                            secondPtr = reader.ReadInt32();
-
-                        if (secondPtr - firstPtr == 48)
-                        {
-                            reader.undertaleData.SetGMS2Version(2, 2, 2, 302);
-
-                            //"GameObject.ImageSpeed" + "...ImageIndex"
-                            uint newSize = GameObject.ChildObjectsSize + 8;
-                            reader.SetStaticChildObjectsSize(typeof(GameObject), newSize);
-                        }
-                        // Check performed, one way or the other
-                        break;
-                    }
-                    // continue to next room if there are no objects
-                }
-
-                reader.Position = returnTo;
+                checkedForGMS2_2_2_302 = true;
+                return;
             }
+            long returnTo = reader.Position;
+
+            // Iterate over all rooms until a length check is performed
+            int roomCount = reader.ReadInt32();
+            for (uint roomIndex = 0; roomIndex < roomCount; roomIndex++)
+            {
+                // Advance to room data we're interested in (and grab pointer for next room)
+                reader.Position = returnTo + 4 + (4 * roomIndex);
+                uint roomPtr = (uint)reader.ReadInt32();
+                reader.AbsPosition = roomPtr + (12 * 4);
+
+                // Get the pointer for this room's object list, as well as pointer to tile list
+                uint objectListPtr = (uint)reader.ReadInt32();
+                int tileListPtr = reader.ReadInt32();
+                reader.AbsPosition = objectListPtr;
+                int objectCount = reader.ReadInt32();
+                if (objectCount <= 0)
+                {
+                    // No objects, try the next room
+                    continue;
+                }
+                // Compare position of first object to second
+                int firstPtr = reader.ReadInt32();
+                int secondPtr;
+                if (objectCount == 1) // Tile list starts right after, so it works as an alternate
+                    secondPtr = tileListPtr;
+                else
+                    secondPtr = reader.ReadInt32();
+
+                if (secondPtr - firstPtr == 48)
+                {
+                    reader.undertaleData.SetGMS2Version(2, 2, 2, 302);
+
+                    uint newSize = GameObject.ChildObjectsSize + 8;
+                    reader.SetStaticChildObjectsSize(typeof(GameObject), newSize);
+                }
+                // Check performed, one way or the other
+                break;
+            }
+
+            reader.Position = returnTo;
 
             checkedForGMS2_2_2_302 = true;
         }
@@ -1122,68 +1131,74 @@ namespace UndertaleModLib
         private void CheckFor2022_3And5(UndertaleReader reader)
         {
             // Detect GM2022.3
-            if (reader.undertaleData.IsVersionAtLeast(2, 3) && !reader.undertaleData.IsVersionAtLeast(2022, 3))
+            if (!reader.undertaleData.IsVersionAtLeast(2, 3) || reader.undertaleData.IsVersionAtLeast(2022, 3))
             {
-                long positionToReturn = reader.Position;
-
-                // Check for 2022.3 format
-                uint texCount = reader.ReadUInt32();
-                if (texCount == 1) // If no textures exist, this could false positive.
-                {
-                    reader.Position += 16; // Jump to either padding or length, depending on version
-                    if (reader.ReadUInt32() > 0) // Check whether it's padding or length
-                        reader.undertaleData.SetGMS2Version(2022, 3);
-                }
-                else if (texCount > 1)
-                {
-                    uint firstTex = reader.ReadUInt32();
-                    uint secondTex = reader.ReadUInt32();
-                    if (firstTex + 16 == secondTex)
-                        reader.undertaleData.SetGMS2Version(2022, 3);
-                }
-
-                if (reader.undertaleData.IsVersionAtLeast(2022, 3))
-                {
-                    // Also check for 2022.5 format
-                    reader.Position = positionToReturn + 4;
-                    for (uint i = 0; i < texCount; i++)
-                    {
-                        // Go to each texture, and then to each texture's data
-                        reader.Position = positionToReturn + 4 + (i * 4);
-                        reader.AbsPosition = reader.ReadUInt32() + 12; // go to texture, at an offset
-                        reader.AbsPosition = reader.ReadUInt32(); // go to texture data
-                        byte[] header = reader.ReadBytes(4);
-                        if (header.SequenceEqual(UndertaleEmbeddedTexture.TexData.QOIAndBZip2Header))
-                        {
-                            reader.Position += 4; // skip width/height
-                            bool is2022_5 = false;
-                            // Now check the actual BZ2 headers
-                            if (reader.ReadByte() != (byte)'B')
-                                is2022_5 = true;
-                            else if (reader.ReadByte() != (byte)'Z')
-                                is2022_5 = true;
-                            else if (reader.ReadByte() != (byte)'h')
-                                is2022_5 = true;
-                            else
-                            {
-                                reader.Position++;
-                                if (reader.ReadUInt24() != 0x594131) // digits of pi... (block header)
-                                    is2022_5 = true;
-                                else if (reader.ReadUInt24() != 0x595326)
-                                    is2022_5 = true;
-                            }
-
-                            if (is2022_5)
-                                reader.undertaleData.SetGMS2Version(2022, 5);
-
-                            // Checked one QOI+BZ2 texture. No need to check any more
-                            break;
-                        }
-                    }
-                }
-
-                reader.Position = positionToReturn;
+                checkedFor2022_3 = true;
+                return;
             }
+            long positionToReturn = reader.Position;
+
+            // Check for 2022.3 format
+            bool isGM2022_3 = false;
+            uint texCount = reader.ReadUInt32();
+            if (texCount == 1) // If no textures exist, this could false positive.
+            {
+                reader.Position += 16; // Jump to either padding or length, depending on version
+                if (reader.ReadUInt32() > 0) // Check whether it's padding or length
+                    isGM2022_3 = true;
+            }
+            else if (texCount > 1)
+            {
+                uint firstTex = reader.ReadUInt32();
+                uint secondTex = reader.ReadUInt32();
+                if (firstTex + 16 == secondTex)
+                    isGM2022_3 = true;
+            }
+
+            if (isGM2022_3)
+            {
+                reader.undertaleData.SetGMS2Version(2022, 3);
+                // Also check for 2022.5 format
+                reader.Position = positionToReturn + 4;
+                for (uint i = 0; i < texCount; i++)
+                {
+                    // Go to each texture, and then to each texture's data
+                    reader.Position = positionToReturn + 4 + (i * 4);
+                    reader.AbsPosition = reader.ReadUInt32() + 12; // go to texture, at an offset
+                    reader.AbsPosition = reader.ReadUInt32(); // go to texture data
+                    byte[] header = reader.ReadBytes(4);
+                    if (!header.SequenceEqual(UndertaleEmbeddedTexture.TexData.QOIAndBZip2Header))
+                    {
+                        // Nothing useful, check the next texture
+                        continue;
+                    }
+                    reader.Position += 4; // Skip width/height
+                    bool is2022_5 = false;
+                    // Now check the actual BZ2 headers
+                    if (reader.ReadByte() != (byte)'B')
+                        is2022_5 = true;
+                    else if (reader.ReadByte() != (byte)'Z')
+                        is2022_5 = true;
+                    else if (reader.ReadByte() != (byte)'h')
+                        is2022_5 = true;
+                    else
+                    {
+                        reader.Position++;
+                        if (reader.ReadUInt24() != 0x594131) // Digits of pi... (block header)
+                            is2022_5 = true;
+                        else if (reader.ReadUInt24() != 0x595326)
+                            is2022_5 = true;
+                    }
+
+                    if (is2022_5)
+                        reader.undertaleData.SetGMS2Version(2022, 5);
+
+                    // Checked one QOI+BZ2 texture. No need to check any more
+                    break;
+                }
+            }
+
+            reader.Position = positionToReturn;
 
             checkedFor2022_3 = true;
         }
@@ -1233,8 +1248,7 @@ namespace UndertaleModLib
         private void CheckForGMS2_0_6(UndertaleReader reader)
         {
             bool atLeastGMS2_0 = reader.undertaleData.IsGameMaker2();
-            bool atLeastGMS2_2 = reader.undertaleData.IsVersionAtLeast(2, 2);
-            if (!atLeastGMS2_0 || atLeastGMS2_2 || reader.undertaleData.IsVersionAtLeast(2, 0, 6))
+            if (!atLeastGMS2_0 || reader.undertaleData.IsVersionAtLeast(2, 0, 6))
                 return;
 
             long returnPos = reader.Position;
@@ -1252,7 +1266,7 @@ namespace UndertaleModLib
                 uint firstPtr = reader.ReadUInt32();
                 uint secondPtr = reader.ReadUInt32();
 
-                if (atLeastGMS2_0 && !atLeastGMS2_2) // 2 < version < 2.2
+                if (atLeastGMS2_0) // 2 < version < 2.2
                 {
                     if (secondPtr - firstPtr == 8) // "Scaled" + "_textureData" -> 8
                         noGeneratedMips = true;
@@ -1392,7 +1406,7 @@ namespace UndertaleModLib
         private void CheckFor2022_9And2023(UndertaleReader reader)
         {
             if (!reader.undertaleData.IsVersionAtLeast(2, 3)
-                || reader.undertaleData.IsVersionAtLeast(2022, 9) || reader.undertaleData.IsVersionAtLeast(2023, 1))
+                || reader.undertaleData.IsVersionAtLeast(2022, 9))
             {
                 checkedFor2022_9 = true;
                 return;
@@ -1514,13 +1528,12 @@ namespace UndertaleModLib
             if (reader.ReadUInt32() != 0) // in 2.3 a int with the value of 0 would be set here,
             {                             // it cannot be version 2.3 if this value isn't 0
                 reader.undertaleData.SetGMS2Version(2, 3, 1);
-                reader.Position -= 4;
             }
             else
             {
                 if (reader.ReadUInt32() == 0)                      // At all points (besides the first one)
                     reader.undertaleData.SetGMS2Version(2, 3, 1);  // if BezierX0 equals to 0 (the above check)
-                reader.Position -= 8;                              // then BezierY0 equals to 0 as well (the current check)
+                                                                   // then BezierY0 equals to 0 as well (the current check)
             }
 
             reader.Position = returnTo;
