@@ -231,7 +231,6 @@ for (var i = 0; i < Data.Code.Count; i++)
     locals.Locals.Add(argsLocal);
 
     Data.Code[i].LocalsCount = 1;
-    Data.Code[i].GenerateLocalVarDefinitions(Data.Code[i].FindReferencedLocalVars(), locals); // Dunno if we actually need this line, but it seems to work?
     Data.Code[i].WeirdLocalFlag = false;
     Data.CodeLocals.Add(locals);
 }

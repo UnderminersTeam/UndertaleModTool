@@ -15,6 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using UndertaleModLib;
 using UndertaleModLib.Models;
+using UndertaleModTool.Windows;
 
 namespace UndertaleModTool
 {
@@ -23,11 +24,33 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertaleStringReference : UserControl
     {
+        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+
         public static DependencyProperty ObjectReferenceProperty =
             DependencyProperty.Register("ObjectReference", typeof(UndertaleString),
                 typeof(UndertaleStringReference),
                 new FrameworkPropertyMetadata(null,
-                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (sender, e) =>
+                    {
+                        var inst = sender as UndertaleStringReference;
+                        if (inst is null)
+                            return;
+
+                        if (e.NewValue is not null)
+                        {
+                            try
+                            {
+                                if (inst.Resources["contextMenu"] is not ContextMenu menu)
+                                    return;
+
+                                menu.DataContext = inst.ObjectReference;
+                                inst.ObjectText.ContextMenu = menu;
+                            }
+                            catch { }
+                        }
+                        else
+                            inst.ObjectText.ContextMenu = null;
+                    }));
 
         public UndertaleString ObjectReference
         {
@@ -42,7 +65,60 @@ namespace UndertaleModTool
 
         private void Details_Click(object sender, RoutedEventArgs e)
         {
-            (Application.Current.MainWindow as MainWindow).ChangeSelection(ObjectReference);
+            mainWindow.ChangeSelection(ObjectReference);
+        }
+        private void Details_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (ObjectReference is null)
+                return;
+
+            if (e.ChangedButton == MouseButton.Middle && e.ButtonState == MouseButtonState.Pressed)
+                mainWindow.ChangeSelection(ObjectReference, true);
+        }
+        private void OpenInNewTabItem_Click(object sender, RoutedEventArgs e)
+        {
+            mainWindow.ChangeSelection(ObjectReference, true);
+        }
+        private void MenuItem_ContextMenuOpened(object sender, RoutedEventArgs e)
+        {
+            var menu = sender as ContextMenu;
+            foreach (var item in menu.Items)
+            {
+                var menuItem = item as MenuItem;
+                if ((menuItem.Header as string) == "Find all references")
+                {
+                    Type objType = menu.DataContext.GetType();
+                    menuItem.Visibility = UndertaleResourceReferenceMap.IsTypeReferenceable(objType)
+                                          ? Visibility.Visible : Visibility.Collapsed;
+
+                    break;
+                }
+            }
+        }
+        private void FindAllReferencesItem_Click(object sender, RoutedEventArgs e)
+        {
+            var obj = (sender as FrameworkElement)?.DataContext;
+            if (obj is not UndertaleResource res)
+            {
+                mainWindow.ShowError("The selected object is not an \"UndertaleResource\".");
+                return;
+            }
+
+            FindReferencesTypesDialog dialog = null;
+            try
+            {
+                dialog = new(res, mainWindow.Data);
+                dialog.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                mainWindow.ShowError("An error occured in the object references related window.\n" +
+                                     $"Please report this on GitHub.\n\n{ex}");
+            }
+            finally
+            {
+                dialog?.Close();
+            }
         }
 
         private void Remove_Click(object sender, RoutedEventArgs e)

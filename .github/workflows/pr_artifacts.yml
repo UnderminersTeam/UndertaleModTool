@@ -5,6 +5,9 @@ on:
       - Publish PR
     types:
       - completed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}-artifacts
+  cancel-in-progress: true
 jobs:
   pr_Comment:
     if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'

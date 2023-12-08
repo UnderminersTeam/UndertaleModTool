@@ -14,8 +14,11 @@ namespace UndertaleModLib.Models;
 /// anything outside of that is just transparent. <br/>
 /// <see cref="SourceX"/>, <see cref="SourceY"/>, <see cref="SourceWidth"/> and <see cref="SourceHeight"/> are part of the texture page which
 /// are drawn over <see cref="TargetX"/>, <see cref="TargetY"/>, <see cref="TargetWidth"/>, <see cref="TargetHeight"/>.</remarks>
-public class UndertaleTexturePageItem : UndertaleNamedResource, INotifyPropertyChanged, IDisposable
+public class UndertaleTexturePageItem : UndertaleNamedResource, INotifyPropertyChanged, IStaticChildObjectsSize, IDisposable
 {
+    /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+    public static readonly uint ChildObjectsSize = 22;
+
     /// <summary>
     /// The name of the texture page item.
     /// </summary>

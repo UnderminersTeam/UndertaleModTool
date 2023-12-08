@@ -5,6 +5,10 @@ on:
     branches: [ master ]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   build_gui:
 
@@ -12,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest]
-        configuration: [Debug]
+        configuration: [Debug, Release]
         bundled: [true]
         singlefile: [true, false]
 
@@ -41,11 +45,12 @@ jobs:
         cp ./LICENSE.txt ./${{ matrix.os }}
     - name: Create zip for nightly release Windows GUI
       run: |
-        7z a -tzip GUI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip ${{ matrix.os }} -mx0 
+        7z a -tzip GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip ./${{ matrix.os }}/* -mx0 
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-          path: GUI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip
+          name: GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}
+          path: GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip
 
   build_cli:
 
@@ -53,7 +58,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
-        configuration: [Debug]
+        configuration: [Debug, Release]
         bundled: [true]
         include:
           - os: ubuntu-latest
@@ -83,11 +88,12 @@ jobs:
         cp ./LICENSE.txt ./CLI-${{ matrix.os }}/
     - name: Create zip for nightly release CLI
       run: |
-        7z a -tzip CLI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}.zip CLI-${{ matrix.os }} -mx0 
+        7z a -tzip CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}.zip ./CLI-${{ matrix.os }}/* -mx0 
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-          path: CLI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}.zip
+          name: CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}
+          path: CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}.zip
 
   upload:
 
@@ -97,7 +103,7 @@ jobs:
     - name: Download artifacts
       uses: actions/download-artifact@v2
     - name: Delete tag and release
-      uses: dev-drprasad/delete-tag-and-release@v0.2.0
+      uses: dev-drprasad/delete-tag-and-release@v1.0
       with:
         delete_release: true # default: false
         tag_name: bleeding-edge # tag name to delete
@@ -109,9 +115,61 @@ jobs:
         tag_name: bleeding-edge
         name: Bleeding Edge
         prerelease: false
+        fail_on_unmatched_files: true
         files: |
-          artifact/*
+          */*
         body: | 
           This is an automatically updating **bleeding edge** build of UndertaleModTool. There *will* be bugs! If you encounter any, please make an issue on GitHub or join the Underminers Discord for more help!
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Check and fix the release
+      uses: actions/github-script@v3
+      with:
+        script: |
+          // Wait 10 seconds
+          await new Promise(r => setTimeout(r, 10000));
+
+          const {owner, repo} = context.repo;
+          const listReleasesResponse = await github.repos.listReleases({
+            owner,
+            repo
+          });
+          
+          if (listReleasesResponse.status !== 200)
+            throw new Error("Error listing releases");
+          
+          let release_id;
+          for (let release of listReleasesResponse.data) {
+            if (release.tag_name !== "bleeding-edge")
+              continue;
+
+            console.log(release);
+
+            if (!release.draft) {
+              console.log("Found published bleeding edge release - no need to do anything.");
+              return;
+            }
+
+            if (release_id == undefined)
+              release_id = release.id;
+          }
+
+          if (release_id == undefined)
+            throw new Error("The bleeding edge release was not found.");
+          
+          console.warn("Found the bleeding edge release that is draft.\nTrying to publish...");
+
+          try {
+            await github.repos.updateRelease({owner, repo, release_id, draft: false});
+          }
+          catch (err) {
+            if ('status' in err && err.status == 422) {
+              console.log('A non-draft release already exists?');
+              console.error(err);
+              return;
+            }
+            else
+              throw err;
+          }
+
+          console.log("The draft release was published successfully.");

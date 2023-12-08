@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 
 namespace UndertaleModLib.Models;
 
@@ -10,6 +8,9 @@ namespace UndertaleModLib.Models;
 [PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleFeatureFlags : UndertaleObject, IDisposable
 {
+    /// <summary>
+    /// The list of feature flags.
+    /// </summary>
     public UndertaleSimpleListString List { get; set; }
 
 
@@ -24,6 +25,12 @@ public class UndertaleFeatureFlags : UndertaleObject, IDisposable
     {
         List = new UndertaleSimpleListString();
         List.Unserialize(reader);
+    }
+
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        return UndertaleSimpleListString.UnserializeChildObjectCount(reader);
     }
 
     /// <inheritdoc/>

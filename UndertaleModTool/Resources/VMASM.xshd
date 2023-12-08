@@ -13,15 +13,15 @@
     <!-- This is the main ruleset. -->
     <RuleSet>
         <Rule color="Comment">
-            ^;.*|(^|\n)\..*
+            ^;.*|(?:^|\n)\..*
         </Rule>
 
         <Rule color="Label">
-            ^(\:|\>).*|(^|\n)\..*
+            ^(?:\:|\>).*|(?:^|\n)\..*
         </Rule>
 
         <Rule color="String">
-            \"(\\.|[^"\\])*\"@\d+
+            \"(?:\\.|[^"\\])*\"@\d+
         </Rule>
         
         <Rule color="Label">
@@ -43,7 +43,7 @@
 
         <!-- Addresses -->
         <Rule foreground="#E0B0B0">
-            (^|\n)\d+(?=:)
+            (?:^|\n)\d+(?=:)
         </Rule>
 
         <!-- Various other things -->
@@ -60,7 +60,7 @@
             \b0x[0-9a-fA-F]+  # hex number
         |   \$[0-9a-fA-F]+   # alternate hex number
         |
-            (    -?\d+(\.[0-9]+)?  # digits with optional . and -
+            (?:    -?\d+(?:\.[0-9]+)?  # digits with optional . and -
             |    -?\.[0-9]+        # start with ., then digits
             )
             \b

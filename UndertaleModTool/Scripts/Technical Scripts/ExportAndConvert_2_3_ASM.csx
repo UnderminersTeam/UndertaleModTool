@@ -73,7 +73,6 @@ void DumpCode()
                     codeLocalsCount += 1;
                 }
                 code_orig.LocalsCount = codeLocalsCount;
-                code_orig.GenerateLocalVarDefinitions(code_orig.FindReferencedLocalVars(), locals); // Dunno if we actually need this line, but it seems to work?
                 code_orig.ParentEntry = null;
             }
             else
@@ -83,7 +82,6 @@ void DumpCode()
                 argsLocal.Index = 0;
                 locals.Locals.Add(argsLocal);
                 code_orig.LocalsCount = 1;
-                code_orig.GenerateLocalVarDefinitions(code_orig.FindReferencedLocalVars(), locals); // Dunno if we actually need this line, but it seems to work?
             }
             Data.CodeLocals.Add(locals);
         }

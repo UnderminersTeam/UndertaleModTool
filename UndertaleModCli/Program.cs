@@ -341,8 +341,15 @@ public partial class Program : IScriptInterface
             return EXIT_FAILURE;
         }
 
+        if (program.Data.IsYYC())
+        {
+            Console.WriteLine("The game was made with YYC (YoYo Compiler), which means that the code was compiled into the executable. " +
+                              "There is thus no code to dump. Exiting.");
+            return EXIT_SUCCESS;
+        }
+        
         // If user provided code to dump, dump code
-        if ((options.Code?.Length > 0) && (program.Data.Code.Count > 0))
+        if ((options.Code?.Length > 0) && (program.Data.Code?.Count > 0))
         {
             // If user wanted to dump everything, do that, otherwise only dump what user provided
             string[] codeArray;
@@ -572,8 +579,17 @@ public partial class Program : IScriptInterface
         Console.WriteLine($"{Data.Paths.Count} Paths, {Data.Scripts.Count} Scripts, {Data.Shaders.Count} Shaders");
         Console.WriteLine($"{Data.Fonts.Count} Fonts, {Data.Timelines.Count} Timelines, {Data.GameObjects.Count} Game Objects");
         Console.WriteLine($"{Data.Rooms.Count} Rooms, {Data.Extensions.Count} Extensions, {Data.TexturePageItems.Count} Texture Page Items");
-        Console.WriteLine($"{Data.Code.Count} Code Entries, {Data.Variables.Count} Variables, {Data.Functions.Count} Functions");
-        Console.WriteLine($"{Data.CodeLocals.Count} Code locals, {Data.Strings.Count} Strings, {Data.EmbeddedTextures.Count} Embedded Textures");
+        if (!Data.IsYYC())
+        {
+            Console.WriteLine($"{Data.Code.Count} Code Entries, {Data.Variables.Count} Variables, {Data.Functions.Count} Functions");
+            Console.WriteLine($"{Data.CodeLocals.Count} Code locals, {Data.Strings.Count} Strings, {Data.EmbeddedTextures.Count} Embedded Textures");
+        }
+        else
+        {
+            Console.WriteLine("Unknown amount of Code entries and Code locals");
+        }
+        Console.WriteLine($"{Data.Strings.Count} Strings");
+        Console.WriteLine($"{Data.EmbeddedTextures.Count} Embedded Textures");
         Console.WriteLine($"{Data.EmbeddedAudio.Count} Embedded Audio");
 
         if (IsInteractive) Pause();
@@ -792,7 +808,7 @@ public partial class Program : IScriptInterface
     private static string RemoveQuotes(string s)
 
     {
-        return s.TrimStart('"').TrimEnd('"');
+        return s.Trim('"', '\'');
     }
 
     /// <summary>

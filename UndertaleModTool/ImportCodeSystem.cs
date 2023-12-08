@@ -107,6 +107,9 @@ namespace UndertaleModTool
         }
         public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
         {
+            if (code.ParentEntry is not null)
+                return;
+
             EnsureDataLoaded();
 
             string passBack = "";
@@ -201,6 +204,9 @@ namespace UndertaleModTool
                 code.Name = Data.Strings.MakeString(codeName);
                 Data.Code.Add(code);
             }
+            else if (code.ParentEntry is not null)
+                return;
+
             if (Data?.GeneralInfo.BytecodeVersion > 14 && Data.CodeLocals.ByName(codeName) == null)
             {
                 UndertaleCodeLocals locals = new UndertaleCodeLocals();
@@ -213,7 +219,6 @@ namespace UndertaleModTool
                 locals.Locals.Add(argsLocal);
 
                 code.LocalsCount = 1;
-                code.GenerateLocalVarDefinitions(code.FindReferencedLocalVars(), locals); // Dunno if we actually need this line, but it seems to work?
                 Data.CodeLocals.Add(locals);
             }
             if (doParse)
@@ -313,7 +318,7 @@ namespace UndertaleModTool
                             methodNumberStr = afterPrefix.Substring(afterPrefix.LastIndexOf("_Collision_") + s2.Length, afterPrefix.Length - (afterPrefix.LastIndexOf("_Collision_") + s2.Length));
                             methodName = "Collision";
                             // GMS 2.3+ use the object name for the one colliding, which is rather useful.
-                            if (Data.GMS2_3)
+                            if (Data.IsVersionAtLeast(2, 3))
                             {
                                 if (Data.GameObjects.ByName(methodNumberStr) != null)
                                 {
@@ -335,13 +340,6 @@ namespace UndertaleModTool
                                         gameObj.Name = Data.Strings.MakeString(objName);
                                         Data.GameObjects.Add(gameObj);
                                     }
-                                }
-                                if (Data.GameObjects.ByName(methodNumberStr) != null)
-                                {
-                                    // It *needs* to have a valid value, make the user specify one, silly.
-                                    List<uint> possible_values = new List<uint>();
-                                    possible_values.Add(uint.MaxValue);
-                                    ReassignGUIDs(methodNumberStr, ReduceCollisionValue(possible_values));
                                 }
                             }
                             else
@@ -410,6 +408,9 @@ namespace UndertaleModTool
         void SafeImport(string codeName, string gmlCode, bool IsGML, bool destroyASM = true, bool CheckDecompiler = false, bool throwOnError = false)
         {
             UndertaleCode code = Data.Code.ByName(codeName);
+            if (code?.ParentEntry is not null)
+                return;
+
             try
             {
                 if (IsGML)

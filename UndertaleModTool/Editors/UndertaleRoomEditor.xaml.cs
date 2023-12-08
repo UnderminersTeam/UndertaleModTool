@@ -46,6 +46,7 @@ namespace UndertaleModTool
         public static readonly PropertyInfo visualOffProp = typeof(Canvas).GetProperty("VisualOffset", BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
         private static readonly Regex trailingNumberRegex = new(@"\d+$", RegexOptions.Compiled);
+        private readonly Type[] movableTypes = { typeof(Layer), typeof(GameObject), typeof(Tile), typeof(SpriteInstance), typeof(SequenceInstance), typeof(ParticleSystemInstance) };
 
         // used for the flashing animation when a room object is selected
         public static Dictionary<UndertaleObject, FrameworkElement> ObjElemDict { get; } = new();
@@ -69,6 +70,7 @@ namespace UndertaleModTool
 
         private ConcurrentDictionary<uint, Layer> roomObjDict = new();
         private ConcurrentDictionary<SpriteInstance, Layer> sprInstDict = new();
+        private ConcurrentDictionary<ParticleSystemInstance, Layer> partSysInstDict = new();
 
         public UndertaleRoomEditor()
         {
@@ -129,11 +131,13 @@ namespace UndertaleModTool
 
         private void UndertaleRoomEditor_Loaded(object sender, RoutedEventArgs e)
         {
-            RoomRootItem.IsSelected = true;
+            if (ObjectEditor.Content is null)
+                RoomRootItem.IsSelected = true;
         }
         private void UndertaleRoomEditor_Unloaded(object sender, RoutedEventArgs e)
         {
             ObjElemDict.Clear();
+            ParticleSystemRectConverter.ClearDict();
         }
 
         private void UndertaleRoomEditor_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -145,8 +149,18 @@ namespace UndertaleModTool
                 RoomRootItem.IsSelected = true;
 
                 ScrollViewer viewer = MainWindow.FindVisualChild<ScrollViewer>(RoomObjectsTree);
-                viewer.ScrollToVerticalOffset(0);
-                viewer.ScrollToHorizontalOffset(0);
+                if (viewer is not null)
+                {
+                    viewer.ScrollToTop();
+                    viewer.ScrollToLeftEnd();
+                }
+
+                RoomGraphics.ClearValue(LayoutTransformProperty);
+                _ = Dispatcher.InvokeAsync(() =>
+                {
+                    RoomGraphicsScroll.ScrollToTop();
+                    RoomGraphicsScroll.ScrollToLeftEnd();
+                }, DispatcherPriority.ContextIdle);
             }
 
             UndertaleCachedImageLoader.Reset();
@@ -154,6 +168,7 @@ namespace UndertaleModTool
             ObjElemDict.Clear();
             roomObjDict.Clear();
             sprInstDict.Clear();
+            partSysInstDict.Clear();
 
             if (DataContext is UndertaleRoom room)
             {
@@ -179,9 +194,26 @@ namespace UndertaleModTool
 
                             foreach (Tile tile in layer.AssetsData.LegacyTiles)
                                 roomObjDict.TryAdd(tile.InstanceID, layer);
+
+                            if ((layer.AssetsData.ParticleSystems?.Count ?? 0) > 0)
+                            {
+                                foreach (ParticleSystemInstance partSys in layer.AssetsData.ParticleSystems)
+                                    partSysInstDict.TryAdd(partSys, layer);
+                                    
+                                var particleSystems = layer.AssetsData.ParticleSystems.Select(x => x.ParticleSystem);
+                                ParticleSystemRectConverter.Initialize(particleSystems);
+                            }
                         }
                         else if (layer.LayerType == LayerType.Instances)
                         {
+                            if (layer.InstancesData.AreInstancesUnresolved())
+                            {
+                                _ = mainWindow.Dispatcher.InvokeAsync(() =>
+                                {
+                                    mainWindow.ShowWarning($"The instances list of layer \"{layer.LayerName.Content}\" is empty, but the layer has the instances ID.");
+                                }, DispatcherPriority.ContextIdle);
+                            }
+
                             foreach (GameObject obj in layer.InstancesData.Instances)
                                 roomObjDict.TryAdd(obj.InstanceID, layer);
                         }
@@ -203,15 +235,36 @@ namespace UndertaleModTool
                 currStoryboard.Remove(this);
             }
 
+            bool isMovable = false;
+
             // I can't bind it directly because then clicking on the headers makes WPF explode because it tries to attach the header as child of ObjectEditor
             // TODO: find some better workaround
             if (e.NewValue == RoomRootItem)
             {
                 ObjectEditor.Content = DataContext;
+                MoveButtonsPanel.IsEnabled = false;
             }
             else if (e.NewValue is UndertaleObject obj)
             {
                 ObjectEditor.Content = obj;
+
+                if (obj is GameObject)
+                {
+                    var room = DataContext as UndertaleRoom;
+                    if (room?.Flags.HasFlag(RoomEntryFlags.IsGMS2) == true)
+                    {
+                        // Check if the selected game object is in the "Game objects (from all layers)" list
+                        var objectItem = GameObjItems.ItemContainerGenerator.ContainerFromItem(obj) as TreeViewItem;
+                        if (objectItem?.IsSelected != true)
+                            isMovable = true;
+                    }
+                    else
+                        isMovable = true;
+                }
+                else
+                    isMovable = movableTypes.Contains(obj.GetType());
+
+                MoveButtonsPanel.IsEnabled = isMovable;
 
                 try
                 {
@@ -293,6 +346,7 @@ namespace UndertaleModTool
                 {
                     Tile or GameObject => roomObjDict[(clickedObj as IRoomObject).InstanceID],
                     SpriteInstance spr => sprInstDict[spr],
+                    ParticleSystemInstance partSys => partSysInstDict[partSys],
                     _ => null
                 };
 
@@ -303,6 +357,7 @@ namespace UndertaleModTool
                     GameObject => layer is null ? room.GameObjects : layer.InstancesData.Instances,
                     Tile => layer is null ? room.Tiles : layer.AssetsData.LegacyTiles,
                     SpriteInstance => layer.AssetsData.Sprites,
+                    ParticleSystemInstance => layer.AssetsData.ParticleSystems,
                     _ => null
                 };
                 if (collection is not null)
@@ -312,6 +367,7 @@ namespace UndertaleModTool
                     {
                         IRoomObject roomObj => new(roomObj.X, roomObj.Y),
                         SpriteInstance sprInst => new(sprInst.X, sprInst.Y),
+                        ParticleSystemInstance partSysInst => new(partSysInst.X, partSysInst.Y),
                         _ => new()
                     };
                     clickedObj = AddObjectCopy(room, layer, clickedObj, true, index, pos);
@@ -323,7 +379,7 @@ namespace UndertaleModTool
             SelectObject(clickedObj);
 
             var mousePos = e.GetPosition(roomCanvas);
-            if (clickedObj is GameObject || clickedObj is Tile || clickedObj is SpriteInstance)
+            if (clickedObj is GameObject || clickedObj is Tile || clickedObj is SpriteInstance || clickedObj is ParticleSystemInstance)
             {
                 movingObj = clickedObj;
                 if (movingObj is GameObject)
@@ -343,8 +399,8 @@ namespace UndertaleModTool
                         PreCreateCode = other.PreCreateCode
                     };
                     undoStack.Push(undoObj);
-                    hotpointX = mousePos.X - (movingObj as GameObject).X;
-                    hotpointY = mousePos.Y - (movingObj as GameObject).Y;
+                    hotpointX = mousePos.X - other.X;
+                    hotpointY = mousePos.Y - other.Y;
                 }
                 else if (movingObj is Tile)
                 {
@@ -366,8 +422,8 @@ namespace UndertaleModTool
                         Color = other.Color
                     };
                     undoStack.Push(undoObj);
-                    hotpointX = mousePos.X - (movingObj as Tile).X;
-                    hotpointY = mousePos.Y - (movingObj as Tile).Y;
+                    hotpointX = mousePos.X - other.X;
+                    hotpointY = mousePos.Y - other.Y;
                 }
                 else if (movingObj is SpriteInstance)
                 {
@@ -384,11 +440,29 @@ namespace UndertaleModTool
                         AnimationSpeed = other.AnimationSpeed,
                         AnimationSpeedType = other.AnimationSpeedType,
                         FrameIndex = other.FrameIndex,
-                        Rotation = other.Rotation,
+                        Rotation = other.Rotation
                     };
                     undoStack.Push(undoObj);
-                    hotpointX = mousePos.X - (movingObj as SpriteInstance).X;
-                    hotpointY = mousePos.Y - (movingObj as SpriteInstance).Y;
+                    hotpointX = mousePos.X - other.X;
+                    hotpointY = mousePos.Y - other.Y;
+                }
+                else if (movingObj is ParticleSystemInstance)
+                {
+                    var other = clickedObj as ParticleSystemInstance;
+                    var undoObj = new ParticleSystemInstance
+                    {
+                        Name = other.Name,
+                        ParticleSystem = other.ParticleSystem,
+                        X = other.X,
+                        Y = other.Y,
+                        ScaleX = other.ScaleX,
+                        ScaleY = other.ScaleY,
+                        Color = other.Color,
+                        Rotation = other.Rotation
+                    };
+                    undoStack.Push(undoObj);
+                    hotpointX = mousePos.X - other.X;
+                    hotpointY = mousePos.Y - other.Y;
                 }
             }
         }
@@ -508,7 +582,7 @@ namespace UndertaleModTool
                     AnimationSpeed = sprInst.AnimationSpeed,
                     AnimationSpeedType = sprInst.AnimationSpeedType,
                     FrameIndex = sprInst.FrameIndex,
-                    Rotation = sprInst.Rotation,
+                    Rotation = sprInst.Rotation
                 };
 
                 newObj = newSprInst;
@@ -518,6 +592,35 @@ namespace UndertaleModTool
                     int index = insertIndex > -1 ? insertIndex : layer.AssetsData.Sprites.Count;
                     layer.AssetsData.Sprites.Insert(index, newSprInst);
                     sprInstDict.TryAdd(newSprInst, layer);
+                }
+            }
+            else if (obj is ParticleSystemInstance partSysInst)
+            {
+                if (layer != null && layer.AssetsData == null)
+                {
+                    mainWindow.ShowError("Please select an assets layer.");
+                    return null;
+                }
+
+                var newPartSysInst = new ParticleSystemInstance
+                {
+                    Name = ParticleSystemInstance.GenerateRandomName(mainWindow.Data),
+                    ParticleSystem = partSysInst.ParticleSystem,
+                    X = (int)pos.X,
+                    Y = (int)pos.Y,
+                    ScaleX = partSysInst.ScaleX,
+                    ScaleY = partSysInst.ScaleY,
+                    Color = partSysInst.Color,
+                    Rotation = partSysInst.Rotation
+                };
+
+                newObj = newPartSysInst;
+
+                if (layer != null)
+                {
+                    int index = insertIndex > -1 ? insertIndex : layer.AssetsData.ParticleSystems.Count;
+                    layer.AssetsData.ParticleSystems.Insert(index, newPartSysInst);
+                    partSysInstDict.TryAdd(newPartSysInst, layer);
                 }
             }
 
@@ -540,6 +643,7 @@ namespace UndertaleModTool
                 {
                     Tile or GameObject => roomObjDict[(other as IRoomObject).InstanceID],
                     SpriteInstance spr => sprInstDict[spr],
+                    ParticleSystemInstance partSys => partSysInstDict[partSys],
                     _ => null
                 };
 
@@ -621,20 +725,25 @@ namespace UndertaleModTool
                 tgtX = ((tgtX + gridWidth  / 2) / gridWidth ) * gridWidth;
                 tgtY = ((tgtY + gridHeight / 2) / gridHeight) * gridHeight;
 
-                if (movingObj is GameObject)
+                if (movingObj is GameObject gameObj)
                 {
-                    (movingObj as GameObject).X = tgtX;
-                    (movingObj as GameObject).Y = tgtY;
+                    gameObj.X = tgtX;
+                    gameObj.Y = tgtY;
                 }
-                else if (movingObj is Tile)
+                else if (movingObj is Tile tile)
                 {
-                    (movingObj as Tile).X = tgtX;
-                    (movingObj as Tile).Y = tgtY;
+                    tile.X = tgtX;
+                    tile.Y = tgtY;
                 }
-                else if (movingObj is SpriteInstance)
+                else if (movingObj is SpriteInstance spr)
                 {
-                    (movingObj as SpriteInstance).X = tgtX;
-                    (movingObj as SpriteInstance).Y = tgtY;
+                    spr.X = tgtX;
+                    spr.Y = tgtY;
+                }
+                else if (movingObj is ParticleSystemInstance partSys)
+                {
+                    partSys.X = tgtX;
+                    partSys.Y = tgtY;
                 }
             }
         }
@@ -698,9 +807,8 @@ namespace UndertaleModTool
         private void Canvas_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             e.Handled = true;
-            var element = sender as ItemsControl;
             var mousePos = e.GetPosition(RoomGraphics);
-            var transform = element.LayoutTransform as MatrixTransform;
+            var transform = RoomGraphics.LayoutTransform as MatrixTransform;
             var matrix = transform.Matrix;
             var scale = e.Delta >= 0 ? 1.1 : (1.0 / 1.1); // choose appropriate scaling factor
 
@@ -708,7 +816,7 @@ namespace UndertaleModTool
             {
                 matrix.ScaleAtPrepend(scale, scale, mousePos.X, mousePos.Y);
             }
-            element.LayoutTransform = new MatrixTransform(matrix);
+            RoomGraphics.LayoutTransform = new MatrixTransform(matrix);
         }
 
         private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
@@ -738,7 +846,13 @@ namespace UndertaleModTool
         }
 
         private UndertaleObject selectedObject;
-        private void SelectObject(UndertaleObject obj)
+
+        /// <summary>
+        /// Selects the given object inside the TreeView.
+        /// </summary>
+        /// <param name="obj">the object to select.</param>
+        /// <param name="focus">whether to focus on the object after selcting it.</param>
+        private void SelectObject(UndertaleObject obj, bool focus = true)
         {
             // TODO: enable virtualizing of RoomObjectsTree and make this method work with it
 
@@ -814,6 +928,15 @@ namespace UndertaleModTool
                         resList = resLayer.AssetsData.Sprites;
                         resListView = LayerItems.ItemContainerGenerator.ContainerFromItem(resLayer) as TreeViewItem;
                         break;
+
+                    case ParticleSystemInstance partSys:
+                        resLayer = room.Layers.AsParallel()
+                                              .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
+                                              .FirstOrDefault(l => l.LayerType is LayerType.Assets
+                                                  && (l.AssetsData.ParticleSystems?.Any(x => x.Name == partSys.Name) ?? false));
+                        resList = resLayer.AssetsData.ParticleSystems;
+                        resListView = LayerItems.ItemContainerGenerator.ContainerFromItem(resLayer) as TreeViewItem;
+                        break;
                 }
 
                 if (resList is null || resListView is null)
@@ -842,7 +965,8 @@ namespace UndertaleModTool
                 if (resListView.ItemContainerGenerator.ContainerFromItem(obj1) is TreeViewItem resItem)
                 {
                     resItem.IsSelected = true;
-                    resItem.Focus();
+                    if (focus)
+                        resItem.Focus();
 
                     mainTreeViewer.UpdateLayout();
                     mainTreeViewer.ScrollToHorizontalOffset(0);
@@ -978,150 +1102,80 @@ namespace UndertaleModTool
 
         private void RoomObjectsTree_KeyDown(object sender, KeyEventArgs e)
         {
+            UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
+
             if (e.Key == Key.Delete)
-            {
-                UndertaleRoom room = this.DataContext as UndertaleRoom;
-                UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
-
-                if (selectedObj is Background bg)
-                {
-                    bg.Enabled = false;
-                    bg.BackgroundDefinition = null;
-
-                    ObjectEditor.Content = null;
-                }
-                else if (selectedObj is View view)
-                {
-                    view.Enabled = false;
-
-                    ObjectEditor.Content = null;
-                }
-                else if (selectedObj is Tile tile)
-                {
-                    if (mainWindow.IsGMS2 == Visibility.Visible)
-                    {
-                        foreach (var layer in room.Layers)
-                            if (layer.AssetsData != null)
-                                layer.AssetsData.LegacyTiles.Remove(tile);
-                        roomObjDict.Remove(tile.InstanceID, out _);
-                    }
-
-                    room.Tiles.Remove(tile);
-
-                    ObjectEditor.Content = null;
-                }
-                else if (selectedObj is GameObject gameObj)
-                {
-                    if (mainWindow.IsGMS2 == Visibility.Visible)
-                    {
-                        foreach (var layer in room.Layers)
-                            if (layer.InstancesData != null)
-                                layer.InstancesData.Instances.Remove(gameObj);
-                        roomObjDict.Remove(gameObj.InstanceID, out _);
-                    }
-
-                    room.GameObjects.Remove(gameObj);
-
-                    ObjectEditor.Content = null;
-                }
-                else if (selectedObj is SpriteInstance sprInst)
-                {
-                    foreach (var layer in room.Layers)
-                        if (layer.AssetsData != null)
-                            layer.AssetsData.Sprites.Remove(sprInst);
-
-                    sprInstDict.Remove(sprInst, out _);
-
-                    ObjectEditor.Content = null;
-                }
-                else if (selectedObj is Layer layer)
-                {
-                    if (layer.InstancesData != null)
-                        foreach (var go in layer.InstancesData.Instances)
-                            room.GameObjects.Remove(go);
-
-                    foreach (var pair in roomObjDict)
-                        if (pair.Value == layer)
-                            roomObjDict.Remove(pair.Key, out _);
-
-                    foreach (var pair in sprInstDict)
-                        if (pair.Value == layer)
-                            sprInstDict.Remove(pair.Key, out _);
-
-                    room.Layers.Remove(layer);
-
-                    if (layer.LayerType == LayerType.Background)
-                        room.UpdateBGColorLayer();
-
-                    ObjectEditor.Content = null;
-                }
-            }
-
-            int dir = 0;
-            if (e.Key == Key.OemMinus)
-                dir = -1;
+                DeleteItem(selectedObj);
+            else if (e.Key == Key.OemMinus)
+                MoveItem(selectedObj, -1);
             else if (e.Key == Key.OemPlus)
-                dir = 1;
-
-            if (dir != 0)
-            {
-                UndertaleRoom room = this.DataContext as UndertaleRoom;
-                UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
-                Layer layer = null;
-                if (room.Layers.Count > 0)
-                    layer = selectedObj switch
-                    {
-                        Tile or GameObject => roomObjDict[(selectedObj as IRoomObject).InstanceID],
-                        SpriteInstance spr => sprInstDict[spr],
-                        _ => null
-                    };
-
-                IList list = selectedObj switch
-                {
-                    Tile => layer is null ? room.Tiles : layer.AssetsData.LegacyTiles,
-                    GameObject => layer is null ? room.GameObjects : layer.InstancesData.Instances,
-                    SpriteInstance => layer.AssetsData.Sprites,
-                    _ => null
-                };
-                if (list is null)
-                {
-                    Debug.WriteLine($"Can't change object position - list of selected object not found.");
-                    return;
-                }
-
-                int index = list.IndexOf(selectedObj);
-                if ((dir == -1 && index > 0) || (dir == 1 && index < list.Count - 1))
-                {
-                    int prevIndex = index + dir;
-                    var prevIndexObj = list[prevIndex];
-                    list[prevIndex] = selectedObj;
-                    list[index] = prevIndexObj;
-
-                    if (layer is not null)
-                    {
-                        // swap back objects in "ObjectDict"
-                        var rect = ObjElemDict[selectedObj];
-                        var rectPrev = ObjElemDict[prevIndexObj as UndertaleObject];
-                        ObjElemDict[selectedObj] = rectPrev;
-                        ObjElemDict[prevIndexObj as UndertaleObject] = rect;
-                    }
-                }
-
-                SelectObject(selectedObj);
-            }
+                MoveItem(selectedObj, 1);
         }
 
         private void RoomObjectsTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             object sel = (sender as TreeView).SelectedItem;
-            if (sel is GameObject)
-                mainWindow.ChangeSelection((sel as GameObject).ObjectDefinition);
-            if (sel is Background)
-                mainWindow.ChangeSelection((sel as Background).BackgroundDefinition);
-            if (sel is Tile)
-                mainWindow.ChangeSelection((sel as Tile).ObjectDefinition);
-            if (sel is SpriteInstance)
-                mainWindow.ChangeSelection((sel as SpriteInstance).Sprite);
+            if (sel is GameObject gameObj)
+                mainWindow.ChangeSelection(gameObj.ObjectDefinition);
+            if (sel is Background bg)
+                mainWindow.ChangeSelection(bg.BackgroundDefinition);
+            if (sel is Tile tile)
+                mainWindow.ChangeSelection(tile.ObjectDefinition);
+            if (sel is SpriteInstance sprInst)
+                mainWindow.ChangeSelection(sprInst.Sprite);
+            if (sel is ParticleSystemInstance partSys)
+                mainWindow.ChangeSelection(partSys.ParticleSystem);
+        }
+        private async void RoomObjectsTree_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton != MouseButton.Middle)
+                return;
+
+            TreeViewItem treeViewItem = MainWindow.VisualUpwardSearch<TreeViewItem>(e.OriginalSource as DependencyObject);
+            treeViewItem?.Focus();
+
+            RoomObjectsTree.UpdateLayout();
+            ObjectEditor.UpdateLayout();
+            await Task.Run(async () =>
+            {
+                // Added a little delay in order to see that selection was changed
+                await Task.Delay(25);
+
+                Dispatcher.Invoke(() =>
+                {
+                    object sel = (sender as TreeView).SelectedItem;
+                    if (sel is GameObject gameObj)
+                        mainWindow.ChangeSelection(gameObj.ObjectDefinition, true);
+                    if (sel is Background bg)
+                        mainWindow.ChangeSelection(bg.BackgroundDefinition, true);
+                    if (sel is Tile tile)
+                        mainWindow.ChangeSelection(tile.ObjectDefinition, true);
+                    if (sel is SpriteInstance sprInst)
+                        mainWindow.ChangeSelection(sprInst.Sprite, true);
+                    if (sel is ParticleSystemInstance partSys)
+                        mainWindow.ChangeSelection(partSys.ParticleSystem, true);
+                });
+            });
+        }
+
+        private void TreeViewMoveUpButton_Click(object sender, RoutedEventArgs e)
+        {
+            UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
+            // If the button loses focus it cannot be held
+            MoveItem(selectedObj, -1, false);
+        }
+
+        private void TreeViewMoveDownButton_Click(object sender, RoutedEventArgs e)
+        {
+            UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
+            // If the button loses focus it cannot be held
+            MoveItem(selectedObj, 1, false);
+        }
+
+        private void TreeViewMoveButton_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
+            SelectObject(selectedObj);
         }
 
         private UndertaleObject copied;
@@ -1307,8 +1361,11 @@ namespace UndertaleModTool
                 layer.AssetsData.Sequences ??= new UndertalePointerList<SequenceInstance>();
 
                 // if it's needed to set "NineSlices"
-                if (!data.GMS2_3_2)
+                if (!data.IsVersionAtLeast(2, 3, 2))
                     layer.AssetsData.NineSlices ??= new UndertalePointerList<SpriteInstance>();
+                // likewise
+                if (data.IsVersionAtLeast(2023, 2))
+                    layer.AssetsData.ParticleSystems ??= new UndertalePointerList<ParticleSystemInstance>();
             }
             else if (layer.LayerType == LayerType.Tiles)
             {
@@ -1389,6 +1446,174 @@ namespace UndertaleModTool
             SelectObject(tile);
         }
 
+        /// <summary>
+        /// Deletes the given object from the room.
+        /// </summary>
+        /// <param name="obj">The object to delete.</param>
+        private void DeleteItem(UndertaleObject obj)
+        {
+            UndertaleRoom room = this.DataContext as UndertaleRoom;
+
+            // We need to check before deleting the object but can only clear the editor after deleting the object
+            bool clearEditor = (obj == (ObjectEditor.Content as UndertaleObject));
+
+            if (obj is Background bg)
+            {
+                bg.Enabled = false;
+                bg.BackgroundDefinition = null;
+            }
+            else if (obj is View view)
+            {
+                view.Enabled = false;
+            }
+            else if (obj is Tile tile)
+            {
+                if (mainWindow.IsGMS2 == Visibility.Visible)
+                {
+                    foreach (var layer in room.Layers)
+                        if (layer.AssetsData != null)
+                            layer.AssetsData.LegacyTiles.Remove(tile);
+                    roomObjDict.Remove(tile.InstanceID, out _);
+                }
+
+                room.Tiles.Remove(tile);
+            }
+            else if (obj is GameObject gameObj)
+            {
+                if (mainWindow.IsGMS2 == Visibility.Visible)
+                {
+                    foreach (var layer in room.Layers)
+                        if (layer.InstancesData != null)
+                            layer.InstancesData.Instances.Remove(gameObj);
+                    roomObjDict.Remove(gameObj.InstanceID, out _);
+                }
+
+                room.GameObjects.Remove(gameObj);
+            }
+            else if (obj is SpriteInstance sprInst)
+            {
+                foreach (var layer in room.Layers)
+                    if (layer.AssetsData != null)
+                        layer.AssetsData.Sprites.Remove(sprInst);
+
+                sprInstDict.Remove(sprInst, out _);
+            }
+            else if (obj is ParticleSystemInstance partSysInst)
+            {
+                foreach (var layer in room.Layers)
+                    if (layer.AssetsData != null)
+                        layer.AssetsData.ParticleSystems.Remove(partSysInst);
+            }
+            else if (obj is Layer layer)
+            {
+                if (layer.InstancesData != null)
+                    foreach (var go in layer.InstancesData.Instances)
+                        room.GameObjects.Remove(go);
+
+                foreach (var pair in roomObjDict)
+                    if (pair.Value == layer)
+                        roomObjDict.Remove(pair.Key, out _);
+
+                foreach (var pair in sprInstDict)
+                    if (pair.Value == layer)
+                        sprInstDict.Remove(pair.Key, out _);
+
+                room.Layers.Remove(layer);
+
+                if (layer.LayerType == LayerType.Background)
+                    room.UpdateBGColorLayer();
+            }
+
+            if (clearEditor)
+                ObjectEditor.Content = null;
+        }
+
+        /// <summary>
+        /// Moves the given object up and down the list in the <see cref="TreeView"/>.
+        /// </summary>
+        /// <param name="obj">The object to move.</param>
+        /// <param name="dist">Distance to move it. Positive - down, negative - up.</param>
+        /// <param name="focus">Whether to focus on the element after moving it.</param>
+        private void MoveItem(UndertaleObject obj, int dist, bool focus = true)
+        {
+            if (obj is Layer)
+            {
+                mainWindow.ShowError("Layers don't support this feature currently, change the layer depths instead.");
+                return;
+            }
+            if (obj is View)
+            {
+                mainWindow.ShowError("Views don't support this feature.");
+                return;
+            }
+            if (obj is Background)
+            {
+                mainWindow.ShowError("Backgrounds don't support this feature.");
+                return;
+            }
+
+            if (this.DataContext is not UndertaleRoom room)
+                return;
+
+            if (obj is GameObject)
+            {
+                if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
+                {
+                    // Check if the selected game object is in the "Game objects (from all layers)" list
+                    var objectItem = GameObjItems.ItemContainerGenerator.ContainerFromItem(obj) as TreeViewItem;
+                    if (objectItem?.IsSelected == true)
+                    {
+                        mainWindow.ShowError("You should select an object in an instances layer instead.");
+                        return;
+                    }
+                }
+            }
+
+            Layer layer = null;
+            if (room.Layers.Count > 0)
+                layer = obj switch
+                {
+                    Tile or GameObject => roomObjDict[(obj as IRoomObject).InstanceID],
+                    SpriteInstance spr => sprInstDict[spr],
+                    ParticleSystemInstance partSys => partSysInstDict[partSys],
+                    _ => null
+                };
+
+            IList list = obj switch
+            {
+                Tile => layer is null ? room.Tiles : layer.AssetsData.LegacyTiles,
+                GameObject => layer is null ? room.GameObjects : layer.InstancesData.Instances,
+                SpriteInstance => layer.AssetsData.Sprites,
+                ParticleSystemInstance => layer.AssetsData.ParticleSystems,
+                _ => null
+            };
+            if (list is null)
+            {
+                mainWindow.ShowError("Can't change the object position - no list for the selected object was found.");
+                return;
+            }
+
+            int index = list.IndexOf(obj);
+            int newIndex = Math.Clamp(index + dist, 0, list.Count - 1);
+            if (newIndex != index)
+            {
+                var prevObj = list[newIndex];
+                list[newIndex] = obj;
+                list[index] = prevObj;
+
+                if (layer is not null)
+                {
+                    // swap back objects in "ObjectDict"
+                    var rect = ObjElemDict[obj];
+                    var rectPrev = ObjElemDict[prevObj as UndertaleObject];
+                    ObjElemDict[obj] = rectPrev;
+                    ObjElemDict[prevObj as UndertaleObject] = rect;
+                }
+            }
+
+            SelectObject(obj, focus);
+        }
+
         private void MenuItem_NewLayerInstances_Click(object sender, RoutedEventArgs e)
         {
             AddLayer<Layer.LayerInstancesData>(LayerType.Instances, "NewInstancesLayer");
@@ -1434,6 +1659,29 @@ namespace UndertaleModTool
         private void MenuItem_NewGMS1Tile_Click(object sender, RoutedEventArgs e)
         {
             AddGMS1Tile(this.DataContext as UndertaleRoom);
+        }
+        private void MenuItem_Delete_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuitem = sender as MenuItem;
+            DeleteItem(menuitem.DataContext as UndertaleObject);
+        }
+
+        private void MenuItem_Copy_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuitem = sender as MenuItem;
+            copied = menuitem.DataContext as UndertaleObject;
+        }
+
+        private void MenuItem_Paste_Click(object sender, RoutedEventArgs e)
+        {
+            UndertaleRoom room = this.DataContext as UndertaleRoom;
+            MenuItem menuitem = sender as MenuItem;
+            Layer layer = mainWindow.IsGMS2 == Visibility.Visible ?
+                menuitem.DataContext as Layer : null;
+
+            UndertaleObject newObj = AddObjectCopy(room, layer, copied, true);
+            if (newObj is not null)
+                SelectObject(newObj);
         }
 
         public static void GenerateSpriteCache(UndertaleRoom room)
@@ -1616,12 +1864,53 @@ namespace UndertaleModTool
                     return;
                 }
 
+                char delimChar = ';';
+                Func<string, uint> numParseFunc = (x) => UInt32.Parse(x);
+                if (tileDataLines[0].Count(x => x == ',') > 1)
+                {
+                    var res = mainWindow.ShowQuestion("Was the data exported from \"Tiled\"?");
+                    if (res == MessageBoxResult.Yes)
+                    {
+                        delimChar = ',';
+                        numParseFunc = (x) =>
+                        {
+                            uint val;
+                            unchecked { val = (uint)Int32.Parse(x); }
+                            if (val == uint.MaxValue)
+                                return 0;
+
+                            uint id = val & 0x0FFFFFFF;
+                            uint flags = val & 0xF0000000;
+                            flags = flags switch
+                            {
+                                0 => 0,
+                                2147483648 => 1, // RotateNoneFlipX
+                                1073741824 => 2, // RotateNoneFlipY
+                                3221225472 => 3, // RotateNoneFlipXY
+                                2684354560 => 4, // Rotate90FlipNone
+                                3758096384 => 5, // Rotate270FlipY
+                                536870912 => 6,  // Rotate90FlipY
+                                1610612736 => 7, // Rotate270FlipNone
+                                _ => throw new InvalidDataException($"{flags} is not a valid tile flag value.")
+                            };
+                            flags <<= 28;
+
+                            return (id | flags);
+                        };
+                    }
+                    else
+                    {
+                        mainWindow.ShowError("The file has invalid data.");
+                        return;
+                    }
+                }
+
                 for (int i = 0; i < tileDataLines.Length; i++)
                 {
                     uint[] dataRow;
                     try
                     {
-                        dataRow = tileDataLines[i].Split(';').Select(x => UInt32.Parse(x)).ToArray();
+                        dataRow = tileDataLines[i].Split(delimChar).Select(numParseFunc).ToArray();
                     }
                     catch (Exception ex)
                     {
@@ -1665,6 +1954,7 @@ namespace UndertaleModTool
             canvas.CurrentLayer = layer;
             ObjElemDict[layer] = canvas;
         }
+
         private void LayerCanvas_Unloaded(object sender, RoutedEventArgs e)
         {
             LayerCanvas canvas = sender as LayerCanvas;
@@ -1728,6 +2018,7 @@ namespace UndertaleModTool
 
     public class LayerDataTemplateSelector : DataTemplateSelector
     {
+        public DataTemplate PathDataTemplate { get; set; }
         public DataTemplate InstancesDataTemplate { get; set; }
         public DataTemplate TilesDataTemplate { get; set; }
         public DataTemplate AssetsDataTemplate { get; set; }
@@ -1740,6 +2031,8 @@ namespace UndertaleModTool
             {
                 switch ((item as Layer).LayerType)
                 {
+                    case LayerType.Path:
+                        return PathDataTemplate;
                     case LayerType.Instances:
                         return InstancesDataTemplate;
                     case LayerType.Tiles:
@@ -1810,10 +2103,11 @@ namespace UndertaleModTool
                 return layer.LayerType switch
                 {
                     // TODO: implement "LayerType.Effects"
-                    LayerType.Assets => new CompositeCollection(2)
+                    LayerType.Assets => new CompositeCollection(3)
                                         {
                                           new CollectionContainer() { Collection = layer.AssetsData.LegacyTiles },
-                                          new CollectionContainer() { Collection = layer.AssetsData.Sprites }
+                                          new CollectionContainer() { Collection = layer.AssetsData.Sprites },
+                                          new CollectionContainer() { Collection = layer.AssetsData.ParticleSystems }
                                         },
                     LayerType.Background => new List<Layer.LayerBackgroundData>() { layer.BackgroundData },
                     LayerType.Instances => layer.InstancesData.Instances,
@@ -2285,11 +2579,11 @@ namespace UndertaleModTool
                                     angle = 90;
                                     break;
                                 case 5:
-                                    angle = 90;
+                                    angle = 270;
                                     scaleY = -1;
                                     break;
                                 case 6:
-                                    angle = 270;
+                                    angle = 90;
                                     scaleY = -1;
                                     break;
                                 case 7:
@@ -2334,6 +2628,80 @@ namespace UndertaleModTool
                 return h - 22; // "TabController" has predefined height
             else
                 return 0;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class ParticleSystemRectConverter : IValueConverter
+    {
+        private static Dictionary<UndertaleParticleSystem, Rect> partSystemsDict;
+
+        public static void Initialize(IEnumerable<UndertaleParticleSystem> particleSystems)
+        {
+            partSystemsDict = new();
+
+            foreach (var partSys in particleSystems)
+            {
+                if (partSys is null)
+                    continue;
+
+                _ = AddNewSystem(partSys);
+            }
+        }
+        public static void ClearDict() => partSystemsDict = null;
+
+        private static Rect AddNewSystem(UndertaleParticleSystem partSys)
+        {
+            Rect rect;
+            if (partSys.Emitters.Count == 0)
+            {
+                partSystemsDict[partSys] = rect;
+                return rect;
+            }
+
+            rect = new();
+            var emitters = partSys.Emitters.Select(x => x.Resource);
+
+            float minX = emitters.Select(x => x.RegionX).Min();
+            float maxX = emitters.Select(x => x.RegionX + x.RegionWidth).Max();
+            rect.Width = Math.Abs(minX - maxX);
+
+            float minY = emitters.Select(x => x.RegionY).Min();
+            float maxY = emitters.Select(x => x.RegionY + x.RegionHeight).Max();
+            rect.Height = Math.Abs(minY - maxY);
+
+            rect.X = emitters.Select(x => x.RegionX - x.RegionWidth * 0.5f).Min();
+            rect.Y = emitters.Select(x => x.RegionY - x.RegionHeight * 0.5f).Min();
+
+            partSystemsDict[partSys] = rect;
+
+            return rect;
+        }
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is not UndertaleParticleSystem partSys)
+                return 0;
+            if ((partSys.Emitters?.Count ?? 0) == 0)
+                return 0;
+            if (parameter is not string mode)
+                return 0;
+
+            if (!partSystemsDict.TryGetValue(partSys, out Rect sysRect))
+                sysRect = AddNewSystem(partSys);
+
+            return mode switch
+            {
+                "width" => sysRect.Width,
+                "height" => sysRect.Height,
+                "x" => sysRect.X + 8,
+                "y" => sysRect.Y + 8,
+                _ => 0
+            };
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -44,7 +44,7 @@ public class UndertaleEmbeddedAudio : UndertaleNamedResource, PaddedObject, IDis
     /// <inheritdoc />
     public void UnserializePadding(UndertaleReader reader)
     {
-        while (reader.Position % 4 != 0)
+        while (reader.AbsPosition % 4 != 0)
             if (reader.ReadByte() != 0)
                 throw new IOException("Padding error!");
     }

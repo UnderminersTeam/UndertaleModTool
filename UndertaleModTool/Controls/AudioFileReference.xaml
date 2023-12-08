@@ -6,6 +6,11 @@
              xmlns:local="clr-namespace:UndertaleModTool"
              mc:Ignorable="d" 
              d:DesignHeight="20" d:DesignWidth="300">
+    <UserControl.Resources>
+        <local:ContextMenuDark x:Key="contextMenu">
+            <local:MenuItemDark Header="Open in new tab" Click="OpenInNewTabItem_Click"/>
+        </local:ContextMenuDark>
+    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
@@ -13,11 +18,11 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <TextBox Grid.Column="0" Text="{Binding AudioID}">
+        <local:TextBoxDark Grid.Column="0" Text="{Binding AudioID}">
             <TextBox.Style>
                 <Style TargetType="{x:Type TextBox}">
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding GroupID, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="0">
+                        <DataTrigger Binding="{Binding GroupID}" Value="0">
                             <DataTrigger.Setters>
                                 <Setter Property="IsReadOnly" Value="True"/>
                             </DataTrigger.Setters>
@@ -25,14 +30,17 @@
                     </Style.Triggers>
                 </Style>
             </TextBox.Style>
-        </TextBox>
-        <TextBox Grid.Column="1" IsReadOnly="True" Cursor="Arrow" ToolTip="This is an object reference. Drag and drop an object of matching type from the tree on the left to change it!" AllowDrop="True" PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" PreviewMouseDoubleClick="TextBox_MouseDoubleClick">
+        </local:TextBoxDark>
+        <local:TextBoxDark Grid.Column="1" x:Name="ObjectText" IsReadOnly="True" Cursor="Arrow" AllowDrop="True"
+                           ToolTip="This is an object reference. Drag and drop an object of matching type from the tree on the left to change it!"
+                           ToolTipService.InitialShowDelay="250"
+                           PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" PreviewMouseDoubleClick="TextBox_MouseDoubleClick" PreviewMouseDown="Details_MouseDown">
             <TextBox.Style>
                 <Style TargetType="{x:Type TextBox}">
                     <Setter Property="Text">
                         <Setter.Value>
                             <MultiBinding StringFormat="{}(UndertaleEmbeddedAudio#{0})">
-                                <Binding Path="AudioID" RelativeSource="{RelativeSource AncestorType=UserControl}"/>
+                                <Binding Path="AudioID"/>
                             </MultiBinding>
                         </Setter.Value>
                     </Setter>
@@ -42,8 +50,8 @@
                                 <Setter Property="Text">
                                     <Setter.Value>
                                         <MultiBinding StringFormat="{}(UndertaleEmbeddedAudio#{0} in UndertaleAudioGroup#{1}:{2})">
-                                            <Binding Path="AudioID" RelativeSource="{RelativeSource AncestorType=UserControl}"/>
-                                            <Binding Path="GroupID" RelativeSource="{RelativeSource AncestorType=UserControl}"/>
+                                            <Binding Path="AudioID"/>
+                                            <Binding Path="GroupID"/>
                                             <Binding Path="GroupReference.Name.Content" RelativeSource="{RelativeSource AncestorType=UserControl}"/>
                                         </MultiBinding>
                                     </Setter.Value>
@@ -58,8 +66,8 @@
                     </Style.Triggers>
                 </Style>
             </TextBox.Style>
-        </TextBox>
-        <Button Grid.Column="2" Click="Details_Click" Content=" ... " ToolTip="Open referenced object">
+        </local:TextBoxDark>
+        <local:ButtonDark Grid.Column="2" Click="Details_Click" MouseDown="Details_MouseDown" Content=" ... " ToolTip="Open referenced object">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Style.Triggers>
@@ -69,8 +77,8 @@
                     </Style.Triggers>
                 </Style>
             </Button.Style>
-        </Button>
-        <Button Grid.Column="3" Click="Remove_Click" Content=" X " ToolTip="Remove reference">
+        </local:ButtonDark>
+        <local:ButtonDark Grid.Column="3" Click="Remove_Click" Content=" X " ToolTip="Remove reference">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Style.Triggers>
@@ -82,6 +90,6 @@
                     </Style.Triggers>
                 </Style>
             </Button.Style>
-        </Button>
+        </local:ButtonDark>
     </Grid>
 </UserControl>

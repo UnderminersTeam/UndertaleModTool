@@ -18,6 +18,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using UndertaleModLib.Models;
+using static UndertaleModLib.Models.UndertaleRoom;
 
 namespace UndertaleModTool
 {
@@ -43,8 +44,7 @@ namespace UndertaleModTool
         }
 
         private bool bgGridDisabled;
-        private Pen gridPen;
-        private Brush initialGridBrush;
+        private Brush gridOpacMask;
 
         public UndertaleRoomRenderer()
         {
@@ -58,6 +58,16 @@ namespace UndertaleModTool
 
             UndertaleRoomEditor.SetupRoomWithGrids(room);
             UndertaleRoomEditor.GenerateSpriteCache(room);
+
+            ParticleSystemRectConverter.ClearDict();
+            foreach (var layer in room.Layers)
+            {
+                if (layer.LayerType == LayerType.Assets)
+                {
+                    var particleSystems = layer.AssetsData.ParticleSystems.Select(x => x.ParticleSystem);
+                    ParticleSystemRectConverter.Initialize(particleSystems);
+                }
+            }
         }
 
         private void RoomCanvas_Loaded(object sender, RoutedEventArgs e)
@@ -85,13 +95,10 @@ namespace UndertaleModTool
 
                 if (!displayGrid && !bgGridDisabled)
                 {
-                    if (gridPen is null)
-                    {
-                        gridPen = ((roomCanvas.Background as DrawingBrush).Drawing as GeometryDrawing).Pen;
-                        initialGridBrush = gridPen.Brush;
-                    }
+                    if (gridOpacMask is null)
+                        gridOpacMask = roomCanvas.OpacityMask;
 
-                    gridPen.Brush = null;
+                    roomCanvas.OpacityMask = null;
                     bgGridDisabled = true;
                 }
 
@@ -106,7 +113,7 @@ namespace UndertaleModTool
                 if (!displayGrid && last)
                 {
                     visualOffProp.SetValue(roomCanvas, prevOffset);
-                    gridPen.Brush = initialGridBrush;
+                    roomCanvas.OpacityMask = gridOpacMask;
                 }
             }));
         }

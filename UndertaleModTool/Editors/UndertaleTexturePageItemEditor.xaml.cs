@@ -8,6 +8,7 @@ using UndertaleModLib.Util;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Data;
+using UndertaleModTool.Windows;
 
 namespace UndertaleModTool
 {
@@ -71,6 +72,29 @@ namespace UndertaleModTool
                     mainWindow.ShowError("Failed to export file: " + ex.Message, "Failed to export file");
                 }
                 worker.Cleanup();
+            }
+        }
+
+        private void FindReferencesButton_Click(object sender, RoutedEventArgs e)
+        {
+            var obj = (sender as FrameworkElement)?.DataContext;
+            if (obj is not UndertaleTexturePageItem item)
+                return;
+
+            FindReferencesTypesDialog dialog = null;
+            try
+            {
+                dialog = new(item, mainWindow.Data);
+                dialog.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                mainWindow.ShowError("An error occured in the object references related window.\n" +
+                                     $"Please report this on GitHub.\n\n{ex}");
+            }
+            finally
+            {
+                dialog?.Close();
             }
         }
     }

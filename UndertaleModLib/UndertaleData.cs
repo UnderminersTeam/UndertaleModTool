@@ -25,18 +25,26 @@ namespace UndertaleModLib
         /// </summary>
         /// <param name="resourceTypeName">The resource name to get.</param>
         /// <exception cref="MissingMemberException"> if the data file does not contain a property with that name.</exception>
-        public object this[string resourceTypeName]
+        public IList this[string resourceTypeName]
         {
             get
             {
+                // Prevent recursion
+                if (resourceTypeName == "Item")
+                    return null;
+
                 var property = GetType().GetProperty(resourceTypeName);
                 if (property is null)
                     throw new MissingMemberException($"\"UndertaleData\" doesn't contain a property named \"{resourceTypeName}\".");
 
-                return property.GetValue(this, null);
+                return property.GetValue(this, null) as IList;
             }
             set
             {
+                // Prevent recursion
+                if (resourceTypeName == "Item")
+                    return;
+                
                 var property = GetType().GetProperty(resourceTypeName);
                 if (property is null)
                     throw new MissingMemberException($"\"UndertaleData\" doesn't contain a property named \"{resourceTypeName}\".");
@@ -51,10 +59,14 @@ namespace UndertaleModLib
         /// <param name="resourceType">The resource type to get.</param>
         /// <exception cref="NotSupportedException"> if the type is not an <see cref="UndertaleNamedResource"/>.</exception>
         /// <exception cref="MissingMemberException"> if the data file does not contain a property of that type.</exception>
-        public object this[Type resourceType]
+        public IList this[Type resourceType]
         {
             get
             {
+                // Prevent recursion
+                if (resourceType == typeof(UndertaleResource))
+                    return null;
+
                 if (!typeof(UndertaleResource).IsAssignableFrom(resourceType))
                     throw new NotSupportedException($"\"{resourceType.FullName}\" is not an UndertaleResource.");
 
@@ -63,7 +75,7 @@ namespace UndertaleModLib
                 if (property is null)
                     throw new MissingMemberException($"\"UndertaleData\" doesn't contain a resource list of type \"{resourceType.FullName}\".");
 
-                return property.GetValue(this, null);
+                return property.GetValue(this, null) as IList;
             }
             set
             {
@@ -275,6 +287,22 @@ namespace UndertaleModLib
         public UndertaleFeatureFlags FeatureFlags => FORM.FEAT?.Object;
 
         /// <summary>
+        /// The filter effects stored in the data file.
+        /// </summary>
+        public IList<UndertaleFilterEffect> FilterEffects => FORM.FEDS?.List;
+
+        /// <summary>
+        /// The particle systems stored in the data file.
+        /// </summary>
+        public IList<UndertaleParticleSystem> ParticleSystems => FORM.PSYS?.List;
+
+        /// <summary>
+        /// The particle system emitters stored in the data file.
+        /// </summary>
+        public IList<UndertaleParticleSystemEmitter> ParticleSystemEmitters => FORM.PSEM?.List;
+
+
+        /// <summary>
         /// Whether this is an unsupported bytecode version.
         /// </summary>
         public bool UnsupportedBytecodeVersion = false;
@@ -288,56 +316,6 @@ namespace UndertaleModLib
         /// Whether the data file has short circuiting enabled.
         /// </summary>
         public bool ShortCircuit = true;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2.2.2.302
-        /// </summary>
-        public bool GMS2_2_2_302 = false;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2.3
-        /// </summary>
-        public bool GMS2_3 = false;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2.3.1
-        /// </summary>
-        public bool GMS2_3_1 = false;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2.3.2
-        /// </summary>
-        public bool GMS2_3_2 = false;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2022.1.
-        /// </summary>
-        public bool GMS2022_1 = false;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2022.2.
-        /// </summary>
-        public bool GMS2022_2 = false;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2022.3.
-        /// </summary>
-        public bool GM2022_3 = false;
-        
-        /// <summary>
-        /// Whether the data file is from version GMS2022.5.
-        /// </summary>
-        public bool GM2022_5 = false;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2022.6.
-        /// </summary>
-        public bool GM2022_6 = false;
-
-        /// <summary>
-        /// Whether the data file is from version GMS2022.9.
-        /// </summary>
-        public bool GM2022_9 = false;
 
         /// <summary>
         /// Some info for the editor to store data on.
@@ -363,7 +341,7 @@ namespace UndertaleModLib
 
         //TODO: Why are the functions that deal with the cache in a completely different place than the cache parameters? These have *no* place of being here.
         /// <summary>
-        /// A <see cref="Dictionary{TKey,TValue}"/><typeparam name="TKey"></typeparam> of cached decompiled code,
+        /// A <see cref="Dictionary{TKey,TValue}"/> of cached decompiled code,
         /// with the code name as the Key and the decompiled code text as the value.
         /// </summary>
         public ConcurrentDictionary<string, string> GMLCache { get; set; }
@@ -470,7 +448,7 @@ namespace UndertaleModLib
         /// <returns><see langword="true"/> if yes, <see langword="false"/> if not.</returns>
         public bool IsGameMaker2()
         {
-            return IsVersionAtLeast(2, 0, 0, 0);
+            return IsVersionAtLeast(2);
         }
 
 
@@ -483,6 +461,24 @@ namespace UndertaleModLib
         }
 
         /// <summary>
+        /// Sets the GMS2+ version flag in GeneralInfo.
+        /// </summary>
+        /// <param name="major">The major version.</param>
+        /// <param name="minor">The minor version.</param>
+        /// <param name="release">The release version.</param>
+        /// <param name="build">The build version.</param>
+        public void SetGMS2Version(uint major, uint minor = 0, uint release = 0, uint build = 0)
+        {
+            if (major != 2 && major != 2022 && major != 2023)
+                throw new NotSupportedException("Attempted to set a version of GameMaker " + major + " using SetGMS2Version");
+
+            GeneralInfo.Major = major;
+            GeneralInfo.Minor = minor;
+            GeneralInfo.Release = release;
+            GeneralInfo.Build = build;
+        }
+
+        /// <summary>
         /// Reports whether the version of the data file is the same or higher than a specified version.
         /// </summary>
         /// <param name="major">The major version.</param>
@@ -490,8 +486,14 @@ namespace UndertaleModLib
         /// <param name="release">The release version.</param>
         /// <param name="build">The build version.</param>
         /// <returns>Whether the version of the data file is the same or higher than a specified version.</returns>
-        public bool IsVersionAtLeast(uint major, uint minor, uint release, uint build)
+        public bool IsVersionAtLeast(uint major, uint minor = 0, uint release = 0, uint build = 0)
         {
+            if (GeneralInfo is null)
+            {
+                Debug.WriteLine("\"UndertaleData.IsVersionAtLeast()\" error - \"GeneralInfo\" is null.");
+                return false;
+            }
+
             if (GeneralInfo.Major != major)
                 return (GeneralInfo.Major > major);
 
@@ -631,6 +633,10 @@ namespace UndertaleModLib
             // Clear all object lists (sprites, code, etc.)
             foreach (PropertyInfo dataListProperty in AllListProperties)
             {
+                // If it's an indexer property
+                if (dataListProperty.Name == "Item")
+                    continue;
+
                 // If list is null
                 if (dataListProperty.GetValue(this) is not IList list)
                     continue;

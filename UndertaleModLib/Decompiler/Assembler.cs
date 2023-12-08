@@ -23,7 +23,8 @@ namespace UndertaleModLib.Decompiler
             { -7,  "setstatic" },
             { -8,  "savearef" },
             { -9,  "restorearef" },
-            { -10, "chknullish" }
+            { -10, "chknullish" },
+            { -11, "pushref" }
         };
         public static Dictionary<string, short> NameToBreakID = new Dictionary<string, short>()
         {
@@ -36,7 +37,8 @@ namespace UndertaleModLib.Decompiler
             { "setstatic", -7 },
             { "savearef", -8 },
             { "restorearef", -9 },
-            { "chknullish", -10 }
+            { "chknullish", -10 },
+            { "pushref", -11 }
         };
 
         // TODO: Improve the error messages
@@ -63,7 +65,7 @@ namespace UndertaleModLib.Decompiler
             line = line.Split(" ;;; ", 2)[0]; // remove comments
 
             string opcode = line;
-            int space = opcode.IndexOf(' ');
+            int space = opcode.IndexOf(' ', StringComparison.InvariantCulture);
             if (space >= 0)
             {
                 opcode = line.Substring(0, space);
@@ -77,7 +79,7 @@ namespace UndertaleModLib.Decompiler
 
             string kind = types[0];
             short breakId = 0;
-            if (NameToBreakID.TryGetValue(kind.ToLower(), out breakId))
+            if (NameToBreakID.TryGetValue(kind.ToLower(CultureInfo.InvariantCulture), out breakId))
                 instr.Kind = UndertaleInstruction.Opcode.Break;
             else
                 instr.Kind = (UndertaleInstruction.Opcode)Enum.Parse(typeof(UndertaleInstruction.Opcode), kind, true);
@@ -93,7 +95,7 @@ namespace UndertaleModLib.Decompiler
                     {
                         if (instr.Kind == UndertaleInstruction.Opcode.Dup)
                         {
-                            space = line.IndexOf(' ');
+                            space = line.IndexOf(' ', StringComparison.InvariantCulture);
                             if (space >= 0)
                             {
                                 byte spec = Byte.Parse(line.Substring(space + 1).Trim());
@@ -217,7 +219,14 @@ namespace UndertaleModLib.Decompiler
 
                 case UndertaleInstruction.InstructionType.BreakInstruction:
                     if (breakId != 0)
+                    {
                         instr.Value = breakId;
+                        if (breakId == -11) // pushref
+                        {
+                            // parse additional int argument
+                            instr.IntArgument = Int32.Parse(line);
+                        }
+                    }
                     else
                         instr.Value = Int16.Parse(line);
                     line = "";
@@ -245,7 +254,7 @@ namespace UndertaleModLib.Decompiler
 
         public static List<UndertaleInstruction> Assemble(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, UndertaleData data = null)
         {
-            var lines = source.Replace("\r", "").Split('\n');
+            var lines = source.Replace("\r", "", StringComparison.InvariantCulture).Split('\n');
             uint addr = 0;
             Dictionary<string, uint> labels = new Dictionary<string, uint>();
             Dictionary<UndertaleInstruction, string> labelTargets = new Dictionary<UndertaleInstruction, string>();
@@ -263,7 +272,7 @@ namespace UndertaleModLib.Decompiler
                 {
                     // Code entry inside of this one
                     line = line.Substring(2, line.Length - 2).Trim();
-                    int space = line.IndexOf(' ');
+                    int space = line.IndexOf(' ', StringComparison.InvariantCulture);
                     string codeName = line.Substring(0, space);
                     var code = data.Code.ByName(codeName);
                     if (code == null)
@@ -282,7 +291,7 @@ namespace UndertaleModLib.Decompiler
                 {
                     if (line[1] == '[')
                     {
-                        string label = line.Substring(2, line.IndexOf(']') - 2);
+                        string label = line.Substring(2, line.IndexOf(']', StringComparison.InvariantCulture) - 2);
 
                         if (!string.IsNullOrEmpty(label))
                         {
@@ -385,7 +394,7 @@ namespace UndertaleModLib.Decompiler
             if (str[0] != '[')
             {
                 string inst = null;
-                int instdot = str.IndexOf('.');
+                int instdot = str.IndexOf('.', StringComparison.InvariantCulture);
                 if (instdot >= 0)
                 {
                     inst = str.Substring(0, instdot);
@@ -424,14 +433,14 @@ namespace UndertaleModLib.Decompiler
             }
             else
             {
-                int typeend = str.IndexOf(']');
+                int typeend = str.IndexOf(']', StringComparison.InvariantCulture);
                 if (typeend >= 0)
                 {
                     string typestr = str.Substring(1, typeend - 1);
                     str = str.Substring(typeend + 1);
                     type = (UndertaleInstruction.VariableType)Enum.Parse(typeof(UndertaleInstruction.VariableType), typestr, true);
 
-                    int instanceEnd = str.IndexOf('.');
+                    int instanceEnd = str.IndexOf('.', StringComparison.InvariantCulture);
                     if (instanceEnd >= 0)
                     {
                         string instancestr = str.Substring(0, instanceEnd);
@@ -468,7 +477,7 @@ namespace UndertaleModLib.Decompiler
                 varobj = vars.Where((x) => x.Name.Content == str && x.InstanceType == realinstance).FirstOrDefault();
             }
             if (varobj == null)
-                throw new Exception("Bad variable: " + realinstance.ToString().ToLower() + "." + str);
+                throw new Exception("Bad variable: " + realinstance.ToString().ToLower(CultureInfo.InvariantCulture) + "." + str);
             return new UndertaleInstruction.Reference<UndertaleVariable>(varobj, type);
         }
     }

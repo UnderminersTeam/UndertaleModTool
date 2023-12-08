@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UndertaleModLib.Models;
 using static UndertaleModLib.Compiler.Compiler.AssemblyWriter;
+using AssetRefType = UndertaleModLib.Decompiler.Decompiler.ExpressionAssetRef.RefType;
 
 namespace UndertaleModLib.Compiler
 {
@@ -16,6 +17,8 @@ namespace UndertaleModLib.Compiler
         public Dictionary<string, VariableInfo> userDefinedVariables = new Dictionary<string, VariableInfo>();
         public bool ensureFunctionsDefined = true;
         public bool ensureVariablesDefined = true;
+        public static bool GMS2_3;
+        public bool TypedAssetRefs => Data.IsVersionAtLeast(2023, 8);
         public int LastCompiledArgumentCount = 0;
         public Dictionary<string, string> LocalVars = new Dictionary<string, string>();
         public Dictionary<string, string> GlobalVars = new Dictionary<string, string>();
@@ -79,18 +82,21 @@ namespace UndertaleModLib.Compiler
         private void MakeAssetDictionary()
         {
             assetIds.Clear();
-            AddAssetsFromList(Data?.GameObjects);
-            AddAssetsFromList(Data?.Sprites);
-            AddAssetsFromList(Data?.Sounds);
-            AddAssetsFromList(Data?.Backgrounds);
-            AddAssetsFromList(Data?.Paths);
-            AddAssetsFromList(Data?.Fonts);
-            AddAssetsFromList(Data?.Timelines);
-            if (!(Data?.GMS2_3 ?? false))
-                AddAssetsFromList(Data?.Scripts);
-            AddAssetsFromList(Data?.Shaders);
-            AddAssetsFromList(Data?.Rooms);
-            AddAssetsFromList(Data?.AudioGroups);
+            AddAssetsFromList(Data?.GameObjects, AssetRefType.Object);
+            AddAssetsFromList(Data?.Sprites, AssetRefType.Sprite);
+            AddAssetsFromList(Data?.Sounds, AssetRefType.Sound);
+            AddAssetsFromList(Data?.Backgrounds, AssetRefType.Background);
+            AddAssetsFromList(Data?.Paths, AssetRefType.Path);
+            AddAssetsFromList(Data?.Fonts, AssetRefType.Font);
+            AddAssetsFromList(Data?.Timelines, AssetRefType.Timeline);
+            if (!GMS2_3)
+                AddAssetsFromList(Data?.Scripts, AssetRefType.Object /* not actually used */);
+            AddAssetsFromList(Data?.Shaders, AssetRefType.Shader);
+            AddAssetsFromList(Data?.Rooms, AssetRefType.Room);
+            AddAssetsFromList(Data?.AudioGroups, AssetRefType.Sound /* apparently? */);
+            AddAssetsFromList(Data?.AnimationCurves, AssetRefType.AnimCurve);
+            AddAssetsFromList(Data?.Sequences, AssetRefType.Sequence);
+            AddAssetsFromList(Data?.ParticleSystems, AssetRefType.ParticleSystem);
 
             scripts.Clear();
             if (Data?.Scripts != null)
@@ -115,15 +121,30 @@ namespace UndertaleModLib.Compiler
             }
         }
 
-        private void AddAssetsFromList<T>(IList<T> list) where T : UndertaleNamedResource
+        private void AddAssetsFromList<T>(IList<T> list, AssetRefType type) where T : UndertaleNamedResource
         {
             if (list == null)
                 return;
-            for (int i = 0; i < list.Count; i++)
+            if (TypedAssetRefs)
             {
-                string name = list[i].Name?.Content;
-                if (name != null)
-                    assetIds[name] = i;
+                for (int i = 0; i < list.Count; i++)
+                {
+                    string name = list[i].Name?.Content;
+                    if (name != null)
+                    {
+                        // Typed asset refs pack their type into the ID
+                        assetIds[name] = (i & 0xffffff) | (((int)type & 0x7f) << 24);
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < list.Count; i++)
+                {
+                    string name = list[i].Name?.Content;
+                    if (name != null)
+                        assetIds[name] = i;
+                }
             }
         }
     }

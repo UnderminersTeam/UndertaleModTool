@@ -31,7 +31,8 @@ namespace UndertaleModLib.Compiler
                     Number,
                     String,
                     Constant,
-                    Int64
+                    Int64,
+                    Reference
                 }
 
                 public ExpressionConstant(double val)
@@ -396,7 +397,7 @@ namespace UndertaleModLib.Compiler
             {
                 if (context != null)
                 {
-                    if (msg.EndsWith("."))
+                    if (msg.EndsWith(".", StringComparison.InvariantCulture))
                         msg = msg.Remove(msg.Length - 1);
 
                     if (context.Location != null)
@@ -478,7 +479,7 @@ namespace UndertaleModLib.Compiler
                         // Convert number literals to their raw numerical value
                         Lexer.Token t = tokens[i];
                         ExpressionConstant constant = null;
-                        if (t.Content[0] == '$' || t.Content.StartsWith("0x"))
+                        if (t.Content[0] == '$' || t.Content.StartsWith("0x", StringComparison.InvariantCulture))
                         {
                             long val;
                             try
@@ -660,12 +661,12 @@ namespace UndertaleModLib.Compiler
             {
                 Statement result = new Statement(Statement.StatementKind.FunctionDef, EnsureTokenKind(TokenKind.KeywordFunction).Token);
                 Statement args = new Statement();
-                bool expression = true;
+                bool expressionMode = true;
                 Statement destination = null;
 
                 if (GetNextTokenKind() == TokenKind.ProcFunction)
                 {
-                    expression = false;
+                    expressionMode = false;
                     Statement s = remainingStageOne.Dequeue();
                     destination = new Statement(Statement.StatementKind.ExprFuncName, s.Token) { ID = s.ID };
                 }
@@ -691,7 +692,7 @@ namespace UndertaleModLib.Compiler
                 if (EnsureTokenKind(TokenKind.CloseParen) == null) return null;
 
                 result.Children.Add(ParseStatement(context));
-                if (expression)
+                if (expressionMode)
                     return result;
                 else // Whatever you call non-anonymous definitions
                 {
@@ -1338,7 +1339,7 @@ namespace UndertaleModLib.Compiler
                     // Parse chain variable reference
                     Statement result = new Statement(Statement.StatementKind.ExprVariableRef, remainingStageOne.Peek().Token);
                     bool combine = false;
-                    if (left.Kind != Statement.StatementKind.ExprConstant)
+                    if (left.Kind != Statement.StatementKind.ExprConstant || left.Constant.kind == ExpressionConstant.Kind.Reference /* TODO: will this ever change? */)
                         result.Children.Add(left);
                     else
                         combine = true;
@@ -2707,6 +2708,8 @@ namespace UndertaleModLib.Compiler
                     }
                     return false;
                 }
+                if (context.TypedAssetRefs)
+                    constant.kind = ExpressionConstant.Kind.Reference;
                 constant.valueNumber = (double)index;
                 return true;
             }

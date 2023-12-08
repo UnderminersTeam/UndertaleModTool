@@ -22,6 +22,9 @@ namespace UndertaleModTool.Windows
     /// </summary>
     public partial class ClickableTextOutput : Window
     {
+        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+        private static ContextMenuDark linkContextMenu;
+
         public string Query { get; }
         public int ResultsCount { get; }
 
@@ -32,6 +35,8 @@ namespace UndertaleModTool.Windows
         public ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
         {
             InitializeComponent();
+
+            linkContextMenu = FindResource("linkContextMenu") as ContextMenuDark;
 
             Title = title;
             Query = query;
@@ -44,12 +49,22 @@ namespace UndertaleModTool.Windows
         {
             InitializeComponent();
 
+            linkContextMenu = FindResource("linkContextMenu") as ContextMenuDark;
+
             Title = title;
             Query = query;
             ResultsCount = resultsCount;
             this.resultsDict = resultsDict;
             this.editorDecompile = editorDecompile ? CodeEditorMode.Decompile : CodeEditorMode.DontDecompile;
             this.failedList = failedList;
+        }
+        private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (!IsVisible || IsLoaded)
+                return;
+
+            if (Settings.Instance.EnableDarkMode)
+                MainWindow.SetDarkTitleBarForWindow(this, true, false);
         }
 
         public void GenerateResults()
@@ -178,17 +193,31 @@ namespace UndertaleModTool.Windows
             }
         }
 
-        private void Hyperlink_Click(object sender, RoutedEventArgs e)
+        private void OutTextBox_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            MainWindow w = Application.Current.MainWindow as MainWindow;
+            if (mainWindow is null)
+                return;
+            if (e.OriginalSource is not Run linkRun || linkRun.Parent is not Hyperlink)
+                return;
 
-            if (w is not null)
+            string codeName = linkRun.Text;
+            if (e.ChangedButton == MouseButton.Right && linkContextMenu is not null)
             {
-                Inline inline = (sender as Hyperlink).Inlines.FirstInline;
-                string codeName = new TextRange(inline.ContentStart, inline.ContentEnd).Text;
-
-                w.OpenCodeFile(codeName, editorDecompile);
+                linkContextMenu.DataContext = codeName;
+                linkContextMenu.IsOpen = true;
             }
+            else
+                mainWindow.OpenCodeFile(codeName, editorDecompile, e.ChangedButton == MouseButton.Middle);
+
+            e.Handled = true;
+        }
+        private void OpenInNewTabItem_Click(object sender, RoutedEventArgs e)
+        {
+            string codeName = (sender as FrameworkElement)?.DataContext as string;
+            if (String.IsNullOrEmpty(codeName))
+                return;
+
+            mainWindow.OpenCodeFile(codeName, editorDecompile, true);
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)

@@ -67,17 +67,35 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
     /// <summary>
     /// The x scale this font uses.
     /// </summary>
-    public float ScaleX { get; set; }
+    public float ScaleX { get; set; } = 1;
 
     /// <summary>
     /// The y scale this font uses.
     /// </summary>
-    public float ScaleY { get; set; }
+    public float ScaleY { get; set; } = 1;
 
     /// <summary>
-    /// TODO: currently unknown, needs investigation. GMS2022.2 specific?
+    /// TODO: currently unknown, needs investigation.
+    /// Probably this - <see href="https://en.wikipedia.org/wiki/Ascender_(typography)"/> 
     /// </summary>
+    /// <remarks>
+    /// Was introduced in GM 2022.2.
+    /// </remarks>
     public uint Ascender { get; set; }
+
+    /// <summary>
+    /// A spread value that's used for SDF rendering.
+    /// </summary>
+    /// <remarks>
+    /// Was introduced in GM 2023.2.
+    /// </remarks>
+    /// <value><c>0</c> if SDF is disabled for this font.</value>
+    public uint SDFSpread { get; set; }
+
+    /// <remarks>
+    /// Was introduced in GM 2023.6.
+    /// </remarks>
+    public uint LineHeight { get; set; }
 
     /// <summary>
     /// The glyphs that this font uses.
@@ -85,8 +103,11 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
     public UndertalePointerList<Glyph> Glyphs { get; private set; } = new UndertalePointerList<Glyph>();
 
     /// <summary>
-    /// TODO: currently unknown, needs investigation. Exists since bytecode 17, but seems to be only get checked since 2022.2+.
+    /// The maximum offset from the baseline to the top of the font
     /// </summary>
+    /// <remarks>
+    /// Exists since bytecode 17, but seems to be only get checked in GM 2022.2+.
+    /// </remarks>
     public int AscenderOffset { get; set; }
 
 
@@ -123,12 +144,12 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
 
 
         /// <summary>
-        /// TODO: something kerning related
+        /// The number of pixels to shift right when advancing to the next character.
         /// </summary>
         public short Shift { get; set; }
 
         /// <summary>
-        /// TODO: something kerning related.
+        /// The number of pixels to horizontally offset the rendering of this glyph.
         /// </summary>
         public short Offset { get; set; }
 
@@ -163,34 +184,77 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             Kerning = reader.ReadUndertaleObject<UndertaleSimpleListShort<GlyphKerning>>();
         }
 
+        /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+        public static uint UnserializeChildObjectCount(UndertaleReader reader)
+        {
+            reader.Position += 14;
+
+            return 1 + UndertaleSimpleListShort<GlyphKerning>.UnserializeChildObjectCount(reader);
+        }
+
         /// <summary>
         /// A class representing kerning for a glyph.
         /// </summary>
-        public class GlyphKerning : UndertaleObject
+        public class GlyphKerning : UndertaleObject, IStaticChildObjectsSize
         {
-            /// <summary>
-            /// TODO: unknown?
-            /// </summary>
-            public short Other;
+            /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+            public static readonly uint ChildObjectsSize = 4;
 
             /// <summary>
-            /// TODO: unknown?
+            /// The code point of the preceeding character.
             /// </summary>
-            public short Amount;
+            public short Character { get; set; }
+
+            /// <summary>
+            /// An amount of pixels to add to the existing <see cref="Shift"/>.
+            /// </summary>
+            public short ShiftModifier { get; set; }
 
             /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
-                writer.Write(Other);
-                writer.Write(Amount);
+                writer.Write(Character);
+                writer.Write(ShiftModifier);
             }
 
             /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
-                Other = reader.ReadInt16();
-                Amount = reader.ReadInt16();
+                Character = reader.ReadInt16();
+                ShiftModifier = reader.ReadInt16();
             }
+
+            /// <summary>
+            /// Makes a copy of this <see cref="GlyphKerning"/>.
+            /// </summary>
+            /// <returns>The copy.</returns>
+            public GlyphKerning Clone()
+            {
+                return new GlyphKerning() { ShiftModifier = this.ShiftModifier, Character = this.Character };
+            }
+        }
+
+        /// <summary>
+        /// Makes a copy of this <see cref="Glyph"/>.
+        /// </summary>
+        /// <returns>The copy.</returns>
+        public Glyph Clone()
+        {
+            var kerning = new UndertaleSimpleListShort<GlyphKerning>();
+            foreach (var kern in Kerning)
+                kerning.InternalAdd(kern.Clone());
+
+            return new Glyph()
+            {
+                Character = this.Character,
+                SourceX = this.SourceX,
+                SourceY = this.SourceY,
+                SourceWidth = this.SourceWidth,
+                SourceHeight = this.SourceHeight,
+                Shift = this.Shift,
+                Offset = this.Offset,
+                Kerning = kerning
+            };
         }
 
         /// <inheritdoc/>
@@ -229,8 +293,12 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
         writer.Write(ScaleY);
         if (writer.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
             writer.Write(AscenderOffset);
-        if (writer.undertaleData.GMS2022_2)
+        if (writer.undertaleData.IsVersionAtLeast(2022, 2))
             writer.Write(Ascender);
+        if (writer.undertaleData.IsVersionAtLeast(2023, 2))
+            writer.Write(SDFSpread);
+        if (writer.undertaleData.IsVersionAtLeast(2023, 6))
+            writer.Write(LineHeight);
         writer.WriteUndertaleObject(Glyphs);
     }
 
@@ -261,9 +329,31 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
         ScaleY = reader.ReadSingle();
         if (reader.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
             AscenderOffset = reader.ReadInt32();
-        if (reader.undertaleData.GMS2022_2)
+        if (reader.undertaleData.IsVersionAtLeast(2022, 2))
             Ascender = reader.ReadUInt32();
+        if (reader.undertaleData.IsVersionAtLeast(2023, 2))
+            SDFSpread = reader.ReadUInt32();
+        if (reader.undertaleData.IsVersionAtLeast(2023, 6))
+            LineHeight = reader.ReadUInt32();
         Glyphs = reader.ReadUndertaleObject<UndertalePointerList<Glyph>>();
+    }
+
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        int skipSize = 40;
+        if (reader.undertaleData.GeneralInfo?.BytecodeVersion >= 17)
+            skipSize += 4; // AscenderOffset
+        if (reader.undertaleData.IsVersionAtLeast(2022, 2))
+            skipSize += 4; // Ascender
+        if (reader.undertaleData.IsVersionAtLeast(2023, 2))
+            skipSize += 4; // SDFSpread
+        if (reader.undertaleData.IsVersionAtLeast(2023, 6))
+            skipSize += 4; // LineHeight
+
+        reader.Position += skipSize;
+
+        return 1 + UndertalePointerList<Glyph>.UnserializeChildObjectCount(reader);
     }
 
     /// <inheritdoc />

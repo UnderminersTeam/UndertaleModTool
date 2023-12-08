@@ -129,7 +129,7 @@ public class UndertaleBackground : UndertaleNamedResource, IDisposable
         writer.Write(Smooth);
         writer.Write(Preload);
         writer.WriteUndertaleObjectPointer(Texture);
-        if (writer.undertaleData.GeneralInfo.Major >= 2)
+        if (writer.undertaleData.IsGameMaker2())
         {
             writer.Write(GMS2UnknownAlways2);
             writer.Write(GMS2TileWidth);
@@ -156,7 +156,7 @@ public class UndertaleBackground : UndertaleNamedResource, IDisposable
         Smooth = reader.ReadBoolean();
         Preload = reader.ReadBoolean();
         Texture = reader.ReadUndertaleObjectPointer<UndertaleTexturePageItem>();
-        if (reader.undertaleData.GeneralInfo.Major >= 2)
+        if (reader.undertaleData.IsGameMaker2())
         {
             GMS2UnknownAlways2 = reader.ReadUInt32();
             GMS2TileWidth = reader.ReadUInt32();

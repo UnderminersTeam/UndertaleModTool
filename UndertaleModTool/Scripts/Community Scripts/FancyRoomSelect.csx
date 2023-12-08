@@ -17,7 +17,7 @@ if(Data.GeneralInfo.Name.Content.StartsWith("UNDERTALE")) {
     Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, (uint)114, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML("", Data);
 }
 
-bool gms2 = Data.IsVersionAtLeast(2,0,0,0);
+bool gms2 = Data.IsGameMaker2();
 
 var entry_room = Data.GeneralInfo.RoomOrder[0].Resource;
 var object_list = entry_room.GameObjects;
@@ -117,7 +117,7 @@ scale = 1
 fnt = -4
 len = 0
 ss = -4" 
-+ (!Data.GMS2_3 
++ (!Data.IsVersionAtLeast(2, 3) 
   ? "for (i = room_first; i <= room_last; i++)"
   : "for (i = 0; room_exists(i); i++)")
 + @"
@@ -159,7 +159,7 @@ if selector_active
             roomid = -1
             if (dest_room != """" && dest_room == string_digits(dest_room))
                 roomid = real(dest_room)"
-            + (!Data.GMS2_3
+            + (!Data.IsVersionAtLeast(2, 3)
               ? "for (i = room_first; i <= room_last; i++)"
               : "for (i = 0; i < myroom_last; i++)")
             + @"
@@ -408,7 +408,7 @@ exiting = 0
 ", Data);
 
 string version;
-if (Data.GMS2_3)
+if (Data.IsVersionAtLeast(2, 3))
     version = "2.3";
 else if (gms2)
     version = "2";

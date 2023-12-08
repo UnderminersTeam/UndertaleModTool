@@ -75,7 +75,7 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, ID
     /// <summary>
     /// The pitch change of the audio entry.
     /// </summary>
-    public float Pitch { get; set; } = 0;
+    public float Pitch { get; set; }
 
     private UndertaleResourceById<UndertaleAudioGroup, UndertaleChunkAGRP> _audioGroup = new();
     private UndertaleResourceById<UndertaleEmbeddedAudio, UndertaleChunkAUDO> _audioFile = new();
@@ -102,6 +102,10 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, ID
 
     /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
+    
+    /// <summary>
+    /// Invoked whenever the effective value of any dependency property has been updated.
+    /// </summary>
     protected void OnPropertyChanged([CallerMemberName] string name = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
@@ -161,6 +165,39 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, ID
         }
     }
 
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        uint count = 0;
+
+        reader.Position += 4;
+        AudioEntryFlags flags = (AudioEntryFlags)reader.ReadUInt32();
+        reader.Position += 20;
+
+        int audioGroupID;
+
+        if (flags.HasFlag(AudioEntryFlags.Regular) && reader.undertaleData.GeneralInfo?.BytecodeVersion >= 14)
+        {
+            audioGroupID = reader.ReadInt32();
+            count++;
+        }
+        else
+        {
+            audioGroupID = reader.undertaleData.GetBuiltinSoundGroupID();
+            reader.Position += 4; // "Preload"
+        }
+
+        if (audioGroupID == reader.undertaleData.GetBuiltinSoundGroupID())
+        {
+            reader.Position += 4; // "_audioFile"
+            count++;
+        }
+        else
+            reader.Position += 4; // "_audioFile.CachedId"
+
+        return count;
+    }
+
     /// <inheritdoc />
     public override string ToString()
     {
@@ -184,8 +221,11 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, ID
 /// Audio group entry in a data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleAudioGroup : UndertaleNamedResource, IDisposable
+public class UndertaleAudioGroup : UndertaleNamedResource, IStaticChildObjectsSize, IDisposable
 {
+    /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+    public static readonly uint ChildObjectsSize = 4;
+
     /// <summary>
     /// The name of the audio group.
     /// </summary>

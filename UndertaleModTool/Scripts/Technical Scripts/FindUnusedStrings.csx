@@ -269,9 +269,9 @@ uint[] GetStringUsageCount()
     UpdateProgress("Checking strings in GeneralInfo");
     if (Data.GeneralInfo != null)
     {
-        if (Data.GeneralInfo.Filename != null)
+        if (Data.GeneralInfo.FileName != null)
         {
-            stringsUsageCountArray[Data.Strings.IndexOf(Data.GeneralInfo.Filename)] += 1;
+            stringsUsageCountArray[Data.Strings.IndexOf(Data.GeneralInfo.FileName)] += 1;
         }
         if (Data.GeneralInfo.Config != null)
         {
@@ -497,6 +497,17 @@ uint[] GetStringUsageCount()
             if (obj.Name != null)
             {
                 stringsUsageCountArray[Data.Strings.IndexOf(obj.Name)] += 1;
+            }
+
+            if (obj.V2Sequence is not null && obj.V2Sequence.Tracks.Count != 0)
+            {
+                UndertaleString name = obj.V2Sequence.Tracks[0].Name;
+                if (name is not null)
+                    stringsUsageCountArray[Data.Strings.IndexOf(name)] += 1;
+
+                name = obj.V2Sequence.Tracks[0].ModelName;
+                if (name is not null)
+                    stringsUsageCountArray[Data.Strings.IndexOf(name)] += 1;
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿<Window x:Class="UndertaleModTool.TextInputDialog"
+        IsVisibleChanged="Window_IsVisibleChanged"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -13,7 +14,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0" VerticalAlignment="Center" Text="{Binding Message}"/>
-        <TextBox Grid.Row="1" VerticalAlignment="Center" AcceptsReturn="{Binding IsMultiline}" Text="{Binding InputText}"></TextBox>
+        <local:TextBoxDark Grid.Row="1" VerticalAlignment="Center" AcceptsReturn="{Binding IsMultiline}" Text="{Binding InputText}"/>
 
         <Grid Grid.Row="2" Name="Buttons">
             <Grid.ColumnDefinitions>
@@ -23,8 +24,8 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <Button Grid.Row="2" Grid.Column="0" Margin="3,3" VerticalAlignment="Center" Visibility="{Binding CancelButtonVisibility}" Content="{Binding CancelButtonTitle}" Click="CancelButton_Click"></Button>
-            <Button Grid.Row="2" Grid.Column="1" Margin="3,3" VerticalAlignment="Center" Content="{Binding ButtonTitle}" Click="Button_Click"></Button>
+            <local:ButtonDark Grid.Row="2" Grid.Column="0" Margin="3,3" VerticalAlignment="Center" Visibility="{Binding CancelButtonVisibility}" Content="{Binding CancelButtonTitle}" Click="CancelButton_Click"></local:ButtonDark>
+            <local:ButtonDark Grid.Row="2" Grid.Column="1" Margin="3,3" VerticalAlignment="Center" Content="{Binding ButtonTitle}" Click="Button_Click"></local:ButtonDark>
         </Grid>
         
     </Grid>

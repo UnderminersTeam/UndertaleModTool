@@ -28,9 +28,10 @@
         <local:TileLayerTemplateSelector x:Key="TileLayerTemplateSelector"/>
         <local:TileRectanglesConverter x:Key="TileRectanglesConverter"/>
         <local:CachedImageLoaderWithIndex x:Key="CachedImageLoaderWithIndex"/>
-        <local:DataFieldOneTimeConverter x:Key="DataFieldOneTimeConverter"/>
+        <local:IsVersionAtLeastConverter x:Key="IsVersionAtLeastConverter"/>
         <local:NegateNumberConverter x:Key="NegateNumberConverter"/>
         <local:ParentGridHeightConverter x:Key="ParentGridHeightConverter"/>
+        <local:ParticleSystemRectConverter x:Key="ParticleSystemRectConverter"/>
         <CompositeCollection x:Key="AllObjectsGMS1">
             <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Backgrounds}"/>
             <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Tiles}"/>
@@ -74,54 +75,97 @@
         <Grid Grid.Column="0" Grid.Row="0" Margin="0,0,0,8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
             <TreeView Grid.Column="0" Margin="0,0,3,0" SelectedItemChanged="TreeView_SelectedItemChanged" Name="RoomObjectsTree"
-                      KeyDown="RoomObjectsTree_KeyDown" MouseDoubleClick="RoomObjectsTree_MouseDoubleClick">
+                      KeyDown="RoomObjectsTree_KeyDown" MouseDoubleClick="RoomObjectsTree_MouseDoubleClick" MouseDown="RoomObjectsTree_MouseDown">
                 <TreeView.Resources>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+GameObject}">
                         <TextBlock>
                             <TextBlock.Text>
-                                <MultiBinding Mode="OneWay" StringFormat="{}Instance {0} of {1} (UndertaleRoom+GameObject)">
+                                <MultiBinding Mode="OneWay" StringFormat="{}Instance {0} of {1}">
                                     <Binding Path="InstanceID" Mode="OneWay"/>
                                     <Binding Path="ObjectDefinition.Name.Content" Mode="OneWay" TargetNullValue="?" FallbackValue="EmptyInstance"/>
                                 </MultiBinding>
                             </TextBlock.Text>
+                            <TextBlock.ContextMenu>
+                                <local:ContextMenuDark>
+                                    <MenuItem Header="Copy object" Click="MenuItem_Copy_Click" InputGestureText="Ctrl+C"/>
+                                    <MenuItem Header="Delete object" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
+                                </local:ContextMenuDark>
+                            </TextBlock.ContextMenu>
                         </TextBlock>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Tile}">
                         <TextBlock>
                             <TextBlock.Text>
-                                <MultiBinding Mode="OneWay" StringFormat="{}Tile {0} of {1} (UndertaleRoom+Tile)">
+                                <MultiBinding Mode="OneWay" StringFormat="{}Tile {0} of {1}">
                                     <Binding Path="InstanceID" Mode="OneWay"/>
                                     <Binding Path="ObjectDefinition.Name.Content" Mode="OneWay" TargetNullValue="?" FallbackValue="EmptyTile"/>
                                 </MultiBinding>
                             </TextBlock.Text>
+                            <TextBlock.ContextMenu>
+                                <local:ContextMenuDark>
+                                    <MenuItem Header="Copy tile" Click="MenuItem_Copy_Click" InputGestureText="Ctrl+C"/>
+                                    <MenuItem Header="Delete tile" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
+                                </local:ContextMenuDark>
+                            </TextBlock.ContextMenu>
                         </TextBlock>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+SpriteInstance}">
                         <TextBlock>
                             <TextBlock.Text>
-                                <MultiBinding Mode="OneWay" StringFormat="{}{0} (UndertaleRoom+SpriteInstance)">
-                                    <Binding Path="Name.Content" Mode="OneWay" TargetNullValue="?" FallbackValue="EmptySprite"/>
+                                <MultiBinding Mode="OneWay" StringFormat="{}Sprite {0} of {1}">
+                                    <Binding Path="Name.Content" Mode="OneWay" TargetNullValue="?" FallbackValue="EmptyName"/>
+                                    <Binding Path="Sprite.Name.Content" Mode="OneWay" TargetNullValue="?" FallbackValue="EmptySprite"/>
                                 </MultiBinding>
                             </TextBlock.Text>
+                            <TextBlock.ContextMenu>
+                                <local:ContextMenuDark>
+                                    <MenuItem Header="Copy sprite instance" Click="MenuItem_Copy_Click" InputGestureText="Ctrl+C"/>
+                                    <MenuItem Header="Delete sprite instance" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
+                                </local:ContextMenuDark>
+                            </TextBlock.ContextMenu>
                         </TextBlock>
                     </DataTemplate>
-                    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#D4D4D4"/>
+                    <DataTemplate DataType="{x:Type undertale:UndertaleRoom+ParticleSystemInstance}">
+                        <TextBlock>
+                            <TextBlock.Text>
+                                <MultiBinding Mode="OneWay" StringFormat="{}Particle system {0} of {1}">
+                                    <Binding Path="Name.Content" Mode="OneWay" TargetNullValue="?" FallbackValue="EmptyName"/>
+                                    <Binding Path="ParticleSystem.Name.Content" Mode="OneWay" TargetNullValue="?" FallbackValue="EmptySystem"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                            <TextBlock.ContextMenu>
+                                <local:ContextMenuDark>
+                                    <MenuItem Header="Copy particle system instance" Click="MenuItem_Copy_Click" InputGestureText="Ctrl+C"/>
+                                    <MenuItem Header="Delete particle system instance" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
+                                </local:ContextMenuDark>
+                            </TextBlock.ContextMenu>
+                        </TextBlock>
+                    </DataTemplate>
                 </TreeView.Resources>
 
                 <TreeViewItem Header="{Binding Name.Content}" Name="RoomRootItem" IsExpanded="True">
                     <TreeViewItem Name="BGItems" Header="Backgrounds" ItemsSource="{Binding Backgrounds, Mode=OneWay}" Visibility="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}" IsExpanded="True">
+                        <TreeViewItem.Resources>
+                            <local:ContextMenuDark x:Key="bgContextMenu">
+                                <MenuItem Header="Delete background" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
+                            </local:ContextMenuDark>
+                        </TreeViewItem.Resources>
                         <TreeViewItem.ItemTemplate>
                             <HierarchicalDataTemplate>
                                 <TextBlock Text="{Binding BackgroundDefinition, Mode=OneWay, TargetNullValue='(no name)'}">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
+                                            <Setter Property="ContextMenu" Value="{StaticResource bgContextMenu}"/>
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding Enabled, Mode=OneWay}" Value="False">
-                                                    <Setter Property="Foreground"  Value="LightGray"/>
+                                                    <Setter Property="Foreground"
+                                                            Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                                    <Setter Property="ContextMenu" Value="{x:Null}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -131,14 +175,22 @@
                         </TreeViewItem.ItemTemplate>
                     </TreeViewItem>
                     <TreeViewItem Name="ViewItems" Header="Views" ItemsSource="{Binding Views, Mode=OneWay}" IsExpanded="True">
+                        <TreeViewItem.Resources>
+                            <local:ContextMenuDark x:Key="viewContextMenu">
+                                <MenuItem Header="Disable view" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
+                            </local:ContextMenuDark>
+                        </TreeViewItem.Resources>
                         <TreeViewItem.ItemTemplate>
                             <HierarchicalDataTemplate>
                                 <TextBlock Text="View">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
+                                            <Setter Property="ContextMenu" Value="{StaticResource viewContextMenu}"/>
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding Enabled, Mode=OneWay}" Value="False">
-                                                    <Setter Property="Foreground"  Value="LightGray"/>
+                                                    <Setter Property="Foreground"
+                                                            Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                                    <Setter Property="ContextMenu" Value="{x:Null}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -150,9 +202,10 @@
                     <!-- GameObjItems header changes depending on GMS version -->
                     <TreeViewItem Name="GameObjItems" Header="Game objects" ItemsSource="{Binding GameObjects, Mode=OneWay}">
                         <TreeViewItem.Resources>
-                            <ContextMenu x:Key="cm">
-                                <MenuItem Header="New Object Instance" Click="MenuItem_NewObjectInstance_Click"/>
-                            </ContextMenu>
+                            <local:ContextMenuDark x:Key="cm">
+                                <MenuItem Header="New object instance" Click="MenuItem_NewObjectInstance_Click"/>
+                                <MenuItem Header="Paste object instance" Click="MenuItem_Paste_Click" InputGestureText="Ctrl+V"/>
+                            </local:ContextMenuDark>
                         </TreeViewItem.Resources>
                         <TreeViewItem.Style>
                             <Style TargetType="{x:Type TreeViewItem}">
@@ -160,7 +213,8 @@
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}" Value="False">
                                         <DataTrigger.Setters>
-                                            <Setter Property="Foreground"  Value="LightGray"/>
+                                            <Setter Property="Foreground"
+                                                    Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
                                             <Setter Property="ContextMenu" Value="{x:Null}"/>
                                         </DataTrigger.Setters>
                                     </DataTrigger>
@@ -178,40 +232,70 @@
                                             <Binding Path="ObjectDefinition.Name.Content" TargetNullValue="?" FallbackValue="EmptyTile"/>
                                         </MultiBinding>
                                     </TextBlock.Text>
+                                    <TextBlock.ContextMenu>
+                                        <local:ContextMenuDark>
+                                            <MenuItem Header="Delete tile" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
+                                            <MenuItem Header="Copy tile" Click="MenuItem_Copy_Click" InputGestureText="Ctrl+V"/>
+                                        </local:ContextMenuDark>
+                                    </TextBlock.ContextMenu>
                                 </TextBlock>
                             </HierarchicalDataTemplate>
                         </TreeViewItem.ItemTemplate>
                         <TreeViewItem.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Header="New Tile" Click="MenuItem_NewGMS1Tile_Click"/>
-                            </ContextMenu>
+                            <local:ContextMenuDark>
+                                <MenuItem Header="New tile" Click="MenuItem_NewGMS1Tile_Click"/>
+                                <MenuItem Header="Paste tile" Click="MenuItem_Paste_Click" InputGestureText="Ctrl+V"/>
+                            </local:ContextMenuDark>
                         </TreeViewItem.ContextMenu>
                     </TreeViewItem>
                     <TreeViewItem Name="LayerItems" Header="Layers" ItemsSource="{Binding Layers, Mode=OneWay}" IsExpanded="True" Visibility="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}, ConverterParameter=invert}">
                         <TreeViewItem.ContextMenu>
-                            <ContextMenu>
+                            <local:ContextMenuDark>
                                 <MenuItem Header="New Instances layer" Click="MenuItem_NewLayerInstances_Click"/>
                                 <MenuItem Header="New Tiles layer" Click="MenuItem_NewLayerTiles_Click"/>
                                 <MenuItem Header="New Background layer" Click="MenuItem_NewLayerBackground_Click"/>
                                 <MenuItem Header="New Assets layer" Click="MenuItem_NewLayerAssets_Click"/>
-                            </ContextMenu>
+                            </local:ContextMenuDark>
                         </TreeViewItem.ContextMenu>
+                        <TreeViewItem.Resources>
+                            <Style x:Key="LayerItemStyle" TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsVisible, Mode=OneWay}" Value="False">
+                                        <Setter Property="Foreground"
+                                                Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TreeViewItem.Resources>
                         <TreeViewItem.ItemTemplateSelector>
                             <local:LayerDataTemplateSelector>
+                                <local:LayerDataTemplateSelector.PathDataTemplate>
+                                    <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
+                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}"/>
+                                    </HierarchicalDataTemplate>
+                                </local:LayerDataTemplateSelector.PathDataTemplate>
                                 <local:LayerDataTemplateSelector.InstancesDataTemplate>
                                     <HierarchicalDataTemplate ItemsSource="{Binding InstancesData.Instances, Mode=OneWay}" ItemTemplateSelector="{x:Null}">
-                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}">
+                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">
                                             <TextBlock.ContextMenu>
-                                                <ContextMenu>
-                                                    <MenuItem Header="New Object Instance" Click="MenuItem_NewGMS2ObjectInstance_Click"/>
-                                                </ContextMenu>
+                                                <local:ContextMenuDark>
+                                                    <MenuItem Header="New object instance" Click="MenuItem_NewGMS2ObjectInstance_Click"/>
+                                                    <MenuItem Header="Paste object instance" Click="MenuItem_Paste_Click" InputGestureText="Ctrl+V"/>
+                                                    <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
+                                                </local:ContextMenuDark>
                                             </TextBlock.ContextMenu>
                                         </TextBlock>
                                     </HierarchicalDataTemplate>
                                 </local:LayerDataTemplateSelector.InstancesDataTemplate>
                                 <local:LayerDataTemplateSelector.TilesDataTemplate>
                                     <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
-                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}"/>
+                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">
+                                            <TextBlock.ContextMenu>
+                                                <local:ContextMenuDark>
+                                                    <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
+                                                </local:ContextMenuDark>
+                                            </TextBlock.ContextMenu>
+                                        </TextBlock>
                                     </HierarchicalDataTemplate>
                                 </local:LayerDataTemplateSelector.TilesDataTemplate>
                                 <local:LayerDataTemplateSelector.AssetsDataTemplate>
@@ -224,26 +308,43 @@
                                                 </MultiBinding.Converter>
                                                 <Binding Path="AssetsData.LegacyTiles"/>
                                                 <Binding Path="AssetsData.Sprites"/>
+                                                <Binding Path="AssetsData.Sequences"/>
+                                                <Binding Path="AssetsData.NineSlices"/>
+                                                <Binding Path="AssetsData.ParticleSystems"/>
                                             </MultiBinding>
                                         </HierarchicalDataTemplate.ItemsSource>
-                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}">
+                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">
                                             <TextBlock.ContextMenu>
-                                                <ContextMenu>
-                                                    <MenuItem Header="New Legacy Tile" Click="MenuItem_NewLegacyTile_Click"/>
-                                                    <MenuItem Header="New Sprite Instance" Click="MenuItem_NewSprite_Click"/>
-                                                </ContextMenu>
+                                                <local:ContextMenuDark>
+                                                    <MenuItem Header="New legacy tile" Click="MenuItem_NewLegacyTile_Click"/>
+                                                    <MenuItem Header="New sprite instance" Click="MenuItem_NewSprite_Click"/>
+                                                    <MenuItem Header="Paste asset" Click="MenuItem_Paste_Click" InputGestureText="Ctrl+V"/>
+                                                    <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
+                                                </local:ContextMenuDark>
                                             </TextBlock.ContextMenu>
                                         </TextBlock>
                                     </HierarchicalDataTemplate>
                                 </local:LayerDataTemplateSelector.AssetsDataTemplate>
                                 <local:LayerDataTemplateSelector.BackgroundDataTemplate>
                                     <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
-                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" />
+                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">
+                                            <TextBlock.ContextMenu>
+                                                <local:ContextMenuDark>
+                                                    <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
+                                                </local:ContextMenuDark>
+                                            </TextBlock.ContextMenu>
+                                        </TextBlock>
                                     </HierarchicalDataTemplate>
                                 </local:LayerDataTemplateSelector.BackgroundDataTemplate>
                                 <local:LayerDataTemplateSelector.EffectDataTemplate>
                                     <HierarchicalDataTemplate ItemTemplateSelector="{x:Null}">
-                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" />
+                                        <TextBlock Text="{Binding LayerName.Content, Mode=OneWay}" Style="{StaticResource LayerItemStyle}">
+                                            <TextBlock.ContextMenu>
+                                                <local:ContextMenuDark>
+                                                    <MenuItem Header="Delete layer" Click="MenuItem_Delete_Click" InputGestureText="Delete"/>
+                                                </local:ContextMenuDark>
+                                            </TextBlock.ContextMenu>
+                                        </TextBlock>
                                     </HierarchicalDataTemplate>
                                 </local:LayerDataTemplateSelector.EffectDataTemplate>
                             </local:LayerDataTemplateSelector>
@@ -252,7 +353,19 @@
                 </TreeViewItem>
             </TreeView>
 
-            <ScrollViewer Grid.Column="1" Margin="3,0,0,0" Name="ObjectEditor" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible">
+            <Border Grid.Column="1" BorderBrush="#828790" BorderThickness="0,1,1,1"
+                    Height="Auto" VerticalAlignment="Top" Margin="-3,0,0,0">
+                <StackPanel Name="MoveButtonsPanel" Margin="1,1,1,1">
+                    <local:RepeatButtonDark FontFamily="Marlett" FontSize="14" Content="5" Margin="0,0,0,2"
+                                            ToolTip="Move item up (-)" ToolTipService.InitialShowDelay="250"
+                                            Click="TreeViewMoveUpButton_Click" PreviewMouseLeftButtonUp="TreeViewMoveButton_MouseLeftButtonUp"/>
+                    <local:RepeatButtonDark FontFamily="Marlett" FontSize="14" Content="6"
+                                            ToolTip="Move item down (+)" ToolTipService.InitialShowDelay="250"
+                                            Click="TreeViewMoveDownButton_Click" PreviewMouseLeftButtonUp="TreeViewMoveButton_MouseLeftButtonUp"/>
+                </StackPanel>
+            </Border>
+
+            <ScrollViewer Grid.Column="2" Margin="3,0,0,0" Name="ObjectEditor" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible">
                 <ContentControl.Resources>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom}">
                         <Grid IsSharedSizeScope="True">
@@ -300,12 +413,12 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding Width}"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding Height}"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding Width}"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding Height}"/>
                             </Grid>
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Speed</TextBlock>
-                            <TextBox Grid.Row="3" Grid.Column="2" Margin="3" Text="{Binding Speed}"/>
+                            <local:TextBoxDark Grid.Row="3" Grid.Column="2" Margin="3" Text="{Binding Speed}"/>
 
                             <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Persistent</TextBlock>
                             <CheckBox Grid.Row="4" Grid.Column="2" Margin="3" IsChecked="{Binding Persistent}"/>
@@ -320,10 +433,10 @@
                             <local:UndertaleObjectReference Grid.Row="7" Grid.Column="2" Margin="3" ObjectReference="{Binding CreationCodeId}" ObjectType="{x:Type undertale:UndertaleCode}"  ObjectEventType="{x:Static undertale:EventType.Create}" ObjectEventSubtype="0"/>
 
                             <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Flags</TextBlock>
-                            <TextBox Grid.Row="8" Grid.Column="2" Margin="3" Text="{Binding Flags, Converter={StaticResource IsGMS2Converter}, ConverterParameter=flags}"/>
+                            <local:TextBoxDark Grid.Row="8" Grid.Column="2" Margin="3" Text="{Binding Flags, Converter={StaticResource IsGMS2Converter}, ConverterParameter=flags}"/>
 
                             <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">World</TextBlock>
-                            <TextBox Grid.Row="9" Grid.Column="2" Margin="3" Text="{Binding World}"/>
+                            <local:TextBoxDark Grid.Row="9" Grid.Column="2" Margin="3" Text="{Binding World}"/>
 
                             <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Top/Left/Right/Bottom</TextBlock>
                             <Grid Grid.Row="10" Grid.Column="2">
@@ -333,10 +446,10 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding Top}"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding Left}"/>
-                                <TextBox Grid.Column="2" Margin="3" Text="{Binding Right}"/>
-                                <TextBox Grid.Column="3" Margin="3" Text="{Binding Bottom}"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding Top}"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding Left}"/>
+                                <local:TextBoxDark Grid.Column="2" Margin="3" Text="{Binding Right}"/>
+                                <local:TextBoxDark Grid.Column="3" Margin="3" Text="{Binding Bottom}"/>
                             </Grid>
 
                             <TextBlock Grid.Row="11" Grid.Column="0" Margin="3">Gravity</TextBlock>
@@ -345,18 +458,18 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding GravityX}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding GravityY}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding GravityX}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding GravityY}" ToolTip="Y"/>
                             </Grid>
 
                             <TextBlock Grid.Row="12" Grid.Column="0" Margin="3">Grid Width</TextBlock>
-                            <TextBox Grid.Row="12" Grid.Column="2" Margin="3" Text="{Binding GridWidth}"/>
+                            <local:TextBoxDark Grid.Row="12" Grid.Column="2" Margin="3" Text="{Binding GridWidth}"/>
 
                             <TextBlock Grid.Row="13" Grid.Column="0" Margin="3">Grid Height</TextBlock>
-                            <TextBox Grid.Row="13" Grid.Column="2" Margin="3" Text="{Binding GridHeight}"/>
+                            <local:TextBoxDark Grid.Row="13" Grid.Column="2" Margin="3" Text="{Binding GridHeight}"/>
 
                             <TextBlock Grid.Row="14" Grid.Column="0" Margin="3">Grid Thickness</TextBlock>
-                            <TextBox Grid.Row="14" Grid.Column="2" Margin="3" Text="{Binding GridThicknessPx}"/>
+                            <local:TextBoxDark Grid.Row="14" Grid.Column="2" Margin="3" Text="{Binding GridThicknessPx}"/>
                         </Grid>
                     </DataTemplate>
 
@@ -390,7 +503,7 @@
                             <CheckBox Grid.Row="1" Grid.Column="2" Margin="3" IsChecked="{Binding Foreground}"/>
 
                             <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Definition</TextBlock>
-                            <local:UndertaleObjectReference Grid.Row="2" Grid.Column="2" Margin="3" ObjectReference="{Binding BackgroundDefinition}" ObjectType="{x:Type undertale:UndertaleBackground}" CanRemove="False"/>
+                            <local:UndertaleObjectReference Grid.Row="2" Grid.Column="2" Margin="3" ObjectReference="{Binding BackgroundDefinition}" ObjectType="{x:Type undertale:UndertaleBackground}" CanRemove="True"/>
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Position</TextBlock>
                             <Grid Grid.Row="3" Grid.Column="2">
@@ -398,8 +511,8 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding X}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding Y}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding X}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding Y}" ToolTip="Y"/>
                             </Grid>
 
                             <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Tiling</TextBlock>
@@ -418,8 +531,8 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding SpeedX}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding SpeedY}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding SpeedX}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding SpeedY}" ToolTip="Y"/>
                             </Grid>
 
                             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Stretch</TextBlock>
@@ -460,10 +573,10 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding ViewX}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding ViewY}" ToolTip="Y"/>
-                                <TextBox Grid.Column="2" Margin="3" Text="{Binding ViewWidth}" ToolTip="Width"/>
-                                <TextBox Grid.Column="3" Margin="3" Text="{Binding ViewHeight}" ToolTip="Height"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding ViewX}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding ViewY}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="2" Margin="3" Text="{Binding ViewWidth}" ToolTip="Width"/>
+                                <local:TextBoxDark Grid.Column="3" Margin="3" Text="{Binding ViewHeight}" ToolTip="Height"/>
                             </Grid>
 
                             <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Port pos/size</TextBlock>
@@ -474,10 +587,10 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding PortX}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding PortY}" ToolTip="Y"/>
-                                <TextBox Grid.Column="2" Margin="3" Text="{Binding PortWidth}" ToolTip="Width"/>
-                                <TextBox Grid.Column="3" Margin="3" Text="{Binding PortHeight}" ToolTip="Height"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding PortX}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding PortY}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="2" Margin="3" Text="{Binding PortWidth}" ToolTip="Width"/>
+                                <local:TextBoxDark Grid.Column="3" Margin="3" Text="{Binding PortHeight}" ToolTip="Height"/>
                             </Grid>
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Border</TextBlock>
@@ -486,8 +599,8 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding BorderX}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding BorderY}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding BorderX}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding BorderY}" ToolTip="Y"/>
                             </Grid>
 
                             <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Speed</TextBlock>
@@ -496,8 +609,8 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding SpeedX}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding SpeedY}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding SpeedX}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding SpeedY}" ToolTip="Y"/>
                             </Grid>
 
                             <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Follows object</TextBlock>
@@ -536,15 +649,15 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding X}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding Y}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding X}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding Y}" ToolTip="Y"/>
                             </Grid>
 
                             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Definition</TextBlock>
                             <local:UndertaleObjectReference Grid.Row="1" Grid.Column="2" Margin="3" ObjectReference="{Binding ObjectDefinition}" ObjectType="{x:Type undertale:UndertaleGameObject}" CanRemove="False"/>
 
                             <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Instance ID</TextBlock>
-                            <TextBox Grid.Row="2" Grid.Column="2" Margin="3" Text="{Binding InstanceID}"/>
+                            <local:TextBoxDark Grid.Row="2" Grid.Column="2" Margin="3" Text="{Binding InstanceID}"/>
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Creation code</TextBlock>
                             <local:UndertaleObjectReference Grid.Row="3" Grid.Column="2" Margin="3" ObjectReference="{Binding CreationCode}" ObjectType="{x:Type undertale:UndertaleCode}" ObjectEventType="{x:Static undertale:EventType.Create}" ObjectEventSubtype="0"/>
@@ -555,17 +668,17 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding ScaleX}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding ScaleY}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding ScaleX}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding ScaleY}" ToolTip="Y"/>
                             </Grid>
 
                             <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Color</TextBlock>
                             <local:ColorPicker Grid.Row="5" Grid.Column="2" Margin="3" Color="{Binding Color}"/>
 
                             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Rotation</TextBlock>
-                            <TextBox Grid.Row="6" Grid.Column="2" Margin="3" Text="{Binding Rotation}"/>
+                            <local:TextBoxDark Grid.Row="6" Grid.Column="2" Margin="3" Text="{Binding Rotation}"/>
 
-                            <Grid Grid.Row="7" Grid.ColumnSpan="3" Visibility="{Binding Data, ConverterParameter=GMS2_2_2_302, Mode=OneTime, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}, Converter={StaticResource DataFieldOneTimeConverter}}">
+                            <Grid Grid.Row="7" Grid.ColumnSpan="3" Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter},ConverterParameter=2.2.2.302}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" SharedSizeGroup="FirstColumn"/>
                                     <ColumnDefinition Width="5"/>
@@ -576,10 +689,10 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Frame index</TextBlock>
-                                <TextBox Grid.Row="0" Grid.Column="2" Margin="3" Text="{Binding ImageIndex}"/>
+                                <local:TextBoxDark Grid.Row="0" Grid.Column="2" Margin="3" Text="{Binding ImageIndex}"/>
 
                                 <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Image speed</TextBlock>
-                                <TextBox Grid.Row="1" Grid.Column="2" Margin="3" Text="{Binding ImageSpeed}"/>
+                                <local:TextBoxDark Grid.Row="1" Grid.Column="2" Margin="3" Text="{Binding ImageSpeed}"/>
                             </Grid>
 
                             <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Pre Create code</TextBlock>
@@ -619,8 +732,8 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding X}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding Y}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding X}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding Y}" ToolTip="Y"/>
                             </Grid>
 
                             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Definition</TextBlock>
@@ -651,10 +764,10 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding SourceX}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding SourceY}" ToolTip="Y"/>
-                                <TextBox Grid.Column="2" Margin="3" Text="{Binding Width}" ToolTip="Width"/>
-                                <TextBox Grid.Column="3" Margin="3" Text="{Binding Height}" ToolTip="Height"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding SourceX}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding SourceY}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="2" Margin="3" Text="{Binding Width}" ToolTip="Width"/>
+                                <local:TextBoxDark Grid.Column="3" Margin="3" Text="{Binding Height}" ToolTip="Height"/>
                             </Grid>
 
                             <TextBlock Grid.Row="3" Grid.Column="2" Margin="3" HorizontalAlignment="Center" Foreground="DarkGray" FontStyle="Italic" TextWrapping="Wrap">
@@ -685,10 +798,10 @@
                             </Viewbox>
 
                             <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Depth</TextBlock>
-                            <TextBox Grid.Row="5" Grid.Column="2" Margin="3" Text="{Binding TileDepth}"/>
+                            <local:TextBoxDark Grid.Row="5" Grid.Column="2" Margin="3" Text="{Binding TileDepth}"/>
 
                             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Instance ID</TextBlock>
-                            <TextBox Grid.Row="6" Grid.Column="2" Margin="3" Text="{Binding InstanceID}"/>
+                            <local:TextBoxDark Grid.Row="6" Grid.Column="2" Margin="3" Text="{Binding InstanceID}"/>
 
                             <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Scale</TextBlock>
                             <Grid Grid.Row="7" Grid.Column="2">
@@ -696,8 +809,8 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding ScaleX}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding ScaleY}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding ScaleX}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding ScaleY}" ToolTip="Y"/>
                             </Grid>
 
                             <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Color</TextBlock>
@@ -741,13 +854,13 @@
                             <local:UndertaleStringReference Grid.Row="0" Grid.Column="2" Margin="3" ObjectReference="{Binding LayerName}"/>
 
                             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Layer id</TextBlock>
-                            <TextBox Grid.Row="1" Grid.Column="2" Margin="3" Text="{Binding LayerId}"/>
+                            <local:TextBoxDark Grid.Row="1" Grid.Column="2" Margin="3" Text="{Binding LayerId}"/>
 
                             <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Layer type</TextBlock>
                             <TextBlock Grid.Row="2" Grid.Column="2" Margin="3" Text="{Binding LayerType}" FontWeight="Bold"/>
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Depth</TextBlock>
-                            <TextBox Grid.Row="3" Grid.Column="2" Margin="3" Text="{Binding LayerDepth}"/>
+                            <local:TextBoxDark Grid.Row="3" Grid.Column="2" Margin="3" Text="{Binding LayerDepth}"/>
 
                             <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Visibility="{Binding LayerType, Mode=OneTime, Converter={StaticResource LayerTypeConverter}}">Offset</TextBlock>
                             <Grid Grid.Row="4" Grid.Column="2" Visibility="{Binding LayerType, Mode=OneTime, Converter={StaticResource LayerTypeConverter}}">
@@ -755,8 +868,8 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding XOffset}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding YOffset}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding XOffset}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding YOffset}" ToolTip="Y"/>
                             </Grid>
 
                             <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Visibility="{Binding LayerType, Mode=OneTime, Converter={StaticResource LayerTypeConverter}}">Speed</TextBlock>
@@ -765,8 +878,8 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding HSpeed}" ToolTip="Horizontal"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding VSpeed}" ToolTip="Vertical"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding HSpeed}" ToolTip="Horizontal"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding VSpeed}" ToolTip="Vertical"/>
                             </Grid>
 
                             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Visible</TextBlock>
@@ -774,7 +887,14 @@
 
                             <Separator Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="3"/>
 
-                            <ContentControl Name="LayerDataContent" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="3" Content="{Binding Data, Mode=OneTime}">
+                            <ContentControl Name="LayerDataContent" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="3">
+                                <ContentControl.Content>
+                                    <Binding Path="Data" Mode="OneTime">
+                                        <Binding.TargetNullValue>
+                                            <TextBlock Margin="3" Text="Empty layer data."/>
+                                        </Binding.TargetNullValue>
+                                    </Binding>
+                                </ContentControl.Content>
                                 <ContentControl.Resources>
                                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerInstancesData}">
                                         <TextBlock Margin="3" Text="Contains GameObject instances, listed in the tree on the left"/>
@@ -803,8 +923,8 @@
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <TextBox Grid.Column="0" Margin="3" Text="{Binding TilesX}" ToolTip="Horizontal"/>
-                                                <TextBox Grid.Column="1" Margin="3" Text="{Binding TilesY}" ToolTip="Vertical"/>
+                                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding TilesX}" ToolTip="Horizontal"/>
+                                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding TilesY}" ToolTip="Vertical"/>
                                             </Grid>
 
                                             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Tile set</TextBlock>
@@ -816,8 +936,8 @@
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <Button Grid.Column="0" Margin="3" Click="TileDataExport_Click">Export</Button>
-                                                <Button Grid.Column="1" Margin="3" Click="TileDataImport_Click">Import</Button>
+                                                <local:ButtonDark Grid.Column="0" Margin="3" Click="TileDataExport_Click">Export</local:ButtonDark>
+                                                <local:ButtonDark Grid.Column="1" Margin="3" Click="TileDataImport_Click">Import</local:ButtonDark>
                                             </Grid>
                                         </Grid>
                                     </DataTemplate>
@@ -873,7 +993,7 @@
                                             <local:ColorPicker Grid.Row="5" Grid.Column="2" Margin="3" Color="{Binding Color}"/>
 
                                             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">First frame</TextBlock>
-                                            <TextBox Grid.Row="6" Grid.Column="2" Margin="3" Text="{Binding FirstFrame}"/>
+                                            <local:TextBoxDark Grid.Row="6" Grid.Column="2" Margin="3" Text="{Binding FirstFrame}"/>
 
                                             <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Animation speed</TextBlock>
                                             <Grid Grid.Row="7" Grid.Column="2" Margin="3">
@@ -882,8 +1002,8 @@
                                                     <ColumnDefinition Width="1*"/>
                                                 </Grid.ColumnDefinitions>
 
-                                                <TextBox Grid.Column="0" Text="{Binding AnimationSpeed}"/>
-                                                <ComboBox Grid.Column="1" ItemsSource="{Binding Source={StaticResource AnimationSpeedType}}" SelectedItem="{Binding AnimationSpeedType}" />
+                                                <local:TextBoxDark Grid.Column="0" Text="{Binding AnimationSpeed}"/>
+                                                <local:ComboBoxDark Grid.Column="1" ItemsSource="{Binding Source={StaticResource AnimationSpeedType}}" SelectedItem="{Binding AnimationSpeedType}" />
                                             </Grid>
                                         </Grid>
                                     </DataTemplate>
@@ -904,7 +1024,6 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
@@ -935,8 +1054,8 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding X}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding Y}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding X}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding Y}" ToolTip="Y"/>
                             </Grid>
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Scale</TextBlock>
@@ -945,29 +1064,87 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0" Margin="3" Text="{Binding ScaleX}" ToolTip="X"/>
-                                <TextBox Grid.Column="1" Margin="3" Text="{Binding ScaleY}" ToolTip="Y"/>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding ScaleX}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding ScaleY}" ToolTip="Y"/>
                             </Grid>
 
-                            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Color</TextBlock>
-                            <local:ColorPicker Grid.Row="5" Grid.Column="2" Margin="3" Color="{Binding Color}"/>
+                            <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Color</TextBlock>
+                            <local:ColorPicker Grid.Row="4" Grid.Column="2" Margin="3" Color="{Binding Color}"/>
 
-                            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Animation speed</TextBlock>
-                            <Grid Grid.Row="6" Grid.Column="2" Margin="3">
+                            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Animation speed</TextBlock>
+                            <Grid Grid.Row="5" Grid.Column="2" Margin="3">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="2*"/>
                                     <ColumnDefinition Width="1*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <TextBox Grid.Column="0" Text="{Binding AnimationSpeed}"/>
-                                <ComboBox Grid.Column="1" ItemsSource="{Binding Source={StaticResource AnimationSpeedType}}" SelectedItem="{Binding AnimationSpeedType}" />
+                                <local:TextBoxDark Grid.Column="0" Text="{Binding AnimationSpeed}"/>
+                                <local:ComboBoxDark Grid.Column="1" ItemsSource="{Binding Source={StaticResource AnimationSpeedType}}" SelectedItem="{Binding AnimationSpeedType}" />
                             </Grid>
 
-                            <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Frame index</TextBlock>
-                            <TextBox Grid.Row="7" Grid.Column="2" Margin="3" Text="{Binding FrameIndex}"/>
+                            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Frame index</TextBlock>
+                            <local:TextBoxDark Grid.Row="6" Grid.Column="2" Margin="3" Text="{Binding FrameIndex}"/>
 
-                            <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Rotation</TextBlock>
-                            <TextBox Grid.Row="8" Grid.Column="2" Margin="3" Text="{Binding Rotation}"/>
+                            <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Rotation</TextBlock>
+                            <local:TextBoxDark Grid.Row="7" Grid.Column="2" Margin="3" Text="{Binding Rotation}"/>
+                        </Grid>
+                    </DataTemplate>
+
+                    <DataTemplate DataType="{x:Type undertale:UndertaleRoom+ParticleSystemInstance}">
+                        <Grid IsSharedSizeScope="True">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="5"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
+                                <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
+                                <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
+                                <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
+                                <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
+                                <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
+                            </Grid.RowDefinitions>
+                            <Grid.Resources>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource Centered}"/>
+                                <Style TargetType="TextBox" BasedOn="{StaticResource Centered}"/>
+                                <Style TargetType="ComboBox" BasedOn="{StaticResource Centered}"/>
+                                <Style TargetType="local:UndertaleStringReference" BasedOn="{StaticResource Centered}"/>
+                                <Style TargetType="local:UndertaleObjectReference" BasedOn="{StaticResource Centered}"/>
+                                <Style TargetType="local:ColorPicker" BasedOn="{StaticResource Centered}"/>
+                            </Grid.Resources>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
+                            <local:UndertaleStringReference Grid.Row="0" Grid.Column="2" Margin="3" ObjectReference="{Binding Name}"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Definition</TextBlock>
+                            <local:UndertaleObjectReference Grid.Row="1" Grid.Column="2" Margin="3" ObjectReference="{Binding ParticleSystem}" ObjectType="{x:Type undertale:UndertaleParticleSystem}" CanRemove="False"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Position</TextBlock>
+                            <Grid Grid.Row="2" Grid.Column="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding X}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding Y}" ToolTip="Y"/>
+                            </Grid>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Scale</TextBlock>
+                            <Grid Grid.Row="3" Grid.Column="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding ScaleX}" ToolTip="X"/>
+                                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding ScaleY}" ToolTip="Y"/>
+                            </Grid>
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Color</TextBlock>
+                            <local:ColorPicker Grid.Row="4" Grid.Column="2" Margin="3" Color="{Binding Color}"/>
+
+                            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Rotation</TextBlock>
+                            <local:TextBoxDark Grid.Row="5" Grid.Column="2" Margin="3" Text="{Binding Rotation}"/>
                         </Grid>
                     </DataTemplate>
                 </ContentControl.Resources>
@@ -1016,7 +1193,7 @@
                     <ItemsPanelTemplate>
                         <local:RoomCanvas x:Name="RoomCanvas" Width="{Binding Width, Mode=OneWay}" Height="{Binding Height, Mode=OneWay}" IsItemsHost="True" AllowDrop="True"
                                           DragOver="Canvas_DragOver" Drop="Canvas_Drop" Loaded="RoomCanvas_Loaded">
-                                                        <Canvas.OpacityMask>
+                            <Canvas.OpacityMask>
                                 <DrawingBrush TileMode="Tile" ViewportUnits="Absolute">
                                     <DrawingBrush.Viewport>
                                         <MultiBinding Converter="{StaticResource GridConverter}">
@@ -1244,6 +1421,40 @@
                             </Rectangle.Fill>
                         </Rectangle>
                     </DataTemplate>
+                    <DataTemplate DataType="{x:Type undertale:UndertaleRoom+ParticleSystemInstance}">
+                        <Canvas Background="Transparent"
+                                Opacity="{Binding Color, Mode=OneWay, Converter={StaticResource ColorToOpacityConverter}}"
+                                MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp">
+                            <Canvas.RenderTransform>
+                                <TransformGroup>
+                                    <TranslateTransform X="-8" Y="-8"/>
+                                    <TranslateTransform x:Name="transform6_0" X="{Binding X, Mode=OneWay}" Y="{Binding Y, Mode=OneWay}"/>
+                                    <ScaleTransform x:Name="transform6_1" ScaleX="{Binding ScaleX, Mode=OneWay}" ScaleY="{Binding ScaleY, Mode=OneWay}"/>
+                                    <RotateTransform x:Name="transform6_2" Angle="{Binding OppositeRotation, Mode=OneWay}"
+                                                     CenterX="{Binding X, Mode=OneWay}" CenterY="{Binding Y, Mode=OneWay}"/>
+                                </TransformGroup>
+                            </Canvas.RenderTransform>
+                            <Ellipse Width="16" Height="16" Fill="Silver"/>
+
+                            <Ellipse Canvas.Left="5" Canvas.Top="5" Width="3" Height="3" Fill="White"/>
+                            <Line Canvas.Left="3.5" Canvas.Top="6.5" X2="6" Stroke="White"/>
+                            <Line Canvas.Left="6.5" Canvas.Top="3.5" Y2="6" Stroke="White"/>
+
+                            <Ellipse Canvas.Left="9" Canvas.Top="9" Width="2" Height="2" Fill="White"/>
+                            <Line Canvas.Left="8" Canvas.Top="10" X2="4" Stroke="White"/>
+                            <Line Canvas.Left="10" Canvas.Top="8" Y2="4" Stroke="White"/>
+
+                            <Border BorderBrush="DarkCyan" BorderThickness="1" Background="Transparent"
+                                    Width="{Binding ParticleSystem, Mode=OneWay, Converter={StaticResource ParticleSystemRectConverter}, ConverterParameter=width}"
+                                    Height="{Binding ParticleSystem, Mode=OneWay, Converter={StaticResource ParticleSystemRectConverter}, ConverterParameter=height}">
+                                <Border.RenderTransform>
+                                    <TranslateTransform x:Name="transform6_3"
+                                                        X="{Binding ParticleSystem, Mode=OneWay, Converter={StaticResource ParticleSystemRectConverter}, ConverterParameter=x}"
+                                                        Y="{Binding ParticleSystem, Mode=OneWay, Converter={StaticResource ParticleSystemRectConverter}, ConverterParameter=y}"/>
+                                </Border.RenderTransform>
+                            </Border>
+                        </Canvas>
+                    </DataTemplate>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom+Layer+LayerBackgroundData}">
                         <Rectangle Width="{Binding Sprite.Textures[0].Texture.SourceWidth, Mode=OneWay}" Height="{Binding Sprite.Textures[0].Texture.SourceHeight, Mode=OneWay}"
                                    MouseDown="Rectangle_MouseDown"
@@ -1352,6 +1563,6 @@
                 </ItemsControl.Resources>
             </ItemsControl>
         </ScrollViewer>
-        <Button Grid.Column="0" Grid.Row="3" Content="Save as PNG" Click="ExportAsPNG_Click"/>
+        <local:ButtonDark Grid.Column="0" Grid.Row="3" Content="Save as PNG" Click="ExportAsPNG_Click"/>
     </Grid>
 </local:DataUserControl>

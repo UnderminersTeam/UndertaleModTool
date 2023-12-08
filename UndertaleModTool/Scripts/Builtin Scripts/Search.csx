@@ -76,7 +76,11 @@ async Task DumpCode()
     else
     {
         if (Data.KnownSubFunctions is null) //if we run script before opening any code
-            Decompiler.BuildSubFunctionCache(Data);
+        {
+            SetProgressBar(null, "Building the cache of all sub-functions...", 0, 0);
+            await Task.Run(() => Decompiler.BuildSubFunctionCache(Data));
+            SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
+        }
 
         await Task.Run(() => Parallel.ForEach(Data.Code, DumpCode));
     }

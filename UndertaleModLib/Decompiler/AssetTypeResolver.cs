@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using UndertaleModLib.Models;
 
 namespace UndertaleModLib.Decompiler
@@ -42,6 +43,9 @@ namespace UndertaleModLib.Decompiler
         GameObject, // or GameObjectInstance or InstanceType, these are all interchangable
         Script,
         Shader,
+        AnimCurve,
+        Sequence,
+        ParticleSystem,
 
         EventType, // For event_perform
 
@@ -376,7 +380,7 @@ namespace UndertaleModLib.Decompiler
                     arguments[i] = scriptArgs[function_name][i];
             }
 
-            function_name = function_name.Replace("color", "colour"); // Just GameMaker things... both are valid :o
+            function_name = function_name.Replace("color", "colour", StringComparison.InvariantCulture); // Just GameMaker things... both are valid :o
 
             if(context.GlobalContext.Data?.IsGameMaker2() ?? false)
             {
@@ -1043,10 +1047,10 @@ namespace UndertaleModLib.Decompiler
             };
 
             // TODO: make proper file/manifest for all games to use, not just UT/DR, and also not these specific names
-            string lowerName = data?.GeneralInfo?.DisplayName?.Content.ToLower();
+            string lowerName = data?.GeneralInfo?.DisplayName?.Content.ToLower(CultureInfo.InvariantCulture);
 
             // Just Undertale
-            if (lowerName != null && lowerName.StartsWith("undertale"))
+            if (lowerName != null && lowerName.StartsWith("undertale", StringComparison.InvariantCulture))
             {
 
                 //AddOverrideFor("gml_Object_obj_wizardorb_chaser_Alarm_0", "pop", AssetIDType.Script);
@@ -1082,7 +1086,7 @@ namespace UndertaleModLib.Decompiler
             }
 
             // Just Deltarune
-            if (lowerName != null && (lowerName == "survey_program" || lowerName.StartsWith("deltarune") || lowerName == "deltarune chapter 1 & 2"))
+            if (lowerName != null && (lowerName == "survey_program" || lowerName.StartsWith("deltarune", StringComparison.InvariantCulture) || lowerName == "deltarune chapter 1 & 2"))
             {
                 builtin_vars.Add("actreadysprite", AssetIDType.Sprite);
                 builtin_vars.Add("actsprite", AssetIDType.Sprite);
@@ -1237,7 +1241,7 @@ namespace UndertaleModLib.Decompiler
             }
 
             // Both UT and DR
-            if (lowerName != null && (lowerName.StartsWith("undertale") || lowerName == "survey_program" || lowerName.StartsWith("deltarune")))
+            if (lowerName != null && (lowerName.StartsWith("undertale", StringComparison.InvariantCulture) || lowerName == "survey_program" || lowerName.StartsWith("deltarune", StringComparison.InvariantCulture)))
             {
                 AddOverrideFor("gml_Script_scr_getbuttonsprite", "control", AssetIDType.Enum_GamepadButton);
                 AddOverrideFor("gml_Script_scr_getbuttonsprite", "button", AssetIDType.Enum_GamepadButton);

@@ -9,7 +9,7 @@ using UndertaleModLib.Util;
 EnsureDataLoaded();
 
 bool is2_3 = false;
-if (!((Data.GMS2_3 == false) && (Data.GMS2_3_1 == false) && (Data.GMS2_3_2 == false)))
+if (Data.IsVersionAtLeast(2, 3))
 {
     is2_3 = true;
     ScriptMessage("This script is for GMS 2.3 games code from \"ExportAllCode2_3.csx\", because some code names get so long that Windows cannot write them adequately.");
@@ -126,7 +126,6 @@ await Task.Run(() => {
             argsLocal.Index = 0;
             locals.Locals.Add(argsLocal);
             code.LocalsCount = 1;
-            code.GenerateLocalVarDefinitions(code.FindReferencedLocalVars(), locals); // Dunno if we actually need this line, but it seems to work?
             Data.CodeLocals.Add(locals);
         }
         if (doParse)

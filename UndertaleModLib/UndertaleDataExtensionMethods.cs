@@ -44,18 +44,22 @@ public static class UndertaleDataExtensionMethods
 	/// </summary>
 	/// <param name="list">The <see cref="List{T}"/> of <see cref="UndertaleString"/>.</param>
 	/// <param name="content">The string to create a <see cref="UndertaleString"/> of.</param>
+	/// <param name="createNew">Whether to create a new <see cref="UndertaleString"/> if the one with the same content exists.</param>
 	/// <returns><paramref name="content"/> as a <see cref="UndertaleString"/>.</returns>
 	/// <exception cref="ArgumentNullException"><paramref name="content"/> is null.</exception>
-	public static UndertaleString MakeString(this IList<UndertaleString> list, string content)
+	public static UndertaleString MakeString(this IList<UndertaleString> list, string content, bool createNew = false)
 	{
 		if (content == null)
 			throw new ArgumentNullException(nameof(content));
 
-		// TODO: without reference counting the strings, this may leave unused strings in the array
-		foreach (UndertaleString str in list)
+		if (!createNew)
 		{
-			if (str.Content == content)
-				return str;
+			// TODO: without reference counting the strings, this may leave unused strings in the array
+			foreach (UndertaleString str in list)
+			{
+				if (str.Content == content)
+					return str;
+			}
 		}
 
 		UndertaleString newString = new UndertaleString(content);
@@ -97,7 +101,7 @@ public static class UndertaleDataExtensionMethods
 	public static UndertaleFunction EnsureDefined(this IList<UndertaleFunction> list, string name, IList<UndertaleString> strg, bool fast = false)
 	{
 		UndertaleFunction func = fast ? null : list.ByName(name);
-		if (func == null)
+        if (func == null)
 		{
 			var str = strg.MakeString(name, out int id);
 			func = new UndertaleFunction()
@@ -125,7 +129,7 @@ public static class UndertaleDataExtensionMethods
 			var oldId = data.VarCount1;
 			if (!bytecode14)
 			{
-				if (data.GMS2_3)
+				if (data.IsVersionAtLeast(2, 3))
 				{
 					// GMS 2.3+
 					if (!isBuiltin)
@@ -182,7 +186,7 @@ public static class UndertaleDataExtensionMethods
 		if (originalReferencedLocalVars != null)
 		{
 			UndertaleVariable refvar;
-			if (data?.GMS2_3 == true)
+			if (data?.IsVersionAtLeast(2, 3) == true)
 				refvar = originalReferencedLocalVars.Where((x) => x.Name.Content == name).FirstOrDefault();
 			else
 				refvar = originalReferencedLocalVars.Where((x) => x.Name.Content == name && x.VarID == localId).FirstOrDefault();
@@ -191,7 +195,7 @@ public static class UndertaleDataExtensionMethods
 		}
 
 		var str = strg.MakeString(name, out int id);
-		if (data?.GMS2_3 == true)
+		if (data?.IsVersionAtLeast(2, 3) == true)
 			localId = id;
 		UndertaleVariable vari = new UndertaleVariable()
 		{

@@ -1,14 +1,12 @@
 ﻿using ICSharpCode.SharpZipLib.BZip2;
 using System;
 using System.Buffers.Binary;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using UndertaleModLib.Util;
 
 namespace UndertaleModLib.Models;
@@ -17,8 +15,15 @@ namespace UndertaleModLib.Models;
 /// An embedded texture entry in the data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
+public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
+                                        IStaticChildObjCount, IStaticChildObjectsSize
 {
+    /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
+    public static readonly uint ChildObjectCount = 1;
+
+    /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+    public static readonly uint ChildObjectsSize = 4; // minimal size
+
     /// <summary>
     /// The name of the embedded texture entry.
     /// </summary>
@@ -36,14 +41,25 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
     public uint GeneratedMips { get; set; }
 
     /// <summary>
-    /// Size of the texture block in bytes. Only appears in later 2022 versions of GameMaker.
+    /// Size of the texture attached to this texture page in bytes. Only appears in GM 2022.3+.
     /// </summary>
-    public uint TextureBlockSize { get; set; }
+    private uint _textureBlockSize { get; set; }
+
+    /// <summary>
+    /// The position of the placeholder <see cref="_textureBlockSize">TextureBlockSize</see> value
+    /// to be overwritten in SerializeBlob. <br/>
+    /// Only used internally for GM 2022.3+ support.
+    /// </summary>
+    private uint _textureBlockSizeLocation { get; set; }
 
     /// <summary>
     /// The texture data in the embedded image.
     /// </summary>
-    public TexData TextureData { get { return _textureData ?? (_textureData = LoadExternalTexture()); } set { _textureData = value; } }
+    public TexData TextureData
+    {
+        get => _textureData ??= LoadExternalTexture();
+        set => _textureData = value;
+    }
     private TexData _textureData = new TexData();
 
 
@@ -87,18 +103,23 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
     public void Serialize(UndertaleWriter writer)
     {
         writer.Write(Scaled);
-        if (writer.undertaleData.GeneralInfo.Major >= 2)
+        if (writer.undertaleData.IsVersionAtLeast(2, 0, 6))
             writer.Write(GeneratedMips);
-        if (writer.undertaleData.GM2022_3)
-            writer.Write(TextureBlockSize);
-        if (writer.undertaleData.GM2022_9)
+        if (writer.undertaleData.IsVersionAtLeast(2022, 3))
+        {
+            // We're going to overwrite this later with the actual size
+            // of our texture block, so save the position
+            _textureBlockSizeLocation = writer.Position;
+            writer.Write(_textureBlockSize);
+        }
+        if (writer.undertaleData.IsVersionAtLeast(2022, 9))
         {
             writer.Write(TextureWidth);
             writer.Write(TextureHeight);
             writer.Write(IndexInGroup);
         }
         if (TextureExternal)
-            writer.Write((int)0); // Ensure null pointer is written with external texture
+            writer.Write(0); // Ensure null pointer is written with external texture
         else
             writer.WriteUndertaleObjectPointer(_textureData);
     }
@@ -107,11 +128,11 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
     public void Unserialize(UndertaleReader reader)
     {
         Scaled = reader.ReadUInt32();
-        if (reader.undertaleData.GeneralInfo.Major >= 2)
+        if (reader.undertaleData.IsVersionAtLeast(2, 0, 6))
             GeneratedMips = reader.ReadUInt32();
-        if (reader.undertaleData.GM2022_3)
-            TextureBlockSize = reader.ReadUInt32();
-        if (reader.undertaleData.GM2022_9)
+        if (reader.undertaleData.IsVersionAtLeast(2022, 3))
+            _textureBlockSize = reader.ReadUInt32();
+        if (reader.undertaleData.IsVersionAtLeast(2022, 9))
         {
             TextureWidth = reader.ReadInt32();
             TextureHeight = reader.ReadInt32();
@@ -130,6 +151,10 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
     {
         // If external, don't serialize blob
         // Has sanity check for data being null as well, although the external flag should be set
+        // FIXME: Implement external texture writing
+        // When we implement the above, we should also write the texture's actual size to
+        // TextureBlockSize because GM does it
+        // (behavior observed in a VM game built with Runtime 2022.11.1.75)
         if (_textureData == null || TextureExternal)
             return;
 
@@ -137,7 +162,19 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         while (writer.Position % 0x80 != 0)
             writer.Write((byte)0);
 
+        var texStartPos = writer.Position;
         writer.WriteUndertaleObject(_textureData);
+
+        if (writer.undertaleData.IsVersionAtLeast(2022, 3))
+        {
+            _textureBlockSize = writer.Position - texStartPos;
+            // Write the actual size of the texture block in
+            // the place of _textureBlockSize
+            var posBackup = writer.Position;
+            writer.Position = _textureBlockSizeLocation;
+            writer.Write(_textureBlockSize);
+            writer.Position = posBackup;
+        }
     }
 
     /// <summary>
@@ -151,7 +188,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         if (_textureData == null || TextureExternal)
             return;
 
-        while (reader.Position % 0x80 != 0)
+        while (reader.AbsPosition % 0x80 != 0)
             if (reader.ReadByte() != 0)
                 throw new IOException("Padding error!");
 
@@ -207,7 +244,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
 
             // Try to find file on disk
             string path = Path.Combine(_2022_9_GameDirectory, TextureInfo.Directory.Content,
-                                       TextureInfo.Name.Content + "_" + IndexInGroup.ToString() + TextureInfo.Extension.Content);
+                                       TextureInfo.Name.Content + "_" + IndexInGroup + TextureInfo.Extension.Content);
             if (!File.Exists(path))
                 return _placeholderTexture;
 
@@ -314,6 +351,10 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
 
         /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
+        
+        /// <summary>
+        /// Invoked whenever the effective value of any dependency property has been updated.
+        /// </summary>
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
@@ -352,7 +393,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
-            Serialize(writer, writer.undertaleData.GM2022_3, writer.undertaleData.GM2022_5);
+            Serialize(writer, writer.undertaleData.IsVersionAtLeast(2022, 3), writer.undertaleData.IsVersionAtLeast(2022, 5));
         }
 
         /// <summary>
@@ -393,17 +434,17 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
-            Unserialize(reader, reader.undertaleData.GM2022_5);
+            Unserialize(reader, reader.undertaleData.IsVersionAtLeast(2022, 5));
         }
 
         /// <summary>
         /// Unserializes the texture from any type of reader (can be from any source).
         /// </summary>
-        public void Unserialize(FileBinaryReader reader, bool is_2022_5)
+        public void Unserialize(IBinaryReader reader, bool gm2022_5)
         {
             sharedStream ??= new();
 
-            uint startAddress = reader.Position;
+            long startAddress = reader.Position;
 
             byte[] header = reader.ReadBytes(8);
             if (!header.SequenceEqual(PNGHeader))
@@ -416,7 +457,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
                     FormatBZ2 = true;
 
                     // Don't really care about the width/height, so skip them, as well as header
-                    reader.Position += (uint)(is_2022_5 ? 12 : 8);
+                    reader.Position += (uint)(gm2022_5 ? 12 : 8);
 
                     // Need to fully decompress and convert the QOI data to PNG for compatibility purposes (at least for now)
                     if (sharedStream.Length != 0)
@@ -456,13 +497,13 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
             {
                 // PNG is big endian and BinaryRead can't handle that (damn)
                 uint len = (uint)reader.ReadByte() << 24 | (uint)reader.ReadByte() << 16 | (uint)reader.ReadByte() << 8 | (uint)reader.ReadByte();
-                string type = Encoding.UTF8.GetString(reader.ReadBytes(4));
+                uint type = reader.ReadUInt32();
                 reader.Position += len + 4;
-                if (type == "IEND")
+                if (type == 0x444e4549) // 0x444e4549 -> "IEND"
                     break;
             }
 
-            uint length = reader.Position - startAddress;
+            long length = reader.Position - startAddress;
             reader.Position = startAddress;
             TextureBlob = reader.ReadBytes((int)length);
         }

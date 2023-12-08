@@ -15,7 +15,6 @@ foreach (UndertaleCode code in Data.Code)
         argsLocal.Index = 0;
         locals.Locals.Add(argsLocal);
         code.LocalsCount = 1;
-        code.GenerateLocalVarDefinitions(code.FindReferencedLocalVars(), locals); // Dunno if we actually need this line, but it seems to work?
         Data.CodeLocals.Add(locals);
         newCount += 1;
     }

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
+using UndertaleModLib.Compiler;
+using UndertaleModLib.Decompiler;
 
 namespace UndertaleModLib.Models;
 
@@ -204,6 +207,7 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
 
     /// <summary>
     /// The major version of the data file.
+    /// If greater than 1, serialization produces "2.0.0.0" due to the flag no longer updating in data.win
     /// </summary>
     public uint Major { get; set; } = 1;
 
@@ -305,6 +309,37 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     /// </summary>
     public bool InfoTimestampOffset { get; set; } = true;
 
+    public static (uint, uint, uint, uint) TestForCommonGMSVersions(UndertaleReader reader,
+                                                                    (uint, uint, uint, uint) readVersion)
+    {
+        (uint Major, uint Minor, uint Release, uint Build) detectedVer = readVersion;
+
+        // Some GMS2+ version detection. The rest is spread around, mostly in UndertaleChunks.cs
+        if (reader.AllChunkNames.Contains("PSEM"))      // 2023.2
+            detectedVer = (2023, 2, 0, 0);
+        else if (reader.AllChunkNames.Contains("FEAT")) // 2022.8
+            detectedVer = (2022, 8, 0, 0);
+        else if (reader.AllChunkNames.Contains("FEDS")) // 2.3.6
+            detectedVer = (2, 3, 6, 0);
+        else if (reader.AllChunkNames.Contains("SEQN")) // 2.3
+            detectedVer = (2, 3, 0, 0);
+        else if (reader.AllChunkNames.Contains("TGIN")) // 2.2.1
+            detectedVer = (2, 2, 1, 0);
+
+        if (detectedVer.Major > 2 || (detectedVer.Major == 2 && detectedVer.Minor >= 3))
+        {
+            CompileContext.GMS2_3 = true;
+            DecompileContext.GMS2_3 = true;
+        }
+        else
+        {
+            CompileContext.GMS2_3 = false;
+            DecompileContext.GMS2_3 = false;
+        }
+
+        return detectedVer;
+    }
+
     /// <inheritdoc/>
     /// <exception cref="IOException">If <see cref="LicenseMD5"/> or <see cref="GMS2GameGUID"/> has an invalid length.</exception>
     public void Serialize(UndertaleWriter writer)
@@ -319,10 +354,22 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         writer.Write(GameID);
         writer.Write(DirectPlayGuid.ToByteArray());
         writer.WriteUndertaleString(Name);
-        writer.Write(Major);
-        writer.Write(Minor);
-        writer.Write(Release);
-        writer.Write(Build);
+        if (Major == 1)
+        {
+            writer.Write(Major);
+            writer.Write(Minor);
+            writer.Write(Release);
+            writer.Write(Build);
+        }
+        else
+        {
+            // The version number here is no longer updated,
+            // but it's still useful for the tool
+            writer.Write((uint)2);
+            writer.Write((uint)0);
+            writer.Write((uint)0);
+            writer.Write((uint)0);
+        }
         writer.Write(DefaultWindowWidth);
         writer.Write(DefaultWindowHeight);
         writer.Write((uint)Info);
@@ -380,10 +427,30 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     /// <inheritdoc />
     public void Unserialize(UndertaleReader reader)
     {
+        Func<UndertaleString> readFileNameDelegate;
+        if (reader.ReadOnlyGEN8)
+            readFileNameDelegate = () =>
+            {
+                UndertaleString res = reader.ReadUndertaleString();
+                if (res.Content is not null)
+                    return res;
+
+                reader.SwitchReaderType(false);
+                long returnTo = reader.Position;
+                reader.Position = reader.GetOffsetMapRev()[res];
+                reader.ReadUndertaleObject<UndertaleString>();
+                reader.Position = returnTo;
+                reader.SwitchReaderType(true);
+
+                return res;
+            };
+        else
+            readFileNameDelegate = reader.ReadUndertaleString;
+
         IsDebuggerDisabled = reader.ReadByte() != 0;
         BytecodeVersion = reader.ReadByte();
         Unknown = reader.ReadUInt16();
-        FileName = reader.ReadUndertaleString();
+        FileName = readFileNameDelegate();
         Config = reader.ReadUndertaleString();
         LastObj = reader.ReadUInt32();
         LastTile = reader.ReadUInt32();
@@ -395,6 +462,29 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         Minor = reader.ReadUInt32();
         Release = reader.ReadUInt32();
         Build = reader.ReadUInt32();
+
+        if (reader.ReadOnlyGEN8)
+            return;
+
+        var detectedVer = TestForCommonGMSVersions(reader, (Major, Minor, Release, Build));
+        (Major, Minor, Release, Build) = detectedVer;
+
+        if (reader.undertaleData.GeneralInfo is not null)
+        {
+            var prevGenInfo = reader.undertaleData.GeneralInfo;
+            // If previous version is greater than current
+            if (prevGenInfo.Major > Major
+                || prevGenInfo.Major == Major && prevGenInfo.Minor > Minor
+                || prevGenInfo.Major == Major && prevGenInfo.Minor == Minor && prevGenInfo.Release > Release
+                || prevGenInfo.Major == Major && prevGenInfo.Minor == Minor && prevGenInfo.Release == Release && prevGenInfo.Build > Build)
+            {
+                Major = prevGenInfo.Major;
+                Minor = prevGenInfo.Minor;
+                Release = prevGenInfo.Release;
+                Build = prevGenInfo.Build;
+            }
+        }
+
         DefaultWindowWidth = reader.ReadUInt32();
         DefaultWindowHeight = reader.ReadUInt32();
         Info = (InfoFlags)reader.ReadUInt32();
@@ -451,6 +541,19 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         reader.Bytecode14OrLower = BytecodeVersion <= 14;
     }
 
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        reader.Position++; // "IsDebuggerDisabled"
+        byte bytecodeVer = reader.ReadByte();
+        bool readDebugPort = bytecodeVer >= 14;
+
+        reader.Position += (uint)(122 + (readDebugPort ? 4 : 0));
+
+        // "RoomOrder"
+        return 1 + UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM>.UnserializeChildObjectCount(reader);
+    }
+
     /// <summary>
     /// Generates "info number" used for GMS2 UIDs.
     /// </summary>
@@ -478,7 +581,36 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     /// <inheritdoc />
     public override string ToString()
     {
-        return DisplayName + " (GMS " + Major + "." + Minor + "." + Release + "." + Build + ", bytecode " + BytecodeVersion + ")";
+        if (Major == 1)
+            return DisplayName + " (GMS " + Major + "." + Minor + "." + Release + "." + Build + ", bytecode " + BytecodeVersion + ")";
+        else
+        {
+            StringBuilder sb = new(DisplayName?.ToString() ?? "");
+            if (Major < 2022 || (Major == 2022 && Minor < 3))
+                sb.Append(" (GMS ");
+            else
+                sb.Append(" (GM ");
+            sb.Append(Major);
+            sb.Append('.');
+            sb.Append(Minor);
+            if (Release != 0)
+            {
+                sb.Append('.');
+                sb.Append(Release);
+                if (Build != 0)
+                {
+                    sb.Append('.');
+                    sb.Append(Build);
+                }
+            }
+            if (Major < 2022)
+            {
+                sb.Append(", bytecode ");
+                sb.Append(BytecodeVersion);
+            }
+            sb.Append(')');
+            return sb.ToString();
+        }
     }
 
     /// <inheritdoc/>
@@ -579,44 +711,58 @@ public class UndertaleOptions : UndertaleObject, IDisposable
     public OptionsFlags Info { get; set; } = OptionsFlags.InterpolatePixels | OptionsFlags.UseNewAudio | OptionsFlags.ShowCursor | OptionsFlags.ScreenKey | OptionsFlags.QuitKey | OptionsFlags.SaveKey | OptionsFlags.ScreenShotKey | OptionsFlags.CloseSec | OptionsFlags.ScaleProgress | OptionsFlags.DisplayErrors | OptionsFlags.VariableErrors | OptionsFlags.CreationEventOrder;
 
     /// <summary>
-    /// The window scale.
+    /// The window scale. // TODO: is this a legacy gm thing, or still used today? 
     /// </summary>
     public int Scale { get; set; } = -1;
 
     /// <summary>
-    /// The window color. TODO: unused? Legacy GM remnant?
+    /// The window color. TODO: unused? Legacy GM remnant? Is this the "Color outside the room region" thing?
     /// </summary>
     public uint WindowColor { get; set; } = 0;
 
     /// <summary>
-    /// The Color depth. TODO: unused? Legacy GM remnant?
+    /// The Color depth the game uses. Used only in Game Maker 8 and earlier.
     /// </summary>
     public uint ColorDepth { get; set; } = 0;
 
     /// <summary>
-    /// The game's resolution. TODO: unused? Legacy GM remnant?
+    /// The game's resolution. Used only in Game Maker 8 and earlier.
     /// </summary>
     public uint Resolution { get; set; } = 0;
 
     /// <summary>
-    /// The game's refresh rate. TODO: unused? Legacy GM remnant?
+    /// The game's refresh rate. Used only in Game Maker 8 and earlier.
     /// </summary>
     public uint Frequency { get; set; } = 0;
 
     /// <summary>
-    /// Whether the game uses V-Sync. TODO: unused? Legacy GM remnant?
+    /// Whether the game uses V-Sync. Used only in Game Maker 8 and earlier.
     /// </summary>
     public uint VertexSync { get; set; } = 0;
 
     /// <summary>
-    /// TODO: unused? Legacy GM remnant?
+    /// The priority of the game process. The higher the number, the more priority will be given to the game. Used only in Game Maker 8 and earlier.
     /// </summary>
     public uint Priority { get; set; } = 0;
-
-    // Apparently these exist, but I can't find any examples of it. They're also only used in "old format".
+    
+    /// <summary>
+    /// The background of the loading bar when loading GameMaker 8 games.
+    /// </summary>
     public UndertaleSprite.TextureEntry BackImage { get; set; } = new UndertaleSprite.TextureEntry();
+    
+    /// <summary>
+    /// The image of the loading bar when loading GameMaker 8 games.
+    /// </summary>
     public UndertaleSprite.TextureEntry FrontImage { get; set; } = new UndertaleSprite.TextureEntry();
+    
+    /// <summary>
+    /// The image that gets shown when loading GameMaker 8 games.
+    /// </summary>
     public UndertaleSprite.TextureEntry LoadImage { get; set; } = new UndertaleSprite.TextureEntry();
+    
+    /// <summary>
+    /// The transparency value of <see cref="LoadImage"/>. 255 indicates fully opaque, 0 means fully transparent. 
+    /// </summary>
     public uint LoadAlpha { get; set; } = 255;
 
     /// <summary>
@@ -631,8 +777,9 @@ public class UndertaleOptions : UndertaleObject, IDisposable
     /// A class for game constants.
     /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class Constant : UndertaleObject, IDisposable
+    public class Constant : UndertaleObject, IStaticChildObjectsSize, IDisposable
     {
+        public static readonly uint ChildObjectsSize = 8;
         /// <summary>
         /// The name of the constant.
         /// </summary>
@@ -732,7 +879,7 @@ public class UndertaleOptions : UndertaleObject, IDisposable
     /// <inheritdoc />
     public void Unserialize(UndertaleReader reader)
     {
-        NewFormat = reader.ReadInt32() == int.MinValue;
+        NewFormat = reader.ReadInt32() == Int32.MinValue;
         reader.Position -= 4;
         if (NewFormat)
         {
@@ -794,6 +941,22 @@ public class UndertaleOptions : UndertaleObject, IDisposable
         }
     }
 
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        uint count = 0;
+        bool newFormat = reader.ReadInt32() == Int32.MinValue;
+        reader.Position -= 4;
+
+        reader.Position += newFormat ? 60u : 140u;
+        count += 3; // images
+
+        // "Constants"
+        count += 1 + UndertaleSimpleList<Constant>.UnserializeChildObjectCount(reader);
+
+        return count;
+    }
+
     /// <inheritdoc/>
     public void Dispose()
     {
@@ -803,7 +966,7 @@ public class UndertaleOptions : UndertaleObject, IDisposable
         {
             foreach (Constant constant in Constants)
                 constant?.Dispose();
-         }
+        }
         BackImage = new();
         FrontImage = new();
         LoadImage = new();

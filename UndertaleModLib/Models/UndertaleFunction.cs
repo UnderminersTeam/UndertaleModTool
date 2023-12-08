@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using static UndertaleModLib.Models.UndertaleGeneralInfo;
@@ -9,8 +10,11 @@ namespace UndertaleModLib.Models;
 /// A function entry as it's used in a GameMaker data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.ReferencedObject, IDisposable
+public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.ReferencedObject, IStaticChildObjectsSize, IDisposable
 {
+    /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+    public static readonly uint ChildObjectsSize = 12;
+
     public FunctionClassification Classification { get; set; }
 
     /// <summary>
@@ -42,13 +46,13 @@ public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.Re
         if (Occurrences > 0)
         {
             uint addr = writer.GetAddressForUndertaleObject(FirstAddress);
-            if (writer.undertaleData.GMS2_3)
+            if (writer.undertaleData.IsVersionAtLeast(2, 3))
                 writer.Write((addr == 0) ? 0 : (addr + 4)); // in GMS 2.3, it points to the actual reference rather than the instruction
             else
                 writer.Write(addr);
         }
         else
-            writer.Write((int)-1);
+            writer.Write(-1);
     }
 
     /// <inheritdoc />
@@ -58,7 +62,7 @@ public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.Re
         Occurrences = reader.ReadUInt32();
         if (Occurrences > 0)
         {
-            if (reader.GMS2_3)
+            if (reader.undertaleData.IsVersionAtLeast(2, 3))
                 FirstAddress = reader.GetUndertaleObjectAtAddress<UndertaleInstruction>(reader.ReadUInt32() - 4);
             else
                 FirstAddress = reader.ReadUndertaleObjectPointer<UndertaleInstruction>();
@@ -94,7 +98,7 @@ public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.Re
 public class UndertaleCodeLocals : UndertaleNamedResource, IDisposable
 {
     public UndertaleString Name { get; set; }
-    public ObservableCollection<LocalVar> Locals { get; } = new ObservableCollection<LocalVar>();
+    public ObservableCollection<LocalVar> Locals { get; private set; } = new ObservableCollection<LocalVar>();
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
@@ -112,12 +116,21 @@ public class UndertaleCodeLocals : UndertaleNamedResource, IDisposable
     {
         uint count = reader.ReadUInt32();
         Name = reader.ReadUndertaleString();
-        Locals.Clear();
+        List<LocalVar> newLocals = new((int)count);
         for (uint i = 0; i < count; i++)
-        {
-            Locals.Add(reader.ReadUndertaleObject<LocalVar>());
-        }
+            newLocals.Add(reader.ReadUndertaleObject<LocalVar>());
+        Locals = new(newLocals);
         Util.DebugUtil.Assert(Locals.Count == count);
+    }
+
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        uint count = reader.ReadUInt32();
+
+        reader.Position += 4 + count * LocalVar.ChildObjectsSize;
+
+        return count;
     }
 
     public bool HasLocal(string varName)
@@ -126,8 +139,11 @@ public class UndertaleCodeLocals : UndertaleNamedResource, IDisposable
     }
 
     // TODO: INotifyPropertyChanged
-    public class LocalVar : UndertaleObject, IDisposable
+    public class LocalVar : UndertaleObject, IStaticChildObjectsSize, IDisposable
     {
+        /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+        public static readonly uint ChildObjectsSize = 8;
+
         public uint Index { get; set; }
         public UndertaleString Name { get; set; }
 

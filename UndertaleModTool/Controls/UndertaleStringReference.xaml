@@ -4,15 +4,23 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UndertaleModTool"
-             xmlns:x1="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
              d:DesignHeight="20" d:DesignWidth="300">
+    <UserControl.Resources>
+        <local:ContextMenuDark x:Key="contextMenu" Opened="MenuItem_ContextMenuOpened">
+            <MenuItem Header="Open in new tab" Click="OpenInNewTabItem_Click"/>
+            <MenuItem Header="Find all references" Click="FindAllReferencesItem_Click"/>
+        </local:ContextMenuDark>
+    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <TextBox Grid.Column="0" ToolTip="This is an string reference. Change the value here to edit this just this value of all referenced values, or drag and drop another string instance from the tree on the left to change the reference" AllowDrop="True" PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" Text="{Binding ObjectReference.Content, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=Explicit}" LostFocus="TextBox_LostFocus">
+        <local:TextBoxDark Grid.Column="0" x:Name="ObjectText" AllowDrop="True"
+                           ToolTip="This is an string reference. Change the value here to edit this just this value of all referenced values, or drag and drop another string instance from the tree on the left to change the reference"
+                           Text="{Binding ObjectReference.Content, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=Explicit}"
+                           PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" LostFocus="TextBox_LostFocus" PreviewMouseDown="Details_MouseDown">
             <TextBox.Style>
                 <Style TargetType="{x:Type TextBox}">
                     <Style.Resources>
@@ -42,8 +50,8 @@
                     </Style.Triggers>
                 </Style>
             </TextBox.Style>
-        </TextBox>
-        <Button Grid.Column="1" Click="Details_Click" Content=" ... " ToolTip="Open referenced object">
+        </local:TextBoxDark>
+        <local:ButtonDark Grid.Column="1" Click="Details_Click" MouseDown="Details_MouseDown" Content=" ... " ToolTip="Open referenced object">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Style.Triggers>
@@ -53,6 +61,6 @@
                     </Style.Triggers>
                 </Style>
             </Button.Style>
-        </Button>
+        </local:ButtonDark>
     </Grid>
 </UserControl>

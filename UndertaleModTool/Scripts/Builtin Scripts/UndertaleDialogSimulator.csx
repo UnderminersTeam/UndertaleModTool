@@ -41,8 +41,8 @@ else
     return;
 }
 
-bool GMS1_mode = (Data.GeneralInfo.Major < 2);
-bool GMS2_3_mode = Data.GMS2_3;
+bool GMS1_mode = !Data.IsGameMaker2();
+bool GMS2_3_mode = Data.IsVersionAtLeast(2, 3);
 bool isDeltarune = false;
 
 if (Data.GeneralInfo.Name.ToString() == "\"DELTARUNE\"")

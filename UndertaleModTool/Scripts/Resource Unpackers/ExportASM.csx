@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
 
 EnsureDataLoaded();
 
@@ -16,7 +17,10 @@ if (Directory.Exists(codeFolder))
 
 Directory.CreateDirectory(codeFolder);
 
-SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
+List<UndertaleCode> toDump = Data.Code.Where(c => c.ParentEntry is null)
+                                      .ToList();
+
+SetProgressBar(null, "Code Entries", 0, toDump.Count);
 StartProgressBarUpdater();
 
 await DumpCode();
@@ -34,7 +38,7 @@ string GetFolder(string path)
 
 async Task DumpCode()
 {
-    await Task.Run(() => Parallel.ForEach(Data.Code, DumpCode));
+    await Task.Run(() => Parallel.ForEach(toDump, DumpCode));
 }
 
 void DumpCode(UndertaleCode code)

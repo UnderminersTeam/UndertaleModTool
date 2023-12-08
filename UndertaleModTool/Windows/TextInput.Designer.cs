@@ -55,6 +55,7 @@ namespace UndertaleModTool.Windows
             this.richTextBox1.TabIndex = 0;
             this.richTextBox1.Text = "Input Text Here";
             this.richTextBox1.TextChanged += new System.EventHandler(this.richTextBox1_TextChanged);
+            this.richTextBox1.BackColor = System.Drawing.SystemColors.ControlLight;
             // 
             // textCommandsMenu
             // 
@@ -109,6 +110,7 @@ namespace UndertaleModTool.Windows
             this.button1.Text = "Done";
             this.button1.UseCompatibleTextRendering = true;
             this.button1.UseVisualStyleBackColor = true;
+            this.button1.BackColor = System.Drawing.SystemColors.Control;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // label1
@@ -128,6 +130,7 @@ namespace UndertaleModTool.Windows
             this.textCopyMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.copyMenuItem1,
             this.copyAllMenuItem1});
+            this.textCopyMenu.ShowImageMargin = false;
             this.textCopyMenu.Name = "textCopyMenu";
             this.textCopyMenu.Size = new System.Drawing.Size(118, 48);
             this.textCopyMenu.Opening += new System.ComponentModel.CancelEventHandler(this.textCopyMenu_Opening);
@@ -153,6 +156,7 @@ namespace UndertaleModTool.Windows
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(594, 397);
+            this.BackColor = System.Drawing.SystemColors.Window;
             this.Controls.Add(this.label1);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.richTextBox1);
@@ -171,11 +175,11 @@ namespace UndertaleModTool.Windows
         private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.ContextMenuStrip textCommandsMenu;
+        public System.Windows.Forms.ContextMenuStrip textCommandsMenu;
         private System.Windows.Forms.ToolStripMenuItem copyMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cutMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pasteMenuItem;
-        private System.Windows.Forms.ContextMenuStrip textCopyMenu;
+        public System.Windows.Forms.ContextMenuStrip textCopyMenu;
         private System.Windows.Forms.ToolStripMenuItem copyMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem copyAllMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem copyAllMenuItem;

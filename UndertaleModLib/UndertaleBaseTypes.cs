@@ -20,16 +20,18 @@ namespace UndertaleModLib
         /// </summary>
         /// <param name="reader">Where to deserialize from.</param>
         void Unserialize(UndertaleReader reader);
-    }
 
-    public interface UndertaleObjectLenCheck : UndertaleObject
-    {
-        void Unserialize(UndertaleReader reader, int length);
-    }
-
-    public interface UndertaleObjectEndPos : UndertaleObject
-    {
-        void Unserialize(UndertaleReader reader, uint endPosition);
+        /*
+         * As for C# 10, it's impossible to inherit static methods from an interface :(
+         * (so this method is for inheriting XML commentary only)
+         */
+        /// <summary>
+        /// Deserializes the total child object count of this object from specified <see cref="UndertaleReader"/>.
+        /// </summary>
+        /// <param name="reader">Where to deserialize from.</param>
+        /// <returns>The object count.</returns>
+        static uint UnserializeChildObjectCount(UndertaleReader reader) => 0;
+        
     }
 
     public interface UndertaleObjectWithBlobs
@@ -85,7 +87,10 @@ namespace UndertaleModLib
 
         // GMS2.3+
         Sequence = 11,
-        AnimCurve = 12
+        AnimCurve = 12,
+
+        // GM 2023+
+        ParticleSystem = 13
     }
 
     public interface UndertaleResource : UndertaleObject
@@ -106,5 +111,22 @@ namespace UndertaleModLib
         /// <returns><see langword="true"/> if <paramref name="filter"/> occurs within this object, or if
         /// <paramref name="filter"/> is the empty string (""); otherwise, false.</returns>
         bool SearchMatches(string filter);
+    }
+
+    public interface IStaticChildObjCount
+    {
+        /// <summary>
+        /// The total child object count of the current object type.
+        /// Used for the object count unserialization.
+        /// </summary>
+        public static readonly uint ChildObjectCount = 0;
+    }
+    public interface IStaticChildObjectsSize
+    {
+        /// <summary>
+        /// The summary child objects size of the current object type.
+        /// Used for the object count unserialization.
+        /// </summary>
+        public static readonly uint ChildObjectsSize = 0;
     }
 }

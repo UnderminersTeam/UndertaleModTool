@@ -17,6 +17,6 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Content</TextBlock>
-        <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding Content}"/>
+        <local:TextBoxDark Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding Content}"/>
     </Grid>
 </local:DataUserControl>

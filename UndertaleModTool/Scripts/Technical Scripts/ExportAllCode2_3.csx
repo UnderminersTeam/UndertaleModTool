@@ -3,11 +3,12 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
 
 EnsureDataLoaded();
 
 bool is2_3 = false;
-if (!((Data.GMS2_3 == false) && (Data.GMS2_3_1 == false) && (Data.GMS2_3_2 == false)))
+if (Data.IsVersionAtLeast(2, 3))
 {
     is2_3 = true;
     ScriptMessage("This script is for GMS 2.3 games, because some code names get so long that Windows cannot write them adequately.");
@@ -28,7 +29,11 @@ if (Directory.Exists(codeFolder))
 
 Directory.CreateDirectory(codeFolder);
 
-SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
+List<UndertaleCode> toDump = Data.Code.Where(c => c.ParentEntry is null)
+                                      .ToList();
+object lockObj = new();
+
+SetProgressBar(null, "Code Entries", 0, toDump.Count);
 StartProgressBarUpdater();
 
 int failed = 0;
@@ -36,7 +41,7 @@ await Task.Run(DumpCode);
 
 await StopProgressBarUpdater();
 HideProgressBar();
-ScriptMessage("Export Complete.\n\nLocation: " + codeFolder + " " + failed.ToString() + " failed");
+ScriptMessage("Export Complete.\n\nLocation: " + codeFolder + "\n" + failed.ToString() + " failed");
 
 string GetFolder(string path)
 {
@@ -46,18 +51,23 @@ string GetFolder(string path)
 void DumpCode()
 {
     //Because 2.3 code names get way too long, we're gonna convert it to an index based system, starting with a lookup system
-    string index_path = Path.Combine(codeFolder, "LookUpTable.txt");
-    string index_text = "This is zero indexed, index 0 starts at line 2.";
-    for (var i = 0; i < Data.Code.Count; i++)
+    string indexPath = Path.Combine(codeFolder, "LookUpTable.txt");
+    StringBuilder indexText = new("This is zero indexed, index 0 starts at line 2.");
+    for (var i = 0; i < toDump.Count; i++)
+        indexText.Append($"\n{toDump[i].Name.Content}");
+
+    File.WriteAllText(indexPath, indexText.ToString());
+
+    if (Data.KnownSubFunctions is null) // if we run script before opening any code
     {
-        UndertaleCode code = Data.Code[i];
-        index_text += "\n";
-        index_text += code.Name.Content;
+        SetProgressBar(null, "Building the cache of all sub-functions...", 0, 0);
+        await Task.Run(() => Decompiler.BuildSubFunctionCache(Data));
+        SetProgressBar(null, "Code Entries", 0, toDump.Count);
     }
-    File.WriteAllText(index_path, index_text);
-    for (var i = 0; i < Data.Code.Count; i++)
+
+    Parallel.For(0, toDump.Count - 1, (i, _) =>
     {
-        UndertaleCode code = Data.Code[i];
+        UndertaleCode code = toDump[i];
         string path = Path.Combine(codeFolder, i.ToString() + ".gml");
         try
         {
@@ -65,15 +75,19 @@ void DumpCode()
         }
         catch (Exception e)
         {
-            if (!(Directory.Exists(codeFolder + "/Failed/")))
+            lock (lockObj)
             {
-                Directory.CreateDirectory(codeFolder + "/Failed/");
+                if (!(Directory.Exists(codeFolder + "/Failed/")))
+                {
+                    Directory.CreateDirectory(codeFolder + "/Failed/");
+                }
             }
+            
             path = Path.Combine(codeFolder + "/Failed/", i.ToString() + ".gml");
             File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
             failed += 1;
         }
 
-        IncrementProgress();
-    }
+        IncrementProgressParallel();
+    });
 }

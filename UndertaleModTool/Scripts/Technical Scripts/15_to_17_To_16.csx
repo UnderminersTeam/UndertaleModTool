@@ -1,7 +1,7 @@
 ﻿//Upgrade from bytecode 13 (experimental), 14, 15, 17 to 16 - by Grossley
 //13 and 14 do not work apparently due to variable issues that I don't know how to fix.
 //Need to test this, once I do then I can obsolete the other two scripts
-if (!((Data.GMS2_3 == false) && (Data.GMS2_3_1 == false) && (Data.GMS2_3_2 == false)))
+if (Data.IsVersionAtLeast(2, 3))
 {
     bool x = RunUMTScript(Path.Combine(ExePath, "Scripts", "Helper Scripts", "ConvertFrom17to16_for_2.3.csx"));
     if (x == false)
@@ -30,7 +30,7 @@ if (Data?.GeneralInfo.BytecodeVersion == 14)
     return;
 }
 
-if (!((Data.GMS2_3 == false) && (Data.GMS2_3_1 == false) && (Data.GMS2_3_2 == false)))
+if (Data.IsVersionAtLeast(2, 3))
 {
     ScriptError(game_name + "is GMS 2.3+ and is ineligible", "Ineligible");
     return;
@@ -65,7 +65,6 @@ if ((Data?.GeneralInfo.BytecodeVersion == 14) || (Data?.GeneralInfo.BytecodeVers
             locals.Locals.Add(argsLocal);
 
             code.LocalsCount = 1;
-            code.GenerateLocalVarDefinitions(code.FindReferencedLocalVars(), locals); // Dunno if we actually need this line, but it seems to work?
             Data.CodeLocals.Add(locals);
         }
     }
@@ -140,7 +139,7 @@ else if (Data?.GeneralInfo.BytecodeVersion == 17)
     Data.GeneralInfo.BytecodeVersion = 16;
     if (Data.FORM.Chunks.ContainsKey("TGIN"))
         Data.FORM.Chunks.Remove("TGIN");
-    Data.GMS2_2_2_302 = false;
+    Data.SetGMS2Version(2);
     ScriptMessage("Downgraded from 17 to 16 successfully. Save the game to apply the changes.");
 }
 else if (Data?.GeneralInfo.BytecodeVersion == 16)
@@ -157,11 +156,7 @@ on Discord and provide the name of the game, where
 you obtained it from, and additionally send the
 data.win file of the game." + @"
 
-Current status of game '" + game_name + @"':
-GMS 2.3 == " + Data.GMS2_3.ToString() + @"
-GMS 2.3.1 == " + Data.GMS2_3_1.ToString() + @"
-GMS 2.3.2 == " + Data.GMS2_3_2.ToString() + @"
-Bytecode == " + (Data?.GeneralInfo.BytecodeVersion).ToString();
+Game and version: '" + Data.GeneralInfo.ToString() + "'";
     ScriptError(error, "Unknown game error");
     SetUMTConsoleText(error);
     SetFinishedMessage(false);

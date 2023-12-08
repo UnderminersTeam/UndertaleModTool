@@ -21,6 +21,9 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+        <Grid.Resources>
+            <local:IsVersionAtLeastConverter x:Key="IsVersionAtLeastConverter"/>
+        </Grid.Resources>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
@@ -35,7 +38,7 @@
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Texture</TextBlock>
         <local:UndertaleObjectReference Grid.Row="4" Grid.Column="1" Margin="3" ObjectReference="{Binding Texture}" ObjectType="{x:Type undertale:UndertaleTexturePageItem}"/>
 
-        <Grid Grid.Row="5" Grid.ColumnSpan="2" Margin="0" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
+        <Grid Grid.Row="5" Grid.ColumnSpan="2" Margin="0" Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2.0}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="3*"/>
@@ -52,41 +55,42 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Unknown Always 2</TextBlock>
-            <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GMS2UnknownAlways2}"/>
+            <local:TextBoxDark Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GMS2UnknownAlways2}"/>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Tile Width</TextBlock>
-            <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GMS2TileWidth}"/>
+            <local:TextBoxDark Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GMS2TileWidth}"/>
 
             <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Tile Height</TextBlock>
-            <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding GMS2TileHeight}"/>
+            <local:TextBoxDark Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding GMS2TileHeight}"/>
 
             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Output Border X</TextBlock>
-            <TextBox Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding GMS2OutputBorderX}"/>
+            <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding GMS2OutputBorderX}"/>
 
             <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Output Border Y</TextBlock>
-            <TextBox Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding GMS2OutputBorderY}"/>
+            <local:TextBoxDark Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding GMS2OutputBorderY}"/>
 
             <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Tile Columns</TextBlock>
-            <TextBox Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding GMS2TileColumns}"/>
+            <local:TextBoxDark Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding GMS2TileColumns}"/>
 
             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Items/frames per tile</TextBlock>
-            <TextBox Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding GMS2ItemsPerTileCount}"/>
+            <local:TextBoxDark Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding GMS2ItemsPerTileCount}"/>
 
             <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Tile Count</TextBlock>
-            <TextBox Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding GMS2TileCount}"/>
+            <local:TextBoxDark Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding GMS2TileCount}"/>
 
             <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Unknown Always Zero</TextBlock>
-            <TextBox Grid.Row="8" Grid.Column="1" Margin="3" Text="{Binding GMS2UnknownAlwaysZero}"/>
+            <local:TextBoxDark Grid.Row="8" Grid.Column="1" Margin="3" Text="{Binding GMS2UnknownAlwaysZero}"/>
 
             <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Frame Time (microseconds)</TextBlock>
-            <TextBox Grid.Row="9" Grid.Column="1" Margin="3" Text="{Binding GMS2FrameLength}"/>
+            <local:TextBoxDark Grid.Row="9" Grid.Column="1" Margin="3" Text="{Binding GMS2FrameLength}"/>
 
             <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Tile IDs</TextBlock>
-            <DataGrid Grid.Row="10" Grid.Column="1" Name="TileIdList" ItemsSource="{Binding GMS2TileIds}" MaxHeight="279" Margin="0,0,0,3" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True"
-                      SelectionChanged="DataGrid_SelectionChanged">
+            <local:DataGridDark Grid.Row="10" Grid.Column="1" x:Name="TileIdList" ItemsSource="{Binding GMS2TileIds}" MaxHeight="279" Margin="0,0,0,3" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True"
+                                SelectionChanged="DataGrid_SelectionChanged">
                 <DataGrid.Resources>
                     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                     <Style TargetType="{x:Type DataGridCell}">
@@ -116,17 +120,32 @@
                     <DataGridTemplateColumn Header="ID" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBox Margin="20,0,0,0" Text="{Binding ID, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                <local:TextBoxDark Margin="20,0,0,0" Text="{Binding ID, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
-            </DataGrid>
+            </local:DataGridDark>
+
+            <TextBlock Grid.Row="11" Grid.ColumnSpan="2" Margin="3" HorizontalAlignment="Center" Foreground="DarkGray" FontStyle="Italic" TextWrapping="Wrap" TextAlignment="Center">
+                Hint: You can click on any tile region below to highlight its ID above.
+            </TextBlock>
         </Grid>
 
         <Viewbox Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Stretch="Uniform" StretchDirection="DownOnly">
-            <Canvas Name="BGTexture" Width="{Binding Texture.BoundingWidth, Mode=OneWay}" Height="{Binding Texture.BoundingHeight, Mode=OneWay}"
-                    MouseLeftButtonDown="BGTexture_MouseLeftButtonDown">
+            <Canvas Name="BGTexture"
+                    Width="{Binding Texture.BoundingWidth, Mode=OneWay}" Height="{Binding Texture.BoundingHeight, Mode=OneWay}"
+                    MouseLeftButtonDown="BGTexture_MouseLeftButtonDown" PreviewMouseRightButtonDown="BGTexture_PreviewMouseRightButtonDown">
+                <Canvas.Style>
+                    <Style TargetType="Canvas">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2.0}"
+                                         Value="Visible">
+                                <Setter Property="Cursor" Value="Hand"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Canvas.Style>
                 <Border>
                     <Border.Background>
                         <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">

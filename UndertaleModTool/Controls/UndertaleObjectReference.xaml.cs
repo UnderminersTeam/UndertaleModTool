@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,8 +17,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using UndertaleModLib;
 using UndertaleModLib.Models;
-using UndertaleModLib.Decompiler;
 using UndertaleModLib.Scripting;
+using UndertaleModTool.Windows;
 
 namespace UndertaleModTool
 {
@@ -26,11 +27,35 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertaleObjectReference : UserControl
     {
+        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+        private static readonly Regex camelCaseRegex = new("(?<=[a-z])([A-Z])", RegexOptions.Compiled);
+        private static readonly char[] vowels = { 'a', 'o', 'u', 'e', 'i', 'y' };
+
         public static DependencyProperty ObjectReferenceProperty =
             DependencyProperty.Register("ObjectReference", typeof(object),
                 typeof(UndertaleObjectReference),
                 new FrameworkPropertyMetadata(null,
-                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (sender, e) =>
+                    {
+                        var inst = sender as UndertaleObjectReference;
+                        if (inst is null)
+                            return;
+
+                        if (e.NewValue is not null)
+                        {
+                            try
+                            {
+                                if (inst.Resources["contextMenu"] is not ContextMenu menu)
+                                    return;
+
+                                menu.DataContext = inst.ObjectReference;
+                                inst.ObjectText.ContextMenu = menu;
+                            }
+                            catch { }
+                        }
+                        else
+                            inst.ObjectText.ContextMenu = null;
+                    }));
 
         public static DependencyProperty ObjectTypeProperty =
             DependencyProperty.Register("ObjectType", typeof(Type),
@@ -89,6 +114,30 @@ namespace UndertaleModTool
         public UndertaleObjectReference()
         {
             InitializeComponent();
+            Loaded += UndertaleObjectReference_Loaded;
+        }
+        private void UndertaleObjectReference_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (ObjectType is null)
+                return;
+
+            var label = TryFindResource("emptyReferenceLabel") as Label;
+            if (label is null)
+                return;
+            
+            string typeName = ObjectType.ToString();
+            string n = "";
+            if (typeName.StartsWith("UndertaleModLib.Models.Undertale"))
+            {
+                // "UndertaleAudioGroup" -> "audio group"
+                typeName = typeName["UndertaleModLib.Models.Undertale".Length..];
+                typeName = camelCaseRegex.Replace(typeName, " $1").ToLowerInvariant();
+            }
+            // If the first letter is a vowel
+            if (Array.IndexOf(vowels, typeName[0]) != -1)
+                n = "n";
+                
+            label.Content = $"(drag & drop a{n} {typeName})";
         }
 
         public void ClearRemoveClickHandler()
@@ -100,8 +149,6 @@ namespace UndertaleModTool
         {
             if (ObjectReference is null)
             {
-                MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
-
                 if (mainWindow.Selected is null)
                 {
                     mainWindow.ShowError("Nothing currently selected! This is currently unsupported.");
@@ -122,7 +169,61 @@ namespace UndertaleModTool
             }
             else
             {
-                (Application.Current.MainWindow as MainWindow).ChangeSelection(ObjectReference);
+                mainWindow.ChangeSelection(ObjectReference);
+            }
+        }
+
+        private void Details_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (ObjectReference is null)
+                return;
+
+            if (e.ChangedButton == MouseButton.Middle && e.ButtonState == MouseButtonState.Pressed)
+                mainWindow.ChangeSelection(ObjectReference, true);
+        }
+        private void OpenInNewTabItem_Click(object sender, RoutedEventArgs e)
+        {
+            mainWindow.ChangeSelection(ObjectReference, true);
+        }
+        private void MenuItem_ContextMenuOpened(object sender, RoutedEventArgs e)
+        {
+            var menu = sender as ContextMenu;
+            foreach (var item in menu.Items)
+            {
+                var menuItem = item as MenuItem;
+                if ((menuItem.Header as string) == "Find all references")
+                {
+                    Type objType = menu.DataContext.GetType();
+                    menuItem.Visibility = UndertaleResourceReferenceMap.IsTypeReferenceable(objType)
+                                          ? Visibility.Visible : Visibility.Collapsed;
+
+                    break;
+                }
+            }
+        }
+        private void FindAllReferencesItem_Click(object sender, RoutedEventArgs e)
+        {
+            var obj = (sender as FrameworkElement)?.DataContext;
+            if (obj is not UndertaleResource res)
+            {
+                mainWindow.ShowError("The selected object is not an \"UndertaleResource\".");
+                return;
+            }
+
+            FindReferencesTypesDialog dialog = null;
+            try
+            {
+                dialog = new(res, mainWindow.Data);
+                dialog.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                mainWindow.ShowError("An error occured in the object references related window.\n" +
+                                     $"Please report this on GitHub.\n\n{ex}");
+            }
+            finally
+            {
+                dialog?.Close();
             }
         }
 
@@ -135,7 +236,7 @@ namespace UndertaleModTool
         {
             if (ObjectReference != null)
             {
-                (Application.Current.MainWindow as MainWindow).ChangeSelection(ObjectReference);
+                mainWindow.ChangeSelection(ObjectReference);
             }
         }
 
