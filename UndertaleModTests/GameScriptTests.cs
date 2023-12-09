@@ -36,7 +36,7 @@ namespace UndertaleModTests
 
         public bool IsAppClosed => throw new NotImplementedException();
 
-        public void ChangeSelection(object newSelection)
+        public void ChangeSelection(object newSelection, bool inNewTab)
         {
         }
 
