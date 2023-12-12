@@ -1,4 +1,4 @@
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
@@ -2469,7 +2469,8 @@ namespace UndertaleModTool
 
         public string ProcessException(in Exception exc, in string scriptText)
         {
-            List<int> excLineNums = new();
+            // each member is a (file name, line number) pair for all lines in the stack trace
+            List<Tuple<string, int>> loadedScriptLineNums = new();
             string excText = string.Empty;
             List<string> traceLines = new();
             Dictionary<string, int> exTypesDict = null;
@@ -2505,12 +2506,13 @@ namespace UndertaleModTool
                 {
                     if (traceLine.TrimStart()[..13] == "at Submission") // only stack trace lines from the script
                     {
+                        // matches full path of the script file
+                        string sourceFile = Regex.Match(traceLine, @"(?<=in ).*\.csx(?=:line \d+)").Value;
                         int linePos = traceLine.IndexOf(":line ") + 6;  // ":line ".Length = 6
                         if (linePos != (-1 + 6))
                         {
                             int lineNum = Convert.ToInt32(traceLine[linePos..]);
-                            if (!excLineNums.Contains(lineNum))
-                                excLineNums.Add(lineNum);
+                            loadedScriptLineNums.Add(new Tuple<string, int>(sourceFile, lineNum));
                         }
                     }
                 }
@@ -2526,10 +2528,22 @@ namespace UndertaleModTool
                 return $"An error occurred while processing the exception text.\nError message - \"{e.Message}\"\nThe unprocessed text is below.\n\n" + excString;
             }
 
-            if (excLineNums.Count > 0) //if line number(s) is found
+            if (loadedScriptLineNums.Count > 0) //if line number(s) is found
             {
+                // read the code for the files to know what the code line associated with the stack trace is
+                Dictionary<string, List<string>> scriptsCode = new();
+                foreach (Tuple<string, int> scriptLineNum in loadedScriptLineNums)
+                {
+                    string scriptPath = scriptLineNum.Item1;
+                    if (!scriptsCode.ContainsKey(scriptPath))
+                    {
+                        string scriptCode = File.ReadAllText(scriptPath);
+                        scriptsCode.Add(scriptPath, scriptCode.Split('\n').ToList());
+                    }
+                }
+
                 string[] scriptLines = scriptText.Split('\n');
-                string excLines = string.Join('\n', excLineNums.Select(n => $"Line {n}: {scriptLines[n].TrimStart(new char[] { '\t', ' ' })}"));
+                string excLines = string.Join('\n', loadedScriptLineNums.Select(pair => $"Line {pair.Item2} in script {pair.Item1}: {scriptsCode[pair.Item1][pair.Item2 - 1]}")); // - 1 because line numbers start from 1
                 if (exTypesDict is not null)
                 {
                     string exTypesStr = string.Join(",\n", exTypesDict.Select(x => $"{x.Key}{((x.Value > 1) ? " (x" + x.Value + ")" : string.Empty)}"));
