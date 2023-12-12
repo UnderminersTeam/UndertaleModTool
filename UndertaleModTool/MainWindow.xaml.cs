@@ -2467,7 +2467,7 @@ namespace UndertaleModTool
             }
         }
 
-        public string ProcessException(in Exception exc, in string scriptText)
+        public string ProcessException(in Exception exc)
         {
             // each member is a (file name, line number) pair for all lines in the stack trace
             List<Tuple<string, int>> loadedScriptLineNums = new();
@@ -2542,7 +2542,6 @@ namespace UndertaleModTool
                     }
                 }
 
-                string[] scriptLines = scriptText.Split('\n');
                 string excLines = string.Join('\n', loadedScriptLineNums.Select(pair => $"Line {pair.Item2} in script {pair.Item1}: {scriptsCode[pair.Item1][pair.Item2 - 1]}")); // - 1 because line numbers start from 1
                 if (exTypesDict is not null)
                 {
@@ -2641,7 +2640,7 @@ namespace UndertaleModTool
                 string excString = string.Empty;
 
                 if (!isScriptException)
-                    excString = ProcessException(in exc, in scriptText);
+                    excString = ProcessException(in exc);
 
                 await StopProgressBarUpdater();
 
