@@ -12,6 +12,10 @@ public class UndertaleEmbeddedAudio : UndertaleNamedResource, PaddedObject, IDis
     /// <summary>
     /// The name of the embedded audio entry.
     /// </summary>
+    /// <remarks>
+    /// This is UTMT specific.
+    /// The data file does not contain names for embedded audio entries.
+    /// </remarks>
     public UndertaleString Name { get; set; }
 
     /// <summary>
@@ -54,13 +58,13 @@ public class UndertaleEmbeddedAudio : UndertaleNamedResource, PaddedObject, IDis
     {
         try
         {
-            return Name.Content + " (" + GetType().Name + ")";
+            return $"{Name.Content} ({GetType().Name})";
         }
         catch
         {
             Name = new UndertaleString("EmbeddedSound Unknown Index");
         }
-        return Name.Content + " (" + GetType().Name + ")";
+        return $"{Name.Content} ({GetType().Name})";
     }
 
     /// <inheritdoc/>
