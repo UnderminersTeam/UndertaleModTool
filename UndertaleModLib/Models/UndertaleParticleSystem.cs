@@ -7,6 +7,7 @@ namespace UndertaleModLib.Models;
 [PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleParticleSystem : UndertaleNamedResource, IDisposable
 {
+    // TODO: Documentation on these values.
     public UndertaleString Name { get; set; }
 
     public int OriginX { get; set; }
@@ -15,7 +16,7 @@ public class UndertaleParticleSystem : UndertaleNamedResource, IDisposable
 
     public int DrawOrder { get; set; }
 
-    public UndertaleSimpleResourcesList<UndertaleParticleSystemEmitter, UndertaleChunkPSEM> Emitters { get; private set; } = new();
+    public UndertaleSimpleResourcesList<UndertaleParticleSystemEmitter, UndertaleChunkPSEM> Emitters { get; set; } = new();
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
@@ -78,11 +79,25 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 
+    // TODO: Documentation on these values
+
     public UndertaleString Name { get; set; }
+
+    // 2023.6
+    public bool Enabled { get; set; } = true;
 
     public EmitMode Mode { get; set; }
 
-    public int EmitCount { get; set; } = 1;
+    public int EmitCount { get; set; } = 1; // Note: technically float in 2023.8
+
+    // 2023.8
+    public bool EmitRelative { get; set; }
+    public float DelayMin { get; set; }
+    public float DelayMax { get; set; }
+    public TimeUnitEnum DelayUnit { get; set; }
+    public float IntervalMin { get; set; }
+    public float IntervalMax { get; set; }
+    public TimeUnitEnum IntervalUnit { get; set; }
 
     public DistributionEnum Distribution { get; set; }
 
@@ -104,6 +119,11 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
 
     public float FrameIndex { get; set; }
 
+    // 2023.4
+    public bool Animate { get; set; }
+    public bool Stretch { get; set; }
+    public bool IsRandom { get; set; }
+
     public uint StartColor { get; set; } = 0xFFFFFFFF;
 
     public uint MidColor { get; set; } = 0xFFFFFFFF;
@@ -120,13 +140,23 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
 
     public float ScaleY { get; set; } = 1;
 
-    public float SizeMin { get; set; } = 1;
+    // 2023.8
+    public float SizeMinX { get; set; } = 1;
+    public float SizeMaxX { get; set; } = 1;
+    public float SizeIncreaseX { get; set; }
+    public float SizeWiggleX { get; set; }
+    public float SizeMinY { get; set; } = 1;
+    public float SizeMaxY { get; set; } = 1;
+    public float SizeIncreaseY { get; set; }
+    public float SizeWiggleY { get; set; }
 
-    public float SizeMax { get; set; } = 1;
+    // These two are used and serialized prior to 2023.8, retained for compatibility.
+    public float SizeMin { get => (SizeMinX + SizeMinY) / 2; set { SizeMinX = value; SizeMinY = value; } }
+    public float SizeMax { get => (SizeMaxX + SizeMaxY) / 2; set { SizeMaxX = value; SizeMaxY = value; } }
 
-    public float SizeIncrease { get; set; }
+    public float SizeIncrease { get => (SizeIncreaseX + SizeIncreaseY) / 2; set { SizeIncreaseX = value; SizeIncreaseY = value; } }
 
-    public float SizeWiggle { get; set; }
+    public float SizeWiggle { get => (SizeWiggleX + SizeWiggleY) / 2; set { SizeWiggleX = value; SizeWiggleY = value; } }
 
     public float SpeedMin { get; set; } = 5;
 
@@ -170,8 +200,22 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
     public void Serialize(UndertaleWriter writer)
     {
         writer.WriteUndertaleString(Name);
+        if (writer.undertaleData.IsVersionAtLeast(2023, 6))
+            writer.Write(Enabled);
         writer.Write((int)Mode);
-        writer.Write(EmitCount);
+        if (writer.undertaleData.IsVersionAtLeast(2023, 8))
+        {
+            writer.Write((float)EmitCount);
+            writer.Write(EmitRelative);
+            writer.Write(DelayMin);
+            writer.Write(DelayMax);
+            writer.Write((int)DelayUnit);
+            writer.Write(IntervalMin);
+            writer.Write(IntervalMax);
+            writer.Write((int)IntervalUnit);
+        }
+        else
+            writer.Write(EmitCount);
         writer.Write((int)Distribution);
         writer.Write((int)Shape);
         writer.Write(RegionX);
@@ -182,6 +226,12 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
         writer.Write(_sprite.SerializeById(writer));
         writer.Write((int)Texture);
         writer.Write(FrameIndex);
+        if (writer.undertaleData.IsVersionAtLeast(2023, 4))
+        {
+            writer.Write(Animate);
+            writer.Write(Stretch);
+            writer.Write(IsRandom);
+        }
         writer.Write(StartColor);
         writer.Write(MidColor);
         writer.Write(EndColor);
@@ -190,10 +240,24 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
         writer.Write(LifetimeMax);
         writer.Write(ScaleX);
         writer.Write(ScaleY);
-        writer.Write(SizeMin);
-        writer.Write(SizeMax);
-        writer.Write(SizeIncrease);
-        writer.Write(SizeWiggle);
+        if (writer.undertaleData.IsVersionAtLeast(2023, 8))
+        {
+            writer.Write(SizeMinX);
+            writer.Write(SizeMaxX);
+            writer.Write(SizeMinY);
+            writer.Write(SizeMaxY);
+            writer.Write(SizeIncreaseX);
+            writer.Write(SizeIncreaseY);
+            writer.Write(SizeWiggleX);
+            writer.Write(SizeWiggleY);
+        }
+        else
+        {
+            writer.Write(SizeMin);
+            writer.Write(SizeMax);
+            writer.Write(SizeIncrease);
+            writer.Write(SizeWiggle);
+        }
         writer.Write(SpeedMin);
         writer.Write(SpeedMax);
         writer.Write(SpeedIncrease);
@@ -220,8 +284,22 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
     public void Unserialize(UndertaleReader reader)
     {
         Name = reader.ReadUndertaleString();
+        if (reader.undertaleData.IsVersionAtLeast(2023, 6))
+            Enabled = reader.ReadBoolean();
         Mode = (EmitMode)reader.ReadInt32();
-        EmitCount = reader.ReadInt32();
+        if (reader.undertaleData.IsVersionAtLeast(2023, 8))
+        {
+            EmitCount = (int)reader.ReadSingle(); // The GUI still only allows integer input...
+            EmitRelative = reader.ReadBoolean(); // Always 0
+            DelayMin = reader.ReadSingle();
+            DelayMax = reader.ReadSingle();
+            DelayUnit = (TimeUnitEnum)reader.ReadInt32();
+            IntervalMin = reader.ReadSingle();
+            IntervalMax = reader.ReadSingle();
+            IntervalUnit = (TimeUnitEnum)reader.ReadInt32();
+        }
+        else
+            EmitCount = reader.ReadInt32();
         Distribution = (DistributionEnum)reader.ReadInt32();
         Shape = (EmitterShape)reader.ReadInt32();
         RegionX = reader.ReadSingle();
@@ -233,6 +311,12 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
         _sprite.Unserialize(reader);
         Texture = (TextureEnum)reader.ReadInt32();
         FrameIndex = reader.ReadSingle();
+        if (reader.undertaleData.IsVersionAtLeast(2023, 4))
+        {
+            Animate = reader.ReadBoolean();
+            Stretch = reader.ReadBoolean();
+            IsRandom = reader.ReadBoolean();
+        }
         StartColor = reader.ReadUInt32();
         MidColor = reader.ReadUInt32();
         EndColor = reader.ReadUInt32();
@@ -241,10 +325,24 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
         LifetimeMax = reader.ReadSingle();
         ScaleX = reader.ReadSingle();
         ScaleY = reader.ReadSingle();
-        SizeMin = reader.ReadSingle();
-        SizeMax = reader.ReadSingle();
-        SizeIncrease = reader.ReadSingle();
-        SizeWiggle = reader.ReadSingle();
+        if (reader.undertaleData.IsVersionAtLeast(2023, 8))
+        {
+            SizeMinX = reader.ReadSingle();
+            SizeMaxX = reader.ReadSingle();
+            SizeMinY = reader.ReadSingle();
+            SizeMaxY = reader.ReadSingle();
+            SizeIncreaseX = reader.ReadSingle();
+            SizeIncreaseY = reader.ReadSingle();
+            SizeWiggleX = reader.ReadSingle();
+            SizeWiggleY = reader.ReadSingle();
+        }
+        else
+        {
+            SizeMin = reader.ReadSingle();
+            SizeMax = reader.ReadSingle();
+            SizeIncrease = reader.ReadSingle();
+            SizeWiggle = reader.ReadSingle();
+        }
         SpeedMin = reader.ReadSingle();
         SpeedMax = reader.ReadSingle();
         SpeedIncrease = reader.ReadSingle();
@@ -286,7 +384,7 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
         _spawnOnUpdate.Dispose();
     }
 
-
+    // TODO: More documentation needed
     public enum EmitMode
     {
         Stream,
@@ -322,5 +420,10 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
         Cloud = 11,
         Smoke = 12,
         Snow = 13
+    }
+    public enum TimeUnitEnum
+    {
+        Seconds,
+        Frames
     }
 }

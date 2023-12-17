@@ -876,7 +876,7 @@ public class UndertaleInstruction : UndertaleObject
                 if (Kind == Opcode.Dup || Kind == Opcode.CallV)
                 {
                     sb.Append(' ');
-                    sb.Append(Extra.ToString());
+                    sb.Append(Extra);
                     if (Kind == Opcode.Dup)
                     {
                         if ((byte)ComparisonKind != 0)
@@ -924,7 +924,7 @@ public class UndertaleInstruction : UndertaleObject
                 {
                     // Special scenario - the swap instruction
                     // TODO: Figure out the proper syntax, see #129
-                    sb.Append(SwapExtra.ToString());
+                    sb.Append(SwapExtra);
                     sb.Append(" ;;; this is a weird swap instruction, see #129");
                 }
                 else
@@ -954,7 +954,7 @@ public class UndertaleInstruction : UndertaleObject
                 sb.Append(' ');
                 sb.Append(Function);
                 sb.Append("(argc=");
-                sb.Append(ArgumentsCount.ToString());
+                sb.Append(ArgumentsCount);
                 sb.Append(')');
                 break;
 
@@ -962,12 +962,12 @@ public class UndertaleInstruction : UndertaleObject
                 sb.Append("." + Type1.ToOpcodeParam());
                 if (unknownBreak)
                 {
-                    sb.Append(" ");
+                    sb.Append(' ');
                     sb.Append(Value);
                 }
                 if (Type1 == DataType.Int32)
                 {
-                    sb.Append(" ");
+                    sb.Append(' ');
                     sb.Append(IntArgument);
                 }
                 break;

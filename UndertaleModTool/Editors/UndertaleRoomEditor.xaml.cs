@@ -1376,6 +1376,9 @@ namespace UndertaleModTool
                 // if it's needed to set "NineSlices"
                 if (!data.IsVersionAtLeast(2, 3, 2))
                     layer.AssetsData.NineSlices ??= new UndertalePointerList<SpriteInstance>();
+                // likewise
+                if (data.IsVersionAtLeast(2023, 2))
+                    layer.AssetsData.ParticleSystems ??= new UndertalePointerList<ParticleSystemInstance>();
             }
             else if (layer.LayerType == LayerType.Tiles)
             {

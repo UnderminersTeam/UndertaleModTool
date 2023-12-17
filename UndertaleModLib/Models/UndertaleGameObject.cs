@@ -139,17 +139,21 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// <summary>
     /// The vertices used for a <see cref="CollisionShape"/> of type <see cref="CollisionShapeFlags.Custom"/>.
     /// </summary>
-    public List<UndertalePhysicsVertex> PhysicsVertices { get; private set; } = new List<UndertalePhysicsVertex>();
+    public List<UndertalePhysicsVertex> PhysicsVertices { get; set; } = new List<UndertalePhysicsVertex>();
 
     #endregion
 
     /// <summary>
     /// All the events that this game object has.
     /// </summary>
-    public UndertalePointerList<UndertalePointerList<Event>> Events { get; private set; } = new();
+    public UndertalePointerList<UndertalePointerList<Event>> Events { get; set; } = new();
 
     /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
+    
+    /// <summary>
+    /// Invoked whenever the effective value of any dependency property has been updated.
+    /// </summary>
     protected void OnPropertyChanged([CallerMemberName] string name = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
@@ -277,7 +281,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
 
     public UndertaleCode EventHandlerFor(EventType type, uint subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
     {
-        Event subtypeObj = Events[(int)type].Where((x) => x.EventSubtype == subtype).FirstOrDefault();
+        Event subtypeObj = Events[(int)type].FirstOrDefault(x => x.EventSubtype == subtype);
         if (subtypeObj == null)
             Events[(int)type].Add(subtypeObj = new Event() { EventSubtype = subtype });
         EventAction action = subtypeObj.Actions.FirstOrDefault();
@@ -289,7 +293,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         UndertaleCode code = action.CodeId;
         if (code == null)
         {
-            var name = strg.MakeString("gml_Object_" + Name.Content + "_" + type.ToString() + "_" + subtype);
+            var name = strg.MakeString("gml_Object_" + Name.Content + "_" + type + "_" + subtype);
             code = new UndertaleCode()
             {
                 Name = name,
@@ -428,7 +432,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         /// The available actions that will be performed for this event.
         /// </summary>
         /// <remarks>This seems to always have 1 entry, it would need testing if maybe the games using drag-and-drop code are different</remarks>
-        public UndertalePointerList<EventAction> Actions { get; private set; } = new UndertalePointerList<EventAction>();
+        public UndertalePointerList<EventAction> Actions { get; set; } = new UndertalePointerList<EventAction>();
 
         //TODO: not used, condense. Also UMT specific.
         public EventSubtypeKey EventSubtypeKey
@@ -537,6 +541,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         public bool IsNot { get; set; } // always 0
         public uint UnknownAlwaysZero { get; set; } // always 0
 
+        /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <inheritdoc />
