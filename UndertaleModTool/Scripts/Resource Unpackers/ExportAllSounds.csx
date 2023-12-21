@@ -180,7 +180,8 @@ void DumpSound(UndertaleSound sound)
         {
             if (groupedExport)
             {
-                dest =  Path.Combine(winFolder, "External_Sounds", sound.AudioGroup.Name.Content, soundName + audioExt);
+                dest = Path.Combine(winFolder, "External_Sounds", sound.AudioGroup.Name.Content, soundName + audioExt);
+
                 MakeFolder(Path.Combine("External_Sounds", sound.AudioGroup.Name.Content));
             }
             MakeFolder("External_Sounds");
