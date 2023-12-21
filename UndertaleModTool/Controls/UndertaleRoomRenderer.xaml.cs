@@ -66,9 +66,8 @@ namespace UndertaleModTool
                 {
                     if (layer.AssetsData.ParticleSystems is not null)
                     {
-                        var particleSystems = Enumerable.Empty<UndertaleParticleSystem>();
-                        particleSystems = layer.AssetsData.ParticleSystems.Select(x => x.ParticleSystem);
-                        ParticleSystemRectConverter.Initialize(particleSystems);    
+                        var particleSystems = layer.AssetsData.ParticleSystems.Select(x => x.ParticleSystem);
+                        ParticleSystemRectConverter.Initialize(particleSystems);
                     }
                     
                 }
