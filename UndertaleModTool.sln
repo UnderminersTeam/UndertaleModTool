@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModCli", "Undertal
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UndertaleModToolUpdater", "UndertaleModToolUpdater\UndertaleModToolUpdater.csproj", "{1E004B65-F3C8-4A62-B649-1465EA6A3B01}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UndertaleModLibTests", "UndertaleModLibTests\UndertaleModLibTests.csproj", "{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +63,14 @@ Global
 		{1E004B65-F3C8-4A62-B649-1465EA6A3B01}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1E004B65-F3C8-4A62-B649-1465EA6A3B01}.Release|x64.ActiveCfg = Release|Any CPU
 		{1E004B65-F3C8-4A62-B649-1465EA6A3B01}.Release|x64.Build.0 = Release|Any CPU
+		{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}.Debug|x64.Build.0 = Debug|Any CPU
+		{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}.Release|x64.ActiveCfg = Release|Any CPU
+		{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
