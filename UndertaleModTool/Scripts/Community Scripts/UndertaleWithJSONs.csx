@@ -10,7 +10,7 @@ int maxCount = 1;
 
 EnsureDataLoaded();
 
-var displayName = Data?.GeneralInfo?.DisplayName?.Content.ToLower(); 
+var displayName = Data.GeneralInfo?.DisplayName?.Content.ToLower(); 
 
 if (displayName == "deltarune chapter 1 & 2" || displayName == "deltarune chapter 1&2")
 {
@@ -99,7 +99,7 @@ ossafe_ini_close()
 
 //////////////////////////////////////////////////////
 
-    ImportGMLString("gml_Script_scr_84_load_map_json", @"
+ImportGMLString("gml_Script_scr_84_load_map_json", @"
 var filename = argument0
 var file = file_text_open_read(filename)
 var json = """"
