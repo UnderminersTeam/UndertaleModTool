@@ -57,7 +57,8 @@ Note: If an error window stating that 'the directory is not empty' appears, plea
 bool groupedExport;
 if (usesAGRP)
 {
-    groupedExport = ScriptQuestion(@"Group sounds by audio group?");
+    groupedExport = ScriptQuestion("Group sounds by audio group?");
+
 }
 
 byte[] EMPTY_WAV_FILE_BYTES = System.Convert.FromBase64String("UklGRiQAAABXQVZFZm10IBAAAAABAAIAQB8AAAB9AAAEABAAZGF0YQAAAAA=");
@@ -162,7 +163,8 @@ void DumpSound(UndertaleSound sound)
         soundFilePath = Path.Combine(exportedSoundsDir, soundName);
     MakeFolder("Exported_Sounds");
     if (groupedExport)
-        MakeFolder(Path.Combine("Exported_Sounds",  sound.AudioGroup.Name.Content));
+        MakeFolder(Path.Combine("Exported_Sounds", sound.AudioGroup.Name.Content));
+
     bool process = true;
     if (flagEmbedded && !flagCompressed) // 1.
         audioExt = ".wav";
