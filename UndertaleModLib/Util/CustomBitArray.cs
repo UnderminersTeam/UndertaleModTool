@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace UndertaleModLib.Util
+﻿namespace UndertaleModLib.Util
 {
     // BitArray class custom-made for the decompiler
     // Designed with performance in mind
