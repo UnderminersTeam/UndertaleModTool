@@ -1,6 +1,6 @@
 EnsureDataLoaded();
 
-var displayName = Data?.GeneralInfo?.DisplayName?.Content.ToLower() 
+var displayName = Data.GeneralInfo?.DisplayName?.Content.ToLower() 
 
 if (displayName == "deltarune chapter 1 & 2" || displayName == "deltarune chapter 1&2")
 {
