@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
@@ -111,6 +112,16 @@ namespace UndertaleModTool
                 Settings.Save();
             }
         }
+        public static bool CustomProfileName
+        {
+            get => Settings.Instance.CustomProfileName;
+            set
+            {
+                Settings.Instance.CustomProfileName = value;
+                Settings.Save();
+            }
+        }
+
         public static bool WarnOnClose
         {
             get => Settings.Instance.WarnOnClose;
@@ -239,5 +250,15 @@ namespace UndertaleModTool
         {
             ((MainWindow)Owner).UpdateApp(this);
         }
+        
+        private void ProfileButtonExport_Click(object sender, RoutedEventArgs e)
+        {
+            ((MainWindow)Owner).ExportProfileFolder();
+        }
+        private void ProfileButtonImport_Click(object sender, RoutedEventArgs e)
+        {
+            ((MainWindow)Owner).ImportProfileFolder();
+        }
+
     }
 }

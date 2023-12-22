@@ -14,10 +14,11 @@
         Height="450" Width="800" Loaded="Window_Loaded"
         AllowDrop="True" Drop="Window_Drop">
     <Window.Title>
-        <MultiBinding StringFormat="{}{0} - {1} [{2}]">
+        <MultiBinding StringFormat="{}{0} - {1} [{2}] {3}">
             <Binding Path="TitleMain"/>
             <Binding Path="Data.GeneralInfo" FallbackValue="No game loaded"/>
             <Binding Path="FilePath"/>
+            <Binding Path="CurrentProfileName"/>
         </MultiBinding>
     </Window.Title>
     <Window.Resources>

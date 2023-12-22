@@ -14,6 +14,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Media;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -64,7 +65,7 @@ namespace UndertaleModTool
         /// It does that on code compilation.
 
         private Tab _currentTab;
-
+        public string CurrentProfileName { get; set; }
         public UndertaleData Data { get; set; }
         public string FilePath { get; set; }
         public string ScriptPath { get; set; } // For the scripting interface specifically
@@ -197,11 +198,15 @@ namespace UndertaleModTool
         // Related to profile system and appdata
         public byte[] MD5PreviouslyLoaded = new byte[13];
         public byte[] MD5CurrentlyLoaded = new byte[15];
+        public byte[] remMD5 = new byte[15];
+        public String CurProfileName = "null";
+        public bool is_string = false;
         public static string AppDataFolder => Settings.AppDataFolder;
         public static string ProfilesFolder = Path.Combine(Settings.AppDataFolder, "Profiles");
         public static string CorrectionsFolder = Path.Combine(Program.GetExecutableDirectory(), "Corrections");
         public string ProfileHash = "Unknown";
         public bool CrashedWhileEditing = false;
+        public bool _ProfileModeEnabled = true;
 
         // Scripting interface-related
         private ScriptOptions scriptOptions;
@@ -237,6 +242,10 @@ namespace UndertaleModTool
 
         public MainWindow()
         {
+            if (ProfileHash != "Unknown")
+                _ProfileModeEnabled = true;
+            else
+                _ProfileModeEnabled = false;
             InitializeComponent();
             this.DataContext = this;
 
@@ -244,6 +253,9 @@ namespace UndertaleModTool
             OpenInTab(Highlighted);
 
             TitleMain = "UndertaleModTool by krzys_h v:" + Version;
+
+            if (_ProfileModeEnabled == false)
+                CurrentProfileName = "";
 
             CanSave = false;
             CanSafelySave = false;
@@ -376,6 +388,22 @@ namespace UndertaleModTool
                 if (File.Exists(arg))
                 {
                     await LoadFile(arg, true, isLaunch || isSpecialLaunch);
+                    if (SettingsWindow.ProfileModeEnabled)
+                    {
+                        var MD5DirName = CurProfileName;
+                        var FileDir = ProfilesFolder;
+                        if (Directory.Exists(FileDir + "\\" + MD5DirName + "\\Main"))
+                        {
+                            string[] Files = Directory.GetFiles(FileDir + "\\" + MD5DirName + "\\Main");
+                            for (var i = 0; i < Files.Length; i++)
+                            {
+                                if (Files[i].EndsWith(".gml"))
+                                {
+                                    ImportCodeFromFile(Files[i], true, true, false, true);
+                                }
+                            }
+                        }
+                    }
                 }
                 else if (arg == "deleteTempFolder") // if was launched from UndertaleModToolUpdater
                 {
@@ -685,7 +713,26 @@ namespace UndertaleModTool
                     else if (IFF_EXTENSIONS.Contains(fileext) || fileext == ".dat" /* audiogroup */)
                     {
                         if (this.ShowQuestion($"Open {filepath} as a data file?") == MessageBoxResult.Yes)
+                        {
                             await LoadFile(filepath, true);
+                            if (SettingsWindow.ProfileModeEnabled)
+                            {
+                                var MD5DirName = CurProfileName;
+                                var FileDir = ProfilesFolder;
+                                if (Directory.Exists(FileDir + "\\" + MD5DirName + "\\Main"))
+                                {
+                                    string[] Files = Directory.GetFiles(FileDir + "\\" + MD5DirName + "\\Main");
+                                    for (var i = 0; i < Files.Length; i++)
+                                    {
+                                        if (Files[i].EndsWith(".gml"))
+                                        {
+                                            ImportCodeFromFile(Files[i], true, true, false, true);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                     }
                     // else, do something?
                 }
@@ -702,6 +749,22 @@ namespace UndertaleModTool
             if (dlg.ShowDialog(this) == true)
             {
                 await LoadFile(dlg.FileName, true);
+                if (SettingsWindow.ProfileModeEnabled)
+                { 
+                    var MD5DirName = CurProfileName;
+                    var FileDir = ProfilesFolder;
+                    if (Directory.Exists(FileDir + "\\" + MD5DirName + "\\Main"))
+                    {
+                        string[] Files = Directory.GetFiles(FileDir + "\\" + MD5DirName + "\\Main");
+                        for (var i = 0; i < Files.Length; i++)
+                        {
+                            if (Files[i].EndsWith(".gml"))
+                            {
+                                ImportCodeFromFile(Files[i], true, true, false, true);
+                            }
+                        }
+                    }
+                }
                 return true;
             }
             return false;
@@ -1012,7 +1075,7 @@ namespace UndertaleModTool
                             if (data != null)
                             {
                                 data.ToolInfo.ProfileMode = SettingsWindow.ProfileModeEnabled;
-                                data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
+                                data.ToolInfo.CurrentMD5 = CurProfileName;
                             }
                         }
                         if (data.IsYYC())
@@ -1244,7 +1307,7 @@ namespace UndertaleModTool
                 if (Data != null)
                 {
                     Data.ToolInfo.ProfileMode = SettingsWindow.ProfileModeEnabled;
-                    Data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
+                    Data.ToolInfo.CurrentMD5 = CurProfileName;
                 }
 
                 #pragma warning disable CA1416
@@ -3497,7 +3560,6 @@ result in loss of work.");
                 }
             }
         }
-
         private void OpenInTab(object obj, bool isNewTab = false, string tabTitle = null)
         {
             if (obj is null)
@@ -3925,6 +3987,69 @@ result in loss of work.");
             }
 
             return false;
+        }
+
+        public void ExportProfileFolder()
+        {
+            if (CurProfileName != "null")
+            {
+                var MD5DirName = CurProfileName;
+                var MD5DirPath = Path.Combine(ProfilesFolder, MD5DirName);
+                var FileDir = "";
+                string[] iwishiwasbetteratnames = FilePath.Split(new char[] { '\\' });
+                var directoriesamt = iwishiwasbetteratnames.Length;
+                for (var i = 0; i < directoriesamt - 1; i++)
+                {
+                    FileDir += iwishiwasbetteratnames[i] + "\\";
+                }
+                FileDir += "Profiles\\" + MD5DirName;
+                if (Directory.Exists(FileDir))
+                    Directory.Delete(FileDir, true);
+                Directory.CreateDirectory(FileDir);
+                DirectoryCopy(MD5DirPath, FileDir, true);
+                this.ShowMessage("Done!");
+            }
+            else
+            {
+                this.ShowMessage("You have to load a Profile beforehand!");
+            }
+        }
+        public void ImportProfileFolder()
+        {
+            if (CanSave == true)
+            {
+                var MD5DirName = CurProfileName;
+                var FileDir = "";
+                string[] iwishiwasbetteratnames = FilePath.Split(new char[] { '\\' });
+                var directoriesamt = iwishiwasbetteratnames.Length;
+                for (var i = 0; i < directoriesamt - 1; i++)
+                {
+                    FileDir += iwishiwasbetteratnames[i] + "\\";
+                }
+                FileDir += "Profiles";
+                if (Directory.Exists(FileDir + "\\" + MD5DirName))
+                {
+                    if (Directory.Exists(ProfilesFolder + "\\" + MD5DirName))
+                        Directory.Delete(ProfilesFolder + "\\" + MD5DirName, true);
+                    DirectoryCopy(FileDir, ProfilesFolder, true);
+                    if (Directory.Exists(FileDir + "\\" + MD5DirName + "\\Main"))
+                    {
+                        string[] Files = Directory.GetFiles(FileDir + "\\" + MD5DirName + "\\Main");
+                        for (var i = 0; i < Files.Length; i++)
+                        {
+                            if (Files[i].EndsWith(".gml"))
+                                ImportCodeFromFile(Files[i], true, false, false, true);
+                        }
+                        this.ShowMessage("Done!");
+                    }
+                    else
+                        this.ShowMessage("There's no code to import at all.");
+                }
+                else
+                    this.ShowMessage("You have to export a Profile folder to your current data.win's path beforehand!");
+            }
+            else
+                this.ShowMessage("You have to open a data.win beforehand!");
         }
     }
 
