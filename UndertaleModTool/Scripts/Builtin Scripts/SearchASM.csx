@@ -93,7 +93,10 @@ void DumpCode(UndertaleCode code)
             while ((lineInt = assemblyText.ReadLine()) is not null)
             {
                 if (lineInt == string.Empty)
+                {
+                    lineNumber++;
                     continue;
+                }
 
                 if (((regexCheck && RegexContains(in lineInt)) || ((!regexCheck && caseSensitive) ? lineInt.Contains(keyword) : lineInt.ToLower().Contains(keyword.ToLower()))))
                 {
@@ -105,7 +108,7 @@ void DumpCode(UndertaleCode code)
                     resultsDict[code.Name.Content].Add((lineNumber, lineInt));
                     Interlocked.Increment(ref resultCount);
                 }
-                lineNumber += 1;
+                lineNumber++;
             }
         }
         catch (Exception e)
