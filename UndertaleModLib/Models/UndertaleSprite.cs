@@ -193,12 +193,12 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
     /// <summary>
     /// The frames of the sprite.
     /// </summary>
-    public UndertaleSimpleList<TextureEntry> Textures { get; private set; } = new UndertaleSimpleList<TextureEntry>();
+    public UndertaleSimpleList<TextureEntry> Textures { get; set; } = new UndertaleSimpleList<TextureEntry>();
 
     /// <summary>
     /// The collision masks of the sprite.
     /// </summary>
-    public ObservableCollection<MaskEntry> CollisionMasks { get; private set; } = new ObservableCollection<MaskEntry>();
+    public ObservableCollection<MaskEntry> CollisionMasks { get; set; } = new ObservableCollection<MaskEntry>();
 
     // Special sprite types (always used in GMS2)
     public uint SVersion { get; set; } = 1;

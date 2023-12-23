@@ -14,7 +14,7 @@ if (exportFolder is null)
 
 string stringsPath = Path.Combine(exportFolder, "strings.txt");
 //Overwrite Check One
-if (File.Exists(stringsPath)
+if (File.Exists(stringsPath))
 {
     bool overwriteCheckOne = ScriptQuestion(@"A 'strings.txt' file already exists.
 Would you like to overwrite it?");

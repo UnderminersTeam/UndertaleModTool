@@ -758,7 +758,7 @@ namespace UndertaleModLib
                 reader.AbsPosition = jumpOffset;
 
                 LayerType layerType = (LayerType)reader.ReadInt32();
-                // Basically the switch's default, as each successful switch case terminates the loop
+                // This is the only way to repeat the loop, because each successful switch case terminates the loop
                 if (!Enum.IsDefined(layerType) || layerType == LayerType.Path)
                     continue;
 
@@ -1164,8 +1164,8 @@ namespace UndertaleModLib
                 {
                     // Go to each texture, and then to each texture's data
                     reader.Position = positionToReturn + 4 + (i * 4);
-                    reader.AbsPosition = reader.ReadUInt32() + 12; // go to texture, at an offset
-                    reader.AbsPosition = reader.ReadUInt32(); // go to texture data
+                    reader.AbsPosition = reader.ReadUInt32() + 12; // Go to texture, at an offset
+                    reader.AbsPosition = reader.ReadUInt32(); // Go to texture data
                     byte[] header = reader.ReadBytes(4);
                     if (!header.SequenceEqual(UndertaleEmbeddedTexture.TexData.QOIAndBZip2Header))
                     {
@@ -1831,7 +1831,6 @@ namespace UndertaleModLib
                 checkedPsemVersion = true;
                 return;
             }
-
             else if (count == 1) // Special case
             {
                 // Fortunately, consistent padding means we need no parsing here
@@ -1882,7 +1881,7 @@ namespace UndertaleModLib
             else if (secondPtr - firstPtr != 0xB0) // 2023.2
             {
                 reader.AbsPosition = positionToReturn;
-                throw new IOException("Unrecognized PSEM size with " + count.ToString() + " elements");
+                throw new IOException("Unrecognized PSEM size with " + count + " elements");
             }
             
 

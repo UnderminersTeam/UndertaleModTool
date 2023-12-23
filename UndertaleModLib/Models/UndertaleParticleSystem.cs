@@ -7,6 +7,7 @@ namespace UndertaleModLib.Models;
 [PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleParticleSystem : UndertaleNamedResource, IDisposable
 {
+    // TODO: Documentation on these values.
     public UndertaleString Name { get; set; }
 
     public int OriginX { get; set; }
@@ -15,7 +16,7 @@ public class UndertaleParticleSystem : UndertaleNamedResource, IDisposable
 
     public int DrawOrder { get; set; }
 
-    public UndertaleSimpleResourcesList<UndertaleParticleSystemEmitter, UndertaleChunkPSEM> Emitters { get; private set; } = new();
+    public UndertaleSimpleResourcesList<UndertaleParticleSystemEmitter, UndertaleChunkPSEM> Emitters { get; set; } = new();
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
@@ -78,6 +79,8 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 
+    // TODO: Documentation on these values
+
     public UndertaleString Name { get; set; }
 
     // 2023.6
@@ -85,7 +88,7 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
 
     public EmitMode Mode { get; set; }
 
-    public int EmitCount { get; set; } = 1; // Note: technically single in 2023.8
+    public int EmitCount { get; set; } = 1; // Note: technically float in 2023.8
 
     // 2023.8
     public bool EmitRelative { get; set; }
@@ -147,8 +150,8 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
     public float SizeIncreaseY { get; set; }
     public float SizeWiggleY { get; set; }
 
+    // These two are used and serialized prior to 2023.8, retained for compatibility.
     public float SizeMin { get => (SizeMinX + SizeMinY) / 2; set { SizeMinX = value; SizeMinY = value; } }
-
     public float SizeMax { get => (SizeMaxX + SizeMaxY) / 2; set { SizeMaxX = value; SizeMaxY = value; } }
 
     public float SizeIncrease { get => (SizeIncreaseX + SizeIncreaseY) / 2; set { SizeIncreaseX = value; SizeIncreaseY = value; } }
@@ -381,7 +384,7 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
         _spawnOnUpdate.Dispose();
     }
 
-
+    // TODO: More documentation needed
     public enum EmitMode
     {
         Stream,
