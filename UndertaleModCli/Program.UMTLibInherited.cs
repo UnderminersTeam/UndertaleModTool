@@ -521,13 +521,13 @@ public partial class Program : IScriptInterface
     }
 
     /// <inheritdoc/>
-    public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
+    public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int, string)>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
     {
         await ClickableSearchOutput(title, query, resultsCount, resultsDict.ToDictionary(pair => pair.Key, pair => pair.Value), editorDecompile, failedList);
     }
 
     /// <inheritdoc/>
-    public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
+    public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<(int, string)>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
     {
         await Task.Delay(1); //dummy await
 
@@ -555,17 +555,17 @@ public partial class Program : IScriptInterface
         Console.WriteLine();
 
         // Print in a pattern of:
-        // results in code_file
-        // line3: code
-        // line6: code
+        // Results in code_file
+        // Line 3: line of code
+        // Line 6: line of code
         //
-        // results in a codefile2
-        //etc.
+        // Results in code_file_1
+        // etc.
         foreach (var dictEntry in resultsDict)
         {
             Console.WriteLine($"Results in {dictEntry.Key}:");
             foreach (var resultEntry in dictEntry.Value)
-                Console.WriteLine(resultEntry);
+                Console.WriteLine($"Line {resultEntry.Item1}: {resultEntry.Item2}");
 
             Console.WriteLine();
         }
