@@ -8,7 +8,7 @@ using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
-string displayName = Data?.GeneralInfo?.DisplayName?.Content.ToLower();
+string displayName = Data.GeneralInfo?.DisplayName?.Content.ToLower();
 
 if (displayName != "deltarune chapter 1 & 2" && displayName != "deltarune chapter 1&2" && displayName != "undertale")
 {
