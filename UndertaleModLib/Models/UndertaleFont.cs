@@ -100,7 +100,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
     /// <summary>
     /// The glyphs that this font uses.
     /// </summary>
-    public UndertalePointerList<Glyph> Glyphs { get; private set; } = new UndertalePointerList<Glyph>();
+    public UndertalePointerList<Glyph> Glyphs { get; set; } = new UndertalePointerList<Glyph>();
 
     /// <summary>
     /// The maximum offset from the baseline to the top of the font

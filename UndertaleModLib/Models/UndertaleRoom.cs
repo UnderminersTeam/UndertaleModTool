@@ -139,34 +139,32 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     /// <summary>
     /// The list of backgrounds this room uses.
     /// </summary>
-    public UndertalePointerList<Background> Backgrounds { get; private set; } = new UndertalePointerList<Background>();
+    public UndertalePointerList<Background> Backgrounds { get; set; } = new UndertalePointerList<Background>();
 
     /// <summary>
     /// The list of views this room uses.
     /// </summary>
-    public UndertalePointerList<View> Views { get; private set; } = new UndertalePointerList<View>();
+    public UndertalePointerList<View> Views { get; set; } = new UndertalePointerList<View>();
 
     /// <summary>
     /// The list of game objects this room uses.
     /// </summary>
-    public UndertalePointerList<GameObject> GameObjects { get; private set; } = new UndertalePointerList<GameObject>();
+    public UndertalePointerList<GameObject> GameObjects { get; set; } = new UndertalePointerList<GameObject>();
 
     /// <summary>
     /// The list of tiles this room uses.
     /// </summary>
-    public UndertalePointerList<Tile> Tiles { get; private set; } = new UndertalePointerList<Tile>();
+    public UndertalePointerList<Tile> Tiles { get; set; } = new UndertalePointerList<Tile>();
 
     /// <summary>
     /// The list of layers this room uses. Used in Game Maker Studio: 2 only, as <see cref="Backgrounds"/> and <see cref="Tiles"/> are empty there.
     /// </summary>
-    public UndertalePointerList<Layer> Layers { get => _layers; private set { _layers = value; UpdateBGColorLayer(); OnPropertyChanged(); } }
+    public UndertalePointerList<Layer> Layers { get => _layers; set { _layers = value; UpdateBGColorLayer(); OnPropertyChanged(); } }
 
     /// <summary>
     /// The list of sequences this room uses.
     /// </summary>
-    public UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>> Sequences { get; private set; } = new UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>>();
-
-    public static bool CheckedForGMS2_2_2_302;
+    public UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>> Sequences { get; set; } = new UndertaleSimpleList<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>>();
 
     /// <summary>
     /// Calls <see cref="OnPropertyChanged(string)"/> for <see cref="BGColorLayer"/> in order to update the room background color.<br/>
@@ -270,50 +268,6 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             Views[0].Enabled = true;
     }
 
-    private static void CheckForGMS2_2_2_302(UndertaleReader reader)
-    {
-        if (reader.undertaleData.IsVersionAtLeast(2, 2, 2, 302))
-        {
-            CheckedForGMS2_2_2_302 = true;
-
-            uint newSize = GameObject.ChildObjectsSize + 8;
-            reader.SetStaticChildObjectsSize(typeof(GameObject), newSize);
-
-            return;
-        }
-
-        long returnTo = reader.Position;
-        reader.Position -= 4;
-
-        uint gameObjPtr = reader.ReadUInt32();
-        uint tilePtr = reader.ReadUInt32();
-
-        reader.AbsPosition = gameObjPtr; // "GameObjects"
-        uint objCount = reader.ReadUInt32();
-        if (objCount > 0)
-        {
-            uint firstPtr = reader.ReadUInt32();
-            uint secondPtr;
-            if (objCount == 1)
-                secondPtr = tilePtr;
-            else
-                secondPtr = reader.ReadUInt32();
-
-            if (secondPtr - firstPtr == 48)
-            {
-                reader.undertaleData.SetGMS2Version(2, 2, 2, 302);
-
-                //"GameObject.ImageSpeed" + "...ImageIndex"
-                uint newSize = GameObject.ChildObjectsSize + 8;
-                reader.SetStaticChildObjectsSize(typeof(GameObject), newSize);
-            }
-        }
-
-        reader.Position = returnTo;
-
-        CheckedForGMS2_2_2_302 = true;
-    }
-
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
     {
@@ -390,10 +344,6 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         Backgrounds = reader.ReadUndertaleObjectPointer<UndertalePointerList<Background>>();
         Views = reader.ReadUndertaleObjectPointer<UndertalePointerList<View>>();
         GameObjects = reader.ReadUndertaleObjectPointer<UndertalePointerList<GameObject>>();
-
-        if (!CheckedForGMS2_2_2_302)
-            CheckForGMS2_2_2_302(reader);
-        
         Tiles = reader.ReadUndertaleObjectPointer<UndertalePointerList<Tile>>();
         World = reader.ReadBoolean();
         Top = reader.ReadUInt32();
@@ -481,8 +431,6 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         uint backgroundPtr = reader.ReadUInt32();
         uint viewsPtr = reader.ReadUInt32();
         uint gameObjsPtr = reader.ReadUInt32();
-        if (!CheckedForGMS2_2_2_302)
-            CheckForGMS2_2_2_302(reader);
         uint tilesPtr = reader.ReadUInt32();
         uint layersPtr = 0;
         uint sequencesPtr = 0;
@@ -1583,8 +1531,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
         public class LayerInstancesData : LayerData
         {
-            internal uint[] InstanceIds { get; private set; } // 100000, 100001, 100002, 100003 - instance ids from GameObjects list in the room
-            public ObservableCollection<GameObject> Instances { get; private set; } = new();
+            internal uint[] InstanceIds { get; set; } // 100000, 100001, 100002, 100003 - instance ids from GameObjects list in the room
+            public ObservableCollection<GameObject> Instances { get; set; } = new();
 
             public bool AreInstancesUnresolved()
             {

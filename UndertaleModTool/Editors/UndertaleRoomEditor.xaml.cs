@@ -2691,7 +2691,7 @@ namespace UndertaleModTool
             if (parameter is not string mode)
                 return 0;
 
-            if (!partSystemsDict.TryGetValue(partSys, out Rect sysRect))
+            if (partSystemsDict is not null && !partSystemsDict.TryGetValue(partSys, out Rect sysRect))
                 sysRect = AddNewSystem(partSys);
 
             return mode switch
