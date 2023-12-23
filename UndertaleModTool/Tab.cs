@@ -903,9 +903,9 @@ namespace UndertaleModTool
             {
                 #pragma warning disable CA1416
                 if (codeTabState.IsDecompiledOpen)
-                    MainWindow.CodeEditorDecompile = MainWindow.CodeEditorMode.Decompile;
+                    UndertaleCodeEditor.EditorTab = UndertaleCodeEditor.CodeEditorTab.Decompiled;
                 else
-                    MainWindow.CodeEditorDecompile = MainWindow.CodeEditorMode.DontDecompile;
+                    UndertaleCodeEditor.EditorTab = UndertaleCodeEditor.CodeEditorTab.Disassembly;
 
                 UndertaleCodeEditor.OverriddenDecompPos = codeTabState.DecompiledCodePosition;
                 UndertaleCodeEditor.OverriddenDisasmPos = codeTabState.DisassemblyCodePosition;

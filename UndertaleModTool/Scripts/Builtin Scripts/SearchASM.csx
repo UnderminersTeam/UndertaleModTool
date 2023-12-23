@@ -17,13 +17,13 @@ if (Data.IsYYC())
 }
 
 StringBuilder results = new();
-ConcurrentDictionary<string, List<string>> resultsDict = new();
+ConcurrentDictionary<string, List<(int, string)>> resultsDict = new();
 ConcurrentBag<string> failedList = new();
-IOrderedEnumerable<string> failedSorted;                              //failedList.OrderBy()
-IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsSorted; //resultsDict.OrderBy()
-int result_count = 0;
-bool case_sensitive = ScriptQuestion("Case sensitive?");
-bool regex_check = ScriptQuestion("Regex search?");
+IOrderedEnumerable<string> failedSorted;                                     //failedList.OrderBy()
+IOrderedEnumerable<KeyValuePair<string, List<(int, string)>>> resultsSorted; //resultsDict.OrderBy()
+int resultCount = 0;
+bool caseSensitive = ScriptQuestion("Case sensitive?");
+bool regexCheck = ScriptQuestion("Regex search?");
 string keyword = SimpleTextInput("Enter your search", "Search box below", "", false);
 if (String.IsNullOrEmpty(keyword) || String.IsNullOrWhiteSpace(keyword))
 {
@@ -32,9 +32,9 @@ if (String.IsNullOrEmpty(keyword) || String.IsNullOrWhiteSpace(keyword))
 }
 
 Regex keywordRegex;
-if (regex_check)
+if (regexCheck)
 {
-    if (case_sensitive)
+    if (caseSensitive)
         keywordRegex = new(keyword, RegexOptions.Compiled);
     else
         keywordRegex = new(keyword, RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -50,7 +50,7 @@ await StopProgressBarUpdater();
 await Task.Run(SortResults);
 
 UpdateProgressStatus("Generating result list...");
-await ClickableSearchOutput("Search results.", keyword, result_count, resultsSorted, false, failedSorted);
+await ClickableSearchOutput("Search results.", keyword, resultCount, resultsSorted, false, failedSorted);
 
 HideProgressBar();
 EnableUI();
@@ -86,26 +86,26 @@ void DumpCode(UndertaleCode code)
     {
         try
         {
-            var line_number = 1;
+            var lineNumber = 1;
             StringReader assemblyText = new(code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : "");
-            bool name_written = false;
+            bool nameWritten = false;
             string lineInt;
             while ((lineInt = assemblyText.ReadLine()) is not null)
             {
                 if (lineInt == string.Empty)
                     continue;
 
-                if (((regex_check && RegexContains(in lineInt)) || ((!regex_check && case_sensitive) ? lineInt.Contains(keyword) : lineInt.ToLower().Contains(keyword.ToLower()))))
+                if (((regexCheck && RegexContains(in lineInt)) || ((!regexCheck && caseSensitive) ? lineInt.Contains(keyword) : lineInt.ToLower().Contains(keyword.ToLower()))))
                 {
-                    if (name_written == false)
+                    if (nameWritten == false)
                     {
-                        resultsDict[code.Name.Content] = new List<string>();
-                        name_written = true;
+                        resultsDict[code.Name.Content] = new List<(int, string)>();
+                        nameWritten = true;
                     }
-                    resultsDict[code.Name.Content].Add($"Line {line_number}: {lineInt}");
-                    Interlocked.Increment(ref result_count);
+                    resultsDict[code.Name.Content].Add((lineNumber, lineInt));
+                    Interlocked.Increment(ref resultCount);
                 }
-                line_number += 1;
+                lineNumber += 1;
             }
         }
         catch (Exception e)

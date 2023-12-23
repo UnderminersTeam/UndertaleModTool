@@ -116,12 +116,7 @@ namespace UndertaleModTool
         public string ExePath { get; private set; } = Program.GetExecutableDirectory();
         public string ScriptErrorType { get; set; } = "";
 
-        public enum CodeEditorMode
-        {
-            Unstated,
-            DontDecompile,
-            Decompile
-        }
+        
         public enum SaveResult
         {
             NotSaved,
@@ -133,9 +128,6 @@ namespace UndertaleModTool
             Left,
             Right
         }
-
-        // TODO: move this to the code editor
-        public static CodeEditorMode CodeEditorDecompile { get; set; } = CodeEditorMode.Unstated;
 
         private int progressValue;
         private Task updater;
@@ -2421,7 +2413,11 @@ namespace UndertaleModTool
                 updater.Dispose();
         }
 
-        public void OpenCodeFile(string name, CodeEditorMode editorDecompile, bool inNewTab = false)
+        public void OpenCodeEntry(string name, UndertaleCodeEditor.CodeEditorTab editorTab, bool inNewTab = false)
+        {
+            OpenCodeEntry(name, -1, editorTab, inNewTab);
+        }
+        public void OpenCodeEntry(string name, int lineNum, UndertaleCodeEditor.CodeEditorTab editorTab, bool inNewTab = false)
         {
             UndertaleCode code = Data.Code.ByName(name);
 
@@ -2429,31 +2425,39 @@ namespace UndertaleModTool
             {
                 Focus();
 
+                #pragma warning disable CA1416
                 if (Selected == code)
                 {
-                    #pragma warning disable CA1416
                     var codeEditor = FindVisualChild<UndertaleCodeEditor>(DataEditor);
                     if (codeEditor is null)
                     {
-                        Debug.WriteLine("Cannot select the code editor mode tab - its instance is not found.");
+                        Debug.WriteLine("Cannot select the code editor mode tab - the instance is not found.");
                     }
                     else
                     {
-                        if (editorDecompile == CodeEditorMode.Decompile
+                        if (editorTab == UndertaleCodeEditor.CodeEditorTab.Decompiled
                             && !codeEditor.DecompiledTab.IsSelected)
                         {
                             codeEditor.CodeModeTabs.SelectedItem = codeEditor.DecompiledTab;
                         }
-                        else if (editorDecompile == CodeEditorMode.DontDecompile
+                        else if (editorTab == UndertaleCodeEditor.CodeEditorTab.Disassembly
                             && !codeEditor.DisassemblyTab.IsSelected)
                         {
                             codeEditor.CodeModeTabs.SelectedItem = codeEditor.DisassemblyTab;
                         }
+
+                        var editor = editorTab == UndertaleCodeEditor.CodeEditorTab.Decompiled
+                                     ? codeEditor.DecompiledEditor : codeEditor.DisassemblyEditor;
+                        UndertaleCodeEditor.ChangeLineNumber(lineNum, editor);
                     }
-                    #pragma warning restore CA1416
                 }
                 else
-                    CodeEditorDecompile = editorDecompile;
+                {
+                    UndertaleCodeEditor.EditorTab = editorTab;
+                    UndertaleCodeEditor.ChangeLineNumber(lineNum, editorTab);
+                }
+                
+                #pragma warning restore CA1416
 
                 HighlightObject(code);
                 ChangeSelection(code, inNewTab);
@@ -2718,7 +2722,7 @@ namespace UndertaleModTool
             TextInput textOutput = new TextInput(labelText, titleText, message, isMultiline, true); //read-only mode
             textOutput.Show();
         }
-        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null)
+        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int, string)>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null)
         {
             await Task.Delay(150); //wait until progress bar status is displayed
 
@@ -2731,7 +2735,7 @@ namespace UndertaleModTool
 
             PlayInformationSound();
         }
-        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null)
+        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<(int, string)>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null)
         {
             await Task.Delay(150);
 
