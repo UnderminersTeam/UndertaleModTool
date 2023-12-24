@@ -2460,7 +2460,6 @@ namespace UndertaleModTool
                     UndertaleCodeEditor.EditorTab = editorTab;
                     UndertaleCodeEditor.ChangeLineNumber(lineNum, editorTab);
                 }
-                
                 #pragma warning restore CA1416
 
                 HighlightObject(code);
@@ -2468,7 +2467,7 @@ namespace UndertaleModTool
             }
             else
             {
-                this.ShowError($"Can't find code \"{name}\".\n(probably, different game data was loaded)");
+                this.ShowError($"Can't find code entry \"{name}\".\n(probably, different game data was loaded)");
             }
         }
 
