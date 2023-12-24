@@ -28,11 +28,11 @@ namespace UndertaleModTool.Windows
         public string Query { get; }
         public int ResultsCount { get; }
 
-        private readonly IDictionary<string, List<(int, string)>> resultsDict;
+        private readonly IDictionary<string, List<(int lineNum, string codeLine)>> resultsDict;
         private readonly IEnumerable<string> failedList;
         private readonly CodeEditorTab editorTab;
         
-        public ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int, string)>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
+        public ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int lineNum, string codeLine)>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
         {
             #pragma warning disable CA1416
             InitializeComponent();
@@ -47,7 +47,7 @@ namespace UndertaleModTool.Windows
             this.failedList = failedList?.ToList();
             #pragma warning restore CA1416
         }
-        public ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<(int, string)>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
+        public ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<(int lineNum, string codeLine)>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
         {
             #pragma warning disable CA1416
             InitializeComponent();
@@ -140,7 +140,7 @@ namespace UndertaleModTool.Windows
             if (tooManyLines)
                 mainWindow.ShowWarning($"There are too many code lines to display ({totalLineCount}), so there would be no clickable line numbers.");
 
-            foreach (KeyValuePair<string, List<(int, string)>> result in resultsDict)
+            foreach (KeyValuePair<string, List<(int lineNum, string codeLine)>> result in resultsDict)
             {
                 int lineCount = result.Value.Count;
                 Paragraph resPara = new();
@@ -153,21 +153,21 @@ namespace UndertaleModTool.Windows
                 resPara.Inlines.Add(resHeader);
 
                 int i = 1;
-                foreach (var linePair in result.Value)
+                foreach (var (lineNum, codeLine) in result.Value)
                 {
                     if (!tooManyLines)
                     {
-                        Hyperlink lineLink = new(new Run($"Line {linePair.Item1}")
+                        Hyperlink lineLink = new(new Run($"Line {lineNum}")
                         {
                             Tag = result.Key // code entry name
                         });
 
                         resPara.Inlines.Add(lineLink);
-                        resPara.Inlines.Add(new Run($": {linePair.Item2}"));
+                        resPara.Inlines.Add(new Run($": {codeLine}"));
                     }
                     else
                     {
-                        Run lineRun = new($"Line {linePair.Item1}: {linePair.Item2}");
+                        Run lineRun = new($"Line {lineNum}: {codeLine}");
 
                         resPara.Inlines.Add(lineRun);
                     }

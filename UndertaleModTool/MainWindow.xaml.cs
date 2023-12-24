@@ -2724,7 +2724,7 @@ namespace UndertaleModTool
             TextInput textOutput = new TextInput(labelText, titleText, message, isMultiline, true); //read-only mode
             textOutput.Show();
         }
-        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int, string)>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null)
+        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int lineNum, string codeLine)>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null)
         {
             await Task.Delay(150); //wait until progress bar status is displayed
 
@@ -2737,7 +2737,7 @@ namespace UndertaleModTool
 
             PlayInformationSound();
         }
-        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<(int, string)>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null)
+        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<(int lineNum, string codeLine)>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null)
         {
             await Task.Delay(150);
 

@@ -297,7 +297,7 @@ public interface IScriptInterface
     /// <param name="showInDecompiledView">Whether to open the "Decompiled" view or the "Disassembly" view when clicking on an entry name.</param>
     /// <param name="failedList">A list of code entries that encountered an error while searching.</param>
     /// <returns>A task that represents the search output.</returns>
-    Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int, string)>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null);
+    Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int lineNum, string codeLine)>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null);
 
     /// <summary>
     /// Shows search output with clickable text to the user.
@@ -310,7 +310,7 @@ public interface IScriptInterface
     /// <param name="showInDecompiledView">Whether to open the "Decompiled" view or the "Disassembly" view when clicking on an entry name.</param>
     /// <param name="failedList">A list of code entries that encountered an error while searching.</param>
     /// <returns>A task that represents the search output.</returns>
-    Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<(int, string)>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null);
+    Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<(int lineNum, string codeLine)>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null);
 
     /// <summary>
     /// Sets <see cref="isFinishedMessageEnabled"/>.

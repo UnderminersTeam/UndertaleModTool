@@ -521,13 +521,13 @@ public partial class Program : IScriptInterface
     }
 
     /// <inheritdoc/>
-    public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int, string)>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
+    public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int lineNum, string codeLine)>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
     {
         await ClickableSearchOutput(title, query, resultsCount, resultsDict.ToDictionary(pair => pair.Key, pair => pair.Value), editorDecompile, failedList);
     }
 
     /// <inheritdoc/>
-    public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<(int, string)>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
+    public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<(int lineNum, string codeLine)>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
     {
         await Task.Delay(1); //dummy await
 
@@ -565,7 +565,7 @@ public partial class Program : IScriptInterface
         {
             Console.WriteLine($"Results in {dictEntry.Key}:");
             foreach (var resultEntry in dictEntry.Value)
-                Console.WriteLine($"Line {resultEntry.Item1}: {resultEntry.Item2}");
+                Console.WriteLine($"Line {resultEntry.lineNum}: {resultEntry.codeLine}");
 
             Console.WriteLine();
         }

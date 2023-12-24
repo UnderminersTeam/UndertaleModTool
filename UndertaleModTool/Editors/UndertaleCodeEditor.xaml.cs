@@ -76,11 +76,11 @@ namespace UndertaleModTool
 
         public enum CodeEditorTab
         {
-            Unstated,
+            Unknown,
             Disassembly,
             Decompiled
         }
-        public static CodeEditorTab EditorTab { get; set; } = CodeEditorTab.Unstated;
+        public static CodeEditorTab EditorTab { get; set; } = CodeEditorTab.Unknown;
 
         public UndertaleCodeEditor()
         {
@@ -305,7 +305,7 @@ namespace UndertaleModTool
             CurrentDecompiled = null;
             CurrentDisassembled = null;
 
-            if (EditorTab != CodeEditorTab.Unstated) //if opened from the code search results "link"
+            if (EditorTab != CodeEditorTab.Unknown) // if opened from the code search results "link"
             {
                 if (EditorTab == CodeEditorTab.Disassembly && code != CurrentDisassembled)
                 {
@@ -323,7 +323,7 @@ namespace UndertaleModTool
                         _ = DecompileCode(code, true);
                 }
 
-                EditorTab = CodeEditorTab.Unstated;
+                EditorTab = CodeEditorTab.Unknown;
             }
             else
                 FillInCodeViewer(true);
@@ -399,9 +399,9 @@ namespace UndertaleModTool
             if (lineNum < 1)
                 return;
 
-            if (editorTab == CodeEditorTab.Unstated)
+            if (editorTab == CodeEditorTab.Unknown)
             {
-                Debug.WriteLine("The \"editorTab\" argument of \"GoToLine()\" is \"Unstated\".");
+                Debug.WriteLine($"The \"{nameof(editorTab)}\" argument of \"{nameof(ChangeLineNumber)}()\" is \"{nameof(CodeEditorTab.Unknown)}\".");
                 return;
             }
 
@@ -417,7 +417,7 @@ namespace UndertaleModTool
 
             if (textEditor is null)
             {
-                Debug.WriteLine("The \"textEditor\" argument of \"GoToLine()\" is null.");
+                Debug.WriteLine($"The \"{nameof(textEditor)}\" argument of \"{nameof(ChangeLineNumber)}()\" is null.");
                 return;
             }
 
