@@ -116,7 +116,6 @@ namespace UndertaleModTool
         public string ExePath { get; private set; } = Program.GetExecutableDirectory();
         public string ScriptErrorType { get; set; } = "";
 
-        
         public enum SaveResult
         {
             NotSaved,
