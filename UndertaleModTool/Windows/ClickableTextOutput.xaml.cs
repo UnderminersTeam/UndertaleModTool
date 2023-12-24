@@ -135,7 +135,11 @@ namespace UndertaleModTool.Windows
             headerPara.Inlines.Add(new LineBreak());
             doc.Blocks.Add(headerPara);
 
-            bool tooManyLines = resultsDict.Select(x => x.Value.Count).Sum() > 10000;
+            int totalLineCount = resultsDict.Select(x => x.Value.Count).Sum();
+            bool tooManyLines = totalLineCount > 10000;
+            if (tooManyLines)
+                mainWindow.ShowWarning($"There are too many code lines to display ({totalLineCount}), so there would be no clickable line numbers.");
+
             foreach (KeyValuePair<string, List<(int, string)>> result in resultsDict)
             {
                 int lineCount = result.Value.Count;
