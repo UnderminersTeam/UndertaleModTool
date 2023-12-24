@@ -168,7 +168,8 @@ namespace UndertaleModLib.Util
 
         public static byte[] GetImageBytes(SKBitmap image, bool disposeImage = true)
         {
-            byte[] result = image.Bytes;
+            using var data = image.Encode(SKEncodedImageFormat.Png, 100);
+            byte[] result = data.ToArray();
             if (disposeImage)
                 image.Dispose();
             return result;

@@ -157,7 +157,7 @@ public class UndertaleTexturePageItem : UndertaleNamedResource, INotifyPropertyC
             TextureWorker worker = new TextureWorker();
             SKBitmap embImage = worker.GetEmbeddedTexture(TexturePage); // Use SetPixel if needed.
 
-            SKCanvas g = new SKCanvas(embImage);
+            SKCanvas g = new(embImage);
             g.DrawBitmap(finalImage, SourceX, SourceY);
             g.Dispose();
 

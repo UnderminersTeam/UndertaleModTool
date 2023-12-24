@@ -1,4 +1,5 @@
 using Microsoft.Win32;
+using SkiaSharp;
 using System;
 using System.Buffers;
 using System.Collections;
@@ -2534,9 +2535,16 @@ namespace UndertaleModTool
                     {
                         Tuple<string, uint> tileKey = new(tilesBG.Texture.Name.Content, id);
 
-                        IntPtr bmpPtr = CachedTileDataLoader.TileCache[tileKey].GetHbitmap();
-                        ImageSource spriteSrc = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(bmpPtr, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-                        DeleteObject(bmpPtr);
+                        SKBitmap bmp = CachedTileDataLoader.TileCache[tileKey];
+                        var data = bmp.Encode(SKEncodedImageFormat.Png, 100);
+
+                        BitmapImage spriteSrc = new();
+                        spriteSrc.BeginInit();
+                        spriteSrc.CacheOption = BitmapCacheOption.OnLoad;
+                        spriteSrc.StreamSource = data.AsStream();
+                        spriteSrc.EndInit();
+                        data.Dispose();
+
                         spriteSrc.Freeze(); // allow UI thread access
 
                         TileCache.TryAdd(tileKey, spriteSrc);
