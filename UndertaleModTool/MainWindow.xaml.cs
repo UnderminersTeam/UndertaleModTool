@@ -2448,11 +2448,15 @@ namespace UndertaleModTool
 
                         var editor = editorTab == UndertaleCodeEditor.CodeEditorTab.Decompiled
                                      ? codeEditor.DecompiledEditor : codeEditor.DisassemblyEditor;
+                        CurrentTab?.SaveTabContentState();
                         UndertaleCodeEditor.ChangeLineNumber(lineNum, editor);
                     }
                 }
                 else
                 {
+                    if (CurrentTab?.CurrentObject is UndertaleCode)
+                        CurrentTab.SaveTabContentState();
+
                     UndertaleCodeEditor.EditorTab = editorTab;
                     UndertaleCodeEditor.ChangeLineNumber(lineNum, editorTab);
                 }
