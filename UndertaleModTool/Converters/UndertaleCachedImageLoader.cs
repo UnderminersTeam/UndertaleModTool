@@ -173,6 +173,7 @@ namespace UndertaleModTool
                 var rectSrc = SKRect.Create(rect.Left, rect.Top, rect.Width, rect.Height);
                 g.DrawBitmap(img, rectSrc, rectDest);
             }
+            spriteBMP.SetImmutable();
 
             return spriteBMP;
         }
@@ -440,6 +441,7 @@ namespace UndertaleModTool
                         SKBitmap tileBMP = new(w, h);
                         Marshal.Copy(bufferRes, 0, tileBMP.GetPixels(), bufferResLen);
                         ArrayPool<byte>.Shared.Return(bufferRes);
+                        tileBMP.SetImmutable();
 
                         TileCache.TryAdd(new(texName, (uint)((tilesBG.GMS2TileColumns * y) + x)), tileBMP);
                     }
@@ -467,10 +469,10 @@ namespace UndertaleModTool
 
         public ImageSource CreateLayerSource(in Layer.LayerTilesData tilesData, in UndertaleBackground tilesBG, in int w, in int h)
         {
-            SKBitmap layerBMP = new(w * (int)tilesData.TilesX, h * (int)tilesData.TilesY);
+            using SKBitmap layerBMP = new(w * (int)tilesData.TilesX, h * (int)tilesData.TilesY);
+            SKCanvas layerG = new(layerBMP);
             uint maxID = tilesData.Background.GMS2TileIds.Select(x => x.ID).Max();
 
-            using SKCanvas g = new(layerBMP);
             for (int y = 0; y < tilesData.TilesY; y++)
             {
                 for (int x = 0; x < tilesData.TilesX; x++)
@@ -488,51 +490,60 @@ namespace UndertaleModTool
                             continue;
                         }
 
-                        /*SKBitmap resBMP = SKBitmap.FromImage(TileCache[new(tilesBG.Texture.Name.Content, realID)]);
+                        SKBitmap srcBMP = TileCache[new(tilesBG.Texture.Name.Content, realID)];
+                        using SKSurface tileSurf = SKSurface.Create(srcBMP.Info);
 
                         switch (id >> 28)
                         {
                             case 1:
-                                resBMP.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                                // Flip X
+                                tileSurf.Canvas.Scale(-1, 1, srcBMP.Width / 2, 0);
                                 break;
                             case 2:
-                                resBMP.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                                // Flip Y
+                                tileSurf.Canvas.Scale(1, -1, 0, srcBMP.Height / 2);
                                 break;
                             case 3:
-                                resBMP.RotateFlip(RotateFlipType.RotateNoneFlipXY);
+                                // Flip X and Y
+                                tileSurf.Canvas.Scale(-1, -1, srcBMP.Width / 2, srcBMP.Height / 2);
                                 break;
                             case 4:
-                                resBMP.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                                tileSurf.Canvas.RotateDegrees(90);
                                 break;
                             case 5:
-                                resBMP.RotateFlip(RotateFlipType.Rotate270FlipY);
+                                tileSurf.Canvas.RotateDegrees(270);
+                                tileSurf.Canvas.Scale(1, -1, 0, srcBMP.Height / 2);
                                 break;
                             case 6:
-                                resBMP.RotateFlip(RotateFlipType.Rotate90FlipY);
+                                tileSurf.Canvas.RotateDegrees(90);
+                                tileSurf.Canvas.Scale(1, -1, 0, srcBMP.Height / 2);
                                 break;
                             case 7:
-                                resBMP.RotateFlip(RotateFlipType.Rotate270FlipNone);
+                                tileSurf.Canvas.RotateDegrees(270);
                                 break;
 
                             default:
                                 Debug.WriteLine("Tile of " + tilesData.ParentLayer.LayerName + " located at (" + x + ", " + y + ") has unknown flag.");
                                 break;
-                        }*/
+                        }
 
-                        g.DrawBitmap(TileCache[new(tilesBG.Texture.Name.Content, realID)], x * w, y * h);
+                        tileSurf.Canvas.DrawBitmap(srcBMP, 0, 0);
+                        tileSurf.Draw(layerG, x * w, y * h, null);
                     }
                     else
-                        g.DrawBitmap(TileCache[new(tilesBG.Texture.Name.Content, id)], x * w, y * h);
+                        layerG.DrawBitmap(TileCache[new(tilesBG.Texture.Name.Content, id)], x * w, y * h);
                 }
             }
+            layerG.Dispose();
 
             var data = layerBMP.Encode(SKEncodedImageFormat.Png, 100);
+
             BitmapImage spriteSrc = new();
             spriteSrc.BeginInit();
             spriteSrc.CacheOption = BitmapCacheOption.OnLoad;
             spriteSrc.StreamSource = data.AsStream();
             spriteSrc.EndInit();
-            layerBMP.Dispose();
+
             data.Dispose();
             // TODO: spriteSrc.Freeze() ?
 
