@@ -473,6 +473,8 @@ namespace UndertaleModTool
             SKCanvas layerG = new(layerBMP);
             uint maxID = tilesData.Background.GMS2TileIds.Select(x => x.ID).Max();
 
+            using SKSurface tileSurf = SKSurface.Create(new SKImageInfo(w, h));
+
             for (int y = 0; y < tilesData.TilesY; y++)
             {
                 for (int x = 0; x < tilesData.TilesX; x++)
@@ -491,7 +493,7 @@ namespace UndertaleModTool
                         }
 
                         SKBitmap srcBMP = TileCache[new(tilesBG.Texture.Name.Content, realID)];
-                        using SKSurface tileSurf = SKSurface.Create(srcBMP.Info);
+                        tileSurf.Canvas.ResetMatrix();
 
                         switch (id >> 28)
                         {
