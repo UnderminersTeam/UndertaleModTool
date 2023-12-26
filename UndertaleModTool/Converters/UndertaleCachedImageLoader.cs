@@ -175,8 +175,8 @@ namespace UndertaleModTool
         }
         private ImageSource CreateSpriteSource(in Rectangle rect, in UndertaleTexturePageItem texture, int diffW = 0, int diffH = 0, bool isTile = false)
         {
-            SKBitmap spriteBMP = CreateSpriteBitmap(rect, in texture, diffW, diffH, isTile);
-            var data = spriteBMP.Encode(SKEncodedImageFormat.Png, 100);
+            using SKBitmap spriteBMP = CreateSpriteBitmap(rect, in texture, diffW, diffH, isTile);
+            using var data = spriteBMP.Encode(SKEncodedImageFormat.Png, 100);
 
             BitmapImage spriteSrc = new();
             spriteSrc.BeginInit();
@@ -184,8 +184,6 @@ namespace UndertaleModTool
             spriteSrc.StreamSource = data.AsStream();
             spriteSrc.EndInit();
 
-            spriteBMP.Dispose();
-            data.Dispose();
             spriteSrc.Freeze(); // allow UI thread access
 
             return spriteSrc;
@@ -248,18 +246,16 @@ namespace UndertaleModTool
                     }
                 }
 
-                SKBitmap tileBMP = new(w, h);
+                using SKBitmap tileBMP = new(w, h);
                 Marshal.Copy(bufferRes, 0, tileBMP.GetPixels(), bufferResLen);
                 ArrayPool<byte>.Shared.Return(bufferRes);
 
-                var data = tileBMP.Encode(SKEncodedImageFormat.Png, 100);
+                using var data = tileBMP.Encode(SKEncodedImageFormat.Png, 100);
                 BitmapImage spriteSrc = new();
                 spriteSrc.BeginInit();
                 spriteSrc.CacheOption = BitmapCacheOption.OnLoad;
                 spriteSrc.StreamSource = data.AsStream();
                 spriteSrc.EndInit();
-                tileBMP.Dispose();
-                data.Dispose();
 
                 spriteSrc.Freeze(); // allow UI thread access
 
@@ -530,7 +526,7 @@ namespace UndertaleModTool
             }
             layerG.Dispose();
 
-            var data = layerBMP.Encode(SKEncodedImageFormat.Png, 100);
+            using var data = layerBMP.Encode(SKEncodedImageFormat.Png, 100);
 
             BitmapImage spriteSrc = new();
             spriteSrc.BeginInit();
@@ -538,7 +534,6 @@ namespace UndertaleModTool
             spriteSrc.StreamSource = data.AsStream();
             spriteSrc.EndInit();
 
-            data.Dispose();
             spriteSrc.Freeze();
 
             return spriteSrc;
