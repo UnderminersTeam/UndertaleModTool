@@ -3,7 +3,7 @@
 
 using System;
 using System.IO;
-using System.Drawing;
+using SkiaSharp;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,7 +37,6 @@ int atlasCount = 0;
 foreach (Atlas atlas in packer.Atlasses)
 {
     string atlasName = String.Format(prefix + "{0:000}" + ".png", atlasCount);
-    Bitmap atlasBitmap = new Bitmap(atlasName);
     UndertaleEmbeddedTexture texture = new UndertaleEmbeddedTexture();
     texture.Name = new UndertaleString("Texture " + ++lastTextPage);
     texture.TextureData.TextureBlob = File.ReadAllBytes(atlasName);
@@ -85,8 +84,6 @@ foreach (Atlas atlas in packer.Atlasses)
     }
     atlasCount++;
 }
-
-
 
 HideProgressBar();
 ScriptMessage("Import Complete!");
@@ -176,10 +173,17 @@ public enum BestFitHeuristic
     Area,
     MaxOneAxis,
 }
+public struct Rect
+{
+    public int X { get; set; }
+    public int Y { get; set; }
+    public int Width { get; set; }
+    public int Height { get; set; }
+}
 
 public class Node
 {
-    public Rectangle Bounds;
+    public Rect Bounds;
     public TextureInfo Texture;
     public SplitType SplitType;
 }
@@ -201,6 +205,26 @@ public class Packer
     public bool DebugMode;
     public BestFitHeuristic FitHeuristic;
     public List<Atlas> Atlasses;
+    public static readonly SKPaint paintGreen = new()
+    {
+        Color = SKColors.Green,
+        BlendMode = SKBlendMode.Src
+    };
+    public static readonly SKPaint paintBlack = new()
+    {
+        Color = SKColors.Black,
+        BlendMode = SKBlendMode.Src
+    };
+    public static readonly SKPaint paintWhite = new()
+    {
+        Color = SKColors.White,
+        BlendMode = SKBlendMode.Src
+    };
+    public static readonly SKPaint paintDarkMagenta = new()
+    {
+        Color = SKColors.DarkMagenta,
+        BlendMode = SKBlendMode.Src
+    };
 
     public Packer()
     {
@@ -256,13 +280,10 @@ public class Packer
         {
             string atlasName = String.Format(prefix + "{0:000}" + ".png", atlasCount);
             //1: Save images
-            Image img = CreateAtlasImage(atlas);
-            //DPI fix start
-            Bitmap ResolutionFix = new Bitmap(img);
-            ResolutionFix.SetResolution(96.0F, 96.0F);
-            Image img2 = ResolutionFix;
-            //DPI fix end
-            img2.Save(atlasName, System.Drawing.Imaging.ImageFormat.Png);
+            using SKBitmap img = CreateAtlasImage(atlas);
+            using FileStream fs = new(atlasName, FileMode.Create, FileAccess.Write);
+            img.Encode(fs, SKEncodedImageFormat.Png, 100);
+            fs.Close();
             //2: save description in file
             foreach (Node n in atlas.Nodes)
             {
@@ -293,25 +314,27 @@ public class Packer
         FileInfo[] files = di.GetFiles(_Wildcard, SearchOption.AllDirectories);
         foreach (FileInfo fi in files)
         {
-            Image img = Image.FromFile(fi.FullName);
-            if (img != null)
+            var imgSize = TextureWorker.GetImageSizeFromFile(fi.FullName);
+            if (imgSize == default)
+                continue;
+            int width = imgSize.Width;
+            int height = imgSize.Height;
+
+            if (width <= AtlasSize && height <= AtlasSize)
             {
-                if (img.Width <= AtlasSize && img.Height <= AtlasSize)
-                {
-                    TextureInfo ti = new TextureInfo();
+                TextureInfo ti = new TextureInfo();
 
-                    ti.Source = fi.FullName;
-                    ti.Width = img.Width;
-                    ti.Height = img.Height;
+                ti.Source = fi.FullName;
+                ti.Width = width;
+                ti.Height = height;
 
-                    SourceTextures.Add(ti);
+                SourceTextures.Add(ti);
 
-                    Log.WriteLine("Added " + fi.FullName);
-                }
-                else
-                {
-                    Error.WriteLine(fi.FullName + " is too large to fix in the atlas. Skipping!");
-                }
+                Log.WriteLine("Added " + fi.FullName);
+            }
+            else
+            {
+                Error.WriteLine(fi.FullName + " is too large to fix in the atlas. Skipping!");
             }
         }
     }
@@ -404,7 +427,8 @@ public class Packer
         _Atlas.Nodes = new List<Node>();
         textures = _Textures.ToList();
         Node root = new Node();
-        root.Bounds.Size = new Size(_Atlas.Width, _Atlas.Height);
+        root.Bounds.Width = _Atlas.Width;
+        root.Bounds.Height = _Atlas.Height;
         root.SplitType = SplitType.Horizontal;
         freeList.Add(root);
         while (freeList.Count > 0 && textures.Count > 0)
@@ -432,42 +456,46 @@ public class Packer
         return textures;
     }
 
-    private Image CreateAtlasImage(Atlas _Atlas)
+    private SKBitmap CreateAtlasImage(Atlas _Atlas)
     {
-        Image img = new Bitmap(_Atlas.Width, _Atlas.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-        Graphics g = Graphics.FromImage(img);
+        SKBitmap img = new(_Atlas.Width, _Atlas.Height);
+        using SKCanvas g = new(img);
         if (DebugMode)
-        {
-            g.FillRectangle(Brushes.Green, new Rectangle(0, 0, _Atlas.Width, _Atlas.Height));
-        }
+            g.DrawRect(0, 0, _Atlas.Width, _Atlas.Height, paintGreen);
+
         foreach (Node n in _Atlas.Nodes)
         {
+            SKRect rect = SKRect.Create(n.Bounds.X, n.Bounds.Y, n.Bounds.Width, n.Bounds.Height);
+
             if (n.Texture != null)
             {
-                Image sourceImg = Image.FromFile(n.Texture.Source);
-                g.DrawImage(sourceImg, n.Bounds);
+                using SKBitmap sourceImg = SKBitmap.Decode(n.Texture.Source);
+                g.DrawBitmap(sourceImg, rect);
                 if (DebugMode)
                 {
                     string label = Path.GetFileNameWithoutExtension(n.Texture.Source);
-                    SizeF labelBox = g.MeasureString(label, SystemFonts.MenuFont, new SizeF(n.Bounds.Size));
-                    RectangleF rectBounds = new Rectangle(n.Bounds.Location, new Size((int)labelBox.Width, (int)labelBox.Height));
-                    g.FillRectangle(Brushes.Black, rectBounds);
-                    g.DrawString(label, SystemFonts.MenuFont, Brushes.White, rectBounds);
+                    SKRect labelBox = default;
+                    paintWhite.MeasureText(label, ref labelBox);
+                    SKRect rectBounds = SKRect.Create(n.Bounds.X, n.Bounds.Y, labelBox.Width, labelBox.Height);
+                    g.DrawRect(rectBounds, paintBlack);
+                    g.DrawText(label, rectBounds.Left, rectBounds.Top, paintWhite);
                 }
             }
             else
             {
-                g.FillRectangle(Brushes.DarkMagenta, n.Bounds);
+                g.DrawRect(rect, paintDarkMagenta);
                 if (DebugMode)
                 {
-                    string label = n.Bounds.Width.ToString() + "x" + n.Bounds.Height.ToString();
-                    SizeF labelBox = g.MeasureString(label, SystemFonts.MenuFont, new SizeF(n.Bounds.Size));
-                    RectangleF rectBounds = new Rectangle(n.Bounds.Location, new Size((int)labelBox.Width, (int)labelBox.Height));
-                    g.FillRectangle(Brushes.Black, rectBounds);
-                    g.DrawString(label, SystemFonts.MenuFont, Brushes.White, rectBounds);
+                    string label = $"{n.Bounds.Width}x{n.Bounds.Height}";
+                    SKRect labelBox = default;
+                    paintWhite.MeasureText(label, ref labelBox);
+                    SKRect rectBounds = SKRect.Create(n.Bounds.X, n.Bounds.Y, labelBox.Width, labelBox.Height);
+                    g.DrawRect(rectBounds, paintBlack);
+                    g.DrawText(label, rectBounds.Left, rectBounds.Top, paintWhite);
                 }
             }
         }
+
         return img;
     }
 }
