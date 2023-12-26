@@ -14,7 +14,7 @@ bool padded = ScriptQuestion("Export all sprites WITH padding?");
 string texFolder = PromptChooseDirectory();
 if (texFolder == null)
     throw new ScriptException("The export folder was not set.");
-codeFolder = Path.Combine(texFolder, "Sprites");
+texFolder = texFolder + "Sprites" + Path.DirectorySeparatorChar;
 Directory.CreateDirectory(texFolder);
 
 TextureWorker worker = new TextureWorker();
@@ -24,16 +24,16 @@ List<String> splitStringsList = new List<String>();
 
 string inputtedText = "";
 inputtedText = SimpleTextInput("Menu", "Enter the name of the sprites", "", true);
-string[] individualLineArray = inputtedText.Split('\n', stringSplitOptions.RemoveEmptyEntries);
+string[] individualLineArray = inputtedText.Split('\n', StringSplitOptions.RemoveEmptyEntries);
 foreach (var oneLine in individualLineArray)
 {
     splitStringsList.Add(oneLine.Trim());
 }
-for (var j = 0; j < splitStringsList.Count; j++)
+foreach (string listElement in splitStringsList)
 {
     foreach (UndertaleSprite spr in Data.Sprites)
     {
-        if (splitStringsList[j].ToLower() == spr.Name.Content.ToLower())
+        if (listElement.ToLower() == spr.Name.Content.ToLower())
         {
             spritesToDump.Add(spr);
         }
@@ -46,9 +46,9 @@ StartProgressBarUpdater();
 
 
 await Task.Run(() => {
-    for (var j = 0; j < spritesToDump.Count; j++)
+    foreach (UndertaleSprite sprToDump in spritesToDump)
     {
-        DumpSprite(spritesToDump[j]);
+        DumpSprite(sprToDump);
     }
 });
 
