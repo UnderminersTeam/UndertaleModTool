@@ -12,6 +12,16 @@ namespace UndertaleModLib.Util
     public class TextureWorker
     {
         private readonly Dictionary<UndertaleEmbeddedTexture, SKBitmap> embeddedDictionary = new();
+        private static readonly SKPaint paintBlack = new()
+        {
+            Color = SKColors.Black,
+            BlendMode = SKBlendMode.Src
+        };
+        private static readonly SKPaint paintWhite = new()
+        {
+            Color = SKColors.White,
+            BlendMode = SKBlendMode.Src
+        };
 
         // Cleans up all the images when usage of this worker is finished.
         // Should be called when a TextureWorker will never be used again.
@@ -105,7 +115,6 @@ namespace UndertaleModLib.Util
             using SKBitmap image = ReadImageFromFile(filePath);
             List<byte> bytes = new();
 
-            int enableColor = Color.White.ToArgb();
             for (int y = 0; y < image.Height; y++)
             {
                 for (int xByte = 0; xByte < (image.Width + 7) / 8; xByte++)
@@ -115,7 +124,7 @@ namespace UndertaleModLib.Util
                     int pxEnd = Math.Min(pxStart + 8, image.Width);
 
                     for (int x = pxStart; x < pxEnd; x++)
-                        if ((uint)image.GetPixel(x, y) == enableColor) // Don't use Color == OtherColor, it doesn't seem to give us the type of equals comparison we want here.
+                        if (image.GetPixel(x, y) == SKColors.White)
                             fullByte |= (byte)(0b1 << (7 - (x - pxStart)));
 
                     bytes.Add(fullByte);
@@ -134,16 +143,16 @@ namespace UndertaleModLib.Util
         public static void SaveEmptyPNG(string fullPath, int width, int height)
         {
             var blackImage = new SKBitmap(width, height);
-            for (int x = 0; x < width; x++)
-                for (int y = 0; y < height; y++)
-                    blackImage.SetPixel(x, y, SKColors.Black);
+            using SKCanvas g = new(blackImage);
+            g.Clear(SKColors.Black);
             SaveImageToFile(fullPath, blackImage);
         }
 
         public static SKBitmap GetCollisionMaskImage(UndertaleSprite sprite, UndertaleSprite.MaskEntry mask)
         {
             byte[] maskData = mask.Data;
-            SKBitmap bitmap = new((int)sprite.Width, (int)sprite.Height); // Ugh. I want to use 1bpp, but for some BS reason C# doesn't allow SetPixel in that mode.
+            SKBitmap bitmap = new((int)sprite.Width, (int)sprite.Height, SKColorType.Gray8, SKAlphaType.Premul);
+            using SKCanvas g = new(bitmap);
 
             for (int y = 0; y < sprite.Height; y++)
             {
@@ -152,7 +161,7 @@ namespace UndertaleModLib.Util
                 {
                     byte temp = maskData[rowStart + (x / 8)];
                     bool pixelBit = (temp & (0b1 << (7 - (x % 8)))) != 0b0;
-                    bitmap.SetPixel(x, y, pixelBit ? SKColors.White : SKColors.Black);
+                    g.DrawPoint(x, y, pixelBit ? paintWhite : paintBlack);
                 }
             }
 
