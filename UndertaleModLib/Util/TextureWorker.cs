@@ -51,7 +51,7 @@ namespace UndertaleModLib.Util
         {
             int exportWidth = texPageItem.BoundingWidth; // sprite.Width
             int exportHeight = texPageItem.BoundingHeight; // sprite.Height
-            using SKBitmap embeddedImage = GetEmbeddedTexture(texPageItem.TexturePage);
+            SKBitmap embeddedImage = GetEmbeddedTexture(texPageItem.TexturePage);
 
             // Sanity checks.
             if (includePadding && ((texPageItem.TargetWidth > exportWidth) || (texPageItem.TargetHeight > exportHeight)))
