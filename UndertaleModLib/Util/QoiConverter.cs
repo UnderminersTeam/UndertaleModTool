@@ -66,7 +66,7 @@ namespace UndertaleModLib.Util
         /// <summary>
         /// Creates a <see cref="SKBitmap"/> from a <see cref="ReadOnlySpan{TKey}"/> of <see cref="byte"/>s.
         /// </summary>
-        /// <param name="bytes">The <see cref="Span{TKey}"/> of <see cref="byte"/>s to create the PNG image from.</param>
+        /// <param name="bytes">The <see cref="ReadOnlySpan{TKey}"/> of <see cref="byte"/>s to create the PNG image from.</param>
         /// <returns>The QOI image as a PNG.</returns>
         /// <exception cref="Exception">If there is an invalid QOIF magic header or there was an error with stride width.</exception>
         public static SKBitmap GetImageFromSpan(ReadOnlySpan<byte> bytes) => GetImageFromSpan(bytes, out _);
