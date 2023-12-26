@@ -24,10 +24,6 @@ namespace UndertaleModTool
 {
     public class UndertaleCachedImageLoader : IValueConverter
     {
-        [DllImport("gdi32.dll", EntryPoint = "DeleteObject")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool DeleteObject([In] IntPtr hObject);
-
         private static readonly ConcurrentDictionary<string, ImageSource> imageCache = new();
         private static readonly ConcurrentDictionary<Tuple<string, Tuple<uint, uint, uint, uint>>, ImageSource> tileCache = new();
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
@@ -335,10 +331,6 @@ namespace UndertaleModTool
 
     public class CachedTileDataLoader : IMultiValueConverter
     {
-        [DllImport("gdi32.dll", EntryPoint = "DeleteObject")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool DeleteObject([In] IntPtr hObject);
-
         // Tile text. page, tile ID - tile pixel data
         public static ConcurrentDictionary<Tuple<string, uint>, SKBitmap> TileCache { get; set; } = new();
         private static readonly ConcurrentDictionary<string, SKBitmap> tilePageCache = new();
@@ -547,7 +539,7 @@ namespace UndertaleModTool
             spriteSrc.EndInit();
 
             data.Dispose();
-            // TODO: spriteSrc.Freeze() ?
+            spriteSrc.Freeze();
 
             return spriteSrc;
         }
