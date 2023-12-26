@@ -11,7 +11,7 @@ namespace UndertaleModLib.Util
 {
     public class TextureWorker
     {
-        private Dictionary<UndertaleEmbeddedTexture, SKBitmap> embeddedDictionary = new Dictionary<UndertaleEmbeddedTexture, SKBitmap>();
+        private readonly Dictionary<UndertaleEmbeddedTexture, SKBitmap> embeddedDictionary = new();
 
         // Cleans up all the images when usage of this worker is finished.
         // Should be called when a TextureWorker will never be used again.
@@ -32,16 +32,16 @@ namespace UndertaleModLib.Util
             }
         }
 
-        public void ExportAsPNG(UndertaleTexturePageItem texPageItem, string FullPath, string imageName = null, bool includePadding = false)
+        public void ExportAsPNG(UndertaleTexturePageItem texPageItem, string fullPath, string imageName = null, bool includePadding = false)
         {
-            SaveImageToFile(FullPath, GetTextureFor(texPageItem, imageName != null ? imageName : Path.GetFileNameWithoutExtension(FullPath), includePadding));
+            SaveImageToFile(fullPath, GetTextureFor(texPageItem, imageName ?? Path.GetFileNameWithoutExtension(fullPath), includePadding));
         }
 
         public SKBitmap GetTextureFor(UndertaleTexturePageItem texPageItem, string imageName, bool includePadding = false)
         {
             int exportWidth = texPageItem.BoundingWidth; // sprite.Width
             int exportHeight = texPageItem.BoundingHeight; // sprite.Height
-            SKBitmap embeddedImage = GetEmbeddedTexture(texPageItem.TexturePage);
+            using SKBitmap embeddedImage = GetEmbeddedTexture(texPageItem.TexturePage);
 
             // Sanity checks.
             if (includePadding && ((texPageItem.TargetWidth > exportWidth) || (texPageItem.TargetHeight > exportHeight)))
@@ -73,9 +73,9 @@ namespace UndertaleModLib.Util
             if (includePadding)
             {
                 returnImage = new SKBitmap(exportWidth, exportHeight);
-                SKCanvas g = new SKCanvas(returnImage);
-                g.DrawBitmap(resultImage, SKRect.Create(0, 0, resultImage.Width, resultImage.Height), SKRect.Create(texPageItem.TargetX, texPageItem.TargetY, resultImage.Width, resultImage.Height));
-                g.Dispose();
+                using SKCanvas g = new(returnImage);
+                g.DrawBitmap(resultImage, SKRect.Create(0, 0, resultImage.Width, resultImage.Height),
+                             SKRect.Create(texPageItem.TargetX, texPageItem.TargetY, resultImage.Width, resultImage.Height));
             }
 
             return returnImage;
@@ -95,7 +95,6 @@ namespace UndertaleModLib.Util
         // This should perform a high quality resize.
         public static SKBitmap ResizeImage(SKBitmap image, int width, int height)
         {
-            var destRect = new Rectangle(0, 0, width, height);
             var destImage = new SKBitmap(width, height);
             image.ScalePixels(destImage, SKFilterQuality.High);
             return destImage;
@@ -103,8 +102,8 @@ namespace UndertaleModLib.Util
 
         public static byte[] ReadMaskData(string filePath)
         {
-            SKBitmap image = ReadImageFromFile(filePath);
-            List<byte> bytes = new List<byte>();
+            using SKBitmap image = ReadImageFromFile(filePath);
+            List<byte> bytes = new();
 
             int enableColor = Color.White.ToArgb();
             for (int y = 0; y < image.Height; y++)
@@ -112,8 +111,8 @@ namespace UndertaleModLib.Util
                 for (int xByte = 0; xByte < (image.Width + 7) / 8; xByte++)
                 {
                     byte fullByte = 0x00;
-                    int pxStart = (xByte * 8);
-                    int pxEnd = Math.Min(pxStart + 8, (int) image.Width);
+                    int pxStart = xByte * 8;
+                    int pxEnd = Math.Min(pxStart + 8, image.Width);
 
                     for (int x = pxStart; x < pxEnd; x++)
                         if ((uint)image.GetPixel(x, y) == enableColor) // Don't use Color == OtherColor, it doesn't seem to give us the type of equals comparison we want here.
@@ -123,7 +122,6 @@ namespace UndertaleModLib.Util
                 }
             }
 
-            image.Dispose();
             return bytes.ToArray();
         }
 
@@ -133,19 +131,19 @@ namespace UndertaleModLib.Util
             return File.ReadAllBytes(filePath);
         }
 
-        public static void SaveEmptyPNG(string FullPath, int width, int height)
+        public static void SaveEmptyPNG(string fullPath, int width, int height)
         {
             var blackImage = new SKBitmap(width, height);
             for (int x = 0; x < width; x++)
                 for (int y = 0; y < height; y++)
                     blackImage.SetPixel(x, y, SKColors.Black);
-            SaveImageToFile(FullPath, blackImage);
+            SaveImageToFile(fullPath, blackImage);
         }
 
         public static SKBitmap GetCollisionMaskImage(UndertaleSprite sprite, UndertaleSprite.MaskEntry mask)
         {
             byte[] maskData = mask.Data;
-            SKBitmap bitmap = new SKBitmap((int)sprite.Width, (int)sprite.Height); // Ugh. I want to use 1bpp, but for some BS reason C# doesn't allow SetPixel in that mode.
+            SKBitmap bitmap = new((int)sprite.Width, (int)sprite.Height); // Ugh. I want to use 1bpp, but for some BS reason C# doesn't allow SetPixel in that mode.
 
             for (int y = 0; y < sprite.Height; y++)
             {
@@ -175,9 +173,9 @@ namespace UndertaleModLib.Util
             return result;
         }
 
-        public static void SaveImageToFile(string FullPath, SKBitmap image, Boolean disposeImage = true)
+        public static void SaveImageToFile(string fullPath, SKBitmap image, bool disposeImage = true)
         {
-            var stream = new FileStream(FullPath, FileMode.Create);
+            using var stream = new FileStream(fullPath, FileMode.Create);
             image.Encode(stream, SKEncodedImageFormat.Png, 100);
             stream.Close();
             if (disposeImage)
