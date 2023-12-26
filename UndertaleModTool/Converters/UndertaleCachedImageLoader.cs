@@ -3,8 +3,6 @@ using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Imaging;
 using SkiaSharp;
 using System.Globalization;
 using System.IO;
@@ -95,7 +93,7 @@ namespace UndertaleModTool
 
             if (tileRectList is not null)
             {
-                Rectangle rect = new(texture.SourceX, texture.SourceY, texture.SourceWidth, texture.SourceHeight);
+                Rect rect = new(texture.SourceX, texture.SourceY, texture.SourceWidth, texture.SourceHeight);
                 ProcessTileSet(texName, CreateSpriteBitmap(rect, in texture), tileRectList, texture.TargetX, texture.TargetY);
 
                 return null;
@@ -110,7 +108,7 @@ namespace UndertaleModTool
 
             if (!imageCache.ContainsKey(texName) || !cacheEnabled)
             {
-                Rectangle rect;
+                Rect rect;
 
                 // how many pixels are out of bounds of tile texture page
                 int diffW = 0;
@@ -152,9 +150,9 @@ namespace UndertaleModTool
             currBufferSize = 1048576;
         }
 
-        public static SKBitmap CreateSpriteBitmap(Rectangle rect, in UndertaleTexturePageItem texture, int diffW = 0, int diffH = 0, bool isTile = false)
+        public static SKBitmap CreateSpriteBitmap(Rect rect, in UndertaleTexturePageItem texture, int diffW = 0, int diffH = 0, bool isTile = false)
         {
-            SKBitmap spriteBMP = new(rect.Width, rect.Height);
+            SKBitmap spriteBMP = new((int)rect.Width, (int)rect.Height);
 
             rect.Width -= (diffW > 0) ? diffW : 0;
             rect.Height -= (diffH > 0) ? diffH : 0;
@@ -165,15 +163,15 @@ namespace UndertaleModTool
             {
                 using SKBitmap img = SKBitmap.Decode(texture.TexturePage.TextureData.TextureBlob);
                 
-                var rectDest = SKRect.Create(x, y, rect.Width, rect.Height);
-                var rectSrc = SKRect.Create(rect.Left, rect.Top, rect.Width, rect.Height);
+                var rectDest = SKRect.Create(x, y, (float)rect.Width, (float)rect.Height);
+                var rectSrc = SKRect.Create((float)rect.Left, (float)rect.Top, (float)rect.Width, (float)rect.Height);
                 g.DrawBitmap(img, rectSrc, rectDest);
             }
             spriteBMP.SetImmutable();
 
             return spriteBMP;
         }
-        private ImageSource CreateSpriteSource(in Rectangle rect, in UndertaleTexturePageItem texture, int diffW = 0, int diffH = 0, bool isTile = false)
+        private ImageSource CreateSpriteSource(in Rect rect, in UndertaleTexturePageItem texture, int diffW = 0, int diffH = 0, bool isTile = false)
         {
             using SKBitmap spriteBMP = CreateSpriteBitmap(rect, in texture, diffW, diffH, isTile);
             using var data = spriteBMP.Encode(SKEncodedImageFormat.Png, 100);

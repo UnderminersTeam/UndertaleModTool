@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Drawing;
 using SkiaSharp;
 using UndertaleModLib.Util;
 
