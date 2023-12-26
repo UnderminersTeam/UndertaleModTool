@@ -1,4 +1,5 @@
 //Basically a mashup of ExportAllSprites and DumpSpecificCode
+
 using System.Text;
 using System;
 using System.IO;
@@ -8,12 +9,12 @@ using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
-bool padded = (ScriptQuestion("Export all sprites WITH padding?"));
+bool padded = ScriptQuestion("Export all sprites WITH padding?");
 
 string texFolder = PromptChooseDirectory();
 if (texFolder == null)
     throw new ScriptException("The export folder was not set.");
-texFolder = texFolder + "Sprites" + Path.DirectorySeparatorChar;
+codeFolder = Path.Combine(texFolder, "Sprites");
 Directory.CreateDirectory(texFolder);
 
 TextureWorker worker = new TextureWorker();
@@ -21,12 +22,12 @@ TextureWorker worker = new TextureWorker();
 List<UndertaleSprite> spritesToDump = new List<UndertaleSprite>();
 List<String> splitStringsList = new List<String>();
 
-string InputtedText = "";
-InputtedText = SimpleTextInput("Menu", "Enter the name of the sprites", InputtedText, true);
-string[] IndividualLineArray = InputtedText.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-foreach (var OneLine in IndividualLineArray)
+string inputtedText = "";
+inputtedText = SimpleTextInput("Menu", "Enter the name of the sprites", "", true);
+string[] individualLineArray = inputtedText.Split('\n', stringSplitOptions.RemoveEmptyEntries);
+foreach (var oneLine in individualLineArray)
 {
-    splitStringsList.Add(OneLine.Trim());
+    splitStringsList.Add(oneLine.Trim());
 }
 for (var j = 0; j < splitStringsList.Count; j++)
 {
@@ -58,10 +59,12 @@ ScriptMessage("Export Complete.\n\nLocation: " + texFolder);
 
 void DumpSprite(UndertaleSprite sprite)
 {
-
     for (int i = 0; i < sprite.Textures.Count; i++)
+    {
         if (sprite.Textures[i]?.Texture != null)
+        {
             worker.ExportAsPNG(sprite.Textures[i].Texture, texFolder + sprite.Name.Content + "_" + i + ".png", null, padded); // Include padding to make sprites look neat!
-
+        }
+    }
     IncrementProgress();
 }
