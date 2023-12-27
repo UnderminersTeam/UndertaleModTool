@@ -1,6 +1,8 @@
 using System;
 using System.IO;
-using SkiaSharp;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Drawing.Drawing2D;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,9 +21,9 @@ if (!ScriptQuestion("Visual glitches are very likely to occur in game. Do you ac
 
 TextureWorker worker = new TextureWorker();
 double scale = -1;
-bool selectScale = true;
+bool SelectScale = true;
 
-if (selectScale)
+if (SelectScale)
 {
     bool success = false;
     while (scale <= 0 || scale > 10)
@@ -129,8 +131,9 @@ ChangeSelection(Data.Rooms.ByName("room_ruins1"));
 
 void ScaleEmbeddedTexture(UndertaleEmbeddedTexture tex)
 {
-    SKBitmap embImage = worker.GetEmbeddedTexture(tex);
-    embImage = worker.ResizeImage(embImage, (int)(embImage.Width * scale), (int)(embImage.Height * scale), true);
+    Bitmap embImage = worker.GetEmbeddedTexture(tex);
+    embImage = ResizeBitmap(embImage, (int)(embImage.Width * scale), (int)(embImage.Height * scale));
+    embImage.SetResolution(96.0F, 96.0F);
     try
     {
         var width = (uint)embImage.Width;
@@ -141,7 +144,7 @@ void ScaleEmbeddedTexture(UndertaleEmbeddedTexture tex)
         }
         using (var stream = new MemoryStream())
         {
-            embImage.Encode(stream, SKEncodedImageFormat.Png, 100);
+            embImage.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
             tex.TextureData.TextureBlob = stream.ToArray();
         }
     }
@@ -149,4 +152,15 @@ void ScaleEmbeddedTexture(UndertaleEmbeddedTexture tex)
     {
         //ScriptError("Failed to import file: " + ex.Message, "Failed to import file");
     }
+}
+
+private Bitmap ResizeBitmap(Bitmap sourceBMP, int width, int height)
+{
+    Bitmap result = new Bitmap(width, height);
+    using (Graphics g = Graphics.FromImage(result))
+    {
+        g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+        g.DrawImage(sourceBMP, 0, 0, width, height);
+    }
+    return result;
 }
