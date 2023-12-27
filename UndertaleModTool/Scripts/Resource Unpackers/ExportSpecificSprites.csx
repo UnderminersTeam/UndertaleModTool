@@ -14,8 +14,8 @@ bool padded = ScriptQuestion("Export all sprites WITH padding?");
 string texFolder = PromptChooseDirectory();
 if (texFolder == null)
     throw new ScriptException("The export folder was not set.");
-texFolder = texFolder + "Sprites" + Path.DirectorySeparatorChar;
-Directory.CreateDirectory(texFolder);
+Directory.CreateDirectory(Path.Combine(texFolder, "Sprites"));
+texFolder = Path.Combine(texFolder, "Sprites");
 
 TextureWorker worker = new TextureWorker();
 
@@ -63,7 +63,7 @@ void DumpSprite(UndertaleSprite sprite)
     {
         if (sprite.Textures[i]?.Texture != null)
         {
-            worker.ExportAsPNG(sprite.Textures[i].Texture, texFolder + sprite.Name.Content + "_" + i + ".png", null, padded); // Include padding to make sprites look neat!
+            worker.ExportAsPNG(sprite.Textures[i].Texture, Path.Combine(texFolder , sprite.Name.Content + "_" + i + ".png"), null, padded); // Include padding to make sprites look neat!
         }
     }
     IncrementProgress();
