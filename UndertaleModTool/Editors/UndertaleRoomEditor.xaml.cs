@@ -2497,10 +2497,6 @@ namespace UndertaleModTool
     }
     public class TileRectanglesConverter : IMultiValueConverter
     {
-        [DllImport("gdi32.dll", EntryPoint = "DeleteObject")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool DeleteObject([In] IntPtr hObject);
-
         public static ConcurrentDictionary<Tuple<string, uint>, ImageSource> TileCache { get; set; } = new();
         private static CachedTileDataLoader loader = new();
 
