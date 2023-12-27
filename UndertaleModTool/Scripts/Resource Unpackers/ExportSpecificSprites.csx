@@ -12,7 +12,7 @@ EnsureDataLoaded();
 bool padded = ScriptQuestion("Export all sprites WITH padding?");
 
 string texFolder = PromptChooseDirectory();
-if (texFolder == null)
+if (texFolder is null)
     throw new ScriptException("The export folder was not set.");
 Directory.CreateDirectory(Path.Combine(texFolder, "Sprites"));
 texFolder = Path.Combine(texFolder, "Sprites");
