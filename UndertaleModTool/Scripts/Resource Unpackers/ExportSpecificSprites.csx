@@ -1,4 +1,4 @@
-//Basically a mashup of ExportAllSprites and DumpSpecificCode
+// Basically a mashup of ExportAllSprites and DumpSpecificCode
 
 using System.Text;
 using System;
