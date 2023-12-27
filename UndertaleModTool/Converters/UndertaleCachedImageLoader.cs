@@ -276,7 +276,7 @@ namespace UndertaleModTool
     // UndertaleCachedImageLoader wrappers
     public class CachedTileImageLoader : IMultiValueConverter
     {
-        private static UndertaleCachedImageLoader loader = new();
+        private static readonly UndertaleCachedImageLoader loader = new();
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
             if (values[0] is null) // tile
@@ -496,17 +496,21 @@ namespace UndertaleModTool
                                 tileSurf.Canvas.Scale(-1, -1, srcBMP.Width / 2, srcBMP.Height / 2);
                                 break;
                             case 4:
+                                // Rotate 90 degrees clockwise
                                 tileSurf.Canvas.RotateDegrees(90);
                                 break;
                             case 5:
+                                // Rotate 270 degrees clockwise and flip Y
                                 tileSurf.Canvas.RotateDegrees(270);
                                 tileSurf.Canvas.Scale(1, -1, 0, srcBMP.Height / 2);
                                 break;
                             case 6:
+                                // Rotate 90 degrees clockwise and flip Y
                                 tileSurf.Canvas.RotateDegrees(90);
                                 tileSurf.Canvas.Scale(1, -1, 0, srcBMP.Height / 2);
                                 break;
                             case 7:
+                                // Rotate 270 degrees clockwise
                                 tileSurf.Canvas.RotateDegrees(270);
                                 break;
 
