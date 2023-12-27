@@ -176,6 +176,7 @@ namespace UndertaleModTool
             using SKBitmap spriteBMP = CreateSpriteBitmap(rect, in texture, diffW, diffH, isTile);
             using var data = spriteBMP.Encode(SKEncodedImageFormat.Png, 100);
 
+            // The `CacheOption` must be set after `BeginInit()`, otherwise it won't work.
             BitmapImage spriteSrc = new();
             spriteSrc.BeginInit();
             spriteSrc.CacheOption = BitmapCacheOption.OnLoad;
@@ -295,7 +296,7 @@ namespace UndertaleModTool
     }
     public class CachedImageLoaderWithIndex : IMultiValueConverter
     {
-        private static UndertaleCachedImageLoader loader = new();
+        private static readonly UndertaleCachedImageLoader loader = new();
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
             if (values.Any(x => x is null))
