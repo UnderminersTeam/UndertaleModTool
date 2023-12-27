@@ -167,7 +167,6 @@ namespace UndertaleModTool
                 var rectSrc = SKRect.Create((float)rect.Left, (float)rect.Top, (float)rect.Width, (float)rect.Height);
                 g.DrawBitmap(img, rectSrc, rectDest);
             }
-            spriteBMP.SetImmutable();
 
             return spriteBMP;
         }
