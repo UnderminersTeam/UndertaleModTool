@@ -99,11 +99,24 @@ namespace UndertaleModLib.Util
             return bm;
         }
 
-        // This should perform a high quality resize.
-        public static SKBitmap ResizeImage(SKBitmap image, int width, int height)
+        public static SKSizeI GetImageSizeFromFile(string filePath)
+        {
+            using SKCodec codec = SKCodec.Create(filePath);
+
+            return codec?.Info.Size ?? default;
+        }
+        public static SKSizeI GetImageSizeFromByteArray(byte[] byteArray)
+        {
+            using MemoryStream stream = new(byteArray);
+            using SKCodec codec = SKCodec.Create(stream);
+
+            return codec?.Info.Size ?? default;
+        }
+
+        public static SKBitmap ResizeImage(SKBitmap image, int width, int height, bool useNearestNeighbor = false)
         {
             var destImage = new SKBitmap(width, height);
-            image.ScalePixels(destImage, SKFilterQuality.High);
+            image.ScalePixels(destImage, useNearestNeighbor ? SKFilterQuality.None : SKFilterQuality.High);
             return destImage;
         }
 
