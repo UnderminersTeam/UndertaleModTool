@@ -2498,7 +2498,7 @@ namespace UndertaleModTool
     public class TileRectanglesConverter : IMultiValueConverter
     {
         public static ConcurrentDictionary<Tuple<string, uint>, ImageSource> TileCache { get; set; } = new();
-        private static CachedTileDataLoader loader = new();
+        private static readonly CachedTileDataLoader loader = new();
 
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
@@ -2568,6 +2568,7 @@ namespace UndertaleModTool
                                 return;
                             }
 
+                            // Don't forget to also modify `CachedTileDataLoader.CreateLayerSource()` in "Converters/UndertaleCachedImageLoader.cs"
                             switch (id >> 28)
                             {
                                 case 1:

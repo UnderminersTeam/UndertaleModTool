@@ -481,6 +481,7 @@ namespace UndertaleModTool
                         SKBitmap srcBMP = TileCache[new(tilesBG.Texture.Name.Content, realID)];
                         tileSurf.Canvas.ResetMatrix();
 
+                        // Don't forget to also modify `TileRectanglesConverter.Convert()` in "Editors/UndertaleRoomEditor.cs"
                         switch (id >> 28)
                         {
                             case 1:
