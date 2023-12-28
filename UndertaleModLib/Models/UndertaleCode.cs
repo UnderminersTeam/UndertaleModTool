@@ -277,7 +277,7 @@ public class UndertaleInstruction : UndertaleObject
             return new Reference<T>()
             {
                 NextOccurrenceOffset = this.NextOccurrenceOffset,
-                Target = (T)this.Target,
+                Target = this.Target,
                 Type = this.Type
             };
         }
@@ -1414,6 +1414,35 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
         }
 
         Instructions.InsertRange(index + 1, instructions);
+    }
+    /// <summary>
+    /// Insert an instruction at specified index in this code entry.
+    /// </summary>
+    /// <param name="instruction">The instruction to insert.</param>
+    /// <param name="index">The index of insertion.</param>
+    public void Insert(UndertaleInstruction instruction, int index)
+    {
+        uint address = Instructions[index].Address;
+        int offset = (int)instruction.CalculateInstructionSize();
+
+        for (int i = 0; i < Instructions.Count; i++)
+        {
+            if (UndertaleInstruction.GetInstructionType(Instructions[i].Kind) == UndertaleInstruction.InstructionType.GotoInstruction)
+            {
+                if (i < index && Instructions[i].Address + Instructions[i].JumpOffset > address)
+                {
+                    Instructions[i] = Instructions[i].Clone();
+                    Instructions[i].JumpOffset += offset;
+                }
+                else if (i > index && Instructions[i].Address + Instructions[i].JumpOffset <= address)
+                {
+                    Instructions[i] = Instructions[i].Clone();
+                    Instructions[i].JumpOffset -= offset;
+                }
+            }
+        }
+
+        Instructions.Insert(index + 1, instruction);
     }
 
     /// <summary>
