@@ -843,6 +843,10 @@ public class UndertaleInstruction : UndertaleObject
         return 0;
     }
 
+    /// <summary>
+    /// Creates a new <see cref="UndertaleInstruction"/> that is a copy of this instruction.
+    /// </summary>
+    /// <returns>A new <see cref="UndertaleInstruction"/> that is a copy of this instruction.</returns>
     public UndertaleInstruction Clone()
     {
         return new UndertaleInstruction()
@@ -1379,6 +1383,11 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
         Append(instructions);
     }
 
+    /// <summary>
+    /// Insert instructions at specified index in this code entry.
+    /// </summary>
+    /// <param name="instructions">The instructions to insert.</param>
+    /// <param name="index">The index of insertion.</param>
     public void Insert(IList<UndertaleInstruction> instructions, int index)
     {
         uint offsetU = 0;
