@@ -26,7 +26,7 @@ namespace UndertaleModLib
         int SerializeById(UndertaleWriter writer);
     }
 
-    public class UndertaleResourceById<T, ChunkT> : UndertaleResourceRef, IStaticChildObjectsSize, IDisposable where T : UndertaleResource, new() where ChunkT : UndertaleListChunk<T>
+    public class UndertaleResourceById<T, ChunkT> : UndertaleResourceRef, IStaticChildObjectsSize, ICloneable, IDisposable where T : UndertaleResource, new() where ChunkT : UndertaleListChunk<T>
     {
         /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
         public static readonly uint ChildObjectsSize = 4;
@@ -119,6 +119,13 @@ namespace UndertaleModLib
         {
             return (Resource?.ToString() ?? "(null)") + GetMarkerSuffix();
         }
+
+        /// <inheritdoc cref="ICloneable.Clone()"/>
+        public UndertaleResourceById<T, ChunkT> Clone()
+        {
+            return new UndertaleResourceById<T, ChunkT>(Resource, CachedId);
+        }
+        object ICloneable.Clone() => Clone();
 
         /// <inheritdoc/>
         public void Dispose()

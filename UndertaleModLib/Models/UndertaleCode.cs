@@ -226,7 +226,7 @@ public class UndertaleInstruction : UndertaleObject
         int NameStringID { get; set; }
     }
 
-    public class Reference<T> : UndertaleObject where T : class, UndertaleObject, ReferencedObject
+    public class Reference<T> : UndertaleObject, ICloneable where T : class, UndertaleObject, ReferencedObject
     {
         public uint NextOccurrenceOffset { get; set; } = 0xdead;
         public VariableType Type { get; set; }
@@ -267,6 +267,18 @@ public class UndertaleInstruction : UndertaleObject
             NextOccurrenceOffset = (uint)int32Value & 0x07FFFFFF;
             Type = (VariableType)((int32Value >> 24) & 0xF8);
         }
+
+        /// <inheritdoc cref="ICloneable.Clone()"/>
+        public Reference<T> Clone()
+        {
+            return new Reference<T>()
+            {
+                NextOccurrenceOffset = this.NextOccurrenceOffset,
+                Target = (T)this.Target,
+                Type = this.Type
+            };
+        }
+        object ICloneable.Clone() => Clone();
 
         /// <inheritdoc />
         public override string ToString()
@@ -856,30 +868,14 @@ public class UndertaleInstruction : UndertaleObject
             Type1 = this.Type1,
             Type2 = this.Type2,
             TypeInst = this.TypeInst,
-            Value = (
-                this.Value != null
-                    ? (
-                        this.Value.GetType() == typeof(Reference<UndertaleVariable>)
-                        ? new Reference<UndertaleVariable>(((Reference<UndertaleVariable>)(this.Value)).Target, ((Reference<UndertaleVariable>)(this.Value)).Type)
-                        : (
-                            this.Value.GetType() == typeof(Reference<UndertaleFunction>)
-                            ? new Reference<UndertaleFunction>(((Reference<UndertaleFunction>)(this.Value)).Target)
-                            : (
-                                this.Value.GetType() == typeof(UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)
-                                ? new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>(((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)(this.Value)).Resource, ((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)(this.Value)).CachedId)
-                                : this.Value
-                            )
-                        )
-                    )
-                    : null
-            ),
-            Destination = (this.Destination != null ? new Reference<UndertaleVariable>(this.Destination.Target, this.Destination.Type) : null),
-            Function = (this.Function != null ? new Reference<UndertaleFunction>(this.Function.Target, this.Function.Type) : null),
+            Value = this.Value is ICloneable cloneable ? cloneable.Clone() : this.Value,
+            Destination = this.Destination?.Clone(),
+            Function = this.Function?.Clone(),
             JumpOffset = this.JumpOffset,
             JumpOffsetPopenvExitMagic = this.JumpOffsetPopenvExitMagic,
             ArgumentsCount = this.ArgumentsCount,
             Extra = this.Extra,
-            SwapExtra = this.SwapExtra,
+            SwapExtra = this.SwapExtra
         };
     }
 
