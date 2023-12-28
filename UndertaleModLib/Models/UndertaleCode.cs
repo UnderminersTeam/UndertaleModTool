@@ -268,7 +268,10 @@ public class UndertaleInstruction : UndertaleObject
             Type = (VariableType)((int32Value >> 24) & 0xF8);
         }
 
-        /// <inheritdoc cref="ICloneable.Clone()"/>
+        /// <summary>
+        /// Creates a new <see cref="Reference{T}"/> that is a copy of this <see cref="Reference{T}"/>.
+        /// </summary>
+        /// <returns>A new <see cref="Reference{T}"/> that is a copy of this <see cref="Reference{T}"/>.</returns>
         public Reference<T> Clone()
         {
             return new Reference<T>()

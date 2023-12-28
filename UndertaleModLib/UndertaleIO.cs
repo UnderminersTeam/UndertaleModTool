@@ -120,7 +120,10 @@ namespace UndertaleModLib
             return (Resource?.ToString() ?? "(null)") + GetMarkerSuffix();
         }
 
-        /// <inheritdoc cref="ICloneable.Clone()"/>
+        /// <summary>
+        /// Creates a new <see cref="UndertaleResourceById{T, ChunkT}"/> that is a copy of this <see cref="UndertaleResourceById{T, ChunkT}"/>.
+        /// </summary>
+        /// <returns>A new <see cref="UndertaleResourceById{T, ChunkT}"/> that is a copy of this <see cref="UndertaleResourceById{T, ChunkT}"/>.</returns>
         public UndertaleResourceById<T, ChunkT> Clone()
         {
             return new UndertaleResourceById<T, ChunkT>(Resource, CachedId);
