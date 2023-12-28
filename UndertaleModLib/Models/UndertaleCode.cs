@@ -843,6 +843,42 @@ public class UndertaleInstruction : UndertaleObject
         return 0;
     }
 
+    public UndertaleInstruction Clone()
+    {
+        return new UndertaleInstruction()
+        {
+            Kind = this.Kind,
+            ComparisonKind = this.ComparisonKind,
+            Type1 = this.Type1,
+            Type2 = this.Type2,
+            TypeInst = this.TypeInst,
+            Value = (
+                this.Value != null
+                    ? (
+                        this.Value.GetType() == typeof(Reference<UndertaleVariable>)
+                        ? new Reference<UndertaleVariable>(((Reference<UndertaleVariable>)(this.Value)).Target, ((Reference<UndertaleVariable>)(this.Value)).Type)
+                        : (
+                            this.Value.GetType() == typeof(Reference<UndertaleFunction>)
+                            ? new Reference<UndertaleFunction>(((Reference<UndertaleFunction>)(this.Value)).Target)
+                            : (
+                                this.Value.GetType() == typeof(UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)
+                                ? new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>(((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)(this.Value)).Resource, ((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)(this.Value)).CachedId)
+                                : this.Value
+                            )
+                        )
+                    )
+                    : null
+            ),
+            Destination = (this.Destination != null ? new Reference<UndertaleVariable>(this.Destination.Target, this.Destination.Type) : null),
+            Function = (this.Function != null ? new Reference<UndertaleFunction>(this.Function.Target, this.Function.Type) : null),
+            JumpOffset = this.JumpOffset,
+            JumpOffsetPopenvExitMagic = this.JumpOffsetPopenvExitMagic,
+            ArgumentsCount = this.ArgumentsCount,
+            Extra = this.Extra,
+            SwapExtra = this.SwapExtra,
+        };
+    }
+
     /// <inheritdoc />
     public override string ToString()
     {
@@ -1341,6 +1377,35 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
 
         Instructions.Clear();
         Append(instructions);
+    }
+
+    public void Insert(IList<UndertaleInstruction> instructions, int index)
+    {
+        uint offsetU = 0;
+        uint address = Instructions[index].Address;
+        foreach (UndertaleInstruction instr in instructions)
+            offsetU += instr.CalculateInstructionSize();
+
+        int offset = (int)offsetU;
+
+        for (int i = 0; i < Instructions.Count; i++)
+        {
+            if (UndertaleInstruction.GetInstructionType(Instructions[i].Kind) == UndertaleInstruction.InstructionType.GotoInstruction)
+            {
+                if (i < index && Instructions[i].Address + Instructions[i].JumpOffset > address)
+                {
+                    Instructions[i] = Instructions[i].Clone();
+                    Instructions[i].JumpOffset += offset;
+                }
+                else if (i > index && Instructions[i].Address + Instructions[i].JumpOffset <= address)
+                {
+                    Instructions[i] = Instructions[i].Clone();
+                    Instructions[i].JumpOffset -= offset;
+                }
+            }
+        }
+
+        Instructions.InsertRange(index + 1, instructions);
     }
 
     /// <summary>
