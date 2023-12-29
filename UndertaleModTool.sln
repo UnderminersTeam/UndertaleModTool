@@ -5,13 +5,13 @@ VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModTool", "UndertaleModTool\UndertaleModTool.csproj", "{C703A485-DBFB-4601-8A26-42E64CCF812F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Test\Test.csproj", "{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModLib", "UndertaleModLib\UndertaleModLib.csproj", "{4781ADAC-9469-42C4-B357-4A0A157D7FCD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModCli", "UndertaleModCli\UndertaleModCli.csproj", "{CC5FDC60-A955-4D0C-B59F-8BD451778237}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UndertaleModToolUpdater", "UndertaleModToolUpdater\UndertaleModToolUpdater.csproj", "{1E004B65-F3C8-4A62-B649-1465EA6A3B01}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UndertaleModLibTests", "UndertaleModLibTests\UndertaleModLibTests.csproj", "{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,14 +29,6 @@ Global
 		{C703A485-DBFB-4601-8A26-42E64CCF812F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C703A485-DBFB-4601-8A26-42E64CCF812F}.Release|x64.ActiveCfg = Release|x64
 		{C703A485-DBFB-4601-8A26-42E64CCF812F}.Release|x64.Build.0 = Release|x64
-		{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}.Debug|x64.ActiveCfg = Debug|x64
-		{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}.Debug|x64.Build.0 = Debug|x64
-		{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}.Release|x64.ActiveCfg = Release|x64
-		{8EDAB51C-F72D-47B0-B6E7-0DA5BF72FACB}.Release|x64.Build.0 = Release|x64
 		{4781ADAC-9469-42C4-B357-4A0A157D7FCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4781ADAC-9469-42C4-B357-4A0A157D7FCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4781ADAC-9469-42C4-B357-4A0A157D7FCD}.Debug|x64.ActiveCfg = Debug|x64
@@ -69,6 +61,14 @@ Global
 		{1E004B65-F3C8-4A62-B649-1465EA6A3B01}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1E004B65-F3C8-4A62-B649-1465EA6A3B01}.Release|x64.ActiveCfg = Release|Any CPU
 		{1E004B65-F3C8-4A62-B649-1465EA6A3B01}.Release|x64.Build.0 = Release|Any CPU
+		{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}.Debug|x64.Build.0 = Debug|Any CPU
+		{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}.Release|x64.ActiveCfg = Release|Any CPU
+		{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

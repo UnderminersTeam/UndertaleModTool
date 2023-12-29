@@ -2,8 +2,12 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <OutputType>Library</OutputType>
-    <!-- TODO: this should properly get migrated and get rid of -->
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <!-- AssemblyInfo -->
+    <AssemblyTitle>UndertaleModLib</AssemblyTitle>
+    <ProductName>UndertaleModLib</ProductName>
+    <Copyright>Copyright ©  2018-2023, licensed under GPLv3</Copyright>
+    <AssemblyVersion>0.5.1.0</AssemblyVersion>
+    <FileVersion>0.5.1.0</FileVersion>
     <DebugType>embedded</DebugType>
     <Platforms>AnyCPU;x64</Platforms>
     <RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
