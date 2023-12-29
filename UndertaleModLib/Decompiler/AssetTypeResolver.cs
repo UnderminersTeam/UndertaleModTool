@@ -1111,6 +1111,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("state", AssetIDType.PT_State);
                 builtin_vars.Add("_state", AssetIDType.PT_State);
                 builtin_vars.Add("prevstate", AssetIDType.PT_State);
+                builtin_vars.Add("_prevstate", AssetIDType.PT_State);
                 builtin_vars.Add("substate", AssetIDType.PT_State);
                 builtin_vars.Add("arenastate", AssetIDType.PT_State);
                 builtin_vars.Add("player_state", AssetIDType.PT_State);
@@ -1129,6 +1130,10 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("bossintrostate", AssetIDType.PT_State);
                 builtin_vars.Add("introstate", AssetIDType.PT_State);
                 builtin_vars.Add("fadeoutstate", AssetIDType.PT_State);
+                builtin_vars.Add("supergrabstate", AssetIDType.PT_State);
+                builtin_vars.Add("startstate", AssetIDType.PT_State);
+                builtin_vars.Add("atstate", AssetIDType.PT_State);
+                builtin_vars.Add("attack_pool", AssetIDType.PT_State);
 
                 builtin_vars.Add("leveltorestart", AssetIDType.Room);
                 builtin_vars.Add("targetRoom", AssetIDType.Room);
@@ -1155,6 +1160,21 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("player", AssetIDType.GameObject);
                 builtin_vars.Add("targetplayer", AssetIDType.GameObject);
                 builtin_vars.Add("target", AssetIDType.GameObject);
+
+                builtin_vars.Add("ispeppino", AssetIDType.Boolean);
+                builtin_vars.Add("isgustavo", AssetIDType.Boolean);
+                builtin_vars.Add("brick", AssetIDType.Boolean);
+                builtin_vars.Add("_found", AssetIDType.Boolean);
+                builtin_vars.Add("jumpAnim", AssetIDType.Boolean);
+                builtin_vars.Add("landAnim", AssetIDType.Boolean);
+                builtin_vars.Add("machslideAnim", AssetIDType.Boolean);
+                builtin_vars.Add("moveAnim", AssetIDType.Boolean);
+                builtin_vars.Add("stopAnim", AssetIDType.Boolean);
+                builtin_vars.Add("crouchslideAnim", AssetIDType.Boolean);
+                builtin_vars.Add("crouchAnim", AssetIDType.Boolean);
+                builtin_vars.Add("machhitAnim", AssetIDType.Boolean);
+                builtin_vars.Add("stompAnim", AssetIDType.Boolean);
+                builtin_vars.Add("dashAnim", AssetIDType.Boolean);
 
                 builtin_vars.Add("playerid", AssetIDType.GameObject);
                 builtin_vars.Add("_playerid", AssetIDType.GameObject);
@@ -1315,6 +1335,9 @@ namespace UndertaleModLib.Decompiler
                 builtin_funcs["scr_pizzaface_p3_do_player_attack"] =
                     new[] { AssetIDType.GameObject };
 
+                builtin_funcs["vigilante_cancel_attack"] =
+                    new[] { AssetIDType.PT_State, AssetIDType.Repeat };
+
                 builtin_funcs["check_slope"] = new[] { AssetIDType.GameObject };
                 builtin_funcs["try_solid"] =
                     new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject, AssetIDType.Other };
@@ -1324,7 +1347,7 @@ namespace UndertaleModLib.Decompiler
                     AssetIDType.Other };
                 builtin_funcs["add_boss_achievements"] =
                     new[] { AssetIDType.Other, AssetIDType.Room, AssetIDType.Sprite, AssetIDType.Other };
-                
+
                 builtin_funcs["achievement_unlock"] =
                     new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other };
                 builtin_funcs["palette_unlock"] =

@@ -697,7 +697,7 @@ namespace UndertaleModTool
             OpenFileDialog dlg = new OpenFileDialog();
 
             dlg.DefaultExt = "win";
-            dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios, .droid, audiogroup*.dat)|*.win;*.unx;*.ios;*.droid;audiogroup*.dat|All files|*";
+            dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios, .droid, audiogroup*.dat)|*.win;*.win.po;*.unx;*.ios;*.droid;audiogroup*.dat|All files|*";
 
             if (dlg.ShowDialog(this) == true)
             {
@@ -711,7 +711,7 @@ namespace UndertaleModTool
             SaveFileDialog dlg = new SaveFileDialog();
 
             dlg.DefaultExt = "win";
-            dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios, .droid, audiogroup*.dat)|*.win;*.unx;*.ios;*.droid;audiogroup*.dat|All files|*";
+            dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios, .droid, audiogroup*.dat)|*.win;*.win.po;*.unx;*.ios;*.droid;audiogroup*.dat|All files|*";
             dlg.FileName = FilePath;
 
             if (dlg.ShowDialog(this) == true)
@@ -2634,7 +2634,7 @@ namespace UndertaleModTool
         {
             OpenFileDialog dlg = new OpenFileDialog();
             dlg.DefaultExt = defaultExt ?? "win";
-            dlg.Filter = filter ?? "Game Maker Studio data files (.win, .unx, .ios, .droid, audiogroup*.dat)|*.win;*.unx;*.ios;*.droid;audiogroup*.dat|All files|*";
+            dlg.Filter = filter ?? "Game Maker Studio data files (.win, .unx, .ios, .droid, audiogroup*.dat)|*.win;*.win.po;*.unx;*.ios;*.droid;audiogroup*.dat|All files|*";
             return dlg.ShowDialog() == true ? dlg.FileName : null;
         }
 
@@ -3454,7 +3454,7 @@ result in loss of work.");
             OpenFileDialog dlg = new OpenFileDialog();
 
             dlg.DefaultExt = "win";
-            dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios, .droid)|*.win;*.unx;*.ios;*.droid|All files|*";
+            dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios, .droid)|*.win;*.win.po;*.unx;*.ios;*.droid|All files|*";
 
             if (dlg.ShowDialog() == true)
             {
