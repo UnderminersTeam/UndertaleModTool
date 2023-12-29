@@ -3990,7 +3990,7 @@ namespace UndertaleModLib.Decompiler
                 {
                     if (func.Name.Content.StartsWith("gml_Script_"))
                     {
-                        var funcName = func.Name.Content.Substring("gml_Script_".Length);
+                        var funcName = func.Name.Content[("gml_Script_".Length)..];
                         data.KnownSubFunctions.TryAdd(funcName, func);
                     }
                 }
@@ -4013,7 +4013,7 @@ namespace UndertaleModLib.Decompiler
                             {
                                 lock (data.KnownSubFunctions)
                                 {
-                                    data.KnownSubFunctions.Add(assign.Destination.Var.Name.Content, funcDef.Function);
+                                    data.KnownSubFunctions.TryAdd(assign.Destination.Var.Name.Content, funcDef.Function);
                                 }
                             }
                         }
