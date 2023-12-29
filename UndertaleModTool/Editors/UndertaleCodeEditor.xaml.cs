@@ -679,45 +679,58 @@ namespace UndertaleModTool
                         mainWindow.ShowError(exc.ToString());
                     }
 
-                    if (decompiled != null)
+                    // Add `// string` at the end of lines with `scr_gettext()` or `scr_84_get_lang_string()`
+                    if (decompiled is not null)
                     {
-                        StringReader strReader;
-                        StringBuilder strBuilder;
-                        if (gettext != null && decompiled.Contains("scr_gettext"))
+                        StringReader decompLinesReader;
+                        StringBuilder decompLinesBuilder;
+                        Dictionary<string, string> currDict = null;
+                        Regex currRegex = null;
+                        if (gettext is not null && decompiled.Contains("scr_gettext"))
                         {
-                            strReader = new(decompiled);
-                            strBuilder = new();
-                            string line;
-                            while ((line = strReader.ReadLine()) is not null)
-                            {
-                                Match match = gettextRegex.Match(line);
-                                if (match.Success)
-                                {
-                                    if (gettext.TryGetValue(match.Groups[1].Value, out string text))
-                                        strBuilder.Append($"{line} // {text}\n");
-                                }
-                                else
-                                    strBuilder.Append(line + '\n');
-                            }
-                            decompiled = strBuilder.ToString();
+                            currDict = gettext;
+                            currRegex = gettextRegex;
                         }
-                        else if (gettextJSON != null && decompiled.Contains("scr_84_get_lang_string"))
+                        else if (gettextJSON is not null && decompiled.Contains("scr_84_get_lang_string"))
                         {
-                            strReader = new(decompiled);
-                            strBuilder = new();
+                            currDict = gettextJSON;
+                            currRegex = getlangRegex;
+                        }
+
+                        if (currDict is not null && currRegex is not null)
+                        {
+                            decompLinesReader = new(decompiled);
+                            decompLinesBuilder = new();
                             string line;
-                            while ((line = strReader.ReadLine()) is not null)
+                            while ((line = decompLinesReader.ReadLine()) is not null)
                             {
-                                Match match = getlangRegex.Match(line);
-                                if (match.Success)
+                                // Not `currRegex.Match()`, because one line could contain several calls
+                                // if the "Profile mode" is enabled.
+                                var matches = currRegex.Matches(line).Where(m => m.Success).ToArray();
+                                if (matches.Length > 0)
                                 {
-                                    if (gettext.TryGetValue(match.Groups[1].Value, out string text))
-                                        strBuilder.Append($"{line} // {text}\n");
+                                    decompLinesBuilder.Append($"{line} // ");
+
+                                    for (int i = 0; i < matches.Length; i++)
+                                    {
+                                        Match match = matches[i];
+                                        if (match.Success)
+                                        {
+                                            if (currDict.TryGetValue(match.Groups[1].Value, out string text))
+                                            {
+                                                if (i != matches.Length - 1) // if not the last
+                                                    decompLinesBuilder.Append($"{text}; ");
+                                                else
+                                                    decompLinesBuilder.Append(text + '\n');
+                                            }
+                                        }
+                                    }
                                 }
                                 else
-                                    strBuilder.Append(line + '\n');
+                                    decompLinesBuilder.Append(line + '\n');
                             }
-                            decompiled = strBuilder.ToString();
+
+                            decompiled = decompLinesBuilder.ToString();
                         }
                     }
 
