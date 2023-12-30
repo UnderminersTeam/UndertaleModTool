@@ -597,6 +597,8 @@ namespace UndertaleModTool
         }
 
         public static Dictionary<string, string> gettextJSON = null;
+        private static readonly Regex gettextRegex = new("scr_gettext\\(\\\"(.*?)\\\"\\)", RegexOptions.Compiled);
+        private static readonly Regex getlangRegex = new("scr_84_get_lang_string(?:.*?)\\(\\\"(.*?)\\\"\\)", RegexOptions.Compiled);
         private string UpdateGettextJSON(string json)
         {
             try
@@ -717,42 +719,57 @@ namespace UndertaleModTool
                         mainWindow.ShowError(exc.ToString());
                     }
 
-                    if (decompiled != null)
+                    // Add `// string` at the end of lines with `scr_gettext()` or `scr_84_get_lang_string()`
+                    if (decompiled is not null)
                     {
-                        string[] decompiledLines;
-                        if (gettext != null && decompiled.Contains("scr_gettext"))
+                        StringReader decompLinesReader;
+                        StringBuilder decompLinesBuilder;
+                        Dictionary<string, string> currDict = null;
+                        Regex currRegex = null;
+                        if (gettext is not null && decompiled.Contains("scr_gettext"))
                         {
-                            decompiledLines = decompiled.Split('\n');
-                            for (int i = 0; i < decompiledLines.Length; i++)
-                            {
-                                var matches = Regex.Matches(decompiledLines[i], "scr_gettext\\(\\\"(\\w*)\\\"\\)");
-                                foreach (Match match in matches)
-                                {
-                                    if (match.Success)
-                                    {
-                                        if (gettext.TryGetValue(match.Groups[1].Value, out string text))
-                                            decompiledLines[i] += $" // {text}";
-                                    }
-                                }
-                            }
-                            decompiled = string.Join('\n', decompiledLines);
+                            currDict = gettext;
+                            currRegex = gettextRegex;
                         }
-                        else if (gettextJSON != null && decompiled.Contains("scr_84_get_lang_string"))
+                        else if (gettextJSON is not null && decompiled.Contains("scr_84_get_lang_string"))
                         {
-                            decompiledLines = decompiled.Split('\n');
-                            for (int i = 0; i < decompiledLines.Length; i++)
+                            currDict = gettextJSON;
+                            currRegex = getlangRegex;
+                        }
+
+                        if (currDict is not null && currRegex is not null)
+                        {
+                            decompLinesReader = new(decompiled);
+                            decompLinesBuilder = new();
+                            string line;
+                            while ((line = decompLinesReader.ReadLine()) is not null)
                             {
-                                var matches = Regex.Matches(decompiledLines[i], "scr_84_get_lang_string(\\w*)\\(\\\"(\\w*)\\\"\\)");
-                                foreach (Match match in matches)
+                                // Not `currRegex.Match()`, because one line could contain several calls
+                                // if the "Profile mode" is enabled.
+                                var matches = currRegex.Matches(line).Where(m => m.Success).ToArray();
+                                if (matches.Length > 0)
                                 {
-                                    if (match.Success)
+                                    decompLinesBuilder.Append($"{line} // ");
+
+                                    for (int i = 0; i < matches.Length; i++)
                                     {
-                                        if (gettextJSON.TryGetValue(match.Groups[^1].Value, out string text))
-                                            decompiledLines[i] += $" // {text}";
+                                        Match match = matches[i];
+                                        if (!currDict.TryGetValue(match.Groups[1].Value, out string text))
+                                            continue;
+
+                                        if (i != matches.Length - 1) // If not the last
+                                            decompLinesBuilder.Append($"{text}; ");
+                                        else
+                                            decompLinesBuilder.Append(text + '\n');
                                     }
                                 }
+                                else
+                                {
+                                    decompLinesBuilder.Append(line + '\n');
+                                }
                             }
-                            decompiled = string.Join('\n', decompiledLines);
+
+                            decompiled = decompLinesBuilder.ToString();
                         }
                     }
 

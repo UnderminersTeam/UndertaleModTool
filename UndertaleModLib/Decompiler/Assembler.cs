@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -40,6 +41,9 @@ namespace UndertaleModLib.Decompiler
             { "chknullish", -10 },
             { "pushref", -11 }
         };
+
+        private static readonly Regex callInstrRegex = new(@"^(.*)\(argc=(.*)\)$", RegexOptions.Compiled);
+        private static readonly Regex codeEntryRegex = new(@"^\(locals=(.*)\,\s*argc=(.*)\)$", RegexOptions.Compiled);
 
         // TODO: Improve the error messages
 
@@ -205,7 +209,7 @@ namespace UndertaleModLib.Decompiler
                     break;
 
                 case UndertaleInstruction.InstructionType.CallInstruction:
-                    Match match = Regex.Match(line, @"^(.*)\(argc=(.*)\)$");
+                    Match match = callInstrRegex.Match(line);
                     if (!match.Success)
                         throw new Exception("Call instruction format error");
 
@@ -254,15 +258,16 @@ namespace UndertaleModLib.Decompiler
 
         public static List<UndertaleInstruction> Assemble(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, UndertaleData data = null)
         {
-            var lines = source.Replace("\r", "", StringComparison.InvariantCulture).Split('\n');
+            StringReader strReader = new(source);
             uint addr = 0;
             Dictionary<string, uint> labels = new Dictionary<string, uint>();
             Dictionary<UndertaleInstruction, string> labelTargets = new Dictionary<UndertaleInstruction, string>();
             List<UndertaleInstruction> instructions = new List<UndertaleInstruction>();
             Dictionary<string, UndertaleVariable> localvars = new Dictionary<string, UndertaleVariable>();
-            foreach (var fullline in lines)
+            string fullLine;
+            while ((fullLine = strReader.ReadLine()) is not null)
             {
-                string line = fullline;
+                string line = fullLine;
                 if (line.Length == 0)
                     continue;
 
@@ -279,7 +284,7 @@ namespace UndertaleModLib.Decompiler
                         throw new Exception($"Failed to find code entry with name \"{codeName}\".");
                     string info = line.Substring(space + 1);
 
-                    Match match = Regex.Match(info, @"^\(locals=(.*)\,\s*argc=(.*)\)$");
+                    Match match = codeEntryRegex.Match(info);
                     if (!match.Success)
                         throw new Exception("Sub-code entry format error");
                     code.LocalsCount = ushort.Parse(match.Groups[1].Value);
