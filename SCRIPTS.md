@@ -27,7 +27,9 @@ They are relatively self-explanatory, but there are also some helpful general-pu
 - `EditGMS2TileData.csx`: A temporary script to help edit tile data in GMS2 games.
 - `ExternalizeAllOGGs.csx`: Script to externalize all OGG sound effects from a game.
 - `FancyRoomSelect.csx`: Script to make selecting and teleporting to different rooms in a game very user-friendly.
+- `FixAlphysLabCrashAndroid.csx`: Script that fixes a crash at Alphys's lab on Android devices.
 - `ReloadDeltaruneJSON.csx`: Script to add a hotkey to Deltarune, which reloads the language JSON.
+- `TouchControlsEnabler.csx`: Adds mobile touch controls to an Undertale or Deltarune data.win.
 - `TTFFonts (Deltarune).csx`: Marks all fonts in Deltarune to be externally loaded. Does not handle Japanese text.
 - `UndertaleWithJSONs.csx`: This script JSONifies all Undertale versions with Japanese support, 1.05+. Switch languages using F11. Reload text for curent language from JSON on command using F12. Reloading from JSON may take about 10 seconds.
 
@@ -77,14 +79,15 @@ For individual script credits, look at the source for any given script. Often, c
 
 Here is the list of contributors as of writing:
 - Agentalex9
-- BenjaminUrquhart
-- colinator27
-- Grossley
-- Kneesnap
-- krzys_h
+- [BenjaminUrquhart](https://github.com/BenjaminUrquhart)
+- [colinator27](https://github.com/colinator27)
+- [GitMuslim](https://github.com/GitMuslim)
+- [Grossley](https://github.com/Grossley)
+- [Kneesnap](https://github.com/Kneesnap)
+- [krzys_h](https://github.com/krzys-h)
 - Lassebq
 - mono21400
-- nik (the cat)
+- [nik (the cat)](https://github.com/nkrapivin)
 - samuelroy21 (among others from the DSG team)
 - Yokim (Jockeholm)
 
