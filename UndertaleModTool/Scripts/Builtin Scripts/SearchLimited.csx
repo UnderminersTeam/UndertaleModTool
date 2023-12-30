@@ -17,10 +17,10 @@ using System.Text.RegularExpressions;
 
 EnsureDataLoaded();
 
-int result_count = 0;
+int resultCount = 0;
 StringBuilder results = new();
 string searchNames = "";
-Dictionary<string, List<string>> resultsDict = new();
+Dictionary<string, List<(int, string)>> resultsDict = new();
 List<string> failedList = new();
 List<string> codeToDump = new();
 List<string> gameObjectCandidates = new();
@@ -32,8 +32,8 @@ if (Data.IsYYC())
     return;
 }
 
-bool case_sensitive = ScriptQuestion("Case sensitive?");
-bool regex_check = ScriptQuestion("Regex search?");
+bool caseSensitive = ScriptQuestion("Case sensitive?");
+bool regexCheck = ScriptQuestion("Regex search?");
 string keyword = SimpleTextInput("Enter your search", "Search box below", "", false);
 if (String.IsNullOrEmpty(keyword) || String.IsNullOrWhiteSpace(keyword))
 {
@@ -48,9 +48,9 @@ if (String.IsNullOrEmpty(searchNames) || String.IsNullOrWhiteSpace(searchNames))
 }
 
 Regex keywordRegex;
-if (regex_check)
+if (regexCheck)
 {
-    if (case_sensitive)
+    if (caseSensitive)
         keywordRegex = new(keyword, RegexOptions.Compiled);
     else
         keywordRegex = new(keyword, RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -107,7 +107,8 @@ for (var j = 0; j < gameObjectCandidates.Count; j++)
 SetProgressBar(null, "Code Entries", 0, codeToDump.Count);
 StartProgressBarUpdater();
 
-await Task.Run(() => {
+await Task.Run(() =>
+{
     for (var j = 0; j < codeToDump.Count; j++)
     {
         DumpCode(Data.Code.ByName(codeToDump[j]));
@@ -117,7 +118,7 @@ await Task.Run(() => {
 await StopProgressBarUpdater();
 
 UpdateProgressStatus("Generating result list...");
-await ClickableSearchOutput("Search results.", keyword, result_count, resultsDict, true, failedList);
+await ClickableSearchOutput("Search results.", keyword, resultCount, resultsDict, true, failedList);
 
 HideProgressBar();
 EnableUI();
@@ -138,26 +139,26 @@ void DumpCode(UndertaleCode code)
     {
         if (code.ParentEntry is null)
         {
-            var line_number = 1;
+            int lineNumber = 1;
             StringReader decompiledText = new(code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : "");
-            bool name_written = false;
+            bool nameWritten = false;
             string lineInt;
             while ((lineInt = decompiledText.ReadLine()) is not null)
             {
                 if (lineInt == string.Empty)
                     continue;
 
-                if (((regex_check && RegexContains(in lineInt)) || ((!regex_check && case_sensitive) ? lineInt.Contains(keyword) : lineInt.ToLower().Contains(keyword.ToLower()))))
+                if (((regexCheck && RegexContains(in lineInt)) || ((!regexCheck && caseSensitive) ? lineInt.Contains(keyword) : lineInt.ToLower().Contains(keyword.ToLower()))))
                 {
-                    if (name_written == false)
+                    if (nameWritten == false)
                     {
-                        resultsDict.Add(code.Name.Content, new List<string>());
-                        name_written = true;
+                        resultsDict.Add(code.Name.Content, new List<(int, string)>());
+                        nameWritten = true;
                     }
-                    resultsDict[code.Name.Content].Add($"Line {line_number}: {lineInt}");
-                    result_count += 1;
+                    resultsDict[code.Name.Content].Add((lineNumber, lineInt));
+                    resultCount += 1;
                 }
-                line_number += 1;
+                lineNumber += 1;
             }
         }
     }
