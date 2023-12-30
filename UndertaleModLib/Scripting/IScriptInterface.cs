@@ -293,11 +293,20 @@ public interface IScriptInterface
     /// <param name="query">The query that was searched for.</param>
     /// <param name="resultsCount">How many results have been found.</param>
     /// <param name="resultsDict">An <see cref="IOrderedEnumerable{TElement}"/> of type <see cref="KeyValuePair{TKey,TValue}"/>,
-    /// with TKey being the name of the code entry an TValue being a list of tuples where the first item is the matching code line number and the second one is the code line itself.</param>
+    /// with TKey being the name of the code entry an TValue being a list of matching code lines with their line number prepended.</param>
     /// <param name="showInDecompiledView">Whether to open the "Decompiled" view or the "Disassembly" view when clicking on an entry name.</param>
     /// <param name="failedList">A list of code entries that encountered an error while searching.</param>
     /// <returns>A task that represents the search output.</returns>
-    Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int lineNum, string codeLine)>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null);
+    Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null);
+
+    /// <summary>
+    /// Obsolete.
+    /// </summary>
+    [Obsolete("Use ClickableSearchOutput instead!")]
+    sealed Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null)
+    {
+        return ClickableSearchOutput(title, query, resultsCount, resultsDict, showInDecompiledView, failedList);
+    }
 
     /// <summary>
     /// Shows search output with clickable text to the user.
@@ -306,11 +315,20 @@ public interface IScriptInterface
     /// <param name="query">The query that was searched for.</param>
     /// <param name="resultsCount">How many results have been found.</param>
     /// <param name="resultsDict">A <see cref="Dictionary{TKey,TValue}"/> with TKey being the name of the code entry and
-    /// TValue being a list of tuples where the first item is the matching code line number and the second one is the code line itself.</param>
+    /// TValue being a list of matching code lines with their line number prepended.</param>
     /// <param name="showInDecompiledView">Whether to open the "Decompiled" view or the "Disassembly" view when clicking on an entry name.</param>
     /// <param name="failedList">A list of code entries that encountered an error while searching.</param>
     /// <returns>A task that represents the search output.</returns>
-    Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<(int lineNum, string codeLine)>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null);
+    Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null);
+
+    /// <summary>
+    /// Obsolete.
+    /// </summary>
+    [Obsolete("Use ClickableSearchOutput instead!")]
+    sealed Task ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null)
+    {
+        return ClickableSearchOutput(title, query, resultsCount, resultsDict, showInDecompiledView, failedList);
+    }
 
     /// <summary>
     /// Sets <see cref="isFinishedMessageEnabled"/>.

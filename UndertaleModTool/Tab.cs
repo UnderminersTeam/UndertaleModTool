@@ -265,15 +265,8 @@ namespace UndertaleModTool
         }
 
         /// <summary>Saves the current tab content state.</summary>
-        /// <param name="overwrite">
-        /// Whether to overwrite the current tab content state if it's already set.
-        /// It's <see langword="false"/> by default.
-        /// </param>
-        public void SaveTabContentState(bool overwrite = false)
+        public void SaveTabContentState()
         {
-            if (!overwrite && LastContentState is not null)
-                return;
-
             ContentControl dataEditor = mainWindow.DataEditor;
             if (dataEditor is null
                 || dataEditor.Content is null
@@ -910,9 +903,9 @@ namespace UndertaleModTool
             {
                 #pragma warning disable CA1416
                 if (codeTabState.IsDecompiledOpen)
-                    UndertaleCodeEditor.EditorTab = UndertaleCodeEditor.CodeEditorTab.Decompiled;
+                    MainWindow.CodeEditorDecompile = MainWindow.CodeEditorMode.Decompile;
                 else
-                    UndertaleCodeEditor.EditorTab = UndertaleCodeEditor.CodeEditorTab.Disassembly;
+                    MainWindow.CodeEditorDecompile = MainWindow.CodeEditorMode.DontDecompile;
 
                 UndertaleCodeEditor.OverriddenDecompPos = codeTabState.DecompiledCodePosition;
                 UndertaleCodeEditor.OverriddenDisasmPos = codeTabState.DisassemblyCodePosition;
