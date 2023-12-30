@@ -3986,6 +3986,8 @@ namespace UndertaleModLib.Decompiler
                 data.KnownSubFunctions = new Dictionary<string, UndertaleFunction>();
                 GlobalDecompileContext globalDecompileContext = new GlobalDecompileContext(data, false);
 
+                // TODO: Is this necessary?
+                // Doesn't the latter `Parallel.ForEach()` already cover this?
                 foreach (var func in data.Functions)
                 {
                     if (func.Name.Content.StartsWith("gml_Script_"))

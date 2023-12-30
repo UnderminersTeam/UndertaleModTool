@@ -714,20 +714,19 @@ namespace UndertaleModTool
                                     for (int i = 0; i < matches.Length; i++)
                                     {
                                         Match match = matches[i];
-                                        if (match.Success)
-                                        {
-                                            if (currDict.TryGetValue(match.Groups[1].Value, out string text))
-                                            {
-                                                if (i != matches.Length - 1) // if not the last
-                                                    decompLinesBuilder.Append($"{text}; ");
-                                                else
-                                                    decompLinesBuilder.Append(text + '\n');
-                                            }
-                                        }
+                                        if (!currDict.TryGetValue(match.Groups[1].Value, out string text))
+                                            continue;
+
+                                        if (i != matches.Length - 1) // If not the last
+                                            decompLinesBuilder.Append($"{text}; ");
+                                        else
+                                            decompLinesBuilder.Append(text + '\n');
                                     }
                                 }
                                 else
+                                {
                                     decompLinesBuilder.Append(line + '\n');
+                                }
                             }
 
                             decompiled = decompLinesBuilder.ToString();
