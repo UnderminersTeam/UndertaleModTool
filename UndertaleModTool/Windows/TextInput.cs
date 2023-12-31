@@ -122,10 +122,13 @@ namespace UndertaleModTool.Windows
         private void richTextBox1_KeyDown(object sender, KeyEventArgs e)
         {
             // Prevent image pasting
-            if (e.Control && e.KeyCode == Keys.V)
+            // Based on this - https://stackoverflow.com/questions/13703083/prevent-images-in-rich-text-box
+            if (e.Control && e.KeyCode == Keys.V
+                || e.Shift & e.KeyCode == Keys.Insert)
             {
                 if (Clipboard.ContainsText())
                     richTextBox1.Paste(DataFormats.GetFormat(DataFormats.Text));
+
                 e.Handled = true;
             }
         }
