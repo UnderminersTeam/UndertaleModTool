@@ -10,7 +10,7 @@ A fork of [UndertaleModTool](https://github.com/krzys-h/UndertaleModTool) with a
   - Scaling objects by dragging the edges of one
 - Features from [SrPerez's UTMT fork](https://github.com/GithubSPerez/UndertaleModTool/):
   - Additional functions for structs and stuff
-- Features from CST1229's [UTMT Super Usable](https://github.com/CST1229/UndertaleModTool/tree/super-usable) (which is a fork of Usable):
+- Features from CST1229's [UTMT Super Usable](https://github.com/CST1229/UndertaleModTool/tree/super-usable) (which is a fork of UTMT Usable):
   - Types for some Pizza Tower stuff, like `spr_*` variables for characterspr and state IDs
   - Automatic selection/creation of instance layers and grid snapping when dragging objects into rooms
 - And more to come in the future!
