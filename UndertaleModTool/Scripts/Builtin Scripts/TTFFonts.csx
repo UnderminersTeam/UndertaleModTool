@@ -1,6 +1,6 @@
 EnsureDataLoaded();
 
-var displayName = Data.GeneralInfo?.DisplayName?.Content.ToLower() 
+var displayName = Data.GeneralInfo?.DisplayName?.Content.ToLower();
 
 if (displayName == "deltarune chapter 1 & 2" || displayName == "deltarune chapter 1&2")
 {
@@ -8,7 +8,7 @@ if (displayName == "deltarune chapter 1 & 2" || displayName == "deltarune chapte
     return;
 }
 
-if (!(displayName == "undertale" || displayName == "nxtale")
+if (!(displayName == "undertale" || displayName == "nxtale"))
 {
     ScriptError("Error 1: This script only works with Undertale!");
 }
