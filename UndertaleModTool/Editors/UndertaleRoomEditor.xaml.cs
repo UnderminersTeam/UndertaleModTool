@@ -397,13 +397,14 @@ namespace UndertaleModTool
             {
                 var objElement = sender as Rectangle;
                 var relativemousePos = e.GetPosition(objElement);
-                var edgeMargin = 5;
+                var edgeMarginX = Math.Max(5 / (clickedObj as GameObject).ScaleX, 0.000001);
+                var edgeMarginY = Math.Max(5 / (clickedObj as GameObject).ScaleY, 0.000001);
                 roomcanvas.vDrag = false;
                 roomcanvas.hDrag = false;
                 var objSize = objElement.RenderSize;
-                if ((Math.Abs(relativemousePos.X) < edgeMargin) || (Math.Abs(objSize.Width - relativemousePos.X) < edgeMargin))
+                if ((Math.Abs(relativemousePos.X) < edgeMarginX) || (Math.Abs(objSize.Width - relativemousePos.X) < edgeMarginX))
                     roomcanvas.hDrag = true;
-                if ((Math.Abs(relativemousePos.Y) < edgeMargin) || (Math.Abs(objSize.Height - relativemousePos.Y) < edgeMargin))
+                if ((Math.Abs(relativemousePos.Y) < edgeMarginY) || (Math.Abs(objSize.Height - relativemousePos.Y) < edgeMarginY))
                     roomcanvas.vDrag = true;
                 if (roomcanvas.dragOrigin == null)
                 {
@@ -2230,6 +2231,12 @@ namespace UndertaleModTool
                 else
                     throw new Exception("\"RoomCanvas\" not found.");
             }
+        }
+
+        private void RoomGraphicsScroll_MouseLeave(object sender, RoutedEventArgs e)
+        {
+            // Prevent the scrolling getting "stuck" if you release MMB outside the room view
+            CancelScrolling();
         }
 
         private void LayerCanvas_Unloaded(object sender, RoutedEventArgs e)
