@@ -397,8 +397,36 @@ namespace UndertaleModTool
             {
                 var objElement = sender as Rectangle;
                 var relativemousePos = e.GetPosition(objElement);
-                var edgeMarginX = Math.Max(5 / (clickedObj as GameObject).ScaleX, 0.000001);
-                var edgeMarginY = Math.Max(5 / (clickedObj as GameObject).ScaleY, 0.000001);
+
+                var transform = RoomGraphics.LayoutTransform as MatrixTransform;
+                float scaleX = 1;
+                float scaleY = 1;
+                // type hell
+                if (clickedObj is GameObject obj)
+                {
+                    scaleX = obj.ScaleX;
+                    scaleY = obj.ScaleY;
+                }
+                else if (clickedObj is Tile tile)
+                {
+                    scaleX = tile.ScaleX;
+                    scaleY = tile.ScaleY;
+                }
+                else if (clickedObj is SpriteInstance spr)
+                {
+                    scaleX = spr.ScaleX;
+                    scaleY = spr.ScaleY;
+                }
+                else if (clickedObj is ParticleSystemInstance part)
+                {
+                    scaleX = part.ScaleX;
+                    scaleY = part.ScaleY;
+                }
+                scaleX *= (float)transform.Matrix.M11;
+                scaleY *= (float)transform.Matrix.M22;
+
+                var edgeMarginX = Math.Max(8 / scaleX, 0.000001);
+                var edgeMarginY = Math.Max(8 / scaleY, 0.000001);
                 roomcanvas.vDrag = false;
                 roomcanvas.hDrag = false;
                 var objSize = objElement.RenderSize;
