@@ -1156,7 +1156,7 @@
         <GridSplitter Grid.Column="0" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" ShowsPreview="True" Width="Auto" Height="3"/>
 
         <!-- Don't forget to modify "UndertaleRoomRenderer" control as well -->
-        <ScrollViewer Name="RoomGraphicsScroll" Margin="0,8,0,0" Grid.Column="0" Grid.Row="2" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" ScrollChanged="ScrollViewer_ScrollChanged">
+        <ScrollViewer Name="RoomGraphicsScroll" Margin="0,8,0,0" Grid.Column="0" Grid.Row="2" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" ScrollChanged="ScrollViewer_ScrollChanged" MouseUp="RoomGraphicsScroll_MouseUp" MouseDown="RoomGraphicsScroll_MouseDown" MouseMove="RoomGraphicsScroll_MouseMove" Loaded="RoomGraphicsScroll_Loaded">
             <ItemsControl Name="RoomGraphics" Background="Gray" MouseDown="RectangleBackground_MouseDown" MouseMove="RectangleBackground_MouseMove" MouseUp="RectangleBackground_MouseUp" MouseWheel="Canvas_MouseWheel">
                 <ItemsControl.Style>
                     <Style TargetType="ItemsControl">
