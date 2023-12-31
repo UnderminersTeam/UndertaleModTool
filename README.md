@@ -3,9 +3,11 @@
 A fork of [UndertaleModTool](https://github.com/krzys-h/UndertaleModTool) with a lot of features for Pizza Tower modding and stuff.
 
 ## Features
-- Features from AwfulNasty's [UTMT Usable](https://github.com/AwfulNasty/UndertaleModTool/tree/RoomEditorChanges):
+- Features from AwfulNasty's [UTMT fork](https://github.com/AwfulNasty/UndertaleModTool/):
   - Can open scr_player_mach3
   - Button to add creation code to rooms and objects in rooms
+  - Middle-mouse-button room scrolling
+  - Scaling objects by dragging the edges of one
 - Features from [SrPerez's UTMT fork](https://github.com/GithubSPerez/UndertaleModTool/):
   - Additional functions for structs and stuff
 - Features from CST1229's [UTMT Super Usable](https://github.com/CST1229/UndertaleModTool/tree/super-usable) (which is a fork of Usable):
