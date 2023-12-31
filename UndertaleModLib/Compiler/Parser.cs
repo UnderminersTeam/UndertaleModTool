@@ -899,7 +899,14 @@ namespace UndertaleModLib.Compiler
                 Statement left = ParsePostAndRef(context);
                 if (left != null)
                 {
-                    return ParseAssignInner(context, left);
+                    if (left.Children.Count > 0 && left.Children.Last().Kind == Statement.StatementKind.ExprFunctionCall)
+                    {
+                        return left;
+                    }
+                    else
+                    {
+                        return ParseAssignInner(context, left);
+                    }
                 }
                 else
                 {
@@ -1103,6 +1110,25 @@ namespace UndertaleModLib.Compiler
                 return null;
             }
 
+            private static void ParseFunctionCallArgs(CompileContext context, Statement result, Statement s)
+            {
+                // Parse the parameters/arguments
+                while (remainingStageOne.Count > 0 && !hasError && !IsNextToken(TokenKind.EOF) && !IsNextToken(TokenKind.CloseParen))
+                {
+                    Statement expr = ParseExpression(context);
+                    if (expr != null)
+                        result.Children.Add(expr);
+                    if (!IsNextTokenDiscard(TokenKind.Comma))
+                    {
+                        if (!IsNextToken(TokenKind.CloseParen))
+                        {
+                            ReportCodeError("Expected ',' or ')' after argument in function call.", s.Token, true);
+                            break;
+                        }
+                    }
+                }
+            }
+
             private static Statement ParseFunctionCall(CompileContext context, bool expression = false)
             {
                 bool isNew = false;
@@ -1128,21 +1154,7 @@ namespace UndertaleModLib.Compiler
                 newStatement.Text = isNew ? "new" : "";
                 result.Children.Add(newStatement);
 
-                // Parse the parameters/arguments
-                while (remainingStageOne.Count > 0 && !hasError && !IsNextToken(TokenKind.EOF) && !IsNextToken(TokenKind.CloseParen))
-                {
-                    Statement expr = ParseExpression(context);
-                    if (expr != null)
-                        result.Children.Add(expr);
-                    if (!IsNextTokenDiscard(TokenKind.Comma))
-                    {
-                        if (!IsNextToken(TokenKind.CloseParen))
-                        {
-                            ReportCodeError("Expected ',' or ')' after argument in function call.", s.Token, true);
-                            break;
-                        }
-                    }
-                }
+                ParseFunctionCallArgs(context, result, s);
 
                 if (EnsureTokenKind(TokenKind.CloseParen) == null) return null;
 
@@ -1490,6 +1502,23 @@ namespace UndertaleModLib.Compiler
 
             private static Statement ParseSingleVar(CompileContext context)
             {
+                if (IsNextToken(TokenKind.ProcFunction))
+                {
+                    Statement procFunc = EnsureTokenKind(TokenKind.ProcFunction);
+                    EnsureTokenKind(TokenKind.OpenParen); // this should be guaranteed
+                    Statement funcCall = new Statement(Statement.StatementKind.ExprFunctionCall, procFunc.Token);
+                    
+                    Statement newStatement = new Statement();
+                    newStatement.Text = "";
+                    funcCall.Children.Add(newStatement);
+
+                    ParseFunctionCallArgs(context, funcCall, procFunc);
+
+                    if (EnsureTokenKind(TokenKind.CloseParen) == null) return null;
+
+                    return funcCall;
+                }
+
                 Statement s = EnsureTokenKind(TokenKind.ProcVariable);
                 if (s == null)
                     return null;

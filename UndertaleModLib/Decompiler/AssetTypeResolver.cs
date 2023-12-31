@@ -1233,6 +1233,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("boss_palette", AssetIDType.Sprite);
                 builtin_vars.Add("panicspr", AssetIDType.Sprite);
                 builtin_vars.Add("bossarr", AssetIDType.Sprite);
+                builtin_vars.Add("palettetexture", AssetIDType.Sprite);
 
                 builtin_vars.Add("storedspriteindex", AssetIDType.Sprite);
                 builtin_vars.Add("icon", AssetIDType.Sprite);
