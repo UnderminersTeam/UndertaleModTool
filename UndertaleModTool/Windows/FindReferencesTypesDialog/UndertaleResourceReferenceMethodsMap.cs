@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using UndertaleModLib;
+using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 using static UndertaleModLib.Models.UndertaleSequence;
 
@@ -42,6 +43,9 @@ namespace UndertaleModTool.Windows
         private static Dictionary<UndertaleCode, HashSet<UndertaleString>> stringReferences;
         private static Dictionary<UndertaleCode, HashSet<UndertaleFunction>> funcReferences;
         private static Dictionary<UndertaleCode, HashSet<UndertaleVariable>> variReferences;
+
+        private static Dictionary<string, AssetIDType[]> fontFunctions;
+        private static Dictionary<UndertaleCode, HashSet<UndertaleFont>> fontReferences;
 
         private static readonly Dictionary<Type, PredicateForVersion[]> typeMap = new()
         {
@@ -323,6 +327,101 @@ namespace UndertaleModTool.Windows
                                 return null;
 
                             var textGroups = data.TextureGroupInfo.Where(x => x.TexturePages.Any(s => s.Resource == obj));
+                            if (textGroups.Any())
+                                return new() { { "Texture groups", checkOne ? textGroups.ToEmptyArray() : textGroups.ToArray() } };
+                            else
+                                return null;
+                        }
+                    }
+                }
+            },
+            {
+                typeof(UndertaleFont),
+                new[]
+                {
+                    new PredicateForVersion()
+                    {
+                        Version = (1, 0, 0),
+                        Predicate = (objSrc, types, checkOne) =>
+                        {
+                            if (!types.Contains(typeof(UndertaleCode)))
+                                return null;
+
+                            if (objSrc is not UndertaleFont obj)
+                                return null;
+
+                            IEnumerable<UndertaleCode> fontRefs;
+                            if (fontReferences is not null)
+                            {
+                                fontRefs = fontReferences.Where(x => x.Value.Contains(obj))
+                                                         .Select(x => x.Key);
+                            }
+                            else
+                            {
+                                IEnumerable<UndertaleCode> GetCodeEntries()
+                                {
+                                    foreach (var code in data.Code)
+                                    {
+                                        UndertaleCode fontReference = null;
+
+                                        for (int i = 0; i < code.Instructions.Count; i++)
+                                        {
+                                            var instr = code.Instructions[i];
+
+                                            string funcName = instr.Function?.Target?.Name?.Content;
+                                            if (funcName is null)
+                                                continue;
+                                            if (!fontFunctions.TryGetValue(funcName, out var argTypes))
+                                                continue;
+
+                                            int fontArgIndex;
+                                            if (argTypes.Length < 2)
+                                                fontArgIndex = 0;
+                                            else
+                                                fontArgIndex = Array.IndexOf(argTypes, AssetIDType.Font); // This shouldn't return -1
+                                            int fontInstrIndex = i - ((fontArgIndex + 1) * 2);
+                                            if (fontInstrIndex < 0)
+                                                continue;
+
+                                            var fontInstr = code.Instructions[fontInstrIndex];
+                                            if (fontInstr.Kind != UndertaleInstruction.Opcode.PushI
+                                                || fontInstr.Type1 != UndertaleInstruction.DataType.Int16
+                                                || fontInstr.Value is not short fontIndex
+                                                || fontIndex < 0 || fontIndex > data.Fonts.Count - 1)
+                                                continue;
+
+                                            if (data.Fonts[fontIndex] == obj)
+                                            {
+                                                fontReference = code;
+                                                break;
+                                            }
+                                        }
+
+                                        if (fontReference is not null)
+                                            yield return fontReference;
+                                    }
+                                }
+
+                                fontRefs = GetCodeEntries();
+                            }
+                            if (fontRefs.Any())
+                                return new() { { "Code", checkOne ? fontRefs.ToEmptyArray() : fontRefs.ToArray() } };
+                            else
+                                return null;
+                        }
+                    },
+                    new PredicateForVersion()
+                    {
+                        Version = (2, 2, 1),
+                        Predicate = (objSrc, types, checkOne) =>
+                        {
+                            if (!types.Contains(typeof(UndertaleTextureGroupInfo)))
+                                return null;
+
+                            if (objSrc is not UndertaleFont obj)
+                                return null;
+
+                            var textGroups = data.TextureGroupInfo.Where(x => x.Fonts.Any(s => s.Resource == obj));
                             if (textGroups.Any())
                                 return new() { { "Texture groups", checkOne ? textGroups.ToEmptyArray() : textGroups.ToArray() } };
                             else
@@ -1400,7 +1499,6 @@ namespace UndertaleModTool.Windows
         };
 
 
-
         public static Dictionary<string, List<object>> GetReferencesOfObject(object obj, UndertaleData data, HashSetTypesOverride types, bool checkOne = false)
         {
             if (obj is null)
@@ -1408,6 +1506,12 @@ namespace UndertaleModTool.Windows
 
             if (!typeMap.TryGetValue(obj.GetType(), out PredicateForVersion[] predicatesForVer))
                 return null;
+
+            if (!checkOne && fontFunctions is null)
+            {
+                var kvpList = AssetTypeResolver.builtin_funcs.Where(x => x.Value.Contains(AssetIDType.Font));
+                fontFunctions = new(kvpList);
+            }
 
             UndertaleResourceReferenceMethodsMap.data = data;
 
@@ -1442,7 +1546,11 @@ namespace UndertaleModTool.Windows
         {
             UndertaleResourceReferenceMethodsMap.data = data;
 
-            var ver = (data.GeneralInfo.Major, data.GeneralInfo.Minor, data.GeneralInfo.Release);
+            if (fontFunctions is null)
+            {
+                var kvpList = AssetTypeResolver.builtin_funcs.Where(x => x.Value.Contains(AssetIDType.Font));
+                fontFunctions = new(kvpList);
+            }
 
             Dictionary<string, List<object>> outDict = new();
 
@@ -1462,13 +1570,17 @@ namespace UndertaleModTool.Windows
             stringReferences = new();
             funcReferences = new();
             variReferences = new();
+            fontReferences = new();
             foreach (var code in data.Code)
             {
                 var strings = new HashSet<UndertaleString>();
                 var functions = new HashSet<UndertaleFunction>();
                 var variables = new HashSet<UndertaleVariable>();
-                foreach (var inst in code.Instructions)
+                var fonts = new HashSet<UndertaleFont>();
+                for (int i = 0; i < code.Instructions.Count; i++)
                 {
+                    var inst = code.Instructions[i];
+
                     if (inst.Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG> strPtr)
                         strings.Add(strPtr.Resource);
 
@@ -1478,7 +1590,34 @@ namespace UndertaleModTool.Windows
                         variables.Add(varRef.Target);
 
                     if (inst.Function?.Target is not null)
+                    {
                         functions.Add(inst.Function.Target);
+
+                        string funcName = inst.Function.Target.Name?.Content;
+                        if (funcName is not null
+                            && fontFunctions.TryGetValue(funcName, out var argTypes))
+                        {
+                            int fontArgIndex;
+                            if (argTypes.Length < 2)
+                                fontArgIndex = 0;
+                            else
+                                fontArgIndex = Array.IndexOf(argTypes, AssetIDType.Font); // This shouldn't return -1
+                            int fontInstrIndex = i - ((fontArgIndex + 1) * 2);
+                            if (fontInstrIndex >= 0)
+                            {
+                                var fontInstr = code.Instructions[fontInstrIndex];
+                                if (fontInstr.Kind == UndertaleInstruction.Opcode.PushI
+                                    && fontInstr.Type1 == UndertaleInstruction.DataType.Int16
+                                    && fontInstr.Value is short fontIndex
+                                    && fontIndex >= 0 && fontIndex <= data.Fonts.Count - 1)
+                                {
+                                    fonts.Add(data.Fonts[fontIndex]);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
                     if (inst.Value is UndertaleInstruction.Reference<UndertaleFunction> funcRef && funcRef.Target is not null)
                         functions.Add(funcRef.Target);
                 }
@@ -1489,6 +1628,8 @@ namespace UndertaleModTool.Windows
                     funcReferences[code] = functions;
                 if (variables.Count != 0)
                     variReferences[code] = variables;
+                if (fonts.Count != 0)
+                    fontReferences[code] = fonts;
             }
 
             mainWindow.IsEnabled = false;
@@ -1585,6 +1726,8 @@ namespace UndertaleModTool.Windows
                 return null;
             return outDict;
         }
+
+        public static void ClearFontFunctionList() => fontFunctions = null;
 
         private static T[] ToEmptyArray<T>(this IEnumerable<T> _) => Array.Empty<T>();
     }
