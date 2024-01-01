@@ -80,7 +80,7 @@ namespace UndertaleModTool.Windows
             label1.Text = message;
             richTextBox1.Multiline = AllowMultiline;
             richTextBox1.DetectUrls = false;
-            richTextBox1.LanguageOption = RichTextBoxLanguageOptions.UIFonts; //prevents the bug with Japanese characters
+            richTextBox1.LanguageOption = RichTextBoxLanguageOptions.UIFonts; // Prevents the bug with Japanese characters
             richTextBox1.ReadOnly = readOnly;
 
             label1.AutoSize = false;
@@ -100,7 +100,7 @@ namespace UndertaleModTool.Windows
 
         private void TextInput_Load(object sender, EventArgs e)
         {
-            richTextBox1.Clear(); //remove "Input text here"
+            richTextBox1.Clear(); // Remove "Input text here"
 
             if (DefaultValue.Length > 0)
             {
@@ -111,13 +111,27 @@ namespace UndertaleModTool.Windows
 
             if (richTextBox1.ReadOnly)
             {
-                richTextBox1.BackColor = TextBoxBGColor; //restore color to default one.
+                richTextBox1.BackColor = TextBoxBGColor; // Restore color to default one.
                 richTextBox1.ContextMenuStrip = textCopyMenu;
             }
         }
 
         private void richTextBox1_TextChanged(object sender, EventArgs e)
         {
+        }
+        private void richTextBox1_KeyDown(object sender, KeyEventArgs e)
+        {
+            // Prevent image pasting
+            // Based on this - https://stackoverflow.com/questions/13703083/prevent-images-in-rich-text-box
+            // TODO: What if you use a different key combination when you run the app from Wine on Linux?
+            if (e.Control && e.KeyCode == Keys.V
+                || e.Shift && e.KeyCode == Keys.Insert)
+            {
+                if (Clipboard.ContainsText())
+                    richTextBox1.Paste(DataFormats.GetFormat(DataFormats.Text));
+
+                e.Handled = true;
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
