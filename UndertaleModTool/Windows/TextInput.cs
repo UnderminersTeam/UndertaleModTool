@@ -125,7 +125,7 @@ namespace UndertaleModTool.Windows
             // Based on this - https://stackoverflow.com/questions/13703083/prevent-images-in-rich-text-box
             // TODO: What if you use a different key combination when you run the app from Wine on Linux?
             if (e.Control && e.KeyCode == Keys.V
-                || e.Shift & e.KeyCode == Keys.Insert)
+                || e.Shift && e.KeyCode == Keys.Insert)
             {
                 if (Clipboard.ContainsText())
                     richTextBox1.Paste(DataFormats.GetFormat(DataFormats.Text));
