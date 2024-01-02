@@ -925,7 +925,7 @@ namespace UndertaleModTool
                 UpdateLayout();
                 Dispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
 
-                UndertaleResourceReferenceMethodsMap.ClearFontFunctionList();
+                UndertaleResourceReferenceMethodsMap.ClearFunctionLists();
 
                 Data.Dispose();
                 Data = null;
