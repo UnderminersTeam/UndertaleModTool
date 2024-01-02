@@ -900,6 +900,19 @@ namespace UndertaleModLib
     {
         public override string Name => "CODE";
 
+        private void CheckForGM2023_8(UndertaleReader reader)
+        {
+            if (!reader.undertaleData.IsVersionAtLeast(2, 3) || reader.undertaleData.IsVersionAtLeast(2023, 8))
+                return;
+
+            // Check for a `pushref` instruction
+            if (List.Any(c => c.Instructions.Any(x => x.Kind == UndertaleInstruction.Opcode.Break
+                                                      && x.Value is short val && val == -11)))
+            {
+                reader.undertaleData.SetGMS2Version(2023, 8);
+            }
+        }
+
         internal override void SerializeChunk(UndertaleWriter writer)
         {
             if (List == null)
@@ -917,6 +930,7 @@ namespace UndertaleModLib
 
             UndertaleCode.CurrCodeIndex = 0;
             base.UnserializeChunk(reader);
+            CheckForGM2023_8(reader);
 
             reader.InstructionArraysLengths = null;
         }
