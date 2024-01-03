@@ -1160,6 +1160,13 @@ namespace UndertaleModTool.Windows
 
                             Dictionary<string, object[]> outDict = new();
 
+                            if (types.Contains(typeof(UndertaleGameObject)))
+                            {
+                                var gameObjects = data.GameObjects.Where(x => x.ParentId == obj);
+                                if (gameObjects.Any())
+                                    outDict["Game objects (parent entry)"] = checkOne ? gameObjects.ToEmptyArray() : gameObjects.ToArray();
+                            }
+
                             if (types.Contains(typeof(UndertaleCode)))
                             {
                                 IEnumerable<UndertaleCode> gameObjRefs;
