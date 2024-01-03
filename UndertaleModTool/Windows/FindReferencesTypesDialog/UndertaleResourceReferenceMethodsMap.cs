@@ -350,6 +350,9 @@ namespace UndertaleModTool.Windows
                         Version = (1, 0, 0),
                         Predicate = (objSrc, types, checkOne) =>
                         {
+                            if (!types.Contains(typeof(UndertaleTexturePageItem)))
+                                return null;
+
                             if (objSrc is not UndertaleEmbeddedTexture obj)
                                 return null;
 
@@ -474,10 +477,10 @@ namespace UndertaleModTool.Windows
                         Version = (1, 0, 0),
                         Predicate = (objSrc, types, checkOne) =>
                         {
-                            Dictionary<string, object[]> outDict = new();
-
                             if (objSrc is not UndertaleTexturePageItem obj)
                                 return null;
+
+                            Dictionary<string, object[]> outDict = new();
 
                             if (types.Contains(typeof(UndertaleSprite)))
                             {
