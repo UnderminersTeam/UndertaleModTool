@@ -2135,6 +2135,28 @@ namespace UndertaleModLib.Decompiler
             return GetTypeSize(e.Type);
         }
 
+        internal static bool InstructionReturns(UndertaleInstruction instr)
+        {
+            return instr.Kind == UndertaleInstruction.Opcode.Exit || instr.Kind == UndertaleInstruction.Opcode.Ret;
+        }
+        // Returns whether a block most likely leads into a return statement or not
+        // (mainly for popenv purposes)
+        internal static bool BlockReturns(Block block)
+        {
+            if (block.Instructions.Count <= 0) return false;
+            if (InstructionReturns(block.Instructions.Last())) return true;
+            if (block.nextBlockTrue is null && block.nextBlockTrue is null) return false;
+            Block nextBlock = block.nextBlockTrue;
+            Block nextBlockFalse = block.nextBlockFalse;
+            return (nextBlock is not null && (
+                nextBlock.Instructions.Count > 0 &&
+                InstructionReturns(nextBlock.Instructions.Last())
+            )) || (nextBlockFalse is not null && (
+                nextBlockFalse.Instructions.Count > 0 &&
+                InstructionReturns(nextBlockFalse.Instructions.Last())
+            ));
+        }
+
         // The core function to decompile a specific block.
         internal static void DecompileFromBlock(DecompileContext context, Dictionary<uint, Block> blocks, Block block, List<TempVarReference> tempvars, Stack<Tuple<Block, List<TempVarReference>>> workQueue)
         {
@@ -2368,11 +2390,12 @@ namespace UndertaleModLib.Decompiler
                         break;
 
                     case UndertaleInstruction.Opcode.PopEnv:
-                        if (!instr.JumpOffsetPopenvExitMagic)
+                        if (!instr.JumpOffsetPopenvExitMagic || !BlockReturns(block))
                             statements.Add(new PopEnvStatement());
                         // For JumpOffsetPopenvExitMagic:
                         //  This is just an instruction to make sure the pushenv/popenv stack is cleared on early function return
-                        //  Works kinda like 'break', but doesn't have a high-level representation as it's immediately followed by a 'return'
+                        //  Works kinda like 'break', but doesn't have a high-level representation as it's immediately followed by a 'return' in most cases
+                        // But, when it's not followed by a `return`, it *is* a `break`
                         end = true;
                         break;
 
@@ -3886,10 +3909,30 @@ namespace UndertaleModLib.Decompiler
                     {
                         var last = block.Instructions.Last();
                         var lastKind = last.Kind;
+                        // the loop hack!!
+                        // (this makes pizza tower obj_player step not throw an exception)
+                        // (it still decompiles incorrectly but it does decompile)
+                        if (
+                            lastKind == UndertaleInstruction.Opcode.B
+                            && block.nextBlockFalse == block.nextBlockTrue
+                            && block.nextBlockTrue.Address < block.Address
+                            // fix some continue statements being erroneously removed
+                            // (`gameframe` script)
+                            && (
+                                block.Instructions.Count < 2 ||
+                                block.Instructions[block.Instructions.Count - 2].Kind != UndertaleInstruction.Opcode.Popz
+                            )
+                        )
+                        {
+                            break;
+                        }
                         if (lastKind == UndertaleInstruction.Opcode.PopEnv && last.JumpOffsetPopenvExitMagic)
                         {
                             block = block.nextBlockTrue;
                             popenvDrop = true;
+                            // Add a break statement if there's no return
+                            if (!BlockReturns(block))
+                                output.Statements.Add(new BreakHLStatement());
                         } else
                             block = ((lastKind != UndertaleInstruction.Opcode.Ret && lastKind != UndertaleInstruction.Opcode.Exit)
                                 || (block.nextBlockTrue != null && block.nextBlockTrue.nextBlockFalse == null)) ? block.nextBlockTrue : stopAt;
