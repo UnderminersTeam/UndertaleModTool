@@ -575,7 +575,7 @@ namespace UndertaleModTool.Windows
                                             string funcName = instr.Function?.Target?.Name?.Content;
                                             if (funcName is null)
                                                 continue;
-                                            if (instr.ArgumentsCount != 1)
+                                            if (instr.ArgumentsCount == 0)
                                                 continue;
                                             if (!fontFunctions.TryGetValue(funcName, out var argIndex))
                                                 continue;
@@ -1328,7 +1328,7 @@ namespace UndertaleModTool.Windows
                             if (types.Contains(typeof(UndertaleCode)))
                             {
                                 IEnumerable<UndertaleCode> gameObjRefs;
-                                if (fontReferences is not null)
+                                if (gameObjReferences is not null)
                                 {
                                     gameObjRefs = gameObjReferences.Where(x => x.Value.Contains(obj))
                                                                    .Select(x => x.Key);
@@ -1372,9 +1372,9 @@ namespace UndertaleModTool.Windows
                                     }
 
                                     gameObjRefs = GetCodeEntries();
-                                    if (gameObjRefs.Any())
-                                        outDict["Code"] = checkOne ? gameObjRefs.ToEmptyArray() : gameObjRefs.ToArray();
                                 }
+                                if (gameObjRefs.Any())
+                                    outDict["Code"] = checkOne ? gameObjRefs.ToEmptyArray() : gameObjRefs.ToArray();
                             }
 
                             if (types.Contains(typeof(UndertaleRoom.GameObject)))
@@ -1864,7 +1864,7 @@ namespace UndertaleModTool.Windows
                 string funcName = instr.Function.Target.Name?.Content;
                 if (funcName is null)
                     return;
-                if (instr.ArgumentsCount != 1)
+                if (instr.ArgumentsCount == 0)
                     return;
 
                 ProcessInstructionForFont(i, code, funcName, in fonts);
