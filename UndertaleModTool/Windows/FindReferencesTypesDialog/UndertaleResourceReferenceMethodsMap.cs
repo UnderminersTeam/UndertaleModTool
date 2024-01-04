@@ -50,7 +50,10 @@ namespace UndertaleModTool.Windows
         private static Dictionary<UndertaleCode, HashSet<UndertaleFont>> fontReferences;
         private static Dictionary<UndertaleCode, HashSet<UndertaleGameObject>> gameObjReferences;
 
-        private static bool ConsumeCallArgument(bool isLastArg, ref int i, UndertaleCode code, ref int val)
+        #region Call instructions processing
+        private static bool isGM2023_8;
+        private static int dummyInt;
+        private static bool ConsumeCallArgument(bool isLastArg, ref int i, UndertaleCode code, ref int val, bool dontParse = false)
         {
             short instrRemaining = 1;
 
@@ -68,9 +71,12 @@ namespace UndertaleModTool.Windows
 
                         break;
 
-                    case Opcode.PushI:
+                    // It's possible that it will be `conv` and `pushi` in GM 2023.8+, but
+                    // it would mean that the reference is not recognized, so
+                    // we should also skip that.
+                    case Opcode.PushI when !isGM2023_8:
                     {
-                        if (isLastArg)
+                        if (isLastArg && !dontParse)
                         {
                             if (instr.Value is short v)
                             {
@@ -86,7 +92,7 @@ namespace UndertaleModTool.Windows
                     }
                     case Opcode.Break:
                     {
-                        if (isLastArg)
+                        if (isLastArg && !dontParse)
                         {
                             // A `pushref` instruction (GM 2023.8+) 
                             if (instr.Value is short v && v == -11)
@@ -127,8 +133,15 @@ namespace UndertaleModTool.Windows
 
                         break;
 
-                    case Opcode.Call or Opcode.CallV:
-                        return false;
+                    case Opcode.Call:
+                        i++;
+                        ConsumeCallInstructions(instr.ArgumentsCount - 1, ref i, code);
+                        break;
+
+                    case Opcode.CallV:
+                        i++;
+                        ConsumeCallInstructions(instr.Extra - 1, ref i, code);
+                        break;
                 }
 
                 if (instrRemaining > 0)
@@ -153,6 +166,21 @@ namespace UndertaleModTool.Windows
 
             return assetIndex;
         }
+        private static void ConsumeCallInstructions(int argIndex, ref int i, UndertaleCode code)
+        {
+            int consumedCount = 0;
+            i--;
+            while (i >= 0 && consumedCount <= argIndex)
+            {
+                bool isLastArg = consumedCount == argIndex;
+                // `dummyInt` won't be changed because of `dontParse = true`
+                if (!ConsumeCallArgument(isLastArg, ref i, code, ref dummyInt, true))
+                    break;
+
+                consumedCount++;
+            }
+        }
+        #endregion
 
         private delegate int GetAssetIndexDeleg(int argIndex, int argCount, int i, UndertaleCode code, int assetListLen);
         private static readonly GetAssetIndexDeleg getAssetIndex = (int argIndex, int argCount, int i, UndertaleCode code, int assetListLen) =>
@@ -1757,7 +1785,8 @@ namespace UndertaleModTool.Windows
                     gameObjFunctions = new(kvpList);
                 }
 
-                getAssetIndexCurr = data.IsVersionAtLeast(2023, 8) ? getAssetIndexGM2023_8 : getAssetIndex;
+                isGM2023_8 = data.IsVersionAtLeast(2023, 8);
+                getAssetIndexCurr = isGM2023_8 ? getAssetIndexGM2023_8 : getAssetIndex;
             }
 
             UndertaleResourceReferenceMethodsMap.data = data;
@@ -1810,7 +1839,8 @@ namespace UndertaleModTool.Windows
                 gameObjFunctions = new(kvpList);
             }
 
-            getAssetIndexCurr = data.IsVersionAtLeast(2023, 8) ? getAssetIndexGM2023_8 : getAssetIndex;
+            isGM2023_8 = data.IsVersionAtLeast(2023, 8);
+            getAssetIndexCurr = isGM2023_8 ? getAssetIndexGM2023_8 : getAssetIndex;
 
             Dictionary<string, List<object>> outDict = new();
 
