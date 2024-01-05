@@ -84,6 +84,8 @@ namespace UndertaleModTool.Windows
                                     val = -1;
                                 else
                                     val = v;
+
+                                instrRemaining = 0;
                             }
                             else
                                 return false;
@@ -102,6 +104,8 @@ namespace UndertaleModTool.Windows
                                     val = -1;
                                 else
                                     val = assetIndex;
+
+                                instrRemaining = 0;
                             }
                         }
                         break;
