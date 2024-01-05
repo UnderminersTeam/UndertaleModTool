@@ -51,7 +51,7 @@ namespace UndertaleModTool.Windows
         private static Dictionary<UndertaleCode, HashSet<UndertaleGameObject>> gameObjReferences;
 
         #region Call instructions processing
-        private static bool isGM2023_8;
+        private static bool isGMS2_3, isGM2023_8;
         private static int dummyInt;
         private static bool ConsumeCallArgument(bool isLastArg, ref int i, UndertaleCode code, ref int val, bool dontParse = false)
         {
@@ -59,6 +59,9 @@ namespace UndertaleModTool.Windows
             {
                 // If it's an asset argument and we don't need to consume
                 // all instructions, then we only check one (GM 2023.8+) or two instructions.
+                // Also, it's possible that it will be `conv` + `pushi` in GM 2023.8+, but
+                // it would mean that the reference is not recognized, so
+                // we should also skip that.
                 var instr = code.Instructions[i];
 
                 if (isGM2023_8 && instr.Kind == Opcode.Break
@@ -103,23 +106,29 @@ namespace UndertaleModTool.Windows
 
                         break;
 
-                    // It's possible that it will be `conv` and `pushi` in GM 2023.8+, but
-                    // it would mean that the reference is not recognized, so
-                    // we should also skip that.
-                    case Opcode.PushI when !isGM2023_8:
-                    case Opcode.Break:
-                    case Opcode.PushBltn or Opcode.PushGlb or Opcode.PushEnv
-                         or Opcode.PushLoc:
+                    case Opcode.PushI:
+                    case Opcode.PushBltn or Opcode.PushGlb or Opcode.PushEnv or Opcode.PushLoc:
+                        break;
+                    case Opcode.Break when isGMS2_3:
+                        if (instr.Value is short v)
+                        {
+                            if (v == -2 || v == -4) // `pushaf`, `pushac`
+                                instrRemaining += 2;
+                        }
                         break;
 
                     case Opcode.Push:
                         if (instr.Value is Reference<UndertaleVariable> varRef)
                         {
-                            if (varRef.Type == VariableType.Array)
+                            if (varRef.Type == VariableType.Array
+                                || varRef.Type == VariableType.ArrayPushAF)
+                            {
                                 instrRemaining += 2;
+                            }
                             else if (varRef.Type == VariableType.StackTop)
+                            {
                                 instrRemaining++;
-                            // TODO: check other `VariableType` values
+                            }
                         }
                         break;
 
@@ -1787,6 +1796,7 @@ namespace UndertaleModTool.Windows
                     gameObjFunctions = new(kvpList);
                 }
 
+                isGMS2_3 = data.IsVersionAtLeast(2, 3);
                 isGM2023_8 = data.IsVersionAtLeast(2023, 8);
                 getAssetIndexCurr = isGM2023_8 ? getAssetIndexGM2023_8 : getAssetIndex;
             }
@@ -1841,6 +1851,7 @@ namespace UndertaleModTool.Windows
                 gameObjFunctions = new(kvpList);
             }
 
+            isGMS2_3 = data.IsVersionAtLeast(2, 3);
             isGM2023_8 = data.IsVersionAtLeast(2023, 8);
             getAssetIndexCurr = isGM2023_8 ? getAssetIndexGM2023_8 : getAssetIndex;
 
