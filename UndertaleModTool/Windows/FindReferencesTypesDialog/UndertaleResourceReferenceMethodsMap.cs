@@ -55,6 +55,38 @@ namespace UndertaleModTool.Windows
         private static int dummyInt;
         private static bool ConsumeCallArgument(bool isLastArg, ref int i, UndertaleCode code, ref int val, bool dontParse = false)
         {
+            if (isLastArg && !dontParse)
+            {
+                // If it's an asset argument and we don't need to consume
+                // all instructions, then we only check one (GM 2023.8+) or two instructions.
+                var instr = code.Instructions[i];
+
+                if (isGM2023_8 && instr.Kind == Opcode.Break
+                    && instr.Value is short v && v == -11)
+                {
+                    int assetIndex = Decompiler.ExpressionAssetRef.DecodeResourceIndex(instr.IntArgument);
+                    if (assetIndex < 0)
+                        val = -1;
+                    else
+                        val = assetIndex;
+                }
+                else if (instr.Kind == Opcode.Conv && i - 1 >= 0)
+                {
+                    instr = code.Instructions[--i];
+                    if (instr.Kind != Opcode.PushI || instr.Value is not short v1)
+                        return false;
+
+                    if (v1 < 0)
+                        val = -1;
+                    else
+                        val = v1;
+                }
+                else
+                    return false;
+
+                return true;
+            }
+
             short instrRemaining = 1;
 
             while (instrRemaining > 0)
@@ -75,54 +107,20 @@ namespace UndertaleModTool.Windows
                     // it would mean that the reference is not recognized, so
                     // we should also skip that.
                     case Opcode.PushI when !isGM2023_8:
-                    {
-                        if (isLastArg && !dontParse)
-                        {
-                            if (instr.Value is short v)
-                            {
-                                if (v < 0)
-                                    val = -1;
-                                else
-                                    val = v;
-
-                                instrRemaining = 0;
-                            }
-                            else
-                                return false;
-                        }
-                        break;
-                    }
                     case Opcode.Break:
-                    {
-                        if (isLastArg && !dontParse)
-                        {
-                            // A `pushref` instruction (GM 2023.8+) 
-                            if (instr.Value is short v && v == -11)
-                            {
-                                int assetIndex = Decompiler.ExpressionAssetRef.DecodeResourceIndex(instr.IntArgument);
-                                if (assetIndex < 0)
-                                    val = -1;
-                                else
-                                    val = assetIndex;
-
-                                instrRemaining = 0;
-                            }
-                        }
-                        break;
-                    }
-
                     case Opcode.PushBltn or Opcode.PushGlb or Opcode.PushEnv
                          or Opcode.PushLoc:
-                        if (isLastArg)
-                            return false;
-
                         break;
 
                     case Opcode.Push:
-                        if (instr.Value is Reference<UndertaleVariable> varRef
-                            && varRef.Type == VariableType.Array)
-                            instrRemaining += 2;
-                        // TODO: check other `VariableType` values
+                        if (instr.Value is Reference<UndertaleVariable> varRef)
+                        {
+                            if (varRef.Type == VariableType.Array)
+                                instrRemaining += 2;
+                            else if (varRef.Type == VariableType.StackTop)
+                                instrRemaining++;
+                            // TODO: check other `VariableType` values
+                        }
                         break;
 
                     case Opcode.Add or Opcode.Sub or Opcode.Mul
