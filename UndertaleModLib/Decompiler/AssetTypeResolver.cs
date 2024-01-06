@@ -406,25 +406,6 @@ namespace UndertaleModLib.Decompiler
                     }
                 }
 
-                if (overloaded)
-                {
-                    // Copy the array to make sure we don't overwrite existing known types
-                    func_types = (AssetIDType[]) func_types.Clone();
-                    AssetIDType scriptArgType;
-
-                    for (int i = 0; i < arguments.Length && i < func_types.Length && i < scriptArgs[function_name].Length; i++)
-                    {
-                        scriptArgType = scriptArgs[function_name][i];
-
-                        // Merge types together
-                        if (func_types[i] == AssetIDType.Other && scriptArgType != AssetIDType.Other)
-                            func_types[i] = scriptArgType;
-                        // Conflicting types - do not resolve
-                        else if (func_types[i] != AssetIDType.Other && scriptArgType != AssetIDType.Other && func_types[i] != scriptArgType)
-                            func_types[i] = AssetIDType.Other;
-                        // func_types[i] is correct, do not replace
-                    }
-                }
                 for (int i = 0; i < arguments.Length && i < func_types.Length; i++)
                     arguments[i] = func_types[i];
                 return true;
