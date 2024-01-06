@@ -1717,6 +1717,10 @@ namespace UndertaleModLib.Compiler
                                     // Ignore the optimization for GMS build versions less than 1763 and not equal to 1539.
                                     if ((context.Data?.GeneralInfo.Build >= 1763) || (context.Data?.GeneralInfo.Major >= 2) || (context.Data?.GeneralInfo.Build == 1539))
                                     {
+                                        // If it's `string("test {0}", "format")`
+                                        if (CompileContext.GM2022_11 && result.Children.Count > 1)
+                                            return result;
+
                                         string conversion;
                                         switch (child0.Constant.kind)
                                         {

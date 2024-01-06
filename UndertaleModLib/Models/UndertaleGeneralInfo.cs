@@ -336,6 +336,10 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
             CompileContext.GMS2_3 = false;
             DecompileContext.GMS2_3 = false;
         }
+        if (detectedVer.Major > 2022 || (detectedVer.Major == 2022 && detectedVer.Minor >= 11))
+            CompileContext.GM2022_11 = true;
+        else
+            CompileContext.GM2022_11 = false;
 
         return detectedVer;
     }

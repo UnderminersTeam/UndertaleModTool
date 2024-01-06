@@ -1177,7 +1177,10 @@ namespace UndertaleModLib.Compiler
             Functions["angle_difference"] = new FunctionInfo(this, 2);
             Functions["real"] = new FunctionInfo(this, 1);
             Functions["bool"] = new FunctionInfo(this, 1);
-            Functions["string"] = new FunctionInfo(this, 1);
+            if (data?.IsVersionAtLeast(2022, 11) == true)
+                Functions["string"] = new FunctionInfo(this, -1);
+            else
+                Functions["string"] = new FunctionInfo(this, 1);
             Functions["int64"] = new FunctionInfo(this, 1);
             Functions["ptr"] = new FunctionInfo(this, 1);
             Functions["string_format"] = new FunctionInfo(this, 3);
