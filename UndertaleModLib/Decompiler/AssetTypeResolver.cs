@@ -1250,16 +1250,15 @@ namespace UndertaleModLib.Decompiler
 
                 builtin_funcs["c_soundplay_wait"] = new[] { AssetIDType.Sound };
                 builtin_funcs["snd_pitch_time"] = new[] { AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["draw_sprite_ext_glow"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-
+                builtin_funcs["draw_sprite_ext_glow"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Color };
                 builtin_funcs["draw_enable_alphablend"] = new[] { AssetIDType.Boolean };
-                builtin_funcs["draw_sprite_part_ext_glow"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["draw_sprite_part_ext_glow"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Color };
                 builtin_funcs["scr_marker_animated"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other };
-                builtin_funcs["scr_act_charsprite"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Boolean };
-                builtin_funcs["scr_draw_sprite_tiled_area"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Boolean };
-                builtin_funcs["c_actorsetsprites"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Boolean };
+                builtin_funcs["scr_act_charsprite"] = new[] { AssetIDType.Other /* string */, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Boolean };
+                builtin_funcs["scr_draw_sprite_tiled_area"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
+                builtin_funcs["c_actorsetsprites"] = new[] { AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Boolean };
                 builtin_funcs["c_jump_sprite"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Sprite };
-                builtin_funcs["scr_dark_marker_animated"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Boolean };
+                builtin_funcs["scr_dark_marker_animated"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite, AssetIDType.Other };
                 builtin_funcs["_background_set"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
                 builtin_funcs["c_addxy"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color };
                 builtin_funcs["c_autowalk"] = new[] { AssetIDType.Boolean };
@@ -1268,7 +1267,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_funcs["c_pannable"] = new[] { AssetIDType.Boolean };
                 builtin_funcs["c_panobj"] = new[] { AssetIDType.GameObject, AssetIDType.Other };
                 builtin_funcs["c_panspeed"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["c_script_instance"] = new[] { AssetIDType.GameObject, AssetIDType.Script, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["c_script_instance"] = new[] { AssetIDType.GameObject, AssetIDType.Script, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other }; // TODO: it's actually dynamic starting from the third argument
                 builtin_funcs["c_script_instance_stop"] = new[] { AssetIDType.GameObject, AssetIDType.Script };
                 builtin_funcs["c_setxy"] = new[] { AssetIDType.Other, AssetIDType.Other };
                 builtin_funcs["c_soundplay"] = new[] { AssetIDType.Sound };
@@ -1288,7 +1287,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_funcs["draw_sprite_ext_centerscale"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
                 builtin_funcs["draw_sprite_ext_flash"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
                 builtin_funcs["draw_sprite_skew_ext_cute"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["draw_text_outline"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["draw_text_outline"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other /* string */, AssetIDType.Color };
                 builtin_funcs["i_ex"] = new[] { AssetIDType.GameObject };
                 builtin_funcs["instance_create_ch1"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
                 builtin_funcs["msgsetloc"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
@@ -1306,7 +1305,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_funcs["scr_bullet_create"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
                 builtin_funcs["scr_bulletspawner"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
                 builtin_funcs["scr_caterpillar_facing_ch1"] = new[] { AssetIDType.Other };
-                builtin_funcs["scr_custom_afterimage"] = new[] { AssetIDType.Sprite };
+                builtin_funcs["scr_custom_afterimage"] = new[] { AssetIDType.GameObject };
                 builtin_funcs["scr_custom_afterimage_ext"] = new[] { AssetIDType.GameObject, AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
                 builtin_funcs["scr_dark_marker"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
                 builtin_funcs["scr_dark_marker_ch1"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
@@ -1314,7 +1313,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_funcs["scr_debug_keycheck"] = new[] { AssetIDType.KeyboardKey };
                 builtin_funcs["scr_draw_background_ps4_ch1"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other };
                 builtin_funcs["scr_draw_outline_ext"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other };
-                builtin_funcs["scr_draw_sprite_crop_ext"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_draw_sprite_crop_ext"] = new[] { AssetIDType.Sprite, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Color, AssetIDType.Other };
                 builtin_funcs["scr_ds_list_write"] = new[] { AssetIDType.Other, AssetIDType.Other };
                 builtin_funcs["scr_enemyblcon"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
                 builtin_funcs["scr_following_afterimage"] = new[] { AssetIDType.GameObject, AssetIDType.GameObject };
@@ -1330,7 +1329,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_funcs["scr_pan_ch1"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
                 builtin_funcs["scr_pan_to_obj"] = new[] { AssetIDType.GameObject, AssetIDType.Other };
                 builtin_funcs["scr_pan_to_obj_ch1"] = new[] { AssetIDType.GameObject, AssetIDType.Other };
-                builtin_funcs["scr_script_delayed"] = new[] { AssetIDType.Script, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_script_delayed"] = new[] { AssetIDType.Script, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other }; // TODO: it's actually dynamic starting from the third argument
                 builtin_funcs["scr_textsetup"] = new[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
                 builtin_funcs["scr_textsetup_ch1"] = new[] { AssetIDType.Font, AssetIDType.Color, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sound, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
                 builtin_funcs["snd_is_playing"] = new[] { AssetIDType.Sound };
