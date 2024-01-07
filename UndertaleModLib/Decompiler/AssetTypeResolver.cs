@@ -372,17 +372,19 @@ namespace UndertaleModLib.Decompiler
             Dictionary<string, AssetIDType[]> scriptArgs = context.GlobalContext.ScriptArgsCache;
 
             bool overloaded = false;
+            AssetIDType[] funcArgs;
             // Scripts overload builtins because in GMS2 some functions are just backwards-compatibility scripts
-            if (scriptArgs.ContainsKey(function_name) && scriptArgs[function_name] != null)
+            if (scriptArgs.TryGetValue(function_name, out funcArgs) && funcArgs is not null)
             {
                 overloaded = true;
-                for (int i = 0; i < arguments.Length && i < scriptArgs[function_name].Length; i++)
-                    arguments[i] = scriptArgs[function_name][i];
+                for (int i = 0; i < arguments.Length && i < funcArgs.Length; i++)
+                    arguments[i] = funcArgs[i];
             }
 
             function_name = function_name.Replace("color", "colour", StringComparison.InvariantCulture); // Just GameMaker things... both are valid :o
 
-            if(context.GlobalContext.Data?.IsGameMaker2() ?? false)
+            bool isGMS2 = context.GlobalContext.Data?.IsGameMaker2() ?? false;
+            if (isGMS2)
             {
                 // Backgrounds don't exist in GMS2
                 for (int i = 0; i < arguments.Length; i++)
@@ -392,29 +394,30 @@ namespace UndertaleModLib.Decompiler
                 }
             }
 
-            if (builtin_funcs.ContainsKey(function_name))
+            if (builtin_funcs.TryGetValue(function_name, out var funcTypes))
             {
-                AssetIDType[] func_types = builtin_funcs[function_name];
-
-                if (context.GlobalContext.Data?.IsGameMaker2() ?? false)
+                if (isGMS2)
                 {
                     // Backgrounds don't exist in GMS2
-                    for (int i = 0; i < func_types.Length; i++)
+                    for (int i = 0; i < funcTypes.Length; i++)
                     {
-                        if (func_types[i] == AssetIDType.Background)
-                            func_types[i] = AssetIDType.Sprite;
+                        if (funcTypes[i] == AssetIDType.Background)
+                            funcTypes[i] = AssetIDType.Sprite;
                     }
                 }
 
-                for (int i = 0; i < arguments.Length && i < func_types.Length; i++)
-                    arguments[i] = func_types[i];
+                for (int i = 0; i < arguments.Length && i < funcTypes.Length; i++)
+                    arguments[i] = funcTypes[i];
+
                 return true;
             }
+
             if (function_name == "script_execute")
             {
                 // This needs a special case
                 if (arguments.Length < 1)
                     throw new Exception("Bad call to " + function_name + " with " + arguments.Length + " arguments (instead of at least 1)");
+
                 arguments[0] = AssetIDType.Script;
 
                 // Attempt to resolve the arguments of the script being called.
@@ -433,7 +436,7 @@ namespace UndertaleModLib.Decompiler
                             if (script_id >= 0 && script_id < context.GlobalContext.Data.Scripts.Count)
                             {
                                 var script = context.GlobalContext.Data.Scripts[script_id];
-                                AssetIDType[] args = new AssetIDType[arguments.Length-1];
+                                AssetIDType[] args = new AssetIDType[arguments.Length - 1];
                                 AnnotateTypesForFunctionCall(script.Name.Content, args, context);
                                 Array.Copy(args, 0, arguments, 1, args.Length);
                                 return true;
@@ -441,13 +444,16 @@ namespace UndertaleModLib.Decompiler
                         }
                     }
                 }
-                if (scriptArgs.ContainsKey(function_name) && scriptArgs[function_name] != null)
+
+                if (funcArgs is not null)
                 {
-                    for (int i = 0; i < arguments.Length && i < scriptArgs[function_name].Length; i++)
-                        arguments[1 + i] = scriptArgs[function_name][i];
+                    for (int i = 0; i < arguments.Length && i < funcArgs.Length; i++)
+                        arguments[1 + i] = funcArgs[i];
                 }
+
                 return true;
             }
+
             return overloaded;
         }
 
