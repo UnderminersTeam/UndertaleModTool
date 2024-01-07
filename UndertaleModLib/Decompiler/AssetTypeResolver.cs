@@ -459,27 +459,29 @@ namespace UndertaleModLib.Decompiler
 
         internal static AssetIDType AnnotateTypeForVariable(DecompileContext context, string variable_name)
         {
+            AssetIDType type;
             var overrides = GetTypeOverridesFor(context.TargetCode.Name.Content);
-            if (overrides.ContainsKey(variable_name))
-                return overrides[variable_name];
+            if (overrides.TryGetValue(variable_name, out type))
+                return type;
 
             if (context.Object != null)
             {
                 overrides = GetTypeOverridesFor(context.Object.Name.Content);
-                if (overrides.ContainsKey(variable_name))
-                    return overrides[variable_name];
+                if (overrides.TryGetValue(variable_name, out type))
+                    return type;
             }
 
+            if (builtin_vars.TryGetValue(variable_name, out type))
+                return type;
 
-            if (builtin_vars.ContainsKey(variable_name))
-                return builtin_vars[variable_name];
             return AssetIDType.Other;
         }
 
         internal static AssetIDType AnnotateTypeForScript(string script_name)
         {
-            if (return_types.ContainsKey(script_name))
-                return return_types[script_name];
+            if (return_types.TryGetValue(script_name, out var type))
+                return type;
+
             return AssetIDType.Other;
         }
 
@@ -490,12 +492,13 @@ namespace UndertaleModLib.Decompiler
 
         internal static Dictionary<string, AssetIDType> GetTypeOverridesFor(string code_entry_name)
         {
-            lock(builtin_var_overrides)
+            lock (builtin_var_overrides)
             {
-                if (!builtin_var_overrides.ContainsKey(code_entry_name))
-                    builtin_var_overrides.Add(code_entry_name, new Dictionary<string, AssetIDType>());
+                Dictionary<string, AssetIDType> varOverride;
+                if (!builtin_var_overrides.TryGetValue(code_entry_name, out varOverride))
+                    builtin_var_overrides.Add(code_entry_name, varOverride = new());
 
-                return builtin_var_overrides[code_entry_name];
+                return varOverride;
             }
         }
 
@@ -512,29 +515,29 @@ namespace UndertaleModLib.Decompiler
             if (const_name.Length >= 1 && const_name[0] == '-')
                 return null; // that is not a constant either
 
-            // By avoiding Enum.TryParse, we avoid exception spam in the console, and there isn't any speed loss.
-            if (Enum.IsDefined(typeof(OSType), const_name))
-                return (int)Enum.Parse(typeof(OSType), const_name);
-            if (Enum.IsDefined(typeof(GamepadButton), const_name))
-                return (int)Enum.Parse(typeof(GamepadButton), const_name);
-            if (Enum.IsDefined(typeof(MouseButton), const_name))
-                return (int)Enum.Parse(typeof(MouseButton), const_name);
-            if (Enum.IsDefined(typeof(MouseCursor), const_name))
-                return (int)Enum.Parse(typeof(MouseCursor), const_name);
-            if (Enum.IsDefined(typeof(HAlign), const_name))
-                return (int)Enum.Parse(typeof(HAlign), const_name);
-            if (Enum.IsDefined(typeof(VAlign), const_name))
-                return (int)Enum.Parse(typeof(VAlign), const_name);
-            if (Enum.IsDefined(typeof(GameSpeed), const_name))
-                return (int)Enum.Parse(typeof(GameSpeed), const_name);
-            if (Enum.IsDefined(typeof(e__VW), const_name))
-                return (int)Enum.Parse(typeof(e__VW), const_name);
-            if (Enum.IsDefined(typeof(e__BG), const_name))
-                return (int)Enum.Parse(typeof(e__BG), const_name);
-            if (Enum.IsDefined(typeof(EventSubtypeKey), const_name))
-                return Convert.ToInt32((uint)Enum.Parse(typeof(EventSubtypeKey), const_name));
-            if (Enum.IsDefined(typeof(Enum_EventType), const_name))
-                return (int)Enum.Parse(typeof(Enum_EventType), const_name);
+            object res;
+            if (Enum.TryParse(typeof(OSType), const_name, false, out res))
+                return (int)res;
+            if (Enum.TryParse(typeof(GamepadButton), const_name, false, out res))
+                return (int)res;
+            if (Enum.TryParse(typeof(MouseButton), const_name, false, out res))
+                return (int)res;
+            if (Enum.TryParse(typeof(MouseCursor), const_name, false, out res))
+                return (int)res;
+            if (Enum.TryParse(typeof(HAlign), const_name, false, out res))
+                return (int)res;
+            if (Enum.TryParse(typeof(VAlign), const_name, false, out res))
+                return (int)res;
+            if (Enum.TryParse(typeof(GameSpeed), const_name, false, out res))
+                return (int)res;
+            if (Enum.TryParse(typeof(e__VW), const_name, false, out res))
+                return (int)res;
+            if (Enum.TryParse(typeof(e__BG), const_name, false, out res))
+                return (int)res;
+            if (Enum.TryParse(typeof(EventSubtypeKey), const_name, false, out res))
+                return Convert.ToInt32((uint)res);
+            if (Enum.TryParse(typeof(Enum_EventType), const_name, false, out res))
+                return (int)res;
 
             return null;
         }
