@@ -545,7 +545,6 @@ namespace UndertaleModLib.Decompiler
         // Properly initializes per-project/game
         public static void InitializeTypes(UndertaleData data)
         {
-
             ContextualAssetResolver.Initialize(data);
 
             return_types = new Dictionary<string, AssetIDType>();
@@ -1309,7 +1308,7 @@ namespace UndertaleModLib.Decompiler
                 builtin_funcs["texture_set_interpolation_ch1"] = new[] { AssetIDType.Boolean };
                 builtin_funcs["scr_anim"] = new[] { AssetIDType.Sprite, AssetIDType.Other };
                 builtin_funcs["scr_anim_ch1"] = new[] { AssetIDType.Sprite, AssetIDType.Other };
-                builtin_funcs["scr_battle"] = new[] { AssetIDType.Other, AssetIDType.Boolean, AssetIDType.Other, AssetIDType.Other, AssetIDType.Other };
+                builtin_funcs["scr_battle"] = new[] { AssetIDType.Other, AssetIDType.Boolean, AssetIDType.GameObject, AssetIDType.GameObject, AssetIDType.GameObject };
                 builtin_funcs["scr_battle_marker"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.Sprite };
                 builtin_funcs["scr_bullet_create"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
                 builtin_funcs["scr_bulletspawner"] = new[] { AssetIDType.Other, AssetIDType.Other, AssetIDType.GameObject };
