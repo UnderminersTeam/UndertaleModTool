@@ -27,8 +27,8 @@ namespace UndertaleModTool.Windows
                         Version = (1, 0, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleCode), "Code"),
-                            (typeof(UndertaleGameObject), "Game objects")
+                            (typeof(UndertaleGameObject), "Game objects"),
+                            (typeof(UndertaleCode), "Code")
                         }
                     },
                     new TypesForVersion
@@ -69,7 +69,8 @@ namespace UndertaleModTool.Windows
                         Types = new[]
                         {
                             (typeof(UndertaleRoom.Background), "Room backgrounds"),
-                            (typeof(UndertaleRoom.Tile), "Room tiles")
+                            (typeof(UndertaleRoom.Tile), "Room tiles"),
+                            (typeof(UndertaleCode), "Code")
                         }
                     },
                     new TypesForVersion
@@ -79,6 +80,7 @@ namespace UndertaleModTool.Windows
                         {
                             (typeof(UndertaleRoom.Background), null),
                             (typeof(UndertaleRoom.Tile), null),
+                            (typeof(UndertaleCode), null),
                             (typeof(UndertaleRoom.Layer), "Room tile layers")
                         }
                     },
