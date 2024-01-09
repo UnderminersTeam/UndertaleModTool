@@ -103,6 +103,8 @@ namespace UndertaleModLib.Compiler
         public Dictionary<Compiler.Lexer.Token.TokenKind, AccessorInfo> Accessors1D = null;
         public Dictionary<Compiler.Lexer.Token.TokenKind, AccessorInfo> Accessors2D = null;
 
+        public static bool CheckBuiltinFuncArgCount { get; set; } = true;
+
         public int CurrentID = 0;
         public int ArgumentID = 0;
         public int Argument0ID = 0;

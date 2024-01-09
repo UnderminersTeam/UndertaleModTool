@@ -471,6 +471,7 @@ namespace UndertaleModTool
 
             RunGMSDebuggerItem.Visibility = Settings.Instance.ShowDebuggerOption
                                             ? Visibility.Visible : Visibility.Collapsed;
+            UndertaleModLib.Compiler.BuiltinList.CheckBuiltinFuncArgCount = Settings.Instance.CheckBuiltinFunctionsArgCount;
         }
 
         public Dictionary<string, NamedPipeServerStream> childFiles = new Dictionary<string, NamedPipeServerStream>();

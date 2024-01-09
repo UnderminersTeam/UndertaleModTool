@@ -397,19 +397,31 @@ namespace UndertaleModLib.Compiler
             {
                 if (context != null)
                 {
-                    if (msg.EndsWith(".", StringComparison.InvariantCulture))
-                        msg = msg.Remove(msg.Length - 1);
+                    int firstDotIndex = msg.IndexOf('.');
+                    if (firstDotIndex != -1)
+                        msg = msg.Remove(firstDotIndex, 1);
 
                     if (context.Location != null)
                     {
-                        msg += string.Format(" around line {0}, column {1}", context.Location.Line, context.Location.Column);
-                    } else if (context.Kind == TokenKind.EOF)
+                        string s = string.Format(" around line {0}, column {1}", context.Location.Line, context.Location.Column);
+                        msg = msg.Insert(firstDotIndex, s);
+                        firstDotIndex += s.Length;
+                    }
+                    else if (context.Kind == TokenKind.EOF)
                     {
-                        msg += " around EOF (end of file)";
+                        msg = msg.Insert(firstDotIndex, " around EOF (end of file)");
+                        firstDotIndex += " around EOF (end of file)".Length;
                     }
                     if (context.Content != null && context.Content.Length > 0)
-                        msg += " (" + context.Content + ")";
-                    ReportCodeError(msg + ".", synchronize);
+                    {
+                        string s = " (" + context.Content + ')';
+                        msg = msg.Insert(firstDotIndex, s);
+                        firstDotIndex += s.Length;
+                    }
+
+                    msg = msg.Insert(firstDotIndex, ".");
+
+                    ReportCodeError(msg, synchronize);
                 }
                 else
                 {
@@ -1046,7 +1058,8 @@ namespace UndertaleModLib.Compiler
                 if (EnsureTokenKind(TokenKind.CloseParen) == null) return null;
 
                 // Check for proper argument count, at least for builtins
-                if (context.BuiltInList.Functions.TryGetValue(s.Text, out FunctionInfo fi))
+                if (BuiltinList.CheckBuiltinFuncArgCount
+                    && context.BuiltInList.Functions.TryGetValue(s.Text, out FunctionInfo fi))
                 {
                     if (fi.ArgumentCount < -1)
                     {
@@ -1054,14 +1067,18 @@ namespace UndertaleModLib.Compiler
                         int minArgCount = -fi.ArgumentCount - 1; 
                         if (result.Children.Count < minArgCount)
                         {
-                            ReportCodeError(string.Format("Function {0} expects at least {1} arguments, got {2}.",
+                            ReportCodeError(string.Format("Function {0} expects at least {1} arguments, got {2}.\n\n" +
+                                                          "If you sure that's a mistake, then you can disable built-in functions " +
+                                                          "argument count checking in the settings.",
                                                           s.Text, minArgCount, result.Children.Count),
                                             s.Token, false);
                         }
                     }
                     else if (fi.ArgumentCount != -1 && result.Children.Count != fi.ArgumentCount)
                     {
-                        ReportCodeError(string.Format("Function {0} expects {1} arguments, got {2}.",
+                        ReportCodeError(string.Format("Function {0} expects {1} arguments, got {2}.\n\n" +
+                                                      "If you sure that's a mistake, then you can disable built-in functions " +
+                                                      "argument count checking in the settings.",
                                                       s.Text, fi.ArgumentCount, result.Children.Count),
                                         s.Token, false);
                     }

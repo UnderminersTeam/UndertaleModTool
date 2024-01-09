@@ -209,6 +209,18 @@ namespace UndertaleModTool
             }
         }
 
+        public static bool CheckBuiltinFunctionsArgCount
+        {
+            get => Settings.Instance.CheckBuiltinFunctionsArgCount;
+            set
+            {
+                Settings.Instance.CheckBuiltinFunctionsArgCount = value;
+                Settings.Save();
+
+                UndertaleModLib.Compiler.BuiltinList.CheckBuiltinFuncArgCount = value;
+            }
+        }
+
         public bool UpdateButtonEnabled
         {
             get => UpdateAppButton.IsEnabled;
