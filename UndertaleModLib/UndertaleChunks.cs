@@ -902,7 +902,7 @@ namespace UndertaleModLib
 
         private void CheckForGM2023_8(UndertaleReader reader)
         {
-            if (!reader.undertaleData.IsVersionAtLeast(2, 3) || reader.undertaleData.IsVersionAtLeast(2023, 8))
+            if (!reader.undertaleData.IsVersionAtLeast(2023, 2) || reader.undertaleData.IsVersionAtLeast(2023, 8))
                 return;
 
             // Check for a `pushref` instruction
