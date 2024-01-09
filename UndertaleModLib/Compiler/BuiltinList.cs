@@ -56,8 +56,6 @@ namespace UndertaleModLib.Compiler
     public class FunctionInfo
     {
         public int ArgumentCount;
-        public bool IsFirstParamInstance = false;
-        public bool IsFirstParamOther = false;
         public int ID;
         public FunctionClassification Classification = FunctionClassification.None;
 
@@ -71,21 +69,6 @@ namespace UndertaleModLib.Compiler
         {
             Classification = classification;
             // Maybe handle this differently? (look UndertaleFunction.cs)
-        }
-
-        public FunctionInfo(BuiltinList list, int argumentCount, bool isFirstParamInstance)
-        {
-            ArgumentCount = argumentCount;
-            IsFirstParamInstance = isFirstParamInstance;
-            ID = list.CurrentID++;
-        }
-
-        public FunctionInfo(BuiltinList list, int argumentCount, bool isFirstParamInstance, bool isFirstParamOther)
-        {
-            ArgumentCount = argumentCount;
-            IsFirstParamInstance = isFirstParamInstance;
-            IsFirstParamOther = isFirstParamOther;
-            ID = list.CurrentID++;
         }
     }
 
@@ -136,24 +119,29 @@ namespace UndertaleModLib.Compiler
 
         public void Initialize(UndertaleData data)
         {
-            // Functions
+            // Functions.
+            // If the argument count is less that -1, then it's a minimal count
+            // (-2 = at least 1 argument).
             Functions = new Dictionary<string, FunctionInfo>();
-            Functions["matrix_get"] = new FunctionInfo(this, 1);
-            Functions["matrix_set"] = new FunctionInfo(this, 2);
-            Functions["matrix_build"] = new FunctionInfo(this, 9);
-            Functions["matrix_build_lookat"] = new FunctionInfo(this, 9);
-            Functions["matrix_build_identity"] = new FunctionInfo(this, 0);
-            Functions["matrix_build_projection_ortho"] = new FunctionInfo(this, 4);
-            Functions["matrix_build_projection_perspective"] = new FunctionInfo(this, 4);
-            Functions["matrix_build_projection_perspective_fov"] = new FunctionInfo(this, 4);
-            Functions["matrix_multiply"] = new FunctionInfo(this, 2);
-            Functions["matrix_transform_vertex"] = new FunctionInfo(this, 4);
-            Functions["matrix_stack_push"] = new FunctionInfo(this, -1);
-            Functions["matrix_stack_pop"] = new FunctionInfo(this, 0);
-            Functions["matrix_stack_set"] = new FunctionInfo(this, 1);
-            Functions["matrix_stack_clear"] = new FunctionInfo(this, 0);
-            Functions["matrix_stack_top"] = new FunctionInfo(this, 0);
-            Functions["matrix_stack_is_empty"] = new FunctionInfo(this, 0);
+            if (data?.IsVersionAtLeast(2, 0, 4) == true)
+            {
+                Functions["matrix_get"] = new FunctionInfo(this, 1);
+                Functions["matrix_set"] = new FunctionInfo(this, 2);
+                Functions["matrix_build"] = new FunctionInfo(this, 9);
+                Functions["matrix_build_lookat"] = new FunctionInfo(this, 9);
+                Functions["matrix_build_identity"] = new FunctionInfo(this, 0);
+                Functions["matrix_build_projection_ortho"] = new FunctionInfo(this, 4);
+                Functions["matrix_build_projection_perspective"] = new FunctionInfo(this, 4);
+                Functions["matrix_build_projection_perspective_fov"] = new FunctionInfo(this, 4);
+                Functions["matrix_multiply"] = new FunctionInfo(this, 2);
+                Functions["matrix_transform_vertex"] = new FunctionInfo(this, 4);
+                Functions["matrix_stack_push"] = new FunctionInfo(this, 1);
+                Functions["matrix_stack_pop"] = new FunctionInfo(this, 0);
+                Functions["matrix_stack_set"] = new FunctionInfo(this, 1);
+                Functions["matrix_stack_clear"] = new FunctionInfo(this, 0);
+                Functions["matrix_stack_top"] = new FunctionInfo(this, 0);
+                Functions["matrix_stack_is_empty"] = new FunctionInfo(this, 0);
+            }
             if (data?.GeneralInfo?.Major < 2)
             {
                 Functions["d3d_start"] = new FunctionInfo(this, 0);
@@ -247,7 +235,7 @@ namespace UndertaleModLib.Compiler
             if (data?.GeneralInfo?.Major < 2)
             {
                 Functions["action_path_old"] = new FunctionInfo(this, 3);
-                Functions["action_set_sprite"] = new FunctionInfo(this, 2, true);
+                Functions["action_set_sprite"] = new FunctionInfo(this, 2);
                 Functions["action_draw_font"] = new FunctionInfo(this, 1);
                 Functions["action_draw_font_old"] = new FunctionInfo(this, 6);
                 Functions["action_fill_color"] = new FunctionInfo(this, 1);
@@ -256,38 +244,38 @@ namespace UndertaleModLib.Compiler
                 Functions["action_line_colour"] = new FunctionInfo(this, 1);
                 Functions["action_highscore"] = new FunctionInfo(this, 0);
                 Functions["action_set_relative"] = new FunctionInfo(this, 1);
-                Functions["action_move"] = new FunctionInfo(this, 2, true);
-                Functions["action_set_motion"] = new FunctionInfo(this, 2, true);
-                Functions["action_set_hspeed"] = new FunctionInfo(this, 1, true);
-                Functions["action_set_vspeed"] = new FunctionInfo(this, 1, true);
-                Functions["action_set_gravity"] = new FunctionInfo(this, 2, true);
-                Functions["action_set_friction"] = new FunctionInfo(this, 1, true);
-                Functions["action_move_point"] = new FunctionInfo(this, 3, true);
-                Functions["action_move_to"] = new FunctionInfo(this, 2, true);
-                Functions["action_move_start"] = new FunctionInfo(this, 0, true);
-                Functions["action_move_random"] = new FunctionInfo(this, 2, true);
-                Functions["action_snap"] = new FunctionInfo(this, 2, true);
-                Functions["action_wrap"] = new FunctionInfo(this, 1, true);
-                Functions["action_reverse_xdir"] = new FunctionInfo(this, 0, true);
-                Functions["action_reverse_ydir"] = new FunctionInfo(this, 0, true);
-                Functions["action_move_contact"] = new FunctionInfo(this, 3, true);
-                Functions["action_bounce"] = new FunctionInfo(this, 2, true);
-                Functions["action_path"] = new FunctionInfo(this, 4, true);
-                Functions["action_path_end"] = new FunctionInfo(this, 0, true);
-                Functions["action_path_position"] = new FunctionInfo(this, 1, true);
-                Functions["action_path_speed"] = new FunctionInfo(this, 1, true);
-                Functions["action_linear_step"] = new FunctionInfo(this, 4, true);
-                Functions["action_potential_step"] = new FunctionInfo(this, 4, true);
-                Functions["action_kill_object"] = new FunctionInfo(this, 0, true);
-                Functions["action_create_object"] = new FunctionInfo(this, 3, true);
-                Functions["action_create_object_motion"] = new FunctionInfo(this, 5, true);
-                Functions["action_create_object_random"] = new FunctionInfo(this, 6, true);
-                Functions["action_change_object"] = new FunctionInfo(this, 2, true);
-                Functions["action_kill_position"] = new FunctionInfo(this, 2, true);
-                Functions["action_sprite_set"] = new FunctionInfo(this, 3, true);
-                Functions["action_sprite_transform"] = new FunctionInfo(this, 4, true);
-                Functions["action_sprite_color"] = new FunctionInfo(this, 2, true);
-                Functions["action_sprite_colour"] = new FunctionInfo(this, 2, true);
+                Functions["action_move"] = new FunctionInfo(this, 2);
+                Functions["action_set_motion"] = new FunctionInfo(this, 2);
+                Functions["action_set_hspeed"] = new FunctionInfo(this, 1);
+                Functions["action_set_vspeed"] = new FunctionInfo(this, 1);
+                Functions["action_set_gravity"] = new FunctionInfo(this, 2);
+                Functions["action_set_friction"] = new FunctionInfo(this, 1);
+                Functions["action_move_point"] = new FunctionInfo(this, 3);
+                Functions["action_move_to"] = new FunctionInfo(this, 2);
+                Functions["action_move_start"] = new FunctionInfo(this, 0);
+                Functions["action_move_random"] = new FunctionInfo(this, 2);
+                Functions["action_snap"] = new FunctionInfo(this, 2);
+                Functions["action_wrap"] = new FunctionInfo(this, 1);
+                Functions["action_reverse_xdir"] = new FunctionInfo(this, 0);
+                Functions["action_reverse_ydir"] = new FunctionInfo(this, 0);
+                Functions["action_move_contact"] = new FunctionInfo(this, 3);
+                Functions["action_bounce"] = new FunctionInfo(this, 2);
+                Functions["action_path"] = new FunctionInfo(this, 4);
+                Functions["action_path_end"] = new FunctionInfo(this, 0);
+                Functions["action_path_position"] = new FunctionInfo(this, 1);
+                Functions["action_path_speed"] = new FunctionInfo(this, 1);
+                Functions["action_linear_step"] = new FunctionInfo(this, 4);
+                Functions["action_potential_step"] = new FunctionInfo(this, 4);
+                Functions["action_kill_object"] = new FunctionInfo(this, 0);
+                Functions["action_create_object"] = new FunctionInfo(this, 3);
+                Functions["action_create_object_motion"] = new FunctionInfo(this, 5);
+                Functions["action_create_object_random"] = new FunctionInfo(this, 6);
+                Functions["action_change_object"] = new FunctionInfo(this, 2);
+                Functions["action_kill_position"] = new FunctionInfo(this, 2);
+                Functions["action_sprite_set"] = new FunctionInfo(this, 3);
+                Functions["action_sprite_transform"] = new FunctionInfo(this, 4);
+                Functions["action_sprite_color"] = new FunctionInfo(this, 2);
+                Functions["action_sprite_colour"] = new FunctionInfo(this, 2);
                 Functions["action_sound"] = new FunctionInfo(this, 2);
                 Functions["action_end_sound"] = new FunctionInfo(this, 1);
                 Functions["action_if_sound"] = new FunctionInfo(this, 1);
@@ -297,15 +285,15 @@ namespace UndertaleModLib.Compiler
                 Functions["action_next_room"] = new FunctionInfo(this, 0);
                 Functions["action_if_previous_room"] = new FunctionInfo(this, 0);
                 Functions["action_if_next_room"] = new FunctionInfo(this, 0);
-                Functions["action_set_alarm"] = new FunctionInfo(this, 2, true);
+                Functions["action_set_alarm"] = new FunctionInfo(this, 2);
                 Functions["action_sleep"] = new FunctionInfo(this, 2);
-                Functions["action_set_timeline"] = new FunctionInfo(this, 2, true);
-                Functions["action_timeline_set"] = new FunctionInfo(this, 4, true);
-                Functions["action_timeline_start"] = new FunctionInfo(this, 0, true);
-                Functions["action_timeline_stop"] = new FunctionInfo(this, 0, true);
-                Functions["action_timeline_pause"] = new FunctionInfo(this, 0, true);
-                Functions["action_set_timeline_position"] = new FunctionInfo(this, 1, true);
-                Functions["action_set_timeline_speed"] = new FunctionInfo(this, 1, true);
+                Functions["action_set_timeline"] = new FunctionInfo(this, 2);
+                Functions["action_timeline_set"] = new FunctionInfo(this, 4);
+                Functions["action_timeline_start"] = new FunctionInfo(this, 0);
+                Functions["action_timeline_stop"] = new FunctionInfo(this, 0);
+                Functions["action_timeline_pause"] = new FunctionInfo(this, 0);
+                Functions["action_set_timeline_position"] = new FunctionInfo(this, 1);
+                Functions["action_set_timeline_speed"] = new FunctionInfo(this, 1);
                 Functions["action_message"] = new FunctionInfo(this, 1);
                 Functions["action_show_info"] = new FunctionInfo(this, 0);
                 Functions["action_show_video"] = new FunctionInfo(this, 3);
@@ -316,31 +304,31 @@ namespace UndertaleModLib.Compiler
                 Functions["action_replace_sprite"] = new FunctionInfo(this, 3);
                 Functions["action_replace_sound"] = new FunctionInfo(this, 2);
                 Functions["action_replace_background"] = new FunctionInfo(this, 2);
-                Functions["action_if_empty"] = new FunctionInfo(this, 3, true);
-                Functions["action_if_collision"] = new FunctionInfo(this, 3, true);
+                Functions["action_if_empty"] = new FunctionInfo(this, 3);
+                Functions["action_if_collision"] = new FunctionInfo(this, 3);
                 Functions["action_if"] = new FunctionInfo(this, 1);
                 Functions["action_if_number"] = new FunctionInfo(this, 3);
-                Functions["action_if_object"] = new FunctionInfo(this, 3, true);
+                Functions["action_if_object"] = new FunctionInfo(this, 3);
                 Functions["action_if_question"] = new FunctionInfo(this, 1);
                 Functions["action_if_dice"] = new FunctionInfo(this, 1);
                 Functions["action_if_mouse"] = new FunctionInfo(this, 1);
-                Functions["action_if_aligned"] = new FunctionInfo(this, 2, true);
-                Functions["action_execute_script"] = new FunctionInfo(this, 6, true);
-                Functions["action_inherited"] = new FunctionInfo(this, 0, true, true);
+                Functions["action_if_aligned"] = new FunctionInfo(this, 2);
+                Functions["action_execute_script"] = new FunctionInfo(this, 6);
+                Functions["action_inherited"] = new FunctionInfo(this, 0);
                 Functions["action_if_variable"] = new FunctionInfo(this, 3);
-                Functions["action_draw_variable"] = new FunctionInfo(this, 3, true);
+                Functions["action_draw_variable"] = new FunctionInfo(this, 3);
                 Functions["action_set_score"] = new FunctionInfo(this, 1);
                 Functions["action_if_score"] = new FunctionInfo(this, 2);
-                Functions["action_draw_score"] = new FunctionInfo(this, 3, true);
+                Functions["action_draw_score"] = new FunctionInfo(this, 3);
                 Functions["action_highscore_show"] = new FunctionInfo(this, 11);
                 Functions["action_highscore_clear"] = new FunctionInfo(this, 0);
                 Functions["action_set_life"] = new FunctionInfo(this, 1);
                 Functions["action_if_life"] = new FunctionInfo(this, 2);
-                Functions["action_draw_life"] = new FunctionInfo(this, 3, true);
-                Functions["action_draw_life_images"] = new FunctionInfo(this, 3, true);
-                Functions["action_set_health"] = new FunctionInfo(this, 1, true);
-                Functions["action_if_health"] = new FunctionInfo(this, 2, true);
-                Functions["action_draw_health"] = new FunctionInfo(this, 6, true);
+                Functions["action_draw_life"] = new FunctionInfo(this, 3);
+                Functions["action_draw_life_images"] = new FunctionInfo(this, 3);
+                Functions["action_set_health"] = new FunctionInfo(this, 1);
+                Functions["action_if_health"] = new FunctionInfo(this, 2);
+                Functions["action_draw_health"] = new FunctionInfo(this, 6);
                 Functions["action_set_caption"] = new FunctionInfo(this, 6);
                 Functions["action_partsyst_create"] = new FunctionInfo(this, 1);
                 Functions["action_partsyst_destroy"] = new FunctionInfo(this, 0);
@@ -366,23 +354,23 @@ namespace UndertaleModLib.Compiler
                 Functions["action_set_cursor"] = new FunctionInfo(this, 2);
                 Functions["action_webpage"] = new FunctionInfo(this, 1);
                 Functions["action_splash_web"] = new FunctionInfo(this, 1);
-                Functions["action_draw_sprite"] = new FunctionInfo(this, 4, true);
-                Functions["action_draw_background"] = new FunctionInfo(this, 4, true);
-                Functions["action_draw_text"] = new FunctionInfo(this, 3, true);
-                Functions["action_draw_text_transformed"] = new FunctionInfo(this, 6, true);
-                Functions["action_draw_rectangle"] = new FunctionInfo(this, 5, true);
-                Functions["action_draw_gradient_hor"] = new FunctionInfo(this, 6, true);
-                Functions["action_draw_gradient_vert"] = new FunctionInfo(this, 6, true);
-                Functions["action_draw_ellipse"] = new FunctionInfo(this, 5, true);
-                Functions["action_draw_ellipse_gradient"] = new FunctionInfo(this, 6, true);
-                Functions["action_draw_line"] = new FunctionInfo(this, 4, true);
-                Functions["action_draw_arrow"] = new FunctionInfo(this, 5, true);
+                Functions["action_draw_sprite"] = new FunctionInfo(this, 4);
+                Functions["action_draw_background"] = new FunctionInfo(this, 4);
+                Functions["action_draw_text"] = new FunctionInfo(this, 3);
+                Functions["action_draw_text_transformed"] = new FunctionInfo(this, 6);
+                Functions["action_draw_rectangle"] = new FunctionInfo(this, 5);
+                Functions["action_draw_gradient_hor"] = new FunctionInfo(this, 6);
+                Functions["action_draw_gradient_vert"] = new FunctionInfo(this, 6);
+                Functions["action_draw_ellipse"] = new FunctionInfo(this, 5);
+                Functions["action_draw_ellipse_gradient"] = new FunctionInfo(this, 6);
+                Functions["action_draw_line"] = new FunctionInfo(this, 4);
+                Functions["action_draw_arrow"] = new FunctionInfo(this, 5);
                 Functions["action_color"] = new FunctionInfo(this, 1);
                 Functions["action_colour"] = new FunctionInfo(this, 1);
                 Functions["action_font"] = new FunctionInfo(this, 2);
                 Functions["action_fullscreen"] = new FunctionInfo(this, 1);
                 Functions["action_snapshot"] = new FunctionInfo(this, 1);
-                Functions["action_effect"] = new FunctionInfo(this, 6, true);
+                Functions["action_effect"] = new FunctionInfo(this, 6);
             }
             Functions["ds_set_precision"] = new FunctionInfo(this, 1);
             Functions["ds_exists"] = new FunctionInfo(this, 2);
@@ -392,30 +380,30 @@ namespace UndertaleModLib.Compiler
             Functions["ds_stack_copy"] = new FunctionInfo(this, 2);
             Functions["ds_stack_size"] = new FunctionInfo(this, 1);
             Functions["ds_stack_empty"] = new FunctionInfo(this, 1);
-            Functions["ds_stack_push"] = new FunctionInfo(this, -1);
+            Functions["ds_stack_push"] = new FunctionInfo(this, -3);
             Functions["ds_stack_pop"] = new FunctionInfo(this, 1);
             Functions["ds_stack_top"] = new FunctionInfo(this, 1);
             Functions["ds_stack_write"] = new FunctionInfo(this, 1);
-            Functions["ds_stack_read"] = new FunctionInfo(this, -1);
+            Functions["ds_stack_read"] = new FunctionInfo(this, -3);
             Functions["ds_queue_create"] = new FunctionInfo(this, 0);
             Functions["ds_queue_destroy"] = new FunctionInfo(this, 1);
             Functions["ds_queue_clear"] = new FunctionInfo(this, 1);
             Functions["ds_queue_copy"] = new FunctionInfo(this, 2);
             Functions["ds_queue_size"] = new FunctionInfo(this, 1);
             Functions["ds_queue_empty"] = new FunctionInfo(this, 1);
-            Functions["ds_queue_enqueue"] = new FunctionInfo(this, -1);
+            Functions["ds_queue_enqueue"] = new FunctionInfo(this, -3);
             Functions["ds_queue_dequeue"] = new FunctionInfo(this, 1);
             Functions["ds_queue_head"] = new FunctionInfo(this, 1);
             Functions["ds_queue_tail"] = new FunctionInfo(this, 1);
             Functions["ds_queue_write"] = new FunctionInfo(this, 1);
-            Functions["ds_queue_read"] = new FunctionInfo(this, -1);
+            Functions["ds_queue_read"] = new FunctionInfo(this, -3);
             Functions["ds_list_create"] = new FunctionInfo(this, 0);
             Functions["ds_list_destroy"] = new FunctionInfo(this, 1);
             Functions["ds_list_clear"] = new FunctionInfo(this, 1);
             Functions["ds_list_copy"] = new FunctionInfo(this, 2);
             Functions["ds_list_size"] = new FunctionInfo(this, 1);
             Functions["ds_list_empty"] = new FunctionInfo(this, 1);
-            Functions["ds_list_add"] = new FunctionInfo(this, -1);
+            Functions["ds_list_add"] = new FunctionInfo(this, -3);
             Functions["ds_list_insert"] = new FunctionInfo(this, 3);
             Functions["ds_list_replace"] = new FunctionInfo(this, 3);
             Functions["ds_list_delete"] = new FunctionInfo(this, 2);
@@ -426,7 +414,7 @@ namespace UndertaleModLib.Compiler
             Functions["ds_list_sort"] = new FunctionInfo(this, 2);
             Functions["ds_list_shuffle"] = new FunctionInfo(this, 1);
             Functions["ds_list_write"] = new FunctionInfo(this, 1);
-            Functions["ds_list_read"] = new FunctionInfo(this, -1);
+            Functions["ds_list_read"] = new FunctionInfo(this, -3);
             Functions["ds_list_set"] = new FunctionInfo(this, 3);
             Functions["ds_list_set_pre"] = new FunctionInfo(this, 3);
             Functions["ds_list_set_post"] = new FunctionInfo(this, 3);
@@ -450,7 +438,7 @@ namespace UndertaleModLib.Compiler
             Functions["ds_map_find_first"] = new FunctionInfo(this, 1);
             Functions["ds_map_find_last"] = new FunctionInfo(this, 1);
             Functions["ds_map_write"] = new FunctionInfo(this, 1);
-            Functions["ds_map_read"] = new FunctionInfo(this, -1);
+            Functions["ds_map_read"] = new FunctionInfo(this, -3);
             Functions["ds_map_secure_save"] = new FunctionInfo(this, 2);
             Functions["ds_map_secure_load"] = new FunctionInfo(this, 1);
             Functions["ds_map_secure_load_buffer"] = new FunctionInfo(this, 1);
@@ -461,7 +449,7 @@ namespace UndertaleModLib.Compiler
             Functions["ds_priority_create"] = new FunctionInfo(this, 0);
             Functions["ds_priority_destroy"] = new FunctionInfo(this, 1);
             Functions["ds_priority_clear"] = new FunctionInfo(this, 1);
-            Functions["ds_priority_copy"] = new FunctionInfo(this, 2, true);
+            Functions["ds_priority_copy"] = new FunctionInfo(this, 2);
             Functions["ds_priority_size"] = new FunctionInfo(this, 1);
             Functions["ds_priority_empty"] = new FunctionInfo(this, 1);
             Functions["ds_priority_add"] = new FunctionInfo(this, 3);
@@ -473,7 +461,7 @@ namespace UndertaleModLib.Compiler
             Functions["ds_priority_delete_max"] = new FunctionInfo(this, 1);
             Functions["ds_priority_find_max"] = new FunctionInfo(this, 1);
             Functions["ds_priority_write"] = new FunctionInfo(this, 1);
-            Functions["ds_priority_read"] = new FunctionInfo(this, -1);
+            Functions["ds_priority_read"] = new FunctionInfo(this, -3);
             Functions["ds_grid_create"] = new FunctionInfo(this, 2);
             Functions["ds_grid_destroy"] = new FunctionInfo(this, 1);
             Functions["ds_grid_copy"] = new FunctionInfo(this, 2);
@@ -510,7 +498,7 @@ namespace UndertaleModLib.Compiler
             Functions["ds_grid_value_disk_y"] = new FunctionInfo(this, 5);
             Functions["ds_grid_shuffle"] = new FunctionInfo(this, 1);
             Functions["ds_grid_write"] = new FunctionInfo(this, 1);
-            Functions["ds_grid_read"] = new FunctionInfo(this, -1);
+            Functions["ds_grid_read"] = new FunctionInfo(this, -3);
             Functions["ds_grid_sort"] = new FunctionInfo(this, 3);
             Functions["ds_grid_set_pre"] = new FunctionInfo(this, 4);
             Functions["ds_grid_set_post"] = new FunctionInfo(this, 4);
@@ -585,37 +573,40 @@ namespace UndertaleModLib.Compiler
             Functions["json_decode"] = new FunctionInfo(this, 1);
             Functions["zip_unzip"] = new FunctionInfo(this, 2);
             Functions["load_csv"] = new FunctionInfo(this, 1);
-            Functions["move_random"] = new FunctionInfo(this, 2, true);
-            Functions["place_free"] = new FunctionInfo(this, 2, true);
-            Functions["place_empty"] = new FunctionInfo(this, -1, true);
-            Functions["place_meeting"] = new FunctionInfo(this, 3, true);
-            Functions["place_snapped"] = new FunctionInfo(this, 2, true);
-            Functions["move_snap"] = new FunctionInfo(this, 2, true);
-            Functions["move_towards_point"] = new FunctionInfo(this, 3, true);
-            Functions["move_contact"] = new FunctionInfo(this, 1, true);
-            Functions["move_contact_solid"] = new FunctionInfo(this, 2, true);
-            Functions["move_contact_all"] = new FunctionInfo(this, 2, true);
-            Functions["move_outside_solid"] = new FunctionInfo(this, 2, true);
-            Functions["move_outside_all"] = new FunctionInfo(this, 2, true);
-            Functions["move_bounce"] = new FunctionInfo(this, 1, true);
-            Functions["move_bounce_solid"] = new FunctionInfo(this, 1, true);
-            Functions["move_bounce_all"] = new FunctionInfo(this, 1, true);
-            Functions["move_wrap"] = new FunctionInfo(this, 3, true);
-            Functions["motion_set"] = new FunctionInfo(this, 2, true);
-            Functions["motion_add"] = new FunctionInfo(this, 2, true);
-            Functions["distance_to_point"] = new FunctionInfo(this, 2, true);
-            Functions["distance_to_object"] = new FunctionInfo(this, 1, true);
-            Functions["path_start"] = new FunctionInfo(this, 4, true);
-            Functions["path_end"] = new FunctionInfo(this, 0, true);
-            Functions["mp_linear_step"] = new FunctionInfo(this, 4, true);
-            Functions["mp_linear_path"] = new FunctionInfo(this, 5, true);
-            Functions["mp_linear_step_object"] = new FunctionInfo(this, 4, true);
-            Functions["mp_linear_path_object"] = new FunctionInfo(this, 5, true);
-            Functions["mp_potential_settings"] = new FunctionInfo(this, 4, true);
-            Functions["mp_potential_step"] = new FunctionInfo(this, 4, true);
-            Functions["mp_potential_path"] = new FunctionInfo(this, 6, true);
-            Functions["mp_potential_step_object"] = new FunctionInfo(this, 4, true);
-            Functions["mp_potential_path_object"] = new FunctionInfo(this, 6, true);
+            Functions["move_random"] = new FunctionInfo(this, 2);
+            Functions["place_free"] = new FunctionInfo(this, 2);
+            if (data?.IsVersionAtLeast(2, 2, 2) == true)
+                Functions["place_empty"] = new FunctionInfo(this, -3);
+            else
+                Functions["place_empty"] = new FunctionInfo(this, 2);
+            Functions["place_meeting"] = new FunctionInfo(this, 3);
+            Functions["place_snapped"] = new FunctionInfo(this, 2);
+            Functions["move_snap"] = new FunctionInfo(this, 2);
+            Functions["move_towards_point"] = new FunctionInfo(this, 3);
+            Functions["move_contact"] = new FunctionInfo(this, 1);
+            Functions["move_contact_solid"] = new FunctionInfo(this, 2);
+            Functions["move_contact_all"] = new FunctionInfo(this, 2);
+            Functions["move_outside_solid"] = new FunctionInfo(this, 2);
+            Functions["move_outside_all"] = new FunctionInfo(this, 2);
+            Functions["move_bounce"] = new FunctionInfo(this, 1);
+            Functions["move_bounce_solid"] = new FunctionInfo(this, 1);
+            Functions["move_bounce_all"] = new FunctionInfo(this, 1);
+            Functions["move_wrap"] = new FunctionInfo(this, 3);
+            Functions["motion_set"] = new FunctionInfo(this, 2);
+            Functions["motion_add"] = new FunctionInfo(this, 2);
+            Functions["distance_to_point"] = new FunctionInfo(this, 2);
+            Functions["distance_to_object"] = new FunctionInfo(this, 1);
+            Functions["path_start"] = new FunctionInfo(this, 4);
+            Functions["path_end"] = new FunctionInfo(this, 0);
+            Functions["mp_linear_step"] = new FunctionInfo(this, 4);
+            Functions["mp_linear_path"] = new FunctionInfo(this, 5);
+            Functions["mp_linear_step_object"] = new FunctionInfo(this, 4);
+            Functions["mp_linear_path_object"] = new FunctionInfo(this, 5);
+            Functions["mp_potential_settings"] = new FunctionInfo(this, 4);
+            Functions["mp_potential_step"] = new FunctionInfo(this, 4);
+            Functions["mp_potential_path"] = new FunctionInfo(this, 6);
+            Functions["mp_potential_step_object"] = new FunctionInfo(this, 4);
+            Functions["mp_potential_path_object"] = new FunctionInfo(this, 6);
             Functions["mp_grid_create"] = new FunctionInfo(this, 6);
             Functions["mp_grid_destroy"] = new FunctionInfo(this, 1);
             Functions["mp_grid_clear_all"] = new FunctionInfo(this, 1);
@@ -624,60 +615,58 @@ namespace UndertaleModLib.Compiler
             Functions["mp_grid_add_cell"] = new FunctionInfo(this, 3);
             Functions["mp_grid_get_cell"] = new FunctionInfo(this, 3);
             Functions["mp_grid_add_rectangle"] = new FunctionInfo(this, 5);
-            Functions["mp_grid_add_instances"] = new FunctionInfo(this, 3, true);
-            Functions["mp_grid_path"] = new FunctionInfo(this, 7, true);
+            Functions["mp_grid_add_instances"] = new FunctionInfo(this, 3);
+            Functions["mp_grid_path"] = new FunctionInfo(this, 7);
             Functions["mp_grid_draw"] = new FunctionInfo(this, 1);
             Functions["mp_grid_to_ds_grid"] = new FunctionInfo(this, 2);
-            Functions["collision_point"] = new FunctionInfo(this, 5, true);
-            Functions["collision_point_list"] = new FunctionInfo(this, 7, true);
-            Functions["collision_rectangle"] = new FunctionInfo(this, 7, true);
-            Functions["collision_rectangle_list"] = new FunctionInfo(this, 9, true);
-            Functions["collision_circle"] = new FunctionInfo(this, 6, true);
-            Functions["collision_circle_list"] = new FunctionInfo(this, 8, true);
-            Functions["collision_ellipse"] = new FunctionInfo(this, 7, true);
-            Functions["collision_ellipse_list"] = new FunctionInfo(this, 9, true);
-            Functions["collision_line"] = new FunctionInfo(this, 7, true);
-            Functions["collision_line_list"] = new FunctionInfo(this, 9, true);
-            Functions["collision_shape"] = new FunctionInfo(this, 9, true);
-            Functions["point_in_rectangle"] = new FunctionInfo(this, 6, false);
-            Functions["point_in_triangle"] = new FunctionInfo(this, 8, false);
-            Functions["point_in_circle"] = new FunctionInfo(this, 5, false);
-            Functions["rectangle_in_rectangle"] = new FunctionInfo(this, 8, false);
-            Functions["rectangle_in_triangle"] = new FunctionInfo(this, 10, false);
-            Functions["rectangle_in_circle"] = new FunctionInfo(this, 7, false);
+            Functions["collision_point"] = new FunctionInfo(this, 5);
+            Functions["collision_point_list"] = new FunctionInfo(this, 7);
+            Functions["collision_rectangle"] = new FunctionInfo(this, 7);
+            Functions["collision_rectangle_list"] = new FunctionInfo(this, 9);
+            Functions["collision_circle"] = new FunctionInfo(this, 6);
+            Functions["collision_circle_list"] = new FunctionInfo(this, 8);
+            Functions["collision_ellipse"] = new FunctionInfo(this, 7);
+            Functions["collision_ellipse_list"] = new FunctionInfo(this, 9);
+            Functions["collision_line"] = new FunctionInfo(this, 7);
+            Functions["collision_line_list"] = new FunctionInfo(this, 9);
+            Functions["collision_shape"] = new FunctionInfo(this, 9);
+            Functions["point_in_rectangle"] = new FunctionInfo(this, 6);
+            Functions["point_in_triangle"] = new FunctionInfo(this, 8);
+            Functions["point_in_circle"] = new FunctionInfo(this, 5);
+            Functions["rectangle_in_rectangle"] = new FunctionInfo(this, 8);
+            Functions["rectangle_in_triangle"] = new FunctionInfo(this, 10);
+            Functions["rectangle_in_circle"] = new FunctionInfo(this, 7);
             Functions["instance_find"] = new FunctionInfo(this, 2);
             Functions["instance_exists"] = new FunctionInfo(this, 1);
             Functions["instance_number"] = new FunctionInfo(this, 1);
             Functions["instance_position"] = new FunctionInfo(this, 3);
             Functions["instance_position_list"] = new FunctionInfo(this, 5);
-            Functions["instance_nearest"] = new FunctionInfo(this, 3, true);
-            Functions["instance_furthest"] = new FunctionInfo(this, 3, true);
-            Functions["instance_place"] = new FunctionInfo(this, 3, true);
-            Functions["instance_place_list"] = new FunctionInfo(this, 5, true);
+            Functions["instance_nearest"] = new FunctionInfo(this, 3);
+            Functions["instance_furthest"] = new FunctionInfo(this, 3);
+            Functions["instance_place"] = new FunctionInfo(this, 3);
+            Functions["instance_place_list"] = new FunctionInfo(this, 5);
             if (data?.GeneralInfo?.Major < 2)
-            {
                 Functions["instance_create"] = new FunctionInfo(this, 3);
-            }
             Functions["instance_create_depth"] = new FunctionInfo(this, 4);
             Functions["instance_create_layer"] = new FunctionInfo(this, 4);
-            Functions["instance_copy"] = new FunctionInfo(this, 1, true);
-            Functions["instance_change"] = new FunctionInfo(this, 2, true);
-            Functions["instance_destroy"] = new FunctionInfo(this, -1, true);
-            Functions["instance_sprite"] = new FunctionInfo(this, 1, true);
-            Functions["position_empty"] = new FunctionInfo(this, 2, true);
-            Functions["position_meeting"] = new FunctionInfo(this, 3, true);
-            Functions["position_destroy"] = new FunctionInfo(this, 2, true);
-            Functions["position_change"] = new FunctionInfo(this, 4, true);
-            Functions["instance_id_get"] = new FunctionInfo(this, 1, true);
-            Functions["instance_deactivate_all"] = new FunctionInfo(this, 1, true);
-            Functions["instance_deactivate_object"] = new FunctionInfo(this, 1, true);
-            Functions["instance_deactivate_region"] = new FunctionInfo(this, 6, true);
-            Functions["instance_deactivate_region_special"] = new FunctionInfo(this, 8, true);
-            Functions["instance_deactivate_layer"] = new FunctionInfo(this, 1, true);
-            Functions["instance_activate_all"] = new FunctionInfo(this, 0, true);
-            Functions["instance_activate_object"] = new FunctionInfo(this, 1, true);
-            Functions["instance_activate_region"] = new FunctionInfo(this, 5, true);
-            Functions["instance_activate_layer"] = new FunctionInfo(this, 1, true);
+            Functions["instance_copy"] = new FunctionInfo(this, 1);
+            Functions["instance_change"] = new FunctionInfo(this, 2);
+            Functions["instance_destroy"] = new FunctionInfo(this, -1);
+            Functions["instance_sprite"] = new FunctionInfo(this, 1);
+            Functions["position_empty"] = new FunctionInfo(this, 2);
+            Functions["position_meeting"] = new FunctionInfo(this, 3);
+            Functions["position_destroy"] = new FunctionInfo(this, 2);
+            Functions["position_change"] = new FunctionInfo(this, 4);
+            Functions["instance_id_get"] = new FunctionInfo(this, 1);
+            Functions["instance_deactivate_all"] = new FunctionInfo(this, 1);
+            Functions["instance_deactivate_object"] = new FunctionInfo(this, 1);
+            Functions["instance_deactivate_region"] = new FunctionInfo(this, 6);
+            Functions["instance_deactivate_region_special"] = new FunctionInfo(this, 8);
+            Functions["instance_deactivate_layer"] = new FunctionInfo(this, 1);
+            Functions["instance_activate_all"] = new FunctionInfo(this, 0);
+            Functions["instance_activate_object"] = new FunctionInfo(this, 1);
+            Functions["instance_activate_region"] = new FunctionInfo(this, 5);
+            Functions["instance_activate_layer"] = new FunctionInfo(this, 1);
             Functions["room_goto"] = new FunctionInfo(this, 1);
             Functions["room_goto_previous"] = new FunctionInfo(this, 0);
             Functions["room_goto_next"] = new FunctionInfo(this, 0);
@@ -695,7 +684,7 @@ namespace UndertaleModLib.Compiler
             Functions["display_get_orientation"] = new FunctionInfo(this, 0);
             Functions["display_get_gui_width"] = new FunctionInfo(this, 0);
             Functions["display_get_gui_height"] = new FunctionInfo(this, 0);
-            Functions["display_reset"] = new FunctionInfo(this, 2, true);
+            Functions["display_reset"] = new FunctionInfo(this, 2);
             Functions["display_mouse_get_x"] = new FunctionInfo(this, 0);
             Functions["display_mouse_get_y"] = new FunctionInfo(this, 0);
             Functions["display_mouse_set"] = new FunctionInfo(this, 2);
@@ -881,19 +870,19 @@ namespace UndertaleModLib.Compiler
             Functions["draw_text_ext_colour"] = new FunctionInfo(this, 10);
             Functions["draw_text_ext_transformed_colour"] = new FunctionInfo(this, 13);
             Functions["shader_enable_corner_id"] = new FunctionInfo(this, 1);
-            Functions["draw_self"] = new FunctionInfo(this, 0, true);
-            Functions["draw_sprite"] = new FunctionInfo(this, 4, true);
-            Functions["draw_sprite_pos"] = new FunctionInfo(this, 11, true);
-            Functions["draw_shape"] = new FunctionInfo(this, 12, true);
-            Functions["draw_shape_string"] = new FunctionInfo(this, 11, true);
-            Functions["draw_sprite_ext"] = new FunctionInfo(this, 9, true);
-            Functions["draw_sprite_stretched"] = new FunctionInfo(this, 6, true);
-            Functions["draw_sprite_stretched_ext"] = new FunctionInfo(this, 8, true);
-            Functions["draw_sprite_part"] = new FunctionInfo(this, 8, true);
-            Functions["draw_sprite_part_ext"] = new FunctionInfo(this, 12, true);
-            Functions["draw_sprite_general"] = new FunctionInfo(this, 16, true);
-            Functions["draw_sprite_tiled"] = new FunctionInfo(this, 4, true);
-            Functions["draw_sprite_tiled_ext"] = new FunctionInfo(this, 8, true);
+            Functions["draw_self"] = new FunctionInfo(this, 0);
+            Functions["draw_sprite"] = new FunctionInfo(this, 4);
+            Functions["draw_sprite_pos"] = new FunctionInfo(this, 11);
+            Functions["draw_shape"] = new FunctionInfo(this, 12);
+            Functions["draw_shape_string"] = new FunctionInfo(this, 11);
+            Functions["draw_sprite_ext"] = new FunctionInfo(this, 9);
+            Functions["draw_sprite_stretched"] = new FunctionInfo(this, 6);
+            Functions["draw_sprite_stretched_ext"] = new FunctionInfo(this, 8);
+            Functions["draw_sprite_part"] = new FunctionInfo(this, 8);
+            Functions["draw_sprite_part_ext"] = new FunctionInfo(this, 12);
+            Functions["draw_sprite_general"] = new FunctionInfo(this, 16);
+            Functions["draw_sprite_tiled"] = new FunctionInfo(this, 4);
+            Functions["draw_sprite_tiled_ext"] = new FunctionInfo(this, 8);
             if (data?.GeneralInfo?.Major < 2)
             {
                 Functions["draw_background"] = new FunctionInfo(this, 3);
@@ -1102,7 +1091,7 @@ namespace UndertaleModLib.Compiler
             Functions["array_set_2D_post"] = new FunctionInfo(this, 4);
             Functions["array_get_2D"] = new FunctionInfo(this, 3);
             Functions["array_equals"] = new FunctionInfo(this, 2);
-            Functions["array_create"] = new FunctionInfo(this, -1);
+            Functions["array_create"] = new FunctionInfo(this, -2);
             Functions["array_copy"] = new FunctionInfo(this, 5);
             if (data?.IsVersionAtLeast(2, 3) == true)
             {
@@ -1178,7 +1167,7 @@ namespace UndertaleModLib.Compiler
             Functions["real"] = new FunctionInfo(this, 1);
             Functions["bool"] = new FunctionInfo(this, 1);
             if (data?.IsVersionAtLeast(2022, 11) == true)
-                Functions["string"] = new FunctionInfo(this, -1);
+                Functions["string"] = new FunctionInfo(this, -2);
             else
                 Functions["string"] = new FunctionInfo(this, 1);
             Functions["int64"] = new FunctionInfo(this, 1);
@@ -1212,12 +1201,12 @@ namespace UndertaleModLib.Compiler
             Functions["point_direction"] = new FunctionInfo(this, 4);
             Functions["lengthdir_x"] = new FunctionInfo(this, 2);
             Functions["lengthdir_y"] = new FunctionInfo(this, 2);
-            Functions["event_inherited"] = new FunctionInfo(this, 0, true, true);
-            Functions["event_perform"] = new FunctionInfo(this, 2, true);
-            Functions["event_user"] = new FunctionInfo(this, 1, true);
-            Functions["event_perform_object"] = new FunctionInfo(this, 3, true);
-            Functions["external_define"] = new FunctionInfo(this, -1);
-            Functions["external_call"] = new FunctionInfo(this, -1);
+            Functions["event_inherited"] = new FunctionInfo(this, 0);
+            Functions["event_perform"] = new FunctionInfo(this, 2);
+            Functions["event_user"] = new FunctionInfo(this, 1);
+            Functions["event_perform_object"] = new FunctionInfo(this, 3);
+            Functions["external_define"] = new FunctionInfo(this, -6);
+            Functions["external_call"] = new FunctionInfo(this, -2);
             Functions["external_free"] = new FunctionInfo(this, 1);
             Functions["external_define0"] = new FunctionInfo(this, 3);
             Functions["external_call0"] = new FunctionInfo(this, 1);
@@ -1244,8 +1233,8 @@ namespace UndertaleModLib.Compiler
             Functions["show_debug_message"] = new FunctionInfo(this, 1);
             Functions["show_debug_overlay"] = new FunctionInfo(this, 1);
             Functions["debug_event"] = new FunctionInfo(this, 1);
-            Functions["alarm_get"] = new FunctionInfo(this, 1, true);
-            Functions["alarm_set"] = new FunctionInfo(this, 2, true);
+            Functions["alarm_get"] = new FunctionInfo(this, 1);
+            Functions["alarm_set"] = new FunctionInfo(this, 2);
             Functions["clipboard_has_text"] = new FunctionInfo(this, 0);
             Functions["clipboard_set_text"] = new FunctionInfo(this, 1);
             Functions["clipboard_get_text"] = new FunctionInfo(this, 0);
@@ -1422,8 +1411,8 @@ namespace UndertaleModLib.Compiler
                 Functions["background_get_preload"] = new FunctionInfo(this, 1);
                 Functions["background_set_alpha_from_background"] = new FunctionInfo(this, 2);
                 Functions["background_create_from_surface"] = new FunctionInfo(this, 7);
-                Functions["background_create_color"] = new FunctionInfo(this, 3, true);
-                Functions["background_create_colour"] = new FunctionInfo(this, 3, true);
+                Functions["background_create_color"] = new FunctionInfo(this, 3);
+                Functions["background_create_colour"] = new FunctionInfo(this, 3);
                 Functions["background_create_gradient"] = new FunctionInfo(this, 5);
                 Functions["background_add"] = new FunctionInfo(this, 3);
                 Functions["background_replace"] = new FunctionInfo(this, 4);
@@ -1564,7 +1553,7 @@ namespace UndertaleModLib.Compiler
             Functions["font_delete"] = new FunctionInfo(this, 1);
             Functions["script_exists"] = new FunctionInfo(this, 1);
             Functions["script_get_name"] = new FunctionInfo(this, 1);
-            Functions["script_execute"] = new FunctionInfo(this, -1);
+            Functions["script_execute"] = new FunctionInfo(this, -2);
             Functions["path_name"] = new FunctionInfo(this, 1);
             Functions["path_exists"] = new FunctionInfo(this, 1);
             Functions["path_get_name"] = new FunctionInfo(this, 1);
@@ -1642,7 +1631,7 @@ namespace UndertaleModLib.Compiler
             if (data?.GeneralInfo?.Major < 2)
             {
                 Functions["room_set_background"] = new FunctionInfo(this, 12);
-                Functions["room_set_view"] = new FunctionInfo(this, 16, true);
+                Functions["room_set_view"] = new FunctionInfo(this, 16);
             }
             if (data?.GeneralInfo?.Major >= 2)
             {
@@ -1725,12 +1714,10 @@ namespace UndertaleModLib.Compiler
             Functions["ads_event_preload"] = new FunctionInfo(this, 1);
             Functions["shop_leave_rating"] = new FunctionInfo(this, 4);
             Functions["analytics_event"] = new FunctionInfo(this, 1);
-            Functions["analytics_event_ext"] = new FunctionInfo(this, -1);
+            Functions["analytics_event_ext"] = new FunctionInfo(this, -4);
             Functions["ads_set_reward_callback"] = new FunctionInfo(this, 1);
             if (data?.GeneralInfo?.Major < 2)
-            {
                 Functions["draw_enable_alphablend"] = new FunctionInfo(this, 1);
-            }
             Functions["draw_texture_flush"] = new FunctionInfo(this, 0);
             Functions["draw_flush"] = new FunctionInfo(this, 0);
             if (data?.GeneralInfo?.Major >= 2)
@@ -1930,25 +1917,25 @@ namespace UndertaleModLib.Compiler
             Functions["physics_fixture_set_polygon_shape"] = new FunctionInfo(this, 1);
             Functions["physics_fixture_set_chain_shape"] = new FunctionInfo(this, 2);
             Functions["physics_fixture_add_point"] = new FunctionInfo(this, 3);
-            Functions["physics_fixture_bind"] = new FunctionInfo(this, 2, true);
-            Functions["physics_fixture_bind_ext"] = new FunctionInfo(this, 4, true);
+            Functions["physics_fixture_bind"] = new FunctionInfo(this, 2);
+            Functions["physics_fixture_bind_ext"] = new FunctionInfo(this, 4);
             Functions["physics_fixture_delete"] = new FunctionInfo(this, 1);
-            Functions["physics_apply_force"] = new FunctionInfo(this, 4, true);
-            Functions["physics_apply_impulse"] = new FunctionInfo(this, 4, true);
-            Functions["physics_apply_angular_impulse"] = new FunctionInfo(this, 1, true);
-            Functions["physics_apply_local_force"] = new FunctionInfo(this, 4, true);
-            Functions["physics_apply_local_impulse"] = new FunctionInfo(this, 4, true);
-            Functions["physics_apply_torque"] = new FunctionInfo(this, 1, true);
-            Functions["physics_mass_properties"] = new FunctionInfo(this, 4, true);
-            Functions["physics_draw_debug"] = new FunctionInfo(this, 0, true);
-            Functions["physics_test_overlap"] = new FunctionInfo(this, 4, true);
-            Functions["physics_remove_fixture"] = new FunctionInfo(this, 2, false);
-            Functions["physics_get_friction"] = new FunctionInfo(this, 1, true);
-            Functions["physics_get_density"] = new FunctionInfo(this, 1, true);
-            Functions["physics_get_restitution"] = new FunctionInfo(this, 1, true);
-            Functions["physics_set_friction"] = new FunctionInfo(this, 2, true);
-            Functions["physics_set_density"] = new FunctionInfo(this, 2, true);
-            Functions["physics_set_restitution"] = new FunctionInfo(this, 2, true);
+            Functions["physics_apply_force"] = new FunctionInfo(this, 4);
+            Functions["physics_apply_impulse"] = new FunctionInfo(this, 4);
+            Functions["physics_apply_angular_impulse"] = new FunctionInfo(this, 1);
+            Functions["physics_apply_local_force"] = new FunctionInfo(this, 4);
+            Functions["physics_apply_local_impulse"] = new FunctionInfo(this, 4);
+            Functions["physics_apply_torque"] = new FunctionInfo(this, 1);
+            Functions["physics_mass_properties"] = new FunctionInfo(this, 4);
+            Functions["physics_draw_debug"] = new FunctionInfo(this, 0);
+            Functions["physics_test_overlap"] = new FunctionInfo(this, 4);
+            Functions["physics_remove_fixture"] = new FunctionInfo(this, 2);
+            Functions["physics_get_friction"] = new FunctionInfo(this, 1);
+            Functions["physics_get_density"] = new FunctionInfo(this, 1);
+            Functions["physics_get_restitution"] = new FunctionInfo(this, 1);
+            Functions["physics_set_friction"] = new FunctionInfo(this, 2);
+            Functions["physics_set_density"] = new FunctionInfo(this, 2);
+            Functions["physics_set_restitution"] = new FunctionInfo(this, 2);
             Functions["physics_joint_enable_motor"] = new FunctionInfo(this, 2);
             Functions["physics_joint_get_value"] = new FunctionInfo(this, 2);
             Functions["physics_joint_set_value"] = new FunctionInfo(this, 3);
@@ -2059,8 +2046,8 @@ namespace UndertaleModLib.Compiler
             Functions["winphone_tile_wide_content"] = new FunctionInfo(this, 2);
             Functions["winphone_tile_cycle_images"] = new FunctionInfo(this, -1);
             Functions["winphone_tile_small_background_image"] = new FunctionInfo(this, 1);
-            Functions["gml_release_mode"] = new FunctionInfo(this, 1, false);
-            Functions["gml_pragma"] = new FunctionInfo(this, -1, false);
+            Functions["gml_release_mode"] = new FunctionInfo(this, 1);
+            Functions["gml_pragma"] = new FunctionInfo(this, -1);
             Functions["buffer_create"] = new FunctionInfo(this, 3);
             Functions["buffer_delete"] = new FunctionInfo(this, 1);
             Functions["buffer_get_type"] = new FunctionInfo(this, 1);
@@ -2258,24 +2245,24 @@ namespace UndertaleModLib.Compiler
             Functions["push_get_first_local_notification"] = new FunctionInfo(this, 1);
             Functions["push_get_next_local_notification"] = new FunctionInfo(this, 1);
             Functions["push_cancel_local_notification"] = new FunctionInfo(this, 1);
-            Functions["skeleton_animation_set"] = new FunctionInfo(this, 1, true);
-            Functions["skeleton_animation_get"] = new FunctionInfo(this, 0, true);
-            Functions["skeleton_animation_mix"] = new FunctionInfo(this, 3, true);
-            Functions["skeleton_animation_set_ext"] = new FunctionInfo(this, 2, true);
-            Functions["skeleton_animation_get_ext"] = new FunctionInfo(this, 1, true);
-            Functions["skeleton_animation_get_duration"] = new FunctionInfo(this, 1, true);
-            Functions["skeleton_animation_get_frames"] = new FunctionInfo(this, 1, true);
-            Functions["skeleton_animation_clear"] = new FunctionInfo(this, 1, true);
-            Functions["skeleton_skin_set"] = new FunctionInfo(this, 1, true);
-            Functions["skeleton_skin_get"] = new FunctionInfo(this, 0, true);
-            Functions["skeleton_attachment_set"] = new FunctionInfo(this, 2, true);
-            Functions["skeleton_attachment_get"] = new FunctionInfo(this, 1, true);
-            Functions["skeleton_attachment_create"] = new FunctionInfo(this, 8, true);
-            Functions["skeleton_collision_draw_set"] = new FunctionInfo(this, 1, true);
-            Functions["skeleton_bone_data_get"] = new FunctionInfo(this, 2, true);
-            Functions["skeleton_bone_data_set"] = new FunctionInfo(this, 2, true);
-            Functions["skeleton_bone_state_get"] = new FunctionInfo(this, 2, true);
-            Functions["skeleton_bone_state_set"] = new FunctionInfo(this, 2, true);
+            Functions["skeleton_animation_set"] = new FunctionInfo(this, 1);
+            Functions["skeleton_animation_get"] = new FunctionInfo(this, 0);
+            Functions["skeleton_animation_mix"] = new FunctionInfo(this, 3);
+            Functions["skeleton_animation_set_ext"] = new FunctionInfo(this, 2);
+            Functions["skeleton_animation_get_ext"] = new FunctionInfo(this, 1);
+            Functions["skeleton_animation_get_duration"] = new FunctionInfo(this, 1);
+            Functions["skeleton_animation_get_frames"] = new FunctionInfo(this, 1);
+            Functions["skeleton_animation_clear"] = new FunctionInfo(this, 1);
+            Functions["skeleton_skin_set"] = new FunctionInfo(this, 1);
+            Functions["skeleton_skin_get"] = new FunctionInfo(this, 0);
+            Functions["skeleton_attachment_set"] = new FunctionInfo(this, 2);
+            Functions["skeleton_attachment_get"] = new FunctionInfo(this, 1);
+            Functions["skeleton_attachment_create"] = new FunctionInfo(this, 8);
+            Functions["skeleton_collision_draw_set"] = new FunctionInfo(this, 1);
+            Functions["skeleton_bone_data_get"] = new FunctionInfo(this, 2);
+            Functions["skeleton_bone_data_set"] = new FunctionInfo(this, 2);
+            Functions["skeleton_bone_state_get"] = new FunctionInfo(this, 2);
+            Functions["skeleton_bone_state_set"] = new FunctionInfo(this, 2);
             Functions["draw_skeleton"] = new FunctionInfo(this, 11);
             Functions["draw_skeleton_time"] = new FunctionInfo(this, 11);
             Functions["draw_skeleton_instance"] = new FunctionInfo(this, 11);
@@ -2283,14 +2270,14 @@ namespace UndertaleModLib.Compiler
             Functions["skeleton_animation_list"] = new FunctionInfo(this, 2);
             Functions["skeleton_skin_list"] = new FunctionInfo(this, 2);
             Functions["skeleton_slot_data"] = new FunctionInfo(this, 2);
-            Functions["skeleton_animation_get_frame"] = new FunctionInfo(this, 1, true);
-            Functions["skeleton_animation_set_frame"] = new FunctionInfo(this, 2, true);
-            Functions["skeleton_get_minmax"] = new FunctionInfo(this, 0, true);
-            Functions["skeleton_get_num_bounds"] = new FunctionInfo(this, 0, true);
-            Functions["skeleton_get_bounds"] = new FunctionInfo(this, 1, true);
-            Functions["yyg_player_run"] = new FunctionInfo(this, 4, true);
-            Functions["yyg_player_restarted"] = new FunctionInfo(this, 0, false);
-            Functions["yyg_player_launch_args"] = new FunctionInfo(this, 0, false);
+            Functions["skeleton_animation_get_frame"] = new FunctionInfo(this, 1);
+            Functions["skeleton_animation_set_frame"] = new FunctionInfo(this, 2);
+            Functions["skeleton_get_minmax"] = new FunctionInfo(this, 0);
+            Functions["skeleton_get_num_bounds"] = new FunctionInfo(this, 0);
+            Functions["skeleton_get_bounds"] = new FunctionInfo(this, 1);
+            Functions["yyg_player_run"] = new FunctionInfo(this, 4);
+            Functions["yyg_player_restarted"] = new FunctionInfo(this, 0);
+            Functions["yyg_player_launch_args"] = new FunctionInfo(this, 0);
             Functions["extension_stubfunc_real"] = new FunctionInfo(this, -1);
             Functions["extension_stubfunc_string"] = new FunctionInfo(this, -1);
             Functions["ps4_share_screenshot_enable"] = new FunctionInfo(this, 1);
@@ -2613,8 +2600,8 @@ namespace UndertaleModLib.Compiler
                 Functions["tilemap_get_cell_x_at_pixel"] = new FunctionInfo(this, 3);
                 Functions["tilemap_get_cell_y_at_pixel"] = new FunctionInfo(this, 3);
                 Functions["tilemap_clear"] = new FunctionInfo(this, 2);
-                Functions["draw_tilemap"] = new FunctionInfo(this, 3, true);
-                Functions["draw_tile"] = new FunctionInfo(this, 5, true);
+                Functions["draw_tilemap"] = new FunctionInfo(this, 3);
+                Functions["draw_tile"] = new FunctionInfo(this, 5);
                 Functions["tilemap_set_global_mask"] = new FunctionInfo(this, 1);
                 Functions["tilemap_get_global_mask"] = new FunctionInfo(this, 0);
                 Functions["tilemap_set_mask"] = new FunctionInfo(this, 2);

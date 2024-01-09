@@ -433,6 +433,7 @@ namespace UndertaleModLib.Compiler
             {
                 // Basic initialization
                 remainingStageOne.Clear();
+                remainingStageOne.EnsureCapacity(tokens.Count);
                 ErrorMessages.Clear();
                 context.LocalVars.Clear();
                 if ((context.Data?.GeneralInfo?.BytecodeVersion ?? 15) >= 15)
@@ -446,7 +447,7 @@ namespace UndertaleModLib.Compiler
                     tokens.Add(new Lexer.Token(TokenKind.EOF));
 
                 // Run first parse stage- basic abstraction into functions and constants
-                List<Statement> firstPass = new List<Statement>();
+                List<Statement> firstPass = new(tokens.Count);
 
                 bool chainedVariableReference = false;
                 for (int i = 0; i < tokens.Count; i++)
@@ -485,7 +486,8 @@ namespace UndertaleModLib.Compiler
                             try
                             {
                                 val = Convert.ToInt64(t.Content.Substring(t.Content[0] == '$' ? 1 : 2), 16);
-                            } catch (Exception)
+                            }
+                            catch (Exception)
                             {
                                 ReportCodeError("Invalid hex literal.", t, false);
                                 constant = new ExpressionConstant(0);
@@ -1044,11 +1046,26 @@ namespace UndertaleModLib.Compiler
                 if (EnsureTokenKind(TokenKind.CloseParen) == null) return null;
 
                 // Check for proper argument count, at least for builtins
-                if (context.BuiltInList.Functions.TryGetValue(s.Text, out FunctionInfo fi) && 
-                    fi.ArgumentCount != -1 && result.Children.Count != fi.ArgumentCount)
-                    ReportCodeError(string.Format("Function {0} expects {1} arguments, got {2}.",
-                                                  s.Text, fi.ArgumentCount, result.Children.Count)
-                                                  , s.Token, false);
+                if (context.BuiltInList.Functions.TryGetValue(s.Text, out FunctionInfo fi))
+                {
+                    if (fi.ArgumentCount < -1)
+                    {
+                        // -2 = at least 1 argument
+                        int minArgCount = -fi.ArgumentCount - 1; 
+                        if (result.Children.Count < minArgCount)
+                        {
+                            ReportCodeError(string.Format("Function {0} expects at least {1} arguments, got {2}.",
+                                                          s.Text, minArgCount, result.Children.Count),
+                                            s.Token, false);
+                        }
+                    }
+                    else if (fi.ArgumentCount != -1 && result.Children.Count != fi.ArgumentCount)
+                    {
+                        ReportCodeError(string.Format("Function {0} expects {1} arguments, got {2}.",
+                                                      s.Text, fi.ArgumentCount, result.Children.Count),
+                                        s.Token, false);
+                    }
+                }
 
                 return result;
             }
