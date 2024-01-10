@@ -2794,6 +2794,45 @@ namespace UndertaleModLib.Compiler
                 Functions["immersion_play_effect"] = new FunctionInfo(this, 1, FunctionClassification.Immersion);
                 Functions["immersion_stop"] = new FunctionInfo(this, 0, FunctionClassification.Immersion);
             }
+            if (data?.IsVersionAtLeast(2, 3) == true)
+            {
+                Functions["sequence_exists"] = new FunctionInfo(this, 1);
+                Functions["sequence_create"] = new FunctionInfo(this, 0);
+                Functions["sequence_destroy"] = new FunctionInfo(this, 1);
+                Functions["sequence_get"] = new FunctionInfo(this, 1);
+                Functions["sequence_track_new"] = new FunctionInfo(this, 1);
+                Functions["sequence_keyframe_new"] = new FunctionInfo(this, 1);
+                Functions["sequence_keyframedata_new"] = new FunctionInfo(this, 1);
+                Functions["sequence_get_objects"] = new FunctionInfo(this, 1);
+                Functions["sequence_instance_override_object"] = new FunctionInfo(this, 3);
+
+                Functions["layer_sequence_exists"] = new FunctionInfo(this, 2);
+                Functions["layer_sequence_create"] = new FunctionInfo(this, 4);
+                Functions["layer_sequence_destroy"] = new FunctionInfo(this, 1);
+                Functions["layer_sequence_x"] = new FunctionInfo(this, 2);
+                Functions["layer_sequence_y"] = new FunctionInfo(this, 2);
+                Functions["layer_sequence_angle"] = new FunctionInfo(this, 2);
+                Functions["layer_sequence_xscale"] = new FunctionInfo(this, 2);
+                Functions["layer_sequence_yscale"] = new FunctionInfo(this, 2);
+                Functions["layer_sequence_headpos"] = new FunctionInfo(this, 2);
+                Functions["layer_sequence_headdir"] = new FunctionInfo(this, 2);
+                Functions["layer_sequence_pause"] = new FunctionInfo(this, 1);
+                Functions["layer_sequence_play"] = new FunctionInfo(this, 1);
+                Functions["layer_sequence_speedscale"] = new FunctionInfo(this, 2);
+                Functions["layer_sequence_get_x"] = new FunctionInfo(this, 1);
+                Functions["layer_sequence_get_y"] = new FunctionInfo(this, 1);
+                Functions["layer_sequence_get_angle"] = new FunctionInfo(this, 1);
+                Functions["layer_sequence_get_xscale"] = new FunctionInfo(this, 1);
+                Functions["layer_sequence_get_yscale"] = new FunctionInfo(this, 1);
+                Functions["layer_sequence_get_headpos"] = new FunctionInfo(this, 1);
+                Functions["layer_sequence_get_headdir"] = new FunctionInfo(this, 1);
+                Functions["layer_sequence_get_speedscale"] = new FunctionInfo(this, 1);
+                Functions["layer_sequence_get_length"] = new FunctionInfo(this, 1);
+                Functions["layer_sequence_get_instance"] = new FunctionInfo(this, 1);
+                Functions["layer_sequence_get_sequence"] = new FunctionInfo(this, 1);
+                Functions["layer_sequence_is_paused"] = new FunctionInfo(this, 1);
+                Functions["layer_sequence_is_finished"] = new FunctionInfo(this, 1);
+            }
 
             // Moving on to constants
             Constants = new Dictionary<string, double>();
@@ -3713,6 +3752,30 @@ namespace UndertaleModLib.Compiler
                 Constants["kbv_autocapitalize_words"] = 1.0;
                 Constants["kbv_autocapitalize_sentences"] = 2.0;
                 Constants["kbv_autocapitalize_characters"] = 3.0;
+            }
+            if (data?.IsVersionAtLeast(2, 3) == true)
+            {
+                Constants["seqtracktype_graphic"] = 1;
+                Constants["seqtracktype_audio"] = 2;
+                Constants["seqtracktype_instance"] = 14;
+                Constants["seqtracktype_sequence"] = 7;
+                Constants["seqtracktype_clipmask"] = 8;
+                Constants["seqtracktype_clipmask_mask"] = 9;
+                Constants["seqtracktype_clipmask_subject"] = 10;
+                Constants["seqtracktype_group"] = 11;
+                Constants["seqtracktype_colour"] = 4;
+                Constants["seqtracktype_real"] = 3;
+                Constants["seqtracktype_message"] = 15;
+                Constants["seqtracktype_moment"] = 16;
+                Constants["seqtracktype_text"] = 17;
+                Constants["seqtracktype_particlesystem"] = 18;
+                Constants["seqtracktype_bool"] = 5;
+                Constants["seqtracktype_string"] = 6;
+                Constants["seqtracktype_spriteframes"] = 13;
+                Constants["seqtracktype_empty"] = 12;
+
+                Constants["seqdir_right"] = 1;
+                Constants["seqdir_left"] = -1;
             }
             // This one is a special case; it only exports to browser. I don't think this library supports
             // browser at all though, so we'll just assume it's -1. Wouldn't hurt anyway.

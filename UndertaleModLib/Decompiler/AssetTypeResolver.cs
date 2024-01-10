@@ -5,6 +5,7 @@ using UndertaleModLib.Models;
 
 namespace UndertaleModLib.Decompiler
 {
+    #region Enums
     public enum AssetIDType
     {
         Other = 0,
@@ -15,6 +16,8 @@ namespace UndertaleModLib.Decompiler
         Enum_HAlign,
         Enum_VAlign,
         Enum_GameSpeed, // GMS2 only
+        Enum_Track, // GMS2.3+
+        Enum_SequenceDirection, // GMS2.3+
         Enum_OSType,
         Enum_GamepadButton,
         Enum_PathEndAction,
@@ -74,6 +77,33 @@ namespace UndertaleModLib.Decompiler
     {
         gamespeed_fps,
         gamespeed_microseconds
+    }
+
+    public enum Track
+    {
+        seqtracktype_graphic = 1,
+        seqtracktype_audio = 2,
+        seqtracktype_instance = 14,
+        seqtracktype_sequence = 7,
+        seqtracktype_clipmask = 8,
+        seqtracktype_clipmask_mask = 9,
+        seqtracktype_clipmask_subject = 10,
+        seqtracktype_group = 11,
+        seqtracktype_colour = 4,
+        seqtracktype_real = 3,
+        seqtracktype_message = 15,
+        seqtracktype_moment = 16,
+        seqtracktype_text = 17,
+        seqtracktype_particlesystem = 18,
+        seqtracktype_bool = 5,
+        seqtracktype_string = 6,
+        seqtracktype_spriteframes = 13,
+        seqtracktype_empty = 12
+    }
+    public enum SequenceDirection
+    {
+        seqdir_right = 1,
+        seqdir_left = -1
     }
 
     public enum MouseCursor
@@ -352,6 +382,7 @@ namespace UndertaleModLib.Decompiler
         ev_gesture,
         ev_pre_create,
     }
+    #endregion
 
     public class AssetTypeResolver
     {
@@ -540,6 +571,10 @@ namespace UndertaleModLib.Decompiler
                 return (int)Enum.Parse(typeof(VAlign), const_name);
             if (Enum.IsDefined(typeof(GameSpeed), const_name))
                 return (int)Enum.Parse(typeof(GameSpeed), const_name);
+            if (Enum.IsDefined(typeof(Track), const_name))
+                return (int)Enum.Parse(typeof(Track), const_name);
+            if (Enum.IsDefined(typeof(SequenceDirection), const_name))
+                return (int)Enum.Parse(typeof(SequenceDirection), const_name);
             if (Enum.IsDefined(typeof(e__VW), const_name))
                 return (int)Enum.Parse(typeof(e__VW), const_name);
             if (Enum.IsDefined(typeof(e__BG), const_name))
@@ -560,6 +595,8 @@ namespace UndertaleModLib.Decompiler
 
             return_types = new Dictionary<string, AssetIDType>();
 
+            // TODO: extract some functions and add them only if they are available for
+            // the current version of GM(S), e.g. make `background_get_name(id)` not available in GMS 2+
             builtin_funcs = new Dictionary<string, AssetIDType[]>
             {
                 { "action_create_object", new[] { AssetIDType.GameObject, AssetIDType.Other, AssetIDType.Other } },
@@ -1017,6 +1054,7 @@ namespace UndertaleModLib.Decompiler
                     builtin_var_overrides[code.Name.Content] = new Dictionary<string, AssetIDType>();
             }
 
+            // TODO: see the TODO above `builtin_funcs`
             builtin_vars = new Dictionary<string, AssetIDType>
             {
                 // only the relevant ones because I'm sick of writing this
@@ -1043,8 +1081,49 @@ namespace UndertaleModLib.Decompiler
                 { "view_enabled", AssetIDType.Boolean },
                 { "view_visible", AssetIDType.Boolean },
                 { "visible", AssetIDType.Boolean }
-
             };
+
+            if (data?.IsVersionAtLeast(2, 3) == true)
+            {
+                builtin_funcs["sequence_exists"] = new[] { AssetIDType.Sequence };
+                builtin_funcs["sequence_create"] = Array.Empty<AssetIDType>();
+                builtin_funcs["sequence_destroy"] = new[] { AssetIDType.Sequence };
+                builtin_funcs["sequence_get"] = new[] { AssetIDType.Sequence };
+                builtin_funcs["sequence_track_new"] = new[] { AssetIDType.Enum_Track };
+                builtin_funcs["sequence_keyframe_new"] = new[] { AssetIDType.Enum_Track };
+                builtin_funcs["sequence_keyframedata_new"] = new[] { AssetIDType.Enum_Track };
+                builtin_funcs["sequence_get_objects"] = new[] { AssetIDType.Sequence };
+                builtin_funcs["sequence_instance_override_object"] = new[] { AssetIDType.Sequence, AssetIDType.GameObject, AssetIDType.GameObject };
+
+                builtin_funcs["layer_sequence_exists"] = new[] { AssetIDType.Layer, AssetIDType.Sequence };
+                builtin_funcs["layer_sequence_create"] = new[] { AssetIDType.Layer, AssetIDType.Other, AssetIDType.Other, AssetIDType.Sequence };
+                builtin_funcs["layer_sequence_destroy"] = new[] { AssetIDType.Sequence };
+                builtin_funcs["layer_sequence_x"] = new[] { AssetIDType.Sequence, AssetIDType.Other };
+                builtin_funcs["layer_sequence_y"] = new[] { AssetIDType.Sequence, AssetIDType.Other };
+                builtin_funcs["layer_sequence_angle"] = new[] { AssetIDType.Sequence, AssetIDType.Other };
+                builtin_funcs["layer_sequence_xscale"] = new[] { AssetIDType.Sequence, AssetIDType.Other };
+                builtin_funcs["layer_sequence_yscale"] = new[] { AssetIDType.Sequence, AssetIDType.Other };
+                builtin_funcs["layer_sequence_headpos"] = new[] { AssetIDType.Sequence, AssetIDType.Other };
+                builtin_funcs["layer_sequence_headdir"] = new[] { AssetIDType.Sequence, AssetIDType.Enum_SequenceDirection };
+                builtin_funcs["layer_sequence_pause"] = new[] { AssetIDType.Sequence };
+                builtin_funcs["layer_sequence_play"] = new[] { AssetIDType.Sequence };
+                builtin_funcs["layer_sequence_speedscale"] = new[] { AssetIDType.Sequence, AssetIDType.Other };
+                builtin_funcs["layer_sequence_get_x"] = new[] { AssetIDType.Sequence };
+                builtin_funcs["layer_sequence_get_y"] = new[] { AssetIDType.Sequence };
+                builtin_funcs["layer_sequence_get_angle"] = new[] { AssetIDType.Sequence };
+                builtin_funcs["layer_sequence_get_xscale"] = new[] { AssetIDType.Sequence };
+                builtin_funcs["layer_sequence_get_yscale"] = new[] { AssetIDType.Sequence };
+                builtin_funcs["layer_sequence_get_headpos"] = new[] { AssetIDType.Sequence };
+                builtin_funcs["layer_sequence_get_headdir"] = new[] { AssetIDType.Sequence };
+                builtin_funcs["layer_sequence_get_speedscale"] = new[] { AssetIDType.Sequence };
+                builtin_funcs["layer_sequence_get_length"] = new[] { AssetIDType.Sequence };
+                builtin_funcs["layer_sequence_get_instance"] = new[] { AssetIDType.Sequence };
+                builtin_funcs["layer_sequence_get_sequence"] = new[] { AssetIDType.Sequence };
+                builtin_funcs["layer_sequence_is_paused"] = new[] { AssetIDType.Sequence };
+                builtin_funcs["layer_sequence_is_finished"] = new[] { AssetIDType.Sequence };
+
+                builtin_vars["in_sequence"] = AssetIDType.Boolean;
+            }
 
             // TODO: make proper file/manifest for all games to use, not just UT/DR, and also not these specific names
             string lowerName = data?.GeneralInfo?.DisplayName?.Content.ToLower(CultureInfo.InvariantCulture);

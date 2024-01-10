@@ -408,6 +408,10 @@ namespace UndertaleModLib.Decompiler
                         return ConvertToEnumStr<VAlign>(Value);
                     case AssetIDType.Enum_GameSpeed:
                         return ConvertToEnumStr<GameSpeed>(Value);
+                    case AssetIDType.Enum_Track:
+                        return ConvertToEnumStr<Track>(Value);
+                    case AssetIDType.Enum_SequenceDirection:
+                        return ConvertToEnumStr<SequenceDirection>(Value);
                     case AssetIDType.Enum_OSType:
                         return ConvertToEnumStr<OSType>(Value);
                     case AssetIDType.Enum_GamepadButton:
@@ -537,6 +541,15 @@ namespace UndertaleModLib.Decompiler
                             break;
                         case AssetIDType.Script:
                             assetList = (IList)context.GlobalContext.Data.Scripts;
+                            break;
+                        case AssetIDType.AnimCurve:
+                            assetList = (IList)context.GlobalContext.Data.AnimationCurves;
+                            break;
+                        case AssetIDType.Sequence:
+                            assetList = (IList)context.GlobalContext.Data.Sequences;
+                            break;
+                        case AssetIDType.ParticleSystem:
+                            assetList = (IList)context.GlobalContext.Data.ParticleSystems;
                             break;
                     }
 
