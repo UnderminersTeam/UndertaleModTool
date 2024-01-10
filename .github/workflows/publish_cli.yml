@@ -41,7 +41,7 @@ jobs:
         cp ./README.md ./CLI-${{ matrix.os }}/
         cp ./LICENSE.txt ./CLI-${{ matrix.os }}/
     - name: Upload ${{ matrix.os }} CLI
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: CLI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}
         path: CLI-${{ matrix.os }}
