@@ -130,7 +130,7 @@ jobs:
           await new Promise(r => setTimeout(r, 10000));
 
           const {owner, repo} = context.repo;
-          const listReleasesResponse = await github.repos.listReleases({
+          const listReleasesResponse = await github.rest.repos.listReleases({
             owner,
             repo
           });
