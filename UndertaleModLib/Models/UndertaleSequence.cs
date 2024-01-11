@@ -22,10 +22,10 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
     public int OriginX { get; set; }
     public int OriginY { get; set; }
     public float Volume { get; set; } = 1;
-    public UndertaleSimpleList<Keyframe<BroadcastMessage>> BroadcastMessages { get; set; }
-    public UndertaleSimpleList<Keyframe<Moment>> Moments { get; set; }
-    public UndertaleSimpleList<Track> Tracks { get; set; }
-    public Dictionary<int, UndertaleString> FunctionIDs { get; set; }
+    public UndertaleSimpleList<Keyframe<BroadcastMessage>> BroadcastMessages { get; set; } = new();
+    public UndertaleSimpleList<Keyframe<Moment>> Moments { get; set; } = new();
+    public UndertaleSimpleList<Track> Tracks { get; set; } = new();
+    public Dictionary<int, UndertaleString> FunctionIDs { get; set; } = new();
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
@@ -284,10 +284,10 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         public TrackBuiltinName BuiltinName { get; set; }
         public TrackTraits Traits { get; set; }
         public bool IsCreationTrack { get; set; }
-        public List<int> Tags { get; set; }
-        public List<Track> Tracks { get; set; } // Sub-tracks
+        public List<int> Tags { get; set; } = new();
+        public List<Track> Tracks { get; set; } = new(); // Sub-tracks
         public ITrackKeyframes Keyframes { get; set; }
-        public List<UndertaleResource> OwnedResources { get; set; }
+        public List<UndertaleResource> OwnedResources { get; set; } = new();
 
         public UndertaleString GMAnimCurveString;
 
