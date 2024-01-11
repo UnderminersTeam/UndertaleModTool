@@ -73,5 +73,5 @@ jobs:
             else
             {
                 core.info("Creating new comment on PR " + issue_number);
-                await github.rest,issues.createComment({repo, owner, issue_number, body});
+                await github.rest.issues.createComment({repo, owner, issue_number, body});
             }
