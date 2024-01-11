@@ -714,6 +714,10 @@
                                 <DataTemplate DataType="{x:Type undertale:UndertaleParticleSystemEmitter}">
                                     <local:UndertaleParticleSystemEmitterEditor/>
                                 </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type undertale:UndertaleSequence}">
+                                    <local:UndertaleSequenceEditor/>
+                                </DataTemplate>
                             </ContentControl.Resources>
                         </ContentControl>
                     </ScrollViewer>
