@@ -459,6 +459,13 @@
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
+                        <TreeViewItem Header="Sequences" ItemsSource="{Binding Sequences, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding ParticleSystems, Converter={StaticResource VisibleIfNotNull}}">
+                            <TreeViewItem.ItemTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleSequence}">
+                                    <TextBlock Text="{Binding Name.Content}" />
+                                </HierarchicalDataTemplate>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
                         <TreeViewItem Header="Embedded images" ItemsSource="{Binding EmbeddedImages, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding EmbeddedImages, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleEmbeddedImage}">

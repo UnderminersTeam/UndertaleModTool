@@ -15,13 +15,13 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
     }
 
     public UndertaleString Name { get; set; }
-    public PlaybackType Playback { get; set; }
-    public float PlaybackSpeed { get; set; }
-    public AnimSpeedType PlaybackSpeedType { get; set; }
-    public float Length { get; set; }
+    public PlaybackType Playback { get; set; } = PlaybackType.Oneshot;
+    public float PlaybackSpeed { get; set; } = 60;
+    public AnimSpeedType PlaybackSpeedType { get; set; } = AnimSpeedType.FramesPerGameFrame;
+    public float Length { get; set; } = 60;
     public int OriginX { get; set; }
     public int OriginY { get; set; }
-    public float Volume { get; set; }
+    public float Volume { get; set; } = 1;
     public UndertaleSimpleList<Keyframe<BroadcastMessage>> BroadcastMessages { get; set; }
     public UndertaleSimpleList<Keyframe<Moment>> Moments { get; set; }
     public UndertaleSimpleList<Track> Tracks { get; set; }
@@ -887,7 +887,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
 
     public class RealKeyframes : TrackKeyframes<RealData>
     {
-        public int Interpolation;
+        public int Interpolation = 1;
 
         /// <inheritdoc />
         public override void Serialize(UndertaleWriter writer)
