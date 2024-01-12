@@ -447,7 +447,7 @@ namespace UndertaleModLib.Decompiler
                     case AssetIDType.ContextDependent:
                         {
                             var func = context.currentFunction;
-                            if (func != null && (ContextualAssetResolver.resolvers?.ContainsKey(func.Function.Name.Content) ?? false))
+                            if (func != null && (ContextualAssetResolver.resolvers?.TryGetValue(func.Function.Name.Content, out var resolveFunc) ?? false))
                             {
                                 List<Expression> actualArguments = new List<Expression>();
                                 foreach (var arg in func.Arguments)
@@ -457,7 +457,7 @@ namespace UndertaleModLib.Decompiler
                                     else
                                         actualArguments.Add(arg);
                                 }
-                                string result = ContextualAssetResolver.resolvers[func.Function.Name.Content](context, func, actualArguments.IndexOf(this), this);
+                                string result = resolveFunc(context, func, actualArguments.IndexOf(this), this);
                                 if (result != null)
                                     return result;
                             }
@@ -473,8 +473,8 @@ namespace UndertaleModLib.Decompiler
                             else // guaranteed to be an unsigned int.
                             {
                                 uint vuint = (uint)vint;
-                                if (Decompiler.ColorDictionary.ContainsKey(vuint))
-                                    return Decompiler.ColorDictionary[vuint];
+                                if (Decompiler.ColorDictionary.TryGetValue(vuint, out var colorName))
+                                    return colorName;
                                 else
                                     return (context.GlobalContext.Data?.IsGameMaker2() ?? false ? "0x" : "$") + formattable.ToString("X6", CultureInfo.InvariantCulture); // not a known color and not negative.
                             }
@@ -1212,14 +1212,14 @@ namespace UndertaleModLib.Decompiler
             {
                 if (Value != null)
                 {
-                    if (AssetTypeResolver.return_types.ContainsKey(context.TargetCode.Name.Content))
-                        Value.DoTypePropagation(context, AssetTypeResolver.return_types[context.TargetCode.Name.Content]);
+                    if (AssetTypeResolver.return_types.TryGetValue(context.TargetCode.Name.Content, out var type))
+                        Value.DoTypePropagation(context, type);
                     if (context.GlobalContext.Data != null && !DecompileContext.GMS2_3)
                     {
                         // We might be decompiling a legacy script - resolve it's name
                         UndertaleScript script = context.GlobalContext.Data.Scripts.FirstOrDefault(x => x.Code == context.TargetCode);
-                        if (script != null && AssetTypeResolver.return_types.ContainsKey(script.Name.Content))
-                            Value.DoTypePropagation(context, AssetTypeResolver.return_types[script.Name.Content]);
+                        if (script != null && AssetTypeResolver.return_types.TryGetValue(script.Name.Content, out type))
+                            Value.DoTypePropagation(context, type);
                     }
 
                     string cleanVal = Value.ToString(context);
@@ -1494,7 +1494,7 @@ namespace UndertaleModLib.Decompiler
             public override string ToString(DecompileContext context)
             {
                 StringBuilder sb = new StringBuilder();
-                if (context.Statements.ContainsKey(FunctionBodyEntryBlock.Address.Value))
+                if (context.Statements.TryGetValue(FunctionBodyEntryBlock.Address.Value, out var statements))
                 {
                     FunctionDefinition def;
                     var oldDecompilingStruct = context.DecompilingStruct;
@@ -1508,7 +1508,7 @@ namespace UndertaleModLib.Decompiler
                         sb.Append("function");
                         if (IsStatement)
                         {
-                            sb.Append(" ");
+                            sb.Append(' ');
 
                             // For further optimization, we could *probably* create a dictionary that's just flipped KVPs (assuming there are no dup. values).
                             // Doing so would save the need for LINQ and what-not. Not that big of an issue, but still an option.
@@ -1531,11 +1531,11 @@ namespace UndertaleModLib.Decompiler
                                         gotFuncName = true;
                                     }
                                 }
-                                if(!gotFuncName)
+                                if (!gotFuncName)
                                     sb.Append((context.Statements[0].Last() as AssignmentStatement).Destination.Var.Name.Content);
                             }
                         }
-                        sb.Append("(");
+                        sb.Append('(');
                         for (int i = 0; i < FunctionBodyCodeEntry.ArgumentsCount; ++i)
                         {
                             if (i != 0)
@@ -1550,12 +1550,11 @@ namespace UndertaleModLib.Decompiler
                         sb.Append(Function.Name.Content);
                     }
 
-                    var statements = context.Statements[FunctionBodyEntryBlock.Address.Value];
                     int numNotReturn = statements.FindAll(stmt => !(stmt is ReturnStatement)).Count;
 
                     if (numNotReturn > 0 || Subtype != FunctionType.Struct)
                     {
-                        sb.Append("\n");
+                        sb.Append('\n');
                         sb.Append(context.Indentation);
                         sb.Append("{\n");
                         context.IndentationLevel++;
@@ -1583,24 +1582,24 @@ namespace UndertaleModLib.Decompiler
                             if (def?.Function == Function)
                             {
                                 //sb.Append("// Error decompiling function: function contains its own declaration???\n");
-                                sb.Append("\n");
+                                sb.Append('\n');
                                 break;
                             }
                             else
                             {
                                 sb.Append(stmt.ToString(context));
                                 if (Subtype == FunctionType.Struct && count < numNotReturn)
-                                    sb.Append(",");
+                                    sb.Append(',');
                             }
-                            sb.Append("\n");
+                            sb.Append('\n');
                         }
                         context.DecompilingStruct = oldDecompilingStruct;
                         context.ArgumentReplacements = oldReplacements;
                         context.IndentationLevel--;
                         sb.Append(context.Indentation);
-                        sb.Append("}");
+                        sb.Append('}');
                         if(!oldDecompilingStruct)
-                            sb.Append("\n");
+                            sb.Append('\n');
                     }
                     else
                         sb.Append("{}");
@@ -1609,6 +1608,7 @@ namespace UndertaleModLib.Decompiler
                 {
                     sb.Append(Function.Name.Content);
                 }
+
                 return sb.ToString();
             }
 
@@ -1779,11 +1779,13 @@ namespace UndertaleModLib.Decompiler
                             Decompiler.DecompileFromBlock(childContext, blocks, blocks[0]);
                             Decompiler.DoTypePropagation(childContext, blocks); // TODO: This should probably put suggestedType through the "return" statement at the other end
                         }
-                        context.GlobalContext.ScriptArgsCache[funcName] = new AssetIDType[15];
+
+                        var typesArr = new AssetIDType[15];
+                        context.GlobalContext.ScriptArgsCache[funcName] = typesArr;
                         for (int i = 0; i < 15; i++)
                         {
                             var v = childContext.assetTypes.Where((x) => x.Key.Name.Content == "argument" + i);
-                            context.GlobalContext.ScriptArgsCache[funcName][i] = v.Any() ? v.First().Value : AssetIDType.Other;
+                            typesArr[i] = v.Any() ? v.First().Value : AssetIDType.Other;
                         }
                     }
                     catch (Exception e)
@@ -1989,7 +1991,9 @@ namespace UndertaleModLib.Decompiler
                         e?.DoTypePropagation(context, AssetIDType.Other);
                 }
 
-                AssetIDType current = context.assetTypes.ContainsKey(Var) ? context.assetTypes[Var] : AssetIDType.Other;
+                AssetIDType current;
+                if (!context.assetTypes.TryGetValue(Var, out current))
+                    current = AssetIDType.Other;
                 if (current == AssetIDType.Other && suggestedType != AssetIDType.Other)
                     current = suggestedType;
                 AssetIDType builtinSuggest = AssetTypeResolver.AnnotateTypeForVariable(context, Var.Name.Content);
@@ -2805,16 +2809,16 @@ namespace UndertaleModLib.Decompiler
 
             foreach (var instr in code.Instructions)
             {
-                if (blockByAddress.ContainsKey(instr.Address))
+                if (blockByAddress.TryGetValue(instr.Address, out var block))
                 {
                     if (currentBlock != null)
                     {
                         currentBlock.conditionalExit = false;
-                        currentBlock.nextBlockTrue = blockByAddress[instr.Address];
-                        currentBlock.nextBlockFalse = blockByAddress[instr.Address];
-                        blockByAddress[instr.Address].entryPoints.Add(currentBlock);
+                        currentBlock.nextBlockTrue = block;
+                        currentBlock.nextBlockFalse = block;
+                        block.entryPoints.Add(currentBlock);
                     }
-                    currentBlock = blockByAddress[instr.Address];
+                    currentBlock = block;
                 }
 
                 if (currentBlock == null)
@@ -3670,9 +3674,10 @@ namespace UndertaleModLib.Decompiler
                             caseExpr = cmp.Argument2;
                         }
 
-                        if (!caseEntries.ContainsKey(block.nextBlockTrue))
-                            caseEntries.Add(block.nextBlockTrue, new List<Expression>());
-                        caseEntries[block.nextBlockTrue].Add(caseExpr);
+                        List<Expression> list;
+                        if (!caseEntries.TryGetValue(block.nextBlockTrue, out list))
+                            caseEntries.Add(block.nextBlockTrue, list = new());
+                        list.Add(caseExpr);
 
                         if (!block.conditionalExit)
                         {
@@ -3726,9 +3731,8 @@ namespace UndertaleModLib.Decompiler
                         {
                             // This is the default-case meet-point if it is b.
                             uint instructionId = ((uint)block.Address + 1 + (uint)breakInstruction.JumpOffset);
-                            if (!blocks.ContainsKey(instructionId))
+                            if (!blocks.TryGetValue(instructionId, out var switchEnd))
                                 Debug.Fail("Switch statement default: Bad target [" + block.Address + ", " + breakInstruction.JumpOffset + "]: " + breakInstruction.ToString());
-                            Block switchEnd = blocks[instructionId];
 
                             Block start = meetPoint;
                             defaultCase.Block = HLDecompileBlocks(context, ref start, blocks, loops, reverseDominators, alreadyVisited, currentLoop, switchEnd, switchEnd, false, depth + 1);

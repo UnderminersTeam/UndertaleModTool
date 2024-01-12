@@ -53,6 +53,7 @@ namespace UndertaleModTool
 
         public bool EnableDarkMode { get; set; } = false;
         public bool ShowDebuggerOption { get; set; } = false;
+        public bool CheckBuiltinFunctionsArgCount { get; set; } = true;
 
         public static Settings Instance;
 

@@ -17,7 +17,7 @@ namespace UndertaleModLib.Compiler
         public Dictionary<string, VariableInfo> userDefinedVariables = new Dictionary<string, VariableInfo>();
         public bool ensureFunctionsDefined = true;
         public bool ensureVariablesDefined = true;
-        public static bool GMS2_3;
+        public static bool GMS2_3, GM2022_11;
         public bool TypedAssetRefs => Data.IsVersionAtLeast(2023, 8);
         public int LastCompiledArgumentCount = 0;
         public Dictionary<string, string> LocalVars = new Dictionary<string, string>();

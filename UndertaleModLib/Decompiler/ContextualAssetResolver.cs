@@ -81,10 +81,11 @@ namespace UndertaleModLib.Decompiler
                 if (type == Enum_EventType.ev_keypress || type == Enum_EventType.ev_keyrelease)
                     type = Enum_EventType.ev_keyboard;
 
-                if (!event_subtypes.ContainsKey(type))
-                    event_subtypes[type] = new Dictionary<int, string>();
+                Dictionary<int, string> subtypes;
+                if (!event_subtypes.TryGetValue(type, out subtypes))
+                    event_subtypes[type] = (subtypes = new Dictionary<int, string>());
 
-                return event_subtypes[type];
+                return subtypes;
             };
 
             // This is going to get bulky really quickly
@@ -145,11 +146,10 @@ namespace UndertaleModLib.Decompiler
                         if (key != null)
                             return key;
                     }
-                    else if (subtypes.ContainsKey(type))
+                    else if (subtypes.TryGetValue(type, out var mappings))
                     {
-                        var mappings = subtypes[type];
-                        if (mappings.ContainsKey(val))
-                            return mappings[val];
+                        if (mappings.TryGetValue(val, out var str))
+                            return str;
                     }
                 }
 
@@ -209,7 +209,10 @@ namespace UndertaleModLib.Decompiler
                         if (val == null)
                             return null;
 
-                        return blend_modes.ContainsKey(val.Value) ? blend_modes[val.Value] : null;
+                        if (blend_modes.TryGetValue(val.Value, out var mode))
+                            return mode;
+                        
+                        return null;
                     }
                 },
                 { "gpu_set_blendmode_ext", (context, func, index, self) =>
@@ -218,7 +221,10 @@ namespace UndertaleModLib.Decompiler
                         if (val == null)
                             return null;
 
-                        return blend_modes.ContainsKey(val.Value) ? blend_modes[val.Value] : null;
+                        if (blend_modes.TryGetValue(val.Value, out var mode))
+                            return mode;
+
+                        return null;
                     }
                 },
                 { "__view_set", (context, func, index, self) => 
@@ -252,6 +258,7 @@ namespace UndertaleModLib.Decompiler
                                         return "true";
                                 } break;
                         }
+
                         return null;
                     }
                 },

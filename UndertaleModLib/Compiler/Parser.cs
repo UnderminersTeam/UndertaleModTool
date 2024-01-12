@@ -397,19 +397,31 @@ namespace UndertaleModLib.Compiler
             {
                 if (context != null)
                 {
-                    if (msg.EndsWith(".", StringComparison.InvariantCulture))
-                        msg = msg.Remove(msg.Length - 1);
+                    int firstDotIndex = msg.IndexOf('.');
+                    if (firstDotIndex != -1)
+                        msg = msg.Remove(firstDotIndex, 1);
 
                     if (context.Location != null)
                     {
-                        msg += string.Format(" around line {0}, column {1}", context.Location.Line, context.Location.Column);
-                    } else if (context.Kind == TokenKind.EOF)
+                        string s = string.Format(" around line {0}, column {1}", context.Location.Line, context.Location.Column);
+                        msg = msg.Insert(firstDotIndex, s);
+                        firstDotIndex += s.Length;
+                    }
+                    else if (context.Kind == TokenKind.EOF)
                     {
-                        msg += " around EOF (end of file)";
+                        msg = msg.Insert(firstDotIndex, " around EOF (end of file)");
+                        firstDotIndex += " around EOF (end of file)".Length;
                     }
                     if (context.Content != null && context.Content.Length > 0)
-                        msg += " (" + context.Content + ")";
-                    ReportCodeError(msg + ".", synchronize);
+                    {
+                        string s = " (" + context.Content + ')';
+                        msg = msg.Insert(firstDotIndex, s);
+                        firstDotIndex += s.Length;
+                    }
+
+                    msg = msg.Insert(firstDotIndex, ".");
+
+                    ReportCodeError(msg, synchronize);
                 }
                 else
                 {
@@ -433,6 +445,7 @@ namespace UndertaleModLib.Compiler
             {
                 // Basic initialization
                 remainingStageOne.Clear();
+                remainingStageOne.EnsureCapacity(tokens.Count);
                 ErrorMessages.Clear();
                 context.LocalVars.Clear();
                 if ((context.Data?.GeneralInfo?.BytecodeVersion ?? 15) >= 15)
@@ -446,7 +459,7 @@ namespace UndertaleModLib.Compiler
                     tokens.Add(new Lexer.Token(TokenKind.EOF));
 
                 // Run first parse stage- basic abstraction into functions and constants
-                List<Statement> firstPass = new List<Statement>();
+                List<Statement> firstPass = new(tokens.Count);
 
                 bool chainedVariableReference = false;
                 for (int i = 0; i < tokens.Count; i++)
@@ -485,7 +498,8 @@ namespace UndertaleModLib.Compiler
                             try
                             {
                                 val = Convert.ToInt64(t.Content.Substring(t.Content[0] == '$' ? 1 : 2), 16);
-                            } catch (Exception)
+                            }
+                            catch (Exception)
                             {
                                 ReportCodeError("Invalid hex literal.", t, false);
                                 constant = new ExpressionConstant(0);
@@ -1044,11 +1058,31 @@ namespace UndertaleModLib.Compiler
                 if (EnsureTokenKind(TokenKind.CloseParen) == null) return null;
 
                 // Check for proper argument count, at least for builtins
-                if (context.BuiltInList.Functions.TryGetValue(s.Text, out FunctionInfo fi) && 
-                    fi.ArgumentCount != -1 && result.Children.Count != fi.ArgumentCount)
-                    ReportCodeError(string.Format("Function {0} expects {1} arguments, got {2}.",
-                                                  s.Text, fi.ArgumentCount, result.Children.Count)
-                                                  , s.Token, false);
+                if (BuiltinList.CheckBuiltinFuncArgCount
+                    && context.BuiltInList.Functions.TryGetValue(s.Text, out FunctionInfo fi))
+                {
+                    if (fi.ArgumentCount < -1)
+                    {
+                        // -2 = at least 1 argument
+                        int minArgCount = -fi.ArgumentCount - 1; 
+                        if (result.Children.Count < minArgCount)
+                        {
+                            ReportCodeError(string.Format("Function {0} expects at least {1} arguments, got {2}.\n\n" +
+                                                          "If you sure that's a mistake, then you can disable built-in functions " +
+                                                          "argument count checking in the settings.",
+                                                          s.Text, minArgCount, result.Children.Count),
+                                            s.Token, false);
+                        }
+                    }
+                    else if (fi.ArgumentCount != -1 && result.Children.Count != fi.ArgumentCount)
+                    {
+                        ReportCodeError(string.Format("Function {0} expects {1} arguments, got {2}.\n\n" +
+                                                      "If you sure that's a mistake, then you can disable built-in functions " +
+                                                      "argument count checking in the settings.",
+                                                      s.Text, fi.ArgumentCount, result.Children.Count),
+                                        s.Token, false);
+                    }
+                }
 
                 return result;
             }
@@ -1717,6 +1751,10 @@ namespace UndertaleModLib.Compiler
                                     // Ignore the optimization for GMS build versions less than 1763 and not equal to 1539.
                                     if ((context.Data?.GeneralInfo.Build >= 1763) || (context.Data?.GeneralInfo.Major >= 2) || (context.Data?.GeneralInfo.Build == 1539))
                                     {
+                                        // If it's `string("test {0}", "format")`
+                                        if (CompileContext.GM2022_11 && result.Children.Count > 1)
+                                            return result;
+
                                         string conversion;
                                         switch (child0.Constant.kind)
                                         {
