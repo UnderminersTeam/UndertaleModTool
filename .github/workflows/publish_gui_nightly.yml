@@ -160,7 +160,7 @@ jobs:
           console.warn("Found the bleeding edge release that is draft.\nTrying to publish...");
 
           try {
-            await github.repos.updateRelease({owner, repo, release_id, draft: false});
+            await github.rest.repos.updateRelease({owner, repo, release_id, draft: false});
           }
           catch (err) {
             if ('status' in err && err.status == 422) {
