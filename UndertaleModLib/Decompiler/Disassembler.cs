@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using UndertaleModLib.Models;
 
 namespace UndertaleModLib.Decompiler
@@ -34,18 +34,24 @@ namespace UndertaleModLib.Decompiler
 
             return sb.ToString();
         }
-
+        
         public static string Disassemble(this UndertaleCode code, IList<UndertaleVariable> vars, UndertaleCodeLocals locals)
         {
-            StringBuilder sb = new StringBuilder();
+            // This StringBuilder is shared with the ToString method of the code instructions.
+            // Experimentation has shown that 200 is a good enough starting value for it. 
+            // 300 seemed too high and 100 too low. This may change in the future.
+            StringBuilder sb = new StringBuilder(200);
             if (locals == null && !code.WeirdLocalFlag)
                 sb.Append("; WARNING: Missing code locals, possibly due to unsupported bytecode version or a brand new code entry.\n");
             else
                 sb.Append(code.GenerateLocalVarDefinitions(vars, locals));
 
-            Dictionary<uint, string> fragments = new Dictionary<uint, string>();
+            Dictionary<uint, string> fragments = new(code.ChildEntries.Count);
             foreach (var dup in code.ChildEntries)
+            {
                 fragments.Add(dup.Offset / 4, (dup.Name?.Content ?? "<null>") + $" (locals={dup.LocalsCount}, argc={dup.ArgumentsCount})");
+            }
+
             List<uint> blocks = FindBlockAddresses(code);
 
             foreach (var inst in code.Instructions)
@@ -66,7 +72,8 @@ namespace UndertaleModLib.Decompiler
                     sb.AppendLine($":[{ind}]");
                 }
 
-                sb.AppendLine(inst.ToString(code, blocks));
+                inst.ToString(sb, code, blocks);
+                sb.Append(Environment.NewLine);
             }
 
             sb.AppendLine();
