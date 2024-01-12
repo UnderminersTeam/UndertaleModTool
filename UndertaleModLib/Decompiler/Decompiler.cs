@@ -616,9 +616,7 @@ namespace UndertaleModLib.Decompiler
             {
                 Type = UndertaleInstruction.DataType.Variable;
 
-                // Break down index - first 24 bits are the ID, the rest is the ref type
-                AssetIndex = encodedResourceIndex & 0xffffff;
-                AssetRefType = (RefType)(encodedResourceIndex >> 24);
+                (AssetIndex, AssetRefType) = DecodeResourceIndexAndType(encodedResourceIndex);
             }
 
             public ExpressionAssetRef(int resourceIndex, RefType resourceType)
@@ -641,46 +639,7 @@ namespace UndertaleModLib.Decompiler
             {
                 if (context.GlobalContext.Data != null)
                 {
-                    IList assetList = null;
-                    switch (AssetRefType)
-                    {
-                        case RefType.Sprite:
-                            assetList = (IList)context.GlobalContext.Data.Sprites;
-                            break;
-                        case RefType.Background:
-                            assetList = (IList)context.GlobalContext.Data.Backgrounds;
-                            break;
-                        case RefType.Sound:
-                            assetList = (IList)context.GlobalContext.Data.Sounds;
-                            break;
-                        case RefType.Font:
-                            assetList = (IList)context.GlobalContext.Data.Fonts;
-                            break;
-                        case RefType.Path:
-                            assetList = (IList)context.GlobalContext.Data.Paths;
-                            break;
-                        case RefType.Timeline:
-                            assetList = (IList)context.GlobalContext.Data.Timelines;
-                            break;
-                        case RefType.Room:
-                            assetList = (IList)context.GlobalContext.Data.Rooms;
-                            break;
-                        case RefType.Object:
-                            assetList = (IList)context.GlobalContext.Data.GameObjects;
-                            break;
-                        case RefType.Shader:
-                            assetList = (IList)context.GlobalContext.Data.Shaders;
-                            break;
-                        case RefType.AnimCurve:
-                            assetList = (IList)context.GlobalContext.Data.AnimationCurves;
-                            break;
-                        case RefType.Sequence:
-                            assetList = (IList)context.GlobalContext.Data.Sequences;
-                            break;
-                        case RefType.ParticleSystem:
-                            assetList = (IList)context.GlobalContext.Data.ParticleSystems;
-                            break;
-                    }
+                    IList assetList = GetAssetListFromType(context.GlobalContext.Data, AssetRefType);
 
                     if (assetList != null && AssetIndex >= 0 && AssetIndex < assetList.Count)
                         return ((UndertaleNamedResource)assetList[AssetIndex]).Name.Content;
@@ -706,6 +665,42 @@ namespace UndertaleModLib.Decompiler
                     RefType.ParticleSystem => AssetIDType.ParticleSystem,
                     _ => throw new NotImplementedException($"Missing ref type {AssetRefType}")
                 };
+            }
+
+            public static (int resourceIndex, RefType resourceType) DecodeResourceIndexAndType(int encodedResourceIndex)
+            {
+                // Break down index - first 24 bits are the ID, the rest is the ref type
+                return (encodedResourceIndex & 0xffffff, (RefType)(encodedResourceIndex >> 24));
+            }
+            public static int DecodeResourceIndex(int encodedResourceIndex)
+            {
+                return encodedResourceIndex & 0xffffff;
+            }
+            public static RefType DecodeResourceType(int encodedResourceIndex)
+            {
+                return (RefType)(encodedResourceIndex >> 24);
+            }
+
+            public static IList GetAssetListFromType(UndertaleData data, RefType type)
+            {
+                object list = type switch
+                {
+                    RefType.Sprite => data.Sprites,
+                    RefType.Background => data.Backgrounds,
+                    RefType.Sound => data.Sounds,
+                    RefType.Font => data.Fonts,
+                    RefType.Path => data.Paths,
+                    RefType.Timeline => data.Timelines,
+                    RefType.Room => data.Rooms,
+                    RefType.Object => data.GameObjects,
+                    RefType.Shader => data.Shaders,
+                    RefType.AnimCurve => data.AnimationCurves,
+                    RefType.Sequence => data.Sequences,
+                    RefType.ParticleSystem => data.ParticleSystems,
+                    _ => null
+                };
+
+                return list as IList;
             }
         }
 
