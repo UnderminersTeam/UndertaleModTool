@@ -63,7 +63,7 @@ jobs:
             cli_part += "\n";
             body += gui_part + cli_part;
 
-            const {data: comments} = await github.issues.listComments({repo, owner, issue_number});
+            const {data: comments} = await github.rest.issues.listComments({repo, owner, issue_number});
             const doesCommentExist = comments.find((c) => c.user.login === "github-actions[bot]");
             if (doesCommentExist)
             {
