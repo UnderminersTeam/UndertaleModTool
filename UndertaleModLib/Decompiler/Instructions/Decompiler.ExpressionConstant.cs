@@ -74,7 +74,7 @@ public static partial class Decompiler
         public override string ToString(DecompileContext context)
         {
             if (Value is float f) // More accurate, larger range, double to string.
-                return RoundTrip.ToRoundTrip(f);
+                return DoubleToString.StringOf(f);
 
             if (Value is Int64 i && i <= int.MaxValue && i >= int.MinValue) // Decompiler accuracy improvement.
             {
@@ -82,7 +82,7 @@ public static partial class Decompiler
             }
 
             if (Value is double d) // More accurate, larger range, double to string.
-                return RoundTrip.ToRoundTrip(d);
+                return DoubleToString.StringOf(d);
 
             if (Value is Statement statement)
                 return statement.ToString(context);
