@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using UndertaleModLib.Models;
 
 namespace UndertaleModLib.Decompiler
 {
-    // Implemented from https://stackoverflow.com/a/49663470
-    public static class RoundTrip
+    // Inspired from https://stackoverflow.com/a/49663470, but reimplemented to be more readable.
+    public static class DoubleToString
     {
-        private static readonly string[] zeros = new string[1000];
+        // This small lookup dictionary is for readability sake. So that if someone opens up a code entry,
+        // they don't see "var foo = 0.66666666666" but instead "var foo = 2/3". The values have been mostly taken from Undertale/Deltarune.
         public static Dictionary<double, string> PredefinedValues { get; private set; } = new Dictionary<double, string>()
         {
             { 3.141592653589793, "pi" },
@@ -34,88 +30,72 @@ namespace UndertaleModLib.Decompiler
             { 0.9523809523809523, "(20/21)" }
         };
 
-        static RoundTrip()
+        public static string StringOf(double number)
         {
-            for (int i = 0; i < zeros.Length; i++)
-            {
-                zeros[i] = new string('0', i);
-            }
-        }
-
-        public static string ToRoundTrip(double value)
-        {
-            if (PredefinedValues.TryGetValue(value, out string res))
+            // This function ensures that a double that is converted to a string is later parsed back into the same numeric value.
+            if (PredefinedValues.TryGetValue(number, out string res))
                 return res;
 
-            string str = value.ToString("r", CultureInfo.InvariantCulture);
-            int x = str.IndexOf('E', StringComparison.InvariantCulture);
-            int x_lower = str.IndexOf('e', StringComparison.InvariantCulture);
-            if ((x < 0) && (x_lower < 0))
-                return str;
+            ReadOnlySpan<char> numberAsSpan = number.ToString("G17", CultureInfo.InvariantCulture).AsSpan();      // This can sometimes return a scientific notation
+            int indexOfE = numberAsSpan.IndexOf("E".AsSpan());
+            if (indexOfE < 0)
+                return numberAsSpan.ToString();
+
+            // This converts the scientific notation to standard form/fixed point notation
+            // As of time of writing this comment, C# does not offer a way to print fixed point notation while preserving precision.
+            // You may ask "But why not use F17?". And the answer is, that for everything but R and G, the precision is hard-capped to 15 (according to MSDN: Double.ToString()).
+            // Thus we use G17 to keep our precision, and then manually convert this to fixed point notation.
+            // For anyone unaware of the general algorithm: you get the exponent 'n', then move the decimal point n times to the right if it's positive / left if it's negative.
+            ReadOnlySpan<char> exponentAsSpan = numberAsSpan.Slice(indexOfE + 1);
+            int exponent = Int32.Parse(exponentAsSpan);
+
+            StringBuilder builder = new();
+            int indexOfFirstDigitAfterDecimalPoint = number < 0 ? 3 : 2;
+            // Get digits before exponent
+
+            // i.e. "-1.2E2"/"1.2E2". Our "E" has to be at least 3/2 places in. "-1.E2"/"1.E2" would not have any decimals at all.
+            // Also a safety measure in case we get a string like "1E2".
+            int numDecimals = indexOfE - indexOfFirstDigitAfterDecimalPoint;
+            if (numDecimals < 0)
+                numDecimals = 0;
+            
+            // If the number is not negative, that means that the first character is a digit, that we want to copy.
+            if (number >= 0)
+            {
+                builder.Append(numberAsSpan[0]);
+            }
+            // If the number is negative and the exponent is negative, that means that we will have to prepend 0's,
+            // which means we can't copy the '-' (first) character in that case.
             else
             {
-                x = ((x < 0) ? x_lower : x);
+                if (exponent >= 0)
+                    builder.Append(numberAsSpan[0]);
+                builder.Append(numberAsSpan[1]);
             }
-            int x1 = x + 1;
-            string exp = str.Substring(x1, str.Length - x1);
-            int e = int.Parse(exp);
+            
+            // If we have decimal digits, append them too.
+            if (numDecimals > 0)
+            {
+                builder.Append(numberAsSpan.Slice(indexOfFirstDigitAfterDecimalPoint, numDecimals));
+            }
+            
 
-            string s;
-            int numDecimals = 0;
-            if (value < 0)
+            // Move our "decimal point".
+            if (exponent >= 0)
             {
-                int len = x - 3;
-                if (e >= 0)
-                {
-                    if (len > 0)
-                    {
-                        s = str.Substring(0, 2) + str.Substring(3, len);
-                        numDecimals = len;
-                    }
-                    else
-                        s = str.Substring(0, 2);
-                }
-                else
-                {
-                    // remove the leading minus sign
-                    if (len > 0)
-                    {
-                        s = str.Substring(1, 1) + str.Substring(3, len);
-                        numDecimals = len;
-                    }
-                    else
-                        s = str.Substring(1, 1);
-                }
-            }
-            else
-            {
-                int len = x - 2;
-                if (len > 0)
-                {
-                    s = str[0] + str.Substring(2, len);
-                    numDecimals = len;
-                }
-                else
-                    s = str[0].ToString();
-            }
-
-            if (e >= 0)
-            {
-                e -= numDecimals;
-                string z = (e < zeros.Length ? zeros[e] : new string('0', e));
-                s += z;
+                exponent -= numDecimals;
+                builder.Append('0', exponent);
             }
             else
             {
-                e = (-e - 1);
-                string z = (e < zeros.Length ? zeros[e] : new string('0', e));
-                if (value < 0)
-                    s = "-0." + z + s;
-                else
-                    s = "0." + z + s;
+                exponent = (-exponent - 1);     // -1, because we're manually inserting a "0."
+                builder.Insert(0, "0", exponent);
+                builder.Insert(0, "0.");
+                if (number < 0)
+                    builder.Insert(0, '-');
             }
 
-            return s;
+            return builder.ToString();
         }
     }
 }
