@@ -12,6 +12,9 @@
     <Platforms>AnyCPU;x64</Platforms>
     <RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NeutralLanguage>en</NeutralLanguage>
+    <ResourceLanguages>en</ResourceLanguages>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <!-- Suppress all missing XML comment warnings -->
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
