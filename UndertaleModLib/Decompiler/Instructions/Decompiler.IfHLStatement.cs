@@ -145,20 +145,13 @@ public static partial class Decompiler
         public override string ToString(DecompileContext context)
         {
             StringBuilder sb = new StringBuilder();
-            string cond;
-            if (condition is ExpressionCompare)
-                cond = (condition as ExpressionCompare).ToStringWithParen(context);
-            else
-                cond = condition.ToString(context);
+            string cond = condition.ToString(context);
             sb.Append("if " + cond + "\n");
             sb.Append(context.Indentation + trueBlock.ToString(context));
 
             foreach (ValueTuple<Expression, BlockHLStatement> tuple in elseConditions)
             {
-                if (tuple.Item1 is ExpressionCompare)
-                    cond = (tuple.Item1 as ExpressionCompare).ToStringWithParen(context);
-                else
-                    cond = tuple.Item1.ToString(context);
+                cond = tuple.Item1.ToString(context);
                 sb.Append("\n" + context.Indentation + "else if " + cond + "\n");
                 sb.Append(context.Indentation + tuple.Item2.ToString(context));
             }

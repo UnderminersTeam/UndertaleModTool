@@ -130,12 +130,12 @@ public static partial class Decompiler
             }
 
             string cond;
-            if (Condition is ExpressionCompare)
-                cond = (Condition as ExpressionCompare).ToStringWithParen(context);
+            if (Condition is ExpressionCompare compare)
+                cond = compare.ToString(context);
             else if (IsDoUntilLoop)
                 cond = Condition?.ToString(context) ?? "(false)";
             else
-                cond = Condition != null ? Condition.ToString(context) : "(true)";
+                cond = Condition is not null ? Condition.ToString(context) : "(true)";
 
             if (IsDoUntilLoop)
                 return "do\n" + context.Indentation + Block.ToString(context, false) + " until " + cond + ";";
