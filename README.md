@@ -6,7 +6,7 @@
 
 Heya. I heard you like digging deep into GameMaker games like Undertale/Deltarune, so here's a tool just for you!
 
-<img src="images/flowey.gif" alt="Flowey"/>
+![Flowey: Now YOU are the GOD of this world.](images/flowey.gif)
 
 
 # Downloads
