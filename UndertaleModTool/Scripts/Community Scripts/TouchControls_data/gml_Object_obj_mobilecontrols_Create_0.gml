@@ -1,11 +1,16 @@
-if (string_lower(game_display_name) == "undertale")
+if(font_exists(fnt_main))
 {
     settings_font = fnt_main
     settings_num_x = 477
 }
-else
+else if(font_exists(fnt_mainbig))
 {
     settings_font = fnt_mainbig
+    settings_num_x = 502
+}
+else
+{
+    settings_font = 0
     settings_num_x = 502
 }
 zx = 510
