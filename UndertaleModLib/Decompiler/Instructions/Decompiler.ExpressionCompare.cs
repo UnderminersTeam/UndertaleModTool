@@ -29,7 +29,7 @@ public static partial class Decompiler
         {
             string arg1 = Argument1.ToString(context);
             string arg2 = Argument2.ToString(context);
-            return String.Format("({0} {1} {2})", arg1, OperationToPrintableString(Opcode), arg2);
+            return String.Format("{0} {1} {2}", arg1, OperationToPrintableString(Opcode), arg2);
         }
 
         public string ToStringWithParen(DecompileContext context)
