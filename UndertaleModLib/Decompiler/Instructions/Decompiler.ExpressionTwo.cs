@@ -34,15 +34,81 @@ public static partial class Decompiler
             return this;
         }
 
-        public override string ToString(DecompileContext context)
+        private string AddParensIfNeeded(Expression argument, DecompileContext context)
         {
+            string arg = argument.ToString(context);
+            bool needsParens;
+            if (arg.Substring(0, 1) != "(" &&
+                argument is not ExpressionConstant &&
+                arg.Contains(' ', StringComparison.InvariantCulture))
+                needsParens = true;
+            else
+                needsParens = false;
+
+
+            if (argument is ExpressionTwo || argument is ExpressionCompare)
+            {
+                int myPriorityLevel = Opcode switch
+                {
+                    UndertaleInstruction.Opcode.Mul or UndertaleInstruction.Opcode.Div => 4,
+                    UndertaleInstruction.Opcode.Add or UndertaleInstruction.Opcode.Sub => 3,
+                    // comparison operations are considered level 2, below/after math but above/before binary
+                    UndertaleInstruction.Opcode.And or UndertaleInstruction.Opcode.Or or UndertaleInstruction.Opcode.Xor => 1,
+                    _ => 0,
+                };
+                int argPriorityLevel = 0;
+
+                if (argument is ExpressionTwo argumentAsBinaryExpression)
+                {
+                    // First, no parentheses on this type
+                    arg = argumentAsBinaryExpression.ToStringNoParens(context);
+
+                    argPriorityLevel = argumentAsBinaryExpression.Opcode switch
+                    {
+                        UndertaleInstruction.Opcode.Mul or UndertaleInstruction.Opcode.Div => 4,
+                        UndertaleInstruction.Opcode.Add or UndertaleInstruction.Opcode.Sub => 3,
+                        // comparison operations are considered level 2, below/after math but above/before binary
+                        UndertaleInstruction.Opcode.And or UndertaleInstruction.Opcode.Or or UndertaleInstruction.Opcode.Xor => 1,
+                        _ => 0,
+                    };
+                }
+                else if (argument is ExpressionCompare)
+                {
+                    // See above comments in switches (all comparison operations are equal for math and binary operations)
+                    argPriorityLevel = 2;
+                }
+
+                // Suppose we have "(arg1a argOp arg1b) opcode argument2", and are wondering whether the depicted parentheses are needed
+                // If the argument's opcode is more highly-prioritized than our own, such as it being multiplication
+                // while we use addition, then no parentheses are required.
+                // If the argument's opcode doesn't fall into typical math rules (that is, I don't know my full order of operations)
+                // Assume it has lower priority and needs parentheses to clarify.
+                // Parentheses are also not needed for operations of the same level, especially string concatenation.
+                needsParens = (myPriorityLevel > argPriorityLevel);
+                if (myPriorityLevel == 0)
+                    needsParens = true; // Better safe than sorry
+            }
+
+            return (needsParens ? String.Format("({0})", arg) : arg);
+        }
+
+        public string ToStringNoParens(DecompileContext context)
+        {
+            string arg1 = AddParensIfNeeded(Argument1, context);
+            string arg2 = AddParensIfNeeded(Argument2, context);
+
             if (Opcode == UndertaleInstruction.Opcode.Or || Opcode == UndertaleInstruction.Opcode.And)
             {
                 // If both arguments are a boolean type, this is a non-short-circuited logical condition
                 if (Type == UndertaleInstruction.DataType.Boolean && Type2 == UndertaleInstruction.DataType.Boolean)
-                    return String.Format("({0} {1}{1} {2})", Argument1.ToString(context), OperationToPrintableString(Opcode), Argument2.ToString(context));
+                    return String.Format("{0} {1}{1} {2}", arg1, OperationToPrintableString(Opcode), arg2);
             }
-            return String.Format("({0} {1} {2})", Argument1.ToString(context), OperationToPrintableString(Opcode), Argument2.ToString(context));
+            return String.Format("{0} {1} {2}", arg1, OperationToPrintableString(Opcode), arg2);
+        }
+
+        public override string ToString(DecompileContext context)
+        {
+            return String.Format("({0})", ToStringNoParens(context));
         }
 
         internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)

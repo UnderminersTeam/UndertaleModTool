@@ -117,7 +117,16 @@ public static partial class Decompiler
                     }
                 }
             }
-            return String.Format("{0}{1}{2} {3}", varPrefix, varName, context.DecompilingStruct ? ":" : " =", Value.ToString(context));
+
+            // Since parenthesized is now the default output of ExpressionTwo (mainly math operations)
+            // It is specifically safe in variable assignment to not parenthesize this (e.g. "foo = a + b")
+            string stringOfValue;
+            if (Value is ExpressionTwo expressionTwoVal)
+                stringOfValue = expressionTwoVal.ToStringNoParens(context);
+            else
+                stringOfValue = Value.ToString(context);
+
+            return String.Format("{0}{1}{2} {3}", varPrefix, varName, context.DecompilingStruct ? ":" : " =", stringOfValue);
         }
 
         public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
