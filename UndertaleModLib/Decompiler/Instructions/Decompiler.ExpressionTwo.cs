@@ -46,7 +46,7 @@ public static partial class Decompiler
                 needsParens = false;
 
 
-            if (argument is ExpressionTwo || argument is ExpressionCompare)
+            if (argument is ExpressionTwo argumentAsBinaryExpression)
             {
                 int myPriorityLevel = Opcode switch
                 {
@@ -58,8 +58,6 @@ public static partial class Decompiler
                 };
                 int argPriorityLevel = 0;
 
-                if (argument is ExpressionTwo argumentAsBinaryExpression)
-                {
                     // First, no parentheses on this type
                     arg = argumentAsBinaryExpression.ToStringNoParens(context);
 
@@ -71,12 +69,7 @@ public static partial class Decompiler
                         UndertaleInstruction.Opcode.And or UndertaleInstruction.Opcode.Or or UndertaleInstruction.Opcode.Xor => 1,
                         _ => 0,
                     };
-                }
-                else if (argument is ExpressionCompare)
-                {
-                    // See above comments in switches (all comparison operations are equal for math and binary operations)
-                    argPriorityLevel = 2;
-                }
+                
 
                 // Suppose we have "(arg1a argOp arg1b) opcode argument2", and are wondering whether the depicted parentheses are needed
                 // If the argument's opcode is more highly-prioritized than our own, such as it being multiplication
