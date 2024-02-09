@@ -50,26 +50,21 @@ public static partial class Decompiler
             {
                 int myPriorityLevel = Opcode switch
                 {
-                    UndertaleInstruction.Opcode.Mul or UndertaleInstruction.Opcode.Div => 4,
-                    UndertaleInstruction.Opcode.Add or UndertaleInstruction.Opcode.Sub => 3,
-                    // comparison operations are considered level 2, below/after math but above/before binary
-                    UndertaleInstruction.Opcode.And or UndertaleInstruction.Opcode.Or or UndertaleInstruction.Opcode.Xor => 1,
+                    UndertaleInstruction.Opcode.Mul or UndertaleInstruction.Opcode.Div => 2,
+                    UndertaleInstruction.Opcode.Add or UndertaleInstruction.Opcode.Sub => 1,
                     _ => 0,
                 };
-                int argPriorityLevel = 0;
 
-                    // First, no parentheses on this type
-                    arg = argumentAsBinaryExpression.ToStringNoParens(context);
+                // First, no parentheses on this type
+                arg = argumentAsBinaryExpression.ToStringNoParens(context);
 
-                    argPriorityLevel = argumentAsBinaryExpression.Opcode switch
-                    {
-                        UndertaleInstruction.Opcode.Mul or UndertaleInstruction.Opcode.Div => 4,
-                        UndertaleInstruction.Opcode.Add or UndertaleInstruction.Opcode.Sub => 3,
-                        // comparison operations are considered level 2, below/after math but above/before binary
-                        UndertaleInstruction.Opcode.And or UndertaleInstruction.Opcode.Or or UndertaleInstruction.Opcode.Xor => 1,
-                        _ => 0,
-                    };
-                
+                int argPriorityLevel = argumentAsBinaryExpression.Opcode switch
+                {
+                    UndertaleInstruction.Opcode.Mul or UndertaleInstruction.Opcode.Div => 2,
+                    UndertaleInstruction.Opcode.Add or UndertaleInstruction.Opcode.Sub => 1,
+                    _ => 0,
+                };
+
 
                 // Suppose we have "(arg1a argOp arg1b) opcode argument2", and are wondering whether the depicted parentheses are needed
                 // If the argument's opcode is more highly-prioritized than our own, such as it being multiplication
