@@ -31,7 +31,13 @@ public class UndertaleSpineTextureEntry : UndertaleObject, IDisposable
     /// The atlas as raw bytes, can be a GameMaker QOI texture or a PNG file.
     /// </summary>
     public byte[] TexBlob { get; set; }
-    
+
+    // TODO: figure out what these bytes mean
+    /// <summary>
+    /// Unknown for >= 2023.4
+    /// </summary>
+    public int Unknown { get; set; }
+
     /// <summary>
     /// Indicates whether <see cref="TexBlob"/> contains a GameMaker QOI texture (the header is qoif reversed).
     /// </summary>
@@ -44,8 +50,7 @@ public class UndertaleSpineTextureEntry : UndertaleObject, IDisposable
         writer.Write(PageHeight);
         // TODO: check if this is also the case on earlier versions
         if (writer.undertaleData.IsVersionAtLeast(2023, 4)) {
-            // TODO: figure out what these bytes mean
-            writer.Write(0);
+            writer.Write(Unknown);
         } else {
             writer.Write(TexBlob.Length);
             writer.Write(TexBlob);
@@ -59,8 +64,7 @@ public class UndertaleSpineTextureEntry : UndertaleObject, IDisposable
         PageHeight = reader.ReadInt32();
         // TODO: check if this is also the case on earlier versions
         if (reader.undertaleData.IsVersionAtLeast(2023, 4)) {
-            // TODO: figure out what these bytes mean
-            reader.ReadInt32();
+            Unknown = reader.ReadInt32();
         } else
             TexBlob = reader.ReadBytes(reader.ReadInt32());
     }
@@ -71,7 +75,6 @@ public class UndertaleSpineTextureEntry : UndertaleObject, IDisposable
         reader.Position += 8;                        // Size
         // TODO: check if this is also the case on earlier versions
         if (reader.undertaleData.IsVersionAtLeast(2023, 4)) {
-            // TODO: figure out what these bytes mean
             reader.Position += 4; // unknown
         } else
             reader.Position += (uint)reader.ReadInt32(); // "TexBlob"
