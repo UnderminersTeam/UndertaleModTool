@@ -12,9 +12,9 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest]
-        configuration: [Debug]
+        configuration: [Debug, Release]
         bundled: [true, false]
-        singlefile: [true, false]
+        singlefile: [true]
 
     runs-on: ${{ matrix.os }}
 
@@ -43,5 +43,5 @@ jobs:
     - name: Upload ${{ matrix.os }} GUI
       uses: actions/upload-artifact@v2
       with:
-        name: UTMTCE-GUI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}
+        name: UTMTCE-GUI-${{ matrix.os }}-${{matrix.configuration}}-isBundled-${{ matrix.bundled }}
         path: ${{ matrix.os }}
