@@ -1,8 +1,8 @@
 name: Publish GUI
 
 on:
- #push:
- #  branches: [ master ]
+  push:
+    branches: [ master ]
   workflow_dispatch:
 
 jobs:
@@ -29,11 +29,11 @@ jobs:
     - name: Build
       run: |
         dotnet build UndertaleModTool --no-restore
-        dotnet build UndertaleModToolUpdater --no-restore
+      #  dotnet build UndertaleModToolUpdater --no-restore
     - name: Publish ${{ matrix.os }} GUI
       run: |
         dotnet publish UndertaleModTool -c ${{ matrix.configuration }} -r win-x64 --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=${{ matrix.singlefile }} --output ${{ matrix.os }}
-        dotnet publish UndertaleModToolUpdater -c ${{ matrix.configuration }} -r win-x64 --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false --output ${{ matrix.os }}/Updater
+      #  dotnet publish UndertaleModToolUpdater -c ${{ matrix.configuration }} -r win-x64 --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false --output ${{ matrix.os }}/Updater
     - name: Copy external files
       run: |
         cp ./README.md ./${{ matrix.os }}
@@ -43,5 +43,5 @@ jobs:
     - name: Upload ${{ matrix.os }} GUI
       uses: actions/upload-artifact@v2
       with:
-        name: UTMTCE-GUI-${{ matrix.os }}-${{matrix.configuration}}-isBundled-${{ matrix.bundled }}
+        name: UTMTCE-GUI64BIT-${{ matrix.os }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}
         path: ${{ matrix.os }}
