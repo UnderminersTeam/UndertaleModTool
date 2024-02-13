@@ -199,38 +199,18 @@ namespace UndertaleModLib.Decompiler
 
                     case UndertaleInstruction.Opcode.Ret:
                     case UndertaleInstruction.Opcode.Exit:
-                        // 2.3 scripts add exits to every script, even those that lack a return
-                        // This detects that type of exit using the next block.
-                        Block nextBlock = null;
-                        if (DecompileContext.GMS2_3 && instr.Kind == UndertaleInstruction.Opcode.Exit)
-                        {
-                            uint[] blockAddresses = blocks.Keys.ToArray();
-                            Array.Sort(blockAddresses);
-                            int nextBlockIndex = Array.IndexOf(blockAddresses, block.Address ?? 0) + 1;
-                            if (blockAddresses.Length > nextBlockIndex)
-                            {
-                                uint nextBlockAddress = blockAddresses[nextBlockIndex];
-                                nextBlock = blocks[nextBlockAddress];
-                            }
-                        }
+                        ReturnStatement stmt = new ReturnStatement(instr.Kind == UndertaleInstruction.Opcode.Ret ? stack.Pop() : null);
+                        /*
+                            This shouldn't be necessary: all unused things on the stack get converted to tempvars at the end anyway, and this fixes decompilation of repeat()
+                            See #85
 
-                        if (!(nextBlock is not null
-                            && nextBlock.Instructions.Count > 0
-                            && nextBlock.Instructions[0].Kind == UndertaleInstruction.Opcode.Push
-                            && nextBlock.Instructions[0].Value.GetType() != typeof(int)))
-                        {
-                            ReturnStatement stmt = new ReturnStatement(instr.Kind == UndertaleInstruction.Opcode.Ret ? stack.Pop() : null);
-                            /*
-                                This shouldn't be necessary: all unused things on the stack get converted to tempvars at the end anyway, and this fixes decompilation of repeat()
-                                See #85
+                            foreach (var expr in stack.Reverse())
+                                if (!(expr is ExpressionTempVar))
+                                    statements.Add(expr);
+                            stack.Clear();
+                        */
+                        statements.Add(stmt);
 
-                                foreach (var expr in stack.Reverse())
-                                    if (!(expr is ExpressionTempVar))
-                                        statements.Add(expr);
-                                stack.Clear();
-                            */
-                            statements.Add(stmt);
-                        }
                         end = true;
                         returned = true;
                         break;
@@ -1438,8 +1418,16 @@ namespace UndertaleModLib.Decompiler
             DoTypePropagation(context, blocks);
             context.Statements = new Dictionary<uint, List<Statement>>();
             context.Statements.Add(0, HLDecompile(context, blocks, blocks[0], blocks[code.Length / 4]));
-            foreach (UndertaleCode duplicate in code.ChildEntries)
-                context.Statements.Add(duplicate.Offset / 4, HLDecompile(context, blocks, blocks[duplicate.Offset / 4], blocks[code.Length / 4]));
+            foreach (UndertaleCode duplicate in code.ChildEntries) {
+                List<Statement> statements = HLDecompile(context, blocks, blocks[duplicate.Offset / 4], blocks[code.Length / 4]);
+
+                // 2.3 scripts add exits to every script, even those that lack a return
+                // This removes that
+                if (DecompileContext.GMS2_3 && statements.Last() is ReturnStatement)
+                    statements.RemoveAt(statements.Count - 1);
+
+                context.Statements.Add(duplicate.Offset / 4, statements);
+            }
 
             // Write code.
             context.IndentationLevel = 0;
