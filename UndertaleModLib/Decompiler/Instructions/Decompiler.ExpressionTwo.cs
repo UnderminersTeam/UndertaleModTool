@@ -48,7 +48,7 @@ public static partial class Decompiler
 
             if (argument is ExpressionTwo argumentAsBinaryExpression)
             {
-                int myPriorityLevel = Opcode switch
+                int outerPriorityLevel = Opcode switch
                 {
                     UndertaleInstruction.Opcode.Mul or UndertaleInstruction.Opcode.Div => 2,
                     UndertaleInstruction.Opcode.Add or UndertaleInstruction.Opcode.Sub => 1,
@@ -72,8 +72,8 @@ public static partial class Decompiler
                 // If the argument's opcode doesn't fall into typical math rules (that is, I don't know my full order of operations)
                 // Assume it has lower priority and needs parentheses to clarify.
                 // Parentheses are also not needed for operations of the same level, especially string concatenation.
-                needsParens = (myPriorityLevel > argPriorityLevel);
-                if (myPriorityLevel == 0)
+                needsParens = (outerPriorityLevel > argPriorityLevel);
+                if (outerPriorityLevel == 0)
                     needsParens = true; // Better safe than sorry
             }
 
