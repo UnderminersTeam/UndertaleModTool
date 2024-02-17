@@ -51,11 +51,16 @@ namespace UndertaleModTool
                         Directory.CreateDirectory(path);
 
                         // textures
-                        if (sprite.SpineHasTextureData) {
-                            foreach (var tex in sprite.SpineTextures.Select((tex, id) => new { id, tex })) {
-                                try {
+                        if (sprite.SpineHasTextureData)
+                        {
+                            foreach (var tex in sprite.SpineTextures.Select((tex, id) => new { id, tex }))
+                            {
+                                try
+                                {
                                     File.WriteAllBytes(Path.Combine(path, tex.id + ext), tex.tex.TexBlob);
-                                } catch (Exception ex) {
+                                } 
+                                catch (Exception ex) 
+                                {
                                     mainWindow.ShowError("Failed to export file: " + ex.Message, "Failed to export file");
                                 }
                             }

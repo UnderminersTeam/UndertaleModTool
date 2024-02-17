@@ -49,9 +49,12 @@ public class UndertaleSpineTextureEntry : UndertaleObject, IDisposable
         writer.Write(PageWidth);
         writer.Write(PageHeight);
         // TODO: check if this is also the case on earlier versions
-        if (writer.undertaleData.IsVersionAtLeast(2023, 4)) {
+        if (writer.undertaleData.IsVersionAtLeast(2023, 4))
+        {
             writer.Write(Unknown);
-        } else {
+        } 
+        else 
+        {
             writer.Write(TexBlob.Length);
             writer.Write(TexBlob);
         }
@@ -63,9 +66,9 @@ public class UndertaleSpineTextureEntry : UndertaleObject, IDisposable
         PageWidth = reader.ReadInt32();
         PageHeight = reader.ReadInt32();
         // TODO: check if this is also the case on earlier versions
-        if (reader.undertaleData.IsVersionAtLeast(2023, 4)) {
+        if (reader.undertaleData.IsVersionAtLeast(2023, 4))
             Unknown = reader.ReadInt32();
-        } else
+        else
             TexBlob = reader.ReadBytes(reader.ReadInt32());
     }
 
@@ -74,9 +77,9 @@ public class UndertaleSpineTextureEntry : UndertaleObject, IDisposable
     {
         reader.Position += 8;                        // Size
         // TODO: check if this is also the case on earlier versions
-        if (reader.undertaleData.IsVersionAtLeast(2023, 4)) {
+        if (reader.undertaleData.IsVersionAtLeast(2023, 4))
             reader.Position += 4; // unknown
-        } else
+        else
             reader.Position += (uint)reader.ReadInt32(); // "TexBlob"
 
         return 0;
@@ -610,7 +613,8 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                     reader.Align(4);
 
                     // TODO: check if this is also the case on earlier versions
-                    if (reader.undertaleData.IsVersionAtLeast(2023, 4)) {
+                    if (reader.undertaleData.IsVersionAtLeast(2023, 4))
+                    {
                         Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
                         SpineHasTextureData = false;
                     }
