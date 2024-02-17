@@ -704,6 +704,20 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
+            // GMS2.3 instance keywords
+            private static Statement ParseInstanceKeyword(CompileContext context)
+            {
+                Lexer.Token token = remainingStageOne.Dequeue().Token;
+                Statement result = new Statement(Statement.StatementKind.ExprFunctionCall, token);
+                // They literally convert into function calls
+                if (token.Kind == TokenKind.KeywordSelf) {
+                    result.Text = "@@This@@";
+                } else {
+                    result.Text = "@@Other@@";
+                }
+                return result;
+            }
+
             private static Statement ParseFor(CompileContext context)
             {
                 Statement result = new Statement(Statement.StatementKind.ForLoop, EnsureTokenKind(TokenKind.KeywordFor).Token);
@@ -751,65 +765,77 @@ namespace UndertaleModLib.Compiler
                 return result;
             }
 
+            private static Statement ParseAssignInner(CompileContext context, Statement left)
+            {
+                if (left.Kind != Statement.StatementKind.Pre && left.Kind != Statement.StatementKind.Post)
+                {
+                    // hack because I don't know what I'm doing
+                    string name;
+                    if (left.Children.Count == 0 || left.Kind == Statement.StatementKind.ExprSingleVariable)
+                        name = left.Text;
+                    else
+                        name = left.Children[left.Children.Count - 1]?.Text;
+                    if (name == null)
+                        return null;
+
+                    VariableInfo vi;
+                    if ((context.BuiltInList.GlobalNotArray.TryGetValue(name, out vi) ||
+                        context.BuiltInList.GlobalArray.TryGetValue(name, out vi) ||
+                        context.BuiltInList.Instance.TryGetValue(name, out vi) ||
+                        context.BuiltInList.InstanceLimitedEvent.TryGetValue(name, out vi)
+                        ) && !vi.CanSet)
+                    {
+                        ReportCodeError("Attempt to set a read-only variable.", left.Token, false);
+                    }
+
+                    if (remainingStageOne.Count == 0)
+                    {
+                        ReportCodeError("Malformed assignment statement.", true);
+                        return null;
+                    }
+                    Statement assign = new Statement(Statement.StatementKind.Assign, remainingStageOne.Dequeue().Token);
+                    assign.Children.Add(left);
+
+                    if (assign.Token.Kind.In(
+                        TokenKind.Assign,
+                        TokenKind.AssignAnd,
+                        TokenKind.AssignDivide,
+                        TokenKind.AssignMinus,
+                        TokenKind.AssignMod,
+                        TokenKind.AssignOr,
+                        TokenKind.AssignPlus,
+                        TokenKind.AssignTimes,
+                        TokenKind.AssignXor
+                        ))
+                    {
+                        assign.Children.Add(new Statement(Statement.StatementKind.Token, assign.Token));
+                        assign.Children.Add(ParseExpression(context));
+                    }
+                    else
+                    {
+                        ReportCodeError("Expected assignment operator.", assign.Token, true);
+                    }
+
+                    return assign;
+                }
+                else
+                {
+                    return left;
+                }
+            }
+
             private static Statement ParseAssign(CompileContext context)
             {
                 Statement left = ParsePostAndRef(context);
                 if (left != null)
                 {
-                    if (left.Kind != Statement.StatementKind.Pre && left.Kind != Statement.StatementKind.Post)
+                    if (left.Children.Count > 0 && left.Children.Last().Kind == Statement.StatementKind.ExprFunctionCall)
                     {
-                        // hack because I don't know what I'm doing
-                        string name;
-                        if (left.Children.Count == 0 || left.Kind == Statement.StatementKind.ExprSingleVariable)
-                            name = left.Text;
-                        else
-                            name = left.Children[left.Children.Count - 1]?.Text;
-                        if (name == null)
-                            return null;
-
-                        VariableInfo vi;
-                        if ((context.BuiltInList.GlobalNotArray.TryGetValue(name, out vi) ||
-                            context.BuiltInList.GlobalArray.TryGetValue(name, out vi) ||
-                            context.BuiltInList.Instance.TryGetValue(name, out vi) ||
-                            context.BuiltInList.InstanceLimitedEvent.TryGetValue(name, out vi)
-                            ) && !vi.CanSet)
-                        {
-                            ReportCodeError("Attempt to set a read-only variable.", left.Token, false);
-                        }
-
-                        if (remainingStageOne.Count == 0)
-                        {
-                            ReportCodeError("Malformed assignment statement.", true);
-                            return null;
-                        }
-                        Statement assign = new Statement(Statement.StatementKind.Assign, remainingStageOne.Dequeue().Token);
-                        assign.Children.Add(left);
-
-                        if (assign.Token.Kind.In(
-                            TokenKind.Assign,
-                            TokenKind.AssignAnd,
-                            TokenKind.AssignDivide,
-                            TokenKind.AssignMinus,
-                            TokenKind.AssignMod,
-                            TokenKind.AssignOr,
-                            TokenKind.AssignPlus,
-                            TokenKind.AssignTimes,
-                            TokenKind.AssignXor
-                            ))
-                        {
-                            assign.Children.Add(new Statement(Statement.StatementKind.Token, assign.Token));
-                            assign.Children.Add(ParseExpression(context));
-                        }
-                        else
-                        {
-                            ReportCodeError("Expected assignment operator.", assign.Token, true);
-                        }
-
-                        return assign;
+                        return left;
                     }
                     else
                     {
-                        return left;
+                        return ParseAssignInner(context, left);
                     }
                 }
                 else
@@ -1014,17 +1040,7 @@ namespace UndertaleModLib.Compiler
                 return null;
             }
 
-            private static Statement ParseFunctionCall(CompileContext context, bool expression = false)
-            {
-                Statement s = EnsureTokenKind(TokenKind.ProcFunction);
-
-                // gml_pragma processing can be done here, however we don't need to do that yet really
-
-                EnsureTokenKind(TokenKind.OpenParen); // this should be guaranteed
-
-                Statement result = new Statement(expression ? Statement.StatementKind.ExprFunctionCall :
-                                                 Statement.StatementKind.FunctionCall, s.Token);
-
+            private static void ParseFunctionCallArgs(CompileContext context, Statement result, Statement s) {
                 // Parse the parameters/arguments
                 while (remainingStageOne.Count > 0 && !hasError && !IsNextToken(TokenKind.EOF) && !IsNextToken(TokenKind.CloseParen))
                 {
@@ -1040,6 +1056,20 @@ namespace UndertaleModLib.Compiler
                         }
                     }
                 }
+            }
+
+            private static Statement ParseFunctionCall(CompileContext context, bool expression = false)
+            {
+                Statement s = EnsureTokenKind(TokenKind.ProcFunction);
+
+                // gml_pragma processing can be done here, however we don't need to do that yet really
+
+                EnsureTokenKind(TokenKind.OpenParen); // this should be guaranteed
+
+                Statement result = new Statement(expression ? Statement.StatementKind.ExprFunctionCall :
+                                                 Statement.StatementKind.FunctionCall, s.Token);
+
+                ParseFunctionCallArgs(context, result, s);
 
                 if (EnsureTokenKind(TokenKind.CloseParen) == null) return null;
 
@@ -1377,6 +1407,18 @@ namespace UndertaleModLib.Compiler
 
             private static Statement ParseSingleVar(CompileContext context)
             {
+                if (IsNextToken(TokenKind.ProcFunction)) {
+                    Statement procFunc = EnsureTokenKind(TokenKind.ProcFunction);
+                    EnsureTokenKind(TokenKind.OpenParen); // this should be guaranteed
+                    Statement funcCall = new Statement(Statement.StatementKind.ExprFunctionCall, procFunc.Token);
+
+                    ParseFunctionCallArgs(context, funcCall, procFunc);
+
+                    if (EnsureTokenKind(TokenKind.CloseParen) == null) return null;
+
+                    return funcCall;
+                }
+
                 Statement s = EnsureTokenKind(TokenKind.ProcVariable);
                 if (s == null)
                     return null;
@@ -1479,6 +1521,9 @@ namespace UndertaleModLib.Compiler
                         return ParseFunctionCall(context, true);
                     case TokenKind.KeywordFunction:
                         return ParseFunction(context);
+                    case TokenKind.KeywordSelf:
+                    case TokenKind.KeywordOther:
+                        return ParseInstanceKeyword(context);
                     case TokenKind.ProcVariable:
                         {
                             Statement variableRef = ParseSingleVar(context);
