@@ -38,7 +38,7 @@ public static partial class Decompiler
         {
             string arg = argument.ToString(context);
             bool needsParens;
-            if (arg.Substring(0, 1) != "(" &&
+            if (arg[0] != '(' &&
                 argument is not ExpressionConstant &&
                 arg.Contains(' ', StringComparison.InvariantCulture))
                 needsParens = true;
