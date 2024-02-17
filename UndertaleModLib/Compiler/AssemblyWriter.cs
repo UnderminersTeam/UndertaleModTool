@@ -2249,10 +2249,16 @@ namespace UndertaleModLib.Compiler
                 else if (s.Kind == Parser.Statement.StatementKind.ExprFuncName)
                 {
                     // Until further notice, I'm assuming this only comes up in 2.3 script definition.
+
+                    // sub funcs in an object store the self variable without the object function name suffix
+                    string funcName = s.Text;
+                    if (funcName.Contains("_gml_Object_"))
+                        funcName = funcName[..funcName.LastIndexOf("_gml_Object_")];
+
                     cw.varPatches.Add(new VariablePatch()
                     {
                         Target = cw.EmitRef(Opcode.Pop, DataType.Variable, DataType.Variable),
-                        Name = s.Text,
+                        Name = funcName,
                         InstType = InstanceType.Self,
                         VarType = VariableType.StackTop
                     });
