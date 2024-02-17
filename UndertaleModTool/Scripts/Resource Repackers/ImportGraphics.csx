@@ -14,6 +14,7 @@ EnsureDataLoaded();
 
 bool importAsSprite = false;
 
+// TODO: see if this can be reimplemented using substring instead of regex?
 // "(.+?)" - match everything; "?" = match as few characters as possible.
 // "(?:_(\d+))" - an underscore followed by digits;
 // "?:" = don't make a separate group for the whole part, "?" = make this part optional.
