@@ -709,12 +709,13 @@ namespace UndertaleModLib.Compiler
             {
                 Lexer.Token token = remainingStageOne.Dequeue().Token;
                 Statement result = new Statement(Statement.StatementKind.ExprFunctionCall, token);
+
                 // They literally convert into function calls
-                if (token.Kind == TokenKind.KeywordSelf) {
+                if (token.Kind == TokenKind.KeywordSelf)
                     result.Text = "@@This@@";
-                } else {
+                else
                     result.Text = "@@Other@@";
-                }
+
                 return result;
             }
 
@@ -1407,7 +1408,8 @@ namespace UndertaleModLib.Compiler
 
             private static Statement ParseSingleVar(CompileContext context)
             {
-                if (IsNextToken(TokenKind.ProcFunction)) {
+                if (IsNextToken(TokenKind.ProcFunction))
+                {
                     Statement procFunc = EnsureTokenKind(TokenKind.ProcFunction);
                     EnsureTokenKind(TokenKind.OpenParen); // this should be guaranteed
                     Statement funcCall = new Statement(Statement.StatementKind.ExprFunctionCall, procFunc.Token);
