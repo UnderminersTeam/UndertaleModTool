@@ -9,12 +9,10 @@ using UndertaleModLib.Util;
 EnsureDataLoaded();
 
 string displayName = Data.GeneralInfo?.DisplayName?.Content.ToLower();
-bool isUTorDR = true;
 
 if (displayName != "deltarune chapter 1 & 2" && displayName != "deltarune chapter 1&2" && displayName != "undertale")
 {
-    isUTorDR = !ScriptQuestion("This game isn't Undertale nor Deltarune, thus the script may not work properly. Continue anyway?");
-    if(!isUTorDR)
+    if(!ScriptQuestion("This game isn't Undertale nor Deltarune, thus the script may not work properly. Continue anyway?"))
     {
         return;
     }
@@ -104,49 +102,35 @@ ImportGMLFile(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Step_0.gml")
 var mobileControls = Data.GameObjects.ByName("obj_mobilecontrols");
 mobileControls.Persistent = true;
 
-if (!isUTorDR)
+var obj_time = Data.GameObjects.ByName("obj_time");
+if (obj_time is not null)
 {
-    if (displayName == "deltarune chapter 1 & 2" || displayName == "deltarune chapter 1&2")
-    {
-        Data.Code.ByName("gml_Object_obj_gamecontroller_Create_0").AppendGML("instance_create(0, 0, obj_mobilecontrols);", Data);
-    }
-    else if (displayName == "undertale") 
-    {
-        Data.Code.ByName("gml_Object_obj_time_Create_0").AppendGML("instance_create(0, 0, obj_mobilecontrols);", Data);
+    Data.Code.ByName("gml_Object_obj_time_Create_0").AppendGML("instance_create(0, 0, obj_mobilecontrols);", Data);
+    return;
+}
+var obj_gamecontroller = Data.GameObjects.ByName("obj_gamecontroller");
+if (obj_gamecontroller is not null)
+{
+    Data.Code.ByName("gml_Object_obj_gamecontroller_Create_0").AppendGML("instance_create(0, 0, obj_mobilecontrols);", Data);
+    return;
+}
+
+var firstRoom = Data.Rooms[0];
+var shouldAdd = true;
+
+foreach(var room_obj in firstRoom.GameObjects) {
+    if(room_obj.ObjectDefinition == mobileControls) {
+        shouldAdd = false;
     }
 }
-else
+
+if (shouldAdd)
 {
-    var obj_time = Data.GameObjects.ByName("obj_time");
-    if (obj_time is not null)
+    firstRoom.GameObjects.Add(new UndertaleRoom.GameObject()
     {
-        Data.Code.ByName("gml_Object_obj_time_Create_0").AppendGML("instance_create(0, 0, obj_mobilecontrols);", Data);
-        return;
-    }
-    var obj_gamecontroller = Data.GameObjects.ByName("obj_gamecontroller");
-    if (obj_gamecontroller is not null)
-    {
-        Data.Code.ByName("gml_Object_obj_gamecontroller_Create_0").AppendGML("instance_create(0, 0, obj_mobilecontrols);", Data);
-        return;
-    }
-
-    var firstRoom = Data.Rooms[0];
-    var shouldAdd = true;
-
-    foreach(var room_obj in firstRoom.GameObjects) {
-        if(room_obj.ObjectDefinition == mobileControls) {
-            shouldAdd = false;
-        }
-    }
-
-    if (shouldAdd)
-    {
-        firstRoom.GameObjects.Add(new UndertaleRoom.GameObject()
-        {
-            InstanceID = Data.GeneralInfo.LastObj++,
-            ObjectDefinition = mobileControls,
-            X = 0, Y = 0
-        });
-    }
+        InstanceID = Data.GeneralInfo.LastObj++,
+        ObjectDefinition = mobileControls,
+        X = 0, Y = 0
+    });
 }
 return;
