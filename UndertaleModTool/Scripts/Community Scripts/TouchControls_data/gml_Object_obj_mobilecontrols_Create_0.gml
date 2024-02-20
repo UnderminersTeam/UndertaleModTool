@@ -1,4 +1,4 @@
-if(font_exists(fnt_main))
+if (font_exists(fnt_main))
 {
     settings_font = fnt_main
     settings_num_x = 477

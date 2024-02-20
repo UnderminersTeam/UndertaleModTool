@@ -9,17 +9,14 @@ using UndertaleModLib.Util;
 EnsureDataLoaded();
 
 string displayName = Data.GeneralInfo?.DisplayName?.Content.ToLower();
-bool otherName = false;
+bool isUTorDR = true;
 
 if (displayName != "deltarune chapter 1 & 2" && displayName != "deltarune chapter 1&2" && displayName != "undertale")
 {
-    otherName = !ScriptQuestion("This game isn't Undertale nor Deltarune, thus the script may not work properly. Continue anyway?")
+    isUTorDR = !ScriptQuestion("This game isn't Undertale nor Deltarune, thus the script may not work properly. Continue anyway?");
+    if(!isUTorDR)
     {
         return;
-    }
-    else
-    {
-        otherName = true;
     }
 }
 
@@ -107,7 +104,7 @@ ImportGMLFile(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Step_0.gml")
 var mobileControls = Data.GameObjects.ByName("obj_mobilecontrols");
 mobileControls.Persistent = true;
 
-if(otherName == false)
+if (!isUTorDR)
 {
     if (displayName == "deltarune chapter 1 & 2" || displayName == "deltarune chapter 1&2")
     {
@@ -127,11 +124,12 @@ else
         return;
     }
     var obj_gamecontroller = Data.GameObjects.ByName("obj_gamecontroller");
-    if (obj_gamecontroller is null)
+    if (obj_gamecontroller is not null)
     {
         Data.Code.ByName("gml_Object_obj_gamecontroller_Create_0").AppendGML("instance_create(0, 0, obj_mobilecontrols);", Data);
         return;
     }
+
     var firstRoom = Data.Rooms[0];
     var shouldAdd = true;
 
@@ -141,7 +139,7 @@ else
         }
     }
 
-    if(shouldAdd)
+    if (shouldAdd)
     {
         firstRoom.GameObjects.Add(new UndertaleRoom.GameObject()
         {
