@@ -10,7 +10,7 @@ EnsureDataLoaded();
 
 if (Data.GeneralInfo?.DisplayName?.Content.ToLower() != "undertale")
 {
-    if(!ScriptQuestion("This game isn't undertale. Continue anyway?"))
+    if (!ScriptQuestion("This game isn't Undertale, thus the script may not work properly. Continue anyway?"))
     {
         return;
     }
