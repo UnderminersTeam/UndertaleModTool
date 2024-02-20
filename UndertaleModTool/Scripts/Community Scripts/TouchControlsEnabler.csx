@@ -121,7 +121,7 @@ if(otherName == false)
 else
 {
     var obj_time = Data.GameObjects.ByName("obj_time");
-    if(obj_time != null)
+    if (obj_time is not null)
     {
         Data.Code.ByName("gml_Object_obj_time_Create_0").AppendGML("instance_create(0, 0, obj_mobilecontrols);", Data);
         return;
