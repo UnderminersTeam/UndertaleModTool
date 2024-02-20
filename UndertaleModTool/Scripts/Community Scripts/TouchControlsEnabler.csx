@@ -13,7 +13,7 @@ bool otherName = false;
 
 if (displayName != "deltarune chapter 1 & 2" && displayName != "deltarune chapter 1&2" && displayName != "undertale")
 {
-    if(!ScriptQuestion("This game isn't undertale or deltarune. Continue anyway?"))
+    otherName = !ScriptQuestion("This game isn't Undertale nor Deltarune, thus the script may not work properly. Continue anyway?")
     {
         return;
     }
