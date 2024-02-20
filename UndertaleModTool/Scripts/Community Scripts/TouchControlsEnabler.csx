@@ -127,7 +127,7 @@ else
         return;
     }
     var obj_gamecontroller = Data.GameObjects.ByName("obj_gamecontroller");
-    if(obj_gamecontroller != null)
+    if (obj_gamecontroller is null)
     {
         Data.Code.ByName("gml_Object_obj_gamecontroller_Create_0").AppendGML("instance_create(0, 0, obj_mobilecontrols);", Data);
         return;
