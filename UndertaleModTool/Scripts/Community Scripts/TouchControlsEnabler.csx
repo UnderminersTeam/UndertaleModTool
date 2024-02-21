@@ -12,7 +12,7 @@ string displayName = Data.GeneralInfo?.DisplayName?.Content.ToLower();
 
 if (displayName != "deltarune chapter 1 & 2" && displayName != "deltarune chapter 1&2" && displayName != "undertale")
 {
-    if(!ScriptQuestion("This game isn't Undertale nor Deltarune, thus the script may not work properly. Continue anyway?"))
+    if (!ScriptQuestion("This game isn't Undertale nor Deltarune, thus the script may not work properly. Continue anyway?"))
     {
         return;
     }
@@ -116,13 +116,7 @@ if (obj_gamecontroller is not null)
 }
 
 var firstRoom = Data.Rooms[0];
-var shouldAdd = true;
-
-foreach(var room_obj in firstRoom.GameObjects) {
-    if(room_obj.ObjectDefinition == mobileControls) {
-        shouldAdd = false;
-    }
-}
+var shouldAdd = !(firstRoom.GameObjects.Any(o => o.ObjectDefinition == mobileControls));
 
 if (shouldAdd)
 {
