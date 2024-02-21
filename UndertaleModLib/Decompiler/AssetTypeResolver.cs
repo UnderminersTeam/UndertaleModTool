@@ -1501,7 +1501,8 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("sourceobject", AssetIDType.GameObject);
                 //builtin_vars.Add("target", AssetIDType.GameObject);
                 builtin_vars.Add("writergod", AssetIDType.GameObject);
-                builtin_vars.Add("k", AssetIDType.GameObject);
+                AddOverrideFor("obj_carcutscene", "k", AssetIDType.GameObject);
+                AddOverrideFor("obj_carcutscene_ch1", "k", AssetIDType.GameObject);
                 builtin_vars.Add("childBullet", AssetIDType.GameObject);
                 builtin_vars.Add("body_obj", AssetIDType.GameObject);
                 builtin_vars.Add("sneo", AssetIDType.GameObject);
