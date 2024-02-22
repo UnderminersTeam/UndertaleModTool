@@ -136,6 +136,8 @@ public static partial class Decompiler
 
         internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
         {
+            if (Value is ExpressionCompare)
+                suggestedType = AssetIDType.Boolean;
             return Value.DoTypePropagation(context, Destination.DoTypePropagation(context, suggestedType));
         }
     }

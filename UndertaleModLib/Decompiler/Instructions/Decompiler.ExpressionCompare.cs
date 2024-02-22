@@ -47,7 +47,8 @@ public static partial class Decompiler
         internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
         {
             // TODO: This should be probably able to go both ways...
-            Argument2.DoTypePropagation(context, Argument1.DoTypePropagation(context, suggestedType));
+            Argument2.DoTypePropagation(context, Argument1.DoTypePropagation(context, AssetIDType.Other));
+            //Argument2.DoTypePropagation(context, Argument1.DoTypePropagation(context, suggestedType));
 
             /*
                 if (Opcode != UndertaleInstruction.ComparisonType.EQ && Opcode != UndertaleInstruction.ComparisonType.NEQ)
@@ -61,7 +62,7 @@ public static partial class Decompiler
                             arg2.AssetType = AssetIDType.Other;
                 }*/
 
-            return AssetIDType.Other;
+            return AssetIDType.Boolean;
         }
     }
 }
