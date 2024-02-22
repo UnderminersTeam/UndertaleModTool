@@ -536,10 +536,11 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
                     throw new UndertaleSerializationException("Failed to compute length of shader data: instructed to read less data than expected.");
                 else if (_Length < length)
                 {
-                    if (isLast) // Normal for the last element due to chunk padding, just trust the system
+                    if (isLast && ((reader.AbsPosition + length) % 16 == 0)) // Normal for the last element due to chunk padding, just trust the system
                         length = (int)_Length;
                     else
-                        throw new UndertaleSerializationException("Failed to compute length of shader data: instructed to read more data than expected.");
+                        throw new UndertaleSerializationException("Failed to compute length of shader data: instructed to read more data than expected." +
+                            (isLast ? " Shader data was the last in the shader, but given length was incorrectly padded." : ""));
                 }
             }
 
