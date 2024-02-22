@@ -45,5 +45,12 @@ public static partial class Decompiler
             }
             return sb.ToString();
         }
+
+        internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
+        {
+            foreach (var caseExpr in CaseExpressions)
+                caseExpr?.DoTypePropagation(context, suggestedType);
+            return Block.DoTypePropagation(context, AssetIDType.Other);
+        }
     }
 }

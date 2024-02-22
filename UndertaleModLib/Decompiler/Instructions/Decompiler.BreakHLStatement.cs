@@ -13,5 +13,10 @@ public static partial class Decompiler
         {
             return this;
         }
+
+        internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
+        {
+            return suggestedType;
+        }
     }
 }

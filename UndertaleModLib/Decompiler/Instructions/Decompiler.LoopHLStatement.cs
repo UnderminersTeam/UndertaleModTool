@@ -142,5 +142,14 @@ public static partial class Decompiler
 
             return "while " + cond + "\n" + context.Indentation + Block.ToString(context);
         }
+
+        internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
+        {
+            RepeatStartValue?.DoTypePropagation(context, AssetIDType.Other);
+            Condition?.DoTypePropagation(context, AssetIDType.Other);
+            InitializeStatement?.DoTypePropagation(context, AssetIDType.Other);
+            StepStatement?.DoTypePropagation(context, AssetIDType.Other);
+            return Block.DoTypePropagation(context, AssetIDType.Other);
+        }
     };
 }
