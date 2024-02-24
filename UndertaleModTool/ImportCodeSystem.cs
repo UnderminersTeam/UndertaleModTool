@@ -120,7 +120,12 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    passBack = GetPassBack((code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT ) : ""), keyword, replacement, caseSensitive, isRegex);
+                    if (code is null) // It would just be recompiling an empty string and messing with null entries seems bad
+                        return;
+                    string original = Decompiler.Decompile(code, DECOMPILE_CONTEXT);
+                    passBack = GetPassBack(original, keyword, replacement, caseSensitive, isRegex);
+                    if (passBack == original) // No need to compile something unchanged
+                        return;
                     code.ReplaceGML(passBack, Data);
                 }
                 catch (Exception exc)
@@ -135,7 +140,10 @@ namespace UndertaleModTool
                     string path = Path.Combine(ProfilesFolder, Data.ToolInfo.CurrentMD5, "Temp", codeName + ".gml");
                     if (File.Exists(path))
                     {
-                        passBack = GetPassBack(File.ReadAllText(path), keyword, replacement, caseSensitive, isRegex);
+                        string original = File.ReadAllText(path);
+                        passBack = GetPassBack(original, keyword, replacement, caseSensitive, isRegex);
+                        if (passBack == original) // No need to compile something unchanged
+                            return;
                         File.WriteAllText(path, passBack);
                         code.ReplaceGML(passBack, Data);
                     }
@@ -143,10 +151,12 @@ namespace UndertaleModTool
                     {
                         try
                         {
-                            if (context is null)
-                                passBack = GetPassBack((code != null ? Decompiler.Decompile(code, new GlobalDecompileContext(Data, false)) : ""), keyword, replacement, caseSensitive, isRegex);
-                            else
-                                passBack = GetPassBack((code != null ? Decompiler.Decompile(code, context) : ""), keyword, replacement, caseSensitive, isRegex);
+                            if (code is null) // It would just be recompiling an empty string and messing with null entries seems bad
+                                return;
+                            string original = Decompiler.Decompile(code, DECOMPILE_CONTEXT);
+                            passBack = GetPassBack(original, keyword, replacement, caseSensitive, isRegex);
+                            if (passBack == original) // No need to compile something unchanged
+                                return;
                             code.ReplaceGML(passBack, Data);
                         }
                         catch (Exception exc)

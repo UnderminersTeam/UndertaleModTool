@@ -657,7 +657,12 @@ public partial class Program : IScriptInterface
         {
             try
             {
-                passBack = GetPassBack(Decompiler.Decompile(code, decompileContext), keyword, replacement, caseSensitive, isRegex);
+                if (code is null) // It would just be recompiling an empty string and messing with null entries seems bad
+                    return;
+                string original = Decompiler.Decompile(code, decompileContext);
+                passBack = GetPassBack(original, keyword, replacement, caseSensitive, isRegex);
+                if (passBack == original) // No need to compile something unchanged
+                    return;
                 code.ReplaceGML(passBack, Data);
             }
             catch (Exception exc)
@@ -665,27 +670,9 @@ public partial class Program : IScriptInterface
                 throw new Exception("Error during GML code replacement:\n" + exc);
             }
         }
-        else if (Data.ToolInfo.ProfileMode)
+        else
         {
-            try
-            {
-                try
-                {
-                    if (context is null)
-                        passBack = GetPassBack(Decompiler.Decompile(code, new GlobalDecompileContext(Data, false)), keyword, replacement, caseSensitive, isRegex);
-                    else
-                        passBack = GetPassBack(Decompiler.Decompile(code, context), keyword, replacement, caseSensitive, isRegex);
-                    code.ReplaceGML(passBack, Data);
-                }
-                catch (Exception exc)
-                {
-                    throw new Exception("Error during GML code replacement:\n" + exc);
-                }
-            }
-            catch (Exception exc)
-            {
-                throw new Exception("Error during writing of GML code to profile:\n" + exc + "\n\nCode:\n\n" + passBack);
-            }
+            throw new Exception("This UndertaleData is set to use profile mode, but UndertaleModCLI does not support profile mode.");
         }
     }
 
