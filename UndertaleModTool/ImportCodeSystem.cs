@@ -120,11 +120,13 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    if (code is null) // It would just be recompiling an empty string and messing with null entries seems bad
+                    // It would just be recompiling an empty string and messing with null entries seems bad
+                    if (code is null)
                         return;
-                    string original = Decompiler.Decompile(code, DECOMPILE_CONTEXT);
-                    passBack = GetPassBack(original, keyword, replacement, caseSensitive, isRegex);
-                    if (passBack == original) // No need to compile something unchanged
+                    string originalCode = Decompiler.Decompile(code, DECOMPILE_CONTEXT);
+                    passBack = GetPassBack(originalCode, keyword, replacement, caseSensitive, isRegex);
+                    // No need to compile something unchanged
+                    if (passBack == originalCode)
                         return;
                     code.ReplaceGML(passBack, Data);
                 }
@@ -140,9 +142,10 @@ namespace UndertaleModTool
                     string path = Path.Combine(ProfilesFolder, Data.ToolInfo.CurrentMD5, "Temp", codeName + ".gml");
                     if (File.Exists(path))
                     {
-                        string original = File.ReadAllText(path);
-                        passBack = GetPassBack(original, keyword, replacement, caseSensitive, isRegex);
-                        if (passBack == original) // No need to compile something unchanged
+                        string originalCode = File.ReadAllText(path);
+                        passBack = GetPassBack(originalCode, keyword, replacement, caseSensitive, isRegex);
+                        // No need to compile something unchanged
+                        if (passBack == originalCode)
                             return;
                         File.WriteAllText(path, passBack);
                         code.ReplaceGML(passBack, Data);
@@ -151,11 +154,13 @@ namespace UndertaleModTool
                     {
                         try
                         {
-                            if (code is null) // It would just be recompiling an empty string and messing with null entries seems bad
+                            // It would just be recompiling an empty string and messing with null entries seems bad
+                            if (code is null)
                                 return;
-                            string original = Decompiler.Decompile(code, DECOMPILE_CONTEXT);
-                            passBack = GetPassBack(original, keyword, replacement, caseSensitive, isRegex);
-                            if (passBack == original) // No need to compile something unchanged
+                            string originalCode = Decompiler.Decompile(code, DECOMPILE_CONTEXT);
+                            passBack = GetPassBack(originalCode, keyword, replacement, caseSensitive, isRegex);
+                            // No need to compile something unchanged
+                            if (passBack == originalCode)
                                 return;
                             code.ReplaceGML(passBack, Data);
                         }

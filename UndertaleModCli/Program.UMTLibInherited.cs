@@ -657,11 +657,13 @@ public partial class Program : IScriptInterface
         {
             try
             {
-                if (code is null) // It would just be recompiling an empty string and messing with null entries seems bad
+                // It would just be recompiling an empty string and messing with null entries seems bad
+                if (code is null)
                     return;
-                string original = Decompiler.Decompile(code, decompileContext);
-                passBack = GetPassBack(original, keyword, replacement, caseSensitive, isRegex);
-                if (passBack == original) // No need to compile something unchanged
+                string originalCode = Decompiler.Decompile(code, decompileContext);
+                passBack = GetPassBack(originalCode, keyword, replacement, caseSensitive, isRegex);
+                // No need to compile something unchanged
+                if (passBack == originalCode)
                     return;
                 code.ReplaceGML(passBack, Data);
             }
