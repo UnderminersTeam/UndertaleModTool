@@ -133,6 +133,7 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
             Name = reader.ReadUndertaleString();
             Function = (FunctionType)reader.ReadUInt32();
             Iterations = reader.ReadUInt32();
+
             // This check is partly duplicated from UndertaleChunks.cs, but it's necessary to handle embedded curves
             // (for example, those in SEQN in the TS!Underswap v1.0 demo; see issue #1414)
             if (!reader.undertaleData.IsVersionAtLeast(2, 3, 1))
@@ -156,6 +157,7 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
 
                 reader.AbsPosition = returnPosition;
             }
+
             Points = reader.ReadUndertaleObject<UndertaleSimpleList<Point>>();
         }
 
