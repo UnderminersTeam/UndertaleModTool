@@ -16,6 +16,8 @@ public class UndertaleParticleSystem : UndertaleNamedResource, IDisposable
 
     public int DrawOrder { get; set; }
 
+    public int Unknown { get; set; }
+
     public UndertaleSimpleResourcesList<UndertaleParticleSystemEmitter, UndertaleChunkPSEM> Emitters { get; set; } = new();
 
     /// <inheritdoc />
@@ -25,6 +27,9 @@ public class UndertaleParticleSystem : UndertaleNamedResource, IDisposable
         writer.Write(OriginX);
         writer.Write(OriginY);
         writer.Write(DrawOrder);
+        // TODO: find out when this started happening
+        if (writer.undertaleData.IsVersionAtLeast(2023, 8))
+            writer.Write(Unknown);
         writer.WriteUndertaleObject(Emitters);
     }
 
@@ -35,6 +40,9 @@ public class UndertaleParticleSystem : UndertaleNamedResource, IDisposable
         OriginX = reader.ReadInt32();
         OriginY = reader.ReadInt32();
         DrawOrder = reader.ReadInt32();
+        // TODO: find out when this started happening
+        if (reader.undertaleData.IsVersionAtLeast(2023, 8))
+            Unknown = reader.ReadInt32();
         Emitters = reader.ReadUndertaleObject<UndertaleSimpleResourcesList<UndertaleParticleSystemEmitter, UndertaleChunkPSEM>>();
     }
 
@@ -42,6 +50,10 @@ public class UndertaleParticleSystem : UndertaleNamedResource, IDisposable
     public static uint UnserializeChildObjectCount(UndertaleReader reader)
     {
         reader.Position += 16;
+
+        // TODO: find out when this started happening
+        if (reader.undertaleData.IsVersionAtLeast(2023, 8))
+            reader.Position += 4;
 
         return 1 + UndertaleSimpleResourcesList<UndertaleParticleSystemEmitter, UndertaleChunkPSEM>.UnserializeChildObjectCount(reader);
     }
