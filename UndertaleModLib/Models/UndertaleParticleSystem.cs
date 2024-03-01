@@ -16,7 +16,7 @@ public class UndertaleParticleSystem : UndertaleNamedResource, IDisposable
 
     public int DrawOrder { get; set; }
 
-    public int Unknown { get; set; }
+    public bool GlobalSpaceParticles { get; set; }
 
     public UndertaleSimpleResourcesList<UndertaleParticleSystemEmitter, UndertaleChunkPSEM> Emitters { get; set; } = new();
 
@@ -27,9 +27,8 @@ public class UndertaleParticleSystem : UndertaleNamedResource, IDisposable
         writer.Write(OriginX);
         writer.Write(OriginY);
         writer.Write(DrawOrder);
-        // TODO: find out when this started happening
         if (writer.undertaleData.IsVersionAtLeast(2023, 8))
-            writer.Write(Unknown);
+            writer.Write(GlobalSpaceParticles);
         writer.WriteUndertaleObject(Emitters);
     }
 
@@ -40,9 +39,8 @@ public class UndertaleParticleSystem : UndertaleNamedResource, IDisposable
         OriginX = reader.ReadInt32();
         OriginY = reader.ReadInt32();
         DrawOrder = reader.ReadInt32();
-        // TODO: find out when this started happening
         if (reader.undertaleData.IsVersionAtLeast(2023, 8))
-            Unknown = reader.ReadInt32();
+            GlobalSpaceParticles = reader.ReadBoolean();
         Emitters = reader.ReadUndertaleObject<UndertaleSimpleResourcesList<UndertaleParticleSystemEmitter, UndertaleChunkPSEM>>();
     }
 
@@ -51,7 +49,6 @@ public class UndertaleParticleSystem : UndertaleNamedResource, IDisposable
     {
         reader.Position += 16;
 
-        // TODO: find out when this started happening
         if (reader.undertaleData.IsVersionAtLeast(2023, 8))
             reader.Position += 4;
 
