@@ -6,7 +6,7 @@
 
 Heya. I heard you like digging deep into GameMaker games like Undertale/Deltarune, so here's a tool just for you!
 
-<img src="images/flowey.gif" alt="Flowey"/>
+![Flowey: Now YOU are the GOD of this world.](images/flowey.gif)
 
 
 # Downloads
@@ -40,13 +40,9 @@ It's worth noting that UndertaleModTool has different builds per release. The di
 
 # Screenshots
 
-Here are some screenshots of what UTMT can do:
+![Screenshot of UndertaleModTool's room editor.](images/screenshot1.png)
 
-## [Undertale: Bits and Pieces Mod](https://gamejolt.com/games/UndertaleBnP/574044)
-<img src="images/bnp-ut.png" alt="BnP" width="640" height="480"/>
-
-## [RIBBIT - The Deltarune Mod](https://gamejolt.com/games/ribbitmod/671888)
-<img src="images/ribbit-dr.png" alt="RIBBIT" width="640" height="480"/>
+![Screenshot of UndertaleModTool's code editor.](images/screenshot2.png)
 
 # Included Scripts
 
