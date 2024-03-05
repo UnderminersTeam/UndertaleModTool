@@ -18,5 +18,11 @@ public static partial class Decompiler
             Block = Block?.CleanBlockStatement(context);
             return this;
         }
+
+        internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
+        {
+            NewEnv.DoTypePropagation(context, AssetIDType.GameObject);
+            return Block.DoTypePropagation(context, AssetIDType.Other);
+        }
     }
 }

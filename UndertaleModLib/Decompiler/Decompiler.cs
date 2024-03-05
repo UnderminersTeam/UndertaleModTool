@@ -1454,6 +1454,8 @@ namespace UndertaleModLib.Decompiler
                 if (stmt is AssignmentStatement assign && assign.IsStructDefinition)
                     continue;
 
+                stmt.DoTypePropagation(context, AssetIDType.Other);
+
                 sb.Append(stmt.ToString(context) + "\n");
             }
 

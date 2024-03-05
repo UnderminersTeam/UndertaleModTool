@@ -170,5 +170,17 @@ public static partial class Decompiler
             }
             return sb.ToString();
         }
+
+        internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
+        {
+            condition?.DoTypePropagation(context, AssetIDType.Boolean);
+            falseBlock?.DoTypePropagation(context, AssetIDType.Other);
+            foreach (var (expr, block) in elseConditions)
+            {
+                expr.DoTypePropagation(context, AssetIDType.Boolean);
+                block.DoTypePropagation(context, AssetIDType.Other);
+            }
+            return trueBlock?.DoTypePropagation(context, AssetIDType.Other) ?? AssetIDType.Other;
+        }
     };
 }
