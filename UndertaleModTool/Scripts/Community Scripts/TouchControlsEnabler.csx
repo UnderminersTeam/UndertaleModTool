@@ -12,8 +12,10 @@ string displayName = Data.GeneralInfo?.DisplayName?.Content.ToLower();
 
 if (displayName != "deltarune chapter 1 & 2" && displayName != "deltarune chapter 1&2" && displayName != "undertale")
 {
-    ScriptError("Error 0: Only compatible with Undertale & Deltarune");
-    return;
+    if (!ScriptQuestion("This game isn't Undertale nor Deltarune, thus the script may not work properly. Continue anyway?"))
+    {
+        return;
+    }
 }
 
 string dataPath = Path.Combine(Path.GetDirectoryName(ScriptPath), "TouchControls_data");
@@ -100,11 +102,29 @@ ImportGMLFile(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Step_0.gml")
 var mobileControls = Data.GameObjects.ByName("obj_mobilecontrols");
 mobileControls.Persistent = true;
 
-if (displayName == "deltarune chapter 1 & 2" || displayName == "deltarune chapter 1&2")
-{
-    Data.Code.ByName("gml_Object_obj_gamecontroller_Create_0").AppendGML("instance_create(0, 0, obj_mobilecontrols);", Data);
-}
-else if (displayName == "undertale") 
+var obj_time = Data.GameObjects.ByName("obj_time");
+if (obj_time is not null)
 {
     Data.Code.ByName("gml_Object_obj_time_Create_0").AppendGML("instance_create(0, 0, obj_mobilecontrols);", Data);
+    return;
 }
+var obj_gamecontroller = Data.GameObjects.ByName("obj_gamecontroller");
+if (obj_gamecontroller is not null)
+{
+    Data.Code.ByName("gml_Object_obj_gamecontroller_Create_0").AppendGML("instance_create(0, 0, obj_mobilecontrols);", Data);
+    return;
+}
+
+var firstRoom = Data.Rooms[0];
+var shouldAdd = !(firstRoom.GameObjects.Any(o => o.ObjectDefinition == mobileControls));
+
+if (shouldAdd)
+{
+    firstRoom.GameObjects.Add(new UndertaleRoom.GameObject()
+    {
+        InstanceID = Data.GeneralInfo.LastObj++,
+        ObjectDefinition = mobileControls,
+        X = 0, Y = 0
+    });
+}
+return;
