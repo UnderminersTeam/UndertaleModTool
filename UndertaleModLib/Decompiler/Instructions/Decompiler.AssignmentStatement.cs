@@ -72,9 +72,12 @@ public static partial class Decompiler
 
             // Someone enlighten me on structs, I'm steering clear for now.
             // And find the "right" way to do this.
-            if (Value is FunctionDefinition functionVal && functionVal.Subtype != FunctionDefinition.FunctionType.Struct)
+            if (Value is FunctionDefinition functionVal &&
+                functionVal.Subtype != FunctionDefinition.FunctionType.Struct &&
+                Destination.VarType == UndertaleInstruction.VariableType.StackTop)
             {
                 functionVal.IsStatement = true;
+                functionVal.StatementName = Destination.Var.Name.Content;
                 return functionVal.ToString(context);
             }
 

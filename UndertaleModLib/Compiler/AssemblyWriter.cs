@@ -249,9 +249,12 @@ namespace UndertaleModLib.Compiler
                         {
                             if (patch.isNewFunc)
                             {
-                                UndertaleString childName = new("gml_Script_" + patch.Name);
-                                int childNameIndex = compileContext.Data.Strings.Count;
-                                compileContext.Data.Strings.Add(childName);
+                                // If there's already a function at this position, it's almost certainly the same one renamed.
+                                // Disconnect it anyway.
+                                if (compileContext.OriginalCode.ChildEntries.FirstOrDefault(e => e.Offset == patch.Offset) is UndertaleCode oldChild)
+                                    compileContext.OriginalCode.ChildEntries.Remove(oldChild);
+
+                                UndertaleString childName = compileContext.Data.Strings.MakeString("gml_Script_" + patch.Name, out int childNameIndex);
 
                                 UndertaleCode childEntry = new()
                                 {
@@ -1282,27 +1285,32 @@ namespace UndertaleModLib.Compiler
                             Patch startPatch = Patch.StartHere(cw);
                             Patch endPatch = Patch.Start();
                             endPatch.Add(cw.Emit(Opcode.B));
-                            // we're accessing a subfunction here, so build the cache if needed
+                            // We're accessing a subfunction here, so build the cache if needed
                             Decompiler.Decompiler.BuildSubFunctionCache(cw.compileContext.Data);
 
-                            //Attempt to find the function before rushing to create a new one
-                            var func = cw.compileContext.Data.Functions.FirstOrDefault(f => f.Name.Content == "gml_Script_" + funcDefName.Text);
+                            // Objects get a suffix for clarification.
+                            string suffixedFuncName = funcDefName.Text;
+                            if (!cw.compileContext.OriginalCode.Name.Content.StartsWith("gml_GlobalScript_"))
+                                suffixedFuncName += $"@{cw.compileContext.OriginalCode.Name.Content}";
+
+                            // Attempt to find the function before rushing to create a new one
+                            var func = cw.compileContext.Data.Functions.FirstOrDefault(f => f.Name.Content == "gml_Script_" + suffixedFuncName);
                             if (func != null)
-                                cw.compileContext.Data.KnownSubFunctions.TryAdd(funcDefName.Text, func);
+                                cw.compileContext.Data.KnownSubFunctions.TryAdd(suffixedFuncName, func);
                             
-                            if (cw.compileContext.Data.KnownSubFunctions.ContainsKey(funcDefName.Text))
+                            if (cw.compileContext.Data.KnownSubFunctions.ContainsKey(suffixedFuncName))
                             {
-                                string subFunctionName = cw.compileContext.Data.KnownSubFunctions[funcDefName.Text].Name.Content;
+                                string subFunctionName = cw.compileContext.Data.KnownSubFunctions[suffixedFuncName].Name.Content;
                                 UndertaleCode childEntry = cw.compileContext.OriginalCode.ChildEntries.ByName(subFunctionName);
                                 childEntry.Offset = cw.offset * 4;
                                 childEntry.ArgumentsCount = (ushort)e.Children[0].Children.Count;
-                                childEntry.LocalsCount = cw.compileContext.OriginalCode.LocalsCount; // todo: use just the locals for the individual script
+                                childEntry.LocalsCount = cw.compileContext.OriginalCode.LocalsCount; // Todo: use just the locals for the individual script
                             }
-                            else // we're making a new function baby
+                            else // We're making a new function baby
                             {
                                 cw.funcPatches.Add(new FunctionPatch()
                                 {
-                                    Name = funcDefName.Text,
+                                    Name = suffixedFuncName,
                                     Offset = cw.offset * 4,
                                     ArgCount = (ushort)e.Children[0].Children.Count,
                                     isNewFunc = true
@@ -1310,7 +1318,7 @@ namespace UndertaleModLib.Compiler
                             }
 
                             cw.loopContexts.Push(new LoopContext(endPatch, startPatch));
-                            AssembleStatement(cw, e.Children[1]); // body
+                            AssembleStatement(cw, e.Children[1]); // Body
                             AssembleExit(cw);
                             cw.loopContexts.Pop();
                             endPatch.Finish(cw);
@@ -1318,7 +1326,7 @@ namespace UndertaleModLib.Compiler
                             cw.funcPatches.Add(new FunctionPatch()
                             {
                                 Target = cw.EmitRef(Opcode.Push, DataType.Int32),
-                                Name = funcDefName.Text,
+                                Name = suffixedFuncName,
                                 ArgCount = -1
                             });
                             cw.Emit(Opcode.Conv, DataType.Int32, DataType.Variable);
@@ -1331,8 +1339,11 @@ namespace UndertaleModLib.Compiler
                                 ArgCount = 2
                             });
                             cw.typeStack.Push(DataType.Variable);
-                            cw.Emit(Opcode.Dup, DataType.Variable).Extra = 0;
-                            cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-1; // todo: -6 sometimes?
+                            if (funcDefName.ID == 0) // Anonymous functions being assigned to a value get a variable ID, normal functions don't.
+                            {
+                                cw.Emit(Opcode.Dup, DataType.Variable).Extra = 0;
+                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-1; // Todo: -6 sometimes?
+                            }
                         }
                         break;
                     case Parser.Statement.StatementKind.ExprBinaryOp:
