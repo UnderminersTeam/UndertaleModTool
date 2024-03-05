@@ -23,6 +23,7 @@ public static partial class Decompiler
         public Block FunctionBodyEntryBlock { get; private set; }
         public FunctionType Subtype { get; private set; }
         public bool IsStatement = false; // I know it's an expression, yes. But I'm not duplicating the rest.
+        public string StatementName = null;
 
         internal List<Expression> Arguments;
 
@@ -81,7 +82,7 @@ public static partial class Decompiler
                     if (IsStatement)
                     {
                         sb.Append(" ");
-
+                        /*
                         // For further optimization, we could *probably* create a dictionary that's just flipped KVPs (assuming there are no dup. values).
                         // Doing so would save the need for LINQ and what-not. Not that big of an issue, but still an option.
                         Dictionary<string, UndertaleFunction> subFuncs = context.GlobalContext.Data.KnownSubFunctions;
@@ -106,6 +107,8 @@ public static partial class Decompiler
                             if(!gotFuncName)
                                 sb.Append((context.Statements[0].Last() as AssignmentStatement).Destination.Var.Name.Content);
                         }
+                        */
+                        sb.Append(StatementName);
                     }
                     sb.Append("(");
                     for (int i = 0; i < FunctionBodyCodeEntry.ArgumentsCount; ++i)
@@ -171,7 +174,7 @@ public static partial class Decompiler
                     context.IndentationLevel--;
                     sb.Append(context.Indentation);
                     sb.Append("}");
-                    if(!oldDecompilingStruct)
+                    if (!oldDecompilingStruct)
                         sb.Append("\n");
                 }
                 else
