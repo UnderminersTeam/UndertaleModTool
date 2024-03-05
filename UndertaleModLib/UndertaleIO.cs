@@ -344,6 +344,7 @@ namespace UndertaleModLib
             if (poolSize != 0 && poolSize != objectPool.Count)
             {
                 SubmitWarning("Warning - the estimated object pool size differs from the actual size.\n" +
+                             $"Estimated: {poolSize}, Actual: {objectPool.Count}\n" +
                               "Please report this on UndertaleModTool GitHub.");
             }
 
