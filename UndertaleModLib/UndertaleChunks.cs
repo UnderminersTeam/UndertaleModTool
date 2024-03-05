@@ -1504,6 +1504,8 @@ namespace UndertaleModLib
         public override string Name => "ACRV";
 
         private static bool checkedForGMS2_3_1;
+
+        // See also a similar check in UndertaleAnimationCurve.cs, necessary for embedded animation curves.
         private void CheckForGMS2_3_1(UndertaleReader reader)
         {
             if (reader.undertaleData.IsVersionAtLeast(2, 3, 1))
@@ -1522,10 +1524,10 @@ namespace UndertaleModLib
                 return;
             }
 
-            reader.AbsPosition = reader.ReadUInt32(); // go to the first "Point"
+            reader.AbsPosition = reader.ReadUInt32(); // Go to the first "Point"
             reader.Position += 8;
 
-            if (reader.ReadUInt32() != 0) // in 2.3 a int with the value of 0 would be set here,
+            if (reader.ReadUInt32() != 0) // In 2.3 a int with the value of 0 would be set here,
             {                             // it cannot be version 2.3 if this value isn't 0
                 reader.undertaleData.SetGMS2Version(2, 3, 1);
             }
