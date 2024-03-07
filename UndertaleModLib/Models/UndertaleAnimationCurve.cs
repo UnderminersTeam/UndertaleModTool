@@ -151,7 +151,7 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
         public uint Iterations { get; set; }
         
         /// <summary>
-        /// The points
+        /// The points in the channel.
         /// </summary>
         public UndertaleSimpleList<Point> Points { get; set; }
 

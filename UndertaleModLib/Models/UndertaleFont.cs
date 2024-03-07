@@ -19,7 +19,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
     public UndertaleString DisplayName { get; set; }
 
     /// <summary>
-    /// Whether the Em size is a float.
+    /// A helper variable on whether the Em size is a float.
     /// </summary>
     public bool EmSizeIsFloat { get; set; }
 
@@ -84,7 +84,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
     public uint Ascender { get; set; }
 
     /// <summary>
-    /// A spread value that's used for SDF rendering.
+    /// A spread value that's used for SDF rendering. TODO: what is spread, what is sdf?
     /// </summary>
     /// <remarks>
     /// Was introduced in GM 2023.2.
@@ -93,7 +93,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
     public uint SDFSpread { get; set; }
 
     /// <remarks>
-    /// Was introduced in GM 2023.6.
+    /// Was introduced in GM 2023.6. TODO: give an explanation of what this does
     /// </remarks>
     public uint LineHeight { get; set; }
 
@@ -103,7 +103,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
     public UndertalePointerList<Glyph> Glyphs { get; set; } = new UndertalePointerList<Glyph>();
 
     /// <summary>
-    /// The maximum offset from the baseline to the top of the font
+    /// The maximum offset from the baseline to the top of the font.
     /// </summary>
     /// <remarks>
     /// Exists since bytecode 17, but seems to be only get checked in GM 2022.2+.
@@ -201,7 +201,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             public static readonly uint ChildObjectsSize = 4;
 
             /// <summary>
-            /// The code point of the preceeding character.
+            /// The code point of the preceding character.
             /// </summary>
             public short Character { get; set; }
 
