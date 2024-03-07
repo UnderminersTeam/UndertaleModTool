@@ -5,10 +5,17 @@ namespace UndertaleModLib.Decompiler;
 
 public static partial class Decompiler
 {
-    // Represents all expressions.
+    /// <summary>
+    /// Represents all expressions.
+    /// </summary>
     public abstract class Expression : Statement
     {
+        /// <summary>
+        /// What type this expression evaluates to.
+        /// </summary>
         public UndertaleInstruction.DataType Type;
+        
+        
         public bool WasDuplicated = false;
 
         // Helper function to convert opcode operations to "printable" strings.

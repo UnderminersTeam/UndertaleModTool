@@ -2,9 +2,14 @@ namespace UndertaleModLib.Decompiler;
 
 public static partial class Decompiler
 {
-    // Represents a code comment, for debugging use (or minor error reporting).
+    /// <summary>
+    /// Represents a code comment, for debugging use (or minor error reporting). 
+    /// </summary>
     public class CommentStatement : Statement
     {
+        /// <summary>
+        /// The code comment.
+        /// </summary>
         public string Message;
 
         public CommentStatement(string message)
