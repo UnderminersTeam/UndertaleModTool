@@ -209,6 +209,16 @@ namespace UndertaleModTool
             }
         }
 
+        public static bool OpenDisassemblyByDefault
+        {
+            get => Settings.Instance.OpenDisassemblyByDefault;
+            set
+            {
+                Settings.Instance.OpenDisassemblyByDefault = value;
+                Settings.Save();
+            }
+        }
+
         public bool UpdateButtonEnabled
         {
             get => UpdateAppButton.IsEnabled;

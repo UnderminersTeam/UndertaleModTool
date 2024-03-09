@@ -298,7 +298,22 @@ namespace UndertaleModTool
             CurrentDecompiled = null;
             CurrentDisassembled = null;
 
-            if (MainWindow.CodeEditorDecompile != Unstated) //if opened from the code search results "link"
+            // If there is no override (e.g. from opened tab)
+            if (MainWindow.CodeEditorDecompile == Unstated)
+            {
+                if (!SettingsWindow.OpenDisassemblyByDefault)
+                {
+                    CodeModeTabs.SelectedItem = DecompiledTab;
+                    MainWindow.CodeEditorDecompile = Decompile;
+                }
+                else
+                {
+                    CodeModeTabs.SelectedItem = DisassemblyTab;
+                    MainWindow.CodeEditorDecompile = DontDecompile;
+                }
+            }  
+
+            if (MainWindow.CodeEditorDecompile != Unstated)
             {
                 if (MainWindow.CodeEditorDecompile == DontDecompile && code != CurrentDisassembled)
                 {
