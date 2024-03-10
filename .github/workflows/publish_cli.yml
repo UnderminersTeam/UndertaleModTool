@@ -40,6 +40,11 @@ jobs:
       run: |
         cp ./README.md ./CLI-${{ matrix.os }}/
         cp ./LICENSE.txt ./CLI-${{ matrix.os }}/
+    - name: Remove residual files from NetCoreBeauty 
+      continue-on-error: true
+      run: |
+        rm -f ./CLI-${{ matrix.os }}/NetCoreBeauty
+        rm -f ./CLI-${{ matrix.os }}/hostfxr.dll.bak
     - name: Upload ${{ matrix.os }} CLI
       uses: actions/upload-artifact@v4
       with:

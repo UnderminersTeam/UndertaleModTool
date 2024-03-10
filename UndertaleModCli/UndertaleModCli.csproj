@@ -16,9 +16,21 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.8.0" />
+    <PackageReference Include="nulastudio.NetCoreBeauty" Version="1.2.9.5" />
     <PackageReference Include="runtime.osx.10.10-x64.CoreCompat.System.Drawing" Version="6.0.5.128" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21308.1" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <BeautySharedRuntimeMode>False</BeautySharedRuntimeMode>
+    <BeautyLibsDir Condition="$(BeautySharedRuntimeMode) == 'True'">../Libraries</BeautyLibsDir>
+    <BeautyLibsDir Condition="$(BeautySharedRuntimeMode) != 'True'">./Libraries</BeautyLibsDir>
+    <DisableBeauty>False</DisableBeauty>
+    <BeautyOnPublishOnly>False</BeautyOnPublishOnly>
+    <BeautyEnableDebugging>True</BeautyEnableDebugging>
+    <BeautyUsePatch>True</BeautyUsePatch>
+    <BeautyLogLevel>Info</BeautyLogLevel>
+  </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\UndertaleModLib\UndertaleModLib.csproj" />

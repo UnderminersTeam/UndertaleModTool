@@ -29,10 +29,21 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="nulastudio.NetCoreBeauty" Version="1.2.9.5" />
     <PackageReference Include="PropertyChanged.Fody" Version="3.3.3" />
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
     <PackageReference Include="System.Drawing.Common" Version="5.0.3" />
   </ItemGroup>
+  <PropertyGroup>
+    <BeautySharedRuntimeMode>False</BeautySharedRuntimeMode>
+    <BeautyLibsDir Condition="$(BeautySharedRuntimeMode) == 'True'">../Libraries</BeautyLibsDir>
+    <BeautyLibsDir Condition="$(BeautySharedRuntimeMode) != 'True'">./Libraries</BeautyLibsDir>
+    <DisableBeauty>False</DisableBeauty>
+    <BeautyOnPublishOnly>False</BeautyOnPublishOnly>
+    <BeautyEnableDebugging>True</BeautyEnableDebugging>
+    <BeautyUsePatch>True</BeautyUsePatch>
+    <BeautyLogLevel>Info</BeautyLogLevel>
+  </PropertyGroup>
   <ItemGroup>
     <None Remove="version.txt" />
   </ItemGroup>
