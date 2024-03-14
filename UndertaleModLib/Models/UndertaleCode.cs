@@ -227,7 +227,7 @@ public class UndertaleInstruction : UndertaleObject
         int NameStringID { get; set; }
     }
 
-    public class Reference<T> : UndertaleObject where T : class, UndertaleObject, ReferencedObject
+    public class Reference<T> : UndertaleObject, ICloneable where T : class, UndertaleObject, ReferencedObject
     {
         public uint NextOccurrenceOffset { get; set; } = 0xdead;
         public VariableType Type { get; set; }
@@ -268,6 +268,21 @@ public class UndertaleInstruction : UndertaleObject
             NextOccurrenceOffset = (uint)int32Value & 0x07FFFFFF;
             Type = (VariableType)((int32Value >> 24) & 0xF8);
         }
+
+        /// <summary>
+        /// Creates a new <see cref="Reference{T}"/> that is a copy of this <see cref="Reference{T}"/>.
+        /// </summary>
+        /// <returns>A new <see cref="Reference{T}"/> that is a copy of this <see cref="Reference{T}"/>.</returns>
+        public Reference<T> Clone()
+        {
+            return new Reference<T>()
+            {
+                NextOccurrenceOffset = this.NextOccurrenceOffset,
+                Target = this.Target,
+                Type = this.Type
+            };
+        }
+        object ICloneable.Clone() => Clone();
 
         /// <inheritdoc />
         public override string ToString()
@@ -844,6 +859,30 @@ public class UndertaleInstruction : UndertaleObject
         return 0;
     }
 
+    /// <summary>
+    /// Creates a new <see cref="UndertaleInstruction"/> that is a copy of this instruction.
+    /// </summary>
+    /// <returns>A new <see cref="UndertaleInstruction"/> that is a copy of this instruction.</returns>
+    public UndertaleInstruction Clone()
+    {
+        return new UndertaleInstruction()
+        {
+            Kind = this.Kind,
+            ComparisonKind = this.ComparisonKind,
+            Type1 = this.Type1,
+            Type2 = this.Type2,
+            TypeInst = this.TypeInst,
+            Value = this.Value is ICloneable cloneable ? cloneable.Clone() : this.Value,
+            Destination = this.Destination?.Clone(),
+            Function = this.Function?.Clone(),
+            JumpOffset = this.JumpOffset,
+            JumpOffsetPopenvExitMagic = this.JumpOffsetPopenvExitMagic,
+            ArgumentsCount = this.ArgumentsCount,
+            Extra = this.Extra,
+            SwapExtra = this.SwapExtra
+        };
+    }
+
     /// <inheritdoc />
     public override string ToString()
     {
@@ -1380,6 +1419,69 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
 
         Instructions.Clear();
         Append(instructions);
+    }
+
+    /// <summary>
+    /// Insert instructions at specified index in this code entry.
+    /// </summary>
+    /// <param name="instructions">The instructions to insert.</param>
+    /// <param name="index">The index of insertion.</param>
+    public void Insert(IList<UndertaleInstruction> instructions, int index)
+    {
+        uint offsetU = 0;
+        uint address = Instructions[index].Address;
+        foreach (UndertaleInstruction instr in instructions)
+            offsetU += instr.CalculateInstructionSize();
+
+        int offset = (int)offsetU;
+
+        for (int i = 0; i < Instructions.Count; i++)
+        {
+            if (UndertaleInstruction.GetInstructionType(Instructions[i].Kind) == UndertaleInstruction.InstructionType.GotoInstruction)
+            {
+                if (i < index && Instructions[i].Address + Instructions[i].JumpOffset > address)
+                {
+                    Instructions[i] = Instructions[i].Clone();
+                    Instructions[i].JumpOffset += offset;
+                }
+                else if (i > index && Instructions[i].Address + Instructions[i].JumpOffset <= address)
+                {
+                    Instructions[i] = Instructions[i].Clone();
+                    Instructions[i].JumpOffset -= offset;
+                }
+            }
+        }
+
+        Instructions.InsertRange(index + 1, instructions);
+    }
+    /// <summary>
+    /// Insert an instruction at specified index in this code entry.
+    /// </summary>
+    /// <param name="instruction">The instruction to insert.</param>
+    /// <param name="index">The index of insertion.</param>
+    public void Insert(UndertaleInstruction instruction, int index)
+    {
+        uint address = Instructions[index].Address;
+        int offset = (int)instruction.CalculateInstructionSize();
+
+        for (int i = 0; i < Instructions.Count; i++)
+        {
+            if (UndertaleInstruction.GetInstructionType(Instructions[i].Kind) == UndertaleInstruction.InstructionType.GotoInstruction)
+            {
+                if (i < index && Instructions[i].Address + Instructions[i].JumpOffset > address)
+                {
+                    Instructions[i] = Instructions[i].Clone();
+                    Instructions[i].JumpOffset += offset;
+                }
+                else if (i > index && Instructions[i].Address + Instructions[i].JumpOffset <= address)
+                {
+                    Instructions[i] = Instructions[i].Clone();
+                    Instructions[i].JumpOffset -= offset;
+                }
+            }
+        }
+
+        Instructions.Insert(index + 1, instruction);
     }
 
     /// <summary>
