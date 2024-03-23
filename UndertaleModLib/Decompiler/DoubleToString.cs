@@ -45,6 +45,7 @@ namespace UndertaleModLib.Decompiler
             // As of time of writing this comment, C# does not offer a way to print fixed point notation while preserving precision.
             // You may ask "But why not use F17?". And the answer is, that for everything but R and G, the precision is hard-capped to 15 (according to MSDN: Double.ToString()).
             // Thus we use R to keep our precision, and then manually convert this to fixed point notation.
+            // R is used instead of G17 to prevent things like 0.1 turning into 0.10000000000000001.
             // For anyone unaware of the general algorithm: you get the exponent 'n', then move the decimal point n times to the right if it's positive / left if it's negative.
             ReadOnlySpan<char> exponentAsSpan = numberAsSpan.Slice(indexOfE + 1);
             int exponent = Int32.Parse(exponentAsSpan);
