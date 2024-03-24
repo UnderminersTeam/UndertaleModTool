@@ -53,6 +53,11 @@ public static partial class Decompiler
             return false;
         }
 
+        // Used for converting int constants to bool constants for 2.3.7+ code
+        internal virtual void CastToBoolean() {
+            Type = UndertaleInstruction.DataType.Boolean;
+        }
+
         public Expression CleanExpression(DecompileContext context, BlockHLStatement block)
         {
             return CleanStatement(context, block) as Expression;
