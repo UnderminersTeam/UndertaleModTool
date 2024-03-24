@@ -217,7 +217,7 @@ namespace UndertaleModLib.Decompiler
                         if (!(nextBlock is not null
                             && nextBlock.Instructions.Count > 0
                             && nextBlock.Instructions[0].Kind == UndertaleInstruction.Opcode.Push
-                            && nextBlock.Instructions[0].Value.GetType() != typeof(int)))
+                            && nextBlock.Instructions[0].Value is UndertaleInstruction.Reference<UndertaleFunction>))
                         {
                             ReturnStatement stmt = new ReturnStatement(instr.Kind == UndertaleInstruction.Opcode.Ret ? stack.Pop() : null);
                             /*
