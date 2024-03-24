@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,6 +18,7 @@ namespace UndertaleModLib.Compiler
         public bool ensureFunctionsDefined = true;
         public bool ensureVariablesDefined = true;
         public static bool GMS2_3;
+        public bool BooleanTypeEnabled => Data.IsVersionAtLeast(2, 3, 7);
         public bool TypedAssetRefs => Data.IsVersionAtLeast(2023, 8);
         public int LastCompiledArgumentCount = 0;
         public Dictionary<string, string> LocalVars = new Dictionary<string, string>();
