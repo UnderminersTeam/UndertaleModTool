@@ -755,6 +755,14 @@ public class UndertaleInstruction : UndertaleObject
                     if (!reader.undertaleData.IsVersionAtLeast(2023, 8))
                         reader.undertaleData.SetGMS2Version(2023, 8);
                 }
+                if (reader.undertaleData.IsVersionAtLeast(2, 3))
+                {
+                    if ((short)Value == -10) // chknullish instruction, added in 2.3.7
+                    {
+                        if (!reader.undertaleData.IsVersionAtLeast(2, 3, 7))
+                            reader.undertaleData.SetGMS2Version(2, 3, 7);
+                    }
+                }
             }
                 break;
 

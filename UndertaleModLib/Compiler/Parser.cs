@@ -59,6 +59,7 @@ namespace UndertaleModLib.Compiler
                     valueNumber = copyFrom.valueNumber;
                     valueString = copyFrom.valueString;
                     valueInt64 = copyFrom.valueInt64;
+                    isBool = copyFrom.isBool;
                 }
             }
 
@@ -2701,7 +2702,19 @@ namespace UndertaleModLib.Compiler
                 int index = context.GetAssetIndexByName(identifier);
                 if (index == -1)
                 {
-                    if (context.BuiltInList.Constants.TryGetValue(identifier, out double val))
+                    if (identifier == "true")
+                    {
+                        constant.isBool = context.BooleanTypeEnabled;
+                        constant.valueNumber = 1.0;
+                        return true;
+                    }
+                    else if (identifier == "false")
+                    {
+                        constant.isBool = context.BooleanTypeEnabled;
+                        constant.valueNumber = 0.0;
+                        return true;
+                    }
+                    else if (context.BuiltInList.Constants.TryGetValue(identifier, out double val))
                     {
                         constant.valueNumber = val;
                         return true;
