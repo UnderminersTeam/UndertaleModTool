@@ -23,9 +23,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Setup .NET
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
@@ -47,7 +47,7 @@ jobs:
       run: |
         7z a -tzip GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip ./${{ matrix.os }}/* -mx0 
     - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
           name: GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}
           path: GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip
@@ -71,9 +71,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Setup .NET
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
@@ -90,7 +90,7 @@ jobs:
       run: |
         7z a -tzip CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}.zip ./CLI-${{ matrix.os }}/* -mx0 
     - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
           name: CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}
           path: CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}.zip
@@ -101,7 +101,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Download artifacts
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
     - name: Delete tag and release
       uses: dev-drprasad/delete-tag-and-release@v1.0
       with:
@@ -123,14 +123,14 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Check and fix the release
-      uses: actions/github-script@v3
+      uses: actions/github-script@v7
       with:
         script: |
           // Wait 10 seconds
           await new Promise(r => setTimeout(r, 10000));
 
           const {owner, repo} = context.repo;
-          const listReleasesResponse = await github.repos.listReleases({
+          const listReleasesResponse = await github.rest.repos.listReleases({
             owner,
             repo
           });
@@ -160,7 +160,7 @@ jobs:
           console.warn("Found the bleeding edge release that is draft.\nTrying to publish...");
 
           try {
-            await github.repos.updateRelease({owner, repo, release_id, draft: false});
+            await github.rest.repos.updateRelease({owner, repo, release_id, draft: false});
           }
           catch (err) {
             if ('status' in err && err.status == 422) {

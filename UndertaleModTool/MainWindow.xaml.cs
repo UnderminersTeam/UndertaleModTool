@@ -1147,7 +1147,7 @@ namespace UndertaleModTool
                                 {
                                     if (debugMode == DebugDataDialog.DebugDataMode.FullAssembler || instr.Kind == UndertaleInstruction.Opcode.Pop || instr.Kind == UndertaleInstruction.Opcode.Popz || instr.Kind == UndertaleInstruction.Opcode.B || instr.Kind == UndertaleInstruction.Opcode.Bt || instr.Kind == UndertaleInstruction.Opcode.Bf || instr.Kind == UndertaleInstruction.Opcode.Ret || instr.Kind == UndertaleInstruction.Opcode.Exit)
                                         debugInfo.Add(new UndertaleDebugInfo.DebugInfoPair() { SourceCodeOffset = (uint)sb.Length, BytecodeOffset = instr.Address * 4 });
-                                    sb.Append(instr.ToString(code));
+                                    instr.ToString(sb, code);
                                     sb.Append('\n');
                                 }
                                 outputs[i] = sb.ToString();
@@ -2013,7 +2013,7 @@ namespace UndertaleModTool
 
         private void MenuItem_Add_Click(object sender, RoutedEventArgs e)
         {
-            object source = null;
+            object source;
             try
             {
                 source = (MainTree.SelectedItem as TreeViewItem).ItemsSource;
@@ -2048,11 +2048,20 @@ namespace UndertaleModTool
                 {
                     notDataNewName = "Texture " + list.Count;
                 }
+                if (obj is UndertaleShader shader)
+                {
+                    shader.GLSL_ES_Vertex = Data.Strings.MakeString("", true);
+                    shader.GLSL_ES_Fragment = Data.Strings.MakeString("", true);
+                    shader.GLSL_Vertex = Data.Strings.MakeString("", true);
+                    shader.GLSL_Fragment = Data.Strings.MakeString("", true);
+                    shader.HLSL9_Vertex = Data.Strings.MakeString("", true);
+                    shader.HLSL9_Fragment = Data.Strings.MakeString("", true);
+                }
 
                 if (doMakeString)
                 {
-                    string newname = obj.GetType().Name.Replace("Undertale", "").Replace("GameObject", "Object").ToLower() + list.Count;
-                    (obj as UndertaleNamedResource).Name = Data.Strings.MakeString(newname);
+                    string newName = obj.GetType().Name.Replace("Undertale", "").Replace("GameObject", "Object").ToLower() + list.Count;
+                    (obj as UndertaleNamedResource).Name = Data.Strings.MakeString(newName);
                     if (obj is UndertaleRoom)
                     {
                         (obj as UndertaleRoom).Caption = Data.Strings.MakeString("");
@@ -2065,7 +2074,7 @@ namespace UndertaleModTool
                     {
                         UndertaleCode code = new UndertaleCode();
                         string prefix = Data.IsVersionAtLeast(2, 3) ? "gml_GlobalScript_" : "gml_Script_";
-                        code.Name = Data.Strings.MakeString(prefix + newname);
+                        code.Name = Data.Strings.MakeString(prefix + newName);
                         Data.Code.Add(code);
                         if (Data?.GeneralInfo.BytecodeVersion > 14)
                         {
@@ -2080,7 +2089,7 @@ namespace UndertaleModTool
                         }
                         (obj as UndertaleScript).Code = code;
                     }
-                    if ((obj is UndertaleCode) && (Data?.GeneralInfo.BytecodeVersion > 14))
+                    if ((obj is UndertaleCode) && (Data.GeneralInfo.BytecodeVersion > 14))
                     {
                         UndertaleCodeLocals locals = new UndertaleCodeLocals();
                         locals.Name = (obj as UndertaleCode).Name;
@@ -3666,8 +3675,6 @@ result in loss of work.");
             {
                 CurrentTab?.SaveTabContentState();
 
-                ScrollToTab(CurrentTabIndex);
-
                 Tab newTab = Tabs[CurrentTabIndex];
 
                 if (CurrentTab?.CurrentObject != newTab.CurrentObject)
@@ -3678,6 +3685,8 @@ result in loss of work.");
                 UpdateObjectLabel(CurrentTab.CurrentObject);
 
                 CurrentTab.RestoreTabContentState();
+
+                ScrollToTab(CurrentTabIndex);
             }
         }
 
@@ -3754,16 +3763,12 @@ result in loss of work.");
                     tabItems.RemoveAt(tabItems.Count - 1);
                 }
 
-                TabItem currTabItem = null;
                 double offset = 0;
                 int i = 0;
                 foreach (TabItem item in tabItems)
                 {
                     if (i == tabIndex)
-                    {
-                        currTabItem = item;
                         break;
-                    }
 
                     offset += item.ActualWidth;
                     i++;
@@ -3772,14 +3777,16 @@ result in loss of work.");
                 double endOffset = TabScrollViewer.HorizontalOffset + TabScrollViewer.ViewportWidth;
                 if (offset < TabScrollViewer.HorizontalOffset || offset > endOffset)
                     TabScrollViewer.ScrollToHorizontalOffset(offset);
-                else
-                    currTabItem?.BringIntoView();
             }
         }
         private void TabScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             ScrollTabs(e.Delta < 0 ? ScrollDirection.Right : ScrollDirection.Left);
             e.Handled = true;
+        }
+        private void TabScrollViewer_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            initTabContPos = e.GetPosition(TabScrollViewer);
         }
         private void TabsScrollLeftButton_Click(object sender, RoutedEventArgs e)
         {
@@ -3820,6 +3827,7 @@ result in loss of work.");
             }
         }
 
+        private Point initTabContPos;
         // source - https://stackoverflow.com/a/10738247/12136394
         private void TabItem_PreviewMouseMove(object sender, MouseEventArgs e)
         {
@@ -3828,6 +3836,12 @@ result in loss of work.");
 
             if (Mouse.PrimaryDevice.LeftButton == MouseButtonState.Pressed)
             {
+                // Filter false mouse move events, because it sometimes
+                // triggers even on a mouse click
+                Point currPos = e.GetPosition(TabScrollViewer);
+                if (Math.Abs(Point.Subtract(currPos, initTabContPos).X) < 2)
+                    return;
+
                 CurrentTabIndex = tabItem.TabIndex;
                 try
                 {

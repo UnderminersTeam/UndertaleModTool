@@ -24,12 +24,9 @@ bool debug_override = false;
 
 // Setup root export folder.
 string winFolder = GetFolder(FilePath); // The folder data.win is located in.
-string BackupFolder = winFolder + "/Backups/";
+string BackupFolder = Path.Combine(winFolder, "Backups");
 
-if (!(Directory.Exists(BackupFolder)))
-{
-    Directory.CreateDirectory(BackupFolder);
-}
+Directory.CreateDirectory(BackupFolder);
 
 System.Timers.Timer aTimer;
 // Create a timer with a minute interval defined by 'minutes_per_backup'.
@@ -39,17 +36,15 @@ while (true)
 {
     try
     {
-        //                               SimpleTextInput(string titleText,                                                                      string labelText, string defaultInputBoxText, bool isMultiline)
+        // SimpleTextInput(string titleText, string labelText, string defaultInputBoxText, bool isMultiline)
         double result = Convert.ToDouble(SimpleTextInput("Automatic backup script.", "Please enter the backup interval in minutes (minimum interval 5 minutes).", "30", false));
         if ((result < 5) && (!debug_override))
         {
             continue;
         }
-        else
-        {
-            minutes_per_backup = result;
-            break;
-        }
+        
+        minutes_per_backup = result;
+        break;
     }
     catch (FormatException)
     {
@@ -62,17 +57,15 @@ while (true)
 {
     try
     {
-        //                            SimpleTextInput(string titleText,                                                                      string labelText, string defaultInputBoxText, bool isMultiline)
+        // SimpleTextInput(string titleText, string labelText, string defaultInputBoxText, bool isMultiline)
         int result2 = Convert.ToInt32(SimpleTextInput("Automatic backup script.", "Please enter the maximum number of unique backups this session (0 for unlimited).", "200", false));
         if (result2 < 0)
         {
             continue;
         }
-        else
-        {
-            maximum_number_of_runs = result2;
-            break;
-        }
+        
+        maximum_number_of_runs = result2;
+        break;
     }
     catch (FormatException)
     {
@@ -138,6 +131,7 @@ void OnTimedEvent(Object source, ElapsedEventArgs e)
             return;
         }
         if (times_ran > 1)
+            // TODO: what's this about? 
             FileCompare();
         else
         {
