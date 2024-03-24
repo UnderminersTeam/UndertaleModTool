@@ -78,7 +78,7 @@ public static partial class Decompiler
                 return functionVal.ToString(context);
             }
 
-            string varPrefix = (HasVarKeyword ? "var " : "");
+            string varPrefix = (HasVarKeyword && !context.DecompilingStruct) ? "var " : "";
 
             // Check for possible ++, --, or operation equal (for single vars)
             if (Value is ExpressionTwo two && (two.Argument1 is ExpressionVar) &&
