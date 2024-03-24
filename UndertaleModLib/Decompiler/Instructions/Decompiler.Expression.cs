@@ -54,7 +54,8 @@ public static partial class Decompiler
         }
 
         // Used for converting int constants to bool constants for 2.3.7+ code
-        internal virtual void CastToBoolean() {
+        internal virtual void CastToBoolean()
+        {
             Type = UndertaleInstruction.DataType.Boolean;
         }
 
