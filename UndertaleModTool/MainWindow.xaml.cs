@@ -1847,7 +1847,7 @@ namespace UndertaleModTool
                 }
             }
         }
-        private void CopyItemName(object obj)
+        public void CopyItemName(object obj)
         {
             string name = null;
 
