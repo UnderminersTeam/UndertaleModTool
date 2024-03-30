@@ -37,6 +37,14 @@ public static partial class Decompiler
             return this;
         }
 
+        internal override void CastToBoolean(DecompileContext context) {
+            Type = UndertaleInstruction.DataType.Boolean;
+            if (context.TempVarMap.ContainsKey(Var.Var.Name))
+            {
+                context.TempVarMap[Var.Var.Name].Value.CastToBoolean(context);
+            }
+        }
+
         internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
         {
             if (Var.Var.AssetType == AssetIDType.Other)

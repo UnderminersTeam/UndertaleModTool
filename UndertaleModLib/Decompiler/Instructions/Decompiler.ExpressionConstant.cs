@@ -27,7 +27,7 @@ public static partial class Decompiler
             return true;
         }
 
-        internal override void CastToBoolean()
+        internal override void CastToBoolean(DecompileContext context)
         {
             Type = UndertaleInstruction.DataType.Boolean;
             Value = Convert.ToBoolean(Value);
