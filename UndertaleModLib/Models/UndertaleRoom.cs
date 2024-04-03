@@ -1693,7 +1693,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                         {
                             // Repeat run
                             int length = opcode - 127;
-                            reader.ReadUInt32();
+                            reader.Position += 4;
                             tiles += length;
                         }
                         else
@@ -1701,7 +1701,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                             // Verbatim run
                             int length = opcode;
                             for (int i = 0; i < length; i++)
-                                reader.ReadUInt32();
+                                reader.Position += 4;
                             tiles += length;
                         }
                     }
