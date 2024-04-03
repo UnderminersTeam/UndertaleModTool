@@ -1637,12 +1637,17 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 writer.Write(TilesY);
                 if (TileData.Length != TilesY)
                     throw new Exception("Invalid TileData row length");
-                foreach (var row in TileData)
+                if (writer.undertaleData.IsVersionAtLeast(2024, 2))
+                    WriteCompressedTileData(writer);
+                else
                 {
-                    if (row.Length != TilesX)
-                        throw new Exception("Invalid TileData column length");
-                    foreach (var tile in row)
-                        writer.Write(tile);
+                    foreach (var row in TileData)
+                    {
+                        if (row.Length != TilesX)
+                            throw new Exception("Invalid TileData column length");
+                        foreach (var tile in row)
+                            writer.Write(tile);
+                    }
                 }
             }
 
@@ -1655,12 +1660,15 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 TilesX = reader.ReadUInt32();
                 TilesY = reader.ReadUInt32();
                 TileData = new uint[TilesY][];
-                for (uint y = 0; y < TilesY; y++)
+                if (reader.undertaleData.IsVersionAtLeast(2024, 2))
+                    ReadCompressedTileData(reader);
+                else
                 {
-                    TileData[y] = new uint[TilesX];
-                    for (uint x = 0; x < TilesX; x++)
+                    for (uint y = 0; y < TilesY; y++)
                     {
-                        TileData[y][x] = reader.ReadUInt32();
+                        TileData[y] = new uint[TilesX];
+                        for (uint x = 0; x < TilesX; x++)
+                            TileData[y][x] = reader.ReadUInt32();
                     }
                 }
             }
@@ -1674,9 +1682,176 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
                 uint tilesX = reader.ReadUInt32();
                 uint tilesY = reader.ReadUInt32();
-                reader.Position += tilesX * tilesY * 4;
+                if (reader.undertaleData.IsVersionAtLeast(2024, 2))
+                {
+                    uint tileCount = tilesX * tilesY;
+                    int tiles = 0;
+                    while (tiles < tileCount)
+                    {
+                        byte opcode = reader.ReadByte();
+                        if (opcode >= 128)
+                        {
+                            // Repeat run
+                            int length = opcode - 127;
+                            reader.ReadUInt32();
+                            tiles += length;
+                        }
+                        else
+                        {
+                            // Verbatim run
+                            int length = opcode;
+                            for (int i = 0; i < length; i++)
+                                reader.ReadUInt32();
+                            tiles += length;
+                        }
+                    }
+                }
+                else
+                    reader.Position += tilesX * tilesY * 4;
 
                 return count;
+            }
+
+            /// <summary>
+            /// Reads 2024.2+ compressed RLE tile data.
+            /// </summary>
+            /// <param name="reader">Where to deserialize from.</param>
+            public void ReadCompressedTileData(UndertaleReader reader)
+            {
+                int x = 0;
+                int y = 0;
+                if (TilesY > 0)
+                    TileData[y] = new uint[TilesX];
+
+                Func<bool> NextTile = () =>
+                {
+                    x++;
+                    if (x >= TilesX)
+                    {
+                        x = 0;
+                        y++;
+                        if (y >= TilesY)
+                            return true;
+                        TileData[y] = new uint[TilesX];
+                    }
+                    return false;
+                };
+
+                while (true)
+                {
+                    byte length = reader.ReadByte();
+                    if (length >= 128)
+                    {
+                        // Repeat run
+                        int runLength = length - 128 + 1;
+                        uint tile = reader.ReadUInt32();
+                        for (int i = 0; i < runLength; i++)
+                        {
+                            TileData[y][x] = tile;
+                            if (NextTile())
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        // Verbatim run
+                        int runLength = length;
+                        for (int i = 0; i < runLength; i++)
+                        {
+                            TileData[y][x] = reader.ReadUInt32();
+                            if (NextTile())
+                                break;
+                        }
+                    }
+                    if (y >= TilesY)
+                        break;
+                }
+            }
+
+            /// <summary>
+            /// Writes 2024.2+ compressed RLE tile data.
+            /// </summary>
+            /// <param name="writer">Where to serialize to.</param>
+            public void WriteCompressedTileData(UndertaleWriter writer)
+            {
+                List<uint> run = new();
+                run.EnsureCapacity(128);
+                bool runIsVerbatim = false;
+                Action EndRun = () =>
+                {
+                    if (run.Count == 0)
+                        return;
+
+                    if (runIsVerbatim || run.Count == 1)
+                    {
+                        if (run.Count > 127)
+                            throw new IndexOutOfRangeException("Attempted to encode verbatim tile run size " + run.Count + " larger than maximum 127");
+                        writer.Write((byte)run.Count);
+                        foreach (uint tile in run)
+                            writer.Write(tile);
+                    }
+                    else
+                    {
+                        if (run.Count > 128)
+                            throw new IndexOutOfRangeException("Attempted to encode repeat tile run size " + run.Count + " larger than maximum 128");
+                        writer.Write((byte)(run.Count + 127));
+                        writer.Write(run[0]);
+                    }
+                    run.Clear();
+                };
+
+                for (int y = 0; y < TileData.Length; y++)
+                {
+                    uint[] row = TileData[y];
+                    if (row.Length != TilesX)
+                        throw new Exception("Invalid TileData row length");
+                    for (int x = 0; x < row.Length; x++)
+                    {
+                        uint tile = row[x];
+                        if (!runIsVerbatim)
+                        {
+                            if (run.Count > 0 && tile != run[0])
+                            {
+                                if (run.Count == 1)
+                                {
+                                    runIsVerbatim = true;
+                                    run.Add(tile);
+                                    continue;
+                                }
+                                EndRun();
+                            }
+                            else if (run.Count >= 128)
+                                // Split the run
+                                EndRun();
+                            run.Add(tile);
+                        }
+                        else
+                        {
+
+                            if ((x + 1) <= TilesX || (y + 1) <= TilesY)
+                            {
+                                // Check the next tile for repeat runs
+                                int nextX = x + 1;
+                                int nextY = y;
+                                if (nextX >= TilesX)
+                                {
+                                    nextX = 0;
+                                    nextY++;
+                                }
+                                if (TileData[nextY][nextX] == tile)
+                                {
+                                    EndRun();
+                                    runIsVerbatim = false;
+                                }
+                            }
+                            if (run.Count >= 127)
+                                // Split the run
+                                EndRun();
+                            run.Add(tile);
+                        }
+                    }
+                }
+                EndRun();
             }
 
             /// <inheritdoc/>
