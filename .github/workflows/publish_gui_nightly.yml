@@ -103,7 +103,7 @@ jobs:
     - name: Download artifacts
       uses: actions/download-artifact@v4
     - name: Delete tag and release
-      uses: dev-drprasad/delete-tag-and-release@v1.0
+      uses: dev-drprasad/delete-tag-and-release@v1.1
       with:
         delete_release: true # default: false
         tag_name: bleeding-edge # tag name to delete
