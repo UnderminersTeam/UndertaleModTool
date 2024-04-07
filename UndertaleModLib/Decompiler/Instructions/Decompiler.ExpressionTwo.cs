@@ -77,7 +77,7 @@ public static partial class Decompiler
                     needsParens = true; // Better safe than sorry
                 
                 // Non-commutative operators may still need parentheses, e.g `a - (b - c)`
-                bool nonCommutative = Opcode == UndertaleInstruction.Opcode.Sub || Opcode == UndertaleInstruction.Opcode.Div;
+                bool nonCommutative = Opcode is UndertaleInstruction.Opcode.Sub or UndertaleInstruction.Opcode.Div;
                 if (isSecond && nonCommutative && Opcode == argumentAsBinaryExpression.Opcode)
                     needsParens = true;
             }
