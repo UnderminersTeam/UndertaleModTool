@@ -34,7 +34,7 @@ public static partial class Decompiler
             return this;
         }
 
-        private string AddParensIfNeeded(Expression argument, DecompileContext context)
+        private string AddParensIfNeeded(Expression argument, DecompileContext context, bool isSecond)
         {
             string arg = argument.ToString(context);
             bool needsParens;
@@ -87,8 +87,8 @@ public static partial class Decompiler
 
         public string ToStringNoParens(DecompileContext context)
         {
-            string arg1 = AddParensIfNeeded(Argument1, context);
-            string arg2 = AddParensIfNeeded(Argument2, context);
+            string arg1 = AddParensIfNeeded(Argument1, context, false);
+            string arg2 = AddParensIfNeeded(Argument2, context, true);
 
             if (Opcode == UndertaleInstruction.Opcode.Or || Opcode == UndertaleInstruction.Opcode.And)
             {
