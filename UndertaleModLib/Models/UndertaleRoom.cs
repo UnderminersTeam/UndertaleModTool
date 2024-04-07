@@ -1700,8 +1700,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                         {
                             // Verbatim run
                             int length = opcode;
-                            for (int i = 0; i < length; i++)
-                                reader.Position += 4;
+                            reader.Position += length * 4;
                             tiles += length;
                         }
                     }
