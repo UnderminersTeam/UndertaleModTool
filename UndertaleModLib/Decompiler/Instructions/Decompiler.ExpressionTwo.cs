@@ -75,6 +75,11 @@ public static partial class Decompiler
                 needsParens = (outerPriorityLevel > argPriorityLevel);
                 if (outerPriorityLevel == 0)
                     needsParens = true; // Better safe than sorry
+                
+                // Non-commutative operators may still need parentheses, e.g `a - (b - c)`
+                bool nonCommutative = Opcode == UndertaleInstruction.Opcode.Sub || Opcode == UndertaleInstruction.Opcode.Div;
+                if (isSecond && nonCommutative && Opcode == argumentAsBinaryExpression.Opcode)
+                    needsParens = true;
             }
 
             return (needsParens ? String.Format("({0})", arg) : arg);
