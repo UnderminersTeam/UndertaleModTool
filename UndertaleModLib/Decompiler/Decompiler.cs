@@ -282,8 +282,13 @@ namespace UndertaleModLib.Decompiler
 
                     case UndertaleInstruction.Opcode.Bt:
                     case UndertaleInstruction.Opcode.Bf:
-                        block.ConditionStatement = stack.Pop();
-                        end = true;
+                        {
+                            Expression val = stack.Pop();
+                            if (context.BooleanTypeEnabled && val.Type == UndertaleInstruction.DataType.Int16)
+                                val.CastToBoolean(context);
+                            block.ConditionStatement = val;
+                            end = true;
+                        }
                         break;
 
                     case UndertaleInstruction.Opcode.PushEnv:
