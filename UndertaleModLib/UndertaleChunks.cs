@@ -514,9 +514,9 @@ namespace UndertaleModLib
         {
             // This is basically the same as the 2022.2 check, but adapted for the LineHeight value instead of Ascender.
             
-            // We already know whether the version is more or less than 2023.2 due to PSEM. Checking a shorter range narrows possibility of error.
-            // TODO: Does this hold with LTS?
-            if (!reader.undertaleData.IsVersionAtLeast(2023, 2) || reader.undertaleData.IsVersionAtLeast(2023, 6))
+            // We already know whether the version is more or less than 2022.8 due to FEAT. Checking a shorter range narrows possibility of error.
+            // PSEM (2023.2) is not used, as it would return a false negative on LTS (2022.9+ equivalent with no particles).
+            if (!reader.undertaleData.IsVersionAtLeast(2022, 8) || reader.undertaleData.IsVersionAtLeast(2023, 6))
             {
                 checkedFor2023_6 = true;
                 return;
