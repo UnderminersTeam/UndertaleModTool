@@ -206,6 +206,20 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     public UndertaleString Name { get; set; }
 
     /// <summary>
+    /// Different GameMaker release branches. LTS has some but not all features of equivalent newer versions.
+    /// </summary>
+    public enum BranchType
+    {
+        LTS,
+        NonLTS
+    }
+
+    /// <summary>
+    /// The GameMaker release branch of the data file. May be set to "NonLTS" when features exempted from LTS are detected.
+    /// </summary>
+    public BranchType Branch = BranchType.LTS;
+
+    /// <summary>
     /// The major version of the data file.
     /// If greater than 1, serialization produces "2.0.0.0" due to the flag no longer updating in data.win
     /// </summary>
@@ -309,22 +323,22 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     /// </summary>
     public bool InfoTimestampOffset { get; set; } = true;
 
-    public static (uint, uint, uint, uint) TestForCommonGMSVersions(UndertaleReader reader,
-                                                                    (uint, uint, uint, uint) readVersion)
+    public static (uint, uint, uint, uint, BranchType) TestForCommonGMSVersions(UndertaleReader reader,
+                                                                    (uint, uint, uint, uint, BranchType) readVersion)
     {
-        (uint Major, uint Minor, uint Release, uint Build) detectedVer = readVersion;
+        (uint Major, uint Minor, uint Release, uint Build, BranchType Branch) detectedVer = readVersion;
 
         // Some GMS2+ version detection. The rest is spread around, mostly in UndertaleChunks.cs
-        if (reader.AllChunkNames.Contains("PSEM"))      // 2023.2
-            detectedVer = (2023, 2, 0, 0);
+        if (reader.AllChunkNames.Contains("PSEM"))      // 2023.2, not present on LTS
+            detectedVer = (2023, 2, 0, 0, BranchType.NonLTS);
         else if (reader.AllChunkNames.Contains("FEAT")) // 2022.8
-            detectedVer = (2022, 8, 0, 0);
+            detectedVer = (2022, 8, 0, 0, BranchType.LTS);
         else if (reader.AllChunkNames.Contains("FEDS")) // 2.3.6
-            detectedVer = (2, 3, 6, 0);
+            detectedVer = (2, 3, 6, 0, BranchType.LTS);
         else if (reader.AllChunkNames.Contains("SEQN")) // 2.3
-            detectedVer = (2, 3, 0, 0);
+            detectedVer = (2, 3, 0, 0, BranchType.LTS);
         else if (reader.AllChunkNames.Contains("TGIN")) // 2.2.1
-            detectedVer = (2, 2, 1, 0);
+            detectedVer = (2, 2, 1, 0, BranchType.LTS);
 
         if (detectedVer.Major > 2 || (detectedVer.Major == 2 && detectedVer.Minor >= 3))
         {
@@ -466,8 +480,8 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         if (reader.ReadOnlyGEN8)
             return;
 
-        var detectedVer = TestForCommonGMSVersions(reader, (Major, Minor, Release, Build));
-        (Major, Minor, Release, Build) = detectedVer;
+        var detectedVer = TestForCommonGMSVersions(reader, (Major, Minor, Release, Build, Branch));
+        (Major, Minor, Release, Build, Branch) = detectedVer;
 
         if (reader.undertaleData.GeneralInfo is not null)
         {

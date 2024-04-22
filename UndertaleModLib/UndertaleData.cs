@@ -510,6 +510,40 @@ namespace UndertaleModLib
         }
 
         /// <summary>
+        /// Sets the branch type in GeneralInfo to LTS. (true for LTS, false for non-LTS.)
+        /// </summary>
+        /// <param name="isLTS">true for LTS, false for non-LTS.</param>
+        public void SetLTS(bool isLTS)
+        {
+            if (isLTS)
+                GeneralInfo.Branch = UndertaleGeneralInfo.BranchType.LTS;
+            else
+                GeneralInfo.Branch = UndertaleGeneralInfo.BranchType.NonLTS;
+        }
+
+        /// <summary>
+        /// Reports whether the version of the data file is the same or higher than a specified version, and off the LTS branch that lacks some features.
+        /// </summary>
+        /// <param name="major">The major version.</param>
+        /// <param name="minor">The minor version.</param>
+        /// <param name="release">The release version.</param>
+        /// <param name="build">The build version.</param>
+        /// <returns>Whether the version of the data file is the same or higher than a specified version. Always false for LTS.</returns>
+        public bool IsNonLTSVersionAtLeast(uint major, uint minor = 0, uint release = 0, uint build = 0)
+        {
+            if (GeneralInfo is null)
+            {
+                Debug.WriteLine("\"UndertaleData.IsNonLTSVersionAtLeast()\" error - \"GeneralInfo\" is null.");
+                return false;
+            }
+
+            if (GeneralInfo.Branch == UndertaleGeneralInfo.BranchType.LTS)
+                return false;
+
+            return IsVersionAtLeast(major, minor, release, build);
+        }
+
+        /// <summary>
         /// TODO: needs to be documented on what this does.
         /// </summary>
         /// <returns>TODO</returns>
