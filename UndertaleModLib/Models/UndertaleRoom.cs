@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -1736,14 +1737,16 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                     return false;
                 };
 
+                byte length;
+                uint tile;
                 while (true)
                 {
-                    byte length = reader.ReadByte();
+                    length = reader.ReadByte();
                     if (length >= 128)
                     {
                         // Repeat run
-                        int runLength = length - 128 + 1;
-                        uint tile = reader.ReadUInt32();
+                        int runLength = (length & 0x7f) + 1;
+                        tile = reader.ReadUInt32();
                         for (int i = 0; i < runLength; i++)
                         {
                             TileData[y][x] = tile;
@@ -1764,6 +1767,38 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                     }
                     if (y >= TilesY)
                         break;
+                }
+
+                if (TilesX == 0 && TilesY == 0)
+                    return;
+
+                // Due to a GMAC bug, 2 blank tiles are inserted into the layer
+                // if the last 2 tiles in the layer are different.
+                // This is a certified YoyoGames moment right here.
+                x = (int)(TilesX - 1);
+                y = (int)(TilesY - 1);
+                uint lastTile = TileData[y][x];
+
+                x--;
+                if (x < 0)
+                {
+                    x = (int)(TilesX - 1);
+                    y--;
+                }
+                if (y < 0)
+                    y = 0; // most likely only 1 tile on the layer in which case the blank tiles exist
+
+                bool hasPadding = TileData[y][x] != lastTile;
+                if (hasPadding)
+                {
+                    length = reader.ReadByte();
+                    tile = reader.ReadUInt32();
+
+                    // sanity check: run of 2 empty tiles
+                    if (length != 0x81) 
+                        throw new IOException("Expected 0x81, got " + length.ToString("X2"));
+                    if (tile != unchecked((uint)-1))
+                        throw new IOException("Expected -1, got " + tile + " (0x" + tile.ToString("X8") + ")");
                 }
             }
 
@@ -1851,6 +1886,9 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                     }
                 }
                 EndRun();
+
+                // TODO: insert 2 blank tiles if the last 2 tiles on the layer don't match.
+                // This is important for writing an identical file.
             }
 
             /// <inheritdoc/>

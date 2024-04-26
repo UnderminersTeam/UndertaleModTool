@@ -894,35 +894,43 @@ namespace UndertaleModLib
                     // No layers, try the next room
                     continue;
                 }
-                // Get pointer into the individual layer data (plus 8 bytes) for the first layer in the room
-                int jumpOffset = reader.ReadInt32() + 8;
 
-                // Find the offset for the end of this layer
-                int nextOffset;
-                if (layerCount == 1)
-                    nextOffset = seqnPtr;
-                else
-                    nextOffset = reader.ReadInt32(); // (pointer to next element in the layer list)
+                for (int layerNum = 0; layerNum < layerCount; layerNum++)
+                {
+                    reader.AbsPosition = layerListPtr + (4 * layerNum) + 4;
 
-                // Actually perform the length checks
-                reader.AbsPosition = jumpOffset;
+                    // Get pointer into the individual layer data (plus 8 bytes) for the first layer in the room
+                    int jumpOffset = reader.ReadInt32() + 8;
 
-                LayerType layerType = (LayerType)reader.ReadInt32();
-                // This is the only way to repeat the loop, because each successful switch case terminates the loop
-                if (layerType != LayerType.Tiles)
-                    continue;
+                    // Find the offset for the end of this layer
+                    int nextOffset;
+                    if (layerNum == layerCount - 1)
+                        nextOffset = seqnPtr;
+                    else
+                        nextOffset = reader.ReadInt32(); // (pointer to next element in the layer list)
 
-                reader.Position += 10 * 4;
-                int tileMapWidth = reader.ReadInt32();
-                int tileMapHeight = reader.ReadInt32();
-                if (nextOffset - reader.AbsPosition != (tileMapWidth * tileMapHeight * 4))
-                    reader.undertaleData.SetGMS2Version(2024, 2);
-                // Check complete, found and tested a layer.
-                break;
+                    // Actually perform the length checks
+                    reader.AbsPosition = jumpOffset;
+
+                    LayerType layerType = (LayerType)reader.ReadInt32();
+                    if (layerType != LayerType.Tiles)
+                        continue;
+
+                    reader.Position += 10 * 4;
+                    int tileMapWidth = reader.ReadInt32();
+                    int tileMapHeight = reader.ReadInt32();
+                    if (nextOffset - reader.AbsPosition != (tileMapWidth * tileMapHeight * 4))
+                    {
+                        // Check complete, found and tested a layer.
+                        reader.undertaleData.SetGMS2Version(2024, 2);
+                        reader.Position = returnTo;
+                        checkedFor2024_2 = true;
+                        return;
+                    }
+                }
             }
 
             reader.Position = returnTo;
-
             checkedFor2024_2 = true;
         }
     }

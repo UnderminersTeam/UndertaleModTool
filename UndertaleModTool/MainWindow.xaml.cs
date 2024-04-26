@@ -956,8 +956,12 @@ namespace UndertaleModTool
                     {
                         data = UndertaleIO.Read(stream, warning =>
                         {
+#if DEBUG
+                            Debug.WriteLine("[WARNING]: " + warning);
+                            Debug.WriteLine("");
+#else
                             this.ShowWarning(warning, "Loading warning");
-
+#endif
                             if (warning.Contains("unserializeCountError.txt")
                                 || warning.Contains("object pool size"))
                                 return;
@@ -973,6 +977,9 @@ namespace UndertaleModTool
                 }
                 catch (Exception e)
                 {
+#if DEBUG
+                    Debug.WriteLine(e);
+#endif
                     this.ShowError("An error occured while trying to load:\n" + e.Message, "Load error");
                 }
 
