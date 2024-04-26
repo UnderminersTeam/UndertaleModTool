@@ -1777,18 +1777,22 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 // This is a certified YoyoGames moment right here.
                 x = (int)(TilesX - 1);
                 y = (int)(TilesY - 1);
+                bool hasPadding = false;
                 uint lastTile = TileData[y][x];
 
+                // Go back 1 tile
                 x--;
                 if (x < 0)
                 {
                     x = (int)(TilesX - 1);
                     y--;
                 }
-                if (y < 0)
-                    y = 0; // most likely only 1 tile on the layer in which case the blank tiles exist
 
-                bool hasPadding = TileData[y][x] != lastTile;
+                if (y < 0)
+                    hasPadding = true; // most likely only 1 tile on the layer in which case the blank tiles exist
+                else
+                    hasPadding = TileData[y][x] != lastTile;
+
                 if (hasPadding)
                 {
                     length = reader.ReadByte();
