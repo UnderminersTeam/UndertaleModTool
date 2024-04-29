@@ -10,6 +10,8 @@ EnsureDataLoaded();
 
 bool padded = (!ScriptQuestion("Export all sprites unpadded?"));
 
+bool useSubDirectories = ScriptQuestion("Export sprites into subdirectories?")
+
 string texFolder = GetFolder(FilePath) + "Export_Sprites" + Path.DirectorySeparatorChar;
 TextureWorker worker = new TextureWorker();
 if (Directory.Exists(texFolder))
@@ -43,7 +45,9 @@ async Task DumpSprites()
 
 void DumpSprite(UndertaleSprite sprite)
 {
-    string outputFolder = Path.Combine(texFolder, sprite.Name.Content);
+    string outputFolder = texFolder;
+    if (useSubDirectoriesPath)
+        Path.Combine(outputFolder, sprite.Name.Content);
     if (sprite.Textures.Count > 0)
         Directory.CreateDirectory(outputFolder);
         
