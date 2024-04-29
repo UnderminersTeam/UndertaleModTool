@@ -34,7 +34,8 @@ public static partial class Decompiler
             get
             {
                 // Quick hack
-                if (_checkedForDefinition) return _isStructDefinition;
+                if (_checkedForDefinition) 
+                    return _isStructDefinition;
 
                 try
                 {
