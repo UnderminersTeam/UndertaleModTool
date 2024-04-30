@@ -1718,11 +1718,13 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             /// <param name="reader">Where to deserialize from.</param>
             public void ReadCompressedTileData(UndertaleReader reader)
             {
+                if (TilesX == 0 && TilesY == 0)
+                    return;
+
                 int x = 0;
                 int y = 0;
                 if (TilesY > 0)
                     TileData[y] = new uint[TilesX];
-
                 Func<bool> NextTile = () =>
                 {
                     x++;
@@ -1768,9 +1770,6 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                     if (y >= TilesY)
                         break;
                 }
-
-                if (TilesX == 0 && TilesY == 0)
-                    return;
 
                 // Due to a GMAC bug, 2 blank tiles are inserted into the layer
                 // if the last 2 tiles in the layer are different.
