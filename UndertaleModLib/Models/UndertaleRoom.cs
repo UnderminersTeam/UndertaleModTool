@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -1637,12 +1638,17 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 writer.Write(TilesY);
                 if (TileData.Length != TilesY)
                     throw new Exception("Invalid TileData row length");
-                foreach (var row in TileData)
+                if (writer.undertaleData.IsVersionAtLeast(2024, 2))
+                    WriteCompressedTileData(writer);
+                else
                 {
-                    if (row.Length != TilesX)
-                        throw new Exception("Invalid TileData column length");
-                    foreach (var tile in row)
-                        writer.Write(tile);
+                    foreach (var row in TileData)
+                    {
+                        if (row.Length != TilesX)
+                            throw new Exception("Invalid TileData column length");
+                        foreach (var tile in row)
+                            writer.Write(tile);
+                    }
                 }
             }
 
@@ -1655,12 +1661,15 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 TilesX = reader.ReadUInt32();
                 TilesY = reader.ReadUInt32();
                 TileData = new uint[TilesY][];
-                for (uint y = 0; y < TilesY; y++)
+                if (reader.undertaleData.IsVersionAtLeast(2024, 2))
+                    ReadCompressedTileData(reader);
+                else
                 {
-                    TileData[y] = new uint[TilesX];
-                    for (uint x = 0; x < TilesX; x++)
+                    for (uint y = 0; y < TilesY; y++)
                     {
-                        TileData[y][x] = reader.ReadUInt32();
+                        TileData[y] = new uint[TilesX];
+                        for (uint x = 0; x < TilesX; x++)
+                            TileData[y][x] = reader.ReadUInt32();
                     }
                 }
             }
@@ -1674,9 +1683,251 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
                 uint tilesX = reader.ReadUInt32();
                 uint tilesY = reader.ReadUInt32();
-                reader.Position += tilesX * tilesY * 4;
+                if (reader.undertaleData.IsVersionAtLeast(2024, 2))
+                {
+                    uint tileCount = tilesX * tilesY;
+                    int tiles = 0;
+                    while (tiles < tileCount)
+                    {
+                        byte opcode = reader.ReadByte();
+                        if (opcode >= 128)
+                        {
+                            // Repeat run
+                            int length = opcode - 127;
+                            reader.Position += 4;
+                            tiles += length;
+                        }
+                        else
+                        {
+                            // Verbatim run
+                            int length = opcode;
+                            reader.Position += length * 4;
+                            tiles += length;
+                        }
+                    }
+                }
+                else
+                    reader.Position += tilesX * tilesY * 4;
 
                 return count;
+            }
+
+            /// <summary>
+            /// Reads 2024.2+ compressed RLE tile data.
+            /// </summary>
+            /// <param name="reader">Where to deserialize from.</param>
+            public void ReadCompressedTileData(UndertaleReader reader)
+            {
+                if (TilesX == 0 && TilesY == 0)
+                    return;
+
+                int x = 0;
+                int y = 0;
+                if (TilesY > 0)
+                    TileData[y] = new uint[TilesX];
+                Func<bool> NextTile = () =>
+                {
+                    x++;
+                    if (x >= TilesX)
+                    {
+                        x = 0;
+                        y++;
+                        if (y >= TilesY)
+                            return true;
+                        TileData[y] = new uint[TilesX];
+                    }
+                    return false;
+                };
+
+                byte length;
+                uint tile;
+                while (true)
+                {
+                    length = reader.ReadByte();
+                    if (length >= 128)
+                    {
+                        // Repeat run
+                        int runLength = (length & 0x7f) + 1;
+                        tile = reader.ReadUInt32();
+                        for (int i = 0; i < runLength; i++)
+                        {
+                            TileData[y][x] = tile;
+                            if (NextTile())
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        // Verbatim run
+                        int runLength = length;
+                        for (int i = 0; i < runLength; i++)
+                        {
+                            TileData[y][x] = reader.ReadUInt32();
+                            if (NextTile())
+                                break;
+                        }
+                    }
+                    if (y >= TilesY)
+                        break;
+                }
+
+                // Due to a GMAC bug, 2 blank tiles are inserted into the layer
+                // if the last 2 tiles in the layer are different.
+                // This is a certified YoyoGames moment right here.
+                x = (int)(TilesX - 1);
+                y = (int)(TilesY - 1);
+                bool hasPadding = false;
+                uint lastTile = TileData[y][x];
+
+                // Go back 1 tile
+                x--;
+                if (x < 0)
+                {
+                    x = (int)(TilesX - 1);
+                    y--;
+                }
+
+                if (y < 0)
+                    hasPadding = true; // most likely only 1 tile on the layer in which case the blank tiles exist
+                else
+                    hasPadding = TileData[y][x] != lastTile;
+
+                if (hasPadding)
+                {
+                    length = reader.ReadByte();
+                    tile = reader.ReadUInt32();
+
+                    // sanity check: run of 2 empty tiles
+                    if (length != 0x81) 
+                        throw new IOException("Expected 0x81, got " + length.ToString("X2"));
+                    if (tile != unchecked((uint)-1))
+                        throw new IOException("Expected -1, got " + tile + " (0x" + tile.ToString("X8") + ")");
+                }
+            }
+
+            /// <summary>
+            /// Writes 2024.2+ compressed RLE tile data.
+            /// </summary>
+            /// <param name="writer">Where to serialize to.</param>
+            public void WriteCompressedTileData(UndertaleWriter writer)
+            {
+                List<uint> run = new();
+                run.EnsureCapacity(128);
+                bool runIsVerbatim = false;
+                Action EndRun = () =>
+                {
+                    if (run.Count == 0)
+                        return;
+
+                    if (runIsVerbatim || run.Count == 1)
+                    {
+                        if (run.Count > 127)
+                            throw new IndexOutOfRangeException("Attempted to encode verbatim tile run size " + run.Count + " larger than maximum 127");
+                        writer.Write((byte)run.Count);
+                        foreach (uint tile in run)
+                            writer.Write(tile);
+                    }
+                    else
+                    {
+                        if (run.Count > 128)
+                            throw new IndexOutOfRangeException("Attempted to encode repeat tile run size " + run.Count + " larger than maximum 128");
+                        writer.Write((byte)(run.Count + 127));
+                        writer.Write(run[0]);
+                    }
+                    run.Clear();
+                };
+
+                for (int y = 0; y < TileData.Length; y++)
+                {
+                    uint[] row = TileData[y];
+                    if (row.Length != TilesX)
+                        throw new Exception("Invalid TileData row length");
+                    for (int x = 0; x < row.Length; x++)
+                    {
+                        uint tile = row[x];
+                        if (!runIsVerbatim)
+                        {
+                            if (run.Count > 0 && tile != run[0])
+                            {
+                                if (run.Count == 1)
+                                {
+                                    runIsVerbatim = true;
+                                    run.Add(tile);
+                                    continue;
+                                }
+                                EndRun();
+                            }
+                            else if (run.Count >= 128)
+                                // Split the run
+                                EndRun();
+                            run.Add(tile);
+                        }
+                        else
+                        {
+
+                            if ((x + 1) <= TilesX || (y + 1) <= TilesY)
+                            {
+                                // Check the next tile for repeat runs
+                                int nextX = x + 1;
+                                int nextY = y;
+                                if (nextX >= TilesX)
+                                {
+                                    nextX = 0;
+                                    nextY++;
+                                }
+                                if (nextY < TilesY && TileData[nextY][nextX] == tile)
+                                {
+                                    EndRun();
+                                    runIsVerbatim = false;
+                                }
+                            }
+                            if (run.Count >= 127)
+                                // Split the run
+                                EndRun();
+                            run.Add(tile);
+                        }
+                    }
+                }
+
+                EndRun();
+
+                // Append 2 blank tiles if the last 2 tiles on the layer don't match.
+                // This is important for writing an identical file as the Gamemaker IDE
+                // does it at compile time to work around a GMAC bug.
+
+                // As far as I know empty layers are not affected
+                if (TilesX == 0 && TilesY == 0)
+                    return;
+
+                int prevX = (int)TilesX - 2;
+                int prevY = (int)TilesY - 1;
+
+                if (prevX < 0)
+                {
+                    prevY--;
+                    prevX = (int)TilesX - 1;
+                }
+                bool writeBlanks = false;
+
+                
+                if (prevY < 0)
+                    writeBlanks = true; // Single tile on layer, affected
+                else
+                {
+                    // Run of 1 with blank tile (-1) is considered as 2 matching tiles
+                    // so we shouldn't need to append blanks in that case (I think).
+                    int lastX = (int)TilesX - 1;
+                    int lastY = (int)TilesY - 1;
+                    writeBlanks = TileData[lastY][lastX] != TileData[prevY][prevX];
+                }
+
+                if (writeBlanks)
+                {
+                    runIsVerbatim = false;
+                    run.Add(0xffffffff);
+                    run.Add(0xffffffff);
+                    EndRun();
+                }
             }
 
             /// <inheritdoc/>
