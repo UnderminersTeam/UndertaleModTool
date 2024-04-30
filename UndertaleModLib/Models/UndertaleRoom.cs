@@ -1875,7 +1875,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                                     nextX = 0;
                                     nextY++;
                                 }
-                                if (TileData[nextY][nextX] == tile)
+                                if (nextY < TilesY && TileData[nextY][nextX] == tile)
                                 {
                                     EndRun();
                                     runIsVerbatim = false;
@@ -1888,10 +1888,46 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                         }
                     }
                 }
+
                 EndRun();
 
-                // TODO: insert 2 blank tiles if the last 2 tiles on the layer don't match.
-                // This is important for writing an identical file.
+                // Append 2 blank tiles if the last 2 tiles on the layer don't match.
+                // This is important for writing an identical file as the Gamemaker IDE
+                // does it at compile time to work around a GMAC bug.
+
+                // As far as I know empty layers are not affected
+                if (TilesX == 0 && TilesY == 0)
+                    return;
+
+                int prevX = (int)TilesX - 2;
+                int prevY = (int)TilesY - 1;
+
+                if (prevX < 0)
+                {
+                    prevY--;
+                    prevX = (int)TilesX - 1;
+                }
+                bool writeBlanks = false;
+
+                
+                if (prevY < 0)
+                    writeBlanks = true; // Single tile on layer, affected
+                else
+                {
+                    // Run of 1 with blank tile (-1) is considered as 2 matching tiles
+                    // so we shouldn't need to append blanks in that case (I think).
+                    int lastX = (int)TilesX - 1;
+                    int lastY = (int)TilesY - 1;
+                    writeBlanks = TileData[lastY][lastX] != TileData[prevY][prevX];
+                }
+
+                if (writeBlanks)
+                {
+                    runIsVerbatim = false;
+                    run.Add(0xffffffff);
+                    run.Add(0xffffffff);
+                    EndRun();
+                }
             }
 
             /// <inheritdoc/>
