@@ -1,6 +1,4 @@
-﻿#define WARNING_POPUP
-
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.Win32;
@@ -953,12 +951,7 @@ namespace UndertaleModTool
                     {
                         data = UndertaleIO.Read(stream, warning =>
                         {
-#if WARNING_POPUP
                             this.ShowWarning(warning, "Loading warning");
-#else
-                            Debug.WriteLine("[WARNING]: " + warning);
-                            Debug.WriteLine("");
-#endif
                             if (warning.Contains("unserializeCountError.txt")
                                 || warning.Contains("object pool size"))
                                 return;
