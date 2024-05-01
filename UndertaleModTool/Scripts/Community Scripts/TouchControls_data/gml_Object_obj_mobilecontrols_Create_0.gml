@@ -1,18 +1,5 @@
-if (font_exists(fnt_main))
-{
-    settings_font = fnt_main
-    settings_num_x = 477
-}
-else if (font_exists(fnt_mainbig))
-{
-    settings_font = fnt_mainbig
-    settings_num_x = 502
-}
-else
-{
-    settings_font = 0
-    settings_num_x = 502
-}
+settings_font = {_font}
+settings_num_x = {_settingsnumx}
 zx = 510
 zy = 340
 xx = 560

@@ -1,6 +1,7 @@
 // Made by GitMuslim
 
 using System;
+using System.Text;
 using System.IO;
 using System.Threading.Tasks;
 using System.Linq;
@@ -12,7 +13,7 @@ string displayName = Data.GeneralInfo?.DisplayName?.Content.ToLower();
 
 if (displayName != "deltarune chapter 1 & 2" && displayName != "deltarune chapter 1&2" && displayName != "undertale")
 {
-    if (!ScriptQuestion("This game isn't Undertale nor Deltarune, thus the script may not work properly. Continue anyway?"))
+    if (!ScriptQuestion("This game is neither Undertale or Deltarune, thus the script may not work properly. Continue anyway?"))
     {
         return;
     }
@@ -93,7 +94,37 @@ AddNewUndertaleSprite("spr_controls_opacity", 107, 13, new UndertaleTexturePageI
 AddNewUndertaleSprite("spr_arrow_leftright", 41, 9, new UndertaleTexturePageItem[] {pg_arrow_leftright});
 AddNewUndertaleSprite("spr_black", 640, 480, new UndertaleTexturePageItem[] {pg_black});
 
-ImportGMLFile(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Create_0.gml"), true, false, true);
+string currentFont = "";
+var fntMain = Data.Fonts.Any(o => o.Name.Content.ToLower() == "fnt_main");
+
+if (fntMain)
+{
+    currentFont = "fnt_main";
+}
+else
+{
+    var fntMainBig = Data.Fonts.Any(o => o.Name.Content.ToLower() == "fnt_mainbig");
+    if (fntMainBig)
+    {
+        currentFont = "fnt_mainbig";
+    }
+    else
+    {
+        currentFont = Data.Fonts.First().Name.Content;
+    }
+}
+
+int settingsnumx = 0;
+if(currentFont == "fnt_main") {settingsnumx = 477; }
+else if(currentFont == "fnt_mainbig") { settingsnumx = 502; }
+
+string mobileControlsCreate = File.ReadAllText(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Create_0.gml"));
+StringBuilder builder = new StringBuilder(mobileControlsCreate);
+builder.Replace("{_font}", currentFont);
+builder.Replace("{_settingsnumx}", Convert.ToString(settingsnumx));
+mobileControlsCreate = builder.ToString();
+
+ImportGMLString("gml_Object_obj_mobilecontrols_Create_0.gml", mobileControlsCreate);
 ImportGMLFile(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Draw_64.gml"), true, false, true);
 ImportGMLFile(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Other_4.gml"), true, false, true);
 Data.Scripts.Add(new UndertaleScript() { Name = Data.Strings.MakeString("scr_add_keys"), Code = Data.Code.ByName("gml_Object_obj_mobilecontrols_Other_4") });
@@ -102,16 +133,17 @@ ImportGMLFile(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Step_0.gml")
 var mobileControls = Data.GameObjects.ByName("obj_mobilecontrols");
 mobileControls.Persistent = true;
 
-var obj_time = Data.GameObjects.ByName("obj_time");
-if (obj_time is not null)
-{
-    Data.Code.ByName("gml_Object_obj_time_Create_0").AppendGML("instance_create(0, 0, obj_mobilecontrols);", Data);
-    return;
-}
 var obj_gamecontroller = Data.GameObjects.ByName("obj_gamecontroller");
 if (obj_gamecontroller is not null)
 {
     Data.Code.ByName("gml_Object_obj_gamecontroller_Create_0").AppendGML("instance_create(0, 0, obj_mobilecontrols);", Data);
+    return;
+}
+
+var obj_time = Data.GameObjects.ByName("obj_time");
+if (obj_time is not null)
+{
+    Data.Code.ByName("gml_Object_obj_time_Create_0").AppendGML("instance_create(0, 0, obj_mobilecontrols);", Data);
     return;
 }
 
