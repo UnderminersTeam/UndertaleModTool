@@ -4,8 +4,10 @@ namespace UndertaleModLib.Decompiler;
 
 public static partial class Decompiler
 {
-    // Represents an unnamed value that gets passed around the stack.
-    // Theoretically, these should be cleaned up and removed by the end of decompilation.
+    /// <summary>
+    /// Represents an unnamed value that gets passed around the stack.
+    /// Theoretically, these should be cleaned up and removed by the end of decompilation.
+    /// </summary>
     public class TempVar
     {
         public string Name;
