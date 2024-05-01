@@ -923,10 +923,10 @@ namespace UndertaleModLib
                     {
                         // Check complete, found and tested a layer.
                         reader.undertaleData.SetGMS2Version(2024, 2);
-                        reader.Position = returnTo;
-                        checkedFor2024_2 = true;
-                        return;
                     }
+                    reader.Position = returnTo;
+                    checkedFor2024_2 = true;
+                    return;
                 }
             }
 
