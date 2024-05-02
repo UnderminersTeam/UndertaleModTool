@@ -1799,7 +1799,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
                     // sanity check: run of 2 empty tiles
                     if (length != 0x81) 
-                        throw new IOException("Expected 0x81, got " + length.ToString("X2"));
+                        throw new IOException("Expected 0x81, got 0x" + length.ToString("X2"));
                     if (tile != unchecked((uint)-1))
                         throw new IOException("Expected -1, got " + tile + " (0x" + tile.ToString("X8") + ")");
                 }

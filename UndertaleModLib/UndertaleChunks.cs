@@ -916,7 +916,10 @@ namespace UndertaleModLib
                     if (layerType != LayerType.Tiles)
                         continue;
 
-                    reader.Position += 10 * 4;
+                    reader.Position += 32;
+                    int effectCount = reader.ReadInt32();
+                    reader.Position += effectCount * 12 + 4;
+
                     int tileMapWidth = reader.ReadInt32();
                     int tileMapHeight = reader.ReadInt32();
                     if (nextOffset - reader.AbsPosition != (tileMapWidth * tileMapHeight * 4))
