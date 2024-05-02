@@ -698,6 +698,7 @@ namespace UndertaleModLib
         {
             checkedFor2022_1 = false;
             checkedFor2024_2 = false;
+            checkedFor2024_4 = false;
             checkedForGMS2_2_2_302 = false;
 
             CheckForTileCompression(reader);
