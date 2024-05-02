@@ -916,17 +916,20 @@ namespace UndertaleModLib
                     if (layerType != LayerType.Tiles)
                         continue;
 
-                    reader.Position += 10 * 4;
+                    reader.Position += 32;
+                    int effectCount = reader.ReadInt32();
+                    reader.Position += effectCount * 12 + 4;
+
                     int tileMapWidth = reader.ReadInt32();
                     int tileMapHeight = reader.ReadInt32();
                     if (nextOffset - reader.AbsPosition != (tileMapWidth * tileMapHeight * 4))
                     {
                         // Check complete, found and tested a layer.
                         reader.undertaleData.SetGMS2Version(2024, 2);
-                        reader.Position = returnTo;
-                        checkedFor2024_2 = true;
-                        return;
                     }
+                    reader.Position = returnTo;
+                    checkedFor2024_2 = true;
+                    return;
                 }
             }
 
