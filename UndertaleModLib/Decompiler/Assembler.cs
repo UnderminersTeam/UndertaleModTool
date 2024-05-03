@@ -227,8 +227,19 @@ namespace UndertaleModLib.Decompiler
                         instr.Value = breakId;
                         if (breakId == -11) // pushref
                         {
-                            // parse additional int argument
-                            instr.IntArgument = Int32.Parse(line);
+                            // Parse additional int argument
+                            if (Int32.TryParse(line, out int intArgument))
+                            {
+                                instr.IntArgument = intArgument;
+                            }
+                            else
+                            {
+                                // Or alternatively parse function!
+                                var f = data.Functions.ByName(line);
+                                if (f == null)
+                                    throw new Exception("Function in pushref not found: " + line);
+                                instr.Function = new UndertaleInstruction.Reference<UndertaleFunction>(f);
+                            }
                         }
                     }
                     else
