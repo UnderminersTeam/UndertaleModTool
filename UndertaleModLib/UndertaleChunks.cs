@@ -698,6 +698,7 @@ namespace UndertaleModLib
         {
             checkedFor2022_1 = false;
             checkedFor2024_2 = false;
+            checkedFor2024_4 = false;
             checkedForGMS2_2_2_302 = false;
 
             CheckForTileCompression(reader);
@@ -864,19 +865,26 @@ namespace UndertaleModLib
         }
 
         private static bool checkedFor2024_2;
+        private static bool checkedFor2024_4;
         private void CheckForTileCompression(UndertaleReader reader)
         {
-            if (!reader.undertaleData.IsVersionAtLeast(2023, 2) || reader.undertaleData.IsVersionAtLeast(2024, 2))
+            if (!reader.undertaleData.IsVersionAtLeast(2023, 2) || reader.undertaleData.IsVersionAtLeast(2024, 4))
             {
                 checkedFor2024_2 = true;
+                checkedFor2024_4 = true;
                 return;
+            }
+            if (reader.undertaleData.IsVersionAtLeast(2024, 2))
+            {
+                checkedFor2024_2 = true;
             }
 
             // Do a length check on room layers to see if this is 2024.2 or higher
             long returnTo = reader.Position;
 
-            // Iterate over all rooms until a length check is performed
+            // Iterate over all rooms
             int roomCount = reader.ReadInt32();
+            bool foundAnyNonAlignedLayers = false;
             for (uint roomIndex = 0; roomIndex < roomCount; roomIndex++)
             {
                 // Advance to room data we're interested in (and grab pointer for next room)
@@ -895,11 +903,18 @@ namespace UndertaleModLib
                     continue;
                 }
 
+                bool checkNextLayerOffset = false;
                 for (int layerNum = 0; layerNum < layerCount; layerNum++)
                 {
-                    reader.AbsPosition = layerListPtr + (4 * layerNum) + 4;
+                    long layerPtr = layerListPtr + (4 * layerNum);
+                    if (checkNextLayerOffset && layerPtr % 4 != 0)
+                    {
+                        foundAnyNonAlignedLayers = true;
+                    }
 
-                    // Get pointer into the individual layer data (plus 8 bytes) for the first layer in the room
+                    reader.AbsPosition = layerPtr + 4;
+
+                    // Get pointer into the individual layer data (plus 8 bytes)
                     int jumpOffset = reader.ReadInt32() + 8;
 
                     // Find the offset for the end of this layer
@@ -914,7 +929,11 @@ namespace UndertaleModLib
 
                     LayerType layerType = (LayerType)reader.ReadInt32();
                     if (layerType != LayerType.Tiles)
+                    {
+                        checkNextLayerOffset = false;
                         continue;
+                    }
+                    checkNextLayerOffset = true;
 
                     reader.Position += 32;
                     int effectCount = reader.ReadInt32();
@@ -922,19 +941,25 @@ namespace UndertaleModLib
 
                     int tileMapWidth = reader.ReadInt32();
                     int tileMapHeight = reader.ReadInt32();
-                    if (nextOffset - reader.AbsPosition != (tileMapWidth * tileMapHeight * 4))
+                    if (!checkedFor2024_2 && nextOffset - reader.AbsPosition != (tileMapWidth * tileMapHeight * 4))
                     {
                         // Check complete, found and tested a layer.
                         reader.undertaleData.SetGMS2Version(2024, 2);
+                        checkedFor2024_2 = true;
                     }
-                    reader.Position = returnTo;
-                    checkedFor2024_2 = true;
-                    return;
                 }
+            }
+
+            if (!checkedFor2024_4 && reader.undertaleData.IsVersionAtLeast(2024, 2) && !foundAnyNonAlignedLayers)
+            {
+                // We found no layer that suggests we're not using 2024.4
+                // This can rarely lead to false positives, though (in which case it's just 2024.2)
+                reader.undertaleData.SetGMS2Version(2024, 4);
             }
 
             reader.Position = returnTo;
             checkedFor2024_2 = true;
+            checkedFor2024_4 = true;
         }
     }
 

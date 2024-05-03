@@ -1803,6 +1803,11 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                     if (tile != unchecked((uint)-1))
                         throw new IOException("Expected -1, got " + tile + " (0x" + tile.ToString("X8") + ")");
                 }
+
+                if (reader.undertaleData.IsVersionAtLeast(2024, 4))
+                {
+                    reader.Align(4);
+                }
             }
 
             /// <summary>
@@ -1811,122 +1816,88 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             /// <param name="writer">Where to serialize to.</param>
             public void WriteCompressedTileData(UndertaleWriter writer)
             {
-                List<uint> run = new();
-                run.EnsureCapacity(128);
-                bool runIsVerbatim = false;
-                Action EndRun = () =>
-                {
-                    if (run.Count == 0)
-                        return;
+                if (TilesX * TilesY <= 0)
+                    return;
 
-                    if (runIsVerbatim || run.Count == 1)
+                // Perform run-length encoding using process identical to GameMaker's logic.
+                // This only serializes data when outputting a repeat run, upon which the
+                // previous verbatim run is serialized first.
+                // We also iterate in 1D, which requires some division and modulo to work with
+                // the 2D array we have for representation here.
+                uint tileCount = TilesX * TilesY;
+                uint lastTile = TileData[0][0];
+                int numVerbatim = 0;
+                int verbatimStart = 0;
+                int i = 1;
+                while (i <= tileCount + 1) // note: we go out of bounds to ensure a repeat run at the end
+                {
+                    uint currTile = (i >= tileCount) ? unchecked((uint)-1) : TileData[i / TilesX][i % TilesX];
+                    i++;
+
+                    if (currTile == lastTile)
                     {
-                        if (run.Count > 127)
-                            throw new IndexOutOfRangeException("Attempted to encode verbatim tile run size " + run.Count + " larger than maximum 127");
-                        writer.Write((byte)run.Count);
-                        foreach (uint tile in run)
-                            writer.Write(tile);
+                        // We have two tiles in a row - construct a repeating run.
+                        // Figure out how far this repeat goes, first.
+                        int numRepeats = 2;
+                        while (i < tileCount)
+                        {
+                            uint nextTile = TileData[i / TilesX][i % TilesX];
+                            if (nextTile != currTile)
+                            {
+                                break;
+                            }
+
+                            numRepeats++;
+                            i++;
+                        }
+
+                        // Serialize the preceding verbatim run, splitting into 127-length chunks
+                        while (numVerbatim > 0)
+                        {
+                            int numToWrite = Math.Min(127, numVerbatim);
+                            writer.Write((byte)numToWrite);
+
+                            for (int j = 0; j < numToWrite; j++)
+                            {
+                                int tileIndex = verbatimStart + j;
+                                writer.Write(TileData[tileIndex / TilesX][tileIndex % TilesX]);
+                            }
+
+                            numVerbatim -= numToWrite;
+                            verbatimStart += numToWrite;
+                        }
+
+                        // Serialize this repeat run, splitting into 128-length chunks
+                        while (numRepeats > 0)
+                        {
+                            int numToWrite = Math.Min(128, numRepeats);
+                            writer.Write((byte)(0x80 | (numToWrite - 1)));
+                            writer.Write(lastTile);
+
+                            numRepeats -= numToWrite;
+                        }
+
+                        // Update our current tile to be the one after the run
+                        currTile = (i >= tileCount) ? 0 : TileData[i / TilesX][i % TilesX];
+
+                        // Update the start of our next verbatim run, and move on
+                        verbatimStart = i;
+                        numVerbatim = 0;
+                        i++;
                     }
                     else
                     {
-                        if (run.Count > 128)
-                            throw new IndexOutOfRangeException("Attempted to encode repeat tile run size " + run.Count + " larger than maximum 128");
-                        writer.Write((byte)(run.Count + 127));
-                        writer.Write(run[0]);
+                        // We have different tiles, so just increase the number of tiles in this verbatim run
+                        numVerbatim++;
                     }
-                    run.Clear();
-                };
 
-                for (int y = 0; y < TileData.Length; y++)
-                {
-                    uint[] row = TileData[y];
-                    if (row.Length != TilesX)
-                        throw new Exception("Invalid TileData row length");
-                    for (int x = 0; x < row.Length; x++)
-                    {
-                        uint tile = row[x];
-                        if (!runIsVerbatim)
-                        {
-                            if (run.Count > 0 && tile != run[0])
-                            {
-                                if (run.Count == 1)
-                                {
-                                    runIsVerbatim = true;
-                                    run.Add(tile);
-                                    continue;
-                                }
-                                EndRun();
-                            }
-                            else if (run.Count >= 128)
-                                // Split the run
-                                EndRun();
-                            run.Add(tile);
-                        }
-                        else
-                        {
-
-                            if ((x + 1) <= TilesX || (y + 1) <= TilesY)
-                            {
-                                // Check the next tile for repeat runs
-                                int nextX = x + 1;
-                                int nextY = y;
-                                if (nextX >= TilesX)
-                                {
-                                    nextX = 0;
-                                    nextY++;
-                                }
-                                if (nextY < TilesY && TileData[nextY][nextX] == tile)
-                                {
-                                    EndRun();
-                                    runIsVerbatim = false;
-                                }
-                            }
-                            if (run.Count >= 127)
-                                // Split the run
-                                EndRun();
-                            run.Add(tile);
-                        }
-                    }
+                    // Update lastTile for the next iteration
+                    lastTile = currTile;
                 }
 
-                EndRun();
-
-                // Append 2 blank tiles if the last 2 tiles on the layer don't match.
-                // This is important for writing an identical file as the Gamemaker IDE
-                // does it at compile time to work around a GMAC bug.
-
-                // As far as I know empty layers are not affected
-                if (TilesX == 0 && TilesY == 0)
-                    return;
-
-                int prevX = (int)TilesX - 2;
-                int prevY = (int)TilesY - 1;
-
-                if (prevX < 0)
+                if (writer.undertaleData.IsVersionAtLeast(2024, 4))
                 {
-                    prevY--;
-                    prevX = (int)TilesX - 1;
-                }
-                bool writeBlanks = false;
-
-                
-                if (prevY < 0)
-                    writeBlanks = true; // Single tile on layer, affected
-                else
-                {
-                    // Run of 1 with blank tile (-1) is considered as 2 matching tiles
-                    // so we shouldn't need to append blanks in that case (I think).
-                    int lastX = (int)TilesX - 1;
-                    int lastY = (int)TilesY - 1;
-                    writeBlanks = TileData[lastY][lastX] != TileData[prevY][prevX];
-                }
-
-                if (writeBlanks)
-                {
-                    runIsVerbatim = false;
-                    run.Add(0xffffffff);
-                    run.Add(0xffffffff);
-                    EndRun();
+                    writer.Align(4);
                 }
             }
 
