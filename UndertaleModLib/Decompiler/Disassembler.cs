@@ -11,7 +11,7 @@ namespace UndertaleModLib.Decompiler
     {
         private static void AppendLocalVarDefinitionsToStringBuilder(StringBuilder sb, UndertaleCode code, IList<UndertaleVariable> vars, UndertaleCodeLocals locals)
         {
-            if (code.WeirdLocalFlag)
+            if (code.WeirdLocalFlag && locals is null)
             {
                 return;
             }
