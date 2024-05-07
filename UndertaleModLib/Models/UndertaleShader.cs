@@ -336,7 +336,7 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
             else
                 next = EntryEnd;
             int length = (int)(next - reader.AbsPosition);
-            HLSL11_VertexData.ReadData(reader, length, HLSL11_VertexData.IsNull);
+            HLSL11_VertexData.ReadData(reader, length, HLSL11_PixelData.IsNull);
         }
         if (!HLSL11_PixelData.IsNull)
         {
@@ -349,7 +349,7 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
             else
                 next = EntryEnd;
             int length = (int)(next - reader.AbsPosition);
-            HLSL11_PixelData.ReadData(reader, length, HLSL11_PixelData.IsNull);
+            HLSL11_PixelData.ReadData(reader, length, PSSL_VertexData.IsNull);
         }
 
         if (!PSSL_VertexData.IsNull)
