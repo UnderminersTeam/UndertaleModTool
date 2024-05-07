@@ -2017,6 +2017,32 @@ namespace UndertaleModLib.Decompiler
                 builtin_vars.Add("sound1", AssetIDType.Sound);
                 builtin_vars.Add("sound2", AssetIDType.Sound);
             }
+
+            // In 2.3.7+, booleans don't need to be typed.
+            // Turn any boolean types (other than overrides) into AssetIDType.Other
+            // so integers don't turn into booleans when they shouldn't
+            if (data.IsVersionAtLeast(2, 3, 7))
+            {
+                foreach (KeyValuePair<string, AssetIDType> kvp in builtin_vars)
+                {
+                    if (kvp.Value == AssetIDType.Boolean)
+                        builtin_vars.Remove(kvp.Key);
+                }
+                foreach (KeyValuePair<string, AssetIDType> kvp in return_types)
+                {
+                    if (kvp.Value == AssetIDType.Boolean)
+                        builtin_vars.Remove(kvp.Key);
+                }
+                foreach (KeyValuePair<string, AssetIDType[]> kvp in builtin_funcs)
+                {
+                    AssetIDType[] arr = kvp.Value;
+                    for (int i = 0; i < arr.Length; i++)
+                    {
+                        if (arr[i] == AssetIDType.Boolean)
+                            arr[i] = AssetIDType.Other;
+                    }
+                }
+            }
         }
     }
 }
