@@ -172,7 +172,7 @@ public static partial class Decompiler
             }
 
             AssetIDType[] args = new AssetIDType[Arguments.Count];
-            AssetTypeResolver.AnnotateTypesForFunctionCall(funcName, args, context, this);
+            AssetTypeResolver.AnnotateTypesForFunctionCall(funcName, args, context, this, suggestedType);
             for (var i = 0; i < Arguments.Count; i++)
                 Arguments[i].DoTypePropagation(context, args[i]);
 

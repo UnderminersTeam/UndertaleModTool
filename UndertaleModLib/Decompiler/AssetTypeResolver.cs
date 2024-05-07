@@ -364,10 +364,10 @@ namespace UndertaleModLib.Decompiler
 
         internal static bool AnnotateTypesForFunctionCall(string function_name, AssetIDType[] arguments, DecompileContext context)
         {
-            return AnnotateTypesForFunctionCall(function_name, arguments, context, null);
+            return AnnotateTypesForFunctionCall(function_name, arguments, context, null, AssetIDType.Other);
         }
 
-        internal static bool AnnotateTypesForFunctionCall(string function_name, AssetIDType[] arguments, DecompileContext context, Decompiler.FunctionCall function)
+        internal static bool AnnotateTypesForFunctionCall(string function_name, AssetIDType[] arguments, DecompileContext context, Decompiler.FunctionCall function, AssetIDType suggestedType)
         {
             Dictionary<string, AssetIDType[]> scriptArgs = context.GlobalContext.ScriptArgsCache;
 
@@ -466,6 +466,15 @@ namespace UndertaleModLib.Decompiler
                         arguments[1 + i] = scriptArgs[function_name][i];
                 }
                 return true;
+            }
+            else if (function_name == "choose")
+            {
+                // Another special case, but it probably shouldn't be
+                for (int i = 0; i < arguments.Length; i++)
+                {
+                    if (arguments[i] == AssetIDType.Other)
+                        arguments[i] = suggestedType;
+                }
             }
             return overloaded;
         }
