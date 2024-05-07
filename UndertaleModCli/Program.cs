@@ -17,6 +17,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Models;
+using Newtonsoft.Json;
 
 namespace UndertaleModCli;
 
@@ -193,6 +194,7 @@ public partial class Program : IScriptInterface
                 "System.Text.RegularExpressions")
             .AddReferences(typeof(UndertaleObject).GetTypeInfo().Assembly,
                 GetType().GetTypeInfo().Assembly,
+                typeof(JsonConvert).GetTypeInfo().Assembly,
                 typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly,
                 typeof(TextureWorker).GetTypeInfo().Assembly)
             // "WithEmitDebugInformation(true)" not only lets us to see a script line number which threw an exception,

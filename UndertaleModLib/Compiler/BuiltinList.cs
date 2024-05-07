@@ -2802,8 +2802,6 @@ namespace UndertaleModLib.Compiler
             Constants["all"] = -3.0;
             Constants["noone"] = -4.0;
             Constants["global"] = -5.0;
-            Constants["true"] = 1.0;
-            Constants["false"] = 0.0;
             Constants["pi"] = 3.1415926535897931;
             Constants["pr_pointlist"] = 1.0;
             Constants["pr_linelist"] = 2.0;
