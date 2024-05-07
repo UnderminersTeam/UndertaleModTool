@@ -706,6 +706,11 @@ namespace UndertaleModLib.Decompiler
                                     // Note that this operator peeks from the stack, it does not pop directly.
                                     break;
                                 case -11: // GM 2023.8+, pushref
+                                    if (instr.Function != null)
+                                    {
+                                        stack.Push(new ExpressionConstant(UndertaleInstruction.DataType.Int32, instr.Function));
+                                        break;
+                                    }
                                     stack.Push(new ExpressionAssetRef(instr.IntArgument));
                                     break;
                             }

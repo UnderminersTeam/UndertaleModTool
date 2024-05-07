@@ -9,30 +9,36 @@ namespace UndertaleModLib.Decompiler
 {
     public static class Disassembler
     {
-        public static string GenerateLocalVarDefinitions(this UndertaleCode code, IList<UndertaleVariable> vars, UndertaleCodeLocals locals)
+        private static void AppendLocalVarDefinitionsToStringBuilder(StringBuilder sb, UndertaleCode code, IList<UndertaleVariable> vars, UndertaleCodeLocals locals)
         {
-            if (code.WeirdLocalFlag)
-                return "";
-            if (locals == null)
-                return "; Missing code locals- possibly due to unsupported bytecode version or brand new code entry.\n";
-
-            StringBuilder sb = new StringBuilder();
-
-            var referenced = code.FindReferencedLocalVars();
-            if (locals.Name != code.Name)
-                throw new Exception("Name of the locals block does not match name of the code block");
-            foreach (var arg in locals.Locals)
+            if (code.WeirdLocalFlag && locals is null)
             {
-                sb.Append(".localvar " + arg.Index + " " + arg.Name.Content);
-                var refvar = referenced.Where((x) => x.Name == arg.Name && x.VarID == arg.Index).FirstOrDefault();
-                if (refvar != null)
-                {
-                    sb.Append(" " + vars.IndexOf(refvar));
-                }
-                sb.Append('\n');
+                return;
             }
 
-            return sb.ToString();
+            if (locals is null)
+            {
+                sb.AppendLine("; Missing code locals, possibly due to unsupported bytecode version or brand new code entry.");
+                return;
+            }
+            
+            var referenced = code.FindReferencedLocalVars();
+            if (locals.Name != code.Name)
+                throw new Exception("Name of the locals block does not match name of the code block!");
+            foreach (var arg in locals.Locals)
+            {
+                sb.Append(".localvar ");
+                sb.Append(arg.Index);
+                sb.Append(' ');
+                sb.Append(arg.Name.Content);
+                var refVar = referenced.FirstOrDefault(x => x.Name == arg.Name && x.VarID == arg.Index);
+                if (refVar is not null)
+                {
+                    sb.Append(' ');
+                    sb.Append(vars.IndexOf(refVar));
+                }
+                sb.AppendLine();
+            }
         }
         
         public static string Disassemble(this UndertaleCode code, IList<UndertaleVariable> vars, UndertaleCodeLocals locals)
@@ -41,15 +47,15 @@ namespace UndertaleModLib.Decompiler
             // Experimentation has shown that 200 is a good enough starting value for it. 
             // 300 seemed too high and 100 too low. This may change in the future.
             StringBuilder sb = new StringBuilder(200);
-            if (locals == null && !code.WeirdLocalFlag)
-                sb.Append("; WARNING: Missing code locals, possibly due to unsupported bytecode version or a brand new code entry.\n");
+            if (locals is null && !code.WeirdLocalFlag)
+                sb.AppendLine("; WARNING: Missing code locals, possibly due to unsupported bytecode version or a brand new code entry.");
             else
-                sb.Append(code.GenerateLocalVarDefinitions(vars, locals));
+                AppendLocalVarDefinitionsToStringBuilder(sb, code, vars, locals);
 
             Dictionary<uint, string> fragments = new(code.ChildEntries.Count);
             foreach (var dup in code.ChildEntries)
             {
-                fragments.Add(dup.Offset / 4, (dup.Name?.Content ?? "<null>") + $" (locals={dup.LocalsCount}, argc={dup.ArgumentsCount})");
+                fragments.Add(dup.Offset / 4, $"{(dup.Name?.Content ?? "<null>")} (locals={dup.LocalsCount}, argc={dup.ArgumentsCount})");
             }
 
             List<uint> blocks = FindBlockAddresses(code);
@@ -73,7 +79,7 @@ namespace UndertaleModLib.Decompiler
                 }
 
                 inst.ToString(sb, code, blocks);
-                sb.Append(Environment.NewLine);
+                sb.AppendLine();
             }
 
             sb.AppendLine();

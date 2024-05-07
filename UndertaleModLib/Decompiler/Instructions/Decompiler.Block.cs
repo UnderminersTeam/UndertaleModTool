@@ -5,7 +5,9 @@ namespace UndertaleModLib.Decompiler;
 
 public static partial class Decompiler
 {
-    // Represents a block node of instructions from GML bytecode (for control flow).
+    /// <summary>
+    /// Represents a block node of instructions from GML bytecode (for control flow). 
+    /// </summary>
     public class Block
     {
         public uint? Address;

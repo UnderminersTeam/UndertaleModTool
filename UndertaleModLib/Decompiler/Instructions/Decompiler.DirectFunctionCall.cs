@@ -86,13 +86,21 @@ public static partial class Decompiler
             }
             else
             {
-                foreach (Expression exp in Arguments)
+                if (Arguments.Count == 1 && Arguments[0] is ExpressionTwo expTwo)
                 {
                     context.currentFunction = this;
-                    if (argumentString.Length > 0)
-                        argumentString.Append(", ");
-                    argumentString.Append(exp.ToString(context));
+                    argumentString.Append(expTwo.ToStringNoParens(context));
+                }
+                else
+                {
+                    foreach (Expression exp in Arguments)
+                    {
+                        context.currentFunction = this;
+                        if (argumentString.Length > 0)
+                            argumentString.Append(", ");
+                        argumentString.Append(exp.ToString(context));
 
+                    }
                 }
                 context.currentFunction = null;
 

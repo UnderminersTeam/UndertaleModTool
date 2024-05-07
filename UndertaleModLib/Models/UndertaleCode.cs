@@ -363,10 +363,18 @@ public class UndertaleInstruction : UndertaleObject
     public Reference<T> GetReference<T>(bool allowResolve = false) where T : class, UndertaleObject, ReferencedObject
     {
         Reference<T> res = (Destination as Reference<T>) ?? (Function as Reference<T>) ?? (Value as Reference<T>);
-        if (allowResolve && res == null && Value is int val)
+        if (allowResolve && res == null)
         {
-            Value = new Reference<T>(val);
-            return (Reference<T>)Value;
+            if (Kind == Opcode.Break && Value is short breakType && breakType == -11 /* pushref */)
+            {
+                Function = new Reference<UndertaleFunction>(IntArgument);
+                return Function as Reference<T>;
+            }
+            if (Value is int val)
+            {
+                Value = new Reference<T>(val);
+                return (Reference<T>)Value;
+            }
         }
         return res;
     }
@@ -563,7 +571,13 @@ public class UndertaleInstruction : UndertaleObject
                 writer.Write((short)Value);
                 writer.Write((byte)Type1);
                 writer.Write((byte)Kind);
-                if (Type1 == DataType.Int32) writer.Write(IntArgument);
+                if (Type1 == DataType.Int32)
+                {
+                    if (Function != null)
+                        writer.WriteUndertaleObject(Function);
+                    else
+                        writer.Write(IntArgument);
+                }
             }
                 break;
 
@@ -1008,7 +1022,10 @@ public class UndertaleInstruction : UndertaleObject
                 if (Type1 == DataType.Int32)
                 {
                     sbh.Append(stringBuilder, ' ');
-                    sbh.Append(stringBuilder, IntArgument);
+                    if (Function != null)
+                        sbh.Append(stringBuilder, Function);
+                    else
+                        sbh.Append(stringBuilder, IntArgument);
                 }
                 break;
         }
