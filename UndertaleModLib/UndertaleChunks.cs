@@ -682,6 +682,9 @@ namespace UndertaleModLib
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
+            if (!checkedFor2024_2)
+                CheckForTileCompression(reader);
+
             if (!checkedFor2022_1)
                 CheckForEffectData(reader);
 
@@ -694,8 +697,11 @@ namespace UndertaleModLib
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
             checkedFor2022_1 = false;
+            checkedFor2024_2 = false;
+            checkedFor2024_4 = false;
             checkedForGMS2_2_2_302 = false;
 
+            CheckForTileCompression(reader);
             CheckForEffectData(reader);
             CheckForImageSpeed(reader);
 
@@ -856,6 +862,104 @@ namespace UndertaleModLib
             reader.Position = returnTo;
 
             checkedForGMS2_2_2_302 = true;
+        }
+
+        private static bool checkedFor2024_2;
+        private static bool checkedFor2024_4;
+        private void CheckForTileCompression(UndertaleReader reader)
+        {
+            if (!reader.undertaleData.IsVersionAtLeast(2023, 2) || reader.undertaleData.IsVersionAtLeast(2024, 4))
+            {
+                checkedFor2024_2 = true;
+                checkedFor2024_4 = true;
+                return;
+            }
+            if (reader.undertaleData.IsVersionAtLeast(2024, 2))
+            {
+                checkedFor2024_2 = true;
+            }
+
+            // Do a length check on room layers to see if this is 2024.2 or higher
+            long returnTo = reader.Position;
+
+            // Iterate over all rooms
+            int roomCount = reader.ReadInt32();
+            bool foundAnyNonAlignedLayers = false;
+            for (uint roomIndex = 0; roomIndex < roomCount; roomIndex++)
+            {
+                // Advance to room data we're interested in (and grab pointer for next room)
+                reader.Position = returnTo + 4 + (4 * roomIndex);
+                uint roomPtr = (uint)reader.ReadInt32();
+                reader.AbsPosition = roomPtr + (22 * 4);
+
+                // Get the pointer for this room's layer list, as well as pointer to sequence list
+                uint layerListPtr = (uint)reader.ReadInt32();
+                int seqnPtr = reader.ReadInt32();
+                reader.AbsPosition = layerListPtr;
+                int layerCount = reader.ReadInt32();
+                if (layerCount <= 0)
+                {
+                    // No layers, try the next room
+                    continue;
+                }
+
+                bool checkNextLayerOffset = false;
+                for (int layerNum = 0; layerNum < layerCount; layerNum++)
+                {
+                    long layerPtr = layerListPtr + (4 * layerNum);
+                    if (checkNextLayerOffset && layerPtr % 4 != 0)
+                    {
+                        foundAnyNonAlignedLayers = true;
+                    }
+
+                    reader.AbsPosition = layerPtr + 4;
+
+                    // Get pointer into the individual layer data (plus 8 bytes)
+                    int jumpOffset = reader.ReadInt32() + 8;
+
+                    // Find the offset for the end of this layer
+                    int nextOffset;
+                    if (layerNum == layerCount - 1)
+                        nextOffset = seqnPtr;
+                    else
+                        nextOffset = reader.ReadInt32(); // (pointer to next element in the layer list)
+
+                    // Actually perform the length checks
+                    reader.AbsPosition = jumpOffset;
+
+                    LayerType layerType = (LayerType)reader.ReadInt32();
+                    if (layerType != LayerType.Tiles)
+                    {
+                        checkNextLayerOffset = false;
+                        continue;
+                    }
+                    checkNextLayerOffset = true;
+
+                    reader.Position += 32;
+                    int effectCount = reader.ReadInt32();
+                    reader.Position += effectCount * 12 + 4;
+
+                    int tileMapWidth = reader.ReadInt32();
+                    int tileMapHeight = reader.ReadInt32();
+                    if (!checkedFor2024_2 && nextOffset - reader.AbsPosition != (tileMapWidth * tileMapHeight * 4))
+                    {
+                        // Check complete, found and tested a layer.
+                        reader.undertaleData.SetGMS2Version(2024, 2);
+                        checkedFor2024_2 = true;
+                    }
+                }
+            }
+
+            if (!checkedFor2024_4 && reader.undertaleData.IsVersionAtLeast(2024, 2) && !foundAnyNonAlignedLayers)
+            {
+                // We found no layer that suggests we're not using 2024.4
+                // This can rarely lead to false positives, though (in which case it's just 2024.2)
+                reader.undertaleData.SetGMS2Version(2024, 4);
+            }
+
+            reader.Position = returnTo;
+            checkedFor2024_2 = true;
+            checkedFor2024_4 = true;
         }
     }
 

@@ -715,7 +715,7 @@ namespace UndertaleModTool
                                     {
                                         Match match = matches[i];
                                         if (!currDict.TryGetValue(match.Groups[1].Value, out string text))
-                                            continue;
+                                            text = "<localization fetch error>";
 
                                         if (i != matches.Length - 1) // If not the last
                                             decompLinesBuilder.Append($"{text}; ");

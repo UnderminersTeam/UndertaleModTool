@@ -336,7 +336,7 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
             else
                 next = EntryEnd;
             int length = (int)(next - reader.AbsPosition);
-            HLSL11_VertexData.ReadData(reader, length);
+            HLSL11_VertexData.ReadData(reader, length, HLSL11_PixelData.IsNull);
         }
         if (!HLSL11_PixelData.IsNull)
         {
@@ -349,7 +349,7 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
             else
                 next = EntryEnd;
             int length = (int)(next - reader.AbsPosition);
-            HLSL11_PixelData.ReadData(reader, length);
+            HLSL11_PixelData.ReadData(reader, length, PSSL_VertexData.IsNull);
         }
 
         if (!PSSL_VertexData.IsNull)
@@ -363,7 +363,7 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
             else
                 next = EntryEnd;
             int length = (int)(next - reader.AbsPosition);
-            PSSL_VertexData.ReadData(reader, length);
+            PSSL_VertexData.ReadData(reader, length, PSSL_PixelData.IsNull);
         }
         if (!PSSL_PixelData.IsNull)
         {
@@ -376,7 +376,7 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
             else
                 next = EntryEnd;
             int length = (int)(next - reader.AbsPosition);
-            PSSL_PixelData.ReadData(reader, length);
+            PSSL_PixelData.ReadData(reader, length, Cg_PSVita_VertexData.IsNull);
         }
 
         if (!Cg_PSVita_VertexData.IsNull)
@@ -390,7 +390,7 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
             else
                 next = EntryEnd;
             int length = (int)(next - reader.AbsPosition);
-            Cg_PSVita_VertexData.ReadData(reader, length);
+            Cg_PSVita_VertexData.ReadData(reader, length, Cg_PSVita_PixelData.IsNull);
         }
         if (!Cg_PSVita_PixelData.IsNull)
         {
@@ -403,7 +403,7 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
             else
                 next = EntryEnd;
             int length = (int)(next - reader.AbsPosition);
-            Cg_PSVita_PixelData.ReadData(reader, length);
+            Cg_PSVita_PixelData.ReadData(reader, length, Cg_PS3_VertexData.IsNull);
         }
 
         if (Version >= 2)
@@ -419,7 +419,7 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
                 else
                     next = EntryEnd;
                 int length = (int)(next - reader.AbsPosition);
-                Cg_PS3_VertexData.ReadData(reader, length);
+                Cg_PS3_VertexData.ReadData(reader, length, Cg_PS3_PixelData.IsNull);
             }
             if (!Cg_PS3_PixelData.IsNull)
             {
@@ -428,7 +428,7 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
                 // Calculate length of data
                 uint next = EntryEnd; // final possible data, nothing else to check for
                 int length = (int)(next - reader.AbsPosition);
-                Cg_PS3_PixelData.ReadData(reader, length);
+                Cg_PS3_PixelData.ReadData(reader, length, true);
             }
         }
     }
@@ -528,10 +528,25 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
             writer.Write(Data);
         }
 
-        public void ReadData(UndertaleReader reader, int length)
+        public void ReadData(UndertaleReader reader, int length, bool isLast = false)
         {
-            if (_Length != 0 && _Length != length)
-                throw new UndertaleSerializationException("Failed to compute length of shader data");
+            if (_Length != 0) // _Length is the "expected" length here
+            {
+                if (_Length > length)
+                    throw new UndertaleSerializationException("Failed to compute length of shader data: instructed to read less data than expected.");
+                else if (_Length < length)
+                {
+                    if (isLast && ((reader.AbsPosition + length) % 16 == 0)) // Normal for the last element due to chunk padding, just trust the system
+                    {
+                        length = (int)_Length;
+                    }
+                    else
+                    {
+                        throw new UndertaleSerializationException("Failed to compute length of shader data: instructed to read more data than expected." +
+                            (isLast ? " Shader data was the last in the shader, but given length was incorrectly padded." : ""));
+                    }
+                }
+            }
 
             _Length = (uint)length;
             Data = reader.ReadBytes(length);

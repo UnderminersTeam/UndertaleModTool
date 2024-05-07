@@ -14,10 +14,11 @@ EnsureDataLoaded();
 
 bool importAsSprite = false;
 
+// TODO: see if this can be reimplemented using substring instead of regex?
 // "(.+?)" - match everything; "?" = match as few characters as possible.
-// "(?:_(-*\d+))*" - an underscore + (optional minus + several digits);
-// "?:" = don't make a separate group for the whole part, "*" = make this part optional.
-Regex sprFrameRegex = new(@"^(.+?)(?:_(-*\d+))*$", RegexOptions.Compiled);
+// "(?:_(\d+))" - an underscore followed by digits;
+// "?:" = don't make a separate group for the whole part
+Regex sprFrameRegex = new(@"^(.+?)(?:_(\d+))$", RegexOptions.Compiled);
 string importFolder = CheckValidity();
 
 string packDir = Path.Combine(ExePath, "Packager");

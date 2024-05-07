@@ -27,6 +27,15 @@ public static partial class Decompiler
             return true;
         }
 
+        internal override void CastToBoolean(DecompileContext context)
+        {
+            if (Type == UndertaleInstruction.DataType.Int16 && Value is (short)0 or (short)1)
+            {
+                Type = UndertaleInstruction.DataType.Boolean;
+                Value = Convert.ToBoolean(Value);
+            }
+        }
+
         public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
         {
             Value = (Value as Statement)?.CleanStatement(context, block) ?? Value;
@@ -41,7 +50,7 @@ public static partial class Decompiler
         // Helper function to carefully check if an object is in fact an integer, for asset types.
         public static int? ConvertToInt(object val)
         {
-            if (val is int || val is short || val is ushort || val is UndertaleInstruction.InstanceType)
+            if (val is int || val is short || val is ushort || val is bool || val is UndertaleInstruction.InstanceType)
             {
                 return Convert.ToInt32(val);
             }
@@ -83,6 +92,9 @@ public static partial class Decompiler
 
             if (Value is double d) // More accurate, larger range, double to string.
                 return DoubleToString.StringOf(d);
+            
+            if (Value is bool b)
+                return b ? "true" : "false";
 
             if (Value is Statement statement)
                 return statement.ToString(context);
