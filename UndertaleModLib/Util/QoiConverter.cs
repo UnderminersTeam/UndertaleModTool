@@ -70,8 +70,11 @@ namespace UndertaleModLib.Util
         /// <exception cref="Exception">If there is an invalid QOIF magic header or there was an error with stride width.</exception>
         public static Bitmap GetImageFromSpan(ReadOnlySpan<byte> bytes) => GetImageFromSpan(bytes, out _);
 
-        /// <inheritdoc cref="GetImageFromSpan(System.ReadOnlySpan{byte})"/>
+        /// <summary><inheritdoc cref="GetImageFromSpan(System.ReadOnlySpan{byte})"/></summary>
+        /// <param name="bytes"><inheritdoc cref="GetImageFromSpan(System.ReadOnlySpan{byte})"/></param>
         /// <param name="length">The total amount of data read from the <see cref="Span{TKey}"/>.</param>
+        /// <returns><inheritdoc cref="GetImageFromSpan(System.ReadOnlySpan{byte})"/></returns>
+        /// <exception cref="Exception"><inheritdoc cref="GetImageFromSpan(System.ReadOnlySpan{byte})"/></exception>
         public unsafe static Bitmap GetImageFromSpan(ReadOnlySpan<byte> bytes, out int length)
         {
             ReadOnlySpan<byte> header = bytes[..12];

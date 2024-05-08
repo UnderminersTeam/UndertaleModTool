@@ -5,10 +5,17 @@ namespace UndertaleModLib.Decompiler;
 
 public static partial class Decompiler
 {
-    // Represents all expressions.
+    /// <summary>
+    /// Represents all expressions.
+    /// </summary>
     public abstract class Expression : Statement
     {
+        /// <summary>
+        /// What type this expression evaluates to.
+        /// </summary>
         public UndertaleInstruction.DataType Type;
+        
+        
         public bool WasDuplicated = false;
 
         // Helper function to convert opcode operations to "printable" strings.
@@ -51,6 +58,13 @@ public static partial class Decompiler
         internal virtual bool IsDuplicationSafe()
         {
             return false;
+        }
+
+
+        // Casts this expression to a GMS2.3.7+ boolean.
+        internal virtual void CastToBoolean(DecompileContext context)
+        {
+            Type = UndertaleInstruction.DataType.Boolean;
         }
 
         public Expression CleanExpression(DecompileContext context, BlockHLStatement block)
