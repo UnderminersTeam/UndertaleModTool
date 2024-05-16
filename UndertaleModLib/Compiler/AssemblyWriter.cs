@@ -1651,7 +1651,7 @@ namespace UndertaleModLib.Compiler
                         {
                             cw.typeStack.Pop();
                             cw.Emit(Opcode.Conv, type, DataType.Int32);
-                            cw.typeStack.Push(DataType.Double);
+                            cw.typeStack.Push(DataType.Int32);
                         }
                         break;
                     case Lexer.Token.TokenKind.LogicalAnd:
