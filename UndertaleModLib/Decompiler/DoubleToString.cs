@@ -36,17 +36,17 @@ namespace UndertaleModLib.Decompiler
             if (PredefinedValues.TryGetValue(number, out string res))
                 return res;
 
-            ReadOnlySpan<char> numberAsSpan = number.ToString("G16", CultureInfo.InvariantCulture).AsSpan();      // This can sometimes return a scientific notation
+            ReadOnlySpan<char> numberAsSpan = number.ToString("G", CultureInfo.InvariantCulture).AsSpan();      // This can sometimes return a scientific notation
             int indexOfE = numberAsSpan.IndexOf("E".AsSpan());
             if (indexOfE < 0)
                 return numberAsSpan.ToString();
 
             // This converts the scientific notation to standard form/fixed point notation
-            // As of time of writing this comment, C# does not offer a way to print fixed point notation while preserving precision.
-            // You may ask "But why not use F17?". And the answer is, that for everything but R and G, the precision is hard-capped to 15 (according to MSDN: Double.ToString()).
-            // You may also ask "And G17? What merits the drop to G16?".
-            // This is because G17 is long enough to show IEEE 754 errors, which almost always make code less readable and don't affect recompilation.
-            // Thus we use G16, and then manually convert this to fixed point notation.
+            // As of time of writing this comment, C# does not offer a way to print fixed point notation while
+            // preserving full precision, but only having the smallest amount of numbers to represent the digit.
+            // You may ask "But why not use F or F17?". And the answer is, that for everything but R and G, the precision is hard-capped to 15 (according to MSDN: Double.ToString()).
+            // Thus we use G, and then manually convert this to fixed point notation.
+            
             // For anyone unaware of the general algorithm: you get the exponent 'n', then move the decimal point n times to the right if it's positive / left if it's negative.
             ReadOnlySpan<char> exponentAsSpan = numberAsSpan.Slice(indexOfE + 1);
             int exponent = Int32.Parse(exponentAsSpan);
