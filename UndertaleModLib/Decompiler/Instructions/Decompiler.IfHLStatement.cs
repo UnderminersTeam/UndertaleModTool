@@ -53,9 +53,9 @@ public static partial class Decompiler
                 if (trueAssign != null && falseAssign != null && trueAssign.Var.Var == falseAssign.Var.Var)
                 {
                     TempVarAssignmentStatement newAssign;
-                    if (TestNumber(trueAssign.Value, 1) && (falseAssign.Var.Var.Type == UndertaleInstruction.DataType.Boolean || falseAssign.Value.Type == UndertaleInstruction.DataType.Boolean))
+                    if (TestBoolLike(trueAssign.Value, true) && (falseAssign.Var.Var.Type == UndertaleInstruction.DataType.Boolean || falseAssign.Value.Type == UndertaleInstruction.DataType.Boolean))
                         newAssign = new TempVarAssignmentStatement(trueAssign.Var, new ExpressionTwoSymbol("||", UndertaleInstruction.DataType.Boolean, condition, falseAssign.Value));
-                    else if (TestNumber(falseAssign.Value, 0) && (trueAssign.Var.Var.Type == UndertaleInstruction.DataType.Boolean || trueAssign.Value.Type == UndertaleInstruction.DataType.Boolean))
+                    else if (TestBoolLike(falseAssign.Value, false) && (trueAssign.Var.Var.Type == UndertaleInstruction.DataType.Boolean || trueAssign.Value.Type == UndertaleInstruction.DataType.Boolean))
                         newAssign = new TempVarAssignmentStatement(trueAssign.Var, new ExpressionTwoSymbol("&&", UndertaleInstruction.DataType.Boolean, condition, trueAssign.Value));
                     else
                         newAssign = new TempVarAssignmentStatement(trueAssign.Var, new ExpressionTernary(trueAssign.Value.Type, condition, trueAssign.Value, falseAssign.Value));
