@@ -35,7 +35,7 @@ public static partial class Decompiler
         public override string ToString(DecompileContext context)
         {
             string condStr = Condition.ToString(context);
-            if (TestNumber(TrueExpression, 1) && TestNumber(FalseExpression, 0))
+            if (TestBoolLike(TrueExpression, true) && TestBoolLike(FalseExpression, false))
                 return condStr; // Default values, yes = true, no = false.
 
             return "(" + condStr + " ? " + TrueExpression.ToString(context) + " : " + FalseExpression.ToString(context) + ")";

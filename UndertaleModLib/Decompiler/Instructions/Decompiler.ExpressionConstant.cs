@@ -47,6 +47,13 @@ public static partial class Decompiler
             return (Value is Int16 || Value is Int32) && Convert.ToInt32(Value) == TestNumber;
         }
 
+        public bool EqualsBoolLike(bool TestBool)
+        {
+            if (Value is Int16 || Value is Int32)
+                return Convert.ToInt32(Value) == Convert.ToInt32(TestBool);
+            return (Value is bool boolValue) && boolValue == TestBool;
+        }
+
         // Helper function to carefully check if an object is in fact an integer, for asset types.
         public static int? ConvertToInt(object val)
         {
