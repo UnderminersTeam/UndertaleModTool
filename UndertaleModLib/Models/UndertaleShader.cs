@@ -226,17 +226,30 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
 
         writer.WriteUndertaleObject(VertexShaderAttributes);
 
-        writer.Write(Version);
-
-        PSSL_VertexData.Serialize(writer);
-        PSSL_PixelData.Serialize(writer);
-        Cg_PSVita_VertexData.Serialize(writer);
-        Cg_PSVita_PixelData.Serialize(writer);
-
-        if (Version >= 2)
+        if (writer.undertaleData.GeneralInfo.BytecodeVersion > 13)
         {
-            Cg_PS3_VertexData.Serialize(writer);
-            Cg_PS3_PixelData.Serialize(writer);
+
+            writer.Write(Version);
+
+            PSSL_VertexData.Serialize(writer);
+            PSSL_PixelData.Serialize(writer);
+            Cg_PSVita_VertexData.Serialize(writer);
+            Cg_PSVita_PixelData.Serialize(writer);
+
+            if (Version >= 2)
+            {
+                Cg_PS3_VertexData.Serialize(writer);
+                Cg_PS3_PixelData.Serialize(writer);
+            }
+        }
+        else
+        {
+            PSSL_VertexData.IsNull = true;
+            PSSL_PixelData.IsNull = true;
+            Cg_PSVita_VertexData.IsNull = true;
+            Cg_PSVita_PixelData.IsNull = true;
+            Cg_PS3_VertexData.IsNull = true;
+            Cg_PS3_PixelData.IsNull = true;
         }
 
         if (!HLSL11_VertexData.IsNull)
@@ -313,16 +326,19 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
 
         VertexShaderAttributes = reader.ReadUndertaleObject<UndertaleSimpleList<VertexShaderAttribute>>();
 
-        Version = reader.ReadInt32();
-
-        PSSL_VertexData.Unserialize(reader);
-        PSSL_PixelData.Unserialize(reader);
-        Cg_PSVita_VertexData.Unserialize(reader);
-        Cg_PSVita_PixelData.Unserialize(reader);
-        if (Version >= 2)
+        if (reader.undertaleData.GeneralInfo.BytecodeVersion > 13)
         {
-            Cg_PS3_VertexData.Unserialize(reader);
-            Cg_PS3_PixelData.Unserialize(reader);
+            Version = reader.ReadInt32();
+
+            PSSL_VertexData.Unserialize(reader);
+            PSSL_PixelData.Unserialize(reader);
+            Cg_PSVita_VertexData.Unserialize(reader);
+            Cg_PSVita_PixelData.Unserialize(reader);
+            if (Version >= 2)
+            {
+                Cg_PS3_VertexData.Unserialize(reader);
+                Cg_PS3_PixelData.Unserialize(reader);
+            }
         }
 
         if (!HLSL11_VertexData.IsNull)
