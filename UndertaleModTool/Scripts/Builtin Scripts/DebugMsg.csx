@@ -4,19 +4,19 @@ ScriptMessage("DebugMsg - Displays dialogue messages\nwhile debug mode is enable
 var code = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data.Strings, Data.Code, Data.CodeLocals);
 
 code.AppendGML(@"
-if (global.debug == 1) {
-    draw_set_color(0xFFFF);
-    var trueI = 0
+if global.debug 
+{
+    draw_set_color(c_white);
+    var drawYPosition = 0
     for (var i = 0; i < array_length_1d(global.msg); i++)
     {
-        if ((!(global.msg[i] == ""%%%"")) && (!(global.msg[i] == ""%%"")) && (!(global.msg[i] == ""%"")))
+        var currentMessage = global.msg[i]
+        if ((!(currentMessage == ""%%%"")) && (!(currentMessage == ""%%"")) && (!(currentMessage == ""%"")))
         {
-            trueI++
-            draw_text(50, (trueI * 15 + 50), global.msg[i])
+            drawYPosition++
+            draw_text(10, (drawYPosition * 15 + 50), currentMessage)
         }
     }
-    with (OBJ_WRITER)
-        draw_text(70, 30, mystring);
 }", Data);
 
 ChangeSelection(code);
