@@ -5,40 +5,55 @@ namespace UndertaleModLib.Decompiler;
 
 public static partial class Decompiler
 {
-    // Represents a high-level assignment statement.
+    /// <summary>
+    /// Represents a high-level assignment statement.
+    /// </summary>
     public class AssignmentStatement : Statement
     {
+        /// <summary>
+        /// The variable that will get something assigned to.
+        /// </summary>
         public ExpressionVar Destination;
+        /// <summary>
+        /// The value that will be assigned.
+        /// </summary>
         public Expression Value;
 
-        public bool HasVarKeyword;
+        /// <summary>
+        /// Whether the destination variable is a local variable.
+        /// </summary>
+        public bool IsLocalVariable;
 
         private bool _isStructDefinition, _checkedForDefinition;
+        
+        /// <summary>
+        /// Whether the destination variable is a struct.
+        /// </summary>
         public bool IsStructDefinition
         {
             get
             {
                 // Quick hack
-                if (!_checkedForDefinition)
-                {
-                    try
-                    {
-                        if (Destination.Var.Name.Content.StartsWith("___struct___", StringComparison.InvariantCulture))
-                        {
-                            Expression val = Value;
-                            while (val is ExpressionCast cast)
-                                val = cast;
+                if (_checkedForDefinition) 
+                    return _isStructDefinition;
 
-                            if (val is FunctionDefinition def)
-                            {
-                                def.PromoteToStruct();
-                                _isStructDefinition = true;
-                            }
+                try
+                {
+                    if (Destination.Var.Name.Content.StartsWith("___struct___", StringComparison.InvariantCulture))
+                    {
+                        Expression val = Value;
+                        while (val is ExpressionCast cast)
+                            val = cast;
+
+                        if (val is FunctionDefinition def)
+                        {
+                            def.PromoteToStruct();
+                            _isStructDefinition = true;
                         }
                     }
-                    catch (Exception) { }
-                    _checkedForDefinition = true;
                 }
+                catch (Exception) { }
+                _checkedForDefinition = true;
                 return _isStructDefinition;
             }
         }
@@ -58,16 +73,13 @@ public static partial class Decompiler
 
             string varName = Destination.ToString(context);
 
-            if (gms2 && !HasVarKeyword)
+            if (gms2 && !IsLocalVariable)
             {
                 var data = context.GlobalContext.Data;
-                if (data != null)
-                {
-                    var locals = data.CodeLocals.For(context.TargetCode);
-                    // Stop decompiler from erroring on missing CodeLocals
-                    if (locals != null && locals.HasLocal(varName) && context.LocalVarDefines.Add(varName))
-                        HasVarKeyword = true;
-                }
+                var locals = data?.CodeLocals.For(context.TargetCode);
+                // Stop decompiler from erroring on missing CodeLocals
+                if (locals is not null && locals.HasLocal(varName) && context.LocalVarDefines.Add(varName))
+                    IsLocalVariable = true;
             }
 
             // Someone enlighten me on structs, I'm steering clear for now.
@@ -78,7 +90,7 @@ public static partial class Decompiler
                 return functionVal.ToString(context);
             }
 
-            string varPrefix = (HasVarKeyword && !context.DecompilingStruct) ? "var " : "";
+            string varPrefix = (IsLocalVariable && !context.DecompilingStruct) ? "var " : "";
 
             // Check for possible ++, --, or operation equal (for single vars)
             if (Value is ExpressionTwo two && (two.Argument1 is ExpressionVar) &&
@@ -117,7 +129,16 @@ public static partial class Decompiler
                     }
                 }
             }
-            return String.Format("{0}{1}{2} {3}", varPrefix, varName, context.DecompilingStruct ? ":" : " =", Value.ToString(context));
+
+            // Since parenthesized is now the default output of ExpressionTwo (mainly math operations)
+            // It is specifically safe in variable assignment to not parenthesize this (e.g. "foo = a + b")
+            string stringOfValue;
+            if (Value is ExpressionTwo expressionTwoVal)
+                stringOfValue = expressionTwoVal.ToStringNoParens(context);
+            else
+                stringOfValue = Value.ToString(context);
+
+            return String.Format("{0}{1}{2} {3}", varPrefix, varName, context.DecompilingStruct ? ":" : " =", stringOfValue);
         }
 
         public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)

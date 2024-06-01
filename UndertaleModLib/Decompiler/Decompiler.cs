@@ -242,7 +242,12 @@ namespace UndertaleModLib.Decompiler
                         break;
 
                     case UndertaleInstruction.Opcode.Conv:
-                        stack.Push(new ExpressionCast(instr.Type2, stack.Pop()));
+                        {
+                            Expression val = stack.Pop();
+                            if (context.BooleanTypeEnabled && instr.Type1 == UndertaleInstruction.DataType.Boolean)
+                                val.CastToBoolean(context);
+                            stack.Push(new ExpressionCast(instr.Type2, val));
+                        }
                         break;
 
                     case UndertaleInstruction.Opcode.Mul:
@@ -263,7 +268,11 @@ namespace UndertaleModLib.Decompiler
 
                     case UndertaleInstruction.Opcode.Cmp:
                         Expression aa2 = stack.Pop();
+                        if (context.BooleanTypeEnabled && instr.Type1 == UndertaleInstruction.DataType.Boolean)
+                            aa2.CastToBoolean(context);
                         Expression aa1 = stack.Pop();
+                        if (context.BooleanTypeEnabled && instr.Type2 == UndertaleInstruction.DataType.Boolean)
+                            aa1.CastToBoolean(context);
                         stack.Push(new ExpressionCompare(instr.ComparisonKind, aa1, aa2));
                         break;
 
@@ -273,8 +282,13 @@ namespace UndertaleModLib.Decompiler
 
                     case UndertaleInstruction.Opcode.Bt:
                     case UndertaleInstruction.Opcode.Bf:
-                        block.ConditionStatement = stack.Pop();
-                        end = true;
+                        {
+                            Expression val = stack.Pop();
+                            if (context.BooleanTypeEnabled && val.Type == UndertaleInstruction.DataType.Int16)
+                                val.CastToBoolean(context);
+                            block.ConditionStatement = val;
+                            end = true;
+                        }
                         break;
 
                     case UndertaleInstruction.Opcode.PushEnv:
@@ -362,6 +376,8 @@ namespace UndertaleModLib.Decompiler
                                 val = stack.Pop();
                             if (val != null)
                             {
+                                if (context.BooleanTypeEnabled && instr.Type2 == UndertaleInstruction.DataType.Boolean)
+                                    val.CastToBoolean(context);
                                 if ((target.VarType == UndertaleInstruction.VariableType.StackTop || target.VarType == UndertaleInstruction.VariableType.Array) && target.InstType.WasDuplicated)
                                 {
                                     // Almost safe to assume that this is a +=, -=, etc.
@@ -706,6 +722,11 @@ namespace UndertaleModLib.Decompiler
                                     // Note that this operator peeks from the stack, it does not pop directly.
                                     break;
                                 case -11: // GM 2023.8+, pushref
+                                    if (instr.Function != null)
+                                    {
+                                        stack.Push(new ExpressionConstant(UndertaleInstruction.DataType.Int32, instr.Function));
+                                        break;
+                                    }
                                     stack.Push(new ExpressionAssetRef(instr.IntArgument));
                                     break;
                             }
@@ -1308,10 +1329,17 @@ namespace UndertaleModLib.Decompiler
             return statement;
         }
 
-        private static bool TestNumber(Statement statement, int number, DecompileContext context = null)
+        private static bool TestNumber(Statement statement, int number)
         {
             statement = UnCast(statement);
             return (statement is ExpressionConstant constant) && constant.EqualsNumber(number);
+        }
+
+        // A bool-like can be either 1, 0, true or false.
+        private static bool TestBoolLike(Statement statement, bool boolean)
+        {
+            statement = UnCast(statement);
+            return (statement is ExpressionConstant constant) && constant.EqualsBoolLike(boolean);
         }
 
         public static List<Statement> HLDecompile(DecompileContext context, Dictionary<uint, Block> blocks, Block entryPoint, Block rootExitPoint)

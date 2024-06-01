@@ -229,7 +229,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
     /// <summary>
     /// Attempts to load the corresponding external texture. Should only happen in 2022.9 and above.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>The texture data of the external texture or a placeholder texture if it can't be loaded.</returns>
     public TexData LoadExternalTexture()
     {
         lock (_textureLoadLock)
@@ -340,12 +340,12 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
         }
 
         /// <summary>
-        /// Whether this texture uses QOI format.
+        /// Whether this texture uses the QOI format.
         /// </summary>
         public bool FormatQOI { get; set; } = false;
 
         /// <summary>
-        /// Whether this texture uses BZ2 format. (Always used in combination with QOI.)
+        /// Whether this texture uses the BZ2 format. (Always used in combination with QOI.)
         /// </summary>
         public bool FormatBZ2 { get; set; } = false;
 

@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
-using Microsoft.CodeAnalysis.Scripting.Hosting;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using System;
@@ -33,11 +32,8 @@ using UndertaleModTool.Windows;
 using System.IO.Pipes;
 using Ookii.Dialogs.Wpf;
 
-using ColorConvert = System.Windows.Media.ColorConverter;
 using System.Text.RegularExpressions;
 using System.Windows.Data;
-using System.Reflection.Metadata.Ecma335;
-using System.Windows.Media.Imaging;
 using System.Security.Cryptography;
 using System.Collections.Concurrent;
 using System.Runtime;
@@ -49,7 +45,6 @@ using System.Net;
 using System.Globalization;
 using System.Windows.Controls.Primitives;
 using System.Runtime.CompilerServices;
-using System.Diagnostics.Metrics;
 using System.Windows.Interop;
 
 namespace UndertaleModTool
@@ -957,7 +952,6 @@ namespace UndertaleModTool
                         data = UndertaleIO.Read(stream, warning =>
                         {
                             this.ShowWarning(warning, "Loading warning");
-
                             if (warning.Contains("unserializeCountError.txt")
                                 || warning.Contains("object pool size"))
                                 return;
@@ -973,6 +967,9 @@ namespace UndertaleModTool
                 }
                 catch (Exception e)
                 {
+#if DEBUG
+                    Debug.WriteLine(e);
+#endif
                     this.ShowError("An error occured while trying to load:\n" + e.Message, "Load error");
                 }
 

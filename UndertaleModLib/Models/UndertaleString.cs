@@ -70,6 +70,8 @@ public class UndertaleString : UndertaleResource, ISearchable, IDisposable
             return "\"" + Content.Replace("\\", "\\\\").Replace("\r", "\\r").Replace("\n", "\\n").Replace("\"", "\\\"") + "\"";
 
         // Handle GM:S 1's lack of escaping
+        // Yes, in GM:S 1 you cannot escape quotation marks. You are expected to concatenate
+        // single-quote strings with double-quote strings.
         string res = Content;
         bool front, back;
         if (res.StartsWith('"'))
