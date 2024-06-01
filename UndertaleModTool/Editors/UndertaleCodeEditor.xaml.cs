@@ -557,8 +557,8 @@ namespace UndertaleModTool
         }
 
         public static Dictionary<string, string> gettextJSON = null;
-        private static readonly Regex gettextRegex = new("scr_gettext\\(\\\"(.*?)\\\"\\)", RegexOptions.Compiled);
-        private static readonly Regex getlangRegex = new("scr_84_get_lang_string(?:.*?)\\(\\\"(.*?)\\\"\\)", RegexOptions.Compiled);
+        private static readonly Regex gettextRegex = new(@"scr_gettext\(\""(.*?)\""\)(?!(.*?\/\/.*?$))", RegexOptions.Compiled);
+        private static readonly Regex getlangRegex = new(@"scr_84_get_lang_string(?:.*?)\(\""(.*?)\""\)(?!(.*?\/\/.*?$))", RegexOptions.Compiled);
         private string UpdateGettextJSON(string json)
         {
             try
