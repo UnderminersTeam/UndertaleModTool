@@ -46,8 +46,8 @@ jobs:
     - name: Remove residual files from NetCoreBeauty 
       continue-on-error: true
       run: |
-        rm -f ./${{ matrix.os }}/NetCoreBeauty
-        rm -f ./${{ matrix.os }}/hostfxr.dll.bak
+        rm -Force ./${{ matrix.os }}/NetCoreBeauty
+        rm -Force ./${{ matrix.os }}/hostfxr.dll.bak
     - name: Create zip for nightly release Windows GUI
       run: |
         7z a -tzip GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip ./${{ matrix.os }}/* -mx0 

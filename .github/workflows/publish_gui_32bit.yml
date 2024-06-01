@@ -46,8 +46,8 @@ jobs:
     - name: Remove residual files from NetCoreBeauty 
       continue-on-error: true
       run: |
-        rm -f ./${{ matrix.os }}/NetCoreBeauty
-        rm -f ./${{ matrix.os }}/hostfxr.dll.bak
+        rm -Force ./${{ matrix.os }}/NetCoreBeauty
+        rm -Force ./${{ matrix.os }}/hostfxr.dll.bak
     - name: Upload ${{ matrix.os }} GUI 32Bit
       uses: actions/upload-artifact@v4
       with:
