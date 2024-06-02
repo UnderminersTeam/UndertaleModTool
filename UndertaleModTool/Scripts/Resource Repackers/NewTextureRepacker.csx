@@ -26,7 +26,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Drawing;
+using SkiaSharp;
 using UndertaleModLib.Scripting;
 using UndertaleModLib.Util;
 using UndertaleModLib.Models;
@@ -440,12 +440,10 @@ await Task.Run(() =>
             UndertaleEmbeddedTexture tex = new UndertaleEmbeddedTexture();
             tex.Name = new UndertaleString("Texture " + ++lastTextPage);
             Data.EmbeddedTextures.Add(tex);
-            Bitmap img = new Bitmap(atlas.Width, atlas.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
-            // DPI fix
-            img.SetResolution(96.0F, 96.0F);
+            using SKBitmap img = new(atlas.Width, atlas.Height);
+            using SKCanvas g = new(img);
 
-            Graphics g = Graphics.FromImage(img);
             tex.Scaled = group.First().Scaled; // Make sure the original pane "Scaled" value is mantained.
 
             // Dump debug info regarding splits
@@ -457,8 +455,8 @@ await Task.Run(() =>
             {
                 f.WriteLine($"tex: {texPageItems.IndexOf(item)}: {item.NewRect.X}, {item.NewRect.Y}, {item.NewRect.Width}, {item.NewRect.Height}");
 
-                using (Bitmap source = new Bitmap(item.Filename))
-                    g.DrawImage(source, item.NewRect.X, item.NewRect.Y);
+                using SKBitmap source = TextureWorker.ReadImageFromFile(item.Filename);
+                g.DrawBitmap(source, item.NewRect.X, item.NewRect.Y);
 
                 item.Item.TexturePage = tex;
                 item.Item.SourceX = (ushort)item.NewRect.X;
@@ -470,10 +468,8 @@ await Task.Run(() =>
 
             // Save atlas into a file and load it back into 
             string atlasFile = Path.Combine(packagerDirectory, $"atlas_{atlasName}.png");
-            img.Save(atlasFile, System.Drawing.Imaging.ImageFormat.Png);
+            TextureWorker.SaveImageToFile(atlasFile, img);
             tex.TextureData.TextureBlob = File.ReadAllBytes(atlasFile);
-
-            img.Dispose();
         }
         else
         {
@@ -493,21 +489,16 @@ await Task.Run(() =>
                     int potw = NearestPowerOf2((uint)item.OriginalRect.Width),
                         poth = NearestPowerOf2((uint)item.OriginalRect.Height);
 
-                    Bitmap img = new Bitmap(potw, poth, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-                    // DPI fix
-                    img.SetResolution(96.0F, 96.0F);
-
-                    Graphics g = Graphics.FromImage(img);
-
-                    // Load texture
-                    using (Bitmap source = new Bitmap(item.Filename))
-                        g.DrawImage(source, 0, 0);
+                    // Load texture and draw in on a new one with POT size
+                    using SKBitmap img = new(potw, poth);
+                    using (SKCanvas g = new(img))
+                    {
+                        using SKBitmap source = SKBitmap.Decode(item.Filename);
+                        g.DrawBitmap(source, 0, 0);
+                    }
 
                     itemFile = Path.Combine(packagerDirectory, $"pot_{texPageItems.IndexOf(item)}.png");
-                    img.Save(itemFile, System.Drawing.Imaging.ImageFormat.Png);
-
-                    img.Dispose();
+                    TextureWorker.SaveImageToFile(itemFile, img);
                 }
 
                 tex.TextureData.TextureBlob = File.ReadAllBytes(itemFile);

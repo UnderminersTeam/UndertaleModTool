@@ -4,7 +4,7 @@
 
 using System;
 using System.IO;
-using System.Drawing;
+using SkiaSharp;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -128,7 +128,6 @@ int atlasCount = 0;
 foreach (Atlas atlas in packer.Atlasses)
 {
     string atlasName = String.Format(prefix + "{0:000}" + ".png", atlasCount);
-    Bitmap atlasBitmap = new Bitmap(atlasName);
     UndertaleEmbeddedTexture texture = new UndertaleEmbeddedTexture();
     texture.Name = new UndertaleString("Texture " + ++lastTextPage);
     texture.TextureData.TextureBlob = File.ReadAllBytes(atlasName);
@@ -273,9 +272,17 @@ public enum BestFitHeuristic
     MaxOneAxis,
 }
 
+public struct Rect
+{
+    public int X { get; set; }
+    public int Y { get; set; }
+    public int Width { get; set; }
+    public int Height { get; set; }
+}
+
 public class Node
 {
-    public Rectangle Bounds;
+    public Rect Bounds;
     public TextureInfo Texture;
     public SplitType SplitType;
 }
@@ -352,8 +359,8 @@ public class Packer
         {
             string atlasName = String.Format(prefix + "{0:000}" + ".png", atlasCount);
             //1: Save images
-            Image img = CreateAtlasImage(atlas);
-            img.Save(atlasName, System.Drawing.Imaging.ImageFormat.Png);
+            SKBitmap img = CreateAtlasImage(atlas);
+            TextureWorker.SaveImageToFile(atlasName, img);
             //2: save description in file
             foreach (Node n in atlas.Nodes)
             {
@@ -384,25 +391,27 @@ public class Packer
         FileInfo[] files = di.GetFiles(_Wildcard, SearchOption.AllDirectories);
         foreach (FileInfo fi in files)
         {
-            Image img = Image.FromFile(fi.FullName);
-            if (img != null)
+            var imgSize = TextureWorker.GetImageSizeFromFile(fi.FullName);
+            if (imgSize == default)
+                continue;
+            int width = imgSize.Width;
+            int height = imgSize.Height;
+
+            if (width <= AtlasSize && height <= AtlasSize)
             {
-                if (img.Width <= AtlasSize && img.Height <= AtlasSize)
-                {
-                    TextureInfo ti = new TextureInfo();
+                TextureInfo ti = new TextureInfo();
 
-                    ti.Source = fi.FullName;
-                    ti.Width = img.Width;
-                    ti.Height = img.Height;
+                ti.Source = fi.FullName;
+                ti.Width = width;
+                ti.Height = height;
 
-                    SourceTextures.Add(ti);
+                SourceTextures.Add(ti);
 
-                    Log.WriteLine("Added " + fi.FullName);
-                }
-                else
-                {
-                    Error.WriteLine(fi.FullName + " is too large to fix in the atlas. Skipping!");
-                }
+                Log.WriteLine("Added " + fi.FullName);
+            }
+            else
+            {
+                Error.WriteLine(fi.FullName + " is too large to fix in the atlas. Skipping!");
             }
         }
     }
@@ -495,7 +504,8 @@ public class Packer
         _Atlas.Nodes = new List<Node>();
         textures = _Textures.ToList();
         Node root = new Node();
-        root.Bounds.Size = new Size(_Atlas.Width, _Atlas.Height);
+        root.Bounds.Width = _Atlas.Width;
+        root.Bounds.Height = _Atlas.Height;
         root.SplitType = SplitType.Horizontal;
         freeList.Add(root);
         while (freeList.Count > 0 && textures.Count > 0)
@@ -523,23 +533,20 @@ public class Packer
         return textures;
     }
 
-    private Image CreateAtlasImage(Atlas _Atlas)
+    private SKBitmap CreateAtlasImage(Atlas _Atlas)
     {
-        Image img = new Bitmap(_Atlas.Width, _Atlas.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-        Graphics g = Graphics.FromImage(img);
+        SKBitmap img = new(_Atlas.Width, _Atlas.Height);
+        using SKCanvas g = new(img);
         foreach (Node n in _Atlas.Nodes)
         {
             if (n.Texture != null)
             {
-                Image sourceImg = Image.FromFile(n.Texture.Source);
-                g.DrawImage(sourceImg, n.Bounds);
+                using SKBitmap sourceImg = SKBitmap.Decode(n.Texture.Source);
+                SKRect rect = SKRect.Create(n.Bounds.X, n.Bounds.Y, n.Bounds.Width, n.Bounds.Height);
+                g.DrawBitmap(sourceImg, rect);
             }
         }
-        // DPI FIX START
-        Bitmap ResolutionFix = new Bitmap(img);
-        ResolutionFix.SetResolution(96.0F, 96.0F);
-        Image img2 = ResolutionFix;
-        return img2;
-        // DPI FIX END
+
+        return img;
     }
 }
