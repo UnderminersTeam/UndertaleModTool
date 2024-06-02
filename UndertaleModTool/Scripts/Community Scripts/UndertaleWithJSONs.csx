@@ -19,7 +19,7 @@ if (displayName == "deltarune chapter 1 & 2" || displayName == "deltarune chapte
 }
 
 
-string langFolder = Path.Combine(FilePath, "lang");
+string langFolder = Path.Combine(Path.GetDirectoryName(FilePath), "lang");
 ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
 if (Directory.Exists(langFolder))
