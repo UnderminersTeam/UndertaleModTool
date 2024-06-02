@@ -1,4 +1,5 @@
 // Made by mono21400
+// TODO: this heavily uses windows stuff, should be made cross platform
 
 using System.Text;
 using System;

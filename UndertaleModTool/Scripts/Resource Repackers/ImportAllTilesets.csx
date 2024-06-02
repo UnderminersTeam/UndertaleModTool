@@ -1,5 +1,6 @@
 // Adapted from original script by Grossley
 
+// TODO: remove system.drawing from here, used for bitmaps 
 using System.Text;
 using System;
 using System.IO;

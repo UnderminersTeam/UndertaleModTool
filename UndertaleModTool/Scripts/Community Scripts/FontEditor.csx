@@ -1,4 +1,5 @@
 //by porog
+// TODO: this heavily uses windows stuff, should be made cross platform
 
 using System.Drawing;
 using System.Drawing.Imaging;
