@@ -210,14 +210,15 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     /// </summary>
     public enum BranchType
     {
-        LTS,
-        NonLTS
+        Unknown,
+        LTS2022_0,
+        Post2022_0
     }
 
     /// <summary>
     /// The GameMaker release branch of the data file. May be set to "NonLTS" when features exempted from LTS are detected.
     /// </summary>
-    public BranchType Branch = BranchType.LTS;
+    public BranchType Branch = BranchType.Unknown;
 
     /// <summary>
     /// The major version of the data file.
@@ -330,15 +331,15 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
 
         // Some GMS2+ version detection. The rest is spread around, mostly in UndertaleChunks.cs
         if (reader.AllChunkNames.Contains("PSEM"))      // 2023.2, not present on LTS
-            detectedVer = (2023, 2, 0, 0, BranchType.NonLTS);
+            detectedVer = (2023, 2, 0, 0, BranchType.Post2022_0);
         else if (reader.AllChunkNames.Contains("FEAT")) // 2022.8
-            detectedVer = (2022, 8, 0, 0, BranchType.LTS);
+            detectedVer = (2022, 8, 0, 0, BranchType.Unknown);
         else if (reader.AllChunkNames.Contains("FEDS")) // 2.3.6
-            detectedVer = (2, 3, 6, 0, BranchType.LTS);
+            detectedVer = (2, 3, 6, 0, BranchType.Unknown);
         else if (reader.AllChunkNames.Contains("SEQN")) // 2.3
-            detectedVer = (2, 3, 0, 0, BranchType.LTS);
+            detectedVer = (2, 3, 0, 0, BranchType.Unknown);
         else if (reader.AllChunkNames.Contains("TGIN")) // 2.2.1
-            detectedVer = (2, 2, 1, 0, BranchType.LTS);
+            detectedVer = (2, 2, 1, 0, BranchType.Unknown);
 
         if (detectedVer.Major > 2 || (detectedVer.Major == 2 && detectedVer.Minor >= 3))
         {
@@ -604,9 +605,16 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
                 sb.Append(" (GMS ");
             else
                 sb.Append(" (GM ");
-            sb.Append(Major);
-            sb.Append('.');
-            sb.Append(Minor);
+            if (Branch == BranchType.LTS2022_0)
+            {
+                sb.Append("2022.0");
+            }
+            else
+            {
+                sb.Append(Major);
+                sb.Append('.');
+                sb.Append(Minor);
+            }
             if (Release != 0)
             {
                 sb.Append('.');

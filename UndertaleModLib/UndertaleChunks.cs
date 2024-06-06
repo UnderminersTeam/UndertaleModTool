@@ -108,6 +108,12 @@ namespace UndertaleModLib
                         return;
                 }
             }
+
+            if (reader.undertaleData.IsVersionAtLeast(2023, 1) &&
+                reader.undertaleData.GeneralInfo.Branch == UndertaleGeneralInfo.BranchType.Unknown)
+            {
+                reader.undertaleData.SetLTS(true);
+            }
         }
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)

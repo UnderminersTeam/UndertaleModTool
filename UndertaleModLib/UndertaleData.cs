@@ -516,9 +516,9 @@ namespace UndertaleModLib
         public void SetLTS(bool isLTS)
         {
             if (isLTS)
-                GeneralInfo.Branch = UndertaleGeneralInfo.BranchType.LTS;
+                GeneralInfo.Branch = UndertaleGeneralInfo.BranchType.LTS2022_0;
             else
-                GeneralInfo.Branch = UndertaleGeneralInfo.BranchType.NonLTS;
+                GeneralInfo.Branch = UndertaleGeneralInfo.BranchType.Post2022_0;
         }
 
         /// <summary>
@@ -537,7 +537,7 @@ namespace UndertaleModLib
                 return false;
             }
 
-            if (GeneralInfo.Branch == UndertaleGeneralInfo.BranchType.LTS)
+            if (GeneralInfo.Branch < UndertaleGeneralInfo.BranchType.Post2022_0)
                 return false;
 
             return IsVersionAtLeast(major, minor, release, build);
