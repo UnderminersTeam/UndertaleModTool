@@ -106,7 +106,25 @@ namespace UndertaleModLib.Compiler
 
         private void MakeAssetDictionary()
         {
+            // Clear the dictionary first and set the worst case max size so that we don't resize it over and over
             assetIds.Clear();
+            int maxSize = 0;
+            maxSize += Data?.GameObjects?.Count ?? 0;
+            maxSize += Data?.Sprites?.Count ?? 0;
+            maxSize += Data?.Sounds?.Count ?? 0;
+            maxSize += Data?.Backgrounds?.Count ?? 0;
+            maxSize += Data?.Paths?.Count ?? 0;
+            maxSize += Data?.Fonts?.Count ?? 0;
+            maxSize += Data?.Timelines?.Count ?? 0;
+            maxSize += Data?.Scripts?.Count ?? 0;
+            maxSize += Data?.Shaders?.Count ?? 0;
+            maxSize += Data?.Rooms?.Count ?? 0;
+            maxSize += Data?.AudioGroups?.Count ?? 0;
+            maxSize += Data?.AnimationCurves?.Count ?? 0;
+            maxSize += Data?.Sequences?.Count ?? 0;
+            maxSize += Data?.ParticleSystems?.Count ?? 0;
+            assetIds.EnsureCapacity(maxSize);
+
             AddAssetsFromList(Data?.GameObjects, AssetRefType.Object);
             AddAssetsFromList(Data?.Sprites, AssetRefType.Sprite);
             AddAssetsFromList(Data?.Sounds, AssetRefType.Sound);
