@@ -90,7 +90,7 @@ public static partial class Decompiler
                 return functionVal.ToString(context);
             }
 
-            string varPrefix = (IsLocalVariable ? "var " : "");
+            string varPrefix = (IsLocalVariable && !context.DecompilingStruct) ? "var " : "";
 
             // Check for possible ++, --, or operation equal (for single vars)
             if (Value is ExpressionTwo two && (two.Argument1 is ExpressionVar) &&

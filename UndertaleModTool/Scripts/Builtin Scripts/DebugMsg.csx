@@ -1,23 +1,23 @@
-﻿ScriptError("This script is temporarily disabled as it doesn't work properly, causing the game to crash, sorry about that.");
-return;
+﻿EnsureDataLoaded();
+ScriptMessage("DebugMsg - Displays dialogue messages\nwhile debug mode is enabled.\n\nAuthor: krzys-h, Kneesnap");
 
-if (false)
+var code = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data.Strings, Data.Code, Data.CodeLocals);
+
+code.AppendGML(@"
+if global.debug 
 {
-    EnsureDataLoaded();
-    ScriptMessage("DebugMsg - Displays dialogue messages\nwhile debug mode is enabled.\n\nAuthor: krzys-h, Kneesnap");
-
-    var code = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data.Strings, Data.Code, Data.CodeLocals);
-
-    code.ReplaceGML(@"
-if (global.debug == 1) {
-    draw_set_color(0xFFFF);
-    for (var i = 0; i < 100; i++)
-        draw_text(50, (i * 15) + 50, global.msg[i]);
-    
-    with (OBJ_WRITER)
-        draw_text(70, 30, mystring);
+    draw_set_color(c_white);
+    var drawYPosition = 0
+    for (var i = 0; i < array_length_1d(global.msg); i++)
+    {
+        var currentMessage = global.msg[i]
+        if ((!(currentMessage == ""%%%"")) && (!(currentMessage == ""%%"")) && (!(currentMessage == ""%"")))
+        {
+            drawYPosition++
+            draw_text(10, (drawYPosition * 15 + 50), currentMessage)
+        }
+    }
 }", Data);
 
-    ChangeSelection(code);
-    ScriptMessage("DebugMsg - Finished.");
-}
+ChangeSelection(code);
+ScriptMessage("DebugMsg - Finished.");

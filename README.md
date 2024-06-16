@@ -56,7 +56,6 @@ Included are some test scripts. They are, but not limited to:
   * EnableDebug: does just that, makes the global variable 'debug' be enabled at game start. If you don't know about Undertale's debug mode, check out [this write up of Undertale's Debug Mode](https://tcrf.net/Undertale/Debug_Mode)
   * DebugToggler: similar to the above, but instead toggles the debug mode on and off with F1
   * BorderEnabler: lets you import the PlayStation exclusive borders into the PC version and patches all version checks so that they display properly
-  * testing: nothing important, just displays random text on the main menu - the first script I ever made
   * TTFFonts: Makes the game load fonts in TTF format from current directory instead of using the spritesheet fonts. You will need to track down all the font files yourself, I can't host them here for licensing reasons :(
   * RoomOfDetermination: Adds a new room to Undertale 1.08. I wanted to add something more to it but never got around to it, so I guess I'm releasing it as is. Just start the game and you'll see. Probably the most complete sample of adding stuff you'll find.
 * Deltarune only:

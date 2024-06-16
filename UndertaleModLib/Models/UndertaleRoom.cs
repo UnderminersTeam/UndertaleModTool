@@ -30,9 +30,9 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         /// </summary>
         ShowColor = 2,
         /// <summary>
-        /// Whether the room should clear the display buffer.
+        /// Whether the room should not clear the display buffer.
         /// </summary>
-        ClearDisplayBuffer = 4,
+        DoNotClearDisplayBuffer = 4,
         /// <summary>
         /// Whether the room was made in Game Maker: Studio 2.
         /// </summary>

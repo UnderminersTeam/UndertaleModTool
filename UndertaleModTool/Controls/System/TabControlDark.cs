@@ -18,7 +18,7 @@ namespace UndertaleModTool
 
         private void TabControlDark_Loaded(object sender, RoutedEventArgs e)
         {
-            SetDarkMode(Settings.Instance.EnableDarkMode);
+            SetDarkMode(Settings.Instance is not null ? Settings.Instance.EnableDarkMode : false);
         }
 
         /// <inheritdoc/>

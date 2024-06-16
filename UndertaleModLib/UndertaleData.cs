@@ -551,7 +551,7 @@ namespace UndertaleModLib
         {
             // It is known it works this way in 1.0.1266. The exact version which changed this is unknown.
             // If we find a game which does not fit the version identified here, we should fix this check.
-            return TestGMS1Version(1354, 161, true) ? 0 : 1;
+            return TestGMS1Version(1250, 161, true) ? 0 : 1;
         }
 
         /// <summary>

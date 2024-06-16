@@ -33,6 +33,8 @@ namespace UndertaleModLib.Compiler
         public string ResultError = null;
         public List<UndertaleInstruction> ResultAssembly = null;
 
+        public List<string> FunctionsToObliterate = new();
+
         public Compiler.MainThreadDelegate MainThreadDelegate = (f) => { f(); };
 
         public CompileContext(UndertaleData data, UndertaleCode oldCode)
@@ -55,6 +57,27 @@ namespace UndertaleModLib.Compiler
                 {
                     foreach (KeyValuePair<string, string> v in GlobalVars)
                         Data?.Variables?.EnsureDefined(v.Key, UndertaleInstruction.InstanceType.Global, false, Data.Strings, Data);
+                    if (Data is not null)
+                    {
+                        foreach (string name in FunctionsToObliterate)
+                        {
+                            string scriptName = "gml_Script_" + name;
+                            UndertaleScript scriptObj = Data.Scripts.ByName(scriptName);
+                            if (scriptObj is not null)
+                                Data.Scripts.Remove(scriptObj);
+                            UndertaleCode codeObj = Data.Code.ByName(scriptName);
+                            if (codeObj is not null)
+                            {
+                                Data.Code.Remove(codeObj);
+                                OriginalCode.ChildEntries.Remove(codeObj);
+                            }
+                            UndertaleFunction functionObj = Data.Functions.ByName(scriptName);
+                            if (functionObj is not null)
+                                Data.Functions.Remove(functionObj);
+                            Data.KnownSubFunctions.Remove(name);
+                        }
+                        FunctionsToObliterate.Clear();
+                    }
                 });
             }
 
@@ -76,6 +99,7 @@ namespace UndertaleModLib.Compiler
 
             LastCompiledArgumentCount = 0;
             userDefinedVariables.Clear();
+            FunctionsToObliterate.Clear();
             if (redoAssets || assetIds.Count == 0)
                 MakeAssetDictionary();
         }

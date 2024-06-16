@@ -166,7 +166,6 @@ public static partial class Decompiler
                         }
                         sb.Append("\n");
                     }
-                    context.DecompilingStruct = oldDecompilingStruct;
                     context.ArgumentReplacements = oldReplacements;
                     context.IndentationLevel--;
                     sb.Append(context.Indentation);
@@ -176,6 +175,7 @@ public static partial class Decompiler
                 }
                 else
                     sb.Append("{}");
+                context.DecompilingStruct = oldDecompilingStruct;
             }
             else
             {

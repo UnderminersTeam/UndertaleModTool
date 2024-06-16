@@ -383,7 +383,6 @@ an issue on GitHub.");
                     Directory.CreateDirectory(profDir);
                     Directory.CreateDirectory(Path.Combine(profDir, "Main"));
                     Directory.CreateDirectory(Path.Combine(profDir, "Temp"));
-                    this.ShowMessage("Profile saved successfully to " + ProfileHash);
                 }
                 if (SettingsWindow.DeleteOldProfileOnSave && copyProfile)
                 {
