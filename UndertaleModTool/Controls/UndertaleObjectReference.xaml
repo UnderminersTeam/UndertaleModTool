@@ -12,6 +12,7 @@
         <local:ContextMenuDark x:Key="contextMenu" Opened="MenuItem_ContextMenuOpened">
             <MenuItem Header="Open in new tab" Click="OpenInNewTabItem_Click"/>
             <MenuItem Header="Find all references" Click="FindAllReferencesItem_Click"/>
+            <MenuItem Header="Copy name to clipboard" Click="CopyNameToClipboard_Click"/>
         </local:ContextMenuDark>
         <Label x:Key="emptyReferenceLabel" Foreground="Gray" FontStyle="Italic" />
     </UserControl.Resources>
@@ -21,7 +22,7 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <local:TextBoxDark Grid.Column="0" x:Name="ObjectText" IsReadOnly="True" Cursor="Arrow" AllowDrop="True"
+        <local:TextBoxDark Grid.Column="0" x:Name="ObjectText" IsReadOnly="True" Cursor="Arrow" AllowDrop="True" Focusable="False"
                            ToolTip="This is an object reference. Drag and drop an object of matching type from the tree on the left to change it!"
                            ToolTipService.InitialShowDelay="250"
                            PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" PreviewMouseDoubleClick="TextBox_MouseDoubleClick" PreviewMouseDown="Details_MouseDown"

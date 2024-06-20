@@ -226,6 +226,10 @@ namespace UndertaleModTool
                 dialog?.Close();
             }
         }
+        private void CopyNameToClipboard_Click(object sender, RoutedEventArgs e)
+        {
+            mainWindow.CopyItemName(ObjectReference);
+        }
 
         private void Remove_Click(object sender, RoutedEventArgs e)
         {
