@@ -28,7 +28,12 @@ public static partial class Decompiler
         public override string ToString(DecompileContext context)
         {
             string arg1 = Argument1.ToString(context);
+            if (Argument1 is ExpressionCompare compare1)
+                arg1 = compare1.ToStringWithParen(context);
             string arg2 = Argument2.ToString(context);
+            if (Argument2 is ExpressionCompare compare2)
+                arg2 = compare2.ToStringWithParen(context);
+
             return String.Format("{0} {1} {2}", arg1, OperationToPrintableString(Opcode), arg2);
         }
 
