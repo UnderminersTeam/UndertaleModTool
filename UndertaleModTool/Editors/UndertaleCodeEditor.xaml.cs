@@ -305,7 +305,7 @@ namespace UndertaleModTool
             CurrentDecompiled = null;
             CurrentDisassembled = null;
 
-            if (EditorTab != CodeEditorTab.Unknown) // if opened from the code search results "link"
+            if (EditorTab != CodeEditorTab.Unknown) // If opened from the code search results "link"
             {
                 if (EditorTab == CodeEditorTab.Disassembly && code != CurrentDisassembled)
                 {

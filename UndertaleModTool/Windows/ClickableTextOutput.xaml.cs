@@ -138,7 +138,7 @@ namespace UndertaleModTool.Windows
             int totalLineCount = resultsDict.Select(x => x.Value.Count).Sum();
             bool tooManyLines = totalLineCount > 10000;
             if (tooManyLines)
-                mainWindow.ShowWarning($"There are too many code lines to display ({totalLineCount}), so there would be no clickable line numbers.");
+                mainWindow.ShowWarning($"There are too many code lines to display ({totalLineCount}), so the line numbers aren't clickable.");
 
             foreach (KeyValuePair<string, List<(int lineNum, string codeLine)>> result in resultsDict)
             {
