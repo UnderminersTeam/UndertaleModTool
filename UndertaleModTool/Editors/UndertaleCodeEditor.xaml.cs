@@ -34,7 +34,6 @@ using UndertaleModLib;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
-using static UndertaleModTool.MainWindow.CodeEditorMode;
 using Input = System.Windows.Input;
 
 namespace UndertaleModTool
@@ -59,14 +58,14 @@ namespace UndertaleModTool
         public bool DecompiledYet = false;
         public bool DecompiledSkipped = false;
         public SearchPanel DecompiledSearchPanel;
-        public static (int Line, int Column, double ScrollPos) OverriddenDecompPos;
+        public static (int Line, int Column, double ScrollPos) OverriddenDecompPos { get; set; }
 
         public bool DisassemblyFocused = false;
         public bool DisassemblyChanged = false;
         public bool DisassembledYet = false;
         public bool DisassemblySkipped = false;
         public SearchPanel DisassemblySearchPanel;
-        public static (int Line, int Column, double ScrollPos) OverriddenDisasmPos;
+        public static (int Line, int Column, double ScrollPos) OverriddenDisasmPos { get; set; }
 
         public static RoutedUICommand Compile = new RoutedUICommand("Compile code", "Compile", typeof(UndertaleCodeEditor));
 
@@ -74,6 +73,14 @@ namespace UndertaleModTool
         private static readonly Dictionary<string, UndertaleNamedResource> ScriptsDict = new();
         private static readonly Dictionary<string, UndertaleNamedResource> FunctionsDict = new();
         private static readonly Dictionary<string, UndertaleNamedResource> CodeDict = new();
+
+        public enum CodeEditorTab
+        {
+            Unknown,
+            Disassembly,
+            Decompiled
+        }
+        public static CodeEditorTab EditorTab { get; set; } = CodeEditorTab.Unknown;
 
         public UndertaleCodeEditor()
         {
@@ -298,9 +305,9 @@ namespace UndertaleModTool
             CurrentDecompiled = null;
             CurrentDisassembled = null;
 
-            if (MainWindow.CodeEditorDecompile != Unstated) //if opened from the code search results "link"
+            if (EditorTab != CodeEditorTab.Unknown) // If opened from the code search results "link"
             {
-                if (MainWindow.CodeEditorDecompile == DontDecompile && code != CurrentDisassembled)
+                if (EditorTab == CodeEditorTab.Disassembly && code != CurrentDisassembled)
                 {
                     if (CodeModeTabs.SelectedItem != DisassemblyTab)
                         CodeModeTabs.SelectedItem = DisassemblyTab;
@@ -308,7 +315,7 @@ namespace UndertaleModTool
                         DisassembleCode(code, true);
                 }
 
-                if (MainWindow.CodeEditorDecompile == Decompile && code != CurrentDecompiled)
+                if (EditorTab == CodeEditorTab.Decompiled && code != CurrentDecompiled)
                 {
                     if (CodeModeTabs.SelectedItem != DecompiledTab)
                         CodeModeTabs.SelectedItem = DecompiledTab;
@@ -316,7 +323,7 @@ namespace UndertaleModTool
                         _ = DecompileCode(code, true);
                 }
 
-                MainWindow.CodeEditorDecompile = Unstated;
+                EditorTab = CodeEditorTab.Unknown;
             }
             else
                 FillInCodeViewer(true);
@@ -367,6 +374,9 @@ namespace UndertaleModTool
         {
             if (linePos <= textEditor.LineCount)
             {
+                if (linePos == -1)
+                    linePos = textEditor.Document.LineCount;
+
                 int lineLen = textEditor.Document.GetLineByNumber(linePos).Length;
                 textEditor.TextArea.Caret.Line = linePos;
                 if (columnPos != -1)
@@ -375,7 +385,8 @@ namespace UndertaleModTool
                     textEditor.TextArea.Caret.Column = lineLen + 1;
 
                 textEditor.ScrollToLine(linePos);
-                textEditor.ScrollToVerticalOffset(scrollPos);
+                if (scrollPos != -1)
+                    textEditor.ScrollToVerticalOffset(scrollPos);
             }
             else
             {
@@ -383,7 +394,36 @@ namespace UndertaleModTool
                 textEditor.ScrollToEnd();
             }
         }
-        
+        public static void ChangeLineNumber(int lineNum, CodeEditorTab editorTab)
+        {
+            if (lineNum < 1)
+                return;
+
+            if (editorTab == CodeEditorTab.Unknown)
+            {
+                Debug.WriteLine($"The \"{nameof(editorTab)}\" argument of \"{nameof(ChangeLineNumber)}()\" is \"{nameof(CodeEditorTab.Unknown)}\".");
+                return;
+            }
+
+            if (editorTab == CodeEditorTab.Decompiled)
+                OverriddenDecompPos = (lineNum, -1, -1);
+            else
+                OverriddenDisasmPos = (lineNum, -1, -1);
+        }
+        public static void ChangeLineNumber(int lineNum, TextEditor textEditor)
+        {
+            if (lineNum < 1)
+                return;
+
+            if (textEditor is null)
+            {
+                Debug.WriteLine($"The \"{nameof(textEditor)}\" argument of \"{nameof(ChangeLineNumber)}()\" is null.");
+                return;
+            }
+
+            RestoreCaretPosition(textEditor, lineNum, -1, -1);
+        }
+
         private static void FillObjectDicts()
         {
             var data = mainWindow.Data;
