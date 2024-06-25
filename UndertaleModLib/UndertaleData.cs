@@ -467,15 +467,23 @@ namespace UndertaleModLib
         /// <param name="minor">The minor version.</param>
         /// <param name="release">The release version.</param>
         /// <param name="build">The build version.</param>
-        public void SetGMS2Version(uint major, uint minor = 0, uint release = 0, uint build = 0)
+        /// <param name="isLTS">If included, alter the data branch between LTS and non-LTS.</param>
+        public void SetGMS2Version(uint? major = null, uint minor = 0, uint release = 0, uint build = 0, bool? isLTS = null)
         {
             if (major != 2 && major != 2022 && major != 2023 && major != 2024)
                 throw new NotSupportedException("Attempted to set a version of GameMaker " + major + " using SetGMS2Version");
 
-            GeneralInfo.Major = major;
-            GeneralInfo.Minor = minor;
-            GeneralInfo.Release = release;
-            GeneralInfo.Build = build;
+            if (major is not null)
+            {
+                GeneralInfo.Major = (uint)major;
+                GeneralInfo.Minor = minor;
+                GeneralInfo.Release = release;
+                GeneralInfo.Build = build;
+            }
+            if (isLTS is not null)
+            {
+                GeneralInfo.Branch = (bool)isLTS ? UndertaleGeneralInfo.BranchType.LTS2022_0 : UndertaleGeneralInfo.BranchType.Post2022_0;
+            }
         }
 
         /// <summary>
@@ -507,18 +515,6 @@ namespace UndertaleModLib
                 return (GeneralInfo.Build > build);
 
             return true; // The version is exactly what supplied.
-        }
-
-        /// <summary>
-        /// Sets the branch type in GeneralInfo to LTS. (true for LTS, false for non-LTS.)
-        /// </summary>
-        /// <param name="isLTS">true for LTS, false for non-LTS.</param>
-        public void SetLTS(bool isLTS)
-        {
-            if (isLTS)
-                GeneralInfo.Branch = UndertaleGeneralInfo.BranchType.LTS2022_0;
-            else
-                GeneralInfo.Branch = UndertaleGeneralInfo.BranchType.Post2022_0;
         }
 
         /// <summary>

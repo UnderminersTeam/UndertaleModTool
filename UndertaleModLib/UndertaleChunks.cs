@@ -112,7 +112,7 @@ namespace UndertaleModLib
             if (reader.undertaleData.IsVersionAtLeast(2023, 1) &&
                 reader.undertaleData.GeneralInfo.Branch == UndertaleGeneralInfo.BranchType.Unknown)
             {
-                reader.undertaleData.SetLTS(true);
+                reader.undertaleData.SetGMS2Version(isLTS: true);
             }
         }
 
@@ -1563,8 +1563,7 @@ namespace UndertaleModLib
                 // (the list could be either "Tilesets" or "Fonts").
                 if (reader.ReadUInt32() <= fourthPtr)
                 {
-                    reader.undertaleData.SetGMS2Version(2023, 1);
-                    reader.undertaleData.SetLTS(false);
+                    reader.undertaleData.SetGMS2Version(2023, 1, 0, 0, false);
                 }
             }
 
