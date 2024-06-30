@@ -468,22 +468,30 @@ namespace UndertaleModLib
         /// <param name="release">The release version.</param>
         /// <param name="build">The build version.</param>
         /// <param name="isLTS">If included, alter the data branch between LTS and non-LTS.</param>
-        public void SetGMS2Version(uint? major = null, uint minor = 0, uint release = 0, uint build = 0, bool? isLTS = null)
+        public void SetGMS2Version(uint major, uint minor = 0, uint release = 0, uint build = 0, bool? isLTS = null)
         {
             if (major != 2 && major != 2022 && major != 2023 && major != 2024)
                 throw new NotSupportedException("Attempted to set a version of GameMaker " + major + " using SetGMS2Version");
 
-            if (major is not null)
-            {
-                GeneralInfo.Major = (uint)major;
-                GeneralInfo.Minor = minor;
-                GeneralInfo.Release = release;
-                GeneralInfo.Build = build;
-            }
+            GeneralInfo.Major = (uint)major;
+            GeneralInfo.Minor = minor;
+            GeneralInfo.Release = release;
+            GeneralInfo.Build = build;
+
             if (isLTS is not null)
             {
-                GeneralInfo.Branch = (bool)isLTS ? UndertaleGeneralInfo.BranchType.LTS2022_0 : UndertaleGeneralInfo.BranchType.Post2022_0;
+                SetLTS((bool)isLTS);
             }
+        }
+
+        /// <summary>
+        /// Sets the branch type in GeneralInfo to the appropriate LTS or non-LTS version based on 
+        /// </summary>
+        /// <param name="isLTS">If included, alter the data branch between LTS and non-LTS.</param>
+        public void SetLTS(bool isLTS)
+        {
+            // Insert additional logic as needed for new branches using IsVersionAtLeast
+            GeneralInfo.Branch = isLTS ? UndertaleGeneralInfo.BranchType.LTS2022_0 : UndertaleGeneralInfo.BranchType.Post2022_0;
         }
 
         /// <summary>
