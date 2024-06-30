@@ -1,28 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 using System.IO;
+using SkiaSharp;
 using UndertaleModLib.Models;
 
 namespace UndertaleModLib.Util
 {
     public class TextureWorker
     {
-        private Dictionary<UndertaleEmbeddedTexture, Bitmap> embeddedDictionary = new Dictionary<UndertaleEmbeddedTexture, Bitmap>();
-        private static readonly ImageConverter _imageConverter = new ImageConverter();
+        private readonly Dictionary<UndertaleEmbeddedTexture, SKBitmap> embeddedDictionary = new();
+        private static readonly SKPaint paintBlack = new()
+        {
+            Color = SKColors.Black,
+            BlendMode = SKBlendMode.Src
+        };
+        private static readonly SKPaint paintWhite = new()
+        {
+            Color = SKColors.White,
+            BlendMode = SKBlendMode.Src
+        };
 
         // Cleans up all the images when usage of this worker is finished.
         // Should be called when a TextureWorker will never be used again.
         public void Cleanup()
         {
-            foreach (Bitmap img in embeddedDictionary.Values)
+            foreach (SKBitmap img in embeddedDictionary.Values)
                 img.Dispose();
             embeddedDictionary.Clear();
         }
 
-        public Bitmap GetEmbeddedTexture(UndertaleEmbeddedTexture embeddedTexture)
+        public SKBitmap GetEmbeddedTexture(UndertaleEmbeddedTexture embeddedTexture)
         {
             lock (embeddedDictionary)
             {
@@ -32,28 +39,31 @@ namespace UndertaleModLib.Util
             }
         }
 
-        public void ExportAsPNG(UndertaleTexturePageItem texPageItem, string FullPath, string imageName = null, bool includePadding = false)
+        public void ExportAsPNG(UndertaleTexturePageItem texPageItem, string fullPath, string imageName = null, bool includePadding = false)
         {
-            SaveImageToFile(FullPath, GetTextureFor(texPageItem, imageName != null ? imageName : Path.GetFileNameWithoutExtension(FullPath), includePadding));
+            SaveImageToFile(fullPath, GetTextureFor(texPageItem, imageName ?? Path.GetFileNameWithoutExtension(fullPath), includePadding));
         }
 
-        public Bitmap GetTextureFor(UndertaleTexturePageItem texPageItem, string imageName, bool includePadding = false)
+        public SKBitmap GetTextureFor(UndertaleTexturePageItem texPageItem, string imageName, bool includePadding = false)
         {
             int exportWidth = texPageItem.BoundingWidth; // sprite.Width
             int exportHeight = texPageItem.BoundingHeight; // sprite.Height
-            Bitmap embeddedImage = GetEmbeddedTexture(texPageItem.TexturePage);
+            SKBitmap embeddedImage = GetEmbeddedTexture(texPageItem.TexturePage);
 
             // Sanity checks.
             if (includePadding && ((texPageItem.TargetWidth > exportWidth) || (texPageItem.TargetHeight > exportHeight)))
                 throw new InvalidDataException(imageName + "'s texture is larger than its bounding box!");
 
             // Create a bitmap representing that part of the texture page.
-            Bitmap resultImage = null;
+            SKBitmap resultImage = new SKBitmap();
+
             lock (embeddedImage)
             {
                 try
                 {
-                    resultImage = embeddedImage.Clone(new Rectangle(texPageItem.SourceX, texPageItem.SourceY, texPageItem.SourceWidth, texPageItem.SourceHeight), PixelFormat.DontCare);
+                    var sourceRect = SKRectI.Create(texPageItem.SourceX, texPageItem.SourceY, texPageItem.SourceWidth, texPageItem.SourceHeight);
+                    embeddedImage.ExtractSubset(resultImage, sourceRect);
+                    resultImage = resultImage.Copy();
                 }
                 catch (OutOfMemoryException)
                 {
@@ -66,113 +76,93 @@ namespace UndertaleModLib.Util
                 resultImage = ResizeImage(resultImage, texPageItem.TargetWidth, texPageItem.TargetHeight);
 
             // Put it in the final holder image.
-            Bitmap returnImage = resultImage;
+            SKBitmap returnImage = resultImage;
             if (includePadding)
             {
-                returnImage = new Bitmap(exportWidth, exportHeight);
-                Graphics g = Graphics.FromImage(returnImage);
-                g.DrawImage(resultImage, new Rectangle(texPageItem.TargetX, texPageItem.TargetY, resultImage.Width, resultImage.Height), new Rectangle(0, 0, resultImage.Width, resultImage.Height), GraphicsUnit.Pixel);
-                g.Dispose();
+                returnImage = new SKBitmap(exportWidth, exportHeight);
+                using SKCanvas g = new(returnImage);
+                g.DrawBitmap(resultImage, SKRect.Create(0, 0, resultImage.Width, resultImage.Height),
+                             SKRect.Create(texPageItem.TargetX, texPageItem.TargetY, resultImage.Width, resultImage.Height));
             }
 
             return returnImage;
         }
 
-        public static Bitmap ReadImageFromFile(string filePath)
+        public static SKBitmap ReadImageFromFile(string filePath)
         {
             return GetImageFromByteArray(File.ReadAllBytes(filePath));
         }
 
-        // Grabbed from https://stackoverflow.com/questions/3801275/how-to-convert-image-to-byte-array/16576471#16576471
-        public static Bitmap GetImageFromByteArray(byte[] byteArray)
+        public static SKBitmap GetImageFromByteArray(byte[] byteArray)
         {
-            Bitmap bm = (Bitmap)_imageConverter.ConvertFrom(byteArray);
-
-            if (bm != null && (bm.HorizontalResolution != (int)bm.HorizontalResolution ||
-                               bm.VerticalResolution != (int)bm.VerticalResolution))
-            {
-                // Correct a strange glitch that has been observed in the test program when converting 
-                //  from a PNG file image created by CopyImageToByteArray() - the dpi value "drifts" 
-                //  slightly away from the nominal integer value
-                bm.SetResolution((int)(bm.HorizontalResolution + 0.5f),
-                                 (int)(bm.VerticalResolution + 0.5f));
-            }
-
+            SKBitmap bm = SKBitmap.Decode(byteArray);
             return bm;
         }
 
-        // This should perform a high quality resize.
-        // Grabbed from https://stackoverflow.com/questions/1922040/how-to-resize-an-image-c-sharp
-        public static Bitmap ResizeImage(Image image, int width, int height)
+        public static SKSizeI GetImageSizeFromFile(string filePath)
         {
-            var destRect = new Rectangle(0, 0, width, height);
-            var destImage = new Bitmap(width, height);
+            using SKCodec codec = SKCodec.Create(filePath);
 
-            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+            return codec?.Info.Size ?? default;
+        }
+        public static SKSizeI GetImageSizeFromByteArray(byte[] byteArray)
+        {
+            using MemoryStream stream = new(byteArray);
+            using SKCodec codec = SKCodec.Create(stream);
 
-            using (var graphics = Graphics.FromImage(destImage))
-            {
-                graphics.CompositingMode = CompositingMode.SourceCopy;
-                graphics.CompositingQuality = CompositingQuality.HighQuality;
-                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                graphics.SmoothingMode = SmoothingMode.HighQuality;
-                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            return codec?.Info.Size ?? default;
+        }
 
-                using (var wrapMode = new ImageAttributes())
-                {
-                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
-                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
-                }
-            }
-
+        public static SKBitmap ResizeImage(SKBitmap image, int width, int height, bool useNearestNeighbor = false)
+        {
+            var destImage = new SKBitmap(width, height);
+            image.ScalePixels(destImage, useNearestNeighbor ? SKFilterQuality.None : SKFilterQuality.High);
             return destImage;
         }
 
         public static byte[] ReadMaskData(string filePath)
         {
-            Bitmap image = ReadImageFromFile(filePath);
-            List<byte> bytes = new List<byte>();
+            using SKBitmap image = ReadImageFromFile(filePath);
+            List<byte> bytes = new();
 
-            int enableColor = Color.White.ToArgb();
             for (int y = 0; y < image.Height; y++)
             {
                 for (int xByte = 0; xByte < (image.Width + 7) / 8; xByte++)
                 {
                     byte fullByte = 0x00;
-                    int pxStart = (xByte * 8);
-                    int pxEnd = Math.Min(pxStart + 8, (int) image.Width);
+                    int pxStart = xByte * 8;
+                    int pxEnd = Math.Min(pxStart + 8, image.Width);
 
                     for (int x = pxStart; x < pxEnd; x++)
-                        if (image.GetPixel(x, y).ToArgb() == enableColor) // Don't use Color == OtherColor, it doesn't seem to give us the type of equals comparison we want here.
+                        if (image.GetPixel(x, y) == SKColors.White)
                             fullByte |= (byte)(0b1 << (7 - (x - pxStart)));
 
                     bytes.Add(fullByte);
                 }
             }
 
-            image.Dispose();
             return bytes.ToArray();
         }
 
         public static byte[] ReadTextureBlob(string filePath)
         {
-            Image.FromFile(filePath).Dispose(); // Make sure the file is valid image.
+            SKBitmap.Decode(filePath).Dispose(); // Make sure the file is valid image.
             return File.ReadAllBytes(filePath);
         }
 
-        public static void SaveEmptyPNG(string FullPath, int width, int height)
+        public static void SaveEmptyPNG(string fullPath, int width, int height)
         {
-            var blackImage = new Bitmap(width, height);
-            for (int x = 0; x < width; x++)
-                for (int y = 0; y < height; y++)
-                    blackImage.SetPixel(x, y, Color.Black);
-            SaveImageToFile(FullPath, blackImage);
+            var blackImage = new SKBitmap(width, height);
+            using SKCanvas g = new(blackImage);
+            g.Clear(SKColors.Black);
+            SaveImageToFile(fullPath, blackImage);
         }
 
-        public static Bitmap GetCollisionMaskImage(UndertaleSprite sprite, UndertaleSprite.MaskEntry mask)
+        public static SKBitmap GetCollisionMaskImage(UndertaleSprite sprite, UndertaleSprite.MaskEntry mask)
         {
             byte[] maskData = mask.Data;
-            Bitmap bitmap = new Bitmap((int)sprite.Width, (int)sprite.Height, PixelFormat.Format32bppArgb); // Ugh. I want to use 1bpp, but for some BS reason C# doesn't allow SetPixel in that mode.
+            SKBitmap bitmap = new((int)sprite.Width, (int)sprite.Height, SKColorType.Gray8, SKAlphaType.Premul);
+            using SKCanvas g = new(bitmap);
 
             for (int y = 0; y < sprite.Height; y++)
             {
@@ -181,7 +171,7 @@ namespace UndertaleModLib.Util
                 {
                     byte temp = maskData[rowStart + (x / 8)];
                     bool pixelBit = (temp & (0b1 << (7 - (x % 8)))) != 0b0;
-                    bitmap.SetPixel(x, y, pixelBit ? Color.White : Color.Black);
+                    g.DrawPoint(x, y, pixelBit ? paintWhite : paintBlack);
                 }
             }
 
@@ -193,22 +183,19 @@ namespace UndertaleModLib.Util
             SaveImageToFile(fullPath, GetCollisionMaskImage(sprite, mask));
         }
 
-        public static byte[] GetImageBytes(Image image, bool disposeImage = true)
+        public static byte[] GetImageBytes(SKBitmap image, bool disposeImage = true)
         {
-            using (var ms = new MemoryStream())
-            {
-                image.Save(ms, image.RawFormat);
-                byte[] result = ms.ToArray();
-                if (disposeImage)
-                    image.Dispose();
-                return result;
-            }
+            using var data = image.Encode(SKEncodedImageFormat.Png, 100);
+            byte[] result = data.ToArray();
+            if (disposeImage)
+                image.Dispose();
+            return result;
         }
 
-        public static void SaveImageToFile(string FullPath, Image image, Boolean disposeImage = true)
+        public static void SaveImageToFile(string fullPath, SKBitmap image, bool disposeImage = true)
         {
-            var stream = new FileStream(FullPath, FileMode.Create);
-            image.Save(stream, ImageFormat.Png);
+            using var stream = new FileStream(fullPath, FileMode.Create);
+            image.Encode(stream, SKEncodedImageFormat.Png, 100);
             stream.Close();
             if (disposeImage)
                 image.Dispose();

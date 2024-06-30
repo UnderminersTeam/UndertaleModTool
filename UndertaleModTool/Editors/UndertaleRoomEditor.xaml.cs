@@ -1,4 +1,5 @@
 using Microsoft.Win32;
+using SkiaSharp;
 using System;
 using System.Buffers;
 using System.Collections;
@@ -2496,12 +2497,8 @@ namespace UndertaleModTool
     }
     public class TileRectanglesConverter : IMultiValueConverter
     {
-        [DllImport("gdi32.dll", EntryPoint = "DeleteObject")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool DeleteObject([In] IntPtr hObject);
-
         public static ConcurrentDictionary<Tuple<string, uint>, ImageSource> TileCache { get; set; } = new();
-        private static CachedTileDataLoader loader = new();
+        private static readonly CachedTileDataLoader loader = new();
 
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
@@ -2534,9 +2531,16 @@ namespace UndertaleModTool
                     {
                         Tuple<string, uint> tileKey = new(tilesBG.Texture.Name.Content, id);
 
-                        IntPtr bmpPtr = CachedTileDataLoader.TileCache[tileKey].GetHbitmap();
-                        ImageSource spriteSrc = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(bmpPtr, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-                        DeleteObject(bmpPtr);
+                        SKBitmap bmp = CachedTileDataLoader.TileCache[tileKey];
+                        var data = bmp.Encode(SKEncodedImageFormat.Png, 100);
+
+                        BitmapImage spriteSrc = new();
+                        spriteSrc.BeginInit();
+                        spriteSrc.CacheOption = BitmapCacheOption.OnLoad;
+                        spriteSrc.StreamSource = data.AsStream();
+                        spriteSrc.EndInit();
+                        data.Dispose();
+
                         spriteSrc.Freeze(); // allow UI thread access
 
                         TileCache.TryAdd(tileKey, spriteSrc);
@@ -2564,6 +2568,7 @@ namespace UndertaleModTool
                                 return;
                             }
 
+                            // Don't forget to also modify `CachedTileDataLoader.CreateLayerSource()` in "Converters/UndertaleCachedImageLoader.cs"
                             switch (id >> 28)
                             {
                                 case 1:

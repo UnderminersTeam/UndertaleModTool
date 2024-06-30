@@ -3,7 +3,6 @@
 
 using System.IO;
 using System;
-using System.Drawing;
 using System.Windows.Forms;
 using UndertaleModLib.Util;
 
@@ -25,10 +24,10 @@ else if (GameName == "deltarune chapter 1&2")
 }
 if (Data.GeneralInfo.Name.Content == "NXTALE" || Data.GeneralInfo.Name.Content.StartsWith("UNDERTALE")) 
 {
-	if (!ScriptQuestion("Would you like to apply this mod?"))
-	{
-		return;
-	}
+    if (!ScriptQuestion("Would you like to apply this mod?"))
+    {
+        return;
+    }
 }
 else if (Data.GeneralInfo.DisplayName.Content == "SURVEY_PROGRAM" || Data.GeneralInfo.DisplayName.Content == "DELTARUNE Chapter 1")
 {

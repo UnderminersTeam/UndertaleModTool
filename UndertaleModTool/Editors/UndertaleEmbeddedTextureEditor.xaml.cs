@@ -14,7 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using System.Drawing;
+using SkiaSharp;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 using System.Globalization;
@@ -154,12 +154,7 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    Bitmap bmp;
-                    using (var ms = new MemoryStream(TextureWorker.ReadTextureBlob(dlg.FileName)))
-                    {
-                        bmp = new Bitmap(ms);
-                    }
-                    bmp.SetResolution(96.0F, 96.0F);
+                    using SKBitmap bmp = SKBitmap.Decode(TextureWorker.ReadTextureBlob(dlg.FileName));
 
                     var width = (uint)bmp.Width;
                     var height = (uint)bmp.Height;
@@ -169,14 +164,12 @@ namespace UndertaleModTool
                         mainWindow.ShowWarning("WARNING: texture page dimensions are not powers of 2. Sprite blurring is very likely in game.", "Unexpected texture dimensions");
                     }
 
-                    using (var stream = new MemoryStream())
-                    {
-                        bmp.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-                        target.TextureData.TextureBlob = stream.ToArray();
+                    using var stream = new MemoryStream();
+                    bmp.Encode(stream, SKEncodedImageFormat.Png, 100);
+                    target.TextureData.TextureBlob = stream.ToArray();
 
-                        TexWidth.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
-                        TexHeight.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
-                    }
+                    TexWidth.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
+                    TexHeight.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
                 }
                 catch (Exception ex)
                 {

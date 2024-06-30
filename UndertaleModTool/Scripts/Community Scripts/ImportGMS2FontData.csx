@@ -2,7 +2,7 @@
 
 using System;
 using System.IO;
-using System.Drawing;
+using SkiaSharp;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +11,7 @@ using UndertaleModLib;
 using UndertaleModLib.Util;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
@@ -96,10 +97,10 @@ else if (attemptToFixFontNotAppearing)
         fontTexGroup.Fonts.Add(new UndertaleResourceById<UndertaleFont, UndertaleChunkFONT>() { Resource = font });
 }
 
-// Prepare font texture
-Bitmap textureBitmap = new Bitmap(fontTexturePath);
-// Make the DPI exactly 96 for this bitmap
-textureBitmap.SetResolution(96.0F, 96.0F);
+// Get texture properties
+var imgSize = TextureWorker.GetImageSizeFromFile(fontTexturePath);
+ushort width = (ushort)imgSize.Width;
+ushort height = (ushort)imgSize.Height;
 
 UndertaleEmbeddedTexture texture = new UndertaleEmbeddedTexture();
 // ??? Why?
@@ -115,14 +116,14 @@ texturePageItem.Name = new UndertaleString("PageItem " + Data.TexturePageItems.C
 texturePageItem.TexturePage = texture;
 texturePageItem.SourceX = 0;
 texturePageItem.SourceY = 0;
-texturePageItem.SourceWidth = (ushort)textureBitmap.Width;
-texturePageItem.SourceHeight = (ushort)textureBitmap.Height;
+texturePageItem.SourceWidth = width;
+texturePageItem.SourceHeight = height;
 texturePageItem.TargetX = 0;
 texturePageItem.TargetY = 0;
-texturePageItem.TargetWidth = (ushort)textureBitmap.Width;
-texturePageItem.TargetHeight = (ushort)textureBitmap.Height;
-texturePageItem.BoundingWidth = (ushort)textureBitmap.Width;
-texturePageItem.BoundingHeight = (ushort)textureBitmap.Height;
+texturePageItem.TargetWidth = width;
+texturePageItem.TargetHeight = height;
+texturePageItem.BoundingWidth = width;
+texturePageItem.BoundingHeight = height;
 Data.TexturePageItems.Add(texturePageItem);
 
 font.DisplayName = Data.Strings.MakeString((string)fontData["fontName"]);

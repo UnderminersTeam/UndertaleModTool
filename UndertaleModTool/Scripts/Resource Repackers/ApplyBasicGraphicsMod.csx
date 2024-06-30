@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using System.Drawing;
+using SkiaSharp;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -105,12 +105,7 @@ await Task.Run(() => {
         {
             try
             {
-                Bitmap bmp;
-                using (var ms = new MemoryStream(TextureWorker.ReadTextureBlob(file)))
-                {
-                    bmp = new Bitmap(ms);
-                }
-                bmp.SetResolution(96.0F, 96.0F);
+                SKBitmap bmp = SKBitmap.Decode(file);
                 var width = (uint)bmp.Width;
                 var height = (uint)bmp.Height;
                 var CheckWidth = (uint)(sprite.Textures[frame].Texture.TargetWidth);
