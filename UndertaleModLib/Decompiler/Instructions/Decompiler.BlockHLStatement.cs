@@ -69,5 +69,12 @@ public static partial class Decompiler
             Statement statement = blockStatement.Statements[0];
             return !(statement is IfHLStatement || statement is LoopHLStatement || statement is HLSwitchStatement || statement is WithHLStatement); // Nesting these can cause issues.
         }
-    };
+
+        internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
+        {
+            foreach (var stmt in Statements)
+                stmt.DoTypePropagation(context, AssetIDType.Other);
+            return suggestedType;
+        }
+    }
 }
