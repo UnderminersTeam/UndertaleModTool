@@ -17,6 +17,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Models;
+using Newtonsoft.Json;
 
 namespace UndertaleModCli;
 
@@ -26,6 +27,7 @@ namespace UndertaleModCli;
 public partial class Program : IScriptInterface
 {
     #region Properties
+
     // taken from the Linux programmer manual:
     /// <summary>
     /// Value that should be returned on a successful operation.
@@ -80,6 +82,7 @@ public partial class Program : IScriptInterface
     /// Determines if actions should show a "this is finished" text. Gets set by <see cref="SetFinishedMessage"/>.
     /// </summary>
     private bool FinishedMessageEnabled { get; set; }
+
     #endregion
 
     /// <summary>
@@ -89,41 +92,37 @@ public partial class Program : IScriptInterface
     /// <returns>Result code of the program.</returns>
     public static int Main(string[] args)
     {
-        var verboseOption = new Option<bool>(new []{"-v", "--verbose"}, "Detailed logs");
+        var verboseOption = new Option<bool>(new[] { "-v", "--verbose" }, "Detailed logs");
 
         var dataFileArgument = new Argument<FileInfo>("datafile", "Path to the data.win/.ios/.droid/.unx file");
 
         // Setup new command
         Command newCommand = new Command("new", "Generates a blank data file")
         {
-            new Option<FileInfo>(new []{"-o", "--output"}, () => new NewOptions().Output),
-            new Option<bool>(new []{"-f", "--overwrite"}, "Overwrite destination file if it already exists"),
-            new Option<bool>(new []{"-", "--stdout"}, "Write new data content to stdout"),  // "-" is often used in *nix land as a replacement for stdout
+            new Option<FileInfo>(new[] { "-o", "--output" }, () => new NewOptions().Output),
+            new Option<bool>(new[] { "-f", "--overwrite" }, "Overwrite destination file if it already exists"),
+            new Option<bool>(new[] { "-", "--stdout" }, "Write new data content to stdout"), // "-" is often used in *nix land as a replacement for stdout
             verboseOption
         };
         newCommand.Handler = CommandHandler.Create<NewOptions>(Program.New);
 
         // Setup load command
-        var scriptRunnerOption = new Option<FileInfo[]>(new []{ "-s", "--scripts"}, "Scripts to apply to the <datafile>. Ex. a.csx b.csx");
+        var scriptRunnerOption = new Option<FileInfo[]>(new[] { "-s", "--scripts" }, "Scripts to apply to the <datafile>. Ex. a.csx b.csx");
         Command loadCommand = new Command("load", "Load a data file and perform actions on it")
         {
             dataFileArgument,
             scriptRunnerOption,
             verboseOption,
             //TODO: why no force overwrite here, but needed for new?
-            new Option<FileInfo>(new []{"-o", "--output"}, "Where to save the modified data file"),
-            new Option<string>(new []{"-l","--line"}, "Run C# string. Runs AFTER everything else"),
+            new Option<FileInfo>(new[] { "-o", "--output" }, "Where to save the modified data file"),
+            new Option<string>(new[] { "-l", "--line" }, "Run C# string. Runs AFTER everything else"),
             //TODO: make interactive another Command
-            new Option<bool>(new []{"-i", "--interactive"}, "Interactive menu launch")
+            new Option<bool>(new[] { "-i", "--interactive" }, "Interactive menu launch")
         };
         loadCommand.Handler = CommandHandler.Create<LoadOptions>(Program.Load);
 
         // Setup info command
-        Command infoCommand = new Command("info", "Show basic info about the game data file")
-        {
-            dataFileArgument,
-            verboseOption
-        };
+        Command infoCommand = new Command("info", "Show basic info about the game data file") { dataFileArgument, verboseOption };
         infoCommand.Handler = CommandHandler.Create<InfoOptions>(Program.Info);
 
         // Setup dump command
@@ -131,11 +130,11 @@ public partial class Program : IScriptInterface
         {
             dataFileArgument,
             verboseOption,
-            new Option<DirectoryInfo>(new []{"-o", "--output"}, "Where to dump data file properties to. Will default to path of the data file"),
-            new Option<string[]>(new[] {"-c", "--code"},
+            new Option<DirectoryInfo>(new[] { "-o", "--output" }, "Where to dump data file properties to. Will default to path of the data file"),
+            new Option<string[]>(new[] { "-c", "--code" },
                 $"The code files to dump. Ex. gml_Script_init_map gml_Script_reset_map. Specify '{UMT_DUMP_ALL}' to dump all code entries"),
-            new Option<bool>(new[] {"-s", "--strings"}, "Whether to dump all strings"),
-            new Option<bool>(new[] {"-t", "--textures"}, "Whether to dump all embedded textures")
+            new Option<bool>(new[] { "-s", "--strings" }, "Whether to dump all strings"),
+            new Option<bool>(new[] { "-t", "--textures" }, "Whether to dump all embedded textures")
         };
         dumpCommand.Handler = CommandHandler.Create<DumpOptions>(Program.Dump);
 
@@ -144,10 +143,10 @@ public partial class Program : IScriptInterface
         {
             dataFileArgument,
             verboseOption,
-            new Option<FileInfo>(new []{"-o", "--output"}, "Where to save the modified data file"),
-            new Option<string[]>(new[] {"-c", "--code"},
+            new Option<FileInfo>(new[] { "-o", "--output" }, "Where to save the modified data file"),
+            new Option<string[]>(new[] { "-c", "--code" },
                 $"Which code files to replace with which file. Ex. 'gml_Script_init_map=./newCode.gml'. It is possible to replace everything by using '{UMT_REPLACE_ALL}'"),
-            new Option<string[]>(new []{"-t", "--textures"},
+            new Option<string[]>(new[] { "-t", "--textures" },
                 $"Which embedded texture entry to replace with which file. Ex. 'Texture 0=./newTexture.png'. It is possible to replace everything by using '{UMT_REPLACE_ALL}'")
         };
         replaceCommand.Handler = CommandHandler.Create<ReplaceOptions>(Program.Replace);
@@ -183,7 +182,7 @@ public partial class Program : IScriptInterface
         this.ExePath = Environment.CurrentDirectory;
         this.Output = output;
 
-        this.Data = ReadDataFile(datafile, this.Verbose ? WarningHandler : null, this.Verbose ? MessageHandler : null);
+        this.Data = ReadDataFile(datafile, this.Verbose ? WarningHandler : DummyHandler, this.Verbose ? MessageHandler : DummyHandler);
 
         FinishedMessageEnabled = true;
         this.CliScriptOptions = ScriptOptions.Default
@@ -193,6 +192,7 @@ public partial class Program : IScriptInterface
                 "System.Text.RegularExpressions")
             .AddReferences(typeof(UndertaleObject).GetTypeInfo().Assembly,
                 GetType().GetTypeInfo().Assembly,
+                typeof(JsonConvert).GetTypeInfo().Assembly,
                 typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly,
                 typeof(TextureWorker).GetTypeInfo().Assembly)
             // "WithEmitDebugInformation(true)" not only lets us to see a script line number which threw an exception,
@@ -341,8 +341,15 @@ public partial class Program : IScriptInterface
             return EXIT_FAILURE;
         }
 
+        if (program.Data.IsYYC())
+        {
+            Console.WriteLine("The game was made with YYC (YoYo Compiler), which means that the code was compiled into the executable. " +
+                              "There is thus no code to dump. Exiting.");
+            return EXIT_SUCCESS;
+        }
+
         // If user provided code to dump, dump code
-        if ((options.Code?.Length > 0) && (program.Data.Code.Count > 0))
+        if ((options.Code?.Length > 0) && (program.Data.Code?.Count > 0))
         {
             // If user wanted to dump everything, do that, otherwise only dump what user provided
             string[] codeArray;
@@ -544,6 +551,7 @@ public partial class Program : IScriptInterface
                     bool isInputYes = Console.ReadKey(false).Key == ConsoleKey.Y;
                     Console.WriteLine();
                     if (isInputYes) return;
+
                     break;
                 }
 
@@ -572,8 +580,18 @@ public partial class Program : IScriptInterface
         Console.WriteLine($"{Data.Paths.Count} Paths, {Data.Scripts.Count} Scripts, {Data.Shaders.Count} Shaders");
         Console.WriteLine($"{Data.Fonts.Count} Fonts, {Data.Timelines.Count} Timelines, {Data.GameObjects.Count} Game Objects");
         Console.WriteLine($"{Data.Rooms.Count} Rooms, {Data.Extensions.Count} Extensions, {Data.TexturePageItems.Count} Texture Page Items");
-        Console.WriteLine($"{Data.Code.Count} Code Entries, {Data.Variables.Count} Variables, {Data.Functions.Count} Functions");
-        Console.WriteLine($"{Data.CodeLocals.Count} Code locals, {Data.Strings.Count} Strings, {Data.EmbeddedTextures.Count} Embedded Textures");
+        if (!Data.IsYYC())
+        {
+            Console.WriteLine($"{Data.Code.Count} Code Entries, {Data.Variables.Count} Variables, {Data.Functions.Count} Functions");
+            Console.WriteLine($"{Data.CodeLocals.Count} Code locals, {Data.Strings.Count} Strings, {Data.EmbeddedTextures.Count} Embedded Textures");
+        }
+        else
+        {
+            Console.WriteLine("Unknown amount of Code entries and Code locals");
+        }
+
+        Console.WriteLine($"{Data.Strings.Count} Strings");
+        Console.WriteLine($"{Data.EmbeddedTextures.Count} Embedded Textures");
         Console.WriteLine($"{Data.EmbeddedAudio.Count} Embedded Audio");
 
         if (IsInteractive) Pause();
@@ -817,6 +835,13 @@ public partial class Program : IScriptInterface
     /// </summary>
     /// <param name="message">The message to print</param>
     private static void MessageHandler(string message) => Console.WriteLine($"[MESSAGE]: {message}");
+
+    /// <summary>
+    /// A dummy handler that does nothing.
+    /// </summary>
+    /// <param name="message">Not used.</param>
+    private static void DummyHandler(string message)
+    {  }
 
     //TODO: document these as well
     private void ProgressUpdater()

@@ -344,6 +344,7 @@ namespace UndertaleModLib
             if (poolSize != 0 && poolSize != objectPool.Count)
             {
                 SubmitWarning("Warning - the estimated object pool size differs from the actual size.\n" +
+                             $"Estimated: {poolSize}, Actual: {objectPool.Count}\n" +
                               "Please report this on UndertaleModTool GitHub.");
             }
 
@@ -638,7 +639,7 @@ namespace UndertaleModLib
                 if (length != expectedLength)
                 {
                     int diff = (int)expectedLength - (int)length;
-                    Console.WriteLine("WARNING: File specified length " + expectedLength + ", but read only " + length + " (" + diff + " padding?)");
+                    reader.SubmitMessage("WARNING: File specified length " + expectedLength + ", but read only " + length + " (" + diff + " padding?)");
                     if (diff > 0)
                         reader.Position += (uint)diff;
                     else

@@ -51,15 +51,18 @@ namespace UndertaleModTool
                         Directory.CreateDirectory(path);
 
                         // textures
-                        foreach (var tex in sprite.SpineTextures.Select((tex, id) => new { id,tex }))
+                        if (sprite.SpineHasTextureData)
                         {
-                            try
+                            foreach (var tex in sprite.SpineTextures.Select((tex, id) => new { id, tex }))
                             {
-                                File.WriteAllBytes(Path.Combine(path, tex.id + ext), tex.tex.TexBlob);
-                            }
-                            catch (Exception ex)
-                            {
-                                mainWindow.ShowError("Failed to export file: " + ex.Message, "Failed to export file");
+                                try
+                                {
+                                    File.WriteAllBytes(Path.Combine(path, tex.id + ext), tex.tex.TexBlob);
+                                } 
+                                catch (Exception ex) 
+                                {
+                                    mainWindow.ShowError("Failed to export file: " + ex.Message, "Failed to export file");
+                                }
                             }
                         }
 
@@ -88,7 +91,8 @@ namespace UndertaleModTool
             if (sprite.IsSpineSprite)
             {
                 ExportAllSpine(dlg, sprite);
-                return;
+                if (sprite.SpineHasTextureData)
+                    return;
             }
 
             TextureWorker worker = new TextureWorker();

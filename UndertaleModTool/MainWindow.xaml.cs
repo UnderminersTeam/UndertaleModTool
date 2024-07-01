@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
-using Microsoft.CodeAnalysis.Scripting.Hosting;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using System;
@@ -33,11 +32,8 @@ using UndertaleModTool.Windows;
 using System.IO.Pipes;
 using Ookii.Dialogs.Wpf;
 
-using ColorConvert = System.Windows.Media.ColorConverter;
 using System.Text.RegularExpressions;
 using System.Windows.Data;
-using System.Reflection.Metadata.Ecma335;
-using System.Windows.Media.Imaging;
 using System.Security.Cryptography;
 using System.Collections.Concurrent;
 using System.Runtime;
@@ -49,7 +45,6 @@ using System.Net;
 using System.Globalization;
 using System.Windows.Controls.Primitives;
 using System.Runtime.CompilerServices;
-using System.Diagnostics.Metrics;
 using System.Windows.Interop;
 
 namespace UndertaleModTool
@@ -116,12 +111,6 @@ namespace UndertaleModTool
         public string ExePath { get; private set; } = Program.GetExecutableDirectory();
         public string ScriptErrorType { get; set; } = "";
 
-        public enum CodeEditorMode
-        {
-            Unstated,
-            DontDecompile,
-            Decompile
-        }
         public enum SaveResult
         {
             NotSaved,
@@ -133,9 +122,6 @@ namespace UndertaleModTool
             Left,
             Right
         }
-
-        // TODO: move this to the code editor
-        public static CodeEditorMode CodeEditorDecompile { get; set; } = CodeEditorMode.Unstated;
 
         private int progressValue;
         private Task updater;
@@ -957,7 +943,6 @@ namespace UndertaleModTool
                         data = UndertaleIO.Read(stream, warning =>
                         {
                             this.ShowWarning(warning, "Loading warning");
-
                             if (warning.Contains("unserializeCountError.txt")
                                 || warning.Contains("object pool size"))
                                 return;
@@ -973,6 +958,9 @@ namespace UndertaleModTool
                 }
                 catch (Exception e)
                 {
+#if DEBUG
+                    Debug.WriteLine(e);
+#endif
                     this.ShowError("An error occured while trying to load:\n" + e.Message, "Load error");
                 }
 
@@ -1147,7 +1135,7 @@ namespace UndertaleModTool
                                 {
                                     if (debugMode == DebugDataDialog.DebugDataMode.FullAssembler || instr.Kind == UndertaleInstruction.Opcode.Pop || instr.Kind == UndertaleInstruction.Opcode.Popz || instr.Kind == UndertaleInstruction.Opcode.B || instr.Kind == UndertaleInstruction.Opcode.Bt || instr.Kind == UndertaleInstruction.Opcode.Bf || instr.Kind == UndertaleInstruction.Opcode.Ret || instr.Kind == UndertaleInstruction.Opcode.Exit)
                                         debugInfo.Add(new UndertaleDebugInfo.DebugInfoPair() { SourceCodeOffset = (uint)sb.Length, BytecodeOffset = instr.Address * 4 });
-                                    sb.Append(instr.ToString(code));
+                                    instr.ToString(sb, code);
                                     sb.Append('\n');
                                 }
                                 outputs[i] = sb.ToString();
@@ -2013,7 +2001,7 @@ namespace UndertaleModTool
 
         private void MenuItem_Add_Click(object sender, RoutedEventArgs e)
         {
-            object source = null;
+            object source;
             try
             {
                 source = (MainTree.SelectedItem as TreeViewItem).ItemsSource;
@@ -2048,11 +2036,20 @@ namespace UndertaleModTool
                 {
                     notDataNewName = "Texture " + list.Count;
                 }
+                if (obj is UndertaleShader shader)
+                {
+                    shader.GLSL_ES_Vertex = Data.Strings.MakeString("", true);
+                    shader.GLSL_ES_Fragment = Data.Strings.MakeString("", true);
+                    shader.GLSL_Vertex = Data.Strings.MakeString("", true);
+                    shader.GLSL_Fragment = Data.Strings.MakeString("", true);
+                    shader.HLSL9_Vertex = Data.Strings.MakeString("", true);
+                    shader.HLSL9_Fragment = Data.Strings.MakeString("", true);
+                }
 
                 if (doMakeString)
                 {
-                    string newname = obj.GetType().Name.Replace("Undertale", "").Replace("GameObject", "Object").ToLower() + list.Count;
-                    (obj as UndertaleNamedResource).Name = Data.Strings.MakeString(newname);
+                    string newName = obj.GetType().Name.Replace("Undertale", "").Replace("GameObject", "Object").ToLower() + list.Count;
+                    (obj as UndertaleNamedResource).Name = Data.Strings.MakeString(newName);
                     if (obj is UndertaleRoom)
                     {
                         (obj as UndertaleRoom).Caption = Data.Strings.MakeString("");
@@ -2065,7 +2062,7 @@ namespace UndertaleModTool
                     {
                         UndertaleCode code = new UndertaleCode();
                         string prefix = Data.IsVersionAtLeast(2, 3) ? "gml_GlobalScript_" : "gml_Script_";
-                        code.Name = Data.Strings.MakeString(prefix + newname);
+                        code.Name = Data.Strings.MakeString(prefix + newName);
                         Data.Code.Add(code);
                         if (Data?.GeneralInfo.BytecodeVersion > 14)
                         {
@@ -2080,7 +2077,7 @@ namespace UndertaleModTool
                         }
                         (obj as UndertaleScript).Code = code;
                     }
-                    if ((obj is UndertaleCode) && (Data?.GeneralInfo.BytecodeVersion > 14))
+                    if ((obj is UndertaleCode) && (Data.GeneralInfo.BytecodeVersion > 14))
                     {
                         UndertaleCodeLocals locals = new UndertaleCodeLocals();
                         locals.Name = (obj as UndertaleCode).Name;
@@ -2421,7 +2418,11 @@ namespace UndertaleModTool
                 updater.Dispose();
         }
 
-        public void OpenCodeFile(string name, CodeEditorMode editorDecompile, bool inNewTab = false)
+        public void OpenCodeEntry(string name, UndertaleCodeEditor.CodeEditorTab editorTab, bool inNewTab = false)
+        {
+            OpenCodeEntry(name, -1, editorTab, inNewTab);
+        }
+        public void OpenCodeEntry(string name, int lineNum, UndertaleCodeEditor.CodeEditorTab editorTab, bool inNewTab = false)
         {
             UndertaleCode code = Data.Code.ByName(name);
 
@@ -2429,38 +2430,49 @@ namespace UndertaleModTool
             {
                 Focus();
 
+                #pragma warning disable CA1416
                 if (Selected == code)
                 {
-                    #pragma warning disable CA1416
                     var codeEditor = FindVisualChild<UndertaleCodeEditor>(DataEditor);
                     if (codeEditor is null)
                     {
-                        Debug.WriteLine("Cannot select the code editor mode tab - its instance is not found.");
+                        Debug.WriteLine("Cannot select the code editor mode tab - the instance is not found.");
                     }
                     else
                     {
-                        if (editorDecompile == CodeEditorMode.Decompile
+                        if (editorTab == UndertaleCodeEditor.CodeEditorTab.Decompiled
                             && !codeEditor.DecompiledTab.IsSelected)
                         {
                             codeEditor.CodeModeTabs.SelectedItem = codeEditor.DecompiledTab;
                         }
-                        else if (editorDecompile == CodeEditorMode.DontDecompile
+                        else if (editorTab == UndertaleCodeEditor.CodeEditorTab.Disassembly
                             && !codeEditor.DisassemblyTab.IsSelected)
                         {
                             codeEditor.CodeModeTabs.SelectedItem = codeEditor.DisassemblyTab;
                         }
+
+                        var editor = editorTab == UndertaleCodeEditor.CodeEditorTab.Decompiled
+                                     ? codeEditor.DecompiledEditor : codeEditor.DisassemblyEditor;
+                        CurrentTab?.SaveTabContentState();
+                        UndertaleCodeEditor.ChangeLineNumber(lineNum, editor);
                     }
-                    #pragma warning restore CA1416
                 }
                 else
-                    CodeEditorDecompile = editorDecompile;
+                {
+                    if (CurrentTab?.CurrentObject is UndertaleCode)
+                        CurrentTab.SaveTabContentState();
+
+                    UndertaleCodeEditor.EditorTab = editorTab;
+                    UndertaleCodeEditor.ChangeLineNumber(lineNum, editorTab);
+                }
+                #pragma warning restore CA1416
 
                 HighlightObject(code);
                 ChangeSelection(code, inNewTab);
             }
             else
             {
-                this.ShowError($"Can't find code \"{name}\".\n(probably, different game data was loaded)");
+                this.ShowError($"Can't find code entry \"{name}\".\n(probably, different game data was loaded)");
             }
         }
 
@@ -2718,7 +2730,7 @@ namespace UndertaleModTool
             TextInput textOutput = new TextInput(labelText, titleText, message, isMultiline, true); //read-only mode
             textOutput.Show();
         }
-        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null)
+        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int lineNum, string codeLine)>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null)
         {
             await Task.Delay(150); //wait until progress bar status is displayed
 
@@ -2731,7 +2743,7 @@ namespace UndertaleModTool
 
             PlayInformationSound();
         }
-        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null)
+        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<(int lineNum, string codeLine)>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null)
         {
             await Task.Delay(150);
 
@@ -3051,7 +3063,7 @@ namespace UndertaleModTool
 
                     // Unzip double-zipped update
                     ZipFile.ExtractToDirectory(Path.Combine(tempFolder, "Update.zip.zip"), tempFolder, true);
-                    File.Move(Path.Combine(tempFolder, $"{patchName}.zip"), Path.Combine(tempFolder, "Update.zip"));
+                    File.Move(Path.Combine(tempFolder, $"{patchName}.zip"), Path.Combine(tempFolder, "Update.zip"), true);
                     File.Delete(Path.Combine(tempFolder, "Update.zip.zip"));
 
                     string updaterFolder = Path.Combine(ExePath, "Updater");

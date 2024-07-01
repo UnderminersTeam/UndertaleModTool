@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
+using UndertaleModLib.Util;
 
 namespace UndertaleModLib.Models;
 
@@ -362,10 +363,18 @@ public class UndertaleInstruction : UndertaleObject
     public Reference<T> GetReference<T>(bool allowResolve = false) where T : class, UndertaleObject, ReferencedObject
     {
         Reference<T> res = (Destination as Reference<T>) ?? (Function as Reference<T>) ?? (Value as Reference<T>);
-        if (allowResolve && res == null && Value is int val)
+        if (allowResolve && res == null)
         {
-            Value = new Reference<T>(val);
-            return (Reference<T>)Value;
+            if (Kind == Opcode.Break && Value is short breakType && breakType == -11 /* pushref */)
+            {
+                Function = new Reference<UndertaleFunction>(IntArgument);
+                return Function as Reference<T>;
+            }
+            if (Value is int val)
+            {
+                Value = new Reference<T>(val);
+                return (Reference<T>)Value;
+            }
         }
         return res;
     }
@@ -562,7 +571,13 @@ public class UndertaleInstruction : UndertaleObject
                 writer.Write((short)Value);
                 writer.Write((byte)Type1);
                 writer.Write((byte)Kind);
-                if (Type1 == DataType.Int32) writer.Write(IntArgument);
+                if (Type1 == DataType.Int32)
+                {
+                    if (Function != null)
+                        writer.WriteUndertaleObject(Function);
+                    else
+                        writer.Write(IntArgument);
+                }
             }
                 break;
 
@@ -754,6 +769,14 @@ public class UndertaleInstruction : UndertaleObject
                     if (!reader.undertaleData.IsVersionAtLeast(2023, 8))
                         reader.undertaleData.SetGMS2Version(2023, 8);
                 }
+                if (reader.undertaleData.IsVersionAtLeast(2, 3))
+                {
+                    if ((short)Value == -10) // chknullish instruction, added in 2.3.7
+                    {
+                        if (!reader.undertaleData.IsVersionAtLeast(2, 3, 7))
+                            reader.undertaleData.SetGMS2Version(2, 3, 7);
+                    }
+                }
             }
                 break;
 
@@ -848,11 +871,37 @@ public class UndertaleInstruction : UndertaleObject
     {
         return ToString(null);
     }
-
+    
+    /// <summary>
+    /// <inheritdoc cref="ToString()"/>
+    /// </summary>
+    /// <param name="code">The <see cref="UndertaleCode"/> code entry for which these instructions belong to.</param>
+    /// <param name="blocks">A list of block addresses for the code entry for which these instructions belong to.</param>
+    /// <returns></returns>
     public string ToString(UndertaleCode code, List<uint> blocks = null)
     {
         StringBuilder sb = new StringBuilder();
+        ToString(sb, code, blocks);
+        return sb.ToString();
+    }
+    
+    /// <summary>
+    /// Inserts a string representation of this object at a specified index in a <see cref="StringBuilder"/>.
+    /// </summary>
+    /// <param name="stringBuilder">The <see cref="StringBuilder"/> instance on where to insert the string representation.</param>
+    /// <param name="code"><inheritdoc cref="ToString(UndertaleCode, List{uint})"/></param>
+    /// <param name="blocks"><inheritdoc cref="ToString(UndertaleCode, List{uint})"/></param>
+    /// <param name="index">The index on where to insert the string representation. If this is <see langword="null"/>
+    /// it will use <paramref name="stringBuilder.Length"/> as the index instead.</param>
+    /// <remarks>Note that performance of this function can be drastically different, depending on <paramref name="index"/>.
+    /// For best results, it's recommended to leave it at <see langword="null"/>.</remarks>
+    public void ToString(StringBuilder stringBuilder, UndertaleCode code, List<uint> blocks = null, int? index = null)
+    {
+        if (index is null)
+            index = stringBuilder.Length;
 
+        StringBuilderHelper sbh = new StringBuilderHelper(index.Value);
+        
         string kind = Kind.ToString();
         var type = GetInstructionType(Kind);
         bool unknownBreak = false;
@@ -865,114 +914,129 @@ public class UndertaleInstruction : UndertaleObject
             }
         }
         else
+        {
             kind = kind.ToLower(CultureInfo.InvariantCulture);
-        sb.Append(kind);
+        }
+
+        sbh.Append(stringBuilder, kind);
 
         switch (GetInstructionType(Kind))
         {
             case InstructionType.SingleTypeInstruction:
-                sb.Append("." + Type1.ToOpcodeParam());
+                sbh.Append(stringBuilder, '.');
+                sbh.Append(stringBuilder, Type1.ToOpcodeParam());
 
                 if (Kind == Opcode.Dup || Kind == Opcode.CallV)
                 {
-                    sb.Append(' ');
-                    sb.Append(Extra.ToString());
+                    sbh.Append(stringBuilder, ' ');
+                    sbh.Append(stringBuilder, Extra);
                     if (Kind == Opcode.Dup)
                     {
                         if ((byte)ComparisonKind != 0)
                         {
                             // Special dup instruction with extra parameters
-                            sb.Append(' ');
-                            sb.Append((byte)ComparisonKind & 0x7F);
-                            sb.Append(" ;;; this is a weird GMS2.3+ swap instruction");
+                            sbh.Append(stringBuilder, ' ');
+                            sbh.Append(stringBuilder, (byte)ComparisonKind & 0x7F);
+                            sbh.Append(stringBuilder, " ;;; this is a weird GMS2.3+ swap instruction");
                         }
                     }
                 }
                 break;
 
             case InstructionType.DoubleTypeInstruction:
-                sb.Append("." + Type1.ToOpcodeParam());
-                sb.Append("." + Type2.ToOpcodeParam());
+                sbh.Append(stringBuilder, '.');
+                sbh.Append(stringBuilder, Type1.ToOpcodeParam());
+                sbh.Append(stringBuilder, '.');
+                sbh.Append(stringBuilder, Type2.ToOpcodeParam());
                 break;
 
             case InstructionType.ComparisonInstruction:
-                sb.Append("." + Type1.ToOpcodeParam());
-                sb.Append("." + Type2.ToOpcodeParam());
-                sb.Append(' ');
-                sb.Append(ComparisonKind.ToString());
+                sbh.Append(stringBuilder, '.');
+                sbh.Append(stringBuilder, Type1.ToOpcodeParam());
+                sbh.Append(stringBuilder, '.');
+                sbh.Append(stringBuilder, Type2.ToOpcodeParam());
+                sbh.Append(stringBuilder, ' ');
+                sbh.Append(stringBuilder, ComparisonKind.ToString());
                 break;
 
             case InstructionType.GotoInstruction:
-                sb.Append(' ');
-                string tgt;
-                if (code != null && Address + JumpOffset == code.Length / 4)
-                    tgt = "[end]";
+                sbh.Append(stringBuilder, ' ');
+                string targetGoto;
+                if (code is not null && Address + JumpOffset == code.Length / 4)
+                    targetGoto = "[end]";
                 else if (JumpOffsetPopenvExitMagic)
-                    tgt = "<drop>";
-                else if (blocks != null)
-                    tgt = "[" + blocks.IndexOf((uint)(Address + JumpOffset)) + "]";
+                    targetGoto = "<drop>";
+                else if (blocks is not null)
+                    targetGoto = $"[{blocks.IndexOf((uint)(Address + JumpOffset))}]";
                 else
-                    tgt = (Address + JumpOffset).ToString("D5");
-                sb.Append(tgt);
+                    targetGoto = (Address + JumpOffset).ToString("D5");
+                sbh.Append(stringBuilder, targetGoto);
                 break;
 
             case InstructionType.PopInstruction:
-                sb.Append("." + Type1.ToOpcodeParam());
-                sb.Append("." + Type2.ToOpcodeParam());
-                sb.Append(' ');
+                sbh.Append(stringBuilder, '.');
+                sbh.Append(stringBuilder, Type1.ToOpcodeParam());
+                sbh.Append(stringBuilder, '.');
+                sbh.Append(stringBuilder, Type2.ToOpcodeParam());
+                sbh.Append(stringBuilder, ' ');
                 if (Type1 == DataType.Int16)
                 {
                     // Special scenario - the swap instruction
                     // TODO: Figure out the proper syntax, see #129
-                    sb.Append(SwapExtra.ToString());
-                    sb.Append(" ;;; this is a weird swap instruction, see #129");
+                    sbh.Append(stringBuilder, SwapExtra);
+                    sbh.Append(stringBuilder, " ;;; this is a weird swap instruction, see #129");
                 }
                 else
                 {
                     if (Type1 == DataType.Variable && TypeInst != InstanceType.Undefined)
                     {
-                        sb.Append(TypeInst.ToString().ToLower(CultureInfo.InvariantCulture));
-                        sb.Append('.');
+                        sbh.Append(stringBuilder, TypeInst.ToString().ToLower(CultureInfo.InvariantCulture));
+                        sbh.Append(stringBuilder, '.');
                     }
-                    sb.Append(Destination);
+                    sbh.Append(stringBuilder, Destination);
                 }
                 break;
 
             case InstructionType.PushInstruction:
-                sb.Append("." + Type1.ToOpcodeParam());
-                sb.Append(' ');
+                sbh.Append(stringBuilder, '.');
+                sbh.Append(stringBuilder, Type1.ToOpcodeParam());
+                sbh.Append(stringBuilder, ' ');
                 if (Type1 == DataType.Variable && TypeInst != InstanceType.Undefined)
                 {
-                    sb.Append(TypeInst.ToString().ToLower(CultureInfo.InvariantCulture));
-                    sb.Append('.');
+                    sbh.Append(stringBuilder, TypeInst.ToString().ToLower(CultureInfo.InvariantCulture));
+                    sbh.Append(stringBuilder, '.');
                 }
-                sb.Append((Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString());
+                sbh.Append(stringBuilder, (Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString());
                 break;
 
             case InstructionType.CallInstruction:
-                sb.Append("." + Type1.ToOpcodeParam());
-                sb.Append(' ');
-                sb.Append(Function);
-                sb.Append("(argc=");
-                sb.Append(ArgumentsCount.ToString());
-                sb.Append(')');
+                sbh.Append(stringBuilder, '.');
+                sbh.Append(stringBuilder, Type1.ToOpcodeParam());
+                sbh.Append(stringBuilder, ' ');
+                sbh.Append(stringBuilder, Function);
+                sbh.Append(stringBuilder, "(argc=");
+                sbh.Append(stringBuilder, ArgumentsCount);
+                sbh.Append(stringBuilder, ')');
                 break;
 
             case InstructionType.BreakInstruction:
-                sb.Append("." + Type1.ToOpcodeParam());
+                sbh.Append(stringBuilder, '.');
+                sbh.Append(stringBuilder, Type1.ToOpcodeParam());
                 if (unknownBreak)
                 {
-                    sb.Append(" ");
-                    sb.Append(Value);
+                    sbh.Append(stringBuilder, ' ');
+                    sbh.Append(stringBuilder, Value);
                 }
                 if (Type1 == DataType.Int32)
                 {
-                    sb.Append(" ");
-                    sb.Append(IntArgument);
+                    sbh.Append(stringBuilder, ' ');
+                    if (Function != null)
+                        sbh.Append(stringBuilder, Function);
+                    else
+                        sbh.Append(stringBuilder, IntArgument);
                 }
                 break;
         }
-        return sb.ToString();
     }
 
     public uint CalculateInstructionSize()

@@ -19,9 +19,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Setup .NET
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
@@ -40,7 +40,7 @@ jobs:
         cp ./SCRIPTS.md ./${{ matrix.os }}
         cp ./LICENSE.txt ./${{ matrix.os }}
     - name: Upload ${{ matrix.os }} GUI
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: GUI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}
         path: ${{ matrix.os }}

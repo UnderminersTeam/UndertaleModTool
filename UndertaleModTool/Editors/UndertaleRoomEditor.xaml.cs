@@ -1363,6 +1363,9 @@ namespace UndertaleModTool
                 // if it's needed to set "NineSlices"
                 if (!data.IsVersionAtLeast(2, 3, 2))
                     layer.AssetsData.NineSlices ??= new UndertalePointerList<SpriteInstance>();
+                // likewise
+                if (data.IsVersionAtLeast(2023, 2))
+                    layer.AssetsData.ParticleSystems ??= new UndertalePointerList<ParticleSystemInstance>();
             }
             else if (layer.LayerType == LayerType.Tiles)
             {
@@ -2688,7 +2691,7 @@ namespace UndertaleModTool
             if (parameter is not string mode)
                 return 0;
 
-            if (!partSystemsDict.TryGetValue(partSys, out Rect sysRect))
+            if (partSystemsDict is not null && !partSystemsDict.TryGetValue(partSys, out Rect sysRect))
                 sysRect = AddNewSystem(partSys);
 
             return mode switch

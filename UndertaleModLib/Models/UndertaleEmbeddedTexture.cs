@@ -1,14 +1,12 @@
 ﻿using ICSharpCode.SharpZipLib.BZip2;
 using System;
 using System.Buffers.Binary;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using UndertaleModLib.Util;
 
 namespace UndertaleModLib.Models;
@@ -124,7 +122,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
             writer.Write(IndexInGroup);
         }
         if (TextureExternal)
-            writer.Write((int)0); // Ensure null pointer is written with external texture
+            writer.Write(0); // Ensure null pointer is written with external texture
         else
             writer.WriteUndertaleObjectPointer(_textureData);
     }
@@ -234,7 +232,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
     /// <summary>
     /// Attempts to load the corresponding external texture. Should only happen in 2022.9 and above.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>The texture data of the external texture or a placeholder texture if it can't be loaded.</returns>
     public TexData LoadExternalTexture()
     {
         lock (_textureLoadLock)
@@ -249,7 +247,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
 
             // Try to find file on disk
             string path = Path.Combine(_2022_9_GameDirectory, TextureInfo.Directory.Content,
-                                       TextureInfo.Name.Content + "_" + IndexInGroup.ToString() + TextureInfo.Extension.Content);
+                                       TextureInfo.Name.Content + "_" + IndexInGroup + TextureInfo.Extension.Content);
             if (!File.Exists(path))
                 return _placeholderTexture;
 
@@ -345,12 +343,12 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
         }
 
         /// <summary>
-        /// Whether this texture uses QOI format.
+        /// Whether this texture uses the QOI format.
         /// </summary>
         public bool FormatQOI { get; set; } = false;
 
         /// <summary>
-        /// Whether this texture uses BZ2 format. (Always used in combination with QOI.)
+        /// Whether this texture uses the BZ2 format. (Always used in combination with QOI.)
         /// </summary>
         public bool FormatBZ2 { get; set; } = false;
 

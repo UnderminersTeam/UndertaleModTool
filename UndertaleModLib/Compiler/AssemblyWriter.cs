@@ -271,6 +271,8 @@ namespace UndertaleModLib.Compiler
                                     Name = childName,
                                     Code = childEntry
                                 };
+                                // If we don't set IsConstructor, the game will crash when creating the struct
+                                if (patch.Name.StartsWith("___struct___")) childScript.IsConstructor = true;
                                 compileContext.Data.Scripts.Add(childScript);
 
                                 UndertaleFunction childFunction = new()
@@ -1182,6 +1184,30 @@ namespace UndertaleModLib.Compiler
                 cw.typeStack.Push(DataType.Variable);
             }
 
+            private static void AssembleStructDef(CodeWriter cw, Parser.Statement str)
+            {
+                List<Parser.Statement> leaked = str.Children[0].Children;
+                // Just push these leaked variables onto the stack
+                // We need to do this in reverse since function arguments
+                // are parsed in reverse stack order
+                for (int i = leaked.Count - 1; i >= 0; i--)
+                {
+                    Parser.Statement statement = leaked[i];
+                    AssembleExpression(cw, statement);
+                }
+
+                AssembleStatement(cw, str.Children[1]);
+
+                cw.funcPatches.Add(new FunctionPatch()
+                {
+                    Target = cw.EmitRef(Opcode.Call, DataType.Int32),
+                    Name = "@@NewGMLObject@@",
+                    Offset = cw.offset * 4,
+                    ArgCount = leaked.Count + 1
+                });
+                cw.typeStack.Push(DataType.Variable);
+            }
+
             private static void AssembleExpression(CodeWriter cw, Parser.Statement e, Parser.Statement funcDefName = null)
             {
                 switch (e.Kind)
@@ -1267,6 +1293,9 @@ namespace UndertaleModLib.Compiler
                     case Parser.Statement.StatementKind.ExprFunctionCall:
                         AssembleFunctionCall(cw, e); // the return value in this case must be used
                         break;
+                    case Parser.Statement.StatementKind.ExprStruct:
+                        AssembleStructDef(cw, e);
+                        break;
                     case Parser.Statement.StatementKind.ExprVariableRef:
                     case Parser.Statement.StatementKind.ExprSingleVariable:
                         AssembleVariablePush(cw, e);
@@ -1278,6 +1307,8 @@ namespace UndertaleModLib.Compiler
                                 AssemblyWriterError(cw, "Malformed function assignment.", e.Token);
                                 break;
                             }
+
+                            bool isStructDef = funcDefName.Text.StartsWith("___struct___");
                             
                             Patch startPatch = Patch.StartHere(cw);
                             Patch endPatch = Patch.Start();
@@ -1322,8 +1353,20 @@ namespace UndertaleModLib.Compiler
                                 ArgCount = -1
                             });
                             cw.Emit(Opcode.Conv, DataType.Int32, DataType.Variable);
-                            cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-1;
-                            cw.Emit(Opcode.Conv, DataType.Int32, DataType.Variable);
+                            if (isStructDef)
+                            {
+                                cw.funcPatches.Add(new FunctionPatch()
+                                {
+                                    Target = cw.EmitRef(Opcode.Call, DataType.Int32),
+                                    Name = "@@NullObject@@",
+                                    ArgCount = 0
+                                });
+                            } 
+                            else
+                            {
+                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-1;
+                                cw.Emit(Opcode.Conv, DataType.Int32, DataType.Variable);
+                            }
                             cw.funcPatches.Add(new FunctionPatch()
                             {
                                 Target = cw.EmitRef(Opcode.Call, DataType.Int32),
@@ -1332,7 +1375,10 @@ namespace UndertaleModLib.Compiler
                             });
                             cw.typeStack.Push(DataType.Variable);
                             cw.Emit(Opcode.Dup, DataType.Variable).Extra = 0;
-                            cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-1; // todo: -6 sometimes?
+                            if (isStructDef)
+                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-16;
+                            else
+                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-1; // todo: -6 sometimes?
                         }
                         break;
                     case Parser.Statement.StatementKind.ExprBinaryOp:
@@ -1651,7 +1697,7 @@ namespace UndertaleModLib.Compiler
                         {
                             cw.typeStack.Pop();
                             cw.Emit(Opcode.Conv, type, DataType.Int32);
-                            cw.typeStack.Push(DataType.Double);
+                            cw.typeStack.Push(DataType.Int32);
                         }
                         break;
                     case Lexer.Token.TokenKind.LogicalAnd:
@@ -2197,15 +2243,16 @@ namespace UndertaleModLib.Compiler
                 }
                 else if (s.Kind == Parser.Statement.StatementKind.ExprFuncName)
                 {
+                    bool isStructDef = s.Text.StartsWith("___struct___");
                     // Until further notice, I'm assuming this only comes up in 2.3 script definition.
                     cw.varPatches.Add(new VariablePatch()
                     {
                         Target = cw.EmitRef(Opcode.Pop, DataType.Variable, DataType.Variable),
                         Name = s.Text,
-                        InstType = InstanceType.Self,
+                        InstType = isStructDef ? InstanceType.Static : InstanceType.Self,
                         VarType = VariableType.StackTop
                     });
-                    cw.Emit(Opcode.Popz, DataType.Variable);
+                    if (!isStructDef) cw.Emit(Opcode.Popz, DataType.Variable);
                 }
                 else
                 {

@@ -28,10 +28,15 @@ public class UndertaleSpineTextureEntry : UndertaleObject, IDisposable
     public int PageHeight { get; set; }
     
     /// <summary>
-    /// The atlas as raw bytes, can be a GameMaker QOI texture or a PNG file.
+    /// The atlas as raw bytes, can be a GameMaker QOI texture or a PNG file. Null for versions >= 2023.1.
     /// </summary>
     public byte[] TexBlob { get; set; }
-    
+
+    /// <summary>
+    /// The length of the corresponding sprite texture entry for versions >= 2023.1.
+    /// </summary>
+    public int TextureEntryLength { get; set; }
+
     /// <summary>
     /// Indicates whether <see cref="TexBlob"/> contains a GameMaker QOI texture (the header is qoif reversed).
     /// </summary>
@@ -42,8 +47,15 @@ public class UndertaleSpineTextureEntry : UndertaleObject, IDisposable
     {
         writer.Write(PageWidth);
         writer.Write(PageHeight);
-        writer.Write(TexBlob.Length);
-        writer.Write(TexBlob);
+        if (writer.undertaleData.IsVersionAtLeast(2023, 1))
+        {
+            writer.Write(TextureEntryLength);
+        } 
+        else 
+        {
+            writer.Write(TexBlob.Length);
+            writer.Write(TexBlob);
+        }
     }
 
     /// <inheritdoc />
@@ -51,14 +63,20 @@ public class UndertaleSpineTextureEntry : UndertaleObject, IDisposable
     {
         PageWidth = reader.ReadInt32();
         PageHeight = reader.ReadInt32();
-        TexBlob = reader.ReadBytes(reader.ReadInt32());
+        if (reader.undertaleData.IsVersionAtLeast(2023, 1))
+            TextureEntryLength = reader.ReadInt32();
+        else
+            TexBlob = reader.ReadBytes(reader.ReadInt32());
     }
 
     /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
     public static uint UnserializeChildObjectCount(UndertaleReader reader)
     {
         reader.Position += 8;                        // Size
-        reader.Position += (uint)reader.ReadInt32(); // "TexBlob"
+        if (reader.undertaleData.IsVersionAtLeast(2023, 1))
+            reader.Position += 4; // "TextureEntryLength"
+        else
+            reader.Position += (uint)reader.ReadInt32(); // "TexBlob"
 
         return 0;
     }
@@ -193,12 +211,12 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
     /// <summary>
     /// The frames of the sprite.
     /// </summary>
-    public UndertaleSimpleList<TextureEntry> Textures { get; private set; } = new UndertaleSimpleList<TextureEntry>();
+    public UndertaleSimpleList<TextureEntry> Textures { get; set; } = new UndertaleSimpleList<TextureEntry>();
 
     /// <summary>
     /// The collision masks of the sprite.
     /// </summary>
-    public ObservableCollection<MaskEntry> CollisionMasks { get; private set; } = new ObservableCollection<MaskEntry>();
+    public ObservableCollection<MaskEntry> CollisionMasks { get; set; } = new ObservableCollection<MaskEntry>();
 
     // Special sprite types (always used in GMS2)
     public uint SVersion { get; set; } = 1;
@@ -214,6 +232,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
     public UndertaleSimpleList<UndertaleSpineTextureEntry> SpineTextures { get; set; }
 
     public bool IsSpineSprite { get => SpineJSON != null && SpineAtlas != null && SpineTextures != null; }
+    public bool SpineHasTextureData { get; set; } = true;
     public bool IsYYSWFSprite { get => YYSWF != null; }
 
     private int _SWFVersion;
@@ -379,11 +398,11 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                 if (SVersion >= 2)
                 {
                     sequencePatchPos = writer.Position;
-                    writer.Write((int)0);
+                    writer.Write(0);
                     if (SVersion >= 3)
                     {
                         nineSlicePatchPos = writer.Position;
-                        writer.Write((int)0);
+                        writer.Write(0);
                     }
                 }
             }
@@ -404,6 +423,9 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
 
                     byte[] encodedJson = EncodeSpineBlob(Encoding.UTF8.GetBytes(SpineJSON));
                     byte[] encodedAtlas = EncodeSpineBlob(Encoding.UTF8.GetBytes(SpineAtlas));
+
+                    if (writer.undertaleData.IsVersionAtLeast(2023, 1))
+                        writer.WriteUndertaleObject(Textures);
 
                     // the header.
                     writer.Write(SpineVersion);
@@ -458,7 +480,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                 writer.Position = sequencePatchPos;
                 writer.Write(returnTo);
                 writer.Position = returnTo;
-                writer.Write((int)1);
+                writer.Write(1);
                 writer.WriteUndertaleObject(V2Sequence);
             }
             if (nineSlicePatchPos != 0 && V3NineSlice != null)
@@ -584,6 +606,12 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                 case SpriteType.Spine:
                 {
                     reader.Align(4);
+
+                    if (reader.undertaleData.IsVersionAtLeast(2023, 1))
+                    {
+                        Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
+                        SpineHasTextureData = false;
+                    }
 
                     SpineVersion = reader.ReadInt32();
                     if (SpineVersion >= 3)
@@ -713,6 +741,9 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                 case SpriteType.Spine:
                 {
                     reader.Align(4);
+
+                    if (reader.undertaleData.IsVersionAtLeast(2023, 1))
+                        count += 1 + UndertaleSimpleList<TextureEntry>.UnserializeChildObjectCount(reader);
 
                     int spineVersion = reader.ReadInt32();
                     if (spineVersion >= 3)
@@ -1079,7 +1110,7 @@ public class UndertaleYYSWFCollisionMask : UndertaleObject
     }
 }
 
-public enum UndertaleYYSWFItemType : int
+public enum UndertaleYYSWFItemType
 {
     ItemInvalid,
     ItemShape,
@@ -1913,7 +1944,7 @@ public class UndertaleYYSWF : UndertaleObject
     public void Unserialize(UndertaleReader reader)
     {
         reader.Align(4);
-        int jpeglen = reader.ReadInt32() & (~int.MinValue); // the length is ORed with int.MinValue.
+        int jpeglen = reader.ReadInt32() & (~Int32.MinValue); // the length is ORed with int.MinValue.
         Version = reader.ReadInt32();
         Util.DebugUtil.Assert(Version == 8 || Version == 7, "Invalid YYSWF version data! Expected 7 or 8, got " + Version);
 

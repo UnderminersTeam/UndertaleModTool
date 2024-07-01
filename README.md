@@ -6,7 +6,7 @@
 
 Heya. I heard you like digging deep into GameMaker games like Undertale/Deltarune, so here's a tool just for you!
 
-<img src="images/flowey.gif" alt="Flowey"/>
+![Flowey: Now YOU are the GOD of this world.](images/flowey.gif)
 
 
 # Downloads
@@ -42,9 +42,6 @@ It's worth noting that UndertaleModTool has different builds per release. The di
 
 Here are some screenshots of what UTMT can do:
 
-## [Undertale: Bits and Pieces Mod](https://gamejolt.com/games/UndertaleBnP/574044)
-<img src="images/bnp-ut.png" alt="BnP" width="640" height="480"/>
-
 ## [RIBBIT - The Deltarune Mod](https://gamejolt.com/games/ribbitmod/671888)
 <img src="images/ribbit-dr.png" alt="RIBBIT" width="640" height="480"/>
 
@@ -59,7 +56,6 @@ Included are some test scripts. They are, but not limited to:
   * EnableDebug: does just that, makes the global variable 'debug' be enabled at game start. If you don't know about Undertale's debug mode, check out [this write up of Undertale's Debug Mode](https://tcrf.net/Undertale/Debug_Mode)
   * DebugToggler: similar to the above, but instead toggles the debug mode on and off with F1
   * BorderEnabler: lets you import the PlayStation exclusive borders into the PC version and patches all version checks so that they display properly
-  * testing: nothing important, just displays random text on the main menu - the first script I ever made
   * TTFFonts: Makes the game load fonts in TTF format from current directory instead of using the spritesheet fonts. You will need to track down all the font files yourself, I can't host them here for licensing reasons :(
   * RoomOfDetermination: Adds a new room to Undertale 1.08. I wanted to add something more to it but never got around to it, so I guess I'm releasing it as is. Just start the game and you'll see. Probably the most complete sample of adding stuff you'll find.
 * Deltarune only:

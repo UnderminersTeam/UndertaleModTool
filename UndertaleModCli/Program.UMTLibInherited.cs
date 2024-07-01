@@ -521,13 +521,13 @@ public partial class Program : IScriptInterface
     }
 
     /// <inheritdoc/>
-    public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
+    public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int lineNum, string codeLine)>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
     {
         await ClickableSearchOutput(title, query, resultsCount, resultsDict.ToDictionary(pair => pair.Key, pair => pair.Value), editorDecompile, failedList);
     }
 
     /// <inheritdoc/>
-    public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
+    public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<(int lineNum, string codeLine)>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
     {
         await Task.Delay(1); //dummy await
 
@@ -555,17 +555,17 @@ public partial class Program : IScriptInterface
         Console.WriteLine();
 
         // Print in a pattern of:
-        // results in code_file
-        // line3: code
-        // line6: code
+        // Results in code_file
+        // Line 3: line of code
+        // Line 6: line of code
         //
-        // results in a codefile2
-        //etc.
+        // Results in code_file_1
+        // etc.
         foreach (var dictEntry in resultsDict)
         {
             Console.WriteLine($"Results in {dictEntry.Key}:");
             foreach (var resultEntry in dictEntry.Value)
-                Console.WriteLine(resultEntry);
+                Console.WriteLine($"Line {resultEntry.lineNum}: {resultEntry.codeLine}");
 
             Console.WriteLine();
         }
@@ -657,7 +657,14 @@ public partial class Program : IScriptInterface
         {
             try
             {
-                passBack = GetPassBack(Decompiler.Decompile(code, decompileContext), keyword, replacement, caseSensitive, isRegex);
+                // It would just be recompiling an empty string and messing with null entries seems bad
+                if (code is null)
+                    return;
+                string originalCode = Decompiler.Decompile(code, decompileContext);
+                passBack = GetPassBack(originalCode, keyword, replacement, caseSensitive, isRegex);
+                // No need to compile something unchanged
+                if (passBack == originalCode)
+                    return;
                 code.ReplaceGML(passBack, Data);
             }
             catch (Exception exc)
@@ -665,27 +672,9 @@ public partial class Program : IScriptInterface
                 throw new Exception("Error during GML code replacement:\n" + exc);
             }
         }
-        else if (Data.ToolInfo.ProfileMode)
+        else
         {
-            try
-            {
-                try
-                {
-                    if (context is null)
-                        passBack = GetPassBack(Decompiler.Decompile(code, new GlobalDecompileContext(Data, false)), keyword, replacement, caseSensitive, isRegex);
-                    else
-                        passBack = GetPassBack(Decompiler.Decompile(code, context), keyword, replacement, caseSensitive, isRegex);
-                    code.ReplaceGML(passBack, Data);
-                }
-                catch (Exception exc)
-                {
-                    throw new Exception("Error during GML code replacement:\n" + exc);
-                }
-            }
-            catch (Exception exc)
-            {
-                throw new Exception("Error during writing of GML code to profile:\n" + exc + "\n\nCode:\n\n" + passBack);
-            }
+            throw new Exception("This UndertaleData is set to use profile mode, but UndertaleModCLI does not support profile mode.");
         }
     }
 

@@ -469,7 +469,7 @@ namespace UndertaleModLib
         /// <param name="build">The build version.</param>
         public void SetGMS2Version(uint major, uint minor = 0, uint release = 0, uint build = 0)
         {
-            if (major != 2 && major != 2022 && major != 2023)
+            if (major != 2 && major != 2022 && major != 2023 && major != 2024)
                 throw new NotSupportedException("Attempted to set a version of GameMaker " + major + " using SetGMS2Version");
 
             GeneralInfo.Major = major;
@@ -517,7 +517,7 @@ namespace UndertaleModLib
         {
             // It is known it works this way in 1.0.1266. The exact version which changed this is unknown.
             // If we find a game which does not fit the version identified here, we should fix this check.
-            return TestGMS1Version(1354, 161, true) ? 0 : 1;
+            return TestGMS1Version(1250, 161, true) ? 0 : 1;
         }
 
         /// <summary>
