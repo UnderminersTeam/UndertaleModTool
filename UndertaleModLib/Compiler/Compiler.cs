@@ -108,48 +108,52 @@ namespace UndertaleModLib.Compiler
         {
             // Clear the dictionary first and set the worst case max size so that we don't resize it over and over
             assetIds.Clear();
-            int maxSize = 0;
-            maxSize += Data?.GameObjects?.Count ?? 0;
-            maxSize += Data?.Sprites?.Count ?? 0;
-            maxSize += Data?.Sounds?.Count ?? 0;
-            maxSize += Data?.Backgrounds?.Count ?? 0;
-            maxSize += Data?.Paths?.Count ?? 0;
-            maxSize += Data?.Fonts?.Count ?? 0;
-            maxSize += Data?.Timelines?.Count ?? 0;
-            maxSize += Data?.Scripts?.Count ?? 0;
-            maxSize += Data?.Shaders?.Count ?? 0;
-            maxSize += Data?.Rooms?.Count ?? 0;
-            maxSize += Data?.AudioGroups?.Count ?? 0;
-            maxSize += Data?.AnimationCurves?.Count ?? 0;
-            maxSize += Data?.Sequences?.Count ?? 0;
-            maxSize += Data?.ParticleSystems?.Count ?? 0;
-            assetIds.EnsureCapacity(maxSize);
-
-            AddAssetsFromList(Data?.GameObjects, AssetRefType.Object);
-            AddAssetsFromList(Data?.Sprites, AssetRefType.Sprite);
-            AddAssetsFromList(Data?.Sounds, AssetRefType.Sound);
-            AddAssetsFromList(Data?.Backgrounds, AssetRefType.Background);
-            AddAssetsFromList(Data?.Paths, AssetRefType.Path);
-            AddAssetsFromList(Data?.Fonts, AssetRefType.Font);
-            AddAssetsFromList(Data?.Timelines, AssetRefType.Timeline);
-            if (!GMS2_3)
-                AddAssetsFromList(Data?.Scripts, AssetRefType.Object /* not actually used */);
-            AddAssetsFromList(Data?.Shaders, AssetRefType.Shader);
-            AddAssetsFromList(Data?.Rooms, AssetRefType.Room);
-            AddAssetsFromList(Data?.AudioGroups, AssetRefType.Sound /* apparently? */);
-            AddAssetsFromList(Data?.AnimationCurves, AssetRefType.AnimCurve);
-            AddAssetsFromList(Data?.Sequences, AssetRefType.Sequence);
-            AddAssetsFromList(Data?.ParticleSystems, AssetRefType.ParticleSystem);
-
             scripts.Clear();
-            if (Data?.Scripts != null)
+            if (Data is null) return;
+            
+            int maxSize = 0;
+            maxSize += Data.GameObjects?.Count ?? 0;
+            maxSize += Data.Sprites?.Count ?? 0;
+            maxSize += Data.Sounds?.Count ?? 0;
+            maxSize += Data.Backgrounds?.Count ?? 0;
+            maxSize += Data.Paths?.Count ?? 0;
+            maxSize += Data.Fonts?.Count ?? 0;
+            maxSize += Data.Timelines?.Count ?? 0;
+            maxSize += Data.Scripts?.Count ?? 0;
+            maxSize += Data.Shaders?.Count ?? 0;
+            maxSize += Data.Rooms?.Count ?? 0;
+            maxSize += Data.AudioGroups?.Count ?? 0;
+            maxSize += Data.AnimationCurves?.Count ?? 0;
+            maxSize += Data.Sequences?.Count ?? 0;
+            maxSize += Data.ParticleSystems?.Count ?? 0;
+            
+            assetIds.EnsureCapacity(maxSize);
+            scripts.EnsureCapacity(Data.Scripts?.Count ?? 0);
+
+            AddAssetsFromList(Data.GameObjects, AssetRefType.Object);
+            AddAssetsFromList(Data.Sprites, AssetRefType.Sprite);
+            AddAssetsFromList(Data.Sounds, AssetRefType.Sound);
+            AddAssetsFromList(Data.Backgrounds, AssetRefType.Background);
+            AddAssetsFromList(Data.Paths, AssetRefType.Path);
+            AddAssetsFromList(Data.Fonts, AssetRefType.Font);
+            AddAssetsFromList(Data.Timelines, AssetRefType.Timeline);
+            if (!GMS2_3)
+                AddAssetsFromList(Data.Scripts, AssetRefType.Object /* not actually used */);
+            AddAssetsFromList(Data.Shaders, AssetRefType.Shader);
+            AddAssetsFromList(Data.Rooms, AssetRefType.Room);
+            AddAssetsFromList(Data.AudioGroups, AssetRefType.Sound /* apparently? */);
+            AddAssetsFromList(Data.AnimationCurves, AssetRefType.AnimCurve);
+            AddAssetsFromList(Data.Sequences, AssetRefType.Sequence);
+            AddAssetsFromList(Data.ParticleSystems, AssetRefType.ParticleSystem);
+
+            if (Data.Scripts is not null)
             {
                 foreach (UndertaleScript s in Data.Scripts)
                 {
                     scripts.Add(s.Name.Content);
                 }
             }
-            if (Data?.Extensions != null)
+            if (Data.Extensions is not null)
             {
                 foreach (UndertaleExtension e in Data.Extensions)
                 {
