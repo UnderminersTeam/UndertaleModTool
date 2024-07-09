@@ -110,7 +110,7 @@ namespace UndertaleModLib
             }
 
             if (reader.undertaleData.IsVersionAtLeast(2023, 1) &&
-                reader.undertaleData.GeneralInfo.Branch == UndertaleGeneralInfo.BranchType.Unknown)
+                reader.undertaleData.GeneralInfo.Branch == UndertaleGeneralInfo.BranchType.Pre2022_0)
             {
                 reader.undertaleData.SetLTS(true);
             }
