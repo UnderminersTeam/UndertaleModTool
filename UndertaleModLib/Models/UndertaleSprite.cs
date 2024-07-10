@@ -697,8 +697,12 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
         reader.Position += 4; // "Name"
         uint width = reader.ReadUInt32();
         uint height = reader.ReadUInt32();
+        int marginLeft = reader.ReadInt32();
+        int marginRight = reader.ReadInt32();
+        int marginBottom = reader.ReadInt32();
+        int marginTop = reader.ReadInt32();
 
-        reader.Position += 44;
+        reader.Position += 28;
 
         if (reader.ReadInt32() == -1)
         {
@@ -727,7 +731,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
             {
                 case SpriteType.Normal:
                     count += 1 + UndertaleSimpleList<TextureEntry>.UnserializeChildObjectCount(reader);
-                    SkipMaskData(reader, width, height);
+                    SkipMaskData(reader, width, height, marginRight, marginLeft, marginBottom, marginTop);
                     break;
 
                 case SpriteType.SWF:
@@ -796,17 +800,40 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
         {
             reader.Position -= 4;
             count += 1 + UndertaleSimpleList<TextureEntry>.UnserializeChildObjectCount(reader);
-            SkipMaskData(reader, width, height);
+            SkipMaskData(reader, width, height, marginRight, marginLeft, marginBottom, marginTop);
         }
 
         return count;
     }
 
+    public (uint Width, uint Height) CalculateMaskDimensions(UndertaleData data)
+    {
+        if (data.IsVersionAtLeast(2024, 6))
+        {
+            return CalculateBboxMaskDimensions(MarginRight, MarginLeft, MarginBottom, MarginTop);
+        }
+        return CalculateFullMaskDimensions(Width, Height);
+    }
+
+    public static (uint Width, uint Height) CalculateBboxMaskDimensions(int marginRight, int marginLeft, int marginBottom, int marginTop)
+    {
+        return ((uint)(marginRight - marginLeft + 1), (uint)(marginBottom - marginTop + 1));
+    }
+
+    public static (uint Width, uint Height) CalculateFullMaskDimensions(uint width, uint height)
+    {
+        return (width, height);
+    }
+
     private void ReadMaskData(UndertaleReader reader)
     {
+        // Initialize mask list
         uint maskCount = reader.ReadUInt32();
-        uint len = (Width + 7) / 8 * Height;
         List<MaskEntry> newMasks = new((int)maskCount);
+
+        // Read in mask data
+        (uint width, uint height) = CalculateMaskDimensions(reader.undertaleData);
+        uint len = (width + 7) / 8 * height;
         uint total = 0;
         for (uint i = 0; i < maskCount; i++)
         {
@@ -814,19 +841,34 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
             total += len;
         }
 
-        CollisionMasks = new(newMasks);
-
-        while (total % 4 != 0)
+        while ((total % 4) != 0)
         {
             if (reader.ReadByte() != 0)
+            {
                 throw new IOException("Mask padding");
+            }
             total++;
         }
-        Util.DebugUtil.Assert(total == CalculateMaskDataSize(Width, Height, maskCount));
+        if (total != CalculateMaskDataSize(width, height, maskCount))
+        {
+            throw new IOException("Mask data size incorrect");
+        }
+
+        // Assign masks to sprite
+        CollisionMasks = new(newMasks);
     }
-    private static void SkipMaskData(UndertaleReader reader, uint width, uint height)
+
+    private static void SkipMaskData(UndertaleReader reader, uint width, uint height, int marginRight, int marginLeft, int marginBottom, int marginTop)
     {
         uint maskCount = reader.ReadUInt32();
+        if (reader.undertaleData.IsVersionAtLeast(2024, 6))
+        {
+            (width, height) = CalculateBboxMaskDimensions(marginRight, marginLeft, marginBottom, marginTop);
+        }
+        else
+        {
+            (width, height) = CalculateFullMaskDimensions(width, height);
+        }
         uint len = (width + 7) / 8 * height;
 
         uint total = 0;
