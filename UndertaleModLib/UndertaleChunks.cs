@@ -108,6 +108,12 @@ namespace UndertaleModLib
                         return;
                 }
             }
+
+            if (reader.undertaleData.IsVersionAtLeast(2023, 1) &&
+                reader.undertaleData.GeneralInfo.Branch == UndertaleGeneralInfo.BranchType.Pre2022_0)
+            {
+                reader.undertaleData.SetLTS(true);
+            }
         }
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
@@ -164,9 +170,9 @@ namespace UndertaleModLib
             Object.Release = reader.ReadUInt32();
             Object.Build = reader.ReadUInt32();
 
-            var readVer = (Object.Major, Object.Minor, Object.Release, Object.Build);
+            var readVer = (Object.Major, Object.Minor, Object.Release, Object.Build, Object.Branch);
             var detectedVer = UndertaleGeneralInfo.TestForCommonGMSVersions(reader, readVer);
-            (Object.Major, Object.Minor, Object.Release, Object.Build) = detectedVer;
+            (Object.Major, Object.Minor, Object.Release, Object.Build, Object.Branch) = detectedVer;
         }
     }
 
@@ -514,8 +520,9 @@ namespace UndertaleModLib
         {
             // This is basically the same as the 2022.2 check, but adapted for the LineHeight value instead of Ascender.
             
-            // We already know whether the version is more or less than 2023.2 due to PSEM. Checking a shorter range narrows possibility of error.
-            if (!reader.undertaleData.IsVersionAtLeast(2023, 2) || reader.undertaleData.IsVersionAtLeast(2023, 6))
+            // We already know whether the version is more or less than 2022.8 due to FEAT. Checking a shorter range narrows possibility of error.
+            // PSEM (2023.2) is not used, as it would return a false negative on LTS (2022.9+ equivalent with no particles).
+            if (!reader.undertaleData.IsVersionAtLeast(2022, 8) || reader.undertaleData.IsVersionAtLeast(2023, 6))
             {
                 checkedFor2023_6 = true;
                 return;
@@ -1510,7 +1517,7 @@ namespace UndertaleModLib
         private void CheckFor2022_9And2023(UndertaleReader reader)
         {
             if (!reader.undertaleData.IsVersionAtLeast(2, 3)
-                || reader.undertaleData.IsVersionAtLeast(2022, 9))
+                || reader.undertaleData.IsNonLTSVersionAtLeast(2023, 1))
             {
                 checkedFor2022_9 = true;
                 return;
@@ -1533,7 +1540,8 @@ namespace UndertaleModLib
                 if (ptr < tginPtr || ptr >= secondTginPtr)
                 {
                     isGM2022_9 = true;
-                    reader.undertaleData.SetGMS2Version(2022, 9);
+                    if (!reader.undertaleData.IsVersionAtLeast(2022, 9))
+                        reader.undertaleData.SetGMS2Version(2022, 9);
                 }
             }
 
@@ -1554,7 +1562,9 @@ namespace UndertaleModLib
                 // The count can't be greater than the pointer.
                 // (the list could be either "Tilesets" or "Fonts").
                 if (reader.ReadUInt32() <= fourthPtr)
-                    reader.undertaleData.SetGMS2Version(2023, 1);
+                {
+                    reader.undertaleData.SetGMS2Version(2023, 1, 0, 0, false);
+                }
             }
 
             reader.AbsPosition = returnPosition;

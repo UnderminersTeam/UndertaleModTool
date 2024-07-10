@@ -467,7 +467,8 @@ namespace UndertaleModLib
         /// <param name="minor">The minor version.</param>
         /// <param name="release">The release version.</param>
         /// <param name="build">The build version.</param>
-        public void SetGMS2Version(uint major, uint minor = 0, uint release = 0, uint build = 0)
+        /// <param name="isLTS">If included, alter the data branch between LTS and non-LTS.</param>
+        public void SetGMS2Version(uint major, uint minor = 0, uint release = 0, uint build = 0, bool? isLTS = null)
         {
             if (major != 2 && major != 2022 && major != 2023 && major != 2024)
                 throw new NotSupportedException("Attempted to set a version of GameMaker " + major + " using SetGMS2Version");
@@ -476,6 +477,21 @@ namespace UndertaleModLib
             GeneralInfo.Minor = minor;
             GeneralInfo.Release = release;
             GeneralInfo.Build = build;
+
+            if (isLTS is not null)
+            {
+                SetLTS((bool)isLTS);
+            }
+        }
+
+        /// <summary>
+        /// Sets the branch type in GeneralInfo to the appropriate LTS or non-LTS version based on 
+        /// </summary>
+        /// <param name="isLTS">If included, alter the data branch between LTS and non-LTS.</param>
+        public void SetLTS(bool isLTS)
+        {
+            // Insert additional logic as needed for new branches using IsVersionAtLeast
+            GeneralInfo.Branch = isLTS ? UndertaleGeneralInfo.BranchType.LTS2022_0 : UndertaleGeneralInfo.BranchType.Post2022_0;
         }
 
         /// <summary>
@@ -507,6 +523,28 @@ namespace UndertaleModLib
                 return (GeneralInfo.Build > build);
 
             return true; // The version is exactly what supplied.
+        }
+
+        /// <summary>
+        /// Reports whether the version of the data file is the same or higher than a specified version, and off the LTS branch that lacks some features.
+        /// </summary>
+        /// <param name="major">The major version.</param>
+        /// <param name="minor">The minor version.</param>
+        /// <param name="release">The release version.</param>
+        /// <param name="build">The build version.</param>
+        /// <returns>Whether the version of the data file is the same or higher than a specified version. Always false for LTS.</returns>
+        public bool IsNonLTSVersionAtLeast(uint major, uint minor = 0, uint release = 0, uint build = 0)
+        {
+            if (GeneralInfo is null)
+            {
+                Debug.WriteLine("\"UndertaleData.IsNonLTSVersionAtLeast()\" error - \"GeneralInfo\" is null.");
+                return false;
+            }
+
+            if (GeneralInfo.Branch < UndertaleGeneralInfo.BranchType.Post2022_0)
+                return false;
+
+            return IsVersionAtLeast(major, minor, release, build);
         }
 
         /// <summary>
