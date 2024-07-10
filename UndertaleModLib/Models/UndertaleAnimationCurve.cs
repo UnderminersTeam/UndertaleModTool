@@ -134,6 +134,14 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
             Function = (FunctionType)reader.ReadUInt32();
             Iterations = reader.ReadUInt32();
 
+            Points = reader.ReadUndertaleObject<UndertaleSimpleList<Point>>();
+        }
+
+        /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+        public static uint UnserializeChildObjectCount(UndertaleReader reader)
+        {
+            reader.Position += 12;
+
             // This check is partly duplicated from UndertaleChunks.cs, but it's necessary to handle embedded curves
             // (For example, those in SEQN in the TS!Underswap v1.0 demo; see issue #1414)
             if (!reader.undertaleData.IsVersionAtLeast(2, 3, 1))
@@ -157,14 +165,6 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
 
                 reader.AbsPosition = returnPosition;
             }
-
-            Points = reader.ReadUndertaleObject<UndertaleSimpleList<Point>>();
-        }
-
-        /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
-        public static uint UnserializeChildObjectCount(UndertaleReader reader)
-        {
-            reader.Position += 12;
 
             // "Points"
             uint count = reader.ReadUInt32();
