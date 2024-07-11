@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using Underanalyzer.Decompiler;
+using Underanalyzer.Decompiler.GameSpecific;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Models;
 
@@ -333,9 +335,14 @@ namespace UndertaleModLib
         public BuiltinList BuiltinList;
 
         /// <summary>
-        /// Cache for known 2.3-style function names for compiler speedups. Can be re-built by setting this to null.
+        /// Cache for 2.3-style functions defined in global scripts. Can be re-built by setting this to null.
         /// </summary>
-        public Dictionary<string, UndertaleFunction> KnownSubFunctions;
+        public IGlobalFunctions GlobalFunctions;
+
+        /// <summary>
+        /// Registry for macro types, their resolvers, and other data specific to this game.
+        /// </summary>
+        public GameSpecificRegistry GameSpecificRegistry;
 
         //Profile mode related properties
 
@@ -691,7 +698,8 @@ namespace UndertaleModLib
 
             // Clear other references
             FORM = null;
-            KnownSubFunctions = null;
+            GlobalFunctions = null;
+            GameSpecificRegistry = null;
             GMLCache = null;
             GMLCacheFailed = null;
             GMLCacheChanged = new();

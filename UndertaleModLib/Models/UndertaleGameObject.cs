@@ -279,7 +279,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     // TODO: Add documentation for these methods.
     // These methods are used by scripts for getting a code entry for a certain event of the game object.
 
-    public UndertaleCode EventHandlerFor(EventType type, uint subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
+    public UndertaleCode EventHandlerFor(EventType type, uint subtype, UndertaleData data)
     {
         Event subtypeObj = Events[(int)type].FirstOrDefault(x => x.EventSubtype == subtype);
         if (subtypeObj == null)
@@ -288,22 +288,22 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         if (action == null)
         {
             subtypeObj.Actions.Add(action = new EventAction());
-            action.ActionName = strg.MakeString("");
+            action.ActionName = data.Strings.MakeString("");
         }
         UndertaleCode code = action.CodeId;
         if (code == null)
         {
-            var name = strg.MakeString("gml_Object_" + Name.Content + "_" + type + "_" + subtype);
+            var name = data.Strings.MakeString("gml_Object_" + Name.Content + "_" + type + "_" + subtype);
             code = new UndertaleCode()
             {
                 Name = name,
                 LocalsCount = 1
             };
             action.CodeId = code;
-            codelist.Add(code);
+            data.Code.Add(code);
 
             UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
-            argsLocal.Name = strg.MakeString("arguments");
+            argsLocal.Name = data.Strings.MakeString("arguments");
             argsLocal.Index = 0;
 
             var locals = new UndertaleCodeLocals()
@@ -311,84 +311,49 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
                 Name = name
             };
             locals.Locals.Add(argsLocal);
-            localslist.Add(locals);
+            data.CodeLocals.Add(locals);
         }
         return code;
     }
 
     public UndertaleCode EventHandlerFor(EventType type, UndertaleData data)
     {
-        return EventHandlerFor(type, data.Strings, data.Code, data.CodeLocals);
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, uint subtype, UndertaleData data)
-    {
-        return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
-    {
-        return EventHandlerFor(type, 0u, strg, codelist, localslist);
+        return EventHandlerFor(type, 0u, data);
     }
 
     public UndertaleCode EventHandlerFor(EventType type, EventSubtypeKey subtype, UndertaleData data)
     {
-        return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, EventSubtypeKey subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
-    {
         if (type != EventType.Keyboard && type != EventType.KeyPress && type != EventType.KeyRelease)
             throw new InvalidOperationException();
-        return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
+        return EventHandlerFor(type, (uint)subtype, data);
     }
 
     public UndertaleCode EventHandlerFor(EventType type, EventSubtypeStep subtype, UndertaleData data)
     {
-        return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, EventSubtypeStep subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
-    {
         if (type != EventType.Step)
             throw new InvalidOperationException();
-        return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
+        return EventHandlerFor(type, (uint)subtype, data);
     }
 
     public UndertaleCode EventHandlerFor(EventType type, EventSubtypeMouse subtype, UndertaleData data)
     {
-        return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, EventSubtypeMouse subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
-    {
         if (type != EventType.Mouse)
             throw new InvalidOperationException();
-        return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
+        return EventHandlerFor(type, (uint)subtype, data);
     }
 
     public UndertaleCode EventHandlerFor(EventType type, EventSubtypeOther subtype, UndertaleData data)
     {
-        return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, EventSubtypeOther subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
-    {
         if (type != EventType.Other)
             throw new InvalidOperationException();
-        return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
+        return EventHandlerFor(type, (uint)subtype, data);
     }
 
     public UndertaleCode EventHandlerFor(EventType type, EventSubtypeDraw subtype, UndertaleData data)
     {
-        return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, EventSubtypeDraw subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
-    {
         if (type != EventType.Draw)
             throw new InvalidOperationException();
-        return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
+        return EventHandlerFor(type, (uint)subtype, data);
     }
     #endregion
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Underanalyzer;
 using static UndertaleModLib.Models.UndertaleGeneralInfo;
 
 namespace UndertaleModLib.Models;
@@ -10,7 +11,7 @@ namespace UndertaleModLib.Models;
 /// A function entry as it's used in a GameMaker data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.ReferencedObject, IStaticChildObjectsSize, IDisposable
+public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.ReferencedObject, IStaticChildObjectsSize, IDisposable, IGMFunction
 {
     /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
     public static readonly uint ChildObjectsSize = 12;
@@ -97,6 +98,9 @@ public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.Re
         Name = null;
         FirstAddress = null;
     }
+
+    // Underanalyzer implementations
+    IGMString IGMFunction.Name => Name;
 }
 
 // Seems to be unused. You can remove all entries and the game still works normally. TODO: not true, incorrect/missing locals can wreak some weird havoc like random segfaults.

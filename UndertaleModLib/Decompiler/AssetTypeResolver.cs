@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
+using System.Reflection;
+using Underanalyzer.Decompiler.GameSpecific;
 using UndertaleModLib.Models;
 
 namespace UndertaleModLib.Decompiler
@@ -552,9 +555,36 @@ namespace UndertaleModLib.Decompiler
             return null;
         }
 
+        private static ReadOnlySpan<char> ReadMacroTypesFile(string filename)
+        {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            string resourceName = $"UndertaleModLib.BuiltinMacroTypes.{filename}";
+
+            using Stream stream = assembly.GetManifestResourceStream(resourceName);
+            using StreamReader reader = new(stream);
+            return reader.ReadToEnd();
+        }
+
         // Properly initializes per-project/game
         public static void InitializeTypes(UndertaleData data)
         {
+            data.GameSpecificRegistry = new();
+
+            // TODO: make proper file/manifest for all games to use, not just UT/DR, and also not these specific names
+
+            // Read registry data files
+            string lowerName = data?.GeneralInfo?.DisplayName?.Content.ToLower(CultureInfo.InvariantCulture) ?? "";
+            data.GameSpecificRegistry.DeserializeFromJson(ReadMacroTypesFile("gamemaker.json"));
+            if (lowerName.StartsWith("undertale", StringComparison.InvariantCulture))
+            {
+                data.GameSpecificRegistry.DeserializeFromJson(ReadMacroTypesFile("undertale.json"));
+            }
+            if (lowerName == "survey_program" || lowerName.StartsWith("deltarune", StringComparison.InvariantCulture))
+            {
+                data.GameSpecificRegistry.DeserializeFromJson(ReadMacroTypesFile("deltarune.json"));
+            }
+
+            // TODO: gut the rest of the following code once all data is transferred
 
             ContextualAssetResolver.Initialize(data);
 
@@ -1045,9 +1075,6 @@ namespace UndertaleModLib.Decompiler
                 { "visible", AssetIDType.Boolean }
 
             };
-
-            // TODO: make proper file/manifest for all games to use, not just UT/DR, and also not these specific names
-            string lowerName = data?.GeneralInfo?.DisplayName?.Content.ToLower(CultureInfo.InvariantCulture);
 
             // Just Undertale
             if (lowerName != null && lowerName.StartsWith("undertale", StringComparison.InvariantCulture))

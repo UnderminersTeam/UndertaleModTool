@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UndertaleModLib.Models;
+using static UndertaleModLib.Util.AssetReferenceTypes;
 
 namespace UndertaleModLib.Decompiler;
 
@@ -9,35 +10,16 @@ public static partial class Decompiler
     // Represents a reference to an asset in the resource tree, used in 2023.8+ only
     public class ExpressionAssetRef : Expression
     {
-        // NOTE: Also see generalized "ResourceType" enum. This has slightly differing values, though
-        public enum RefType
-        {
-            Object = 0,
-            Sprite = 1,
-            Sound = 2,
-            Room = 3,
-            Background = 4,
-            Path = 5,
-            // missing 6
-            Font = 7,
-            Timeline = 8,
-            // missing 9
-            Shader = 10,
-            Sequence = 11,
-            AnimCurve = 12,
-            ParticleSystem = 13
-        }
-
         public int AssetIndex;
         public RefType AssetRefType;
 
-        public ExpressionAssetRef(int encodedResourceIndex)
+        public ExpressionAssetRef(UndertaleData data, int encodedResourceIndex)
         {
             Type = UndertaleInstruction.DataType.Variable;
 
             // Break down index - first 24 bits are the ID, the rest is the ref type
             AssetIndex = encodedResourceIndex & 0xffffff;
-            AssetRefType = (RefType)(encodedResourceIndex >> 24);
+            AssetRefType = ConvertToRefType(data, encodedResourceIndex >> 24);
         }
 
         public ExpressionAssetRef(int resourceIndex, RefType resourceType)

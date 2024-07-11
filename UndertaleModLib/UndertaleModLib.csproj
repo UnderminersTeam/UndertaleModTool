@@ -34,11 +34,22 @@
     <PackageReference Include="System.Drawing.Common" Version="5.0.3" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="BuiltinMacroTypes\deltarune.json" />
+    <None Remove="BuiltinMacroTypes\empty.json" />
+    <None Remove="BuiltinMacroTypes\gamemaker.json" />
+    <None Remove="BuiltinMacroTypes\undertale.json" />
     <None Remove="version.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="gitversion.txt" />
+    <EmbeddedResource Include="BuiltinMacroTypes\deltarune.json" />
+    <EmbeddedResource Include="BuiltinMacroTypes\empty.json" />
+    <EmbeddedResource Include="BuiltinMacroTypes\gamemaker.json" />
+    <EmbeddedResource Include="BuiltinMacroTypes\undertale.json" />
     <EmbeddedResource Include="gitversion.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Underanalyzer\Underanalyzer\Underanalyzer.csproj" />
   </ItemGroup>
   <!--A prebuild responsible for creating a git commit name and branch name -->
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
@@ -47,7 +58,7 @@
 
     <!--If on Windows check if git is in PATH-->
     <Exec Condition="$([MSBuild]::IsOsPlatform('Windows'))" Command="where /q git" IgnoreExitCode="true">
-      <Output TaskParameter="ExitCode" PropertyName="ErrorCode"/>
+      <Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
     </Exec>
     <PropertyGroup>
       <!--Assign the location of git to GitPath. By default it's "git", if the above PATH checked failed, it'll get set to the git path in VS -->
@@ -55,6 +66,6 @@
       <GitPath Condition="'$(ErrorCode)'=='1'">$(DevEnvDir)\CommonExtensions\Microsoft\TeamFoundation\Team Explorer\Git\cmd\git</GitPath>
     </PropertyGroup>
     <!-- Use GitPath and put the git commit name and branch name into gitversion.txt which is an embedded resource-->
-    <Exec Command="( &quot;$(GitPath)&quot; describe --always --dirty &amp;&amp; &quot;$(GitPath)&quot; rev-parse --abbrev-ref HEAD ) &gt; &quot;$(ProjectDir)/gitversion.txt&quot;" IgnoreExitCode="true"/>
+    <Exec Command="( &quot;$(GitPath)&quot; describe --always --dirty &amp;&amp; &quot;$(GitPath)&quot; rev-parse --abbrev-ref HEAD ) &gt; &quot;$(ProjectDir)/gitversion.txt&quot;" IgnoreExitCode="true" />
   </Target>
 </Project>

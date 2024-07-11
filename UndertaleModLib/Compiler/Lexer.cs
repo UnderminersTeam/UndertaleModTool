@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace UndertaleModLib.Compiler
 {
@@ -166,14 +165,44 @@ namespace UndertaleModLib.Compiler
                     return new Token(Token.TokenKind.EOF);
                 }
 
-                if (cr.PeekChar() == '#')
+                while (cr.PeekChar() == '#')
                 {
-                    // Skip preprocessor directive/macro/etc. Maybe support could be added later... but not yet.
+                    int startHashtagIndex = cr.Position;
+                    cr.AdvancePosition();
+
+                    // Read first word to see if it's one we want to skip
+                    StringBuilder firstWordBuilder = new("#", 8);
                     while (!cr.EOF)
                     {
-                        if (cr.PeekChar() == '\n')
+                        char nextChar = cr.PeekChar();
+                        if ((nextChar < '0' || nextChar > '9') && (nextChar < 'A' || nextChar > 'Z') &&
+                            (nextChar < 'a' || nextChar > 'z') && nextChar != '_')
+                        {
                             break;
+                        }
+                        firstWordBuilder.Append(nextChar);
                         cr.AdvancePosition();
+                    }
+
+                    string firstWord = firstWordBuilder.ToString();
+                    if (firstWord == "#macro" || firstWord == "#region" || firstWord == "#endregion")
+                    {
+                        // Skip preprocessor directive/macros/etc
+                        while (!cr.EOF)
+                        {
+                            if (cr.PeekChar() == '\n')
+                                break;
+                            cr.AdvancePosition();
+                        }
+                        SkipWhitespaceAndComments(cr);
+                        if (cr.EOF)
+                        {
+                            return new Token(Token.TokenKind.EOF);
+                        }
+                    }
+                    else
+                    {
+                        return new Token(Token.TokenKind.Number, firstWord, cr.GetPositionInfo(startHashtagIndex));
                     }
                 }
 
@@ -494,6 +523,9 @@ namespace UndertaleModLib.Compiler
                     "default" => new Token(Token.TokenKind.KeywordDefault, cr.GetPositionInfo(index)),
                     "struct" => new Token(Token.TokenKind.KeywordStruct, cr.GetPositionInfo(index)),
                     "function" when CompileContext.GMS2_3 => new Token(Token.TokenKind.KeywordFunction, cr.GetPositionInfo(index)),
+                    "throw" when CompileContext.GMS2_3 => new Token(Token.TokenKind.KeywordThrow, cr.GetPositionInfo(index)),
+                    "constructor" when CompileContext.GMS2_3 => new Token(Token.TokenKind.KeywordConstructor, cr.GetPositionInfo(index)),
+                    "new" when CompileContext.GMS2_3 => new Token(Token.TokenKind.KeywordNew, cr.GetPositionInfo(index)),
                     "for" => new Token(Token.TokenKind.KeywordFor, cr.GetPositionInfo(index)),
                     "case" => new Token(Token.TokenKind.KeywordCase, cr.GetPositionInfo(index)),
                     "switch" => new Token(Token.TokenKind.KeywordSwitch, cr.GetPositionInfo(index)),
@@ -698,13 +730,14 @@ namespace UndertaleModLib.Compiler
 
             private static Token ReadHexLiteral(CodeReader cr)
             {
-                StringBuilder sb = new StringBuilder();
+                StringBuilder sb = new(8);
 
                 int index = cr.Position;
 
                 // Read the prefix ($ or 0x)
-                sb.Append(cr.ReadChar());
-                if (cr.PeekChar() == 'x')
+                char first = cr.ReadChar();
+                sb.Append(first);
+                if (first == '0' && cr.PeekChar() == 'x')
                     sb.Append(cr.ReadChar());
 
                 // Read the digits
@@ -813,6 +846,9 @@ namespace UndertaleModLib.Compiler
                     KeywordContinue,
                     KeywordStruct, // Apparently this exists
                     KeywordFunction,
+                    KeywordThrow,
+                    KeywordConstructor,
+                    KeywordNew,
                     OpenBlock, // {
                     CloseBlock, // }
                     OpenArray, // [

@@ -553,12 +553,15 @@ namespace UndertaleModTool
         }
 
         public static Dictionary<string, string> gettext = null;
-        private void UpdateGettext(UndertaleCode gettextCode)
+        private void UpdateGettext(UndertaleData data, UndertaleCode gettextCode)
         {
             gettext = new Dictionary<string, string>();
             string[] decompilationOutput;
+            GlobalDecompileContext context = new GlobalDecompileContext(data, false);
             if (!SettingsWindow.ProfileModeEnabled)
-                decompilationOutput = Decompiler.Decompile(gettextCode, new GlobalDecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
+            {
+                decompilationOutput = new Underanalyzer.Decompiler.DecompileContext(context, gettextCode).DecompileToString().Split('\n');
+            }
             else
             {
                 try
@@ -567,11 +570,11 @@ namespace UndertaleModTool
                     if (File.Exists(path))
                         decompilationOutput = File.ReadAllText(path).Replace("\r\n", "\n").Split('\n');
                     else
-                        decompilationOutput = Decompiler.Decompile(gettextCode, new GlobalDecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
+                        decompilationOutput = new Underanalyzer.Decompiler.DecompileContext(context, gettextCode).DecompileToString().Split('\n');
                 }
                 catch
                 {
-                    decompilationOutput = Decompiler.Decompile(gettextCode, new GlobalDecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
+                    decompilationOutput = new Underanalyzer.Decompiler.DecompileContext(context, gettextCode).DecompileToString().Split('\n');
                 }
             }
             Regex textdataRegex = new Regex("^ds_map_add\\(global\\.text_data_en, \\\"(.*)\\\", \\\"(.*)\\\"\\)", RegexOptions.Compiled);
@@ -692,7 +695,14 @@ namespace UndertaleModTool
                         string path = Path.Combine(TempPath, code.Name.Content + ".gml");
                         if (!SettingsWindow.ProfileModeEnabled || !File.Exists(path))
                         {
-                            decompiled = Decompiler.Decompile(code, context, (msg) => { dialog.Message = msg; });
+                            Underanalyzer.Decompiler.DecompileSettings settings = new()
+                            {
+                                UnknownArgumentNamePattern = "argument{0}",
+                                RemoveSingleLineBlockBraces = true,
+                                EmptyLineAroundBranchStatements = true,
+                                EmptyLineBeforeSwitchCases = true
+                            };
+                            decompiled = new Underanalyzer.Decompiler.DecompileContext(context, code, settings).DecompileToString();
                         }
                         else
                             decompiled = File.ReadAllText(path);
@@ -703,7 +713,7 @@ namespace UndertaleModTool
                     }
 
                     if (gettextCode != null)
-                        UpdateGettext(gettextCode);
+                        UpdateGettext(dataa, gettextCode);
 
                     try
                     {
@@ -1362,7 +1372,7 @@ namespace UndertaleModTool
                             else
                             {
                                 // Resolve 2.3 sub-functions for their parent entry
-                                if (data.KnownSubFunctions?.TryGetValue(nameText, out UndertaleFunction f) == true)
+                                if (data.GlobalFunctions?.NameToFunction?.TryGetValue(nameText, out Underanalyzer.IGMFunction f) == true)
                                 {
                                     ScriptsDict.TryGetValue(f.Name.Content, out val);
                                     val = (val as UndertaleScript)?.Code?.ParentEntry;

@@ -244,7 +244,8 @@ namespace UndertaleModTool
                                 .AddReferences(typeof(UndertaleObject).GetTypeInfo().Assembly,
                                                 GetType().GetTypeInfo().Assembly,
                                                 typeof(JsonConvert).GetTypeInfo().Assembly,
-                                                typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly)
+                                                typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly,
+                                                typeof(Underanalyzer.Decompiler.DecompileContext).Assembly)
                                 .WithEmitDebugInformation(true); //when script throws an exception, add a exception location (line number)
             });
 
@@ -1458,7 +1459,7 @@ namespace UndertaleModTool
             if (decompileContext is null)
                 decompileContext = new(() => new GlobalDecompileContext(Data, false));
 
-            if (Data.KnownSubFunctions is null) //if we run script before opening any code
+            if (Data.GlobalFunctions is null) //if we run script before opening any code
             {
                 SetProgressBar(null, "Building the cache of all sub-functions...", 0, 0);
                 await Task.Run(() => Decompiler.BuildSubFunctionCache(Data));
@@ -2597,8 +2598,7 @@ namespace UndertaleModTool
 
                 ScriptPath = path;
 
-                string compatScriptText = Regex.Replace(scriptText, @"\bDecompileContext(?!\.)\b", "GlobalDecompileContext", RegexOptions.None);
-                object result = await CSharpScript.EvaluateAsync(compatScriptText, scriptOptions, this, typeof(IScriptInterface));
+                object result = await CSharpScript.EvaluateAsync(scriptText, scriptOptions, this, typeof(IScriptInterface));
 
                 if (FinishedMessageEnabled)
                 {
