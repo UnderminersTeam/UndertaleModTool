@@ -2539,7 +2539,15 @@ namespace UndertaleModTool
                     string scriptPath = scriptLineNum.Item1;
                     if (!scriptsCode.ContainsKey(scriptPath))
                     {
-                        string scriptCode = File.ReadAllText(scriptPath);
+                        string scriptCode = null;
+                        try
+                        {
+                            scriptCode = File.ReadAllText(scriptPath);
+                        }
+                        catch (Exception e)
+                        {
+                            return $"An error occurred while processing the exception text.\nError message - \"{e.Message}\"\nThe unprocessed text is below.\n\n" + excString;
+                        }
                         scriptsCode.Add(scriptPath, scriptCode.Split('\n').ToList());
                     }
                 }
