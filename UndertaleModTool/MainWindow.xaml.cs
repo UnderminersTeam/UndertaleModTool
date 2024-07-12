@@ -2508,6 +2508,8 @@ namespace UndertaleModTool
                     {
                         // matches full path of the script file
                         string sourceFile = Regex.Match(traceLine, @"(?<=in ).*\.csx(?=:line \d+)").Value;
+                        if (!File.Exists(sourceFile))
+                            continue;
                         int linePos = traceLine.IndexOf(":line ") + 6;  // ":line ".Length = 6
                         if (linePos != (-1 + 6))
                         {
