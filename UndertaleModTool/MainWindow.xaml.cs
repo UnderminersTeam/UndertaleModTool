@@ -2552,7 +2552,11 @@ namespace UndertaleModTool
                     }
                 }
 
-                string excLines = string.Join('\n', loadedScriptLineNums.Select(pair => $"Line {pair.Item2} in script {pair.Item1}: {scriptsCode[pair.Item1][pair.Item2 - 1]}")); // - 1 because line numbers start from 1
+                string excLines = string.Join('\n', loadedScriptLineNums.Select(pair => 
+                {
+                    string scriptName = pair.Item1.Split(Path.DirectorySeparatorChar)[^1];
+                    return $"Line {pair.Item2} in script {scriptName}: {scriptsCode[pair.Item1][pair.Item2 - 1]}"; // - 1 because line numbers start from 1
+                }));
                 if (exTypesDict is not null)
                 {
                     string exTypesStr = string.Join(",\n", exTypesDict.Select(x => $"{x.Key}{((x.Value > 1) ? " (x" + x.Value + ")" : string.Empty)}"));
