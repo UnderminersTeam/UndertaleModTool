@@ -151,15 +151,15 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
                 if (numPoints > 0)
                 {
                     reader.AbsPosition += 8;
-                    if (reader.ReadUInt32() != 0) // In 2.3 a int with the value of 0 would be set here,
-                    {                             // it cannot be version 2.3 if this value isn't 0
+                    if (reader.ReadUInt32() != 0) // In 2.3 an int with the value of 0 would be set here,
+                    {                             // It cannot be version 2.3 if this value isn't 0
                         reader.undertaleData.SetGMS2Version(2, 3, 1);
                     }
                     else
                     {
                         if (reader.ReadUInt32() == 0)                      // At all points (besides the first one)
-                            reader.undertaleData.SetGMS2Version(2, 3, 1);  // if BezierX0 equals to 0 (the above check)
-                                                                           // then BezierY0 equals to 0 as well (the current check)
+                            reader.undertaleData.SetGMS2Version(2, 3, 1);  // If BezierX0 equals to 0 (the above check)
+                                                                           // Then BezierY0 equals to 0 as well (the current check)
                     }
                 }
 

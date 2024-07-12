@@ -1527,8 +1527,8 @@ namespace UndertaleModLib
             reader.AbsPosition = reader.ReadUInt32(); // Go to the first "Point"
             reader.Position += 8;
 
-            if (reader.ReadUInt32() != 0) // In 2.3 a int with the value of 0 would be set here,
-            {                             // it cannot be version 2.3 if this value isn't 0
+            if (reader.ReadUInt32() != 0) // In 2.3 an int with the value of 0 would be set here,
+            {                             // It cannot be version 2.3 if this value isn't 0
                 reader.undertaleData.SetGMS2Version(2, 3, 1);
             }
             else
