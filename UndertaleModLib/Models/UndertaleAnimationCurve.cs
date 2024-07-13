@@ -170,6 +170,7 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
             Name = reader.ReadUndertaleString();
             Curve = (CurveType)reader.ReadUInt32();
             Iterations = reader.ReadUInt32();
+
             Points = reader.ReadUndertaleObject<UndertaleSimpleList<Point>>();
         }
 
@@ -178,14 +179,38 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
         {
             reader.Position += 12;
 
-            // "Points"
-            uint count = reader.ReadUInt32();
-            if (reader.undertaleData.IsVersionAtLeast(2, 3, 1))
-                reader.Position += 24 * count;
-            else
-                reader.Position += 12 * count;
+            // Read the number of points in the curve
+            uint pointCount = reader.ReadUInt32();
 
-            return 1 + count;
+            // This check is partly duplicated from UndertaleChunks.cs, but it's necessary to handle embedded curves
+            // (For example, those in SEQN in the TS!Underswap v1.0 demo; see issue #1414)
+            if (!reader.undertaleData.IsVersionAtLeast(2, 3, 1))
+            {
+                long returnPosition = reader.AbsPosition;
+                if (pointCount > 0)
+                {
+                    reader.AbsPosition += 8;
+                    if (reader.ReadUInt32() != 0) // In 2.3 an int with the value of 0 would be set here,
+                    {                             // It cannot be version 2.3 if this value isn't 0
+                        reader.undertaleData.SetGMS2Version(2, 3, 1);
+                    }
+                    else
+                    {
+                        if (reader.ReadUInt32() == 0)                      // At all points (besides the first one)
+                            reader.undertaleData.SetGMS2Version(2, 3, 1);  // If BezierX0 equals to 0 (the above check)
+                                                                           // Then BezierY0 equals to 0 as well (the current check)
+                    }
+                }
+                reader.AbsPosition = returnPosition;
+            }
+
+            // "Points"
+            if (reader.undertaleData.IsVersionAtLeast(2, 3, 1))
+                reader.Position += 24 * pointCount;
+            else
+                reader.Position += 12 * pointCount;
+
+            return 1 + pointCount;
         }
 
         /// <inheritdoc/>
