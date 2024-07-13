@@ -142,13 +142,15 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
         {
             reader.Position += 12;
 
+            // Read the number of points in the curve
+            uint pointCount = reader.ReadUInt32();
+
             // This check is partly duplicated from UndertaleChunks.cs, but it's necessary to handle embedded curves
             // (For example, those in SEQN in the TS!Underswap v1.0 demo; see issue #1414)
             if (!reader.undertaleData.IsVersionAtLeast(2, 3, 1))
             {
                 long returnPosition = reader.AbsPosition;
-                uint numPoints = reader.ReadUInt32();
-                if (numPoints > 0)
+                if (pointCount > 0)
                 {
                     reader.AbsPosition += 8;
                     if (reader.ReadUInt32() != 0) // In 2.3 an int with the value of 0 would be set here,
@@ -162,18 +164,16 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
                                                                            // Then BezierY0 equals to 0 as well (the current check)
                     }
                 }
-
                 reader.AbsPosition = returnPosition;
             }
 
             // "Points"
-            uint count = reader.ReadUInt32();
             if (reader.undertaleData.IsVersionAtLeast(2, 3, 1))
-                reader.Position += 24 * count;
+                reader.Position += 24 * pointCount;
             else
-                reader.Position += 12 * count;
+                reader.Position += 12 * pointCount;
 
-            return 1 + count;
+            return 1 + pointCount;
         }
 
         /// <inheritdoc/>
