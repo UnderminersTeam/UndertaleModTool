@@ -557,7 +557,7 @@ namespace UndertaleModTool
         {
             gettext = new Dictionary<string, string>();
             string[] decompilationOutput;
-            GlobalDecompileContext context = new GlobalDecompileContext(data, false);
+            GlobalDecompileContext context = new(data);
             if (!SettingsWindow.ProfileModeEnabled)
             {
                 decompilationOutput = new Underanalyzer.Decompiler.DecompileContext(context, gettextCode).DecompileToString().Split('\n');
@@ -687,7 +687,7 @@ namespace UndertaleModTool
                 var dataa = mainWindow.Data;
                 Task t = Task.Run(() =>
                 {
-                    GlobalDecompileContext context = new GlobalDecompileContext(dataa, false);
+                    GlobalDecompileContext context = new(dataa);
                     string decompiled = null;
                     Exception e = null;
                     try

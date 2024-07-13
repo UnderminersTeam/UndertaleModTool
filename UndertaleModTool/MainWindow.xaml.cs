@@ -1103,7 +1103,7 @@ namespace UndertaleModTool
                         object countLock = new object();
                         string[] outputs = new string[Data.Code.Count];
                         UndertaleDebugInfo[] outputsOffsets = new UndertaleDebugInfo[Data.Code.Count];
-                        GlobalDecompileContext context = new GlobalDecompileContext(Data, false);
+                        GlobalDecompileContext context = new(Data);
                         Parallel.For(0, Data.Code.Count, (i) =>
                         {
                             var code = Data.Code[i];
@@ -1114,7 +1114,7 @@ namespace UndertaleModTool
                                 string output;
                                 try
                                 {
-                                    output = Decompiler.Decompile(code, context);
+                                    output = new Underanalyzer.Decompiler.DecompileContext(context, code).DecompileToString();
                                 }
                                 catch (Exception e)
                                 {
@@ -1457,12 +1457,12 @@ namespace UndertaleModTool
                 existedDialog = true;
 
             if (decompileContext is null)
-                decompileContext = new(() => new GlobalDecompileContext(Data, false));
+                decompileContext = new(() => new GlobalDecompileContext(Data));
 
-            if (Data.GlobalFunctions is null) //if we run script before opening any code
+            if (Data.GlobalFunctions is null) // If we run script before opening any code
             {
-                SetProgressBar(null, "Building the cache of all sub-functions...", 0, 0);
-                await Task.Run(() => Decompiler.BuildSubFunctionCache(Data));
+                SetProgressBar(null, "Building a cache of all global functions...", 0, 0);
+                await Task.Run(() => GlobalDecompileContext.BuildGlobalFunctionCache(Data));
             }
 
             if (Data.GMLCache.IsEmpty)
@@ -1476,7 +1476,7 @@ namespace UndertaleModTool
                     {
                         try
                         {
-                            Data.GMLCache[code.Name.Content] = Decompiler.Decompile(code, decompileContext.Value);
+                            Data.GMLCache[code.Name.Content] = new Underanalyzer.Decompiler.DecompileContext(decompileContext.Value, code).DecompileToString();
                         }
                         catch
                         {
@@ -1524,7 +1524,7 @@ namespace UndertaleModTool
                         {
                             try
                             {
-                                Data.GMLCache[code.Name.Content] = Decompiler.Decompile(code, decompileContext.Value);
+                                Data.GMLCache[code.Name.Content] = new Underanalyzer.Decompiler.DecompileContext(decompileContext.Value, code).DecompileToString();
 
                                 Data.GMLCacheFailed.Remove(code.Name.Content); //that code compiles now
                             }

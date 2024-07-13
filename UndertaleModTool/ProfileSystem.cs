@@ -26,10 +26,10 @@ namespace UndertaleModTool
             if (code.ParentEntry is not null)
                 return $"// This code entry is a reference to an anonymous function within \"{code.ParentEntry.Name.Content}\", decompile that instead.";
 
-            GlobalDecompileContext DECOMPILE_CONTEXT = context is null ? new(Data, false) : context;
+            GlobalDecompileContext DECOMPILE_CONTEXT = context is null ? new(Data) : context;
             try
             {
-                return code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT) : "";
+                return code != null ? (new Underanalyzer.Decompiler.DecompileContext(DECOMPILE_CONTEXT, code).DecompileToString()) : "";
             }
             catch (Exception e)
             {

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using UndertaleModLib.Models;
 using static UndertaleModLib.Compiler.Compiler.AssemblyWriter;
-using static UndertaleModLib.Decompiler.Decompiler.ExpressionAssetRef;
 using static UndertaleModLib.Util.AssetReferenceTypes;
 
 namespace UndertaleModLib.Compiler

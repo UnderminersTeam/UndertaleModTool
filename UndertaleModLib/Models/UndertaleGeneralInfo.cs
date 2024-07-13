@@ -344,12 +344,10 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         if (detectedVer.Major > 2 || (detectedVer.Major == 2 && detectedVer.Minor >= 3))
         {
             CompileContext.GMS2_3 = true;
-            DecompileContext.GMS2_3 = true;
         }
         else
         {
             CompileContext.GMS2_3 = false;
-            DecompileContext.GMS2_3 = false;
         }
 
         return detectedVer;

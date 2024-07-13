@@ -255,7 +255,7 @@ namespace UndertaleModLib.Compiler
                         // The FUNC chunk contains references to builtin functions, and anonymous function definitions called gml_Script_...
                         // The anonymous functions are bound to names by code in Data.GlobalInit
                         // so to get an actual mapping from names to functions, you have to decompile all GlobalInit scripts...
-                        Decompiler.Decompiler.BuildSubFunctionCache(compileContext.Data);
+                        Decompiler.GlobalDecompileContext.BuildGlobalFunctionCache(compileContext.Data);
                         foreach (var patch in funcPatches)
                         {
                             if (patch.isNewFunc)
@@ -1458,7 +1458,7 @@ namespace UndertaleModLib.Compiler
                             endPatch.Add(cw.Emit(Opcode.B));
 
                             // we're accessing a subfunction here, so build the cache if needed
-                            Decompiler.Decompiler.BuildSubFunctionCache(cw.compileContext.Data);
+                            Decompiler.GlobalDecompileContext.BuildGlobalFunctionCache(cw.compileContext.Data);
 
                             if (funcDefName is null)
                             {

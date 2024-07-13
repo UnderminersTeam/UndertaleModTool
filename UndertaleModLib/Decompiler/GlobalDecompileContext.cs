@@ -1,12 +1,10 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
+using System.Diagnostics;
+using System;
 using Underanalyzer;
 using Underanalyzer.Decompiler;
 using Underanalyzer.Decompiler.GameSpecific;
 using UndertaleModLib.Models;
-using static UndertaleModLib.Models.UndertaleRoom;
 
 namespace UndertaleModLib.Decompiler;
 
@@ -14,27 +12,9 @@ namespace UndertaleModLib.Decompiler;
 /// The DecompileContext is global for the entire decompilation run, or possibly multiple runs. It caches the decompilation results which don't change often
 /// to speedup decompilation.
 /// </summary>
-public class GlobalDecompileContext : Underanalyzer.IGameContext
+public class GlobalDecompileContext : IGameContext
 {
     public UndertaleData Data;
-
-    public bool EnableStringLabels;
-
-    public List<string> DecompilerWarnings = new List<string>();
-
-    /// <summary>
-    /// A cache of resolved function argument types. This is kept here because decompiling is slow, and there is no need to do it every time
-    /// unless the code has changed.
-    /// </summary>
-    public Dictionary<string, AssetIDType[]> ScriptArgsCache = new Dictionary<string, AssetIDType[]>();
-
-    /// <summary>
-    /// A cache of function to actual name mapping. GMS2.3+ sometimes (usually when dealing with global scripts) calls method functions
-    /// using the legacy call operator, passing the anonymous function directly. This dictionary contains a map from UndertaleFunction
-    /// to its actual name, obtained by decompiling the parent CodeObject and looking for the assignment to global variable with function
-    /// name.
-    /// </summary>
-    public Dictionary<UndertaleFunction, string> AnonymousFunctionNameCache = new Dictionary<UndertaleFunction, string>();
 
     // Implementation of Underanalyzer properties
     public bool UsingGMLv2 => Data?.IsVersionAtLeast(2, 3) ?? false;
@@ -47,19 +27,51 @@ public class GlobalDecompileContext : Underanalyzer.IGameContext
     public bool UsingRoomInstanceReferences => Data?.IsVersionAtLeast(2024, 2) ?? false;
     public GameSpecificRegistry GameSpecificRegistry => Data?.GameSpecificRegistry;
 
-    public GlobalDecompileContext(UndertaleData data, bool enableStringLabels)
+    public GlobalDecompileContext(UndertaleData data)
     {
-        this.Data = data;
-        this.EnableStringLabels = enableStringLabels;
-        Decompiler.BuildSubFunctionCache(data);
+        Data = data;
+        BuildGlobalFunctionCache(data);
     }
 
-    public void ClearDecompilationCache()
+    /// <summary>
+    /// Builds the GlobalFunctions cache, required for Underanalyzer's decompiler to recognize function names in global scope.
+    /// </summary>
+    public static void BuildGlobalFunctionCache(UndertaleData data)
     {
-        // This will not be done automatically, because it would cause significant slowdown having to recalculate this each time, and there's no reason to reset it if it's decompiling a bunch at once.
-        // But, since it is possible to invalidate this data, we add this here so we'll be able to invalidate it if we need to.
-        ScriptArgsCache.Clear();
-        AnonymousFunctionNameCache.Clear();
+        if (data == null || data.GlobalFunctions != null)
+        {
+            // Nothing to calculate
+            return;
+        }
+
+        if (!data.IsVersionAtLeast(2, 3))
+        {
+            // Make an empty instance
+            data.GlobalFunctions = new GlobalFunctions();
+            return;
+        }
+
+        // Use Underanalyzer's built-in global function finder
+        try
+        {
+            data.GlobalFunctions = new GlobalFunctions(GetGlobalScriptCodeEntries(data));
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.ToString());
+
+            // If an error occurs, just default to empty
+            data.GlobalFunctions = new GlobalFunctions();
+        }
+    }
+
+    // Enumerates over all global script code entries
+    private static IEnumerable<IGMCode> GetGlobalScriptCodeEntries(UndertaleData data)
+    {
+        foreach (UndertaleGlobalInit script in data.GlobalInitScripts)
+        {
+            yield return script.Code;
+        }
     }
 
     // Implementation of Underanalyzer methods

@@ -5,6 +5,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Underanalyzer.Decompiler;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
@@ -33,13 +34,13 @@ namespace UndertaleModTests
         [TestMethod]
         public void DecompileAllScripts()
         {
-            GlobalDecompileContext context = new GlobalDecompileContext(data, true);
+            GlobalDecompileContext context = new GlobalDecompileContext(data);
             Parallel.ForEach(data.Code, (code) =>
             {
                 //Console.WriteLine(code.Name.Content);
                 try
                 {
-                    Decompiler.Decompile(code, context);
+                    new DecompileContext(context, code).DecompileToString();
                 }
                 catch (Exception e)
                 {

@@ -114,7 +114,7 @@ namespace UndertaleModTool
 
             string passBack = "";
             string codeName = code.Name.Content;
-            GlobalDecompileContext DECOMPILE_CONTEXT = context is null ? new(Data, false) : context;
+            GlobalDecompileContext DECOMPILE_CONTEXT = context is null ? new(Data) : context;
 
             if (!Data.ToolInfo.ProfileMode)
             {
@@ -123,7 +123,7 @@ namespace UndertaleModTool
                     // It would just be recompiling an empty string and messing with null entries seems bad
                     if (code is null)
                         return;
-                    string originalCode = Decompiler.Decompile(code, DECOMPILE_CONTEXT);
+                    string originalCode = new Underanalyzer.Decompiler.DecompileContext(DECOMPILE_CONTEXT, code).DecompileToString();
                     passBack = GetPassBack(originalCode, keyword, replacement, caseSensitive, isRegex);
                     // No need to compile something unchanged
                     if (passBack == originalCode)
@@ -157,7 +157,7 @@ namespace UndertaleModTool
                             // It would just be recompiling an empty string and messing with null entries seems bad
                             if (code is null)
                                 return;
-                            string originalCode = Decompiler.Decompile(code, DECOMPILE_CONTEXT);
+                            string originalCode = new Underanalyzer.Decompiler.DecompileContext(DECOMPILE_CONTEXT, code).DecompileToString();
                             passBack = GetPassBack(originalCode, keyword, replacement, caseSensitive, isRegex);
                             // No need to compile something unchanged
                             if (passBack == originalCode)
