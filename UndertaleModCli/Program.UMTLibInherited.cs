@@ -420,10 +420,10 @@ public partial class Program : IScriptInterface
         if (code.ParentEntry is not null)
             return $"// This code entry is a reference to an anonymous function within \"{code.ParentEntry.Name.Content}\", decompile that instead.";
 
-        GlobalDecompileContext decompileContext = context is null ? new(Data, false) : context;
+        GlobalDecompileContext decompileContext = context is null ? new(Data) : context;
         try
         {
-            return code != null ? Decompiler.Decompile(code, decompileContext) : "";
+            return code != null ? (new Underanalyzer.Decompiler.DecompileContext(decompileContext, code).DecompileToString()) : "";
         }
         catch (Exception e)
         {
@@ -651,7 +651,7 @@ public partial class Program : IScriptInterface
         EnsureDataLoaded();
 
         string passBack = "";
-        GlobalDecompileContext decompileContext = context is null ? new(Data, false) : context;
+        GlobalDecompileContext decompileContext = context is null ? new(Data) : context;
 
         if (!Data.ToolInfo.ProfileMode)
         {
@@ -660,7 +660,7 @@ public partial class Program : IScriptInterface
                 // It would just be recompiling an empty string and messing with null entries seems bad
                 if (code is null)
                     return;
-                string originalCode = Decompiler.Decompile(code, decompileContext);
+                string originalCode = new Underanalyzer.Decompiler.DecompileContext(decompileContext, code).DecompileToString();
                 passBack = GetPassBack(originalCode, keyword, replacement, caseSensitive, isRegex);
                 // No need to compile something unchanged
                 if (passBack == originalCode)
