@@ -144,6 +144,12 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, ID
     /// </summary>
     public int GroupID { get => _audioGroup.CachedId; set { _audioGroup.CachedId = value; OnPropertyChanged(); } }
 
+    /// <summary>
+    /// The precomputed length of the sound's audio data.
+    /// </summary>
+    /// <remarks>Introduced in GameMaker 2024.6.</remarks>
+    public float AudioLength { get; set; }
+
     /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
     
@@ -174,6 +180,9 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, ID
             writer.WriteUndertaleObject(_audioFile);
         else
             writer.Write(_audioFile.CachedId);
+
+        if (writer.undertaleData.IsVersionAtLeast(2024, 6))
+            writer.Write(AudioLength);
     }
 
     /// <inheritdoc />
@@ -207,6 +216,9 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, ID
         {
             _audioFile.CachedId = reader.ReadInt32();
         }
+
+        if (reader.undertaleData.IsVersionAtLeast(2024, 6))
+            AudioLength = reader.ReadSingle();
     }
 
     /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
