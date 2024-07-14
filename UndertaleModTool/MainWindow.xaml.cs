@@ -2546,6 +2546,8 @@ namespace UndertaleModTool
                         }
                         catch (Exception e)
                         {
+                            string excString = exc.ToString();
+                            
                             return $"An error occurred while processing the exception text.\nError message - \"{e.Message}\"\nThe unprocessed text is below.\n\n" + excString;
                         }
                         scriptsCode.Add(scriptPath, scriptCode.Split('\n').ToList());
