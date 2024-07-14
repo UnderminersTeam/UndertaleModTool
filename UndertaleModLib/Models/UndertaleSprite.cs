@@ -806,6 +806,9 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
         return count;
     }
 
+    /// <summary>
+    /// Returns the width and height of the collision mask for this sprite, which changes depending on GameMaker version.
+    /// </summary>
     public (uint Width, uint Height) CalculateMaskDimensions(UndertaleData data)
     {
         if (data.IsVersionAtLeast(2024, 6))
@@ -815,11 +818,22 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
         return CalculateFullMaskDimensions(Width, Height);
     }
 
+    /// <summary>
+    /// Calculates the width and height of a collision mask from the given margin/bounding box.
+    /// This method is used to calculate collision mask dimensions in GameMaker 2024.6 and above.
+    /// </summary>
     public static (uint Width, uint Height) CalculateBboxMaskDimensions(int marginRight, int marginLeft, int marginBottom, int marginTop)
     {
         return ((uint)(marginRight - marginLeft + 1), (uint)(marginBottom - marginTop + 1));
     }
 
+    /// <summary>
+    /// Calculates the width and height of a collision mask from a given sprite's full width and height.
+    /// This method is used to calculate collision mask dimensions prior to GameMaker 2024.6.
+    /// </summary>
+    /// <remarks>
+    /// This simply returns the width and height supplied, but is intended for clarity in the code.
+    /// </remarks>
     public static (uint Width, uint Height) CalculateFullMaskDimensions(uint width, uint height)
     {
         return (width, height);

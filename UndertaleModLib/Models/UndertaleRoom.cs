@@ -2069,7 +2069,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                     if (reader.undertaleData.IsNonLTSVersionAtLeast(2023, 2))
                         ParticleSystems = reader.ReadUndertaleObjectPointer<UndertalePointerList<ParticleSystemInstance>>();
                     if (firstPointerTarget > reader.AbsPosition && !reader.undertaleData.IsVersionAtLeast(2024, 6))
-                        reader.undertaleData.SetGMS2Version(2024, 6); // there's more data before legacy tiles, so must be 2024.6+
+                        reader.undertaleData.SetGMS2Version(2024, 6); // There's more data before legacy tiles, so must be 2024.6+
                     if (reader.undertaleData.IsVersionAtLeast(2024, 6))
                         TextItems = reader.ReadUndertaleObjectPointer<UndertalePointerList<TextItemInstance>>();
                 }
@@ -2106,7 +2106,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                     if (reader.undertaleData.IsNonLTSVersionAtLeast(2023, 2))
                         partSystemsPtr = reader.ReadUInt32();
                     if (legacyTilesPtr > reader.AbsPosition && !reader.undertaleData.IsVersionAtLeast(2024, 6))
-                        reader.undertaleData.SetGMS2Version(2024, 6); // there's more data before legacy tiles, so must be 2024.6+
+                        reader.undertaleData.SetGMS2Version(2024, 6); // There's more data before legacy tiles, so must be 2024.6+
                     if (reader.undertaleData.IsVersionAtLeast(2024, 6))
                         textItemsPtr = reader.ReadUInt32();
                 }
@@ -2388,6 +2388,9 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             Rotation = reader.ReadSingle();
         }
 
+        /// <summary>
+        /// Generates a random name for this instance, as a utility for room editing.
+        /// </summary>
         //TODO: rework this method slightly.
         public static UndertaleString GenerateRandomName(UndertaleData data)
         {
@@ -2550,6 +2553,9 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             Rotation = reader.ReadSingle();
         }
 
+        /// <summary>
+        /// Generates a random name for this instance, as a utility for room editing.
+        /// </summary>
         public static UndertaleString GenerateRandomName(UndertaleData data)
         {
             return data.Strings.MakeString("particle_" + ((uint)Random.Shared.Next(-Int32.MaxValue, Int32.MaxValue)).ToString("X8"));
@@ -2587,6 +2593,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
         private UndertaleResourceById<UndertaleFont, UndertaleChunkFONT> _font = new();
 
+        // TODO: document these fields; some are self-explanatory but unsure on the behavior of all of them
         public UndertaleString Name { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
@@ -2657,6 +2664,9 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             Wrap = reader.ReadBoolean();
         }
 
+        /// <summary>
+        /// Generates a random name for this instance, as a utility for room editing.
+        /// </summary>
         public static UndertaleString GenerateRandomName(UndertaleData data)
         {
             return data.Strings.MakeString("textitem_" + ((uint)Random.Shared.Next(-Int32.MaxValue, Int32.MaxValue)).ToString("X8"));
@@ -2665,7 +2675,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         /// <inheritdoc />
         public override string ToString()
         {
-            return "Text item " + Name?.Content + " with text \"" + (Text?.Content ?? "?") + "\"";
+            return $"Text item {Name?.Content} with text \"{Text?.Content ?? "?"}\"";
         }
 
         /// <inheritdoc/>
