@@ -24,6 +24,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: true
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
@@ -72,6 +74,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: true
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
