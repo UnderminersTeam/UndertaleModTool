@@ -142,13 +142,13 @@ namespace UndertaleModLib.Compiler
             AddAssetsFromList(Data.Fonts, RefType.Font);
             AddAssetsFromList(Data.Timelines, RefType.Timeline);
             if (!GMS2_3)
-                AddAssetsFromList(Data.Scripts, AssetRefType.Script /* not actually used */);
-            AddAssetsFromList(Data.Shaders, AssetRefType.Shader);
-            AddAssetsFromList(Data.Rooms, AssetRefType.Room);
-            AddAssetsFromList(Data.AudioGroups, AssetRefType.Sound /* apparently? */);
-            AddAssetsFromList(Data.AnimationCurves, AssetRefType.AnimCurve);
-            AddAssetsFromList(Data.Sequences, AssetRefType.Sequence);
-            AddAssetsFromList(Data.ParticleSystems, AssetRefType.ParticleSystem);
+                AddAssetsFromList(Data.Scripts, RefType.Script /* not actually used */);
+            AddAssetsFromList(Data.Shaders, RefType.Shader);
+            AddAssetsFromList(Data.Rooms, RefType.Room);
+            AddAssetsFromList(Data.AudioGroups, RefType.Sound /* apparently? */);
+            AddAssetsFromList(Data.AnimationCurves, RefType.AnimCurve);
+            AddAssetsFromList(Data.Sequences, RefType.Sequence);
+            AddAssetsFromList(Data.ParticleSystems, RefType.ParticleSystem);
 
             if (Data.Scripts is not null)
             {
