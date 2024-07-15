@@ -721,7 +721,8 @@ public partial class Program : IScriptInterface
 
         try
         {
-            CSharpScript.EvaluateAsync(code, CliScriptOptions, this, typeof(IScriptInterface)).GetAwaiter().GetResult();
+            var processedCode = ScriptUtil.ProcessScriptText(code, scriptFile);
+            CSharpScript.EvaluateAsync(processedCode, CliScriptOptions, this, typeof(IScriptInterface)).GetAwaiter().GetResult();
             ScriptExecutionSuccess = true;
             ScriptErrorMessage = "";
         }
