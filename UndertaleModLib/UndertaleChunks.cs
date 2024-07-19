@@ -1692,7 +1692,7 @@ namespace UndertaleModLib
         {
             if (!writer.undertaleData.IsGameMaker2())
                 throw new InvalidOperationException();
-            writer.Write((uint)1); // apparently hardcoded 1, see https://github.com/krzys-h/UndertaleModTool/issues/4#issuecomment-421844420
+            writer.Write((uint)1); // Apparently hardcoded 1, see https://github.com/UnderminersTeam/UndertaleModTool/issues/4#issuecomment-421844420
             base.SerializeChunk(writer);
         }
 

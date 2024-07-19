@@ -1020,7 +1020,7 @@ namespace UndertaleModLib.Compiler
                             {
                                 // Put the return value into a local variable (GM does this as well)
                                 // so that it doesn't get cleared out of the stack??
-                                // See here: https://github.com/krzys-h/UndertaleModTool/issues/164
+                                // See here: https://github.com/UnderminersTeam/UndertaleModTool/issues/164
                                 cw.varPatches.Add(new VariablePatch()
                                 {
                                     Target = cw.EmitRef(Opcode.Pop, DataType.Variable, DataType.Variable),
