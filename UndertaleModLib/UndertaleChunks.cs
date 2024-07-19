@@ -1651,17 +1651,6 @@ namespace UndertaleModLib
 
             CheckFor2022_3And5(reader);
 
-            uint txtrSize = UndertaleEmbeddedTexture.ChildObjectsSize;
-            if (reader.undertaleData.IsVersionAtLeast(2, 0, 6))
-                txtrSize += 4; // "GeneratedMips"
-            if (reader.undertaleData.IsVersionAtLeast(2022, 3))
-                txtrSize += 4; // "TextureBlockSize"
-            if (reader.undertaleData.IsVersionAtLeast(2022, 9))
-                txtrSize += 12;
-
-            if (txtrSize != UndertaleEmbeddedTexture.ChildObjectsSize)
-                reader.SetStaticChildObjectsSize(typeof(UndertaleEmbeddedTexture), txtrSize);
-
             // Texture blobs are already included in the count
             return base.UnserializeObjectCount(reader);
         }
