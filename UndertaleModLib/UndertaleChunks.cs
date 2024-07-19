@@ -1651,17 +1651,6 @@ namespace UndertaleModLib
 
             CheckFor2022_3And5(reader);
 
-            uint txtrSize = UndertaleEmbeddedTexture.ChildObjectsSize;
-            if (reader.undertaleData.IsVersionAtLeast(2, 0, 6))
-                txtrSize += 4; // "GeneratedMips"
-            if (reader.undertaleData.IsVersionAtLeast(2022, 3))
-                txtrSize += 4; // "TextureBlockSize"
-            if (reader.undertaleData.IsVersionAtLeast(2022, 9))
-                txtrSize += 12;
-
-            if (txtrSize != UndertaleEmbeddedTexture.ChildObjectsSize)
-                reader.SetStaticChildObjectsSize(typeof(UndertaleEmbeddedTexture), txtrSize);
-
             // Texture blobs are already included in the count
             return base.UnserializeObjectCount(reader);
         }
@@ -1703,7 +1692,7 @@ namespace UndertaleModLib
         {
             if (!writer.undertaleData.IsGameMaker2())
                 throw new InvalidOperationException();
-            writer.Write((uint)1); // apparently hardcoded 1, see https://github.com/krzys-h/UndertaleModTool/issues/4#issuecomment-421844420
+            writer.Write((uint)1); // Apparently hardcoded 1, see https://github.com/UnderminersTeam/UndertaleModTool/issues/4#issuecomment-421844420
             base.SerializeChunk(writer);
         }
 
