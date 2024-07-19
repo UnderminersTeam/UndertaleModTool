@@ -26,6 +26,8 @@ if (code == null)
     return;
 }
 
+Underanalyzer.Decompiler.IDecompileSettings decompileSettings = new Underanalyzer.Decompiler.DecompileSettings();
+
 bool case_sensitive = true;
 bool multiline = false;
 bool isRegex = true;
@@ -38,7 +40,7 @@ if (!ScriptQuestion("Change the battlegroup in \"gml_Object_obj_mainchara_KeyPre
 }
 if (GetPreviousValue() == "None")
 {
-    String replacement = SimpleTextInput("Enter new battle group value for when you press \"HOME\"", "New battle group value",     GetDecompiledText("gml_Object_obj_mainchara_KeyPress_36"), true);
+    String replacement = SimpleTextInput("Enter new battle group value for when you press \"HOME\"", "New battle group value", GetDecompiledText("gml_Object_obj_mainchara_KeyPress_36", null, decompileSettings), true);
     ImportGMLString("gml_Object_obj_mainchara_KeyPress_36", replacement);
     ScriptMessage("Completed");
     return;
@@ -47,7 +49,7 @@ if (GetPreviousValue() == "None")
 //Group 1: "global.battlegroup = ("
 //Group 2: Original value of battlegroup
 //Group 3: " + nnn)"
-String keyword = @"(global\.battlegroup = \()(\d+)( \+ nnn\))";
+const string keyword = @"(global\.battlegroup ?= ?\(?)(\d+)( ?\+ ?nnn\)?);?";
 bool success = false;
 int number;
 while (!success)
@@ -64,9 +66,8 @@ ScriptMessage("Completed");
 string GetPreviousValue()
 {
     var line_number = 1;
-    string decompiled_text = GetDecompiledText("gml_Object_obj_mainchara_KeyPress_36");
+    string decompiled_text = GetDecompiledText("gml_Object_obj_mainchara_KeyPress_36", null, decompileSettings);
     string results = "";
-    string keyword = @"(global\.battlegroup = \()(\d+)( \+ nnn\))";
     string[] splitted = decompiled_text.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
     bool exists = false;
     foreach (string lineInt in splitted)

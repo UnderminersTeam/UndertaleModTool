@@ -651,7 +651,7 @@ namespace UndertaleModLib
             data.Options.Constants.Add(new UndertaleOptions.Constant() { Name = data.Strings.MakeString("@@DrawColour"), Value = data.Strings.MakeString(0xFFFFFFFF.ToString()) });
             data.Rooms.Add(new UndertaleRoom() { Name = data.Strings.MakeString("room0"), Caption = data.Strings.MakeString("") });
             data.BuiltinList = new BuiltinList(data);
-            Decompiler.GameSpecificResolver.InitializeTypes(data);
+            Decompiler.GameSpecificResolver.Initialize(data);
             return data;
         }
 
@@ -726,5 +726,11 @@ namespace UndertaleModLib
         /// The MD5 hash of the current file.
         /// </summary>
         public string CurrentMD5 = "Unknown";
+
+        /// <summary>
+        /// Default settings to be used by the Underanalyzer decompiler,
+        /// for a tool and in any scripts that desire matching the same settings.
+        /// </summary>
+        public IDecompileSettings DecompilerSettings = new DecompileSettings();
     }
 }

@@ -38,7 +38,7 @@ Data.Sprites.Add(spr_joker_enemy);
 var obj_joker = Data.GameObjects.ByName("obj_joker");
 
 var obj_chaseenemy = Data.GameObjects.ByName("obj_chaseenemy");
-obj_chaseenemy.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+obj_chaseenemy.EventHandlerFor(EventType.Create, Data).AppendGML(@"
 myencounter = 25; // Jevil.
 touchsprite = spr_joker_enemy;
 sprite_index = spr_joker_enemy;
@@ -46,11 +46,11 @@ chasetype = 0;
 pacetype = 1;", Data);
 
 var obj_testoverworldenemy = Data.GameObjects.ByName("obj_testoverworldenemy");
-var obj_testoverworldenemy_User0 = obj_testoverworldenemy.EventHandlerFor(EventType.Other, EventSubtypeOther.User0, Data.Strings, Data.Code, Data.CodeLocals);
+var obj_testoverworldenemy_User0 = obj_testoverworldenemy.EventHandlerFor(EventType.Other, EventSubtypeOther.User0, Data);
 obj_testoverworldenemy_User0.AppendGML("snd_play(snd_joker_laugh0);", Data);
 obj_testoverworldenemy_User0.Instructions[3].JumpOffset += 5; // Ugly hack to redirect exit of if()
 
-var obj_joker_User10 = obj_joker.EventHandlerFor(EventType.Other, EventSubtypeOther.User10, Data.Strings, Data.Code, Data.CodeLocals);
+var obj_joker_User10 = obj_joker.EventHandlerFor(EventType.Other, EventSubtypeOther.User10, Data);
 for (int i = 0; i < obj_joker_User10.Instructions.Count; i++)
 {
     if (obj_joker_User10.Instructions[i].Kind == UndertaleInstruction.Opcode.Pop && obj_joker_User10.Instructions[i].Destination.Target.Name.Content == "skipvictory")
@@ -137,7 +137,7 @@ spr_jokerdoor.Textures[1].Texture = spr_jokerdoor.Textures[2].Texture;
 
 
 var obj_doorX_musfade = Data.GameObjects.ByName("obj_doorX_musfade");
-obj_doorX_musfade.EventHandlerFor(EventType.Other, EventSubtypeOther.User9, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+obj_doorX_musfade.EventHandlerFor(EventType.Other, EventSubtypeOther.User9, Data).ReplaceGML(@"
 if (room == room_cc_prison_prejoker && global.flag[241] < 6) {
     global.typer = 666;
     global.fc = 0;
@@ -158,7 +158,7 @@ if (touched == 0) {
 }", Data);
 
 var obj_jokerbattleevent = Data.GameObjects.ByName("obj_jokerbattleevent");
-obj_jokerbattleevent.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+obj_jokerbattleevent.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data).AppendGML(@"
 if (instance_exists(obj_battlecontroller) && global.jevilizer < 0.15) {
     __view_set(4, 0, ((__view_get(4, 0) + (sin((global.time / 15)) / 2)) + 1));
     __view_set(11, 0, (__view_get(11, 0) + (cos((global.time / 10)) * 1.5)));
@@ -210,13 +210,13 @@ if (con == 1345) {
     con = 15.1;
 }", Data);
 
-obj_jokerbattleevent.EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+obj_jokerbattleevent.EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data).AppendGML(@"
 if (global.debug) {
     draw_set_color(0xFFFF);
     draw_text(50, 50, global.jevilizer);
 }", Data);
 
-obj_jokerbattleevent.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+obj_jokerbattleevent.EventHandlerFor(EventType.Create, Data).AppendGML(@"
 if (!snd_is_playing(global.currentsong[1])) {
     global.currentsong[0] = snd_init(""prejoker.ogg"");
     global.currentsong[1] = mus_loop_ext(global.currentsong[0], 1, 0.85);
@@ -231,7 +231,7 @@ if (argument0 == room_cc_joker)
 return roomname;", Data);
 
 var obj_shop1 = Data.GameObjects.ByName("obj_shop1");
-var obj_shop1_Draw = obj_shop1.EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data.Strings, Data.Code, Data.CodeLocals);
+var obj_shop1_Draw = obj_shop1.EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data);
 var obj_shop1_Patches = new Dictionary<string, string>()
 {
     { "obj_shop1_slash_Draw_0_gml_474_0", @"\E3* ... I see^1.&* After all the trouble I went through to lock him up^1, he managed to escape?/" },
@@ -262,15 +262,15 @@ for (int i = 0; i < obj_shop1_Draw.Instructions.Count; i++)
 obj_shop1_Draw.UpdateAddresses();
 obj_shop1_Draw.Replace(Assembler.Assemble(obj_shop1_Draw.Disassemble(Data.Variables, Data.CodeLocals.For(obj_shop1_Draw)), Data)); // TODO: no idea why this is needed
 
-Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f6, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f6, Data).ReplaceGML(@"
 if (global.debug == 1)
     global.flag[241] = 1;", Data);
 
-Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f7, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f7, Data).ReplaceGML(@"
 if (global.debug == 1)
     global.flag[241] = 7;", Data);
 
-Data.GameObjects.ByName("obj_jokerbg_triangle_real").EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+Data.GameObjects.ByName("obj_jokerbg_triangle_real").EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data).AppendGML(@"
 if (room == room_cc_joker) {
     on = (instance_number(obj_joker) != 0);
     rotspeed = (instance_number(obj_joker) * instance_number(obj_joker));

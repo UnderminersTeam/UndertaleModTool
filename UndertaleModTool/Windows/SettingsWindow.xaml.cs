@@ -13,6 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Underanalyzer.Decompiler;
 
 namespace UndertaleModTool
 {
@@ -208,6 +209,14 @@ namespace UndertaleModTool
                 mainWindow.RunGMSDebuggerItem.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
             }
         }
+
+        public static DecompileSettings DecompilerSettings { get; } = new DecompileSettings()
+        {
+            UnknownArgumentNamePattern = "argument{0}",
+            RemoveSingleLineBlockBraces = true,
+            EmptyLineAroundBranchStatements = true,
+            EmptyLineBeforeSwitchCases = true
+        };
 
         public bool UpdateButtonEnabled
         {

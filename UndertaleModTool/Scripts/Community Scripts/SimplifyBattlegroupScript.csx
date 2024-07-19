@@ -11,14 +11,17 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
     return;
 }
 
-ReplaceTextInGML("gml_Script_scr_battlegroup", @"global.monstertype[0] = 47", "", true, false);
-ReplaceTextInGML("gml_Script_scr_battlegroup", @"global.monstertype[1] = 0", "", true, false);
-ReplaceTextInGML("gml_Script_scr_battlegroup", @"global.monstertype[2] = 0", "", true, false);
-ReplaceTextInGML("gml_Script_scr_battlegroup", @"global.batmusic = caster_load(""music/battle1.ogg"")", "", true, false);
-ReplaceTextInGML("gml_Script_scr_battlegroup", @"global.actfirst = 0", "", true, false);
-ReplaceTextInGML("gml_Script_scr_battlegroup", @"global.extraintro = 0", "", true, false);
-ReplaceTextInGML("gml_Script_scr_battlegroup", @"global.battlelv = 0", "", true, false);
-ReplaceTextInGML("gml_Script_scr_battlegroup", @"global.msc = 0", "", true, false);
+GlobalDecompileContext globalDecompileContext = new(Data);
+Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = new Underanalyzer.Decompiler.DecompileSettings();
+
+ReplaceTextInGML("gml_Script_scr_battlegroup", @"global.monstertype[0] = 47", "", true, false, globalDecompileContext, decompilerSettings);
+ReplaceTextInGML("gml_Script_scr_battlegroup", @"global.monstertype[1] = 0", "", true, false, globalDecompileContext, decompilerSettings);
+ReplaceTextInGML("gml_Script_scr_battlegroup", @"global.monstertype[2] = 0", "", true, false, globalDecompileContext, decompilerSettings);
+ReplaceTextInGML("gml_Script_scr_battlegroup", @"global.batmusic = caster_load(""music/battle1.ogg"")", "", true, false, globalDecompileContext, decompilerSettings);
+ReplaceTextInGML("gml_Script_scr_battlegroup", @"global.actfirst = 0", "", true, false, globalDecompileContext, decompilerSettings);
+ReplaceTextInGML("gml_Script_scr_battlegroup", @"global.extraintro = 0", "", true, false, globalDecompileContext, decompilerSettings);
+ReplaceTextInGML("gml_Script_scr_battlegroup", @"global.battlelv = 0", "", true, false, globalDecompileContext, decompilerSettings);
+ReplaceTextInGML("gml_Script_scr_battlegroup", @"global.msc = 0", "", true, false, globalDecompileContext, decompilerSettings);
 string prepend = @"global.monstertype[0] = 47
 global.monstertype[1] = 0
 global.monstertype[2] = 0
@@ -28,4 +31,4 @@ global.extraintro = 0
 global.battlelv = 0
 global.msc = 0
 ";
-ImportGMLString("gml_Script_scr_battlegroup", prepend + GetDecompiledText("gml_Script_scr_battlegroup"));
+ImportGMLString("gml_Script_scr_battlegroup", prepend + GetDecompiledText("gml_Script_scr_battlegroup", globalDecompileContext, decompilerSettings));

@@ -275,7 +275,7 @@ namespace UndertaleModLib
             if (!FilePath.EndsWith(".dat"))
             {
                 data.BuiltinList = new BuiltinList(data);
-                Decompiler.GameSpecificResolver.InitializeTypes(data);
+                Decompiler.GameSpecificResolver.Initialize(data);
                 UndertaleEmbeddedTexture.FindAllTextureInfo(data);
             }
 

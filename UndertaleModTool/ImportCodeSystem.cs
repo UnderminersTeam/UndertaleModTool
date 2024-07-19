@@ -5,6 +5,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows;
+using Underanalyzer.Decompiler;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
@@ -97,15 +98,15 @@ namespace UndertaleModTool
             return passBack;
         }
 
-        public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
+        public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null, IDecompileSettings settings = null)
         {
             UndertaleCode code = Data.Code.ByName(codeName);
             if (code is null)
                 throw new ScriptException($"No code named \"{codeName}\" was found!");
 
-            ReplaceTextInGML(code, keyword, replacement, caseSensitive, isRegex, context);
+            ReplaceTextInGML(code, keyword, replacement, caseSensitive, isRegex, context, settings);
         }
-        public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
+        public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null, IDecompileSettings settings = null)
         {
             if (code.ParentEntry is not null)
                 return;
@@ -114,7 +115,7 @@ namespace UndertaleModTool
 
             string passBack = "";
             string codeName = code.Name.Content;
-            GlobalDecompileContext DECOMPILE_CONTEXT = context is null ? new(Data) : context;
+            GlobalDecompileContext globalDecompileContext = context is null ? new(Data) : context;
 
             if (!Data.ToolInfo.ProfileMode)
             {
@@ -123,7 +124,8 @@ namespace UndertaleModTool
                     // It would just be recompiling an empty string and messing with null entries seems bad
                     if (code is null)
                         return;
-                    string originalCode = new Underanalyzer.Decompiler.DecompileContext(DECOMPILE_CONTEXT, code).DecompileToString();
+                    string originalCode = new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, settings ?? Data.ToolInfo.DecompilerSettings)
+                        .DecompileToString();
                     passBack = GetPassBack(originalCode, keyword, replacement, caseSensitive, isRegex);
                     // No need to compile something unchanged
                     if (passBack == originalCode)
@@ -157,7 +159,8 @@ namespace UndertaleModTool
                             // It would just be recompiling an empty string and messing with null entries seems bad
                             if (code is null)
                                 return;
-                            string originalCode = new Underanalyzer.Decompiler.DecompileContext(DECOMPILE_CONTEXT, code).DecompileToString();
+                            string originalCode = new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, Data.ToolInfo.DecompilerSettings)
+                                .DecompileToString();
                             passBack = GetPassBack(originalCode, keyword, replacement, caseSensitive, isRegex);
                             // No need to compile something unchanged
                             if (passBack == originalCode)

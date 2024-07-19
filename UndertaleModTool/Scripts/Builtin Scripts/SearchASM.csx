@@ -55,12 +55,6 @@ await ClickableSearchOutput("Search results.", keyword, resultCount, resultsSort
 HideProgressBar();
 EnableUI();
 
-
-string GetFolder(string path)
-{
-    return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
-}
-
 async Task DumpCode()
 {
     await Task.Run(() => Parallel.ForEach(Data.Code, DumpCode));

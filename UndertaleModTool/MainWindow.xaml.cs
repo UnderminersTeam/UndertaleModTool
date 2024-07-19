@@ -635,6 +635,7 @@ namespace UndertaleModTool
             FilePath = null;
             Data = UndertaleData.CreateNew();
             Data.ToolInfo.AppDataProfiles = ProfilesFolder;
+            Data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
             CloseChildFiles();
             OnPropertyChanged("Data");
             OnPropertyChanged("FilePath");
@@ -1001,6 +1002,7 @@ namespace UndertaleModTool
                             if (data != null)
                             {
                                 data.ToolInfo.ProfileMode = SettingsWindow.ProfileModeEnabled;
+                                data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
                                 data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
                             }
                         }
@@ -1028,6 +1030,7 @@ namespace UndertaleModTool
                         CachedTileDataLoader.Reset();
 
                         Data.ToolInfo.AppDataProfiles = ProfilesFolder;
+                        Data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
                         FilePath = filename;
                         OnPropertyChanged("Data");
                         OnPropertyChanged("FilePath");
@@ -1114,7 +1117,8 @@ namespace UndertaleModTool
                                 string output;
                                 try
                                 {
-                                    output = new Underanalyzer.Decompiler.DecompileContext(context, code).DecompileToString();
+                                    output = new Underanalyzer.Decompiler.DecompileContext(context, code, Data.ToolInfo.DecompilerSettings)
+                                        .DecompileToString();
                                 }
                                 catch (Exception e)
                                 {
@@ -1421,7 +1425,7 @@ namespace UndertaleModTool
             });
         }
 
-        public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool clearGMLEditedBefore = false)
+        public async Task<bool> GenerateGMLCache(GlobalDecompileContext decompileContext = null, object dialog = null, bool clearGMLEditedBefore = false)
         {
             if (!SettingsWindow.UseGMLCache)
                 return false;
@@ -1456,8 +1460,7 @@ namespace UndertaleModTool
             else
                 existedDialog = true;
 
-            if (decompileContext is null)
-                decompileContext = new(() => new GlobalDecompileContext(Data));
+            decompileContext ??= new(Data);
 
             if (Data.GlobalFunctions is null) // If we run script before opening any code
             {
@@ -1476,7 +1479,9 @@ namespace UndertaleModTool
                     {
                         try
                         {
-                            Data.GMLCache[code.Name.Content] = new Underanalyzer.Decompiler.DecompileContext(decompileContext.Value, code).DecompileToString();
+                            Data.GMLCache[code.Name.Content] = 
+                                new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, Data.ToolInfo.DecompilerSettings)
+                                    .DecompileToString();
                         }
                         catch
                         {
@@ -1524,7 +1529,9 @@ namespace UndertaleModTool
                         {
                             try
                             {
-                                Data.GMLCache[code.Name.Content] = new Underanalyzer.Decompiler.DecompileContext(decompileContext.Value, code).DecompileToString();
+                                Data.GMLCache[code.Name.Content] = 
+                                    new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, Data.ToolInfo.DecompilerSettings)
+                                        .DecompileToString();
 
                                 Data.GMLCacheFailed.Remove(code.Name.Content); //that code compiles now
                             }

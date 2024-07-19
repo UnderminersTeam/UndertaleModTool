@@ -5,7 +5,7 @@ Data.Functions.EnsureDefined("room_get_name", Data.Strings); // required for Del
 string displayName = Data?.GeneralInfo?.DisplayName?.Content.ToLower();
 bool isDeltarune = displayName.StartsWith("deltarune chapter 1");
 
-var gml_Object_obj_time_Draw_64 = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data.Strings, Data.Code, Data.CodeLocals);
+var gml_Object_obj_time_Draw_64 = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data);
 if (isDeltarune)
 {
     gml_Object_obj_time_Draw_64.AppendGML(@"

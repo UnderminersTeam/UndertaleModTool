@@ -7,8 +7,7 @@ using System.Collections.Generic;
 
 EnsureDataLoaded();
 
-string codeFolder = GetFolder(FilePath) + "Export_Code" + Path.DirectorySeparatorChar;
-ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
+string codeFolder = Path.Combine(Path.GetDirectoryName(FilePath), "Export_Code");
 if (Directory.Exists(codeFolder))
 {
     ScriptError("A code export already exists. Please remove it.", "Error");
@@ -17,6 +16,9 @@ if (Directory.Exists(codeFolder))
 
 Directory.CreateDirectory(codeFolder);
 
+GlobalDecompileContext globalDecompileContext = new(Data);
+Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = Data.ToolInfo.DecompilerSettings;
+
 bool exportFromCache = false;
 if (GMLCacheEnabled && Data.GMLCache is not null)
     exportFromCache = ScriptQuestion("Export from the cache?");
@@ -24,19 +26,14 @@ if (GMLCacheEnabled && Data.GMLCache is not null)
 List<UndertaleCode> toDump;
 if (!exportFromCache)
 {
-    toDump = new();
-    foreach (UndertaleCode code in Data.Code)
-    {
-        if (code.ParentEntry != null)
-            continue;
-        toDump.Add(code);
-    }
+    toDump = Data.Code.Where(c => c.ParentEntry is null)
+                      .ToList();
 }
 
 bool cacheGenerated = false;
 if (exportFromCache)
 {
-    cacheGenerated = await GenerateGMLCache(DECOMPILE_CONTEXT);
+    cacheGenerated = await GenerateGMLCache(globalDecompileContext);
     await StopProgressBarUpdater();
 }
 
@@ -49,13 +46,6 @@ await StopProgressBarUpdater();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + codeFolder);
 
-
-string GetFolder(string path)
-{
-    return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
-}
-
-
 async Task DumpCode()
 {
     if (cacheGenerated)
@@ -64,10 +54,10 @@ async Task DumpCode()
 
         if (Data.GMLCacheFailed.Count > 0)
         {
-            if (Data.KnownSubFunctions is null) //if we run script before opening any code
+            if (Data.GlobalFunctions is null)
             {
-                SetProgressBar(null, "Building the cache of all sub-functions...", 0, 0);
-                await Task.Run(() => Decompiler.BuildSubFunctionCache(Data));
+                SetProgressBar(null, "Building the cache of all global functions...", 0, 0);
+                await Task.Run(() => GlobalDecompileContext.BuildGlobalFunctionCache(Data));
                 SetProgressBar(null, "Code Entries", 0, Data.GMLCache.Count + Data.GMLCacheFailed.Count);
             }   
 
@@ -76,10 +66,10 @@ async Task DumpCode()
     }
     else
     {
-        if (Data.KnownSubFunctions is null) //if we run script before opening any code
+        if (Data.GlobalFunctions is null)
         {
-            SetProgressBar(null, "Building the cache of all sub-functions...", 0, 0);
-            await Task.Run(() => Decompiler.BuildSubFunctionCache(Data));
+            SetProgressBar(null, "Building the cache of all global functions...", 0, 0);
+            await Task.Run(() => GlobalDecompileContext.BuildGlobalFunctionCache(Data));
             SetProgressBar(null, "Code Entries", 0, toDump.Count);
         }
 
@@ -94,7 +84,9 @@ void DumpCode(UndertaleCode code)
         string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
         try
         {
-            File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
+            File.WriteAllText(path, (code != null 
+                ? new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, decompilerSettings).DecompileToString() 
+                : ""));
         }
         catch (Exception e)
         {

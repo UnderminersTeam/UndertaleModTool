@@ -40,7 +40,7 @@ namespace UndertaleModTests
                 //Console.WriteLine(code.Name.Content);
                 try
                 {
-                    new DecompileContext(context, code).DecompileToString();
+                    new DecompileContext(context, code, data.ToolInfo.DecompilerSettings).DecompileToString();
                 }
                 catch (Exception e)
                 {

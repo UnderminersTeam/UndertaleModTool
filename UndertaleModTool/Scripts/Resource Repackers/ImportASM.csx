@@ -38,7 +38,8 @@ SetProgressBar(null, "Files", 0, dirFiles.Length);
 StartProgressBarUpdater();
 
 SyncBinding("Strings, Code, CodeLocals, Scripts, GlobalInitScripts, GameObjects, Functions, Variables", true);
-await Task.Run(() => {
+await Task.Run(() => 
+{
     foreach (string file in dirFiles)
     {
         ImportASMFile(file, doParse, true, false, stopOnError);

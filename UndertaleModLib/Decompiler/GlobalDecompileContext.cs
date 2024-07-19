@@ -85,79 +85,79 @@ public class GlobalDecompileContext : IGameContext
         switch (assetType)
         {
             case AssetType.Object:
-                if (assetIndex > Data.GameObjects.Count)
+                if (assetIndex >= Data.GameObjects.Count)
                 {
                     return null;
                 }
                 return Data.GameObjects[assetIndex].Name?.Content;
             case AssetType.Sprite:
-                if (assetIndex > Data.Sprites.Count)
+                if (assetIndex >= Data.Sprites.Count)
                 {
                     return null;
                 }
                 return Data.Sprites[assetIndex].Name?.Content;
             case AssetType.Sound:
-                if (assetIndex > Data.Sounds.Count)
+                if (assetIndex >= Data.Sounds.Count)
                 {
                     return null;
                 }
                 return Data.Sounds[assetIndex].Name?.Content;
             case AssetType.Room:
-                if (assetIndex > Data.Rooms.Count)
+                if (assetIndex >= Data.Rooms.Count)
                 {
                     return null;
                 }
                 return Data.Rooms[assetIndex].Name?.Content;
             case AssetType.Background:
-                if (assetIndex > Data.Backgrounds.Count)
+                if (assetIndex >= Data.Backgrounds.Count)
                 {
                     return null;
                 }
                 return Data.Backgrounds[assetIndex].Name?.Content;
             case AssetType.Path:
-                if (assetIndex > Data.Paths.Count)
+                if (assetIndex >= Data.Paths.Count)
                 {
                     return null;
                 }
                 return Data.Paths[assetIndex].Name?.Content;
             case AssetType.Script:
-                if (assetIndex > Data.Scripts.Count)
+                if (assetIndex >= Data.Scripts.Count)
                 {
                     return null;
                 }
                 return Data.Scripts[assetIndex].Name?.Content;
             case AssetType.Font:
-                if (assetIndex > Data.Fonts.Count)
+                if (assetIndex >= Data.Fonts.Count)
                 {
                     return null;
                 }
                 return Data.Fonts[assetIndex].Name?.Content;
             case AssetType.Timeline:
-                if (assetIndex > Data.Timelines.Count)
+                if (assetIndex >= Data.Timelines.Count)
                 {
                     return null;
                 }
                 return Data.Timelines[assetIndex].Name?.Content;
             case AssetType.Shader:
-                if (assetIndex > Data.Shaders.Count)
+                if (assetIndex >= Data.Shaders.Count)
                 {
                     return null;
                 }
                 return Data.Shaders[assetIndex].Name?.Content;
             case AssetType.Sequence:
-                if (assetIndex > Data.Sequences.Count)
+                if (assetIndex >= Data.Sequences.Count)
                 {
                     return null;
                 }
                 return Data.Sequences[assetIndex].Name?.Content;
             case AssetType.AnimCurve:
-                if (assetIndex > Data.AnimationCurves.Count)
+                if (assetIndex >= Data.AnimationCurves.Count)
                 {
                     return null;
                 }
                 return Data.AnimationCurves[assetIndex].Name?.Content;
             case AssetType.ParticleSystem:
-                if (assetIndex > Data.ParticleSystems.Count)
+                if (assetIndex >= Data.ParticleSystems.Count)
                 {
                     return null;
                 }

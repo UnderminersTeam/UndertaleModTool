@@ -560,21 +560,28 @@ namespace UndertaleModTool
             GlobalDecompileContext context = new(data);
             if (!SettingsWindow.ProfileModeEnabled)
             {
-                decompilationOutput = new Underanalyzer.Decompiler.DecompileContext(context, gettextCode).DecompileToString().Split('\n');
+                decompilationOutput = new Underanalyzer.Decompiler.DecompileContext(context, gettextCode, data.ToolInfo.DecompilerSettings)
+                    .DecompileToString().Split('\n');
             }
             else
             {
-                try
+                string path = Path.Combine(TempPath, gettextCode.Name.Content + ".gml");
+                if (File.Exists(path))
                 {
-                    string path = Path.Combine(TempPath, gettextCode.Name.Content + ".gml");
-                    if (File.Exists(path))
+                    try
+                    {
                         decompilationOutput = File.ReadAllText(path).Replace("\r\n", "\n").Split('\n');
-                    else
-                        decompilationOutput = new Underanalyzer.Decompiler.DecompileContext(context, gettextCode).DecompileToString().Split('\n');
+                    }
+                    catch
+                    {
+                        decompilationOutput = new Underanalyzer.Decompiler.DecompileContext(context, gettextCode, data.ToolInfo.DecompilerSettings)
+                            .DecompileToString().Split('\n');
+                    }
                 }
-                catch
+                else
                 {
-                    decompilationOutput = new Underanalyzer.Decompiler.DecompileContext(context, gettextCode).DecompileToString().Split('\n');
+                    decompilationOutput = new Underanalyzer.Decompiler.DecompileContext(context, gettextCode, data.ToolInfo.DecompilerSettings)
+                        .DecompileToString().Split('\n');
                 }
             }
             Regex textdataRegex = new Regex("^ds_map_add\\(global\\.text_data_en, \\\"(.*)\\\", \\\"(.*)\\\"\\)", RegexOptions.Compiled);
@@ -695,17 +702,13 @@ namespace UndertaleModTool
                         string path = Path.Combine(TempPath, code.Name.Content + ".gml");
                         if (!SettingsWindow.ProfileModeEnabled || !File.Exists(path))
                         {
-                            Underanalyzer.Decompiler.DecompileSettings settings = new()
-                            {
-                                UnknownArgumentNamePattern = "argument{0}",
-                                RemoveSingleLineBlockBraces = true,
-                                EmptyLineAroundBranchStatements = true,
-                                EmptyLineBeforeSwitchCases = true
-                            };
-                            decompiled = new Underanalyzer.Decompiler.DecompileContext(context, code, settings).DecompileToString();
+                            decompiled = new Underanalyzer.Decompiler.DecompileContext(context, code, dataa.ToolInfo.DecompilerSettings)
+                                .DecompileToString();
                         }
                         else
+                        {
                             decompiled = File.ReadAllText(path);
+                        }
                     }
                     catch (Exception ex)
                     {

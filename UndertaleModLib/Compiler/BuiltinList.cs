@@ -125,7 +125,8 @@ namespace UndertaleModLib.Compiler
         public int Argument0ID = 0;
         public int Argument15ID = 0;
 
-        public BuiltinList() {
+        public BuiltinList() 
+        {
             Initialize(null);
         }
 
@@ -2090,7 +2091,7 @@ namespace UndertaleModLib.Compiler
             Functions["buffer_async_group_begin"] = new FunctionInfo(this, 1);
             Functions["buffer_async_group_end"] = new FunctionInfo(this, 0);
             Functions["buffer_async_group_option"] = new FunctionInfo(this, 2);
-            Functions["buffer_get_surface"] = new FunctionInfo(this, (data.IsVersionAtLeast(2, 3, 1) ? 3 : 5)); // be more robust here
+            Functions["buffer_get_surface"] = new FunctionInfo(this, ((data?.IsVersionAtLeast(2, 3, 1) ?? false) ? 3 : 5)); // be more robust here
             Functions["buffer_set_surface"] = new FunctionInfo(this, 5);
             Functions["buffer_set_network_safe"] = new FunctionInfo(this, 2);
             Functions["buffer_create_from_vertex_buffer"] = new FunctionInfo(this, 3);

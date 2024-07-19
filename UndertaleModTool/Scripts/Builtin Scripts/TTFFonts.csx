@@ -22,7 +22,7 @@ Data.Fonts.Clear();
 
 Data.Functions.EnsureDefined("font_add", Data.Strings); // Allow font_add.
 
-var obj_time_Create_0 = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals);
+var obj_time_Create_0 = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Create, Data);
 obj_time_Create_0.AppendGML(@"
 // NOTE: According to GMS documentation the font ranges are ignored with ttf fonts, and that seems to be indeed the case
 font_add(""wingding.ttf"", 12, false, false, 32, 127);

@@ -21,7 +21,7 @@ public class GameSpecificResolver
     /// <summary>
     /// Initializes the registry of game-specific data for the given game.
     /// </summary>
-    public static void InitializeTypes(UndertaleData data)
+    public static void Initialize(UndertaleData data)
     {
         data.GameSpecificRegistry = new();
 

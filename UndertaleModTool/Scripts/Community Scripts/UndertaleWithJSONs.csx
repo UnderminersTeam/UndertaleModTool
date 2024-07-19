@@ -4,7 +4,9 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-//Made by Grossley with the help of Colinator
+// TODO: this needs a rewrite to use Underanalyzer's AST (and compile)
+
+// Made by Grossley with the help of Colinator
 
 int maxCount = 1;
 
@@ -91,13 +93,13 @@ else
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f11, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f11, Data).ReplaceGML(@"
 scr_change_language()
 ", Data);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f12, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f12, Data).ReplaceGML(@"
 if (global.language == ""en"")
     textdata_en()
 else
