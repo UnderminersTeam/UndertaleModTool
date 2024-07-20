@@ -232,7 +232,20 @@
       "optionCommentCColor": "Constant.Color",
       "menuHeaderColor": "Constant.Color",
       "hpcolor": "Constant.Color",
-      "gamepad_controls": "Constant.GamepadButton",
+      "gamepad_controls": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Constant.GamepadButton"
+          },
+          "Constant.GamepadButton"
+        ]
+      },
+      "pieceColours": {
+        "MacroType": "ArrayInit",
+        "Macro": "Constant.Color"
+      },
       "textsound": "Asset.Sound",
       "coasterSprite": "Asset.Sprite",
       "usprite_blush": "Asset.Sprite",
@@ -295,7 +308,24 @@
       "jumpsprite": "Deltarune.Asset.ZeroOrSprite",
       "shieldpiece_alpha": "Deltarune.Asset.ZeroOneOrSprite",
       "parent": "Asset.Object",
-      "box": "Asset.Object"
+      "box": "Asset.Object",
+      "roomchoice": "Asset.Room",
+      "button0": "Constant.GamepadButton",
+      "button1": "Constant.GamepadButton",
+      "button2": "Constant.GamepadButton",
+      "_control": "Constant.GamepadButton",
+      "new_gamepad_key": "Constant.GamepadButton",
+      "input_k": "Constant.VirtualKey",
+      "input_g": "Constant.GamepadButton",
+      "COL_A": "Constant.Color",
+      "COL_B": "Constant.Color",
+      "mybutton": "Constant.VirtualKey",
+      "bird_color": "Constant.Color",
+      "_colorA": "Constant.Color",
+      "_colorB": "Constant.Color",
+      "drawcolor": "Constant.Color",
+      "fadecolor": "Constant.Color",
+      "lettercolor": "Constant.Color"
     },
     "FunctionArguments": {
       "snd_play": [ "Asset.Sound" ],
@@ -504,7 +534,9 @@
         },
         "Asset.Sound"
       ],
-      "gml_Script_scr_room": [ "Asset.Room", null ]
+      "gml_Script_scr_room": [ "Asset.Room", null ],
+      "gml_Script_scr_stickto": [ "Id.InstanceOrObject", null ],
+      "gml_Script_c_stickto": [ "Id.InstanceOrObject", null ]
     },
     "FunctionReturn": {
       "scr_getbuttonsprite": {
@@ -542,62 +574,62 @@
     },
     "gml_Object_obj_ch2_sceneex2_special_Draw_0": {
       "Variables": {
-        "color": null
+        "color": "None"
       }
     },
     "gml_Object_obj_ch2_sceneex2_special_Step_0": {
       "Variables": {
-        "color": null
+        "color": "None"
       }
     },
     "gml_Object_obj_dbulletcontroller_Step_0": {
       "Variables": {
-        "color": null
+        "color": "None"
       }
     },
     "gml_Script_scr_heartcolor": {
       "Variables": {
-        "color": null
+        "color": "None"
       }
     },
     "gml_Object_obj_heart_Create_0": {
       "Variables": {
-        "color": null
+        "color": "None"
       }
     },
     "gml_Object_obj_heart_Draw_0": {
       "Variables": {
-        "color": null
+        "color": "None"
       }
     },
     "gml_Object_obj_heart_Step_0": {
       "Variables": {
-        "color": null
+        "color": "None"
       }
     },
     "gml_Object_obj_sneo_fakeheart_Create_0": {
       "Variables": {
-        "color": null
+        "color": "None"
       }
     },
     "gml_Object_obj_sneo_fakeheart_Destroy_0": {
       "Variables": {
-        "color": null
+        "color": "None"
       }
     },
     "gml_Object_obj_sneo_fakeheart_Step_2": {
       "Variables": {
-        "color": null
+        "color": "None"
       }
     },
     "gml_Object_obj_cybercity_balloon_cheese_Create_0": {
       "Variables": {
-        "blend": null
+        "blend": "None"
       }
     },
     "gml_Object_obj_cybercity_balloon_Create_0": {
       "Variables": {
-        "blend": null
+        "blend": "None"
       }
     },
     "gml_Object_obj_shadowMaker_Step_2": {
@@ -727,6 +759,16 @@
     "gml_Object_obj_debug_sprite_catalog_Create_0": {
       "Variables": {
         "myLastSprite": "Asset.Sprite"
+      }
+    },
+    "gml_Object_obj_move_to_point_Create_0": {
+      "Variables": {
+        "target": "Asset.Object"
+      }
+    },
+    "gml_Object_obj_move_to_point_Step_0": {
+      "Variables": {
+        "target": "Asset.Object"
       }
     }
   }

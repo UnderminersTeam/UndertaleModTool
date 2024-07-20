@@ -122,7 +122,8 @@
       "scr_getsprite": [ "Asset.Sprite" ],
       "scr_setfont": [ "Asset.Font" ],
       "scr_bouncer": [ "Asset.Object", null, null ],
-      "scr_draw_background_ps4": [ "Asset.Background", null, null ]
+      "scr_draw_background_ps4": [ "Asset.Background", null, null ],
+      "scr_marker": [ null, null, "Asset.Sprite" ]
     },
     "FunctionReturn": {
       "gml_Script_scr_getsprite": "Asset.Sprite",
