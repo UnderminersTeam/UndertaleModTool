@@ -3,10 +3,11 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Underanalyzer.Decompiler;
+using Underanalyzer.Decompiler.AST;
 
-// TODO: this needs a rewrite to use Underanalyzer's AST (and compile)
-
-// Made by Grossley with the help of Colinator
+// Made by Grossley with the help of colinator27
 
 int maxCount = 1;
 
@@ -23,31 +24,29 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
     return;
 }
 
-
-string langFolder = GetFolder(FilePath) + "lang" + Path.DirectorySeparatorChar;
-ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
-
+string langFolder = Path.Combine(Path.GetDirectoryName(FilePath), "lang");
 if (Directory.Exists(langFolder))
 {
-    ScriptError("The lang files already exist.", "Error");
+    ScriptError("The lang folder already exists.", "Error");
     return;
 }
 
 Directory.CreateDirectory(langFolder);
+
+GlobalDecompileContext globalDecompileContext = new(Data);
+IDecompileSettings decompilerSettings = new DecompileSettings();
 
 ScriptMessage("JSONifies Undertale versions 1.05+");
 ScriptMessage(@"Switch languages using F11.
 Reload text for curent language from JSON on command using F12.
 Note: reloading from JSON may take about 10 seconds.
 ");
-//this is one of the rare cases when it's better without "ProgressUpdater()"
-await Task.Run(() => {
+
+// this is one of the rare cases when it's better without "ProgressUpdater()"
+await Task.Run(() =>
+{
     maxCount = 2;
-    SetProgressBar(null, "Dumping the language files", 0, maxCount);
-    DumpJSON("en");
-    DumpJSON("ja");
-    maxCount = 2;
-    SetProgressBar(null, "Making the JSONs", 0, maxCount);
+    SetProgressBar(null, "Decompiling and making the JSONs", 0, maxCount);
     MakeJSON("en");
     MakeJSON("ja");
     maxCount = 6;
@@ -58,10 +57,6 @@ void IncProgressLocal()
 {
     if (GetProgress() < maxCount)
         IncrementProgress();
-}
-
-string GetFolder(string path) {
-    return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -94,40 +89,40 @@ else
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f11, Data).ReplaceGML(@"
-scr_change_language()
+scr_change_language();
 ", Data);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f12, Data).ReplaceGML(@"
 if (global.language == ""en"")
-    textdata_en()
+    textdata_en();
 else
-    textdata_ja()
+    textdata_ja();
 ", Data);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     ImportGMLString("gml_Script_scr_change_language", @"
-//Read the language from the INI file
+// Read the language from the INI file
 if (global.language == ""en"")
-    global.language = ""ja""
+    global.language = ""ja"";
 else
-    global.language = ""en""
-ossafe_ini_open(""config.ini"")
-ini_write_string(""General"", ""lang"", global.language)
-ossafe_ini_close()
+    global.language = ""en"";
+ossafe_ini_open(""config.ini"");
+ini_write_string(""General"", ""lang"", global.language);
+ossafe_ini_close();
 ");
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     ImportGMLString("gml_Script_scr_84_load_map_json", @"
-var filename = argument0
-var file = file_text_open_read(filename)
-var json = """"
+var filename = argument0;
+var file = file_text_open_read(filename);
+var json = """";
 while (file_text_eof(file) == 0)
-    json += file_text_readln(file)
-file_text_close(file)
+    json += file_text_readln(file);
+file_text_close(file);
 return json_decode(json);
 ");
 
@@ -136,88 +131,26 @@ ScriptMessage("Complete.");
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void DumpJSON(string language)
+void MakeJSON(string language)
 {
-    var lang_file = Data.Code.ByName("gml_Script_textdata_" + language);
-    try
+    UndertaleCode code = Data.Code.ByName("gml_Script_textdata_" + language);
+    Dictionary<string, string> contents = new();
+
+    var context = new DecompileContext(globalDecompileContext, code, decompilerSettings);
+    BlockNode rootBlock = (BlockNode)context.DecompileToAST();
+    foreach (IStatementNode stmt in rootBlock.Children)
     {
-        File.WriteAllText(Path.Combine(langFolder, "lang_" + language + ".json"), (lang_file != null ? Decompiler.Decompile(lang_file, DECOMPILE_CONTEXT.Value) : ""));
+        if (stmt is FunctionCallNode { Function.Name.Content: "ds_map_add" } funcCall)
+        {
+            StringNode keyString = (StringNode)funcCall.Arguments[1];
+            StringNode valueString = (StringNode)funcCall.Arguments[2];
+            contents[keyString.Value.Content] = valueString.Value.Content;
+        }
     }
-    catch (Exception e)
-    {
-        throw new ScriptException("gml_Script_textdata_" + language + " has an error that prevents creation of JSONs.");
-    }
+
+    string outputPath = Path.Combine(langFolder, "lang_" + language + ".json");
+    File.WriteAllText(outputPath, JsonConvert.SerializeObject(contents, Formatting.Indented));
 
     IncProgressLocal();
     UpdateProgressValue(GetProgress());
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void MakeJSON(string language)
-{
-    if (Data.GeneralInfo.Major < 2) // Undertale PC (GMS1)
-    {
-        string input = File.ReadAllText(Path.Combine(langFolder, "lang_" + language + ".json"));
-
-        string pattern = ".*ds_map_create\\(\\)";
-        string replacement = "{";
-        input = Regex.Replace(input, pattern, replacement);
-
-        pattern = @"\\";
-        replacement = @"\\";
-        input = Regex.Replace(input, pattern, replacement);
-
-        pattern = @""" \+ '""' \+ """;
-        replacement = @"\""";
-        input = Regex.Replace(input, pattern, replacement);
-
-        pattern = @"'""' \+ """;
-        replacement = @"""\""";
-        input = Regex.Replace(input, pattern, replacement);
-
-        pattern = @""" \+ '""'";
-        replacement = @"\""""";
-        input = Regex.Replace(input, pattern, replacement);
-
-        pattern = @"'""'";
-        replacement = @"\""";
-        input = Regex.Replace(input, pattern, replacement);
-
-        input = input.Replace(@"\"",", @"\"""",");
-
-        pattern = @"ds_map_add\(global\.text_data_.., ("".*""), ("".*"")\)";
-        replacement = @"  $1: $2,";
-        input = Regex.Replace(input, pattern, replacement);
-
-        pattern = @",\n\Z";
-        replacement = "\n}";
-        input = Regex.Replace(input, pattern, replacement);
-
-        File.WriteAllText(Path.Combine(langFolder, "lang_" + language + ".json"), input);
-
-        IncProgressLocal();
-        UpdateProgressValue(GetProgress());
-    }
-    else // Undertale Switch/Probs other consoles (GMS2)
-    {
-        string input = File.ReadAllText(Path.Combine(langFolder, "lang_" + language + ".json"));
-
-        string pattern = ".*ds_map_create\\(\\)";
-        string replacement = "{";
-        input = Regex.Replace(input, pattern, replacement);
-
-        pattern = @"ds_map_add\(global\.text_data_.., ("".*""), ("".*"")\)";
-        replacement = @"  $1: $2,";
-        input = Regex.Replace(input, pattern, replacement);
-
-        pattern = @",\n\Z";
-        replacement = "\n}";
-        input = Regex.Replace(input, pattern, replacement);
-
-        File.WriteAllText(Path.Combine(langFolder, "lang_" + language + ".json"), input);
-
-        IncProgressLocal();
-        UpdateProgressValue(GetProgress());
-    }
 }

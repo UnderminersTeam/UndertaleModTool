@@ -770,6 +770,16 @@
       "Variables": {
         "target": "Asset.Object"
       }
+    },
+    "gml_Object_obj_move_to_point_ch1_Create_0": {
+      "Variables": {
+        "target": "Asset.Object"
+      }
+    },
+    "gml_Object_obj_move_to_point_ch1_Step_0": {
+      "Variables": {
+        "target": "Asset.Object"
+      }
     }
   }
 }
