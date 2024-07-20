@@ -224,7 +224,7 @@ num = 0
 
 var obj_gasterbl_gen = Data.GameObjects.ByName("obj_gasterbl_gen");
 UndertaleCode codeToDecompile = obj_gasterbl_gen.EventHandlerFor(EventType.Alarm, (uint)0, Data);
-string decomp = GetDecompiledText(codeToDecompile, null, new Underanalyzer.Decompiler.DecompileSettings);
+string decomp = GetDecompiledText(codeToDecompile, null, new Underanalyzer.Decompiler.DecompileSettings());
 obj_safebl_gen.EventHandlerFor(EventType.Alarm, (uint)0, Data).ReplaceGML(decomp.Replace("obj_gasterblaster", "obj_safeblaster"), Data);
 
 
