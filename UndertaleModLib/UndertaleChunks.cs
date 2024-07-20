@@ -1576,11 +1576,15 @@ namespace UndertaleModLib
         // GMS 2.0.6.96 is the oldest available runtime version,
         // so this actually could be some other version between GMS 2.0 - 2.0.6.
         // (the oldest copy of "Zeus-Runtime.rss" on web.archive.org has this version as first one)
+        private static bool checkedFor2_0_6;
         private void CheckForGMS2_0_6(UndertaleReader reader)
         {
             bool atLeastGMS2_0 = reader.undertaleData.IsGameMaker2();
             if (!atLeastGMS2_0 || reader.undertaleData.IsVersionAtLeast(2, 0, 6))
+            {
+                checkedFor2_0_6 = true;
                 return;
+            }
 
             long returnPos = reader.Position;
             bool noGeneratedMips = false;
@@ -1617,6 +1621,7 @@ namespace UndertaleModLib
                 reader.undertaleData.SetGMS2Version(2, 0, 6);
 
             reader.Position = returnPos;
+            checkedFor2_0_6 = true;
         }
 
         internal override void UnserializeChunk(UndertaleReader reader)
@@ -1624,7 +1629,8 @@ namespace UndertaleModLib
             if (!checkedFor2022_3)
                 CheckFor2022_3And5(reader);
 
-            CheckForGMS2_0_6(reader);
+            if (!checkedFor2_0_6)
+                CheckForGMS2_0_6(reader);
 
             base.UnserializeChunk(reader);
             reader.SwitchReaderType(false);
@@ -1648,8 +1654,10 @@ namespace UndertaleModLib
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
             checkedFor2022_3 = false;
+            checkedFor2_0_6 = false;
 
             CheckFor2022_3And5(reader);
+            CheckForGMS2_0_6(reader);
 
             // Texture blobs are already included in the count
             return base.UnserializeObjectCount(reader);
