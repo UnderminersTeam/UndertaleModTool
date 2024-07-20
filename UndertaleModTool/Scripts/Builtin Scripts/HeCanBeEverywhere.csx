@@ -276,7 +276,9 @@ if (room == room_cc_joker) {
     rotspeed = (instance_number(obj_joker) * instance_number(obj_joker));
 }", Data);
 
-ReplaceTextInGML("gml_Object_obj_joker_Draw_0", "global.flag[241] = 6", "");
+GlobalDecompileContext globalDecompileContext = new(Data);
+Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = new Underanalyzer.Decompiler.DecompileSettings();
+ReplaceTextInGML("gml_Object_obj_joker_Draw_0", "global.flag[241] = 6", "", false, false, globalDecompileContext, decompilerSettings);
 
 ChangeSelection(spr_joker_enemy);
 

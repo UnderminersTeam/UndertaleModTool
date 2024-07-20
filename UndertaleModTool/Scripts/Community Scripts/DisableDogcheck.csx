@@ -18,16 +18,19 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
 ScriptMessage(@"This script disables Dogcheck for
 all Undertale and Deltarune versions.");
 
+GlobalDecompileContext globalDecompileContext = new(Data);
+Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = new Underanalyzer.Decompiler.DecompileSettings();
+
 // Removes the invoking of the dog check script and the actual check itself from "gml_Script_scr_load".
 var scr_load = "gml_Script_scr_load";
 if (Data.GeneralInfo.Name.Content == "NXTALE" || Data.GeneralInfo.Name.Content.StartsWith("UNDERTALE")) 
 {
-    ReplaceTextInGML(scr_load, @"scr_dogcheck()
-if (dogcheck == 1)", "");
+    ReplaceTextInGML(scr_load, @"scr_dogcheck();
+if (dogcheck == 1)", "", false, false, globalDecompileContext, decompilerSettings);
 }
 else if (Data.GeneralInfo.DisplayName.Content == "SURVEY_PROGRAM" || Data.GeneralInfo.DisplayName.Content == "DELTARUNE Chapter 1")
 {
-    ReplaceTextInGML(scr_load, @"scr_dogcheck()", "0");
+    ReplaceTextInGML(scr_load, @"scr_dogcheck()", "0", false, false, globalDecompileContext, decompilerSettings);
 }
 else
 {

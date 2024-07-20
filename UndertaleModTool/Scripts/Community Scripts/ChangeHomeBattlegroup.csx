@@ -26,7 +26,8 @@ if (code == null)
     return;
 }
 
-Underanalyzer.Decompiler.IDecompileSettings decompileSettings = new Underanalyzer.Decompiler.DecompileSettings();
+GlobalDecompileContext globalDecompileContext = new(Data);
+Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = new Underanalyzer.Decompiler.DecompileSettings();
 
 bool case_sensitive = true;
 bool multiline = false;
@@ -40,7 +41,7 @@ if (!ScriptQuestion("Change the battlegroup in \"gml_Object_obj_mainchara_KeyPre
 }
 if (GetPreviousValue() == "None")
 {
-    String replacement = SimpleTextInput("Enter new battle group value for when you press \"HOME\"", "New battle group value", GetDecompiledText("gml_Object_obj_mainchara_KeyPress_36", null, decompileSettings), true);
+    String replacement = SimpleTextInput("Enter new battle group value for when you press \"HOME\"", "New battle group value", GetDecompiledText("gml_Object_obj_mainchara_KeyPress_36", globalDecompileContext, decompilerSettings), true);
     ImportGMLString("gml_Object_obj_mainchara_KeyPress_36", replacement);
     ScriptMessage("Completed");
     return;
@@ -59,14 +60,14 @@ while (!success)
 
 //Substitute in group 1, the new value, and group 3
 //And the groups are specified using curly brackets to prevent the regex from misinterpreting the request.
-ReplaceTextInGML(code.Name.Content, keyword, ("${1}" + number.ToString() + "${3}"), case_sensitive, isRegex);
+ReplaceTextInGML(code.Name.Content, keyword, ("${1}" + number.ToString() + "${3}"), case_sensitive, isRegex, globalDecompileContext, decompilerSettings);
 
 ScriptMessage("Completed");
 
 string GetPreviousValue()
 {
     var line_number = 1;
-    string decompiled_text = GetDecompiledText("gml_Object_obj_mainchara_KeyPress_36", null, decompileSettings);
+    string decompiled_text = GetDecompiledText("gml_Object_obj_mainchara_KeyPress_36", globalDecompileContext, decompilerSettings);
     string results = "";
     string[] splitted = decompiled_text.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
     bool exists = false;
