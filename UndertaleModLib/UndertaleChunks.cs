@@ -1459,6 +1459,8 @@ namespace UndertaleModLib
         public override string Name => "TXTR";
 
         private static bool checkedFor2022_3;
+        private static bool checkedFor2_0_6;
+
         private void CheckFor2022_3And5(UndertaleReader reader)
         {
             // Detect GM2022.3
@@ -1576,7 +1578,6 @@ namespace UndertaleModLib
         // GMS 2.0.6.96 is the oldest available runtime version,
         // so this actually could be some other version between GMS 2.0 - 2.0.6.
         // (the oldest copy of "Zeus-Runtime.rss" on web.archive.org has this version as first one)
-        private static bool checkedFor2_0_6;
         private void CheckForGMS2_0_6(UndertaleReader reader)
         {
             bool atLeastGMS2_0 = reader.undertaleData.IsGameMaker2();
