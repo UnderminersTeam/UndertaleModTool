@@ -32,11 +32,7 @@ namespace UndertaleModLib.Util
                     n = count;
                 if (n <= 0)
                 {
-#if DEBUG
                     throw new IOException("Reading out of chunk bounds");
-#else
-                    return 0;
-#endif
                 }
 
                 if (n <= 8)
@@ -56,11 +52,7 @@ namespace UndertaleModLib.Util
                 int n = Math.Min(_length - _position, buffer.Length);
                 if (n <= 0)
                 {
-#if DEBUG
                     throw new IOException("Reading out of chunk bounds");
-#else
-                    return 0;
-#endif
                 }
 
                 new Span<byte>(_buffer, _position, n).CopyTo(buffer);
@@ -74,11 +66,7 @@ namespace UndertaleModLib.Util
                 int newPos = _position + 1;
                 if (newPos > _length)
                 {
-#if DEBUG
                     throw new IOException("Reading out of chunk bounds");
-#else
-                    return 0;
-#endif
                 }
 
                 _position = newPos;
@@ -186,10 +174,11 @@ namespace UndertaleModLib.Util
 
         public string ReadChars(int count)
         {
-#if DEBUG
             if (chunkBuffer.Position + count > _length)
+            {
                 throw new IOException("Reading out of chunk bounds");
-#endif
+            }
+
             if (count > 1024)
             {
                 byte[] buf = new byte[count];
@@ -209,10 +198,11 @@ namespace UndertaleModLib.Util
 
         public byte[] ReadBytes(int count)
         {
-#if DEBUG
             if (chunkBuffer.Position + count > _length)
+            {
                 throw new IOException("Reading out of chunk bounds");
-#endif
+            }
+
             byte[] val = new byte[count];
             if (count > 0)
                 chunkBuffer.Read(val, count);
@@ -273,15 +263,14 @@ namespace UndertaleModLib.Util
 
         public string ReadGMString()
         {
-#if DEBUG
             if (chunkBuffer.Position + 5 > _length)
                 throw new IOException("Reading out of chunk bounds");
-#endif
+
             int length = BinaryPrimitives.ReadInt32LittleEndian(ReadToBuffer(4));
-#if DEBUG
+
             if (chunkBuffer.Position + length + 1 >= _length)
                 throw new IOException("Reading out of chunk bounds");
-#endif
+
             string res;
             if (length > 1024)
             {
@@ -296,13 +285,12 @@ namespace UndertaleModLib.Util
                     chunkBuffer.Read(buf);
                 res = encoding.GetString(buf);
             }
-            
-#if DEBUG
+
             if (ReadByte() != 0)
+            {
                 throw new IOException("String not null terminated!");
-#else
-            Position++;
-#endif
+            }
+
             return res;
         }
         public void SkipGMString()

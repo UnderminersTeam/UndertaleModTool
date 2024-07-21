@@ -1010,7 +1010,7 @@ namespace UndertaleModLib
                     case LayerType.Assets:
                         reader.Position += 6 * 4;
                         int tileOffset = reader.ReadInt32();
-                        if (tileOffset != reader.AbsPosition + 8)
+                        if (tileOffset != reader.AbsPosition + 8 && tileOffset != reader.AbsPosition + 12)
                             reader.undertaleData.SetGMS2Version(2022, 1);
                         break;
                     case LayerType.Tiles:
