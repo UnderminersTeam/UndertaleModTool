@@ -218,6 +218,16 @@ namespace UndertaleModTool
             EmptyLineBeforeSwitchCases = true
         };
 
+        public static string InstanceIdPrefix
+        {
+            get => Settings.Instance.InstanceIdPrefix;
+            set
+            {
+                Settings.Instance.InstanceIdPrefix = value;
+                Settings.Save();
+            }
+        }
+
         public bool UpdateButtonEnabled
         {
             get => UpdateAppButton.IsEnabled;

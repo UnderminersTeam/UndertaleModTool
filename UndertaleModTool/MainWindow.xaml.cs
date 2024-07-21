@@ -636,6 +636,7 @@ namespace UndertaleModTool
             Data = UndertaleData.CreateNew();
             Data.ToolInfo.AppDataProfiles = ProfilesFolder;
             Data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
+            Data.ToolInfo.InstanceIdPrefix = SettingsWindow.InstanceIdPrefix;
             CloseChildFiles();
             OnPropertyChanged("Data");
             OnPropertyChanged("FilePath");
@@ -1003,6 +1004,7 @@ namespace UndertaleModTool
                             {
                                 data.ToolInfo.ProfileMode = SettingsWindow.ProfileModeEnabled;
                                 data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
+                                data.ToolInfo.InstanceIdPrefix = SettingsWindow.InstanceIdPrefix;
                                 data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
                             }
                         }
@@ -1031,6 +1033,7 @@ namespace UndertaleModTool
 
                         Data.ToolInfo.AppDataProfiles = ProfilesFolder;
                         Data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
+                        Data.ToolInfo.InstanceIdPrefix = SettingsWindow.InstanceIdPrefix;
                         FilePath = filename;
                         OnPropertyChanged("Data");
                         OnPropertyChanged("FilePath");

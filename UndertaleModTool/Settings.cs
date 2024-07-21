@@ -53,6 +53,7 @@ namespace UndertaleModTool
 
         public bool EnableDarkMode { get; set; } = false;
         public bool ShowDebuggerOption { get; set; } = false;
+        public string InstanceIdPrefix { get; set; } = "inst_";
 
         public static Settings Instance;
 

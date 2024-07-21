@@ -732,5 +732,11 @@ namespace UndertaleModLib
         /// for a tool and in any scripts that desire matching the same settings.
         /// </summary>
         public IDecompileSettings DecompilerSettings = new DecompileSettings();
+
+        /// <summary>
+        /// Prefix to be used when resolving instance ID references
+        /// in the compiler and decompiler.
+        /// </summary>
+        public string InstanceIdPrefix = "inst_";
     }
 }

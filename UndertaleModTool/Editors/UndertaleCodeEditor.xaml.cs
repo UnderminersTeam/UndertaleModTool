@@ -1353,6 +1353,7 @@ namespace UndertaleModTool
                 bool func = (offset + nameLength + 1 < CurrentContext.VisualLine.LastDocumentLine.EndOffset) &&
                             (doc.GetCharAt(offset + nameLength) == '(');
                 UndertaleNamedResource val = null;
+                bool nonResourceReference = false;
 
                 var editor = textEditorInst;
 
@@ -1397,11 +1398,50 @@ namespace UndertaleModTool
                 else
                 {
                     NamedObjDict.TryGetValue(nameText, out val);
-                    if (data.IsVersionAtLeast(2, 3) & val is UndertaleScript)
-                        val = null; // in GMS2.3 scripts are never referenced directly
+                    if (data.IsVersionAtLeast(2, 3))
+                    { 
+                        if (val is UndertaleScript)
+                            val = null; // in GMS2.3 scripts are never referenced directly
+
+                        if (data.GlobalFunctions?.NameToFunction?.TryGetValue(nameText, out Underanalyzer.IGMFunction globalFunc) == true &&
+                            globalFunc is UndertaleFunction utGlobalFunc)
+                        {
+                            // Try getting script that this function reference belongs to
+                            if (NamedObjDict.TryGetValue("gml_Script_" + nameText, out val) && val is UndertaleScript script)
+                            {
+                                // Highlight like a function as well
+                                val = script.Code;
+                                func = true;
+                            }
+                        }
+
+                        if (val == null)
+                        {
+                            // Try to get basic function
+                            if (FunctionsDict.TryGetValue(nameText, out val))
+                            {
+                                func = true;
+                            }
+                        }
+
+                        if (val == null)
+                        {
+                            // Try resolving to room instance ID
+                            string instanceIdPrefix = data.ToolInfo.InstanceIdPrefix;
+                            if (nameText.StartsWith(instanceIdPrefix) &&
+                                int.TryParse(nameText[instanceIdPrefix.Length..], out int id) && id >= 100000)
+                            {
+                                // TODO: We currently mark this as a non-resource reference, but ideally
+                                // we resolve this to the room that this instance ID occurs in.
+                                // However, we should only do this when actually clicking on it.
+                                nonResourceReference = true;
+                            }
+                        }
+                    }
                 }
-                if (val == null)
+                if (val == null && !nonResourceReference)
                 {
+                    // Check for variable name colors
                     if (offset >= 7)
                     {
                         if (doc.GetText(offset - 7, 7) == "global.")
@@ -1427,19 +1467,26 @@ namespace UndertaleModTool
                 var line = new ClickVisualLineText(nameText, CurrentContext.VisualLine, nameLength,
                                                    func ? FunctionBrush : ConstantBrush);
                 if (func)
-                    line.Bold = true;
-                line.Clicked += async (text, button) =>
                 {
-                    await codeEditorInst?.SaveChanges();
-
-                    if (button == Input.MouseButton.Right)
+                    // Make function references bold as well as a different color
+                    line.Bold = true;
+                }
+                if (val is not null)
+                {
+                    // Add click operation when we have a resource
+                    line.Clicked += async (text, button) =>
                     {
-                        contextMenu.DataContext = val;
-                        contextMenu.IsOpen = true;
-                    }
-                    else
-                        mainWindow.ChangeSelection(val, button == Input.MouseButton.Middle);
-                };
+                        await codeEditorInst?.SaveChanges();
+
+                        if (button == Input.MouseButton.Right)
+                        {
+                            contextMenu.DataContext = val;
+                            contextMenu.IsOpen = true;
+                        }
+                        else
+                            mainWindow.ChangeSelection(val, button == Input.MouseButton.Middle);
+                    };
+                }
 
                 return line;
             }

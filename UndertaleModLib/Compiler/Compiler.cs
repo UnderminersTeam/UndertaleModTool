@@ -47,9 +47,35 @@ namespace UndertaleModLib.Compiler
             OriginalReferencedLocalVars = OriginalCode?.FindReferencedLocalVars();
         }
 
+        /// <summary>
+        /// Returns the asset index (including encoded reference type, if applicable) of a given identifier,
+        /// or -1 if no asset/reference is found.
+        /// </summary>
         public int GetAssetIndexByName(string name)
         {
-            return assetIds.TryGetValue(name, out int val) ? val : -1;
+            // Look up asset names
+            if (assetIds.TryGetValue(name, out int val))
+            {
+                return val;
+            }
+
+            // Handle named instance IDs
+            string instanceIdPrefix = Data.ToolInfo.InstanceIdPrefix;
+            if (name.StartsWith(instanceIdPrefix, StringComparison.InvariantCulture))
+            {
+                if (int.TryParse(name[instanceIdPrefix.Length..], out int id) && id >= 100000)
+                {
+                    if (TypedAssetRefs)
+                    {
+                        // Add type to ID
+                        id = (id & 0xffffff) | ((ConvertFromRefType(Data, RefType.RoomInstance) & 0x7f) << 24);
+                    }
+                    return id;
+                }
+            }
+
+            // Nothing found
+            return -1;
         }
 
         public void OnSuccessfulFinish()
