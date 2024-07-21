@@ -948,7 +948,6 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                             // Special dup instruction with extra parameters
                             sbh.Append(stringBuilder, ' ');
                             sbh.Append(stringBuilder, (byte)ComparisonKind & 0x7F);
-                            sbh.Append(stringBuilder, " ;;; this is a weird GMS2.3+ swap instruction");
                         }
                     }
                 }
@@ -993,9 +992,7 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                 if (Type1 == DataType.Int16)
                 {
                     // Special scenario - the swap instruction
-                    // TODO: Figure out the proper syntax, see #129
                     sbh.Append(stringBuilder, SwapExtra);
-                    sbh.Append(stringBuilder, " ;;; this is a weird swap instruction, see #129");
                 }
                 else
                 {
