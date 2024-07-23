@@ -60,7 +60,7 @@ namespace UndertaleModLib.Compiler
             }
 
             // Handle named instance IDs
-            string instanceIdPrefix = Data.ToolInfo.InstanceIdPrefix;
+            string instanceIdPrefix = Data.ToolInfo.InstanceIdPrefix();
             if (name.StartsWith(instanceIdPrefix, StringComparison.InvariantCulture))
             {
                 if (int.TryParse(name[instanceIdPrefix.Length..], out int id) && id >= 100000)

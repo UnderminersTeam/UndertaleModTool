@@ -1427,7 +1427,7 @@ namespace UndertaleModTool
                         if (val == null)
                         {
                             // Try resolving to room instance ID
-                            string instanceIdPrefix = data.ToolInfo.InstanceIdPrefix;
+                            string instanceIdPrefix = data.ToolInfo.InstanceIdPrefix();
                             if (nameText.StartsWith(instanceIdPrefix) &&
                                 int.TryParse(nameText[instanceIdPrefix.Length..], out int id) && id >= 100000)
                             {

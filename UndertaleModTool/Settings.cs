@@ -88,6 +88,8 @@ namespace UndertaleModTool
                     Save();
                     return;
                 }
+
+                // Read in data
                 byte[] bytes = File.ReadAllBytes(path);
                 JsonSerializer.Deserialize<Settings>(bytes, JsonOptions);
 
@@ -100,14 +102,18 @@ namespace UndertaleModTool
                 if (Instance.Version != MainWindow.Version)
                 {
                     changed = true;
-                    // TODO when it becomes necessary
+                    // TODO: When necessary, account for any version upgrades
                 }
 
                 // Update the version to this version
                 Instance.Version = MainWindow.Version;
                 if (changed)
+                {
+                    // Update settings to new version on disk as well
                     Save();
-            } catch (Exception e)
+                }
+            } 
+            catch (Exception e)
             {
                 MessageBox.Show($"Failed to load settings.json! Using default values.\n{e.Message}");
                 new Settings() { DecompilerSettings = existingDecompilerSettings ?? new() };
@@ -128,7 +134,6 @@ namespace UndertaleModTool
                 MessageBox.Show($"Failed to save settings.json!\n{e.Message}");
             }
         }
-
     }
 
     /// <summary>

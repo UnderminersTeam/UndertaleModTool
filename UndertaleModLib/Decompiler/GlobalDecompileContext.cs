@@ -167,7 +167,7 @@ public class GlobalDecompileContext : IGameContext
                 {
                     return null;
                 }
-                return $"{Data.ToolInfo.InstanceIdPrefix}{assetIndex}";
+                return $"{Data.ToolInfo.InstanceIdPrefix()}{assetIndex}";
         }
 
         return null;
