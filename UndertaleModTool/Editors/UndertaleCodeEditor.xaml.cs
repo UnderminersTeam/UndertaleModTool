@@ -48,7 +48,7 @@ namespace UndertaleModTool
 
         public UndertaleCode CurrentDisassembled = null;
         public UndertaleCode CurrentDecompiled = null;
-        public List<string> CurrentLocals = null;
+        public List<string> CurrentLocals = new();
         public string ProfileHash = mainWindow.ProfileHash;
         public string MainPath = Path.Combine(Settings.ProfilesFolder, mainWindow.ProfileHash, "Main");
         public string TempPath = Path.Combine(Settings.ProfilesFolder, mainWindow.ProfileHash, "Temp");
@@ -248,6 +248,11 @@ namespace UndertaleModTool
                 }
                 else
                     _ = DecompileCode(code, true);
+            }
+            if (DecompiledTab.IsSelected)
+            {
+                // Re-populate local variables when in decompiled code, fixing #1320
+                PopulateCurrentLocals(mainWindow.Data, code);
             }
         }
 
@@ -525,7 +530,7 @@ namespace UndertaleModTool
                     var data = mainWindow.Data;
                     text = code.Disassemble(data.Variables, data.CodeLocals.For(code));
 
-                    CurrentLocals = new List<string>();
+                    CurrentLocals.Clear();
                 }
                 catch (Exception ex)
                 {
@@ -797,14 +802,7 @@ namespace UndertaleModTool
                         else if (decompiled != null)
                         {
                             DecompiledEditor.Document.Text = decompiled;
-                            CurrentLocals = new List<string>();
-
-                            var locals = dataa.CodeLocals.ByName(code.Name.Content);
-                            if (locals != null)
-                            {
-                                foreach (var local in locals.Locals)
-                                    CurrentLocals.Add(local.Name.Content);
-                            }
+                            PopulateCurrentLocals(dataa, code);
 
                             RestoreCaretPosition(DecompiledEditor, currLine, currColumn, scrollPos);
 
@@ -835,6 +833,19 @@ namespace UndertaleModTool
 
                 if (openSaveDialog)
                     await mainWindow.DoSaveDialog();
+            }
+        }
+
+        private void PopulateCurrentLocals(UndertaleData data, UndertaleCode code)
+        {
+            CurrentLocals.Clear();
+
+            // Look up locals for given code entry's name, for syntax highlighting
+            var locals = data.CodeLocals.ByName(code.Name.Content);
+            if (locals != null)
+            {
+                foreach (var local in locals.Locals)
+                    CurrentLocals.Add(local.Name.Content);
             }
         }
 
