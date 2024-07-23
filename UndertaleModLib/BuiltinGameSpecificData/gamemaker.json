@@ -522,6 +522,26 @@
         "ds_type_queue": 4,
         "ds_type_grid": 5,
         "ds_type_priority": 6
+      },
+      "Constant.SocketType": {
+        "network_socket_tcp": 0,
+        "network_socket_udp": 1,
+        "network_socket_bluetooth": 2,
+        "network_socket_tcp_psn": 3,
+        "network_socket_udp_psn": 4,
+        "network_socket_udp_switch": 5,
+        "network_socket_ws": 6,
+        "network_socket_wss": 7
+      },
+      "Constant.NetworkConfig": {
+        "network_config_connect_timeout": 0,
+        "network_config_use_non_blocking_socket": 1,
+        "network_config_enable_reliable_udp": 2,
+        "network_config_disable_reliable_udp": 3,
+        "network_config_avoid_time_wait": 4,
+        "network_config_websocket_protocol": 5,
+        "network_config_enable_multicast": 6,
+        "network_config_disable_multicast": 7
       }
     },
     "General": {
@@ -984,6 +1004,8 @@
       "steam_ugc_query_set_allow_cached_response": [ null, "Bool" ],
       "steam_create_leaderboard": [ null, "Constant.SteamLeaderboardSort", "Constant.SteamLeaderboardDisplay" ],
       "steam_activate_overlay": [ "Constant.SteamOverlay" ],
+      "network_create_socket": [ "Constant.SocketType" ],
+      "network_set_config": [ "Constant.NetworkConfig", null ],
       "gpu_set_blendmode": [ "Constant.BlendMode" ],
       "draw_set_blend_mode": [ "Constant.BlendMode" ],
       "gml_Script_draw_set_blend_mode": [ "Constant.BlendMode" ],
