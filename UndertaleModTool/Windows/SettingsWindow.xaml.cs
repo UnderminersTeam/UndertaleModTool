@@ -210,13 +210,7 @@ namespace UndertaleModTool
             }
         }
 
-        public static DecompileSettings DecompilerSettings { get; } = new DecompileSettings()
-        {
-            UnknownArgumentNamePattern = "argument{0}",
-            RemoveSingleLineBlockBraces = true,
-            EmptyLineAroundBranchStatements = true,
-            EmptyLineBeforeSwitchCases = true
-        };
+        public static DecompilerSettings DecompilerSettings => Settings.Instance.DecompilerSettings;
 
         public static string InstanceIdPrefix
         {
@@ -240,6 +234,7 @@ namespace UndertaleModTool
             this.DataContext = this;
             Settings.Load();
         }
+
         private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (!IsVisible || IsLoaded)
@@ -257,6 +252,14 @@ namespace UndertaleModTool
         private void UpdateAppButton_Click(object sender, RoutedEventArgs e)
         {
             ((MainWindow)Owner).UpdateApp(this);
+        }
+
+        private void GMLSettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            GMLSettingsWindow settings = new(Settings.Instance);
+            settings.Owner = this;
+            settings.ShowDialog();
+            Settings.Save();
         }
     }
 }
