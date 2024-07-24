@@ -93,10 +93,6 @@ namespace UndertaleModTool
                 byte[] bytes = File.ReadAllBytes(path);
                 JsonSerializer.Deserialize<Settings>(bytes, JsonOptions);
 
-                // Use existing decompiler settings (from last settings instance)
-                if (existingDecompilerSettings is not null)
-                    Instance.DecompilerSettings = existingDecompilerSettings;
-
                 // Handle upgrading settings here when needed
                 bool changed = false;
                 if (Instance.Version != MainWindow.Version)
@@ -104,6 +100,13 @@ namespace UndertaleModTool
                     changed = true;
                     // TODO: When necessary, account for any version upgrades
                 }
+
+                // Use existing decompiler settings (from last settings instance)
+                if (existingDecompilerSettings is not null)
+                    Instance.DecompilerSettings = existingDecompilerSettings;
+
+                // If no settings were supplied at all, generate a new one (can be caused from downgrading)
+                Instance.DecompilerSettings ??= new();
 
                 // Update the version to this version
                 Instance.Version = MainWindow.Version;
