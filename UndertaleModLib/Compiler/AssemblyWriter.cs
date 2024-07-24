@@ -200,40 +200,56 @@ namespace UndertaleModLib.Compiler
                                     }
                                 }
 
-                                foreach (var patch in varPatches)
+                                // Patch variables in the compiled code
+                                foreach (VariablePatch patch in varPatches)
                                 {
-                                    if (patch.InstType != InstanceType.Local)
+                                    // Only process non-local variables (extra check needed for room instance IDs, as InstType can overlap)
+                                    if (patch.InstType != InstanceType.Local || patch.VarType == VariableType.Instance)
                                     {
-                                        var realInstType = patch.InstType;
-                                        if (realInstType >= 0)
-                                            realInstType = InstanceType.Self;
-                                        else if (realInstType == InstanceType.Other)
-                                            realInstType = InstanceType.Self;
-                                        else if (realInstType == InstanceType.Arg)
-                                            realInstType = InstanceType.Builtin;
-                                        else if (realInstType == InstanceType.Builtin)
-                                            realInstType = InstanceType.Self; // used with @@This@@
-                                        else if (realInstType == InstanceType.Stacktop)
-                                            realInstType = InstanceType.Self; // used with @@GetInstance@@
+                                        // Change VARI instance type depending on context
+                                        InstanceType variInstanceType = patch.InstType switch
+                                        {
+                                            >= 0                    => InstanceType.Self,
+                                            InstanceType.Other      => InstanceType.Self,
+                                            InstanceType.Arg        => InstanceType.Builtin,
+                                            InstanceType.Builtin    => InstanceType.Self,       // used with @@This@@
+                                            InstanceType.Stacktop   => InstanceType.Self,       // used with @@GetInstance@@
+                                            _ => patch.InstType
+                                        };
+
+                                        // Room instance ID variables should always be type self (even if inst type is negative)
+                                        if (patch.VarType == VariableType.Instance)
+                                        {
+                                            variInstanceType = InstanceType.Self;
+                                        }
 
                                         // 2.3 variable fix
                                         // Definitely needs at least some change when ++/-- support is added,
                                         // since that does use instance type global
-                                        if (CompileContext.GMS2_3 &&
-                                            patch.VarType == VariableType.Array &&
-                                            realInstType == InstanceType.Global)
-                                            realInstType = InstanceType.Self;
+                                        if (CompileContext.GMS2_3 && patch.VarType == VariableType.Array && variInstanceType == InstanceType.Global)
+                                        {
+                                            variInstanceType = InstanceType.Self;
+                                        }
 
-                                        UndertaleVariable def = variables.EnsureDefined(patch.Name, realInstType,
-                                                                 compileContext.BuiltInList.GlobalArray.ContainsKey(patch.Name) ||
-                                                                 compileContext.BuiltInList.GlobalNotArray.ContainsKey(patch.Name) ||
-                                                                 compileContext.BuiltInList.Instance.ContainsKey(patch.Name) ||
-                                                                 compileContext.BuiltInList.InstanceLimitedEvent.ContainsKey(patch.Name), 
-                                                                 compileContext.Data.Strings, compileContext.Data);
+                                        // Define (or locate) variable
+                                        UndertaleVariable def = variables.EnsureDefined(patch.Name, variInstanceType,
+                                            compileContext.BuiltInList.GlobalArray.ContainsKey(patch.Name) ||
+                                            compileContext.BuiltInList.GlobalNotArray.ContainsKey(patch.Name) ||
+                                            compileContext.BuiltInList.Instance.ContainsKey(patch.Name) ||
+                                            compileContext.BuiltInList.InstanceLimitedEvent.ContainsKey(patch.Name), 
+                                            compileContext.Data.Strings, compileContext.Data);
                                         if (patch.Target.Kind == Opcode.Pop)
+                                        {
+                                            // Pop instruction, set instruction's destination
                                             patch.Target.Destination = new Reference<UndertaleVariable>(def, patch.VarType);
+                                        }
                                         else
+                                        {
+                                            // All other instructions, just set instruction's value
                                             patch.Target.Value = new Reference<UndertaleVariable>(def, patch.VarType);
+                                        }
+
+                                        // Perform final adjustments to the instance type
                                         if (patch.VarType == VariableType.Normal)
                                         {
                                             if (patch.InstType == InstanceType.Self && compileContext.Data.IsVersionAtLeast(2024, 2))
@@ -243,8 +259,14 @@ namespace UndertaleModLib.Compiler
                                             }
                                             else
                                             {
+                                                // For all other normal variables, just use the existing instance type like usual
                                                 patch.Target.TypeInst = patch.InstType;
                                             }
+                                        }
+                                        else if (patch.VarType == VariableType.Instance)
+                                        {
+                                            // In this case, the instance type is the room object instance ID
+                                            patch.Target.TypeInst = patch.InstType;
                                         }
                                     }
                                 }
@@ -2018,9 +2040,17 @@ namespace UndertaleModLib.Compiler
                             return;
                         }
                         isSingle = true;
+
+                        // Get variable type (if self) and instance ID
+                        VariableType varTypeIfSelf = VariableType.Normal;
                         int id = e.Children[0].ID;
                         if (id >= 100000)
+                        {
+                            // This is a room instance ID, encoded as a 16-bit integer apparently
+                            varTypeIfSelf = VariableType.Instance;
                             id -= 100000;
+                        }
+
                         string name = e.Children[0].Text;
                         switch (id)
                         {
@@ -2069,7 +2099,7 @@ namespace UndertaleModLib.Compiler
                                         Target = cw.EmitRef(Opcode.Push, DataType.Variable),
                                         Name = name,
                                         InstType = InstanceType.Self,
-                                        VarType = VariableType.Normal
+                                        VarType = varTypeIfSelf
                                     });
                                 }
                                 break;
@@ -2372,17 +2402,23 @@ namespace UndertaleModLib.Compiler
                             return;
                         }
 
-                        // Simple common assignment
+                        // Simple common assignment. Get variable type and instance ID
+                        VariableType varTypeIfSelf = VariableType.Normal;
                         int id = s.Children[0].ID;
                         if (id >= 100000)
+                        {
+                            // This is a room instance ID, encoded as a 16-bit integer apparently
+                            varTypeIfSelf = VariableType.Instance;
                             id -= 100000;
+                        }
+
                         var processedCommon = CheckFor23BuiltinOrArg(cw, s.Children[0].Text, id);
                         cw.varPatches.Add(new VariablePatch()
                         {
                             Target = cw.EmitRef(Opcode.Pop, popLocation, typeToStore),
                             Name = processedCommon.NewVarName,
                             InstType = (InstanceType)processedCommon.NewID,
-                            VarType = VariableType.Normal
+                            VarType = varTypeIfSelf
                         });
                     }
                     else

@@ -998,7 +998,16 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                 {
                     if (Type1 == DataType.Variable && TypeInst != InstanceType.Undefined)
                     {
-                        sbh.Append(stringBuilder, TypeInst.ToString().ToLower(CultureInfo.InvariantCulture));
+                        if (Destination.Type == VariableType.Instance)
+                        {
+                            // Syntax here is a bit ugly (but maintaining compatibility) - this is a room instance ID
+                            sbh.Append(stringBuilder, (short)TypeInst);
+                        }
+                        else
+                        {
+                            // Regular instance type
+                            sbh.Append(stringBuilder, TypeInst.ToString().ToLower(CultureInfo.InvariantCulture));
+                        }
                         sbh.Append(stringBuilder, '.');
                     }
                     sbh.Append(stringBuilder, Destination);
