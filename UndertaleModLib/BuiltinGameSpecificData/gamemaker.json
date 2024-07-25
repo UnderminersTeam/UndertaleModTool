@@ -627,7 +627,8 @@
       "mouse_last_button": "Constant.MouseButton",
       "os_type": "Constant.OperatingSystem",
       "event_type": "Constant.EventType",
-      "instance_id": "Id.InstanceOrObject"
+      "instance_id": "Id.InstanceOrObject",
+      "persistent": "Bool"
     },
     "FunctionArguments": {
       "action_create_object": [ "Asset.Object", null, null ],
