@@ -31,7 +31,7 @@ public class UndertaleGlobalInit : UndertaleObject, INotifyPropertyChanged, IDis
     public void Unserialize(UndertaleReader reader)
     {
         _code = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
-        reader.ReadUndertaleObject(_code);
+       _code.Unserialize(reader);   // Cannot use ReadUndertaleObject, as that messes things up.
     }
 
     /// <inheritdoc/>
