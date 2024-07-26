@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace UndertaleModLib.Models;
 
@@ -8,9 +10,6 @@ namespace UndertaleModLib.Models;
 [PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleFeatureFlags : UndertaleObject, IDisposable
 {
-    /// <summary>
-    /// The list of feature flags.
-    /// </summary>
     public UndertaleSimpleListString List { get; set; }
 
 

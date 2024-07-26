@@ -341,7 +341,7 @@ namespace UndertaleModLib
 
         //TODO: Why are the functions that deal with the cache in a completely different place than the cache parameters? These have *no* place of being here.
         /// <summary>
-        /// A <see cref="Dictionary{TKey,TValue}"/> of cached decompiled code,
+        /// A <see cref="Dictionary{TKey,TValue}"/><typeparam name="TKey"></typeparam> of cached decompiled code,
         /// with the code name as the Key and the decompiled code text as the value.
         /// </summary>
         public ConcurrentDictionary<string, string> GMLCache { get; set; }

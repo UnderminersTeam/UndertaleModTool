@@ -65,7 +65,6 @@ namespace UndertaleModLib.Decompiler
         public UndertaleCode TargetCode;
         public UndertaleGameObject Object;
         public static bool GMS2_3;
-        public bool AssetResolutionEnabled => !GlobalContext.Data.IsVersionAtLeast(2023, 8);
 
         public DecompileContext(GlobalDecompileContext globalContext, UndertaleCode code, bool computeObject = true)
         {
@@ -75,32 +74,21 @@ namespace UndertaleModLib.Decompiler
             if (code.ParentEntry != null)
                 throw new InvalidOperationException("This code block represents a function nested inside " + code.ParentEntry.Name + " - decompile that instead");
 
-            if (computeObject && globalContext.Data is not null)
+            if (computeObject && globalContext.Data != null)
             {
                 // TODO: This is expensive, move it somewhere else as a dictionary
                 // and have it update when events/objects are modified.
-                
-                // Currently using for loops on purpose, as foreach has memory issues due to IEnumerable
-                for (int i = 0; i < globalContext.Data.GameObjects.Count; i++)
-                {
-                    UndertaleGameObject obj = globalContext.Data.GameObjects[i];
-                    for (int j = 0; j < obj.Events.Count; j++)
-                    {
-                        var eventList = obj.Events[j];
-                        for (int k = 0; k < eventList.Count; k++)
-                        {
-                            UndertaleGameObject.Event subEvent = eventList[k];
-                            for (int l = 0; l < subEvent.Actions.Count; l++)
-                            {
-                                UndertaleGameObject.EventAction ev = subEvent.Actions[l];
-                                if (ev.CodeId != code) continue;
-                                Object = obj;
-                                return;
-                            }
-                        }
-                    }
-                }
+                foreach (var obj in globalContext.Data.GameObjects)
+                    foreach (var event_list in obj.Events)
+                        foreach (var subevent in event_list)
+                            foreach (var ev in subevent.Actions)
+                                if (ev.CodeId == code)
+                                {
+                                    Object = obj;
+                                    goto LoopEnd;
+                                }
             }
+        LoopEnd: return;
         }
 
         #region Struct management
@@ -502,7 +490,7 @@ namespace UndertaleModLib.Decompiler
                         break;*/
                 }
 
-                if ((context.AssetResolutionEnabled || AssetType == AssetIDType.Script) && context.GlobalContext.Data != null && AssetType != AssetIDType.Other)
+                if (context.GlobalContext.Data != null && AssetType != AssetIDType.Other)
                 {
                     IList assetList = null;
                     switch (AssetType)
@@ -584,128 +572,6 @@ namespace UndertaleModLib.Decompiler
                 if (AssetType == AssetIDType.Other)
                     AssetType = suggestedType;
                 return AssetType;
-            }
-        }
-
-        // Represents a reference to an asset in the resource tree, used in 2023.8+ only
-        public class ExpressionAssetRef : Expression
-        {
-            // NOTE: Also see generalized "ResourceType" enum. This has slightly differing values, though
-            public enum RefType
-            {
-                Object = 0,
-                Sprite = 1,
-                Sound = 2,
-                Room = 3,
-                Background = 4,
-                Path = 5,
-                // missing 6
-                Font = 7,
-                Timeline = 8,
-                // missing 9
-                Shader = 10,
-                Sequence = 11,
-                AnimCurve = 12,
-                ParticleSystem = 13
-            }
-
-            public int AssetIndex;
-            public RefType AssetRefType;
-
-            public ExpressionAssetRef(int encodedResourceIndex)
-            {
-                Type = UndertaleInstruction.DataType.Variable;
-
-                // Break down index - first 24 bits are the ID, the rest is the ref type
-                AssetIndex = encodedResourceIndex & 0xffffff;
-                AssetRefType = (RefType)(encodedResourceIndex >> 24);
-            }
-
-            public ExpressionAssetRef(int resourceIndex, RefType resourceType)
-            {
-                Type = UndertaleInstruction.DataType.Variable;
-                AssetIndex = resourceIndex;
-                AssetRefType = resourceType;
-            }
-
-            internal override bool IsDuplicationSafe()
-            {
-                return true;
-            }
-
-            public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
-            {
-                return this;
-            }
-            public override string ToString(DecompileContext context)
-            {
-                if (context.GlobalContext.Data != null)
-                {
-                    IList assetList = null;
-                    switch (AssetRefType)
-                    {
-                        case RefType.Sprite:
-                            assetList = (IList)context.GlobalContext.Data.Sprites;
-                            break;
-                        case RefType.Background:
-                            assetList = (IList)context.GlobalContext.Data.Backgrounds;
-                            break;
-                        case RefType.Sound:
-                            assetList = (IList)context.GlobalContext.Data.Sounds;
-                            break;
-                        case RefType.Font:
-                            assetList = (IList)context.GlobalContext.Data.Fonts;
-                            break;
-                        case RefType.Path:
-                            assetList = (IList)context.GlobalContext.Data.Paths;
-                            break;
-                        case RefType.Timeline:
-                            assetList = (IList)context.GlobalContext.Data.Timelines;
-                            break;
-                        case RefType.Room:
-                            assetList = (IList)context.GlobalContext.Data.Rooms;
-                            break;
-                        case RefType.Object:
-                            assetList = (IList)context.GlobalContext.Data.GameObjects;
-                            break;
-                        case RefType.Shader:
-                            assetList = (IList)context.GlobalContext.Data.Shaders;
-                            break;
-                        case RefType.AnimCurve:
-                            assetList = (IList)context.GlobalContext.Data.AnimationCurves;
-                            break;
-                        case RefType.Sequence:
-                            assetList = (IList)context.GlobalContext.Data.Sequences;
-                            break;
-                        case RefType.ParticleSystem:
-                            assetList = (IList)context.GlobalContext.Data.ParticleSystems;
-                            break;
-                    }
-
-                    if (assetList != null && AssetIndex >= 0 && AssetIndex < assetList.Count)
-                        return ((UndertaleNamedResource)assetList[AssetIndex]).Name.Content;
-                }
-                return $"/* ERROR: missing {AssetRefType} asset, using ID instead */ {AssetIndex}";
-            }
-            internal override AssetIDType DoTypePropagation(DecompileContext context, AssetIDType suggestedType)
-            {
-                // Convert type to corresponding AssetIDType equivalent
-                return AssetRefType switch
-                {
-                    RefType.Object => AssetIDType.GameObject,
-                    RefType.Sprite => AssetIDType.Sprite,
-                    RefType.Sound => AssetIDType.Sound,
-                    RefType.Room => AssetIDType.Room,
-                    RefType.Background => AssetIDType.Background,
-                    RefType.Path => AssetIDType.Path,
-                    RefType.Font => AssetIDType.Font,
-                    RefType.Timeline => AssetIDType.Timeline,
-                    RefType.Shader => AssetIDType.Shader,
-                    RefType.Sequence => AssetIDType.Sequence,
-                    RefType.AnimCurve => AssetIDType.AnimCurve,
-                    RefType.ParticleSystem => AssetIDType.ParticleSystem,
-                    _ => throw new NotImplementedException($"Missing ref type {AssetRefType}")
-                };
             }
         }
 
@@ -1730,6 +1596,8 @@ namespace UndertaleModLib.Decompiler
 
                     return String.Format("{0}({1})", OverridenName != string.Empty ? OverridenName : Function.Name.Content, argumentString.ToString());
                 }
+
+
             }
 
             public override Statement CleanStatement(DecompileContext context, BlockHLStatement block)
@@ -2718,9 +2586,6 @@ namespace UndertaleModLib.Decompiler
 
                                     // Note that this operator peeks from the stack, it does not pop directly.
                                     break;
-                                case -11: // GM 2023.8+, pushref
-                                    stack.Push(new ExpressionAssetRef(instr.IntArgument));
-                                    break;
                             }
                         }
 
@@ -3475,7 +3340,7 @@ namespace UndertaleModLib.Decompiler
 
                     Block b = blockList[i];
 
-                    Block[] e;
+                    IEnumerable<Block> e;
                     if (b.conditionalExit)
                     {
                         reverseUse2[0] = b.nextBlockTrue;
@@ -4054,7 +3919,7 @@ namespace UndertaleModLib.Decompiler
             {
                 throw new TimeoutException("The building cache process hung.\n" +
                                            "The function code entries that didn't manage to decompile:\n" +
-                                           String.Join('\n', processingCodeList.Keys) + "\n\n" +
+                                           String.Join('\n', processingCodeList.Keys) + "\n\n" + 
                                            "You should save the game data (if it's necessary) and re-open the app.\n");
             }
         }
@@ -4077,13 +3942,8 @@ namespace UndertaleModLib.Decompiler
                 return meetPoint;
 
             Queue<Block> blocks = new Queue<Block>();
-            // Preventing the same block and its children from being queued repeatedly
-            // becomes increasingly important on large switches. The HashSet should give
-            // good performance while preventing this type of duplication.
-            HashSet<Block> usedBlocks = new HashSet<Block>(); 
 
             blocks.Enqueue(start);
-            usedBlocks.Add(start);
             while (blocks.Count > 0)
             {
                 Block test = blocks.Dequeue();
@@ -4092,16 +3952,10 @@ namespace UndertaleModLib.Decompiler
                     return end;
                 if (test == meetPoint)
                     return meetPoint;
-                if (!usedBlocks.Contains(test.nextBlockTrue))
-                {
-                    blocks.Enqueue(test.nextBlockTrue);
-                    usedBlocks.Add(test.nextBlockTrue);
-                }
-                if (!usedBlocks.Contains(test.nextBlockFalse))
-                {
+
+                blocks.Enqueue(test.nextBlockTrue);
+                if (test.nextBlockTrue != test.nextBlockFalse)
                     blocks.Enqueue(test.nextBlockFalse);
-                    usedBlocks.Add(test.nextBlockFalse);
-                }
 
             }
 

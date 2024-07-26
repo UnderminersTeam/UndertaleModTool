@@ -29,7 +29,6 @@ public class UndertaleTags : UndertaleObject, IDisposable
             UndertaleShader => ResourceType.Shader,
             UndertaleSequence => ResourceType.Sequence,
             UndertaleAnimationCurve => ResourceType.AnimCurve,
-            UndertaleParticleSystem => ResourceType.ParticleSystem,
             _ => throw new ArgumentException("Invalid resource type!")
         };
         IList list = data[resource.GetType()];

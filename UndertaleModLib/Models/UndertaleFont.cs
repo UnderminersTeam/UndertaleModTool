@@ -92,11 +92,6 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
     /// <value><c>0</c> if SDF is disabled for this font.</value>
     public uint SDFSpread { get; set; }
 
-    /// <remarks>
-    /// Was introduced in GM 2023.6.
-    /// </remarks>
-    public uint LineHeight { get; set; }
-
     /// <summary>
     /// The glyphs that this font uses.
     /// </summary>
@@ -297,8 +292,6 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             writer.Write(Ascender);
         if (writer.undertaleData.IsVersionAtLeast(2023, 2))
             writer.Write(SDFSpread);
-        if (writer.undertaleData.IsVersionAtLeast(2023, 6))
-            writer.Write(LineHeight);
         writer.WriteUndertaleObject(Glyphs);
     }
 
@@ -333,8 +326,6 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             Ascender = reader.ReadUInt32();
         if (reader.undertaleData.IsVersionAtLeast(2023, 2))
             SDFSpread = reader.ReadUInt32();
-        if (reader.undertaleData.IsVersionAtLeast(2023, 6))
-            LineHeight = reader.ReadUInt32();
         Glyphs = reader.ReadUndertaleObject<UndertalePointerList<Glyph>>();
     }
 
@@ -348,8 +339,6 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             skipSize += 4; // Ascender
         if (reader.undertaleData.IsVersionAtLeast(2023, 2))
             skipSize += 4; // SDFSpread
-        if (reader.undertaleData.IsVersionAtLeast(2023, 6))
-            skipSize += 4; // LineHeight
 
         reader.Position += skipSize;
 

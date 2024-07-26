@@ -209,9 +209,7 @@ public class UndertaleInstruction : UndertaleObject
     public object Value { get; set; }
     public Reference<UndertaleVariable> Destination { get; set; }
     public Reference<UndertaleFunction> Function { get; set; }
-    private int _IntegerArgument;
-    public int JumpOffset { get => _IntegerArgument; set => _IntegerArgument = value; }
-    public int IntArgument { get => _IntegerArgument; set => _IntegerArgument = value; }
+    public int JumpOffset { get; set; }
     public bool JumpOffsetPopenvExitMagic { get; set; }
     public ushort ArgumentsCount { get; set; }
     public byte Extra { get; set; }
@@ -562,7 +560,6 @@ public class UndertaleInstruction : UndertaleObject
                 writer.Write((short)Value);
                 writer.Write((byte)Type1);
                 writer.Write((byte)Kind);
-                if (Type1 == DataType.Int32) writer.Write(IntArgument);
             }
                 break;
 
@@ -748,12 +745,6 @@ public class UndertaleInstruction : UndertaleObject
                 Value = reader.ReadInt16();
                 Type1 = (DataType)reader.ReadByte();
                 if (reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
-                if (Type1 == DataType.Int32)
-                {
-                    IntArgument = reader.ReadInt32();
-                    if (!reader.undertaleData.IsVersionAtLeast(2023, 8))
-                        reader.undertaleData.SetGMS2Version(2023, 8);
-                }
             }
                 break;
 
@@ -780,6 +771,7 @@ public class UndertaleInstruction : UndertaleObject
             case InstructionType.DoubleTypeInstruction:
             case InstructionType.ComparisonInstruction:
             case InstructionType.GotoInstruction:
+            case InstructionType.BreakInstruction:
                 reader.Position += 4;
                 break;
 
@@ -825,17 +817,6 @@ public class UndertaleInstruction : UndertaleObject
                 reader.Position += 8;
                 return 1; // "Function"
 
-            case InstructionType.BreakInstruction:
-                {
-                    reader.Position += 2;
-                    DataType Type1 = (DataType)reader.ReadByte();
-                    if (Type1 == DataType.Int32)
-                        reader.Position += 5;
-                    else
-                        reader.Position += 1;
-                    break;
-                }
-
             default:
                 throw new IOException("Unknown opcode " + Kind.ToString().ToUpper(CultureInfo.InvariantCulture));
         }
@@ -876,7 +857,7 @@ public class UndertaleInstruction : UndertaleObject
                 if (Kind == Opcode.Dup || Kind == Opcode.CallV)
                 {
                     sb.Append(' ');
-                    sb.Append(Extra);
+                    sb.Append(Extra.ToString());
                     if (Kind == Opcode.Dup)
                     {
                         if ((byte)ComparisonKind != 0)
@@ -924,7 +905,7 @@ public class UndertaleInstruction : UndertaleObject
                 {
                     // Special scenario - the swap instruction
                     // TODO: Figure out the proper syntax, see #129
-                    sb.Append(SwapExtra);
+                    sb.Append(SwapExtra.ToString());
                     sb.Append(" ;;; this is a weird swap instruction, see #129");
                 }
                 else
@@ -954,7 +935,7 @@ public class UndertaleInstruction : UndertaleObject
                 sb.Append(' ');
                 sb.Append(Function);
                 sb.Append("(argc=");
-                sb.Append(ArgumentsCount);
+                sb.Append(ArgumentsCount.ToString());
                 sb.Append(')');
                 break;
 
@@ -962,13 +943,8 @@ public class UndertaleInstruction : UndertaleObject
                 sb.Append("." + Type1.ToOpcodeParam());
                 if (unknownBreak)
                 {
-                    sb.Append(' ');
+                    sb.Append(" ");
                     sb.Append(Value);
-                }
-                if (Type1 == DataType.Int32)
-                {
-                    sb.Append(' ');
-                    sb.Append(IntArgument);
                 }
                 break;
         }
@@ -984,8 +960,6 @@ public class UndertaleInstruction : UndertaleObject
                 return 3;
             else if (Type1 != DataType.Int16)
                 return 2;
-        if (Kind == Opcode.Break && Type1 == DataType.Int32)
-            return 2;
         return 1;
     }
 }

@@ -341,6 +341,13 @@ namespace UndertaleModTool
                                         Data.GameObjects.Add(gameObj);
                                     }
                                 }
+                                if (Data.GameObjects.ByName(methodNumberStr) != null)
+                                {
+                                    // It *needs* to have a valid value, make the user specify one, silly.
+                                    List<uint> possible_values = new List<uint>();
+                                    possible_values.Add(uint.MaxValue);
+                                    ReassignGUIDs(methodNumberStr, ReduceCollisionValue(possible_values));
+                                }
                             }
                             else
                             {

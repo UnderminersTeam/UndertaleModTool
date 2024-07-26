@@ -22,12 +22,11 @@ else
 }
 
 string importFolder = PromptChooseDirectory();
-if (importFolder is null)
+if (importFolder == null)
     throw new ScriptException("The import folder was not set.");
 
-// Overwrite Check One
-string stringsPath = Path.Combine(importFolder, "strings.txt");
-if (!File.Exists(stringsPath))
+//Overwrite Check One
+if (!File.Exists(importFolder + "\\strings.txt"))
 {
     ScriptError("No 'strings.txt' file exists!", "Error");
     return;
@@ -35,9 +34,9 @@ if (!File.Exists(stringsPath))
 
 int file_length = 0;
 string line = "";
-using (StreamReader reader = new StreamReader(stringsPath))
+using (StreamReader reader = new StreamReader(importFolder + "\\strings.txt"))
 {
-    while ((line = reader.ReadLine()) is not null)
+    while ((line = reader.ReadLine()) != null)
     {
         file_length += 1;
     }
@@ -62,7 +61,7 @@ else if (file_length > validStringsCount)
     return;
 }
 
-using (StreamReader reader = new StreamReader(stringsPath))
+using (StreamReader reader = new StreamReader(importFolder + "\\strings.txt"))
 {
     int line_no = 1;
     line = "";
@@ -70,7 +69,7 @@ using (StreamReader reader = new StreamReader(stringsPath))
     {
         if (str.Content.Contains("\n") || str.Content.Contains("\r"))
             continue;
-        if (!((line = reader.ReadLine()) is not null))
+        if (!((line = reader.ReadLine()) != null))
         {
             ScriptError("ERROR 2: Unexpected end of file at line: " + line_no.ToString() + ". Expected file length was: " + validStringsCount.ToString() + ". No changes have been made.", "Error");
             return;
@@ -79,7 +78,7 @@ using (StreamReader reader = new StreamReader(stringsPath))
     }
 }
 
-using (StreamReader reader = new StreamReader(stringsPath))
+using (StreamReader reader = new StreamReader(importFolder + "\\strings.txt"))
 {
     int line_no = 1;
     line = "";
@@ -87,7 +86,7 @@ using (StreamReader reader = new StreamReader(stringsPath))
     {
         if (str.Content.Contains("\n") || str.Content.Contains("\r"))
             continue;
-        if ((line = reader.ReadLine()) is not null)
+        if ((line = reader.ReadLine()) != null)
             str.Content = line;
         else
         {

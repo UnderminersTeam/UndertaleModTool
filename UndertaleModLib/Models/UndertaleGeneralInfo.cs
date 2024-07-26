@@ -591,15 +591,15 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
             else
                 sb.Append(" (GM ");
             sb.Append(Major);
-            sb.Append('.');
+            sb.Append(".");
             sb.Append(Minor);
             if (Release != 0)
             {
-                sb.Append('.');
+                sb.Append(".");
                 sb.Append(Release);
                 if (Build != 0)
                 {
-                    sb.Append('.');
+                    sb.Append(".");
                     sb.Append(Build);
                 }
             }
@@ -608,7 +608,7 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
                 sb.Append(", bytecode ");
                 sb.Append(BytecodeVersion);
             }
-            sb.Append(')');
+            sb.Append(")");
             return sb.ToString();
         }
     }
@@ -711,58 +711,44 @@ public class UndertaleOptions : UndertaleObject, IDisposable
     public OptionsFlags Info { get; set; } = OptionsFlags.InterpolatePixels | OptionsFlags.UseNewAudio | OptionsFlags.ShowCursor | OptionsFlags.ScreenKey | OptionsFlags.QuitKey | OptionsFlags.SaveKey | OptionsFlags.ScreenShotKey | OptionsFlags.CloseSec | OptionsFlags.ScaleProgress | OptionsFlags.DisplayErrors | OptionsFlags.VariableErrors | OptionsFlags.CreationEventOrder;
 
     /// <summary>
-    /// The window scale. // TODO: is this a legacy gm thing, or still used today? 
+    /// The window scale.
     /// </summary>
     public int Scale { get; set; } = -1;
 
     /// <summary>
-    /// The window color. TODO: unused? Legacy GM remnant? Is this the "Color outside the room region" thing?
+    /// The window color. TODO: unused? Legacy GM remnant?
     /// </summary>
     public uint WindowColor { get; set; } = 0;
 
     /// <summary>
-    /// The Color depth the game uses. Used only in Game Maker 8 and earlier.
+    /// The Color depth. TODO: unused? Legacy GM remnant?
     /// </summary>
     public uint ColorDepth { get; set; } = 0;
 
     /// <summary>
-    /// The game's resolution. Used only in Game Maker 8 and earlier.
+    /// The game's resolution. TODO: unused? Legacy GM remnant?
     /// </summary>
     public uint Resolution { get; set; } = 0;
 
     /// <summary>
-    /// The game's refresh rate. Used only in Game Maker 8 and earlier.
+    /// The game's refresh rate. TODO: unused? Legacy GM remnant?
     /// </summary>
     public uint Frequency { get; set; } = 0;
 
     /// <summary>
-    /// Whether the game uses V-Sync. Used only in Game Maker 8 and earlier.
+    /// Whether the game uses V-Sync. TODO: unused? Legacy GM remnant?
     /// </summary>
     public uint VertexSync { get; set; } = 0;
 
     /// <summary>
-    /// The priority of the game process. The higher the number, the more priority will be given to the game. Used only in Game Maker 8 and earlier.
+    /// TODO: unused? Legacy GM remnant?
     /// </summary>
     public uint Priority { get; set; } = 0;
-    
-    /// <summary>
-    /// The background of the loading bar when loading GameMaker 8 games.
-    /// </summary>
+
+    // Apparently these exist, but I can't find any examples of it. They're also only used in "old format".
     public UndertaleSprite.TextureEntry BackImage { get; set; } = new UndertaleSprite.TextureEntry();
-    
-    /// <summary>
-    /// The image of the loading bar when loading GameMaker 8 games.
-    /// </summary>
     public UndertaleSprite.TextureEntry FrontImage { get; set; } = new UndertaleSprite.TextureEntry();
-    
-    /// <summary>
-    /// The image that gets shown when loading GameMaker 8 games.
-    /// </summary>
     public UndertaleSprite.TextureEntry LoadImage { get; set; } = new UndertaleSprite.TextureEntry();
-    
-    /// <summary>
-    /// The transparency value of <see cref="LoadImage"/>. 255 indicates fully opaque, 0 means fully transparent. 
-    /// </summary>
     public uint LoadAlpha { get; set; } = 255;
 
     /// <summary>
@@ -879,7 +865,7 @@ public class UndertaleOptions : UndertaleObject, IDisposable
     /// <inheritdoc />
     public void Unserialize(UndertaleReader reader)
     {
-        NewFormat = reader.ReadInt32() == Int32.MinValue;
+        NewFormat = reader.ReadInt32() == int.MinValue;
         reader.Position -= 4;
         if (NewFormat)
         {
@@ -945,7 +931,7 @@ public class UndertaleOptions : UndertaleObject, IDisposable
     public static uint UnserializeChildObjectCount(UndertaleReader reader)
     {
         uint count = 0;
-        bool newFormat = reader.ReadInt32() == Int32.MinValue;
+        bool newFormat = reader.ReadInt32() == int.MinValue;
         reader.Position -= 4;
 
         reader.Position += newFormat ? 60u : 140u;
@@ -966,7 +952,7 @@ public class UndertaleOptions : UndertaleObject, IDisposable
         {
             foreach (Constant constant in Constants)
                 constant?.Dispose();
-        }
+         }
         BackImage = new();
         FrontImage = new();
         LoadImage = new();

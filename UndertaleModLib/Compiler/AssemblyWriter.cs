@@ -1249,14 +1249,6 @@ namespace UndertaleModLib.Compiler
                                     cw.Emit(Opcode.Push, DataType.Int64).Value = value.valueInt64;
                                     cw.typeStack.Push(DataType.Int64);
                                     break;
-                                case Parser.ExpressionConstant.Kind.Reference:
-                                    {
-                                        var instr = cw.Emit(Opcode.Break, DataType.Int32);
-                                        instr.Value = (short)-11; // pushref
-                                        instr.IntArgument = (int)value.valueNumber;
-                                        cw.typeStack.Push(DataType.Variable);
-                                        break;
-                                    }
                                 default:
                                     cw.typeStack.Push(DataType.Variable);
                                     AssemblyWriterError(cw, "Invalid constant type.", e.Token);

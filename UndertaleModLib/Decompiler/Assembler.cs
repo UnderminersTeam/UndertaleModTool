@@ -23,8 +23,7 @@ namespace UndertaleModLib.Decompiler
             { -7,  "setstatic" },
             { -8,  "savearef" },
             { -9,  "restorearef" },
-            { -10, "chknullish" },
-            { -11, "pushref" }
+            { -10, "chknullish" }
         };
         public static Dictionary<string, short> NameToBreakID = new Dictionary<string, short>()
         {
@@ -37,8 +36,7 @@ namespace UndertaleModLib.Decompiler
             { "setstatic", -7 },
             { "savearef", -8 },
             { "restorearef", -9 },
-            { "chknullish", -10 },
-            { "pushref", -11 }
+            { "chknullish", -10 }
         };
 
         // TODO: Improve the error messages
@@ -219,14 +217,7 @@ namespace UndertaleModLib.Decompiler
 
                 case UndertaleInstruction.InstructionType.BreakInstruction:
                     if (breakId != 0)
-                    {
                         instr.Value = breakId;
-                        if (breakId == -11) // pushref
-                        {
-                            // parse additional int argument
-                            instr.IntArgument = Int32.Parse(line);
-                        }
-                    }
                     else
                         instr.Value = Int16.Parse(line);
                     line = "";

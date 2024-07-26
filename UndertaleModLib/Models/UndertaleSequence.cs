@@ -249,7 +249,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
 
     public class Track : UndertaleObject
     {
-        public enum TrackBuiltinName
+        public enum TrackBuiltinName : int
         {
             Gain = 5,
             Pitch = 6,
@@ -273,7 +273,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         }
 
         [Flags]
-        public enum TrackTraits
+        public enum TrackTraits : int
         {
             None,
             ChildrenIgnoreOrigin
@@ -657,7 +657,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
             public override void Serialize(UndertaleWriter writer)
             {
                 base.Serialize(writer);
-                writer.Write(0);
+                writer.Write((int)0);
                 writer.Write(Mode);
             }
 
@@ -671,7 +671,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
             }
 
             /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
-            public new static uint UnserializeChildObjectCount(UndertaleReader reader)
+            public static new uint UnserializeChildObjectCount(UndertaleReader reader)
             {
                 uint count = ResourceData<UndertaleResourceById<UndertaleSound, UndertaleChunkSOND>>.UnserializeChildObjectCount(reader);
 
@@ -810,7 +810,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         }
 
         /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
-        public new static uint UnserializeChildObjectCount(UndertaleReader reader)
+        public static new uint UnserializeChildObjectCount(UndertaleReader reader)
         {
             reader.Position += 4; // "Value"
 
@@ -847,7 +847,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         }
 
         /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
-        public new static uint UnserializeChildObjectCount(UndertaleReader reader)
+        public static new uint UnserializeChildObjectCount(UndertaleReader reader)
         {
             while (reader.AbsPosition % 4 != 0)
                 reader.Position++;
@@ -877,7 +877,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         }
 
         /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
-        public new static uint UnserializeChildObjectCount(UndertaleReader reader)
+        public static new uint UnserializeChildObjectCount(UndertaleReader reader)
         {
             reader.Position += 4; // "Value"
 
@@ -914,7 +914,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         }
 
         /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
-        public new static uint UnserializeChildObjectCount(UndertaleReader reader)
+        public static new uint UnserializeChildObjectCount(UndertaleReader reader)
         {
             while (reader.AbsPosition % 4 != 0)
                 reader.Position++;

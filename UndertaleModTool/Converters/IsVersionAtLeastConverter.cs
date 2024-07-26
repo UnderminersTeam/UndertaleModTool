@@ -33,7 +33,7 @@ namespace UndertaleModTool
                 if (ver.Groups[3].Value != "")
                     release = uint.Parse(ver.Groups[3].Value);
                 if (ver.Groups[4].Value != "")
-                    build = uint.Parse(ver.Groups[4].Value);
+                    release = uint.Parse(ver.Groups[4].Value);
 
                 if (mainWindow.Data.IsVersionAtLeast(major, minor, release, build))
                     return Visibility.Visible;

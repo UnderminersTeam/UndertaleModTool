@@ -1105,12 +1105,6 @@ namespace UndertaleModTool
                                 possibleObjects.Add(data.Shaders[id]);
                             if (id < data.Timelines.Count)
                                 possibleObjects.Add(data.Timelines[id]);
-                            if (id < (data.AnimationCurves?.Count ?? 0))
-                                possibleObjects.Add(data.AnimationCurves[id]);
-                            if (id < (data.Sequences?.Count ?? 0))
-                                possibleObjects.Add(data.Sequences[id]);
-                            if (id < (data.ParticleSystems?.Count ?? 0))
-                                possibleObjects.Add(data.ParticleSystems[id]);
                         }
 
                         ContextMenuDark contextMenu = new();

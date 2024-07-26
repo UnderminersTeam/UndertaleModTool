@@ -32,8 +32,7 @@ namespace UndertaleModLib.Compiler
                     Number,
                     String,
                     Constant,
-                    Int64,
-                    Reference
+                    Int64
                 }
 
                 public ExpressionConstant(double val)
@@ -1346,7 +1345,7 @@ namespace UndertaleModLib.Compiler
                     // Parse chain variable reference
                     Statement result = new Statement(Statement.StatementKind.ExprVariableRef, remainingStageOne.Peek().Token);
                     bool combine = false;
-                    if (left.Kind != Statement.StatementKind.ExprConstant || left.Constant.kind == ExpressionConstant.Kind.Reference /* TODO: will this ever change? */)
+                    if (left.Kind != Statement.StatementKind.ExprConstant)
                         result.Children.Add(left);
                     else
                         combine = true;
@@ -2715,8 +2714,6 @@ namespace UndertaleModLib.Compiler
                     }
                     return false;
                 }
-                if (context.TypedAssetRefs)
-                    constant.kind = ExpressionConstant.Kind.Reference;
                 constant.valueNumber = (double)index;
                 return true;
             }

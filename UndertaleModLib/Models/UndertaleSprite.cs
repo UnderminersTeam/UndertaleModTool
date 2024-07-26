@@ -81,7 +81,7 @@ public class UndertaleSpineTextureEntry : UndertaleObject, IDisposable
 /// <summary>
 /// Sprite entry in the data file.
 /// </summary>
-public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyPropertyChanged, IDisposable
+public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyPropertyChanged
 {
     /// <summary>
     /// The name of the sprite.
@@ -155,7 +155,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
     public int OriginY { get; set; }
 
     /// <summary>
-    /// A <see cref="OriginX"/> wrapper that also sets <see cref="V2Sequence"/> accordingly.
+    /// A <see cref="OriginX"/> wrapper that also sets <see cref="V2Sequence.OriginX"/> accordingly.
     /// </summary>
     /// <remarks>
     /// This attribute is used only in UndertaleModTool and doesn't exist in GameMaker.
@@ -173,7 +173,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
     }
 
     /// <summary>
-    /// A <see cref="OriginY"/> wrapper that also sets <see cref="V2Sequence"/> accordingly.
+    /// A <see cref="OriginY"/> wrapper that also sets <see cref="V2Sequence.OriginY"/> accordingly.
     /// </summary>
     /// <remarks>
     /// This attribute is used only in UndertaleModTool and doesn't exist in GameMaker.
@@ -379,11 +379,11 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                 if (SVersion >= 2)
                 {
                     sequencePatchPos = writer.Position;
-                    writer.Write(0);
+                    writer.Write((int)0);
                     if (SVersion >= 3)
                     {
                         nineSlicePatchPos = writer.Position;
-                        writer.Write(0);
+                        writer.Write((int)0);
                     }
                 }
             }
@@ -458,7 +458,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                 writer.Position = sequencePatchPos;
                 writer.Write(returnTo);
                 writer.Position = returnTo;
-                writer.Write(1);
+                writer.Write((int)1);
                 writer.WriteUndertaleObject(V2Sequence);
             }
             if (nineSlicePatchPos != 0 && V3NineSlice != null)
@@ -1079,7 +1079,7 @@ public class UndertaleYYSWFCollisionMask : UndertaleObject
     }
 }
 
-public enum UndertaleYYSWFItemType
+public enum UndertaleYYSWFItemType : int
 {
     ItemInvalid,
     ItemShape,
@@ -1174,20 +1174,11 @@ public class UndertaleYYSWFGradientFillData : UndertaleObject
     public UndertaleYYSWFGradientFillType GradientFillType { get; set; }
     public UndertaleYYSWFMatrix33 TransformationMatrix { get; set; }
     public UndertaleSimpleList<UndertaleYYSWFGradientRecord> Records { get; set; }
-    /// <summary>
-    /// Unknown purpose. Probably to accomodate for new texture formats.
-    /// </summary>
-    /// <remarks>
-    /// Presumably present in GM 2022.1+.
-    /// </remarks>
-    public int? TPEIndex { get; set; }
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
     {
         writer.Write((int)GradientFillType);
-        if (TPEIndex is not null)
-            writer.Write(TPEIndex.Value);
         writer.WriteUndertaleObject(TransformationMatrix);
         writer.WriteUndertaleObject(Records);
     }
@@ -1196,10 +1187,6 @@ public class UndertaleYYSWFGradientFillData : UndertaleObject
     public void Unserialize(UndertaleReader reader)
     {
         GradientFillType = (UndertaleYYSWFGradientFillType)reader.ReadInt32();
-        if (reader.undertaleData.IsVersionAtLeast(2022, 1))
-        {
-            TPEIndex = reader.ReadInt32();
-        }
         TransformationMatrix = reader.ReadUndertaleObject<UndertaleYYSWFMatrix33>();
         Records = new UndertaleSimpleList<UndertaleYYSWFGradientRecord>();
         int count = reader.ReadInt32();
@@ -1664,13 +1651,6 @@ public class UndertaleYYSWFBitmapData : UndertaleObject
     public UndertaleYYSWFBitmapType Type { get; set; }
     public int Width { get; set; }
     public int Height { get; set; }
-    /// <summary>
-    /// Unknown purpose. Probably to accomodate for new texture formats.
-    /// </summary>
-    /// <remarks>
-    /// Presumably present in GM 2022.1+.
-    /// </remarks>
-    public int? TPEIndex { get; set; }
     public byte[] ImageData { get; set; }
     public byte[] AlphaData { get; set; }
     public byte[] ColorPaletteData { get; set; }
@@ -1683,25 +1663,18 @@ public class UndertaleYYSWFBitmapData : UndertaleObject
         writer.Write(Width);
         writer.Write(Height);
 
-        if (TPEIndex is null)
-        {
-            writer.Write(ImageData is null ? 0 : ImageData.Length);
-            writer.Write(AlphaData is null ? 0 : AlphaData.Length);
-            writer.Write(ColorPaletteData is null ? 0 : ColorPaletteData.Length);
+        writer.Write(ImageData is null ? 0 : ImageData.Length);
+        writer.Write(AlphaData is null ? 0 : AlphaData.Length);
+        writer.Write(ColorPaletteData is null ? 0 : ColorPaletteData.Length);
 
-            if (ImageData != null)
-                writer.Write(ImageData);
-            if (AlphaData != null)
-                writer.Write(AlphaData);
-            if (ColorPaletteData != null)
-                writer.Write(ColorPaletteData);
+        if (ImageData != null)
+            writer.Write(ImageData);
+        if (AlphaData != null)
+            writer.Write(AlphaData);
+        if (ColorPaletteData != null)
+            writer.Write(ColorPaletteData);
 
-            writer.Align(4);
-        }
-        else
-        {
-            writer.Write(TPEIndex.Value);
-        }
+        writer.Align(4);
     }
 
     /// <inheritdoc />
@@ -1711,25 +1684,18 @@ public class UndertaleYYSWFBitmapData : UndertaleObject
         Width = reader.ReadInt32();
         Height = reader.ReadInt32();
 
-        if (reader.undertaleData.IsVersionAtLeast(2022, 1))
-        {
-            TPEIndex = reader.ReadInt32();
-        }
-        else
-        {
-            int iL = reader.ReadInt32();
-            int aL = reader.ReadInt32();
-            int cL = reader.ReadInt32();
+        int iL = reader.ReadInt32();
+        int aL = reader.ReadInt32();
+        int cL = reader.ReadInt32();
 
-            if (iL > 0)
-                ImageData = reader.ReadBytes(iL);
-            if (aL > 0)
-                AlphaData = reader.ReadBytes(aL);
-            if (cL > 0)
-                ColorPaletteData = reader.ReadBytes(cL);
+        if (iL > 0)
+            ImageData = reader.ReadBytes(iL);
+        if (aL > 0)
+            AlphaData = reader.ReadBytes(aL);
+        if (cL > 0)
+            ColorPaletteData = reader.ReadBytes(cL);
 
-            reader.Align(4);
-        }
+        reader.Align(4);
     }
 }
 
@@ -1913,7 +1879,7 @@ public class UndertaleYYSWF : UndertaleObject
     public void Unserialize(UndertaleReader reader)
     {
         reader.Align(4);
-        int jpeglen = reader.ReadInt32() & (~Int32.MinValue); // the length is ORed with int.MinValue.
+        int jpeglen = reader.ReadInt32() & (~int.MinValue); // the length is ORed with int.MinValue.
         Version = reader.ReadInt32();
         Util.DebugUtil.Assert(Version == 8 || Version == 7, "Invalid YYSWF version data! Expected 7 or 8, got " + Version);
 
