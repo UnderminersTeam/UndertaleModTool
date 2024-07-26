@@ -383,7 +383,7 @@ namespace UndertaleModTool
                 textEditor.ScrollToEnd();
             }
         }
-        
+
         private static void FillObjectDicts()
         {
             var data = mainWindow.Data;
@@ -1025,7 +1025,7 @@ namespace UndertaleModTool
                 {
                     int line = docLine.LineNumber;
                     var highlighter = highlighterInst;
-                    
+
                     HighlightedLine highlighted;
                     try
                     {
@@ -1071,10 +1071,10 @@ namespace UndertaleModTool
                     return null;
 
                 var doc = CurrentContext.Document;
-                string numText = doc.GetText(offset, numLength); 
+                string numText = doc.GetText(offset, numLength);
 
                 var line = new ClickVisualLineText(numText, CurrentContext.VisualLine, numLength);
-                
+
                 line.Clicked += (text, inNewTab) =>
                 {
                     if (int.TryParse(text, out int id))
@@ -1122,7 +1122,7 @@ namespace UndertaleModTool
                                 {
                                     mainWindow.Focus();
                                     mainWindow.ChangeSelection(obj, true);
-                                    
+
                                 }
                                 else if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
                                     mainWindow.ChangeSelection(obj);
@@ -1183,11 +1183,11 @@ namespace UndertaleModTool
             private readonly TextEditor textEditorInst;
             private readonly UndertaleCodeEditor codeEditorInst;
 
-            private static readonly SolidColorBrush FunctionBrush = new(Color.FromRgb(0xFF, 0xB8, 0x71));
-            private static readonly SolidColorBrush GlobalBrush = new(Color.FromRgb(0xF9, 0x7B, 0xF9));
-            private static readonly SolidColorBrush ConstantBrush = new(Color.FromRgb(0xFF, 0x80, 0x80));
-            private static readonly SolidColorBrush InstanceBrush = new(Color.FromRgb(0x58, 0xE3, 0x5A));
-            private static readonly SolidColorBrush LocalBrush = new(Color.FromRgb(0xFF, 0xF8, 0x99)); // new(Color.FromRgb(0x58, 0xF8, 0x99)); -> this color is pretty cool
+            private SolidColorBrush FunctionBrush = new(Color.FromRgb(CodeColorsWindow.FunctionColor_0, CodeColorsWindow.FunctionColor_1, CodeColorsWindow.FunctionColor_2));
+            private SolidColorBrush GlobalBrush = new(Color.FromRgb(CodeColorsWindow.GlobalColor_0, CodeColorsWindow.GlobalColor_1, CodeColorsWindow.GlobalColor_2));
+            private SolidColorBrush ConstantBrush = new(Color.FromRgb(CodeColorsWindow.ConstantColor_0, CodeColorsWindow.ConstantColor_1, CodeColorsWindow.ConstantColor_2));
+            private SolidColorBrush InstanceBrush = new(Color.FromRgb(CodeColorsWindow.InstanceColor_0, CodeColorsWindow.InstanceColor_1, CodeColorsWindow.InstanceColor_2));
+            private SolidColorBrush LocalBrush = new(Color.FromRgb(CodeColorsWindow.LocalColor_0, CodeColorsWindow.LocalColor_1, CodeColorsWindow.LocalColor_2)); // new(Color.FromRgb(0x58, 0xF8, 0x99)); -> this color is pretty cool
 
             private static ContextMenuDark contextMenu;
 
@@ -1215,7 +1215,6 @@ namespace UndertaleModTool
                     Placement = PlacementMode.MousePoint
                 };
             }
-
             public override void StartGeneration(ITextRunConstructionContext context)
             {
                 lineNameSections.Clear();

@@ -55,6 +55,22 @@ namespace UndertaleModTool
         public bool EnableDarkMode { get; set; } = false;
         public bool ShowDebuggerOption { get; set; } = false;
 
+        public byte FunctionColor_0 { get; set; } = 255;
+        public byte FunctionColor_1 { get; set; } = 184;
+        public byte FunctionColor_2 { get; set; } = 113;
+        public byte GlobalColor_0 { get; set; } = 249;
+        public byte GlobalColor_1 { get; set; } = 123;
+        public byte GlobalColor_2 { get; set; } = 249;
+        public byte ConstantColor_0 { get; set; } = 255;
+        public byte ConstantColor_1 { get; set; } = 128;
+        public byte ConstantColor_2 { get; set; } = 128;
+        public byte InstanceColor_0 { get; set; } = 88;
+        public byte InstanceColor_1 { get; set; } = 227;
+        public byte InstanceColor_2 { get; set; } = 90;
+        public byte LocalColor_0 { get; set; } = 255;
+        public byte LocalColor_1 { get; set; } = 248;
+        public byte LocalColor_2 { get; set; } = 153;
+
         public static Settings Instance;
 
         public static JsonSerializerOptions JsonOptions = new JsonSerializerOptions

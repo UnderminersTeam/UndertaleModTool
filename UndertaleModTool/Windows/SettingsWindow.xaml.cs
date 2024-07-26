@@ -259,6 +259,12 @@ namespace UndertaleModTool
         {
             ((MainWindow)Owner).ImportProfileFolder();
         }
+        private void ColorEditorButton_Click(object sender, RoutedEventArgs e)
+        {
+            CodeColorsWindow codecolors = new CodeColorsWindow();
+            codecolors.Owner = this;
+            codecolors.ShowDialog();
+        }
 
     }
 }

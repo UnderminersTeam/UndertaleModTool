@@ -403,7 +403,8 @@ namespace UndertaleModLib.Compiler
                     if (context.Location != null)
                     {
                         msg += string.Format(" around line {0}, column {1}", context.Location.Line, context.Location.Column);
-                    } else if (context.Kind == TokenKind.EOF)
+                    }
+                    else if (context.Kind == TokenKind.EOF)
                     {
                         msg += " around EOF (end of file)";
                     }
@@ -439,7 +440,7 @@ namespace UndertaleModLib.Compiler
                     context.LocalVars["arguments"] = "arguments";
                 context.GlobalVars.Clear();
                 context.Enums.Clear();
-                context.LocalArgs.Clear();
+                //context.LocalArgs.Clear();
                 hasError = false;
 
                 // Ensuring an EOF exists
@@ -461,7 +462,7 @@ namespace UndertaleModLib.Compiler
                     else if (tokens[i].Kind == TokenKind.Identifier)
                     {
                         // Convert identifiers into their proper references, at least sort of.
-                        if ((i != 0 && tokens[i - 1].Kind == TokenKind.Dot) || 
+                        if ((i != 0 && tokens[i - 1].Kind == TokenKind.Dot) ||
                             !ResolveIdentifier(context, tokens[i].Content, out ExpressionConstant constant))
                         {
                             int ID = GetVariableID(context, tokens[i].Content, out _);
@@ -486,7 +487,8 @@ namespace UndertaleModLib.Compiler
                             try
                             {
                                 val = Convert.ToInt64(t.Content.Substring(t.Content[0] == '$' ? 1 : 2), 16);
-                            } catch (Exception)
+                            }
+                            catch (Exception)
                             {
                                 ReportCodeError("Invalid hex literal.", t, false);
                                 constant = new ExpressionConstant(0);
@@ -674,13 +676,14 @@ namespace UndertaleModLib.Compiler
 
                 EnsureTokenKind(TokenKind.OpenParen);
                 var i = 0;
-                Dictionary<string, int> argsDict = new();
+                //Dictionary<string, int> argsDict = new();
                 while (remainingStageOne.Count > 0 && !hasError && !IsNextToken(TokenKind.EOF, TokenKind.CloseParen))
                 {
                     var token = EnsureTokenKind(TokenKind.ProcVariable);
                     if (token == null)
                         return null;
-                    argsDict.Add(token.Text, i);
+                    //argsDict.Add(token.Text, i);
+                    args.Children.Add(new Statement(Statement.StatementKind.Token, token.Text));
                     i++;
                     if (!IsNextTokenDiscard(TokenKind.Comma))
                     {
@@ -696,7 +699,7 @@ namespace UndertaleModLib.Compiler
                 if (EnsureTokenKind(TokenKind.CloseParen) == null) return null;
 
                 result.Children.Add(ParseStatement(context)); // most likely parses the body.
-                context.LocalArgs.Add(result, argsDict);
+                //context.LocalArgs.Add(result, argsDict);
 
                 if (expressionMode)
                     return result;
@@ -1050,7 +1053,7 @@ namespace UndertaleModLib.Compiler
                 if (EnsureTokenKind(TokenKind.CloseParen) == null) return null;
 
                 // Check for proper argument count, at least for builtins
-                if (context.BuiltInList.Functions.TryGetValue(s.Text, out FunctionInfo fi) && 
+                if (context.BuiltInList.Functions.TryGetValue(s.Text, out FunctionInfo fi) &&
                     fi.ArgumentCount != -1 && result.Children.Count != fi.ArgumentCount)
                     ReportCodeError(string.Format("Function {0} expects {1} arguments, got {2}.",
                                                   s.Text, fi.ArgumentCount, result.Children.Count)
@@ -1113,7 +1116,7 @@ namespace UndertaleModLib.Compiler
                     {
                         result.Children.Add(ParseAndOp(context));
                     }
-                    
+
                     return result;
                 }
                 else
@@ -1391,7 +1394,7 @@ namespace UndertaleModLib.Compiler
                 if (context.BuiltInList.Functions.ContainsKey(s.Text) || context.scripts.Contains(s.Text))
                 {
                     //ReportCodeError(string.Format("Variable name {0} cannot be used; a function or script already has the name.", s.Text), false);
-                    return new Statement(Statement.StatementKind.ExprFuncName, s.Token) { ID = s.ID };       
+                    return new Statement(Statement.StatementKind.ExprFuncName, s.Token) { ID = s.ID };
                 }
 
                 Statement result = new Statement(Statement.StatementKind.ExprSingleVariable, s.Token);
@@ -1581,7 +1584,8 @@ namespace UndertaleModLib.Compiler
                                 result.Children[i] = Optimize(context, result.Children[i]);
                         }
                     }
-                } else
+                }
+                else
                     result = new Statement(s);
                 Statement child0 = result.Children[0];
 
@@ -1625,7 +1629,8 @@ namespace UndertaleModLib.Compiler
                                             accessorFunc.Children.Insert(0, left);
                                             accessorFunc.Children.Add(Optimize(context, result.Children[2]));
                                             return accessorFunc;
-                                        } else
+                                        }
+                                        else
                                         {
                                             // Not the final set function
                                             Statement accessorFunc = new Statement(Statement.StatementKind.ExprFunctionCall, ai.RFunc);
@@ -1652,7 +1657,8 @@ namespace UndertaleModLib.Compiler
                             {
                                 result.Children[i] = Optimize(context, result.Children[i]);
                             }
-                        } else
+                        }
+                        else
                         {
                             for (int i = 0; i < result.Children.Count; i++)
                             {
@@ -1941,7 +1947,7 @@ namespace UndertaleModLib.Compiler
                             ReportCodeError("Case argument must be constant.", result.Token, false);
                         }
                         break;
-                    // todo: parse enum references
+                        // todo: parse enum references
                 }
                 return result;
             }
@@ -1956,7 +1962,8 @@ namespace UndertaleModLib.Compiler
                         ai = context.BuiltInList.Accessors1D[kind];
                     else
                         ReportCodeError("Accessor has incorrect number of arguments", s.Children[0].Token, false);
-                } else
+                }
+                else
                 {
                     if (context.BuiltInList.Accessors2D.ContainsKey(kind))
                         ai = context.BuiltInList.Accessors2D[kind];

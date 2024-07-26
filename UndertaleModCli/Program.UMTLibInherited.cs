@@ -1024,6 +1024,7 @@ public partial class Program : IScriptInterface
 
     public uint ReduceCollisionValue(List<uint> possibleValues)
     {
+        this.ScriptMessage("haha dumbass");
         if (possibleValues.Count == 1)
         {
             if (possibleValues[0] != uint.MaxValue)
