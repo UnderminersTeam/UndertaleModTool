@@ -628,7 +628,8 @@
       "os_type": "Constant.OperatingSystem",
       "event_type": "Constant.EventType",
       "instance_id": "Id.InstanceOrObject",
-      "persistent": "Bool"
+      "persistent": "Bool",
+      "background_visible": "Bool"
     },
     "FunctionArguments": {
       "action_create_object": [ "Asset.Object", null, null ],

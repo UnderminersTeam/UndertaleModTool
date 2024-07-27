@@ -418,6 +418,7 @@
       "gml_Script_scr_textsetup_ch1": [ "Asset.Font", "Constant.Color", null, null, null, null, null, "Asset.Sound" ],
       "gml_Script_scr_custom_afterimage": [ "Asset.Object" ],
       "gml_Script_scr_custom_afterimage_ext": [ "Asset.Object", "Asset.Sprite", null, null, null, null, null ],
+      "gml_Script_scr_following_afterimage": [ "Asset.Object", "Id.InstanceOrObject" ],
       "gml_Script_c_var_instance": [
         null,
         {
