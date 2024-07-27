@@ -754,7 +754,10 @@ namespace UndertaleModLib
             if (reader.ReadUInt32() > 0) // Font count
             {
                 uint firstFontPointer = reader.ReadUInt32();
-                reader.AbsPosition = firstFontPointer + 56; // Two more values: SDFSpread and LineHeight. 48 + 4 + 4 = 56.
+                reader.AbsPosition = firstFontPointer + 52; // Also the LineHeight value. 48 + 4 = 52.
+                if (reader.undertaleData.IsNonLTSVersionAtLeast(2023, 2)) // SDFSpread is present from 2023.2 non-LTS onward
+                    reader.AbsPosition += 4;                              // (detected by PSEM/PSYS chunk existence)
+
                 uint glyphsLength = reader.ReadUInt32();
                 GMS2023_6 = true;
                 if ((glyphsLength * 4) > this.Length)
