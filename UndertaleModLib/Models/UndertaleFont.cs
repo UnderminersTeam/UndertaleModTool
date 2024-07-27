@@ -295,7 +295,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             writer.Write(AscenderOffset);
         if (writer.undertaleData.IsVersionAtLeast(2022, 2))
             writer.Write(Ascender);
-        if (writer.undertaleData.IsVersionAtLeast(2023, 2))
+        if (writer.undertaleData.IsNonLTSVersionAtLeast(2023, 2))
             writer.Write(SDFSpread);
         if (writer.undertaleData.IsVersionAtLeast(2023, 6))
             writer.Write(LineHeight);
@@ -335,7 +335,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             AscenderOffset = reader.ReadInt32();
         if (reader.undertaleData.IsVersionAtLeast(2022, 2))
             Ascender = reader.ReadUInt32();
-        if (reader.undertaleData.IsVersionAtLeast(2023, 2))
+        if (reader.undertaleData.IsNonLTSVersionAtLeast(2023, 2))
             SDFSpread = reader.ReadUInt32();
         if (reader.undertaleData.IsVersionAtLeast(2023, 6))
             LineHeight = reader.ReadUInt32();
@@ -350,7 +350,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             skipSize += 4; // AscenderOffset
         if (reader.undertaleData.IsVersionAtLeast(2022, 2))
             skipSize += 4; // Ascender
-        if (reader.undertaleData.IsVersionAtLeast(2023, 2))
+        if (reader.undertaleData.IsNonLTSVersionAtLeast(2023, 2))
             skipSize += 4; // SDFSpread
         if (reader.undertaleData.IsVersionAtLeast(2023, 6))
             skipSize += 4; // LineHeight

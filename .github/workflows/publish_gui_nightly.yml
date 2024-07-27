@@ -38,7 +38,7 @@ jobs:
         dotnet build UndertaleModToolUpdater --no-restore
     - name: Publish ${{ matrix.os }} GUI
       run: |
-        dotnet publish UndertaleModTool -c ${{ matrix.configuration }} -r win-x64 --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=${{ matrix.singlefile }} --output ${{ matrix.os }}
+        dotnet publish UndertaleModTool -c ${{ matrix.configuration }} -r win-x64 -p:DefineConstants=\"SHOW_COMMIT_HASH\" --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=${{ matrix.singlefile }} --output ${{ matrix.os }}
         dotnet publish UndertaleModToolUpdater -c ${{ matrix.configuration }} -r win-x64 --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false --output ${{ matrix.os }}/Updater
     - name: Copy external files
       run: |

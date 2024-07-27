@@ -197,7 +197,7 @@ namespace UndertaleModTool
         public static string Edition = "(Git: " + GitVersion.GetGitVersion().Substring(0, 7) + ")";
 
         // On debug, build with git versions and provided release version. Otherwise, use the provided release version only.
-#if DEBUG
+#if DEBUG || SHOW_COMMIT_HASH
         public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString() + (Edition != "" ? " - " + Edition : "");
 #else
         public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
