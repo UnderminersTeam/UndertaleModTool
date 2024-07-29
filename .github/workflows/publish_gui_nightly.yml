@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest]
-        configuration: [Debug, Release]
+        configuration: [Debug]
         bundled: [true]
         singlefile: [true, false]
 
@@ -60,7 +60,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
-        configuration: [Debug, Release]
+        configuration: [Debug]
         bundled: [true]
         include:
           - os: ubuntu-latest
