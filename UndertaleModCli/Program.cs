@@ -713,7 +713,7 @@ public partial class Program : IScriptInterface
         string lines;
         try
         {
-            lines = File.ReadAllText(path);
+            lines = File.ReadAllText(path, Encoding.UTF8);
         }
         catch (Exception exc)
         {
@@ -740,7 +740,7 @@ public partial class Program : IScriptInterface
 
         try
         {
-            CSharpScript.EvaluateAsync(code, CliScriptOptions, this, typeof(IScriptInterface)).GetAwaiter().GetResult();
+            CSharpScript.EvaluateAsync(code, CliScriptOptions.WithFilePath(scriptFile ?? "").WithFileEncoding(Encoding.UTF8), this, typeof(IScriptInterface)).GetAwaiter().GetResult();
             ScriptExecutionSuccess = true;
             ScriptErrorMessage = "";
         }
