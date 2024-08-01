@@ -4,7 +4,6 @@
 
 using System;
 using System.IO;
-using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,15 +37,13 @@ foreach (string file in dirFiles)
     {
         throw new ScriptException("Getting the sprite name of " + FileNameWithExtension + " failed.");
     }
-    if (Data.Sprites.ByName(spriteName) == null) // Reject non-existing sprites
-    {
-        throw new ScriptException(FileNameWithExtension + " could not be imported as the sprite " + spriteName + " does not exist.");
-    }
-    using (Image img = Image.FromFile(file))
-    {
-        if ((Data.Sprites.ByName(spriteName).Width != (uint)img.Width) || (Data.Sprites.ByName(spriteName).Height != (uint)img.Height))
-            throw new ScriptException(FileNameWithExtension + " is not the proper size to be imported! Please correct this before importing! The proper dimensions are width: " + Data.Sprites.ByName(spriteName).Width.ToString() + " px, height: " + Data.Sprites.ByName(spriteName).Height.ToString() + " px.");
-    }
+    var sprite = Data.Sprites.ByName(spriteName);
+    if (sprite is null) // Reject non-existing sprites
+        throw new ScriptException($"{FileNameWithExtension} could not be imported as the sprite {spriteName} does not exist.");
+
+    var imgSize = TextureWorker.GetImageSizeFromFile(file);
+    if ((sprite.Width != (uint)imgSize.Width) || (sprite.Height != (uint)imgSize.Height))
+        throw new ScriptException($"{FileNameWithExtension} is not the proper size to be imported! Please correct this before importing! The proper dimensions are width: {sprite.Width} px, height: {sprite.Height} px.");
 
     Int32 validFrameNumber = 0;
     try

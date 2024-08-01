@@ -531,7 +531,7 @@ namespace UndertaleModTool
             {
                 foreach (var pair in appDarkStyle)
                     resources[pair.Key] = pair.Value;
-
+                
                 Windows.TextInput.BGColor = System.Drawing.Color.FromArgb(darkColor.R,
                                                                           darkColor.G,
                                                                           darkColor.B);

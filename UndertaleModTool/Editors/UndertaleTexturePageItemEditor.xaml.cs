@@ -1,6 +1,5 @@
 ﻿using Microsoft.Win32;
 using System;
-using System.Drawing;
 using System.Windows;
 using System.IO;
 using UndertaleModLib.Models;
@@ -36,8 +35,7 @@ namespace UndertaleModTool
 
             try
             {
-                Bitmap image = TextureWorker.ReadImageFromFile(dlg.FileName);
-                image.SetResolution(96.0F, 96.0F);
+                SkiaSharp.SKBitmap image = TextureWorker.ReadImageFromFile(dlg.FileName);
                 (this.DataContext as UndertaleTexturePageItem).ReplaceTexture(image);
 
                 // Refresh the image of "ItemDisplay"
