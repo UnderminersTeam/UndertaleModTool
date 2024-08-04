@@ -935,6 +935,8 @@ namespace UndertaleModTool
             Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!");
             OpenInTab(Highlighted);
 
+            GameSpecificResolver.BaseDirectory = ExePath;
+
             Task t = Task.Run(() =>
             {
                 bool hadWarnings = false;

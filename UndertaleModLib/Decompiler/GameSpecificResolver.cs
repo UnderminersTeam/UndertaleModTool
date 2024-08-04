@@ -11,6 +11,11 @@ namespace UndertaleModLib.Decompiler;
 /// </summary>
 public class GameSpecificResolver
 {
+    /// <summary>
+    /// Base app directory used for locating the "GameSpecificData" directory, which should be immediately inside.
+    /// </summary>
+    public static string BaseDirectory { get; set; } = AppContext.BaseDirectory;
+
     private enum ConditionResult
     {
         Ignore,
@@ -111,7 +116,7 @@ public class GameSpecificResolver
         {
             if (!string.IsNullOrEmpty(UnderanalyzerFilename))
             {
-                string underanalyzerPath = Path.Combine("GameSpecificData", "Underanalyzer", UnderanalyzerFilename);
+                string underanalyzerPath = Path.Combine(BaseDirectory, "GameSpecificData", "Underanalyzer", UnderanalyzerFilename);
                 if (File.Exists(underanalyzerPath))
                 {
                     data.GameSpecificRegistry.DeserializeFromJson(File.ReadAllText(underanalyzerPath));
@@ -129,7 +134,7 @@ public class GameSpecificResolver
         _loadedDefinitions = true;
 
         // Scan directory for files, if it exists
-        string dir = Path.Combine("GameSpecificData", "Definitions");
+        string dir = Path.Combine(BaseDirectory, "GameSpecificData", "Definitions");
         if (Directory.Exists(dir))
         {
             foreach (string file in Directory.EnumerateFiles(dir, "*.json", SearchOption.TopDirectoryOnly))
