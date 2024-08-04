@@ -13,7 +13,6 @@
             <MenuItem Header="Open in new tab" Click="OpenInNewTabItem_Click"/>
             <MenuItem Header="Find all references" Click="FindAllReferencesItem_Click"/>
         </local:ContextMenuDark>
-        <Label x:Key="emptyReferenceLabel" Foreground="Gray" FontStyle="Italic" />
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -24,19 +23,18 @@
         <local:TextBoxDark Grid.Column="0" x:Name="ObjectText" IsReadOnly="True" Cursor="Arrow" AllowDrop="True"
                            ToolTip="This is an object reference. Drag and drop an object of matching type from the tree on the left to change it!"
                            ToolTipService.InitialShowDelay="250"
-                           PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" PreviewMouseDoubleClick="TextBox_MouseDoubleClick" PreviewMouseDown="Details_MouseDown"
-                           Text="{Binding ObjectReference, ElementName=objectReference}">
+                           PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" PreviewMouseDoubleClick="TextBox_MouseDoubleClick" PreviewMouseDown="Details_MouseDown">
             <TextBox.Style>
                 <Style TargetType="{x:Type TextBox}">
+                    <Style.Resources>
+                        <local:TypeHintConverter x:Key="typeHintConverter"/>
+                    </Style.Resources>
+                    <Setter Property="Text" Value="{Binding ObjectReference, ElementName=objectReference}"/>
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding ObjectReference, ElementName=objectReference}" Value="{x:Null}">
-                            <Setter Property="Background">
-                                <Setter.Value>
-                                    <VisualBrush AlignmentX="Left" AlignmentY="Center" Stretch="None"
-                                                 Visual="{StaticResource emptyReferenceLabel}">
-                                    </VisualBrush>
-                                </Setter.Value>
-                            </Setter>
+                            <Setter Property="Foreground" Value="Gray"/>
+                            <Setter Property="FontStyle" Value="Italic"/>
+                            <Setter Property="Text" Value="{Binding ObjectType, ElementName=objectReference, Mode=OneWay, Converter={StaticResource typeHintConverter}}"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
