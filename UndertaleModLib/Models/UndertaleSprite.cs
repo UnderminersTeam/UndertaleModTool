@@ -514,7 +514,9 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
             writer.Write((byte)0);
             total++;
         }
-        Util.DebugUtil.Assert(total == CalculateMaskDataSize(Width, Height, (uint)CollisionMasks.Count), "Invalid mask data for sprite");
+
+        (uint width, uint height) = CalculateMaskDimensions(writer.undertaleData);
+        Util.DebugUtil.Assert(total == CalculateMaskDataSize(width, height, (uint)CollisionMasks.Count), "Invalid mask data for sprite");
     }
 
     private static byte[] DecodeSpineBlob(byte[] blob)
