@@ -1,4 +1,4 @@
-// Made by GitMuslim
+// Made by GitMuslim, Some fixes by NC-devC
 
 using System;
 using System.Text;
