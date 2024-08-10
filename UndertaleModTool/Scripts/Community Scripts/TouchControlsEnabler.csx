@@ -124,7 +124,7 @@ builder.Replace("{_font}", currentFont);
 builder.Replace("{_settingsnumx}", Convert.ToString(settingsnumx));
 mobileControlsCreate = builder.ToString();
 
-ImportGMLString("gml_Object_obj_mobilecontrols_Create_0.gml", mobileControlsCreate);
+ImportGMLString("gml_Object_obj_mobilecontrols_Create_0", mobileControlsCreate);
 ImportGMLFile(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Draw_64.gml"), true, false, true);
 ImportGMLFile(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Other_4.gml"), true, false, true);
 Data.Scripts.Add(new UndertaleScript() { Name = Data.Strings.MakeString("scr_add_keys"), Code = Data.Code.ByName("gml_Object_obj_mobilecontrols_Other_4") });
