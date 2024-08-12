@@ -412,13 +412,13 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
-            Serialize(writer, writer.undertaleData.IsVersionAtLeast(2022, 3), writer.undertaleData.IsVersionAtLeast(2022, 5));
+            Serialize(writer, writer.undertaleData.IsVersionAtLeast(2022, 5));
         }
 
         /// <summary>
         /// Serializes the texture to any type of writer (can be any destination file).
         /// </summary>
-        public void Serialize(FileBinaryWriter writer, bool gm2022_3, bool gm2022_5)
+        public void Serialize(FileBinaryWriter writer, bool gm2022_5)
         {
             if (FormatQOI)
             {
@@ -430,7 +430,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
                     using Bitmap bmp = TextureWorker.GetImageFromByteArray(TextureBlob);
                     writer.Write((short)bmp.Width);
                     writer.Write((short)bmp.Height);
-                    byte[] qoiData = QoiConverter.GetArrayFromImage(bmp, gm2022_3 ? 0 : 4);
+                    byte[] qoiData = QoiConverter.GetArrayFromImage(bmp);
                     using MemoryStream input = new MemoryStream(qoiData);
                     if (sharedStream.Length != 0)
                         sharedStream.Seek(0, SeekOrigin.Begin);
@@ -443,7 +443,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
                 {
                     // Encode the PNG data back to QOI
                     using Bitmap bmp = TextureWorker.GetImageFromByteArray(TextureBlob);
-                    writer.Write(QoiConverter.GetSpanFromImage(bmp, gm2022_3 ? 0 : 4));
+                    writer.Write(QoiConverter.GetSpanFromImage(bmp));
                 }
             }
             else

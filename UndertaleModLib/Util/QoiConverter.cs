@@ -187,19 +187,17 @@ namespace UndertaleModLib.Util
         /// Creates a QOI image as a byte array from a <see cref="Bitmap"/>.
         /// </summary>
         /// <param name="bmp">The <see cref="Bitmap"/> to create the QOI image from.</param>
-        /// <param name="padding">The amount of bytes of padding that should be used.</param>
         /// <returns>A QOI Image as a byte array.</returns>
         /// <exception cref="Exception">If there was an error with stride width.</exception>
-        public static byte[] GetArrayFromImage(Bitmap bmp, int padding = 4) => GetSpanFromImage(bmp, padding).ToArray();
+        public static byte[] GetArrayFromImage(Bitmap bmp) => GetSpanFromImage(bmp).ToArray();
 
         /// <summary>
         /// Creates a QOI image as a <see cref="Span{TKey}"/> from a <see cref="Bitmap"/>.
         /// </summary>
         /// <param name="bmp">The <see cref="Bitmap"/> to create the QOI image from.</param>
-        /// <param name="padding">The amount of bytes of padding that should be used.</param>
         /// <returns>A QOI Image as a byte array.</returns>
         /// <exception cref="Exception">If there was an error with stride width.</exception>
-        public static unsafe Span<byte> GetSpanFromImage(Bitmap bmp, int padding = 4)
+        public static unsafe Span<byte> GetSpanFromImage(Bitmap bmp)
         {
             if (!isBufferEmpty)
                 Array.Clear(sharedBuffer);
@@ -312,9 +310,6 @@ namespace UndertaleModLib.Util
             }
 
             bmp.UnlockBits(data);
-
-            // Add padding
-            resPos += padding;
 
             // Write final length
             int length = resPos - HeaderSize;
