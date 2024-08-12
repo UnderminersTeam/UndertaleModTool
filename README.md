@@ -16,7 +16,7 @@ Note, that you can update to the bleeding edge releases at any time from within 
 
 | Releases 	| Status 	|
 |:---:	|----------	|
-| Stable 	| [![Latest Stable Release](https://img.shields.io/github/downloads/krzys-h/UndertaleModTool/0.5.1.0/total)](https://github.com/krzys-h/UndertaleModTool/releases/tag/0.5.1.0) |
+| Stable 	| [![Latest Stable Release](https://img.shields.io/github/downloads/krzys-h/UndertaleModTool/0.6.0.0/total)](https://github.com/krzys-h/UndertaleModTool/releases/tag/0.6.0.0) |
 | Bleeding edge 	| [![Latest Bleeding Edge](https://img.shields.io/github/downloads/krzys-h/UndertaleModTool/bleeding-edge/total)](https://github.com/krzys-h/UndertaleModTool/releases/tag/bleeding-edge) |
 
 It's worth noting that UndertaleModTool has different builds per release. The differences are as follows:

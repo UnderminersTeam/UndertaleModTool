@@ -1858,7 +1858,17 @@ namespace UndertaleModTool
                 name = StringTitleConverter.Instance.Convert(str.Content, null, null, null) as string;
 
             if (name is not null)
-                Clipboard.SetText(name);
+            {
+                try
+                {
+                    Clipboard.SetText(name);
+                }
+                catch (Exception ex)
+                {
+                    this.ShowError("Can't copy the item name to clipboard due to this error:\n" +
+                                   ex.Message + ".\nYou probably should try again.");
+                }
+            }
             else
                 this.ShowWarning("Item name is null.");
         }

@@ -96,7 +96,7 @@
 
             <Separator Grid.Row="18" Grid.ColumnSpan="4" Margin="10"/>
             <local:ButtonDark Grid.Row="19" Grid.Column="0" Grid.ColumnSpan="1" Margin="5" Click="AppDataButton_Click">Open application data folder</local:ButtonDark>
-            <local:ButtonDark Grid.Row="19" Grid.Column="2" Grid.ColumnSpan="2" Margin="5" Click="UpdateAppButton_Click" x:Name="UpdateAppButton" HorizontalAlignment="Right" Width="223">Update app to latest commit</local:ButtonDark>
+            <local:ButtonDark Grid.Row="19" Grid.Column="2" Grid.ColumnSpan="2" Margin="5" Click="UpdateAppButton_Click" x:Name="UpdateAppButton" HorizontalAlignment="Right" Width="223" Visibility="{Binding UpdaterButtonVisibility}">Update app to latest commit</local:ButtonDark>
         </Grid>
     </ScrollViewer>
 </Window>
