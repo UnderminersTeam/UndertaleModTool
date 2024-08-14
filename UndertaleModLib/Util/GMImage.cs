@@ -80,6 +80,7 @@ public class GMImage
         _data = data;
     }
 
+    // Searches for the BZ2 footer magic, when around the end of a BZ2 stream, and returns the exact end position of the stream
     private static long FindEndOfBZ2Search(IBinaryReader reader, long endDataPosition)
     {
         // Magic bit sequence found near the end of a BZip2 stream (square root of pi)
@@ -169,6 +170,7 @@ public class GMImage
         throw new IOException("Failed to find BZip2 footer magic");
     }
 
+    // Finds the end position of a BZ2 stream exactly, given the start and end bounds of the data
     private static long FindEndOfBZ2Stream(IBinaryReader reader, long startOfStreamPosition, long maxEndOfStreamPosition)
     {
         if (startOfStreamPosition >= maxEndOfStreamPosition)
