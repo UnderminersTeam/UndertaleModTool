@@ -21,6 +21,8 @@ using System.Globalization;
 using UndertaleModLib;
 using UndertaleModTool.Windows;
 using System.Windows.Threading;
+using ImageMagick;
+using System.Windows.Media.Media3D;
 
 namespace UndertaleModTool
 {
@@ -55,6 +57,25 @@ namespace UndertaleModTool
             pageContextMenu.Items.Add(referencesItem);
 
             pageContextMenu.Closed += PageContextMenu_Closed;
+
+            DataContextChanged += ReloadTexture;
+            Unloaded += UnloadTexture;
+        }
+
+        private void ReloadTexture(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            UndertaleEmbeddedTexture texture = (DataContext as UndertaleEmbeddedTexture);
+            if (texture is null)
+                return;
+
+            GMImage image = texture.TextureData.Image;
+            BitmapSource bitmap = mainWindow.GetBitmapSourceForImage(image);
+            TextureImageView.Source = bitmap;
+        }
+
+        private void UnloadTexture(object sender, RoutedEventArgs e)
+        {
+            TextureImageView.Source = null;
         }
 
         private void OpenInNewTabItem_Click(object sender, RoutedEventArgs e)
@@ -154,29 +175,41 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    Bitmap bmp;
-                    using (var ms = new MemoryStream(TextureWorker.ReadTextureBlob(dlg.FileName)))
+                    GMImage image;
+                    if (System.IO.Path.GetExtension(dlg.FileName).Equals(".png", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        bmp = new Bitmap(ms);
+                        // Import PNG data verbatim, without attempting to modify it
+                        image = GMImage.FromPng(File.ReadAllBytes(dlg.FileName), true).ConvertToFormat(target.TextureData.Image.Format);
                     }
-                    bmp.SetResolution(96.0F, 96.0F);
+                    else
+                    {
+                        // Import any file type
+                        using var magickImage = new MagickImage(dlg.FileName);
+                        magickImage.Format = MagickFormat.Rgba;
+                        magickImage.Alpha(AlphaOption.Set);
+                        magickImage.SetCompression(CompressionMethod.NoCompression);
 
-                    var width = (uint)bmp.Width;
-                    var height = (uint)bmp.Height;
+                        // Import image
+                        image = GMImage.FromMagickImage(magickImage).ConvertToFormat(target.TextureData.Image.Format);
+                    }
 
+                    // Check dimensions
+                    uint width = (uint)image.Width, height = (uint)image.Height;
                     if ((width & (width - 1)) != 0 || (height & (height - 1)) != 0)
                     {
-                        mainWindow.ShowWarning("WARNING: texture page dimensions are not powers of 2. Sprite blurring is very likely in game.", "Unexpected texture dimensions");
+                        mainWindow.ShowWarning("WARNING: Texture page dimensions are not powers of 2. Sprite blurring is very likely in-game.", "Unexpected texture dimensions");
                     }
 
-                    using (var stream = new MemoryStream())
-                    {
-                        bmp.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-                        target.TextureData.TextureBlob = stream.ToArray();
+                    // Import image
+                    target.TextureData.Image = image;
 
-                        TexWidth.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
-                        TexHeight.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
-                    }
+                    // Update image in UI
+                    BitmapSource bitmap = mainWindow.GetBitmapSourceForImage(target.TextureData.Image);
+                    TextureImageView.Source = bitmap;
+
+                    // Update width/height properties in the UI
+                    TexWidth.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
+                    TexHeight.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
                 }
                 catch (Exception ex)
                 {
@@ -198,7 +231,8 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    File.WriteAllBytes(dlg.FileName, target.TextureData.TextureBlob);
+                    using FileStream fs = new(dlg.FileName, FileMode.Create);
+                    fs.Write(target.TextureData.Image.ConvertToPng().ToSpan());
                 }
                 catch (Exception ex)
                 {

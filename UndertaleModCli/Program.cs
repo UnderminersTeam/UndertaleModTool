@@ -657,7 +657,8 @@ public partial class Program : IScriptInterface
         {
             if (Verbose)
                 Console.WriteLine($"Dumping {texture.Name}");
-            File.WriteAllBytes($"{directory}/{texture.Name.Content}.png", texture.TextureData.TextureBlob);
+            using FileStream fs = new($"{directory}/{texture.Name.Content}.png", FileMode.Create);
+            fs.Write(texture.TextureData.Image.ConvertToPng().ToSpan());
         }
     }
 
@@ -700,7 +701,7 @@ public partial class Program : IScriptInterface
         if (Verbose)
             Console.WriteLine("Replacing " + textureEntry);
 
-        texture.TextureData.TextureBlob = File.ReadAllBytes(fileToReplace.FullName);
+        texture.TextureData.Image = GMImage.FromPng(File.ReadAllBytes(fileToReplace.FullName));
     }
 
     /// <summary>

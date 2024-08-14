@@ -9,6 +9,8 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Data;
 using UndertaleModTool.Windows;
+using ImageMagick;
+using System.Windows.Media.Imaging;
 
 namespace UndertaleModTool
 {
@@ -22,6 +24,27 @@ namespace UndertaleModTool
         public UndertaleTexturePageItemEditor()
         {
             InitializeComponent();
+
+            DataContextChanged += ReloadTexture;
+            Unloaded += UnloadTexture;
+        }
+
+        private void ReloadTexture(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            UndertaleTexturePageItem item = (DataContext as UndertaleTexturePageItem);
+            if (item is null)
+                return;
+
+            GMImage image = item.TexturePage.TextureData.Image;
+            BitmapSource bitmap = mainWindow.GetBitmapSourceForImage(image);
+            TextureImageView1.Source = bitmap;
+            TextureImageView2.Source = bitmap;
+        }
+
+        private void UnloadTexture(object sender, RoutedEventArgs e)
+        {
+            TextureImageView1.Source = null;
+            TextureImageView2.Source = null;
         }
 
         private void Import_Click(object sender, RoutedEventArgs e)
@@ -36,9 +59,14 @@ namespace UndertaleModTool
 
             try
             {
-                Bitmap image = TextureWorker.ReadImageFromFile(dlg.FileName);
-                image.SetResolution(96.0F, 96.0F);
-                (this.DataContext as UndertaleTexturePageItem).ReplaceTexture(image);
+                using MagickImage image = TextureWorker.ReadBGRAImageFromFile(dlg.FileName);
+                UndertaleTexturePageItem item = DataContext as UndertaleTexturePageItem;
+                item.ReplaceTexture(image);
+
+                // Update UI image
+                BitmapSource bitmap = mainWindow.GetBitmapSourceForImage(item.TexturePage.TextureData.Image);
+                TextureImageView1.Source = bitmap;
+                TextureImageView2.Source = bitmap;
 
                 // Refresh the image of "ItemDisplay"
                 if (ItemDisplay.FindName("RenderAreaBorder") is not Border border)
@@ -62,16 +90,15 @@ namespace UndertaleModTool
 
             if (dlg.ShowDialog() == true)
             {
-                TextureWorker worker = new TextureWorker();
+                using TextureWorker worker = new();
                 try
                 {
-                    worker.ExportAsPNG((UndertaleTexturePageItem)this.DataContext, dlg.FileName);
+                    worker.ExportAsPNG((UndertaleTexturePageItem)DataContext, dlg.FileName);
                 }
                 catch (Exception ex)
                 {
                     mainWindow.ShowError("Failed to export file: " + ex.Message, "Failed to export file");
                 }
-                worker.Cleanup();
             }
         }
 

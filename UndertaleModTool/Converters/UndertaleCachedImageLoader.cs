@@ -17,6 +17,7 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using UndertaleModLib.Models;
+using UndertaleModLib.Util;
 using static UndertaleModLib.Models.UndertaleRoom;
 
 namespace UndertaleModTool
@@ -160,30 +161,40 @@ namespace UndertaleModTool
 
         public static Bitmap CreateSpriteBitmap(Rectangle rect, in UndertaleTexturePageItem texture, int diffW = 0, int diffH = 0, bool isTile = false)
         {
-            using MemoryStream stream = new(texture.TexturePage.TextureData.TextureBlob);
-            Bitmap spriteBMP = new(rect.Width, rect.Height);
+            GMImage image = texture.TexturePage.TextureData.Image;
+            BitmapSource bitmapSource = mainWindow.GetBitmapSourceForImage(image);
+
+            Bitmap spriteBitmap = new(rect.Width, rect.Height);
 
             rect.Width -= (diffW > 0) ? diffW : 0;
             rect.Height -= (diffH > 0) ? diffH : 0;
             int x = isTile ? texture.TargetX : 0;
             int y = isTile ? texture.TargetY : 0;
 
-            using (Graphics g = Graphics.FromImage(spriteBMP))
+            // For safety, clamp the rectangle to be within spriteBitmap (not sure why this occurs, but apparently it can)
+            if (x + rect.Width > spriteBitmap.Width)
             {
-                using Image img = Image.FromStream(stream); // "ImageConverter.ConvertFrom()" does the same, except it doesn't explicitly dispose MemoryStream
-                g.DrawImage(img, new Rectangle(x, y, rect.Width, rect.Height), rect, GraphicsUnit.Pixel);
+                rect.Width = spriteBitmap.Width - x;
+            }
+            if (y + rect.Height > spriteBitmap.Height)
+            {
+                rect.Height = spriteBitmap.Height - y;
             }
 
-            return spriteBMP;
+            var data = spriteBitmap.LockBits(new Rectangle(x, y, rect.Width, rect.Height), ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            bitmapSource.CopyPixels(new Int32Rect(rect.X, rect.Y, rect.Width, rect.Height), data.Scan0, data.Height * data.Stride, data.Stride);
+            spriteBitmap.UnlockBits(data);
+
+            return spriteBitmap;
         }
         private ImageSource CreateSpriteSource(in Rectangle rect, in UndertaleTexturePageItem texture, int diffW = 0, int diffH = 0, bool isTile = false)
         {
-            Bitmap spriteBMP = CreateSpriteBitmap(rect, in texture, diffW, diffH, isTile);
+            Bitmap spriteBitmap = CreateSpriteBitmap(rect, in texture, diffW, diffH, isTile);
 
-            IntPtr bmpPtr = spriteBMP.GetHbitmap();
+            IntPtr bmpPtr = spriteBitmap.GetHbitmap();
             ImageSource spriteSrc = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(bmpPtr, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
             DeleteObject(bmpPtr);
-            spriteBMP.Dispose();
+            spriteBitmap.Dispose();
             spriteSrc.Freeze(); // allow UI thread access
 
             return spriteSrc;

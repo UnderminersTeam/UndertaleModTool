@@ -95,16 +95,13 @@ namespace UndertaleModTool
                     return;
             }
 
-            TextureWorker worker = new TextureWorker();
-
             if (dlg.ShowDialog() == true)
             {
                 try
                 {
-                    bool includePadding = false;
-                    if (mainWindow.ShowQuestion("Include padding?") == MessageBoxResult.Yes)
-                        includePadding = true;
+                    bool includePadding = (mainWindow.ShowQuestion("Include padding?") == MessageBoxResult.Yes);
 
+                    using TextureWorker worker = new();
                     if (sprite.Textures.Count > 1)
                     {
                         string dir = Path.GetDirectoryName(dlg.FileName);
@@ -146,8 +143,6 @@ namespace UndertaleModTool
                     mainWindow.ShowError("Failed to export: " + ex.Message, "Failed to export sprite");
                 }
             }
-
-            worker.Cleanup();
         }
 
         private void MaskList_AddingNewItem(object sender, AddingNewItemEventArgs e)
@@ -168,10 +163,7 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    System.Drawing.Image img = System.Drawing.Image.FromFile(dlg.FileName);
-                    if ((sprite.Width != (uint)img.Width) || (sprite.Height != (uint)img.Height))
-                        throw new System.Exception(dlg.FileName + " is not the proper size to be imported! Please correct this before importing! The proper dimensions are width: " + sprite.Width.ToString() + " px, height: " + sprite.Height.ToString() + " px.");
-                    target.Data = TextureWorker.ReadMaskData(dlg.FileName);
+                    target.Data = TextureWorker.ReadMaskData(dlg.FileName, (int)sprite.Width, (int)sprite.Height);
                 }
                 catch (Exception ex)
                 {

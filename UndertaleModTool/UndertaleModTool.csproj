@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net6.0-windows</TargetFramework>
+        <TargetFramework>net8.0-windows7.0</TargetFramework>
         <RollForward>LatestMajor</RollForward>
         <OutputType>WinExe</OutputType>
         <!-- TODO: this should properly get migrated and get rid of -->
@@ -99,6 +99,7 @@
         <PackageReference Include="System.Diagnostics.StackTrace">
             <Version>4.3.0</Version>
         </PackageReference>
+        <PackageReference Include="System.Formats.Asn1" Version="8.0.1" />
         <PackageReference Include="System.IO.Compression">
             <Version>4.3.0</Version>
         </PackageReference>
@@ -111,6 +112,8 @@
         <PackageReference Include="System.Security.Cryptography.X509Certificates">
             <Version>4.3.2</Version>
         </PackageReference>
+        <PackageReference Include="System.Security.Cryptography.Xml" Version="8.0.1" />
+        <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
         <PackageReference Include="System.Threading.Tasks.Parallel">
             <Version>4.3.0</Version>
         </PackageReference>
@@ -126,7 +129,7 @@
         <PackageReference Include="System.Xml.XPath.XDocument">
             <Version>4.3.0</Version>
         </PackageReference>
-        <PackageReference Include="Microsoft.Windows.Compatibility" Version="5.0.2" />
+        <PackageReference Include="Microsoft.Windows.Compatibility" Version="8.0.8" />
     </ItemGroup>
     <Target Name="AfterResolveReferences">
         <ItemGroup>

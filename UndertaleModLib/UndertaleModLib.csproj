@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <OutputType>Library</OutputType>
     <!-- AssemblyInfo -->
     <AssemblyTitle>UndertaleModLib</AssemblyTitle>
@@ -28,10 +28,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="13.10.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="PropertyChanged.Fody" Version="4.1.0" />
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
-    <PackageReference Include="System.Drawing.Common" Version="5.0.3" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="version.txt" />
@@ -47,7 +47,7 @@
 
     <!--If on Windows check if git is in PATH-->
     <Exec Condition="$([MSBuild]::IsOsPlatform('Windows'))" Command="where /q git" IgnoreExitCode="true">
-      <Output TaskParameter="ExitCode" PropertyName="ErrorCode"/>
+      <Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
     </Exec>
     <PropertyGroup>
       <!--Assign the location of git to GitPath. By default it's "git", if the above PATH checked failed, it'll get set to the git path in VS -->
@@ -55,6 +55,6 @@
       <GitPath Condition="'$(ErrorCode)'=='1'">$(DevEnvDir)\CommonExtensions\Microsoft\TeamFoundation\Team Explorer\Git\cmd\git</GitPath>
     </PropertyGroup>
     <!-- Use GitPath and put the git commit name and branch name into gitversion.txt which is an embedded resource-->
-    <Exec Command="( &quot;$(GitPath)&quot; describe --always --dirty &amp;&amp; &quot;$(GitPath)&quot; rev-parse --abbrev-ref HEAD ) &gt; &quot;$(ProjectDir)/gitversion.txt&quot;" IgnoreExitCode="true"/>
+    <Exec Command="( &quot;$(GitPath)&quot; describe --always --dirty &amp;&amp; &quot;$(GitPath)&quot; rev-parse --abbrev-ref HEAD ) &gt; &quot;$(ProjectDir)/gitversion.txt&quot;" IgnoreExitCode="true" />
   </Target>
 </Project>

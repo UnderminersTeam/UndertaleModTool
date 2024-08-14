@@ -1503,7 +1503,7 @@ namespace UndertaleModLib
                     reader.AbsPosition = reader.ReadUInt32() + 12; // Go to texture, at an offset
                     reader.AbsPosition = reader.ReadUInt32(); // Go to texture data
                     byte[] header = reader.ReadBytes(4);
-                    if (!header.SequenceEqual(UndertaleEmbeddedTexture.TexData.QOIAndBZip2Header))
+                    if (header is not [50, 122, 111, 113]) // '2zoq' magic
                     {
                         // Nothing useful, check the next texture
                         continue;
@@ -1546,10 +1546,6 @@ namespace UndertaleModLib
             // texture blobs
             if (List.Count > 0)
             {
-                // Compressed size can't be bigger than maximum decompressed size
-                int maxSize = List.Select(x => x.TextureData.TextureBlob?.Length ?? 0).Max();
-                UndertaleEmbeddedTexture.TexData.InitSharedStream(maxSize);
-
                 bool anythingUsesQoi = false;
                 foreach (var tex in List)
                 {
@@ -1564,8 +1560,7 @@ namespace UndertaleModLib
                 if (anythingUsesQoi)
                 {
                     // Calculate maximum size of QOI converter buffer
-                    maxSize = List.Select(x => x.TextureData.Width * x.TextureData.Height).Max()
-                              * QoiConverter.MaxChunkSize + QoiConverter.HeaderSize + (writer.undertaleData.IsVersionAtLeast(2022, 3) ? 0 : 4);
+                    int maxSize = (List.Select(x => x.TextureData.Width * x.TextureData.Height).Max() * QoiConverter.MaxChunkSize) + QoiConverter.HeaderSize;
                     QoiConverter.InitSharedBuffer(maxSize);
                 }
             }
