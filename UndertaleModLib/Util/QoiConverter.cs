@@ -1,8 +1,4 @@
-﻿using ImageMagick;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
+﻿using System;
 using System.IO;
 
 namespace UndertaleModLib.Util

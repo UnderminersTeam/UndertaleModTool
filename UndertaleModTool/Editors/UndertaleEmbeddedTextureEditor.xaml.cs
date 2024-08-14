@@ -22,7 +22,6 @@ using UndertaleModLib;
 using UndertaleModTool.Windows;
 using System.Windows.Threading;
 using ImageMagick;
-using System.Windows.Media.Media3D;
 
 namespace UndertaleModTool
 {
