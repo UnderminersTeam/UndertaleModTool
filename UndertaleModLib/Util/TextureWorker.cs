@@ -13,7 +13,7 @@ namespace UndertaleModLib.Util
     /// </summary>
     public class TextureWorker : IDisposable
     {
-        private Dictionary<UndertaleEmbeddedTexture, MagickImage> embeddedDictionary = [];
+        private Dictionary<UndertaleEmbeddedTexture, MagickImage> embeddedDictionary = new();
 
         public MagickImage GetEmbeddedTexture(UndertaleEmbeddedTexture embeddedTexture)
         {
@@ -110,7 +110,7 @@ namespace UndertaleModLib.Util
             }
 
             IPixelCollection<byte> pixels = image.GetPixels();
-            List<byte> bytes = [];
+            List<byte> bytes = new();
 
             IMagickColor<byte> enableColor = MagickColor.FromRgba(255, 255, 255, 255);
             for (int y = 0; y < image.Height; y++)
