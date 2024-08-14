@@ -45,7 +45,7 @@ public class GMImage
     // Backing data for the image, whether compressed or not
     private readonly byte[] _data = null;
 
-    // If this is a Bz2Qoi image, this is the size of the BZ2 data when entirely uncompressed
+    // If this is a Bz2Qoi image in GameMaker 2022.5 and above, this is the size of the BZip2 data when entirely uncompressed
     private int _bz2UncompressedSize { get; init; } = -1;
 
     /// <summary>
@@ -80,18 +80,149 @@ public class GMImage
         _data = data;
     }
 
+    private static long FindEndOfBZ2Search(IBinaryReader reader, long endDataPosition)
+    {
+        // Magic bit sequence found near the end of a BZip2 stream (square root of pi)
+        ReadOnlySpan<byte> footerMagic = stackalloc byte[] { 0x17, 0x72, 0x45, 0x38, 0x50, 0x90 };
+
+        // Read 16 bytes from the end of the BZ2 stream
+        Span<byte> data = stackalloc byte[16];
+        reader.Position = endDataPosition - data.Length;
+        int numBytesRead = reader.Stream.Read(data);
+
+        // Start searching for magic, bit by bit (it is not always byte-aligned)
+        int searchStartPosition = numBytesRead - 1;
+        int searchStartBitPosition = 0;
+        while (searchStartPosition >= 0)
+        {
+            // Perform search starting from the current search start position 
+            bool foundMatch = false;
+            int bitPosition = searchStartBitPosition;
+            int searchPosition = searchStartPosition;
+            int magicBitPosition = 0;
+            int magicPosition = footerMagic.Length - 1;
+            while (searchPosition >= 0)
+            {
+                // Compare bits at search position and corresponding magic position
+                bool currentBit = (data[searchPosition] & (1 << bitPosition)) != 0;
+                bool magicCurrentBit = (footerMagic[magicPosition] & (1 << magicBitPosition)) != 0;
+                if (currentBit == magicCurrentBit)
+                {
+                    // Found a matching bit!
+                    // Progress magic position to next bit
+                    magicBitPosition++;
+                    if (magicBitPosition >= 8)
+                    {
+                        magicBitPosition = 0;
+                        magicPosition--;
+                    }
+
+                    // If we reached the end of the magic, then we successfully found a full match!
+                    if (magicPosition < 0)
+                    {
+                        foundMatch = true;
+                        break;
+                    }
+
+                    // We didn't find a full match yet, so we also need to progress our search position to the next bit
+                    bitPosition++;
+                    if (bitPosition >= 8)
+                    {
+                        bitPosition = 0;
+                        searchPosition--;
+                    }
+                }
+                else
+                {
+                    // Bits mismatched, so terminate the current search
+                    break;
+                }
+            }
+
+            if (foundMatch)
+            {
+                // We found a full match, so calculate end of stream position
+                const int footerByteLength = 10;
+                long endOfBZ2StreamPosition = searchPosition + footerByteLength;
+                if (bitPosition != 7)
+                {
+                    // BZip2 footer started partway through a byte, and so it will end partway through the last byte.
+                    // By the BZip2 specification, the unused bits of the last byte are essentially padding.
+                    endOfBZ2StreamPosition++;
+                }
+
+                // Return position relative to the start of the data we read
+                return (endDataPosition - data.Length) + endOfBZ2StreamPosition;
+            }
+            else
+            {
+                // Current search failed to do a full match, so progress to next bit, to search starting from there
+                searchStartBitPosition++;
+                if (searchStartBitPosition >= 8)
+                {
+                    searchStartBitPosition = 0;
+                    searchStartPosition--;
+                }
+            }
+        }
+
+        throw new IOException("Failed to find BZip2 footer magic");
+    }
+
+    private static long FindEndOfBZ2Stream(IBinaryReader reader, long startOfStreamPosition, long maxEndOfStreamPosition)
+    {
+        if (startOfStreamPosition >= maxEndOfStreamPosition)
+        {
+            throw new IOException("Start position is too large");
+        }
+
+        // Read backwards from the max end of stream position, in up to 256-byte chunks.
+        // We want to find the end of nonzero data.
+        const int maxChunkSize = 256;
+        Span<byte> chunkData = stackalloc byte[maxChunkSize];
+        long chunkStartPosition = Math.Max(startOfStreamPosition, maxEndOfStreamPosition - maxChunkSize);
+        int chunkSize = (int)(maxEndOfStreamPosition - chunkStartPosition);
+        do
+        {
+            // Read chunk from stream
+            reader.Position = chunkStartPosition;
+            reader.Stream.Read(chunkData[..chunkSize]);
+
+            // Find first nonzero byte at end of stream
+            int position = chunkSize - 1;
+            while (position >= 0 && chunkData[position] == 0)
+            {
+                position--;
+            }
+
+            // If we're at nonzero data, then invoke search for footer magic
+            if (position >= 0 && chunkData[position] != 0)
+            {
+                return FindEndOfBZ2Search(reader, chunkStartPosition + position + 1);
+            }
+
+            // Move backwards to next chunk
+            chunkStartPosition = Math.Max(startOfStreamPosition, chunkStartPosition - maxChunkSize);
+        }
+        while (chunkStartPosition > startOfStreamPosition);
+
+        throw new IOException("Failed to find nonzero data");
+    }
+
     /// <summary>
     /// Creates a <see cref="GMImage"/> from the image contents stored at the current position of the provided <see cref="IBinaryReader"/>.
     /// </summary>
     /// <param name="reader">Binary reader to read the image data from.</param>
-    /// <param name="sharedStream">Shared <see cref="MemoryStream"/> to be used for BZ2 decompression, when required.</param>
+    /// <param name="maxEndOfStreamPosition">
+    /// Location where the image stream ends, from within the <see cref="IBinaryReader"/>.
+    /// There should only be 0 (null) bytes between this position and the end of the image data.
+    /// </param>
     /// <param name="gm2022_5">Whether using GameMaker version 2022.5 or above. Relevant only for BZ2 + QOI format images.</param>
     /// <exception cref="IOException">If no supported texture format is found</exception>
     /// <exception cref="InvalidDataException">Image data fails to parse</exception>
-    public static GMImage FromBinaryReader(IBinaryReader reader, MemoryStream sharedStream, bool gm2022_5)
+    public static GMImage FromBinaryReader(IBinaryReader reader, long maxEndOfStreamPosition, bool gm2022_5)
     {
         ArgumentNullException.ThrowIfNull(reader);
-        ArgumentNullException.ThrowIfNull(sharedStream);
 
         // Determine type of image by reading the first 8 bytes
         long startAddress = reader.Position;
@@ -127,7 +258,7 @@ public class GMImage
             // Skip past (start of) header
             reader.Position = startAddress + 8;
 
-            // Read uncompressed data size, if it exists, to verify it later
+            // Read uncompressed data size, if it exists
             int serializedUncompressedLength = -1;
             int headerSize = 8;
             if (gm2022_5)
@@ -136,20 +267,9 @@ public class GMImage
                 headerSize = 12;
             }
 
-            // We need to decompress the BZip2 data here temporarily, to get the length.
-            // Unfortunately, it seems there's no better way to do this.
-            if (sharedStream.Length != 0)
-                sharedStream.Seek(0, SeekOrigin.Begin);
-            long startCompressedPosition = reader.Stream.Position;
-            BZip2.Decompress(reader.Stream, sharedStream, false);
-            int compressedLength = (int)(reader.Stream.Position - startCompressedPosition);
-            int uncompressedLength = (int)sharedStream.Position;
-
-            // Verify uncompressed length, if we can
-            if (gm2022_5 && uncompressedLength != serializedUncompressedLength)
-            {
-                throw new IOException("Uncompressed data length mismatches the BZ2 header");
-            }
+            // Find compressed data length, by finding end of BZip2 stream
+            long endOfBZ2Stream = FindEndOfBZ2Stream(reader, reader.Position, maxEndOfStreamPosition);
+            int compressedLength = (int)(endOfBZ2Stream - (startAddress + headerSize));
 
             // Get width/height of image from BZ2 header
             int width = header[4] | (header[5] << 8);
@@ -157,7 +277,7 @@ public class GMImage
 
             // Read entire image, *EXCLUDING BZ2 HEADER*, to byte array
             reader.Position = startAddress + headerSize;
-            return FromBz2Qoi(reader.ReadBytes(compressedLength), width, height, uncompressedLength);
+            return FromBz2Qoi(reader.ReadBytes(compressedLength), width, height, serializedUncompressedLength);
         }
 
         // QOI
@@ -172,6 +292,21 @@ public class GMImage
         }
 
         throw new IOException("Failed to recognize any known image header");
+    }
+
+    // Either retrieves the known uncompressed data size, or makes a lowball guess as to what it could be
+    private int GetInitialUncompressedBufferCapacity()
+    {
+        if (_bz2UncompressedSize != -1)
+        {
+            // We already know the uncompressed size, so use it
+            return _bz2UncompressedSize;
+        }
+        else
+        {
+            // Make a guess - it's probably at LEAST 2 times larger
+            return _data.Length * 2;
+        }
     }
 
     /// <summary>
@@ -322,8 +457,8 @@ public class GMImage
             case ImageFormat.Bz2Qoi:
                 {
                     GMImage rawImage;
-
-                    using (MemoryStream uncompressedData = new())
+                    
+                    using (MemoryStream uncompressedData = new(GetInitialUncompressedBufferCapacity()))
                     {
                         // Decompress BZ2 data
                         using (MemoryStream compressedData = new(_data))
@@ -388,7 +523,7 @@ public class GMImage
                 }
             case ImageFormat.Bz2Qoi:
                 {
-                    using (MemoryStream uncompressedData = new())
+                    using (MemoryStream uncompressedData = new(GetInitialUncompressedBufferCapacity()))
                     {
                         // Decompress BZ2 data
                         using (MemoryStream compressedData = new(_data))
@@ -436,7 +571,7 @@ public class GMImage
                 {
                     GMImage rawImage;
 
-                    using (MemoryStream uncompressedData = new())
+                    using (MemoryStream uncompressedData = new(GetInitialUncompressedBufferCapacity()))
                     {
                         // Decompress BZ2 data
                         using (MemoryStream compressedData = new(_data))
@@ -584,6 +719,10 @@ public class GMImage
                 writer.Write((short)Height);
                 if (gm2022_5)
                 {
+                    if (_bz2UncompressedSize == -1)
+                    {
+                        throw new InvalidOperationException("BZ2 uncompressed data size was not set");
+                    }
                     writer.Write(_bz2UncompressedSize);
                 }
                 writer.Write(_data);
@@ -607,7 +746,7 @@ public class GMImage
         }
 
         // We need to perform a full write with a BinaryWriter
-        using (MemoryStream ms = new())
+        using (MemoryStream ms = new(_data.Length + 16))
         {
             using (BinaryWriter bw = new(ms))
             {

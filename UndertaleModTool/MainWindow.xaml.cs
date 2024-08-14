@@ -103,6 +103,7 @@ namespace UndertaleModTool
         public List<Tab> ClosedTabsHistory { get; } = new();
 
         private List<(GMImage, WeakReference<BitmapSource>)> _bitmapSourceLookup { get; } = new();
+        private object _bitmapSourceLookupLock = new();
 
         public bool CanSave { get; set; }
         public bool CanSafelySave = false;
@@ -263,34 +264,37 @@ namespace UndertaleModTool
         /// </summary>
         public BitmapSource GetBitmapSourceForImage(GMImage image)
         {
-            // Look through entire list, clearing out old weak references, and potentially finding our desired source
-            BitmapSource foundSource = null;
-            for (int i = _bitmapSourceLookup.Count - 1; i >= 0; i--)
+            lock (_bitmapSourceLookupLock)
             {
-                (GMImage imageKey, WeakReference<BitmapSource> referenceVal) = _bitmapSourceLookup[i];
-                if (!referenceVal.TryGetTarget(out BitmapSource source))
+                // Look through entire list, clearing out old weak references, and potentially finding our desired source
+                BitmapSource foundSource = null;
+                for (int i = _bitmapSourceLookup.Count - 1; i >= 0; i--)
                 {
-                    // Clear out old weak reference
-                    _bitmapSourceLookup.RemoveAt(i);
+                    (GMImage imageKey, WeakReference<BitmapSource> referenceVal) = _bitmapSourceLookup[i];
+                    if (!referenceVal.TryGetTarget(out BitmapSource source))
+                    {
+                        // Clear out old weak reference
+                        _bitmapSourceLookup.RemoveAt(i);
+                    }
+                    else if (imageKey == image)
+                    {
+                        // Found our source, store it to return later
+                        foundSource = source;
+                    }
                 }
-                else if (imageKey == image)
+
+                // If we found our source, return it
+                if (foundSource is not null)
                 {
-                    // Found our source, store it to return later
-                    foundSource = source;
+                    return foundSource;
                 }
-            }
 
-            // If we found our source, return it
-            if (foundSource is not null)
-            {
-                return foundSource;
+                // If no source was found, then create a new one
+                BitmapSource bitmap = BitmapSource.Create(image.Width, image.Height, 96, 96, PixelFormats.Bgra32, null, image.ConvertToRawBgra().ToSpan().ToArray(), image.Width * 4);
+                bitmap.Freeze();
+                _bitmapSourceLookup.Add((image, new WeakReference<BitmapSource>(bitmap)));
+                return bitmap;
             }
-
-            // If no source was found, then create a new one
-            BitmapSource bitmap = BitmapSource.Create(image.Width, image.Height, 96, 96, PixelFormats.Bgra32, null, image.ConvertToRawBgra().ToSpan().ToArray(), image.Width * 4);
-            bitmap.Freeze();
-            _bitmapSourceLookup.Add((image, new WeakReference<BitmapSource>(bitmap)));
-            return bitmap;
         }
 
         private void SetIDString(string str)
@@ -992,8 +996,6 @@ namespace UndertaleModTool
                             FileMessageEvent?.Invoke(message);
                         }, onlyGeneralInfo);
                     }
-
-                    UndertaleEmbeddedTexture.TexData.ClearSharedStream();
                 }
                 catch (Exception e)
                 {
@@ -1127,7 +1129,6 @@ namespace UndertaleModTool
                         });
                     }
 
-                    UndertaleEmbeddedTexture.TexData.ClearSharedStream();
                     QoiConverter.ClearSharedBuffer();
 
                     if (debugMode != DebugDataDialog.DebugDataMode.NoDebug)

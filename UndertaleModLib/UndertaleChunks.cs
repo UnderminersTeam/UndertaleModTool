@@ -1625,6 +1625,8 @@ namespace UndertaleModLib
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
+            long startPosition = reader.AbsPosition;
+
             if (!checkedFor2022_3)
                 CheckFor2022_3And5(reader);
 
@@ -1638,6 +1640,30 @@ namespace UndertaleModLib
             for (int index = 0; index < List.Count; index++)
             {
                 UndertaleEmbeddedTexture obj = List[index];
+
+                if (!obj.TextureExternal)
+                {
+                    // Calculate maximum end stream position for this blob
+                    int searchIndex = index + 1;
+                    int maxEndOfStreamPosition = -1;
+                    while (searchIndex < List.Count)
+                    {
+                        UndertaleEmbeddedTexture searchObj = List[searchIndex];
+                        if (!searchObj.TextureExternal)
+                        {
+                            // Use start address of this blob
+                            maxEndOfStreamPosition = (int)reader.GetOffsetMapRev()[searchObj.TextureData];
+                            break;
+                        }
+                        searchIndex++;
+                    }
+                    if (maxEndOfStreamPosition == -1)
+                    {
+                        // At end of list, so just use the end of the chunk
+                        maxEndOfStreamPosition = (int)(startPosition + Length);
+                    }
+                    obj.TextureData.MaxEndOfStreamPosition = maxEndOfStreamPosition;
+                }
 
                 obj.UnserializeBlob(reader);
                 obj.Name = new UndertaleString("Texture " + index.ToString());

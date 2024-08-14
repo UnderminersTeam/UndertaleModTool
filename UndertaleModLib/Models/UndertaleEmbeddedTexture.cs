@@ -55,7 +55,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         get => _textureData ??= LoadExternalTexture();
         set => _textureData = value;
     }
-    private TexData _textureData = new TexData();
+    private TexData _textureData = new();
 
     /// <summary>
     /// Helper variable for whether or not this texture is to be stored externally or not.
@@ -260,7 +260,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
                 using FileStream fs = new(path, FileMode.Open);
                 using FileBinaryReader fbr = new(fs);
                 texData = new TexData();
-                texData.Unserialize(fbr, true);
+                texData.Unserialize(fbr, fs.Length, true);
                 TextureLoaded = true;
             }
             catch (IOException)
@@ -299,7 +299,6 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
     public class TexData : UndertaleObject, INotifyPropertyChanged, IDisposable
     {
         private GMImage _image;
-        private static MemoryStream sharedStream;
 
         /// <summary>
         /// The underlying image of the texture.
@@ -334,6 +333,11 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         /// </summary>
         public bool FormatBZ2 => _image.Format is GMImage.ImageFormat.Bz2Qoi;
 
+        /// <summary>
+        /// If located within a data file, this is the maximum end position of the image data (or start of the next texture blob).
+        /// </summary>
+        public int MaxEndOfStreamPosition { get; set; } = -1;
+
         /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
         
@@ -344,21 +348,6 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
-
-        /// <summary>
-        /// Frees up <see cref="sharedStream"/> from memory.
-        /// </summary>
-        public static void ClearSharedStream()
-        {
-            sharedStream?.Dispose();
-            sharedStream = null;
-        }
-
-        /// <summary>
-        /// Initializes <see cref="sharedStream"/> with a specified initial size.
-        /// </summary>
-        /// <param name="size">Initial size of <see cref="sharedStream"/> in bytes</param>
-        public static void InitSharedStream(int size) => sharedStream = new(size);
 
         /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
@@ -382,16 +371,20 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
-            Unserialize(reader, reader.undertaleData.IsVersionAtLeast(2022, 5));
+            if (MaxEndOfStreamPosition == -1)
+            {
+                throw new Exception("Expected max end of stream position to be set before unserializing");
+            }
+
+            Unserialize(reader, MaxEndOfStreamPosition, reader.undertaleData.IsVersionAtLeast(2022, 5));
         }
 
         /// <summary>
         /// Unserializes the texture from any type of reader (can be from any source).
         /// </summary>
-        public void Unserialize(IBinaryReader reader, bool gm2022_5)
+        public void Unserialize(IBinaryReader reader, long maxEndOfStreamPosition, bool gm2022_5)
         {
-            sharedStream ??= new();
-            Image = GMImage.FromBinaryReader(reader, sharedStream, gm2022_5);
+            Image = GMImage.FromBinaryReader(reader, maxEndOfStreamPosition, gm2022_5);
         }
 
 
@@ -401,7 +394,6 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
             GC.SuppressFinalize(this);
 
             _image = null;
-            ClearSharedStream();
         }
     }
 }
