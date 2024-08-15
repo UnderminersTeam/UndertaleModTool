@@ -29,7 +29,8 @@ namespace UndertaleModLib.Util
 
         public void ExportAsPNG(UndertaleTexturePageItem texPageItem, string fullPath, string imageName = null, bool includePadding = false)
         {
-            SaveImageToFile(fullPath, GetTextureFor(texPageItem, imageName ?? Path.GetFileNameWithoutExtension(fullPath), includePadding));
+            using var image = GetTextureFor(texPageItem, imageName ?? Path.GetFileNameWithoutExtension(fullPath), includePadding);
+            SaveImageToFile(image, fullPath);
         }
 
         public IMagickImage<byte> GetTextureFor(UndertaleTexturePageItem texPageItem, string imageName, bool includePadding = false)
@@ -70,6 +71,7 @@ namespace UndertaleModLib.Util
             {
                 returnImage = new MagickImage(MagickColor.FromRgba(0, 0, 0, 0), exportWidth, exportHeight);
                 returnImage.Composite(resultImage, texPageItem.TargetX, texPageItem.TargetY, CompositeOperator.Copy);
+                resultImage.Dispose();
             }
 
             return returnImage;
@@ -140,7 +142,7 @@ namespace UndertaleModLib.Util
         public static IMagickImage<byte> GetCollisionMaskImage(UndertaleSprite sprite, UndertaleSprite.MaskEntry mask)
         {
             byte[] maskData = mask.Data;
-            MagickImage bitmap = new MagickImage(MagickColor.FromRgba(0, 0, 0, 255), (int)sprite.Width, (int)sprite.Height);
+            MagickImage bitmap = new(MagickColor.FromRgba(0, 0, 0, 255), (int)sprite.Width, (int)sprite.Height);
             IPixelCollection<byte> pixels = bitmap.GetPixels();
             ReadOnlySpan<byte> black = MagickColor.FromRgba(0, 0, 0, 255).ToByteArray().AsSpan();
             ReadOnlySpan<byte> white = MagickColor.FromRgba(255, 255, 255, 255).ToByteArray().AsSpan();
@@ -162,19 +164,13 @@ namespace UndertaleModLib.Util
         public static void ExportCollisionMaskPNG(UndertaleSprite sprite, UndertaleSprite.MaskEntry mask, string fullPath)
         {
             using var image = GetCollisionMaskImage(sprite, mask);
-            SaveImageToFile(fullPath, image);
+            SaveImageToFile(image, fullPath);
         }
 
-        public static void SaveImageToFile(string fullPath, IMagickImage<byte> image, bool disposeImage = true)
+        public static void SaveImageToFile(IMagickImage<byte> image, string fullPath)
         {
-            using (var stream = new FileStream(fullPath, FileMode.Create))
-            {
-                image.Write(stream, MagickFormat.Png32);
-            }
-            if (disposeImage)
-            {
-                image.Dispose();
-            }
+            using var stream = new FileStream(fullPath, FileMode.Create);
+            image.Write(stream, MagickFormat.Png32);
         }
 
         /// <summary>
