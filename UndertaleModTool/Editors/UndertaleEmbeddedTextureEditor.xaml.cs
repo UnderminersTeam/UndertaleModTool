@@ -341,7 +341,10 @@ namespace UndertaleModTool
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
             if (values.Any(v => v == DependencyProperty.UnsetValue))
-                return null;
+            {
+                // Return collapsed until values are known
+                return Visibility.Collapsed;
+            }
 
             bool textureLoaded, textureExternal;
             try
