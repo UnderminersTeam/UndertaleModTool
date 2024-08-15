@@ -77,7 +77,7 @@ namespace UndertaleModLib.Util
                 }
             }
 
-            // Resize the image, if necessar
+            // Resize the image, if necessary
             if (texPageItem.SourceWidth != texPageItem.TargetWidth || texPageItem.SourceHeight != texPageItem.TargetHeight)
             {
                 IMagickImage<byte> original = resultImage;
