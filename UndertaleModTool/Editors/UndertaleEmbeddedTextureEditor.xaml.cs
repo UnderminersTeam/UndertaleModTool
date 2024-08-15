@@ -179,7 +179,7 @@ namespace UndertaleModTool
                     {
                         // Import PNG data verbatim, without attempting to modify it
                         image = GMImage.FromPng(File.ReadAllBytes(dlg.FileName), true)
-                                        .ConvertToFormat(target.TextureData.Image.Format);
+                                       .ConvertToFormat(target.TextureData.Image.Format);
                     }
                     else
                     {
