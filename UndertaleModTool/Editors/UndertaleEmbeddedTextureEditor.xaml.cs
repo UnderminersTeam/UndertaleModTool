@@ -178,7 +178,8 @@ namespace UndertaleModTool
                     if (System.IO.Path.GetExtension(dlg.FileName).Equals(".png", StringComparison.InvariantCultureIgnoreCase))
                     {
                         // Import PNG data verbatim, without attempting to modify it
-                        image = GMImage.FromPng(File.ReadAllBytes(dlg.FileName), true).ConvertToFormat(target.TextureData.Image.Format);
+                        image = GMImage.FromPng(File.ReadAllBytes(dlg.FileName), true)
+                                        .ConvertToFormat(target.TextureData.Image.Format);
                     }
                     else
                     {
@@ -189,7 +190,8 @@ namespace UndertaleModTool
                         magickImage.SetCompression(CompressionMethod.NoCompression);
 
                         // Import image
-                        image = GMImage.FromMagickImage(magickImage).ConvertToFormat(target.TextureData.Image.Format);
+                        image = GMImage.FromMagickImage(magickImage)
+                                       .ConvertToFormat(target.TextureData.Image.Format);
                     }
 
                     // Check dimensions
@@ -231,7 +233,7 @@ namespace UndertaleModTool
                 try
                 {
                     using FileStream fs = new(dlg.FileName, FileMode.Create);
-                    fs.Write(target.TextureData.Image.ConvertToPng().ToSpan());
+                    target.TextureData.Image.SavePng(fs);
                 }
                 catch (Exception ex)
                 {

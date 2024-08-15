@@ -309,7 +309,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
             set
             {
                 _image = value;
-                OnPropertyChanged(nameof(Image));
+                OnPropertyChanged();
             }
         }
 

@@ -429,7 +429,6 @@ public class GMImage
     /// <summary>
     /// Saves this image as a PNG file, writing the data to the provided <see cref="Stream"/>.
     /// </summary>
-    /// <param name="stream"></param>
     public void SavePng(Stream stream)
     {
         switch (Format)

@@ -290,7 +290,8 @@ namespace UndertaleModTool
                 }
 
                 // If no source was found, then create a new one
-                BitmapSource bitmap = BitmapSource.Create(image.Width, image.Height, 96, 96, PixelFormats.Bgra32, null, image.ConvertToRawBgra().ToSpan().ToArray(), image.Width * 4);
+                byte[] pixelData = image.ConvertToRawBgra().ToSpan().ToArray();
+                BitmapSource bitmap = BitmapSource.Create(image.Width, image.Height, 96, 96, PixelFormats.Bgra32, null, pixelData, image.Width * 4);
                 bitmap.Freeze();
                 _bitmapSourceLookup.Add((image, new WeakReference<BitmapSource>(bitmap)));
                 return bitmap;

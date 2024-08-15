@@ -658,7 +658,7 @@ public partial class Program : IScriptInterface
             if (Verbose)
                 Console.WriteLine($"Dumping {texture.Name}");
             using FileStream fs = new($"{directory}/{texture.Name.Content}.png", FileMode.Create);
-            fs.Write(texture.TextureData.Image.ConvertToPng().ToSpan());
+            texture.TextureData.Image.SavePng(fs);
         }
     }
 

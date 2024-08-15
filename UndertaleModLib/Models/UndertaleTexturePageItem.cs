@@ -161,7 +161,8 @@ public class UndertaleTexturePageItem : UndertaleNamedResource, INotifyPropertyC
             embImage.Composite(finalImage, SourceX, SourceY, CompositeOperator.Copy);
 
             // Replace original texture with the new version, in the original texture format
-            TexturePage.TextureData.Image = GMImage.FromMagickImage(embImage).ConvertToFormat(TexturePage.TextureData.Image.Format);
+            TexturePage.TextureData.Image = GMImage.FromMagickImage(embImage)
+                                                   .ConvertToFormat(TexturePage.TextureData.Image.Format);
         }
 
         TargetWidth = (ushort)replaceImage.Width;
