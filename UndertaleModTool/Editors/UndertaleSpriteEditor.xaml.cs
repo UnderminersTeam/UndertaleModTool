@@ -163,7 +163,8 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    target.Data = TextureWorker.ReadMaskData(dlg.FileName, (int)sprite.Width, (int)sprite.Height);
+                    (uint maskWidth, uint maskHeight) = sprite.CalculateMaskDimensions(mainWindow.Data);
+                    target.Data = TextureWorker.ReadMaskData(dlg.FileName, (int)maskWidth, (int)maskHeight);
                 }
                 catch (Exception ex)
                 {
@@ -186,7 +187,8 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    TextureWorker.ExportCollisionMaskPNG(sprite, target, dlg.FileName);
+                    (uint maskWidth, uint maskHeight) = sprite.CalculateMaskDimensions(mainWindow.Data);
+                    TextureWorker.ExportCollisionMaskPNG(sprite, target, dlg.FileName, (int)maskWidth, (int)maskHeight);
                 }
                 catch (Exception ex)
                 {
