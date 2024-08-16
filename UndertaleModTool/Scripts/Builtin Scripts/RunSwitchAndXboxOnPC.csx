@@ -161,7 +161,7 @@ if (ScriptQuestion("Enable the Dog Shrine?"))
         ReplaceTextInGML("gml_Object_obj_npc_room_Create_0", "(global.osflavor != 4 && global.osflavor != 5) || ", "");
 
     if (isXbox)
-        ReplaceTextInGML("gml_Object_obj_doorXmusicfade_Alarm_2", "if (global.osflavor == 6)", "else if (global.osflavor == 6)");
+        ReplaceTextInGML("gml_Object_obj_doorXmusicfade_Alarm_2", "if (global.osflavor == 6)", "else");
     // if in NX version, the door will get you into the ruined dog shrine
 }
 
