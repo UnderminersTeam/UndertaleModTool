@@ -185,7 +185,7 @@ namespace UndertaleModTool
                     {
                         // Import any file type
                         using var magickImage = new MagickImage(dlg.FileName);
-                        magickImage.Format = MagickFormat.Rgba;
+                        magickImage.Format = MagickFormat.Bgra;
                         magickImage.Alpha(AlphaOption.Set);
                         magickImage.SetCompression(CompressionMethod.NoCompression);
 
