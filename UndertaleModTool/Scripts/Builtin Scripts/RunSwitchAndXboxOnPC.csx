@@ -12,7 +12,8 @@ if (Data.GeneralInfo.Name.Content != "NXTALE")
 
 bool isXbox = Data.Rooms.ByName("room_xbox_engagement") is not null;
 
-if (isXbox) {
+if (isXbox)
+{
     // Fix init code not running
     ReplaceTextInGML("gml_Object_obj_time_Create_0", @"if (os_type == os_xboxone)
 {
@@ -131,33 +132,38 @@ if (isXbox)
 else
     ReplaceTextInGML("gml_Script_scr_getbuttonsprite", "os_type == os_ps4", "true");
 // Allow gamepad input for left/right heart halfs
-foreach (string half in new List<string>{"l", "r"}) {
-    foreach (string side in new List<string>{"u", "d", "l", "r"}) {
+foreach (string half in new List<string>{"l", "r"})
+{
+    foreach (string side in new List<string>{"u", "d", "l", "r"})
+    {
         ReplaceTextInGML($"gml_Script_scr_heart{half}_hold{side}", "global.osflavor <= 2 && ", "");
         ReplaceTextInGML($"gml_Script_scr_heart{half}_hold{side}", "global.osflavor >= 4 && ", "");
     }
 }
 
-// This enables the Dog Shrine's entrance.
-if (isXbox)
-    ReplaceTextInGML("gml_Object_obj_kitchenchecker_Create_0", "global.osflavor == 4 || global.osflavor == 5 || global.osflavor == 6", "true");
-else
-    ReplaceTextInGML("gml_Object_obj_kitchenchecker_Create_0", "global.osflavor == 4 || global.osflavor == 5", "true");
+if (ScriptQuestion("Enable the Dog Shrine?"))
+{
+    // This enables the Dog Shrine's entrance.
+    if (isXbox)
+        ReplaceTextInGML("gml_Object_obj_kitchenchecker_Create_0", "global.osflavor == 4 || global.osflavor == 5 || global.osflavor == 6", "true");
+    else
+        ReplaceTextInGML("gml_Object_obj_kitchenchecker_Create_0", "global.osflavor == 4 || global.osflavor == 5", "true");
 
-if (isXbox)
-    ReplaceTextInGML("gml_Object_obj_kitchenchecker_Alarm_2", "(global.osflavor == 4 || global.osflavor == 5 || global.osflavor == 6) && ", "");
-else
-    ReplaceTextInGML("gml_Object_obj_kitchenchecker_Alarm_2", "(global.osflavor == 4 || global.osflavor == 5) && ", "");
+    if (isXbox)
+        ReplaceTextInGML("gml_Object_obj_kitchenchecker_Alarm_2", "(global.osflavor == 4 || global.osflavor == 5 || global.osflavor == 6) && ", "");
+    else
+        ReplaceTextInGML("gml_Object_obj_kitchenchecker_Alarm_2", "(global.osflavor == 4 || global.osflavor == 5) && ", "");
 
-// Enable donation box trash
-if (isXbox)
-    ReplaceTextInGML("gml_Object_obj_npc_room_Create_0", "global.osflavor != 4 && global.osflavor != 6", "false");
-else
-    ReplaceTextInGML("gml_Object_obj_npc_room_Create_0", "(global.osflavor != 4 && global.osflavor != 5) || ", "");
+    // Enable donation box trash
+    if (isXbox)
+        ReplaceTextInGML("gml_Object_obj_npc_room_Create_0", "global.osflavor != 4 && global.osflavor != 6", "false");
+    else
+        ReplaceTextInGML("gml_Object_obj_npc_room_Create_0", "(global.osflavor != 4 && global.osflavor != 5) || ", "");
 
-if (isXbox)
-    ReplaceTextInGML("gml_Object_obj_doorXmusicfade_Alarm_2", "if (global.osflavor == 6)", "else if (global.osflavor == 6)");
-// if in NX version, the door will get you into the ruined dog shrine
+    if (isXbox)
+        ReplaceTextInGML("gml_Object_obj_doorXmusicfade_Alarm_2", "if (global.osflavor == 6)", "else if (global.osflavor == 6)");
+    // if in NX version, the door will get you into the ruined dog shrine
+}
 
 // Done.
 ScriptMessage(@"NXTALE Enabler by Kneesnap
