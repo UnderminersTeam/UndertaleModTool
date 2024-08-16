@@ -51,61 +51,14 @@ ReplaceTextInGML("gml_Object_obj_time_Create_0", @"
     else if (global.osflavor >= 4)
         j_ch = 1");
 string os_switch = "os_switch" + (!isXbox ? "_beta" : "");
-ReplaceTextInGML("gml_Object_obj_time_Step_1", @"
-if (global.osflavor <= 2)
-{
-    if (jt == 0)
-    {
-        if (j_ch != 2)
-        {
-            if joystick_exists(1)
-                j_ch = 1
-            else if (j_ch == 1)
-                j_ch = 0
-        }
-    }
-    if (jt == 4)
-    {
-        if (j_ch != 1)
-        {
-            if joystick_exists(2)
-                j_ch = 2
-            else if (j_ch == 2)
-                j_ch = 0
-        }
-    }
-    jt += 1
-    if (jt >= 8)
-        jt = 0
-}
-else if (os_type == " + os_switch + ")", "");
+ReplaceTextInGML("gml_Object_obj_time_Step_1", "global.osflavor <= 2", "false");
+ReplaceTextInGML("gml_Object_obj_time_Step_1", "os_type == " + os_switch + "", "true");
 ReplaceTextInGML("gml_Object_obj_time_Step_1", @"
     if (j_ch > 0)
-        missing_controller_timeout = 0
-    else if (missing_controller_timeout == 0)
-        missing_controller_timeout = current_time + 2000
-    else if (current_time >= missing_controller_timeout)
-    {
-        if (switch_controller_support_show() == 0)
-        {
-            j_ch = switch_controller_support_get_selected_id() + 1
-            missing_controller_timeout = 0
-        }
-    }", @"
-    if (os_type == " + os_switch + @") {
+        missing_controller_timeout = 0", @"
+    if (os_type == " + os_switch + @")
         if (j_ch > 0)
-            missing_controller_timeout = 0
-        else if (missing_controller_timeout == 0)
-            missing_controller_timeout = current_time + 2000
-        else if (current_time >= missing_controller_timeout)
-        {
-            if (switch_controller_support_show() == 0)
-            {
-                j_ch = switch_controller_support_get_selected_id() + 1
-                missing_controller_timeout = 0
-            }
-        }
-    }");
+            missing_controller_timeout = 0");
 
 // Use Xbox default buttons
 ReplaceTextInGML("gml_Object_obj_time_Create_0", @"
