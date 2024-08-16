@@ -14,10 +14,12 @@ bool isXbox = Data.Rooms.ByName("room_xbox_engagement") is not null;
 
 if (isXbox)
 {
-    // Fix init code not running
-    ReplaceTextInGML("gml_Object_obj_time_Create_0", @"if (os_type == os_xboxone)
+    // Fix initialization code not running
+    ReplaceTextInGML("gml_Object_obj_time_Create_0", @"
+if (os_type == os_xboxone)
 {
-    script_execute(SCR_GAMESTART, 0, 0, 0, 0, 0)", @"if (true)
+    script_execute(SCR_GAMESTART, 0, 0, 0, 0, 0)", @"
+if (true)
 {
     script_execute(SCR_GAMESTART, 0, 0, 0, 0, 0)");
 
@@ -28,25 +30,18 @@ if (isXbox)
         otherEvents.Remove(gameStartEvent);
 }
 
-// Disables interpolation
+// Disables interpolation. Only necessary for NX version.
 Data.GeneralInfo.Info &= ~(UndertaleGeneralInfo.InfoFlags.Interpolate);
-
-// Enables border drawing, and subsequently disables interpolation too.
-// It does this by making platform-specifc code run on desktop.
-ReplaceTextInGML("gml_Object_obj_time_Create_0", @"if (global.osflavor >= 3)
-{
-    application_surface_enable(true)", @"if (true)
-{
-    application_surface_enable(true)");
-ReplaceTextInGML("gml_Object_obj_time_Draw_77", "global.osflavor >= 3", "true");
 
 // Use new gamepad functions, because the compatibility ones are completely broken
 
 // use NX routine for joypad detection
-ReplaceTextInGML("gml_Object_obj_time_Create_0", @"if (global.osflavor >= 4)
+ReplaceTextInGML("gml_Object_obj_time_Create_0", @"
+if (global.osflavor >= 4)
 {
     i = 0
-    while (i < gamepad_get_device_count())", @"if (true)
+    while (i < gamepad_get_device_count())", @"
+if (true)
 {
     i = 0
     while (i < gamepad_get_device_count())");
@@ -56,7 +51,8 @@ ReplaceTextInGML("gml_Object_obj_time_Create_0", @"
     else if (global.osflavor >= 4)
         j_ch = 1");
 string os_switch = "os_switch" + (!isXbox ? "_beta" : "");
-ReplaceTextInGML("gml_Object_obj_time_Step_1", @"if (global.osflavor <= 2)
+ReplaceTextInGML("gml_Object_obj_time_Step_1", @"
+if (global.osflavor <= 2)
 {
     if (jt == 0)
     {
@@ -112,9 +108,11 @@ ReplaceTextInGML("gml_Object_obj_time_Step_1", @"
     }");
 
 // Use Xbox default buttons
-ReplaceTextInGML("gml_Object_obj_time_Create_0", @"global.button0 = 2
+ReplaceTextInGML("gml_Object_obj_time_Create_0", @"
+global.button0 = 2
 global.button1 = 1
-global.button2 = 4", @"global.button0 = gp_face1
+global.button2 = 4", @"
+global.button0 = gp_face1
 global.button1 = gp_face2
 global.button2 = gp_face4");
 ReplaceTextInGML("gml_Object_obj_joypadmenu_Draw_0", @"
@@ -126,9 +124,11 @@ ReplaceTextInGML("gml_Object_obj_joypadmenu_Draw_0", @"
     global.button2 = gp_face4");
 
 // axis check
-ReplaceTextInGML("gml_Object_obj_time_Step_1", @"if (global.osflavor >= 4)
+ReplaceTextInGML("gml_Object_obj_time_Step_1", @"
+    if (global.osflavor >= 4)
     {
-        if (gamepad_button_check", @"if (true)
+        if (gamepad_button_check", @"
+    if (true)
     {
         if (gamepad_button_check");
 
@@ -137,26 +137,19 @@ ReplaceTextInGML("gml_Script_control_update", "else if (obj_time.j_ch > 0)", "el
 ReplaceTextInGML("gml_Script_control_update", "global.osflavor >= 4", "obj_time.j_ch > 0");
 
 /*
-// this partially fixes joypadmenu
-ReplaceTextInGML("gml_Script___joystick_2_gamepad", @"if (argument0 == 2)
-    return global.__jstick_pad2;
-else
-    return global.__jstick_pad1;", @"if (argument0 != obj_time.j_ch)
-    show_debug_message(""Debug : passed in value other than j_ch while calling joystick functions"")
-return obj_time.j_ch - 1;");
 // show button config
 ReplaceTextInGML("gml_Object_obj_settingsmenu_Draw_0", "global.osflavor <= 2", "false");
 ReplaceTextInGML("gml_Object_obj_settingsmenu_Draw_0", "global.osflavor >= 4", "true");
 */
 
 // Fix Joystick Menu
-ReplaceTextInGML("gml_Script___joystick_2_gamepad", @"if (argument0 == 2)
+/*ReplaceTextInGML("gml_Script___joystick_2_gamepad", @"if (argument0 == 2)
     return global.__jstick_pad2;
 else
     return global.__jstick_pad1;", @"show_debug_message(""Debug : __joystick_2_gamepad was called"")
 if (argument0 != obj_time.j_ch)
     show_debug_message(""Debug : passed in value other than j_ch while calling joystick functions"")
-return obj_time.j_ch - 1;");
+return obj_time.j_ch - 1;");*/
 ReplaceTextInGML("gml_Object_obj_joypadmenu_Create_0", "joystick_has_pov(obj_time.j_ch)", "true");
 ReplaceTextInGML("gml_Object_obj_joypadmenu_Draw_0", "joystick_has_pov(obj_time.j_ch)", "true");
 // gamepad_button_count(obj_time.j_ch - 1) might work better but I'm not sure
