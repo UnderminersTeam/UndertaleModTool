@@ -467,7 +467,8 @@ namespace UndertaleModLib
         /// <param name="minor">The minor version.</param>
         /// <param name="release">The release version.</param>
         /// <param name="build">The build version.</param>
-        public void SetGMS2Version(uint major, uint minor = 0, uint release = 0, uint build = 0)
+        /// <param name="isLTS">If included, alter the data branch between LTS and non-LTS.</param>
+        public void SetGMS2Version(uint major, uint minor = 0, uint release = 0, uint build = 0, bool? isLTS = null)
         {
             if (major != 2 && major != 2022 && major != 2023 && major != 2024)
                 throw new NotSupportedException("Attempted to set a version of GameMaker " + major + " using SetGMS2Version");
@@ -476,6 +477,21 @@ namespace UndertaleModLib
             GeneralInfo.Minor = minor;
             GeneralInfo.Release = release;
             GeneralInfo.Build = build;
+
+            if (isLTS is not null)
+            {
+                SetLTS((bool)isLTS);
+            }
+        }
+
+        /// <summary>
+        /// Sets the branch type in GeneralInfo to the appropriate LTS or non-LTS version based on 
+        /// </summary>
+        /// <param name="isLTS">If included, alter the data branch between LTS and non-LTS.</param>
+        public void SetLTS(bool isLTS)
+        {
+            // Insert additional logic as needed for new branches using IsVersionAtLeast
+            GeneralInfo.Branch = isLTS ? UndertaleGeneralInfo.BranchType.LTS2022_0 : UndertaleGeneralInfo.BranchType.Post2022_0;
         }
 
         /// <summary>
@@ -510,18 +526,6 @@ namespace UndertaleModLib
         }
 
         /// <summary>
-        /// Sets the branch type in GeneralInfo to LTS. (true for LTS, false for non-LTS.)
-        /// </summary>
-        /// <param name="isLTS">true for LTS, false for non-LTS.</param>
-        public void SetLTS(bool isLTS)
-        {
-            if (isLTS)
-                GeneralInfo.Branch = UndertaleGeneralInfo.BranchType.LTS;
-            else
-                GeneralInfo.Branch = UndertaleGeneralInfo.BranchType.NonLTS;
-        }
-
-        /// <summary>
         /// Reports whether the version of the data file is the same or higher than a specified version, and off the LTS branch that lacks some features.
         /// </summary>
         /// <param name="major">The major version.</param>
@@ -537,7 +541,7 @@ namespace UndertaleModLib
                 return false;
             }
 
-            if (GeneralInfo.Branch == UndertaleGeneralInfo.BranchType.LTS)
+            if (GeneralInfo.Branch < UndertaleGeneralInfo.BranchType.Post2022_0)
                 return false;
 
             return IsVersionAtLeast(major, minor, release, build);
@@ -551,7 +555,7 @@ namespace UndertaleModLib
         {
             // It is known it works this way in 1.0.1266. The exact version which changed this is unknown.
             // If we find a game which does not fit the version identified here, we should fix this check.
-            return TestGMS1Version(1354, 161, true) ? 0 : 1;
+            return TestGMS1Version(1250, 161, true) ? 0 : 1;
         }
 
         /// <summary>

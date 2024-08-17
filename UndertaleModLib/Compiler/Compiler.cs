@@ -18,6 +18,7 @@ namespace UndertaleModLib.Compiler
         public bool ensureFunctionsDefined = true;
         public bool ensureVariablesDefined = true;
         public static bool GMS2_3;
+        public bool BooleanTypeEnabled => Data.IsVersionAtLeast(2, 3, 7);
         public bool TypedAssetRefs => Data.IsVersionAtLeast(2023, 8);
         public int LastCompiledArgumentCount = 0;
         public Dictionary<string, string> LocalVars = new Dictionary<string, string>();
@@ -31,6 +32,8 @@ namespace UndertaleModLib.Compiler
         public bool HasError = false;
         public string ResultError = null;
         public List<UndertaleInstruction> ResultAssembly = null;
+
+        public List<string> FunctionsToObliterate = new();
 
         public Compiler.MainThreadDelegate MainThreadDelegate = (f) => { f(); };
 
@@ -54,6 +57,27 @@ namespace UndertaleModLib.Compiler
                 {
                     foreach (KeyValuePair<string, string> v in GlobalVars)
                         Data?.Variables?.EnsureDefined(v.Key, UndertaleInstruction.InstanceType.Global, false, Data.Strings, Data);
+                    if (Data is not null)
+                    {
+                        foreach (string name in FunctionsToObliterate)
+                        {
+                            string scriptName = "gml_Script_" + name;
+                            UndertaleScript scriptObj = Data.Scripts.ByName(scriptName);
+                            if (scriptObj is not null)
+                                Data.Scripts.Remove(scriptObj);
+                            UndertaleCode codeObj = Data.Code.ByName(scriptName);
+                            if (codeObj is not null)
+                            {
+                                Data.Code.Remove(codeObj);
+                                OriginalCode.ChildEntries.Remove(codeObj);
+                            }
+                            UndertaleFunction functionObj = Data.Functions.ByName(scriptName);
+                            if (functionObj is not null)
+                                Data.Functions.Remove(functionObj);
+                            Data.KnownSubFunctions.Remove(name);
+                        }
+                        FunctionsToObliterate.Clear();
+                    }
                 });
             }
 
@@ -75,38 +99,61 @@ namespace UndertaleModLib.Compiler
 
             LastCompiledArgumentCount = 0;
             userDefinedVariables.Clear();
+            FunctionsToObliterate.Clear();
             if (redoAssets || assetIds.Count == 0)
                 MakeAssetDictionary();
         }
 
         private void MakeAssetDictionary()
         {
+            // Clear the dictionary first and set the worst case max size so that we don't resize it over and over
             assetIds.Clear();
-            AddAssetsFromList(Data?.GameObjects, AssetRefType.Object);
-            AddAssetsFromList(Data?.Sprites, AssetRefType.Sprite);
-            AddAssetsFromList(Data?.Sounds, AssetRefType.Sound);
-            AddAssetsFromList(Data?.Backgrounds, AssetRefType.Background);
-            AddAssetsFromList(Data?.Paths, AssetRefType.Path);
-            AddAssetsFromList(Data?.Fonts, AssetRefType.Font);
-            AddAssetsFromList(Data?.Timelines, AssetRefType.Timeline);
-            if (!GMS2_3)
-                AddAssetsFromList(Data?.Scripts, AssetRefType.Object /* not actually used */);
-            AddAssetsFromList(Data?.Shaders, AssetRefType.Shader);
-            AddAssetsFromList(Data?.Rooms, AssetRefType.Room);
-            AddAssetsFromList(Data?.AudioGroups, AssetRefType.Sound /* apparently? */);
-            AddAssetsFromList(Data?.AnimationCurves, AssetRefType.AnimCurve);
-            AddAssetsFromList(Data?.Sequences, AssetRefType.Sequence);
-            AddAssetsFromList(Data?.ParticleSystems, AssetRefType.ParticleSystem);
-
             scripts.Clear();
-            if (Data?.Scripts != null)
+            if (Data is null) return;
+            
+            int maxSize = 0;
+            maxSize += Data.GameObjects?.Count ?? 0;
+            maxSize += Data.Sprites?.Count ?? 0;
+            maxSize += Data.Sounds?.Count ?? 0;
+            maxSize += Data.Backgrounds?.Count ?? 0;
+            maxSize += Data.Paths?.Count ?? 0;
+            maxSize += Data.Fonts?.Count ?? 0;
+            maxSize += Data.Timelines?.Count ?? 0;
+            maxSize += Data.Scripts?.Count ?? 0;
+            maxSize += Data.Shaders?.Count ?? 0;
+            maxSize += Data.Rooms?.Count ?? 0;
+            maxSize += Data.AudioGroups?.Count ?? 0;
+            maxSize += Data.AnimationCurves?.Count ?? 0;
+            maxSize += Data.Sequences?.Count ?? 0;
+            maxSize += Data.ParticleSystems?.Count ?? 0;
+            
+            assetIds.EnsureCapacity(maxSize);
+            scripts.EnsureCapacity(Data.Scripts?.Count ?? 0);
+
+            AddAssetsFromList(Data.GameObjects, AssetRefType.Object);
+            AddAssetsFromList(Data.Sprites, AssetRefType.Sprite);
+            AddAssetsFromList(Data.Sounds, AssetRefType.Sound);
+            AddAssetsFromList(Data.Backgrounds, AssetRefType.Background);
+            AddAssetsFromList(Data.Paths, AssetRefType.Path);
+            AddAssetsFromList(Data.Fonts, AssetRefType.Font);
+            AddAssetsFromList(Data.Timelines, AssetRefType.Timeline);
+            if (!GMS2_3)
+                AddAssetsFromList(Data.Scripts, AssetRefType.Object /* not actually used */);
+            AddAssetsFromList(Data.Shaders, AssetRefType.Shader);
+            AddAssetsFromList(Data.Rooms, AssetRefType.Room);
+            AddAssetsFromList(Data.AudioGroups, AssetRefType.Sound /* apparently? */);
+            AddAssetsFromList(Data.AnimationCurves, AssetRefType.AnimCurve);
+            AddAssetsFromList(Data.Sequences, AssetRefType.Sequence);
+            AddAssetsFromList(Data.ParticleSystems, AssetRefType.ParticleSystem);
+
+            if (Data.Scripts is not null)
             {
                 foreach (UndertaleScript s in Data.Scripts)
                 {
                     scripts.Add(s.Name.Content);
                 }
             }
-            if (Data?.Extensions != null)
+            if (Data.Extensions is not null)
             {
                 foreach (UndertaleExtension e in Data.Extensions)
                 {

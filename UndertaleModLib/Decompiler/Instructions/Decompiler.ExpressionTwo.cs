@@ -65,6 +65,10 @@ public static partial class Decompiler
                     _ => 0,
                 };
 
+                // The second argument needs parentheses even if the operation level is equal, not just less; e.g. a - (b + c)
+                // Even some cases that match mathematically will recompile differently without right-hand parentheses e.g. a + (b + c)
+                if (isSecond)
+                    argPriorityLevel--;
 
                 // Suppose we have "(arg1a argOp arg1b) opcode argument2", and are wondering whether the depicted parentheses are needed
                 // If the argument's opcode is more highly-prioritized than our own, such as it being multiplication
@@ -76,10 +80,6 @@ public static partial class Decompiler
                 if (outerPriorityLevel == 0)
                     needsParens = true; // Better safe than sorry
                 
-                // Non-commutative operators may still need parentheses, e.g `a - (b - c)`
-                bool nonCommutative = Opcode is UndertaleInstruction.Opcode.Sub or UndertaleInstruction.Opcode.Div;
-                if (isSecond && nonCommutative && Opcode == argumentAsBinaryExpression.Opcode)
-                    needsParens = true;
             }
 
             return (needsParens ? String.Format("({0})", arg) : arg);

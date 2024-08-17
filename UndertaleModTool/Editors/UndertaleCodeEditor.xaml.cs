@@ -34,7 +34,6 @@ using UndertaleModLib;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
-using static UndertaleModTool.MainWindow.CodeEditorMode;
 using Input = System.Windows.Input;
 
 namespace UndertaleModTool
@@ -49,7 +48,7 @@ namespace UndertaleModTool
 
         public UndertaleCode CurrentDisassembled = null;
         public UndertaleCode CurrentDecompiled = null;
-        public List<string> CurrentLocals = null;
+        public List<string> CurrentLocals = new();
         public string ProfileHash = mainWindow.ProfileHash;
         public string MainPath = Path.Combine(Settings.ProfilesFolder, mainWindow.ProfileHash, "Main");
         public string TempPath = Path.Combine(Settings.ProfilesFolder, mainWindow.ProfileHash, "Temp");
@@ -59,14 +58,14 @@ namespace UndertaleModTool
         public bool DecompiledYet = false;
         public bool DecompiledSkipped = false;
         public SearchPanel DecompiledSearchPanel;
-        public static (int Line, int Column, double ScrollPos) OverriddenDecompPos;
+        public static (int Line, int Column, double ScrollPos) OverriddenDecompPos { get; set; }
 
         public bool DisassemblyFocused = false;
         public bool DisassemblyChanged = false;
         public bool DisassembledYet = false;
         public bool DisassemblySkipped = false;
         public SearchPanel DisassemblySearchPanel;
-        public static (int Line, int Column, double ScrollPos) OverriddenDisasmPos;
+        public static (int Line, int Column, double ScrollPos) OverriddenDisasmPos { get; set; }
 
         public static RoutedUICommand Compile = new RoutedUICommand("Compile code", "Compile", typeof(UndertaleCodeEditor));
 
@@ -74,6 +73,14 @@ namespace UndertaleModTool
         private static readonly Dictionary<string, UndertaleNamedResource> ScriptsDict = new();
         private static readonly Dictionary<string, UndertaleNamedResource> FunctionsDict = new();
         private static readonly Dictionary<string, UndertaleNamedResource> CodeDict = new();
+
+        public enum CodeEditorTab
+        {
+            Unknown,
+            Disassembly,
+            Decompiled
+        }
+        public static CodeEditorTab EditorTab { get; set; } = CodeEditorTab.Unknown;
 
         public UndertaleCodeEditor()
         {
@@ -242,6 +249,11 @@ namespace UndertaleModTool
                 else
                     _ = DecompileCode(code, true);
             }
+            if (DecompiledTab.IsSelected)
+            {
+                // Re-populate local variables when in decompiled code, fixing #1320
+                PopulateCurrentLocals(mainWindow.Data, code);
+            }
         }
 
         private async void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -298,9 +310,9 @@ namespace UndertaleModTool
             CurrentDecompiled = null;
             CurrentDisassembled = null;
 
-            if (MainWindow.CodeEditorDecompile != Unstated) //if opened from the code search results "link"
+            if (EditorTab != CodeEditorTab.Unknown) // If opened from the code search results "link"
             {
-                if (MainWindow.CodeEditorDecompile == DontDecompile && code != CurrentDisassembled)
+                if (EditorTab == CodeEditorTab.Disassembly && code != CurrentDisassembled)
                 {
                     if (CodeModeTabs.SelectedItem != DisassemblyTab)
                         CodeModeTabs.SelectedItem = DisassemblyTab;
@@ -308,7 +320,7 @@ namespace UndertaleModTool
                         DisassembleCode(code, true);
                 }
 
-                if (MainWindow.CodeEditorDecompile == Decompile && code != CurrentDecompiled)
+                if (EditorTab == CodeEditorTab.Decompiled && code != CurrentDecompiled)
                 {
                     if (CodeModeTabs.SelectedItem != DecompiledTab)
                         CodeModeTabs.SelectedItem = DecompiledTab;
@@ -316,7 +328,7 @@ namespace UndertaleModTool
                         _ = DecompileCode(code, true);
                 }
 
-                MainWindow.CodeEditorDecompile = Unstated;
+                EditorTab = CodeEditorTab.Unknown;
             }
             else
                 FillInCodeViewer(true);
@@ -367,6 +379,9 @@ namespace UndertaleModTool
         {
             if (linePos <= textEditor.LineCount)
             {
+                if (linePos == -1)
+                    linePos = textEditor.Document.LineCount;
+
                 int lineLen = textEditor.Document.GetLineByNumber(linePos).Length;
                 textEditor.TextArea.Caret.Line = linePos;
                 if (columnPos != -1)
@@ -375,7 +390,8 @@ namespace UndertaleModTool
                     textEditor.TextArea.Caret.Column = lineLen + 1;
 
                 textEditor.ScrollToLine(linePos);
-                textEditor.ScrollToVerticalOffset(scrollPos);
+                if (scrollPos != -1)
+                    textEditor.ScrollToVerticalOffset(scrollPos);
             }
             else
             {
@@ -383,7 +399,36 @@ namespace UndertaleModTool
                 textEditor.ScrollToEnd();
             }
         }
-        
+        public static void ChangeLineNumber(int lineNum, CodeEditorTab editorTab)
+        {
+            if (lineNum < 1)
+                return;
+
+            if (editorTab == CodeEditorTab.Unknown)
+            {
+                Debug.WriteLine($"The \"{nameof(editorTab)}\" argument of \"{nameof(ChangeLineNumber)}()\" is \"{nameof(CodeEditorTab.Unknown)}\".");
+                return;
+            }
+
+            if (editorTab == CodeEditorTab.Decompiled)
+                OverriddenDecompPos = (lineNum, -1, -1);
+            else
+                OverriddenDisasmPos = (lineNum, -1, -1);
+        }
+        public static void ChangeLineNumber(int lineNum, TextEditor textEditor)
+        {
+            if (lineNum < 1)
+                return;
+
+            if (textEditor is null)
+            {
+                Debug.WriteLine($"The \"{nameof(textEditor)}\" argument of \"{nameof(ChangeLineNumber)}()\" is null.");
+                return;
+            }
+
+            RestoreCaretPosition(textEditor, lineNum, -1, -1);
+        }
+
         private static void FillObjectDicts()
         {
             var data = mainWindow.Data;
@@ -485,7 +530,7 @@ namespace UndertaleModTool
                     var data = mainWindow.Data;
                     text = code.Disassemble(data.Variables, data.CodeLocals.For(code));
 
-                    CurrentLocals = new List<string>();
+                    CurrentLocals.Clear();
                 }
                 catch (Exception ex)
                 {
@@ -557,8 +602,8 @@ namespace UndertaleModTool
         }
 
         public static Dictionary<string, string> gettextJSON = null;
-        private static readonly Regex gettextRegex = new("scr_gettext\\(\\\"(.*?)\\\"\\)", RegexOptions.Compiled);
-        private static readonly Regex getlangRegex = new("scr_84_get_lang_string(?:.*?)\\(\\\"(.*?)\\\"\\)", RegexOptions.Compiled);
+        private static readonly Regex gettextRegex = new(@"scr_gettext\(\""(.*?)\""\)(?!(.*?\/\/.*?$))", RegexOptions.Compiled);
+        private static readonly Regex getlangRegex = new(@"scr_84_get_lang_string(?:.*?)\(\""(.*?)\""\)(?!(.*?\/\/.*?$))", RegexOptions.Compiled);
         private string UpdateGettextJSON(string json)
         {
             try
@@ -744,14 +789,7 @@ namespace UndertaleModTool
                         else if (decompiled != null)
                         {
                             DecompiledEditor.Document.Text = decompiled;
-                            CurrentLocals = new List<string>();
-
-                            var locals = dataa.CodeLocals.ByName(code.Name.Content);
-                            if (locals != null)
-                            {
-                                foreach (var local in locals.Locals)
-                                    CurrentLocals.Add(local.Name.Content);
-                            }
+                            PopulateCurrentLocals(dataa, code);
 
                             RestoreCaretPosition(DecompiledEditor, currLine, currColumn, scrollPos);
 
@@ -782,6 +820,19 @@ namespace UndertaleModTool
 
                 if (openSaveDialog)
                     await mainWindow.DoSaveDialog();
+            }
+        }
+
+        private void PopulateCurrentLocals(UndertaleData data, UndertaleCode code)
+        {
+            CurrentLocals.Clear();
+
+            // Look up locals for given code entry's name, for syntax highlighting
+            var locals = data.CodeLocals.ByName(code.Name.Content);
+            if (locals != null)
+            {
+                foreach (var local in locals.Locals)
+                    CurrentLocals.Add(local.Name.Content);
             }
         }
 

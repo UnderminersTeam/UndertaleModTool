@@ -60,6 +60,13 @@ public static partial class Decompiler
             return false;
         }
 
+
+        // Casts this expression to a GMS2.3.7+ boolean.
+        internal virtual void CastToBoolean(DecompileContext context)
+        {
+            Type = UndertaleInstruction.DataType.Boolean;
+        }
+
         public Expression CleanExpression(DecompileContext context, BlockHLStatement block)
         {
             return CleanStatement(context, block) as Expression;

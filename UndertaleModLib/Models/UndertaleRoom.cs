@@ -30,9 +30,9 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         /// </summary>
         ShowColor = 2,
         /// <summary>
-        /// Whether the room should clear the display buffer.
+        /// Whether the room should not clear the display buffer.
         /// </summary>
-        ClearDisplayBuffer = 4,
+        DoNotClearDisplayBuffer = 4,
         /// <summary>
         /// Whether the room was made in Game Maker: Studio 2.
         /// </summary>
@@ -2021,6 +2021,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             public UndertalePointerList<SequenceInstance> Sequences { get; set; }
             public UndertalePointerList<SpriteInstance> NineSlices { get; set; } // Removed in 2.3.2, before never used
             public UndertalePointerList<ParticleSystemInstance> ParticleSystems { get; set; }
+            public UndertalePointerList<TextItemInstance> TextItems { get; set; }
 
             /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
@@ -2034,6 +2035,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                         writer.WriteUndertaleObjectPointer(NineSlices);
                     if (writer.undertaleData.IsNonLTSVersionAtLeast(2023, 2))
                         writer.WriteUndertaleObjectPointer(ParticleSystems);
+                    if (writer.undertaleData.IsVersionAtLeast(2024, 6))
+                        writer.WriteUndertaleObjectPointer(TextItems);
                 }
                 writer.WriteUndertaleObject(LegacyTiles);
                 writer.WriteUndertaleObject(Sprites);
@@ -2044,12 +2047,18 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                         writer.WriteUndertaleObject(NineSlices);
                     if (writer.undertaleData.IsNonLTSVersionAtLeast(2023, 2))
                         writer.WriteUndertaleObject(ParticleSystems);
+                    if (writer.undertaleData.IsVersionAtLeast(2024, 6))
+                        writer.WriteUndertaleObject(TextItems);
                 }
             }
 
             /// <inheritdoc />
             public void Unserialize(UndertaleReader reader)
             {
+                // Track first pointer target to detect additional data
+                long firstPointerTarget = reader.ReadUInt32();
+                reader.Position -= 4;
+
                 LegacyTiles = reader.ReadUndertaleObjectPointer<UndertalePointerList<Tile>>();
                 Sprites = reader.ReadUndertaleObjectPointer<UndertalePointerList<SpriteInstance>>();
                 if (reader.undertaleData.IsVersionAtLeast(2, 3))
@@ -2059,6 +2068,10 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                         NineSlices = reader.ReadUndertaleObjectPointer<UndertalePointerList<SpriteInstance>>();
                     if (reader.undertaleData.IsNonLTSVersionAtLeast(2023, 2))
                         ParticleSystems = reader.ReadUndertaleObjectPointer<UndertalePointerList<ParticleSystemInstance>>();
+                    if (firstPointerTarget > reader.AbsPosition && !reader.undertaleData.IsVersionAtLeast(2024, 6))
+                        reader.undertaleData.SetGMS2Version(2024, 6); // There's more data before legacy tiles, so must be 2024.6+
+                    if (reader.undertaleData.IsVersionAtLeast(2024, 6))
+                        TextItems = reader.ReadUndertaleObjectPointer<UndertalePointerList<TextItemInstance>>();
                 }
                 reader.ReadUndertaleObject(LegacyTiles);
                 reader.ReadUndertaleObject(Sprites);
@@ -2069,6 +2082,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                         reader.ReadUndertaleObject(NineSlices);
                     if (reader.undertaleData.IsNonLTSVersionAtLeast(2023, 2))
                         reader.ReadUndertaleObject(ParticleSystems);
+                    if (reader.undertaleData.IsVersionAtLeast(2024, 6))
+                        reader.ReadUndertaleObject(TextItems);
                 }
             }
 
@@ -2082,6 +2097,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 uint sequencesPtr = 0;
                 uint nineSlicesPtr = 0;
                 uint partSystemsPtr = 0;
+                uint textItemsPtr = 0;
                 if (reader.undertaleData.IsVersionAtLeast(2, 3))
                 {
                     sequencesPtr = reader.ReadUInt32();
@@ -2089,6 +2105,10 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                         nineSlicesPtr = reader.ReadUInt32();
                     if (reader.undertaleData.IsNonLTSVersionAtLeast(2023, 2))
                         partSystemsPtr = reader.ReadUInt32();
+                    if (legacyTilesPtr > reader.AbsPosition && !reader.undertaleData.IsVersionAtLeast(2024, 6))
+                        reader.undertaleData.SetGMS2Version(2024, 6); // There's more data before legacy tiles, so must be 2024.6+
+                    if (reader.undertaleData.IsVersionAtLeast(2024, 6))
+                        textItemsPtr = reader.ReadUInt32();
                 }
 
                 reader.AbsPosition = legacyTilesPtr;
@@ -2108,6 +2128,11 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                     {
                         reader.AbsPosition = partSystemsPtr;
                         count += 1 + UndertalePointerList<ParticleSystemInstance>.UnserializeChildObjectCount(reader);
+                    }
+                    if (reader.undertaleData.IsVersionAtLeast(2024, 6))
+                    {
+                        reader.AbsPosition = textItemsPtr;
+                        count += 1 + UndertalePointerList<TextItemInstance>.UnserializeChildObjectCount(reader);
                     }
                 }
 
@@ -2363,6 +2388,9 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             Rotation = reader.ReadSingle();
         }
 
+        /// <summary>
+        /// Generates a random name for this instance, as a utility for room editing.
+        /// </summary>
         //TODO: rework this method slightly.
         public static UndertaleString GenerateRandomName(UndertaleData data)
         {
@@ -2525,6 +2553,9 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             Rotation = reader.ReadSingle();
         }
 
+        /// <summary>
+        /// Generates a random name for this instance, as a utility for room editing.
+        /// </summary>
         public static UndertaleString GenerateRandomName(UndertaleData data)
         {
             return data.Strings.MakeString("particle_" + ((uint)Random.Shared.Next(-Int32.MaxValue, Int32.MaxValue)).ToString("X8"));
@@ -2543,6 +2574,118 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
             _particleSys.Dispose();
             Name = null;
+        }
+    }
+
+    public class TextItemInstance : UndertaleObject, INotifyPropertyChanged, IStaticChildObjCount, IStaticChildObjectsSize, IDisposable
+    {
+        /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
+        public static readonly uint ChildObjectCount = 1;
+
+        /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
+        public static readonly uint ChildObjectsSize = 68;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
+        private UndertaleResourceById<UndertaleFont, UndertaleChunkFONT> _font = new();
+
+        // TODO: document these fields; some are self-explanatory but unsure on the behavior of all of them
+        public UndertaleString Name { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
+        public UndertaleFont Font
+        {
+            get => _font.Resource;
+            set
+            {
+                _font.Resource = value;
+                OnPropertyChanged();
+            }
+        }
+        public float ScaleX { get; set; }
+        public float ScaleY { get; set; }
+        public float Rotation { get; set; }
+        public uint Color { get; set; }
+        public float OriginX { get; set; }
+        public float OriginY { get; set; }
+        public UndertaleString Text { get; set; }
+        public int Alignment { get; set; }
+        public float CharSpacing { get; set; }
+        public float LineSpacing { get; set; }
+        public float FrameWidth { get; set; }
+        public float FrameHeight { get; set; }
+        public bool Wrap { get; set; }
+
+        /// <inheritdoc />
+        public void Serialize(UndertaleWriter writer)
+        {
+            writer.WriteUndertaleString(Name);
+            writer.Write(X);
+            writer.Write(Y);
+            writer.WriteUndertaleObject(_font);
+            writer.Write(ScaleX);
+            writer.Write(ScaleY);
+            writer.Write(Rotation);
+            writer.Write(Color);
+            writer.Write(OriginX);
+            writer.Write(OriginY);
+            writer.WriteUndertaleString(Text);
+            writer.Write(Alignment);
+            writer.Write(CharSpacing);
+            writer.Write(LineSpacing);
+            writer.Write(FrameWidth);
+            writer.Write(FrameHeight);
+            writer.Write(Wrap);
+        }
+
+        /// <inheritdoc />
+        public void Unserialize(UndertaleReader reader)
+        {
+            Name = reader.ReadUndertaleString();
+            X = reader.ReadInt32();
+            Y = reader.ReadInt32();
+            _font = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleFont, UndertaleChunkFONT>>();
+            ScaleX = reader.ReadSingle();
+            ScaleY = reader.ReadSingle();
+            Rotation = reader.ReadSingle();
+            Color = reader.ReadUInt32();
+            OriginX = reader.ReadSingle();
+            OriginY = reader.ReadSingle();
+            Text = reader.ReadUndertaleString();
+            Alignment = reader.ReadInt32();
+            CharSpacing = reader.ReadSingle();
+            LineSpacing = reader.ReadSingle();
+            FrameWidth = reader.ReadSingle();
+            FrameHeight = reader.ReadSingle();
+            Wrap = reader.ReadBoolean();
+        }
+
+        /// <summary>
+        /// Generates a random name for this instance, as a utility for room editing.
+        /// </summary>
+        public static UndertaleString GenerateRandomName(UndertaleData data)
+        {
+            return data.Strings.MakeString("textitem_" + ((uint)Random.Shared.Next(-Int32.MaxValue, Int32.MaxValue)).ToString("X8"));
+        }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"Text item {Name?.Content} with text \"{Text?.Content ?? "?"}\"";
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+
+            _font.Dispose();
+            Name = null;
+            Text = null;
         }
     }
 }

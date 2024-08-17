@@ -24,6 +24,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: true
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
@@ -36,7 +38,7 @@ jobs:
         dotnet build UndertaleModToolUpdater --no-restore
     - name: Publish ${{ matrix.os }} GUI
       run: |
-        dotnet publish UndertaleModTool -c ${{ matrix.configuration }} -r win-x64 --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=${{ matrix.singlefile }} --output ${{ matrix.os }}
+        dotnet publish UndertaleModTool -c ${{ matrix.configuration }} -r win-x64 -p:DefineConstants=\"SHOW_COMMIT_HASH\" --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=${{ matrix.singlefile }} --output ${{ matrix.os }}
         dotnet publish UndertaleModToolUpdater -c ${{ matrix.configuration }} -r win-x64 --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false --output ${{ matrix.os }}/Updater
     - name: Copy external files
       run: |
@@ -72,6 +74,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: true
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
