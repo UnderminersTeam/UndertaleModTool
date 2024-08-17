@@ -6,7 +6,7 @@ EnsureDataLoaded();
 
 if (Data.GeneralInfo.Name.Content != "NXTALE")
 {
-    ScriptError("This script can only be used with\nThe Nintendo Switch and Xbox One version of Undertale.", "Not NXTALE");
+    ScriptError("This script can only be used with\nthe Nintendo Switch and Xbox One version of Undertale.", "Not NXTALE");
     return;
 }
 
