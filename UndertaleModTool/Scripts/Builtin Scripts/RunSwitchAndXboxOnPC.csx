@@ -6,12 +6,10 @@ EnsureDataLoaded();
 
 if (Data.GeneralInfo.Name.Content != "NXTALE")
 {
-    ScriptError(
-        """
+    ScriptError("""
         This script can only be used with the Nintendo Switch
         and Xbox One version of Undertale.
-        """,
-        "Not NXTALE");
+        """, "Not NXTALE");
     return;
 }
 
@@ -24,8 +22,7 @@ if (isXbox)
     if (os_type == os_xboxone)
     {
         script_execute(SCR_GAMESTART, 0, 0, 0, 0, 0)
-    """,
-    """
+    """, """
     if (true)
     {
         script_execute(SCR_GAMESTART, 0, 0, 0, 0, 0)
@@ -45,61 +42,51 @@ Data.GeneralInfo.Info &= ~(UndertaleGeneralInfo.InfoFlags.Interpolate);
 
 // use NX routine for joypad detection
 ReplaceTextInGML("gml_Object_obj_time_Create_0", "if (global.osflavor >= 4)", "if (true)");
-ReplaceTextInGML("gml_Object_obj_time_Create_0",
-"""
+ReplaceTextInGML("gml_Object_obj_time_Create_0", """
     else
         j_ch = 1
-""",
-"""
+""", """
     else if (global.osflavor >= 4)
         j_ch = 1
 """);
 string os_switch = "os_switch" + (!isXbox ? "_beta" : "");
 ReplaceTextInGML("gml_Object_obj_time_Step_1", "global.osflavor <= 2", "false");
 ReplaceTextInGML("gml_Object_obj_time_Step_1", $"os_type == {os_switch}", "true");
-ReplaceTextInGML("gml_Object_obj_time_Step_1",
-"""
+ReplaceTextInGML("gml_Object_obj_time_Step_1", """
     if (j_ch > 0)
         missing_controller_timeout = 0
-""",
-$"""
+""", $"""
     if (os_type == {os_switch})
         if (j_ch > 0)
             missing_controller_timeout = 0
 """);
 
 // Use Xbox default buttons
-ReplaceTextInGML("gml_Object_obj_time_Create_0",
-"""
+ReplaceTextInGML("gml_Object_obj_time_Create_0", """
 global.button0 = 2
 global.button1 = 1
 global.button2 = 4
-""",
-"""
+""", """
 global.button0 = gp_face1
 global.button1 = gp_face2
 global.button2 = gp_face4
 """);
-ReplaceTextInGML("gml_Object_obj_joypadmenu_Draw_0",
-"""
+ReplaceTextInGML("gml_Object_obj_joypadmenu_Draw_0", """
     global.button0 = 2
     global.button1 = 1
     global.button2 = 4
-""",
-"""
+""", """
     global.button0 = gp_face1
     global.button1 = gp_face2
     global.button2 = gp_face4
 """);
 
 // axis check
-ReplaceTextInGML("gml_Object_obj_time_Step_1",
-"""
+ReplaceTextInGML("gml_Object_obj_time_Step_1", """
     if (global.osflavor >= 4)
     {
         if (gamepad_button_check
-""",
-"""
+""", """
     if (true)
     {
         if (gamepad_button_check
