@@ -146,13 +146,12 @@ public class UndertaleTexturePageItem : UndertaleNamedResource, INotifyPropertyC
     /// Replaces the current image of this texture page item to hold a new image.
     /// </summary>
     /// <param name="replaceImage">The new image that shall be applied to this texture page item.</param>
-    /// <param name="disposeImage">Whether to dispose <paramref name="replaceImage"/> afterwards.</param>
-    public void ReplaceTexture(MagickImage replaceImage, bool disposeImage = true)
+    public void ReplaceTexture(MagickImage replaceImage)
     {
         // Resize image to bounds on texture page
-        IMagickImage<byte> finalImage = TextureWorker.ResizeImage(replaceImage, SourceWidth, SourceHeight);
+        using IMagickImage<byte> finalImage = TextureWorker.ResizeImage(replaceImage, SourceWidth, SourceHeight);
 
-        // Apply the image to the TexturePage.
+        // Apply the image to the texture page
         lock (TexturePage.TextureData)
         {
             using TextureWorker worker = new();
@@ -167,10 +166,5 @@ public class UndertaleTexturePageItem : UndertaleNamedResource, INotifyPropertyC
 
         TargetWidth = (ushort)replaceImage.Width;
         TargetHeight = (ushort)replaceImage.Height;
-
-        // Cleanup.
-        finalImage.Dispose();
-        if (disposeImage)
-            replaceImage.Dispose();
     }
 }

@@ -89,7 +89,7 @@
                         </Border.Background>
 
                         <Grid Cursor="Hand" MouseDown="Grid_MouseDown" MouseMove="Grid_MouseMove" MouseLeave="Grid_MouseLeave">
-                            <Image Name="TextureImageView"/>
+                            <Image Name="TexturePageImage"/>
                             <Canvas>
                                 <Border Name="PageItemBorder" Background="LightBlue" BorderThickness="2" BorderBrush="Blue" Opacity="0.65"
                                         Width="0" Height="0"/>

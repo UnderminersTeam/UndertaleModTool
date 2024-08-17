@@ -1,20 +1,10 @@
 ﻿using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 
@@ -188,7 +178,7 @@ namespace UndertaleModTool
                 try
                 {
                     (uint maskWidth, uint maskHeight) = sprite.CalculateMaskDimensions(mainWindow.Data);
-                    TextureWorker.ExportCollisionMaskPNG(sprite, target, dlg.FileName, (int)maskWidth, (int)maskHeight);
+                    TextureWorker.ExportCollisionMaskPNG(target, dlg.FileName, (int)maskWidth, (int)maskHeight);
                 }
                 catch (Exception ex)
                 {

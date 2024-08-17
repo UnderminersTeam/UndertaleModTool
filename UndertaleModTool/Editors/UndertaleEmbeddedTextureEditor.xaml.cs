@@ -22,6 +22,7 @@ using UndertaleModLib;
 using UndertaleModTool.Windows;
 using System.Windows.Threading;
 using ImageMagick;
+using System.ComponentModel;
 
 namespace UndertaleModTool
 {
@@ -35,6 +36,11 @@ namespace UndertaleModTool
         private bool isMenuOpen;
         private UndertaleTexturePageItem[] items;
         private UndertaleTexturePageItem hoveredItem;
+
+        /// <summary>
+        /// Handle on the texture data where we're listening for updates from.
+        /// </summary>
+        private UndertaleEmbeddedTexture.TexData _textureDataContext = null;
 
         public static (Transform Transform, double Left, double Top) OverriddenPreviewState { get; set; }
 
@@ -57,24 +63,58 @@ namespace UndertaleModTool
 
             pageContextMenu.Closed += PageContextMenu_Closed;
 
-            DataContextChanged += ReloadTexture;
+            DataContextChanged += SwitchDataContext;
             Unloaded += UnloadTexture;
         }
 
-        private void ReloadTexture(object sender, DependencyPropertyChangedEventArgs e)
+        private void UpdateImage(UndertaleEmbeddedTexture texture)
+        {
+            GMImage image = texture.TextureData.Image;
+            BitmapSource bitmap = mainWindow.GetBitmapSourceForImage(image);
+            TexturePageImage.Source = bitmap;
+        }
+
+        private void SwitchDataContext(object sender, DependencyPropertyChangedEventArgs e)
         {
             UndertaleEmbeddedTexture texture = (DataContext as UndertaleEmbeddedTexture);
             if (texture is null)
                 return;
 
-            GMImage image = texture.TextureData.Image;
-            BitmapSource bitmap = mainWindow.GetBitmapSourceForImage(image);
-            TextureImageView.Source = bitmap;
+            // Load current image
+            UpdateImage(texture);
+
+            // Start listening for texture image updates
+            if (_textureDataContext is not null)
+            {
+                _textureDataContext.PropertyChanged -= ReloadTextureImage;
+            }
+            _textureDataContext = texture.TextureData;
+            _textureDataContext.PropertyChanged += ReloadTextureImage;
+        }
+
+        private void ReloadTextureImage(object sender, PropertyChangedEventArgs e)
+        {
+            UndertaleEmbeddedTexture texture = (DataContext as UndertaleEmbeddedTexture);
+            if (texture is null)
+                return;
+
+            // If the texture's image was updated, reload it
+            if (e.PropertyName == nameof(UndertaleEmbeddedTexture.TexData.Image))
+            {
+                UpdateImage(texture);
+            }
         }
 
         private void UnloadTexture(object sender, RoutedEventArgs e)
         {
-            TextureImageView.Source = null;
+            TexturePageImage.Source = null;
+
+            // Stop listening for texture image updates
+            if (_textureDataContext is not null)
+            {
+                _textureDataContext.PropertyChanged -= ReloadTextureImage;
+                _textureDataContext = null;
+            }
         }
 
         private void OpenInNewTabItem_Click(object sender, RoutedEventArgs e)
@@ -203,10 +243,6 @@ namespace UndertaleModTool
 
                     // Import image
                     target.TextureData.Image = image;
-
-                    // Update image in UI
-                    BitmapSource bitmap = mainWindow.GetBitmapSourceForImage(target.TextureData.Image);
-                    TextureImageView.Source = bitmap;
 
                     // Update width/height properties in the UI
                     TexWidth.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();

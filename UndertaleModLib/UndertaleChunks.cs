@@ -1502,8 +1502,8 @@ namespace UndertaleModLib
                     reader.Position = positionToReturn + 4 + (i * 4);
                     reader.AbsPosition = reader.ReadUInt32() + 12; // Go to texture, at an offset
                     reader.AbsPosition = reader.ReadUInt32(); // Go to texture data
-                    byte[] header = reader.ReadBytes(4);
-                    if (header is not [50, 122, 111, 113]) // '2zoq' magic
+                    ReadOnlySpan<byte> header = reader.ReadBytes(4);
+                    if (!header.SequenceEqual(GMImage.MagicBz2Qoi))
                     {
                         // Nothing useful, check the next texture
                         continue;
@@ -1560,7 +1560,7 @@ namespace UndertaleModLib
                 if (anythingUsesQoi)
                 {
                     // Calculate maximum size of QOI converter buffer
-                    int maxSize = (List.Select(x => x.TextureData.Width * x.TextureData.Height).Max() * QoiConverter.MaxChunkSize) + QoiConverter.HeaderSize;
+                    int maxSize = (List.Max(x => x.TextureData.Width * x.TextureData.Height) * QoiConverter.MaxChunkSize) + QoiConverter.HeaderSize;
                     QoiConverter.InitSharedBuffer(maxSize);
                 }
             }
@@ -1649,20 +1649,26 @@ namespace UndertaleModLib
                     while (searchIndex < List.Count)
                     {
                         UndertaleEmbeddedTexture searchObj = List[searchIndex];
-                        if (!searchObj.TextureExternal)
+
+                        if (searchObj.TextureExternal)
+                        {
+                            // Skip this texture, as it's external
+                            searchIndex++;
+                        }
+                        else
                         {
                             // Use start address of this blob
                             maxEndOfStreamPosition = (int)reader.GetOffsetMapRev()[searchObj.TextureData];
                             break;
                         }
-                        searchIndex++;
                     }
+
                     if (maxEndOfStreamPosition == -1)
                     {
                         // At end of list, so just use the end of the chunk
                         maxEndOfStreamPosition = (int)(startPosition + Length);
                     }
-                    obj.TextureData.MaxEndOfStreamPosition = maxEndOfStreamPosition;
+                    obj.TextureData.SetMaxEndOfStreamPosition(maxEndOfStreamPosition);
                 }
 
                 obj.UnserializeBlob(reader);

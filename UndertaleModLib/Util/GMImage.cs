@@ -7,7 +7,7 @@ using System.IO;
 namespace UndertaleModLib.Util;
 
 /// <summary>
-/// Wrapper around GameMaker textures and sub-images.
+/// Immutable wrapper around GameMaker texture images.
 /// </summary>
 public class GMImage
 {
@@ -16,9 +16,24 @@ public class GMImage
     /// </summary>
     public enum ImageFormat
     {
+        /// <summary>
+        /// Raw BGRA color format, with 8 bits per channel (32 bits per pixel).
+        /// </summary>
         RawBgra,
+
+        /// <summary>
+        /// PNG file format.
+        /// </summary>
         Png,
+
+        /// <summary>
+        /// GameMaker's custom variant of the QOI image file format.
+        /// </summary>
         Qoi,
+
+        /// <summary>
+        /// BZip2 compression applied on top of GameMaker's custom variant of the QOI image file format.
+        /// </summary>
         Bz2Qoi
     }
 
@@ -42,33 +57,58 @@ public class GMImage
     /// </summary>
     public const int MaxImageDimension = 16384;
 
-    // Backing data for the image, whether compressed or not
+    /// <summary>
+    /// PNG file format magic.
+    /// </summary>
+    public static ReadOnlySpan<byte> MagicPng => new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 };
+
+    /// <summary>
+    /// QOI file format magic.
+    /// </summary>
+    public static ReadOnlySpan<byte> MagicQoi => "fioq"u8;
+
+    /// <summary>
+    /// BZip2 + QOI file format magic.
+    /// </summary>
+    public static ReadOnlySpan<byte> MagicBz2Qoi => "2zoq"u8;
+
+    /// <summary>
+    /// Magic value found near the end of a BZip2 stream (square root of pi). 
+    /// </summary>
+    private static ReadOnlySpan<byte> MagicBz2Footer => new byte[] { 0x17, 0x72, 0x45, 0x38, 0x50, 0x90 };
+
+    /// <summary>
+    /// Backing data for the image, whether compressed or not.
+    /// </summary>
     private readonly byte[] _data = null;
 
-    // If this is a Bz2Qoi image in GameMaker 2022.5 and above, this is the size of the BZip2 data when entirely uncompressed
+    /// <summary>
+    /// If this is a Bz2Qoi image in GameMaker 2022.5 and above, then this is 
+    /// the size of the BZip2 data when entirely uncompressed.
+    /// </summary>
     private int _bz2UncompressedSize { get; init; } = -1;
 
     /// <summary>
     /// Initializes an image with raw format, of the desired width and height.
     /// </summary>
     /// <remarks>
-    /// Creates a completely blank image (black, 0 alpha).
+    /// Creates a completely blank image (black, fully transparent).
     /// </remarks>
     public GMImage(int width, int height)
     {
-        if (width < 0 || width > MaxImageDimension)
+        if (width is < 0 or > MaxImageDimension)
         {
             throw new ArgumentOutOfRangeException(nameof(width));
         }
-        if (height < 0 || height > MaxImageDimension)
+        if (height is < 0 or > MaxImageDimension)
         {
-            throw new ArgumentOutOfRangeException(nameof(width));
+            throw new ArgumentOutOfRangeException(nameof(height));
         }
 
         Format = ImageFormat.RawBgra;
         Width = width;
         Height = height;
-        _data = new byte[Width * Height * 4];
+        _data = new byte[width * height * 4];
     }
 
     // Constructor for use by other creation methods
@@ -80,18 +120,19 @@ public class GMImage
         _data = data;
     }
 
-    // Searches for the BZ2 footer magic, when around the end of a BZ2 stream, and returns the exact end position of the stream
+    /// <summary>
+    /// Searches for the BZ2 footer magic, when around the end of a BZ2 stream, 
+    /// and returns the exact end position of the stream.
+    /// </summary>
     private static long FindEndOfBZ2Search(IBinaryReader reader, long endDataPosition)
     {
-        // Magic bit sequence found near the end of a BZip2 stream (square root of pi)
-        ReadOnlySpan<byte> footerMagic = stackalloc byte[] { 0x17, 0x72, 0x45, 0x38, 0x50, 0x90 };
-
         // Read 16 bytes from the end of the BZ2 stream
         Span<byte> data = stackalloc byte[16];
         reader.Position = endDataPosition - data.Length;
         int numBytesRead = reader.Stream.Read(data);
 
         // Start searching for magic, bit by bit (it is not always byte-aligned)
+        ReadOnlySpan<byte> footerMagic = MagicBz2Footer;
         int searchStartPosition = numBytesRead - 1;
         int searchStartBitPosition = 0;
         while (searchStartPosition >= 0)
@@ -104,39 +145,38 @@ public class GMImage
             int magicPosition = footerMagic.Length - 1;
             while (searchPosition >= 0)
             {
-                // Compare bits at search position and corresponding magic position
+                // Get bits at search position and corresponding magic position
                 bool currentBit = (data[searchPosition] & (1 << bitPosition)) != 0;
                 bool magicCurrentBit = (footerMagic[magicPosition] & (1 << magicBitPosition)) != 0;
-                if (currentBit == magicCurrentBit)
-                {
-                    // Found a matching bit!
-                    // Progress magic position to next bit
-                    magicBitPosition++;
-                    if (magicBitPosition >= 8)
-                    {
-                        magicBitPosition = 0;
-                        magicPosition--;
-                    }
 
-                    // If we reached the end of the magic, then we successfully found a full match!
-                    if (magicPosition < 0)
-                    {
-                        foundMatch = true;
-                        break;
-                    }
-
-                    // We didn't find a full match yet, so we also need to progress our search position to the next bit
-                    bitPosition++;
-                    if (bitPosition >= 8)
-                    {
-                        bitPosition = 0;
-                        searchPosition--;
-                    }
-                }
-                else
+                // If bits mismatch, terminate the current search
+                if (currentBit != magicCurrentBit)
                 {
-                    // Bits mismatched, so terminate the current search
                     break;
+                }
+
+                // Found a matching bit!
+                // Progress magic position to next bit
+                magicBitPosition++;
+                if (magicBitPosition >= 8)
+                {
+                    magicBitPosition = 0;
+                    magicPosition--;
+                }
+
+                // If we reached the end of the magic, then we successfully found a full match!
+                if (magicPosition < 0)
+                {
+                    foundMatch = true;
+                    break;
+                }
+
+                // We didn't find a full match yet, so we also need to progress our search position to the next bit
+                bitPosition++;
+                if (bitPosition >= 8)
+                {
+                    bitPosition = 0;
+                    searchPosition--;
                 }
             }
 
@@ -170,12 +210,14 @@ public class GMImage
         throw new IOException("Failed to find BZip2 footer magic");
     }
 
-    // Finds the end position of a BZ2 stream exactly, given the start and end bounds of the data
+    /// <summary>
+    /// Finds the end position of a BZ2 stream exactly, given the start and end bounds of the data.
+    /// </summary>
     private static long FindEndOfBZ2Stream(IBinaryReader reader, long startOfStreamPosition, long maxEndOfStreamPosition)
     {
         if (startOfStreamPosition >= maxEndOfStreamPosition)
         {
-            throw new IOException("Start position is too large");
+            throw new ArgumentOutOfRangeException(nameof(startOfStreamPosition));
         }
 
         // Read backwards from the max end of stream position, in up to 256-byte chunks.
@@ -216,8 +258,8 @@ public class GMImage
     /// </summary>
     /// <param name="reader">Binary reader to read the image data from.</param>
     /// <param name="maxEndOfStreamPosition">
-    /// Location where the image stream ends, from within the <see cref="IBinaryReader"/>.
-    /// There should only be 0 (null) bytes between this position and the end of the image data.
+    /// Location where the image stream must end at or before, from within the <see cref="IBinaryReader"/>.
+    /// There should only be 0 bytes (AKA padding), between the end of the image data and this position.
     /// </param>
     /// <param name="gm2022_5">Whether using GameMaker version 2022.5 or above. Relevant only for BZ2 + QOI format images.</param>
     /// <exception cref="IOException">If no supported texture format is found</exception>
@@ -228,13 +270,13 @@ public class GMImage
 
         // Determine type of image by reading the first 8 bytes
         long startAddress = reader.Position;
-        byte[] header = reader.ReadBytes(8);
+        ReadOnlySpan<byte> header = reader.ReadBytes(8);
 
         // PNG
-        if (header is [137, 80, 78, 71, 13, 10, 26, 10])
+        if (header.SequenceEqual(MagicPng))
         {
-            // There is no length for the PNG anywhere as far as I can see
-            // The only thing we can do is parse the image to find the end
+            // There's no overall PNG image length, so we parse image
+            // chunks until we find the end
             while (true)
             {
                 // PNG is big endian, so swap endianness here manually
@@ -255,7 +297,7 @@ public class GMImage
         }
 
         // QOI + BZip2
-        if (header is [50, 122, 111, 113, ..])
+        if (header.StartsWith(MagicBz2Qoi))
         {
             // Skip past (start of) header
             reader.Position = startAddress + 8;
@@ -283,7 +325,7 @@ public class GMImage
         }
 
         // QOI
-        if (header is [102, 105, 111, 113, ..])
+        if (header.StartsWith(MagicQoi))
         {
             // Read length of data
             uint compressedLength = reader.ReadUInt32();
@@ -327,7 +369,7 @@ public class GMImage
         ReadOnlySpan<byte> span = data.AsSpan();
 
         // Verify header, if requested
-        if (verifyHeader && span[0..8] is not [137, 80, 78, 71, 13, 10, 26, 10])
+        if (verifyHeader && !span[0..8].SequenceEqual(MagicPng))
         {
             throw new InvalidDataException("PNG header mismatch (not a PNG file)");
         }
@@ -337,11 +379,11 @@ public class GMImage
         int height = BinaryPrimitives.ReadInt32BigEndian(span[20..24]);
 
         // Ensure dimensions are valid
-        if (width < 0 || width > MaxImageDimension)
+        if (width is < 0 or > MaxImageDimension)
         {
             throw new InvalidDataException($"Width out of range ({width})");
         }
-        if (height < 0 || height > MaxImageDimension)
+        if (height is < 0 or > MaxImageDimension)
         {
             throw new InvalidDataException($"Height out of range ({height})");
         }
@@ -363,11 +405,11 @@ public class GMImage
         ArgumentNullException.ThrowIfNull(compressedData);
 
         // Ensure dimensions are valid
-        if (width < 0 || width > MaxImageDimension)
+        if (width is < 0 or > MaxImageDimension)
         {
             throw new InvalidDataException($"Width out of range ({width})");
         }
-        if (height < 0 || height > MaxImageDimension)
+        if (height is < 0 or > MaxImageDimension)
         {
             throw new InvalidDataException($"Height out of range ({height})");
         }
@@ -397,11 +439,11 @@ public class GMImage
         int height = BinaryPrimitives.ReadInt16LittleEndian(span[6..8]);
 
         // Ensure dimensions are valid
-        if (width < 0 || width > MaxImageDimension)
+        if (width is < 0 or > MaxImageDimension)
         {
             throw new InvalidDataException($"Width out of range ({width})");
         }
-        if (height < 0 || height > MaxImageDimension)
+        if (height is < 0 or > MaxImageDimension)
         {
             throw new InvalidDataException($"Height out of range ({height})");
         }
@@ -476,6 +518,8 @@ public class GMImage
                     rawImage.SavePng(stream);
                     break;
                 }
+            default:
+                throw new InvalidOperationException($"Unknown format {Format}");
         }
     }
 
@@ -617,8 +661,10 @@ public class GMImage
         throw new InvalidOperationException($"Unknown source format {Format}");
     }
 
-    // Compresses the provided QOI data using BZ2, and using the shared MemoryStream if not null.
-    // Returns a new BZ2 + QOI image with the compressed data.
+    /// <summary>
+    /// Compresses the provided QOI data using BZ2, and using the shared <see cref="MemoryStream"/>, if not null.
+    /// </summary>
+    /// <returns>A new BZ2 + QOI image with the compressed data.</returns>
     private static GMImage CompressQoiData(int width, int height, byte[] qoiData, MemoryStream sharedStream)
     {
         // Compress into new byte array
@@ -715,7 +761,7 @@ public class GMImage
                 break;
             case ImageFormat.Bz2Qoi:
                 // Header is missing in this case, so we need to generate it first
-                writer.Write(0x716F7A32); // '2zoq' magic
+                writer.Write(MagicBz2Qoi);
                 writer.Write((short)Width);
                 writer.Write((short)Height);
                 if (gm2022_5)

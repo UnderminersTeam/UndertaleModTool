@@ -189,12 +189,13 @@ namespace UndertaleModTool
         }
         private ImageSource CreateSpriteSource(in Rectangle rect, in UndertaleTexturePageItem texture, int diffW = 0, int diffH = 0, bool isTile = false)
         {
-            Bitmap spriteBitmap = CreateSpriteBitmap(rect, in texture, diffW, diffH, isTile);
-
-            IntPtr bmpPtr = spriteBitmap.GetHbitmap();
-            ImageSource spriteSrc = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(bmpPtr, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-            DeleteObject(bmpPtr);
-            spriteBitmap.Dispose();
+            ImageSource spriteSrc;
+            using (Bitmap spriteBitmap = CreateSpriteBitmap(rect, in texture, diffW, diffH, isTile))
+            {
+                IntPtr bmpPtr = spriteBitmap.GetHbitmap();
+                spriteSrc = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(bmpPtr, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                DeleteObject(bmpPtr);
+            }
             spriteSrc.Freeze(); // allow UI thread access
 
             return spriteSrc;

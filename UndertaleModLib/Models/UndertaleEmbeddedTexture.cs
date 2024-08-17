@@ -335,8 +335,9 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
 
         /// <summary>
         /// If located within a data file, this is the maximum end position of the image data (or start of the next texture blob).
+        /// All data between the actual end position and this maximum end position should be padding.
         /// </summary>
-        public int MaxEndOfStreamPosition { get; set; } = -1;
+        private int _maxEndOfStreamPosition { get; set; } = -1;
 
         /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
@@ -371,20 +372,34 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
-            if (MaxEndOfStreamPosition == -1)
-            {
-                throw new Exception("Expected max end of stream position to be set before unserializing");
-            }
-
-            Unserialize(reader, MaxEndOfStreamPosition, reader.undertaleData.IsVersionAtLeast(2022, 5));
+            Unserialize(reader, _maxEndOfStreamPosition, reader.undertaleData.IsVersionAtLeast(2022, 5));
         }
 
         /// <summary>
         /// Unserializes the texture from any type of reader (can be from any source).
         /// </summary>
+        /// <param name="reader"><see cref="IBinaryReader"/> to read the texture's image from.</param>
+        /// <param name="maxEndOfStreamPosition">Upper bound on the end of the texture's image data (e.g., for padding).</param>
+        /// <param name="gm2022_5">Whether to unserialize the image data using GameMaker 2022.5+ format.</param>
         public void Unserialize(IBinaryReader reader, long maxEndOfStreamPosition, bool gm2022_5)
         {
+            if (maxEndOfStreamPosition == -1)
+            {
+                throw new Exception("Expected max end of stream position to be set before unserializing");
+            }
+
             Image = GMImage.FromBinaryReader(reader, maxEndOfStreamPosition, gm2022_5);
+        }
+
+        /// <summary>
+        /// Sets the upper bound on the position of the end of the image stream, for use when loading a full data file.
+        /// </summary>
+        /// <remarks>
+        /// All data between the actual end position and this maximum end position should be padding (zero bytes).
+        /// </remarks>
+        public void SetMaxEndOfStreamPosition(int position)
+        {
+            _maxEndOfStreamPosition = position;
         }
 
 
