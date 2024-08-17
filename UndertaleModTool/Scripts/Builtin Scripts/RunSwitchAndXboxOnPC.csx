@@ -36,15 +36,7 @@ Data.GeneralInfo.Info &= ~(UndertaleGeneralInfo.InfoFlags.Interpolate);
 // Use new gamepad functions, because the compatibility ones are completely broken
 
 // use NX routine for joypad detection
-ReplaceTextInGML("gml_Object_obj_time_Create_0", @"
-if (global.osflavor >= 4)
-{
-    i = 0
-    while (i < gamepad_get_device_count())", @"
-if (true)
-{
-    i = 0
-    while (i < gamepad_get_device_count())");
+ReplaceTextInGML("gml_Object_obj_time_Create_0", "if (global.osflavor >= 4)", "if (true)");
 ReplaceTextInGML("gml_Object_obj_time_Create_0", @"
     else
         j_ch = 1", @"
@@ -52,7 +44,7 @@ ReplaceTextInGML("gml_Object_obj_time_Create_0", @"
         j_ch = 1");
 string os_switch = "os_switch" + (!isXbox ? "_beta" : "");
 ReplaceTextInGML("gml_Object_obj_time_Step_1", "global.osflavor <= 2", "false");
-ReplaceTextInGML("gml_Object_obj_time_Step_1", "os_type == " + os_switch + "", "true");
+ReplaceTextInGML("gml_Object_obj_time_Step_1", "os_type == " + os_switch, "true");
 ReplaceTextInGML("gml_Object_obj_time_Step_1", @"
     if (j_ch > 0)
         missing_controller_timeout = 0", @"
@@ -89,29 +81,16 @@ ReplaceTextInGML("gml_Object_obj_time_Step_1", @"
 ReplaceTextInGML("gml_Script_control_update", "else if (obj_time.j_ch > 0)", "else if (false)");
 ReplaceTextInGML("gml_Script_control_update", "global.osflavor >= 4", "obj_time.j_ch > 0");
 
-/*
-// show button config
-ReplaceTextInGML("gml_Object_obj_settingsmenu_Draw_0", "global.osflavor <= 2", "false");
-ReplaceTextInGML("gml_Object_obj_settingsmenu_Draw_0", "global.osflavor >= 4", "true");
-*/
-
 // Fix Joystick Menu
-/*ReplaceTextInGML("gml_Script___joystick_2_gamepad", @"if (argument0 == 2)
-    return global.__jstick_pad2;
-else
-    return global.__jstick_pad1;", @"show_debug_message(""Debug : __joystick_2_gamepad was called"")
-if (argument0 != obj_time.j_ch)
-    show_debug_message(""Debug : passed in value other than j_ch while calling joystick functions"")
-return obj_time.j_ch - 1;");*/
 ReplaceTextInGML("gml_Object_obj_joypadmenu_Create_0", "joystick_has_pov(obj_time.j_ch)", "true");
 ReplaceTextInGML("gml_Object_obj_joypadmenu_Draw_0", "joystick_has_pov(obj_time.j_ch)", "true");
 // gamepad_button_count(obj_time.j_ch - 1) might work better but I'm not sure
 ReplaceTextInGML("gml_Object_obj_joypadmenu_Draw_0", "joystick_buttons(obj_time.j_ch)", "11 + 1");
-ReplaceTextInGML("gml_Object_obj_joypadmenu_Draw_0", "joystick_check_button(obj_time.j_ch, i)", "gamepad_button_check(obj_time.j_ch - 1, 32769 + i)");
+ReplaceTextInGML("gml_Object_obj_joypadmenu_Draw_0", "joystick_check_button(obj_time.j_ch, i)", "gamepad_button_check(obj_time.j_ch - 1, gp_face1 + i)");
 for (var i = 0; i < 3; i++)
 {
-    ReplaceTextInGML("gml_Object_obj_joypadmenu_Draw_0", $"global.button{i} = i", $"global.button{i} = 32769 + i");
-    ReplaceTextInGML("gml_Object_obj_joypadmenu_Draw_0", $"string_hash_to_newline(global.button{i})", $"string(global.button{i} - 32769)");
+    ReplaceTextInGML("gml_Object_obj_joypadmenu_Draw_0", $"global.button{i} = i", $"global.button{i} = gp_face1 + i");
+    ReplaceTextInGML("gml_Object_obj_joypadmenu_Draw_0", $"string_hash_to_newline(global.button{i})", $"string(global.button{i} - gp_face1)");
 }
 
 // Use Xbox or PS4 button sprites
@@ -121,9 +100,9 @@ else
     ReplaceTextInGML("gml_Script_scr_getbuttonsprite", "os_type == os_ps4", "true");
 
 // Allow gamepad input for left/right heart halfs
-foreach (string half in new List<string>{"l", "r"})
+foreach (var half in new char[]{'l', 'r'})
 {
-    foreach (string side in new List<string>{"u", "d", "l", "r"})
+    foreach (var side in new char[]{'u', 'd', 'l', 'r'})
     {
         ReplaceTextInGML($"gml_Script_scr_heart{half}_hold{side}", "global.osflavor <= 2 && ", "");
         ReplaceTextInGML($"gml_Script_scr_heart{half}_hold{side}", "global.osflavor >= 4 && ", "");
@@ -132,26 +111,23 @@ foreach (string half in new List<string>{"l", "r"})
 
 if (ScriptQuestion("Enable the Dog Shrine?"))
 {
-    // This enables the Dog Shrine's entrance.
-    if (isXbox)
+    if (isXbox) {
+        // This enables the Dog Shrine's entrance.
         ReplaceTextInGML("gml_Object_obj_kitchenchecker_Create_0", "global.osflavor == 4 || global.osflavor == 5 || global.osflavor == 6", "true");
-    else
-        ReplaceTextInGML("gml_Object_obj_kitchenchecker_Create_0", "global.osflavor == 4 || global.osflavor == 5", "true");
-
-    if (isXbox)
         ReplaceTextInGML("gml_Object_obj_kitchenchecker_Alarm_2", "(global.osflavor == 4 || global.osflavor == 5 || global.osflavor == 6) && ", "");
-    else
+        // if in NX version, the door will get you into the ruined dog shrine
+        ReplaceTextInGML("gml_Object_obj_doorXmusicfade_Alarm_2", "if (global.osflavor == 6)", "else");
+
+        // Enable donation box trash
+        ReplaceTextInGML("gml_Object_obj_npc_room_Create_0", "global.osflavor != 4 && global.osflavor != 6", "false");
+    } else {
+        // This enables the Dog Shrine's entrance.
+        ReplaceTextInGML("gml_Object_obj_kitchenchecker_Create_0", "global.osflavor == 4 || global.osflavor == 5", "true");
         ReplaceTextInGML("gml_Object_obj_kitchenchecker_Alarm_2", "(global.osflavor == 4 || global.osflavor == 5) && ", "");
 
-    if (isXbox)
-        ReplaceTextInGML("gml_Object_obj_doorXmusicfade_Alarm_2", "if (global.osflavor == 6)", "else");
-    // if in NX version, the door will get you into the ruined dog shrine
-
-    // Enable donation box trash
-    if (isXbox)
-        ReplaceTextInGML("gml_Object_obj_npc_room_Create_0", "global.osflavor != 4 && global.osflavor != 6", "false");
-    else
+        // Enable donation box trash
         ReplaceTextInGML("gml_Object_obj_npc_room_Create_0", "(global.osflavor != 4 && global.osflavor != 5) || ", "");
+    }
 }
 
 // Done.
@@ -161,13 +137,16 @@ Xbox and gamepad fixes by Dobby233Liu
 NOTE: You're not done yet!
 
 For Switch version:
-Copy 'mus_mewmew.ogg', 'mus_sfx_dogseal.ogg', and 'DELTARUNE.exe'
-into the folder you will save this game archive.
-Use the DELTARUNE runner to run Undertale.
+Copy 'mus_mewmew.ogg', 'mus_sfx_dogseal.ogg',
+and 'DELTARUNE.exe' (from SURVEY_PROGRAM/the 2018 version)
+to the folder you will save this data file to.
+Then use the Deltarune runner to run Undertale.
 
 For Xbox version:
-Copy 'mus_mewmew.ogg', 'mus_sfx_dogseal.ogg' and 'mus_dogshrine_xbox.ogg'
-into the folder you will save this game archive.
-Use a 2.2.2-2.2.5 runner to run Undertale.
+Copy 'mus_mewmew.ogg', 'mus_sfx_dogseal.ogg'
+and 'mus_dogshrine_xbox.ogg'
+to the folder you will save this data file to.
+Then use a GMS2 2.2.2-2.2.5 runner to run Undertale.
 
-You might want to reset joystick settings.");
+Due to button constant changes, you might want to reset
+the joystick settings.");
