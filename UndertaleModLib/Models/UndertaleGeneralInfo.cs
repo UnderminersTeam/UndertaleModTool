@@ -498,6 +498,8 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
                 Release = prevGenInfo.Release;
                 Build = prevGenInfo.Build;
             }
+            if (prevGenInfo.Branch > Branch)
+                Branch = prevGenInfo.Branch;
         }
 
         DefaultWindowWidth = reader.ReadUInt32();
