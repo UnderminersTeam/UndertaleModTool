@@ -481,6 +481,14 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         if (reader.ReadOnlyGEN8)
             return;
 
+        // TestForCommonGMSVersions is already run during the object counting phase, so the previous general info is always more accurate.
+        var prevGenInfo = reader.undertaleData.GeneralInfo;
+        Major = prevGenInfo.Major;
+        Minor = prevGenInfo.Minor;
+        Release = prevGenInfo.Release;
+        Build = prevGenInfo.Build;
+        Branch = prevGenInfo.Branch;
+        /*
         var detectedVer = TestForCommonGMSVersions(reader, (Major, Minor, Release, Build, Branch));
         (Major, Minor, Release, Build, Branch) = detectedVer;
 
@@ -501,6 +509,7 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
             if (prevGenInfo.Branch > Branch)
                 Branch = prevGenInfo.Branch;
         }
+        */
 
         DefaultWindowWidth = reader.ReadUInt32();
         DefaultWindowHeight = reader.ReadUInt32();
