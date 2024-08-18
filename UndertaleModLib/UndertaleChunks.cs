@@ -1654,13 +1654,12 @@ namespace UndertaleModLib
                         {
                             // Skip this texture, as it's external
                             searchIndex++;
+                            continue;
                         }
-                        else
-                        {
-                            // Use start address of this blob
-                            maxEndOfStreamPosition = (int)reader.GetOffsetMapRev()[searchObj.TextureData];
-                            break;
-                        }
+
+                        // Use start address of this blob
+                        maxEndOfStreamPosition = (int)reader.GetOffsetMapRev()[searchObj.TextureData];
+                        break;
                     }
 
                     if (maxEndOfStreamPosition == -1)

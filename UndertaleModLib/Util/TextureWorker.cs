@@ -106,6 +106,7 @@ namespace UndertaleModLib.Util
         /// <remarks>
         /// Image color format will always be converted to BGRA, with no compression.
         /// </remarks>
+        /// <param name="filePath">File path to read the image from.</param>
         /// <returns>An image, in uncompressed BGRA format, containing the contents of the image file at the given path.</returns>
         public static MagickImage ReadBGRAImageFromFile(string filePath)
         {

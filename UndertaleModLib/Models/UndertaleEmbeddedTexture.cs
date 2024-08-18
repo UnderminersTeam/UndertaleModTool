@@ -334,9 +334,11 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         public bool FormatBZ2 => _image.Format is GMImage.ImageFormat.Bz2Qoi;
 
         /// <summary>
-        /// If located within a data file, this is the maximum end position of the image data (or start of the next texture blob).
-        /// All data between the actual end position and this maximum end position should be padding.
+        /// If located within a data file, this is the upper bound on the end position of the image data (or start of the next texture blob).
         /// </summary>
+        /// <remarks>
+        /// All data between the actual end position and this maximum end position should be 0x00 byte padding.
+        /// </remarks>
         private int _maxEndOfStreamPosition { get; set; } = -1;
 
         /// <inheritdoc />

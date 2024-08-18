@@ -78,18 +78,18 @@ namespace UndertaleModTool
             if (item is null)
                 return;
 
-            if (e.PropertyName == nameof(UndertaleTexturePageItem.TexturePage))
-            {
-                UpdateImages(item);
+            if (e.PropertyName != nameof(UndertaleTexturePageItem.TexturePage))
+                return;
 
-                // Start listening for (new) texture image updates
-                if (_textureDataContext is not null)
-                {
-                    _textureDataContext.PropertyChanged -= ReloadTextureImage;
-                }
-                _textureDataContext = item.TexturePage.TextureData;
-                _textureDataContext.PropertyChanged += ReloadTextureImage;
+            UpdateImages(item);
+
+            // Start listening for (new) texture image updates
+            if (_textureDataContext is not null)
+            {
+                _textureDataContext.PropertyChanged -= ReloadTextureImage;
             }
+            _textureDataContext = item.TexturePage.TextureData;
+            _textureDataContext.PropertyChanged += ReloadTextureImage;
         }
 
         private void ReloadTextureImage(object sender, PropertyChangedEventArgs e)
@@ -98,11 +98,11 @@ namespace UndertaleModTool
             if (item is null)
                 return;
 
+            if (e.PropertyName != nameof(UndertaleEmbeddedTexture.TexData.Image))
+                return;
+
             // If the texture's image was updated, reload it
-            if (e.PropertyName == nameof(UndertaleEmbeddedTexture.TexData.Image))
-            {
-                UpdateImages(item);
-            }
+            UpdateImages(item);
         }
 
         private void UnloadTexture(object sender, RoutedEventArgs e)

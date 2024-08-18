@@ -111,7 +111,9 @@ public class GMImage
         _data = new byte[width * height * 4];
     }
 
-    // Constructor for use by other creation methods
+    /// <summary>
+    /// Basic private constructor for use by other creation methods; just initializes the given fields.
+    /// </summary>
     private GMImage(ImageFormat format, int width, int height, byte[] data)
     {
         Format = format;
@@ -195,15 +197,13 @@ public class GMImage
                 // Return position relative to the start of the data we read
                 return (endDataPosition - data.Length) + endOfBZ2StreamPosition;
             }
-            else
+
+            // Current search failed to make a full match, so progress to next bit, to search starting from there
+            searchStartBitPosition++;
+            if (searchStartBitPosition >= 8)
             {
-                // Current search failed to do a full match, so progress to next bit, to search starting from there
-                searchStartBitPosition++;
-                if (searchStartBitPosition >= 8)
-                {
-                    searchStartBitPosition = 0;
-                    searchStartPosition--;
-                }
+                searchStartBitPosition = 0;
+                searchStartPosition--;
             }
         }
 
@@ -259,7 +259,7 @@ public class GMImage
     /// <param name="reader">Binary reader to read the image data from.</param>
     /// <param name="maxEndOfStreamPosition">
     /// Location where the image stream must end at or before, from within the <see cref="IBinaryReader"/>.
-    /// There should only be 0 bytes (AKA padding), between the end of the image data and this position.
+    /// There should only be 0x00 bytes (AKA padding), between the end of the image data and this position.
     /// </param>
     /// <param name="gm2022_5">Whether using GameMaker version 2022.5 or above. Relevant only for BZ2 + QOI format images.</param>
     /// <exception cref="IOException">If no supported texture format is found</exception>
@@ -275,8 +275,8 @@ public class GMImage
         // PNG
         if (header.SequenceEqual(MagicPng))
         {
-            // There's no overall PNG image length, so we parse image
-            // chunks until we find the end
+            // There's no overall PNG image length, so we parse image chunks,
+            // which do have their own length, until we find the end
             while (true)
             {
                 // PNG is big endian, so swap endianness here manually

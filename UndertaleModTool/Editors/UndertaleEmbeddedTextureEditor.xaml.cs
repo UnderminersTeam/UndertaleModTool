@@ -98,11 +98,11 @@ namespace UndertaleModTool
             if (texture is null)
                 return;
 
+            if (e.PropertyName != nameof(UndertaleEmbeddedTexture.TexData.Image))
+                return;
+
             // If the texture's image was updated, reload it
-            if (e.PropertyName == nameof(UndertaleEmbeddedTexture.TexData.Image))
-            {
-                UpdateImage(texture);
-            }
+            UpdateImage(texture);
         }
 
         private void UnloadTexture(object sender, RoutedEventArgs e)
