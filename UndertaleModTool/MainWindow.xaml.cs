@@ -772,58 +772,59 @@ namespace UndertaleModTool
                 e.Cancel = true;
 
                 bool save = false;
+                bool quit = false;
 
                 if (SettingsWindow.WarnOnClose)
                 {
-                    if (this.ShowQuestion("Are you sure you want to quit?") == MessageBoxResult.Yes)
-                    {
-                        if (this.ShowQuestion("Save changes first?") == MessageBoxResult.Yes)
+                    MessageBoxResult result = this.ShowQuestionWithCancel("Save changes before quitting?");
+
+                    if (result == MessageBoxResult.Yes) {
+                        quit = true;
+
+                        if (scriptDialog is not null)
                         {
-                            if (scriptDialog is not null)
-                            {
-                                if (this.ShowQuestion("Script still runs. Save anyway?\nIt can corrupt the data file that you'll save.") == MessageBoxResult.Yes)
-                                    save = true;
-                            }
-                            else
+                            if (this.ShowQuestion("Script still runs. Save anyway?\nIt can corrupt the data file that you'll save.") == MessageBoxResult.Yes)
                                 save = true;
-
-                            if (save)
-                            {
-                                SaveResult saveRes = await SaveCodeChanges();
-
-                                if (saveRes == SaveResult.NotSaved)
-                                    _ = DoSaveDialog();
-                                else if (saveRes == SaveResult.Error)
-                                {
-                                    this.ShowError("The changes in code editor weren't saved due to some error in \"SaveCodeChanges()\".");
-                                    return;
-                                }
-                            }
                         }
                         else
-                            RevertProfile();
-
-                        DestroyUMTLastEdited();
+                            save = true;
+                    } else if (result == MessageBoxResult.No) {
+                        quit = true;
                     }
-                    else
-                        return;
                 }
                 else
                 {
-                    RevertProfile();
-                    DestroyUMTLastEdited();
+                    quit = true;
                 }
 
-                if (SettingsWindow.UseGMLCache && Data?.GMLCache?.Count > 0 && !Data.GMLCacheWasSaved && Data.GMLCacheIsReady)
-                    if (this.ShowQuestion("Save unedited code cache?") == MessageBoxResult.Yes)
-                        await SaveGMLCache(FilePath, save);
+                if (quit) {
+                    if (save) {
+                        SaveResult saveRes = await SaveCodeChanges();
 
-                CloseOtherWindows();
+                        if (saveRes == SaveResult.NotSaved)
+                            _ = DoSaveDialog();
+                        else if (saveRes == SaveResult.Error)
+                        {
+                            this.ShowError("The changes in code editor weren't saved due to some error in \"SaveCodeChanges()\".");
+                            return;
+                        }
+                    } else {
+                        RevertProfile();
+                    }
 
-                IsAppClosed = true;
+                    DestroyUMTLastEdited();
 
-                Closing -= DataWindow_Closing; //disable "on window closed" event handler (prevent recursion)
-                _ = Task.Run(() => Dispatcher.Invoke(Close));
+                    if (SettingsWindow.UseGMLCache && Data?.GMLCache?.Count > 0 && !Data.GMLCacheWasSaved && Data.GMLCacheIsReady)
+                        if (this.ShowQuestion("Save unedited code cache?") == MessageBoxResult.Yes)
+                            await SaveGMLCache(FilePath, save);
+
+                    CloseOtherWindows();
+
+                    IsAppClosed = true;
+
+                    Closing -= DataWindow_Closing; //disable "on window closed" event handler (prevent recursion)
+                    _ = Task.Run(() => Dispatcher.Invoke(Close));
+                }
             }
         }
         private void Command_Close(object sender, ExecutedRoutedEventArgs e)
