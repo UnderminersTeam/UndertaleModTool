@@ -91,12 +91,14 @@ AppendGML("gml_Object_obj_screen_Other_4", @"if (room == room_dialoguer)
     window_set_caption(""UNDERTALE Dialog Simulator"")
 ");
 
-ReplaceTextInGML("gml_Object_obj_time_Step_1", "room_goto_next()", "room_goto(room_dialoguer)", true, false);
+GlobalDecompileContext globalDecompileContext = new(Data);
+Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = new Underanalyzer.Decompiler.DecompileSettings();
+ReplaceTextInGML("gml_Object_obj_time_Step_1", "room_goto_next()", "room_goto(room_dialoguer)", true, false, globalDecompileContext, decompilerSettings);
 ImportGMLStringEx("gml_Script_scr_msgup", @"
 if (room != room_dialoguer)
 {
 "
-+ GetDecompiledText("gml_Script_scr_msgup")
++ GetDecompiledText("gml_Script_scr_msgup", globalDecompileContext, decompilerSettings)
 + @"
 }
 else
