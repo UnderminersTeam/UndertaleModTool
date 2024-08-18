@@ -36,7 +36,7 @@ if (isXbox)
 }
 
 // Disables interpolation. Only necessary for NX version.
-Data.GeneralInfo.Info &= ~(UndertaleGeneralInfo.InfoFlags.Interpolate);
+Data.GeneralInfo.Info &= ~UndertaleGeneralInfo.InfoFlags.Interpolate;
 
 // Use new gamepad functions, because the compatibility ones are completely broken
 
