@@ -115,9 +115,9 @@ else
     ReplaceTextInGML("gml_Script_scr_getbuttonsprite", "os_type == os_ps4", "true");
 
 // Allow gamepad input for left/right heart halfs
-foreach (var half in new char[]{'l', 'r'})
+foreach (char half in new[] {'l', 'r'})
 {
-    foreach (var side in new char[]{'u', 'd', 'l', 'r'})
+    foreach (char side in new[] {'u', 'd', 'l', 'r'})
     {
         ReplaceTextInGML($"gml_Script_scr_heart{half}_hold{side}", "global.osflavor <= 2 && ", "");
         ReplaceTextInGML($"gml_Script_scr_heart{half}_hold{side}", "global.osflavor >= 4 && ", "");
@@ -126,7 +126,8 @@ foreach (var half in new char[]{'l', 'r'})
 
 if (ScriptQuestion("Enable the Dog Shrine?"))
 {
-    if (isXbox) {
+    if (isXbox)
+    {
         // This enables the Dog Shrine's entrance.
         ReplaceTextInGML("gml_Object_obj_kitchenchecker_Create_0", "global.osflavor == 4 || global.osflavor == 5 || global.osflavor == 6", "true");
         ReplaceTextInGML("gml_Object_obj_kitchenchecker_Alarm_2", "(global.osflavor == 4 || global.osflavor == 5 || global.osflavor == 6) && ", "");
@@ -135,7 +136,9 @@ if (ScriptQuestion("Enable the Dog Shrine?"))
 
         // Enable donation box trash
         ReplaceTextInGML("gml_Object_obj_npc_room_Create_0", "global.osflavor != 4 && global.osflavor != 6", "false");
-    } else {
+    }
+    else
+    {
         // This enables the Dog Shrine's entrance.
         ReplaceTextInGML("gml_Object_obj_kitchenchecker_Create_0", "global.osflavor == 4 || global.osflavor == 5", "true");
         ReplaceTextInGML("gml_Object_obj_kitchenchecker_Alarm_2", "(global.osflavor == 4 || global.osflavor == 5) && ", "");
