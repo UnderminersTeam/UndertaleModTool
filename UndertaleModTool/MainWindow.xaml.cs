@@ -772,59 +772,60 @@ namespace UndertaleModTool
                 e.Cancel = true;
 
                 bool save = false;
-                bool quit = false;
 
                 if (SettingsWindow.WarnOnClose)
                 {
                     MessageBoxResult result = this.ShowQuestionWithCancel("Save changes before quitting?");
 
-                    if (result == MessageBoxResult.Yes) {
-                        quit = true;
+                    if (result == MessageBoxResult.Cancel)
+                    {
+                        return;
+                    }
 
+                    if (result == MessageBoxResult.Yes)
+                    {
                         if (scriptDialog is not null)
                         {
                             if (this.ShowQuestion("Script still runs. Save anyway?\nIt can corrupt the data file that you'll save.") == MessageBoxResult.Yes)
                                 save = true;
                         }
                         else
+                        {
                             save = true;
-                    } else if (result == MessageBoxResult.No) {
-                        quit = true;
+                        }
+                    }
+                }
+
+                if (save)
+                {
+                    SaveResult saveRes = await SaveCodeChanges();
+
+                    if (saveRes == SaveResult.NotSaved)
+                    {
+                        _ = DoSaveDialog();
+                    }
+                    else if (saveRes == SaveResult.Error)
+                    {
+                        this.ShowError("The changes in code editor weren't saved due to some error in \"SaveCodeChanges()\".");
+                        return;
                     }
                 }
                 else
                 {
-                    quit = true;
+                    RevertProfile();
                 }
 
-                if (quit) {
-                    if (save) {
-                        SaveResult saveRes = await SaveCodeChanges();
+                DestroyUMTLastEdited();
 
-                        if (saveRes == SaveResult.NotSaved)
-                            _ = DoSaveDialog();
-                        else if (saveRes == SaveResult.Error)
-                        {
-                            this.ShowError("The changes in code editor weren't saved due to some error in \"SaveCodeChanges()\".");
-                            return;
-                        }
-                    } else {
-                        RevertProfile();
-                    }
+                if (SettingsWindow.UseGMLCache && Data?.GMLCache?.Count > 0 && !Data.GMLCacheWasSaved && Data.GMLCacheIsReady && this.ShowQuestion("Save unedited code cache?") == MessageBoxResult.Yes)
+                    await SaveGMLCache(FilePath, save);
 
-                    DestroyUMTLastEdited();
+                CloseOtherWindows();
 
-                    if (SettingsWindow.UseGMLCache && Data?.GMLCache?.Count > 0 && !Data.GMLCacheWasSaved && Data.GMLCacheIsReady)
-                        if (this.ShowQuestion("Save unedited code cache?") == MessageBoxResult.Yes)
-                            await SaveGMLCache(FilePath, save);
+                IsAppClosed = true;
 
-                    CloseOtherWindows();
-
-                    IsAppClosed = true;
-
-                    Closing -= DataWindow_Closing; //disable "on window closed" event handler (prevent recursion)
-                    _ = Task.Run(() => Dispatcher.Invoke(Close));
-                }
+                Closing -= DataWindow_Closing; // Disable "on window closed" event handler (prevent recursion)
+                _ = Task.Run(() => Dispatcher.Invoke(Close));
             }
         }
         private void Command_Close(object sender, ExecutedRoutedEventArgs e)
