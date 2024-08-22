@@ -118,7 +118,7 @@ jobs:
       with:
         tag_name: bleeding-edge
         name: Bleeding Edge
-        prerelease: false
+        prerelease: true
         fail_on_unmatched_files: true
         files: |
           */*
