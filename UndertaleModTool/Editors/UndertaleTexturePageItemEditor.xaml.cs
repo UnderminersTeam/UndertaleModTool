@@ -1,14 +1,15 @@
 ﻿using Microsoft.Win32;
 using System;
-using System.Drawing;
 using System.Windows;
-using System.IO;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Data;
 using UndertaleModTool.Windows;
+using ImageMagick;
+using System.Windows.Media.Imaging;
+using System.ComponentModel;
 
 namespace UndertaleModTool
 {
@@ -19,9 +20,109 @@ namespace UndertaleModTool
     {
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
 
+        /// <summary>
+        /// Handle on the texture page item we're listening for updates from.
+        /// </summary>
+        private UndertaleTexturePageItem _textureItemContext = null;
+
+        /// <summary>
+        /// Handle on the texture data where we're listening for updates from.
+        /// </summary>
+        private UndertaleEmbeddedTexture.TexData _textureDataContext = null;
+
         public UndertaleTexturePageItemEditor()
         {
             InitializeComponent();
+
+            DataContextChanged += SwitchDataContext;
+            Unloaded += UnloadTexture;
+        }
+
+        private void UpdateImages(UndertaleTexturePageItem item)
+        {
+            GMImage image = item.TexturePage.TextureData.Image;
+            BitmapSource bitmap = mainWindow.GetBitmapSourceForImage(image);
+            ItemTextureBGImage.Source = bitmap;
+            ItemTextureImage.Source = bitmap;
+        }
+
+        private void SwitchDataContext(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            UndertaleTexturePageItem item = (DataContext as UndertaleTexturePageItem);
+            if (item is null)
+                return;
+
+            // Load current image
+            UpdateImages(item);
+
+            // Start listening for texture page updates
+            if (_textureItemContext is not null)
+            {
+                _textureItemContext.PropertyChanged -= ReloadTexturePage;
+            }
+            _textureItemContext = item;
+            _textureItemContext.PropertyChanged += ReloadTexturePage;
+
+            // Start listening for texture image updates
+            if (_textureDataContext is not null)
+            {
+                _textureDataContext.PropertyChanged -= ReloadTextureImage;
+            }
+            _textureDataContext = item.TexturePage.TextureData;
+            _textureDataContext.PropertyChanged += ReloadTextureImage;
+        }
+
+        private void ReloadTexturePage(object sender, PropertyChangedEventArgs e)
+        {
+            UndertaleTexturePageItem item = (DataContext as UndertaleTexturePageItem);
+            if (item is null)
+                return;
+
+            if (e.PropertyName != nameof(UndertaleTexturePageItem.TexturePage))
+                return;
+
+            UpdateImages(item);
+
+            // Start listening for (new) texture image updates
+            if (_textureDataContext is not null)
+            {
+                _textureDataContext.PropertyChanged -= ReloadTextureImage;
+            }
+            _textureDataContext = item.TexturePage.TextureData;
+            _textureDataContext.PropertyChanged += ReloadTextureImage;
+        }
+
+        private void ReloadTextureImage(object sender, PropertyChangedEventArgs e)
+        {
+            UndertaleTexturePageItem item = (DataContext as UndertaleTexturePageItem);
+            if (item is null)
+                return;
+
+            if (e.PropertyName != nameof(UndertaleEmbeddedTexture.TexData.Image))
+                return;
+
+            // If the texture's image was updated, reload it
+            UpdateImages(item);
+        }
+
+        private void UnloadTexture(object sender, RoutedEventArgs e)
+        {
+            ItemTextureBGImage.Source = null;
+            ItemTextureImage.Source = null;
+
+            // Stop listening for texture page updates
+            if (_textureItemContext is not null)
+            {
+                _textureItemContext.PropertyChanged -= ReloadTexturePage;
+                _textureItemContext = null;
+            }
+
+            // Stop listening for texture image updates
+            if (_textureDataContext is not null)
+            {
+                _textureDataContext.PropertyChanged -= ReloadTextureImage;
+                _textureDataContext = null;
+            }
         }
 
         private void Import_Click(object sender, RoutedEventArgs e)
@@ -36,9 +137,9 @@ namespace UndertaleModTool
 
             try
             {
-                Bitmap image = TextureWorker.ReadImageFromFile(dlg.FileName);
-                image.SetResolution(96.0F, 96.0F);
-                (this.DataContext as UndertaleTexturePageItem).ReplaceTexture(image);
+                using MagickImage image = TextureWorker.ReadBGRAImageFromFile(dlg.FileName);
+                UndertaleTexturePageItem item = DataContext as UndertaleTexturePageItem;
+                item.ReplaceTexture(image);
 
                 // Refresh the image of "ItemDisplay"
                 if (ItemDisplay.FindName("RenderAreaBorder") is not Border border)
@@ -62,16 +163,15 @@ namespace UndertaleModTool
 
             if (dlg.ShowDialog() == true)
             {
-                TextureWorker worker = new TextureWorker();
+                using TextureWorker worker = new();
                 try
                 {
-                    worker.ExportAsPNG((UndertaleTexturePageItem)this.DataContext, dlg.FileName);
+                    worker.ExportAsPNG((UndertaleTexturePageItem)DataContext, dlg.FileName);
                 }
                 catch (Exception ex)
                 {
                     mainWindow.ShowError("Failed to export file: " + ex.Message, "Failed to export file");
                 }
-                worker.Cleanup();
             }
         }
 
