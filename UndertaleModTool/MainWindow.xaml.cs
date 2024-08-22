@@ -784,15 +784,8 @@ namespace UndertaleModTool
 
                     if (result == MessageBoxResult.Yes)
                     {
-                        if (scriptDialog is not null)
-                        {
-                            if (this.ShowQuestion("Script still runs. Save anyway?\nIt can corrupt the data file that you'll save.") == MessageBoxResult.Yes)
-                                save = true;
-                        }
-                        else
-                        {
+                        if (scriptDialog is null || (this.ShowQuestion("Script still runs. Save anyway?\nIt can corrupt the data file that you'll save.") == MessageBoxResult.Yes))
                             save = true;
-                        }
                     }
                 }
 
