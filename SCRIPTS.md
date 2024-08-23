@@ -12,7 +12,7 @@ They are relatively self-explanatory, but there are also some helpful general-pu
 - `EnableDebug.csx`: Enables debug mode in Undertale/Deltarune.
 - `FindAndReplace.csx`: Tool to find and replace GML code across an entire game.
 - `GoToRoom.csx`: Enables a hotkey to warp to a supplied room ID in a game.
-- `RunSwitchOnPC.csx`: Converts the Switch version of Undertale to run on PC (certain versions).
+- `RunSwitchAndXboxOnPC.csx`: Converts the Switch and Xbox versions of Undertale to run on PC (certain versions).
 - `Search.csx`: Tool to search the GML code across an entire game.
 - `ShowRoomName.csx`: Enables an overlay to display the current room name and ID.
 - `TTFFonts.csx`: Marks all fonts in Undertale to be externally loaded. Does not handle Japanese text.
