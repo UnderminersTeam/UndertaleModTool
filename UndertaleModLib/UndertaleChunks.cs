@@ -1167,7 +1167,7 @@ namespace UndertaleModLib
 
                     reader.Position += 32;
                     int effectCount = reader.ReadInt32();
-                    reader.Position += effectCount * 12 + 4;
+                    reader.Position += (uint)effectCount * 12 + 4;
 
                     int tileMapWidth = reader.ReadInt32();
                     int tileMapHeight = reader.ReadInt32();
