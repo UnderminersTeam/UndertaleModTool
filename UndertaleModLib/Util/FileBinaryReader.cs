@@ -63,6 +63,10 @@ namespace UndertaleModLib.Util
 
         public string ReadChars(int count)
         {
+            if (count < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(count));
+            }
 #if DEBUG
             if (Stream.Position + count > _length)
                 throw new IOException("Reading out of bounds");
@@ -85,6 +89,10 @@ namespace UndertaleModLib.Util
 
         public byte[] ReadBytes(int count)
         {
+            if (count < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(count));
+            }
 #if DEBUG
             if (Stream.Position + count > _length)
                 throw new IOException("Reading out of bounds");
@@ -193,6 +201,8 @@ namespace UndertaleModLib.Util
                 throw new IOException("Reading out of bounds");
 #endif
             int length = BinaryPrimitives.ReadInt32LittleEndian(ReadToBuffer(4));
+            if (length < 0)
+                throw new IOException("Invalid string length");
 #if DEBUG
             if (Stream.Position + length + 1 >= _length)
                 throw new IOException("Reading out of bounds");
@@ -222,6 +232,8 @@ namespace UndertaleModLib.Util
         public void SkipGMString()
         {
             int length = BinaryPrimitives.ReadInt32LittleEndian(ReadToBuffer(4));
+            if (length < 0)
+                throw new IOException("Invalid string length");
             Position += (uint)length + 1;
         }
 
