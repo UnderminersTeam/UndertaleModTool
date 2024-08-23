@@ -685,10 +685,12 @@ public class UndertaleInstruction : UndertaleObject
                 {
                     throw new IOException($"Invalid padding in {kind.ToString().ToUpper(CultureInfo.InvariantCulture)}");
                 }
+
                 if (instructionType == InstructionType.SingleTypeInstruction && type2 != 0)
                 {
                     throw new IOException($"Second type should be 0 in {kind.ToString().ToUpper(CultureInfo.InvariantCulture)}");
                 }
+
 
                 // In bytecode 14, the comparison kind is encoded in the opcode itself
                 if (bytecode14 && kind == Opcode.Cmp)
