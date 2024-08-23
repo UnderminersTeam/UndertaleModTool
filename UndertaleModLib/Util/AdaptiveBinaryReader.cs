@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -86,10 +86,8 @@ namespace UndertaleModLib.Util
             {
                 if (isUsingBufferReader)
                 {
-#if DEBUG
-                    if (value < 0 || value > Length)
+                    if (value < 0 || value > Length
                         throw new IOException("Reading out of bounds.");
-#endif
                     bufferBinaryReader.Position = value - bufferBinaryReader.ChunkStartPosition + 8;
                 }
                 else
