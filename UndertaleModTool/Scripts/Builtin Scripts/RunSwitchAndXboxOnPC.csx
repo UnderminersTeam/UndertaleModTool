@@ -17,7 +17,7 @@ bool isXbox = Data.Rooms.ByName("room_xbox_engagement") is not null;
 
 if (isXbox)
 {
-    // Fix cruical initialization code not running.
+    // Fix crucial initialization code not running.
     ReplaceTextInGML("gml_Object_obj_time_Create_0", """
     if (os_type == os_xboxone)
     {
