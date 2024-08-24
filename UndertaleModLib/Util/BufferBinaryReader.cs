@@ -286,7 +286,7 @@ namespace UndertaleModLib.Util
 
             if (length < 0)
                 throw new IOException("Invalid string length");
-            if (chunkBuffer.Position + length + 1 >= _length)
+            if (chunkBuffer.Position + length + 1 > _length)
                 throw new IOException("Reading out of chunk bounds");
 
             string res;
