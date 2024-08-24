@@ -214,7 +214,7 @@ namespace UndertaleModLib.Util
 
             if (length < 0)
                 throw new IOException("Invalid string length");
-            if (Stream.Position + length + 1 >= _length)
+            if (Stream.Position + length + 1 > _length)
                 throw new IOException("Reading out of bounds");
 
             string res;
