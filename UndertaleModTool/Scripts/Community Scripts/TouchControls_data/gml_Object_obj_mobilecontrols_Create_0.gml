@@ -1,3 +1,5 @@
+if (!((os_type == os_android || os_type == os_ios)))
+    instance_destroy()
 settings_font = {_font}
 settings_num_x = {_settingsnumx}
 zx = 510
