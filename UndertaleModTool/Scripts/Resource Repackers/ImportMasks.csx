@@ -48,10 +48,10 @@ foreach (string file in dirFiles)
             throw new ScriptException(FileNameWithExtension + " is not the proper size to be imported! Please correct this before importing! The proper dimensions are width: " + Data.Sprites.ByName(spriteName).Width.ToString() + " px, height: " + Data.Sprites.ByName(spriteName).Height.ToString() + " px.");
     }
 
-    Int32 validFrameNumber = 0;
+    int validFrameNumber = 0;
     try
     {
-        validFrameNumber = Int32.Parse(stripped.Substring(lastUnderscore + 1));
+        validFrameNumber = int.Parse(stripped.Substring(lastUnderscore + 1));
     }
     catch
     {
@@ -60,7 +60,7 @@ foreach (string file in dirFiles)
     int frame = 0;
     try
     {
-        frame = Int32.Parse(stripped.Substring(lastUnderscore + 1));
+        frame = int.Parse(stripped.Substring(lastUnderscore + 1));
     }
     catch
     {
@@ -75,7 +75,7 @@ foreach (string file in dirFiles)
     {
         throw new ScriptException(spriteName + " is using an invalid numbering scheme. The script has stopped for your own protection.");
     }
-    var prevFrameName = spriteName + "_" + prevframe.ToString() + ".png";
+    var prevFrameName = $"{spriteName}_{prevframe}.png";
     string[] previousFrameFiles = Directory.GetFiles(importFolder, prevFrameName);
     if (previousFrameFiles.Length < 1)
         throw new ScriptException(spriteName + " is missing one or more indexes. The detected missing index is: " + prevFrameName);
@@ -84,18 +84,19 @@ foreach (string file in dirFiles)
 SetProgressBar(null, "Files", 0, dirFiles.Length);
 StartProgressBarUpdater();
 
-await Task.Run(() => {
+await Task.Run(() => 
+{
     foreach (string file in dirFiles)
     {
         IncrementProgress();
 
         string FileNameWithExtension = Path.GetFileName(file);
-        if (!FileNameWithExtension.EndsWith(".png"))
+        if (!FileNameWithExtension.EndsWith(".png", StringComparison.InvariantCultureIgnoreCase))
             continue; // Restarts loop if file is not a valid mask asset.
         string stripped = Path.GetFileNameWithoutExtension(file);
         int lastUnderscore = stripped.LastIndexOf('_');
         string spriteName = stripped.Substring(0, lastUnderscore);
-        int frame = Int32.Parse(stripped.Substring(lastUnderscore + 1));
+        int frame = int.Parse(stripped.Substring(lastUnderscore + 1));
         UndertaleSprite sprite = Data.Sprites.ByName(spriteName);
         int collision_mask_count = sprite.CollisionMasks.Count;
         while (collision_mask_count <= frame)
@@ -105,7 +106,8 @@ await Task.Run(() => {
         }
         try
         {
-            sprite.CollisionMasks[frame].Data = TextureWorker.ReadMaskData(file);
+            (uint maskWidth, uint maskHeight) = sprite.CalculateMaskDimensions(Data);
+            sprite.CollisionMasks[frame].Data = TextureWorker.ReadMaskData(file, (int)maskWidth, (int)maskHeight);
         }
         catch
         {

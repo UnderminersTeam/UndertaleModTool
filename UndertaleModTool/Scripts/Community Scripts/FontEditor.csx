@@ -1,4 +1,5 @@
-//by porog
+// by porog
+// TODO: this heavily uses Windows stuff, should be made cross platform
 
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -7,25 +8,30 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using UndertaleModLib.Util;
+using ImageMagick;
 
 EnsureDataLoaded();
 
 UndertaleFont font = FontPickerResult(); //GUI dropdown selection list of fonts
 if (font == null) return; //the 'Cancel' or 'X' button is hit
-new FontEditorGUI(font).ShowDialog(); //font editor GUI
+using (TextureWorker textureWorker = new())
+{
+    new FontEditorGUI(font, textureWorker).ShowDialog(); //font editor GUI
+}
 
 class FontEditorGUI : Form
 {
     UndertaleFont font;
     
     List<Letter> letterData = new List<Letter>();
-    TextureWorker textureWorker = new TextureWorker();
+    TextureWorker textureWorker = null;
     
     ListView listView;
     bool savePrompt = false;
-    public FontEditorGUI(UndertaleFont font)
+    public FontEditorGUI(UndertaleFont font, TextureWorker textureWorker)
     {
         this.font = font;
+        this.textureWorker = textureWorker;
         
         Text = font.Name.Content;
         MinimumSize = new Size(275, 150);
@@ -294,9 +300,12 @@ class FontEditorGUI : Form
                     ((FormClosingEventArgs)e).Cancel = true;
             }
         };
-        
+
         //Populate list from font
-        Bitmap fontSheetImg = textureWorker.GetTextureFor(font.Texture, null);
+        using IMagickImage<byte> fontSheetMagickImg = textureWorker.GetTextureFor(font.Texture, null);
+        IUnsafePixelCollection<byte> fontSheetMagickPixels = fontSheetMagickImg.GetPixelsUnsafe();
+        Bitmap fontSheetImg = new Bitmap(fontSheetMagickImg.Width, fontSheetMagickImg.Height, 4 * fontSheetMagickImg.Width, PixelFormat.Format32bppArgb,
+                                         fontSheetMagickPixels.GetAreaPointer(0, 0, fontSheetMagickImg.Width, fontSheetMagickImg.Height));
         List<Letter> letters = new List<Letter>();
         foreach (UndertaleFont.Glyph glyph in font.Glyphs)
         {
@@ -575,7 +584,7 @@ class FontEditorGUI : Form
         
         //Set font sheet image
         Bitmap spriteSheetImg = null;
-        using (var ms = new MemoryStream(font.Texture.TexturePage.TextureData.TextureBlob))
+        using (var ms = new MemoryStream(font.Texture.TexturePage.TextureData.Image.ConvertToPng().ToSpan().ToArray()))
         {
             spriteSheetImg = new Bitmap(ms);
         }
@@ -601,7 +610,7 @@ class FontEditorGUI : Form
             }
             copy.Save(ms, ImageFormat.Png);
             
-            font.Texture.TexturePage.TextureData.TextureBlob = ms.ToArray();
+            font.Texture.TexturePage.TextureData.Image = GMImage.FromPng(ms.ToArray());
             font.Texture.TargetX = 0;
             font.Texture.TargetY = 0;
         }

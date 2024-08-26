@@ -2,7 +2,6 @@
 
 using System;
 using System.IO;
-using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -96,33 +95,33 @@ else if (attemptToFixFontNotAppearing)
         fontTexGroup.Fonts.Add(new UndertaleResourceById<UndertaleFont, UndertaleChunkFONT>() { Resource = font });
 }
 
-// Prepare font texture
-Bitmap textureBitmap = new Bitmap(fontTexturePath);
-// Make the DPI exactly 96 for this bitmap
-textureBitmap.SetResolution(96.0F, 96.0F);
+// Get texture properties
+(int parsedWidth, int parsedHeight) = TextureWorker.GetImageSizeFromFile(fontTexturePath);
+if (parsedWidth == -1 || parsedHeight == -1)
+    throw new ScriptException("Invalid font texture image");
+ushort width = (ushort)parsedWidth;
+ushort height = (ushort)parsedHeight;
 
 UndertaleEmbeddedTexture texture = new UndertaleEmbeddedTexture();
-// ??? Why?
-texture.Name = new UndertaleString("Texture " + Data.EmbeddedTextures.Count);
-texture.TextureData.TextureBlob = File.ReadAllBytes(fontTexturePath);
+texture.Name = new UndertaleString($"Texture {Data.EmbeddedTextures.Count}");
+texture.TextureData.Image = GMImage.FromPng(File.ReadAllBytes(fontTexturePath)); // TODO: generate other formats
 Data.EmbeddedTextures.Add(texture);
 if (attemptToFixFontNotAppearing)
     fontTexGroup.TexturePages.Add(new UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR>() { Resource = texture });
 
 UndertaleTexturePageItem texturePageItem = new UndertaleTexturePageItem();
-// ??? Same as above
-texturePageItem.Name = new UndertaleString("PageItem " + Data.TexturePageItems.Count);
+texturePageItem.Name = new UndertaleString($"PageItem {Data.TexturePageItems.Count}");
 texturePageItem.TexturePage = texture;
 texturePageItem.SourceX = 0;
 texturePageItem.SourceY = 0;
-texturePageItem.SourceWidth = (ushort)textureBitmap.Width;
-texturePageItem.SourceHeight = (ushort)textureBitmap.Height;
+texturePageItem.SourceWidth = width;
+texturePageItem.SourceHeight = height;
 texturePageItem.TargetX = 0;
 texturePageItem.TargetY = 0;
-texturePageItem.TargetWidth = (ushort)textureBitmap.Width;
-texturePageItem.TargetHeight = (ushort)textureBitmap.Height;
-texturePageItem.BoundingWidth = (ushort)textureBitmap.Width;
-texturePageItem.BoundingHeight = (ushort)textureBitmap.Height;
+texturePageItem.TargetWidth = width;
+texturePageItem.TargetHeight = height;
+texturePageItem.BoundingWidth = width;
+texturePageItem.BoundingHeight = height;
 Data.TexturePageItems.Add(texturePageItem);
 
 font.DisplayName = Data.Strings.MakeString((string)fontData["fontName"]);
