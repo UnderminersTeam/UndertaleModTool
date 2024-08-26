@@ -27,54 +27,57 @@ Directory.CreateDirectory(mainOutputFolder);
 TextureWorker worker = null;
 using (worker = new())
 {
-    foreach (UndertaleTextureGroupInfo tgin in Data.TextureGroupInfo)
+    await Task.Run(() =>
     {
-        int progress = 0;
-        int sum = 0;
-        if (tgin.TexturePages != null)
-            sum += tgin.TexturePages.Count;
-        if (tgin.Sprites != null)
-            sum += tgin.Sprites.Count;
-        if (tgin.Fonts != null)
-            sum += tgin.Fonts.Count;
-        if (tgin.Tilesets != null)
-            sum += tgin.Tilesets.Count;
-        UpdateProgressBar(null, $"Processing \"{tgin.Name.Content}\" (TGIN Group {processTgin++})", progress, sum);
-        string outputFolder = Path.Combine(mainOutputFolder, tgin.Name.Content); // TODO: replace invalid characters?
-        Directory.CreateDirectory(outputFolder);
-        if (tgin.TexturePages != null)
+        foreach (UndertaleTextureGroupInfo tgin in Data.TextureGroupInfo)
         {
-            for (var i = 0; i < tgin.TexturePages.Count; i++)
+            int progress = 0;
+            int sum = 0;
+            if (tgin.TexturePages != null)
+                sum += tgin.TexturePages.Count;
+            if (tgin.Sprites != null)
+                sum += tgin.Sprites.Count;
+            if (tgin.Fonts != null)
+                sum += tgin.Fonts.Count;
+            if (tgin.Tilesets != null)
+                sum += tgin.Tilesets.Count;
+            UpdateProgressBar(null, $"Processing \"{tgin.Name.Content}\" (TGIN Group {processTgin++})", progress, sum);
+            string outputFolder = Path.Combine(mainOutputFolder, tgin.Name.Content); // TODO: replace invalid characters?
+            Directory.CreateDirectory(outputFolder);
+            if (tgin.TexturePages != null)
             {
-                UpdateProgressBar(null, $"Processing \"{tgin.Name.Content}\" EmbeddedTextures (TGIN Group {processTgin})", progress++, sum);
-                DumpEmbeddedTexturePage(outputFolder, tgin.TexturePages[i].Resource);
+                for (var i = 0; i < tgin.TexturePages.Count; i++)
+                {
+                    UpdateProgressBar(null, $"Processing \"{tgin.Name.Content}\" EmbeddedTextures (TGIN Group {processTgin})", progress++, sum);
+                    DumpEmbeddedTexturePage(outputFolder, tgin.TexturePages[i].Resource);
+                }
+            }
+            if (tgin.Sprites != null)
+            {
+                for (var i = 0; i < tgin.Sprites.Count; i++)
+                {
+                    UpdateProgressBar(null, $"Processing \"{tgin.Name.Content}\" Sprites (TGIN Group {processTgin})", progress++, sum);
+                    DumpSprite(outputFolder, tgin.Sprites[i].Resource);
+                }
+            }
+            if (tgin.Fonts != null)
+            {
+                for (var i = 0; i < tgin.Fonts.Count; i++)
+                {
+                    UpdateProgressBar(null, $"Processing \"{tgin.Name.Content}\" Fonts (TGIN Group {processTgin})", progress++, sum);
+                    DumpFont(outputFolder, tgin.Fonts[i].Resource);
+                }
+            }
+            if (tgin.Tilesets != null)
+            {
+                for (var i = 0; i < tgin.Tilesets.Count; i++)
+                {
+                    UpdateProgressBar(null, $"Processing \"{tgin.Name.Content}\" Tilesets (TGIN Group {processTgin})", progress++, sum);
+                    DumpTileset(outputFolder, tgin.Tilesets[i].Resource);
+                }
             }
         }
-        if (tgin.Sprites != null)
-        {
-            for (var i = 0; i < tgin.Sprites.Count; i++)
-            {
-                UpdateProgressBar(null, $"Processing \"{tgin.Name.Content}\" Sprites (TGIN Group {processTgin})", progress++, sum);
-                DumpSprite(outputFolder, tgin.Sprites[i].Resource);
-            }
-        }
-        if (tgin.Fonts != null)
-        {
-            for (var i = 0; i < tgin.Fonts.Count; i++)
-            {
-                UpdateProgressBar(null, $"Processing \"{tgin.Name.Content}\" Fonts (TGIN Group {processTgin})", progress++, sum);
-                DumpFont(outputFolder, tgin.Fonts[i].Resource);
-            }
-        }
-        if (tgin.Tilesets != null)
-        {
-            for (var i = 0; i < tgin.Tilesets.Count; i++)
-            {
-                UpdateProgressBar(null, $"Processing \"{tgin.Name.Content}\" Tilesets (TGIN Group {processTgin})", progress++, sum);
-                DumpTileset(outputFolder, tgin.Tilesets[i].Resource);
-            }
-        }
-    }
+    });
 }
 HideProgressBar();
 ScriptMessage(@"All graphics texture groups successfully exported.
@@ -86,7 +89,8 @@ void DumpEmbeddedTexturePage(string outputFolder, UndertaleEmbeddedTexture Emb)
     Directory.CreateDirectory(exportedTexturesFolder);
     try
     {
-        File.WriteAllBytes(Path.Combine(exportedTexturesFolder, $"{Data.EmbeddedTextures.IndexOf(Emb)}.png"), Emb.TextureData.TextureBlob);
+        using (FileStream fs = new(Path.Combine(exportedTexturesFolder, $"{Data.EmbeddedTextures.IndexOf(Emb)}.png"), FileMode.Create))
+            Emb.TextureData.Image.SavePng(fs);
     }
     catch (Exception ex) 
     {

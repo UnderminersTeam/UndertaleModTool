@@ -1,5 +1,7 @@
 // Imports and unlocks border images into PC version of the game
 
+using UndertaleModLib.Util;
+
 EnsureDataLoaded();
 
 if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
@@ -20,37 +22,37 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
 ScriptMessage("Border enabler (1080p edition)\nby krzys_h");
 
 // Change os_type == 14 checks in scr_draw_screen_border to always pass
-ReplaceTextInGML(("gml_Script_scr_draw_screen_border"), @"os_type == os_psvita", "0", true);
-ReplaceTextInGML(("gml_Script_scr_draw_screen_border"), @"os_type == os_ps4", "1", true);
+ReplaceTextInGML("gml_Script_scr_draw_screen_border", @"os_type == os_psvita", "0", true);
+ReplaceTextInGML("gml_Script_scr_draw_screen_border", @"os_type == os_ps4", "1", true);
 
 // Same for the code that calls it
-ReplaceTextInGML(("gml_Object_obj_time_Draw_77"), @"global.osflavor >= 3", "1", true);
+ReplaceTextInGML("gml_Object_obj_time_Draw_77", @"global.osflavor >= 3", "1", true);
 
 //Remove checks from obj_time creation event
-ReplaceTextInGML(("gml_Object_obj_time_Create_0"), @"os_type == os_psvita", "0", true);
-ReplaceTextInGML(("gml_Object_obj_time_Create_0"), @"os_type == os_ps4", "1", true);
-ReplaceTextInGML(("gml_Object_obj_time_Create_0"), @"global.osflavor >= 4", "1", true);
-ReplaceTextInGML(("gml_Object_obj_time_Create_0"), @"global.osflavor >= 3", "1", true);
+ReplaceTextInGML("gml_Object_obj_time_Create_0", @"os_type == os_psvita", "0", true);
+ReplaceTextInGML("gml_Object_obj_time_Create_0", @"os_type == os_ps4", "1", true);
+ReplaceTextInGML("gml_Object_obj_time_Create_0", @"global.osflavor >= 4", "1", true);
+ReplaceTextInGML("gml_Object_obj_time_Create_0", @"global.osflavor >= 3", "1", true);
 
 //Now patch out the check for the window scale, make it always be true
-ReplaceTextInGML(("gml_Object_obj_time_Draw_76"), @"global.osflavor >= 4", "1", true);
-ReplaceTextInGML(("gml_Object_obj_time_Draw_76"), @"os_type == os_switch_beta", "1", true);
+ReplaceTextInGML("gml_Object_obj_time_Draw_76", @"global.osflavor >= 4", "1", true);
+ReplaceTextInGML("gml_Object_obj_time_Draw_76", @"os_type == os_switch_beta", "1", true);
 //Attempt border display fix in gml_Object_obj_time_Draw_76
 
 //Patch out the OS checks for gml_Script_scr_draw_background_ps4, make PS Vita always false, and PS4 always true, simplifying code.
-ReplaceTextInGML(("gml_Script_scr_draw_background_ps4"), @"os_type == os_psvita", "0", true);
-ReplaceTextInGML(("gml_Script_scr_draw_background_ps4"), @"os_type == os_ps4", "1", true);
+ReplaceTextInGML("gml_Script_scr_draw_background_ps4", @"os_type == os_psvita", "0", true);
+ReplaceTextInGML("gml_Script_scr_draw_background_ps4", @"os_type == os_ps4", "1", true);
 
 // Now, patch the settings menu!
-ReplaceTextInGML(("gml_Object_obj_settingsmenu_Draw_0"), @"obj_time.j_ch > 0", "0", true);
-ReplaceTextInGML(("gml_Object_obj_settingsmenu_Draw_0"), @"global.osflavor <= 2", "0", true);
-ReplaceTextInGML(("gml_Object_obj_settingsmenu_Draw_0"), @"global.osflavor >= 4", "1", true);
+ReplaceTextInGML("gml_Object_obj_settingsmenu_Draw_0", @"obj_time.j_ch > 0", "0", true);
+ReplaceTextInGML("gml_Object_obj_settingsmenu_Draw_0", @"global.osflavor <= 2", "0", true);
+ReplaceTextInGML("gml_Object_obj_settingsmenu_Draw_0", @"global.osflavor >= 4", "1", true);
 
 //Remove code not applicable (PS Vita, Windows, <=2) and make some code always true (global.osflavor >= 4)
-ReplaceTextInGML(("gml_Object_obj_time_Step_1"), @"os_type == os_psvita", "0", true);
-ReplaceTextInGML(("gml_Object_obj_time_Step_1"), @"global.osflavor <= 2", "0", true);
-ReplaceTextInGML(("gml_Object_obj_time_Step_1"), @"global.osflavor == 1", "0", true);
-ReplaceTextInGML(("gml_Object_obj_time_Step_1"), @"global.osflavor >= 4", "1", true);
+ReplaceTextInGML("gml_Object_obj_time_Step_1", @"os_type == os_psvita", "0", true);
+ReplaceTextInGML("gml_Object_obj_time_Step_1", @"global.osflavor <= 2", "0", true);
+ReplaceTextInGML("gml_Object_obj_time_Step_1", @"global.osflavor == 1", "0", true);
+ReplaceTextInGML("gml_Object_obj_time_Step_1", @"global.osflavor >= 4", "1", true);
 
 // Also resize the window so that the border can be seen without going fullscreen
 Data.Functions.EnsureDefined("window_set_size", Data.Strings);
@@ -72,21 +74,23 @@ int lastTextPageItem = Data.TexturePageItems.Count - 1;
 foreach (var path in Directory.EnumerateFiles(bordersPath))
 {
     UndertaleEmbeddedTexture newtex = new UndertaleEmbeddedTexture();
-    newtex.Name = new UndertaleString("Texture " + ++lastTextPage);
-    newtex.TextureData.TextureBlob = File.ReadAllBytes(path);
+    newtex.Name = new UndertaleString($"Texture {++lastTextPage}");
+    newtex.TextureData.Image = GMImage.FromPng(File.ReadAllBytes(path)); // TODO: possibly other formats than PNG in the future, but no Undertale versions currently have them
     Data.EmbeddedTextures.Add(newtex);
     textures.Add(Path.GetFileName(path), newtex);
 }
 
 // Create texture fragments and assign them to existing (but empty) backgrounds
-Action<string, UndertaleEmbeddedTexture, ushort, ushort, ushort, ushort> AssignBorderBackground = (name, tex, x, y, width, height) => {
+Action<string, UndertaleEmbeddedTexture, ushort, ushort, ushort, ushort> AssignBorderBackground = (name, tex, x, y, width, height) => 
+{
     var bg = Data.Backgrounds.ByName(name);
-    if (bg == null) {
+    if (bg == null) 
+    {
         // The anime border does not exist on PC yet ;)
         return;
     }
     UndertaleTexturePageItem tpag = new UndertaleTexturePageItem();
-    tpag.Name = new UndertaleString("PageItem " + ++lastTextPageItem);
+    tpag.Name = new UndertaleString($"PageItem {++lastTextPageItem}");
     tpag.SourceX = x; tpag.SourceY = y; tpag.SourceWidth = width; tpag.SourceHeight = height;
     tpag.TargetX = 0; tpag.TargetY = 0; tpag.TargetWidth = width; tpag.TargetHeight = height;
     tpag.BoundingWidth = width; tpag.BoundingHeight = height;
