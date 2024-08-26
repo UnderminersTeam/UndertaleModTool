@@ -26,11 +26,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Drawing;
 using UndertaleModLib.Scripting;
 using UndertaleModLib.Util;
 using UndertaleModLib.Models;
 using System.Numerics;
+using ImageMagick;
 
 public class Rect
 {
@@ -238,14 +238,13 @@ TPageItem dumpTexturePageItem(UndertaleTexturePageItem pageItem, TextureWorker w
 
 async Task<List<TPageItem>> dumpTexturePageItems(string dir, bool reuse)
 {
-    var worker = new TextureWorker();
+    using var worker = new TextureWorker();
 
     var tpageitems = await Task.Run(() => Data.TexturePageItems
         .AsParallel()
         .Select(item => dumpTexturePageItem(item, worker, Path.Combine(dir, $"texture_page_{Data.TexturePageItems.IndexOf(item)}.png"), reuse))
         .ToList());
 
-    worker.Cleanup();
     return tpageitems;
 }
 
@@ -438,14 +437,11 @@ await Task.Run(() =>
         {
             // Textures that are contained into an atlas
             UndertaleEmbeddedTexture tex = new UndertaleEmbeddedTexture();
-            tex.Name = new UndertaleString("Texture " + ++lastTextPage);
+            tex.Name = new UndertaleString($"Texture {++lastTextPage}");
             Data.EmbeddedTextures.Add(tex);
-            Bitmap img = new Bitmap(atlas.Width, atlas.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            
+            using MagickImage newAtlasImage = new(MagickColors.Transparent, atlas.Width, atlas.Height);
 
-            // DPI fix
-            img.SetResolution(96.0F, 96.0F);
-
-            Graphics g = Graphics.FromImage(img);
             tex.Scaled = group.First().Scaled; // Make sure the original pane "Scaled" value is mantained.
 
             // Dump debug info regarding splits
@@ -457,8 +453,10 @@ await Task.Run(() =>
             {
                 f.WriteLine($"tex: {texPageItems.IndexOf(item)}: {item.NewRect.X}, {item.NewRect.Y}, {item.NewRect.Width}, {item.NewRect.Height}");
 
-                using (Bitmap source = new Bitmap(item.Filename))
-                    g.DrawImage(source, item.NewRect.X, item.NewRect.Y);
+                using (MagickImage source = TextureWorker.ReadBGRAImageFromFile(item.Filename))
+                {
+                    newAtlasImage.Composite(source, item.NewRect.X, item.NewRect.Y, CompositeOperator.Copy);
+                }
 
                 item.Item.TexturePage = tex;
                 item.Item.SourceX = (ushort)item.NewRect.X;
@@ -468,12 +466,12 @@ await Task.Run(() =>
                 UpdateProgress(1);
             }
 
-            // Save atlas into a file and load it back into 
+            // Save atlas into a file
             string atlasFile = Path.Combine(packagerDirectory, $"atlas_{atlasName}.png");
-            img.Save(atlasFile, System.Drawing.Imaging.ImageFormat.Png);
-            tex.TextureData.TextureBlob = File.ReadAllBytes(atlasFile);
+            TextureWorker.SaveImageToFile(newAtlasImage, atlasFile);
 
-            img.Dispose();
+            // Assign new texture image
+            tex.TextureData.Image = GMImage.FromMagickImage(newAtlasImage).ConvertToPng(); // TODO: generate other formats
         }
         else
         {
@@ -483,7 +481,7 @@ await Task.Run(() =>
                 f.WriteLine($"tex: {texPageItems.IndexOf(item)}: {0}, {0}, {item.OriginalRect.Width}, {item.OriginalRect.Height}");
 
                 UndertaleEmbeddedTexture tex = new UndertaleEmbeddedTexture();
-                tex.Name = new UndertaleString("Texture " + ++lastTextPage);
+                tex.Name = new UndertaleString($"Texture {++lastTextPage}");
                 Data.EmbeddedTextures.Add(tex);
 
                 // Create POT texture if needed
@@ -493,24 +491,26 @@ await Task.Run(() =>
                     int potw = NearestPowerOf2((uint)item.OriginalRect.Width),
                         poth = NearestPowerOf2((uint)item.OriginalRect.Height);
 
-                    Bitmap img = new Bitmap(potw, poth, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    using MagickImage newAtlasImage = new(MagickColors.Transparent, potw, poth);
 
-                    // DPI fix
-                    img.SetResolution(96.0F, 96.0F);
-
-                    Graphics g = Graphics.FromImage(img);
-
-                    // Load texture
-                    using (Bitmap source = new Bitmap(item.Filename))
-                        g.DrawImage(source, 0, 0);
+                    // Load texture, composite onto top left of new atlas
+                    using (MagickImage source = TextureWorker.ReadBGRAImageFromFile(item.Filename))
+                    {
+                        newAtlasImage.Composite(source, 0, 0, CompositeOperator.Copy);
+                    }
 
                     itemFile = Path.Combine(packagerDirectory, $"pot_{texPageItems.IndexOf(item)}.png");
-                    img.Save(itemFile, System.Drawing.Imaging.ImageFormat.Png);
+                    TextureWorker.SaveImageToFile(newAtlasImage, itemFile);
 
-                    img.Dispose();
+                    // Assign new texture image
+                    tex.TextureData.Image = GMImage.FromMagickImage(newAtlasImage).ConvertToPng(); // TODO: generate other formats
+                }
+                else
+                {
+                    // Load image from file, and assign it
+                    tex.TextureData.Image = GMImage.FromPng(File.ReadAllBytes(itemFile)); // TODO: generate other formats
                 }
 
-                tex.TextureData.TextureBlob = File.ReadAllBytes(itemFile);
                 tex.Scaled = item.Scaled;
 
                 item.Item.TexturePage = tex;
