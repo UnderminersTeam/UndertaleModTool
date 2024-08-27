@@ -935,9 +935,11 @@
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <local:ButtonDark Grid.Column="0" Margin="3" Click="TileDataExport_Click">Export</local:ButtonDark>
-                                                <local:ButtonDark Grid.Column="1" Margin="3" Click="TileDataImport_Click">Import</local:ButtonDark>
+                                                <local:ButtonDark Grid.Column="0" Margin="3" Click="EditTiles_Click">Edit</local:ButtonDark>
+                                                <local:ButtonDark Grid.Column="1" Margin="3" Click="TileDataExport_Click">Export</local:ButtonDark>
+                                                <local:ButtonDark Grid.Column="2" Margin="3" Click="TileDataImport_Click">Import</local:ButtonDark>
                                             </Grid>
                                         </Grid>
                                     </DataTemplate>
