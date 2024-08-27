@@ -2035,7 +2035,7 @@ namespace UndertaleModTool
                 TileEditor.ShowDialog();
             }
         }
-        
+
         private void AutoSizeTile_Click(object sender, RoutedEventArgs e)
         {
             if (ObjectEditor.Content is Layer lay && this.DataContext is UndertaleRoom room)
