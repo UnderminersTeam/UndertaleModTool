@@ -1442,8 +1442,6 @@ namespace UndertaleModTool.Windows
         {
             UndertaleResourceReferenceMethodsMap.data = data;
 
-            var ver = (data.GeneralInfo.Major, data.GeneralInfo.Minor, data.GeneralInfo.Release);
-
             Dictionary<string, List<object>> outDict = new();
 
             List<(IList, string)> assetLists = new();
