@@ -24,7 +24,7 @@ namespace UndertaleModLib.Tests
 
                 ms.Position = 0;
                 string writtenMD5 = GenerateMD5(ms);
-                Assert.True(expectedMD5 == writtenMD5, "Written file doesn't match read file");
+                Assert.True(expectedMD5.Equals(writtenMD5), "Written file doesn't match read file");
             }
         }
 
@@ -81,29 +81,29 @@ namespace UndertaleModLib.Tests
 
                 IList<UndertaleInstruction> reasm = Assembler.Assemble(disasm, data.Functions, data.Variables, data.Strings);
 
-                Assert.True(code.Instructions.Count == reasm.Count, "Reassembled instruction count didn't match the disassembly for script " + code.Name.Content);
+                Assert.True(code.Instructions.Count.Equals(reasm.Count), "Reassembled instruction count didn't match the disassembly for script " + code.Name.Content);
 
                 for (int i = 0; i < code.Instructions.Count; i++)
                 {
                     string errMsg = "Instruction at " + code.Instructions[i].Address.ToString("D5") + " didn't match for script: " + code.Name.Content;
 
-                    Assert.True(code.Instructions[i].Kind == reasm[i].Kind, errMsg);
-                    Assert.True(code.Instructions[i].ComparisonKind == reasm[i].ComparisonKind, errMsg);
-                    Assert.True(code.Instructions[i].Type1 == reasm[i].Type1, errMsg);
-                    Assert.True(code.Instructions[i].Type2 == reasm[i].Type2, errMsg);
-                    Assert.True(code.Instructions[i].TypeInst == reasm[i].TypeInst, errMsg);
-                    Assert.True(code.Instructions[i].Extra == reasm[i].Extra, errMsg);
-                    Assert.True(code.Instructions[i].SwapExtra == reasm[i].SwapExtra, errMsg);
-                    Assert.True(code.Instructions[i].ArgumentsCount == reasm[i].ArgumentsCount, errMsg);
-                    Assert.True(code.Instructions[i].JumpOffsetPopenvExitMagic == reasm[i].JumpOffsetPopenvExitMagic, errMsg);
+                    Assert.True(code.Instructions[i].Kind.Equals(reasm[i].Kind), errMsg);
+                    Assert.True(code.Instructions[i].ComparisonKind.Equals(reasm[i].ComparisonKind), errMsg);
+                    Assert.True(code.Instructions[i].Type1.Equals(reasm[i].Type1), errMsg);
+                    Assert.True(code.Instructions[i].Type2.Equals(reasm[i].Type2), errMsg);
+                    Assert.True(code.Instructions[i].TypeInst.Equals(reasm[i].TypeInst), errMsg);
+                    Assert.True(code.Instructions[i].Extra.Equals(reasm[i].Extra), errMsg);
+                    Assert.True(code.Instructions[i].SwapExtra.Equals(reasm[i].SwapExtra), errMsg);
+                    Assert.True(code.Instructions[i].ArgumentsCount.Equals(reasm[i].ArgumentsCount), errMsg);
+                    Assert.True(code.Instructions[i].JumpOffsetPopenvExitMagic.Equals(reasm[i].JumpOffsetPopenvExitMagic), errMsg);
 
                     if (!code.Instructions[i].JumpOffsetPopenvExitMagic)
-                        Assert.True(code.Instructions[i].JumpOffset == reasm[i].JumpOffset, errMsg); // note: also handles IntArgument implicitly
+                        Assert.True(code.Instructions[i].JumpOffset.Equals(reasm[i].JumpOffset), errMsg); // note: also handles IntArgument implicitly
 
                     Assert.True(Object.ReferenceEquals(code.Instructions[i].Destination?.Target, reasm[i].Destination?.Target), errMsg);
-                    Assert.True(code.Instructions[i].Destination?.Type == reasm[i].Destination?.Type, errMsg);
+                    Assert.True(Object.Equals(code.Instructions[i].Destination?.Type, reasm[i].Destination?.Type), errMsg);
                     Assert.True(Object.ReferenceEquals(code.Instructions[i].Function?.Target, reasm[i].Function?.Target), errMsg);
-                    Assert.True(code.Instructions[i].Function?.Type == reasm[i].Function?.Type, errMsg);
+                    Assert.True(Object.Equals(code.Instructions[i].Function?.Type, reasm[i].Function?.Type), errMsg);
 
                     Assert.True(Object.ReferenceEquals(code.Instructions[i].Value?.GetType(), reasm[i].Value?.GetType()), errMsg);
 
@@ -118,7 +118,7 @@ namespace UndertaleModLib.Tests
                     else if (code.Instructions[i].Value?.GetType() == typeof(UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>))
                         Assert.True(Object.ReferenceEquals(((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)code.Instructions[i].Value).Resource, ((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)reasm[i].Value).Resource), errMsg);
                     else
-                        Assert.True(code.Instructions[i].Value == reasm[i].Value, errMsg);
+                        Assert.True(Object.Equals(code.Instructions[i].Value, reasm[i].Value), errMsg);
                 }
             });
         }

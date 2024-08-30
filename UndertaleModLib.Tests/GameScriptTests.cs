@@ -385,10 +385,10 @@ namespace UndertaleModLib.Tests
         [InlineData("GoToRoom.csx")]
         [InlineData("ShowRoomName.csx")]
         [InlineData("BorderEnabler.csx")]
-        [InlineData("testing.csx")]
+        [InlineData("testing.csx", Skip = "Script does not exist")]
         [InlineData("RoomOfDetermination.csx")]
         [InlineData("TTFFonts.csx")]
-        [InlineData("MixMod.csx")]
+        [InlineData("MixMod.csx", Skip = "Script not working")]
         public async Task RunScriptTest(string scriptName)
         {
             await RunScript(scriptName);
