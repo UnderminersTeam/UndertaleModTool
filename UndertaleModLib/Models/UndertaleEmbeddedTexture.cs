@@ -316,12 +316,12 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         /// <summary>
         /// The width of the texture.
         /// </summary>
-        public int Width => _image.Width;
+        public int Width => _image?.Width ?? -1;
 
         /// <summary>
         /// The height of the texture.
         /// </summary>
-        public int Height => _image.Height;
+        public int Height => _image?.Height ?? -1;
 
         /// <summary>
         /// Whether this texture uses the QOI format.

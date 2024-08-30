@@ -69,6 +69,9 @@ namespace UndertaleModTool
 
         private void UpdateImage(UndertaleEmbeddedTexture texture)
         {
+            if (texture.TextureData?.Image is null)
+                return;
+            
             GMImage image = texture.TextureData.Image;
             BitmapSource bitmap = mainWindow.GetBitmapSourceForImage(image);
             TexturePageImage.Source = bitmap;
@@ -88,8 +91,13 @@ namespace UndertaleModTool
             {
                 _textureDataContext.PropertyChanged -= ReloadTextureImage;
             }
+            
             _textureDataContext = texture.TextureData;
-            _textureDataContext.PropertyChanged += ReloadTextureImage;
+
+            if (_textureDataContext is not null)
+            {
+                _textureDataContext.PropertyChanged += ReloadTextureImage;
+            }
         }
 
         private void ReloadTextureImage(object sender, PropertyChangedEventArgs e)
