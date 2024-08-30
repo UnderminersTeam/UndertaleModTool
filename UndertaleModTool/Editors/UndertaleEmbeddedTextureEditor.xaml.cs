@@ -70,8 +70,11 @@ namespace UndertaleModTool
         private void UpdateImage(UndertaleEmbeddedTexture texture)
         {
             if (texture.TextureData?.Image is null)
+            {
+                TexturePageImage.Source = null;
                 return;
-            
+            }
+
             GMImage image = texture.TextureData.Image;
             BitmapSource bitmap = mainWindow.GetBitmapSourceForImage(image);
             TexturePageImage.Source = bitmap;

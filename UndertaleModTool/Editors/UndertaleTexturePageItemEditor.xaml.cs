@@ -41,8 +41,12 @@ namespace UndertaleModTool
         private void UpdateImages(UndertaleTexturePageItem item)
         {
             if (item.TexturePage?.TextureData?.Image is null)
+            {
+                ItemTextureBGImage.Source = null;
+                ItemTextureImage.Source = null;
                 return;
-            
+            }
+
             GMImage image = item.TexturePage.TextureData.Image;
             BitmapSource bitmap = mainWindow.GetBitmapSourceForImage(image);
             ItemTextureBGImage.Source = bitmap;
