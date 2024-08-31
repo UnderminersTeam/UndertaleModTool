@@ -40,6 +40,13 @@ namespace UndertaleModTool
 
         private void UpdateImages(UndertaleTexturePageItem item)
         {
+            if (item.TexturePage?.TextureData?.Image is null)
+            {
+                ItemTextureBGImage.Source = null;
+                ItemTextureImage.Source = null;
+                return;
+            }
+
             GMImage image = item.TexturePage.TextureData.Image;
             BitmapSource bitmap = mainWindow.GetBitmapSourceForImage(image);
             ItemTextureBGImage.Source = bitmap;
@@ -68,8 +75,12 @@ namespace UndertaleModTool
             {
                 _textureDataContext.PropertyChanged -= ReloadTextureImage;
             }
-            _textureDataContext = item.TexturePage.TextureData;
-            _textureDataContext.PropertyChanged += ReloadTextureImage;
+
+            if (item.TexturePage?.TextureData is not null)
+            {
+                _textureDataContext = item.TexturePage.TextureData;
+                _textureDataContext.PropertyChanged += ReloadTextureImage;
+            }
         }
 
         private void ReloadTexturePage(object sender, PropertyChangedEventArgs e)
