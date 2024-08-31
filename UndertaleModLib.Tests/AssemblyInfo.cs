@@ -1,0 +1,2 @@
+﻿// This makes so tests run in one collection by default, meaning they will not run in parallel. This is slower but necessary since static variables are used in multiple places, which when running things in parallel can override one another.
+[assembly: CollectionBehavior(CollectionBehavior.CollectionPerAssembly)]
