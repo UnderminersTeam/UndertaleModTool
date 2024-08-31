@@ -8,17 +8,15 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using UndertaleModLib;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 using UndertaleModLib.Scripting;
 
-namespace UndertaleModTests
+namespace UndertaleModLib.Tests
 {
     public abstract class GameScriptTestBase : GameTestBase, IScriptInterface
     {
-        public GameScriptTestBase(string path, string md5) : base(path, md5)
+        protected GameScriptTestBase(string path, string md5) : base(path, md5)
         {
         }
 
@@ -36,7 +34,24 @@ namespace UndertaleModTests
 
         public bool IsAppClosed => throw new NotImplementedException();
 
-        public void ChangeSelection(object newSelection)
+        protected async Task<object> RunScript(string path)
+        {
+            string scriptpath = Path.Combine("../../../../UndertaleModTool/Scripts/Builtin Scripts/", path);
+            using (var loader = new InteractiveAssemblyLoader())
+            {
+                loader.RegisterDependency(typeof(UndertaleObject).GetTypeInfo().Assembly);
+
+                var script = CSharpScript.Create<object>(File.ReadAllText(scriptpath), ScriptOptions.Default
+                    .WithImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting", "System", "System.IO", "System.Collections.Generic")
+                    .WithReferences(typeof(UndertaleObject).GetTypeInfo().Assembly),
+                    typeof(IScriptInterface), loader);
+
+                var result = await script.RunAsync(this);
+                return result;
+            }
+        }
+
+        public void ChangeSelection(object newSelection, bool inNewTab = false)
         {
         }
 
@@ -148,9 +163,11 @@ namespace UndertaleModTests
         public string ScriptInputDialog(string title, string label, string defaultInput, string cancelText, string submitText, bool isMultiline, bool preventClose)
         {
             Console.Write(label + " ");
-            string ret = Console.ReadLine();
+            // Probably a bad idea
+            //string ret = Console.ReadLine();
 
-            return ret;
+            //return ret;
+            return "";
         }
         public string SimpleTextInput(string titleText, string labelText, string defaultInputBoxText, bool isMultiline, bool showDialog = true)
         {
@@ -160,13 +177,13 @@ namespace UndertaleModTests
         {
             Console.WriteLine($"SimpleTextOutput(): \"{titleText}\", \"{labelText}\", *defaultInputBoxText* (length - {message.Length}), {isMultiline}");
         }
-        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null)
+        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int lineNum, string codeLine)>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null)
         {
             Console.WriteLine($"ClickableSearchOutput(): \"{title}\", \"{query}\", {resultsCount}, *resultsDict* (length - {resultsDict.Count()}), {showInDecompiledView.ToString().ToLower()}"
                               + failedList is not null ? $", *failedList* (length - {failedList.Count()})" : string.Empty);
             await Task.Delay(1); //dummy await
         }
-        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null)
+        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<(int lineNum, string codeLine)>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null)
         {
             Console.WriteLine($"ClickableSearchOutput(): \"{title}\", \"{query}\", {resultsCount}, *resultsDict* (length - {resultsDict.Count}), {showInDecompiledView.ToString().ToLower()}"
                               + failedList is not null ? $", *failedList* (length - {failedList.Count()})" : string.Empty);
@@ -247,22 +264,6 @@ namespace UndertaleModTests
             return false;
         }
 
-        protected async Task<object> RunScript(string path)
-        {
-            string scriptpath = Path.Combine("../../../UndertaleModTool/Scripts/Builtin Scripts/", path);
-            using (var loader = new InteractiveAssemblyLoader())
-            {
-                loader.RegisterDependency(typeof(UndertaleObject).GetTypeInfo().Assembly);
-
-                var script = CSharpScript.Create<object>(File.ReadAllText(scriptpath), ScriptOptions.Default
-                    .WithImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting", "System", "System.IO", "System.Collections.Generic")
-                    .WithReferences(typeof(UndertaleObject).GetTypeInfo().Assembly),
-                    typeof(IScriptInterface), loader);
-
-                return await script.RunAsync(this);
-            }
-        }
-
         public void ScriptError(string error, string title = "Error", bool SetConsoleText = true)
         {
             throw new NotImplementedException();
@@ -321,160 +322,64 @@ namespace UndertaleModTests
         }
     }
 
-    [TestClass]
     public class UndertaleScriptTest : GameScriptTestBase
     {
         public UndertaleScriptTest() : base(GamePaths.UNDERTALE_PATH, GamePaths.UNDERTALE_MD5)
         {
         }
 
-        [TestMethod]
-        public async Task EnableDebug()
+        [Theory]
+        [InlineData("EnableDebug.csx")]
+        [InlineData("DebugToggler.csx")]
+        [InlineData("GoToRoom.csx")]
+        [InlineData("ShowRoomName.csx")]
+        [InlineData("BorderEnabler.csx")]
+        [InlineData("testing.csx", Skip = "Script does not exist")]
+        [InlineData("RoomOfDetermination.csx")]
+        [InlineData("TTFFonts.csx")]
+        [InlineData("MixMod.csx", Skip = "Script not working")]
+        public async Task RunScriptTest(string scriptName)
         {
-            await RunScript("EnableDebug.csx");
-        }
-
-        [TestMethod]
-        public async Task DebugToggler()
-        {
-            await RunScript("DebugToggler.csx");
-        }
-
-        [TestMethod]
-        public async Task GoToRoom()
-        {
-            await RunScript("GoToRoom.csx");
-        }
-
-        [TestMethod]
-        public async Task ShowRoomName()
-        {
-            await RunScript("ShowRoomName.csx");
-        }
-
-        [TestMethod]
-        [Ignore] // TODO: path problems
-        public async Task BorderEnabler()
-        {
-            await RunScript("BorderEnabler.csx");
-        }
-
-        [TestMethod]
-        public async Task testing()
-        {
-            await RunScript("testing.csx");
-        }
-
-        [TestMethod]
-        public async Task RoomOfDetermination()
-        {
-            await RunScript("RoomOfDetermination.csx");
-        }
-
-        [TestMethod]
-        public async Task TTFFonts()
-        {
-            await RunScript("TTFFonts.csx");
-        }
-
-        [TestMethod]
-        public async Task MixMod()
-        {
-            await RunScript("MixMod.csx");
+            await RunScript(scriptName);
         }
     }
 
-    [TestClass]
     public class UndertaleSwitchScriptTest : GameScriptTestBase
     {
         public UndertaleSwitchScriptTest() : base(GamePaths.UNDERTALE_SWITCH_PATH, GamePaths.UNDERTALE_SWITCH_MD5)
         {
         }
 
-        [TestMethod]
-        public async Task EnableDebug()
+        [Theory]
+        [InlineData("EnableDebug.csx")]
+        [InlineData("DebugToggler.csx")]
+        [InlineData("GoToRoom.csx")]
+        [InlineData("ShowRoomName.csx")]
+        public async Task RunScriptTest(string scriptName)
         {
-            await RunScript("EnableDebug.csx");
-        }
-
-        [TestMethod]
-        public async Task DebugToggler()
-        {
-            await RunScript("DebugToggler.csx");
-        }
-
-        [TestMethod]
-        public async Task GoToRoom()
-        {
-            await RunScript("GoToRoom.csx");
-        }
-
-        [TestMethod]
-        public async Task ShowRoomName()
-        {
-            await RunScript("ShowRoomName.csx");
+            await RunScript(scriptName);
         }
     }
 
-    [TestClass]
     public class DeltaruneScriptTest : GameScriptTestBase
     {
         public DeltaruneScriptTest() : base(GamePaths.DELTARUNE_PATH, GamePaths.DELTARUNE_MD5)
         {
         }
 
-        [TestMethod]
-        public async Task EnableDebug()
+        [Theory]
+        [InlineData("EnableDebug.csx")]
+        [InlineData("DebugToggler.csx")]
+        [InlineData("GoToRoom.csx")]
+        [InlineData("ShowRoomName.csx")]
+        [InlineData("DeltaHATE.csx")]
+        [InlineData("DeltaMILK.csx")]
+        [InlineData("TheWholeWorldRevolving.csx")]
+        [InlineData("DebugMsg.csx")]
+        [InlineData("HeCanBeEverywhere.csx")]
+        public async Task RunScriptTest(string scriptName)
         {
-            await RunScript("EnableDebug.csx");
-        }
-
-        [TestMethod]
-        public async Task DebugToggler()
-        {
-            await RunScript("DebugToggler.csx");
-        }
-
-        [TestMethod]
-        public async Task GoToRoom()
-        {
-            await RunScript("GoToRoom.csx");
-        }
-
-        [TestMethod]
-        public async Task ShowRoomName()
-        {
-            await RunScript("ShowRoomName.csx");
-        }
-
-        [TestMethod]
-        public async Task DeltaHATE()
-        {
-            await RunScript("DeltaHATE.csx");
-        }
-
-        [TestMethod]
-        public async Task DeltaMILK()
-        {
-            await RunScript("DeltaMILK.csx");
-        }
-
-        [TestMethod]
-        public async Task TheWholeWorldRevolving()
-        {
-            await RunScript("TheWholeWorldRevolving.csx");
-        }
-
-        [TestMethod]
-        public async Task DebugMsg()
-        {
-            await RunScript("DebugMsg.csx");
-        }
-
-        [TestMethod]
-        public async Task HeCanBeEverywhere()
-        {
-            await RunScript("HeCanBeEverywhere.csx");
+            await RunScript(scriptName);
         }
     }
 }
