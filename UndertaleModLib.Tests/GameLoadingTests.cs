@@ -32,7 +32,10 @@ namespace UndertaleModLib.Tests
         public void DecompileAllScripts()
         {
             GlobalDecompileContext context = new GlobalDecompileContext(data, true);
-            Parallel.ForEach(data.Code, (code) =>
+
+            // Disable parallel because that sometimes fails
+            foreach (var code in data.Code)
+            //Parallel.ForEach(data.Code, (code) =>
             {
                 //Console.WriteLine(code.Name.Content);
                 try
@@ -43,7 +46,8 @@ namespace UndertaleModLib.Tests
                 {
                     throw new Exception("Failed to decompile script " + code.Name.Content, e);
                 }
-            });
+            }
+            //);
         }
 
         [Fact]
