@@ -333,7 +333,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         /// Whether this texture uses the QOI format.
         /// </summary>
         /// <remarks>
-        /// In the case of an invalid or missing image, this will always be <c>false</c>.
+        /// In the case of an invalid or missing image, this will always be <see langword="false" />.
         /// </remarks>
         public bool FormatQOI => _image.Format is GMImage.ImageFormat.Qoi or GMImage.ImageFormat.Bz2Qoi;
 
@@ -341,7 +341,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         /// Whether this texture uses the BZ2 format. (Always used in combination with QOI.)
         /// </summary>
         /// <remarks>
-        /// In the case of an invalid or missing image, this will always be <c>false</c>.
+        /// In the case of an invalid or missing image, this will always be <see langword="false" />.
         /// </remarks>
         public bool FormatBZ2 => _image.Format is GMImage.ImageFormat.Bz2Qoi;
 
