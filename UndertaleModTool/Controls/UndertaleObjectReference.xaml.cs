@@ -67,6 +67,11 @@ namespace UndertaleModTool
                 new FrameworkPropertyMetadata(true,
                     FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
+        public static readonly DependencyProperty GameObjectProperty =
+            DependencyProperty.Register("GameObject", typeof(UndertaleGameObject),
+                typeof(UndertaleObjectReference),
+                new PropertyMetadata(null));
+
         public static DependencyProperty ObjectEventTypeProperty =
             DependencyProperty.Register("ObjectEventType", typeof(EventType),
                 typeof(UndertaleObjectReference),
@@ -79,6 +84,15 @@ namespace UndertaleModTool
                 new FrameworkPropertyMetadata((uint) 0,
                     FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
+        public static readonly DependencyProperty RoomProperty =
+            DependencyProperty.Register("Room", typeof(UndertaleRoom),
+                typeof(UndertaleObjectReference),
+                new PropertyMetadata(null));
+
+        public static readonly DependencyProperty RoomGameObjectProperty =
+           DependencyProperty.Register("RoomGameObject", typeof(UndertaleRoom.GameObject),
+               typeof(UndertaleObjectReference),
+               new PropertyMetadata(null));
 
         public object ObjectReference
         {
@@ -98,6 +112,12 @@ namespace UndertaleModTool
             set { SetValue(ObjectTypeProperty, value); }
         }
 
+        public UndertaleGameObject GameObject
+        {
+            get { return (UndertaleGameObject)GetValue(GameObjectProperty); }
+            set { SetValue(GameObjectProperty, value); }
+        }
+
         public EventType ObjectEventType
         {
             get { return (EventType)GetValue(ObjectEventTypeProperty); }
@@ -110,6 +130,19 @@ namespace UndertaleModTool
             set { SetValue(ObjectEventSubtypeProperty, value); }
         }
 
+        public UndertaleRoom Room
+        {
+            get { return (UndertaleRoom)GetValue(RoomProperty); }
+            set { SetValue(RoomProperty, value); }
+        }
+
+        public UndertaleRoom.GameObject RoomGameObject
+        {
+            get { return (UndertaleRoom.GameObject)GetValue(RoomGameObjectProperty); }
+            set { SetValue(RoomGameObjectProperty, value); }
+        }
+
+        public bool IsPreCreate { get; set; } = false;
 
         public UndertaleObjectReference()
         {
@@ -149,28 +182,64 @@ namespace UndertaleModTool
         {
             if (ObjectReference is null)
             {
-                if (mainWindow.Selected is null)
+                if (GameObject is not null)
                 {
-                    mainWindow.ShowError("Nothing currently selected! This is currently unsupported.");
-                    return;
+                    ObjectReference = GameObject.EventHandlerFor(ObjectEventType, ObjectEventSubtype, mainWindow.Data);
                 }
-                else if (mainWindow.Selected is UndertaleGameObject gameObject)
+                else if (Room is not null)
                 {
-                    // Generate the code entry
-                    UndertaleCode code = gameObject.EventHandlerFor(ObjectEventType, ObjectEventSubtype, mainWindow.Data.Strings, mainWindow.Data.Code, mainWindow.Data.CodeLocals);
-
-                    ObjectReference = code;
+                    if (RoomGameObject is null)
+                    {
+                        ObjectReference = CreationCode(mainWindow.Data, "gml_Room_" + Room.Name.Content + "_Create");
+                    }
+                    else
+                    {
+                        if (!IsPreCreate)
+                        {
+                            ObjectReference = CreationCode(mainWindow.Data, "gml_RoomCC_" + Room.Name.Content + "_" + RoomGameObject.InstanceID.ToString() + "_Create");
+                        }
+                        else
+                        {
+                            ObjectReference = CreationCode(mainWindow.Data, "gml_RoomCC_" + Room.Name.Content + "_" + RoomGameObject.InstanceID.ToString() + "_PreCreate");
+                        }
+                    }
                 }
                 else
                 {
-                    mainWindow.ShowError("Adding to non-objects is currently unsupported.");
-                    return;
+                    mainWindow.ShowError($"Adding not supported in this situation.");
                 }
             }
             else
             {
                 mainWindow.ChangeSelection(ObjectReference);
             }
+        }
+
+        // TODO move this to the models
+        UndertaleCode CreationCode(UndertaleData data, string name)
+        {
+            var nameString = data.Strings.MakeString(name);
+
+            var code = new UndertaleCode()
+            {
+                LocalsCount = 1
+            };
+            code.Name = nameString;
+
+            data.Code.Add(code);
+            
+            UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
+            argsLocal.Name = data.Strings.MakeString("arguments");
+            argsLocal.Index = 0;
+
+            UndertaleCodeLocals locals = new UndertaleCodeLocals();
+            locals.Name = nameString;
+
+            locals.Locals.Add(argsLocal);
+
+            data.CodeLocals.Add(locals);
+
+            return code;
         }
 
         private void Details_MouseDown(object sender, MouseButtonEventArgs e)
