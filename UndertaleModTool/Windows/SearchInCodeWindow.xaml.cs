@@ -1,23 +1,16 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using Microsoft.VisualBasic.Devices;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 
@@ -38,14 +31,14 @@ namespace UndertaleModTool.Windows
 
         bool usingGMLCache;
 
-        int progressValue;
+        int progressCount = 0;
+        int resultCount = 0;
 
         ConcurrentDictionary<string, List<(int, string)>> resultsDict;
         ConcurrentBag<string> failedList;
-        IOrderedEnumerable<string> failedSorted;                                     //failedList.OrderBy()
         IOrderedEnumerable<KeyValuePair<string, List<(int, string)>>> resultsSorted; //resultsDict.OrderBy()
-        int resultCount = 0;
-
+        IOrderedEnumerable<string> failedSorted;                                     //failedList.OrderBy()
+        
         Regex keywordRegex;
 
         ThreadLocal<GlobalDecompileContext> decompileContext;
@@ -61,6 +54,12 @@ namespace UndertaleModTool.Windows
             InitializeComponent();
 
             linkContextMenu = FindResource("linkContextMenu") as ContextMenuDark;
+        }
+
+        public void ActivateAndFocusOnTextBox()
+        {
+            Activate();
+            SearchTextBox.Focus();
         }
 
         private async void SearchButton_Click(object sender, RoutedEventArgs e)
@@ -101,18 +100,19 @@ namespace UndertaleModTool.Windows
             this.IsEnabled = false;
 
             loaderDialog = new("Searching...", null);
+            loaderDialog.Owner = this;
             loaderDialog.PreventClose = true;
             loaderDialog.Show();
 
-            decompileContext = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(mainWindow.Data, false));
-
-            // TODO: This creates another loader dialog. Fix this.
-            usingGMLCache = await mainWindow.GenerateGMLCache(decompileContext);
-            
             resultsDict = new();
             failedList = new();
+            progressCount = 0;
             resultCount = 0;
-            progressValue = 0;
+
+            decompileContext = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(mainWindow.Data, false));
+
+            // HACK: This could be problematic
+            usingGMLCache = await mainWindow.GenerateGMLCache(decompileContext, loaderDialog);
 
             // If we run script before opening any code
             if (!usingGMLCache && mainWindow.Data.KnownSubFunctions is null)
@@ -157,8 +157,8 @@ namespace UndertaleModTool.Windows
         {
             SearchInCodeText(code.Key, code.Value);
 
-            Interlocked.Increment(ref resultCount);
-            Dispatcher.InvokeAsync(() => loaderDialog.ReportProgress(resultCount));
+            Interlocked.Increment(ref progressCount);
+            Dispatcher.InvokeAsync(() => loaderDialog.ReportProgress(progressCount));
         }
 
         void SearchInUndertaleCode(UndertaleCode code)
@@ -174,8 +174,8 @@ namespace UndertaleModTool.Windows
                 failedList.Add(code.Name.Content);
             }
 
-            Interlocked.Increment(ref resultCount);
-            Dispatcher.InvokeAsync(() => loaderDialog.ReportProgress(resultCount));
+            Interlocked.Increment(ref progressCount);
+            Dispatcher.InvokeAsync(() => loaderDialog.ReportProgress(progressCount));
         }
 
         void SearchInCodeText(string codeName, string codeText)
@@ -239,9 +239,9 @@ namespace UndertaleModTool.Windows
 
             FlowDocument doc = new();
 
-            if (failedList is not null)
+            if (failedSorted is not null)
             {
-                int failedCount = failedList.Count;
+                int failedCount = failedSorted.Count();
                 if (failedCount > 0)
                 {
                     string errorStr;
@@ -253,7 +253,7 @@ namespace UndertaleModTool.Windows
                         errorStr = "There is 1 code entry that encountered an error while searching:";
                         errLines.Add(new Run(errorStr) { FontWeight = FontWeights.Bold });
                         errLines.Add(new LineBreak());
-                        errLines.Add(new Run(failedList.First()));
+                        errLines.Add(new Run(failedSorted.First()));
                     }
                     else
                     {
@@ -262,7 +262,7 @@ namespace UndertaleModTool.Windows
                         errLines.Add(new LineBreak());
 
                         int i = 1;
-                        foreach (string entry in failedList)
+                        foreach (string entry in failedSorted)
                         {
                             if (i < failedCount)
                             {
@@ -282,12 +282,12 @@ namespace UndertaleModTool.Windows
                 }
             }
 
-            int resCount = resultsDict.Count;
+            int resCount = resultsSorted.Count();
             Paragraph headerPara = new(new Run($"{resultCount} results in {resCount} code entries for \"{text}\".")) { FontWeight = FontWeights.Bold };
             headerPara.Inlines.Add(new LineBreak());
             doc.Blocks.Add(headerPara);
 
-            foreach (KeyValuePair<string, List<(int lineNum, string codeLine)>> result in resultsDict)
+            foreach (KeyValuePair<string, List<(int lineNum, string codeLine)>> result in resultsSorted)
             {
                 int lineCount = result.Value.Count;
                 Paragraph resPara = new();
