@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using UndertaleModLib;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 
@@ -27,6 +28,7 @@ namespace UndertaleModTool.Windows
 
         bool isCaseSensitive;
         bool isRegexSearch;
+        bool isInAssembly;
         string text;
 
         bool usingGMLCache;
@@ -45,7 +47,7 @@ namespace UndertaleModTool.Windows
 
         LoaderDialog loaderDialog;
 
-        private UndertaleCodeEditor.CodeEditorTab editorTab = UndertaleCodeEditor.CodeEditorTab.Decompiled;
+        private UndertaleCodeEditor.CodeEditorTab editorTab;
 
         readonly record struct CodeLine(string Code, int Line);
 
@@ -90,6 +92,7 @@ namespace UndertaleModTool.Windows
 
             isCaseSensitive = CaseSensitiveCheckBox.IsChecked ?? false;
             isRegexSearch = RegexSearchCheckBox.IsChecked ?? false;
+            isInAssembly = InAssemblyCheckBox.IsChecked ?? false;
 
             if (isRegexSearch)
             {
@@ -109,24 +112,27 @@ namespace UndertaleModTool.Windows
             progressCount = 0;
             resultCount = 0;
 
-            decompileContext = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(mainWindow.Data, false));
-
-            // HACK: This could be problematic
-            usingGMLCache = await mainWindow.GenerateGMLCache(decompileContext, loaderDialog);
-
-            // If we run script before opening any code
-            if (!usingGMLCache && mainWindow.Data.KnownSubFunctions is null)
+            if (!isInAssembly)
             {
-                loaderDialog.Maximum = null;
-                loaderDialog.Update("Building the cache of all sub-functions...");
+                decompileContext = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(mainWindow.Data, false));
 
-                await Task.Run(() => Decompiler.BuildSubFunctionCache(mainWindow.Data));
+                // HACK: This could be problematic
+                usingGMLCache = await mainWindow.GenerateGMLCache(decompileContext, loaderDialog);
+
+                // If we run script before opening any code
+                if (!usingGMLCache && mainWindow.Data.KnownSubFunctions is null)
+                {
+                    loaderDialog.Maximum = null;
+                    loaderDialog.Update("Building the cache of all sub-functions...");
+
+                    await Task.Run(() => Decompiler.BuildSubFunctionCache(mainWindow.Data));
+                }
             }
 
             loaderDialog.SavedStatusText = "Code entries";
             loaderDialog.Update(null, "Code entries", 0, mainWindow.Data.Code.Count);
 
-            if (usingGMLCache)
+            if (!isInAssembly && usingGMLCache)
             {
                 await Task.Run(() => Parallel.ForEach(mainWindow.Data.GMLCache, SearchInGMLCache));
             }
@@ -140,10 +146,10 @@ namespace UndertaleModTool.Windows
             loaderDialog.Maximum = null;
             loaderDialog.Update("Generating result list...");
 
+            editorTab = isInAssembly ? UndertaleCodeEditor.CodeEditorTab.Disassembly : UndertaleCodeEditor.CodeEditorTab.Decompiled;
+
             //await Task.Run(GenerateResults);
             await Dispatcher.InvokeAsync(GenerateResults);
-
-            //mainWindow.PlayInformationSound();
 
             loaderDialog.PreventClose = false;
             loaderDialog.Close();
@@ -166,7 +172,13 @@ namespace UndertaleModTool.Windows
             try
             {
                 if (code is not null && code.ParentEntry is null)
-                SearchInCodeText(code.Name.Content, Decompiler.Decompile(code, decompileContext.Value));
+                {
+                    var codeText = isInAssembly
+                        ? code.Disassemble(mainWindow.Data.Variables, mainWindow.Data.CodeLocals.For(code))
+                        : Decompiler.Decompile(code, decompileContext.Value);
+                    SearchInCodeText(code.Name.Content, codeText);
+                }
+                
             }
             // TODO: Look at specific exceptions
             catch (Exception e)
@@ -215,7 +227,7 @@ namespace UndertaleModTool.Windows
         {
             string[] codeNames = mainWindow.Data.Code.Select(x => x.Name.Content).ToArray();
 
-            if (mainWindow.Data.GMLCacheFailed?.Count > 0)
+            if (!isInAssembly && mainWindow.Data.GMLCacheFailed?.Count > 0)
                 failedSorted = failedList.Concat(mainWindow.Data.GMLCacheFailed).OrderBy(c => Array.IndexOf(codeNames, c));
             else if (failedList.Count > 0)
                 failedSorted = failedList.OrderBy(c => Array.IndexOf(codeNames, c));

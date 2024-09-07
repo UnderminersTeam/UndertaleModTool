@@ -945,6 +945,10 @@ namespace UndertaleModTool
             if (searchInCodeWindow is null)
             {
                 searchInCodeWindow = new();
+                searchInCodeWindow.Closed += (object sender, EventArgs e) =>
+                {
+                    searchInCodeWindow = null;
+                };
                 searchInCodeWindow.Show();
             }
             searchInCodeWindow.ActivateAndFocusOnTextBox();

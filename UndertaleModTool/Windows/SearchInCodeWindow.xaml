@@ -15,9 +15,10 @@
     </Window.Resources>
     <Grid>
         <UndertaleModTool:TextBoxDark x:Name="SearchTextBox" Margin="10,10,10,0" TextWrapping="Wrap" AcceptsReturn="True" Height="36" VerticalAlignment="Top" VerticalScrollBarVisibility="Auto"/>
+        <UndertaleModTool:ButtonDark x:Name="SearchButton" Content="Search" Margin="0,51,10,0" VerticalAlignment="Top" Click="SearchButton_Click" HorizontalAlignment="Right" Width="39"/>
         <CheckBox x:Name="CaseSensitiveCheckBox" Content="Case sensitive" HorizontalAlignment="Left" Margin="10,51,0,0" Height="15" VerticalAlignment="Top"/>
         <CheckBox x:Name="RegexSearchCheckBox" Content="Regex search" HorizontalAlignment="Left" Margin="108,51,0,0" VerticalAlignment="Top"/>
-        <UndertaleModTool:ButtonDark x:Name="SearchButton" Content="Search" Margin="0,51,10,0" VerticalAlignment="Top" Click="SearchButton_Click" HorizontalAlignment="Right" Width="39"/>
+        <CheckBox x:Name="InAssemblyCheckBox" Content="In assembly" HorizontalAlignment="Left" Margin="204,51,0,0" VerticalAlignment="Top"/>
         <RichTextBox x:Name="ResultsRichTextBox" Margin="10,76,10,10" IsDocumentEnabled="True" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" PreviewMouseDown="ResultsRichTextBox_PreviewMouseDown" FontFamily="Consolas">
             <Control.CommandBindings>
                 <CommandBinding Command="Copy" Executed="OnCopyCommand"/>
