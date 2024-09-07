@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -8,9 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
@@ -22,8 +22,6 @@ namespace UndertaleModTool.Windows
     /// </summary>
     public partial class SearchInCodeWindow : Window
     {
-        private ContextMenuDark linkContextMenu;
-
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
 
         bool isCaseSensitive;
@@ -36,10 +34,14 @@ namespace UndertaleModTool.Windows
         int progressCount = 0;
         int resultCount = 0;
 
+        public readonly record struct Result(string Code, int LineNumber, string LineText);
+
+        public ObservableCollection<Result> Results { get; set; } = new();
+
         ConcurrentDictionary<string, List<(int, string)>> resultsDict;
         ConcurrentBag<string> failedList;
-        IOrderedEnumerable<KeyValuePair<string, List<(int, string)>>> resultsSorted; //resultsDict.OrderBy()
-        IOrderedEnumerable<string> failedSorted;                                     //failedList.OrderBy()
+        IEnumerable<KeyValuePair<string, List<(int, string)>>> resultsDictSorted;
+        IEnumerable<string> failedListSorted;
         
         Regex keywordRegex;
 
@@ -49,13 +51,9 @@ namespace UndertaleModTool.Windows
 
         private UndertaleCodeEditor.CodeEditorTab editorTab;
 
-        readonly record struct CodeLine(string Code, int Line);
-
         public SearchInCodeWindow()
         {
             InitializeComponent();
-
-            linkContextMenu = FindResource("linkContextMenu") as ContextMenuDark;
         }
 
         public void ActivateAndFocusOnTextBox()
@@ -107,8 +105,12 @@ namespace UndertaleModTool.Windows
             loaderDialog.PreventClose = true;
             loaderDialog.Show();
 
+            Results.Clear();
+
             resultsDict = new();
             failedList = new();
+            resultsDictSorted = null;
+            failedListSorted = null;
             progressCount = 0;
             resultCount = 0;
 
@@ -148,8 +150,7 @@ namespace UndertaleModTool.Windows
 
             editorTab = isInAssembly ? UndertaleCodeEditor.CodeEditorTab.Disassembly : UndertaleCodeEditor.CodeEditorTab.Decompiled;
 
-            //await Task.Run(GenerateResults);
-            await Dispatcher.InvokeAsync(GenerateResults);
+            ShowResults();
 
             loaderDialog.PreventClose = false;
             loaderDialog.Close();
@@ -192,34 +193,26 @@ namespace UndertaleModTool.Windows
 
         void SearchInCodeText(string codeName, string codeText)
         {
-            try
+            var lineNumber = 0;
+            StringReader codeTextReader = new(codeText);
+            bool nameWritten = false;
+            string lineText;
+            while ((lineText = codeTextReader.ReadLine()) is not null)
             {
-                var lineNumber = 0;
-                StringReader codeTextReader = new(codeText);
-                bool nameWritten = false;
-                string lineText;
-                while ((lineText = codeTextReader.ReadLine()) is not null)
-                {
-                    lineNumber += 1;
-                    if (lineText == string.Empty)
-                        continue;
+                lineNumber += 1;
+                if (lineText == string.Empty)
+                    continue;
 
-                    if (((isRegexSearch && keywordRegex.Match(lineText).Success) || ((!isRegexSearch && isCaseSensitive) ? lineText.Contains(text) : lineText.Contains(text, StringComparison.CurrentCultureIgnoreCase))))
+                if (((isRegexSearch && keywordRegex.Match(lineText).Success) || ((!isRegexSearch && isCaseSensitive) ? lineText.Contains(text) : lineText.Contains(text, StringComparison.CurrentCultureIgnoreCase))))
+                {
+                    if (nameWritten == false)
                     {
-                        if (nameWritten == false)
-                        {
-                            resultsDict[codeName] = new List<(int, string)>();
-                            nameWritten = true;
-                        }
-                        resultsDict[codeName].Add((lineNumber, lineText));
-                        Interlocked.Increment(ref resultCount);
+                        resultsDict[codeName] = new List<(int, string)>();
+                        nameWritten = true;
                     }
+                    resultsDict[codeName].Add((lineNumber, lineText));
+                    Interlocked.Increment(ref resultCount);
                 }
-            }
-            // TODO look at specific exceptions
-            catch (Exception e)
-            {
-                failedList.Add(codeName);
             }
         }
 
@@ -227,187 +220,86 @@ namespace UndertaleModTool.Windows
         {
             string[] codeNames = mainWindow.Data.Code.Select(x => x.Name.Content).ToArray();
 
+            resultsDictSorted = resultsDict.OrderBy(c => Array.IndexOf(codeNames, c.Key));
+            failedListSorted = failedList;
+
             if (!isInAssembly && mainWindow.Data.GMLCacheFailed?.Count > 0)
-                failedSorted = failedList.Concat(mainWindow.Data.GMLCacheFailed).OrderBy(c => Array.IndexOf(codeNames, c));
-            else if (failedList.Count > 0)
-                failedSorted = failedList.OrderBy(c => Array.IndexOf(codeNames, c));
+                failedListSorted = failedListSorted.Concat(mainWindow.Data.GMLCacheFailed);
 
-            resultsSorted = resultsDict.OrderBy(c => Array.IndexOf(codeNames, c.Key));
+            failedListSorted = failedListSorted.OrderBy(c => Array.IndexOf(codeNames, c));
         }
 
-        public void GenerateResults()
+        public void ShowResults()
         {
-            //(Not used because it has bad performance)
-            /*MemoryStream docStream = new();
-            ProcessResults(ref docStream);
-            docStream.Seek(0, SeekOrigin.Begin);
-
-            Dispatcher.Invoke(() =>
+            foreach (var result in resultsDictSorted)
             {
-                OutTextBox.Document = XamlReader.Load(docStream) as FlowDocument;
-            });
-            
-            docStream.Dispose();*/
-
-            FlowDocument doc = new();
-
-            if (failedSorted is not null)
-            {
-                int failedCount = failedSorted.Count();
-                if (failedCount > 0)
+                var code = result.Key;
+                foreach (var (lineText, lineNumber) in result.Value)
                 {
-                    string errorStr;
-                    Paragraph errPara = new() { Foreground = Brushes.OrangeRed };
-                    InlineCollection errLines = errPara.Inlines;
-
-                    if (failedCount == 1)
-                    {
-                        errorStr = "There is 1 code entry that encountered an error while searching:";
-                        errLines.Add(new Run(errorStr) { FontWeight = FontWeights.Bold });
-                        errLines.Add(new LineBreak());
-                        errLines.Add(new Run(failedSorted.First()));
-                    }
-                    else
-                    {
-                        errorStr = $"There are {failedCount} code entries that encountered an error while searching:";
-                        errLines.Add(new Run(errorStr) { FontWeight = FontWeights.Bold });
-                        errLines.Add(new LineBreak());
-
-                        int i = 1;
-                        foreach (string entry in failedSorted)
-                        {
-                            if (i < failedCount)
-                            {
-                                errLines.Add(new Run(entry + ','));
-                                errLines.Add(new LineBreak());
-                            }
-                            else
-                                errLines.Add(new Run(entry));
-
-                            i++;
-                        }
-                    }
-                    errLines.Add(new LineBreak());
-                    errLines.Add(new LineBreak());
-
-                    doc.Blocks.Add(errPara);
+                    Results.Add(new(code, lineText, lineNumber));
                 }
             }
 
-            int resCount = resultsSorted.Count();
-            Paragraph headerPara = new(new Run($"{resultCount} results in {resCount} code entries for \"{text}\".")) { FontWeight = FontWeights.Bold };
-            headerPara.Inlines.Add(new LineBreak());
-            doc.Blocks.Add(headerPara);
-
-            foreach (KeyValuePair<string, List<(int lineNum, string codeLine)>> result in resultsSorted)
+            string str = $"{resultCount} result{(resultCount > 1 ? "s" : "")} found in {resultsDictSorted.Count()} code entr{(resultsDictSorted.Count() > 1 ? "ies" : "y")}.";
+            if (failedListSorted.Count() > 0)
             {
-                int lineCount = result.Value.Count;
-                Paragraph resPara = new();
-
-                Underline resHeader = new();
-                resHeader.Inlines.Add(new Run("Results in "));
-                resHeader.Inlines.Add(new Hyperlink(new Run(result.Key)));
-                resHeader.Inlines.Add(new Run(":"));
-                resHeader.Inlines.Add(new LineBreak());
-                resPara.Inlines.Add(resHeader);
-
-                int i = 1;
-                foreach (var (lineNum, codeLine) in result.Value)
-                {
-                    Hyperlink lineLink = new(new Run($"Line {lineNum}")
-                    {
-                        Tag = new CodeLine(result.Key, lineNum)
-                    });
-
-                    resPara.Inlines.Add(lineLink);
-                    resPara.Inlines.Add(new Run($": {codeLine}"));
-
-                    if (i < lineCount)
-                        resPara.Inlines.Add(new LineBreak());
-
-                    i++;
-                }
-                resPara.Inlines.Add(new LineBreak());
-
-                doc.Blocks.Add(resPara);
+                str += $" {failedListSorted.Count()} code entr{(failedListSorted.Count() > 1 ? "ies" : "y")} with an error.";
             }
-
-            ResultsRichTextBox.Document = doc;
+            StatusBarTextBlock.Text = str;
         }
 
-        private void ResultsRichTextBox_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        void OpenSelectedListViewItem(bool inNewTab=false)
         {
-            if (mainWindow is null)
-                return;
-            if (e.OriginalSource is not Run linkRun || linkRun.Parent is not Hyperlink
-                || String.IsNullOrEmpty(linkRun.Text))
-                return;
-
-            if (linkRun.Text.StartsWith("Line "))
+            foreach (Result result in ResultsListView.SelectedItems)
             {
-                var (codeName, lineNum) = (CodeLine)linkRun.Tag;
-                if (String.IsNullOrEmpty(codeName))
-                {
-                    e.Handled = true;
-                    return;
-                }
-
-                if (e.ChangedButton == System.Windows.Input.MouseButton.Right && linkContextMenu is not null)
-                {
-                    linkContextMenu.DataContext = (lineNum, codeName);
-                    linkContextMenu.IsOpen = true;
-                }
-                else
-                    mainWindow.OpenCodeEntry(codeName, lineNum, editorTab, e.ChangedButton == System.Windows.Input.MouseButton.Middle);
+                mainWindow.OpenCodeEntry(result.Code, result.LineNumber, editorTab, inNewTab);
+                // Only first one opens in current tab, the rest go into new tabs.
+                inNewTab = true;
             }
-            else
-            {
-                string codeName = linkRun.Text;
-                if (e.ChangedButton == System.Windows.Input.MouseButton.Right && linkContextMenu is not null)
-                {
-                    linkContextMenu.DataContext = (1, codeName);
-                    linkContextMenu.IsOpen = true;
-                }
-                else
-                    mainWindow.OpenCodeEntry(codeName, editorTab, e.ChangedButton == System.Windows.Input.MouseButton.Middle);
-            }
-
-            e.Handled = true;
         }
 
-        private void OpenInNewTabMenuItem_Click(object sender, RoutedEventArgs e)
+        static void CopyListViewItems(IEnumerable items)
         {
-            if ((sender as FrameworkElement)?.DataContext is not ValueTuple<int, string> codeNamePair
-                || String.IsNullOrEmpty(codeNamePair.Item2))
-                return;
-
-            mainWindow.OpenCodeEntry(codeNamePair.Item2, codeNamePair.Item1, editorTab, true);
+            string str = String.Join("\n", items
+                .Cast<Result>()
+                .Select(result => $"{result.Code}\t{result.LineNumber}\t{result.LineText}"));
+            Clipboard.SetText(str);
         }
 
-        private void copyMenuItem_Click(object sender, RoutedEventArgs e)
+        private void ListViewItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            string outText = ResultsRichTextBox.Selection.Text;
-
-            if (outText.Length > 0)
-                Clipboard.SetText(outText, TextDataFormat.Text);
+            OpenSelectedListViewItem();
         }
 
-        private void copyAllMenuItem_Click(object sender, RoutedEventArgs e)
+        private void ListViewItem_KeyDown(object sender, KeyEventArgs e)
         {
-            string outText = new TextRange(ResultsRichTextBox.Document.ContentStart, ResultsRichTextBox.Document.ContentEnd).Text;
+            if (e.Key == Key.Return)
+                OpenSelectedListViewItem();
+        }
 
-            if (outText.Length > 0)
-                Clipboard.SetText(outText, TextDataFormat.Text);
+        private void MenuItemOpen_Click(object sender, RoutedEventArgs e)
+        {
+            OpenSelectedListViewItem();
+        }
+
+        private void MenuItemOpenInNewTab_Click(object sender, RoutedEventArgs e)
+        {
+            OpenSelectedListViewItem(true);
+        }
+
+        private void MenuItemCopyAll_Click(object sender, RoutedEventArgs e)
+        {
+            CopyListViewItems(ResultsListView.Items);
+        }
+
+        private void CopyCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            CopyListViewItems(ResultsListView.SelectedItems.Cast<Result>().OrderBy(item => ResultsListView.Items.IndexOf(item)));
         }
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
             e.Cancel = (loaderDialog is not null);
-        }
-
-        private void OnCopyCommand(object sender, ExecutedRoutedEventArgs e)
-        {
-            copyMenuItem_Click(null, null);
         }
     }
 }
