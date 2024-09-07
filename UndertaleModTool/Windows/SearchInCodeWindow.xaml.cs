@@ -164,7 +164,7 @@ namespace UndertaleModTool.Windows
             SearchInCodeText(code.Key, code.Value);
 
             Interlocked.Increment(ref progressCount);
-            Dispatcher.InvokeAsync(() => loaderDialog.ReportProgress(progressCount));
+            Dispatcher.Invoke(() => loaderDialog.ReportProgress(progressCount));
         }
 
         void SearchInUndertaleCode(UndertaleCode code)
@@ -187,7 +187,7 @@ namespace UndertaleModTool.Windows
             }
 
             Interlocked.Increment(ref progressCount);
-            Dispatcher.InvokeAsync(() => loaderDialog.ReportProgress(progressCount));
+            Dispatcher.Invoke(() => loaderDialog.ReportProgress(progressCount));
         }
 
         void SearchInCodeText(string codeName, string codeText)
