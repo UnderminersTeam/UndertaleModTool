@@ -6,29 +6,63 @@
         xmlns:local="clr-namespace:UndertaleModTool"
         xmlns:UndertaleModTool="clr-namespace:UndertaleModTool" x:Class="UndertaleModTool.Windows.SearchInCodeWindow"
         mc:Ignorable="d"
-        Title="Search in code" Height="500" Width="550" Closing="Window_Closing" WindowStartupLocation="CenterScreen"
-        FocusManager.FocusedElement="{Binding ElementName=SearchTextBox}">
+        Title="Search in code" Height="500" Width="800" Closing="Window_Closing" WindowStartupLocation="CenterScreen"
+        FocusManager.FocusedElement="{Binding ElementName=SearchTextBox}" DataContext="{Binding Mode=OneWay, RelativeSource={RelativeSource Self}}">
     <Window.Resources>
-        <local:ContextMenuDark x:Key="linkContextMenu" Placement="MousePoint">
-            <local:MenuItemDark Header="Open in new tab" Click="OpenInNewTabMenuItem_Click"/>
+        <local:ContextMenuDark x:Key="ListViewItemContextMenu">
+            <MenuItem Header="Open" Click="MenuItemOpen_Click"/>
+            <MenuItem Header="Open in new tab" Click="MenuItemOpenInNewTab_Click"/>
+            <MenuItem Header="Copy" Command="Copy"/>
+            <MenuItem Header="Copy all" Click="MenuItemCopyAll_Click"/>
         </local:ContextMenuDark>
     </Window.Resources>
-    <Grid>
-        <UndertaleModTool:TextBoxDark x:Name="SearchTextBox" Margin="10,10,10,0" TextWrapping="Wrap" AcceptsReturn="True" Height="36" VerticalAlignment="Top" VerticalScrollBarVisibility="Auto"/>
-        <UndertaleModTool:ButtonDark x:Name="SearchButton" Content="Search" Margin="0,51,10,0" VerticalAlignment="Top" Click="SearchButton_Click" HorizontalAlignment="Right" Width="39"/>
-        <CheckBox x:Name="CaseSensitiveCheckBox" Content="Case sensitive" HorizontalAlignment="Left" Margin="10,51,0,0" Height="15" VerticalAlignment="Top"/>
-        <CheckBox x:Name="RegexSearchCheckBox" Content="Regex search" HorizontalAlignment="Left" Margin="108,51,0,0" VerticalAlignment="Top"/>
-        <CheckBox x:Name="InAssemblyCheckBox" Content="In assembly" HorizontalAlignment="Left" Margin="204,51,0,0" VerticalAlignment="Top"/>
-        <RichTextBox x:Name="ResultsRichTextBox" Margin="10,76,10,10" IsDocumentEnabled="True" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" PreviewMouseDown="ResultsRichTextBox_PreviewMouseDown" FontFamily="Consolas">
-            <Control.CommandBindings>
-                <CommandBinding Command="Copy" Executed="OnCopyCommand"/>
-            </Control.CommandBindings>
-            <RichTextBox.ContextMenu>
-                <local:ContextMenuDark>
-                    <MenuItem Header="Copy" Click="copyMenuItem_Click"/>
-                    <MenuItem Header="Copy all" Click="copyAllMenuItem_Click"/>
-                </local:ContextMenuDark>
-            </RichTextBox.ContextMenu>
-        </RichTextBox>
-    </Grid>
+    <DockPanel>
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem>
+                <TextBlock Name="StatusBarTextBlock"></TextBlock>
+            </StatusBarItem>
+        </StatusBar>
+        <Grid>
+            <UndertaleModTool:TextBoxDark x:Name="SearchTextBox" Margin="10,10,10,0" TextWrapping="Wrap" AcceptsReturn="True" Height="36" VerticalAlignment="Top" VerticalScrollBarVisibility="Auto"/>
+            <UndertaleModTool:ButtonDark x:Name="SearchButton" Content="Search" Margin="0,51,10,0" VerticalAlignment="Top" Click="SearchButton_Click" HorizontalAlignment="Right" Width="39"/>
+            <CheckBox x:Name="CaseSensitiveCheckBox" Content="Case sensitive" HorizontalAlignment="Left" Margin="10,51,0,0" Height="15" VerticalAlignment="Top"/>
+            <CheckBox x:Name="RegexSearchCheckBox" Content="Regex search" HorizontalAlignment="Left" Margin="108,51,0,0" VerticalAlignment="Top"/>
+            <CheckBox x:Name="InAssemblyCheckBox" Content="In assembly" HorizontalAlignment="Left" Margin="204,51,0,0" VerticalAlignment="Top"/>
+            <ListView ItemsSource="{Binding Results}" x:Name="ResultsListView" Margin="10,76,10,10">
+                <ListView.CommandBindings>
+                    <CommandBinding Command="Copy" Executed="CopyCommand_Executed"/>
+                </ListView.CommandBindings>
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_MouseDoubleClick"/>
+                        <EventSetter Event="KeyDown" Handler="ListViewItem_KeyDown"/>
+                        <Setter Property="FontFamily" Value="Consolas"/>
+                        <Setter Property="ContextMenu" Value="{StaticResource ListViewItemContextMenu}"/>
+                        <Setter Property="ToolTip">
+                            <Setter.Value>
+                                <UniformGrid Columns="1">
+                                    <TextBlock>
+                                        <TextBlock.Text>
+                                            <MultiBinding StringFormat="{}{0}:{1}">
+                                                <Binding Path="Code"/>
+                                                <Binding Path="LineNumber"/>
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                    <TextBlock Text="{Binding LineText}"/>
+                                </UniformGrid>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Code" DisplayMemberBinding="{Binding Code}" Width="auto"/>
+                        <GridViewColumn Header="Line" DisplayMemberBinding="{Binding LineNumber}" Width="auto"/>
+                        <GridViewColumn Header="Text" DisplayMemberBinding="{Binding LineText}" Width="auto"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </Grid>
+    </DockPanel>
 </Window>
