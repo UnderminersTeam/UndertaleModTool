@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:UndertaleModTool"
         xmlns:UndertaleModTool="clr-namespace:UndertaleModTool" x:Class="UndertaleModTool.Windows.SearchInCodeWindow"
         mc:Ignorable="d"
-        Title="Search in code" Height="500" Width="550" Closing="Window_Closing">
+        Title="Search in code" Height="500" Width="550" Closing="Window_Closing" WindowStartupLocation="CenterScreen"
+        FocusManager.FocusedElement="{Binding ElementName=SearchTextBox}">
     <Window.Resources>
         <local:ContextMenuDark x:Key="linkContextMenu" Placement="MousePoint">
             <local:MenuItemDark Header="Open in new tab" Click="OpenInNewTabMenuItem_Click"/>
