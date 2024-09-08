@@ -115,7 +115,7 @@ foreach (Atlas atlas in packer.Atlasses)
                 {
                     var spriteParts = sprFrameRegex.Match(stripped);
                     spriteName = spriteParts.Groups[1].Value;
-                    int.TryParse(spriteParts.Groups[2].Value, out frame);
+                    Int32.TryParse(spriteParts.Groups[2].Value, out frame);
                 }
                 catch (Exception e)
                 {
@@ -597,7 +597,7 @@ Pressing ""No"" will cause the program to ignore these images.");
 
             spriteName = spriteParts.Groups[1].Value;
 
-            if (!int.TryParse(spriteParts.Groups[2].Value, out int frame))
+            if (!Int32.TryParse(spriteParts.Groups[2].Value, out int frame))
                 throw new ScriptException($"{spriteName} has an invalid frame index.");
             if (frame < 0)
                 throw new ScriptException($"{spriteName} is using an invalid numbering scheme. The script has stopped for your own protection.");

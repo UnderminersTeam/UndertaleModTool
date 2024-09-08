@@ -75,7 +75,7 @@ foreach (var path in Directory.EnumerateFiles(bordersPath))
 {
     UndertaleEmbeddedTexture newtex = new UndertaleEmbeddedTexture();
     newtex.Name = new UndertaleString($"Texture {++lastTextPage}");
-    newtex.TextureData.Image = GMImage.FromPng(File.ReadAllBytes(path)); // TODO: possibly other formats than PNG in the future, but no Undertale versions currently have them
+    newtex.TextureData.Image = GMImage.FromPng(File.ReadAllBytes(path)); // Possibly other formats than PNG in the future, but no Undertale versions currently have them
     Data.EmbeddedTextures.Add(newtex);
     textures.Add(Path.GetFileName(path), newtex);
 }
@@ -84,7 +84,7 @@ foreach (var path in Directory.EnumerateFiles(bordersPath))
 Action<string, UndertaleEmbeddedTexture, ushort, ushort, ushort, ushort> AssignBorderBackground = (name, tex, x, y, width, height) => 
 {
     var bg = Data.Backgrounds.ByName(name);
-    if (bg == null) 
+    if (bg is null) 
     {
         // The anime border does not exist on PC yet ;)
         return;
