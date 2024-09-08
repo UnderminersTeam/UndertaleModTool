@@ -313,7 +313,7 @@ public interface IScriptInterface
     Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<(int lineNum, string codeLine)>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null);
 
     /// <summary>
-    /// Sets whether or not the script's "finished message" should be enabled, upon the current script's completion.
+    /// Sets whether or not the current script should show a message indicating that it completed.
     /// </summary>
     /// <param name="isFinishedMessageEnabled">True to enable the finished message; false otherwise.</param>
     void SetFinishedMessage(bool isFinishedMessageEnabled);
