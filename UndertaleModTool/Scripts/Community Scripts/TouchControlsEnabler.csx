@@ -38,8 +38,21 @@ UndertaleTexturePageItem AddNewTexturePageItem(ushort sourceX, ushort sourceY, u
     ushort boundingHeight = sourceHeight;
     var texturePage = textures["controls.png"];
 
-    UndertaleTexturePageItem tpItem = new UndertaleTexturePageItem { SourceX = sourceX, SourceY = sourceY, SourceWidth = sourceWidth, SourceHeight = sourceHeight, TargetX = targetX, TargetY = targetY, TargetWidth = targetWidth, TargetHeight = targetHeight, BoundingWidth = boundingWidth, BoundingHeight = boundingHeight, TexturePage = texturePage };
-    tpItem.Name = new UndertaleString($"PageItem {Data.TexturePageItems.Count}");
+    UndertaleTexturePageItem tpItem = new() 
+    { 
+        SourceX = sourceX, 
+        SourceY = sourceY, 
+        SourceWidth = sourceWidth, 
+        SourceHeight = sourceHeight, 
+        TargetX = targetX, 
+        TargetY = targetY, 
+        TargetWidth = targetWidth, 
+        TargetHeight = targetHeight, 
+        BoundingWidth = boundingWidth, 
+        BoundingHeight = boundingHeight, 
+        TexturePage = texturePage,
+        Name = new UndertaleString($"PageItem {Data.TexturePageItems.Count}")
+    };
     Data.TexturePageItems.Add(tpItem);
     return tpItem;
 }

@@ -47,7 +47,7 @@ foreach (string file in dirFiles)
     int validFrameNumber = 0;
     try
     {
-        validFrameNumber = int.Parse(stripped.Substring(lastUnderscore + 1));
+        validFrameNumber = Int32.Parse(stripped.Substring(lastUnderscore + 1));
     }
     catch
     {
@@ -309,7 +309,7 @@ foreach (Atlas atlas in packer.Atlasses)
                 {
                     lastUnderscore = stripped.LastIndexOf('_');
                     spriteName = stripped.Substring(0, lastUnderscore);
-                    frame = int.Parse(stripped.Substring(lastUnderscore + 1));
+                    frame = Int32.Parse(stripped.Substring(lastUnderscore + 1));
                 }
                 catch (Exception e)
                 {

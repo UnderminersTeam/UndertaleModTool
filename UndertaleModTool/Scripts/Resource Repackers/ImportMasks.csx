@@ -51,7 +51,7 @@ foreach (string file in dirFiles)
     int validFrameNumber = 0;
     try
     {
-        validFrameNumber = int.Parse(stripped.Substring(lastUnderscore + 1));
+        validFrameNumber = Int32.Parse(stripped.Substring(lastUnderscore + 1));
     }
     catch
     {
@@ -60,7 +60,7 @@ foreach (string file in dirFiles)
     int frame = 0;
     try
     {
-        frame = int.Parse(stripped.Substring(lastUnderscore + 1));
+        frame = Int32.Parse(stripped.Substring(lastUnderscore + 1));
     }
     catch
     {
@@ -96,7 +96,7 @@ await Task.Run(() =>
         string stripped = Path.GetFileNameWithoutExtension(file);
         int lastUnderscore = stripped.LastIndexOf('_');
         string spriteName = stripped.Substring(0, lastUnderscore);
-        int frame = int.Parse(stripped.Substring(lastUnderscore + 1));
+        int frame = Int32.Parse(stripped.Substring(lastUnderscore + 1));
         UndertaleSprite sprite = Data.Sprites.ByName(spriteName);
         int collision_mask_count = sprite.CollisionMasks.Count;
         while (collision_mask_count <= frame)

@@ -109,19 +109,21 @@ Data.EmbeddedTextures.Add(texture);
 if (attemptToFixFontNotAppearing)
     fontTexGroup.TexturePages.Add(new UndertaleResourceById<UndertaleEmbeddedTexture, UndertaleChunkTXTR>() { Resource = texture });
 
-UndertaleTexturePageItem texturePageItem = new UndertaleTexturePageItem();
-texturePageItem.Name = new UndertaleString($"PageItem {Data.TexturePageItems.Count}");
-texturePageItem.TexturePage = texture;
-texturePageItem.SourceX = 0;
-texturePageItem.SourceY = 0;
-texturePageItem.SourceWidth = width;
-texturePageItem.SourceHeight = height;
-texturePageItem.TargetX = 0;
-texturePageItem.TargetY = 0;
-texturePageItem.TargetWidth = width;
-texturePageItem.TargetHeight = height;
-texturePageItem.BoundingWidth = width;
-texturePageItem.BoundingHeight = height;
+UndertaleTexturePageItem texturePageItem = new UndertaleTexturePageItem()
+{
+    Name = new UndertaleString($"PageItem {Data.TexturePageItems.Count}"),
+    TexturePage = texture,
+    SourceX = 0,
+    SourceY = 0,
+    SourceWidth = width,
+    SourceHeight = height,
+    TargetX = 0,
+    TargetY = 0,
+    TargetWidth = width,
+    TargetHeight = height,
+    BoundingWidth = width,
+    BoundingHeight = height
+};
 Data.TexturePageItems.Add(texturePageItem);
 
 font.DisplayName = Data.Strings.MakeString((string)fontData["fontName"]);

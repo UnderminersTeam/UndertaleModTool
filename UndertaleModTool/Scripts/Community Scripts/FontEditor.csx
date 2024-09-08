@@ -12,11 +12,14 @@ using ImageMagick;
 
 EnsureDataLoaded();
 
-UndertaleFont font = FontPickerResult(); //GUI dropdown selection list of fonts
-if (font == null) return; //the 'Cancel' or 'X' button is hit
+UndertaleFont font = FontPickerResult(); // GUI dropdown selection list of fonts
+if (font is null)
+{
+    return; // the 'Cancel' or 'X' button is hit
+}
 using (TextureWorker textureWorker = new())
 {
-    new FontEditorGUI(font, textureWorker).ShowDialog(); //font editor GUI
+    _ = new FontEditorGUI(font, textureWorker).ShowDialog(); // font editor GUI
 }
 
 class FontEditorGUI : Form
