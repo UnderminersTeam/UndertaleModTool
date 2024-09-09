@@ -124,8 +124,7 @@
                             </Style.Triggers>
                         </Style>
                     </MenuItem.Resources>
-
-                    <MenuItem Header="Search in code" Command="{x:Static local:MainWindow.SearchInCodeCommand}"></MenuItem>
+                    <MenuItem Header="_Search in code" Command="{x:Static local:MainWindow.SearchInCodeCommand}" InputGestureText="Ctrl+Shift+F"></MenuItem>
 
                     <MenuItem Header="Find unreferenced _assets" Name="FindUnreferencedAssetsItem" Click="MenuItem_FindUnreferencedAssets_Click"/>
                     <Separator/>
