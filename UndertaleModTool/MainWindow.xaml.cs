@@ -2889,48 +2889,50 @@ namespace UndertaleModTool
             {
                 httpClient ??= new();
 
+                JsonNode jsonResponse;
+
                 using (var request = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/repos/UnderminersTeam/UndertaleModTool/releases/latest"))
                 {
                     request.Headers.Add("Accept", "application/vnd.github+json");
                     request.Headers.Add("X-GitHub-Api-Version", "2022-11-28");
                     request.Headers.Add("User-Agent", new Regex(@"Git:|[ (),/:;<=>?@[\]{}]").Replace(Version, ""));
 
-                    using (var response = await httpClient.SendAsync(request))
+                    using var response = await httpClient.SendAsync(request);
+
+                    if (response?.IsSuccessStatusCode != true)
                     {
-                        if (response?.IsSuccessStatusCode != true)
-                        {
-                            string errText = $"{(response is null ? "Check your internet connection." : $"HTTP error - {response.ReasonPhrase}.")}";
-                            loaderDialog.ShowError($"Failed to check for updates!\n{errText}");
-                            return;
-                        }
-
-                        JsonNode j = await response.Content.ReadFromJsonAsync<JsonNode>();
-                        string latestVersion = (string)j["tag_name"];
-                        var latestDateTime = ((DateTime)j["published_at"]);
-
-                        // HACK: There has to be a better way of getting the date of the current version
-                        DateTime currentDateTime = File.GetLastWriteTimeUtc(Path.Combine(ExePath, "UndertaleModTool.exe"));
-
-                        if (latestVersion != Version /*&& latestDateTime > currentDateTime*/)
-                        {
-                            if (loaderDialog.ShowQuestion("A new version of UndertaleModTool is avaliable!" +
-                                "\n" +
-                                $"\nCurrent version: {Version} ({currentDateTime})" +
-                                $"\nLatest version: {latestVersion} ({latestDateTime})" +
-                                "\n" +
-                                "\nDo you want to download the latest version?") == MessageBoxResult.Yes)
-                            {
-                                OpenBrowser((string)j["html_url"]);
-
-                                // TODO: Find which of the assets to download
-                                // TODO: Auto update
-                            }
-                        }
-                        else
-                        {
-                            loaderDialog.ShowMessage("UndertaleModTool is up to date.");
-                        }
+                        string errText = $"{(response is null ? "Check your internet connection." : $"HTTP error - {response.ReasonPhrase}.")}";
+                        loaderDialog.ShowError($"Failed to check for updates!\n{errText}");
+                        return;
                     }
+
+                    jsonResponse = await response.Content.ReadFromJsonAsync<JsonNode>();
+                }
+
+                string latestVersion = (string)jsonResponse["tag_name"];
+                DateTime latestDateTime = ((DateTime)jsonResponse["published_at"]);
+
+                // HACK: There has to be a better way of getting the date of the current version
+                DateTime currentDateTime = File.GetLastWriteTimeUtc(Path.Combine(ExePath, "UndertaleModTool.exe"));
+
+                if (latestVersion != Version /*&& latestDateTime > currentDateTime*/)
+                {
+                    if (loaderDialog.ShowQuestion("A new version of UndertaleModTool is avaliable!" +
+                        "\n" +
+                        $"\nCurrent version: {Version} ({currentDateTime})" +
+                        $"\nLatest version: {latestVersion} ({latestDateTime})" +
+                        "\n" +
+                        "\nDo you want to download the latest version?") == MessageBoxResult.Yes)
+                    {
+                        OpenBrowser((string)jsonResponse["html_url"]);
+
+                        // TODO: Find which of the assets to download
+                        // TODO: Auto update
+                    }
+                }
+                else
+                {
+                    loaderDialog.ShowMessage("UndertaleModTool is up to date.");
                 }
             }
             finally
