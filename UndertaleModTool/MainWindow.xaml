@@ -134,6 +134,7 @@
                               Click="MenuItem_RunBuiltinScript_Item_Click" CommandParameter="Scripts\Builtin Scripts\SearchLimited.csx"/>
                 </local:MenuItemDark>
                 <local:MenuItemDark Header="_Help">
+                    <MenuItem Header="_Check for updates" Click="MenuItem_CheckForUpdates_Click"/>
                     <MenuItem Header="_GitHub" Click="MenuItem_GitHub_Click"/>
                     <MenuItem Header="_About" Click="MenuItem_About_Click"/>
                 </local:MenuItemDark>
