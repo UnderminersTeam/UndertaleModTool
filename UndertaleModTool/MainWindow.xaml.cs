@@ -502,6 +502,11 @@ namespace UndertaleModTool
 
             RunGMSDebuggerItem.Visibility = Settings.Instance.ShowDebuggerOption
                                             ? Visibility.Visible : Visibility.Collapsed;
+
+            if (Settings.Instance.CheckForUpdatesAtStartup)
+            {
+                _ = CheckForUpdates(isStartup: true);
+            }
         }
 
         public Dictionary<string, NamedPipeServerStream> childFiles = new Dictionary<string, NamedPipeServerStream>();
@@ -2878,7 +2883,12 @@ namespace UndertaleModTool
             OpenBrowser("https://github.com/UnderminersTeam/UndertaleModTool");
         }
 
-        private async void MenuItem_CheckForUpdates_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_CheckForUpdates_Click(object sender, RoutedEventArgs e)
+        {
+            _ = CheckForUpdates();
+        }
+
+        async Task CheckForUpdates(bool isStartup = false)
         {
             LoaderDialog loaderDialog = new("Check for updates", "Checking for updates...");
             loaderDialog.Owner = this;
@@ -2901,8 +2911,11 @@ namespace UndertaleModTool
 
                     if (response?.IsSuccessStatusCode != true)
                     {
-                        string errText = $"{(response is null ? "Check your internet connection." : $"HTTP error - {response.ReasonPhrase}.")}";
-                        loaderDialog.ShowError($"Failed to check for updates!\n{errText}");
+                        if (!isStartup)
+                        {
+                            string errText = $"{(response is null ? "Check your internet connection." : $"HTTP error - {response.ReasonPhrase}.")}";
+                            loaderDialog.ShowError($"Failed to check for updates!\n{errText}");
+                        }
                         return;
                     }
 
@@ -2922,6 +2935,9 @@ namespace UndertaleModTool
                         $"\nCurrent version: {Version} ({currentDateTime})" +
                         $"\nLatest version: {latestVersion} ({latestDateTime})" +
                         "\n" +
+                        (isStartup ?
+                        "\nYou can disable checking for updates at startup in the settings." +
+                        "\n" : "") +
                         "\nDo you want to download the latest version?") == MessageBoxResult.Yes)
                     {
                         OpenBrowser((string)jsonResponse["html_url"]);
@@ -2932,7 +2948,10 @@ namespace UndertaleModTool
                 }
                 else
                 {
-                    loaderDialog.ShowMessage("UndertaleModTool is up to date.");
+                    if (!isStartup)
+                    {
+                        loaderDialog.ShowMessage("UndertaleModTool is up to date.");
+                    }
                 }
             }
             finally
