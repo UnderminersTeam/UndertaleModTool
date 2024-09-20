@@ -26,12 +26,9 @@ namespace UndertaleModTool
             set { SetValue(FilterProperty, value); }
         }
 
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public virtual Predicate<object> CreateFilter()
         {
-            if (value == null)
-                return null;
-            ICollectionView filteredView = CollectionViewSource.GetDefaultView(value);
-            filteredView.Filter = (obj) =>
+            return (obj) =>
             {
                 if (String.IsNullOrEmpty(Filter))
                     return true;
@@ -44,6 +41,14 @@ namespace UndertaleModTool
                                 .Any(x => (x?.IndexOf(Filter, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0);
                 return true;
             };
+        }
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null)
+                return null;
+            ICollectionView filteredView = CollectionViewSource.GetDefaultView(value);
+            filteredView.Filter = CreateFilter();
             return filteredView;
         }
 
