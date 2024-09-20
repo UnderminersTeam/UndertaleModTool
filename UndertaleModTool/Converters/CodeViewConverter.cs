@@ -13,7 +13,9 @@ namespace UndertaleModTool
             Predicate<object> baseFilter = base.CreateFilter();
             return (obj) =>
             {
-                if (obj is UndertaleCode code && code.ParentEntry != null)
+                if (obj is UndertaleCode code &&
+                    code.ParentEntry != null &&
+                    Settings.Instance.HideChildCodeEntries)
                     return false;
                 return baseFilter(obj);
             };
