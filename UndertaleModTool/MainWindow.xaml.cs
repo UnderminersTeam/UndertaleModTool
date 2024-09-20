@@ -199,13 +199,14 @@ namespace UndertaleModTool
         private Task scriptSetupTask;
 
         // Version info
+        public static string VersionNumber = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         public static string Edition = "(Git: " + GitVersion.GetGitVersion().Substring(0, 7) + ")";
 
         // On debug, build with git versions and provided release version. Otherwise, use the provided release version only.
 #if DEBUG || SHOW_COMMIT_HASH
-        public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString() + (Edition != "" ? " - " + Edition : "");
+        public static string Version = VersionNumber + (Edition != "" ? " - " + Edition : "");
 #else
-        public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        public static string Version = VersionNumber;
 #endif
 
         private static readonly Color darkColor = Color.FromArgb(255, 32, 32, 32);
@@ -2890,6 +2891,10 @@ namespace UndertaleModTool
 
         async Task CheckForUpdates(bool isStartup = false)
         {
+            // Uncomment for testing
+            //VersionNumber = "0.0.0.0";
+            //BuildInfo.IsSingleFile = true;
+
             LoaderDialog loaderDialog = new("Check for updates", "Checking for updates...");
             loaderDialog.Owner = this;
             loaderDialog.PreventClose = true;
@@ -2919,21 +2924,36 @@ namespace UndertaleModTool
                 // HACK: There has to be a better way of getting the date of the current version
                 DateTime currentDateTime = File.GetLastWriteTimeUtc(Path.Combine(ExePath, "UndertaleModTool.exe"));
 
-                if (latestVersion != Version /*&& latestDateTime > currentDateTime*/)
+                if (latestVersion != VersionNumber /*&& latestDateTime > currentDateTime*/)
                 {
-                    if (loaderDialog.ShowQuestion("A new version of UndertaleModTool is avaliable!" +
+                    string expectedAssetName = $"UndertaleModTool_v{latestVersion}{(BuildInfo.IsSingleFile ? "-SingleFile" : "")}.zip";
+
+                    JsonNode asset = jsonResponse["assets"].AsArray()
+                        .FirstOrDefault((JsonNode asset) => (string)asset["name"] == expectedAssetName, null);
+
+                    string questionText = "A new version of UndertaleModTool is avaliable!" +
                         "\n" +
-                        $"\nCurrent version: {Version} ({currentDateTime})" +
+                        $"\nCurrent version: {VersionNumber} ({currentDateTime})" +
                         $"\nLatest version: {latestVersion} ({latestDateTime})" +
                         "\n" +
                         (isStartup ?
                         "\nYou can disable checking for updates at startup in the settings." +
                         "\n" : "") +
-                        "\nDo you want to download the latest version?") == MessageBoxResult.Yes)
-                    {
-                        OpenBrowser((string)jsonResponse["html_url"]);
+                        (asset != null ?
+                        "\nDo you want to download the latest version?" :
+                        "\nHowever, an asset fitting your build was not found. Do you want to visit the release page?");
 
-                        // TODO: Find which of the assets to download
+                    if (loaderDialog.ShowQuestion(questionText) == MessageBoxResult.Yes)
+                    {
+                        if (asset != null)
+                        {
+                            OpenBrowser((string)asset["browser_download_url"]);
+                        }
+                        else
+                        {
+                            OpenBrowser((string)jsonResponse["html_url"]);
+                        }
+
                         // TODO: Auto update
                     }
                 }
