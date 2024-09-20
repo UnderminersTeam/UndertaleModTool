@@ -2908,16 +2908,7 @@ namespace UndertaleModTool
                     request.Headers.Add("User-Agent", new Regex(@"Git:|[ (),/:;<=>?@[\]{}]").Replace(Version, ""));
 
                     using var response = await httpClient.SendAsync(request);
-
-                    if (response?.IsSuccessStatusCode != true)
-                    {
-                        if (!isStartup)
-                        {
-                            string errText = $"{(response is null ? "Check your internet connection." : $"HTTP error - {response.ReasonPhrase}.")}";
-                            loaderDialog.ShowError($"Failed to check for updates!\n{errText}");
-                        }
-                        return;
-                    }
+                    response.EnsureSuccessStatusCode();
 
                     jsonResponse = await response.Content.ReadFromJsonAsync<JsonNode>();
                 }
@@ -2952,6 +2943,18 @@ namespace UndertaleModTool
                     {
                         loaderDialog.ShowMessage("UndertaleModTool is up to date.");
                     }
+                }
+            }
+            catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
+            {
+                if (!isStartup)
+                {
+                    string errText = "Check your internet connection.";
+                    if (e is HttpRequestException e2 && e2.StatusCode != null)
+                    {
+                        errText = $"HTTP error {e2.StatusCode}.";
+                    }
+                    loaderDialog.ShowError($"Failed to check for updates! {errText}");
                 }
             }
             finally
@@ -3021,7 +3024,6 @@ namespace UndertaleModTool
                 Application.Current.MainWindow.ShowError("Failed to open folder!\n" + e);
             }
         }
-
 
         private async Task<HttpResponseMessage> HttpGetAsync(string uri)
         {
