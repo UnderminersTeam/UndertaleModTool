@@ -40,7 +40,7 @@ namespace UndertaleModTool
 
         public bool DeleteOldProfileOnSave { get; set; } = false;
         public bool WarnOnClose { get; set; } = true;
-        public bool HideChildCodeEntries { get; set; } = false;
+        public bool HideChildCodeEntries { get; set; } = true;
 
         private double _globalGridWidth = 20;
         private double _globalGridHeight = 20;

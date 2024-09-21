@@ -62,7 +62,7 @@
             <TextBlock Grid.Row="5" Grid.Column="2" Margin="25 2 2 2" Text="Show &quot;Run game under GMS debugger&quot; file option" ToolTip="Whether to show the option in the &quot;File&quot; menu. Disabled by default."/>
 
             <CheckBox Grid.Row="6" Grid.Column="0" Margin="3" Content="" IsChecked="{Binding HideChildCodeEntries}"/>
-            <TextBlock Grid.Row="6" Grid.Column="0" Margin="25 2 2 2" Text="Hide child code entries" ToolTip="tooltip TBA"/>
+            <TextBlock Grid.Row="6" Grid.Column="0" Margin="25 2 2 2" Text="Hide child code entries" ToolTip="Hides code entries in GMS2.3 games, which correspond to sub-functions of scripts."/>
 
             <Separator Grid.Row="7" Grid.ColumnSpan="4" Margin="10"/>
 
