@@ -8,7 +8,7 @@ namespace UndertaleModTool
     [ValueConversion(typeof(object), typeof(ICollectionView))]
     public class CodeViewConverter : FilteredViewConverter
     {
-        public override Predicate<object> CreateFilter()
+        protected override Predicate<object> CreateFilter()
         {
             Predicate<object> baseFilter = base.CreateFilter();
             return (obj) =>

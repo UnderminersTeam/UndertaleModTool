@@ -26,7 +26,7 @@ namespace UndertaleModTool
             set { SetValue(FilterProperty, value); }
         }
 
-        public virtual Predicate<object> CreateFilter()
+        protected virtual Predicate<object> CreateFilter()
         {
             return (obj) =>
             {

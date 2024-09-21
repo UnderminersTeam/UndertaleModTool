@@ -127,6 +127,9 @@ namespace UndertaleModTool
             {
                 Settings.Instance.HideChildCodeEntries = value;
                 Settings.Save();
+
+                // Refresh the tree to make the changes take effect.
+                mainWindow.UpdateTree();
             }
         }
 
