@@ -2891,10 +2891,6 @@ namespace UndertaleModTool
 
         async Task CheckForUpdates(bool isStartup = false)
         {
-            // Uncomment for testing
-            //VersionNumber = "0.0.0.0";
-            //BuildInfo.IsSingleFile = true;
-
             LoaderDialog loaderDialog = new("Check for updates", "Checking for updates...");
             loaderDialog.Owner = this;
             loaderDialog.PreventClose = true;
@@ -2919,50 +2915,75 @@ namespace UndertaleModTool
                 }
 
                 string latestVersion = (string)jsonResponse["tag_name"];
-                DateTime latestDateTime = ((DateTime)jsonResponse["published_at"]);
 
-                // HACK: There has to be a better way of getting the date of the current version
-                DateTime currentDateTime = File.GetLastWriteTimeUtc(Path.Combine(ExePath, "UndertaleModTool.exe"));
+                DateTimeOffset latestDateTime = ((DateTimeOffset)jsonResponse["created_at"]); // This is the commit time, not release time
+                DateTimeOffset currentDateTime = GitVersion.GetGitVersionData().Time;
 
-                if (latestVersion != VersionNumber /*&& latestDateTime > currentDateTime*/)
+                // Uncomment for testing
+                //VersionNumber = "0.0.0.0";
+                //currentDateTime = new(1970, 1, 1, 0, 0, 0, new());
+                //latestVersion = "0.0.0.0";
+                //latestDateTime = new(1970, 1, 1, 0, 0, 0, new());
+                //BuildInfo.IsSingleFile = true;
+
+                if (latestVersion == VersionNumber)
                 {
-                    string expectedAssetName = $"UndertaleModTool_v{latestVersion}{(BuildInfo.IsSingleFile ? "-SingleFile" : "")}.zip";
-
-                    JsonNode asset = jsonResponse["assets"].AsArray()
-                        .FirstOrDefault((JsonNode asset) => (string)asset["name"] == expectedAssetName, null);
-
-                    string questionText = "A new version of UndertaleModTool is avaliable!" +
-                        "\n" +
-                        $"\nCurrent version: {VersionNumber} ({currentDateTime})" +
-                        $"\nLatest version: {latestVersion} ({latestDateTime})" +
-                        "\n" +
-                        (isStartup ?
-                        "\nYou can disable checking for updates at startup in the settings." +
-                        "\n" : "") +
-                        (asset != null ?
-                        "\nDo you want to download the latest version?" :
-                        "\nHowever, an asset fitting your build was not found. Do you want to visit the release page?");
-
-                    if (loaderDialog.ShowQuestion(questionText) == MessageBoxResult.Yes)
+                    if (latestDateTime != currentDateTime)
                     {
-                        if (asset != null)
-                        {
-                            OpenBrowser((string)asset["browser_download_url"]);
-                        }
-                        else
-                        {
-                            OpenBrowser((string)jsonResponse["html_url"]);
-                        }
-
-                        // TODO: Auto update
+                        if (!isStartup)
+                            loaderDialog.ShowError("Error: Latest version is the same as current version, but their commit times are different. Probably custom build." +
+                                $"\nVersion: {VersionNumber}" +
+                                $"\nLatest version time: {latestDateTime.ToLocalTime()}" +
+                                $"\nCurrent version time: {currentDateTime.ToLocalTime()}");
+                        return;
                     }
+
+                    if (!isStartup)
+                        loaderDialog.ShowMessage("UndertaleModTool is up to date." +
+                            $"\nVersion: {latestVersion} ({currentDateTime.ToLocalTime()})");
+                    return;
                 }
-                else
+
+                if (latestDateTime < currentDateTime)
                 {
                     if (!isStartup)
+                        loaderDialog.ShowError("Error: Latest version is older then current version. Probably in different branch or custom build." +
+                            $"\nLatest version: {latestVersion} ({latestDateTime.ToLocalTime()})" +
+                            $"\nCurrent version: {VersionNumber} ({currentDateTime.ToLocalTime()})");
+                    return;
+                }
+
+                // Version is different and newer, continue
+
+                string expectedAssetName = $"UndertaleModTool_v{latestVersion}{(BuildInfo.IsSingleFile ? "-SingleFile" : "")}.zip";
+
+                JsonNode asset = jsonResponse["assets"].AsArray()
+                    .FirstOrDefault((JsonNode asset) => (string)asset["name"] == expectedAssetName, null);
+
+                string questionText = "A new version of UndertaleModTool is avaliable!" +
+                    "\n" +
+                    $"\nCurrent version: {VersionNumber} ({currentDateTime.ToLocalTime()})" +
+                    $"\nLatest version: {latestVersion} ({latestDateTime.ToLocalTime()})" +
+                    "\n" +
+                    (isStartup ?
+                    "\nYou can disable checking for updates at startup in the settings." +
+                    "\n" : "") +
+                    (asset != null ?
+                    "\nDo you want to download the latest version?" :
+                    "\nHowever, an asset fitting your build was not found. Do you want to visit the release page?");
+
+                if (loaderDialog.ShowQuestion(questionText) == MessageBoxResult.Yes)
+                {
+                    if (asset != null)
                     {
-                        loaderDialog.ShowMessage("UndertaleModTool is up to date.");
+                        OpenBrowser((string)asset["browser_download_url"]);
                     }
+                    else
+                    {
+                        OpenBrowser((string)jsonResponse["html_url"]);
+                    }
+
+                    // TODO: Auto update
                 }
             }
             catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
