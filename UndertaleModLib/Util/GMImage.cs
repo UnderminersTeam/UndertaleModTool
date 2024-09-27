@@ -1,8 +1,8 @@
-﻿using ICSharpCode.SharpZipLib.BZip2;
-using ImageMagick;
-using System;
+﻿using System;
 using System.Buffers.Binary;
 using System.IO;
+using ICSharpCode.SharpZipLib.BZip2;
+using ImageMagick;
 
 namespace UndertaleModLib.Util;
 
@@ -34,7 +34,12 @@ public class GMImage
         /// <summary>
         /// BZip2 compression applied on top of GameMaker's custom variant of the QOI image file format.
         /// </summary>
-        Bz2Qoi
+        Bz2Qoi,
+
+        /// <summary>
+        /// DDS file format.
+        /// </summary>
+        Dds,
     }
 
     /// <summary>
@@ -76,6 +81,11 @@ public class GMImage
     /// Magic value found near the end of a BZip2 stream (square root of pi). 
     /// </summary>
     private static ReadOnlySpan<byte> MagicBz2Footer => new byte[] { 0x17, 0x72, 0x45, 0x38, 0x50, 0x90 };
+
+    /// <summary>
+    /// DDS file format magic.
+    /// </summary>
+    private static ReadOnlySpan<byte> MagicDds => "DDS "u8;
 
     /// <summary>
     /// Backing data for the image, whether compressed or not.
@@ -335,6 +345,14 @@ public class GMImage
             return FromQoi(reader.ReadBytes(12 + (int)compressedLength));
         }
 
+        // DDS
+        if (header.StartsWith(MagicDds))
+        {
+            // Read entire image
+            reader.Position = startAddress;
+            return FromDds(reader.ReadBytes((int)(maxEndOfStreamPosition - startAddress)));
+        }
+
         throw new IOException("Failed to recognize any known image header");
     }
 
@@ -452,6 +470,31 @@ public class GMImage
         return new GMImage(ImageFormat.Qoi, width, height, data);
     }
 
+    /// <summary>
+    /// Creates a <see cref="GMImage"/> of DDS format, wrapping around the provided byte array containing DDS data.
+    /// </summary>
+    /// <param name="data">Byte array of DDS data.</param>
+    public static GMImage FromDds(byte[] data)
+    {
+        ArgumentNullException.ThrowIfNull(data);
+
+        ReadOnlySpan<byte> span = data.AsSpan();
+
+        // Get height and width
+        int height = (int)BinaryPrimitives.ReadUInt32LittleEndian(span[12..16]);
+        int width = (int)BinaryPrimitives.ReadUInt32LittleEndian(span[16..20]);
+
+        // Create wrapper image
+        return new GMImage(ImageFormat.Dds, width, height, data);
+    }
+
+    private void AddMagickToPngSettings(MagickReadSettings settings)
+    {
+        settings.SetDefine(MagickFormat.Png32, "compression-level", 4);
+        settings.SetDefine(MagickFormat.Png32, "compression-filter", 5);
+        settings.SetDefine(MagickFormat.Png32, "compression-strategy", 2);
+    }
+
     // Settings to be used for raw data, and when encoding a PNG
     private MagickReadSettings GetMagickRawToPngSettings()
     {
@@ -462,9 +505,18 @@ public class GMImage
             Format = MagickFormat.Bgra,
             Compression = CompressionMethod.NoCompression
         };
-        settings.SetDefine(MagickFormat.Png32, "compression-level", 4);
-        settings.SetDefine(MagickFormat.Png32, "compression-filter", 5);
-        settings.SetDefine(MagickFormat.Png32, "compression-strategy", 2);
+        AddMagickToPngSettings(settings);
+        return settings;
+    }
+
+    // Settings to be used for decoding DDS, and when encoding a PNG
+    private MagickReadSettings GetMagickDdsToPngSettings()
+    {
+        var settings = new MagickReadSettings()
+        {
+            Format = MagickFormat.Dds,
+        };
+        AddMagickToPngSettings(settings);
         return settings;
     }
 
@@ -518,6 +570,15 @@ public class GMImage
                     rawImage.SavePng(stream);
                     break;
                 }
+            case ImageFormat.Dds:
+                {
+                    // Create image using ImageMagick, and save it as PNG format
+                    using var image = new MagickImage(_data, GetMagickDdsToPngSettings());
+                    image.Alpha(AlphaOption.Set);
+                    image.Format = MagickFormat.Png32;
+                    image.Write(stream);
+                    break;
+                }
             default:
                 throw new InvalidOperationException($"Unknown format {Format}");
         }
@@ -536,6 +597,7 @@ public class GMImage
             ImageFormat.Png => ConvertToPng(),
             ImageFormat.Qoi => ConvertToQoi(),
             ImageFormat.Bz2Qoi => ConvertToBz2Qoi(sharedStream),
+            ImageFormat.Dds => ConvertToDds(),
             _ => throw new ArgumentOutOfRangeException(nameof(format)),
         };
     }
@@ -553,6 +615,7 @@ public class GMImage
                     return this;
                 }
             case ImageFormat.Png:
+            case ImageFormat.Dds:
                 {
                     // Convert image to raw byte array
                     var image = new MagickImage(_data);
@@ -632,6 +695,14 @@ public class GMImage
                     // Convert raw image to PNG
                     return rawImage.ConvertToPng();
                 }
+            case ImageFormat.Dds:
+                {
+                    // Create image using ImageMagick, and convert it to PNG format
+                    using var image = new MagickImage(_data, GetMagickDdsToPngSettings());
+                    image.Alpha(AlphaOption.Set);
+                    image.Format = MagickFormat.Png32;
+                    return new GMImage(ImageFormat.Png, Width, Height, image.ToByteArray());
+                }
         }
 
         throw new InvalidOperationException($"Unknown source format {Format}");
@@ -647,6 +718,7 @@ public class GMImage
             case ImageFormat.RawBgra:
             case ImageFormat.Png:
             case ImageFormat.Bz2Qoi:
+            case ImageFormat.Dds:
                 {
                     // Encode image as QOI
                     return new GMImage(ImageFormat.Qoi, Width, Height, QoiConverter.GetArrayFromImage(this, false));
@@ -706,6 +778,7 @@ public class GMImage
         {
             case ImageFormat.RawBgra:
             case ImageFormat.Png:
+            case ImageFormat.Dds:
                 {
                     // Encode image as QOI, first
                     byte[] data = QoiConverter.GetArrayFromImage(this, false);
@@ -724,6 +797,17 @@ public class GMImage
         }
 
         throw new InvalidOperationException($"Unknown source format {Format}");
+    }
+
+    /// <summary>
+    /// Same as <see cref="ConvertToPng"/>.
+    /// </summary>
+    /// <remarks>This is supposd to return the image converted to <see cref="ImageFormat.Dds"/> format, but that's not implemented yet.</remarks>
+    /// <returns></returns>
+    public GMImage ConvertToDds()
+    {
+        // TODO: Actually convert to DDS
+        return ConvertToPng();
     }
 
     /// <summary>
@@ -756,6 +840,7 @@ public class GMImage
             case ImageFormat.RawBgra:
             case ImageFormat.Png:
             case ImageFormat.Qoi:
+            case ImageFormat.Dds:
                 // Data is stored identically to file format, so write it verbatim
                 writer.Write(_data);
                 break;
@@ -843,6 +928,16 @@ public class GMImage
             case ImageFormat.Bz2Qoi:
                 // Convert to raw data, then parse that
                 return ConvertToRawBgra().GetMagickImage();
+            case ImageFormat.Dds:
+                {
+                    // Parse the DDS data
+                    MagickReadSettings settings = new()
+                    {
+                        Format = MagickFormat.Dds
+                    };
+                    MagickImage image = new(_data, settings);
+                    return image;
+                }
         }
 
         throw new InvalidOperationException($"Unknown format {Format}");
