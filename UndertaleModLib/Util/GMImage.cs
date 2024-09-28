@@ -348,9 +348,56 @@ public class GMImage
         // DDS
         if (header.StartsWith(MagicDds))
         {
-            // Read entire image
+            // Size int skipped because 8 bytes were already read
+            uint flags = reader.ReadUInt32();
+            uint height = reader.ReadUInt32();
+
+            //uint width = reader.ReadUInt32();
+            reader.Position += 4;
+
+            uint pitchOrLinearSize = reader.ReadUInt32();
+
+            //uint depth = reader.ReadUInt32();
+            //uint mipMapCount = reader.ReadUInt32();
+            //byte[] reserved1 = reader.ReadBytes(4 * 11);
+            //uint pixelFormatSize = reader.ReadUInt32();
+            reader.Position += 56;
+
+            uint pixelFormatFlags = reader.ReadUInt32();
+            uint pixelFormatFourCC = reader.ReadUInt32();
+
+            // TODO: Check caps for DDSCAPS_COMPLEX (when there's extra data afterwards)
+
+            // Skip to end of header
+            reader.Position += 40;
+
+            // Check if DX10 header is present and skip it
+            // DDPF_FOURCC == 0x4
+            // DX10 == 0x30315844
+            if ((pixelFormatFlags & 0x4) != 0 && pixelFormatFourCC == 0x30315844)
+                reader.Position += 20;
+
+            // Check if that int is the size or pitch
+            // DDSD_LINEARSIZE == 0x80000
+            int size = (int)(reader.Position - startAddress);
+            if ((flags & 0x80000) != 0)
+                size += (int)pitchOrLinearSize;
+            else
+                size += (int)(pitchOrLinearSize * height);
+
+            // Read entire data
             reader.Position = startAddress;
-            return FromDds(reader.ReadBytes((int)(maxEndOfStreamPosition - startAddress)));
+            byte[] bytes = reader.ReadBytes(size);
+
+            // Check if rest of bytes are 0x00 padded
+            byte[] paddingBytes = reader.ReadBytes((int)(maxEndOfStreamPosition - reader.Position));
+            for (int i=0; i<paddingBytes.Length; i++)
+            {
+                if (paddingBytes[i] != 0)
+                    throw new IOException("Non-zero bytes in padding");
+            }
+
+            return FromDds(bytes);
         }
 
         throw new IOException("Failed to recognize any known image header");
@@ -488,7 +535,7 @@ public class GMImage
         return new GMImage(ImageFormat.Dds, width, height, data);
     }
 
-    private void AddMagickToPngSettings(MagickReadSettings settings)
+    private static void AddMagickToPngSettings(MagickReadSettings settings)
     {
         settings.SetDefine(MagickFormat.Png32, "compression-level", 4);
         settings.SetDefine(MagickFormat.Png32, "compression-filter", 5);
