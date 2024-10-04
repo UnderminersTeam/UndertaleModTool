@@ -1367,9 +1367,35 @@ namespace UndertaleModLib
         public UndertaleSimpleList<UndertaleFunction> Functions = new UndertaleSimpleList<UndertaleFunction>();
         public UndertaleSimpleList<UndertaleCodeLocals> CodeLocals = new UndertaleSimpleList<UndertaleCodeLocals>();
 
+        private static bool checkedFor2024_8;
+
+        private void CheckFor2024_8(UndertaleReader reader)
+        {
+            if (reader.undertaleData.IsVersionAtLeast(2024, 8)
+                || reader.Bytecode14OrLower || Length == 0) // Irrelevant or non-deductible
+            {
+                checkedFor2024_8 = true;
+                return;
+            }
+
+            long returnPos = reader.Position;
+
+            // The CodeLocals list was removed in 2024.8, so we check for its absence here
+
+            uint funcCount = reader.ReadUInt32();
+            // If this is 2024.8, the chunk should only contain the Functions list.
+            // Considering Functions is a SimpleList, this would make the chunk size
+            // sizeof funcCount + sizeof UndertaleFunction * funcCount
+            if (Length == 4 + 12 * funcCount)
+                reader.undertaleData.SetGMS2Version(2024, 8);
+
+            reader.Position = returnPos;
+            checkedFor2024_8 = true;
+        }
+
         internal override void SerializeChunk(UndertaleWriter writer)
         {
-            if (Functions == null && CodeLocals == null)
+            if (Functions is null && (writer.undertaleData.IsVersionAtLeast(2024, 8) || CodeLocals is null))
                 return;
 
             UndertaleInstruction.Reference<UndertaleFunction>.SerializeReferenceChain(writer, writer.undertaleData.Code, Functions);
@@ -1382,12 +1408,16 @@ namespace UndertaleModLib
             else
             {
                 writer.WriteUndertaleObject(Functions);
-                writer.WriteUndertaleObject(CodeLocals);
+                if (!writer.undertaleData.IsVersionAtLeast(2024, 8))
+                    writer.WriteUndertaleObject(CodeLocals);
             }
         }
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
+            if (!checkedFor2024_8)
+                CheckFor2024_8(reader);
+
             if (Length == 0 && reader.undertaleData.GeneralInfo?.BytecodeVersion > 14) // YYC, 14 < bytecode <= 16, chunk is empty but exists
             {
                 Functions = null;
@@ -1408,12 +1438,18 @@ namespace UndertaleModLib
             else
             {
                 Functions = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleFunction>>();
-                CodeLocals = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleCodeLocals>>();
+                if (!reader.undertaleData.IsVersionAtLeast(2024, 8))
+                    CodeLocals = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleCodeLocals>>();
+                else
+                    CodeLocals = null;
             }
         }
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
+            checkedFor2024_8 = false;
+            CheckFor2024_8(reader);
+
             if (Length == 0 && reader.undertaleData.GeneralInfo?.BytecodeVersion > 14)
                 return 0;
 
@@ -1422,7 +1458,8 @@ namespace UndertaleModLib
             if (!reader.Bytecode14OrLower)
             {
                 count += 1 + UndertaleSimpleList<UndertaleFunction>.UnserializeChildObjectCount(reader);
-                count += 1 + UndertaleSimpleList<UndertaleCodeLocals>.UnserializeChildObjectCount(reader);
+                if (!reader.undertaleData.IsVersionAtLeast(2024, 8))
+                    count += 1 + UndertaleSimpleList<UndertaleCodeLocals>.UnserializeChildObjectCount(reader);
             }
             else
                 count = Length / 12;
