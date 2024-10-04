@@ -2149,7 +2149,7 @@ namespace UndertaleModTool
                         }
                         (obj as UndertaleScript).Code = code;
                     }
-                    if ((obj is UndertaleCode) && (Data.GeneralInfo.BytecodeVersion > 14))
+                    if (obj is UndertaleCode && Data.CodeLocals is not null)
                     {
                         UndertaleCodeLocals locals = new UndertaleCodeLocals();
                         locals.Name = (obj as UndertaleCode).Name;
