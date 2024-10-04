@@ -1395,7 +1395,7 @@ namespace UndertaleModLib
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
-            if (Functions is null && (writer.undertaleData.IsVersionAtLeast(2024, 8) || CodeLocals is null))
+            if (Functions is null && CodeLocals is null)
                 return;
 
             UndertaleInstruction.Reference<UndertaleFunction>.SerializeReferenceChain(writer, writer.undertaleData.Code, Functions);
