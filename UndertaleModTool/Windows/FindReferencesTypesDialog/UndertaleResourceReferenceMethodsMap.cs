@@ -1500,7 +1500,7 @@ namespace UndertaleModTool.Windows
 
                 List<Dictionary<string, List<object>>> dicts = new();
 
-                if (assets.Count  != 0) // A Partitioner can't be created on an empty list.
+                if (assets.Count > 0) // A Partitioner can't be created on an empty list.
                 {
                     var assetsPart = Partitioner.Create(0, assets.Count);
 
