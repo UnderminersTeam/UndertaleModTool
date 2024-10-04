@@ -81,7 +81,7 @@ void DumpCode(UndertaleCode code)
         try
         {
             var lineNumber = 1;
-            StringReader assemblyText = new(code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : "");
+            StringReader assemblyText = new(code != null ? code.Disassemble(Data.Variables, Data.CodeLocals?.For(code)) : "");
             bool nameWritten = false;
             string lineInt;
             while ((lineInt = assemblyText.ReadLine()) is not null)

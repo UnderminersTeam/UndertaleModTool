@@ -1210,12 +1210,16 @@ namespace UndertaleModTool
                         {
                             debugData.SourceCode.Add(new UndertaleScriptSource() { SourceCode = debugData.Strings.MakeString(outputs[i]) });
                             debugData.DebugInfo.Add(outputsOffsets[i]);
-                            debugData.LocalVars.Add(Data.CodeLocals[i]);
-                            if (debugData.Strings.IndexOf(Data.CodeLocals[i].Name) < 0)
-                                debugData.Strings.Add(Data.CodeLocals[i].Name);
-                            foreach (var local in Data.CodeLocals[i].Locals)
-                                if (debugData.Strings.IndexOf(local.Name) < 0)
-                                    debugData.Strings.Add(local.Name);
+                            // FIXME: Probably should write something regardless.
+                            if (Data.CodeLocals is not null)
+                            {
+                                debugData.LocalVars.Add(Data.CodeLocals[i]);
+                                if (debugData.Strings.IndexOf(Data.CodeLocals[i].Name) < 0)
+                                    debugData.Strings.Add(Data.CodeLocals[i].Name);
+                                foreach (var local in Data.CodeLocals[i].Locals)
+                                    if (debugData.Strings.IndexOf(local.Name) < 0)
+                                        debugData.Strings.Add(local.Name);
+                            }
                         }
 
                         using (UndertaleWriter writer = new UndertaleWriter(new FileStream(Path.ChangeExtension(FilePath, ".yydebug"), FileMode.Create, FileAccess.Write)))

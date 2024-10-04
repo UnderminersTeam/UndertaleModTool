@@ -225,7 +225,7 @@ namespace UndertaleModTool
             else if (code.ParentEntry is not null)
                 return;
 
-            if (Data?.GeneralInfo.BytecodeVersion > 14 && Data.CodeLocals.ByName(codeName) == null)
+            if (Data.CodeLocals is not null && Data.CodeLocals.ByName(codeName) is null)
             {
                 UndertaleCodeLocals locals = new UndertaleCodeLocals();
                 locals.Name = code.Name;
