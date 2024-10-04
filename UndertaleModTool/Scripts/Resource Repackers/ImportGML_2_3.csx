@@ -118,7 +118,7 @@ await Task.Run(() => {
             code.Name = Data.Strings.MakeString(codeName);
             Data.Code.Add(code);
         }
-        if ((Data?.GeneralInfo.BytecodeVersion > 14) && (Data.CodeLocals.ByName(codeName) == null))
+        if (Data.CodeLocals is not null && Data.CodeLocals.ByName(codeName) is null)
         {
             UndertaleCodeLocals locals = new UndertaleCodeLocals();
             locals.Name = code.Name;

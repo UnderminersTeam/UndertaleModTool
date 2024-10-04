@@ -170,7 +170,7 @@ if (File.Exists(path_error2))
             string asmPath = Path.Combine(asmFolder, code.Name.Content + ".asm");
             try
             {
-                File.WriteAllText(asmPath, (code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : ""));
+                File.WriteAllText(asmPath, (code != null ? code.Disassemble(Data.Variables, Data.CodeLocals?.For(code)) : ""));
             }
             catch (Exception e)
             {
