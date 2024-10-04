@@ -2136,7 +2136,7 @@ namespace UndertaleModTool
                         string prefix = Data.IsVersionAtLeast(2, 3) ? "gml_GlobalScript_" : "gml_Script_";
                         code.Name = Data.Strings.MakeString(prefix + newName);
                         Data.Code.Add(code);
-                        if (Data?.GeneralInfo.BytecodeVersion > 14)
+                        if (Data.CodeLocals is not null)
                         {
                             UndertaleCodeLocals locals = new UndertaleCodeLocals();
                             locals.Name = code.Name;
