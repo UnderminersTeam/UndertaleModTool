@@ -1,27 +1,45 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
-using Microsoft.CodeAnalysis.Scripting;
-using Microsoft.Win32;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
+using System.IO.Pipes;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Reflection;
+using System.Runtime;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.Win32;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Ookii.Dialogs.Wpf;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
@@ -29,24 +47,7 @@ using UndertaleModLib.ModelsDebug;
 using UndertaleModLib.Scripting;
 using UndertaleModLib.Util;
 using UndertaleModTool.Windows;
-using System.IO.Pipes;
-using Ookii.Dialogs.Wpf;
-
-using System.Text.RegularExpressions;
-using System.Windows.Data;
-using System.Security.Cryptography;
-using System.Collections.Concurrent;
-using System.Runtime;
 using SystemJson = System.Text.Json;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using Newtonsoft.Json.Linq;
-using System.Net;
-using System.Globalization;
-using System.Windows.Controls.Primitives;
-using System.Runtime.CompilerServices;
-using System.Windows.Interop;
-using System.Windows.Media.Imaging;
 
 namespace UndertaleModTool
 {
@@ -198,13 +199,14 @@ namespace UndertaleModTool
         private Task scriptSetupTask;
 
         // Version info
+        public static string VersionNumber = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         public static string Edition = "(Git: " + GitVersion.GetGitVersion().Substring(0, 7) + ")";
 
         // On debug, build with git versions and provided release version. Otherwise, use the provided release version only.
 #if DEBUG || SHOW_COMMIT_HASH
-        public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString() + (Edition != "" ? " - " + Edition : "");
+        public static string Version = VersionNumber + (Edition != "" ? " - " + Edition : "");
 #else
-        public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        public static string Version = VersionNumber;
 #endif
 
         private static readonly Color darkColor = Color.FromArgb(255, 32, 32, 32);
@@ -501,6 +503,11 @@ namespace UndertaleModTool
 
             RunGMSDebuggerItem.Visibility = Settings.Instance.ShowDebuggerOption
                                             ? Visibility.Visible : Visibility.Collapsed;
+
+            if (Settings.Instance.CheckForUpdatesAtStartup)
+            {
+                _ = CheckForUpdates(isStartup: true);
+            }
         }
 
         public Dictionary<string, NamedPipeServerStream> childFiles = new Dictionary<string, NamedPipeServerStream>();
@@ -2877,6 +2884,127 @@ namespace UndertaleModTool
             OpenBrowser("https://github.com/UnderminersTeam/UndertaleModTool");
         }
 
+        private void MenuItem_CheckForUpdates_Click(object sender, RoutedEventArgs e)
+        {
+            _ = CheckForUpdates();
+        }
+
+        async Task CheckForUpdates(bool isStartup = false)
+        {
+            LoaderDialog loaderDialog = new("Check for updates", "Checking for updates...");
+            loaderDialog.Owner = this;
+            loaderDialog.PreventClose = true;
+            loaderDialog.Show();
+
+            try
+            {
+                httpClient ??= new();
+
+                JsonNode jsonResponse;
+
+                using (var request = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/repos/UnderminersTeam/UndertaleModTool/releases/latest"))
+                {
+                    request.Headers.Add("Accept", "application/vnd.github+json");
+                    request.Headers.Add("X-GitHub-Api-Version", "2022-11-28");
+                    request.Headers.Add("User-Agent", new Regex(@"Git:|[ (),/:;<=>?@[\]{}]").Replace(Version, ""));
+
+                    using var response = await httpClient.SendAsync(request);
+                    response.EnsureSuccessStatusCode();
+
+                    jsonResponse = await response.Content.ReadFromJsonAsync<JsonNode>();
+                }
+
+                string latestVersion = (string)jsonResponse["tag_name"];
+
+                DateTimeOffset latestDateTime = ((DateTimeOffset)jsonResponse["created_at"]); // This is the commit time, not release time
+                DateTimeOffset currentDateTime = GitVersion.GetGitVersionData().Time;
+
+                // Uncomment for testing
+                //VersionNumber = "0.0.0.0";
+                //currentDateTime = new(1970, 1, 1, 0, 0, 0, new());
+                //latestVersion = "0.0.0.0";
+                //latestDateTime = new(1970, 1, 1, 0, 0, 0, new());
+                //BuildInfo.IsSingleFile = true;
+
+                if (latestVersion == VersionNumber)
+                {
+                    if (latestDateTime != currentDateTime)
+                    {
+                        if (!isStartup)
+                            loaderDialog.ShowError("Error: Latest version is the same as current version, but their commit times are different. Probably custom build." +
+                                $"\nVersion: {VersionNumber}" +
+                                $"\nLatest version time: {latestDateTime.ToLocalTime()}" +
+                                $"\nCurrent version time: {currentDateTime.ToLocalTime()}");
+                        return;
+                    }
+
+                    if (!isStartup)
+                        loaderDialog.ShowMessage("UndertaleModTool is up to date." +
+                            $"\nVersion: {latestVersion} ({currentDateTime.ToLocalTime()})");
+                    return;
+                }
+
+                if (latestDateTime < currentDateTime)
+                {
+                    if (!isStartup)
+                        loaderDialog.ShowError("Error: Latest version is older then current version. Probably in different branch or custom build." +
+                            $"\nLatest version: {latestVersion} ({latestDateTime.ToLocalTime()})" +
+                            $"\nCurrent version: {VersionNumber} ({currentDateTime.ToLocalTime()})");
+                    return;
+                }
+
+                // Version is different and newer, continue
+
+                string expectedAssetName = $"UndertaleModTool_v{latestVersion}{(BuildInfo.IsSingleFile ? "-SingleFile" : "")}.zip";
+
+                JsonNode asset = jsonResponse["assets"].AsArray()
+                    .FirstOrDefault((JsonNode asset) => (string)asset["name"] == expectedAssetName, null);
+
+                string questionText = "A new version of UndertaleModTool is avaliable!" +
+                    "\n" +
+                    $"\nCurrent version: {VersionNumber} ({currentDateTime.ToLocalTime()})" +
+                    $"\nLatest version: {latestVersion} ({latestDateTime.ToLocalTime()})" +
+                    "\n" +
+                    (isStartup ?
+                    "\nYou can disable checking for updates at startup in the settings." +
+                    "\n" : "") +
+                    (asset != null ?
+                    "\nDo you want to download the latest version?" :
+                    "\nHowever, an asset fitting your build was not found. Do you want to visit the release page?");
+
+                if (loaderDialog.ShowQuestion(questionText) == MessageBoxResult.Yes)
+                {
+                    if (asset != null)
+                    {
+                        OpenBrowser((string)asset["browser_download_url"]);
+                    }
+                    else
+                    {
+                        OpenBrowser((string)jsonResponse["html_url"]);
+                    }
+
+                    // TODO: Auto update
+                }
+            }
+            catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
+            {
+                if (!isStartup)
+                {
+                    string errText = "Check your internet connection.";
+                    if (e is HttpRequestException e2 && e2.StatusCode != null)
+                    {
+                        errText = $"HTTP error {e2.StatusCode}.";
+                    }
+                    loaderDialog.ShowError($"Failed to check for updates! {errText}");
+                }
+            }
+            finally
+            {
+                loaderDialog.PreventClose = false;
+                loaderDialog.Close();
+            }
+        }
+
         private void MenuItem_About_Click(object sender, RoutedEventArgs e)
         {
             this.ShowMessage("UndertaleModTool by krzys_h and the Underminers team\nVersion " + Version, "About");
@@ -2938,14 +3066,13 @@ namespace UndertaleModTool
             }
         }
 
-
         private async Task<HttpResponseMessage> HttpGetAsync(string uri)
         {
             try
             {
                 return await httpClient.GetAsync(uri);
             }
-            catch (Exception exp) when (exp is not NullReferenceException)
+            catch (Exception exp) when (exp is HttpRequestException || exp is TaskCanceledException)
             {
                 return null;
             }
@@ -2956,7 +3083,7 @@ namespace UndertaleModTool
 
             window.UpdateButtonEnabled = false;
 
-            httpClient = new();
+            httpClient ??= new();
             httpClient.DefaultRequestHeaders.Accept.Clear();
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
 
