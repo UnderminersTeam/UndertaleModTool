@@ -114,7 +114,7 @@ for (var j = 0; j < splitStringsList.Count; j++)
                                 nativeACT.CodeId.ArgumentsCount = donorACT.CodeId.ArgumentsCount;
                                 nativeACT.CodeId.Offset = donorACT.CodeId.Offset;
                                 nativeACT.CodeId.WeirdLocalFlag = donorACT.CodeId.WeirdLocalFlag;
-                                if (Data?.GeneralInfo.BytecodeVersion > 14)
+                                if (Data.CodeLocals is not null)
                                 {
                                     UndertaleCodeLocals donorlocals = Data.CodeLocals.ByName(donorACT.CodeId?.Name?.Content);
                                     UndertaleCodeLocals nativelocals = new UndertaleCodeLocals();
