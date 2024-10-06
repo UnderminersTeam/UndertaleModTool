@@ -14,12 +14,16 @@
     <UserControl.InputBindings>
         <KeyBinding Modifiers="Control" Key="K" Command="{x:Static local:UndertaleCodeEditor.Compile}"/>
     </UserControl.InputBindings>
+    <UserControl.Resources>
+        <local:NullToVisibilityConverter x:Key="VisibleIfNotNull" nullValue="Collapsed" notNullValue="Visible"/>
+    </UserControl.Resources>
     <Grid MaxHeight="{Binding ElementName=DataEditor, Path=ActualHeight}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -39,7 +43,10 @@
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Offset</TextBlock>
         <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Offset}"/>
 
-        <TabControl x:Name="CodeModeTabs" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" SelectionChanged="TabControl_SelectionChanged">
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Visibility="{Binding ParentEntry, Converter={StaticResource VisibleIfNotNull}}">Parent entry</TextBlock>
+        <local:UndertaleObjectReference Grid.Row="4" Grid.Column="1" Margin="3" Visibility="{Binding ParentEntry, Converter={StaticResource VisibleIfNotNull}}" ObjectReference="{Binding ParentEntry}" ObjectType="{x:Type undertale:UndertaleCode}" CanRemove="False"/>
+
+        <TabControl x:Name="CodeModeTabs" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" SelectionChanged="TabControl_SelectionChanged">
             <TabItem Header="Decompiled" Name="DecompiledTab">
                 <Grid>
                     <avalonEdit:TextEditor
