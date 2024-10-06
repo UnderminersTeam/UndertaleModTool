@@ -519,7 +519,8 @@ namespace UndertaleModTool
             if (code.ParentEntry != null)
             {
                 DisassemblyEditor.IsReadOnly = true;
-                text = "; This code entry is a reference to an anonymous function within " + code.ParentEntry.Name.Content + ", view it there";
+                text = "; This code entry is a reference to an anonymous function within " + code.ParentEntry.Name.Content + ", view it there.";
+                DisassemblyChanged = false;
             }
             else
             {
@@ -645,7 +646,8 @@ namespace UndertaleModTool
 
             if (code.ParentEntry != null)
             {
-                DecompiledEditor.Text = "// This code entry is a reference to an anonymous function within " + code.ParentEntry.Name.Content + ", view it there";
+                DecompiledEditor.Text = "// This code entry is a reference to an anonymous function within " + code.ParentEntry.Name.Content + ", view it there.";
+                DecompiledChanged = false;
                 CurrentDecompiled = code;
                 existingDialog?.TryClose();
             }
