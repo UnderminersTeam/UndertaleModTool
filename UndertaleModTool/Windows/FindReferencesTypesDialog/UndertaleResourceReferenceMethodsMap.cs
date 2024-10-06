@@ -559,14 +559,20 @@ namespace UndertaleModTool.Windows
                                 if (constantsMatches)
                                     outDict["Game options constants"] = new object[] { new GeneralInfoEditor(data.GeneralInfo, data.Options, data.Language) };
                             }
-
-                            if (types.Contains(typeof(UndertaleLanguage)))
+                            try
                             {
-                                bool langsMatches = data.Language.EntryIDs.Contains(obj)
-                                                    || data.Language.Languages.Any(x => x.Name == obj || x.Region == obj
-                                                                                        || x.Entries.Contains(obj));
-                                if (langsMatches)
-                                    outDict["Languages"] = new object[] { new GeneralInfoEditor(data.GeneralInfo, data.Options, data.Language) };
+                                if (types.Contains(typeof(UndertaleLanguage)))
+                                {
+                                    bool langsMatches = data.Language.EntryIDs.Contains(obj)
+                                                        || data.Language.Languages.Any(x => x.Name == obj || x.Region == obj
+                                                                                            || x.Entries.Contains(obj));
+                                    if (langsMatches)
+                                        outDict["Languages"] = new object[] { new GeneralInfoEditor(data.GeneralInfo, data.Options, data.Language) };
+                                }
+                            }
+                            catch(Exception e)
+                            {
+                                //Do nothing
                             }
 
                             if (types.Contains(typeof(UndertalePath)))
