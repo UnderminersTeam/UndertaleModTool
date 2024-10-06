@@ -41,7 +41,7 @@ namespace UndertaleModTool
 		/// <param name="messageBoxText">A <see cref="string"/> that specifies the text to display.</param>
 		/// <param name="icon">The <see cref="MessageBoxImage"/> to display.</param>
 		/// <param name="title">A <see cref="string"/> that specifies the title bar caption to display.</param>
-		/// <returns><see cref="MessageBoxResult.Yes"/>, <see cref="MessageBoxResult.No"/> or <see cref="MessageBoxResult.Cancel"/> depending on the users' answer.
+		/// <returns><see cref="MessageBoxResult.Yes"/>, <see cref="MessageBoxResult.No"/> or <see cref="MessageBoxResult.Cancel"/> depending on the users' answer.</returns>
 		public static MessageBoxResult ShowQuestionWithCancel(this Window window, string messageBoxText, MessageBoxImage icon = MessageBoxImage.Question, string title = "UndertaleModTool")
 		{
 			return ShowCore(window, messageBoxText, title, MessageBoxButton.YesNoCancel, icon);
