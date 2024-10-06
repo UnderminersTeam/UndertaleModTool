@@ -3130,7 +3130,6 @@ namespace UndertaleModLib.Compiler
                     TokenKind.KeywordIf,
                     TokenKind.KeywordRepeat,
                     TokenKind.KeywordReturn,
-                    TokenKind.KeywordStruct,
                     TokenKind.KeywordSwitch,
                     TokenKind.KeywordThen,
                     TokenKind.KeywordUntil,
