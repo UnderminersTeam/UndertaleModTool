@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -30,13 +31,130 @@ namespace UndertaleModTool
             InitializeComponent();
         }
 
+        /// <summary>
+        /// Selects the given room inside the RoomOrderList.
+        /// </summary>
+        /// <param name="rooms">The list of rooms to select.</param>
+        /// <param name="current">The room to make currenly selected and focused</param>
+        private void SelectItems(IList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> rooms, object current)
+        {
+            RoomListGrid.ScrollIntoView(current); // This works with a virtualized DataGrid
+            RoomListGrid.SelectedItems.Clear();
+            foreach (object room in rooms)
+            {
+                RoomListGrid.SelectedItems.Add(room);
+            }
+            RoomListGrid.CurrentItem= current;
+            RoomListGrid.UpdateLayout();
+
+            // Set focus to the selected Element
+            DataGridRow row = RoomListGrid.ItemContainerGenerator.ContainerFromItem(current) as DataGridRow;
+            DataGridCellsPresenter presenter = MainWindow.FindVisualChild<DataGridCellsPresenter>(row) as DataGridCellsPresenter;
+            DataGridCell cell = presenter.ItemContainerGenerator.ContainerFromIndex(0) as DataGridCell;
+            cell.Focus();
+        }
+
+        /// <summary>
+        /// Moves the given room up and down the RoomOrderList./>.
+        /// </summary>
+        /// <param name="rooms">The list of rooms to move.</param>
+        /// <param name="dist">Distance to move them. Positive - down, negative - up.</param>
+        private void MoveItem(IList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> rooms, int dist)
+        {
+            if (rooms.Count == 0)
+                return;
+
+            IList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> roomOrder = (this.DataContext as GeneralInfoEditor).GeneralInfo.RoomOrder;
+            
+            List<int> indexes = rooms.Select(room => roomOrder.IndexOf(room)).ToList();
+            if (indexes.Contains(-1))
+            {
+                mainWindow.ShowError("Can't change room position - room not found in room order.");
+                return;
+            }
+
+            dist = Math.Clamp(dist, -indexes.Min(), roomOrder.Count - 1 - indexes.Max());
+            if (dist == 0)
+                return;
+
+            object current = RoomListGrid.CurrentItem; // In case changing the order changes CurrentItem
+            // If we move the rooms in the wrong order we could move a room twice
+            indexes.Sort();
+            if (dist < 0)
+            {
+                for (int i = 0; i > dist; i--) // move once abs(dist) times
+                {
+                    foreach (int index in indexes)
+                    {
+                        (roomOrder[index + i - 1], roomOrder[index + i]) = (roomOrder[index + i], roomOrder[index + i - 1]);
+                    }
+                }
+            }
+            else
+            {
+                indexes.Reverse();
+                for (int i = 0; i < dist; i++) // move once dist times
+                {
+                    foreach (int index in indexes)
+                        (roomOrder[index + i + 1], roomOrder[index + i]) = (roomOrder[index + i], roomOrder[index + i + 1]);
+                }
+            }
+
+            SelectItems(rooms, current);
+        }
+
+        private void RoomListGrid_KeyDown(object sender, KeyEventArgs e)
+        {
+            IList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> roomOrder = (this.DataContext as GeneralInfoEditor).GeneralInfo.RoomOrder;
+
+            System.Collections.IList selected = RoomListGrid.SelectedItems;
+            selected.Remove(CollectionView.NewItemPlaceholder);
+            if (selected.Count == 0)
+                return;
+
+            List<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> selectedRooms = selected.Cast<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>>().ToList();
+            int dist = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift ? 5 : 1;
+            switch (e.Key)
+            {
+                case Key.OemMinus:
+                    MoveItem(selectedRooms, -dist);
+                    break;
+                case Key.OemPlus:
+                    MoveItem(selectedRooms, dist);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Insert new blank room after selected rooms.
+        /// </summary>
+        private void Command_New(object sender, RoutedEventArgs e)
+        {
+            IList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> roomOrder = (this.DataContext as GeneralInfoEditor).GeneralInfo.RoomOrder;
+
+            System.Collections.IList selected = RoomListGrid.SelectedItems;
+            selected.Remove(CollectionView.NewItemPlaceholder);
+            if (selected.Count == 0)
+                return;
+
+            List<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> selectedRooms = selected.Cast<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>>().ToList();
+
+            int index = selectedRooms.Select(room => roomOrder.IndexOf(room)).Max();
+            UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM> newRoom = new();
+            roomOrder.Insert(index + 1, newRoom);
+            SelectItems(new List<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> { newRoom }, newRoom);
+        }
+
         private void SyncRoomList_Click(object sender, RoutedEventArgs e)
         {
-            IList<UndertaleRoom> rooms = mainWindow.Data.Rooms;
-            IList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> roomOrder = (this.DataContext as GeneralInfoEditor).GeneralInfo.RoomOrder;
-            roomOrder.Clear();
-            foreach(var room in rooms)
-                roomOrder.Add(new UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>() { Resource = room });
+            if (mainWindow.ShowQuestion("Sync room order with room list?\n\nThis will undo all changes made to the room order.", MessageBoxImage.Warning, "Confirmation") == MessageBoxResult.Yes)
+            {
+                IList<UndertaleRoom> rooms = mainWindow.Data.Rooms;
+                IList<UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>> roomOrder = (this.DataContext as GeneralInfoEditor).GeneralInfo.RoomOrder;
+                roomOrder.Clear();
+                foreach (var room in rooms)
+                    roomOrder.Add(new UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>() { Resource = room });
+            }
         }
 
         private void DebuggerCheckBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
