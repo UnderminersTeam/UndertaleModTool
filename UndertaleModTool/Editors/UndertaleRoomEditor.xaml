@@ -430,7 +430,8 @@
                             <CheckBox Grid.Row="6" Grid.Column="2" Margin="3" IsChecked="{Binding DrawBackgroundColor}" Visibility="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}"/>
 
                             <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Creation Code</TextBlock>
-                            <local:UndertaleObjectReference Grid.Row="7" Grid.Column="2" Margin="3" ObjectReference="{Binding CreationCodeId}" ObjectType="{x:Type undertale:UndertaleCode}"  ObjectEventType="{x:Static undertale:EventType.Create}" ObjectEventSubtype="0"/>
+                            <local:UndertaleObjectReference Grid.Row="7" Grid.Column="2" Margin="3" ObjectReference="{Binding CreationCodeId}" ObjectType="{x:Type undertale:UndertaleCode}"
+                                                            Room="{Binding}"/>
 
                             <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Flags</TextBlock>
                             <local:TextBoxDark Grid.Row="8" Grid.Column="2" Margin="3" Text="{Binding Flags, Converter={StaticResource IsGMS2Converter}, ConverterParameter=flags}"/>
@@ -660,7 +661,10 @@
                             <local:TextBoxDark Grid.Row="2" Grid.Column="2" Margin="3" Text="{Binding InstanceID}"/>
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Creation code</TextBlock>
-                            <local:UndertaleObjectReference Grid.Row="3" Grid.Column="2" Margin="3" ObjectReference="{Binding CreationCode}" ObjectType="{x:Type undertale:UndertaleCode}" ObjectEventType="{x:Static undertale:EventType.Create}" ObjectEventSubtype="0"/>
+                            <local:UndertaleObjectReference Grid.Row="3" Grid.Column="2" Margin="3" ObjectReference="{Binding CreationCode}" ObjectType="{x:Type undertale:UndertaleCode}"
+                                                            Room="{Binding DataContext, RelativeSource={RelativeSource AncestorType=local:DataUserControl}}"
+                                                            RoomGameObject="{Binding}"
+                                                            IsPreCreate="False"/>
 
                             <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Scale</TextBlock>
                             <Grid Grid.Row="4" Grid.Column="2">
@@ -696,7 +700,10 @@
                             </Grid>
 
                             <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Pre Create code</TextBlock>
-                            <local:UndertaleObjectReference Grid.Row="9" Grid.Column="2" Margin="3" ObjectReference="{Binding PreCreateCode}" ObjectType="{x:Type undertale:UndertaleCode}"  ObjectEventType="{x:Static undertale:EventType.PreCreate}" ObjectEventSubtype="0"/>
+                            <local:UndertaleObjectReference Grid.Row="9" Grid.Column="2" Margin="3" ObjectReference="{Binding PreCreateCode}" ObjectType="{x:Type undertale:UndertaleCode}"
+                                                            Room="{Binding DataContext, RelativeSource={RelativeSource AncestorType=local:DataUserControl}}"
+                                                            RoomGameObject="{Binding}"
+                                                            IsPreCreate="True"/>
                         </Grid>
                     </DataTemplate>
 
