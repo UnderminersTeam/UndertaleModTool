@@ -560,15 +560,6 @@ namespace UndertaleModTool.Windows
                                     outDict["Game options constants"] = new object[] { new GeneralInfoEditor(data.GeneralInfo, data.Options, data.Language) };
                             }
 
-                            if (types.Contains(typeof(UndertaleLanguage)))
-                            {
-                                bool langsMatches = data.Language.EntryIDs.Contains(obj)
-                                                    || data.Language.Languages.Any(x => x.Name == obj || x.Region == obj
-                                                                                        || x.Entries.Contains(obj));
-                                if (langsMatches)
-                                    outDict["Languages"] = new object[] { new GeneralInfoEditor(data.GeneralInfo, data.Options, data.Language) };
-                            }
-
                             if (types.Contains(typeof(UndertalePath)))
                             {
                                 var paths = data.Paths.Where(x => x.Name == obj);
@@ -627,6 +618,28 @@ namespace UndertaleModTool.Windows
                             var codeLocals = data.CodeLocals.Where(x => x.Name == obj || x.Locals.Any(l => l.Name == obj));
                             if (codeLocals.Any())
                                 return new() { { "Code locals", checkOne ? codeLocals.ToEmptyArray() : codeLocals.ToArray() } };
+                            else
+                                return null;
+                        }
+                    },
+                    new PredicateForVersion()
+                    {
+                        // Bytecode version 16
+                        Version = (16, uint.MaxValue, uint.MaxValue),
+                        Predicate = (objSrc, types, checkOne) =>
+                        {
+                            if (!types.Contains(typeof(UndertaleLanguage)))
+                                return null;
+
+                            if (objSrc is not UndertaleString obj)
+                                return null;
+
+                            bool langsMatches = data.Language.EntryIDs.Contains(obj)
+                                                || data.Language.Languages.Any(x => x.Name == obj || x.Region == obj
+                                                                                    || x.Entries.Contains(obj));
+
+                            if (langsMatches)
+                                return new() { { "Languages",  new object[] { new GeneralInfoEditor(data.GeneralInfo, data.Options, data.Language) } } };
                             else
                                 return null;
                         }
