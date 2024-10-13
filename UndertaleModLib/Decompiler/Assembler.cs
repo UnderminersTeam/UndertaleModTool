@@ -341,6 +341,8 @@ namespace UndertaleModLib.Decompiler
                     string[] aaa = line.Split(' ');
                     if (aaa[0] == ".localvar")
                     {
+                        if (localvars is null)
+                            throw new Exception("Local variable directive is not supported in this bytecode version");
                         if (aaa.Length >= 4)
                         {
                             var varii = vars[Int32.Parse(aaa[3])];
@@ -526,7 +528,7 @@ namespace UndertaleModLib.Decompiler
             // Locate variable from either local variables, or VARI chunk
             UndertaleVariable locatedVariable;
             string variableName = str[strPosition..].ToString();
-            if (variInstanceType == UndertaleInstruction.InstanceType.Local)
+            if (variInstanceType == UndertaleInstruction.InstanceType.Local && data?.CodeLocals is not null)
             {
                 locatedVariable = localvars.ContainsKey(variableName) ? localvars[variableName] : null;
             }
