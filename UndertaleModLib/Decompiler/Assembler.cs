@@ -341,8 +341,6 @@ namespace UndertaleModLib.Decompiler
                     string[] aaa = line.Split(' ');
                     if (aaa[0] == ".localvar")
                     {
-                        if (localvars is null)
-                            throw new Exception("Local variable directive is not supported in this bytecode version");
                         if (aaa.Length >= 4)
                         {
                             var varii = vars[Int32.Parse(aaa[3])];
