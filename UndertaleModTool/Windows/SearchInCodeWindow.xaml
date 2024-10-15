@@ -40,8 +40,8 @@
                         <Setter Property="ContextMenu" Value="{StaticResource ListViewItemContextMenu}"/>
                         <Setter Property="ToolTip">
                             <Setter.Value>
-                                <UniformGrid Columns="1">
-                                    <TextBlock>
+                                <StackPanel>
+                                    <TextBlock TextWrapping="Wrap">
                                         <TextBlock.Text>
                                             <MultiBinding StringFormat="{}{0}:{1}">
                                                 <Binding Path="Code"/>
@@ -49,8 +49,8 @@
                                             </MultiBinding>
                                         </TextBlock.Text>
                                     </TextBlock>
-                                    <TextBlock Text="{Binding LineText}"/>
-                                </UniformGrid>
+                                    <TextBlock Text="{Binding LineText}" TextWrapping="Wrap"/>
+                                </StackPanel>
                             </Setter.Value>
                         </Setter>
                     </Style>
