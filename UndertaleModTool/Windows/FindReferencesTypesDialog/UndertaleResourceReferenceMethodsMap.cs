@@ -1579,26 +1579,17 @@ namespace UndertaleModTool.Windows
                         }
                     }
                 }
-
+            }
+            finally
+            {
                 await mainWindow.StopProgressBarUpdater();
                 mainWindow.HideProgressBar();
-            }
-            catch
-            {
+
                 mainWindow.IsEnabled = true;
                 stringReferences = null;
                 funcReferences = null;
                 variReferences = null;
-
-                await mainWindow.StopProgressBarUpdater();
-                mainWindow.HideProgressBar();
-
-                throw;
             }
-            mainWindow.IsEnabled = true;
-            stringReferences = null;
-            funcReferences = null;
-            variReferences = null;
 
             if (outDict.Count == 0)
                 return null;
