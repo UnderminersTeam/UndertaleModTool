@@ -44,7 +44,7 @@
         <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Offset}"/>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Visibility="{Binding ParentEntry, Converter={StaticResource VisibleIfNotNull}}">Parent entry</TextBlock>
-        <local:UndertaleObjectReference Grid.Row="4" Grid.Column="1" Margin="3" Visibility="{Binding ParentEntry, Converter={StaticResource VisibleIfNotNull}}" ObjectReference="{Binding ParentEntry}" ObjectType="{x:Type undertale:UndertaleCode}" CanRemove="False"/>
+        <local:UndertaleObjectReference Grid.Row="4" Grid.Column="1" Margin="3" Visibility="{Binding ParentEntry, Converter={StaticResource VisibleIfNotNull}}" ObjectReference="{Binding ParentEntry}" ObjectType="{x:Type undertale:UndertaleCode}" CanRemove="False" CanDragInto="False"/>
 
         <TabControl x:Name="CodeModeTabs" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" SelectionChanged="TabControl_SelectionChanged">
             <TabItem Header="Decompiled" Name="DecompiledTab">
