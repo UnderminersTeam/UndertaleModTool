@@ -22,13 +22,15 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <local:TextBoxDark Grid.Column="0" x:Name="ObjectText" IsReadOnly="True" Cursor="Arrow" AllowDrop="True"
-                           ToolTip="This is an object reference. Drag and drop an object of matching type from the tree on the left to change it!"
-                           ToolTipService.InitialShowDelay="250"
                            PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" PreviewMouseDoubleClick="TextBox_MouseDoubleClick" PreviewMouseDown="Details_MouseDown"
                            Text="{Binding ObjectReference, ElementName=objectReference}">
             <TextBox.Style>
                 <Style TargetType="{x:Type TextBox}">
                     <Style.Triggers>
+                        <DataTrigger Binding="{Binding CanDragInto, ElementName=objectReference}" Value="True">
+                            <Setter Property="ToolTip" Value="This is an object reference. Drag and drop an object of matching type from the tree on the left to change it!" />
+                            <Setter Property="ToolTipService.InitialShowDelay" Value="250" />
+                        </DataTrigger>
                         <DataTrigger Binding="{Binding ObjectReference, ElementName=objectReference}" Value="{x:Null}">
                             <Setter Property="Background">
                                 <Setter.Value>
