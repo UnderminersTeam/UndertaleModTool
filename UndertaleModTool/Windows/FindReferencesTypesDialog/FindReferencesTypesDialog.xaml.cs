@@ -22,6 +22,8 @@ namespace UndertaleModTool.Windows
     /// </summary>
     public partial class FindReferencesTypesDialog : Window
     {
+        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+
         private readonly UndertaleResource sourceObj;
         private readonly UndertaleData data;
         private readonly bool dontShowWindow = false;
@@ -140,9 +142,21 @@ namespace UndertaleModTool.Windows
                     return;
                 }
 
-                var results = UndertaleResourceReferenceMethodsMap.GetReferencesOfObject(sourceObj, data, typesList);
-                FindReferencesResults dialog = new(sourceObj, data, results);
-                dialog.Show();
+                FindReferencesResults dialog = null;
+                try
+                {
+                    var results = UndertaleResourceReferenceMethodsMap.GetReferencesOfObject(sourceObj, data, typesList);
+                    dialog = new(sourceObj, data, results);
+                    dialog.Show();
+                }
+                catch (Exception ex)
+                {
+                    mainWindow.ShowError("An error occured in the object references related window.\n" +
+                                         $"Please report this on GitHub.\n\n{ex}");
+                    dialog?.Close();
+
+                }
+
             }
             else
             {
@@ -173,9 +187,19 @@ namespace UndertaleModTool.Windows
                 }
 
                 Hide();
-                var results = await UndertaleResourceReferenceMethodsMap.GetUnreferencedObjects(data, typesDict);
-                FindReferencesResults dialog = new(data, results);
-                dialog.Show();
+                FindReferencesResults dialog = null;
+                try
+                {
+                    var results = await UndertaleResourceReferenceMethodsMap.GetUnreferencedObjects(data, typesDict);
+                    dialog = new(data, results);
+                    dialog.Show();
+                }
+                catch (Exception ex)
+                {
+                    mainWindow.ShowError("An error occured in the object references related window.\n" +
+                                         $"Please report this on GitHub.\n\n{ex}");
+                    dialog?.Close();
+                }
             }
 
             Close();
