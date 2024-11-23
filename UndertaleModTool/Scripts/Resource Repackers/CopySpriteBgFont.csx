@@ -11,22 +11,22 @@ EnsureDataLoaded();
 // Initialization Start
 
 var DataEmbeddedTexturesCount = Data.EmbeddedTextures.Count;
-List<int> tex_TargetX = new List<int>();
-List<int> tex_TargetY = new List<int>();
-List<int> tex_SourceX = new List<int>();
-List<int> tex_SourceY = new List<int>();
-List<int> tex_SourceWidth = new List<int>();
-List<int> tex_SourceHeight = new List<int>();
-List<int> tex_TargetWidth = new List<int>();
-List<int> tex_TargetHeight = new List<int>();
-List<int> tex_BoundingWidth = new List<int>();
-List<int> tex_BoundingHeight = new List<int>();
-List<int> tex_Frame = new List<int>();
-List<int> tex_EmbeddedTextureID = new List<int>();
-List<string> tex_Name = new List<string>();
-List<string> tex_Type = new List<string>();
-List<bool> tex_IsNull = new List<bool>();
-List<bool> TexturePageItemsUsed = new List<bool>();
+List<int> tex_TargetX = new();
+List<int> tex_TargetY = new();
+List<int> tex_SourceX = new();
+List<int> tex_SourceY = new();
+List<int> tex_SourceWidth = new();
+List<int> tex_SourceHeight = new();
+List<int> tex_TargetWidth = new();
+List<int> tex_TargetHeight = new();
+List<int> tex_BoundingWidth = new();
+List<int> tex_BoundingHeight = new();
+List<int> tex_Frame = new();
+List<int> tex_EmbeddedTextureID = new();
+List<string> tex_Name = new();
+List<string> tex_Type = new();
+List<bool> tex_IsNull = new();
+List<bool> TexturePageItemsUsed = new();
 
 // Initialization End
 
@@ -38,7 +38,7 @@ if (DonorDataPath == null)
     throw new ScriptException("The donor data path was not set.");
 
 using (var stream = new FileStream(DonorDataPath, FileMode.Open, FileAccess.Read))
-    DonorData = UndertaleIO.Read(stream, warning => ScriptMessage("A warning occured while trying to load " + DonorDataPath + ":\n" + warning));
+    DonorData = UndertaleIO.Read(stream, warning => ScriptMessage($"A warning occured while trying to load {DonorDataPath}:\n" + warning));
 var DonorDataEmbeddedTexturesCount = DonorData.EmbeddedTextures.Count;
 int copiedSpritesCount = 0;
 int copiedBackgroundsCount = 0;
@@ -54,7 +54,8 @@ SetProgressBar(null, "Textures Exported", 0, DonorData.TexturePageItems.Count);
 StartProgressBarUpdater();
 
 SyncBinding("EmbeddedTextures, Strings, Backgrounds, Sprites, Fonts, TexturePageItems", true);
-await Task.Run(() => {
+await Task.Run(() => 
+{
     for (int i = 0; i < SpriteSheetsCopyNeeded.Length; i++)
     {
         SpriteSheetsCopyNeeded[i] = false;
@@ -67,7 +68,7 @@ await Task.Run(() => {
     {
         UndertaleEmbeddedTexture texture = new UndertaleEmbeddedTexture();
         texture.Name = new UndertaleString("Texture " + ++lastTextPage);
-        texture.TextureData.TextureBlob = DonorData.EmbeddedTextures[i].TextureData.TextureBlob;
+        texture.TextureData.Image = DonorData.EmbeddedTextures[i].TextureData.Image;
         Data.EmbeddedTextures.Add(texture);
     }
     for (var j = 0; j < splitStringsList.Count; j++)
@@ -270,7 +271,7 @@ DisableAllSyncBindings();
 await StopProgressBarUpdater();
 HideProgressBar();
 copiedAssetsCount = (copiedFontsCount + copiedBackgroundsCount + copiedSpritesCount);
-ScriptMessage(copiedAssetsCount.ToString() + " assets were copied (" + copiedSpritesCount.ToString() + " Sprites, " + copiedBackgroundsCount.ToString() + " Backgrounds, and " + copiedFontsCount.ToString() + " Fonts)");
+ScriptMessage($"{copiedAssetsCount} assets were copied ({copiedSpritesCount} Sprites, {copiedBackgroundsCount} Backgrounds, and {copiedFontsCount} Fonts)");
 
 
 

@@ -8,15 +8,13 @@ EnsureDataLoaded();
 
 const string texturesName = "EmbeddedTextures";
 
-// The folder data.win is located in.
-string dataFolder = Path.GetDirectoryName(FilePath);
 // The folder to write the image data to.
-string texturesFolder = Path.Combine(dataFolder, texturesName);
+string texturesFolder = Path.Combine(Path.GetDirectoryName(FilePath), texturesName);
 
 if (!CanOverwrite())
     return;
 
-MakeFolder(texturesFolder);
+Directory.CreateDirectory(texturesFolder);
 
 SetProgressBar(null, texturesName, 0, Data.EmbeddedTextures.Count);
 StartProgressBarUpdater();
@@ -27,7 +25,8 @@ await Task.Run(() =>
     {
         try
         {
-            File.WriteAllBytes(Path.Combine(texturesFolder, i + ".png"), Data.EmbeddedTextures[i].TextureData.TextureBlob);
+            using FileStream fs = new(Path.Combine(texturesFolder, $"{i}.png"), FileMode.Create);
+            Data.EmbeddedTextures[i].TextureData.Image.SavePng(fs);
         }
         catch (Exception ex)
         {
@@ -40,29 +39,16 @@ await Task.Run(() =>
 
 await StopProgressBarUpdater();
 HideProgressBar();
-ScriptMessage("Export Complete.\n\nLocation: " + texturesFolder);
-
-// Helper functions below. //
-
-// Gets the full directory of a file path
-string GetFolder(string path)
-{
-    return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
-}
-
-// Creates the folder, if it does not exist already
-void MakeFolder(string folder)
-{
-    if (!Directory.Exists(folder))
-        Directory.CreateDirectory(folder);
-}
+ScriptMessage($"Export Complete.\n\nLocation: {texturesFolder}");
 
 // Tries to delete the texturesFolder if it doesn't exist. Returns false if the user does not want the folder deleted.
 bool CanOverwrite()
 {
-    // Overwrite Folder Check One
-    if (!Directory.Exists(texturesFolder)) return true;
+    // If folder doesn't exist, we're not overwriting anything
+    if (!Directory.Exists(texturesFolder)) 
+        return true;
 
+    // Prompt user to see if we should delete the folder
     bool overwriteCheckOne = ScriptQuestion($"An '{texturesName}' folder already exists.\nWould you like to remove it? This may some time.\n\nNote: If an error window stating that 'the directory is not empty' appears, please try again or delete the folder manually.");
     if (!overwriteCheckOne)
     {
