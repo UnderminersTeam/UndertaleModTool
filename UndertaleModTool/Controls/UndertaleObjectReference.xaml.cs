@@ -157,7 +157,7 @@ namespace UndertaleModTool
                 else if (mainWindow.Selected is UndertaleGameObject gameObject)
                 {
                     // Generate the code entry
-                    UndertaleCode code = gameObject.EventHandlerFor(ObjectEventType, ObjectEventSubtype, mainWindow.Data.Strings, mainWindow.Data.Code, mainWindow.Data.CodeLocals);
+                    UndertaleCode code = gameObject.EventHandlerFor(ObjectEventType, ObjectEventSubtype, mainWindow.Data);
 
                     ObjectReference = code;
                 }

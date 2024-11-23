@@ -23,7 +23,8 @@ IOrderedEnumerable<string> failedSorted;                                     //f
 IOrderedEnumerable<KeyValuePair<string, List<(int, string)>>> resultsSorted; //resultsDict.OrderBy()
 int resultCount = 0;
 
-ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
+GlobalDecompileContext globalDecompileContext = new(Data);
+Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = Data.ToolInfo.DecompilerSettings;
 
 bool caseSensitive = ScriptQuestion("Case sensitive?");
 bool regexCheck = ScriptQuestion("Regex search?");
@@ -43,7 +44,7 @@ if (regexCheck)
         keywordRegex = new(keyword, RegexOptions.Compiled | RegexOptions.IgnoreCase);
 }
 
-bool cacheGenerated = await GenerateGMLCache(DECOMPILE_CONTEXT);
+bool cacheGenerated = await GenerateGMLCache(globalDecompileContext);
 await StopProgressBarUpdater();
 
 SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
@@ -61,12 +62,6 @@ await ClickableSearchOutput("Search results.", keyword, resultCount, resultsSort
 HideProgressBar();
 EnableUI();
 
-
-string GetFolder(string path)
-{
-    return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
-}
-
 async Task DumpCode()
 {
     if (cacheGenerated)
@@ -75,10 +70,10 @@ async Task DumpCode()
     }
     else
     {
-        if (Data.KnownSubFunctions is null) //if we run script before opening any code
+        if (Data.GlobalFunctions is null) //if we run script before opening any code
         {
-            SetProgressBar(null, "Building the cache of all sub-functions...", 0, 0);
-            await Task.Run(() => Decompiler.BuildSubFunctionCache(Data));
+            SetProgressBar(null, "Building the cache of all global functions...", 0, 0);
+            await Task.Run(() => GlobalDecompileContext.BuildGlobalFunctionCache(Data));
             SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
         }
 
@@ -109,13 +104,18 @@ void DumpCode(UndertaleCode code)
         if (code is not null && code.ParentEntry is null)
         {
             var lineNumber = 1;
-            StringReader decompiledText = new(code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : "");
+            StringReader decompiledText = new(code != null 
+                ? new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, decompilerSettings).DecompileToString() 
+                : "");
             bool nameWritten = false;
             string lineInt;
             while ((lineInt = decompiledText.ReadLine()) is not null)
             {
                 if (lineInt == string.Empty)
+                {
+                    lineNumber += 1;
                     continue;
+                }
 
                 if (((regexCheck && RegexContains(in lineInt)) || ((!regexCheck && caseSensitive) ? lineInt.Contains(keyword) : lineInt.ToLower().Contains(keyword.ToLower()))))
                 {
@@ -149,7 +149,10 @@ void ScanCode(KeyValuePair<string, string> code)
         while ((lineInt = decompiledText.ReadLine()) is not null)
         {
             if (lineInt == string.Empty)
+            {
+                lineNumber += 1;
                 continue;
+            }
 
             if (((regexCheck && RegexContains(in lineInt)) || ((!regexCheck && caseSensitive) ? lineInt.Contains(keyword) : lineInt.ToLower().Contains(keyword.ToLower()))))
             {

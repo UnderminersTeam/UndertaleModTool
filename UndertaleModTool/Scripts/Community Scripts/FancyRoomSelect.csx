@@ -14,7 +14,7 @@ if(obj == null) {
 if(Data.GeneralInfo.Name.Content.StartsWith("UNDERTALE")) {
     // Remove existing F3 handler to avoid accidentally 
     // creating system_information_962
-    Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, (uint)114, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML("", Data);
+    Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, (uint)114, Data).ReplaceGML("", Data);
 }
 
 bool gms2 = Data.IsGameMaker2();
@@ -93,7 +93,7 @@ else {
 
 
 
-obj.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+obj.EventHandlerFor(EventType.Create, Data).ReplaceGML(@"
 if (instance_number(object_index) > 1)
 {
     instance_destroy(id, false)
@@ -135,7 +135,7 @@ xx = 0
 yy = 0
 ", Data);
 
-obj.EventHandlerFor(EventType.Step, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+obj.EventHandlerFor(EventType.Step, Data).ReplaceGML(@"
 if selector_active
 {
     global.interact = 1
@@ -286,7 +286,7 @@ if selector_active
 }
 ", Data);
 
-obj.EventHandlerFor(EventType.Draw, (uint)64, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+obj.EventHandlerFor(EventType.Draw, (uint)64, Data).ReplaceGML(@"
 if selector_active
 {
     if sprite_exists(ss)
@@ -358,23 +358,23 @@ if selector_active
 }
 ", Data);
 
-obj.EventHandlerFor(EventType.Destroy, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+obj.EventHandlerFor(EventType.Destroy, Data).ReplaceGML(@"
 ds_list_destroy(suggestions)
 sprite_delete(ss)
 font_delete(fnt)
 ", Data);
 
-obj.EventHandlerFor(EventType.Other, (uint)5, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+obj.EventHandlerFor(EventType.Other, (uint)5, Data).ReplaceGML(@"
 if selector_active
     event_user(1)
 ", Data);
 
-obj.EventHandlerFor(EventType.KeyPress, (uint)114, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+obj.EventHandlerFor(EventType.KeyPress, (uint)114, Data).ReplaceGML(@"
 if (!selector_active)
     event_user(0)
 ", Data);
 
-obj.EventHandlerFor(EventType.Other, (uint)10, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+obj.EventHandlerFor(EventType.Other, (uint)10, Data).ReplaceGML(@"
 selector_active = 1
 if (!selector_initialized)
     fnt = font_add(""8bitoperator_jve.ttf"", 24, 0, 0, 32, 127)
@@ -397,7 +397,7 @@ exiting = 0
 update = 1
 ", Data);
 
-obj.EventHandlerFor(EventType.Other, (uint)11, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+obj.EventHandlerFor(EventType.Other, (uint)11, Data).ReplaceGML(@"
 display_set_gui_size(-1, -1)
 instance_activate_all()
 keyboard_clear(vk_f3)
