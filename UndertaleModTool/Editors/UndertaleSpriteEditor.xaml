@@ -217,8 +217,8 @@
                                             <MultiBinding.Converter>
                                                 <local:MaskImageConverter/>
                                             </MultiBinding.Converter>
-                                            <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="DataContext.Width" Mode="OneWay"/>
-                                            <Binding RelativeSource="{RelativeSource AncestorType=UserControl}" Path="DataContext.Height" Mode="OneWay"/>
+                                            <Binding Path="Width" Mode="OneWay"/>
+                                            <Binding Path="Height" Mode="OneWay"/>
                                             <Binding Path="Data" Mode="OneWay"/>
                                         </MultiBinding>
                                     </Image.Source>
