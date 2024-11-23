@@ -42,7 +42,7 @@ void DumpFont(UndertaleFont font)
 {
     if (arrayString.Contains(font.Name.ToString().Replace("\"", "")))
     {
-        worker.ExportAsPNG(font.Texture, Path.Combine(fntFolder, $"{font.Name.Content}.png");
+        worker.ExportAsPNG(font.Texture, Path.Combine(fntFolder, $"{font.Name.Content}.png"));
         using (StreamWriter writer = new(Path.Combine(fntFolder, $"glyphs_{font.Name.Content}.csv")))
         {
             writer.WriteLine($"{font.DisplayName};{font.EmSize};{font.Bold};{font.Italic};{font.Charset};{font.AntiAliasing};{font.ScaleX};{font.ScaleY}");
