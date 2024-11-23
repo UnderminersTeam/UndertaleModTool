@@ -46,6 +46,7 @@ using System.Globalization;
 using System.Windows.Controls.Primitives;
 using System.Runtime.CompilerServices;
 using System.Windows.Interop;
+using System.Windows.Media.Imaging;
 
 namespace UndertaleModTool
 {
@@ -100,6 +101,9 @@ namespace UndertaleModTool
         public Visibility IsExtProductIDEligible => (((Data?.GeneralInfo?.Major ?? 0) >= 2) || (((Data?.GeneralInfo?.Major ?? 0) == 1) && (((Data?.GeneralInfo?.Build ?? 0) >= 1773) || ((Data?.GeneralInfo?.Build ?? 0) == 1539)))) ? Visibility.Visible : Visibility.Collapsed;
 
         public List<Tab> ClosedTabsHistory { get; } = new();
+
+        private List<(GMImage, WeakReference<BitmapSource>)> _bitmapSourceLookup { get; } = new();
+        private object _bitmapSourceLookupLock = new();
 
         public bool CanSave { get; set; }
         public bool CanSafelySave = false;
@@ -253,6 +257,46 @@ namespace UndertaleModTool
             resources["CustomTextBrush"] = SystemColors.ControlTextBrush;
             resources[SystemColors.GrayTextBrushKey] = grayTextBrush;
             resources[SystemColors.InactiveSelectionHighlightBrushKey] = inactiveSelectionBrush;
+        }
+
+        /// <summary>
+        /// Returns a <see cref="BitmapSource"/> instance for the given <see cref="GMImage"/>.
+        /// If a previously-created instance has not yet been garbage collected, this will return that instance.
+        /// </summary>
+        public BitmapSource GetBitmapSourceForImage(GMImage image)
+        {
+            lock (_bitmapSourceLookupLock)
+            {
+                // Look through entire list, clearing out old weak references, and potentially finding our desired source
+                BitmapSource foundSource = null;
+                for (int i = _bitmapSourceLookup.Count - 1; i >= 0; i--)
+                {
+                    (GMImage imageKey, WeakReference<BitmapSource> referenceVal) = _bitmapSourceLookup[i];
+                    if (!referenceVal.TryGetTarget(out BitmapSource source))
+                    {
+                        // Clear out old weak reference
+                        _bitmapSourceLookup.RemoveAt(i);
+                    }
+                    else if (imageKey == image)
+                    {
+                        // Found our source, store it to return later
+                        foundSource = source;
+                    }
+                }
+
+                // If we found our source, return it
+                if (foundSource is not null)
+                {
+                    return foundSource;
+                }
+
+                // If no source was found, then create a new one
+                byte[] pixelData = image.ConvertToRawBgra().ToSpan().ToArray();
+                BitmapSource bitmap = BitmapSource.Create(image.Width, image.Height, 96, 96, PixelFormats.Bgra32, null, pixelData, image.Width * 4);
+                bitmap.Freeze();
+                _bitmapSourceLookup.Add((image, new WeakReference<BitmapSource>(bitmap)));
+                return bitmap;
+            }
         }
 
         private void SetIDString(string str)
@@ -778,54 +822,49 @@ namespace UndertaleModTool
 
                 if (SettingsWindow.WarnOnClose)
                 {
-                    if (this.ShowQuestion("Are you sure you want to quit?") == MessageBoxResult.Yes)
+                    MessageBoxResult result = this.ShowQuestionWithCancel("Save changes before quitting?");
+
+                    if (result == MessageBoxResult.Cancel)
                     {
-                        if (this.ShowQuestion("Save changes first?") == MessageBoxResult.Yes)
-                        {
-                            if (scriptDialog is not null)
-                            {
-                                if (this.ShowQuestion("Script still runs. Save anyway?\nIt can corrupt the data file that you'll save.") == MessageBoxResult.Yes)
-                                    save = true;
-                            }
-                            else
-                                save = true;
-
-                            if (save)
-                            {
-                                SaveResult saveRes = await SaveCodeChanges();
-
-                                if (saveRes == SaveResult.NotSaved)
-                                    _ = DoSaveDialog();
-                                else if (saveRes == SaveResult.Error)
-                                {
-                                    this.ShowError("The changes in code editor weren't saved due to some error in \"SaveCodeChanges()\".");
-                                    return;
-                                }
-                            }
-                        }
-                        else
-                            RevertProfile();
-
-                        DestroyUMTLastEdited();
-                    }
-                    else
                         return;
+                    }
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        if (scriptDialog is null || (this.ShowQuestion("Script still runs. Save anyway?\nIt can corrupt the data file that you'll save.") == MessageBoxResult.Yes))
+                            save = true;
+                    }
+                }
+
+                if (save)
+                {
+                    SaveResult saveRes = await SaveCodeChanges();
+
+                    if (saveRes == SaveResult.NotSaved)
+                    {
+                        _ = DoSaveDialog();
+                    }
+                    else if (saveRes == SaveResult.Error)
+                    {
+                        this.ShowError("The changes in code editor weren't saved due to some error in \"SaveCodeChanges()\".");
+                        return;
+                    }
                 }
                 else
                 {
                     RevertProfile();
-                    DestroyUMTLastEdited();
                 }
 
-                if (SettingsWindow.UseGMLCache && Data?.GMLCache?.Count > 0 && !Data.GMLCacheWasSaved && Data.GMLCacheIsReady)
-                    if (this.ShowQuestion("Save unedited code cache?") == MessageBoxResult.Yes)
-                        await SaveGMLCache(FilePath, save);
+                DestroyUMTLastEdited();
+
+                if (SettingsWindow.UseGMLCache && Data?.GMLCache?.Count > 0 && !Data.GMLCacheWasSaved && Data.GMLCacheIsReady && this.ShowQuestion("Save unedited code cache?") == MessageBoxResult.Yes)
+                    await SaveGMLCache(FilePath, save);
 
                 CloseOtherWindows();
 
                 IsAppClosed = true;
 
-                Closing -= DataWindow_Closing; //disable "on window closed" event handler (prevent recursion)
+                Closing -= DataWindow_Closing; // Disable "on window closed" event handler (prevent recursion)
                 _ = Task.Run(() => Dispatcher.Invoke(Close));
             }
         }
@@ -958,8 +997,6 @@ namespace UndertaleModTool
                             FileMessageEvent?.Invoke(message);
                         }, onlyGeneralInfo);
                     }
-
-                    UndertaleEmbeddedTexture.TexData.ClearSharedStream();
                 }
                 catch (Exception e)
                 {
@@ -1097,7 +1134,6 @@ namespace UndertaleModTool
                         });
                     }
 
-                    UndertaleEmbeddedTexture.TexData.ClearSharedStream();
                     QoiConverter.ClearSharedBuffer();
 
                     if (debugMode != DebugDataDialog.DebugDataMode.NoDebug)

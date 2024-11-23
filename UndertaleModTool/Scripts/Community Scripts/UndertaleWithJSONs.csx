@@ -39,7 +39,6 @@ IDecompileSettings decompilerSettings = new DecompileSettings();
 ScriptMessage("JSONifies Undertale versions 1.05+");
 ScriptMessage(@"Switch languages using F11.
 Reload text for curent language from JSON on command using F12.
-Note: reloading from JSON may take about 10 seconds.
 ");
 
 // this is one of the rare cases when it's better without "ProgressUpdater()"
@@ -118,11 +117,9 @@ ossafe_ini_close();
 
     ImportGMLString("gml_Script_scr_84_load_map_json", @"
 var filename = argument0;
-var file = file_text_open_read(filename);
-var json = """";
-while (file_text_eof(file) == 0)
-    json += file_text_readln(file);
-file_text_close(file);
+var file_buffer = buffer_load(filename);
+var json = buffer_read(file_buffer, buffer_string);
+buffer_delete(file_buffer);
 return json_decode(json);
 ");
 

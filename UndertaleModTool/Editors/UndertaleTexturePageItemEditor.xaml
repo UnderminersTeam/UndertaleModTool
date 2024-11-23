@@ -116,9 +116,9 @@
                     </DrawingBrush>
                 </Grid.Background>
 
-                <Image Grid.Row="0" Grid.Column="1" Source="{Binding TexturePage.TextureData.TextureBlob, Mode=OneWay}" Opacity="0.2"/>
+                <Image Grid.Row="0" Grid.Column="1" Name="ItemTextureBGImage" Opacity="0.2"/>
 
-                <Image Grid.Row="0" Grid.Column="1" Source="{Binding TexturePage.TextureData.TextureBlob, Mode=OneWay}">
+                <Image Grid.Row="0" Grid.Column="1" Name="ItemTextureImage">
                     <Image.Clip>
                         <RectangleGeometry>
                             <RectangleGeometry.Rect>
