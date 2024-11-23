@@ -155,14 +155,14 @@
 
                 <TextBlock Grid.Row="20" Grid.Column="0" Margin="3">Debugger port</TextBlock>
                 <local:TextBoxDark Grid.Row="20" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.DebuggerPort}"/>
-
                 <TextBlock Grid.Row="21" Grid.Column="0" Margin="3">Room order</TextBlock>
                 <Expander Grid.Row="21" Grid.Column="1" Margin="3" Header="List" Name="RoomListExpander">
                     <local:DataGridDark ItemsSource="{Binding GeneralInfo.RoomOrder}" MaxHeight="369" x:Name="RoomListGrid"
-                                        AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+                                        AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Extended" SelectionUnit="FullRow"
                                         ScrollViewer.CanContentScroll="True"
                                         VirtualizingPanel.IsVirtualizing="True"
-                                        VirtualizingPanel.VirtualizationMode="Recycling">
+                                        VirtualizingPanel.VirtualizationMode="Recycling"
+                                        KeyDown="RoomListGrid_KeyDown">
                         <DataGrid.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                             <Style TargetType="{x:Type DataGridCell}">
@@ -188,6 +188,12 @@
                                 </Style.Triggers>
                             </Style>
                         </DataGrid.Resources>
+                        <DataGrid.CommandBindings>
+                            <CommandBinding Command="New" Executed="Command_New"/>
+                        </DataGrid.CommandBindings>
+                        <DataGrid.InputBindings>
+                            <KeyBinding Modifiers="Control" Key="N" Command="New"/>
+                        </DataGrid.InputBindings>
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Width="*">
                                 <DataGridTemplateColumn.CellTemplate>
