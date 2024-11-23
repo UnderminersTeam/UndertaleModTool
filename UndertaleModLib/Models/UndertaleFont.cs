@@ -313,7 +313,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
         // since the float is always written negated, it has the first bit set.
         if ((readEmSize & (1 << 31)) != 0)
         {
-            float fsize = -BitConverter.ToSingle(BitConverter.GetBytes(EmSize), 0);
+            float fsize = -BitConverter.ToSingle(BitConverter.GetBytes(readEmSize), 0);
             EmSize = fsize;
             EmSizeIsFloat = true;
         }

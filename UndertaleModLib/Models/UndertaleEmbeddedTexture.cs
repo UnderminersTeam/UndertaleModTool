@@ -3,7 +3,6 @@ using System;
 using System.Buffers.Binary;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -56,8 +55,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         get => _textureData ??= LoadExternalTexture();
         set => _textureData = value;
     }
-    private TexData _textureData = new TexData();
-
+    private TexData _textureData = new();
 
     /// <summary>
     /// Helper variable for whether or not this texture is to be stored externally or not.
@@ -230,20 +228,9 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         }
     }
 
-    // 1x1 black pixel in PNG format
-    private static TexData _placeholderTexture = new()
-    {
-        TextureBlob = new byte[]
-        {
-            0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 
-            0x00, 0x00, 0x00, 0x01, 0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53, 0xDE, 0x00, 0x00, 0x00, 0x01, 0x73, 0x52, 0x47, 
-            0x42, 0x00, 0xAE, 0xCE, 0x1C, 0xE9, 0x00, 0x00, 0x00, 0x04, 0x67, 0x41, 0x4D, 0x41, 0x00, 0x00, 0xB1, 0x8F, 0x0B, 0xFC, 
-            0x61, 0x05, 0x00, 0x00, 0x00, 0x09, 0x70, 0x48, 0x59, 0x73, 0x00, 0x00, 0x0E, 0xC3, 0x00, 0x00, 0x0E, 0xC3, 0x01, 0xC7, 
-            0x6F, 0xA8, 0x64, 0x00, 0x00, 0x00, 0x0C, 0x49, 0x44, 0x41, 0x54, 0x18, 0x57, 0x63, 0x60, 0x60, 0x60, 0x00, 0x00, 0x00, 
-            0x04, 0x00, 0x01, 0x5C, 0xCD, 0xFF, 0x69, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82
-        }
-    };
-    private static object _textureLoadLock = new();
+    // 1x1 blank image
+    private static readonly TexData _placeholderTexture = new() { Image = new GMImage(1, 1) };
+    private static readonly object _textureLoadLock = new();
 
     /// <summary>
     /// Attempts to load the corresponding external texture. Should only happen in 2022.9 and above.
@@ -273,7 +260,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
                 using FileStream fs = new(path, FileMode.Open);
                 using FileBinaryReader fbr = new(fs);
                 texData = new TexData();
-                texData.Unserialize(fbr, true);
+                texData.Unserialize(fbr, fs.Length, true);
                 TextureLoaded = true;
             }
             catch (IOException)
@@ -311,62 +298,60 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
     /// </summary>
     public class TexData : UndertaleObject, INotifyPropertyChanged, IDisposable
     {
-        private byte[] _textureBlob;
-        private static MemoryStream sharedStream;
+        private GMImage _image;
 
         /// <summary>
-        /// The image data of the texture.
+        /// The underlying image of the texture.
         /// </summary>
-        public byte[] TextureBlob
-        {
-            get => _textureBlob;
+        public GMImage Image 
+        { 
+            get => _image;
             set
             {
-                _textureBlob = value;
+                _image = value;
                 OnPropertyChanged();
             }
         }
 
         /// <summary>
         /// The width of the texture.
-        /// In case of an invalid texture data, this will be <c>-1</c>.
         /// </summary>
-        public int Width
-        {
-            get
-            {
-                if (_textureBlob is null || _textureBlob.Length < 24)
-                    return -1;
+        /// <remarks>
+        /// In the case of an invalid or missing image, this will always be <c>-1</c>.
+        /// </remarks>
+        public int Width => _image?.Width ?? -1;
 
-                ReadOnlySpan<byte> span = _textureBlob.AsSpan();
-                return BinaryPrimitives.ReadInt32BigEndian(span[16..20]);
-            }
-        }
         /// <summary>
         /// The height of the texture.
-        /// In case of an invalid texture data, this will be <c>-1</c>.
         /// </summary>
-        public int Height
-        {
-            get
-            {
-                if (_textureBlob is null || _textureBlob.Length < 24)
-                    return -1;
-
-                ReadOnlySpan<byte> span = _textureBlob.AsSpan();
-                return BinaryPrimitives.ReadInt32BigEndian(span[20..24]);
-            }
-        }
+        /// <remarks>
+        /// In the case of an invalid or missing image, this will always be <c>-1</c>.
+        /// </remarks>
+        public int Height => _image?.Height ?? -1;
 
         /// <summary>
         /// Whether this texture uses the QOI format.
         /// </summary>
-        public bool FormatQOI { get; set; } = false;
+        /// <remarks>
+        /// In the case of an invalid or missing image, this will always be <see langword="false" />.
+        /// </remarks>
+        public bool FormatQOI => _image.Format is GMImage.ImageFormat.Qoi or GMImage.ImageFormat.Bz2Qoi;
 
         /// <summary>
         /// Whether this texture uses the BZ2 format. (Always used in combination with QOI.)
         /// </summary>
-        public bool FormatBZ2 { get; set; } = false;
+        /// <remarks>
+        /// In the case of an invalid or missing image, this will always be <see langword="false" />.
+        /// </remarks>
+        public bool FormatBZ2 => _image.Format is GMImage.ImageFormat.Bz2Qoi;
+
+        /// <summary>
+        /// If located within a data file, this is the upper bound on the end position of the image data (or start of the next texture blob).
+        /// </summary>
+        /// <remarks>
+        /// All data between the actual end position and this maximum end position should be 0x00 byte padding.
+        /// </remarks>
+        private int _maxEndOfStreamPosition { get; set; } = -1;
 
         /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
@@ -379,152 +364,56 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        /// <summary>
-        /// Header used for PNG files.
-        /// </summary>
-        public static readonly byte[] PNGHeader = { 137, 80, 78, 71, 13, 10, 26, 10 };
-
-        /// <summary>
-        /// Header used for GameMaker QOI + BZ2 files.
-        /// </summary>
-        public static readonly byte[] QOIAndBZip2Header = { 50, 122, 111, 113 };
-
-        /// <summary>
-        /// Header used for GameMaker QOI files.
-        /// </summary>
-        public static readonly byte[] QOIHeader = { 102, 105, 111, 113 };
-
-        /// <summary>
-        /// Frees up <see cref="sharedStream"/> from memory.
-        /// </summary>
-        public static void ClearSharedStream()
-        {
-            sharedStream?.Dispose();
-            sharedStream = null;
-        }
-
-        /// <summary>
-        /// Initializes <see cref="sharedStream"/> with a specified initial size.
-        /// </summary>
-        /// <param name="size">Initial size of <see cref="sharedStream"/> in bytes</param>
-        public static void InitSharedStream(int size) => sharedStream = new(size);
-
         /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
-            Serialize(writer, writer.undertaleData.IsVersionAtLeast(2022, 3), writer.undertaleData.IsVersionAtLeast(2022, 5));
+            Serialize(writer, writer.undertaleData.IsVersionAtLeast(2022, 5));
         }
 
         /// <summary>
         /// Serializes the texture to any type of writer (can be any destination file).
         /// </summary>
-        public void Serialize(FileBinaryWriter writer, bool gm2022_3, bool gm2022_5)
+        public void Serialize(FileBinaryWriter writer, bool gm2022_5)
         {
-            if (FormatQOI)
+            if (Image.Format == GMImage.ImageFormat.RawBgra)
             {
-                if (FormatBZ2)
-                {
-                    writer.Write(QOIAndBZip2Header);
-
-                    // Encode the PNG data back to QOI+BZip2
-                    using Bitmap bmp = TextureWorker.GetImageFromByteArray(TextureBlob);
-                    writer.Write((short)bmp.Width);
-                    writer.Write((short)bmp.Height);
-                    byte[] qoiData = QoiConverter.GetArrayFromImage(bmp, gm2022_3 ? 0 : 4);
-                    using MemoryStream input = new MemoryStream(qoiData);
-                    if (sharedStream.Length != 0)
-                        sharedStream.Seek(0, SeekOrigin.Begin);
-                    BZip2.Compress(input, sharedStream, false, 9);
-                    if (gm2022_5)
-                        writer.Write((uint)qoiData.Length);
-                    writer.Write(sharedStream.GetBuffer().AsSpan()[..(int)sharedStream.Position]);
-                }
-                else
-                {
-                    // Encode the PNG data back to QOI
-                    using Bitmap bmp = TextureWorker.GetImageFromByteArray(TextureBlob);
-                    writer.Write(QoiConverter.GetSpanFromImage(bmp, gm2022_3 ? 0 : 4));
-                }
+                throw new Exception("Unexpected raw RGBA image");
             }
-            else
-                writer.Write(TextureBlob);
+
+            Image.WriteToBinaryWriter(writer, gm2022_5);
         }
 
         /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
-            Unserialize(reader, reader.undertaleData.IsVersionAtLeast(2022, 5));
+            Unserialize(reader, _maxEndOfStreamPosition, reader.undertaleData.IsVersionAtLeast(2022, 5));
         }
 
         /// <summary>
         /// Unserializes the texture from any type of reader (can be from any source).
         /// </summary>
-        public void Unserialize(IBinaryReader reader, bool gm2022_5)
+        /// <param name="reader"><see cref="IBinaryReader"/> to read the texture's image from.</param>
+        /// <param name="maxEndOfStreamPosition">Upper bound on the end of the texture's image data (e.g., for padding).</param>
+        /// <param name="gm2022_5">Whether to unserialize the image data using GameMaker 2022.5+ format.</param>
+        public void Unserialize(IBinaryReader reader, long maxEndOfStreamPosition, bool gm2022_5)
         {
-            sharedStream ??= new();
-
-            long startAddress = reader.Position;
-
-            byte[] header = reader.ReadBytes(8);
-            if (!header.SequenceEqual(PNGHeader))
+            if (maxEndOfStreamPosition == -1)
             {
-                reader.Position = startAddress;
-
-                if (header.Take(4).SequenceEqual(QOIAndBZip2Header))
-                {
-                    FormatQOI = true;
-                    FormatBZ2 = true;
-
-                    // Don't really care about the width/height, so skip them, as well as header
-                    reader.Position += (uint)(gm2022_5 ? 12 : 8);
-
-                    // Need to fully decompress and convert the QOI data to PNG for compatibility purposes (at least for now)
-                    if (sharedStream.Length != 0)
-                        sharedStream.Seek(0, SeekOrigin.Begin);
-                    BZip2.Decompress(reader.Stream, sharedStream, false);
-                    ReadOnlySpan<byte> decompressed = sharedStream.GetBuffer().AsSpan()[..(int)sharedStream.Position];
-                    using Bitmap bmp = QoiConverter.GetImageFromSpan(decompressed);
-                    sharedStream.Seek(0, SeekOrigin.Begin);
-                    bmp.Save(sharedStream, ImageFormat.Png);
-                    TextureBlob = new byte[(int)sharedStream.Position];
-                    sharedStream.Seek(0, SeekOrigin.Begin);
-                    sharedStream.Read(TextureBlob, 0, TextureBlob.Length);
-                    return;
-                }
-                else if (header.Take(4).SequenceEqual(QOIHeader))
-                {
-                    FormatQOI = true;
-                    FormatBZ2 = false;
-
-                    // Need to convert the QOI data to PNG for compatibility purposes (at least for now)
-                    using Bitmap bmp = QoiConverter.GetImageFromStream(reader.Stream);
-                    if (sharedStream.Length != 0)
-                        sharedStream.Seek(0, SeekOrigin.Begin);
-                    bmp.Save(sharedStream, ImageFormat.Png);
-                    TextureBlob = new byte[(int)sharedStream.Position];
-                    sharedStream.Seek(0, SeekOrigin.Begin);
-                    sharedStream.Read(TextureBlob, 0, TextureBlob.Length);
-                    return;
-                }
-                else
-                    throw new IOException("Didn't find PNG or QOI+BZip2 header");
+                throw new Exception("Expected max end of stream position to be set before unserializing");
             }
 
-            // There is no length for the PNG anywhere as far as I can see
-            // The only thing we can do is parse the image to find the end
-            while (true)
-            {
-                // PNG is big endian and BinaryRead can't handle that (damn)
-                uint len = (uint)reader.ReadByte() << 24 | (uint)reader.ReadByte() << 16 | (uint)reader.ReadByte() << 8 | (uint)reader.ReadByte();
-                uint type = reader.ReadUInt32();
-                reader.Position += len + 4;
-                if (type == 0x444e4549) // 0x444e4549 -> "IEND"
-                    break;
-            }
+            Image = GMImage.FromBinaryReader(reader, maxEndOfStreamPosition, gm2022_5);
+        }
 
-            long length = reader.Position - startAddress;
-            reader.Position = startAddress;
-            TextureBlob = reader.ReadBytes((int)length);
+        /// <summary>
+        /// Sets the upper bound on the position of the end of the image stream, for use when loading a full data file.
+        /// </summary>
+        /// <remarks>
+        /// All data between the actual end position and this maximum end position should be padding (zero bytes).
+        /// </remarks>
+        public void SetMaxEndOfStreamPosition(int position)
+        {
+            _maxEndOfStreamPosition = position;
         }
 
 
@@ -533,8 +422,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         {
             GC.SuppressFinalize(this);
 
-            _textureBlob = null;
-            ClearSharedStream();
+            _image = null;
         }
     }
 }
