@@ -528,7 +528,7 @@ namespace UndertaleModTool
                 try
                 {
                     var data = mainWindow.Data;
-                    text = code.Disassemble(data.Variables, data.CodeLocals.For(code));
+                    text = code.Disassemble(data.Variables, data.CodeLocals?.For(code));
 
                     CurrentLocals.Clear();
                 }
@@ -841,7 +841,7 @@ namespace UndertaleModTool
             CurrentLocals.Clear();
 
             // Look up locals for given code entry's name, for syntax highlighting
-            var locals = data.CodeLocals.ByName(code.Name.Content);
+            var locals = data.CodeLocals?.ByName(code.Name.Content);
             if (locals != null)
             {
                 foreach (var local in locals.Locals)
