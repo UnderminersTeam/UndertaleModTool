@@ -19,6 +19,7 @@
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
         <!-- Suppress all missing XML comment warnings -->
         <NoWarn>1591</NoWarn>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
     </PropertyGroup>
     <ItemGroup>
       <None Remove="Resources\tabs_left_button.png" />
