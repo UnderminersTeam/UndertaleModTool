@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace UndertaleModTool
@@ -53,6 +49,8 @@ namespace UndertaleModTool
 
         public bool EnableDarkMode { get; set; } = false;
         public bool ShowDebuggerOption { get; set; } = false;
+
+        public bool CheckForUpdatesAtStartup { get; set; } = true;
 
         public static Settings Instance;
 

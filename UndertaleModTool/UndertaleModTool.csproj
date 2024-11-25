@@ -21,6 +21,9 @@
         <NoWarn>1591</NoWarn>
         <ApplicationManifest>app.manifest</ApplicationManifest>
     </PropertyGroup>
+    <PropertyGroup>
+      <DefineConstants>$(DefineConstants);BUILD_SINGLEFILE_$(PublishSingleFile)</DefineConstants>
+    </PropertyGroup>
     <ItemGroup>
       <None Remove="Resources\tabs_left_button.png" />
       <None Remove="Resources\tabs_right_button.png" />
