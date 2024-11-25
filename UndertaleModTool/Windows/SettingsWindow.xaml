@@ -65,6 +65,8 @@
             <CheckBox Grid.Row="7" Grid.Column="0" Margin="3" Content="" IsChecked="{Binding EnableDarkMode}"/>
             <TextBlock Grid.Row="7" Grid.Column="0" Margin="25 2 2 2" Text="Enable dark mode" ToolTip="Makes the program interface dark. Disabled by default."/>
 
+            <local:ButtonDark Grid.Row="7" Grid.Column="2" Grid.ColumnSpan="1" Margin="3,0,3,0" Click="GMLSettingsButton_Click" Grid.RowSpan="2" VerticalAlignment="Top">GML compiler/decompiler settings</local:ButtonDark>
+
             <Separator Grid.Row="8" Grid.ColumnSpan="4" Margin="10"/>
 
             <CheckBox Grid.Row="9" Grid.Column="0" Margin="3" VerticalAlignment="Center" Name="gridWidthCheckbox" Content="" IsChecked="{Binding GridWidthEnabled}"/>

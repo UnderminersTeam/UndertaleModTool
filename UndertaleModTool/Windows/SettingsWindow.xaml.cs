@@ -209,6 +209,18 @@ namespace UndertaleModTool
             }
         }
 
+        public static DecompilerSettings DecompilerSettings => Settings.Instance.DecompilerSettings;
+
+        public static string InstanceIdPrefix
+        {
+            get => Settings.Instance.InstanceIdPrefix;
+            set
+            {
+                Settings.Instance.InstanceIdPrefix = value;
+                Settings.Save();
+            }
+        }
+
         public bool UpdateButtonEnabled
         {
             get => UpdateAppButton.IsEnabled;
@@ -227,6 +239,7 @@ namespace UndertaleModTool
             this.DataContext = this;
             Settings.Load();
         }
+
         private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (!IsVisible || IsLoaded)
@@ -244,6 +257,14 @@ namespace UndertaleModTool
         private void UpdateAppButton_Click(object sender, RoutedEventArgs e)
         {
             ((MainWindow)Owner).UpdateApp(this);
+        }
+
+        private void GMLSettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            GMLSettingsWindow settings = new(Settings.Instance);
+            settings.Owner = this;
+            settings.ShowDialog();
+            Settings.Save();
         }
     }
 }

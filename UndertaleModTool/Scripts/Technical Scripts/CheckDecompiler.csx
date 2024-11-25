@@ -1,9 +1,10 @@
-﻿//Made by Grossley ( Grossley#2869 on Discord )
-//Changes:
-//Version 01 (November 13th, 2020): Initial release
-//Version 02 (April 21st, 2021): Updated for GMS 2.3, general refactor
-//Version 03 (April 29th, 2021): Refactored for the profile system, simplified, removed unnecessary components
-//Version 04 (October 1st, 2021): Have CheckDecompiler and CheckDecompiler 2.3 use the same (cleaner) code base and combine them.
+﻿// Made by Grossley ( Grossley#2869 on Discord )
+// Changes:
+// Version 01 (November 13th, 2020): Initial release
+// Version 02 (April 21st, 2021): Updated for GMS 2.3, general refactor
+// Version 03 (April 29th, 2021): Refactored for the profile system, simplified, removed unnecessary components
+// Version 04 (October 1st, 2021): Have CheckDecompiler and CheckDecompiler 2.3 use the same (cleaner) code base and combine them.
+// Version 05 (July 18th, 2024): Updated to Underanalyzer decompiler, and some cleanup.
 
 using System;
 using System.IO;
@@ -230,12 +231,13 @@ void ExportCode(string old_path, bool IsGML = true)
     UpdateProgress();
     if (Is_GMS_2_3)
         SetUpLookUpTable(old_path);
+    GlobalDecompileContext globalDecompileContext = new(Data);
     for (var i = 0; i < Data.Code.Count; i++)
     {
         UndertaleCode code = Data.Code[i];
         string path = Path.Combine(old_path, (Is_GMS_2_3 ? i.ToString() : code.Name.Content) + (IsGML ? ".gml" : ".asm"));
         if (Data.Code.ByName(code.Name.Content).ParentEntry == null)
-            File.WriteAllText(path, (IsGML ? GetDecompiledText(code.Name.Content) : GetDisassemblyText(code.Name.Content)));
+            File.WriteAllText(path, (IsGML ? GetDecompiledText(code.Name.Content, globalDecompileContext) : GetDisassemblyText(code.Name.Content)));
         UpdateProgressBar(null, "Exporting " + (IsGML ? "GML" : "Disassembly") + " Code", progress++, Data.Code.Count);
     }
     progress = 0;
@@ -244,17 +246,12 @@ void ExportCode(string old_path, bool IsGML = true)
 
 string GetSpecialPath(string FolderName)
 {
-    return GetFolder(FilePath) + FolderName + Path.DirectorySeparatorChar;
+    return Path.Combine(Path.GetDirectoryName(FilePath), FolderName);
 }
 
 void UpdateProgress()
 {
     UpdateProgressBar(null, "Code Entries", progress++, Data.Code.Count);
-}
-
-string GetFolder(string path)
-{
-    return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }
 
 List<string> GetCodeList(string importFolder)

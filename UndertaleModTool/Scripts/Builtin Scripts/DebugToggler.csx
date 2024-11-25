@@ -15,7 +15,7 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
 
 ScriptMessage("Toggle debug mode with F1\nby krzys-h, Kneesnap");
 
-var code = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f1, Data.Strings, Data.Code, Data.CodeLocals);
+var code = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f1, Data);
 
 // Toggle global.debug.
 code.ReplaceGML(@"
