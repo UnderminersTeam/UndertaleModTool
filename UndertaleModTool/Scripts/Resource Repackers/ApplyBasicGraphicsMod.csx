@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
+using ImageMagick;
 
 EnsureDataLoaded();
 
@@ -17,129 +17,113 @@ if (importFolder == null)
     throw new ScriptException("The import folder was not set.");
 
 string[] dirFiles = Directory.GetFiles(importFolder);
+List<(string filename, string strippedFilename, string spriteName, UndertaleSprite sprite, int frame)> images = new();
 
-//Stop the script if there's missing sprite entries or w/e.
-foreach (string file in dirFiles)
+await Task.Run(() =>
 {
-    string FileNameWithExtension = Path.GetFileName(file);
-    if (!FileNameWithExtension.EndsWith(".png"))
-        continue; // Restarts loop if file is not a valid mask asset.
-    string stripped = Path.GetFileNameWithoutExtension(file);
-    int lastUnderscore = stripped.LastIndexOf('_');
-    string spriteName = "";
-    try
+    // Stop the script if there's missing sprite entries or w/e.
+    foreach (string file in dirFiles)
     {
-        spriteName = stripped.Substring(0, lastUnderscore);
-    }
-    catch
-    {
-        throw new ScriptException("Getting the sprite name of " + FileNameWithExtension + " failed.");
-    }
-    if (Data.Sprites.ByName(spriteName) == null) // Reject non-existing sprites
-    {
-        throw new ScriptException(FileNameWithExtension + " could not be imported as the sprite " + spriteName + " does not exist.");
-    }
-    using (Image img = Image.FromFile(file))
-    {
-        if ((Data.Sprites.ByName(spriteName).Width != (uint)img.Width) || (Data.Sprites.ByName(spriteName).Height != (uint)img.Height))
+        string filenameWithExtension = Path.GetFileName(file);
+        if (!filenameWithExtension.EndsWith(".png", StringComparison.InvariantCultureIgnoreCase) || !filenameWithExtension.Contains("_"))
         {
-            // This check isn't working right
-            // throw new ScriptException(FileNameWithExtension + " is not the proper size to be imported! Please correct this before importing! The proper dimensions are width: " + Data.Sprites.ByName(spriteName).Width.ToString() + " px, height: " + Data.Sprites.ByName(spriteName).Height.ToString() + " px.");
+            // Skip all non-images
+            continue;
         }
-    }
 
-    Int32 validFrameNumber = 0;
-    try
-    {
-        validFrameNumber = Int32.Parse(stripped.Substring(lastUnderscore + 1));
+        string stripped = Path.GetFileNameWithoutExtension(file);
+        int lastUnderscore = stripped.LastIndexOf('_');
+        string spriteName;
+        try
+        {
+            spriteName = stripped.Substring(0, lastUnderscore);
+        }
+        catch
+        {
+            throw new ScriptException($"Getting the sprite name of {filenameWithExtension} failed.");
+        }
+
+        // Reject non-existing sprites
+        UndertaleSprite sprite = Data.Sprites.ByName(spriteName);
+        if (sprite is null)
+        {
+            throw new ScriptException($"{filenameWithExtension} could not be imported, as the sprite \"{spriteName}\" does not exist.");
+        }
+
+        // Parse and validate frame number
+        if (!int.TryParse(stripped.Substring(lastUnderscore + 1), out int frame))
+        {
+            throw new ScriptException($"The frame index of {filenameWithExtension} could not be determined (should be an integer).");
+        }
+        if (frame < 0)
+        {
+            throw new ScriptException($"The frame index of {filenameWithExtension} appears to be negative (should be 0 or greater).");
+        }
+        if (frame >= sprite.Textures.Count)
+        {
+            throw new ScriptException($"The frame index of {filenameWithExtension} is too large (sprite in the data only has {sprite.Textures.Count} frames).");
+        }
+
+        // Check that the previous frame exists, if not the first frame
+        if (frame > 0)
+        {
+            int prevframe = frame - 1;
+            string prevFrameName = $"{spriteName}_{prevframe}.png";
+            if (!File.Exists(Path.Combine(importFolder, prevFrameName)))
+            {
+                throw new ScriptException($"{spriteName} is missing image index {prevframe} (failed to find {prevFrameName}).");
+            }
+        }
+
+        // Add to validated image list
+        images.Add((file, stripped, spriteName, sprite, frame));
     }
-    catch
-    {
-        throw new ScriptException("The index of " + FileNameWithExtension + " could not be determined.");
-    }
-    int frame = 0;
-    try
-    {
-        frame = Int32.Parse(stripped.Substring(lastUnderscore + 1));
-    }
-    catch
-    {
-        throw new ScriptException(FileNameWithExtension + " is using letters instead of numbers. The script has stopped for your own protection.");
-    }
-    int prevframe = 0;
-    if (frame != 0)
-    {
-        prevframe = (frame - 1);
-    }
-    if (frame < 0)
-    {
-        throw new ScriptException(spriteName + " is using an invalid numbering scheme. The script has stopped for your own protection.");
-    }
-    var prevFrameName = spriteName + "_" + prevframe.ToString() + ".png";
-    string[] previousFrameFiles = Directory.GetFiles(importFolder, prevFrameName);
-    if (previousFrameFiles.Length < 1)
-        throw new ScriptException(spriteName + " is missing one or more indexes. The detected missing index is: " + prevFrameName);
-}
+});
 
 SetProgressBar(null, "Files", 0, dirFiles.Length);
 StartProgressBarUpdater();
 
-await Task.Run(() => {
-    foreach (string file in dirFiles)
+bool errored = false;
+await Task.Run(() => 
+{
+    foreach ((string filename, string strippedFilename, string spriteName, UndertaleSprite sprite, int frame) in images)
     {
         IncrementProgress();
 
-        string fileName = Path.GetFileName(file);
-        if (!fileName.EndsWith(".png") || !fileName.Contains("_"))
-            continue; // Not an image.
-
-        string stripped = Path.GetFileNameWithoutExtension(file);
-
-        int lastUnderscore = stripped.LastIndexOf('_');
-        string spriteName = stripped.Substring(0, lastUnderscore);
-        int frame = Int32.Parse(stripped.Substring(lastUnderscore + 1));
-
-        UndertaleSprite sprite = Data.Sprites.ByName(spriteName);
-
-        if (frame < sprite.Textures.Count)
+        try
         {
-            try
+            using MagickImage image = TextureWorker.ReadBGRAImageFromFile(filename);
+            UndertaleTexturePageItem item = sprite.Textures[frame].Texture;
+            if (image.Width != item.TargetWidth || image.Height != item.TargetHeight)
             {
-                Bitmap bmp;
-                using (var ms = new MemoryStream(TextureWorker.ReadTextureBlob(file)))
+                // Generic error message when the width/height mismatch
+                string error = $"Incorrect dimensions of {strippedFilename}; should be {item.TargetWidth}x{item.TargetHeight}, to fit on the texture page." +
+                               "\n\nStopping early. Some sprites may already be modified.";
+                if (image.Width == sprite.Width && image.Height == sprite.Height)
                 {
-                    bmp = new Bitmap(ms);
+                    // Sprite was likely exported with padding - give a more helpful error message
+                    error = $"{strippedFilename} appears to be exported with padding. The resulting sprite would be too large to fit in the same space on the texture page. " +
+                            "Export the sprite without padding, or use ImportGraphics.csx to import sprites of arbitrary dimensions, on new texture pages." +
+                            "\n\nStopping early. Some sprites may already be modified.";
                 }
-                bmp.SetResolution(96.0F, 96.0F);
-                var width = (uint)bmp.Width;
-                var height = (uint)bmp.Height;
-                var CheckWidth = (uint)(sprite.Textures[frame].Texture.TargetWidth);
-                var CheckHeight = (uint)(sprite.Textures[frame].Texture.TargetHeight);
-                if ((width != CheckWidth) || (height != CheckHeight))
-                {
-                    string error = "Incorrect dimensions of " + stripped + ". Sprite blurring is very likely in game. Aborting!";
-                    ScriptError(error, "Unexpected texture dimensions");
-                    SetUMTConsoleText(error);
-                    SetFinishedMessage(false);
-                    return;
-                }
-                sprite.Textures[frame].Texture.ReplaceTexture(bmp);
-            }
-            catch
-            {
-                string error = file + " encountered an unknown error during import. Contact the Underminers discord with as much information as possible, the file, and this error message. Aborting!";
-                ScriptError(error, "Sprite Error");
+                ScriptError(error, "Unexpected texture dimensions");
                 SetUMTConsoleText(error);
                 SetFinishedMessage(false);
+                errored = true;
                 return;
             }
+
+            // Actually replace texture
+            item.ReplaceTexture(image);
         }
-        else
+        catch
         {
-            string error = fileName + ": Index out of range. Index " + frame.ToString() + " exceeds maximum index (" + ((sprite.Textures.Count) - 1).ToString() + ") of " + spriteName + ". Aborting!";
+            string error = $"{filename} encountered an unknown error during import. " +
+                           "Contact the Underminers discord with as much information as possible, the file, and this error message. Aborting!";
             ScriptError(error, "Sprite Error");
             SetUMTConsoleText(error);
             SetFinishedMessage(false);
+            errored = true;
             return;
         }
     }
@@ -147,4 +131,7 @@ await Task.Run(() => {
 
 await StopProgressBarUpdater();
 HideProgressBar();
-ScriptMessage("Import Complete!");
+if (!errored)
+{
+    ScriptMessage("Import complete!");
+}
