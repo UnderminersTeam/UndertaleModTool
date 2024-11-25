@@ -27,7 +27,7 @@
             <TextBox.Style>
                 <Style TargetType="{x:Type TextBox}">
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding CanDragInto, ElementName=objectReference}" Value="True">
+                        <DataTrigger Binding="{Binding CanChange, ElementName=objectReference}" Value="True">
                             <Setter Property="ToolTip" Value="This is an object reference. Drag and drop an object of matching type from the tree on the left to change it!" />
                             <Setter Property="ToolTipService.InitialShowDelay" Value="250" />
                         </DataTrigger>

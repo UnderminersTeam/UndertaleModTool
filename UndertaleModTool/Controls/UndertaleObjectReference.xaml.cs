@@ -67,8 +67,8 @@ namespace UndertaleModTool
                 new FrameworkPropertyMetadata(true,
                     FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 					
-        public static DependencyProperty CanDragIntoProperty =
-            DependencyProperty.Register("CanDragInto", typeof(bool),
+        public static DependencyProperty CanChangeProperty =
+            DependencyProperty.Register("CanChange", typeof(bool),
                 typeof(UndertaleObjectReference),
                 new FrameworkPropertyMetadata(true,
                     FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
@@ -104,10 +104,10 @@ namespace UndertaleModTool
             set { SetValue(CanRemoveProperty, value); }
         }
 
-        public bool CanDragInto
+        public bool CanChange
         {
-            get { return (bool)GetValue(CanDragIntoProperty); }
-            set { SetValue(CanDragIntoProperty, value); }
+            get { return (bool)GetValue(CanChangeProperty); }
+            set { SetValue(CanChangeProperty, value); }
         }
 
         public EventType ObjectEventType
@@ -149,7 +149,7 @@ namespace UndertaleModTool
             if (Array.IndexOf(vowels, typeName[0]) != -1)
                 n = "n";
 
-            if (CanDragInto)
+            if (CanChange)
                 label.Content = $"(drag & drop a{n} {typeName})";
             else
                 label.Content = $"(empty {typeName} reference)";
@@ -259,7 +259,7 @@ namespace UndertaleModTool
         {
             UndertaleObject sourceItem = e.Data.GetData(e.Data.GetFormats()[0]) as UndertaleObject;
 
-            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) && sourceItem != null && CanDragInto && sourceItem.GetType() == ObjectType ? DragDropEffects.Link : DragDropEffects.None;
+            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) && sourceItem != null && CanChange && sourceItem.GetType() == ObjectType ? DragDropEffects.Link : DragDropEffects.None;
             e.Handled = true;
         }
 
@@ -267,7 +267,7 @@ namespace UndertaleModTool
         {
             UndertaleObject sourceItem = e.Data.GetData(e.Data.GetFormats()[0]) as UndertaleObject;
 
-            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) && sourceItem != null && CanDragInto && sourceItem.GetType() == ObjectType ? DragDropEffects.Link : DragDropEffects.None;
+            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) && sourceItem != null && CanChange && sourceItem.GetType() == ObjectType ? DragDropEffects.Link : DragDropEffects.None;
             if (e.Effects == DragDropEffects.Link)
             {
                 ObjectReference = sourceItem;
