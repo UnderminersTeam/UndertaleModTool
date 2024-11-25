@@ -157,7 +157,7 @@ namespace UndertaleModTool
             var label = TryFindResource("emptyReferenceLabel") as Label;
             if (label is null)
                 return;
-            
+
             string typeName = ObjectType.ToString();
             string n = "";
             if (typeName.StartsWith("UndertaleModLib.Models.Undertale"))
@@ -169,7 +169,7 @@ namespace UndertaleModTool
             // If the first letter is a vowel
             if (Array.IndexOf(vowels, typeName[0]) != -1)
                 n = "n";
-                
+
             label.Content = $"(drag & drop a{n} {typeName})";
         }
 
@@ -190,18 +190,12 @@ namespace UndertaleModTool
                 {
                     if (RoomGameObject is null)
                     {
-                        ObjectReference = CreationCode(mainWindow.Data, "gml_Room_" + Room.Name.Content + "_Create");
+                        ObjectReference = CreateCode(mainWindow.Data, "gml_Room_" + Room.Name.Content + "_Create");
                     }
                     else
                     {
-                        if (!IsPreCreate)
-                        {
-                            ObjectReference = CreationCode(mainWindow.Data, "gml_RoomCC_" + Room.Name.Content + "_" + RoomGameObject.InstanceID.ToString() + "_Create");
-                        }
-                        else
-                        {
-                            ObjectReference = CreationCode(mainWindow.Data, "gml_RoomCC_" + Room.Name.Content + "_" + RoomGameObject.InstanceID.ToString() + "_PreCreate");
-                        }
+                        string suffix = !IsPreCreate ? "_Create" : "_PreCreate";
+                        ObjectReference = CreateCode(mainWindow.Data, "gml_RoomCC_" + Room.Name.Content + "_" + RoomGameObject.InstanceID.ToString() + suffix);
                     }
                 }
                 else
@@ -216,24 +210,28 @@ namespace UndertaleModTool
         }
 
         // TODO move this to the models
-        UndertaleCode CreationCode(UndertaleData data, string name)
+        static UndertaleCode CreateCode(UndertaleData data, string name)
         {
-            var nameString = data.Strings.MakeString(name);
+            UndertaleString nameString = data.Strings.MakeString(name);
 
-            var code = new UndertaleCode()
+            UndertaleCode code = new()
             {
-                LocalsCount = 1
+                LocalsCount = 1,
+                Name = nameString
             };
-            code.Name = nameString;
 
             data.Code.Add(code);
-            
-            UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
-            argsLocal.Name = data.Strings.MakeString("arguments");
-            argsLocal.Index = 0;
 
-            UndertaleCodeLocals locals = new UndertaleCodeLocals();
-            locals.Name = nameString;
+            UndertaleCodeLocals.LocalVar argsLocal = new()
+            {
+                Name = data.Strings.MakeString("arguments"),
+                Index = 0
+            };
+
+            UndertaleCodeLocals locals = new()
+            {
+                Name = nameString
+            };
 
             locals.Locals.Add(argsLocal);
 
