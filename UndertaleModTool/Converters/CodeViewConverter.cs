@@ -14,7 +14,7 @@ namespace UndertaleModTool
             return (obj) =>
             {
                 if (obj is UndertaleCode code &&
-                    code.ParentEntry != null &&
+                    code.ParentEntry is not null &&
                     Settings.Instance.HideChildCodeEntries)
                     return false;
                 return baseFilter(obj);
