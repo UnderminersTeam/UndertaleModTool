@@ -248,7 +248,8 @@ namespace UndertaleModTool
                                 .AddReferences(typeof(UndertaleObject).GetTypeInfo().Assembly,
                                                 GetType().GetTypeInfo().Assembly,
                                                 typeof(JsonConvert).GetTypeInfo().Assembly,
-                                                typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly)
+                                                typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly,
+                                                typeof(ImageMagick.MagickImage).GetTypeInfo().Assembly)
                                 .WithEmitDebugInformation(true); //when script throws an exception, add a exception location (line number)
             });
 

@@ -21,4 +21,4 @@ draw_sprite_ext(spr_x_button, keyboard_check(ord("X")), (xx * ratio), (xy * rati
 draw_sprite_ext(spr_c_button, keyboard_check(ord("C")), (cx * ratio), (cy * ratioVertical), (button_scale * ratio), (button_scale * ratioVertical), 0, c_white, controls_opacity)
 draw_sprite_ext(spr_joybase, joystick_type, (analog_posx * ratio), (analog_posy * ratioVertical), (analog_scale * ratio), (analog_scale * ratioVertical), 0, c_white, controls_opacity)
 draw_sprite_ext(spr_joystick, joystick_type, (analog_center_x * ratio), (analog_center_y * ratioVertical), (analog_scale * ratio), (analog_scale * ratioVertical), 0, c_white, controls_opacity)
-draw_sprite_ext(spr_settings, keyboard_check(ord("\")), (settingsx * ratio), (settingsy * ratioVertical), (button_scale * ratio), (button_scale * ratioVertical), 0, c_white, controls_opacity)
+draw_sprite_ext(spr_settings, keyboard_check(92 /* ord("\") */), (settingsx * ratio), (settingsy * ratioVertical), (button_scale * ratio), (button_scale * ratioVertical), 0, c_white, controls_opacity)
