@@ -19,7 +19,7 @@ if (font is null)
 }
 using (TextureWorker textureWorker = new())
 {
-    _ = new FontEditorGUI(font, textureWorker).ShowDialog(); // font editor GUI
+    _ = new FontEditorGUI(font, textureWorker).ShowDialog(); // Font editor GUI
 }
 
 class FontEditorGUI : Form
