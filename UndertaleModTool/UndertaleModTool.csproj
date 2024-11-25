@@ -19,6 +19,7 @@
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
         <!-- Suppress all missing XML comment warnings -->
         <NoWarn>1591</NoWarn>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
     </PropertyGroup>
     <ItemGroup>
       <None Remove="Corrections\README.txt" />
@@ -62,11 +63,11 @@
         <PackageReference Include="AvalonEdit">
             <Version>6.3.0.90</Version>
         </PackageReference>
-        <PackageReference Include="Fody" Version="6.8.1">
+        <PackageReference Include="Fody" Version="6.9.1">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="log4net" Version="2.0.17" />
+        <PackageReference Include="log4net" Version="3.0.3" />
         <PackageReference Include="Microsoft-WindowsAPICodePack-Shell">
             <Version>1.1.5</Version>
         </PackageReference>
