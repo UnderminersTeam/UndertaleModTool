@@ -195,6 +195,7 @@ public partial class Program : IScriptInterface
                 typeof(JsonConvert).GetTypeInfo().Assembly,
                 typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly,
                 typeof(TextureWorker).GetTypeInfo().Assembly,
+                typeof(ImageMagick.MagickImage).GetTypeInfo().Assembly,
                 typeof(Underanalyzer.Decompiler.DecompileContext).Assembly)
             // "WithEmitDebugInformation(true)" not only lets us to see a script line number which threw an exception,
             // but also provides other useful debug info when we run UMT in "Debug".
