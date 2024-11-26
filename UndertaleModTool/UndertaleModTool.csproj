@@ -70,7 +70,7 @@
             <Version>1.1.5</Version>
         </PackageReference>
         <PackageReference Include="Microsoft.CodeAnalysis.Analyzers">
-            <Version>3.3.4</Version>
+            <Version>3.11.0</Version>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
