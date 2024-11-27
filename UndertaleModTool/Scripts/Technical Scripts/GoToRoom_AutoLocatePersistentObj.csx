@@ -21,7 +21,7 @@ if (!pers)
     return;
 }
 
-var code = obj_pers.EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f3, Data.Strings, Data.Code, Data.CodeLocals);
+var code = obj_pers.EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f3, Data);
 
 Data.Functions.EnsureDefined("get_integer", Data.Strings);
 code.ReplaceGML(@"

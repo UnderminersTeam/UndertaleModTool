@@ -1,4 +1,4 @@
-//Adapted from original script by Grossley
+// Adapted from original script by Grossley
 using System.Text;
 using System;
 using System.IO;
@@ -14,7 +14,8 @@ if (Data.IsYYC())
     return;
 }
 
-ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
+GlobalDecompileContext globalDecompileContext = new(Data);
+Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = Data.ToolInfo.DecompilerSettings;
 
 int failed = 0;
 
@@ -97,7 +98,8 @@ for (var j = 0; j < gameObjectCandidates.Count; j++)
 SetProgressBar(null, "Code Entries", 0, codeToDump.Count);
 StartProgressBarUpdater();
 
-await Task.Run(() => {
+await Task.Run(() => 
+{
     for (var j = 0; j < codeToDump.Count; j++)
     {
         DumpCode(Data.Code.ByName(codeToDump[j]));
@@ -113,7 +115,9 @@ void DumpCode(UndertaleCode code)
     {
         try
         {
-            File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
+            File.WriteAllText(path, (code != null 
+                ? new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, decompilerSettings).DecompileToString() 
+                : ""));
         }
         catch (Exception e)
         {
@@ -128,25 +132,8 @@ void DumpCode(UndertaleCode code)
     }
     else
     {
-        if (!(Directory.Exists(Path.Combine(codeFolder, "Duplicates"))))
-        {
-            Directory.CreateDirectory(Path.Combine(codeFolder, "Duplicates"));
-        }
-        try
-        {
-            path = Path.Combine(codeFolder, "Duplicates", code.Name.Content + ".gml");
-            File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value).Replace("@@This@@()", "self/*@@This@@()*/") : ""));
-        }
-        catch (Exception e)
-        {
-            if (!(Directory.Exists(Path.Combine(codeFolder, "Duplicates", "Failed"))))
-            {
-                Directory.CreateDirectory(Path.Combine(codeFolder, "Duplicates", "Failed"));
-            }
-            path = Path.Combine(codeFolder, "Duplicates", "Failed", code.Name.Content + ".gml");
-            File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
-            failed += 1;
-        }
+        File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\nFrom DumpSpecificCode script: cannot decompile sub-code entries individually.\n*/");
+        failed += 1;
     }
     IncrementProgress();
 }

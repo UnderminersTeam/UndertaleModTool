@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
+using Underanalyzer.Decompiler;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
@@ -293,7 +294,7 @@ public partial class Program : IScriptInterface
     }
 
     /// <inheritdoc/>
-    public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool isSaving = false)
+    public async Task<bool> GenerateGMLCache(GlobalDecompileContext decompileContext = null, object dialog = null, bool isSaving = false)
     {
         await Task.Delay(1); //dummy await
 
@@ -410,21 +411,23 @@ public partial class Program : IScriptInterface
     }
 
     /// <inheritdoc/>
-    public string GetDecompiledText(string codeName, GlobalDecompileContext context = null)
+    public string GetDecompiledText(string codeName, GlobalDecompileContext context = null, IDecompileSettings settings = null)
     {
-        return GetDecompiledText(Data.Code.ByName(codeName), context);
+        return GetDecompiledText(Data.Code.ByName(codeName), context, settings);
     }
 
     /// <inheritdoc/>
-    public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null)
+    public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null, IDecompileSettings settings = null)
     {
         if (code.ParentEntry is not null)
             return $"// This code entry is a reference to an anonymous function within \"{code.ParentEntry.Name.Content}\", decompile that instead.";
 
-        GlobalDecompileContext decompileContext = context is null ? new(Data, false) : context;
+        GlobalDecompileContext decompileContext = context is null ? new(Data) : context;
         try
         {
-            return code != null ? Decompiler.Decompile(code, decompileContext) : "";
+            return code != null 
+                ? new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, settings ?? Data.ToolInfo.DecompilerSettings).DecompileToString() 
+                : "";
         }
         catch (Exception e)
         {
@@ -633,17 +636,17 @@ public partial class Program : IScriptInterface
     }
 
     /// <inheritdoc/>
-    public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
+    public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null, IDecompileSettings settings = null)
     {
         UndertaleCode code = Data.Code.ByName(codeName);
         if (code is null)
             throw new ScriptException($"No code named \"{codeName}\" was found!");
 
-        ReplaceTextInGML(code, keyword, replacement, caseSensitive, isRegex, context);
+        ReplaceTextInGML(code, keyword, replacement, caseSensitive, isRegex, context, settings);
     }
 
     /// <inheritdoc/>
-    public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
+    public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null, IDecompileSettings settings = null)
     {
         if (code == null) throw new ArgumentNullException(nameof(code));
         if (code.ParentEntry is not null)
@@ -652,7 +655,7 @@ public partial class Program : IScriptInterface
         EnsureDataLoaded();
 
         string passBack = "";
-        GlobalDecompileContext decompileContext = context is null ? new(Data, false) : context;
+        GlobalDecompileContext decompileContext = context is null ? new(Data) : context;
 
         if (!Data.ToolInfo.ProfileMode)
         {
@@ -661,7 +664,7 @@ public partial class Program : IScriptInterface
                 // It would just be recompiling an empty string and messing with null entries seems bad
                 if (code is null)
                     return;
-                string originalCode = Decompiler.Decompile(code, decompileContext);
+                string originalCode = new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, settings ?? Data.ToolInfo.DecompilerSettings).DecompileToString();
                 passBack = GetPassBack(originalCode, keyword, replacement, caseSensitive, isRegex);
                 // No need to compile something unchanged
                 if (passBack == originalCode)

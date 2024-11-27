@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Underanalyzer;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Util;
@@ -13,7 +14,7 @@ namespace UndertaleModLib.Models;
 /// <summary>
 /// A bytecode instruction.
 /// </summary>
-public class UndertaleInstruction : UndertaleObject
+public class UndertaleInstruction : UndertaleObject, IGMInstruction
 {
     /// <summary>
     /// Possible opcodes an instruction can use.
@@ -354,7 +355,7 @@ public class UndertaleInstruction : UndertaleObject
             uint addr = reader.GetAddressForUndertaleObject(obj.FirstAddress);
             for (int i = 0; i < obj.Occurrences; i++)
             {
-                reference = reader.GetUndertaleObjectAtAddress<UndertaleInstruction>(addr).GetReference<T>(obj is UndertaleFunction);
+                reference = reader.GetUndertaleObjectAtAddress<UndertaleInstruction>(addr).GetReference<T>(true);
                 if (reference == null)
                     throw new IOException("Failed to find reference at " + addr);
                 reference.Target = obj;
@@ -571,6 +572,12 @@ public class UndertaleInstruction : UndertaleObject
                         {
                             // Write function reference, rather than integer
                             writer.WriteUndertaleObject((Reference<UndertaleFunction>)Value);
+                            break;
+                        }
+                        if (Value.GetType() == typeof(Reference<UndertaleVariable>))
+                        {
+                            // Write variable reference, rather than integer
+                            writer.WriteUndertaleObject((Reference<UndertaleVariable>)Value);
                             break;
                         }
                         writer.Write((int)Value);
@@ -867,6 +874,13 @@ public class UndertaleInstruction : UndertaleObject
                     {
                         reader.undertaleData.SetGMS2Version(2023, 8);
                     }
+
+                    // If this is an asset type found in GameMaker 2024.4 or above, track that as well
+                    if (!reader.undertaleData.IsVersionAtLeast(2024, 4))
+                    {
+                        if (CheckIfAssetTypeIs2024_4(reader.undertaleData, IntArgument & 0xffffff, IntArgument >> 24))
+                            reader.undertaleData.SetGMS2Version(2024, 4);
+                    }
                 }
 
                 // If this is a chknullish instruction (ID -10), then this implies GameMaker 2.3.7 or above
@@ -1054,7 +1068,6 @@ public class UndertaleInstruction : UndertaleObject
                             // Special dup instruction with extra parameters
                             sbh.Append(stringBuilder, ' ');
                             sbh.Append(stringBuilder, (byte)ComparisonKind & 0x7F);
-                            sbh.Append(stringBuilder, " ;;; this is a weird GMS2.3+ swap instruction");
                         }
                     }
                 }
@@ -1100,13 +1113,21 @@ public class UndertaleInstruction : UndertaleObject
                 {
                     // Special scenario - the swap instruction (see #129)
                     sbh.Append(stringBuilder, SwapExtra);
-                    sbh.Append(stringBuilder, " ;;; this is a weird swap instruction, see #129");
                 }
                 else
                 {
                     if (Type1 == DataType.Variable && TypeInst != InstanceType.Undefined)
                     {
-                        sbh.Append(stringBuilder, TypeInst.ToString().ToLower(CultureInfo.InvariantCulture));
+                        if (Destination.Type == VariableType.Instance)
+                        {
+                            // Syntax here is a bit ugly (but maintaining compatibility) - this is a room instance ID
+                            sbh.Append(stringBuilder, (short)TypeInst);
+                        }
+                        else
+                        {
+                            // Regular instance type
+                            sbh.Append(stringBuilder, TypeInst.ToString().ToLower(CultureInfo.InvariantCulture));
+                        }
                         sbh.Append(stringBuilder, '.');
                     }
                     sbh.Append(stringBuilder, Destination);
@@ -1121,6 +1142,19 @@ public class UndertaleInstruction : UndertaleObject
                 {
                     sbh.Append(stringBuilder, TypeInst.ToString().ToLower(CultureInfo.InvariantCulture));
                     sbh.Append(stringBuilder, '.');
+                }
+                if (Type1 == DataType.Int32)
+                {
+                    if (Value.GetType() == typeof(Reference<UndertaleFunction>))
+                    {
+                        sbh.Append(stringBuilder, "[function]");
+                    }
+                    else if (Value.GetType() == typeof(Reference<UndertaleVariable>))
+                    {
+                        sbh.Append(stringBuilder, "[variable]");
+                        sbh.Append(stringBuilder, (Value as Reference<UndertaleVariable>).Target.Name?.Content ?? "<null>");
+                        break;
+                    }
                 }
                 sbh.Append(stringBuilder, (Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString());
                 break;
@@ -1168,6 +1202,115 @@ public class UndertaleInstruction : UndertaleObject
             return 2;
         return 1;
     }
+
+    // Underanalyzer implementations
+    int IGMInstruction.Address => (int)Address * 4;
+    IGMInstruction.Opcode IGMInstruction.Kind => (IGMInstruction.Opcode)Kind;
+    IGMInstruction.ExtendedOpcode IGMInstruction.ExtKind => (IGMInstruction.ExtendedOpcode)Value;
+    IGMInstruction.ComparisonType IGMInstruction.ComparisonKind => (IGMInstruction.ComparisonType)ComparisonKind;
+    IGMInstruction.DataType IGMInstruction.Type1 => (IGMInstruction.DataType)Type1;
+    IGMInstruction.DataType IGMInstruction.Type2 => (IGMInstruction.DataType)Type2;
+    IGMInstruction.InstanceType IGMInstruction.InstType => (IGMInstruction.InstanceType)TypeInst;
+    IGMVariable IGMInstruction.Variable => Destination?.Target ?? (Value as Reference<UndertaleVariable>)?.Target;
+    IGMFunction IGMInstruction.Function => Function?.Target ?? (Value as Reference<UndertaleFunction>)?.Target;
+    IGMInstruction.VariableType IGMInstruction.ReferenceVarType => (IGMInstruction.VariableType)(Destination?.Type ?? (Value as Reference<UndertaleVariable>)?.Type);
+    double IGMInstruction.ValueDouble => (double)Value;
+    short IGMInstruction.ValueShort => (short)Value;
+    int IGMInstruction.ValueInt => (int)Value;
+    long IGMInstruction.ValueLong => (long)Value;
+    bool IGMInstruction.ValueBool => (bool)Value;
+    IGMString IGMInstruction.ValueString => ((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Value).Resource;
+    int IGMInstruction.BranchOffset => JumpOffset * 4;
+    bool IGMInstruction.PopWithContextExit => JumpOffsetPopenvExitMagic;
+    byte IGMInstruction.DuplicationSize => Extra;
+    byte IGMInstruction.DuplicationSize2 => (byte)(((byte)ComparisonKind & 0x7F) >> 3);
+    int IGMInstruction.ArgumentCount => (Kind == Opcode.Call) ? ArgumentsCount : Extra;
+    int IGMInstruction.PopSwapSize => SwapExtra;
+    int IGMInstruction.AssetReferenceId => IntArgument & 0xffffff;
+    AssetType IGMInstruction.GetAssetReferenceType(IGameContext context) => AdaptAssetType((context as GlobalDecompileContext).Data, IntArgument >> 24);
+
+    /// <summary>
+    /// Adapts asset type IDs to the <see cref="Underanalyzer.AssetType"/> enum, across versions.
+    /// </summary>
+    private static AssetType AdaptAssetType(UndertaleData data, int type)
+    {
+        if (data.IsVersionAtLeast(2024, 4))
+        {
+            return type switch
+            {
+                0 => AssetType.Object,
+                1 => AssetType.Sprite,
+                2 => AssetType.Sound,
+                3 => AssetType.Room,
+                4 => AssetType.Path,
+                5 => AssetType.Script,
+                6 => AssetType.Font,
+                7 => AssetType.Timeline,
+                8 => AssetType.Shader,
+                9 => AssetType.Sequence,
+                10 => AssetType.AnimCurve,
+                11 => AssetType.ParticleSystem,
+                13 => AssetType.Background,
+                14 => AssetType.RoomInstance,
+                _ => throw new Exception($"Unknown asset type {type}")
+            };
+        }
+
+        return type switch
+        {
+            0 => AssetType.Object,
+            1 => AssetType.Sprite,
+            2 => AssetType.Sound,
+            3 => AssetType.Room,
+            4 => AssetType.Background,
+            5 => AssetType.Path,
+            6 => AssetType.Script,
+            7 => AssetType.Font,
+            8 => AssetType.Timeline,
+            10 => AssetType.Shader,
+            11 => AssetType.Sequence,
+            12 => AssetType.AnimCurve,
+            13 => AssetType.ParticleSystem,
+            14 => AssetType.RoomInstance,
+            _ => throw new Exception($"Unknown asset type {type}")
+        };
+    }
+
+    /// <summary>
+    /// Checks whether the given pair of ID/type is guaranteed to be 2024.4+.
+    /// That is, it does not exist in the game data when using old IDs.
+    /// </summary>
+    private static bool CheckIfAssetTypeIs2024_4(UndertaleData data, int resourceId, int resourceType)
+    {
+        switch (resourceType)
+        {
+            // cases 0-3 are unnecessary
+
+            case 4:
+                return resourceId >= data.Backgrounds.Count;
+            case 5:
+                return resourceId >= data.Paths.Count;
+            case 6:
+                return resourceId >= data.Scripts.Count;
+            case 7:
+                return resourceId >= data.Fonts.Count;
+            case 8:
+                return resourceId >= data.Timelines.Count;
+            case 9:
+                return true; // used to be unused, now are sequences
+            case 10:
+                return resourceId >= data.Shaders.Count;
+            case 11:
+                return resourceId >= data.Sequences.Count;
+
+            // case 12 used to be animcurves, but now is unused (so would actually mean earlier than 2024.4)
+
+            case 13:
+                return resourceId >= data.ParticleSystems.Count;
+        }
+
+        return false;
+    }
 }
 
 public static class UndertaleInstructionUtil
@@ -1209,7 +1352,7 @@ public static class UndertaleInstructionUtil
 /// A code entry in a data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, IDisposable
+public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, IDisposable, IGMCode
 {
     /// <summary>
     /// The name of the code entry.
@@ -1233,8 +1376,6 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     /// </summary>
     public ushort ArgumentsCount { get; set; }
 
-
-    public bool WeirdLocalsFlag { get; set; }
     public uint Offset { get; set; }
 
 
@@ -1613,4 +1754,16 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
         Name = null;
         _unsupportedBuffer = null;
     }
+    
+    // Underanalyzer implementations
+    IGMString IGMCode.Name => Name;
+    int IGMCode.Length => (int)Length;
+    int IGMCode.InstructionCount => Instructions.Count;
+    int IGMCode.StartOffset => (int)Offset;
+    IGMCode IGMCode.Parent => ParentEntry;
+    int IGMCode.ChildCount => ChildEntries.Count;
+    int IGMCode.ArgumentCount => ArgumentsCount;
+    int IGMCode.LocalCount => (int)LocalsCount;
+    public IGMInstruction GetInstruction(int index) => Instructions[index];
+    public IGMCode GetChild(int index) => ChildEntries[index];
 }

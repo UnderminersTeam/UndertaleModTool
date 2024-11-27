@@ -21,8 +21,6 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
     ScriptError("Error 1: Most likely incompatible with the new Deltarune Chapter 1 & 2 demo, run at your own risk");
 }
 
-ScriptMessage("Enter the object(s) to copy");
-
 int copiedGameObjectsCount = 0;
 List<string> splitStringsList = GetSplitStringsList("game object");
 for (var j = 0; j < splitStringsList.Count; j++)
@@ -36,12 +34,14 @@ for (var j = 0; j < splitStringsList.Count; j++)
             UndertaleGameObject nativeOBJ = new UndertaleGameObject();
             nativeOBJ.Name = Data.Strings.MakeString(obj.Name.Content + "_Copy");
             Data.GameObjects.Add(nativeOBJ);
-            nativeOBJ.Sprite = Data.Sprites.ByName(donorOBJ.Sprite.Name.Content);
+            if (donorOBJ.Sprite != null)
+                nativeOBJ.Sprite = Data.Sprites.ByName(donorOBJ.Sprite.Name.Content);
             nativeOBJ.Visible = donorOBJ.Visible;
             nativeOBJ.Solid = donorOBJ.Solid;
             nativeOBJ.Depth = donorOBJ.Depth;
             nativeOBJ.Persistent = donorOBJ.Persistent;
-            nativeOBJ.ParentId = Data.GameObjects.ByName(donorOBJ.ParentId.Name.Content);
+            if (donorOBJ.ParentId != null)
+                nativeOBJ.ParentId = Data.GameObjects.ByName(donorOBJ.ParentId.Name.Content);
             if (donorOBJ.TextureMaskId != null)
                 nativeOBJ.TextureMaskId = Data.Sprites.ByName(donorOBJ.TextureMaskId.Name.Content);
             nativeOBJ.UsesPhysics = donorOBJ.UsesPhysics;
@@ -87,11 +87,14 @@ for (var j = 0; j < splitStringsList.Count; j++)
                                 nativeACT.ActionName = Data.Strings.MakeString(donorACT.ActionName.Content);
                             if (donorACT.CodeId?.Name?.Content != null)
                             {
-                                ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
+                                GlobalDecompileContext globalDecompileContext = new(Data);
                                 string codeToCopy = "";
                                 try
                                 {
-                                    codeToCopy = (donorACT.CodeId != null ? Decompiler.Decompile(donorACT.CodeId, DECOMPILE_CONTEXT.Value) : "");
+                                    codeToCopy = (donorACT.CodeId != null
+                                        ? new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, donorACT.CodeId, Data.ToolInfo.DecompilerSettings)
+                                                .DecompileToString()
+                                        : "");
                                 }
                                 catch (Exception e)
                                 {
@@ -109,7 +112,6 @@ for (var j = 0; j < splitStringsList.Count; j++)
                                 nativeACT.CodeId = Data.Code.ByName(NewGMLName);
                                 nativeACT.CodeId.LocalsCount = donorACT.CodeId.LocalsCount;
                                 nativeACT.CodeId.ArgumentsCount = donorACT.CodeId.ArgumentsCount;
-                                nativeACT.CodeId.WeirdLocalsFlag = donorACT.CodeId.WeirdLocalsFlag;
                                 nativeACT.CodeId.Offset = donorACT.CodeId.Offset;
                                 nativeACT.CodeId.WeirdLocalFlag = donorACT.CodeId.WeirdLocalFlag;
                                 if (Data?.GeneralInfo.BytecodeVersion > 14)
