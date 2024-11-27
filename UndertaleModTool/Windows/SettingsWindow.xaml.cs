@@ -120,6 +120,18 @@ namespace UndertaleModTool
                 Settings.Save();
             }
         }
+        public static bool HideChildCodeEntries
+        {
+            get => Settings.Instance.HideChildCodeEntries;
+            set
+            {
+                Settings.Instance.HideChildCodeEntries = value;
+                Settings.Save();
+
+                // Refresh the tree to make the changes take effect.
+                mainWindow.UpdateTree();
+            }
+        }
 
         public static double GlobalGridWidth
         {
