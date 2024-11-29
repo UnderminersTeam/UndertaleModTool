@@ -347,8 +347,13 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
     {
         public byte[] Data { get; set; }
 
-        // Not in the data file
+        /// <summary>
+        /// Width of this sprite mask. UTMT only.
+        /// </summary>
         public uint Width { get; set; }
+        /// <summary>
+        /// Height of this sprite mask. UTMT only.
+        /// </summary>
         public uint Height { get; set; }
 
         public MaskEntry()
