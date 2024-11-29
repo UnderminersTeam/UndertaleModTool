@@ -279,9 +279,8 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
 
     public MaskEntry NewMaskEntry()
     {
-        MaskEntry newEntry = new MaskEntry();
         uint len = (Width + 7) / 8 * Height;
-        newEntry.Data = new byte[len];
+        MaskEntry newEntry = new MaskEntry(new byte[len], Width, Height);
         return newEntry;
     }
 
@@ -348,13 +347,24 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
     {
         public byte[] Data { get; set; }
 
+        /// <summary>
+        /// Width of this sprite mask. UTMT only.
+        /// </summary>
+        public uint Width { get; set; }
+        /// <summary>
+        /// Height of this sprite mask. UTMT only.
+        /// </summary>
+        public uint Height { get; set; }
+
         public MaskEntry()
         {
         }
 
-        public MaskEntry(byte[] data)
+        public MaskEntry(byte[] data, uint width, uint height)
         {
             this.Data = data;
+            this.Width = width;
+            this.Height = height;
         }
 
         /// <inheritdoc/>
@@ -853,7 +863,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
         uint total = 0;
         for (uint i = 0; i < maskCount; i++)
         {
-            newMasks.Add(new MaskEntry(reader.ReadBytes((int)len)));
+            newMasks.Add(new MaskEntry(reader.ReadBytes((int)len), width, height));
             total += len;
         }
 
