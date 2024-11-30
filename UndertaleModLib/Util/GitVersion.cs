@@ -6,19 +6,24 @@ namespace UndertaleModLib.Util;
 
 /// <summary>
 /// Includes miscellaneous git information about the project to compile.
-/// <b>Only intended for Debug use!</b>
 /// </summary>
 public static class GitVersion
 {
+    public record GitVersionData(string Commit, string Branch, DateTimeOffset Time);
+
     /// <summary>
     /// Gets and returns the git commit and branch name.
     /// </summary>
     /// <returns>The git commit and branch name.</returns>
     public static string GetGitVersion()
     {
-        string gitOutput;
+        GitVersionData data = GetGitVersionData();
+        return data is null ? "unknownGitCommit" : $"{data.Commit} ({data.Branch})";
+    }
 
-        // try to access the embedded resource
+    public static GitVersionData GetGitVersionData()
+    {
+        // Try to access the embedded resource
         try
         {
             var assembly = Assembly.GetExecutingAssembly();
@@ -28,21 +33,19 @@ public static class GitVersion
             using (StreamReader reader = new StreamReader(stream))
             {
                 // \r is getting nuked just in case Windows is weird.
-                gitOutput = reader.ReadToEnd().Trim().Replace("\r", "");
-            }
+                string[] data = reader.ReadToEnd().Trim().Replace("\r", "").Split('\n');
 
-            // gets formatted as "<commit> (<branch>)"
-            var outputAsArray = gitOutput.Split('\n');
-            gitOutput = $"{outputAsArray[0]} ({outputAsArray[1]})";
+                return new GitVersionData(
+                    Commit: data[0],
+                    Branch: data[1],
+                    Time: DateTimeOffset.Parse(data[2])
+                );
+            }
         }
         // If accessing it fails, give it a default output
         catch
         {
-            gitOutput = "unknownGitCommit";
+            return null;
         }
-
-        // return combined commit + branch
-        if (String.IsNullOrWhiteSpace(gitOutput)) gitOutput = "unknownGitCommit";
-        return gitOutput;
     }
 }
