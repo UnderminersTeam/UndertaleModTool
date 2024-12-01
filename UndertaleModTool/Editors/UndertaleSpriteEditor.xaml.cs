@@ -155,6 +155,8 @@ namespace UndertaleModTool
                 {
                     (uint maskWidth, uint maskHeight) = sprite.CalculateMaskDimensions(mainWindow.Data);
                     target.Data = TextureWorker.ReadMaskData(dlg.FileName, (int)maskWidth, (int)maskHeight);
+                    target.Width = maskWidth;
+                    target.Height = maskHeight;
                 }
                 catch (Exception ex)
                 {
