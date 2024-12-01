@@ -1376,9 +1376,18 @@ namespace UndertaleModLib.Compiler
                             cw.typeStack.Push(DataType.Variable);
                             cw.Emit(Opcode.Dup, DataType.Variable).Extra = 0;
                             if (isStructDef)
+                            {
                                 cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-16;
+                            }
+                            else if (cw.compileContext.OriginalCode?.Name?.Content == ("gml_GlobalScript_" + funcDefName.Text))
+                            {
+                                // -1 when the function is named the same as the script name
+                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-1;
+                            }
                             else
-                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-1; // todo: -6 sometimes?
+                            {
+                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-6; 
+                            }
                         }
                         break;
                     case Parser.Statement.StatementKind.ExprBinaryOp:
