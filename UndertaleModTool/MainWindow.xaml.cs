@@ -3099,7 +3099,7 @@ namespace UndertaleModTool
             {
                 _ = Task.Run(async () =>
                 {
-                    using (HttpClient httpClient = new() { Timeout = TimeSpan.FromHours(1) })
+                    using (HttpClient httpClient = new() { Timeout = TimeSpan.FromMinutes(5) })
                     {
                         // Read HTTP response
                         using (HttpResponseMessage response = await httpClient.GetAsync(new Uri(downloadUrl), HttpCompletionOption.ResponseHeadersRead))
@@ -3152,9 +3152,9 @@ namespace UndertaleModTool
                     try
                     {
                         // Unzip double-zipped update
-                        ZipFile.ExtractToDirectory(Path.Combine(tempFolder, "Update.zip.zip"), tempFolder, true);
+                        ZipFile.ExtractToDirectory(downloadOutput, tempFolder, true);
                         File.Move(Path.Combine(tempFolder, $"{patchName}.zip"), Path.Combine(tempFolder, "Update.zip"), true);
-                        File.Delete(Path.Combine(tempFolder, "Update.zip.zip"));
+                        File.Delete(downloadOutput);
 
                         string updaterFolder = Path.Combine(ExePath, "Updater");
                         if (!File.Exists(Path.Combine(updaterFolder, "UndertaleModToolUpdater.exe")))
@@ -3213,31 +3213,8 @@ namespace UndertaleModTool
             catch (Exception e)
             {
                 string errMsg;
-
                 if (e.InnerException?.InnerException is Exception ex)
-                {
-                    if (ex.Message.StartsWith("Unable to read data")
-                        && e.InnerException.Message.StartsWith("The SSL connection could not be established"))
-                    {
-                        errMsg = "Failed to download new version of UndertaleModTool.\n" +
-                                 "Error - The SSL connection could not be established.";
-
-                        bool isWin7 = Environment.OSVersion.Version.Major == 6;
-                        string win7upd = "\nProbably, you need to install Windows update KB2992611.\n" +
-                                         "Open the update download page?";
-
-                        if (isWin7)
-                        {
-                            if (this.ShowQuestion(errMsg + win7upd, MessageBoxImage.Error) == MessageBoxResult.Yes)
-                                OpenBrowser("https://www.microsoft.com/en-us/download/details.aspx?id=44622");
-
-                            window.UpdateButtonEnabled = true;
-                            return;
-                        }
-                    }
-                    else
-                        errMsg = ex.Message;
-                }
+                    errMsg = ex.Message;
                 else if (e.InnerException is Exception ex1)
                     errMsg = ex1.Message;
                 else
