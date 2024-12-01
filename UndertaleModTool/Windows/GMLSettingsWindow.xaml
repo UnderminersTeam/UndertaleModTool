@@ -151,6 +151,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <CheckBox Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="3" Content="Try/catch/finally rewriting"
                               ToolTip="If enabled, compiler-generated code and logic for try/catch/finally statements is rewritten to (attempt to) look like the original code." 
@@ -164,6 +165,9 @@
                     <CheckBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Margin="3" Content="Builtin array variable syntax" 
                               ToolTip="If enabled, certain builtin globals (such as &quot;view_xview&quot;), when detected to be used without an array accessor, will be printed as such, rather than using compiler-generated syntax." 
                               IsChecked="{Binding DecompilerSettings.CleanupBuiltinArrayVariables}"/>
+                    <CheckBox Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Margin="3" Content="Scope local variable declarations" 
+                              ToolTip="If enabled, local variable declarations will be placed according to their scopes, which are detected based on usage in the code." 
+                              IsChecked="{Binding DecompilerSettings.CleanupLocalVarDeclarations}"/>
                 </Grid>
             </Grid>
         </StackPanel>
