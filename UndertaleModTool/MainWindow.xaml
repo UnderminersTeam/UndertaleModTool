@@ -23,6 +23,7 @@
     <Window.Resources>
         <local:ImplementsInterfaceConverter x:Key="ImplementsInterfaceConverter"/>
         <local:FilteredViewConverter x:Key="FilteredViewConverter" Filter="{Binding Text, Source={x:Reference SearchBox}, UpdateSourceTrigger=PropertyChanged}"/>
+        <local:CodeViewConverter x:Key="CodeViewConverter" Filter="{Binding Text, Source={x:Reference SearchBox}, UpdateSourceTrigger=PropertyChanged}"/>
         <local:NullToVisibilityConverter x:Key="VisibleIfNotNull"  nullValue="Collapsed" notNullValue="Visible"/>
         <local:CompareNumbersConverter x:Key="CompareNumbersConverter"/>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/> <!-- (built-in converter) -->
@@ -388,7 +389,7 @@
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Name="CodeItemsList" Header="Code" ItemsSource="{Binding Code, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Code, Converter={StaticResource VisibleIfNotNull}}">
+                        <TreeViewItem Name="CodeItemsList" Header="Code" ItemsSource="{Binding Code, Converter={StaticResource CodeViewConverter}}" Visibility="{Binding Code, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemContainerStyle>
                                 <Style TargetType="{x:Type TreeViewItem}">
                                     <Setter Property="ContextMenu" Value="{StaticResource UndertaleResourceMenu}"/>
