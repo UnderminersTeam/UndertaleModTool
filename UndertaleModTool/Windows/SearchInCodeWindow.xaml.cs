@@ -60,6 +60,7 @@ namespace UndertaleModTool.Windows
         {
             Activate();
             SearchTextBox.Focus();
+            SearchTextBox.SelectAll();
         }
 
         private async void SearchButton_Click(object sender, RoutedEventArgs e)
@@ -276,6 +277,15 @@ namespace UndertaleModTool.Windows
                 .Cast<Result>()
                 .Select(result => $"{result.Code}\t{result.LineNumber}\t{result.LineText}"));
             Clipboard.SetText(str);
+        }
+
+        private async void SearchTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter && !Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+            {
+                e.Handled = true;
+                await Search();
+            }
         }
 
         private void ListViewItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
