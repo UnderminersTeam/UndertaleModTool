@@ -40,6 +40,13 @@ namespace UndertaleModTool
 
         private void UpdateImages(UndertaleTexturePageItem item)
         {
+            if (item.TexturePage?.TextureData?.Image is null)
+            {
+                ItemTextureBGImage.Source = null;
+                ItemTextureImage.Source = null;
+                return;
+            }
+
             GMImage image = item.TexturePage.TextureData.Image;
             BitmapSource bitmap = mainWindow.GetBitmapSourceForImage(image);
             ItemTextureBGImage.Source = bitmap;
@@ -68,41 +75,53 @@ namespace UndertaleModTool
             {
                 _textureDataContext.PropertyChanged -= ReloadTextureImage;
             }
-            _textureDataContext = item.TexturePage.TextureData;
-            _textureDataContext.PropertyChanged += ReloadTextureImage;
+
+            if (item.TexturePage?.TextureData is not null)
+            {
+                _textureDataContext = item.TexturePage.TextureData;
+                _textureDataContext.PropertyChanged += ReloadTextureImage;
+            }
         }
 
         private void ReloadTexturePage(object sender, PropertyChangedEventArgs e)
         {
-            UndertaleTexturePageItem item = (DataContext as UndertaleTexturePageItem);
-            if (item is null)
-                return;
-
-            if (e.PropertyName != nameof(UndertaleTexturePageItem.TexturePage))
-                return;
-
-            UpdateImages(item);
-
-            // Start listening for (new) texture image updates
-            if (_textureDataContext is not null)
+            // Invoke dispatcher to only perform updates on UI thread
+            Dispatcher.Invoke(() =>
             {
-                _textureDataContext.PropertyChanged -= ReloadTextureImage;
-            }
-            _textureDataContext = item.TexturePage.TextureData;
-            _textureDataContext.PropertyChanged += ReloadTextureImage;
+                UndertaleTexturePageItem item = (DataContext as UndertaleTexturePageItem);
+                if (item is null)
+                    return;
+
+                if (e.PropertyName != nameof(UndertaleTexturePageItem.TexturePage))
+                    return;
+
+                UpdateImages(item);
+
+                // Start listening for (new) texture image updates
+                if (_textureDataContext is not null)
+                {
+                    _textureDataContext.PropertyChanged -= ReloadTextureImage;
+                }
+                _textureDataContext = item.TexturePage.TextureData;
+                _textureDataContext.PropertyChanged += ReloadTextureImage;
+            });
         }
 
         private void ReloadTextureImage(object sender, PropertyChangedEventArgs e)
         {
-            UndertaleTexturePageItem item = (DataContext as UndertaleTexturePageItem);
-            if (item is null)
-                return;
+            // Invoke dispatcher to only perform updates on UI thread
+            Dispatcher.Invoke(() =>
+            {
+                UndertaleTexturePageItem item = (DataContext as UndertaleTexturePageItem);
+                if (item is null)
+                    return;
 
-            if (e.PropertyName != nameof(UndertaleEmbeddedTexture.TexData.Image))
-                return;
+                if (e.PropertyName != nameof(UndertaleEmbeddedTexture.TexData.Image))
+                    return;
 
-            // If the texture's image was updated, reload it
-            UpdateImages(item);
+                // If the texture's image was updated, reload it
+                UpdateImages(item);
+            });
         }
 
         private void UnloadTexture(object sender, RoutedEventArgs e)
