@@ -3130,11 +3130,7 @@ namespace UndertaleModTool
                                 if (bytesToProgressCounter >= bytesToUpdateProgress)
                                 {
                                     bytesToProgressCounter -= bytesToUpdateProgress;
-                                    try
-                                    {
-                                        UpdateProgressStatus($"Downloaded MB: {(totalBytesDownloaded / bytesToMB).ToString("F2", CultureInfo.InvariantCulture)}");
-                                    }
-                                    catch { }
+                                    UpdateProgressStatus($"Downloaded MB: {(totalBytesDownloaded / bytesToMB).ToString("F2", CultureInfo.InvariantCulture)}");
                                 }
 
                                 // Read next bytes
