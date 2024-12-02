@@ -24,7 +24,7 @@ string dataPath = Path.Combine(Path.GetDirectoryName(ScriptPath), "TouchControls
 Dictionary<string, UndertaleEmbeddedTexture> textures = new Dictionary<string, UndertaleEmbeddedTexture>();
 
 UndertaleEmbeddedTexture controlsTexturePage = new UndertaleEmbeddedTexture();
-controlsTexturePage.TextureData.TextureBlob = File.ReadAllBytes(Path.Combine(dataPath, "controls.png"));
+controlsTexturePage.TextureData.Image = GMImage.FromPng(File.ReadAllBytes(Path.Combine(dataPath, "controls.png"))); // TODO: generate other formats
 Data.EmbeddedTextures.Add(controlsTexturePage);
 textures.Add(Path.GetFileName(Path.Combine(dataPath, "controls.png")), controlsTexturePage);
 
@@ -38,7 +38,21 @@ UndertaleTexturePageItem AddNewTexturePageItem(ushort sourceX, ushort sourceY, u
     ushort boundingHeight = sourceHeight;
     var texturePage = textures["controls.png"];
 
-    UndertaleTexturePageItem tpItem = new UndertaleTexturePageItem { SourceX = sourceX, SourceY = sourceY, SourceWidth = sourceWidth, SourceHeight = sourceHeight, TargetX = targetX, TargetY = targetY, TargetWidth = targetWidth, TargetHeight = targetHeight, BoundingWidth = boundingWidth, BoundingHeight = boundingHeight, TexturePage = texturePage };
+    UndertaleTexturePageItem tpItem = new() 
+    { 
+        SourceX = sourceX, 
+        SourceY = sourceY, 
+        SourceWidth = sourceWidth, 
+        SourceHeight = sourceHeight, 
+        TargetX = targetX, 
+        TargetY = targetY, 
+        TargetWidth = targetWidth, 
+        TargetHeight = targetHeight, 
+        BoundingWidth = boundingWidth, 
+        BoundingHeight = boundingHeight, 
+        TexturePage = texturePage,
+        Name = new UndertaleString($"PageItem {Data.TexturePageItems.Count}")
+    };
     Data.TexturePageItems.Add(tpItem);
     return tpItem;
 }
@@ -73,9 +87,10 @@ void AddNewUndertaleSprite(string spriteName, ushort width, ushort height, Under
     int marginBottom = height - 1;
 
     var sItem = new UndertaleSprite { Name = name, Width = width, Height = height, MarginLeft = marginLeft, MarginRight = marginRight, MarginTop = marginTop, MarginBottom = marginBottom };
-    foreach (var spriteTexture in spriteTextures) {
+    foreach (var spriteTexture in spriteTextures) 
+    {
         sItem.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = spriteTexture });
-    };
+    }
     Data.Sprites.Add(sItem);
 }
 
