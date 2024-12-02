@@ -47,7 +47,7 @@ namespace UndertaleModTool
 
             try
             {
-                return code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : "";
+                return code != null ? code.Disassemble(Data.Variables, Data.CodeLocals?.For(code)) : "";
             }
             catch (Exception e)
             {
