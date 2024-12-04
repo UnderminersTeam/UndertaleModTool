@@ -516,13 +516,14 @@ namespace UndertaleModTool
                                 resBMP.RotateFlip(RotateFlipType.Rotate90FlipNone);
                                 break;
                             case 5:
-                                resBMP.RotateFlip(RotateFlipType.Rotate270FlipY);
-                                break;
-                            case 6:
+                                // axes flipped since flip/mirror is done before rotation
                                 resBMP.RotateFlip(RotateFlipType.Rotate90FlipY);
                                 break;
+                            case 6:
+                                resBMP.RotateFlip(RotateFlipType.Rotate90FlipX);
+                                break;
                             case 7:
-                                resBMP.RotateFlip(RotateFlipType.Rotate270FlipNone);
+                                resBMP.RotateFlip(RotateFlipType.Rotate90FlipXY);
                                 break;
 
                             default:
