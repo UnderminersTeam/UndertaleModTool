@@ -6,7 +6,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UndertaleModTool"
         mc:Ignorable="d"
-        Title="{Binding MessageTitle}" Height="150" Width="400" WindowStartupLocation="CenterOwner" ResizeMode="CanMinimize">
+        Title="{Binding MessageTitle}" Height="150" Width="400" WindowStartupLocation="CenterOwner" ResizeMode="CanMinimize"
+        Style="{DynamicResource DefaultWindowStyle}">
     <Window.TaskbarItemInfo>
         <TaskbarItemInfo ProgressState="Indeterminate"/>
     </Window.TaskbarItemInfo>

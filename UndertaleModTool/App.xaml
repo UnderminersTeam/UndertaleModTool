@@ -4,10 +4,19 @@
              xmlns:local="clr-namespace:UndertaleModTool"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <local:ContextMenuDark x:Key="textBoxContextMenu">
-            <MenuItem Command="ApplicationCommands.Cut" />
-            <MenuItem Command="ApplicationCommands.Copy" />
-            <MenuItem Command="ApplicationCommands.Paste" />
-        </local:ContextMenuDark>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/ColourDictionaries/LightTheme.xaml" />
+                <ResourceDictionary Source="Themes/ControlColours.xaml" />
+                <ResourceDictionary Source="Themes/Controls.xaml" />
+                <ResourceDictionary>
+                    <ContextMenu x:Key="textBoxContextMenu">
+                        <MenuItem Command="ApplicationCommands.Cut" />
+                        <MenuItem Command="ApplicationCommands.Copy" />
+                        <MenuItem Command="ApplicationCommands.Paste" />
+                    </ContextMenu>
+                </ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:UndertaleModTool"
         mc:Ignorable="d"
         Title="The types of references" Height="555" Width="450" IsVisibleChanged="Window_IsVisibleChanged"
-        WindowStartupLocation="CenterOwner">
+        WindowStartupLocation="CenterOwner"
+        Style="{DynamicResource DefaultWindowStyle}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

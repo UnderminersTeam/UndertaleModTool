@@ -6,7 +6,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UndertaleModTool"
         mc:Ignorable="d"
-        Title="ClickableTextOutput" Height="540" Width="536" MinHeight="160" MinWidth="210">
+        Title="ClickableTextOutput" Height="540" Width="536" MinHeight="160" MinWidth="210"
+        Style="{DynamicResource DefaultWindowStyle}">
     <Window.Resources>
         <local:ContextMenuDark x:Key="linkContextMenu" Placement="MousePoint">
             <local:MenuItemDark Header="Open in new tab" Click="OpenInNewTabItem_Click"/>

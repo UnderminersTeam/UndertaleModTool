@@ -347,11 +347,9 @@ namespace UndertaleModTool
                 return;
 
             Settings.Load();
-            if (Settings.Instance.EnableDarkMode)
-            {
-                SetDarkMode(true, true);
-                SetDarkTitleBarForWindow(this, true, false);
-            }
+
+            SetDarkMode(Settings.Instance.EnableDarkMode, true);
+            SetDarkTitleBarForWindow(this, Settings.Instance.EnableDarkMode, false);
         }
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -567,37 +565,13 @@ namespace UndertaleModTool
 
         public static void SetDarkMode(bool enable, bool isStartup = false)
         {
-            var resources = Application.Current.Resources;
-
-            var mainWindow = Application.Current.MainWindow as MainWindow;
-            mainWindow.TabController.SetDarkMode(enable);
-            
             if (enable)
             {
-                foreach (var pair in appDarkStyle)
-                    resources[pair.Key] = pair.Value;
-
-                Windows.TextInput.BGColor = System.Drawing.Color.FromArgb(darkColor.R,
-                                                                          darkColor.G,
-                                                                          darkColor.B);
-                Windows.TextInput.TextBoxBGColor = System.Drawing.Color.FromArgb(darkLightColor.R,
-                                                                                 darkLightColor.G,
-                                                                                 darkLightColor.B);
-                Windows.TextInput.TextColor = System.Drawing.Color.FromArgb(whiteColor.R,
-                                                                            whiteColor.G,
-                                                                            whiteColor.B);
+                Theme.WPF.Themes.ThemesController.SetTheme(Theme.WPF.Themes.ThemeType.DeepDark);
             }
             else
             {
-                foreach (ResourceKey key in appDarkStyle.Keys)
-                    resources.Remove(key);
-
-                resources[SystemColors.GrayTextBrushKey] = grayTextBrush;
-                resources[SystemColors.InactiveSelectionHighlightBrushKey] = inactiveSelectionBrush;
-
-                Windows.TextInput.BGColor = System.Drawing.SystemColors.Window;
-                Windows.TextInput.TextBoxBGColor = System.Drawing.SystemColors.ControlLight;
-                Windows.TextInput.TextColor = System.Drawing.SystemColors.ControlText;
+                Theme.WPF.Themes.ThemesController.SetTheme(Theme.WPF.Themes.ThemeType.LightTheme);
             }
 
             if (!isStartup)

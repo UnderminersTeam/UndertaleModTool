@@ -7,7 +7,8 @@
         xmlns:local="clr-namespace:UndertaleModTool.Windows"
         mc:Ignorable="d"
         Title="The references of game object &quot;&quot;" Height="600" Width="450" IsVisibleChanged="Window_IsVisibleChanged"
-        WindowStartupLocation="CenterOwner">
+        WindowStartupLocation="CenterOwner"
+        Style="{DynamicResource DefaultWindowStyle}">
     <Window.Resources>
         <local:ChildInstanceNameConverter x:Key="ChildInstanceNameConverter"/>
         <utmt:StringTitleConverter x:Key="StringTitleConverter"/>
