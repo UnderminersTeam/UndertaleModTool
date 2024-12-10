@@ -126,7 +126,7 @@
                           Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2022.6}"/>
 
         <TextBlock Grid.Row="8" Grid.Column="0" Margin="3" Visibility="{Binding DataContext.IsExtProductIDEligible, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">Product ID</TextBlock>
-        <TextBox Background="#FF333333" Foreground="#FFFFFFFF" Grid.Row="8" Grid.Column="1" Margin="3" Visibility="{Binding DataContext.IsExtProductIDEligible, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Text="{Binding ProductIdData, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UndertaleExtensionEditor}}, Mode = TwoWay, Converter={StaticResource byteArrayConverter}}"/>
+        <TextBox Grid.Row="8" Grid.Column="1" Margin="3" Visibility="{Binding DataContext.IsExtProductIDEligible, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Text="{Binding ProductIdData, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UndertaleExtensionEditor}}, Mode = TwoWay, Converter={StaticResource byteArrayConverter}}"/>
 
         <StackPanel Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2">
             <TextBlock Foreground="Red" FontStyle="Italic">

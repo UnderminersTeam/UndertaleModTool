@@ -22,7 +22,7 @@
                            Text="{Binding ObjectReference.Content, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=Explicit}"
                            PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" LostFocus="TextBox_LostFocus" PreviewMouseDown="Details_MouseDown">
             <TextBox.Style>
-                <Style TargetType="{x:Type TextBox}">
+                <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
                     <Style.Resources>
                         <VisualBrush x:Key="EmptyBrush" AlignmentX="Left" AlignmentY="Top" Stretch="None">
                             <VisualBrush.Visual>
@@ -53,7 +53,7 @@
         </TextBox>
         <Button Grid.Column="1" Click="Details_Click" MouseDown="Details_MouseDown" Content=" ... " ToolTip="Open referenced object">
             <Button.Style>
-                <Style TargetType="{x:Type Button}">
+                <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding ObjectReference, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Value="{x:Null}">
                             <Setter Property="IsEnabled" Value="False"/>

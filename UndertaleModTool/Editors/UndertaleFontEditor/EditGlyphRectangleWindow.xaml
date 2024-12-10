@@ -53,7 +53,7 @@
                             </Style>
                         </ItemsControl.ItemContainerStyle>
                         <ItemsControl.Resources>
-                            <Style TargetType="TextBlock">
+                            <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
                                 <!-- Hide "{NewItemPlaceholder}" -->
                                 <Setter Property="Visibility" Value="Collapsed"/>
                             </Style>

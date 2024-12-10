@@ -66,7 +66,7 @@
                                     VirtualizingPanel.VirtualizationMode="Recycling">
                   <DataGrid.Resources>
                     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
-                    <Style TargetType="{x:Type DataGridCell}">
+                    <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
                       <Setter Property="Template">
                         <Setter.Value>
                           <ControlTemplate TargetType="{x:Type DataGridCell}">
@@ -111,7 +111,7 @@
                                     VirtualizingPanel.VirtualizationMode="Recycling">
                   <DataGrid.Resources>
                     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
-                    <Style TargetType="{x:Type DataGridCell}">
+                    <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
                       <Setter Property="Template">
                         <Setter.Value>
                           <ControlTemplate TargetType="{x:Type DataGridCell}">
@@ -156,7 +156,7 @@
                                     VirtualizingPanel.VirtualizationMode="Recycling">
                   <DataGrid.Resources>
                     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
-                    <Style TargetType="{x:Type DataGridCell}">
+                    <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
                       <Setter Property="Template">
                         <Setter.Value>
                           <ControlTemplate TargetType="{x:Type DataGridCell}">
@@ -201,7 +201,7 @@
                                     VirtualizingPanel.VirtualizationMode="Recycling">
                   <DataGrid.Resources>
                     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
-                    <Style TargetType="{x:Type DataGridCell}">
+                    <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
                       <Setter Property="Template">
                         <Setter.Value>
                           <ControlTemplate TargetType="{x:Type DataGridCell}">
@@ -246,7 +246,7 @@
                                     VirtualizingPanel.VirtualizationMode="Recycling">
                   <DataGrid.Resources>
                     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
-                    <Style TargetType="{x:Type DataGridCell}">
+                    <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
                       <Setter Property="Template">
                         <Setter.Value>
                           <ControlTemplate TargetType="{x:Type DataGridCell}">

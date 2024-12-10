@@ -39,7 +39,7 @@
                           Margin="10,15,20,0" FontSize="14">
             <!-- Source - https://stackoverflow.com/a/7433840/12136394 -->
             <TextBox.Style>
-                <Style TargetType="TextBox">
+                <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
                     <Style.Resources>
                         <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
                             <VisualBrush.Visual>
@@ -75,7 +75,7 @@
                     <MenuItem Header="Copy name to clipboard" Click="MenuItem_CopyName_Click"/>
                     <MenuItem Header="Find all references" Click="MenuItem_FindAllReferences_Click"/>
                 </ContextMenu>
-                <Style TargetType="TreeViewItem">
+                <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding Items.Count, RelativeSource={RelativeSource Self}}" Value="0">
                             <!-- If the data context is not a string -->
@@ -92,7 +92,7 @@
         <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,20">
             <Button Content="Export results" FontSize="18" Width="144" Height="40" Click="ExportButton_Click" Margin="0,0,10,0">
                 <Button.Style>
-                    <Style TargetType="Button">
+                    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding Items.Count, ElementName=ResultsTree, Mode=OneWay}" Value="0">
                                 <Setter Property="IsEnabled" Value="False"/>

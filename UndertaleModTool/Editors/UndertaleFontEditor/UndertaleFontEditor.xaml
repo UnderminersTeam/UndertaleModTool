@@ -11,7 +11,7 @@
         <Grid.Resources>
             <local:CharConverter x:Key="CharConverter"/>
             <local:IsVersionAtLeastConverter x:Key="IsVersionAtLeastConverter"/>
-            <Style x:Key="glyphsOperationButtonStyle" TargetType="Button">
+            <Style x:Key="glyphsOperationButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding Glyphs.Count, Mode=OneWay, FallbackValue=0}" Value="0">
                         <Setter Property="IsEnabled" Value="False"/>
@@ -207,7 +207,7 @@
         <StackPanel Grid.Row="16" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Margin="3" Width="220" Click="EditRectangleButton_Click">
                 <Button.Style>
-                    <Style TargetType="Button">
+                    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding SelectedItem, ElementName=GlyphsGrid, Mode=OneWay}"
                                          Value="{x:Null}">
@@ -219,7 +219,7 @@
                 <Button.Content>
                     <TextBlock>
                         <TextBlock.Style>
-                            <Style TargetType="TextBlock">
+                            <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
                                 <Setter Property="Text" Value="Edit a selected glyph rectangle"/>
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding SelectedItem.SourceWidth, ElementName=GlyphsGrid, Mode=OneWay, FallbackValue=-1}"
@@ -249,7 +249,7 @@
                                 VirtualizingPanel.VirtualizationMode="Recycling">
                 <DataGrid.Resources>
                     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
-                    <Style TargetType="{x:Type DataGridCell}">
+                    <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="{x:Type DataGridCell}">
@@ -271,7 +271,7 @@
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                    <Style x:Key="kerningButtonStyle" TargetType="Button">
+                    <Style x:Key="kerningButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                         <Setter Property="Content" Value="Edit"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding Kerning.Count, Mode=OneWay, FallbackValue=0}"
@@ -289,7 +289,7 @@
                                                    Margin="20,0,0,0" MaxLength="1"
                                                    ToolTip="{Binding Character, Mode=OneWay}" ToolTipService.InitialShowDelay="250">
                                     <TextBox.Style>
-                                        <Style TargetType="TextBox">
+                                        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding Character, Mode=OneWay}" Value="0">
                                                     <Setter Property="ToolTipService.IsEnabled" Value="False"/>
@@ -391,7 +391,7 @@
                                         VirtualizingPanel.VirtualizationMode="Recycling">
                         <DataGrid.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
-                            <Style TargetType="{x:Type DataGridCell}">
+                            <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="{x:Type DataGridCell}">
@@ -421,7 +421,7 @@
                                         <TextBox Text="{Binding Character, Mode=TwoWay, UpdateSourceTrigger=LostFocus, Converter={StaticResource CharConverter}}"
                                                            MaxLength="1" ToolTip="{Binding Character, Mode=OneWay}" ToolTipService.InitialShowDelay="250">
                                             <TextBox.Style>
-                                                <Style TargetType="TextBox">
+                                                <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding Character, Mode=OneWay}" Value="0">
                                                             <Setter Property="ToolTipService.IsEnabled" Value="False"/>

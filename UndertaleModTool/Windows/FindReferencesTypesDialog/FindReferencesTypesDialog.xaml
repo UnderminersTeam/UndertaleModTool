@@ -25,7 +25,7 @@
                     <DynamicResource ResourceKey="{x:Static SystemColors.ControlLightBrushKey}"/>
                 </ItemsControl.Background>
                 <ItemsControl.Resources>
-                    <Style TargetType="CheckBox">
+                    <Style TargetType="{x:Type CheckBox}" BasedOn="{StaticResource {x:Type CheckBox}}">
                         <Setter Property="FontSize" Value="16"/>
                         <Setter Property="VerticalContentAlignment" Value="Center"/>
                         <Setter Property="Margin" Value="5,2"/>
