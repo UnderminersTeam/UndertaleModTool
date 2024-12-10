@@ -66,9 +66,6 @@
                   MouseDoubleClick="ResultsTree_MouseDoubleClick" KeyUp="ResultsTree_KeyUp" PreviewMouseRightButtonDown="ResultsTree_PreviewMouseRightButtonDown"
                   VirtualizingStackPanel.IsVirtualizing="True"
                   VirtualizingStackPanel.VirtualizationMode="Recycling">
-            <TreeView.Background>
-                <DynamicResource ResourceKey="{x:Static SystemColors.ControlLightBrushKey}"/>
-            </TreeView.Background>
             <TreeView.Resources>
                 <ContextMenu x:Key="UndertaleResourceMenu" Opened="MenuItem_ContextMenuOpened">
                     <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>

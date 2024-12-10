@@ -23,9 +23,6 @@
                Margin="0,-3,0,0" Grid.RowSpan="2"/>
         <RichTextBox x:Name="OutTextBox" Margin="10,25,10,0" FontSize="14" IsDocumentEnabled="True" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
                      Grid.RowSpan="2" PreviewMouseDown="OutTextBox_PreviewMouseDown">
-            <RichTextBox.Background>
-                <DynamicResource ResourceKey="{x:Static SystemColors.ControlLightBrushKey}"/>
-            </RichTextBox.Background>
             <RichTextBox.Resources>
                 <Style TargetType="Paragraph">
                     <Setter Property="Margin" Value="0"/>

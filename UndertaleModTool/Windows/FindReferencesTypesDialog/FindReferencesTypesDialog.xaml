@@ -21,9 +21,6 @@
 
         <ScrollViewer Grid.Row="2" Margin="10,15,20,0" VerticalScrollBarVisibility="Auto">
             <ItemsControl Name="TypesList">
-                <ItemsControl.Background>
-                    <DynamicResource ResourceKey="{x:Static SystemColors.ControlLightBrushKey}"/>
-                </ItemsControl.Background>
                 <ItemsControl.Resources>
                     <Style TargetType="{x:Type CheckBox}" BasedOn="{StaticResource {x:Type CheckBox}}">
                         <Setter Property="FontSize" Value="16"/>
