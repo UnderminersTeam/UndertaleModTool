@@ -37,17 +37,17 @@
         <local:UndertaleStringReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding ExtName}"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">ID</TextBlock>
-        <local:TextBoxDark Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding ID}"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding ID}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Kind</TextBlock>
-        <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Kind}"/>
+        <TextBox Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Kind}"/>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Return Type</TextBlock>
-        <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource VarType}}" SelectedItem="{Binding RetType}"
+        <ComboBox ItemsSource="{Binding Source={StaticResource VarType}}" SelectedItem="{Binding RetType}"
                             Grid.Row="4" Grid.Column="1" Margin="3"/>
 
         <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Argument Types</TextBlock>
-        <local:DataGridDark Grid.Row="5" Grid.Column="1" Margin="3" ItemsSource="{Binding Arguments}" x:Name="ArgumentTypesList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True">
+        <DataGrid Grid.Row="5" Grid.Column="1" Margin="3" ItemsSource="{Binding Arguments}" x:Name="ArgumentTypesList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                 <Style TargetType="{x:Type DataGridCell}">
@@ -77,12 +77,12 @@
                 <DataGridTemplateColumn Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <local:ComboBoxDark Margin="20,0,0,0" ItemsSource="{Binding Source={StaticResource VarType}}" SelectedItem="{Binding Path=Type}"/>
+                            <ComboBox Margin="20,0,0,0" ItemsSource="{Binding Source={StaticResource VarType}}" SelectedItem="{Binding Path=Type}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
-        </local:DataGridDark>
+        </DataGrid>
 
         <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2">
             <TextBlock Foreground="Red" FontStyle="Italic">

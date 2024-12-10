@@ -35,10 +35,10 @@
         </ScrollViewer>
         
         <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="10,7,0,0">
-            <local:ButtonDark Content="Select all" Click="SelectAllButton_Click" Height="26" Width="63"/>
-            <local:ButtonDark Content="Deselect all" Margin="5,0,0,0" Click="DeselectAllButton_Click" Height="26" Width="71"/>
+            <Button Content="Select all" Click="SelectAllButton_Click" Height="26" Width="63"/>
+            <Button Content="Deselect all" Margin="5,0,0,0" Click="DeselectAllButton_Click" Height="26" Width="71"/>
         </StackPanel>
 
-        <local:ButtonDark Grid.Row="4" Content="Search" FontSize="18" Width="134" Height="40" Click="SearchButton_Click" Margin="0,15,0,15"/>
+        <Button Grid.Row="4" Content="Search" FontSize="18" Width="134" Height="40" Click="SearchButton_Click" Margin="0,15,0,15"/>
     </Grid>
 </Window>

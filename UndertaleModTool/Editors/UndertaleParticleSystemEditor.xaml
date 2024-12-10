@@ -28,16 +28,16 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding OriginX}"/>
-            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding OriginY}"/>
+            <TextBox Grid.Column="0" Margin="3" Text="{Binding OriginX}"/>
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding OriginY}"/>
         </Grid>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Draw order</TextBlock>
-        <local:TextBoxDark Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding DrawOrder}"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding DrawOrder}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Emitters</TextBlock>
         <Expander Grid.Row="3" Grid.Column="1" Margin="3" Header="List" Name="EmitterListExpander" IsExpanded="True">
-            <local:DataGridDark ItemsSource="{Binding Emitters}" x:Name="EmitterListGrid"
+            <DataGrid ItemsSource="{Binding Emitters}" x:Name="EmitterListGrid"
                                 AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
                                 ScrollViewer.CanContentScroll="True"
                                 VirtualizingPanel.IsVirtualizing="True"
@@ -76,7 +76,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
-            </local:DataGridDark>
+            </DataGrid>
         </Expander>
     </Grid>
 </local:DataUserControl>

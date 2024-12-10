@@ -9,10 +9,10 @@
              d:DesignHeight="20" d:DesignWidth="300"
              Name="objectReference">
     <UserControl.Resources>
-        <local:ContextMenuDark x:Key="contextMenu" Opened="MenuItem_ContextMenuOpened">
+        <ContextMenu x:Key="contextMenu" Opened="MenuItem_ContextMenuOpened">
             <MenuItem Header="Open in new tab" Click="OpenInNewTabItem_Click"/>
             <MenuItem Header="Find all references" Click="FindAllReferencesItem_Click"/>
-        </local:ContextMenuDark>
+        </ContextMenu>
         <Label x:Key="emptyReferenceLabel" Foreground="Gray" FontStyle="Italic" />
     </UserControl.Resources>
     <Grid>
@@ -21,7 +21,7 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <local:TextBoxDark Grid.Column="0" x:Name="ObjectText" IsReadOnly="True" Cursor="Arrow" AllowDrop="True"
+        <TextBox Grid.Column="0" x:Name="ObjectText" IsReadOnly="True" Cursor="Arrow" AllowDrop="True"
                            PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" PreviewMouseDoubleClick="TextBox_MouseDoubleClick" PreviewMouseDown="Details_MouseDown"
                            Text="{Binding ObjectReference, ElementName=objectReference}">
             <TextBox.Style>
@@ -43,8 +43,8 @@
                     </Style.Triggers>
                 </Style>
             </TextBox.Style>
-        </local:TextBoxDark>
-        <local:ButtonDark Grid.Column="1" x:Name="DetailsButton" Click="Details_Click" MouseDown="Details_MouseDown">
+        </TextBox>
+        <Button Grid.Column="1" x:Name="DetailsButton" Click="Details_Click" MouseDown="Details_MouseDown">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Setter Property="Content" Value=" ... " />
@@ -66,8 +66,8 @@
                     </Style.Triggers>
                 </Style>
             </Button.Style>
-        </local:ButtonDark>
-        <local:ButtonDark Grid.Column="2" x:Name="RemoveButton" Click="Remove_Click" Content=" X " ToolTip="Remove reference">
+        </Button>
+        <Button Grid.Column="2" x:Name="RemoveButton" Click="Remove_Click" Content=" X " ToolTip="Remove reference">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Style.Triggers>
@@ -84,6 +84,6 @@
                     </Style.Triggers>
                 </Style>
             </Button.Style>
-        </local:ButtonDark>
+        </Button>
     </Grid>
 </UserControl>

@@ -59,10 +59,10 @@
                           PreviewMouseLeftButtonDown="DebuggerCheckBox_PreviewMouseLeftButtonDown"/>
 
                 <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Bytecode version</TextBlock>
-                <local:TextBoxDark Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.BytecodeVersion}"/>
+                <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.BytecodeVersion}"/>
 
                 <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Unknown</TextBlock>
-                <local:TextBoxDark Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.Unknown}"/>
+                <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.Unknown}"/>
 
                 <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">FileName</TextBlock>
                 <local:UndertaleStringReference Grid.Row="3" Grid.Column="1" Margin="3" ObjectReference="{Binding GeneralInfo.FileName}"/>
@@ -71,16 +71,16 @@
                 <local:UndertaleStringReference Grid.Row="4" Grid.Column="1" Margin="3" ObjectReference="{Binding GeneralInfo.Config}"/>
 
                 <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Last object ID</TextBlock>
-                <local:TextBoxDark Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.LastObj}"/>
+                <TextBox Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.LastObj}"/>
 
                 <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Last tile ID</TextBlock>
-                <local:TextBoxDark Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.LastTile}"/>
+                <TextBox Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.LastTile}"/>
 
                 <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Game ID</TextBlock>
-                <local:TextBoxDark Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.GameID}"/>
+                <TextBox Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.GameID}"/>
 
                 <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">DirectPlay GUID</TextBlock>
-                <local:TextBoxDark Grid.Row="8" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.DirectPlayGuid}"/>
+                <TextBox Grid.Row="8" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.DirectPlayGuid}"/>
 
                 <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Name</TextBlock>
                 <local:UndertaleStringReference Grid.Row="9" Grid.Column="1" Margin="3" ObjectReference="{Binding GeneralInfo.Name}"/>
@@ -96,13 +96,13 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding GeneralInfo.Major}"/>
+                    <TextBox Grid.Column="0" Margin="3" Text="{Binding GeneralInfo.Major}"/>
                     <TextBlock Grid.Column="1" Margin="0,3" Text="."/>
-                    <local:TextBoxDark Grid.Column="2" Margin="3" Text="{Binding GeneralInfo.Minor}"/>
+                    <TextBox Grid.Column="2" Margin="3" Text="{Binding GeneralInfo.Minor}"/>
                     <TextBlock Grid.Column="3" Margin="0,3" Text="."/>
-                    <local:TextBoxDark Grid.Column="4" Margin="3" Text="{Binding GeneralInfo.Release}"/>
+                    <TextBox Grid.Column="4" Margin="3" Text="{Binding GeneralInfo.Release}"/>
                     <TextBlock Grid.Column="5" Margin="0,3" Text="."/>
-                    <local:TextBoxDark Grid.Column="6" Margin="3" Text="{Binding GeneralInfo.Build}"/>
+                    <TextBox Grid.Column="6" Margin="3" Text="{Binding GeneralInfo.Build}"/>
                 </Grid>
 
                 <TextBlock Grid.Row="11" Grid.Column="0" Margin="3">Default window size</TextBlock>
@@ -112,22 +112,22 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding GeneralInfo.DefaultWindowWidth}"/>
+                    <TextBox Grid.Column="0" Margin="3" Text="{Binding GeneralInfo.DefaultWindowWidth}"/>
                     <TextBlock Grid.Column="1" Margin="0,3" Text="x"/>
-                    <local:TextBoxDark Grid.Column="2" Margin="3" Text="{Binding GeneralInfo.DefaultWindowHeight}"/>
+                    <TextBox Grid.Column="2" Margin="3" Text="{Binding GeneralInfo.DefaultWindowHeight}"/>
                 </Grid>
 
                 <TextBlock Grid.Row="12" Grid.Column="0" Margin="3">Flags</TextBlock>
-                <local:TextBoxDark Grid.Row="12" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.Info}"/>
+                <TextBox Grid.Row="12" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.Info}"/>
 
                 <TextBlock Grid.Row="13" Grid.Column="0" Margin="3">License MD5</TextBlock>
-                <local:TextBoxDark Grid.Row="13" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.LicenseMD5, Mode=TwoWay, Converter={StaticResource byteArrayConverter}}"/>
+                <TextBox Grid.Row="13" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.LicenseMD5, Mode=TwoWay, Converter={StaticResource byteArrayConverter}}"/>
 
                 <TextBlock Grid.Row="14" Grid.Column="0" Margin="3">License CRC32</TextBlock>
-                <local:TextBoxDark Grid.Row="14" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.LicenseCRC32, StringFormat={}{0:X8}}"/>
+                <TextBox Grid.Row="14" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.LicenseCRC32, StringFormat={}{0:X8}}"/>
 
                 <TextBlock Grid.Row="15" Grid.Column="0" Margin="3">Timestamp</TextBlock>
-                <local:TextBoxDark Grid.Row="15" Grid.Column="1" Margin="3" IsReadOnly="True"
+                <TextBox Grid.Row="15" Grid.Column="1" Margin="3" IsReadOnly="True"
                          Text="{Binding GeneralInfo.Timestamp, Mode=OneWay, Converter={StaticResource TimestampDateTimeConverter}}"
                          ToolTip="{Binding GeneralInfo.Timestamp, Mode=OneWay, Converter={StaticResource TimestampDateTimeConverter}, ConverterParameter=GMT}"
                          ToolTipService.InitialShowDelay="250">
@@ -139,26 +139,26 @@
                             </VisualBrush.Visual>
                         </VisualBrush>
                     </TextBox.Background>
-                </local:TextBoxDark>
+                </TextBox>
 
                 <TextBlock Grid.Row="16" Grid.Column="0" Margin="3">Display name</TextBlock>
                 <local:UndertaleStringReference Grid.Row="16" Grid.Column="1" Margin="3" ObjectReference="{Binding GeneralInfo.DisplayName}"/>
 
                 <TextBlock Grid.Row="17" Grid.Column="0" Margin="3">Active targets</TextBlock>
-                <local:TextBoxDark Grid.Row="17" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.ActiveTargets}"/>
+                <TextBox Grid.Row="17" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.ActiveTargets}"/>
 
                 <TextBlock Grid.Row="18" Grid.Column="0" Margin="3">Function classifications</TextBlock>
-                <local:TextBoxDark Grid.Row="18" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.FunctionClassifications}"/>
+                <TextBox Grid.Row="18" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.FunctionClassifications}"/>
 
                 <TextBlock Grid.Row="19" Grid.Column="0" Margin="3">Steam AppID</TextBlock>
-                <local:TextBoxDark Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.SteamAppID}"/>
+                <TextBox Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.SteamAppID}"/>
 
                 <TextBlock Grid.Row="20" Grid.Column="0" Margin="3">Debugger port</TextBlock>
-                <local:TextBoxDark Grid.Row="20" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.DebuggerPort}"/>
+                <TextBox Grid.Row="20" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.DebuggerPort}"/>
 
                 <TextBlock Grid.Row="21" Grid.Column="0" Margin="3">Room order</TextBlock>
                 <Expander Grid.Row="21" Grid.Column="1" Margin="3" Header="List" Name="RoomListExpander">
-                    <local:DataGridDark ItemsSource="{Binding GeneralInfo.RoomOrder}" MaxHeight="369" x:Name="RoomListGrid"
+                    <DataGrid ItemsSource="{Binding GeneralInfo.RoomOrder}" MaxHeight="369" x:Name="RoomListGrid"
                                         AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
                                         ScrollViewer.CanContentScroll="True"
                                         VirtualizingPanel.IsVirtualizing="True"
@@ -197,10 +197,10 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                         </DataGrid.Columns>
-                    </local:DataGridDark>
+                    </DataGrid>
                 </Expander>
 
-                <local:ButtonDark Grid.Row="22" Grid.Column="1" Margin="3" Content="Sync with room list" Click="SyncRoomList_Click"/>
+                <Button Grid.Row="22" Grid.Column="1" Margin="3" Content="Sync with room list" Click="SyncRoomList_Click"/>
 
                 <Grid Grid.Row="23" Grid.ColumnSpan="2" Margin="0" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
                     <Grid.ColumnDefinitions>
@@ -215,13 +215,13 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">FPS</TextBlock>
-                    <local:TextBoxDark Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.GMS2FPS}"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.GMS2FPS}"/>
 
                     <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Allow statistics</TextBlock>
                     <CheckBox Grid.Row="2" Grid.Column="1" Margin="3" IsChecked="{Binding GeneralInfo.GMS2AllowStatistics}"/>
 
                     <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Game GUID</TextBlock>
-                    <local:TextBoxDark Grid.Row="13" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.GMS2GameGUID, Mode=TwoWay, Converter={StaticResource byteGUIDArrayConverter}}"/>
+                    <TextBox Grid.Row="13" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.GMS2GameGUID, Mode=TwoWay, Converter={StaticResource byteGUIDArrayConverter}}"/>
                 </Grid>
             </Grid>
         </StackPanel>
@@ -257,33 +257,33 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding Options.Unknown1}"/>
-                    <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding Options.Unknown2}"/>
+                    <TextBox Grid.Column="0" Margin="3" Text="{Binding Options.Unknown1}"/>
+                    <TextBox Grid.Column="1" Margin="3" Text="{Binding Options.Unknown2}"/>
                 </Grid>
 
                 <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Flags</TextBlock>
-                <local:TextBoxDark Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding Options.Info}"/>
+                <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding Options.Info}"/>
 
                 <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Scale</TextBlock>
-                <local:TextBoxDark Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding Options.Scale}"/>
+                <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding Options.Scale}"/>
 
                 <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Window color</TextBlock>
                 <local:ColorPicker Grid.Row="3" Grid.Column="1" Margin="3" Color="{Binding Options.WindowColor}"/>
 
                 <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Color depth</TextBlock>
-                <local:TextBoxDark Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding Options.ColorDepth}"/>
+                <TextBox Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding Options.ColorDepth}"/>
 
                 <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Resolution</TextBlock>
-                <local:TextBoxDark Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding Options.Resolution}"/>
+                <TextBox Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding Options.Resolution}"/>
 
                 <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Frequency</TextBlock>
-                <local:TextBoxDark Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding Options.Frequency}"/>
+                <TextBox Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding Options.Frequency}"/>
 
                 <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Vertex sync</TextBlock>
-                <local:TextBoxDark Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding Options.VertexSync}"/>
+                <TextBox Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding Options.VertexSync}"/>
 
                 <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Priority</TextBlock>
-                <local:TextBoxDark Grid.Row="8" Grid.Column="1" Margin="3" Text="{Binding Options.Priority}"/>
+                <TextBox Grid.Row="8" Grid.Column="1" Margin="3" Text="{Binding Options.Priority}"/>
 
                 <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Back image</TextBlock>
                 <local:UndertaleObjectReference Grid.Row="9" Grid.Column="1" Margin="3" ObjectReference="{Binding Options.BackImage.Texture, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertaleModels:UndertaleTexturePageItem}"/>
@@ -295,10 +295,10 @@
                 <local:UndertaleObjectReference Grid.Row="11" Grid.Column="1" Margin="3" ObjectReference="{Binding Options.LoadImage.Texture, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertaleModels:UndertaleTexturePageItem}"/>
 
                 <TextBlock Grid.Row="12" Grid.Column="0" Margin="3">Load alpha</TextBlock>
-                <local:TextBoxDark Grid.Row="12" Grid.Column="1" Margin="3" Text="{Binding Options.LoadAlpha}"/>
+                <TextBox Grid.Row="12" Grid.Column="1" Margin="3" Text="{Binding Options.LoadAlpha}"/>
 
                 <TextBlock Grid.Row="13" Grid.Column="0" Margin="3">Constants</TextBlock>
-                <local:DataGridDark Grid.Row="13" Grid.Column="1" Margin="3" ItemsSource="{Binding Options.Constants}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
+                <DataGrid Grid.Row="13" Grid.Column="1" Margin="3" ItemsSource="{Binding Options.Constants}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
                     <DataGrid.Resources>
                         <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                         <Style TargetType="{x:Type DataGridCell}">
@@ -340,7 +340,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
-                </local:DataGridDark>
+                </DataGrid>
             </Grid>
         </StackPanel>
 
@@ -361,13 +361,13 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Unknown</TextBlock>
-                <local:TextBoxDark Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding Language.Unknown1}"/>
+                <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding Language.Unknown1}"/>
 
                 <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Language count</TextBlock>
-                <local:TextBoxDark Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding Language.LanguageCount}"/>
+                <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding Language.LanguageCount}"/>
 
                 <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Entry count</TextBlock>
-                <local:TextBoxDark Grid.Row="2" Grid.Column="2" Margin="3" Text="{Binding Language.EntryCount}"/>
+                <TextBox Grid.Row="2" Grid.Column="2" Margin="3" Text="{Binding Language.EntryCount}"/>
 
                 <Border Grid.Row="3" Grid.Column="1" Margin="20" Background="LightPink" BorderBrush="Red" BorderThickness="3">
                     <TextBlock TextWrapping="Wrap" Margin="3" Foreground="Red">Note: the languages currently don't seem used, and so the editor for them has not yet been made.</TextBlock>

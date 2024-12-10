@@ -18,9 +18,9 @@
         <HierarchicalDataTemplate x:Key="StringTemplate">
             <TextBlock Text="{Binding Content, Mode=OneWay, Converter={StaticResource StringTitleConverter}}" />
         </HierarchicalDataTemplate>
-        <utmt:ContextMenuDark x:Key="StandaloneTabMenu">
+        <ContextMenu x:Key="StandaloneTabMenu">
             <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>
-        </utmt:ContextMenuDark>
+        </ContextMenu>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -35,7 +35,7 @@
                    FontSize="22" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="70"/>
         <Rectangle Grid.Row="1" Margin="10,0,20,0" Height="2" Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
 
-        <utmt:TextBoxDark Grid.Row="2" x:Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged"
+        <TextBox Grid.Row="2" x:Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged"
                           Margin="10,15,20,0" FontSize="14">
             <!-- Source - https://stackoverflow.com/a/7433840/12136394 -->
             <TextBox.Style>
@@ -60,7 +60,7 @@
                     </Style.Triggers>
                 </Style>
             </TextBox.Style>
-        </utmt:TextBoxDark>
+        </TextBox>
         <TreeView Grid.Row="3" Name="ResultsTree" Margin="10,5,20,0" FontSize="14"
                   SelectedItemChanged="ResultsTree_SelectedItemChanged" MouseDown="ResultsTree_MouseDown"
                   MouseDoubleClick="ResultsTree_MouseDoubleClick" KeyUp="ResultsTree_KeyUp" PreviewMouseRightButtonDown="ResultsTree_PreviewMouseRightButtonDown"
@@ -70,11 +70,11 @@
                 <DynamicResource ResourceKey="{x:Static SystemColors.ControlLightBrushKey}"/>
             </TreeView.Background>
             <TreeView.Resources>
-                <utmt:ContextMenuDark x:Key="UndertaleResourceMenu" Opened="MenuItem_ContextMenuOpened">
+                <ContextMenu x:Key="UndertaleResourceMenu" Opened="MenuItem_ContextMenuOpened">
                     <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>
                     <MenuItem Header="Copy name to clipboard" Click="MenuItem_CopyName_Click"/>
                     <MenuItem Header="Find all references" Click="MenuItem_FindAllReferences_Click"/>
-                </utmt:ContextMenuDark>
+                </ContextMenu>
                 <Style TargetType="TreeViewItem">
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding Items.Count, RelativeSource={RelativeSource Self}}" Value="0">
@@ -90,7 +90,7 @@
                    Margin="10,0,20,0" FontStyle="Italic" Foreground="Gray"/>
 
         <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,20">
-            <utmt:ButtonDark Content="Export results" FontSize="18" Width="144" Height="40" Click="ExportButton_Click" Margin="0,0,10,0">
+            <Button Content="Export results" FontSize="18" Width="144" Height="40" Click="ExportButton_Click" Margin="0,0,10,0">
                 <Button.Style>
                     <Style TargetType="Button">
                         <Style.Triggers>
@@ -100,8 +100,8 @@
                         </Style.Triggers>
                     </Style>
                 </Button.Style>
-            </utmt:ButtonDark>
-            <utmt:ButtonDark Content="Done" FontSize="18" Width="134" Height="40" Click="DoneButton_Click"/>
+            </Button>
+            <Button Content="Done" FontSize="18" Width="134" Height="40" Click="DoneButton_Click"/>
         </StackPanel>
     </Grid>
 </Window>

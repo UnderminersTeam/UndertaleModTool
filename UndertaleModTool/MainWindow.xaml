@@ -71,7 +71,7 @@
             <Menu DockPanel.Dock="Top"
                   Foreground="{DynamicResource {x:Static SystemColors.MenuTextBrushKey}}"
                   Background="{DynamicResource {x:Static SystemColors.MenuBrushKey}}">
-                <local:MenuItemDark Header="_File">
+                <MenuItem Header="_File">
                     <MenuItem Header="_New" Command="New" InputGestureText="Ctrl+N"/>
                     <MenuItem Header="_Open" Command="Open" InputGestureText="Ctrl+O"/>
                     <MenuItem Header="_Save" Command="Save" InputGestureText="Ctrl+S">
@@ -109,11 +109,11 @@
                     <Separator/>
                     <MenuItem Header="S_ettings" Command="Properties"/>
                     <MenuItem Header="_Close" Command="Close" InputGestureText="Ctrl+Q"/>
-                </local:MenuItemDark>
-                <local:MenuItemDark x:Name="RootScriptItem" Header="_Scripts" SubmenuOpened="RootMenuItem_SubmenuOpened">
+                </MenuItem>
+                <MenuItem x:Name="RootScriptItem" Header="_Scripts" SubmenuOpened="RootMenuItem_SubmenuOpened">
                     <MenuItem Header="(...loading...)" IsEnabled="False"/>
-                </local:MenuItemDark>
-                <local:MenuItemDark Header="_Find">
+                </MenuItem>
+                <MenuItem Header="_Find">
                     <MenuItem.Resources>
                         <Style TargetType="MenuItem">
                             <Style.Triggers>
@@ -133,14 +133,14 @@
                               Click="MenuItem_RunBuiltinScript_Item_Click" CommandParameter="Scripts\Builtin Scripts\SearchASM.csx"/>
                     <MenuItem Header="Search in _specific code (&quot;SearchLimited.csx&quot;)"
                               Click="MenuItem_RunBuiltinScript_Item_Click" CommandParameter="Scripts\Builtin Scripts\SearchLimited.csx"/>
-                </local:MenuItemDark>
-                <local:MenuItemDark Header="_Help">
+                </MenuItem>
+                <MenuItem Header="_Help">
                     <MenuItem Header="_GitHub" Click="MenuItem_GitHub_Click"/>
                     <MenuItem Header="_About" Click="MenuItem_About_Click"/>
-                </local:MenuItemDark>
+                </MenuItem>
             </Menu>
             <Grid DockPanel.Dock="Bottom">
-                <local:TextBoxDark x:Name="CommandBox" AcceptsReturn="True" PreviewKeyDown="CommandBox_PreviewKeyDown" Margin="0,0,35,0"/>
+                <TextBox x:Name="CommandBox" AcceptsReturn="True" PreviewKeyDown="CommandBox_PreviewKeyDown" Margin="0,0,35,0"/>
                 <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" VerticalContentAlignment="Top" Name="ObjectLabel"
                        ToolTip="This is an ID (index) of the currently open asset, item, or object. It starts from 0."
                        ToolTipService.InitialShowDelay="200"/>
@@ -161,7 +161,7 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Margin="0,0,0,5" Orientation="Horizontal">
-                        <local:ButtonDark ToolTip="Back" Margin="0,0,2,0" x:Name="BackButton" Click="BackButton_Click">
+                        <Button ToolTip="Back" Margin="0,0,2,0" x:Name="BackButton" Click="BackButton_Click">
                             <Button.Style>
                                 <Style TargetType="Button">
                                     <Style.Triggers>
@@ -188,8 +188,8 @@
                                     </Style>
                                 </Image.Style>
                             </Image>
-                        </local:ButtonDark>
-                        <local:ButtonDark ToolTip="Forward" x:Name="ForwardButton" Click="ForwardButton_Click">
+                        </Button>
+                        <Button ToolTip="Forward" x:Name="ForwardButton" Click="ForwardButton_Click">
                             <Button.IsEnabled>
                                 <MultiBinding Converter="{StaticResource ForwardButtonEnabledConverter}" Mode="OneWay">
                                     <Binding Path="CurrentTab.HistoryPosition" Mode="OneWay"/>
@@ -216,10 +216,10 @@
                                     </Style>
                                 </Image.Style>
                             </Image>
-                        </local:ButtonDark>
+                        </Button>
                     </StackPanel>
 
-                    <local:TextBoxDark Grid.Row="1" x:Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged">
+                    <TextBox Grid.Row="1" x:Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged">
                         <!-- Source - https://stackoverflow.com/a/7433840/12136394 -->
                         <TextBox.Style>
                             <Style TargetType="TextBox">
@@ -243,7 +243,7 @@
                                 </Style.Triggers>
                             </Style>
                         </TextBox.Style>
-                    </local:TextBoxDark>
+                    </TextBox>
                 </Grid>
                 <TreeView Grid.Column="0" Grid.Row="1" Name="MainTree" Margin="5" DataContext="{Binding Data}" AllowDrop="True"
                           SelectedItemChanged="TreeView_SelectedItemChanged"
@@ -252,18 +252,18 @@
                           VirtualizingStackPanel.IsVirtualizing="True"
                           VirtualizingStackPanel.VirtualizationMode="Recycling">
                     <TreeView.Resources>
-                        <local:ContextMenuDark x:Key="AddMenu">
+                        <ContextMenu x:Key="AddMenu">
                             <MenuItem Header="Add" Click="MenuItem_Add_Click"/>
-                        </local:ContextMenuDark>
-                        <local:ContextMenuDark x:Key="UndertaleResourceMenu" Opened="MenuItem_ContextMenuOpened">
+                        </ContextMenu>
+                        <ContextMenu x:Key="UndertaleResourceMenu" Opened="MenuItem_ContextMenuOpened">
                             <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>
                             <MenuItem Header="Find all references" Click="MenuItem_FindAllReferences_Click"/>
                             <MenuItem Header="Copy name to clipboard" Click="MenuItem_CopyName_Click"/>
                             <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
-                        </local:ContextMenuDark>
-                        <local:ContextMenuDark x:Key="StandaloneTabMenu">
+                        </ContextMenu>
+                        <ContextMenu x:Key="StandaloneTabMenu">
                             <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>
-                        </local:ContextMenuDark>
+                        </ContextMenu>
 
                         <Style TargetType="{x:Type TreeViewItem}">
                             <EventSetter Event="TreeViewItem.DragOver" Handler="TreeView_DragOver"/>
@@ -500,10 +500,10 @@
                         <ScrollViewer Grid.Column="0" Name="TabScrollViewer" Height="26"
                                       HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"
                                       PreviewMouseWheel="TabScrollViewer_PreviewMouseWheel" PreviewMouseDown="TabScrollViewer_PreviewMouseDown">
-                            <local:TabControlDark x:Name="TabController" Height="22" TabStripPlacement="Top" ItemsSource="{Binding Tabs, Mode=OneWay}" SelectedIndex="{Binding CurrentTabIndex}"
+                            <TabControl x:Name="TabController" Height="22" TabStripPlacement="Top" ItemsSource="{Binding Tabs, Mode=OneWay}" SelectedIndex="{Binding CurrentTabIndex}"
                                                   SelectionChanged="TabController_SelectionChanged">
                                 <TabControl.Resources>
-                                    <local:ContextMenuDark x:Key="TabMenu">
+                                    <ContextMenu x:Key="TabMenu">
                                         <MenuItem Header="Close" Click="CloseTabMenuItem_Click" InputGestureText="Ctrl+W"/>
                                         <MenuItem Header="Close other tabs" Click="CloseOtherTabsMenuItem_Click">
                                             <MenuItem.Style>
@@ -517,7 +517,7 @@
                                             </MenuItem.Style>
                                         </MenuItem>
                                         <MenuItem Header="Close all tabs" Command="{x:Static local:MainWindow.CloseAllTabsCommand}" InputGestureText="Ctrl+Shift+W"/>
-                                    </local:ContextMenuDark>
+                                    </ContextMenu>
                                 </TabControl.Resources>
                                 <TabControl.ItemContainerStyle>
                                     <Style TargetType="TabItem">
@@ -540,7 +540,7 @@
                                             <TextBlock Initialized="TabTitleText_Initialized">
                                             <!-- "TextBlock.Text" binding is set in code-behind -->
                                             </TextBlock>
-                                            <local:ButtonDark Background="Transparent" Width="16" Height="16" BorderThickness="0" Margin="12,0,0,0"
+                                            <Button Background="Transparent" Width="16" Height="16" BorderThickness="0" Margin="12,0,0,0"
                                                               Click="TabCloseButton_OnClick" MouseEnter="TabCloseButton_MouseEnter" MouseLeave="TabCloseButton_MouseLeave">
                                                 <Button.Style>
                                                     <Style TargetType="Button">
@@ -552,14 +552,14 @@
                                                     </Style>
                                                 </Button.Style>
                                                 <Image Source="/Resources/X.png"/>
-                                            </local:ButtonDark>
+                                            </Button>
                                         </StackPanel>
                                     </DataTemplate>
                                 </TabControl.ItemTemplate>
                                 <TabControl.ContentTemplate>
                                     <DataTemplate DataType="{x:Type local:Tab}"/>
                                 </TabControl.ContentTemplate>
-                            </local:TabControlDark>
+                            </TabControl>
                         </ScrollViewer>
                         <StackPanel Grid.Column="1" Margin="5" Orientation="Horizontal" RenderOptions.BitmapScalingMode="NearestNeighbor">
                             <StackPanel.Visibility>
@@ -568,12 +568,12 @@
                                     <Binding Path="ActualWidth" Mode="OneWay" ElementName="TabsGrid"/>
                                 </MultiBinding>
                             </StackPanel.Visibility>
-                            <local:ButtonDark Width="16" Height="16" Click="TabsScrollLeftButton_Click">
+                            <Button Width="16" Height="16" Click="TabsScrollLeftButton_Click">
                                 <Image Source="/Resources/tabs_left_button.png" Stretch="None"/>
-                            </local:ButtonDark>
-                            <local:ButtonDark Width="16" Height="16" Click="TabsScrollRightButton_Click">
+                            </Button>
+                            <Button Width="16" Height="16" Click="TabsScrollRightButton_Click">
                                 <Image Source="/Resources/tabs_right_button.png" Stretch="None"/>
-                            </local:ButtonDark>
+                            </Button>
                         </StackPanel>
                     </Grid>
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">

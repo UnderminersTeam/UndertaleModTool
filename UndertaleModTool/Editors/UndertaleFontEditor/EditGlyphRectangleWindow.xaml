@@ -20,7 +20,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <utmt:ButtonDark Grid.Row="0" Margin="3" FontSize="16" Width="100" Height="26"
+        <Button Grid.Row="0" Margin="3" FontSize="16" Width="100" Height="26"
                          Content="Get help" Click="HelpButton_Click" Focusable="False"/>
 
         <ScrollViewer Name="TextureScroll" Grid.Row="1" Margin="3"
@@ -177,7 +177,7 @@
             </Viewbox>
         </ScrollViewer>
 
-        <utmt:ButtonDark Grid.Row="2" Margin="3,9,3,12" Click="SaveButton_Click" Width="160" Height="50"
-                         FontSize="18">Save changes</utmt:ButtonDark>
+        <Button Grid.Row="2" Margin="3,9,3,12" Click="SaveButton_Click" Width="160" Height="50"
+                         FontSize="18">Save changes</Button>
     </Grid>
 </Window>

@@ -92,11 +92,11 @@
                    Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter},ConverterParameter=2023.6}"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Emit mode</TextBlock>
-        <local:ComboBoxDark Grid.Row="2" Grid.Column="1" Margin="3"
+        <ComboBox Grid.Row="2" Grid.Column="1" Margin="3"
                             ItemsSource="{Binding Source={StaticResource EmitMode}}" SelectedItem="{Binding Mode}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Emit count</TextBlock>
-        <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding EmitCount}"/>
+        <TextBox Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding EmitCount}"/>
 
         <Grid Grid.Row="4" Grid.ColumnSpan="2" Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter},ConverterParameter=2023.8}">
             <Grid.ColumnDefinitions>
@@ -120,12 +120,12 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding DelayMin}"/>
-                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding DelayMax}"/>
+                <TextBox Grid.Column="0" Margin="3" Text="{Binding DelayMin}"/>
+                <TextBox Grid.Column="1" Margin="3" Text="{Binding DelayMax}"/>
             </Grid>
 
             <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Delay measured in:</TextBlock>
-            <local:ComboBoxDark Grid.Row="2" Grid.Column="1" Margin="3"
+            <ComboBox Grid.Row="2" Grid.Column="1" Margin="3"
                     ItemsSource="{Binding Source={StaticResource TimeUnitEnum}}" SelectedItem="{Binding DelayUnit}"/>
 
             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Interval min|max</TextBlock>
@@ -134,21 +134,21 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding IntervalMin}"/>
-                <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding IntervalMax}"/>
+                <TextBox Grid.Column="0" Margin="3" Text="{Binding IntervalMin}"/>
+                <TextBox Grid.Column="1" Margin="3" Text="{Binding IntervalMax}"/>
             </Grid>
 
             <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Interval measured in:</TextBlock>
-            <local:ComboBoxDark Grid.Row="4" Grid.Column="1" Margin="3"
+            <ComboBox Grid.Row="4" Grid.Column="1" Margin="3"
                     ItemsSource="{Binding Source={StaticResource TimeUnitEnum}}" SelectedItem="{Binding IntervalUnit}"/>
         </Grid>
 
         <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Distribution</TextBlock>
-        <local:ComboBoxDark Grid.Row="5" Grid.Column="1" Margin="3"
+        <ComboBox Grid.Row="5" Grid.Column="1" Margin="3"
                             ItemsSource="{Binding Source={StaticResource DistributionEnum}}" SelectedItem="{Binding Distribution}"/>
 
         <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Shape</TextBlock>
-        <local:ComboBoxDark Grid.Row="6" Grid.Column="1" Margin="3"
+        <ComboBox Grid.Row="6" Grid.Column="1" Margin="3"
                             ItemsSource="{Binding Source={StaticResource EmitterShape}}" SelectedItem="{Binding Shape}"/>
 
         <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Region X|Y|Width|Height</TextBlock>
@@ -159,14 +159,14 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding RegionX}"/>
-            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding RegionY}"/>
-            <local:TextBoxDark Grid.Column="2" Margin="3" Text="{Binding RegionWidth}"/>
-            <local:TextBoxDark Grid.Column="3" Margin="3" Text="{Binding RegionHeight}"/>
+            <TextBox Grid.Column="0" Margin="3" Text="{Binding RegionX}"/>
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding RegionY}"/>
+            <TextBox Grid.Column="2" Margin="3" Text="{Binding RegionWidth}"/>
+            <TextBox Grid.Column="3" Margin="3" Text="{Binding RegionHeight}"/>
         </Grid>
 
         <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Rotation</TextBlock>
-        <local:TextBoxDark Grid.Row="8" Grid.Column="1" Margin="3" Text="{Binding Rotation}"/>
+        <TextBox Grid.Row="8" Grid.Column="1" Margin="3" Text="{Binding Rotation}"/>
 
         <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Sprite</TextBlock>
         <local:UndertaleObjectReference Grid.Row="9" Grid.Column="1" Margin="3" ObjectReference="{Binding Sprite}" ObjectType="{x:Type undertale:UndertaleSprite}"/>
@@ -199,7 +199,7 @@
         </ListView>
 
         <TextBlock Grid.Row="11" Grid.Column="0" Margin="3">Sprite frame index</TextBlock>
-        <local:TextBoxDark Grid.Row="11" Grid.Column="1" Margin="3" Text="{Binding FrameIndex}"/>
+        <TextBox Grid.Row="11" Grid.Column="1" Margin="3" Text="{Binding FrameIndex}"/>
 
         <Grid Grid.Row="12" Grid.ColumnSpan="2" Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter},ConverterParameter=2023.4}">
             <Grid.ColumnDefinitions>
@@ -223,7 +223,7 @@
         </Grid>
 
         <TextBlock Grid.Row="13" Grid.Column="0" Margin="3">Texture</TextBlock>
-        <local:ComboBoxDark Grid.Row="13" Grid.Column="1" Margin="3"
+        <ComboBox Grid.Row="13" Grid.Column="1" Margin="3"
                             ItemsSource="{Binding Source={StaticResource TextureEnum}}" SelectedItem="{Binding Texture}"/>
 
         <TextBlock Grid.Row="14" Grid.Column="0" Margin="3">Start color</TextBlock>
@@ -244,8 +244,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding LifetimeMin}"/>
-            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding LifetimeMax}"/>
+            <TextBox Grid.Column="0" Margin="3" Text="{Binding LifetimeMin}"/>
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding LifetimeMax}"/>
         </Grid>
 
         <TextBlock Grid.Row="19" Grid.Column="0" Margin="3">Scale X|Y</TextBlock>
@@ -254,8 +254,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding ScaleX}"/>
-            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding ScaleY}"/>
+            <TextBox Grid.Column="0" Margin="3" Text="{Binding ScaleX}"/>
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding ScaleY}"/>
         </Grid>
 
         <TextBlock Grid.Row="20" Grid.Column="1" Margin="3" HorizontalAlignment="Center" Foreground="DarkGray" FontStyle="Italic" TextWrapping="Wrap">
@@ -270,8 +270,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding SizeMinX}"/>
-            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding SizeMinY}"/>
+            <TextBox Grid.Column="0" Margin="3" Text="{Binding SizeMinX}"/>
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding SizeMinY}"/>
         </Grid>
 
         <TextBlock Grid.Row="22" Grid.Column="0" Margin="3">Size max</TextBlock>
@@ -280,8 +280,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding SizeMaxX}"/>
-            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding SizeMaxY}"/>
+            <TextBox Grid.Column="0" Margin="3" Text="{Binding SizeMaxX}"/>
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding SizeMaxY}"/>
         </Grid>
 
         <TextBlock Grid.Row="23" Grid.Column="0" Margin="3">Size increase</TextBlock>
@@ -290,8 +290,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding SizeIncreaseX}"/>
-            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding SizeIncreaseY}"/>
+            <TextBox Grid.Column="0" Margin="3" Text="{Binding SizeIncreaseX}"/>
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding SizeIncreaseY}"/>
         </Grid>
 
         <TextBlock Grid.Row="24" Grid.Column="0" Margin="3">Size wiggle</TextBlock>
@@ -300,8 +300,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding SizeWiggleX}"/>
-            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding SizeWiggleY}"/>
+            <TextBox Grid.Column="0" Margin="3" Text="{Binding SizeWiggleX}"/>
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding SizeWiggleY}"/>
         </Grid>
 
         <TextBlock Grid.Row="25" Grid.Column="0" Margin="3">Speed min|max</TextBlock>
@@ -310,8 +310,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding SpeedMin}"/>
-            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding SpeedMax}"/>
+            <TextBox Grid.Column="0" Margin="3" Text="{Binding SpeedMin}"/>
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding SpeedMax}"/>
         </Grid>
 
         <TextBlock Grid.Row="26" Grid.Column="0" Margin="3">Speed increase|wiggle</TextBlock>
@@ -320,8 +320,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding SpeedIncrease}"/>
-            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding SpeedWiggle}"/>
+            <TextBox Grid.Column="0" Margin="3" Text="{Binding SpeedIncrease}"/>
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding SpeedWiggle}"/>
         </Grid>
 
         <TextBlock Grid.Row="27" Grid.Column="0" Margin="3">Gravity force|direction</TextBlock>
@@ -330,8 +330,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding GravityForce}"/>
-            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding GravityDirection}"/>
+            <TextBox Grid.Column="0" Margin="3" Text="{Binding GravityForce}"/>
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding GravityDirection}"/>
         </Grid>
 
         <TextBlock Grid.Row="28" Grid.Column="0" Margin="3">Direction min|max</TextBlock>
@@ -340,8 +340,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding DirectionMin}"/>
-            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding DirectionMax}"/>
+            <TextBox Grid.Column="0" Margin="3" Text="{Binding DirectionMin}"/>
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding DirectionMax}"/>
         </Grid>
 
         <TextBlock Grid.Row="29" Grid.Column="0" Margin="3">Direction increase|wiggle</TextBlock>
@@ -350,8 +350,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding DirectionIncrease}"/>
-            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding DirectionWiggle}"/>
+            <TextBox Grid.Column="0" Margin="3" Text="{Binding DirectionIncrease}"/>
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding DirectionWiggle}"/>
         </Grid>
 
         <TextBlock Grid.Row="30" Grid.Column="0" Margin="3">Orientation min|max</TextBlock>
@@ -360,8 +360,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding OrientationMin}"/>
-            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding OrientationMax}"/>
+            <TextBox Grid.Column="0" Margin="3" Text="{Binding OrientationMin}"/>
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding OrientationMax}"/>
         </Grid>
 
         <TextBlock Grid.Row="31" Grid.Column="0" Margin="3">Orientation increase|wiggle</TextBlock>
@@ -370,8 +370,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding OrientationIncrease}"/>
-            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding OrientationWiggle}"/>
+            <TextBox Grid.Column="0" Margin="3" Text="{Binding OrientationIncrease}"/>
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding OrientationWiggle}"/>
         </Grid>
 
         <TextBlock Grid.Row="32" Grid.Column="0" Margin="3">Is orientation relative</TextBlock>
@@ -381,12 +381,12 @@
         <local:UndertaleObjectReference Grid.Row="33" Grid.Column="1" Margin="3" ObjectReference="{Binding SpawnOnDeath}" ObjectType="{x:Type undertale:UndertaleParticleSystemEmitter}"/>
 
         <TextBlock Grid.Row="34" Grid.Column="0" Margin="3">Spawn on death count</TextBlock>
-        <local:TextBoxDark Grid.Row="34" Grid.Column="1" Margin="3" Text="{Binding SpawnOnDeathCount}"/>
+        <TextBox Grid.Row="34" Grid.Column="1" Margin="3" Text="{Binding SpawnOnDeathCount}"/>
 
         <TextBlock Grid.Row="35" Grid.Column="0" Margin="3">Spawn on update</TextBlock>
         <local:UndertaleObjectReference Grid.Row="35" Grid.Column="1" Margin="3" ObjectReference="{Binding SpawnOnUpdate}" ObjectType="{x:Type undertale:UndertaleParticleSystemEmitter}"/>
 
         <TextBlock Grid.Row="36" Grid.Column="0" Margin="3">Spawn on update count</TextBlock>
-        <local:TextBoxDark Grid.Row="36" Grid.Column="1" Margin="3" Text="{Binding SpawnOnUpdateCount}"/>
+        <TextBox Grid.Row="36" Grid.Column="1" Margin="3" Text="{Binding SpawnOnUpdateCount}"/>
     </Grid>
 </local:DataUserControl>

@@ -16,8 +16,8 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0" Margin="3">You edited a string reference! What do you want to do?</TextBlock>
-        <local:ButtonDark Grid.Row="1" Margin="3" Click="Button1_Click">Change only this one value</local:ButtonDark>
-        <local:ButtonDark Grid.Row="2" Margin="3" Click="Button2_Click">Change all occurrences of this value</local:ButtonDark>
-        <local:ButtonDark Grid.Row="3" Margin="3" Click="Button3_Click">Abort the change</local:ButtonDark>
+        <Button Grid.Row="1" Margin="3" Click="Button1_Click">Change only this one value</Button>
+        <Button Grid.Row="2" Margin="3" Click="Button2_Click">Change all occurrences of this value</Button>
+        <Button Grid.Row="3" Margin="3" Click="Button3_Click">Abort the change</Button>
     </Grid>
 </Window>

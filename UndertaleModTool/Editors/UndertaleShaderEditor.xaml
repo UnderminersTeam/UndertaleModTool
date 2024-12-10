@@ -36,7 +36,7 @@
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Type</TextBlock>
-        <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource ShaderType}}" SelectedItem="{Binding Path=Type}"
+        <ComboBox ItemsSource="{Binding Source={StaticResource ShaderType}}" SelectedItem="{Binding Path=Type}"
                             Grid.Row="1" Grid.Column="1" Margin="3"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">GLSL ES vertex source</TextBlock>
@@ -106,7 +106,7 @@
         </Expander>
 
         <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Vertex shader attributes</TextBlock>
-        <local:DataGridDark Grid.Row="8" Grid.Column="1" Margin="3" ItemsSource="{Binding VertexShaderAttributes}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
+        <DataGrid Grid.Row="8" Grid.Column="1" Margin="3" ItemsSource="{Binding VertexShaderAttributes}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                 <Style TargetType="{x:Type DataGridCell}">
@@ -141,6 +141,6 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
-        </local:DataGridDark>
+        </DataGrid>
     </Grid>
 </local:DataUserControl>
