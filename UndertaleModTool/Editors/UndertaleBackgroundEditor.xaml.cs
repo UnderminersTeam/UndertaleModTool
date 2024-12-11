@@ -14,7 +14,7 @@ namespace UndertaleModTool
     public partial class UndertaleBackgroundEditor : DataUserControl
     {
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
-        private readonly ContextMenuDark tileContextMenu = new();
+        private readonly ContextMenu tileContextMenu = new();
 
         public UndertaleBackgroundEditor()
         {
