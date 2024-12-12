@@ -384,7 +384,7 @@
                                 <RowDefinition Height="Auto" SharedSizeGroup="{Binding Flags, Mode=OneTime, Converter={StaticResource GridSizeGroupConverter}}"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="{Binding Flags, Mode=OneTime, Converter={StaticResource GridSizeGroupConverter}}"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
-                                <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
+                                <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
@@ -433,7 +433,7 @@
                             <local:UndertaleObjectReference Grid.Row="7" Grid.Column="2" Margin="3" ObjectReference="{Binding CreationCodeId}" ObjectType="{x:Type undertale:UndertaleCode}"  ObjectEventType="{x:Static undertale:EventType.Create}" ObjectEventSubtype="0"/>
 
                             <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Flags</TextBlock>
-                            <local:TextBoxDark Grid.Row="8" Grid.Column="2" Margin="3" Text="{Binding Flags, Converter={StaticResource IsGMS2Converter}, ConverterParameter=flags}"/>
+                            <local:FlagsBox Grid.Row="8" Grid.Column="2" Margin="3" Value="{Binding Flags, Converter={StaticResource IsGMS2Converter}, ConverterParameter=flags}"/>
 
                             <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">World</TextBlock>
                             <local:TextBoxDark Grid.Row="9" Grid.Column="2" Margin="3" Text="{Binding World}"/>
