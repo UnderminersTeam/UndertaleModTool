@@ -217,31 +217,26 @@
                         </Button>
                     </StackPanel>
 
-                    <TextBox Grid.Row="1" x:Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged">
-                        <!-- Source - https://stackoverflow.com/a/7433840/12136394 -->
+                    <TextBox Grid.Row="1" IsHitTestVisible="False" IsReadOnly="True" Focusable="False" BorderBrush="{x:Null}">
                         <TextBox.Style>
                             <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
-                                <Style.Resources>
-                                    <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
-                                        <VisualBrush.Visual>
-                                            <Label Content="Filter by name..." Foreground="Gray" />
-                                        </VisualBrush.Visual>
-                                    </VisualBrush>
-                                </Style.Resources>
+                                <Setter Property="Foreground" Value="{DynamicResource ABrush.Foreground.Disabled}"/>
+                                <Setter Property="Text" Value="Filter by name..."/>
                                 <Style.Triggers>
-                                    <Trigger Property="Text" Value="">
-                                        <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
-                                    </Trigger>
-                                    <Trigger Property="Text" Value="{x:Null}">
-                                        <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
-                                    </Trigger>
-                                    <Trigger Property="IsKeyboardFocused" Value="True">
-                                        <Setter Property="Background" Value="{x:Null}" />
-                                    </Trigger>
+                                    <DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value="">
+                                        <Setter Property="Text" Value="Filter by name..."/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value="{x:Null}">
+                                        <Setter Property="Text" Value="Filter by name..."/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsKeyboardFocused, ElementName=SearchBox}" Value="True">
+                                        <Setter Property="Text" Value=""/>
+                                    </DataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </TextBox.Style>
                     </TextBox>
+                    <TextBox Grid.Row="1" x:Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged" Background="Transparent"/>
                 </Grid>
                 <TreeView Grid.Column="0" Grid.Row="1" Name="MainTree" Margin="5" DataContext="{Binding Data}" AllowDrop="True"
                           SelectedItemChanged="TreeView_SelectedItemChanged"
