@@ -46,8 +46,8 @@
         <local:UndertaleStringReference Grid.Row="3" Grid.Column="1" Margin="3" ObjectReference="{Binding ClassName}"/>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Files</TextBlock>
-        <local:DataGridDark Grid.Row="4" Grid.Column="1" Margin="3" ItemsSource="{Binding Files}"
-                            AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
+        <DataGrid Grid.Row="4" Grid.Column="1" Margin="3" ItemsSource="{Binding Files}"
+                            AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="True" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
             <DataGrid.Columns>
                 <DataGridTemplateColumn Header="Files" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
@@ -57,13 +57,13 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
-        </local:DataGridDark>
-        <local:ButtonDark Grid.Row="5" Grid.Column="1" Content="Add new extension file" Click="NewFileButton_Click"/>
+        </DataGrid>
+        <Button Grid.Row="5" Grid.Column="1" Content="Add new extension file" Click="NewFileButton_Click"/>
 
         <TextBlock Grid.Row="6" Grid.Column="0" Margin="3,13,3,3" Text="Options"
                    Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2022.6}"/>
-        <local:DataGridDark Grid.Row="6" Grid.Column="1" Margin="3,13,3,3" x:Name="OptionsGrid" ItemsSource="{Binding Options, Mode=OneWay}"
-                            AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
+        <DataGrid Grid.Row="6" Grid.Column="1" Margin="3,13,3,3" x:Name="OptionsGrid" ItemsSource="{Binding Options, Mode=OneWay}"
+                            AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="True" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
                             ScrollViewer.CanContentScroll="True"
                             VirtualizingPanel.IsVirtualizing="True"
                             VirtualizingPanel.VirtualizationMode="Recycling">
@@ -90,7 +90,7 @@
                                     <local:OptionValueTemplateSelector>
                                         <local:OptionValueTemplateSelector.StringTemplate>
                                             <DataTemplate>
-                                                <local:TextBoxDark Text="{Binding DataContext.Value.Content, RelativeSource={RelativeSource AncestorType={x:Type ContentControl}}}"/>
+                                                <TextBox Text="{Binding DataContext.Value.Content, RelativeSource={RelativeSource AncestorType={x:Type ContentControl}}}"/>
                                             </DataTemplate>
                                         </local:OptionValueTemplateSelector.StringTemplate>
                                         <local:OptionValueTemplateSelector.BooleanTemplate>
@@ -102,7 +102,7 @@
                                         </local:OptionValueTemplateSelector.BooleanTemplate>
                                         <local:OptionValueTemplateSelector.NumberTemplate>
                                             <DataTemplate>
-                                                <local:TextBoxDark Text="{Binding DataContext.Value.Content, RelativeSource={RelativeSource AncestorType={x:Type ContentControl}},
+                                                <TextBox Text="{Binding DataContext.Value.Content, RelativeSource={RelativeSource AncestorType={x:Type ContentControl}},
                                                                           Converter={StaticResource OptionValueConverter}, ConverterParameter=number}"/>
                                             </DataTemplate>
                                         </local:OptionValueTemplateSelector.NumberTemplate>
@@ -115,18 +115,18 @@
                 <DataGridTemplateColumn Header="Kind" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource OptionKind}}" SelectedItem="{Binding Kind, UpdateSourceTrigger=PropertyChanged}"
+                            <ComboBox ItemsSource="{Binding Source={StaticResource OptionKind}}" SelectedItem="{Binding Kind, UpdateSourceTrigger=PropertyChanged}"
                                                 SelectionChanged="KindComboBox_SelectionChanged"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
-        </local:DataGridDark>
-        <local:ButtonDark Grid.Row="7" Grid.Column="1" Content="Add new extension option" Click="NewOptionButton_Click" Margin="0,0,0,6"
+        </DataGrid>
+        <Button Grid.Row="7" Grid.Column="1" Content="Add new extension option" Click="NewOptionButton_Click" Margin="0,0,0,6"
                           Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2022.6}"/>
 
         <TextBlock Grid.Row="8" Grid.Column="0" Margin="3" Visibility="{Binding DataContext.IsExtProductIDEligible, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">Product ID</TextBlock>
-        <local:TextBoxDark Background="#FF333333" Foreground="#FFFFFFFF" Grid.Row="8" Grid.Column="1" Margin="3" Visibility="{Binding DataContext.IsExtProductIDEligible, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Text="{Binding ProductIdData, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UndertaleExtensionEditor}}, Mode = TwoWay, Converter={StaticResource byteArrayConverter}}"/>
+        <TextBox Grid.Row="8" Grid.Column="1" Margin="3" Visibility="{Binding DataContext.IsExtProductIDEligible, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Text="{Binding ProductIdData, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UndertaleExtensionEditor}}, Mode = TwoWay, Converter={StaticResource byteArrayConverter}}"/>
 
         <StackPanel Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2">
             <TextBlock Foreground="Red" FontStyle="Italic">

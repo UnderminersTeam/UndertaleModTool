@@ -11,23 +11,13 @@
     <DockPanel MaxHeight="{Binding ViewportHeight, Mode=OneWay, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
         <TextBlock Text="Global initialization scripts" FontWeight="Bold" DockPanel.Dock="Top"/>
         <Separator DockPanel.Dock="Top"/>
-        <local:DataGridDark DockPanel.Dock="Top" Margin="3" ItemsSource="{Binding GlobalInits}" x:Name="ScriptsGrid"
-                            AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+        <DataGrid DockPanel.Dock="Top" Margin="3" ItemsSource="{Binding GlobalInits}" x:Name="ScriptsGrid"
+                            AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
                             ScrollViewer.CanContentScroll="True"
                             VirtualizingPanel.IsVirtualizing="True"
                             VirtualizingPanel.VirtualizationMode="Recycling">
             <DataGrid.Resources>
-                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
-                <Style TargetType="{x:Type DataGridCell}">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="{x:Type DataGridCell}">
-                                <Grid Background="{TemplateBinding Background}">
-                                    <ContentPresenter VerticalAlignment="Center" />
-                                </Grid>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
+                <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
                             <Setter Property="Template">
@@ -50,6 +40,6 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
-        </local:DataGridDark>
+        </DataGrid>
     </DockPanel>
 </local:DataUserControl>
