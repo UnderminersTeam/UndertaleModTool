@@ -21,7 +21,7 @@
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Local variables</TextBlock>
-        <DataGrid Grid.Row="3" Grid.Column="1" Margin="3" ItemsSource="{Binding Locals}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow" AddingNewItem="DataGrid_AddingNewItem">
+        <DataGrid Grid.Row="3" Grid.Column="1" Margin="3" ItemsSource="{Binding Locals}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True"  HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow" AddingNewItem="DataGrid_AddingNewItem">
             <DataGrid.Resources>
                 <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
                     <Style.Triggers>

@@ -243,7 +243,7 @@
         <TextBlock Name="GlyphsLabel" Grid.Row="17" Grid.ColumnSpan="2" Margin="3" HorizontalAlignment="Left">Glyphs:</TextBlock>
         <Grid Grid.Row="18" Grid.ColumnSpan="2" MaxHeight="370" Margin="3">
             <DataGrid x:Name="GlyphsGrid" ItemsSource="{Binding Glyphs, Mode=OneWay}"
-                                AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
+                                AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
                                 ScrollViewer.CanContentScroll="True"
                                 VirtualizingPanel.IsVirtualizing="True"
                                 VirtualizingPanel.VirtualizationMode="Recycling">
@@ -375,7 +375,7 @@
                     </StackPanel>
 
                     <DataGrid x:Name="GlyphKerningGrid" IsEnabled="False" Visibility="{Binding Visibility, Mode=OneWay, ElementName=GlyphKerningBorder}"
-                                        AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
+                                        AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
                                         ScrollViewer.CanContentScroll="True"
                                         VirtualizingPanel.IsVirtualizing="True"
                                         VirtualizingPanel.VirtualizationMode="Recycling">

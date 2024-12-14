@@ -106,7 +106,7 @@
         </Expander>
 
         <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Vertex shader attributes</TextBlock>
-        <DataGrid Grid.Row="8" Grid.Column="1" Margin="3" ItemsSource="{Binding VertexShaderAttributes}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
+        <DataGrid Grid.Row="8" Grid.Column="1" Margin="3" ItemsSource="{Binding VertexShaderAttributes}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
             <DataGrid.Resources>
                 <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
                     <Style.Triggers>

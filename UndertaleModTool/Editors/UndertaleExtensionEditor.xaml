@@ -47,7 +47,7 @@
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Files</TextBlock>
         <DataGrid Grid.Row="4" Grid.Column="1" Margin="3" ItemsSource="{Binding Files}"
-                            AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
+                            AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="True" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
             <DataGrid.Columns>
                 <DataGridTemplateColumn Header="Files" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
@@ -63,7 +63,7 @@
         <TextBlock Grid.Row="6" Grid.Column="0" Margin="3,13,3,3" Text="Options"
                    Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2022.6}"/>
         <DataGrid Grid.Row="6" Grid.Column="1" Margin="3,13,3,3" x:Name="OptionsGrid" ItemsSource="{Binding Options, Mode=OneWay}"
-                            AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
+                            AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="True" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
                             ScrollViewer.CanContentScroll="True"
                             VirtualizingPanel.IsVirtualizing="True"
                             VirtualizingPanel.VirtualizationMode="Recycling">

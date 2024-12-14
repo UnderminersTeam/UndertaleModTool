@@ -89,7 +89,7 @@
             <TextBox Grid.Row="9" Grid.Column="1" Margin="3" Text="{Binding GMS2FrameLength}"/>
 
             <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Tile IDs</TextBlock>
-            <DataGrid Grid.Row="10" Grid.Column="1" x:Name="TileIdList" ItemsSource="{Binding GMS2TileIds}" MaxHeight="279" Margin="0,0,0,3" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True"
+            <DataGrid Grid.Row="10" Grid.Column="1" x:Name="TileIdList" ItemsSource="{Binding GMS2TileIds}" MaxHeight="279" Margin="0,0,0,3" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True"
                                 SelectionChanged="DataGrid_SelectionChanged">
                 <DataGrid.Resources>
                     <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">

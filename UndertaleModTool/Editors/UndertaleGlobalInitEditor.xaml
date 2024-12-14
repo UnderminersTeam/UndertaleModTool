@@ -12,7 +12,7 @@
         <TextBlock Text="Global initialization scripts" FontWeight="Bold" DockPanel.Dock="Top"/>
         <Separator DockPanel.Dock="Top"/>
         <DataGrid DockPanel.Dock="Top" Margin="3" ItemsSource="{Binding GlobalInits}" x:Name="ScriptsGrid"
-                            AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+                            AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
                             ScrollViewer.CanContentScroll="True"
                             VirtualizingPanel.IsVirtualizing="True"
                             VirtualizingPanel.VirtualizationMode="Recycling">

@@ -159,7 +159,7 @@
                 <TextBlock Grid.Row="21" Grid.Column="0" Margin="3">Room order</TextBlock>
                 <Expander Grid.Row="21" Grid.Column="1" Margin="3" Header="List" Name="RoomListExpander">
                     <DataGrid ItemsSource="{Binding GeneralInfo.RoomOrder}" MaxHeight="369" x:Name="RoomListGrid"
-                                        AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+                                        AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
                                         ScrollViewer.CanContentScroll="True"
                                         VirtualizingPanel.IsVirtualizing="True"
                                         VirtualizingPanel.VirtualizationMode="Recycling">
@@ -288,7 +288,7 @@
                 <TextBox Grid.Row="12" Grid.Column="1" Margin="3" Text="{Binding Options.LoadAlpha}"/>
 
                 <TextBlock Grid.Row="13" Grid.Column="0" Margin="3">Constants</TextBlock>
-                <DataGrid Grid.Row="13" Grid.Column="1" Margin="3" ItemsSource="{Binding Options.Constants}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
+                <DataGrid Grid.Row="13" Grid.Column="1" Margin="3" ItemsSource="{Binding Options.Constants}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
                     <DataGrid.Resources>
                         <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
                             <Style.Triggers>

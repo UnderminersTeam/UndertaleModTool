@@ -43,7 +43,7 @@
                         Grid.Row="3" Grid.Column="1" Margin="3"/>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Functions</TextBlock>
-        <DataGrid Grid.Row="4" Grid.Column="1" Margin="3" ItemsSource="{Binding Functions}" x:Name="FunctionsList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" AddingNewItem="DataGrid_AddingNewItem" IsSynchronizedWithCurrentItem="True">
+        <DataGrid Grid.Row="4" Grid.Column="1" Margin="3" ItemsSource="{Binding Functions}" x:Name="FunctionsList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" AddingNewItem="DataGrid_AddingNewItem" IsSynchronizedWithCurrentItem="True">
             <DataGrid.Resources>
                 <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
                     <Style.Triggers>
