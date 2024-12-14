@@ -207,24 +207,6 @@ namespace UndertaleModTool
         public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 #endif
 
-        private static readonly Color darkColor = Color.FromArgb(255, 32, 32, 32);
-        private static readonly Color darkLightColor = Color.FromArgb(255, 48, 48, 48);
-        private static readonly Color whiteColor = Color.FromArgb(255, 222, 222, 222);
-        private static readonly SolidColorBrush grayTextBrush = new(Color.FromArgb(255, 179, 179, 179));
-        private static readonly SolidColorBrush inactiveSelectionBrush = new(Color.FromArgb(255, 212, 212, 212));
-        private static readonly Dictionary<ResourceKey, object> appDarkStyle = new()
-        {
-            { SystemColors.WindowTextBrushKey, new SolidColorBrush(whiteColor) },
-            { SystemColors.ControlTextBrushKey, new SolidColorBrush(whiteColor) },
-            { SystemColors.WindowBrushKey, new SolidColorBrush(darkColor) },
-            { SystemColors.ControlBrushKey, new SolidColorBrush(darkLightColor) },
-            { SystemColors.ControlLightBrushKey, new SolidColorBrush(Color.FromArgb(255, 60, 60, 60)) },
-            { SystemColors.MenuTextBrushKey, new SolidColorBrush(whiteColor) },
-            { SystemColors.MenuBrushKey, new SolidColorBrush(darkLightColor) },
-            { SystemColors.GrayTextBrushKey, new SolidColorBrush(Color.FromArgb(255, 136, 136, 136)) },
-            { SystemColors.InactiveSelectionHighlightBrushKey, new SolidColorBrush(Color.FromArgb(255, 112, 112, 112)) }
-        };
-
         public MainWindow()
         {
             InitializeComponent();
@@ -252,11 +234,6 @@ namespace UndertaleModTool
                                                 typeof(ImageMagick.MagickImage).GetTypeInfo().Assembly)
                                 .WithEmitDebugInformation(true); //when script throws an exception, add a exception location (line number)
             });
-
-            var resources = Application.Current.Resources;
-            resources["CustomTextBrush"] = SystemColors.ControlTextBrush;
-            resources[SystemColors.GrayTextBrushKey] = grayTextBrush;
-            resources[SystemColors.InactiveSelectionHighlightBrushKey] = inactiveSelectionBrush;
         }
 
         /// <summary>
@@ -2188,15 +2165,6 @@ namespace UndertaleModTool
             }
 
             item.UpdateLayout();
-            Popup popup = FindVisualChild<Popup>(item);
-            var content = popup?.Child as Border;
-            if (content is not null)
-            {
-                if (Settings.Instance.EnableDarkMode)
-                    content.Background = appDarkStyle[SystemColors.MenuBrushKey] as SolidColorBrush;
-                else
-                    content.Background = SystemColors.MenuBrush;
-            }
 
             // If we're at the complete root, we need to add the "Run other script" button as well
             if (item.Name != "RootScriptItem") return;

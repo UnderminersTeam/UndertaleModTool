@@ -71,9 +71,6 @@
             </TextBlock>
             <ScrollViewer Name="TextureScroll" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" MaxHeight="450"
                           HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" ScrollChanged="TextureScroll_ScrollChanged">
-                <ScrollViewer.Background>
-                    <DynamicResource ResourceKey="{x:Static SystemColors.MenuBrushKey}"/>
-                </ScrollViewer.Background>
                 <Viewbox Name="TextureViewbox" Stretch="Uniform" StretchDirection="DownOnly"
                          SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor" MouseWheel="TextureViewbox_MouseWheel">
                     <Border>

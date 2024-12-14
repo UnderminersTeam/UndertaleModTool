@@ -161,7 +161,7 @@
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding Enabled, Mode=OneWay}" Value="False">
                                                     <Setter Property="Foreground"
-                                                            Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                                            Value="{DynamicResource ABrush.Foreground.Disabled}"/>
                                                     <Setter Property="ContextMenu" Value="{x:Null}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -186,7 +186,7 @@
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding Enabled, Mode=OneWay}" Value="False">
                                                     <Setter Property="Foreground"
-                                                            Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                                            Value="{DynamicResource ABrush.Foreground.Disabled}"/>
                                                     <Setter Property="ContextMenu" Value="{x:Null}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -211,7 +211,7 @@
                                     <DataTrigger Binding="{Binding Flags, Mode=OneTime, Converter={StaticResource IsGMS2Converter}}" Value="False">
                                         <DataTrigger.Setters>
                                             <Setter Property="Foreground"
-                                                    Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                                    Value="{DynamicResource ABrush.Foreground.Disabled}"/>
                                             <Setter Property="ContextMenu" Value="{x:Null}"/>
                                         </DataTrigger.Setters>
                                     </DataTrigger>
@@ -259,7 +259,7 @@
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsVisible, Mode=OneWay}" Value="False">
                                         <Setter Property="Foreground"
-                                                Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                                Value="{DynamicResource ABrush.Foreground.Disabled}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>

@@ -33,7 +33,7 @@
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0" Name="label" Text="The search results for the game object&#x0a;&quot;&quot;." HorizontalAlignment="Left" Padding="5" Margin="10,10,0,0"
                    FontSize="22" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="70"/>
-        <Rectangle Grid.Row="1" Margin="10,0,20,0" Height="2" Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+        <Rectangle Grid.Row="1" Margin="10,0,20,0" Height="2" Fill="{DynamicResource ABrush.Foreground.Static}"/>
 
         <TextBox Grid.Row="2" x:Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged"
                           Margin="10,15,20,0" FontSize="14">
