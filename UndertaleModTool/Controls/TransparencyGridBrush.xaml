@@ -1,21 +1,21 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DrawingBrush x:Key="TransparencyGridBrushBrush" Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
+    <DrawingBrush x:Key="TransparencyGridBrushBrush" Stretch="None" TileMode="Tile" Viewport="0,0,16,16" ViewportUnits="Absolute">
         <DrawingBrush.Drawing>
             <DrawingGroup>
                 <GeometryDrawing Brush="{DynamicResource TransparencyGridColor1}">
                     <GeometryDrawing.Geometry>
                         <GeometryGroup>
-                            <RectangleGeometry Rect="0,0,10,10"/>
-                            <RectangleGeometry Rect="10,10,10,10"/>
+                            <RectangleGeometry Rect="0,0,8,8"/>
+                            <RectangleGeometry Rect="8,8,8,8"/>
                         </GeometryGroup>
                     </GeometryDrawing.Geometry>
                 </GeometryDrawing>
                 <GeometryDrawing Brush="{DynamicResource TransparencyGridColor2}">
                     <GeometryDrawing.Geometry>
                         <GeometryGroup>
-                            <RectangleGeometry Rect="10,0,10,10"/>
-                            <RectangleGeometry Rect="0,10,10,10"/>
+                            <RectangleGeometry Rect="8,0,8,8"/>
+                            <RectangleGeometry Rect="0,8,8,8"/>
                         </GeometryGroup>
                     </GeometryDrawing.Geometry>
                 </GeometryDrawing>
