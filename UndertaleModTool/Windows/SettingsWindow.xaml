@@ -6,7 +6,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UndertaleModTool"
         mc:Ignorable="d"
-        Title="Settings" Height="Auto" Width="800" SizeToContent="Height" WindowStartupLocation="CenterOwner">
+        Title="Settings" Height="Auto" Width="800" SizeToContent="Height" WindowStartupLocation="CenterOwner" UseLayoutRounding="False">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Controls/TransparencyGridBrush.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid Margin="10">
             <Grid.ColumnDefinitions>
@@ -16,6 +23,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -65,19 +73,27 @@
             <CheckBox Grid.Row="7" Grid.Column="0" Margin="3" Content="" IsChecked="{Binding EnableDarkMode}"/>
             <TextBlock Grid.Row="7" Grid.Column="0" Margin="25 2 2 2" Text="Enable dark mode" ToolTip="Makes the program interface dark. Disabled by default."/>
 
-            <Separator Grid.Row="8" Grid.ColumnSpan="4" Margin="10"/>
+            <StackPanel Grid.Row="8" Grid.Column="0" Orientation="Horizontal">
+                <TextBlock Margin="3" Text="Transparency grid colors"/>
+                <local:TextBoxDark Width="80" Margin="3" Text="{Binding TransparencyGridColor1}" />
+                <local:TextBoxDark Width="80" Margin="3" Text="{Binding TransparencyGridColor2}" />
+            </StackPanel>
 
-            <CheckBox Grid.Row="9" Grid.Column="0" Margin="3" VerticalAlignment="Center" Name="gridWidthCheckbox" Content="" IsChecked="{Binding GridWidthEnabled}"/>
-            <TextBlock Grid.Row="9" Grid.Column="0" Margin="25 2 2 2" VerticalAlignment="Center" Text="Global grid width" ToolTip="This option globally overrides the automatic assignment of a room's grid width based on the most used tile's width in that room."/>
-            <local:TextBoxDark Grid.Row="9" Grid.Column="1" Margin="3" IsEnabled="{Binding ElementName=gridWidthCheckbox, Path=IsChecked}" Text="{Binding GlobalGridWidth}"/>
+            <Canvas Grid.Row="8" Grid.Column="1" Width="20" Height="20" Background="{DynamicResource TransparencyGridBrushBrush}"></Canvas>
 
-            <CheckBox Grid.Row="10" Grid.Column="0" Margin="3" VerticalAlignment="Center" Name="gridHeightCheckbox" Content="" IsChecked="{Binding GridHeightEnabled}"/>
-            <TextBlock Grid.Row="10" Grid.Column="0" Margin="25 2 2 2"  VerticalAlignment="Center" Text="Global grid height" ToolTip="This option globally overrides the automatic assignment of a room's grid height based on the most used tile's height in that room."/>
-            <local:TextBoxDark Grid.Row="10" Grid.Column="1" Margin="3" IsEnabled="{Binding ElementName=gridHeightCheckbox, Path=IsChecked}" Text="{Binding GlobalGridHeight}"/>
+            <Separator Grid.Row="9" Grid.ColumnSpan="4" Margin="10"/>
 
-            <CheckBox Grid.Row="9" Grid.Column="2" Margin="3" VerticalAlignment="Center" Name="gridThicknessCheckBox" Content="" IsChecked="{Binding GridThicknessEnabled}"/>
-            <TextBlock Grid.Row="9" Grid.Column="2" Margin="25 2 2 2" VerticalAlignment="Center" Text="Global grid thickness" ToolTip="This option globally overrides the automatic assignment of a room's grid thickness."/>
-            <local:TextBoxDark Grid.Row="9" Grid.Column="3" Margin="3" IsEnabled="{Binding ElementName=gridThicknessCheckBox, Path=IsChecked}" Text="{Binding GlobalGridThickness}"/>
+            <CheckBox Grid.Row="10" Grid.Column="0" Margin="3" VerticalAlignment="Center" Name="gridWidthCheckbox" Content="" IsChecked="{Binding GridWidthEnabled}"/>
+            <TextBlock Grid.Row="10" Grid.Column="0" Margin="25 2 2 2" VerticalAlignment="Center" Text="Global grid width" ToolTip="This option globally overrides the automatic assignment of a room's grid width based on the most used tile's width in that room."/>
+            <local:TextBoxDark Grid.Row="10" Grid.Column="1" Margin="3" IsEnabled="{Binding ElementName=gridWidthCheckbox, Path=IsChecked}" Text="{Binding GlobalGridWidth}"/>
+
+            <CheckBox Grid.Row="11" Grid.Column="0" Margin="3" VerticalAlignment="Center" Name="gridHeightCheckbox" Content="" IsChecked="{Binding GridHeightEnabled}"/>
+            <TextBlock Grid.Row="11" Grid.Column="0" Margin="25 2 2 2"  VerticalAlignment="Center" Text="Global grid height" ToolTip="This option globally overrides the automatic assignment of a room's grid height based on the most used tile's height in that room."/>
+            <local:TextBoxDark Grid.Row="11" Grid.Column="1" Margin="3" IsEnabled="{Binding ElementName=gridHeightCheckbox, Path=IsChecked}" Text="{Binding GlobalGridHeight}"/>
+
+            <CheckBox Grid.Row="10" Grid.Column="2" Margin="3" VerticalAlignment="Center" Name="gridThicknessCheckBox" Content="" IsChecked="{Binding GridThicknessEnabled}"/>
+            <TextBlock Grid.Row="10" Grid.Column="2" Margin="25 2 2 2" VerticalAlignment="Center" Text="Global grid thickness" ToolTip="This option globally overrides the automatic assignment of a room's grid thickness."/>
+            <local:TextBoxDark Grid.Row="10" Grid.Column="3" Margin="3" IsEnabled="{Binding ElementName=gridThicknessCheckBox, Path=IsChecked}" Text="{Binding GlobalGridThickness}"/>
 
             <Separator Grid.Row="13" Grid.ColumnSpan="4" Margin="10"/>
 

@@ -352,6 +352,12 @@ namespace UndertaleModTool
                 SetDarkMode(true, true);
                 SetDarkTitleBarForWindow(this, true, false);
             }
+
+            try
+            {
+                SetTransparencyGridColors(Settings.Instance.TransparencyGridColor1, Settings.Instance.TransparencyGridColor2);
+            }
+            catch (FormatException) { }
         }
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -654,6 +660,12 @@ namespace UndertaleModTool
             {
                 Debug.WriteLine($"SetDarkTitleBarForWindow() error for window \"{form}\" - {ex.GetType()}: {ex.Message}");
             }
+        }
+
+        public static void SetTransparencyGridColors(string color1, string color2)
+        {
+            Application.Current.Resources["TransparencyGridColor1"] = new SolidColorBrush((Color)System.Windows.Media.ColorConverter.ConvertFromString(color1));
+            Application.Current.Resources["TransparencyGridColor2"] = new SolidColorBrush((Color)System.Windows.Media.ColorConverter.ConvertFromString(color2));
         }
 
         private async void Command_New(object sender, ExecutedRoutedEventArgs e)
