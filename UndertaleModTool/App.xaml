@@ -9,7 +9,7 @@
             <MenuItem Command="ApplicationCommands.Copy" />
             <MenuItem Command="ApplicationCommands.Paste" />
         </local:ContextMenuDark>
-        <SolidColorBrush x:Key="TransparencyGridColor1" Color="#ffd3d3d3"/>
-        <SolidColorBrush x:Key="TransparencyGridColor2" Color="#ffffffff"/>
+        <SolidColorBrush x:Key="TransparencyGridColor1" Color="#ff666666"/>
+        <SolidColorBrush x:Key="TransparencyGridColor2" Color="#ff999999"/>
     </Application.Resources>
 </Application>

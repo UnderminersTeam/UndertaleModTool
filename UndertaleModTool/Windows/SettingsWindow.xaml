@@ -79,7 +79,7 @@
                 <local:TextBoxDark Width="80" Margin="3" Text="{Binding TransparencyGridColor2}" />
             </StackPanel>
 
-            <Canvas Grid.Row="8" Grid.Column="1" Width="20" Height="20" Background="{DynamicResource TransparencyGridBrushBrush}"></Canvas>
+            <Canvas Grid.Row="8" Grid.Column="1" Width="16" Height="16" Background="{DynamicResource TransparencyGridBrushBrush}"></Canvas>
 
             <Separator Grid.Row="9" Grid.ColumnSpan="4" Margin="10"/>
 
