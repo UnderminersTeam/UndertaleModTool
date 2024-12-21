@@ -51,6 +51,9 @@ namespace UndertaleModTool
         public double GlobalGridThickness { get; set; } = 1;
         public bool GridThicknessEnabled { get; set; } = false;
 
+        public string TransparencyGridColor1 { get; set; } = "#FF666666";
+        public string TransparencyGridColor2 { get; set; } = "#FF999999";
+
         public bool EnableDarkMode { get; set; } = false;
         public bool ShowDebuggerOption { get; set; } = false;
 
