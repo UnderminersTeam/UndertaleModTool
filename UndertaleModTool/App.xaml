@@ -9,6 +9,7 @@
                 <ResourceDictionary Source="Themes/ColourDictionaries/LightTheme.xaml" />
                 <ResourceDictionary Source="Themes/ControlColours.xaml" />
                 <ResourceDictionary Source="Themes/Controls.xaml" />
+                <ResourceDictionary Source="Themes/AvalonEditControls.xaml" />
                 <ResourceDictionary>
                     <ContextMenu x:Key="textBoxContextMenu">
                         <MenuItem Command="ApplicationCommands.Cut" />
