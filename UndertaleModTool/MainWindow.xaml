@@ -222,7 +222,7 @@
                         <TextBox.Style>
                             <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
                                 <Setter Property="Foreground" Value="{DynamicResource ABrush.Foreground.Disabled}"/>
-                                <Setter Property="Text" Value="Filter by name..."/>
+                                <Setter Property="Text" Value=""/>
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value="">
                                         <Setter Property="Text" Value="Filter by name..."/>
