@@ -31,7 +31,7 @@
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Flags</TextBlock>
-        <local:TextBoxDark Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding Flags}"/>
+        <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding Flags}"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Type</TextBlock>
         <local:UndertaleStringReference Grid.Row="2" Grid.Column="1" Margin="3" ObjectReference="{Binding Type}"/>
@@ -40,13 +40,13 @@
         <local:UndertaleStringReference Grid.Row="3" Grid.Column="1" Margin="3" ObjectReference="{Binding File}"/>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Effects</TextBlock>
-        <local:TextBoxDark Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding Effects}"/>
+        <TextBox Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding Effects}"/>
 
         <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Volume</TextBlock>
-        <local:TextBoxDark Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding Volume}"/>
+        <TextBox Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding Volume}"/>
 
         <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Pitch</TextBlock>
-        <local:TextBoxDark Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding Pitch}"/>
+        <TextBox Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding Pitch}"/>
 
         <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Audio group</TextBlock>
         <local:UndertaleObjectReference Grid.Row="7" Grid.Column="1" Margin="3" ObjectReference="{Binding AudioGroup}" ObjectType="{x:Type undertale:UndertaleAudioGroup}"/>
@@ -65,8 +65,8 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <local:ButtonDark Grid.Row="11" Grid.Column="0" x:Name="Play" Click="Play_Click" Margin="3,0">Play</local:ButtonDark>
-            <local:ButtonDark Grid.Row="11" Grid.Column="1" x:Name="Stop" Click="Stop_Click" Margin="3,0">Stop</local:ButtonDark>
+            <Button Grid.Row="11" Grid.Column="0" x:Name="Play" Click="Play_Click" Margin="3,0">Play</Button>
+            <Button Grid.Row="11" Grid.Column="1" x:Name="Stop" Click="Stop_Click" Margin="3,0">Stop</Button>
         </Grid>
     </Grid>
 </local:DataUserControl>

@@ -21,19 +21,9 @@
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Moments</TextBlock>
-        <local:DataGridDark Grid.Row="3" Grid.Column="1" Margin="3" ItemsSource="{Binding Moments}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow" AddingNewItem="DataGrid_AddingNewItem">
+        <DataGrid Grid.Row="3" Grid.Column="1" Margin="3" ItemsSource="{Binding Moments}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow" AddingNewItem="DataGrid_AddingNewItem">
             <DataGrid.Resources>
-                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
-                <Style TargetType="{x:Type DataGridCell}">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="{x:Type DataGridCell}">
-                                <Grid Background="{TemplateBinding Background}">
-                                    <ContentPresenter VerticalAlignment="Center" />
-                                </Grid>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
+                <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
                             <Setter Property="Template">
@@ -51,14 +41,14 @@
                 <DataGridTemplateColumn Header="Step" Width="1*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <local:TextBoxDark Text="{Binding Step, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0"/>
+                            <TextBox Text="{Binding Step, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Actions (Code Entries)" Width="3*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <local:DataGridDark ItemsSource="{Binding Event}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow">
+                            <DataGrid ItemsSource="{Binding Event}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow">
                                 <DataGrid.Columns>
                                     <DataGridTemplateColumn Header="Code" Width="*">
                                         <DataGridTemplateColumn.CellTemplate>
@@ -68,11 +58,11 @@
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
                                 </DataGrid.Columns>
-                            </local:DataGridDark>
+                            </DataGrid>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
-        </local:DataGridDark>
+        </DataGrid>
     </Grid>
 </local:DataUserControl>

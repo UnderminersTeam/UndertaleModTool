@@ -50,7 +50,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Border Background="{x:Static SystemColors.WindowBrush}" Grid.Row="0" Grid.Column="0" Panel.ZIndex="1">
+        <Border Grid.Row="0" Grid.Column="0" Panel.ZIndex="1">
             <TextBlock HorizontalAlignment="Center" Text="{Binding ., Mode=OneTime, Converter={StaticResource RoomCaptionConverter}}" FontSize="14" FontStyle="Italic" Margin="5"/>
         </Border>
         <ItemsControl Grid.Column="0" Grid.Row="1" Panel.ZIndex="0" Name="RoomGraphics" Background="Gray" ClipToBounds="True">
