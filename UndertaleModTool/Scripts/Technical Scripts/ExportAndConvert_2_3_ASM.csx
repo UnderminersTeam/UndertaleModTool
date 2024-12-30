@@ -13,7 +13,6 @@ if (Data.ToolInfo.ProfileMode)
 }
 
 string codeFolder = GetFolder(FilePath) + "Export_Assembly2" + Path.DirectorySeparatorChar;
-ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
 if (Directory.Exists(codeFolder))
 {

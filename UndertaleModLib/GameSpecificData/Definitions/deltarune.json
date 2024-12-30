@@ -1,0 +1,14 @@
+{
+  "LoadOrder": 1,
+  "Conditions": [
+    {
+      "ConditionKind": "DisplayName.Regex",
+      "Value": "(?i)^SURVEY_PROGRAM$"
+    },
+    {
+      "ConditionKind": "DisplayName.Regex",
+      "Value": "(?i)^deltarune"
+    }
+  ],
+  "UnderanalyzerFilename": "deltarune.json"
+}

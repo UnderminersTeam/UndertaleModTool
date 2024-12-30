@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using UndertaleModLib.Models;
 using static UndertaleModLib.Compiler.Compiler.AssemblyWriter;
-using AssetRefType = UndertaleModLib.Decompiler.Decompiler.ExpressionAssetRef.RefType;
+using static UndertaleModLib.Util.AssetReferenceTypes;
 
 namespace UndertaleModLib.Compiler
 {
@@ -22,8 +21,12 @@ namespace UndertaleModLib.Compiler
         public bool TypedAssetRefs => Data.IsVersionAtLeast(2023, 8);
         public int LastCompiledArgumentCount = 0;
         public Dictionary<string, string> LocalVars = new Dictionary<string, string>();
-        public Dictionary<string, string> GlobalVars = new Dictionary<string, string>();
-        public Dictionary<string, Dictionary<string, int>> Enums = new Dictionary<string, Dictionary<string, int>>();
+        public Dictionary<string, string> GlobalVars = new Dictionary<string, string>(); 
+        public Stack<Compiler.Parser.FunctionParseInfo> FunctionParseStack = new();
+        public Dictionary<Compiler.Parser.Statement, Compiler.Parser.FunctionParseInfo> FunctionParseInfo = new();
+        public List<(string, Compiler.Parser.Statement)> EnumStatements = new List<(string, Compiler.Parser.Statement)>();
+        public Dictionary<string, Dictionary<string, long?>> Enums = new Dictionary<string, Dictionary<string, long?>>();
+        public bool FirstPassResolvingEnums = false;
         public UndertaleCode OriginalCode;
         public IList<UndertaleVariable> OriginalReferencedLocalVars;
         public BuiltinList BuiltInList => Data.BuiltinList;
@@ -44,9 +47,35 @@ namespace UndertaleModLib.Compiler
             OriginalReferencedLocalVars = OriginalCode?.FindReferencedLocalVars();
         }
 
+        /// <summary>
+        /// Returns the asset index (including encoded reference type, if applicable) of a given identifier,
+        /// or -1 if no asset/reference is found.
+        /// </summary>
         public int GetAssetIndexByName(string name)
         {
-            return assetIds.TryGetValue(name, out int val) ? val : -1;
+            // Look up asset names
+            if (assetIds.TryGetValue(name, out int val))
+            {
+                return val;
+            }
+
+            // Handle named instance IDs
+            string instanceIdPrefix = Data.ToolInfo.InstanceIdPrefix();
+            if (name.StartsWith(instanceIdPrefix, StringComparison.InvariantCulture))
+            {
+                if (int.TryParse(name[instanceIdPrefix.Length..], out int id) && id >= 100000)
+                {
+                    if (TypedAssetRefs)
+                    {
+                        // Add type to ID
+                        id = (id & 0xffffff) | ((ConvertFromRefType(Data, RefType.RoomInstance) & 0x7f) << 24);
+                    }
+                    return id;
+                }
+            }
+
+            // Nothing found
+            return -1;
         }
 
         public void OnSuccessfulFinish()
@@ -74,7 +103,8 @@ namespace UndertaleModLib.Compiler
                             UndertaleFunction functionObj = Data.Functions.ByName(scriptName);
                             if (functionObj is not null)
                                 Data.Functions.Remove(functionObj);
-                            Data.KnownSubFunctions.Remove(name);
+                            Data.GlobalFunctions.NameToFunction.Remove(name);
+                            Data.GlobalFunctions.FunctionToName.Remove(functionObj);
                         }
                         FunctionsToObliterate.Clear();
                     }
@@ -130,21 +160,21 @@ namespace UndertaleModLib.Compiler
             assetIds.EnsureCapacity(maxSize);
             scripts.EnsureCapacity(Data.Scripts?.Count ?? 0);
 
-            AddAssetsFromList(Data.GameObjects, AssetRefType.Object);
-            AddAssetsFromList(Data.Sprites, AssetRefType.Sprite);
-            AddAssetsFromList(Data.Sounds, AssetRefType.Sound);
-            AddAssetsFromList(Data.Backgrounds, AssetRefType.Background);
-            AddAssetsFromList(Data.Paths, AssetRefType.Path);
-            AddAssetsFromList(Data.Fonts, AssetRefType.Font);
-            AddAssetsFromList(Data.Timelines, AssetRefType.Timeline);
+            AddAssetsFromList(Data.GameObjects, RefType.Object);
+            AddAssetsFromList(Data.Sprites, RefType.Sprite);
+            AddAssetsFromList(Data.Sounds, RefType.Sound);
+            AddAssetsFromList(Data.Backgrounds, RefType.Background);
+            AddAssetsFromList(Data.Paths, RefType.Path);
+            AddAssetsFromList(Data.Fonts, RefType.Font);
+            AddAssetsFromList(Data.Timelines, RefType.Timeline);
             if (!GMS2_3)
-                AddAssetsFromList(Data.Scripts, AssetRefType.Object /* not actually used */);
-            AddAssetsFromList(Data.Shaders, AssetRefType.Shader);
-            AddAssetsFromList(Data.Rooms, AssetRefType.Room);
-            AddAssetsFromList(Data.AudioGroups, AssetRefType.Sound /* apparently? */);
-            AddAssetsFromList(Data.AnimationCurves, AssetRefType.AnimCurve);
-            AddAssetsFromList(Data.Sequences, AssetRefType.Sequence);
-            AddAssetsFromList(Data.ParticleSystems, AssetRefType.ParticleSystem);
+                AddAssetsFromList(Data.Scripts, RefType.Script /* not actually used */);
+            AddAssetsFromList(Data.Shaders, RefType.Shader);
+            AddAssetsFromList(Data.Rooms, RefType.Room);
+            AddAssetsFromList(Data.AudioGroups, RefType.Sound /* apparently? */);
+            AddAssetsFromList(Data.AnimationCurves, RefType.AnimCurve);
+            AddAssetsFromList(Data.Sequences, RefType.Sequence);
+            AddAssetsFromList(Data.ParticleSystems, RefType.ParticleSystem);
 
             if (Data.Scripts is not null)
             {
@@ -168,7 +198,7 @@ namespace UndertaleModLib.Compiler
             }
         }
 
-        private void AddAssetsFromList<T>(IList<T> list, AssetRefType type) where T : UndertaleNamedResource
+        private void AddAssetsFromList<T>(IList<T> list, RefType type) where T : UndertaleNamedResource
         {
             if (list == null)
                 return;
@@ -180,7 +210,7 @@ namespace UndertaleModLib.Compiler
                     if (name != null)
                     {
                         // Typed asset refs pack their type into the ID
-                        assetIds[name] = (i & 0xffffff) | (((int)type & 0x7f) << 24);
+                        assetIds[name] = (i & 0xffffff) | ((ConvertFromRefType(Data, type) & 0x7f) << 24);
                     }
                 }
             }

@@ -155,7 +155,7 @@ if (obj_whtpxlgrav == null)
     return;
 }
 
-obj_whtpxlgrav.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+obj_whtpxlgrav.EventHandlerFor(EventType.Create, Data).ReplaceGML(@"
 image_speed = 0
 delay = 0
 ", Data);
@@ -168,7 +168,7 @@ delay = 0
 //
 // You can also change/copy it to exclude other colours if you need to
 
-obj_whtpxlgrav.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+obj_whtpxlgrav.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data).ReplaceGML(@"
 if (image_blend == make_color_rgb(0, 0, 0))
     instance_destroy()
 if (delay > 0)
@@ -185,32 +185,32 @@ else
 
 var obj_vaporized = Data.GameObjects.ByName("obj_vaporized");
 
-obj_vaporized.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+obj_vaporized.EventHandlerFor(EventType.Create, Data).ReplaceGML(@"
 sprite_index = global.monstersprite
 snd_play(snd_vaporized)
 ", Data);
 
-obj_vaporized.EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(bepisCode, Data);
+obj_vaporized.EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data).ReplaceGML(bepisCode, Data);
 
-obj_vaporized.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+obj_vaporized.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data).ReplaceGML(@"
 
 ", Data);
 
-obj_vaporized.EventHandlerFor(EventType.Alarm, (uint)0u, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+obj_vaporized.EventHandlerFor(EventType.Alarm, (uint)0u, Data).ReplaceGML(@"
 
 ", Data);
 
 var obj_vaporized_new = Data.GameObjects.ByName("obj_vaporized_new");
 
-obj_vaporized_new.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+obj_vaporized_new.EventHandlerFor(EventType.Create, Data).ReplaceGML(@"
 snd_play(snd_vaporized)
 ", Data);
 
-obj_vaporized_new.EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(bepisCode, Data);
+obj_vaporized_new.EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data).ReplaceGML(bepisCode, Data);
 
 var obj_vaporized_old = Data.GameObjects.ByName("obj_vaporized_old");
 
-obj_vaporized_old.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+obj_vaporized_old.EventHandlerFor(EventType.Create, Data).ReplaceGML(@"
 sprite_index = global.monstersprite
 line = 0
 finished = 0
@@ -220,7 +220,7 @@ snd_play(snd_vaporized)
 action_set_alarm(2, 0)
 ", Data);
 
-obj_vaporized_old.EventHandlerFor(EventType.Alarm, (uint)0u, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(bepisCode, Data);
+obj_vaporized_old.EventHandlerFor(EventType.Alarm, (uint)0u, Data).ReplaceGML(bepisCode, Data);
 
 ChangeSelection(obj_whtpxlgrav);
 

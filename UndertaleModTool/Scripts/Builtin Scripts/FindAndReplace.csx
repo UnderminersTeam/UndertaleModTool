@@ -32,10 +32,12 @@ SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
 StartProgressBarUpdater();
 
 SyncBinding("Strings, Variables, Functions", true);
-await Task.Run(() => {
+await Task.Run(() => 
+{
+    GlobalDecompileContext globalDecompileContext = new(Data);
     foreach (UndertaleCode code in Data.Code)
     {
-        ReplaceTextInGML(code.Name.Content, keyword, replacement, case_sensitive, isRegex);
+        ReplaceTextInGML(code.Name.Content, keyword, replacement, case_sensitive, isRegex, globalDecompileContext);
         IncrementProgress();
     }
 });
