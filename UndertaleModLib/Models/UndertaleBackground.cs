@@ -65,11 +65,10 @@ public class UndertaleBackground : UndertaleNamedResource, IDisposable
     /// </summary>
     public UndertaleTexturePageItem Texture { get; set; }
 
-
     /// <summary>
-    /// TODO: Functionality currently unknown. Game Maker Studio 2 only.
+    /// Tile offset starting from the top left, both horizontally and vertically. Game Maker Studio 2 only.
     /// </summary>
-    public uint GMS2UnknownAlways2 { get; set; } = 2;
+    public uint GMS2TileOffset { get; set; } = 2;
 
     /// <summary>
     /// The width of a tile in this tileset. Game Maker Studio 2 only.
