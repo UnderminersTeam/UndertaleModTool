@@ -332,25 +332,29 @@ namespace UndertaleModLib
                     throw new UndertaleSerializationException(e.Message + "\nwhile reading pointer to item " + (i + 1) + " of " + count + " in a list of " + typeof(T).FullName, e);
                 }
             }
-            if (Count > 0)
-            {
-                uint pos = reader.GetAddressForUndertaleObject(this[0]);
-                if (reader.AbsPosition != pos)
-                {
-                    long skip = pos - reader.AbsPosition;
-                    if (skip > 0)
-                    {
-                        //Console.WriteLine("Skip " + skip + " bytes of blobs");
-                        reader.AbsPosition += skip;
-                    }
-                    else
-                        throw new IOException("First list item starts inside the pointer list?!?!");
-                }
-            }
+
+            bool firstItemHit = false;
             for (uint i = 0; i < count; i++)
             {
                 try
                 {
+                    uint pos = reader.GetAddressForUndertaleObject(this[(int)i]);
+                    if (pos == 0)
+                        continue;
+
+                    if (!firstItemHit && reader.AbsPosition != pos)
+                    {
+                        long skip = pos - reader.AbsPosition;
+                        if (skip > 0)
+                        {
+                            //Console.WriteLine("Skip " + skip + " bytes of blobs");
+                            reader.AbsPosition += skip;
+                        }
+                        else
+                            throw new IOException("First list item starts inside the pointer list?!?!");
+                    }
+                    firstItemHit = true;
+
                     T obj = this[(int)i];
 
                     (obj as PrePaddedObject)?.UnserializePrePadding(reader);
@@ -392,16 +396,31 @@ namespace UndertaleModLib
 
             uint[] pointers = reader.utListPtrsPool.Rent((int)count);
             for (uint i = 0; i < count; i++)
-                pointers[i] = reader.ReadUInt32();
-
-            uint pos = pointers[0];
-            if (reader.AbsPosition != pos)
             {
-                long skip = pos - reader.AbsPosition;
-                if (skip > 0)
-                    reader.AbsPosition += skip;
-                else
-                    throw new IOException("First list item starts inside the pointer list?!?!");
+                uint pos = reader.ReadUInt32();
+                if (pos == 0)
+                {
+                    i--;
+                    count--;
+                    continue;
+                }
+                pointers[i] = pos;
+            }
+
+            for (uint i = 0; i < count; i++)
+            {
+                uint pos = pointers[i];
+                if (pos == 0)
+                    continue;
+                if (reader.AbsPosition != pos)
+                {
+                    long skip = pos - reader.AbsPosition;
+                    if (skip > 0)
+                        reader.AbsPosition += skip;
+                    else
+                        throw new IOException("First list item starts inside the pointer list?!?!");
+                }
+                break;
             }
 
             var unserializeFunc = reader.GetUnserializeCountFunc(t);
