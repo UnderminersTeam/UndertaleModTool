@@ -572,6 +572,8 @@ namespace UndertaleModLib
             try
             {
                 var expectedAddress = GetAddressForUndertaleObject(obj);
+                if (expectedAddress == 0)
+                    return;
                 if (expectedAddress != AbsPosition)
                 {
                     SubmitWarning("Reading misaligned at " + AbsPosition.ToString("X8") + ", realigning back to " + expectedAddress.ToString("X8") + "\nHIGH RISK OF DATA LOSS! The file is probably corrupted, or uses unsupported features\nProceed at your own risk");
