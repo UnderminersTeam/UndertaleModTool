@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using UndertaleModLib.Models;
+using UndertaleModLib.Util;
 
 namespace UndertaleModLib
 {
@@ -412,6 +414,7 @@ namespace UndertaleModLib
         {
             // Read count and set list with that capacity
             uint count = reader.ReadUInt32();
+            uint realCount = count;
             Clear();
             SetCapacity(count);
 
@@ -422,7 +425,16 @@ namespace UndertaleModLib
             {
                 for (; i < count; i++)
                 {
-                    InternalAdd(reader.ReadUndertaleObjectPointer<T>());
+                    T obj = reader.ReadUndertaleObjectPointer<T>();
+                    if (obj is null)
+                    {
+                        // Naturally this can only happen with 2024.11 data files.
+                        // FIXME: Is this a good idea?
+                        if (!reader.undertaleData.IsVersionAtLeast(2024, 11))
+                            reader.undertaleData.SetGMS2Version(2024, 11);
+                        realCount--;
+                    }
+                    InternalAdd(obj);
                 }
             }
             catch (UndertaleSerializationException e)
@@ -431,9 +443,11 @@ namespace UndertaleModLib
             }
 
             // Advance to start of first object (particularly, if blobs exist)
-            if (count > 0)
+            if (realCount > 0)
             {
-                uint pos = reader.GetAddressForUndertaleObject(this[0]);
+                T firstItem = this.FirstOrDefault(i => i is not null);
+                DebugUtil.Assert(firstItem is not null, "Reached this point without actually having items");
+                uint pos = reader.GetAddressForUndertaleObject(firstItem);
                 if (reader.AbsPosition != pos)
                 {
                     long skip = pos - reader.AbsPosition;
@@ -455,6 +469,8 @@ namespace UndertaleModLib
                 for (; j < count; j++)
                 {
                     T obj = this[(int)j];
+                    if (obj is null)
+                        continue;
                     
                     // Unserialize pre-padding, if this is a type that requires it
                     if (t.IsAssignableTo(typeof(PrePaddedObject)))
@@ -492,6 +508,29 @@ namespace UndertaleModLib
                 return 0;
             }
 
+            // Read pointers of all objects
+            uint realCount = count;
+            uint[] pointers = reader.ListPtrsPool.Rent((int)count);
+            for (uint i = 0; i < count; i++)
+            {
+                uint pointer = reader.ReadUInt32();
+                if (pointer == 0)
+                {
+                    // Naturally this can only happen with 2024.11 data files.
+                    // FIXME: Is this a good idea?
+                    if (!reader.undertaleData.IsVersionAtLeast(2024, 11))
+                        reader.undertaleData.SetGMS2Version(2024, 11);
+                    realCount--;
+                }
+                pointers[i] = pointer;
+            }
+
+            if (realCount == 0)
+            {
+                reader.ListPtrsPool.Return(pointers);
+                return 0;
+            }
+
             // If objects have a static child object size/count, simply multiply to determine the number of total objects
             Type t = typeof(T);
             if (t.IsAssignableTo(typeof(IStaticChildObjectsSize)))
@@ -504,20 +543,14 @@ namespace UndertaleModLib
                     subCount = reader.GetStaticChildCount(t);
                 }
 
-                reader.Position += (count * 4) + (count * subSize);
+                reader.Position += (count * 4) + (realCount * subSize);
 
-                return count + (count * subCount);
-            }
-
-            // Read pointers of all objects
-            uint[] pointers = reader.ListPtrsPool.Rent((int)count);
-            for (uint i = 0; i < count; i++)
-            {
-                pointers[i] = reader.ReadUInt32();
+                return realCount + (realCount * subCount);
             }
 
             // Advance to start of first object (particularly, if blobs exist)
-            uint pos = pointers[0];
+            uint pos = pointers.FirstOrDefault(i => i != 0);
+            DebugUtil.Assert(pos != 0, "Reached this point without actually having items");
             if (reader.AbsPosition != pos)
             {
                 long skip = pos - reader.AbsPosition;
@@ -539,6 +572,8 @@ namespace UndertaleModLib
             {
                 for (; j < count; j++)
                 {
+                    if (pointers[j] == 0)
+                        continue;
                     reader.AbsPosition = pointers[j];
                     totalCount += 1 + unserializeFunc(reader);
                 }
