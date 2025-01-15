@@ -576,7 +576,7 @@ namespace UndertaleModLib
                     return;
                 if (expectedAddress != AbsPosition)
                 {
-                    SubmitWarning("Reading misaligned at " + AbsPosition.ToString("X8") + ", realigning back to " + expectedAddress.ToString("X8") + "\nHIGH RISK OF DATA LOSS! The file is probably corrupted, or uses unsupported features\nProceed at your own risk\n" + Environment.StackTrace);
+                    SubmitWarning("Reading misaligned at " + AbsPosition.ToString("X8") + ", realigning back to " + expectedAddress.ToString("X8") + "\nHIGH RISK OF DATA LOSS! The file is probably corrupted, or uses unsupported features\nProceed at your own risk");
                     AbsPosition = expectedAddress;
                 }
                 unreadObjects.Remove((uint)AbsPosition);
