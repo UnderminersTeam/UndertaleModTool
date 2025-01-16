@@ -777,11 +777,20 @@ namespace UndertaleModLib
 
         public void WriteUndertaleObject<T>(T obj) where T : UndertaleObject, new()
         {
+            if (obj is null)
+            {
+                // We simply shouldn't write anything.
+                // Pointers to this "object" are simply written as 0, and we don't need to
+                // put it in the pool
+                return;
+            }
+
             try
             {
                 // This isn't a major issue, and this is a performance waster
                 //if (objectPool.ContainsKey(obj))
                 //    throw new IOException("Writing object twice");
+
                 uint objectAddr = Position;
                 if (obj.GetType() == typeof(UndertaleString))
                 {
@@ -795,7 +804,7 @@ namespace UndertaleModLib
                 }
                 else
                     objectPool.Add(obj, objectAddr); // strings come later in the file, so no need to add them to the pool
-                
+
                 obj.Serialize(this);
 
                 if (pendingWrites.ContainsKey(obj))
