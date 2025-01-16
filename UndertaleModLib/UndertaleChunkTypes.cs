@@ -238,7 +238,10 @@ namespace UndertaleModLib
 
             IndexDict = new();
             for (int i = 0; i < List.Count; i++)
-                IndexDict[List[i]] = i;
+            {
+                if (List[i] is not null)
+                    IndexDict[List[i]] = i;
+            }
         }
         public void ClearIndexDict()
         {
