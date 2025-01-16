@@ -782,6 +782,14 @@ namespace UndertaleModLib
 
         public void WriteUndertaleObject<T>(T obj) where T : UndertaleObject, new()
         {
+            if (obj is null)
+            {
+                // We simply shouldn't write anything.
+                // Pointers to this "object" are simply written as 0, and we don't need to
+                // put it in the pool
+                return;
+            }
+
             try
             {
                 // Store object address before writing it
