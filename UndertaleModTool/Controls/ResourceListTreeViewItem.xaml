@@ -42,6 +42,23 @@
         </Style>
     </TreeViewItem.Resources>
 
+    <TreeViewItem.Style>
+        <Style TargetType="{x:Type local:ResourceListTreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ItemsSource, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+                <!--
+                    Every header should be visible if a data file is not loaded, as seen in previous versions of
+                    the tool.
+                -->
+                <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </TreeViewItem.Style>
+
     <TreeViewItem.ItemContainerStyle>
         <StaticResource ResourceKey="UndertaleModTool.ResourceListTreeViewItem.ItemContainerStyle"/>
     </TreeViewItem.ItemContainerStyle>

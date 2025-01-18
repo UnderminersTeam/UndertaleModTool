@@ -56,17 +56,6 @@ namespace UndertaleModTool
         {
             InitializeComponent();
 
-            Binding visibilityBinding = new("ItemsSource")
-            {
-                RelativeSource = RelativeSource.Self,
-                Converter = new NullToVisibilityConverter() {
-                    nullValue = Visibility.Collapsed,
-                    notNullValue = Visibility.Visible
-                },
-                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
-            };
-            SetBinding(VisibilityProperty, visibilityBinding);
-
             ItemTemplateSelector = new NullConditionalDataTemplateSelector()
             {
                 NonNullTemplate = DefaultItemTemplate,
