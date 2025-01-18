@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using UndertaleModLib.Models;
+using UndertaleModLib.Util;
 
 namespace UndertaleModLib
 {
@@ -378,6 +380,36 @@ namespace UndertaleModLib
             if (count == 0)
                 return 0;
 
+            long pointersStart = reader.Position;
+            uint[] pointers = reader.utListPtrsPool.Rent((int)count);
+            for (uint i = 0; i < count; i++)
+            {
+                uint pos = reader.ReadUInt32();
+                if (pos == 0)
+                {
+                    // Naturally this can only happen with 2024.11 data files.
+                    // FIXME: Is this a good idea?
+                    if (reader.undertaleData.GeneralInfo.BytecodeVersion >= 17)
+                    {
+                        if (!reader.undertaleData.IsVersionAtLeast(2024, 11))
+                            reader.undertaleData.SetGMS2Version(2024, 11);
+                    }
+                    else
+                    {
+                        reader.SubmitWarning("Null pointers found in pointer list on bytecode version pre-17!");
+                    }
+                    i--;
+                    count--;
+                    continue;
+                }
+                pointers[i] = pos;
+            }
+            if (count == 0)
+            {
+                reader.utListPtrsPool.Return(pointers);
+                return 0;
+            }
+
             uint totalCount = 0;
 
             Type t = typeof(T);
@@ -389,42 +421,26 @@ namespace UndertaleModLib
                 if (t.IsAssignableTo(typeof(IStaticChildObjCount)))
                     subCount = reader.GetStaticChildCount(t);
 
-                reader.Position += count * 4 + count * subSize;
+                reader.Position = pointersStart + count * 4;
+                reader.Position += count * subSize;
 
+                reader.utListPtrsPool.Return(pointers);
                 return count + count * subCount;
             }
 
-            uint[] pointers = reader.utListPtrsPool.Rent((int)count);
-            for (uint i = 0; i < count; i++)
+            uint firstItem = pointers.Where(x => x != 0).FirstOrDefault();
+            if (firstItem == 0)
             {
-                uint pos = reader.ReadUInt32();
-                if (pos == 0)
-                {
-                    // Naturally this can only happen with 2024.11 data files.
-                    // FIXME: Is this a good idea?
-                    if (!reader.undertaleData.IsVersionAtLeast(2024, 11))
-                        reader.undertaleData.SetGMS2Version(2024, 11);
-                    i--;
-                    count--;
-                    continue;
-                }
-                pointers[i] = pos;
+                reader.utListPtrsPool.Return(pointers);
+                return 0;
             }
-
-            for (uint i = 0; i < count; i++)
+            if (reader.AbsPosition != firstItem)
             {
-                uint pos = pointers[i];
-                if (pos == 0)
-                    continue;
-                if (reader.AbsPosition != pos)
-                {
-                    long skip = pos - reader.AbsPosition;
-                    if (skip > 0)
-                        reader.AbsPosition += skip;
-                    else
-                        throw new IOException("First list item starts inside the pointer list?!?!");
-                }
-                break;
+                long skip = firstItem - reader.AbsPosition;
+                if (skip > 0)
+                    reader.AbsPosition += skip;
+                else
+                    throw new IOException("First list item starts inside the pointer list?!?!");
             }
 
             var unserializeFunc = reader.GetUnserializeCountFunc(t);
