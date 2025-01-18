@@ -8,11 +8,11 @@
              mc:Ignorable="d">
 
     <TreeViewItem.Resources>
-        <local:ImplementsInterfaceConverter x:Key="ImplementsInterfaceConverter"/>
-
-        <DataTemplate x:Key="NullResourceItemTemplate">
+        <DataTemplate x:Key="DefaultNullItemTemplate">
             <TextBlock Text="(null)"/>
         </DataTemplate>
+
+        <local:ImplementsInterfaceConverter x:Key="ImplementsInterfaceConverter"/>
 
         <local:ContextMenuDark x:Key="UndertaleResourceMenu" Opened="MenuItem_ContextMenuOpened">
             <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>
@@ -22,28 +22,28 @@
         </local:ContextMenuDark>
 
         <!-- TODO: Would need some way to know the ID, IndexOf won't be reliable
-        <local:ContextMenuDark x:Key="NullResourceItemReplaceMenu" Opened="MenuItem_ContextMenuOpened_NullItem">
+        <local:ContextMenuDark x:Key="NullItemReplaceMenu" Opened="MenuItem_ContextMenuOpened_NullItem">
             <MenuItem IsEnabled="False" Header="ID: " Name="ObjectIdLabel" />
             <Separator />
             <MenuItem Header="_Add in place" />
         </local:ContextMenuDark>
         -->
 
-        <Style x:Key="ResourceListTreeViewItem.ItemContainerStyle" TargetType="{x:Type TreeViewItem}">
+        <Style x:Key="UndertaleModTool.ResourceListTreeViewItem.ItemContainerStyle" TargetType="{x:Type TreeViewItem}">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding ., Converter={StaticResource ImplementsInterfaceConverter}, ConverterParameter={x:Type undertalelib:UndertaleResource}}" Value="True">
                     <Setter Property="ContextMenu" Value="{StaticResource UndertaleResourceMenu}"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding .}" Value="{x:Null}">
                     <Setter Property="Foreground" Value="Gray"/>
-                    <!--<Setter Property="ContextMenu" Value="{StaticResource NullResourceItemReplaceMenu}"/>-->
+                    <!--<Setter Property="ContextMenu" Value="{StaticResource NullItemReplaceMenu}"/>-->
                 </DataTrigger>
             </Style.Triggers>
         </Style>
     </TreeViewItem.Resources>
 
     <TreeViewItem.ItemContainerStyle>
-        <StaticResource ResourceKey="ResourceListTreeViewItem.ItemContainerStyle"/>
+        <StaticResource ResourceKey="UndertaleModTool.ResourceListTreeViewItem.ItemContainerStyle"/>
     </TreeViewItem.ItemContainerStyle>
 
 </TreeViewItem>

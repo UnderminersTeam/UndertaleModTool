@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -10,14 +10,46 @@ namespace UndertaleModTool
 {
     public partial class ResourceListTreeViewItem : TreeViewItem
     {
-        public static readonly DependencyProperty DefaultTemplateProperty = DependencyProperty.Register(
-            "DefaultTemplate", typeof(DataTemplate), typeof(ResourceListTreeViewItem),
-            new FrameworkPropertyMetadata(default(DataTemplate), FrameworkPropertyMetadataOptions.AffectsRender, OnDefaultTemplateChanged));
+        // <summary>
+        // TreeViewItem for representing UndertaleResources in the MainWindow data hirearchy
+        // </summary>
 
-        public DataTemplate DefaultTemplate
+        // We can't just use the stock ItemTemplate property, else our Selector will not run
+        public static readonly DependencyProperty DefaultItemTemplateProperty = DependencyProperty.Register(
+            "DefaultItemTemplate", typeof(DataTemplate), typeof(ResourceListTreeViewItem),
+            new FrameworkPropertyMetadata(default(DataTemplate), FrameworkPropertyMetadataOptions.AffectsRender, OnDefaultItemTemplateChanged));
+
+        // <summary>
+        // Template to use if a resource is not null
+        // </summary>
+        [Bindable(true), Category("Content")]
+        public DataTemplate DefaultItemTemplate
         {
-            get { return (DataTemplate)GetValue(DefaultTemplateProperty); }
-            set { SetValue(DefaultTemplateProperty, value); }
+            get { return (DataTemplate)GetValue(DefaultItemTemplateProperty); }
+            set { SetValue(DefaultItemTemplateProperty, value); }
+        }
+
+        public static readonly DependencyProperty NullItemTemplateProperty = DependencyProperty.Register(
+            "NullItemTemplate", typeof(DataTemplate), typeof(ResourceListTreeViewItem),
+            new FrameworkPropertyMetadata(default(DataTemplate), FrameworkPropertyMetadataOptions.AffectsRender, OnNullItemTemplateChanged));
+
+        private DataTemplate _defaultNullItemTemplateCache;
+
+        // <summary>
+        // Template to use if a resource is null
+        // </summary>
+        [Bindable(true), Category("Content")]
+        public DataTemplate NullItemTemplate
+        {
+            get
+            {
+                // HACK: I don't want to implement the default template in code, so I'm getting it from
+                // the resource dict; unfortunately it means I have to do this, since I can't just
+                // specify it in the metadata
+                _defaultNullItemTemplateCache ??= FindResource("DefaultNullItemTemplate") as DataTemplate;
+                return (DataTemplate)GetValue(NullItemTemplateProperty) ?? _defaultNullItemTemplateCache;
+            }
+            set { SetValue(NullItemTemplateProperty, value); }
         }
 
         public ResourceListTreeViewItem()
@@ -26,27 +58,34 @@ namespace UndertaleModTool
 
             Binding visibilityBinding = new("ItemsSource")
             {
+                RelativeSource = RelativeSource.Self,
                 Converter = new NullToVisibilityConverter() {
                     nullValue = Visibility.Collapsed,
                     notNullValue = Visibility.Visible
                 },
-                RelativeSource = RelativeSource.Self,
                 UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
             };
             SetBinding(VisibilityProperty, visibilityBinding);
 
-            ItemTemplateSelector = new ResourceItemTemplateSelector()
+            ItemTemplateSelector = new NullConditionalDataTemplateSelector()
             {
-                DefaultTemplate = DefaultTemplate,
-                NullTemplate = FindResource("NullResourceItemTemplate") as DataTemplate
+                NonNullTemplate = DefaultItemTemplate,
+                NullTemplate = NullItemTemplate
             };
         }
 
-        private static void OnDefaultTemplateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnDefaultItemTemplateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             ResourceListTreeViewItem item = d as ResourceListTreeViewItem;
             if (item is not null)
-                (item.ItemTemplateSelector as ResourceItemTemplateSelector).DefaultTemplate = item.DefaultTemplate;
+                (item.ItemTemplateSelector as NullConditionalDataTemplateSelector).NonNullTemplate = item.DefaultItemTemplate;
+        }
+
+        private static void OnNullItemTemplateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            ResourceListTreeViewItem item = d as ResourceListTreeViewItem;
+            if (item is not null)
+                (item.ItemTemplateSelector as NullConditionalDataTemplateSelector).NullTemplate = item.NullItemTemplate;
         }
 
         private void MenuItem_ContextMenuOpened(object sender, RoutedEventArgs e)
@@ -109,19 +148,6 @@ namespace UndertaleModTool
             MainWindow window = (MainWindow)Application.Current.MainWindow;
             if (window.Highlighted is UndertaleObject obj)
                 window.DeleteItem(obj);
-        }
-    }
-
-    public class ResourceItemTemplateSelector : DataTemplateSelector
-    {
-        public DataTemplate DefaultTemplate { get; set; }
-        public DataTemplate NullTemplate { get; set; }
-
-        public override DataTemplate SelectTemplate(object item, DependencyObject container)
-        {
-            if (item is null)
-                return NullTemplate;
-            return DefaultTemplate;
         }
     }
 }
