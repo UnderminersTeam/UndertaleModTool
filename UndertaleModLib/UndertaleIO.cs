@@ -83,8 +83,8 @@ namespace UndertaleModLib
                     if (CachedId > 0 || (typeof(ChunkT) != typeof(UndertaleChunkAGRP) && CachedId == 0))
                     {
                         if (!writer.undertaleData.IsVersionAtLeast(2024, 11))
-                            throw new IOException("Tried to write an ID reference to a null object, which is abnormal before 2024.11");
-                        writer.SubmitMessage("Writing -1 as the ID reference to a null (likely deleted by GMAC) object, as we can't assure what its position in the relevant chunk is (DATA LOSS)");
+                            throw new IOException("Tried to write an ID reference to a null object which had a cached ID, which is abnormal before 2024.11");
+                        writer.SubmitMessage("Writing -1 as the ID reference to a null object which had a cached ID (likely meaning it was deleted by GMAC), as we can't assure what its position in the relevant chunk is (DATA LOSS)");
                     }
                     if (typeof(ChunkT) == typeof(UndertaleChunkAGRP))
                         CachedId = 0;
