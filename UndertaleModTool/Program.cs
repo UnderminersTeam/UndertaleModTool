@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable CA1416 // Validate platform compatibility
+
+using System;
 using System.Collections.Generic;
 using log4net;
 using System.Diagnostics;
@@ -21,7 +23,7 @@ namespace UndertaleModTool
         }
 
         // https://stackoverflow.com/questions/1025843/merging-dlls-into-a-single-exe-with-wpf
-        [STAThreadAttribute]
+        [STAThread]
         public static void Main()
         {
             try
@@ -59,3 +61,5 @@ namespace UndertaleModTool
         }
     }
 }
+
+#pragma warning restore CA1416 // Validate platform compatibility
