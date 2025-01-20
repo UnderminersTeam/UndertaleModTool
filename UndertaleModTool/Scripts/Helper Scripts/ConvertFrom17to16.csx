@@ -4,7 +4,7 @@ EnsureDataLoaded();
 
 if (Data.IsVersionAtLeast(2, 3))
 {
-    bool x = RunUMTScript(Path.Combine(ExePath, "Scripts", "Helper Scripts", "ConvertFrom17to16_for_2.3.csx"));
+    bool x = await RunUMTScript(Path.Combine(ExePath, "Scripts", "Helper Scripts", "ConvertFrom17to16_for_2.3.csx"));
     if (x == false)
         ScriptError("ConvertFrom17to16_for_2.3.csx failed!");
     return;
