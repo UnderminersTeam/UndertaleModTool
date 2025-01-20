@@ -282,13 +282,51 @@
       "actor_startsprite": "Asset.Sprite",
       "actor_endsprite": "Asset.Sprite",
       "msprite": "Asset.Sprite",
-      "layersprites": "Asset.Sprite",
+      "layersprites": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Sprite"
+          },
+          "Asset.Sprite"
+        ]
+      },
       "pushSound": "Asset.Sound",
       "puzzle_icon": "Asset.Sprite",
       "firstsound": "Asset.Sound",
       "lastsound": "Asset.Sound",
       "sparesprite": "Asset.Sprite",
-      "_rollSprites": "Asset.Sprite",
+      "_rollSprites": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Sprite"
+          },
+          "Asset.Sprite"
+        ]
+      },
+      "_sprites": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Sprite"
+          },
+          "Asset.Sprite"
+        ]
+      },
+      "_spritesTea": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Sprite"
+          },
+          "Asset.Sprite"
+        ]
+      },
       "voiceclips": "Asset.Sound",
       "colClose": "Constant.Color",
       "colFar": "Constant.Color",
@@ -297,6 +335,7 @@
       "face": "Asset.Sprite",
       "_character": "Asset.Object",
       "_charinstance": "Asset.Object",
+      "charinstance": "Asset.Object",
       "sprite": "Deltarune.Asset.ZeroOrSprite",
       "victorySprite": "Deltarune.Asset.ZeroOrSprite",
       "topsprite": "Deltarune.Asset.ZeroOrSprite",
@@ -325,15 +364,33 @@
       "_colorB": "Constant.Color",
       "drawcolor": "Constant.Color",
       "fadecolor": "Constant.Color",
-      "lettercolor": "Constant.Color"
+      "lettercolor": "Constant.Color",
+      "bossObject": "Asset.Object",
+      "pushChar": "Asset.Object",
+      "rotator_target": "Asset.Object",
+      "controlled": "Asset.Object",
+      "tiletype": "Asset.Object",
+      "simcity": "Asset.Object",
+      "returnroom": "Asset.Room",
+      "target_char": "Id.InstanceOrObject",
+      "writergod": "Asset.Object",
+      "source": "Id.InstanceOrObject",
+      "sneo": "Id.InstanceOrObject",
+      "heartobj": "Asset.Object",
+      "swatchbc": "Asset.Object",
+      "swatch_bc": "Asset.Object",
+      "master": "Id.InstanceOrObject",
+      "cutscene_master": "Id.InstanceOrObject",
+      "teacupTarget": "Asset.Object",
+      "_teacups": "Asset.Object"
     },
     "FunctionArguments": {
       "snd_play": [ "Asset.Sound" ],
       "snd_stop": [ "Asset.Sound" ],
       "snd_is_playing": [ "Asset.Sound" ],
-      "snd_volume": [ "Asset.Sound" ],
-      "snd_pitch": [ "Asset.Sound" ],
-      "snd_pitch_time": [ "Asset.Sound" ],
+      "snd_volume": [ "Asset.Sound", null, null ],
+      "snd_pitch": [ "Asset.Sound", null ],
+      "snd_pitch_time": [ "Asset.Sound", null, null ],
       "snd_loop": [ "Asset.Sound" ],
       "snd_pause": [ "Asset.Sound" ],
       "scr_textsetup": [ "Asset.Font", "Constant.Color", null, null, null, null, null, "Asset.Sound" ],
@@ -347,10 +404,10 @@
       "gml_Script_snd_play_x": [ "Asset.Sound", null, null ],
       "gml_Script_snd_stop": [ "Asset.Sound" ],
       "gml_Script_snd_is_playing": [ "Asset.Sound" ],
-      "gml_Script_snd_play_pitch": [ "Asset.Sound" ],
-      "gml_Script_snd_volume": [ "Asset.Sound" ],
-      "gml_Script_snd_pitch": [ "Asset.Sound" ],
-      "gml_Script_snd_pitch_time": [ "Asset.Sound" ],
+      "gml_Script_snd_play_pitch": [ "Asset.Sound", null ],
+      "gml_Script_snd_volume": [ "Asset.Sound", null, null ],
+      "gml_Script_snd_pitch": [ "Asset.Sound", null ],
+      "gml_Script_snd_pitch_time": [ "Asset.Sound", null, null ],
       "gml_Script_snd_loop": [ "Asset.Sound" ],
       "gml_Script_snd_pause": [ "Asset.Sound" ],
       "gml_Script_c_soundplay": [ "Asset.Sound" ],
@@ -358,6 +415,9 @@
       "gml_Script_c_soundplay_wait": [ "Asset.Sound" ],
       "gml_Script_c_sprite": [ "Asset.Sprite" ],
       "gml_Script_c_jump_sprite": [ null, null, null, null, "Asset.Sprite", "Asset.Sprite" ],
+      "gml_Script_c_actortoobject": [ "Asset.Object" ],
+      "gml_Script_scr_pan_to_obj": [ "Asset.Object", null ],
+      "gml_Script_scr_pan_to_obj_ch1": [ "Asset.Object", null ],
       "gml_Script_scr_marker": [ null, null, "Asset.Sprite" ],
       "gml_Script_scr_marker_animated": {
         "MacroType": "Union",
@@ -537,7 +597,10 @@
       ],
       "gml_Script_scr_room": [ "Asset.Room", null ],
       "gml_Script_scr_stickto": [ "Id.InstanceOrObject", null ],
-      "gml_Script_c_stickto": [ "Id.InstanceOrObject", null ]
+      "gml_Script_c_stickto": [ "Id.InstanceOrObject", null ],
+      "gml_Script_scr_monster_add": [ null, "Asset.Object" ],
+      "gml_Script_scr_bullet_create": [ null, null, "Asset.Object" ],
+      "gml_Script_scr_childbullet": [ null, null, "Asset.Object" ]
     },
     "FunctionReturn": {
       "scr_getbuttonsprite": {
@@ -780,6 +843,36 @@
     "gml_Object_obj_move_to_point_ch1_Step_0": {
       "Variables": {
         "target": "Asset.Object"
+      }
+    },
+    "gml_Object_obj_sneo_tiny_susie_axe_Create_0": {
+      "Variables": {
+        "target": "Asset.Object"
+      }
+    },
+    "gml_Object_obj_sneo_tiny_susie_axe_Step_0": {
+      "Variables": {
+        "target": "Asset.Object"
+      }
+    },
+    "gml_Object_obj_power_up_thrash_Create_0": {
+      "Variables": {
+        "thrash": "Asset.Object"
+      }
+    },
+    "gml_Object_obj_queen_bulletcontroller_Create_0": {
+      "Variables": {
+        "queen": "Asset.Object"
+      }
+    },
+    "gml_Object_obj_queen_explodinghead_Step_0": {
+      "Variables": {
+        "_bullet": "Asset.Object"
+      }
+    },
+    "gml_Object_obj_sneo_final_forme_Step_0": {
+      "Variables": {
+        "_box": "Asset.Object"
       }
     }
   }
