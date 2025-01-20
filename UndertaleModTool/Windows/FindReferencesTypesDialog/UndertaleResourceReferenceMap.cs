@@ -161,7 +161,6 @@ namespace UndertaleModTool.Windows
                             (typeof(UndertaleGameObject), "Game objects"),
                             (typeof(UndertaleGeneralInfo), "General info"),
                             (typeof(UndertaleOptions.Constant), "Game options constants"),
-                            (typeof(UndertaleLanguage), "Languages"),
                             (typeof(UndertalePath), "Paths"),
                             (typeof(UndertaleRoom), "Rooms"),
                             (typeof(UndertaleScript), "Scripts"),
@@ -176,6 +175,15 @@ namespace UndertaleModTool.Windows
                         Types = new[]
                         {
                             (typeof(UndertaleCodeLocals), "Code locals")
+                        }
+                    },
+                    new TypesForVersion
+                    {
+                        // Bytecode version 16
+                        Version = (16, uint.MaxValue, uint.MaxValue),
+                        Types = new[]
+                        {
+                            (typeof(UndertaleLanguage), "Languages"),
                         }
                     },
                     new TypesForVersion

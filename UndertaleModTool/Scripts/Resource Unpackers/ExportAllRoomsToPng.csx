@@ -42,7 +42,6 @@ if (mainWindow.IsGMS2 == Visibility.Visible)
         TileLayerTemplateSelector.ForcedMode = 1; // render tile layers as whole images
 
 DirectoryInfo dir = new DirectoryInfo(exportedTexturesFolder);
-TextureWorker worker = new TextureWorker();
 
 mainWindow.LastOpenedObject = mainWindow.Selected;
 
@@ -50,7 +49,6 @@ SetProgressBar(null, "Rooms Exported", 0, roomCount);
 StartUpdater();
 
 await DumpRooms();
-worker.Cleanup();
 
 await StopUpdater();
 HideProgressBar();
