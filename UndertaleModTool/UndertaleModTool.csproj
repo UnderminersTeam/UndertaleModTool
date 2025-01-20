@@ -19,6 +19,7 @@
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
         <!-- Suppress all missing XML comment warnings -->
         <NoWarn>1591</NoWarn>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
     </PropertyGroup>
     <ItemGroup>
       <None Remove="Resources\tabs_left_button.png" />
@@ -60,16 +61,16 @@
         <PackageReference Include="AvalonEdit">
             <Version>6.3.0.90</Version>
         </PackageReference>
-        <PackageReference Include="Fody" Version="6.8.1">
+        <PackageReference Include="Fody" Version="6.9.1">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="log4net" Version="2.0.17" />
+        <PackageReference Include="log4net" Version="3.0.3" />
         <PackageReference Include="Microsoft-WindowsAPICodePack-Shell">
             <Version>1.1.5</Version>
         </PackageReference>
         <PackageReference Include="Microsoft.CodeAnalysis.Analyzers">
-            <Version>3.3.4</Version>
+            <Version>3.11.0</Version>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
@@ -126,7 +127,7 @@
         <PackageReference Include="System.Xml.XPath.XDocument">
             <Version>4.3.0</Version>
         </PackageReference>
-        <PackageReference Include="Microsoft.Windows.Compatibility" Version="5.0.2" />
+        <PackageReference Include="Microsoft.Windows.Compatibility" Version="9.0.0" />
     </ItemGroup>
     <Target Name="AfterResolveReferences">
         <ItemGroup>

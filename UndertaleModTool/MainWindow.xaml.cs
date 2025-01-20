@@ -1,4 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
+﻿#pragma warning disable CA1416 // Validate platform compatibility
+
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.Win32;
@@ -248,7 +250,8 @@ namespace UndertaleModTool
                                 .AddReferences(typeof(UndertaleObject).GetTypeInfo().Assembly,
                                                 GetType().GetTypeInfo().Assembly,
                                                 typeof(JsonConvert).GetTypeInfo().Assembly,
-                                                typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly)
+                                                typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly,
+                                                typeof(ImageMagick.MagickImage).GetTypeInfo().Assembly)
                                 .WithEmitDebugInformation(true); //when script throws an exception, add a exception location (line number)
             });
 
@@ -351,6 +354,12 @@ namespace UndertaleModTool
                 SetDarkMode(true, true);
                 SetDarkTitleBarForWindow(this, true, false);
             }
+
+            try
+            {
+                SetTransparencyGridColors(Settings.Instance.TransparencyGridColor1, Settings.Instance.TransparencyGridColor2);
+            }
+            catch (FormatException) { }
         }
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -655,6 +664,12 @@ namespace UndertaleModTool
             }
         }
 
+        public static void SetTransparencyGridColors(string color1, string color2)
+        {
+            Application.Current.Resources["TransparencyGridColor1"] = new SolidColorBrush((Color)System.Windows.Media.ColorConverter.ConvertFromString(color1));
+            Application.Current.Resources["TransparencyGridColor2"] = new SolidColorBrush((Color)System.Windows.Media.ColorConverter.ConvertFromString(color2));
+        }
+
         private async void Command_New(object sender, ExecutedRoutedEventArgs e)
         {
             await MakeNewDataFile();
@@ -774,7 +789,6 @@ namespace UndertaleModTool
                 return SaveResult.Error;
             }
             
-            #pragma warning disable CA1416
             if (codeEditor.DecompiledChanged || codeEditor.DisassemblyChanged)
             {
                 IsSaving = true;
@@ -785,7 +799,6 @@ namespace UndertaleModTool
                 result = IsSaving ? SaveResult.Error : SaveResult.Saved;
                 IsSaving = false;
             }
-            #pragma warning restore CA1416
 
             return result;
         }
@@ -1073,10 +1086,8 @@ namespace UndertaleModTool
                                                       ? "Tile sets"
                                                       : "Backgrounds & Tile sets";
 
-                        #pragma warning disable CA1416
                         UndertaleCodeEditor.gettext = null;
                         UndertaleCodeEditor.gettextJSON = null;
-                        #pragma warning restore CA1416
                     }
 
                     dialog.Hide();
@@ -1271,9 +1282,7 @@ namespace UndertaleModTool
                     Data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
                 }
 
-                #pragma warning disable CA1416
                 UndertaleCodeEditor.gettextJSON = null;
-                #pragma warning restore CA1416
 
                 Dispatcher.Invoke(() =>
                 {
@@ -2476,7 +2485,6 @@ namespace UndertaleModTool
             {
                 Focus();
 
-                #pragma warning disable CA1416
                 if (Selected == code)
                 {
                     var codeEditor = FindVisualChild<UndertaleCodeEditor>(DataEditor);
@@ -2511,7 +2519,6 @@ namespace UndertaleModTool
                     UndertaleCodeEditor.EditorTab = editorTab;
                     UndertaleCodeEditor.ChangeLineNumber(lineNum, editorTab);
                 }
-                #pragma warning restore CA1416
 
                 HighlightObject(code);
                 ChangeSelection(code, inNewTab);
@@ -2743,7 +2750,6 @@ namespace UndertaleModTool
             return dlg.ShowDialog() == true ? dlg.FileName : null;
         }
 
-        #pragma warning disable CA1416
         public string PromptChooseDirectory()
         {
             VistaFolderBrowserDialog folderBrowser = new VistaFolderBrowserDialog();
@@ -2751,13 +2757,11 @@ namespace UndertaleModTool
             return folderBrowser.ShowDialog() == true ? folderBrowser.SelectedPath + "/" : null;
         }
 
-        #pragma warning disable CA1416
         public void PlayInformationSound()
         {
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
                 System.Media.SystemSounds.Asterisk.Play();
         }
-        #pragma warning restore CA1416
 
         public void ScriptMessage(string message)
         {
@@ -3084,6 +3088,8 @@ namespace UndertaleModTool
             string tempFolder = Path.Combine(Path.GetTempPath(), "UndertaleModTool");
             Directory.CreateDirectory(tempFolder); // We're about to download, so make sure the download dir actually exists
 
+            string downloadOutput = Path.Combine(tempFolder, "Update.zip.zip");
+
             // It's time to download; let's use a cool progress bar
             scriptDialog = new("Downloading", "Downloading new version...")
             {
@@ -3093,135 +3099,129 @@ namespace UndertaleModTool
             };
             SetProgressBar();
 
-            using (WebClient webClient = new())
+            try
             {
-                bool end = false;
-                bool ended = false;
-                string downloaded = "0.00";
-
-                webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler((sender, e) =>
+                _ = Task.Run(async () =>
                 {
-                    if (!end)
-                        downloaded = (e.BytesReceived / bytesToMB).ToString("F2", CultureInfo.InvariantCulture);
-                });
-                webClient.DownloadFileCompleted += new AsyncCompletedEventHandler((sender, e) =>
-                {
-                    end = true;
-
-                    HideProgressBar();
-                    _ = Task.Run(() =>
+                    using (HttpClient httpClient = new() { Timeout = TimeSpan.FromMinutes(5) })
                     {
-                        // wait until progress bar updater loop is finished
-                        while (!ended)
-                            Thread.Sleep(100);
-
-                        scriptDialog = null;
-                    });
-
-                    if (e.Error is not null)
-                    {
-                        string errMsg;
-
-                        if (e.Error.InnerException?.InnerException is Exception ex)
+                        // Read HTTP response
+                        using (HttpResponseMessage response = await httpClient.GetAsync(new Uri(downloadUrl), HttpCompletionOption.ResponseHeadersRead))
                         {
-                            if (ex.Message.StartsWith("Unable to read data")
-                                && e.Error.InnerException.Message.StartsWith("The SSL connection could not be established"))
+                            // Read header
+                            response.EnsureSuccessStatusCode();
+                            long totalBytes = response.Content.Headers.ContentLength ?? throw new Exception("Missing content length");
+
+                            // Start reading content
+                            using Stream contentStream = await response.Content.ReadAsStreamAsync();
+                            const int downloadBufferSize = 8192;
+                            byte[] downloadBuffer = new byte[downloadBufferSize];
+
+                            // Download content and save to file
+                            using FileStream fs = new(downloadOutput, FileMode.Create, FileAccess.Write, FileShare.None, downloadBufferSize, true);
+                            int bytesRead = await contentStream.ReadAsync(downloadBuffer);
+                            long totalBytesDownloaded = 0;
+                            long bytesToUpdateProgress = totalBytes / 500;
+                            long bytesToProgressCounter = 0;
+                            while (bytesRead > 0)
                             {
-                                errMsg = "Failed to download new version of UndertaleModTool.\n" +
-                                         "Error - The SSL connection could not be established.";
+                                // Write current data to file
+                                await fs.WriteAsync(downloadBuffer.AsMemory(0, bytesRead));
 
-                                bool isWin7 = Environment.OSVersion.Version.Major == 6;
-                                string win7upd = "\nProbably, you need to install Windows update KB2992611.\n" +
-                                                 "Open the update download page?";
-
-                                if (isWin7)
+                                // Update progress
+                                totalBytesDownloaded += bytesRead;
+                                bytesToProgressCounter += bytesRead;
+                                if (bytesToProgressCounter >= bytesToUpdateProgress)
                                 {
-                                    if (this.ShowQuestion(errMsg + win7upd, MessageBoxImage.Error) == MessageBoxResult.Yes)
-                                        OpenBrowser("https://www.microsoft.com/en-us/download/details.aspx?id=44622");
-
-                                    window.UpdateButtonEnabled = true;
-                                    return;
+                                    bytesToProgressCounter -= bytesToUpdateProgress;
+                                    UpdateProgressStatus($"Downloaded MB: {(totalBytesDownloaded / bytesToMB).ToString("F2", CultureInfo.InvariantCulture)}");
                                 }
+
+                                // Read next bytes
+                                bytesRead = await contentStream.ReadAsync(downloadBuffer);
                             }
-                            else
-                                errMsg = ex.Message;
                         }
-                        else if (e.Error.InnerException is Exception ex1)
-                            errMsg = ex1.Message;
-                        else
-                            errMsg = e.Error.Message;
-
-                        this.ShowError($"Failed to download new version of UndertaleModTool.\nError - {errMsg}.");
-                        window.UpdateButtonEnabled = true;
-                        return;
                     }
 
-                    // Unzip double-zipped update
-                    ZipFile.ExtractToDirectory(Path.Combine(tempFolder, "Update.zip.zip"), tempFolder, true);
-                    File.Move(Path.Combine(tempFolder, $"{patchName}.zip"), Path.Combine(tempFolder, "Update.zip"), true);
-                    File.Delete(Path.Combine(tempFolder, "Update.zip.zip"));
+                    // Download complete, hide progress bar
+                    HideProgressBar();
 
-                    string updaterFolder = Path.Combine(ExePath, "Updater");
-                    if (!File.Exists(Path.Combine(updaterFolder, "UndertaleModToolUpdater.exe")))
-                    {
-                        this.ShowError("Updater not found! Aborting update, report this to the devs!\nLocation checked: " + updaterFolder);
-                        window.UpdateButtonEnabled = true;
-                        return;
-                    }
-
+                    // Extract ZIP
                     string updaterFolderTemp = Path.Combine(tempFolder, "Updater");
+                    bool extractedSuccessfully = false;
                     try
                     {
-                        if (Directory.Exists(updaterFolderTemp))
-                            Directory.Delete(updaterFolderTemp, true);
+                        // Unzip double-zipped update
+                        ZipFile.ExtractToDirectory(downloadOutput, tempFolder, true);
+                        File.Move(Path.Combine(tempFolder, $"{patchName}.zip"), Path.Combine(tempFolder, "Update.zip"), true);
+                        File.Delete(downloadOutput);
 
-                        Directory.CreateDirectory(updaterFolderTemp);
-                        foreach (string file in Directory.GetFiles(updaterFolder))
+                        string updaterFolder = Path.Combine(ExePath, "Updater");
+                        if (!File.Exists(Path.Combine(updaterFolder, "UndertaleModToolUpdater.exe")))
                         {
-                            File.Copy(file, Path.Combine(updaterFolderTemp, Path.GetFileName(file)));
+                            this.ShowError("Updater not found! Aborting update, report this to the devs!\nLocation checked: " + updaterFolder);
+                            return;
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        this.ShowError($"Can't copy the updater app to the temporary folder.\n{ex}");
-                        window.UpdateButtonEnabled = true;
-                        return;
-                    }
-                    File.WriteAllText(Path.Combine(updaterFolderTemp, "actualAppFolder"), ExePath);
 
-                    window.UpdateButtonEnabled = true;
-
-                    this.ShowMessage("UndertaleModTool will now close to finish the update.");
-
-                    Process.Start(new ProcessStartInfo(Path.Combine(updaterFolderTemp, "UndertaleModToolUpdater.exe"))
-                    {
-                        WorkingDirectory = updaterFolderTemp
-                    });
-
-                    CloseOtherWindows();
-
-                    Closing -= DataWindow_Closing; // disable "on window closed" event handler
-                    Close();
-                });
-
-                _ = Task.Run(() =>
-                {
-                    while (!end)
-                    {
                         try
                         {
-                            UpdateProgressStatus($"Downloaded MB: {downloaded}");
-                        }
-                        catch {}
+                            if (Directory.Exists(updaterFolderTemp))
+                                Directory.Delete(updaterFolderTemp, true);
 
-                        Thread.Sleep(100);
+                            Directory.CreateDirectory(updaterFolderTemp);
+                            foreach (string file in Directory.GetFiles(updaterFolder))
+                            {
+                                File.Copy(file, Path.Combine(updaterFolderTemp, Path.GetFileName(file)));
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            this.ShowError($"Can't copy the updater app to the temporary folder.\n{ex}");
+                            return;
+                        }
+                        File.WriteAllText(Path.Combine(updaterFolderTemp, "actualAppFolder"), ExePath);
+
+                        extractedSuccessfully = true;
+                    }
+                    finally
+                    {
+                        // If we return early or not, always update button status
+                        Dispatcher.Invoke(() =>
+                        {
+                            window.UpdateButtonEnabled = !extractedSuccessfully;
+                        });
                     }
 
-                    ended = true;
-                });
+                    // Move back to UI thread to perform final actions
+                    Dispatcher.Invoke(() =>
+                    {
+                        this.ShowMessage("UndertaleModTool will now close to finish the update.");
 
-                // The Artifact is already zipped then zipped again by the download archive
-                webClient.DownloadFileAsync(new Uri(downloadUrl), Path.Combine(tempFolder, "Update.zip.zip"));
+                        // Invoke updater
+                        Process.Start(new ProcessStartInfo(Path.Combine(updaterFolderTemp, "UndertaleModToolUpdater.exe"))
+                        {
+                            WorkingDirectory = updaterFolderTemp
+                        });
+
+                        CloseOtherWindows();
+
+                        Closing -= DataWindow_Closing; // disable "on window closed" event handler
+                        Close();
+                    });
+                });
+            }
+            catch (Exception e)
+            {
+                string errMsg;
+                if (e.InnerException?.InnerException is Exception ex)
+                    errMsg = ex.Message;
+                else if (e.InnerException is Exception ex1)
+                    errMsg = ex1.Message;
+                else
+                    errMsg = e.Message;
+
+                this.ShowError($"Failed to download new version of UndertaleModTool.\nError - {errMsg}.");
+                window.UpdateButtonEnabled = true;
             }
         }
 
@@ -4081,3 +4081,5 @@ result in loss of work.");
         }
     }
 }
+
+#pragma warning restore CA1416 // Validate platform compatibility
