@@ -917,9 +917,11 @@
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
                                                 <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding TilesX}" ToolTip="Horizontal"/>
                                                 <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding TilesY}" ToolTip="Vertical"/>
+                                                <local:ButtonDark Grid.Column="2" Margin="3" Click="AutoSizeTile_Click" ToolTip="Automatically set size to match room size">Auto</local:ButtonDark>
                                             </Grid>
 
                                             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Tile set</TextBlock>
@@ -930,9 +932,11 @@
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <local:ButtonDark Grid.Column="0" Margin="3" Click="TileDataExport_Click">Export</local:ButtonDark>
-                                                <local:ButtonDark Grid.Column="1" Margin="3" Click="TileDataImport_Click">Import</local:ButtonDark>
+                                                <local:ButtonDark Grid.Column="0" Margin="3" Click="EditTiles_Click">Edit</local:ButtonDark>
+                                                <local:ButtonDark Grid.Column="1" Margin="3" Click="TileDataExport_Click">Export</local:ButtonDark>
+                                                <local:ButtonDark Grid.Column="2" Margin="3" Click="TileDataImport_Click">Import</local:ButtonDark>
                                             </Grid>
                                         </Grid>
                                     </DataTemplate>
