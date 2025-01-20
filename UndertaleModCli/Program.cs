@@ -733,8 +733,8 @@ public partial class Program : IScriptInterface
     /// Evaluates and executes given C# code.
     /// </summary>
     /// <param name="code">The C# string to execute</param>
-    /// <param name="scriptFile">The path to the script file where <see cref="code"/> was executed from.
-    /// Leave as null, if it wasn't executed from a script file</param>
+    /// <param name="scriptFile">The path to the script file where <paramref name="code"/> was loaded from.
+    /// Leave as null, if it wasn't executed from a script file.</param>
     private void RunCSharpCode(string code, string scriptFile = null)
     {
         if (Verbose)

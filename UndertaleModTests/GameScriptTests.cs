@@ -334,7 +334,6 @@ namespace UndertaleModTests
 
         public void ChangeSelection(object newSelection, bool inNewTab = false)
         {
-            throw new NotImplementedException();
         }
     }
 

@@ -35,7 +35,9 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
         private short initShift;
         private Canvas canvas;
 
+#pragma warning disable CS0067 // Event is never used (this is actually used)
         public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067
 
         public EditGlyphRectangleWindow(UndertaleFont font, UndertaleFont.Glyph selectedGlyph)
         {
