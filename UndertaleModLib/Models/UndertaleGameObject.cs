@@ -251,7 +251,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         int physicsShapeVertexCount = reader.ReadInt32();
         reader.Position += 12 + (uint)physicsShapeVertexCount * UndertalePhysicsVertex.ChildObjectsSize;
 
-        count += 2 + 1 + UndertalePointerList<UndertalePointerList<Event>>.UnserializeChildObjectCount(reader);
+        count += 3 + 1 + UndertalePointerList<UndertalePointerList<Event>>.UnserializeChildObjectCount(reader);
 
         return count;
     }
