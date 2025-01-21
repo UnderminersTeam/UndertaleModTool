@@ -339,7 +339,10 @@ namespace UndertaleModTool.Windows
         private void ListViewItem_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Return)
+            {
                 OpenSelectedListViewItem();
+                e.Handled = true;
+            }   
         }
 
         private void MenuItemOpen_Click(object sender, RoutedEventArgs e)
