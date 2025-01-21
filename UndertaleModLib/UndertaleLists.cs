@@ -389,14 +389,14 @@ namespace UndertaleModLib
                 {
                     // Naturally this can only happen with 2024.11 data files.
                     // FIXME: Is this a good idea?
-                    if (reader.undertaleData.GeneralInfo.BytecodeVersion >= 17)
+                    if (reader.undertaleData.IsGameMaker2())
                     {
                         if (!reader.undertaleData.IsVersionAtLeast(2024, 11))
                             reader.undertaleData.SetGMS2Version(2024, 11);
                     }
                     else
                     {
-                        reader.SubmitWarning("Null pointers found in pointer list on bytecode version pre-17!");
+                        reader.SubmitWarning("Null pointers found in pointer list on file built with GMS pre-2!");
                     }
                     i--;
                     count--;
