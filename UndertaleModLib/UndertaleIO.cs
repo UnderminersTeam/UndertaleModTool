@@ -86,11 +86,11 @@ namespace UndertaleModLib
                         newCachedId = -1;
                     if (CachedId > 0 || (typeof(ChunkT) != typeof(UndertaleChunkAGRP) && CachedId == 0))
                     {
-                        if (chunk.List[CachedId] is not null)
+                        if (chunk.List.Count > CachedId && chunk.List[CachedId] is not null)
                         {
-                            int firstNullOccurence = chunk.List.IndexOf(default);
-                            if (firstNullOccurence != -1)
-                                newCachedId = firstNullOccurence;
+                            int firstNullOccurrence = chunk.List.IndexOf(default);
+                            if (firstNullOccurrence != -1)
+                                newCachedId = firstNullOccurrence;
                         }
                         else
                         {
