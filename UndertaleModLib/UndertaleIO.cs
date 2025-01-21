@@ -79,17 +79,21 @@ namespace UndertaleModLib
                 }
                 else
                 {
-                    // FIXME
+                    int newCachedId;
+                    if (typeof(ChunkT) == typeof(UndertaleChunkAGRP))
+                        newCachedId = 0;
+                    else
+                        newCachedId = -1;
                     if (CachedId > 0 || (typeof(ChunkT) != typeof(UndertaleChunkAGRP) && CachedId == 0))
                     {
-                        if (!writer.undertaleData.IsVersionAtLeast(2024, 11))
-                            throw new IOException("Tried to write an ID reference to a null object which had a cached ID, which is abnormal before 2024.11");
-                        writer.SubmitMessage("Writing -1 as the ID reference to a null object which had a cached ID (likely meaning it was deleted by GMAC), as we can't assure what its position in the relevant chunk is (DATA LOSS)");
+                        if (chunk.List[CachedId] is not null)
+                        {
+                            int firstNullOccurence = chunk.List.IndexOf(default(T));
+                            if (firstNullOccurence != -1)
+                                newCachedId = firstNullOccurence;
+                        }
                     }
-                    if (typeof(ChunkT) == typeof(UndertaleChunkAGRP))
-                        CachedId = 0;
-                    else
-                        CachedId = -1;
+                    CachedId = newCachedId;
                 }
             }
             return CachedId;
@@ -123,14 +127,14 @@ namespace UndertaleModLib
                 {
                     // Naturally this can only happen with 2024.11 data files.
                     // FIXME: Is this a good idea?
-                    if (reader.undertaleData.GeneralInfo.BytecodeVersion >= 17)
+                    if (reader.undertaleData.IsGameMaker2())
                     {
                         if (!reader.undertaleData.IsVersionAtLeast(2024, 11))
                             reader.undertaleData.SetGMS2Version(2024, 11);
                     }
                     else
                     {
-                        reader.SubmitWarning("ID reference to null object found on bytecode version pre-17! File is likely corrupt and you won't be able to save.");
+                        reader.SubmitWarning("ID reference to null object found on file built with GMS pre-2!");
                     }
                 }
             }
