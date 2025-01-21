@@ -365,6 +365,15 @@ namespace UndertaleModTool.Windows
             CopyListViewItems(ResultsListView.SelectedItems.Cast<Result>().OrderBy(item => ResultsListView.Items.IndexOf(item)));
         }
 
+        private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (!IsVisible || IsLoaded)
+                return;
+
+            if (Settings.Instance.EnableDarkMode)
+                MainWindow.SetDarkTitleBarForWindow(this, true, false);
+        }
+
         private void Window_Closing(object sender, CancelEventArgs e)
         {
             e.Cancel = (loaderDialog is not null);
