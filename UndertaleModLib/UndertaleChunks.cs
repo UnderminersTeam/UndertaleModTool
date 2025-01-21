@@ -674,6 +674,16 @@ namespace UndertaleModLib
     public class UndertaleChunkFONT : UndertaleListChunk<UndertaleFont>
     {
         public override string Name => "FONT";
+
+        /// <summary>
+        /// Padding bytes at the end of the chunk.
+        /// </summary>
+        /// <remarks>
+        /// Appeared at some point after bytecode version 6, according to the existing copy of GMS 1.0.98.
+        /// Before bytecode version 12 (observed in bytecode 11), this contained unknown data of varying length.
+        /// Afterwards, this contains UTF-16 codepoints representing ASCII's 0x00-0xFF, and is consistently
+        /// 512 bytes long.
+        /// </remarks>
         public byte[] Padding;
 
         private static bool checkedFor2022_2;
@@ -795,14 +805,22 @@ namespace UndertaleModLib
         {
             base.SerializeChunk(writer);
 
-            if (Padding == null)
+            if (writer.undertaleData.GeneralInfo.BytecodeVersion > 6)
             {
-                for (ushort i = 0; i < 0x80; i++)
-                    writer.Write(i);
-                for (ushort i = 0; i < 0x80; i++)
-                    writer.Write((ushort)0x3f);
-            } else
-                writer.Write(Padding);
+                if (Padding == null)
+                {
+                    // TODO: Before bytecode 12 the size of Padding is variable.
+                    // (though we don't properly support them in other places yet)
+                    for (ushort i = 0; i < 0x80; i++)
+                        writer.Write(i);
+                    for (ushort i = 0; i < 0x80; i++)
+                        writer.Write((ushort)0x3f);
+                }
+                else
+                {
+                    writer.Write(Padding);
+                }
+            }
         }
 
         internal override void UnserializeChunk(UndertaleReader reader)
@@ -815,7 +833,19 @@ namespace UndertaleModLib
 
             base.UnserializeChunk(reader);
 
-            Padding = reader.ReadBytes(512);
+            if (reader.undertaleData.GeneralInfo.BytecodeVersion > 6)
+            {
+                if (reader.undertaleData.GeneralInfo.BytecodeVersion >= 12)
+                {
+                    Padding = reader.ReadBytes(512);
+                }
+                else
+                {
+                    // FIXME: how did GMAC the calculate the size of padding?
+                    int remainingBytes = (int)(Length - (reader.Position - 8));
+                    Padding = reader.ReadBytes(remainingBytes);
+                }
+            }
         }
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
