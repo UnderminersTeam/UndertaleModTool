@@ -496,11 +496,9 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         LicenseMD5 = reader.ReadBytes(16);
         Timestamp = reader.ReadUInt64();
         DisplayName = reader.ReadUndertaleString();
-        if (BytecodeVersion >= 14)
+        if (BytecodeVersion >= 13)
             ActiveTargets = reader.ReadUInt64();
         FunctionClassifications = (FunctionClassification)reader.ReadUInt64();
-        if (BytecodeVersion == 13)
-            ActiveTargets = reader.ReadUInt64();
         if (BytecodeVersion >= 13)
             SteamAppID = reader.ReadInt32();
         if (BytecodeVersion >= 14)
