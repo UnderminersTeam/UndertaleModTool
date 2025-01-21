@@ -180,15 +180,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         writer.Write(Solid);
         writer.Write(Depth);
         writer.Write(Persistent);
-        // This apparently has a different notation than everything else...
-        if (_parentId.Resource == null)
-        {
-            writer.Write(-100);
-        }
-        else
-        {
-            writer.WriteUndertaleObject(_parentId);
-        }
+        writer.WriteUndertaleObject(_parentId);
         writer.WriteUndertaleObject(_textureMaskId);
         writer.Write(UsesPhysics);
         writer.Write(IsSensor);
@@ -221,18 +213,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         Solid = reader.ReadBoolean();
         Depth = reader.ReadInt32();
         Persistent = reader.ReadBoolean();
-        _parentId = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
-        int parent = reader.ReadInt32();
-        if (parent == -100)
-        {
-            _parentId.UnserializeById(reader, -1);
-        }
-        else
-        {
-            if (parent < 0 && parent != -1) // Technically can be -100 (undefined), -2 (other), or -1 (self). Other makes no sense here though
-                throw new Exception("Invalid value for parent - should be -100 or object id, got " + parent);
-            _parentId.UnserializeById(reader, parent);
-        }
+        _parentId = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>>();
         _textureMaskId = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>>();
         UsesPhysics = reader.ReadBoolean();
         IsSensor = reader.ReadBoolean();

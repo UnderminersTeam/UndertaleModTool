@@ -897,13 +897,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             BorderY = reader.ReadUInt32();
             SpeedX = reader.ReadInt32();
             SpeedY = reader.ReadInt32();
-            _objectId = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
-            int readObjectId = reader.ReadInt32();
-            // Let's do the same thing done while reading parent object ID in UndertaleGameObject.
-            // FIXME: This likely causes serialization inaccuracy
-            if (readObjectId == -100) // undefined
-                readObjectId = -1;
-            _objectId.UnserializeById(reader, readObjectId);
+            _objectId = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>>();
         }
 
         /// <inheritdoc/>
