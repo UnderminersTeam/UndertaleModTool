@@ -51,16 +51,11 @@ namespace UndertaleModTool.Windows
 
         private UndertaleCodeEditor.CodeEditorTab editorTab;
 
+        static bool isSearchInProgress = false;
+
         public SearchInCodeWindow()
         {
             InitializeComponent();
-        }
-
-        public void ActivateAndFocusOnTextBox()
-        {
-            Activate();
-            SearchTextBox.Focus();
-            SearchTextBox.SelectAll();
         }
 
         private async void SearchButton_Click(object sender, RoutedEventArgs e)
@@ -88,6 +83,13 @@ namespace UndertaleModTool.Windows
 
             if (String.IsNullOrEmpty(text))
                 return;
+
+            if (isSearchInProgress)
+            {
+                this.ShowError("Can't search while another search is in progress.");
+                return;
+            }
+            isSearchInProgress = true;
 
             isCaseSensitive = CaseSensitiveCheckBox.IsChecked ?? false;
             isRegexSearch = RegexSearchCheckBox.IsChecked ?? false;
@@ -159,6 +161,8 @@ namespace UndertaleModTool.Windows
 
             mainWindow.IsEnabled = true;
             this.IsEnabled = true;
+
+            isSearchInProgress = false;
         }
 
         void SearchInGMLCache(KeyValuePair<string, string> code)
@@ -296,6 +300,12 @@ namespace UndertaleModTool.Windows
 
         void OpenSelectedListViewItem(bool inNewTab=false)
         {
+            if (isSearchInProgress)
+            {
+                this.ShowError("Can't open results while a search is in progress.");
+                return;
+            }
+
             foreach (Result result in ResultsListView.SelectedItems)
             {
                 mainWindow.OpenCodeEntry(result.Code, result.LineNumber, editorTab, inNewTab);
