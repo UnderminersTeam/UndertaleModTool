@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:UndertaleModTool"
         xmlns:UndertaleModTool="clr-namespace:UndertaleModTool" x:Class="UndertaleModTool.Windows.SearchInCodeWindow"
         mc:Ignorable="d"
-        Title="Search in code" Height="500" Width="800" Closing="Window_Closing" WindowStartupLocation="CenterScreen"
+        Title="Search in code" Height="500" Width="800" Closing="Window_Closing" IsVisibleChanged="Window_IsVisibleChanged" WindowStartupLocation="CenterScreen"
         FocusManager.FocusedElement="{Binding ElementName=SearchTextBox}" DataContext="{Binding Mode=OneWay, RelativeSource={RelativeSource Self}}">
     <Window.Resources>
         <local:ContextMenuDark x:Key="ListViewItemContextMenu">
@@ -17,7 +17,7 @@
         </local:ContextMenuDark>
     </Window.Resources>
     <DockPanel>
-        <StatusBar DockPanel.Dock="Bottom">
+        <StatusBar DockPanel.Dock="Bottom" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
             <StatusBarItem>
                 <TextBlock Name="StatusBarTextBlock"></TextBlock>
             </StatusBarItem>
@@ -28,12 +28,20 @@
             <CheckBox x:Name="CaseSensitiveCheckBox" Content="Case sensitive" HorizontalAlignment="Left" Margin="10,51,0,0" Height="15" VerticalAlignment="Top"/>
             <CheckBox x:Name="RegexSearchCheckBox" Content="Regex search" HorizontalAlignment="Left" Margin="108,51,0,0" VerticalAlignment="Top"/>
             <CheckBox x:Name="InAssemblyCheckBox" Content="In assembly" HorizontalAlignment="Left" Margin="204,51,0,0" VerticalAlignment="Top"/>
-            <ListView ItemsSource="{Binding Results}" x:Name="ResultsListView" Margin="10,76,10,10">
+            <ListView ItemsSource="{Binding Results}" x:Name="ResultsListView" Margin="10,76,10,10" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}">
                 <ListView.CommandBindings>
                     <CommandBinding Command="Copy" Executed="CopyCommand_Executed"/>
                 </ListView.CommandBindings>
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="true">
+                                <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" />
+                            </Trigger>
+                        </Style.Triggers>
                         <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_MouseDoubleClick"/>
                         <EventSetter Event="KeyDown" Handler="ListViewItem_KeyDown"/>
                         <Setter Property="FontFamily" Value="Consolas"/>
