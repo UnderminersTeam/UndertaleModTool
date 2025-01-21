@@ -496,9 +496,13 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         LicenseMD5 = reader.ReadBytes(16);
         Timestamp = reader.ReadUInt64();
         DisplayName = reader.ReadUndertaleString();
-        ActiveTargets = reader.ReadUInt64();
+        if (BytecodeVersion >= 14)
+            ActiveTargets = reader.ReadUInt64();
         FunctionClassifications = (FunctionClassification)reader.ReadUInt64();
-        SteamAppID = reader.ReadInt32();
+        if (BytecodeVersion == 13)
+            ActiveTargets = reader.ReadUInt64();
+        if (BytecodeVersion >= 13)
+            SteamAppID = reader.ReadInt32();
         if (BytecodeVersion >= 14)
             DebuggerPort = reader.ReadUInt32();
         RoomOrder = reader.ReadUndertaleObject<UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM>>();
@@ -550,9 +554,12 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     {
         reader.Position++; // "IsDebuggerDisabled"
         byte bytecodeVer = reader.ReadByte();
-        bool readDebugPort = bytecodeVer >= 14;
 
-        reader.Position += (uint)(122 + (readDebugPort ? 4 : 0));
+        reader.Position += 110;
+        if (bytecodeVer >= 13)
+            reader.Position += 12; // "ActiveTargets", "SteamAppID"
+        if (bytecodeVer >= 14)
+            reader.Position += 4; // "DebuggerPort"
 
         // "RoomOrder"
         return 1 + UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM>.UnserializeChildObjectCount(reader);
