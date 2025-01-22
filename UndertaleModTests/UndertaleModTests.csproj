@@ -16,6 +16,6 @@
       <Version>3.6.3</Version>
     </PackageReference>
     <PackageReference Include="System.ComponentModel.Composition" Version="9.0.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="3.6.3" />
+    <PackageReference Include="MSTest.TestAdapter" Version="3.7.2" />
   </ItemGroup>
 </Project>
