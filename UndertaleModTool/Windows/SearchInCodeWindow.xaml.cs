@@ -89,7 +89,6 @@ namespace UndertaleModTool.Windows
                 this.ShowError("Can't search while another search is in progress.");
                 return;
             }
-            isSearchInProgress = true;
 
             isCaseSensitive = CaseSensitiveCheckBox.IsChecked ?? false;
             isRegexSearch = RegexSearchCheckBox.IsChecked ?? false;
@@ -97,11 +96,21 @@ namespace UndertaleModTool.Windows
 
             if (isRegexSearch)
             {
-                keywordRegex = new(text, isCaseSensitive ? RegexOptions.Compiled : RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                try
+                {
+                    keywordRegex = new(text, isCaseSensitive ? RegexOptions.Compiled : RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                }
+                catch (ArgumentException e)
+                {
+                    this.ShowError($"Invalid regex: {e.Message}");
+                    return;
+                }
             }
 
             mainWindow.IsEnabled = false;
             this.IsEnabled = false;
+
+            isSearchInProgress = true;
 
             loaderDialog = new("Searching...", null);
             loaderDialog.Owner = this;
@@ -203,7 +212,7 @@ namespace UndertaleModTool.Windows
             {
                 string path = Path.Join(Settings.ProfilesFolder, mainWindow.ProfileHash, "Temp", codeName + ".gml");
                 if (File.Exists(path))
-                    return File.ReadAllText(path);
+                    return File.ReadAllText(path).Replace("\r\n", "\n");
             }
             return null;
         }
