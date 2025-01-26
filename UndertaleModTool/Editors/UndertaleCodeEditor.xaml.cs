@@ -590,7 +590,8 @@ namespace UndertaleModTool
                         .DecompileToString().Split('\n');
                 }
             }
-            Regex textdataRegex = new Regex("^ds_map_add\\(global\\.text_data_en, \\\"(.*)\\\", \\\"(.*)\\\"\\)", RegexOptions.Compiled);
+            Regex textdataRegex = new("^ds_map_add\\(global\\.text_data_en, \\\"(.*)\\\", \\\"(.*)\\\"\\)", RegexOptions.Compiled);
+            Regex textdataRegex2 = new("^ds_map_add\\(global\\.text_data_en, \\\"(.*)\\\", '(.*)'\\)", RegexOptions.Compiled);
             foreach (var line in decompilationOutput)
             {
                 Match m = textdataRegex.Match(line);
@@ -598,7 +599,14 @@ namespace UndertaleModTool
                 {
                     try
                     {
-                        gettext.Add(m.Groups[1].Value, m.Groups[2].Value);
+                        if (!data.IsGameMaker2() && m.Groups[2].Value.Contains("'\"'"))
+                        {
+                            gettext.Add(m.Groups[1].Value, $"\"{m.Groups[2].Value}\"");
+                        }
+                        else
+                        {
+                            gettext.Add(m.Groups[1].Value, m.Groups[2].Value);
+                        }
                     }
                     catch (ArgumentException)
                     {
@@ -607,6 +615,32 @@ namespace UndertaleModTool
                     catch
                     {
                         mainWindow.ShowError("Unknown error in textdata_en. This may cause errors in the comment display of text.");
+                    }
+                }
+                else
+                {
+                    m = textdataRegex2.Match(line);
+                    if (m.Success)
+                    {
+                        try
+                        {
+                            if (!data.IsGameMaker2() && m.Groups[2].Value.Contains("\"'\""))
+                            {
+                                gettext.Add(m.Groups[1].Value, $"\'{m.Groups[2].Value}\'");
+                            }
+                            else
+                            {
+                                gettext.Add(m.Groups[1].Value, m.Groups[2].Value);
+                            }
+                        }
+                        catch (ArgumentException)
+                        {
+                            mainWindow.ShowError("There is a duplicate key in textdata_en, being " + m.Groups[1].Value + ". This may cause errors in the comment display of text.");
+                        }
+                        catch
+                        {
+                            mainWindow.ShowError("Unknown error in textdata_en. This may cause errors in the comment display of text.");
+                        }
                     }
                 }
             }
