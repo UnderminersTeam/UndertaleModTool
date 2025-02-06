@@ -65,6 +65,11 @@
                 </ListView.ItemContainerStyle>
                 <ListView.View>
                     <GridView>
+                        <GridView.ColumnHeaderContainerStyle>
+                            <Style TargetType="{x:Type GridViewColumnHeader}">
+                                <Setter Property="Foreground" Value="Black" />
+                            </Style>
+                        </GridView.ColumnHeaderContainerStyle>
                         <GridViewColumn Header="Code" DisplayMemberBinding="{Binding Code}" Width="auto"/>
                         <GridViewColumn Header="Line" DisplayMemberBinding="{Binding LineNumber}" Width="auto"/>
                         <GridViewColumn Header="Text" DisplayMemberBinding="{Binding LineText}" Width="auto"/>
