@@ -107,6 +107,34 @@ namespace UndertaleModTool
             visualOffProp.SetValue(roomCanvas, prevOffset);
         }
 
+
+        public RenderTargetBitmap GetTileEditorPreview(Layer tilemap)
+        {
+            if (roomCanvas is null)
+            {
+                if (MainWindow.FindVisualChild<Canvas>(RoomGraphics) is Canvas canv && canv.Name == "RoomCanvas")
+                    roomCanvas = canv;
+                else
+                    throw new Exception("\"RoomCanvas\" not found.");
+            }
+
+            bool prevVisible = tilemap.IsVisible;
+            tilemap.IsVisible = false;
+            object prevOffset = visualOffProp.GetValue(roomCanvas);
+            visualOffProp.SetValue(roomCanvas, new Vector(0, 0));
+            Brush gridOpacMask = roomCanvas.OpacityMask;
+            roomCanvas.OpacityMask = null;
+            
+            RenderTargetBitmap target = new((int)roomCanvas.RenderSize.Width, (int)roomCanvas.RenderSize.Height, 96, 96, PixelFormats.Pbgra32);
+
+            target.Render(roomCanvas);
+
+            tilemap.IsVisible = prevVisible;
+            visualOffProp.SetValue(roomCanvas, prevOffset);
+            roomCanvas.OpacityMask = gridOpacMask;
+            return target;
+        }
+
         private void ExportAsPNG_Click(object sender, RoutedEventArgs e)
         {
             SaveFileDialog dlg = new();
@@ -1980,6 +2008,54 @@ namespace UndertaleModTool
             else
                 room.GridThicknessPx = 1;
             room.SetupRoom(!Settings.Instance.GridWidthEnabled, !Settings.Instance.GridHeightEnabled);
+        }
+
+        private void EditTiles_Click(object sender, RoutedEventArgs e)
+        {
+            if (ObjectEditor.Content is Layer lay)
+            {
+                Layer.LayerTilesData data = lay.TilesData;
+
+                if (data.Background is null)
+                {
+                    mainWindow.ShowMessage("The layer must have a tileset set!");
+                    return;
+                }
+                if (data.TilesX <= 0)
+                {
+                    mainWindow.ShowMessage("The layer's horizontal size must be larger than 0 tiles!");
+                    return;
+                }
+                if (data.TilesY <= 0)
+                {
+                    mainWindow.ShowMessage("The layer's horizontal size must be larger than 0 tiles!");
+                    return;
+                }
+
+                UndertaleTileEditor TileEditor = new UndertaleTileEditor(lay);
+                TileEditor.RoomPreview = GetTileEditorPreview(lay);
+                TileEditor.ShowDialog();
+            }
+        }
+
+        private void AutoSizeTile_Click(object sender, RoutedEventArgs e)
+        {
+            if (ObjectEditor.Content is Layer lay && this.DataContext is UndertaleRoom room)
+            {
+                Layer.LayerTilesData data = lay.TilesData;
+
+                if (data.Background is null)
+                {
+                    mainWindow.ShowMessage("The layer must have a tileset set!");
+                    return;
+                }
+                data.TilesX = (uint)Math.Ceiling(
+                    Convert.ToDouble(room.Width) / Convert.ToDouble(data.Background.GMS2TileWidth)
+                );
+                data.TilesY = (uint)Math.Ceiling(
+                    Convert.ToDouble(room.Height) / Convert.ToDouble(data.Background.GMS2TileHeight)
+                );
+            }
         }
     }
 
