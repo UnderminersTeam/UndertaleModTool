@@ -147,6 +147,9 @@ foreach (Atlas atlas in packer.Atlasses)
                         for (int i = 0; i < frame; i++)
                             newSprite.Textures.Add(null);
                     }
+
+                    // FIXME: this needs support for 2024.6+ collision masks, which only use bounding box
+                    //        (should use newSprite.CalculateMaskDimensions(Data) as well as newSprite.NewMaskEntry(Data))
                     newSprite.CollisionMasks.Add(newSprite.NewMaskEntry());
 
                     int width = ((n.Bounds.Width + 7) / 8) * 8;
