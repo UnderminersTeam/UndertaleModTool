@@ -9,39 +9,44 @@
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleGameObject}">
     <UserControl.Resources>
-        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="CollisionShapeFlags">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="undertale:CollisionShapeFlags" />
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
-        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="EventSubtypeKey">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="undertale:EventSubtypeKey" />
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
-        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="EventSubtypeStep">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="undertale:EventSubtypeStep" />
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
-        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="EventSubtypeMouse">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="undertale:EventSubtypeMouse" />
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
-        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="EventSubtypeOther">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="undertale:EventSubtypeOther" />
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
-        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="EventSubtypeDraw">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="undertale:EventSubtypeDraw" />
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
-        <local:EventNameConverter x:Key="EventNameConverter"/>
-        <local:GameObjectByIdConverter x:Key="GameObjectByIdConverter"/>
-        <local:IsGMS2Converter x:Key="IsGMS2Converter" />
+        <ResourceDictionary>
+            <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="CollisionShapeFlags">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="undertale:CollisionShapeFlags" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+            <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="EventSubtypeKey">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="undertale:EventSubtypeKey" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+            <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="EventSubtypeStep">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="undertale:EventSubtypeStep" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+            <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="EventSubtypeMouse">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="undertale:EventSubtypeMouse" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+            <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="EventSubtypeOther">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="undertale:EventSubtypeOther" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+            <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="EventSubtypeDraw">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="undertale:EventSubtypeDraw" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+            <local:EventNameConverter x:Key="EventNameConverter"/>
+            <local:GameObjectByIdConverter x:Key="GameObjectByIdConverter"/>
+            <local:IsGMS2Converter x:Key="IsGMS2Converter" />
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Controls/TransparencyGridBrush.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
 
         <!--
         Leaving this here for now, I might want to add it back for 'advanced' editor
@@ -198,17 +203,7 @@
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Viewbox Stretch="Uniform" StretchDirection="DownOnly">
-                            <Border>
-                                <Border.Background>
-                                    <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
-                                        <DrawingBrush.Drawing>
-                                            <DrawingGroup>
-                                                <GeometryDrawing Geometry="M0,0 L20,0 20,20, 0,20Z" Brush="White"/>
-                                                <GeometryDrawing Geometry="M0,10 L20,10 20,20, 10,20 10,0 0,0Z" Brush="LightGray"/>
-                                            </DrawingGroup>
-                                        </DrawingBrush.Drawing>
-                                    </DrawingBrush>
-                                </Border.Background>
+                            <Border Background="{DynamicResource TransparencyGridBrushBrush}">
                                 <local:UndertaleTexturePageItemDisplay DataContext="{Binding Texture, Mode=OneWay}"/>
                             </Border>
                         </Viewbox>

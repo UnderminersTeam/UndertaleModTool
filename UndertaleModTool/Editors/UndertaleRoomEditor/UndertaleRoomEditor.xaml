@@ -9,43 +9,48 @@
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleRoom}" x:Name="RoomEditor">
     <UserControl.Resources>
-        <local:GridConverter x:Key="GridConverter"/>
-        <local:UndertaleCachedImageLoader x:Key="UndertaleCachedImageLoader"/>
-        <local:ColorConverter x:Key="ColorConverter"/>
-        <local:SimplePointsDisplayConverter x:Key="SimplePointsDisplayConverter"/>
-        <local:LayerItemsSourceConverter x:Key="LayerItemsSourceConverter"/>
-        <local:LayerZIndexConverter x:Key="LayerZIndexConverter"/>
-        <local:IsGMS2Converter x:Key="IsGMS2Converter" />
-        <local:BGColorConverter x:Key="BGColorConverter"/>
-        <local:BGViewportConverter x:Key="BGViewportConverter"/>
-        <local:LayerTypeConverter x:Key="LayerTypeConverter"/>
-        <local:GridSizeGroupConverter x:Key="GridSizeGroupConverter"/>
-        <local:GridColumnSizeConverter x:Key="GridColumnSizeConverter"/>
-        <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
-        <local:ColorToOpacityConverter x:Key="ColorToOpacityConverter"/>
-        <local:CachedTileImageLoader x:Key="CachedTileImageLoader"/>
-        <local:CachedTileDataLoader x:Key="CachedTileDataLoader"/>
-        <local:TileLayerTemplateSelector x:Key="TileLayerTemplateSelector"/>
-        <local:TileRectanglesConverter x:Key="TileRectanglesConverter"/>
-        <local:CachedImageLoaderWithIndex x:Key="CachedImageLoaderWithIndex"/>
-        <local:IsVersionAtLeastConverter x:Key="IsVersionAtLeastConverter"/>
-        <local:NegateNumberConverter x:Key="NegateNumberConverter"/>
-        <local:ParentGridHeightConverter x:Key="ParentGridHeightConverter"/>
-        <local:ParticleSystemRectConverter x:Key="ParticleSystemRectConverter"/>
-        <CompositeCollection x:Key="AllObjectsGMS1">
-            <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Backgrounds}"/>
-            <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Tiles}"/>
-            <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.GameObjects}"/>
-            <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=PreviewPath, Converter={StaticResource SimplePointsDisplayConverter}}"/>
-        </CompositeCollection>
-        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="AnimationSpeedType">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="undertale:AnimationSpeedType" />
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
-        <Style x:Key="Centered" TargetType="FrameworkElement">
-            <Setter Property="VerticalAlignment" Value="Center"/>
-        </Style>
+        <ResourceDictionary>
+            <local:GridConverter x:Key="GridConverter"/>
+            <local:UndertaleCachedImageLoader x:Key="UndertaleCachedImageLoader"/>
+            <local:ColorConverter x:Key="ColorConverter"/>
+            <local:SimplePointsDisplayConverter x:Key="SimplePointsDisplayConverter"/>
+            <local:LayerItemsSourceConverter x:Key="LayerItemsSourceConverter"/>
+            <local:LayerZIndexConverter x:Key="LayerZIndexConverter"/>
+            <local:IsGMS2Converter x:Key="IsGMS2Converter" />
+            <local:BGColorConverter x:Key="BGColorConverter"/>
+            <local:BGViewportConverter x:Key="BGViewportConverter"/>
+            <local:LayerTypeConverter x:Key="LayerTypeConverter"/>
+            <local:GridSizeGroupConverter x:Key="GridSizeGroupConverter"/>
+            <local:GridColumnSizeConverter x:Key="GridColumnSizeConverter"/>
+            <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
+            <local:ColorToOpacityConverter x:Key="ColorToOpacityConverter"/>
+            <local:CachedTileImageLoader x:Key="CachedTileImageLoader"/>
+            <local:CachedTileDataLoader x:Key="CachedTileDataLoader"/>
+            <local:TileLayerTemplateSelector x:Key="TileLayerTemplateSelector"/>
+            <local:TileRectanglesConverter x:Key="TileRectanglesConverter"/>
+            <local:CachedImageLoaderWithIndex x:Key="CachedImageLoaderWithIndex"/>
+            <local:IsVersionAtLeastConverter x:Key="IsVersionAtLeastConverter"/>
+            <local:NegateNumberConverter x:Key="NegateNumberConverter"/>
+            <local:ParentGridHeightConverter x:Key="ParentGridHeightConverter"/>
+            <local:ParticleSystemRectConverter x:Key="ParticleSystemRectConverter"/>
+            <CompositeCollection x:Key="AllObjectsGMS1">
+                <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Backgrounds}"/>
+                <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.Tiles}"/>
+                <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=DataContext.GameObjects}"/>
+                <CollectionContainer Collection="{Binding Source={x:Reference RoomEditor}, Path=PreviewPath, Converter={StaticResource SimplePointsDisplayConverter}}"/>
+            </CompositeCollection>
+            <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="AnimationSpeedType">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="undertale:AnimationSpeedType" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+            <Style x:Key="Centered" TargetType="FrameworkElement">
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Controls/TransparencyGridBrush.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </UserControl.Resources>
 
     <UserControl.CommandBindings>
@@ -384,7 +389,7 @@
                                 <RowDefinition Height="Auto" SharedSizeGroup="{Binding Flags, Mode=OneTime, Converter={StaticResource GridSizeGroupConverter}}"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="{Binding Flags, Mode=OneTime, Converter={StaticResource GridSizeGroupConverter}}"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
-                                <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
+                                <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
@@ -434,7 +439,7 @@
                                                             Room="{Binding}"/>
 
                             <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Flags</TextBlock>
-                            <local:TextBoxDark Grid.Row="8" Grid.Column="2" Margin="3" Text="{Binding Flags, Converter={StaticResource IsGMS2Converter}, ConverterParameter=flags}"/>
+                            <local:FlagsBox Grid.Row="8" Grid.Column="2" Margin="3" Value="{Binding Flags, Converter={StaticResource IsGMS2Converter}, ConverterParameter=flags}"/>
 
                             <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">World</TextBlock>
                             <local:TextBoxDark Grid.Row="9" Grid.Column="2" Margin="3" Text="{Binding World}"/>
@@ -783,17 +788,7 @@
                             </TextBlock>
                             <Viewbox Grid.Row="4" Grid.Column="2" Margin="3" Stretch="Uniform" StretchDirection="DownOnly">
                                 <Canvas Width="{Binding Tpag.BoundingWidth, Mode=OneWay}" Height="{Binding Tpag.BoundingHeight, Mode=OneWay}" SnapsToDevicePixels="True" MouseDown="RectangleTile_MouseDown" MouseMove="RectangleTile_MouseMove">
-                                    <Border>
-                                        <Border.Background>
-                                            <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
-                                                <DrawingBrush.Drawing>
-                                                    <DrawingGroup>
-                                                        <GeometryDrawing Geometry="M0,0 L20,0 20,20, 0,20Z" Brush="White"/>
-                                                        <GeometryDrawing Geometry="M0,10 L20,10 20,20, 10,20 10,0 0,0Z" Brush="LightGray"/>
-                                                    </DrawingGroup>
-                                                </DrawingBrush.Drawing>
-                                            </DrawingBrush>
-                                        </Border.Background>
+                                    <Border Background="{DynamicResource TransparencyGridBrushBrush}">
                                         <local:UndertaleTexturePageItemDisplay DataContext="{Binding Tpag, Mode=OneWay}"/>
                                     </Border>
                                     <Rectangle x:Name="TileSelector" Canvas.Left="{Binding SourceX, Mode=OneWay}" Canvas.Top="{Binding SourceY, Mode=OneWay}" Width="{Binding Width, Mode=OneWay}" Height="{Binding Height, Mode=OneWay}" Stroke="#FFB23131" Panel.ZIndex="50" StrokeThickness="2" SnapsToDevicePixels="True">
@@ -929,9 +924,11 @@
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
                                                 <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding TilesX}" ToolTip="Horizontal"/>
                                                 <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding TilesY}" ToolTip="Vertical"/>
+                                                <local:ButtonDark Grid.Column="2" Margin="3" Click="AutoSizeTile_Click" ToolTip="Automatically set size to match room size">Auto</local:ButtonDark>
                                             </Grid>
 
                                             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Tile set</TextBlock>
@@ -942,9 +939,11 @@
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <local:ButtonDark Grid.Column="0" Margin="3" Click="TileDataExport_Click">Export</local:ButtonDark>
-                                                <local:ButtonDark Grid.Column="1" Margin="3" Click="TileDataImport_Click">Import</local:ButtonDark>
+                                                <local:ButtonDark Grid.Column="0" Margin="3" Click="EditTiles_Click">Edit</local:ButtonDark>
+                                                <local:ButtonDark Grid.Column="1" Margin="3" Click="TileDataExport_Click">Export</local:ButtonDark>
+                                                <local:ButtonDark Grid.Column="2" Margin="3" Click="TileDataImport_Click">Import</local:ButtonDark>
                                             </Grid>
                                         </Grid>
                                     </DataTemplate>
