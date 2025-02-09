@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable CA1416 // Validate platform compatibility
+
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -197,7 +199,7 @@ namespace UndertaleModTool.Windows
                 
             }
             // TODO: Look at specific exceptions
-            catch (Exception e)
+            catch (Exception)
             {
                 failedList.Add(code.Name.Content);
             }
@@ -389,3 +391,5 @@ namespace UndertaleModTool.Windows
         }
     }
 }
+
+#pragma warning restore CA1416 // Validate platform compatibility
