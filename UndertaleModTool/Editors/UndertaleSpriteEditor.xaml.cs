@@ -137,7 +137,7 @@ namespace UndertaleModTool
 
         private void MaskList_AddingNewItem(object sender, AddingNewItemEventArgs e)
         {
-            e.NewItem = (this.DataContext as UndertaleSprite).NewMaskEntry();
+            e.NewItem = (this.DataContext as UndertaleSprite).NewMaskEntry(mainWindow.Data);
         }
 
         private void MaskImport_Click(object sender, RoutedEventArgs e)
@@ -153,8 +153,8 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    (uint maskWidth, uint maskHeight) = sprite.CalculateMaskDimensions(mainWindow.Data);
-                    target.Data = TextureWorker.ReadMaskData(dlg.FileName, (int)maskWidth, (int)maskHeight);
+                    (int maskWidth, int maskHeight) = sprite.CalculateMaskDimensions(mainWindow.Data);
+                    target.Data = TextureWorker.ReadMaskData(dlg.FileName, maskWidth, maskHeight);
                     target.Width = maskWidth;
                     target.Height = maskHeight;
                 }
@@ -179,8 +179,8 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    (uint maskWidth, uint maskHeight) = sprite.CalculateMaskDimensions(mainWindow.Data);
-                    TextureWorker.ExportCollisionMaskPNG(target, dlg.FileName, (int)maskWidth, (int)maskHeight);
+                    (int maskWidth, int maskHeight) = sprite.CalculateMaskDimensions(mainWindow.Data);
+                    TextureWorker.ExportCollisionMaskPNG(target, dlg.FileName, maskWidth, maskHeight);
                 }
                 catch (Exception ex)
                 {
