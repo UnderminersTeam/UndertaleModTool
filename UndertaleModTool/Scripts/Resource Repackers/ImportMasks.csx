@@ -101,13 +101,13 @@ await Task.Run(() =>
         int collision_mask_count = sprite.CollisionMasks.Count;
         while (collision_mask_count <= frame)
         {
-            sprite.CollisionMasks.Add(sprite.NewMaskEntry());
+            sprite.CollisionMasks.Add(sprite.NewMaskEntry(Data));
             collision_mask_count += 1;
         }
         try
         {
-            (uint maskWidth, uint maskHeight) = sprite.CalculateMaskDimensions(Data);
-            sprite.CollisionMasks[frame].Data = TextureWorker.ReadMaskData(file, (int)maskWidth, (int)maskHeight);
+            (int maskWidth, int maskHeight) = sprite.CalculateMaskDimensions(Data);
+            sprite.CollisionMasks[frame].Data = TextureWorker.ReadMaskData(file, maskWidth, maskHeight);
         }
         catch
         {
