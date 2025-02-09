@@ -75,7 +75,7 @@ namespace UndertaleModTests
                 string disasm;
                 try
                 {
-                    disasm = code.Disassemble(data.Variables, data.CodeLocals.For(code));
+                    disasm = code.Disassemble(data.Variables, data.CodeLocals?.For(code));
                 }
                 catch (Exception e)
                 {

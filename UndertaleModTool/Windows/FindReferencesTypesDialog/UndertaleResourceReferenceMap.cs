@@ -10,6 +10,7 @@ namespace UndertaleModTool.Windows
     public class TypesForVersion
     {
         public (uint Major, uint Minor, uint Release) Version { get; set; }
+        public (uint Major, uint Minor, uint Release) BeforeVersion { get; set; } = (uint.MaxValue, uint.MaxValue, uint.MaxValue);
         public (Type, string)[] Types { get; set; }
     }
 
@@ -172,6 +173,7 @@ namespace UndertaleModTool.Windows
                     {
                         // Bytecode version 15
                         Version = (15, uint.MaxValue, uint.MaxValue),
+                        BeforeVersion = (2024, 8, 0),
                         Types = new[]
                         {
                             (typeof(UndertaleCodeLocals), "Code locals")
@@ -439,7 +441,13 @@ namespace UndertaleModTool.Windows
                 else
                     isAtLeast = typeForVer.Version.CompareTo(version) <= 0;
 
-                if (isAtLeast)
+                bool isAboveMost = false;
+                if (typeForVer.BeforeVersion.Minor == uint.MaxValue)
+                    isAboveMost = typeForVer.BeforeVersion.Major <= bytecodeVersion;
+                else
+                    isAboveMost = typeForVer.BeforeVersion.CompareTo(version) <= 0;
+
+                if (isAtLeast && !isAboveMost)
                     outTypes = typeForVer.Types.UnionBy(outTypes, x => x.Item1);
             }
 
