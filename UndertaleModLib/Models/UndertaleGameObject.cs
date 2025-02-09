@@ -302,16 +302,19 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
             action.CodeId = code;
             data.Code.Add(code);
 
-            UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
-            argsLocal.Name = data.Strings.MakeString("arguments");
-            argsLocal.Index = 0;
-
-            var locals = new UndertaleCodeLocals()
+            if (data.CodeLocals is not null)
             {
-                Name = name
-            };
-            locals.Locals.Add(argsLocal);
-            data.CodeLocals.Add(locals);
+                UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
+                argsLocal.Name = data.Strings.MakeString("arguments");
+                argsLocal.Index = 0;
+
+                var locals = new UndertaleCodeLocals()
+                {
+                    Name = name
+                };
+                locals.Locals.Add(argsLocal);
+                data.CodeLocals.Add(locals);
+            }
         }
         return code;
     }

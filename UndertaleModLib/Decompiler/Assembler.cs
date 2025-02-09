@@ -526,7 +526,7 @@ namespace UndertaleModLib.Decompiler
             // Locate variable from either local variables, or VARI chunk
             UndertaleVariable locatedVariable;
             string variableName = str[strPosition..].ToString();
-            if (variInstanceType == UndertaleInstruction.InstanceType.Local)
+            if (variInstanceType == UndertaleInstruction.InstanceType.Local && data?.CodeLocals is not null)
             {
                 locatedVariable = localvars.ContainsKey(variableName) ? localvars[variableName] : null;
             }
