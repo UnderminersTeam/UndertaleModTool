@@ -849,12 +849,12 @@ public class GMImage
     }
 
     /// <summary>
-    /// Creates a new raw format <see cref="GMImage"/> with the contents of the provided <see cref="MagickImage"/>.
+    /// Creates a new raw format <see cref="GMImage"/> with the contents of the provided <see cref="IMagickImage"/>.
     /// </summary>
     /// <remarks>
-    /// This modifies the image format of the provided <see cref="MagickImage"/> to avoid unnecessary copies.
+    /// This modifies the image format of the provided <see cref="IMagickImage"/> to avoid unnecessary copies.
     /// </remarks>
-    public static GMImage FromMagickImage(MagickImage image)
+    public static GMImage FromMagickImage(IMagickImage<byte> image)
     {
         image.Format = MagickFormat.Bgra;
         image.SetCompression(CompressionMethod.NoCompression);

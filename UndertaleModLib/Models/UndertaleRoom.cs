@@ -1623,6 +1623,14 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             }
             public uint[][] TileData { get => _tileData; set { _tileData = value; OnPropertyChanged(); } }
 
+            /// <summary>
+            /// Invokes PropertyChanged on the TileData property. Use when mutating the TileData e.g alongside XAML.
+            /// </summary>
+            public void TileDataUpdated()
+            {
+                OnPropertyChanged(nameof(TileData));
+            }
+
             /// <inheritdoc />
             public event PropertyChangedEventHandler PropertyChanged;
             protected void OnPropertyChanged([CallerMemberName] string name = null)

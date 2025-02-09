@@ -194,7 +194,8 @@ public partial class Program : IScriptInterface
                 GetType().GetTypeInfo().Assembly,
                 typeof(JsonConvert).GetTypeInfo().Assembly,
                 typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly,
-                typeof(TextureWorker).GetTypeInfo().Assembly)
+                typeof(TextureWorker).GetTypeInfo().Assembly,
+                typeof(ImageMagick.MagickImage).GetTypeInfo().Assembly)
             // "WithEmitDebugInformation(true)" not only lets us to see a script line number which threw an exception,
             // but also provides other useful debug info when we run UMT in "Debug".
             .WithEmitDebugInformation(true);
@@ -731,8 +732,8 @@ public partial class Program : IScriptInterface
     /// Evaluates and executes given C# code.
     /// </summary>
     /// <param name="code">The C# string to execute</param>
-    /// <param name="scriptFile">The path to the script file where <see cref="code"/> was executed from.
-    /// Leave as null, if it wasn't executed from a script file</param>
+    /// <param name="scriptFile">The path to the script file where <paramref name="code"/> was loaded from.
+    /// Leave as null, if it wasn't executed from a script file.</param>
     private void RunCSharpCode(string code, string scriptFile = null)
     {
         if (Verbose)

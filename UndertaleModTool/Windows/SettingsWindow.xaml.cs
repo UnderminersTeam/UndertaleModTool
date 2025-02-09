@@ -181,6 +181,38 @@ namespace UndertaleModTool
             }
         }
 
+        public static string TransparencyGridColor1
+        {
+            get => Settings.Instance.TransparencyGridColor1;
+            set
+            {
+                try
+                {
+                    MainWindow.SetTransparencyGridColors(value, TransparencyGridColor2);
+
+                    Settings.Instance.TransparencyGridColor1 = value;
+                    Settings.Save();
+                }
+                catch (FormatException) { }
+            }
+        }
+
+        public static string TransparencyGridColor2
+        {
+            get => Settings.Instance.TransparencyGridColor2;
+            set
+            {
+                try
+                {
+                    MainWindow.SetTransparencyGridColors(TransparencyGridColor1, value);
+
+                    Settings.Instance.TransparencyGridColor2 = value;
+                    Settings.Save();
+                }
+                catch (FormatException) { }
+            }
+        }
+
         public static bool EnableDarkMode
         {
             get => Settings.Instance.EnableDarkMode;
