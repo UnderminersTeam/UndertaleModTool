@@ -277,11 +277,27 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
         V3NineSlice = null;
     }
 
-    public MaskEntry NewMaskEntry()
+    /// <summary>
+    /// Creates a new mask entry for this sprite.
+    /// </summary>
+    /// <param name="data">Data that this sprite is part of, for checking the GameMaker version.</param>
+    /// <returns>The new mask entry.</returns>
+    public MaskEntry NewMaskEntry(UndertaleData data = null)
     {
-        uint len = (Width + 7) / 8 * Height;
-        MaskEntry newEntry = new MaskEntry(new byte[len], Width, Height);
-        return newEntry;
+        int width, height;
+        if (data is not null)
+        {
+            // Support for 2024.6+ (modern code path)
+            (width, height) = CalculateMaskDimensions(data);
+        }
+        else
+        {
+            // Legacy code path (for scripts that haven't been updated to support 2024.6+ yet)
+            (width, height) = ((int)Width, (int)Height);
+        }
+
+        uint len = (uint)((width + 7) / 8 * height);
+        return new MaskEntry(new byte[len], width, height);
     }
 
     /// <summary>
@@ -350,17 +366,17 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
         /// <summary>
         /// Width of this sprite mask. UTMT only.
         /// </summary>
-        public uint Width { get; set; }
+        public int Width { get; set; }
         /// <summary>
         /// Height of this sprite mask. UTMT only.
         /// </summary>
-        public uint Height { get; set; }
+        public int Height { get; set; }
 
         public MaskEntry()
         {
         }
 
-        public MaskEntry(byte[] data, uint width, uint height)
+        public MaskEntry(byte[] data, int width, int height)
         {
             this.Data = data;
             this.Width = width;
@@ -525,7 +541,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
             total++;
         }
 
-        (uint width, uint height) = CalculateMaskDimensions(writer.undertaleData);
+        (int width, int height) = CalculateMaskDimensions(writer.undertaleData);
         Util.DebugUtil.Assert(total == CalculateMaskDataSize(width, height, (uint)CollisionMasks.Count), "Invalid mask data for sprite");
     }
 
@@ -743,7 +759,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
             {
                 case SpriteType.Normal:
                     count += 1 + UndertaleSimpleList<TextureEntry>.UnserializeChildObjectCount(reader);
-                    SkipMaskData(reader, width, height, marginRight, marginLeft, marginBottom, marginTop);
+                    SkipMaskData(reader, (int)width, (int)height, marginRight, marginLeft, marginBottom, marginTop);
                     break;
 
                 case SpriteType.SWF:
@@ -812,7 +828,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
         {
             reader.Position -= 4;
             count += 1 + UndertaleSimpleList<TextureEntry>.UnserializeChildObjectCount(reader);
-            SkipMaskData(reader, width, height, marginRight, marginLeft, marginBottom, marginTop);
+            SkipMaskData(reader, (int)width, (int)height, marginRight, marginLeft, marginBottom, marginTop);
         }
 
         return count;
@@ -821,22 +837,22 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
     /// <summary>
     /// Returns the width and height of the collision mask for this sprite, which changes depending on GameMaker version.
     /// </summary>
-    public (uint Width, uint Height) CalculateMaskDimensions(UndertaleData data)
+    public (int Width, int Height) CalculateMaskDimensions(UndertaleData data)
     {
         if (data.IsVersionAtLeast(2024, 6))
         {
             return CalculateBboxMaskDimensions(MarginRight, MarginLeft, MarginBottom, MarginTop);
         }
-        return CalculateFullMaskDimensions(Width, Height);
+        return CalculateFullMaskDimensions((int)Width, (int)Height);
     }
 
     /// <summary>
     /// Calculates the width and height of a collision mask from the given margin/bounding box.
     /// This method is used to calculate collision mask dimensions in GameMaker 2024.6 and above.
     /// </summary>
-    public static (uint Width, uint Height) CalculateBboxMaskDimensions(int marginRight, int marginLeft, int marginBottom, int marginTop)
+    public static (int Width, int Height) CalculateBboxMaskDimensions(int marginRight, int marginLeft, int marginBottom, int marginTop)
     {
-        return ((uint)(marginRight - marginLeft + 1), (uint)(marginBottom - marginTop + 1));
+        return (marginRight - marginLeft + 1, marginBottom - marginTop + 1);
     }
 
     /// <summary>
@@ -846,7 +862,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
     /// <remarks>
     /// This simply returns the width and height supplied, but is intended for clarity in the code.
     /// </remarks>
-    public static (uint Width, uint Height) CalculateFullMaskDimensions(uint width, uint height)
+    public static (int Width, int Height) CalculateFullMaskDimensions(int width, int height)
     {
         return (width, height);
     }
@@ -858,8 +874,8 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
         List<MaskEntry> newMasks = new((int)maskCount);
 
         // Read in mask data
-        (uint width, uint height) = CalculateMaskDimensions(reader.undertaleData);
-        uint len = (width + 7) / 8 * height;
+        (int width, int height) = CalculateMaskDimensions(reader.undertaleData);
+        uint len = (uint)((width + 7) / 8 * height);
         uint total = 0;
         for (uint i = 0; i < maskCount; i++)
         {
@@ -884,7 +900,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
         CollisionMasks = new(newMasks);
     }
 
-    private static void SkipMaskData(UndertaleReader reader, uint width, uint height, int marginRight, int marginLeft, int marginBottom, int marginTop)
+    private static void SkipMaskData(UndertaleReader reader, int width, int height, int marginRight, int marginLeft, int marginBottom, int marginTop)
     {
         uint maskCount = reader.ReadUInt32();
         if (reader.undertaleData.IsVersionAtLeast(2024, 6))
@@ -895,7 +911,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
         {
             (width, height) = CalculateFullMaskDimensions(width, height);
         }
-        uint len = (width + 7) / 8 * height;
+        uint len = (uint)((width + 7) / 8 * height);
 
         uint total = 0;
         for (uint i = 0; i < maskCount; i++)
@@ -914,10 +930,10 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
         reader.Position += skipSize;
     }
 
-    public uint CalculateMaskDataSize(uint width, uint height, uint maskcount)
+    private uint CalculateMaskDataSize(int width, int height, uint maskCount)
     {
-        uint roundedWidth = (width + 7) / 8 * 8; // round to multiple of 8
-        uint dataBits = roundedWidth * height * maskcount;
+        uint roundedWidth = (uint)((width + 7) / 8 * 8); // round to multiple of 8
+        uint dataBits = (uint)(roundedWidth * height * maskCount);
         uint dataBytes = ((dataBits + 31) / 32 * 32) / 8; // round to multiple of 4 bytes
         return dataBytes;
     }

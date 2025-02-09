@@ -462,8 +462,8 @@ namespace UndertaleModLib
                 int marginRight = reader.ReadInt32();
                 int marginBottom = reader.ReadInt32();
                 int marginTop = reader.ReadInt32();
-                (uint bboxWidth, uint bboxHeight) = UndertaleSprite.CalculateBboxMaskDimensions(marginRight, marginLeft, marginBottom, marginTop);
-                (uint normalWidth, uint normalHeight) = UndertaleSprite.CalculateFullMaskDimensions(width, height);
+                (int bboxWidth, int bboxHeight) = UndertaleSprite.CalculateBboxMaskDimensions(marginRight, marginLeft, marginBottom, marginTop);
+                (int normalWidth, int normalHeight) = UndertaleSprite.CalculateFullMaskDimensions((int)width, (int)height);
                 if (bboxWidth == normalWidth && bboxHeight == normalHeight)
                 {
                     // We can't determine anything from this sprite
@@ -506,11 +506,11 @@ namespace UndertaleModLib
                     // We can't determine anything from this sprite
                     continue;
                 }
-                uint fullLength = (normalWidth + 7) / 8 * normalHeight;
+                uint fullLength = (uint)((normalWidth + 7) / 8 * normalHeight);
                 fullLength *= maskCount;
                 if ((fullLength % 4) != 0)
                     fullLength += (4 - (fullLength % 4));
-                uint bboxLength = (bboxWidth + 7) / 8 * bboxHeight;
+                uint bboxLength = (uint)((bboxWidth + 7) / 8 * bboxHeight);
                 bboxLength *= maskCount;
                 if ((bboxLength % 4) != 0)
                     bboxLength += (4 - (bboxLength % 4));
