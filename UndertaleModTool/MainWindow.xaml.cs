@@ -74,6 +74,8 @@ namespace UndertaleModTool
         public static RoutedUICommand RestoreClosedTabCommand = new RoutedUICommand("Restore last closed tab", "RestoreClosedTab", typeof(MainWindow));
         public static RoutedUICommand SwitchToNextTabCommand = new RoutedUICommand("Switch to the next tab", "SwitchToNextTab", typeof(MainWindow));
         public static RoutedUICommand SwitchToPrevTabCommand = new RoutedUICommand("Switch to the previous tab", "SwitchToPrevTab", typeof(MainWindow));
+        public static RoutedUICommand SearchInCodeCommand = new("Search in code", "SearchInCode", typeof(MainWindow));
+
         public ObservableCollection<Tab> Tabs { get; set; } = new();
         public Tab CurrentTab
         {
@@ -951,6 +953,12 @@ namespace UndertaleModTool
         private void Command_GoForward(object sender, ExecutedRoutedEventArgs e)
         {
             GoForward();
+        }
+
+        private void Command_SearchInCode(object sender, ExecutedRoutedEventArgs e)
+        {
+            SearchInCodeWindow searchInCodeWindow = new();
+            searchInCodeWindow.Show();
         }
 
         private void DisposeGameData()
