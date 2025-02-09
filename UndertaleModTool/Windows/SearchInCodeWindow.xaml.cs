@@ -45,7 +45,7 @@ namespace UndertaleModTool.Windows
         
         Regex keywordRegex;
 
-        ThreadLocal<GlobalDecompileContext> decompileContext;
+        GlobalDecompileContext decompileContext;
 
         LoaderDialog loaderDialog;
 
@@ -128,18 +128,18 @@ namespace UndertaleModTool.Windows
 
             if (!isInAssembly)
             {
-                decompileContext = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(mainWindow.Data, false));
+                decompileContext = new GlobalDecompileContext(mainWindow.Data);
 
                 // HACK: This could be problematic
                 usingGMLCache = await mainWindow.GenerateGMLCache(decompileContext, loaderDialog);
 
                 // If we run script before opening any code
-                if (!usingGMLCache && mainWindow.Data.KnownSubFunctions is null)
+                if (!usingGMLCache && mainWindow.Data.GlobalFunctions is null)
                 {
                     loaderDialog.Maximum = null;
-                    loaderDialog.Update("Building the cache of all sub-functions...");
+                    loaderDialog.Update("Building the cache of all global functions...");
 
-                    await Task.Run(() => Decompiler.BuildSubFunctionCache(mainWindow.Data));
+                    await Task.Run(() => GlobalDecompileContext.BuildGlobalFunctionCache(mainWindow.Data));
                 }
             }
 
@@ -191,7 +191,7 @@ namespace UndertaleModTool.Windows
                     var codeText = isInAssembly
                         ? code.Disassemble(mainWindow.Data.Variables, mainWindow.Data.CodeLocals.For(code))
                         : TryGetProfileModeGML(code.Name.Content)
-                            ?? Decompiler.Decompile(code, decompileContext.Value);
+                            ?? new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, mainWindow.Data.ToolInfo.DecompilerSettings).DecompileToString();
                     SearchInCodeText(code.Name.Content, codeText);
                 }
                 
