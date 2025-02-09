@@ -63,6 +63,8 @@ public class GlobalDecompileContext : IGameContext
             // If an error occurs, just default to empty
             data.GlobalFunctions = new GlobalFunctions();
         }
+
+        // TODO: add extension functions to global functions lookup
     }
 
     // Enumerates over all global script code entries
