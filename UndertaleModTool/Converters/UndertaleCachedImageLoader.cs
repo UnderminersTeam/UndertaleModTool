@@ -111,7 +111,7 @@ namespace UndertaleModTool
             ImageSource spriteSrc;
             if (isTile)
             {
-                if (tileCache.TryGetValue(new(texName, new(tile.SourceX, tile.SourceY, tile.Width, tile.Height)), out spriteSrc))
+                if (tileCache.TryGetValue(new(texName, new((uint)tile.SourceX, (uint)tile.SourceY, tile.Width, tile.Height)), out spriteSrc))
                     return spriteSrc;
             }
 
@@ -137,7 +137,7 @@ namespace UndertaleModTool
                 if (cacheEnabled)
                 {
                     if (isTile)
-                        tileCache.TryAdd(new(texName, new(tile.SourceX, tile.SourceY, tile.Width, tile.Height)), spriteSrc);
+                        tileCache.TryAdd(new(texName, new((uint)tile.SourceX, (uint)tile.SourceY, tile.Width, tile.Height)), spriteSrc);
                     else
                         imageCache.TryAdd(texName, spriteSrc);
                 }
