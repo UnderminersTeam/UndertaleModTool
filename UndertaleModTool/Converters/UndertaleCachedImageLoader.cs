@@ -32,7 +32,7 @@ namespace UndertaleModTool
         private static extern bool DeleteObject([In] IntPtr hObject);
 
         private static readonly ConcurrentDictionary<string, ImageSource> imageCache = new();
-        private static readonly ConcurrentDictionary<Tuple<string, Tuple<uint, uint, uint, uint>>, ImageSource> tileCache = new();
+        private static readonly ConcurrentDictionary<Tuple<string, Tuple<int, int, uint, uint>>, ImageSource> tileCache = new();
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
 
         private static bool _reuseTileBuffer;
@@ -59,7 +59,7 @@ namespace UndertaleModTool
             bool generate = false;
 
             string par;
-            List<Tuple<uint, uint, uint, uint>> tileRectList = null;
+            List<Tuple<int, int, uint, uint>> tileRectList = null;
             if (parameter is string)
             {
                 par = parameter as string;
@@ -68,10 +68,10 @@ namespace UndertaleModTool
                 cacheEnabled = !par.Contains("nocache");
                 generate = par.Contains("generate");
             }
-            else if (parameter is List<Tuple<uint, uint, uint, uint>>)
+            else if (parameter is List<Tuple<int, int, uint, uint>>)
             {
                 generate = true;
-                tileRectList = parameter as List<Tuple<uint, uint, uint, uint>>;
+                tileRectList = parameter as List<Tuple<int, int, uint, uint>>;
             }
 
             Tile tile = null;
@@ -111,7 +111,7 @@ namespace UndertaleModTool
             ImageSource spriteSrc;
             if (isTile)
             {
-                if (tileCache.TryGetValue(new(texName, new((uint)tile.SourceX, (uint)tile.SourceY, tile.Width, tile.Height)), out spriteSrc))
+                if (tileCache.TryGetValue(new(texName, new(tile.SourceX, tile.SourceY, tile.Width, tile.Height)), out spriteSrc))
                     return spriteSrc;
             }
 
@@ -137,7 +137,7 @@ namespace UndertaleModTool
                 if (cacheEnabled)
                 {
                     if (isTile)
-                        tileCache.TryAdd(new(texName, new((uint)tile.SourceX, (uint)tile.SourceY, tile.Width, tile.Height)), spriteSrc);
+                        tileCache.TryAdd(new(texName, new(tile.SourceX, tile.SourceY, tile.Width, tile.Height)), spriteSrc);
                     else
                         imageCache.TryAdd(texName, spriteSrc);
                 }
@@ -200,7 +200,7 @@ namespace UndertaleModTool
 
             return spriteSrc;
         }
-        private void ProcessTileSet(string textureName, Bitmap bmp, List<Tuple<uint, uint, uint, uint>> tileRectList, int targetX, int targetY)
+        private void ProcessTileSet(string textureName, Bitmap bmp, List<Tuple<int, int, uint, uint>> tileRectList, int targetX, int targetY)
         {
             BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, bmp.PixelFormat);
             int depth = Image.GetPixelFormatSize(data.PixelFormat) / 8;
@@ -224,8 +224,8 @@ namespace UndertaleModTool
 
             _ = Parallel.ForEach(tileRectList, (tileRect) =>
             {
-                int origX = (int)tileRect.Item1;
-                int origY = (int)tileRect.Item2;
+                int origX = tileRect.Item1;
+                int origY = tileRect.Item2;
                 int x = origX - targetX;
                 int y = origY - targetY;
                 int w = (int)tileRect.Item3;
@@ -272,7 +272,7 @@ namespace UndertaleModTool
 
                 spriteSrc.Freeze(); // allow UI thread access
 
-                Tuple<string, Tuple<uint, uint, uint, uint>> tileKey = new(textureName, new((uint)origX, (uint)origY, (uint)w, (uint)h));
+                Tuple<string, Tuple<int, int, uint, uint>> tileKey = new(textureName, new(origX, origY, (uint)w, (uint)h));
                 tileCache.TryAdd(tileKey, spriteSrc);
             });
 

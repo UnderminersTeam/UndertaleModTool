@@ -1723,7 +1723,7 @@ namespace UndertaleModTool
             UndertaleCachedImageLoader loader = new();
 
             List<Tile> tiles = null;
-            List<Tuple<UndertaleTexturePageItem, List<Tuple<uint, uint, uint, uint>>>> tileTextures = null;
+            List<Tuple<UndertaleTexturePageItem, List<Tuple<int, int, uint, uint>>>> tileTextures = null;
             List<object> allObjects = new();
             if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
             {
@@ -1767,9 +1767,9 @@ namespace UndertaleModTool
                                  .Where(x => x.Key != "0")
                                  .Select(x =>
                                  {
-                                     return new Tuple<UndertaleTexturePageItem, List<Tuple<uint, uint, uint, uint>>>(
+                                     return new Tuple<UndertaleTexturePageItem, List<Tuple<int, int, uint, uint>>>(
                                          x.First().Tpag,
-                                         x.Select(tile => new Tuple<uint, uint, uint, uint>((uint)tile.SourceX, (uint)tile.SourceY, tile.Width, tile.Height))
+                                         x.Select(tile => new Tuple<int, int, uint, uint>(tile.SourceX, tile.SourceY, tile.Width, tile.Height))
                                           .Distinct()
                                           .ToList());
                                  })
