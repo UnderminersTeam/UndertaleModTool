@@ -105,7 +105,7 @@ for full details and documentation.
 
 Special thanks to everybody who did previous research on unpacking and decompiling Undertale, it was a really huge help:
 
-* [Ulyssis' UNDERTALE decompilation research](https://pcy.ulyssis.be/undertale/)
+* [PoroCYon's UNDERTALE decompilation research, maintained by Tomat](https://tomat.dev/undertale)
 * [Donkeybonks's GameMaker data.win Bytecode research](https://web.archive.org/web/20191126144953if_/https://github.com/donkeybonks/acolyte/wiki/Bytecode)
 * [PoroCYon's Altar.NET](https://github.com/PoroCYon/Altar.NET)
 * [WarlockD's GMdsam](https://github.com/WarlockD/GMdsam)
