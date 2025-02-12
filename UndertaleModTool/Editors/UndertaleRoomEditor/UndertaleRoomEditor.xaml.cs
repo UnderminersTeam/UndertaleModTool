@@ -790,8 +790,8 @@ namespace UndertaleModTool
             Point gridMouseCoordinates = GetGridMouseCoordinates(mousePos, room);
             scaleOriginX = gridMouseCoordinates.X;
             scaleOriginY = gridMouseCoordinates.Y;
-            clickedTile.SourceX = (uint)gridMouseCoordinates.X;
-            clickedTile.SourceY = (uint)gridMouseCoordinates.Y;
+            clickedTile.SourceX = (int)gridMouseCoordinates.X;
+            clickedTile.SourceY = (int)gridMouseCoordinates.Y;
             clickedTile.Width = (uint)room.GridWidth;
             clickedTile.Height = (uint)room.GridHeight;
         }
@@ -818,19 +818,19 @@ namespace UndertaleModTool
                 clickedTile.Height = (uint)Math.Clamp(Math.Abs(differenceY), 0, clickedTile.Tpag.BoundingHeight) + (uint)room.GridHeight;
 
                 if (differenceX < 0)
-                    clickedTile.SourceX = (uint)gridMouseCoordinates.X;
+                    clickedTile.SourceX = (int)gridMouseCoordinates.X;
                 else
-                    clickedTile.SourceX = (uint)scaleOriginX;
+                    clickedTile.SourceX = (int)scaleOriginX;
 
                 if (differenceY < 0)
-                    clickedTile.SourceY = (uint)gridMouseCoordinates.Y;
+                    clickedTile.SourceY = (int)gridMouseCoordinates.Y;
                 else
-                    clickedTile.SourceY = (uint)scaleOriginY;
+                    clickedTile.SourceY = (int)scaleOriginY;
             }
             else
             {
-                clickedTile.SourceX = (uint)gridMouseCoordinates.X;
-                clickedTile.SourceY = (uint)gridMouseCoordinates.Y;
+                clickedTile.SourceX = (int)gridMouseCoordinates.X;
+                clickedTile.SourceY = (int)gridMouseCoordinates.Y;
             }
         }
 
@@ -1723,7 +1723,7 @@ namespace UndertaleModTool
             UndertaleCachedImageLoader loader = new();
 
             List<Tile> tiles = null;
-            List<Tuple<UndertaleTexturePageItem, List<Tuple<uint, uint, uint, uint>>>> tileTextures = null;
+            List<Tuple<UndertaleTexturePageItem, List<Tuple<int, int, uint, uint>>>> tileTextures = null;
             List<object> allObjects = new();
             if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
             {
@@ -1767,9 +1767,9 @@ namespace UndertaleModTool
                                  .Where(x => x.Key != "0")
                                  .Select(x =>
                                  {
-                                     return new Tuple<UndertaleTexturePageItem, List<Tuple<uint, uint, uint, uint>>>(
+                                     return new Tuple<UndertaleTexturePageItem, List<Tuple<int, int, uint, uint>>>(
                                          x.First().Tpag,
-                                         x.Select(tile => new Tuple<uint, uint, uint, uint>(tile.SourceX, tile.SourceY, tile.Width, tile.Height))
+                                         x.Select(tile => new Tuple<int, int, uint, uint>(tile.SourceX, tile.SourceY, tile.Width, tile.Height))
                                           .Distinct()
                                           .ToList());
                                  })
