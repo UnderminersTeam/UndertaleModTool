@@ -1989,79 +1989,6 @@ namespace UndertaleModTool
             }
         }
 
-        private void MenuItem_FindUnreferencedAssets_Click(object sender, RoutedEventArgs e)
-        {
-            FindReferencesTypesDialog dialog = null;
-            try
-            {
-                dialog = new(Data);
-                dialog.ShowDialog();
-            }
-            catch (Exception ex)
-            {
-                this.ShowError("An error occured in the object references related window.\n" +
-                               $"Please report this on GitHub.\n\n{ex}");
-            }
-            finally
-            {
-                dialog?.Close();
-            }
-        }
-
-        private void MenuItem_ContextMenuOpened(object sender, RoutedEventArgs e)
-        {
-            var menu = sender as ContextMenu;
-            foreach (var item in menu.Items)
-            {
-                var menuItem = item as MenuItem;
-                if ((menuItem.Header as string) == "Find all references")
-                {
-                    menuItem.Visibility = UndertaleResourceReferenceMap.IsTypeReferenceable(menu.DataContext?.GetType())
-                                          ? Visibility.Visible : Visibility.Collapsed;
-
-                    break;
-                }
-            }
-        }
-        private void MenuItem_OpenInNewTab_Click(object sender, RoutedEventArgs e)
-        {
-            OpenInTab(Highlighted, true);
-        }
-        private void MenuItem_FindAllReferences_Click(object sender, RoutedEventArgs e)
-        {
-            var obj = (sender as FrameworkElement)?.DataContext as UndertaleResource;
-            if (obj is null)
-            {
-                this.ShowError("The selected object is not an \"UndertaleResource\".");
-                return;
-            }
-
-            FindReferencesTypesDialog dialog = null;
-            try
-            {
-                dialog = new(obj, Data);
-                dialog.ShowDialog();
-            }
-            catch (Exception ex)
-            {
-                this.ShowError("An error occured in the object references related window.\n" +
-                               $"Please report this on GitHub.\n\n{ex}");
-            }
-            finally
-            {
-                dialog?.Close();
-            }
-        }
-        private void MenuItem_CopyName_Click(object sender, RoutedEventArgs e)
-        {
-            CopyItemName(Highlighted);
-        }
-        private void MenuItem_Delete_Click(object sender, RoutedEventArgs e)
-        {
-            if (Highlighted is UndertaleObject obj)
-                DeleteItem(obj);
-        }
-
         private void MenuItem_Add_Click(object sender, RoutedEventArgs e)
         {
             object source;
@@ -2165,9 +2092,302 @@ namespace UndertaleModTool
             OpenInTab(obj, true);
         }
 
-        private void RootMenuItem_SubmenuOpened(object sender, RoutedEventArgs e)
+        private void MenuItem_AddType_Click(object sender, RoutedEventArgs e)
         {
-            MenuItem_RunScript_SubmenuOpened(sender, e, Path.Combine(ExePath, "Scripts"));
+            //this 99% copied from the the Add_Click, so could probably have the fuctionality of it (and above) combined into one method that then gets called from both events)
+            int indexOfCurrentSelectionParent = 0;
+            foreach (TreeViewItem treeItem in (MainTree.Items[0] as TreeViewItem).Items)
+                if (treeItem.Items.Contains(MainTree.SelectedItem))
+                    indexOfCurrentSelectionParent = (MainTree.Items[0] as TreeViewItem).Items.IndexOf(treeItem);
+
+
+            object source = ((MainTree.Items[0] as TreeViewItem).Items[indexOfCurrentSelectionParent] as TreeViewItem).ItemsSource;
+
+            IList list = ((source as ICollectionView)?.SourceCollection as IList) ?? (source as IList);
+            Type t = list.GetType().GetGenericArguments()[0];
+            Debug.Assert(typeof(UndertaleResource).IsAssignableFrom(t));
+            UndertaleResource obj = Activator.CreateInstance(t) as UndertaleResource;
+            if (obj is UndertaleNamedResource)
+            {
+                bool doMakeString = obj is not (UndertaleTexturePageItem or UndertaleEmbeddedAudio or UndertaleEmbeddedTexture);
+                string notDataNewName = null;
+                if (obj is UndertaleTexturePageItem)
+                {
+                    notDataNewName = "PageItem " + list.Count;
+                }
+                if ((obj is UndertaleExtension) && (IsExtProductIDEligible == Visibility.Visible))
+                {
+                    var newProductID = new byte[] { 0xBA, 0x5E, 0xBA, 0x11, 0xBA, 0xDD, 0x06, 0x60, 0xBE, 0xEF, 0xED, 0xBA, 0x0B, 0xAB, 0xBA, 0xBE };
+                    Data.FORM.EXTN.productIdData.Add(newProductID);
+                }
+                if (obj is UndertaleEmbeddedAudio)
+                {
+                    notDataNewName = "EmbeddedSound " + list.Count;
+                }
+                if (obj is UndertaleEmbeddedTexture)
+                {
+                    notDataNewName = "Texture " + list.Count;
+                }
+                if (obj is UndertaleShader shader)
+                {
+                    shader.GLSL_ES_Vertex = Data.Strings.MakeString("", true);
+                    shader.GLSL_ES_Fragment = Data.Strings.MakeString("", true);
+                    shader.GLSL_Vertex = Data.Strings.MakeString("", true);
+                    shader.GLSL_Fragment = Data.Strings.MakeString("", true);
+                    shader.HLSL9_Vertex = Data.Strings.MakeString("", true);
+                    shader.HLSL9_Fragment = Data.Strings.MakeString("", true);
+                }
+
+                if (doMakeString)
+                {
+                    string newName = obj.GetType().Name.Replace("Undertale", "").Replace("GameObject", "Object").ToLower() + list.Count;
+                    (obj as UndertaleNamedResource).Name = Data.Strings.MakeString(newName);
+                    if (obj is UndertaleRoom)
+                    {
+                        (obj as UndertaleRoom).Caption = Data.Strings.MakeString("");
+
+                        if (IsGMS2 == Visibility.Visible)
+                            (obj as UndertaleRoom).Flags |= UndertaleRoom.RoomEntryFlags.IsGMS2;
+                    }
+
+                    if (obj is UndertaleScript)
+                    {
+                        UndertaleCode code = new UndertaleCode();
+                        string prefix = Data.IsVersionAtLeast(2, 3) ? "gml_GlobalScript_" : "gml_Script_";
+                        code.Name = Data.Strings.MakeString(prefix + newName);
+                        Data.Code.Add(code);
+                        if (Data?.GeneralInfo.BytecodeVersion > 14)
+                        {
+                            UndertaleCodeLocals locals = new UndertaleCodeLocals();
+                            locals.Name = code.Name;
+                            UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
+                            argsLocal.Name = Data.Strings.MakeString("arguments");
+                            argsLocal.Index = 0;
+                            locals.Locals.Add(argsLocal);
+                            code.LocalsCount = 1;
+                            Data.CodeLocals.Add(locals);
+                        }
+                        (obj as UndertaleScript).Code = code;
+                    }
+                    if ((obj is UndertaleCode) && (Data.GeneralInfo.BytecodeVersion > 14))
+                    {
+                        UndertaleCodeLocals locals = new UndertaleCodeLocals();
+                        locals.Name = (obj as UndertaleCode).Name;
+                        UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
+                        argsLocal.Name = Data.Strings.MakeString("arguments");
+                        argsLocal.Index = 0;
+                        locals.Locals.Add(argsLocal);
+                        (obj as UndertaleCode).LocalsCount = 1;
+                        Data.CodeLocals.Add(locals);
+                    }
+                }
+                else
+                {
+                    (obj as UndertaleNamedResource).Name = new UndertaleString(notDataNewName); // not Data.MakeString!
+                }
+            }
+            else if (obj is UndertaleString str)
+                str.Content = "string" + list.Count;
+            list.Add(obj);
+            UpdateTree();
+            HighlightObject(obj);
+            OpenInTab(obj, true);
+        }
+
+        private void MenuItem_CollapseAll_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (TreeViewItem item in (MainTree.Items[0] as TreeViewItem).Items)
+                item.IsExpanded = false;
+        }
+
+        private void MenuItem_CollapseCurrent_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (TreeViewItem item in (MainTree.Items[0] as TreeViewItem).Items)
+                if (item.Items.Contains(MainTree.SelectedItem))
+                    item.IsExpanded = false;
+        }
+
+        private void MenuItem_ContextMenuOpened(object sender, RoutedEventArgs e)
+        {
+            var menu = sender as ContextMenu;
+            int countOfItemsInMenu = MainTree.Items.Count;
+            //LMM: Regarding the text changes, and visibility changes here... there is most likely better ways to do this, I'm not super familair with XAML though, and eh, this worked for me.
+            //other contributors could polish this up if need be :)
+
+            foreach (var item in menu.Items)
+            {
+                var menuItem = item as MenuItem;
+
+                if (item.GetType() == typeof(Separator))
+                    continue; //Don't need to make any changes to seperators, hah.
+
+                if ((menuItem.Header as string) == "Find all references")
+                {
+                    menuItem.Visibility = UndertaleResourceReferenceMap.IsTypeReferenceable(menu.DataContext?.GetType())
+                                          ? Visibility.Visible : Visibility.Collapsed;
+
+                    continue;
+                }
+                else if ((menuItem.Header as string).StartsWith("Collapse:"))
+                {
+                    string treeviewItemParentSection = "";
+                    foreach (TreeViewItem treeItem in (MainTree.Items[0] as TreeViewItem).Items)
+                        if (treeItem.Items.Contains(MainTree.SelectedItem))
+                            treeviewItemParentSection = (treeItem.Header as string);
+
+
+                    menuItem.Header = $"Collapse: {treeviewItemParentSection}";
+                    continue;
+                }
+                else if ((menuItem.Header as string).StartsWith("Move up to"))
+                {
+
+                    int indexOfCurrentSelectionParent = 0;
+                    foreach (TreeViewItem treeItem in (MainTree.Items[0] as TreeViewItem).Items)
+                        if (treeItem.Items.Contains(MainTree.SelectedItem))
+                            indexOfCurrentSelectionParent = (MainTree.Items[0] as TreeViewItem).Items.IndexOf(treeItem);
+
+                    if (indexOfCurrentSelectionParent == 0)
+                    {
+                        menuItem.Visibility = Visibility.Hidden;
+                        continue; //Don't need to do the rest of this if this is gonna be hidden
+                    }
+                    else
+                    {
+                        menuItem.Visibility = Visibility.Visible;
+
+                        string parentHeader = ((MainTree.Items[0] as TreeViewItem).Items[indexOfCurrentSelectionParent - 1] as TreeViewItem).Header as string;
+
+
+                        menuItem.Header = $"Move up to {parentHeader}";
+                    }
+                    continue;
+                }
+                else if ((menuItem.Header as string).StartsWith("Move down to"))
+                {
+
+                    int indexOfCurrentSelectionParent = 0;
+                    foreach (TreeViewItem treeItem in (MainTree.Items[0] as TreeViewItem).Items)
+                        if (treeItem.Items.Contains(MainTree.SelectedItem))
+                            indexOfCurrentSelectionParent = (MainTree.Items[0] as TreeViewItem).Items.IndexOf(treeItem);
+
+                    if (indexOfCurrentSelectionParent == countOfItemsInMenu)
+                    {
+                        menuItem.Visibility = Visibility.Hidden;
+                        continue; //Don't need to do the rest of this if this is gonna be hidden
+                    }
+                    else
+                    {
+                        menuItem.Visibility = Visibility.Visible;
+
+                        string parentHeader = ((MainTree.Items[0] as TreeViewItem).Items[indexOfCurrentSelectionParent + 1] as TreeViewItem).Header as string;
+
+                        menuItem.Header = $"Move down to {parentHeader}";
+                    }
+                    continue;
+                }
+                else if ((menuItem.Header as string).StartsWith("Add:"))
+                {
+
+                    int indexOfCurrentSelectionParent = 0;
+                    foreach (TreeViewItem treeItem in (MainTree.Items[0] as TreeViewItem).Items)
+                        if (treeItem.Items.Contains(MainTree.SelectedItem))
+                            indexOfCurrentSelectionParent = (MainTree.Items[0] as TreeViewItem).Items.IndexOf(treeItem);
+
+
+                    string parentHeader = ((MainTree.Items[0] as TreeViewItem).Items[indexOfCurrentSelectionParent] as TreeViewItem).Header as string;
+
+                    //LMM:
+                    //We'd probably want to not just throw the parent header in
+                    //but have some sort of helper method that takes in the header and returns an appropriate string 
+                    //but as a rough pass this works.
+                    menuItem.Header = $"Add: {parentHeader}";
+
+                    continue;
+                }
+            }
+        }
+
+        private void MenuItem_CopyName_Click(object sender, RoutedEventArgs e)
+        {
+            CopyItemName(Highlighted);
+        }
+
+        private void MenuItem_Delete_Click(object sender, RoutedEventArgs e)
+        {
+            if (Highlighted is UndertaleObject obj)
+                DeleteItem(obj);
+        }
+
+        private void MenuItem_FindAllReferences_Click(object sender, RoutedEventArgs e)
+        {
+            var obj = (sender as FrameworkElement)?.DataContext as UndertaleResource;
+            if (obj is null)
+            {
+                this.ShowError("The selected object is not an \"UndertaleResource\".");
+                return;
+            }
+
+            FindReferencesTypesDialog dialog = null;
+            try
+            {
+                dialog = new(obj, Data);
+                dialog.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                this.ShowError("An error occured in the object references related window.\n" +
+                               $"Please report this on GitHub.\n\n{ex}");
+            }
+            finally
+            {
+                dialog?.Close();
+            }
+        }
+
+        private void MenuItem_FindUnreferencedAssets_Click(object sender, RoutedEventArgs e)
+        {
+            FindReferencesTypesDialog dialog = null;
+            try
+            {
+                dialog = new(Data);
+                dialog.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                this.ShowError("An error occured in the object references related window.\n" +
+                               $"Please report this on GitHub.\n\n{ex}");
+            }
+            finally
+            {
+                dialog?.Close();
+            }
+        }
+       
+        private void MenuItem_MoveDownTo_Click(object sender, RoutedEventArgs e)
+        {
+            int indexOfCurrentSelectionParent = 0;
+            foreach (TreeViewItem item in (MainTree.Items[0] as TreeViewItem).Items)
+                if (item.Items.Contains(MainTree.SelectedItem))
+                    indexOfCurrentSelectionParent = (MainTree.Items[0] as TreeViewItem).Items.IndexOf(item);
+
+            ((MainTree.Items[0] as TreeViewItem).Items[indexOfCurrentSelectionParent + 1] as TreeViewItem).IsSelected = true;
+        }
+
+        private void MenuItem_MoveUpTo_Click(object sender, RoutedEventArgs e)
+        {
+            int indexOfCurrentSelectionParent = 0;
+            foreach (TreeViewItem treeItem in (MainTree.Items[0] as TreeViewItem).Items)
+                if (treeItem.Items.Contains(MainTree.SelectedItem))
+                    indexOfCurrentSelectionParent = (MainTree.Items[0] as TreeViewItem).Items.IndexOf(treeItem);
+
+            ((MainTree.Items[0] as TreeViewItem).Items[indexOfCurrentSelectionParent - 1] as TreeViewItem).IsSelected = true;
+
+        }
+
+        private void MenuItem_OpenInNewTab_Click(object sender, RoutedEventArgs e)
+        {
+            OpenInTab(Highlighted, true);
         }
 
         private void MenuItem_RunScript_SubmenuOpened(object sender, RoutedEventArgs e, string folderDir)
@@ -2185,11 +2405,11 @@ namespace UndertaleModTool
                 // exit out early if the path does not exist.
                 if (!directory.Exists)
                 {
-                    item.Items.Add(new MenuItem {Header = $"(Path {folderDir} does not exist, cannot search for files!)", IsEnabled = false});
+                    item.Items.Add(new MenuItem { Header = $"(Path {folderDir} does not exist, cannot search for files!)", IsEnabled = false });
 
                     if (item.Name == "RootScriptItem")
                     {
-                        var otherScripts1 = new MenuItem {Header = "Run _other script..."};
+                        var otherScripts1 = new MenuItem { Header = "Run _other script..." };
                         otherScripts1.Click += MenuItem_RunOtherScript_Click;
                         item.Items.Add(otherScripts1);
                     }
@@ -2202,7 +2422,7 @@ namespace UndertaleModTool
                 {
                     var filename = file.Name;
                     // Replace _ with __ because WPF uses _ for keyboard navigation
-                    MenuItem subitem = new MenuItem {Header = filename.Replace("_", "__")};
+                    MenuItem subitem = new MenuItem { Header = filename.Replace("_", "__") };
                     subitem.Click += MenuItem_RunBuiltinScript_Item_Click;
                     subitem.CommandParameter = file.FullName;
                     item.Items.Add(subitem);
@@ -2216,17 +2436,17 @@ namespace UndertaleModTool
 
                     var subDirName = subDirectory.Name;
                     // In addition to the _ comment from above, we also need to add at least one item, so that WPF uses this as a submenuitem
-                    MenuItemDark subItem = new() {Header = subDirName.Replace("_", "__"), Items = {new MenuItem {Header = "(loading...)", IsEnabled = false}}};
+                    MenuItemDark subItem = new() { Header = subDirName.Replace("_", "__"), Items = { new MenuItem { Header = "(loading...)", IsEnabled = false } } };
                     subItem.SubmenuOpened += (o, args) => MenuItem_RunScript_SubmenuOpened(o, args, subDirectory.FullName);
                     item.Items.Add(subItem);
                 }
 
                 if (item.Items.Count == 0)
-                    item.Items.Add(new MenuItem {Header = "(No scripts found!)", IsEnabled = false});
+                    item.Items.Add(new MenuItem { Header = "(No scripts found!)", IsEnabled = false });
             }
             catch (Exception err)
             {
-                item.Items.Add(new MenuItem {Header = err.ToString(), IsEnabled = false});
+                item.Items.Add(new MenuItem { Header = err.ToString(), IsEnabled = false });
             }
 
             item.UpdateLayout();
@@ -2243,7 +2463,7 @@ namespace UndertaleModTool
             // If we're at the complete root, we need to add the "Run other script" button as well
             if (item.Name != "RootScriptItem") return;
 
-            var otherScripts = new MenuItem {Header = "Run _other script..."};
+            var otherScripts = new MenuItem { Header = "Run _other script..." };
             otherScripts.Click += MenuItem_RunOtherScript_Click;
             item.Items.Add(otherScripts);
         }
@@ -2271,6 +2491,11 @@ namespace UndertaleModTool
             {
                 await RunScript(dlg.FileName);
             }
+        }
+
+        private void RootMenuItem_SubmenuOpened(object sender, RoutedEventArgs e)
+        {
+            MenuItem_RunScript_SubmenuOpened(sender, e, Path.Combine(ExePath, "Scripts"));
         }
 
         // Apparently, one null check is not enough for `scriptDialog`

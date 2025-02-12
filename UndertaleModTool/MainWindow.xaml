@@ -253,6 +253,14 @@
                             <MenuItem Header="Find all references" Click="MenuItem_FindAllReferences_Click"/>
                             <MenuItem Header="Copy name to clipboard" Click="MenuItem_CopyName_Click"/>
                             <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
+                            <Separator/>
+                            <MenuItem Header="Move up to" Click="MenuItem_MoveUpTo_Click"/>
+                            <MenuItem Header="Move down to" Click="MenuItem_MoveDownTo_Click"/>
+                            <Separator/>
+                            <MenuItem Header="Collapse all" Click="MenuItem_CollapseAll_Click"/>
+                            <MenuItem Header="Collapse: {currentSection}" Click="MenuItem_CollapseCurrent_Click"/>
+                            <Separator/>
+                            <MenuItem Header="Add: {currentSection}" Click="MenuItem_AddType_Click"/>
                         </local:ContextMenuDark>
                         <local:ContextMenuDark x:Key="StandaloneTabMenu">
                             <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>
