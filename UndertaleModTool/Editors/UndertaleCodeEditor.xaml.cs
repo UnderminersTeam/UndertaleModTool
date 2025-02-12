@@ -529,7 +529,7 @@ namespace UndertaleModTool
                 try
                 {
                     var data = mainWindow.Data;
-                    text = code.Disassemble(data.Variables, data.CodeLocals.For(code));
+                    text = code.Disassemble(data.Variables, data.CodeLocals?.For(code));
 
                     CurrentLocals.Clear();
                 }
@@ -559,28 +559,39 @@ namespace UndertaleModTool
         }
 
         public static Dictionary<string, string> gettext = null;
-        private void UpdateGettext(UndertaleCode gettextCode)
+        private void UpdateGettext(UndertaleData data, UndertaleCode gettextCode)
         {
             gettext = new Dictionary<string, string>();
             string[] decompilationOutput;
+            GlobalDecompileContext context = new(data);
             if (!SettingsWindow.ProfileModeEnabled)
-                decompilationOutput = Decompiler.Decompile(gettextCode, new GlobalDecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
+            {
+                decompilationOutput = new Underanalyzer.Decompiler.DecompileContext(context, gettextCode, data.ToolInfo.DecompilerSettings)
+                    .DecompileToString().Split('\n');
+            }
             else
             {
-                try
+                string path = Path.Combine(TempPath, gettextCode.Name.Content + ".gml");
+                if (File.Exists(path))
                 {
-                    string path = Path.Combine(TempPath, gettextCode.Name.Content + ".gml");
-                    if (File.Exists(path))
+                    try
+                    {
                         decompilationOutput = File.ReadAllText(path).Replace("\r\n", "\n").Split('\n');
-                    else
-                        decompilationOutput = Decompiler.Decompile(gettextCode, new GlobalDecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
+                    }
+                    catch
+                    {
+                        decompilationOutput = new Underanalyzer.Decompiler.DecompileContext(context, gettextCode, data.ToolInfo.DecompilerSettings)
+                            .DecompileToString().Split('\n');
+                    }
                 }
-                catch
+                else
                 {
-                    decompilationOutput = Decompiler.Decompile(gettextCode, new GlobalDecompileContext(null, false)).Replace("\r\n", "\n").Split('\n');
+                    decompilationOutput = new Underanalyzer.Decompiler.DecompileContext(context, gettextCode, data.ToolInfo.DecompilerSettings)
+                        .DecompileToString().Split('\n');
                 }
             }
-            Regex textdataRegex = new Regex("^ds_map_add\\(global\\.text_data_en, \\\"(.*)\\\", \\\"(.*)\\\"\\)", RegexOptions.Compiled);
+            Regex textdataRegex = new("^ds_map_add\\(global\\.text_data_en, \\\"(.*)\\\", \\\"(.*)\\\"\\)", RegexOptions.Compiled);
+            Regex textdataRegex2 = new("^ds_map_add\\(global\\.text_data_en, \\\"(.*)\\\", '(.*)'\\)", RegexOptions.Compiled);
             foreach (var line in decompilationOutput)
             {
                 Match m = textdataRegex.Match(line);
@@ -588,7 +599,14 @@ namespace UndertaleModTool
                 {
                     try
                     {
-                        gettext.Add(m.Groups[1].Value, m.Groups[2].Value);
+                        if (!data.IsGameMaker2() && m.Groups[2].Value.Contains("'\"'"))
+                        {
+                            gettext.Add(m.Groups[1].Value, $"\"{m.Groups[2].Value}\"");
+                        }
+                        else
+                        {
+                            gettext.Add(m.Groups[1].Value, m.Groups[2].Value);
+                        }
                     }
                     catch (ArgumentException)
                     {
@@ -597,6 +615,32 @@ namespace UndertaleModTool
                     catch
                     {
                         mainWindow.ShowError("Unknown error in textdata_en. This may cause errors in the comment display of text.");
+                    }
+                }
+                else
+                {
+                    m = textdataRegex2.Match(line);
+                    if (m.Success)
+                    {
+                        try
+                        {
+                            if (!data.IsGameMaker2() && m.Groups[2].Value.Contains("\"'\""))
+                            {
+                                gettext.Add(m.Groups[1].Value, $"\'{m.Groups[2].Value}\'");
+                            }
+                            else
+                            {
+                                gettext.Add(m.Groups[1].Value, m.Groups[2].Value);
+                            }
+                        }
+                        catch (ArgumentException)
+                        {
+                            mainWindow.ShowError("There is a duplicate key in textdata_en, being " + m.Groups[1].Value + ". This may cause errors in the comment display of text.");
+                        }
+                        catch
+                        {
+                            mainWindow.ShowError("Unknown error in textdata_en. This may cause errors in the comment display of text.");
+                        }
                     }
                 }
             }
@@ -691,7 +735,7 @@ namespace UndertaleModTool
                 var dataa = mainWindow.Data;
                 Task t = Task.Run(() =>
                 {
-                    GlobalDecompileContext context = new GlobalDecompileContext(dataa, false);
+                    GlobalDecompileContext context = new(dataa);
                     string decompiled = null;
                     Exception e = null;
                     try
@@ -699,10 +743,13 @@ namespace UndertaleModTool
                         string path = Path.Combine(TempPath, code.Name.Content + ".gml");
                         if (!SettingsWindow.ProfileModeEnabled || !File.Exists(path))
                         {
-                            decompiled = Decompiler.Decompile(code, context, (msg) => { dialog.Message = msg; });
+                            decompiled = new Underanalyzer.Decompiler.DecompileContext(context, code, dataa.ToolInfo.DecompilerSettings)
+                                .DecompileToString();
                         }
                         else
+                        {
                             decompiled = File.ReadAllText(path);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -710,7 +757,7 @@ namespace UndertaleModTool
                     }
 
                     if (gettextCode != null)
-                        UpdateGettext(gettextCode);
+                        UpdateGettext(dataa, gettextCode);
 
                     try
                     {
@@ -830,7 +877,7 @@ namespace UndertaleModTool
             CurrentLocals.Clear();
 
             // Look up locals for given code entry's name, for syntax highlighting
-            var locals = data.CodeLocals.ByName(code.Name.Content);
+            var locals = data.CodeLocals?.ByName(code.Name.Content);
             if (locals != null)
             {
                 foreach (var local in locals.Locals)
@@ -1353,6 +1400,7 @@ namespace UndertaleModTool
                 bool func = (offset + nameLength + 1 < CurrentContext.VisualLine.LastDocumentLine.EndOffset) &&
                             (doc.GetCharAt(offset + nameLength) == '(');
                 UndertaleNamedResource val = null;
+                bool nonResourceReference = false;
 
                 var editor = textEditorInst;
 
@@ -1375,7 +1423,7 @@ namespace UndertaleModTool
                             else
                             {
                                 // Resolve 2.3 sub-functions for their parent entry
-                                if (data.KnownSubFunctions?.TryGetValue(nameText, out UndertaleFunction f) == true)
+                                if (data.GlobalFunctions?.NameToFunction?.TryGetValue(nameText, out Underanalyzer.IGMFunction f) == true)
                                 {
                                     ScriptsDict.TryGetValue(f.Name.Content, out val);
                                     val = (val as UndertaleScript)?.Code?.ParentEntry;
@@ -1397,11 +1445,50 @@ namespace UndertaleModTool
                 else
                 {
                     NamedObjDict.TryGetValue(nameText, out val);
-                    if (data.IsVersionAtLeast(2, 3) & val is UndertaleScript)
-                        val = null; // in GMS2.3 scripts are never referenced directly
+                    if (data.IsVersionAtLeast(2, 3))
+                    { 
+                        if (val is UndertaleScript)
+                            val = null; // in GMS2.3 scripts are never referenced directly
+
+                        if (data.GlobalFunctions?.NameToFunction?.TryGetValue(nameText, out Underanalyzer.IGMFunction globalFunc) == true &&
+                            globalFunc is UndertaleFunction utGlobalFunc)
+                        {
+                            // Try getting script that this function reference belongs to
+                            if (NamedObjDict.TryGetValue("gml_Script_" + nameText, out val) && val is UndertaleScript script)
+                            {
+                                // Highlight like a function as well
+                                val = script.Code;
+                                func = true;
+                            }
+                        }
+
+                        if (val == null)
+                        {
+                            // Try to get basic function
+                            if (FunctionsDict.TryGetValue(nameText, out val))
+                            {
+                                func = true;
+                            }
+                        }
+
+                        if (val == null)
+                        {
+                            // Try resolving to room instance ID
+                            string instanceIdPrefix = data.ToolInfo.InstanceIdPrefix();
+                            if (nameText.StartsWith(instanceIdPrefix) &&
+                                int.TryParse(nameText[instanceIdPrefix.Length..], out int id) && id >= 100000)
+                            {
+                                // TODO: We currently mark this as a non-resource reference, but ideally
+                                // we resolve this to the room that this instance ID occurs in.
+                                // However, we should only do this when actually clicking on it.
+                                nonResourceReference = true;
+                            }
+                        }
+                    }
                 }
-                if (val == null)
+                if (val == null && !nonResourceReference)
                 {
+                    // Check for variable name colors
                     if (offset >= 7)
                     {
                         if (doc.GetText(offset - 7, 7) == "global.")
@@ -1427,19 +1514,26 @@ namespace UndertaleModTool
                 var line = new ClickVisualLineText(nameText, CurrentContext.VisualLine, nameLength,
                                                    func ? FunctionBrush : ConstantBrush);
                 if (func)
-                    line.Bold = true;
-                line.Clicked += async (text, button) =>
                 {
-                    await codeEditorInst?.SaveChanges();
-
-                    if (button == Input.MouseButton.Right)
+                    // Make function references bold as well as a different color
+                    line.Bold = true;
+                }
+                if (val is not null)
+                {
+                    // Add click operation when we have a resource
+                    line.Clicked += async (text, button) =>
                     {
-                        contextMenu.DataContext = val;
-                        contextMenu.IsOpen = true;
-                    }
-                    else
-                        mainWindow.ChangeSelection(val, button == Input.MouseButton.Middle);
-                };
+                        await codeEditorInst?.SaveChanges();
+
+                        if (button == Input.MouseButton.Right)
+                        {
+                            contextMenu.DataContext = val;
+                            contextMenu.IsOpen = true;
+                        }
+                        else
+                            mainWindow.ChangeSelection(val, button == Input.MouseButton.Middle);
+                    };
+                }
 
                 return line;
             }

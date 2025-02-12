@@ -195,7 +195,8 @@ public partial class Program : IScriptInterface
                 typeof(JsonConvert).GetTypeInfo().Assembly,
                 typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly,
                 typeof(TextureWorker).GetTypeInfo().Assembly,
-                typeof(ImageMagick.MagickImage).GetTypeInfo().Assembly)
+                typeof(ImageMagick.MagickImage).GetTypeInfo().Assembly,
+                typeof(Underanalyzer.Decompiler.DecompileContext).Assembly)
             // "WithEmitDebugInformation(true)" not only lets us to see a script line number which threw an exception,
             // but also provides other useful debug info when we run UMT in "Debug".
             .WithEmitDebugInformation(true);
@@ -584,7 +585,8 @@ public partial class Program : IScriptInterface
         if (!Data.IsYYC())
         {
             Console.WriteLine($"{Data.Code.Count} Code Entries, {Data.Variables.Count} Variables, {Data.Functions.Count} Functions");
-            Console.WriteLine($"{Data.CodeLocals.Count} Code locals, {Data.Strings.Count} Strings, {Data.EmbeddedTextures.Count} Embedded Textures");
+            var codeLocalsInfo = Data.CodeLocals is not null ? $"{Data.CodeLocals.Count} Code locals, " : "";
+            Console.WriteLine($"{codeLocalsInfo}{Data.Strings.Count} Strings, {Data.EmbeddedTextures.Count} Embedded Textures");
         }
         else
         {

@@ -111,7 +111,7 @@ room_of_determination.GameObjects.Add(new UndertaleRoom.GameObject()
 });
 
 // Actually link the door
-obj_door_ruins13.EventHandlerFor(EventType.Alarm, 2, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+obj_door_ruins13.EventHandlerFor(EventType.Alarm, 2, Data).AppendGML(@"
 if (room == room_ruins1)
     room_goto(room_of_determination);", Data);
 
@@ -210,12 +210,12 @@ var obj_something_changed_trigger = new UndertaleGameObject()
     Visible = false
 };
 
-obj_something_changed_trigger.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+obj_something_changed_trigger.EventHandlerFor(EventType.Create, Data).AppendGML(@"
 con = 0;
 alarm[0] = 30;", Data);
 
 
-obj_something_changed_trigger.EventHandlerFor(EventType.Alarm, (uint)0, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+obj_something_changed_trigger.EventHandlerFor(EventType.Alarm, (uint)0, Data).AppendGML(@"
 global.typer = 5;
 global.msc = 0;
 global.facechoice = 0;
@@ -231,7 +231,7 @@ instance_create(0, 0, obj_dialoguer);
 global.interact = 1;
 con = 1;", Data);
 
-obj_something_changed_trigger.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+obj_something_changed_trigger.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data).AppendGML(@"
 // Toby, please, why can't you just make the obj_dialoguer block movement automatically
 // writing this every time will get really painful really fast
 
@@ -267,7 +267,7 @@ var obj_readable_determination = new UndertaleGameObject()
     ParentId = obj_readable,
     Visible = false
 };
-obj_readable_determination.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+obj_readable_determination.EventHandlerFor(EventType.Create, Data).AppendGML(@"
 myinteract = 0;
 specialread = 0;
 cantalk = 1;
@@ -275,7 +275,7 @@ mydialoguer = 438274832;
 image_xscale = 1;
 image_yscale = 1;", Data);
 
-obj_readable_determination.EventHandlerFor(EventType.Alarm, (uint)0, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+obj_readable_determination.EventHandlerFor(EventType.Alarm, (uint)0, Data).AppendGML(@"
 myinteract = 3;
 global.msc = 0;
 global.typer = 5;
@@ -334,14 +334,14 @@ var obj_determined_rarependant = new UndertaleGameObject()
     Solid = obj_rarependant.Solid,
     ParentId = obj_rarependant.ParentId
 };
-obj_determined_rarependant.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+obj_determined_rarependant.EventHandlerFor(EventType.Create, Data).AppendGML(@"
 myinteract = 0;
 facing = 0;
 direction = 270;
 image_speed = 0;
 con = 0;", Data);
 
-obj_determined_rarependant.EventHandlerFor(EventType.Alarm, (uint)0, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+obj_determined_rarependant.EventHandlerFor(EventType.Alarm, (uint)0, Data).AppendGML(@"
 myinteract = 3;
 global.msc = 11337;
 global.typer = 5;
@@ -350,14 +350,14 @@ global.faceemotion = 0;
 con = 1;
 mydialoguer = instance_create(0, 0, obj_dialoguer);", Data);
 
-obj_determined_rarependant.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+obj_determined_rarependant.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data).AppendGML(@"
 if (con == 1 && instance_exists(OBJ_WRITER) == 0 && global.choice == 0) {
     alarm[1] = 40;
     con = 0;
 }
 event_inherited();", Data);
 
-obj_determined_rarependant.EventHandlerFor(EventType.Alarm, (uint)1, Data.Strings, Data.Code, Data.CodeLocals).AppendGML("room_goto(room_of_dog);", Data);
+obj_determined_rarependant.EventHandlerFor(EventType.Alarm, (uint)1, Data).AppendGML("room_goto(room_of_dog);", Data);
 Data.GameObjects.Add(obj_determined_rarependant);
 
 SCR_TEXT.Code.AppendGML(@"

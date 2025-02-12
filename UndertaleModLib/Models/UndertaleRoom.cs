@@ -1196,12 +1196,12 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         /// <summary>
         /// The x coordinate of the tile in <see cref="ObjectDefinition"/>.
         /// </summary>
-        public uint SourceX { get; set; }
+        public int SourceX { get; set; }
 
         /// <summary>
         /// The y coordinate of the tile in <see cref="ObjectDefinition"/>.
         /// </summary>
-        public uint SourceY { get; set; }
+        public int SourceY { get; set; }
 
         /// <summary>
         /// The width of the tile.
@@ -1283,8 +1283,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 _spriteDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>>();
             else
                 _backgroundDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>>();
-            SourceX = reader.ReadUInt32();
-            SourceY = reader.ReadUInt32();
+            SourceX = reader.ReadInt32();
+            SourceY = reader.ReadInt32();
             Width = reader.ReadUInt32();
             Height = reader.ReadUInt32();
             TileDepth = reader.ReadInt32();

@@ -26,6 +26,9 @@ if (code == null)
     return;
 }
 
+GlobalDecompileContext globalDecompileContext = new(Data);
+Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = new Underanalyzer.Decompiler.DecompileSettings();
+
 bool case_sensitive = true;
 bool multiline = false;
 bool isRegex = true;
@@ -38,7 +41,7 @@ if (!ScriptQuestion("Change the battlegroup in \"gml_Object_obj_mainchara_KeyPre
 }
 if (GetPreviousValue() == "None")
 {
-    String replacement = SimpleTextInput("Enter new battle group value for when you press \"HOME\"", "New battle group value",     GetDecompiledText("gml_Object_obj_mainchara_KeyPress_36"), true);
+    String replacement = SimpleTextInput("Enter new battle group value for when you press \"HOME\"", "New battle group value", GetDecompiledText("gml_Object_obj_mainchara_KeyPress_36", globalDecompileContext, decompilerSettings), true);
     ImportGMLString("gml_Object_obj_mainchara_KeyPress_36", replacement);
     ScriptMessage("Completed");
     return;
@@ -47,7 +50,7 @@ if (GetPreviousValue() == "None")
 //Group 1: "global.battlegroup = ("
 //Group 2: Original value of battlegroup
 //Group 3: " + nnn)"
-String keyword = @"(global\.battlegroup = \()(\d+)( \+ nnn\))";
+const string keyword = @"(global\.battlegroup ?= ?\(?)(\d+)( ?\+ ?nnn\)?);?";
 bool success = false;
 int number;
 while (!success)
@@ -57,16 +60,15 @@ while (!success)
 
 //Substitute in group 1, the new value, and group 3
 //And the groups are specified using curly brackets to prevent the regex from misinterpreting the request.
-ReplaceTextInGML(code.Name.Content, keyword, ("${1}" + number.ToString() + "${3}"), case_sensitive, isRegex);
+ReplaceTextInGML(code.Name.Content, keyword, ("${1}" + number.ToString() + "${3}"), case_sensitive, isRegex, globalDecompileContext, decompilerSettings);
 
 ScriptMessage("Completed");
 
 string GetPreviousValue()
 {
     var line_number = 1;
-    string decompiled_text = GetDecompiledText("gml_Object_obj_mainchara_KeyPress_36");
+    string decompiled_text = GetDecompiledText("gml_Object_obj_mainchara_KeyPress_36", globalDecompileContext, decompilerSettings);
     string results = "";
-    string keyword = @"(global\.battlegroup = \()(\d+)( \+ nnn\))";
     string[] splitted = decompiled_text.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
     bool exists = false;
     foreach (string lineInt in splitted)
