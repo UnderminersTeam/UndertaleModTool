@@ -84,6 +84,8 @@ uint[] GetStringUsageCount()
     {
         foreach (UndertaleAnimationCurve obj in Data.AnimationCurves)
         {
+            if (obj is null)
+                continue;
             if (obj.Name != null)
             {
                 stringsUsageCountArray[Data.Strings.IndexOf(obj.Name)] += 1;
@@ -102,6 +104,8 @@ uint[] GetStringUsageCount()
     {
         foreach (UndertaleAudioGroup obj in Data.AudioGroups)
         {
+            if (obj is null)
+                continue;
             if (obj.Name != null)
             {
                 stringsUsageCountArray[Data.Strings.IndexOf(obj.Name)] += 1;
@@ -113,6 +117,8 @@ uint[] GetStringUsageCount()
     {
         foreach (UndertaleBackground obj in Data.Backgrounds)
         {
+            if (obj is null)
+                continue;
             if (obj.Name != null)
             {
                 stringsUsageCountArray[Data.Strings.IndexOf(obj.Name)] += 1;
@@ -124,6 +130,8 @@ uint[] GetStringUsageCount()
     {
         foreach (UndertaleCode obj in Data.Code)
         {
+            if (obj is null)
+                continue;
             if (obj.Name != null)
             {
                 stringsUsageCountArray[Data.Strings.IndexOf(obj.Name)] += 1;
@@ -145,6 +153,8 @@ uint[] GetStringUsageCount()
     {
         foreach (UndertaleCodeLocals obj in Data.CodeLocals)
         {
+            if (obj is null)
+                continue;
             if (obj.Name != null)
             {
                 stringsUsageCountArray[Data.Strings.IndexOf(obj.Name)] += 1;
@@ -163,6 +173,8 @@ uint[] GetStringUsageCount()
     {
         foreach (UndertaleExtension obj in Data.Extensions)
         {
+            if (obj is null)
+                continue;
             if (obj.Name != null)
             {
                 stringsUsageCountArray[Data.Strings.IndexOf(obj.Name)] += 1;
@@ -212,6 +224,8 @@ uint[] GetStringUsageCount()
     {
         foreach (UndertaleFont obj in Data.Fonts)
         {
+            if (obj is null)
+                continue;
             if (obj.Name != null)
             {
                 stringsUsageCountArray[Data.Strings.IndexOf(obj.Name)] += 1;
@@ -227,6 +241,8 @@ uint[] GetStringUsageCount()
     {
         foreach (UndertaleFunction obj in Data.Functions)
         {
+            if (obj is null)
+                continue;
             if (obj.Name != null)
             {
                 stringsUsageCountArray[Data.Strings.IndexOf(obj.Name)] += 1;
@@ -238,6 +254,8 @@ uint[] GetStringUsageCount()
     {
         foreach (UndertaleGameObject obj in Data.GameObjects)
         {
+            if (obj is null)
+                continue;
             if (obj.Name != null)
             {
                 stringsUsageCountArray[Data.Strings.IndexOf(obj.Name)] += 1;
@@ -312,6 +330,8 @@ uint[] GetStringUsageCount()
     {
         foreach (UndertaleOptions.Constant constant in Data.Options.Constants)
         {
+            if (constant is null)
+                continue;
             if (constant.Name != null)
             {
                 stringsUsageCountArray[Data.Strings.IndexOf(constant.Name)] += 1;
@@ -327,6 +347,8 @@ uint[] GetStringUsageCount()
     {
         foreach (UndertalePath obj in Data.Paths)
         {
+            if (obj is null)
+                continue;
             if (obj.Name != null)
             {
                 stringsUsageCountArray[Data.Strings.IndexOf(obj.Name)] += 1;
@@ -338,6 +360,8 @@ uint[] GetStringUsageCount()
     {
         foreach (UndertaleRoom obj in Data.Rooms)
         {
+            if (obj is null)
+                continue;
             if (obj.Name != null)
             {
                 stringsUsageCountArray[Data.Strings.IndexOf(obj.Name)] += 1;
@@ -396,6 +420,8 @@ uint[] GetStringUsageCount()
     {
         foreach (UndertaleScript obj in Data.Scripts)
         {
+            if (obj is null)
+                continue;
             if (obj.Name != null)
             {
                 stringsUsageCountArray[Data.Strings.IndexOf(obj.Name)] += 1;
@@ -407,6 +433,8 @@ uint[] GetStringUsageCount()
     {
         foreach (UndertaleSequence obj in Data.Sequences)
         {
+            if (obj is null)
+                continue;
             if ((obj as UndertaleSequence).Name != null)
             {
                 stringsUsageCountArray[Data.Strings.IndexOf((obj as UndertaleSequence).Name)] += 1;
@@ -432,6 +460,8 @@ uint[] GetStringUsageCount()
     {
         foreach (UndertaleShader obj in Data.Shaders)
         {
+            if (obj is null)
+                continue;
             if (obj.Name != null)
             {
                 stringsUsageCountArray[Data.Strings.IndexOf(obj.Name)] += 1;
@@ -474,6 +504,8 @@ uint[] GetStringUsageCount()
     {
         foreach (UndertaleSound obj in Data.Sounds)
         {
+            if (obj is null)
+                continue;
             if (obj.Name != null)
             {
                 stringsUsageCountArray[Data.Strings.IndexOf(obj.Name)] += 1;
@@ -493,6 +525,8 @@ uint[] GetStringUsageCount()
     {
         foreach (UndertaleSprite obj in Data.Sprites)
         {
+            if (obj is null)
+                continue;
             if (obj.Name != null)
             {
                 stringsUsageCountArray[Data.Strings.IndexOf(obj.Name)] += 1;
@@ -515,6 +549,8 @@ uint[] GetStringUsageCount()
     {
         foreach (UndertaleTextureGroupInfo obj in Data.TextureGroupInfo)
         {
+            if (obj is null)
+                continue;
             if (obj.Name != null)
             {
                 stringsUsageCountArray[Data.Strings.IndexOf(obj.Name)] += 1;
@@ -526,6 +562,8 @@ uint[] GetStringUsageCount()
     {
         foreach (UndertaleTimeline obj in Data.Timelines)
         {
+            if (obj is null)
+                continue;
             if (obj.Name != null)
             {
                 stringsUsageCountArray[Data.Strings.IndexOf(obj.Name)] += 1;
@@ -537,6 +575,8 @@ uint[] GetStringUsageCount()
     {
         foreach (UndertaleVariable obj in Data.Variables)
         {
+            if (obj is null)
+                continue;
             if (obj.Name != null)
             {
                 stringsUsageCountArray[Data.Strings.IndexOf(obj.Name)] += 1;
@@ -614,6 +654,8 @@ Dictionary<UndertaleVariable, List<UndertaleInstruction>> CollectReferencesVar()
     UpdateProgress("Searching For Unused Variables");
     foreach (UndertaleCode code in Data.Code)
     {
+        if (code is null)
+            continue;
         if (code.Offset != 0) // GMS 2.3, skip duplicates
             continue;
         foreach (UndertaleInstruction instr in code.Instructions)
@@ -635,6 +677,8 @@ Dictionary<UndertaleFunction, List<UndertaleInstruction>> CollectReferencesFunc(
     UpdateProgress("Searching For Unused Functions");
     foreach (UndertaleCode code in Data.Code)
     {
+        if (code is null)
+            continue;
         if (code.Offset != 0) // GMS 2.3, skip duplicates
             continue;
         foreach (UndertaleInstruction instr in code.Instructions)
