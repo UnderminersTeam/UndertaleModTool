@@ -71,19 +71,25 @@ EnableUI();
 
 void CheckObject(UndertaleGameObject obj)
 {
-    string sprName = obj.Sprite?.Name?.Content;
+    if (obj is not null)
+    {
+        string sprName = obj.Sprite?.Name?.Content;
 
-    if (sprName is not null && spriteNames.Contains(sprName))
-        resultList.Add(obj.Name.Content);
+        if (sprName is not null && spriteNames.Contains(sprName))
+            resultList.Add(obj.Name.Content);
+    }
 
     IncrementProgressParallel();
 }
 void CheckObjectRegex(UndertaleGameObject obj)
 {
-    string sprName = obj.Sprite?.Name?.Content;
+    if (obj is not null)
+    {
+        string sprName = obj.Sprite?.Name?.Content;
 
-    if (sprName is not null && searchRegex.Match(sprName).Success)
-        resultList.Add(obj.Name.Content);
+        if (sprName is not null && searchRegex.Match(sprName).Success)
+            resultList.Add(obj.Name.Content);
+    }
 
     IncrementProgressParallel();
 }
