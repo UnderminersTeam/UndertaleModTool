@@ -38,12 +38,15 @@ async Task DumpSprites()
 
 void DumpSprite(UndertaleSprite sprite)
 {
-    for (int i = 0; i < sprite.CollisionMasks.Count; i++)
+    if (sprite is not null)
     {
-        if (sprite.CollisionMasks[i]?.Data is not null)
+        for (int i = 0; i < sprite.CollisionMasks.Count; i++)
         {
-            (int maskWidth, int maskHeight) = sprite.CalculateMaskDimensions(Data);
-            TextureWorker.ExportCollisionMaskPNG(sprite.CollisionMasks[i], Path.Combine(texFolder, $"{sprite.Name.Content}_{i}.png"), maskWidth, maskHeight);
+            if (sprite.CollisionMasks[i]?.Data is not null)
+            {
+                (int maskWidth, int maskHeight) = sprite.CalculateMaskDimensions(Data);
+                TextureWorker.ExportCollisionMaskPNG(sprite.CollisionMasks[i], Path.Combine(texFolder, $"{sprite.Name.Content}_{i}.png"), maskWidth, maskHeight);
+            }
         }
     }
 
