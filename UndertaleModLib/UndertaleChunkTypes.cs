@@ -279,9 +279,9 @@ namespace UndertaleModLib
             uint count = reader.ReadUInt32();
             List.SetCapacity(count);
             uint realCount = count;
-            bool[] gm2024_11_WhatToSkip = null;
+            BitArray gm2024_11_WhatToSkip = null;
             if (reader.undertaleData.IsVersionAtLeast(2024, 11) && count > 0)
-                gm2024_11_WhatToSkip = new bool[count];
+                gm2024_11_WhatToSkip = new((int)count, false);
 
             for (int i = 0; i < count; i++)
             {
@@ -292,7 +292,7 @@ namespace UndertaleModLib
                 if (reader.undertaleData.IsVersionAtLeast(2024, 11) && gm2024_11_WhatToSkip is not null)
                 {
                     // This is "normal" and is likely a object removed by GMAC.
-                    gm2024_11_WhatToSkip[i] = true;
+                    gm2024_11_WhatToSkip.Set(i, true);
                     continue;
                 }
 
@@ -301,7 +301,7 @@ namespace UndertaleModLib
 
             for (int i = 0; i < realCount; i++)
             {
-                if (gm2024_11_WhatToSkip is not null && gm2024_11_WhatToSkip[i])
+                if (gm2024_11_WhatToSkip is not null && gm2024_11_WhatToSkip.Get(i))
                 {
                     List.InternalAdd(default);
                     continue;
