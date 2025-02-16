@@ -791,9 +791,10 @@ namespace UndertaleModLib
                 return;
             }
 
-            long positionToReturn = reader.Position, startAbsPosition = reader.AbsPosition;
+            long positionToReturn = reader.AbsPosition;
             bool GMS2023_6 = false;
             bool GMS2024_11 = false;
+            // When this is set to true the detection logic will not run again
             bool GMS2024_11_Failed = false;
 
             uint possibleFontCount = reader.ReadUInt32();
@@ -812,9 +813,10 @@ namespace UndertaleModLib
                 }
                 if (firstAndNextFontPointers.Count == 1)
                 {
-                    // Add in the position of the padding
-                    firstAndNextFontPointers.Add(startAbsPosition + Length - 512);
+                    // Add in the position of the padding i.e. the end of the font list
+                    firstAndNextFontPointers.Add(positionToReturn + Length - 512);
                 }
+
                 if (firstAndNextFontPointers.Count > 0)
                 {
                     reader.AbsPosition = firstAndNextFontPointers[0] + 52;      // Also the LineHeight value. 48 + 4 = 52.
@@ -823,7 +825,7 @@ namespace UndertaleModLib
 
                     uint glyphsLength = reader.ReadUInt32();
                     GMS2023_6 = true;
-                    if (glyphsLength * 4 > Length)
+                    if (glyphsLength * 4 > (firstAndNextFontPointers[1] - reader.AbsPosition))
                     {
                         GMS2023_6 = false;
                     }
@@ -837,10 +839,9 @@ namespace UndertaleModLib
                                 throw new IOException("One of the glyph pointers is null?");
                             glyphPointers.Add(glyphPointer);
                         }
-                        // Hopefully the last thing in a UTFont is the glyph list
-                        long pointerAfterFirstGlyph = glyphPointers.Count > 1 ? glyphPointers[1] : firstAndNextFontPointers[1];
-                        foreach (uint pointer in glyphPointers)
+                        for (int i = 0; i < glyphPointers.Count; i++)
                         {
+                            uint pointer = glyphPointers[i];
                             if (reader.AbsPosition != pointer)
                             {
                                 GMS2023_6 = false;
@@ -854,15 +855,17 @@ namespace UndertaleModLib
                             {
                                 if (!GMS2024_11)
                                 {
+                                    // Hopefully the last thing in a UTFont is the glyph list
+                                    long pointerNextGlyph = i < (glyphPointers.Count - 1) ? glyphPointers[i + 1] : firstAndNextFontPointers[1];
                                     // And hopefully the last thing in a glyph is the kerning list
                                     long pointerAfterKerningList = reader.AbsPosition + 4 * kerningLength;
                                     // If we won't land into the next glyph just right
-                                    if (pointerAfterKerningList != pointerAfterFirstGlyph)
+                                    if (pointerAfterKerningList != pointerNextGlyph)
                                     {
                                         kerningLength = reader.ReadUInt16(); // Discard last read
                                         pointerAfterKerningList = reader.AbsPosition + 4 * kerningLength;
-                                        if (pointerAfterKerningList != pointerAfterFirstGlyph)
-                                            throw new IOException("Detected that there are more/less values than UnknownAlwaysZero before the kerning list");
+                                        if (pointerAfterKerningList != pointerNextGlyph)
+                                            reader.SubmitWarning("There appears to be more/less values than UnknownAlwaysZero before the kerning list in a UTFont.Glyph - potential data loss");
                                         GMS2024_11 = true;
                                     }
                                     else
@@ -889,7 +892,7 @@ namespace UndertaleModLib
                 if (!reader.undertaleData.IsVersionAtLeast(2023, 6))
                     reader.undertaleData.SetGMS2Version(2023, 6);
             }
-            reader.Position = positionToReturn;
+            reader.AbsPosition = positionToReturn;
 
             checkedFor2023_6And2024_11 = true;
         }
