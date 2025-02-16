@@ -849,27 +849,24 @@ namespace UndertaleModLib
                             }
 
                             reader.Position += 14;
-                            long kerningReadAttemptPosition = reader.Position;
                             ushort kerningLength = reader.ReadUInt16();
                             if (!GMS2024_11_Failed)
                             {
                                 if (!GMS2024_11)
                                 {
                                     // And hopefully the last thing in a glyph is the kerning list
-                                    long pointerAfterKerningList = reader.AbsPosition + (uint)4 * kerningLength;
+                                    long pointerAfterKerningList = reader.AbsPosition + 4 * kerningLength;
                                     // If we won't land into the next glyph just right
                                     if (pointerAfterKerningList != pointerAfterFirstGlyph)
                                     {
-                                        // Could be 2024.11...
                                         kerningLength = reader.ReadUInt16(); // Discard last read
-                                        pointerAfterKerningList = reader.AbsPosition + (uint)4 * kerningLength;
+                                        pointerAfterKerningList = reader.AbsPosition + 4 * kerningLength;
                                         if (pointerAfterKerningList != pointerAfterFirstGlyph)
-                                            throw new IOException("Detected that there are more/less values than just UnknownAlwaysZero before the kerning list");
+                                            throw new IOException("Detected that there are more/less values than UnknownAlwaysZero before the kerning list");
                                         GMS2024_11 = true;
                                     }
                                     else
                                     {
-                                        reader.Position = kerningReadAttemptPosition;
                                         GMS2024_11_Failed = true;
                                     }
                                 }
@@ -879,11 +876,12 @@ namespace UndertaleModLib
                                     kerningLength = reader.ReadUInt16();
                                 }
                             }
-                            reader.Position += (uint)4 * kerningLength; // combining read/write would apparently break
+                            reader.Position += 4 * kerningLength; // combining read/write would apparently break
                         }
                     }
                 }
             }
+
             if (GMS2024_11)
                 reader.undertaleData.SetGMS2Version(2024, 11);
             else if (GMS2023_6)
