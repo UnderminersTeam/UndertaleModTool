@@ -37,6 +37,11 @@ await Task.Run(() =>
     GlobalDecompileContext globalDecompileContext = new(Data);
     foreach (UndertaleCode code in Data.Code)
     {
+        if (code is null)
+        {
+            IncrementProgress();
+            continue;
+        }
         ReplaceTextInGML(code.Name.Content, keyword, replacement, case_sensitive, isRegex, globalDecompileContext);
         IncrementProgress();
     }
