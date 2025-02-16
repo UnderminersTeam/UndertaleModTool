@@ -771,17 +771,16 @@ namespace UndertaleModLib
         private void CheckForGM2023_6AndGM2024_11(UndertaleReader reader)
         {
             /*
-            We already know whether the version is more or less than 2022.8 due to FEAT.
-            Checking a shorter range narrows possibility of error.
-            PSEM (2023.2) is not used, as it would return a false negative on LTS (2022.9+ equivalent with no particles).
-            Taking advantage of that, this is basically the same as the 2022.2 check, but it:
-            - Checks for the LineHeight value instead of Ascender (added in 2023.6)
-            - Checks for UnknownAlwaysZero in Glyphs (added in 2024.11)
-             It's possible for the null pointer check planted in UTPointerList deserialisation to not be triggered:
-             for example, if SDF is enabled for any fonts, the shaders related to SDF will not be stripped;
-             it's also possible to prevent audiogroup_default from being stripped by doing
-                audio_group_name(audiogroup_default)
-             So we check for the presence of UnknownAlwaysZero as a last resort.
+                We already know whether the version is more or less than 2022.8 due to the FEAT chunk being present.
+                Taking advantage of that, this is basically the same as the 2022.2 check, but it:
+                - Checks for the LineHeight value instead of Ascender (added in 2023.6)
+                    PSEM (2023.2) is not used, as it would return a false negative on LTS (2022.9+ equivalent with no particles).
+                - Checks for UnknownAlwaysZero in Glyphs (added in 2024.11)
+                    It's possible for the null pointer check planted in UTPointerList deserialisation to not be triggered:
+                    for example, if SDF is enabled for any fonts, the shaders related to SDF will not be stripped;
+                    it's also possible to prevent audiogroup_default from being stripped by doing
+                        audio_group_name(audiogroup_default)
+                    So we check for the presence of UnknownAlwaysZero as a last resort.
             */
             if (!reader.undertaleData.IsVersionAtLeast(2022, 8) ||
                 (reader.undertaleData.IsVersionAtLeast(2023, 6) && !reader.undertaleData.IsVersionAtLeast(2024, 6)) ||
