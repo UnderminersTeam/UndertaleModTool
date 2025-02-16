@@ -190,7 +190,7 @@ namespace UndertaleModLib.Compiler
                 {
                     if (file is null)
                         continue;
-                    foreach (UndertaleExtensionFunction func in file.Functions?)
+                    foreach (UndertaleExtensionFunction func in file.Functions)
                     {
                         if (func is null)
                             continue;
