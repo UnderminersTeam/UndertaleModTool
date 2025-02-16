@@ -37,6 +37,8 @@ namespace UndertaleModTests
             GlobalDecompileContext context = new GlobalDecompileContext(data);
             Parallel.ForEach(data.Code, (code) =>
             {
+                if (code is null)
+                    return;
                 //Console.WriteLine(code.Name.Content);
                 try
                 {
@@ -54,6 +56,8 @@ namespace UndertaleModTests
         {
             Parallel.ForEach(data.Code, (code) =>
             {
+                if (code is null)
+                    return;
                 //Console.WriteLine(code.Name.Content);
 
                 bool knownBug = false;
