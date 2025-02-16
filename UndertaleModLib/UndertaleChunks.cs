@@ -793,106 +793,124 @@ namespace UndertaleModLib
             long positionToReturn = reader.AbsPosition;
             bool GMS2023_6 = false;
             bool GMS2024_11 = false;
-            // When this is set to true the detection logic will not run again
-            bool GMS2024_11_Failed = false;
 
             uint possibleFontCount = reader.ReadUInt32();
-            if (possibleFontCount > 0)
+            if (possibleFontCount <= 0)
             {
-                List<long> firstAndNextFontPointers = new(2);
-                for (int i = 0; i < possibleFontCount; i++)
+                // No way to know anything
+                reader.AbsPosition = positionToReturn;
+                checkedFor2023_6And2024_11 = true;
+                return;
+            }
+
+            List<long> firstAndNextFontPointers = new(2);
+            for (int i = 0; i < possibleFontCount; i++)
+            {
+                uint fontPointer = reader.ReadUInt32();
+                if (fontPointer != 0)
                 {
-                    uint fontPointer = reader.ReadUInt32();
-                    if (fontPointer != 0)
-                    {
-                        firstAndNextFontPointers.Add(fontPointer);
-                        if (firstAndNextFontPointers.Count == 2)
-                            break;
-                    }
+                    firstAndNextFontPointers.Add(fontPointer);
+                    if (firstAndNextFontPointers.Count == 2)
+                        break;
                 }
-                if (firstAndNextFontPointers.Count == 1)
+            }
+
+            if (firstAndNextFontPointers.Count == 0)
+            {
+                // No way to know anything
+                reader.AbsPosition = positionToReturn;
+                checkedFor2023_6And2024_11 = true;
+                return;
+            }
+
+            if (firstAndNextFontPointers.Count == 1)
+            {
+                // Add in the position of the padding i.e. the end of the font list
+                firstAndNextFontPointers.Add(positionToReturn + Length - 512);
+            }
+
+            reader.AbsPosition = firstAndNextFontPointers[0] + 52;      // Also the LineHeight value. 48 + 4 = 52.
+            if (reader.undertaleData.IsNonLTSVersionAtLeast(2023, 2))   // SDFSpread is present from 2023.2 non-LTS onward
+                reader.AbsPosition += 4;                                // (detected by PSEM/PSYS chunk existence)
+
+            uint glyphsLength = reader.ReadUInt32();
+            GMS2023_6 = true;
+            if (glyphsLength * 4 > firstAndNextFontPointers[1] - reader.AbsPosition)
+            {
+                GMS2023_6 = false;
+            }
+            else if (glyphsLength != 0)
+            {
+                List<uint> glyphPointers = new((int)glyphsLength);
+                for (uint i = 0; i < glyphsLength; i++)
                 {
-                    // Add in the position of the padding i.e. the end of the font list
-                    firstAndNextFontPointers.Add(positionToReturn + Length - 512);
+                    uint glyphPointer = reader.ReadUInt32();
+                    if (glyphPointer == 0)
+                        throw new IOException("One of the glyph pointers is null?");
+                    glyphPointers.Add(glyphPointer);
                 }
 
-                if (firstAndNextFontPointers.Count > 0)
+                // When this is set to true the detection logic will not run again
+                bool GMS2024_11_Failed = false;
+                for (int i = 0; i < glyphPointers.Count; i++)
                 {
-                    reader.AbsPosition = firstAndNextFontPointers[0] + 52;      // Also the LineHeight value. 48 + 4 = 52.
-                    if (reader.undertaleData.IsNonLTSVersionAtLeast(2023, 2))   // SDFSpread is present from 2023.2 non-LTS onward
-                        reader.AbsPosition += 4;                                // (detected by PSEM/PSYS chunk existence)
-
-                    uint glyphsLength = reader.ReadUInt32();
-                    GMS2023_6 = true;
-                    if (glyphsLength * 4 > (firstAndNextFontPointers[1] - reader.AbsPosition))
+                    if (reader.AbsPosition != glyphPointers[i])
                     {
                         GMS2023_6 = false;
+                        GMS2024_11 = false;
+                        break;
                     }
-                    else if (glyphsLength != 0)
-                    {
-                        List<uint> glyphPointers = new((int)glyphsLength);
-                        for (uint i = 0; i < glyphsLength; i++)
-                        {
-                            uint glyphPointer = reader.ReadUInt32();
-                            if (glyphPointer == 0)
-                                throw new IOException("One of the glyph pointers is null?");
-                            glyphPointers.Add(glyphPointer);
-                        }
-                        for (int i = 0; i < glyphPointers.Count; i++)
-                        {
-                            uint pointer = glyphPointers[i];
-                            if (reader.AbsPosition != pointer)
-                            {
-                                GMS2023_6 = false;
-                                GMS2024_11 = false;
-                                break;
-                            }
 
-                            reader.Position += 14;
-                            ushort kerningLength = reader.ReadUInt16();
-                            if (!GMS2024_11_Failed)
+                    reader.Position += 14;
+                    ushort kerningLength = reader.ReadUInt16();
+                    if (!GMS2024_11_Failed)
+                    {
+                        if (!GMS2024_11)
+                        {
+                            // Hopefully the last thing in a UTFont is the glyph list
+                            long pointerNextGlyph = i < (glyphPointers.Count - 1) ? glyphPointers[i + 1] : firstAndNextFontPointers[1];
+                            // And hopefully the last thing in a glyph is the kerning list
+                            // Note that we're actually skipping all items of the Glyph.Kerning SimpleList here;
+                            // 4 is supposed to be the size of a GlyphKerning object
+                            long pointerAfterKerningList = reader.AbsPosition + 4 * kerningLength;
+                            // If we don't land on the next glyph/font after skipping the Kerning list,
+                            // kerningLength is probably bogus and UnknownAlwaysZero may be present
+                            if (pointerAfterKerningList != pointerNextGlyph)
                             {
-                                if (!GMS2024_11)
-                                {
-                                    // Hopefully the last thing in a UTFont is the glyph list
-                                    long pointerNextGlyph = i < (glyphPointers.Count - 1) ? glyphPointers[i + 1] : firstAndNextFontPointers[1];
-                                    // And hopefully the last thing in a glyph is the kerning list
-                                    long pointerAfterKerningList = reader.AbsPosition + 4 * kerningLength;
-                                    // If we won't land into the next glyph just right
-                                    if (pointerAfterKerningList != pointerNextGlyph)
-                                    {
-                                        kerningLength = reader.ReadUInt16(); // Discard last read
-                                        pointerAfterKerningList = reader.AbsPosition + 4 * kerningLength;
-                                        if (pointerAfterKerningList != pointerNextGlyph)
-                                            reader.SubmitWarning("There appears to be more/less values than UnknownAlwaysZero before the kerning list in a UTFont.Glyph - potential data loss");
-                                        GMS2024_11 = true;
-                                    }
-                                    else
-                                    {
-                                        GMS2024_11_Failed = true;
-                                    }
-                                }
-                                else
-                                {
-                                    // Discard last read
-                                    kerningLength = reader.ReadUInt16();
-                                }
+                                // Discard last read, which would be of UnknownAlwaysZero
+                                kerningLength = reader.ReadUInt16();
+                                pointerAfterKerningList = reader.AbsPosition + 4 * kerningLength;
+                                if (pointerAfterKerningList != pointerNextGlyph)
+                                    reader.SubmitWarning("There appears to be more/less values than UnknownAlwaysZero before " +
+                                                            "the kerning list in a UTFont.Glyph - potential data loss");
+                                GMS2024_11 = true;
                             }
-                            reader.Position += 4 * kerningLength; // combining read/write would apparently break
+                            else
+                            {
+                                GMS2024_11_Failed = true;
+                            }
+                        }
+                        else
+                        {
+                            // Discard last read, which would be of UnknownAlwaysZero
+                            kerningLength = reader.ReadUInt16();
                         }
                     }
+                    reader.Position += 4 * kerningLength; // combining read/write would apparently break
                 }
             }
 
             if (GMS2024_11)
+            {
                 reader.undertaleData.SetGMS2Version(2024, 11);
+            }
             else if (GMS2023_6)
             {
                 if (!reader.undertaleData.IsVersionAtLeast(2023, 6))
                     reader.undertaleData.SetGMS2Version(2023, 6);
             }
-            reader.AbsPosition = positionToReturn;
 
+            reader.AbsPosition = positionToReturn;
             checkedFor2023_6And2024_11 = true;
         }
 
