@@ -8,20 +8,19 @@ using UndertaleModTool.Windows;
 
 namespace UndertaleModTool
 {
+    /// <summary>
+    /// TreeViewItem for representing UndertaleResources in the MainWindow data hirearchy
+    /// </summary>
     public partial class ResourceListTreeViewItem : TreeViewItem
     {
-        // <summary>
-        // TreeViewItem for representing UndertaleResources in the MainWindow data hirearchy
-        // </summary>
-
         // We can't just use the stock ItemTemplate property, else our Selector will not run
         public static readonly DependencyProperty DefaultItemTemplateProperty = DependencyProperty.Register(
             "DefaultItemTemplate", typeof(DataTemplate), typeof(ResourceListTreeViewItem),
             new FrameworkPropertyMetadata(default(DataTemplate), FrameworkPropertyMetadataOptions.AffectsRender, OnDefaultItemTemplateChanged));
 
-        // <summary>
-        // Template to use if a resource is not null
-        // </summary>
+        /// <summary>
+        /// Template to use if a resource is not null
+        /// </summary>
         [Bindable(true), Category("Content")]
         public DataTemplate DefaultItemTemplate
         {
@@ -35,9 +34,9 @@ namespace UndertaleModTool
 
         private DataTemplate _defaultNullItemTemplateCache;
 
-        // <summary>
-        // Template to use if a resource is null
-        // </summary>
+        /// <summary>
+        /// Template to use if a resource is null
+        /// </summary>
         [Bindable(true), Category("Content")]
         public DataTemplate NullItemTemplate
         {
