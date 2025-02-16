@@ -74,7 +74,17 @@ ScriptMessage("Externalization Complete.\nExternalized " + sounds.ToString() + "
 void ExternalizeSounds()
 {
     foreach (UndertaleSound sound in Data.Sounds)
-        ExternalizeSound(sound);
+    {
+        if (sound is not null)
+        {
+            ExternalizeSound(sound);
+        }
+        else
+        {
+            sounds++;
+            IncrementProgress();
+        }
+    }
 }
 
 string GetFolder(string path)
@@ -197,7 +207,10 @@ byte[] GetSoundData(UndertaleSound sound)
 void DumpSounds()
 {
     foreach (UndertaleSound sound in Data.Sounds)
-        DumpSound(sound);
+    {
+        if (sound is not null)
+            DumpSound(sound);
+    }
 }
 
 void DumpSound(UndertaleSound sound)
