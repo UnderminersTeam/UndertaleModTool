@@ -201,7 +201,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
         {
             reader.Position += 14;
             if (reader.undertaleData.IsVersionAtLeast(2024, 11))
-                reader.Position += 2;
+                reader.Position += 2; // UnknownAlwaysZero
 
             return 1 + UndertaleSimpleListShort<GlyphKerning>.UnserializeChildObjectCount(reader);
         }
