@@ -692,7 +692,7 @@ namespace UndertaleModLib
         public byte[] Padding;
 
         private bool checkedFor2022_2 = false;
-        private bool checkedFor2023_6 = false;
+        private bool checkedFor2023_6And2024_11 = false;
         private void CheckForGM2022_2(UndertaleReader reader)
         {
            /* This code performs four checks to identify GM2022.2.
@@ -714,35 +714,52 @@ namespace UndertaleModLib
             long positionToReturn = reader.Position;
             bool GMS2022_2 = false;
 
-            if (reader.ReadUInt32() > 0) // Font count
+            uint possibleFontCount = reader.ReadUInt32();
+            if (possibleFontCount > 0)
             {
-                uint firstFontPointer = reader.ReadUInt32();
-                reader.AbsPosition = firstFontPointer + 48; // There are 48 bytes of existing metadata.
-                uint glyphsLength = reader.ReadUInt32();
-                GMS2022_2 = true;
-                if ((glyphsLength * 4) > this.Length)
+                uint firstFontPointer = 0;
+                for (int i = 0; i < possibleFontCount; i++)
                 {
-                    GMS2022_2 = false;
-                }
-                else if (glyphsLength != 0)
-                {
-                    List<uint> glyphPointers = new List<uint>((int)glyphsLength);
-                    for (uint i = 0; i < glyphsLength; i++)
-                        glyphPointers.Add(reader.ReadUInt32());
-                    foreach (uint pointer in glyphPointers)
+                    uint fontPointer = reader.ReadUInt32();
+                    if (fontPointer != 0)
                     {
-                        if (reader.AbsPosition != pointer)
-                        {
-                            GMS2022_2 = false;
-                            break;
-                        }
-
-                        reader.Position += 14;
-                        ushort kerningLength = reader.ReadUInt16();
-                        reader.Position += (uint)4 * kerningLength; // combining read/write would apparently break
+                        firstFontPointer = fontPointer;
+                        break;
                     }
                 }
+                if (firstFontPointer != 0)
+                {
+                    reader.AbsPosition = firstFontPointer + 48; // There are 48 bytes of existing metadata.
+                    uint glyphsLength = reader.ReadUInt32();
+                    GMS2022_2 = true;
+                    if ((glyphsLength * 4) > this.Length)
+                    {
+                        GMS2022_2 = false;
+                    }
+                    else if (glyphsLength != 0)
+                    {
+                        List<uint> glyphPointers = new List<uint>((int)glyphsLength);
+                        for (uint i = 0; i < glyphsLength; i++)
+                        {
+                            uint glyphPointer = reader.ReadUInt32();
+                            if (glyphPointer == 0)
+                                throw new IOException("One of the glyph pointers is null?");
+                            glyphPointers.Add(glyphPointer);
+                        }
+                        foreach (uint pointer in glyphPointers)
+                        {
+                            if (reader.AbsPosition != pointer)
+                            {
+                                GMS2022_2 = false;
+                                break;
+                            }
 
+                            reader.Position += 14;
+                            ushort kerningLength = reader.ReadUInt16();
+                            reader.Position += (uint)4 * kerningLength; // combining read/write would apparently break
+                        }
+                    }
+                }
             }
             if (GMS2022_2)
                 reader.undertaleData.SetGMS2Version(2022, 2);
@@ -751,59 +768,132 @@ namespace UndertaleModLib
             checkedFor2022_2 = true;
         }
 
-        private void CheckForGM2023_6(UndertaleReader reader)
+        private void CheckForGM2023_6AndGM2024_11(UndertaleReader reader)
         {
-            // This is basically the same as the 2022.2 check, but adapted for the LineHeight value instead of Ascender.
-            
-            // We already know whether the version is more or less than 2022.8 due to FEAT. Checking a shorter range narrows possibility of error.
-            // PSEM (2023.2) is not used, as it would return a false negative on LTS (2022.9+ equivalent with no particles).
-            if (!reader.undertaleData.IsVersionAtLeast(2022, 8) || reader.undertaleData.IsVersionAtLeast(2023, 6))
+            /*
+            We already know whether the version is more or less than 2022.8 due to FEAT.
+            Checking a shorter range narrows possibility of error.
+            PSEM (2023.2) is not used, as it would return a false negative on LTS (2022.9+ equivalent with no particles).
+            Taking advantage of that, this is basically the same as the 2022.2 check, but it:
+            - Checks for the LineHeight value instead of Ascender (added in 2023.6)
+            - Checks for UnknownAlwaysZero in Glyphs (added in 2024.11)
+             It's possible for the null pointer check planted in UTPointerList deserialisation to not be triggered:
+             for example, if SDF is enabled for any fonts, the shaders related to SDF will not be stripped;
+             it's also possible to prevent audiogroup_default from being stripped by doing
+                audio_group_name(audiogroup_default)
+             So we check for the presence of UnknownAlwaysZero as a last resort.
+            */
+            if (!reader.undertaleData.IsVersionAtLeast(2022, 8) ||
+                (reader.undertaleData.IsVersionAtLeast(2023, 6) && !reader.undertaleData.IsVersionAtLeast(2024, 6)) ||
+                reader.undertaleData.IsVersionAtLeast(2024, 11))
             {
-                checkedFor2023_6 = true;
+                checkedFor2023_6And2024_11 = true;
                 return;
             }
 
-            long positionToReturn = reader.Position;
+            long positionToReturn = reader.Position, startAbsPosition = reader.AbsPosition;
             bool GMS2023_6 = false;
+            bool GMS2024_11 = false;
+            bool GMS2024_11_Failed = false;
 
-            if (reader.ReadUInt32() > 0) // Font count
+            uint possibleFontCount = reader.ReadUInt32();
+            if (possibleFontCount > 0)
             {
-                uint firstFontPointer = reader.ReadUInt32();
-                reader.AbsPosition = firstFontPointer + 52; // Also the LineHeight value. 48 + 4 = 52.
-                if (reader.undertaleData.IsNonLTSVersionAtLeast(2023, 2)) // SDFSpread is present from 2023.2 non-LTS onward
-                    reader.AbsPosition += 4;                              // (detected by PSEM/PSYS chunk existence)
-
-                uint glyphsLength = reader.ReadUInt32();
-                GMS2023_6 = true;
-                if ((glyphsLength * 4) > this.Length)
+                List<long> firstAndNextFontPointers = new(2);
+                for (int i = 0; i < possibleFontCount; i++)
                 {
-                    GMS2023_6 = false;
-                }
-                else if (glyphsLength != 0)
-                {
-                    List<uint> glyphPointers = new List<uint>((int)glyphsLength);
-                    for (uint i = 0; i < glyphsLength; i++)
-                        glyphPointers.Add(reader.ReadUInt32());
-                    foreach (uint pointer in glyphPointers)
+                    uint fontPointer = reader.ReadUInt32();
+                    if (fontPointer != 0)
                     {
-                        if (reader.AbsPosition != pointer)
-                        {
-                            GMS2023_6 = false;
+                        firstAndNextFontPointers.Add(fontPointer);
+                        if (firstAndNextFontPointers.Count == 2)
                             break;
-                        }
-
-                        reader.Position += 14;
-                        ushort kerningLength = reader.ReadUInt16();
-                        reader.Position += (uint)4 * kerningLength; // combining read/write would apparently break
                     }
                 }
+                if (firstAndNextFontPointers.Count == 1)
+                {
+                    // Add in the position of the padding
+                    firstAndNextFontPointers.Add(startAbsPosition + Length - 512);
+                }
+                if (firstAndNextFontPointers.Count > 0)
+                {
+                    reader.AbsPosition = firstAndNextFontPointers[0] + 52;      // Also the LineHeight value. 48 + 4 = 52.
+                    if (reader.undertaleData.IsNonLTSVersionAtLeast(2023, 2))   // SDFSpread is present from 2023.2 non-LTS onward
+                        reader.AbsPosition += 4;                                // (detected by PSEM/PSYS chunk existence)
 
+                    uint glyphsLength = reader.ReadUInt32();
+                    GMS2023_6 = true;
+                    if (glyphsLength * 4 > Length)
+                    {
+                        GMS2023_6 = false;
+                    }
+                    else if (glyphsLength != 0)
+                    {
+                        List<uint> glyphPointers = new((int)glyphsLength);
+                        for (uint i = 0; i < glyphsLength; i++)
+                        {
+                            uint glyphPointer = reader.ReadUInt32();
+                            if (glyphPointer == 0)
+                                throw new IOException("One of the glyph pointers is null?");
+                            glyphPointers.Add(glyphPointer);
+                        }
+                        // Hopefully the last thing in a UTFont is the glyph list
+                        long pointerAfterFirstGlyph = glyphPointers.Count > 1 ? glyphPointers[1] : firstAndNextFontPointers[1];
+                        foreach (uint pointer in glyphPointers)
+                        {
+                            if (reader.AbsPosition != pointer)
+                            {
+                                GMS2023_6 = false;
+                                GMS2024_11 = false;
+                                break;
+                            }
+
+                            reader.Position += 14;
+                            long kerningReadAttemptPosition = reader.Position;
+                            ushort kerningLength = reader.ReadUInt16();
+                            if (!GMS2024_11_Failed)
+                            {
+                                if (!GMS2024_11)
+                                {
+                                    // And hopefully the last thing in a glyph is the kerning list
+                                    long pointerAfterKerningList = reader.AbsPosition + (uint)4 * kerningLength;
+                                    // If we won't land into the next glyph just right
+                                    if (pointerAfterKerningList != pointerAfterFirstGlyph)
+                                    {
+                                        // Could be 2024.11...
+                                        kerningLength = reader.ReadUInt16(); // Discard last read
+                                        pointerAfterKerningList = reader.AbsPosition + (uint)4 * kerningLength;
+                                        if (pointerAfterKerningList != pointerAfterFirstGlyph)
+                                            throw new IOException("Detected that there are more/less values than just UnknownAlwaysZero before the kerning list");
+                                        GMS2024_11 = true;
+                                    }
+                                    else
+                                    {
+                                        reader.Position = kerningReadAttemptPosition;
+                                        GMS2024_11_Failed = true;
+                                    }
+                                }
+                                else
+                                {
+                                    // Discard last read
+                                    kerningLength = reader.ReadUInt16();
+                                }
+                            }
+                            reader.Position += (uint)4 * kerningLength; // combining read/write would apparently break
+                        }
+                    }
+                }
             }
-            if (GMS2023_6)
-                reader.undertaleData.SetGMS2Version(2023, 6);
+            if (GMS2024_11)
+                reader.undertaleData.SetGMS2Version(2024, 11);
+            else if (GMS2023_6)
+            {
+                if (!reader.undertaleData.IsVersionAtLeast(2023, 6))
+                    reader.undertaleData.SetGMS2Version(2023, 6);
+            }
             reader.Position = positionToReturn;
 
-            checkedFor2023_6 = true;
+            checkedFor2023_6And2024_11 = true;
         }
 
         internal override void SerializeChunk(UndertaleWriter writer)
@@ -825,8 +915,8 @@ namespace UndertaleModLib
             if (!checkedFor2022_2)
                 CheckForGM2022_2(reader);
 
-            if (!checkedFor2023_6)
-                CheckForGM2023_6(reader);
+            if (!checkedFor2023_6And2024_11)
+                CheckForGM2023_6AndGM2024_11(reader);
 
             base.UnserializeChunk(reader);
 
@@ -836,10 +926,10 @@ namespace UndertaleModLib
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
             checkedFor2022_2 = false;
-            checkedFor2023_6 = false;
+            checkedFor2023_6And2024_11 = false;
 
             CheckForGM2022_2(reader);
-            CheckForGM2023_6(reader);
+            CheckForGM2023_6AndGM2024_11(reader);
 
             return base.UnserializeObjectCount(reader);
         }
