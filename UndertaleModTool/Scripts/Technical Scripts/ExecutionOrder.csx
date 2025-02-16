@@ -256,6 +256,8 @@ void ProfileModeExempt()
     // Process bytecode, patching in script calls where needed
     foreach (UndertaleCode c in Data.Code)
     {
+        if (c is null)
+            continue;
         // global.interact get/set patches
         uint addr = 0;
         for (int i = 0; i < c.Instructions.Count; i++)

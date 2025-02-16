@@ -11,6 +11,9 @@ using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
+if (Data.IsVersionAtLeast(2024, 11))
+    ScriptWarning("This script may act erroneusly on GM version 2024.11 and later.");
+
 string assetNamePath = PromptLoadFile("txt", "Text files (.txt)|*.txt|All files|*");
 if (assetNamePath == null)
     throw new ScriptException("The asset name text file was not chosen!");
@@ -34,7 +37,12 @@ void Reorganize<T>(IList<T> list, List<string> order) where T : UndertaleNamedRe
         T asset;
         try
         {
-            asset = temp[order[i]];
+            if (order[i] == "(null)")
+                asset = default(T);
+            else if (int.TryParse(order[i], out int index))
+                asset = list[index];
+            else
+                asset = temp[order[i]];
         }
         catch (Exception e)
         {

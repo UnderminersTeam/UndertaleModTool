@@ -22,6 +22,8 @@ using (var stream = new FileStream(donorDataPath, FileMode.Open, FileAccess.Read
 
 foreach (var sprite in Data.Sprites)
 {
+    if (sprite is null)
+        continue;
     var donorSpr = donorData.Sprites.ByName(sprite.Name.Content);
     if (donorSpr is not null)
     {

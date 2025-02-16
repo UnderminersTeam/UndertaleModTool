@@ -71,7 +71,8 @@ private DialogResult ShowInputDialog()
     //fonts_list.Items.Add("All");
     foreach (var x in Data.Fonts)
     {
-        fonts_list.Items.Add(x.Name.ToString().Replace("\"", ""));
+        if (x is not null)
+            fonts_list.Items.Add(x.Name.ToString().Replace("\"", ""));
     }
 
     fonts_list.Size = new System.Drawing.Size(size.Width - 10, size.Height - 50);
