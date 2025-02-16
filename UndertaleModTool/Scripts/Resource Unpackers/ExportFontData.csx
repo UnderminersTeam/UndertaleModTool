@@ -40,7 +40,7 @@ async Task DumpFonts()
 
 void DumpFont(UndertaleFont font)
 {
-    if (arrayString.Contains(font.Name.ToString().Replace("\"", "")))
+    if (font is not null && arrayString.Contains(font.Name.ToString().Replace("\"", "")))
     {
         worker.ExportAsPNG(font.Texture, Path.Combine(fntFolder, $"{font.Name.Content}.png"));
         using (StreamWriter writer = new(Path.Combine(fntFolder, $"glyphs_{font.Name.Content}.csv")))
