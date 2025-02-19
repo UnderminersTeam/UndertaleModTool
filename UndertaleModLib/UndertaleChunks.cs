@@ -289,7 +289,7 @@ namespace UndertaleModLib
                 // Go to the first extension
                 reader.AbsPosition = reader.ReadUInt32();
 
-                // Skip the miminal amount of strings
+                // Skip the minimal amount of strings
                 reader.Position += 4 * 3;
 
                 uint filesPtr = reader.ReadUInt32();

@@ -415,7 +415,7 @@ namespace UndertaleModLib
         }
 
         /// <summary>
-        /// Reports the zero-based index of the first occurence of the specified <see cref="UndertaleResource"/>.
+        /// Reports the zero-based index of the first occurrence of the specified <see cref="UndertaleResource"/>.
         /// </summary>
         /// <param name="obj">The object to get the index of.</param>
         /// <param name="panicIfInvalid">Whether to throw if <paramref name="obj"/> is not a valid object.</param>
