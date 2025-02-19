@@ -10,7 +10,7 @@ namespace UndertaleModTool
 
         protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
         {
-            // prevent WPF binding errors (and unnessecary "DataContextChanged" firing) when switching to incompatible data type
+            // prevent WPF binding errors (and unnecessary "DataContextChanged" firing) when switching to incompatible data type
             if (e.NewValue is null && e.Property == DataContextProperty)
                 return;
 

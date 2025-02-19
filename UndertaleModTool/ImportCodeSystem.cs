@@ -199,7 +199,7 @@ namespace UndertaleModTool
             {
                 if (!CheckDecompiler)
                 {
-                    this.ShowError("Import" + (IsGML ? "GML" : "ASM") + "File error! Send the following error to Grossley#2869 (Discord) and make an issue on Github:\n\n" + exc.ToString());
+                    this.ShowError("Import" + (IsGML ? "GML" : "ASM") + "File error! Send the following error to Grossley#2869 (Discord) and make an issue on GitHub:\n\n" + exc.ToString());
 
                     if (throwOnError)
                         throw new ScriptException("Code files importation stopped because of error(s).");

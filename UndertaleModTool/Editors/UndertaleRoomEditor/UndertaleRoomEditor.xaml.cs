@@ -2684,7 +2684,7 @@ namespace UndertaleModTool
                 catch (Exception ex)
                 {
                     Window mainWindow = Application.Current?.MainWindow;
-                    mainWindow.ShowError($"An error occured while generating \"Rectangles\" for tile layer {tilesData.ParentLayer.LayerName}.\n\n{ex}");
+                    mainWindow.ShowError($"An error occurred while generating \"Rectangles\" for tile layer {tilesData.ParentLayer.LayerName}.\n\n{ex}");
                     return null;
                 }
             }

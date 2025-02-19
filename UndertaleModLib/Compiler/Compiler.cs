@@ -223,7 +223,7 @@ namespace UndertaleModLib.Compiler
         {
             context.Setup(redoAssets); // Set up
 
-            List<Lexer.Token> tokens = Lexer.LexString(context, input); // Peform lexical analysis
+            List<Lexer.Token> tokens = Lexer.LexString(context, input); // Perform lexical analysis
             Parser.Statement block = Parser.ParseTokens(context, tokens); // Parse tokens, make syntax tree
 
             // Optimize and process syntax tree
