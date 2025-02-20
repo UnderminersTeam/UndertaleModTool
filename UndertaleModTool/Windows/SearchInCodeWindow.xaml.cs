@@ -301,10 +301,10 @@ namespace UndertaleModTool.Windows
                 }
             }
 
-            string str = $"{resultCount} result{(resultCount > 1 ? "s" : "")} found in {resultsDictSorted.Count()} code entr{(resultsDictSorted.Count() > 1 ? "ies" : "y")}.";
+            string str = $"{resultCount} result{(resultCount != 1 ? "s" : "")} found in {resultsDictSorted.Count()} code entr{(resultsDictSorted.Count() != 1 ? "ies" : "y")}.";
             if (failedListSorted.Count() > 0)
             {
-                str += $" {failedListSorted.Count()} code entr{(failedListSorted.Count() > 1 ? "ies" : "y")} with an error.";
+                str += $" {failedListSorted.Count()} code entr{(failedListSorted.Count() != 1 ? "ies" : "y")} with an error.";
             }
             StatusBarTextBlock.Text = str;
         }

@@ -74,7 +74,7 @@ public interface IScriptInterface
     bool ScriptExecutionSuccess { get; }
 
     /// <summary>
-    /// Error message of the last executed script. Will be <c>""</c> (<see cref="String.Empty"/>) if no error occured.
+    /// Error message of the last executed script. Will be <c>""</c> (<see cref="String.Empty"/>) if no error occurred.
     /// </summary>
     string ScriptErrorMessage { get; }
 
