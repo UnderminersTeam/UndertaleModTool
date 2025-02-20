@@ -1,28 +1,20 @@
-﻿using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
+﻿using System;
+using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Drawing;
-using UndertaleModLib.Models;
-using UndertaleModLib.Util;
-using System.Globalization;
-using UndertaleModLib;
-using UndertaleModTool.Windows;
 using System.Windows.Threading;
 using ImageMagick;
-using System.ComponentModel;
+using Microsoft.Win32;
+using UndertaleModLib.Models;
+using UndertaleModLib.Util;
+using UndertaleModTool.Windows;
 
 namespace UndertaleModTool
 {
@@ -252,8 +244,18 @@ namespace UndertaleModTool
                         mainWindow.ShowWarning("WARNING: Texture page dimensions are not powers of 2. Sprite blurring is very likely in-game.", "Unexpected texture dimensions");
                     }
 
+                    var previousFormat = target.TextureData.Image.Format;
+
                     // Import image
                     target.TextureData.Image = image;
+
+                    var currentFormat = target.TextureData.Image.Format;
+
+                    // If texture was DDS, warn user that texture has been converted to PNG
+                    if (previousFormat == GMImage.ImageFormat.Dds && currentFormat == GMImage.ImageFormat.Png)
+                    {
+                        mainWindow.ShowMessage($"{target} was converted into PNG format since we don't support converting images into DDS format. This might have performance issues in the game.");
+                    }
 
                     // Update width/height properties in the UI
                     TexWidth.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();
