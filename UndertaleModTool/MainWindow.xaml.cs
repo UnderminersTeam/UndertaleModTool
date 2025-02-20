@@ -1019,7 +1019,7 @@ namespace UndertaleModTool
 #if DEBUG
                     Debug.WriteLine(e);
 #endif
-                    this.ShowError("An error occured while trying to load:\n" + e.Message, "Load error");
+                    this.ShowError("An error occurred while trying to load:\n" + e.Message, "Load error");
                 }
 
                 if (onlyGeneralInfo)
@@ -1243,7 +1243,7 @@ namespace UndertaleModTool
 
                     Dispatcher.Invoke(() =>
                     {
-                        this.ShowError("An error occured while trying to save:\n" + e.Message, "Save error");
+                        this.ShowError("An error occurred while trying to save:\n" + e.Message, "Save error");
                     });
 
                     SaveSucceeded = false;
@@ -1279,7 +1279,7 @@ namespace UndertaleModTool
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        this.ShowError("An error occured while trying to save:\n" + exc.Message, "Save error");
+                        this.ShowError("An error occurred while trying to save:\n" + exc.Message, "Save error");
                     });
 
                     SaveSucceeded = false;
@@ -1999,7 +1999,7 @@ namespace UndertaleModTool
             }
             catch (Exception ex)
             {
-                this.ShowError("An error occured in the object references related window.\n" +
+                this.ShowError("An error occurred in the object references related window.\n" +
                                $"Please report this on GitHub.\n\n{ex}");
             }
             finally
@@ -2044,7 +2044,7 @@ namespace UndertaleModTool
             }
             catch (Exception ex)
             {
-                this.ShowError("An error occured in the object references related window.\n" +
+                this.ShowError("An error occurred in the object references related window.\n" +
                                $"Please report this on GitHub.\n\n{ex}");
             }
             finally
@@ -2648,7 +2648,7 @@ namespace UndertaleModTool
                 if (exTypesDict is not null)
                 {
                     string exTypesStr = string.Join(",\n", exTypesDict.Select(x => $"{x.Key}{((x.Value > 1) ? " (x" + x.Value + ")" : string.Empty)}"));
-                    excText = $"{exc.GetType().FullName}: One on more errors occured:\n{exTypesStr}\n\nThe current stacktrace:\n{excLines}";
+                    excText = $"{exc.GetType().FullName}: One on more errors occurred:\n{exTypesStr}\n\nThe current stacktrace:\n{excLines}";
                 }
                 else
                 {
@@ -2876,7 +2876,7 @@ namespace UndertaleModTool
 
             if (!dlgResult.HasValue || dlgResult == false)
             {
-                // returns null (not an empty!!!) string if the dialog has been closed, or an error has occured.
+                // returns null (not an empty!!!) string if the dialog has been closed, or an error has occurred.
                 return null;
             }
 
@@ -3088,7 +3088,7 @@ namespace UndertaleModTool
                 return;
             }
 
-            // Github doesn't let anonymous users download artifacts, so let's use nightly.link
+            // GitHub doesn't let anonymous users download artifacts, so let's use nightly.link
 
             string baseDownloadUrl = artifact["archive_download_url"].ToString();
             string downloadUrl = baseDownloadUrl.Replace("api.github.com/repos", "nightly.link").Replace("/zip", ".zip");
@@ -3599,7 +3599,7 @@ result in loss of work.");
                         }
                         catch (Exception ex)
                         {
-                            this.ShowError("An error occured while trying to load:\n" + ex.Message, "Load error");
+                            this.ShowError("An error occurred while trying to load:\n" + ex.Message, "Load error");
                         }
 
                         Dispatcher.Invoke(() =>

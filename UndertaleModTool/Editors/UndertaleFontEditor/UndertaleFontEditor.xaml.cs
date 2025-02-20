@@ -133,7 +133,7 @@ namespace UndertaleModTool
             }
             catch (Exception ex)
             {
-                mainWindow.ShowError("An error occured in the glyph rectangle editor window.\n" +
+                mainWindow.ShowError("An error occurred in the glyph rectangle editor window.\n" +
                                      $"Please report this on GitHub.\n\n{ex}");
             }
             finally

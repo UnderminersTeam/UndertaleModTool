@@ -208,7 +208,7 @@ namespace UndertaleModTool
             }
             catch (Exception ex)
             {
-                mainWindow.ShowError("An error occured in the object references related window.\n" +
+                mainWindow.ShowError("An error occurred in the object references related window.\n" +
                                      $"Please report this on GitHub.\n\n{ex}");
             }
             finally
