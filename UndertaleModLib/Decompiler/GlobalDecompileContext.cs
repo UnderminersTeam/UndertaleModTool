@@ -5,13 +5,16 @@ using Underanalyzer;
 using Underanalyzer.Decompiler;
 using Underanalyzer.Decompiler.GameSpecific;
 using UndertaleModLib.Models;
+using Underanalyzer.Compiler;
 
 namespace UndertaleModLib.Decompiler;
 
 /// <summary>
-/// The DecompileContext is global for the entire decompilation run, or possibly multiple runs. It caches the decompilation results which don't change often
-/// to speedup decompilation.
+/// A global game context to track data used by GML decompilation and compilation.
 /// </summary>
+/// <remarks>
+/// Can be used for multiple runs of both the Underanalyzer decompiler and compiler, and is generally thread-safe.
+/// </remarks>
 public class GlobalDecompileContext : IGameContext
 {
     public UndertaleData Data;
@@ -25,7 +28,18 @@ public class GlobalDecompileContext : IGameContext
     public bool UsingTypedBooleans => Data?.IsVersionAtLeast(2, 3, 7) ?? false;
     public bool UsingAssetReferences => Data?.IsVersionAtLeast(2023, 8) ?? false;
     public bool UsingRoomInstanceReferences => Data?.IsVersionAtLeast(2024, 2) ?? false;
+    public bool UsingLogicalShortCircuit => Data?.ShortCircuit ?? true;
+    public bool UsingExtraRepeatInstruction => Data?.IsNonLTSVersionAtLeast(2022, 11) ?? true;
+    public bool UsingConstructorSetStatic => Data?.IsVersionAtLeast(2024, 11) ?? false;
+    public bool UsingReentrantStatic => !(Data?.IsVersionAtLeast(2024, 11) ?? false);
+    public bool UsingNewFunctionVariables => Data?.IsVersionAtLeast(2024, 2) ?? false;
+    public bool UsingSelfToBuiltin => Data?.IsVersionAtLeast(2024, 2) ?? false;
+    public bool UsingGlobalConstantFunction => Data?.IsVersionAtLeast(2023, 11) ?? false;
+    public bool UsingObjectFunctionForesight => Data?.IsVersionAtLeast(2024, 11) ?? false;
+    public bool UsingBetterTryBreakContinue => Data?.IsVersionAtLeast(2024, 11) ?? false;
     public GameSpecificRegistry GameSpecificRegistry => Data?.GameSpecificRegistry;
+    public IBuiltins Builtins => throw new NotImplementedException(); // to be implemented in compiler branch
+    public ICodeBuilder CodeBuilder => throw new NotImplementedException(); // to be implemented in compiler branch
 
     public GlobalDecompileContext(UndertaleData data)
     {
@@ -173,5 +187,26 @@ public class GlobalDecompileContext : IGameContext
         }
 
         return null;
+    }
+
+    public bool GetAssetId(string assetName, out int assetId)
+    {
+        // TODO: to be implemented in compiler branch
+        assetId = 0;
+        return false;
+    }
+
+    public bool GetScriptId(string scriptName, out int assetId)
+    {
+        // TODO: to be implemented in compiler branch
+        assetId = 0;
+        return false;
+    }
+
+    public bool GetScriptIdByFunctionName(string functionName, out int assetId)
+    {
+        // TODO: to be implemented in compiler branch
+        assetId = 0;
+        return false;
     }
 }

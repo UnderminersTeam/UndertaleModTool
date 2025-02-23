@@ -1814,7 +1814,8 @@ namespace UndertaleModLib.Compiler
                         varName = "___struct___" + context.OriginalCode.Name.Content +
                             "__" + uuidCounter++.ToString();
                         i++;
-                    } while (context.Data.GlobalFunctions.NameToFunction.ContainsKey(varName));
+                    } 
+                    while (context.Data.GlobalFunctions.FunctionNameExists(varName));
                 }
 
                 int ID = GetVariableID(context, varName, out _);
