@@ -337,7 +337,7 @@ namespace UndertaleModLib
         /// <summary>
         /// Cache for 2.3-style functions defined in global scripts. Can be re-built by setting this to null.
         /// </summary>
-        public IGlobalFunctions GlobalFunctions;
+        public GlobalFunctions GlobalFunctions;
 
         /// <summary>
         /// Registry for macro types, their resolvers, and other data specific to this game.

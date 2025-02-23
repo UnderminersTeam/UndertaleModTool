@@ -103,8 +103,7 @@ namespace UndertaleModLib.Compiler
                             UndertaleFunction functionObj = Data.Functions.ByName(scriptName);
                             if (functionObj is not null)
                                 Data.Functions.Remove(functionObj);
-                            Data.GlobalFunctions.NameToFunction.Remove(name);
-                            Data.GlobalFunctions.FunctionToName.Remove(functionObj);
+                            Data.GlobalFunctions.UndefineFunction(name, functionObj);
                         }
                         FunctionsToObliterate.Clear();
                     }

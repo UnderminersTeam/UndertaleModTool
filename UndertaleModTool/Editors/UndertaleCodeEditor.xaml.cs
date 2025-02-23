@@ -1423,7 +1423,7 @@ namespace UndertaleModTool
                             else
                             {
                                 // Resolve 2.3 sub-functions for their parent entry
-                                if (data.GlobalFunctions?.NameToFunction?.TryGetValue(nameText, out Underanalyzer.IGMFunction f) == true)
+                                if (data.GlobalFunctions?.TryGetFunction(nameText, out Underanalyzer.IGMFunction f) == true)
                                 {
                                     ScriptsDict.TryGetValue(f.Name.Content, out val);
                                     val = (val as UndertaleScript)?.Code?.ParentEntry;
@@ -1450,7 +1450,7 @@ namespace UndertaleModTool
                         if (val is UndertaleScript)
                             val = null; // in GMS2.3 scripts are never referenced directly
 
-                        if (data.GlobalFunctions?.NameToFunction?.TryGetValue(nameText, out Underanalyzer.IGMFunction globalFunc) == true &&
+                        if (data.GlobalFunctions?.TryGetFunction(nameText, out Underanalyzer.IGMFunction globalFunc) == true &&
                             globalFunc is UndertaleFunction utGlobalFunc)
                         {
                             // Try getting script that this function reference belongs to
