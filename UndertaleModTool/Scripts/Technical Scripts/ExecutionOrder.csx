@@ -63,7 +63,7 @@ If it is already invisible, select 'NO' to toggle it back on."))
 if (profileChoice)
 {
     if (ScriptQuestion(@"This will make changes across all of the code! Are you sure you'd like to continue?
-Note: this may break GML code if code corrections aren't present."))
+Note: this may break GML code if decompilation is incorrect."))
     {
         ProfileModeOperations();
     }
@@ -281,10 +281,12 @@ void ProfileModeOperations()
 
     //TODO: reimplement ASM solution w/o hacky asm breaking
 
+    GlobalDecompileContext globalDecompileContext = new(Data);
+    Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = new Underanalyzer.Decompiler.DecompileSettings();
     foreach (UndertaleCode c in Data.Code)
     {
         UpdateProgressBar(null, "Code entries processed", progress++, Data.Code.Count);
-        string gmlCode = GetDecompiledText(c.Name.Content);
+        string gmlCode = GetDecompiledText(c.Name.Content, globalDecompileContext, decompilerSettings);
         gmlCode = gmlCode.Replace("\r\n", "\n");
         gmlCode = Regex.Replace(gmlCode, "global\\.interact = (\\d+)", "__scr_setinteract__($1)");
         gmlCode = gmlCode.Replace("global.interact", "__scr_getinteract__()");

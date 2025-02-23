@@ -77,6 +77,8 @@ applying any changes to the game.";
         Data.FORM.Chunks.Remove("TAGS");
     if (Data.FORM.Chunks.ContainsKey("EMBI"))
         Data.FORM.Chunks.Remove("EMBI");
+    if (Data.FORM.FUNC.CodeLocals is null)
+        Data.FORM.FUNC.CodeLocals = new UndertaleSimpleList<UndertaleCodeLocals>();
     Data.SetGMS2Version(2);
     //Data.IsTPAG4ByteAligned = false;
     for (int i = 0; i < Data.Code.Count; i++)

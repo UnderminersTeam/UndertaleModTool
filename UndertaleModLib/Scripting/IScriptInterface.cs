@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Underanalyzer.Decompiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 
@@ -192,21 +193,23 @@ public interface IScriptInterface
     ///Get the decompiled text from a code entry (like <c>gml_Script_moveTo</c>).
     /// </summary>
     /// <param name="codeName">The name of the code entry from which to get the decompiled code from.</param>
-    /// <param name="context">The GlobalDecompileContext</param>
+    /// <param name="context">The GlobalDecompileContext to use for decompilation.</param>
+    /// <param name="settings">The settings to use for decompilation, or <see langword="null"/> to use the default.</param>
     /// <returns>Decompiled text as a <see cref="string"/>.</returns>
     /// <remarks>This will return a string, even if the decompilation failed! Usually commented out and featuring
     /// <c>DECOMPILER FAILED!</c> .</remarks>
-    string GetDecompiledText(string codeName, GlobalDecompileContext context = null);
+    string GetDecompiledText(string codeName, GlobalDecompileContext context = null, IDecompileSettings settings = null);
 
     /// <summary>
     /// Get the decompiled text from an <see cref="UndertaleCode"/> object.
     /// </summary>
     /// <param name="code">The object from which to get the decompiled code from.</param>
-    /// <param name="context">The GlobalDecompileContext</param>
+    /// <param name="context">The GlobalDecompileContext to use for decompilation.</param>
+    /// <param name="settings">The settings to use for decompilation, or <see langword="null"/> to use the default.</param>
     /// <returns>Decompiled text as a <see cref="string"/>.</returns>
     /// <remarks>This will return a string, even if the decompilation failed! Usually commented out and featuring
     /// <c>DECOMPILER FAILED!</c> .</remarks>
-    string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null);
+    string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null, IDecompileSettings settings = null);
 
     /// <summary>
     ///  Get the disassembly from a code entry (like <c>gml_Script_moveTo</c>).
@@ -484,12 +487,12 @@ public interface IScriptInterface
     /// <summary>
     /// Generates a decompiled code cache to accelerate operations that need to access code often.
     /// </summary>
-    /// <param name="decompileContext">The GlobalDecompileContext.</param>
+    /// <param name="decompileContext">The GlobalDecompileContext to be used when decompiling.</param>
     /// <param name="dialog">The dialog that should be shown. If <see langword="null"/> then a new dialog will be automatically created and shown.</param>
     /// <param name="clearGMLEditedBefore">Whether to clear <see cref="UndertaleData.GMLEditedBefore"/> from <see cref="Data"/>.</param>
     /// <returns>Whether the decompiled GML cache was generated or not. <see langword="true"/> if it was successful,
     /// <see langword="false"/> if it wasn't or <see cref="GMLCacheEnabled"/> is disabled.</returns>
-    Task<bool> GenerateGMLCache(ThreadLocal<Decompiler.GlobalDecompileContext> decompileContext = null, object dialog = null, bool clearGMLEditedBefore = false);
+    Task<bool> GenerateGMLCache(GlobalDecompileContext decompileContext = null, object dialog = null, bool clearGMLEditedBefore = false);
 
     /// <summary>
     /// Changes the currently selected in the GUI.
@@ -585,8 +588,10 @@ public interface IScriptInterface
     /// <param name="replacement">The replacement term.</param>
     /// <param name="caseSensitive">Whether the keyword search should be case-sensitive.</param>
     /// <param name="isRegex">Whether <paramref name="keyword"/> should be treated as RegEx.</param>
-    /// <param name="context">The global decompile context.</param>
-    void ReplaceTextInGML(string codeName, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null);
+    /// <param name="context">The GlobalDecompileContext to use for decompilation.</param>
+    /// <param name="settings">The settings to use for decompilation, or <see langword="null"/> to use the default.</param>
+    void ReplaceTextInGML(string codeName, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, 
+                          GlobalDecompileContext context = null, IDecompileSettings settings = null);
 
     /// <summary>
     /// Find a keyword in a GML code entry and replaces it with a replacement string.
@@ -596,8 +601,10 @@ public interface IScriptInterface
     /// <param name="replacement">The replacement term.</param>
     /// <param name="caseSensitive">Whether the keyword search should be case-sensitive.</param>
     /// <param name="isRegex">Whether <paramref name="keyword"/> should be treated as RegEx.</param>
-    /// <param name="context">The global decompile context.</param>
-    void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null);
+    /// <param name="context">The GlobalDecompileContext to use for decompilation.</param>
+    /// <param name="settings">The settings to use for decompilation, or <see langword="null"/> to use the default.</param>
+    void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, 
+                          GlobalDecompileContext context = null, IDecompileSettings settings = null);
 
     /// <summary>
     /// Method returning a dummy boolean value.
