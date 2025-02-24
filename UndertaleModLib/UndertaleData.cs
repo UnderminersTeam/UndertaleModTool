@@ -690,7 +690,7 @@ namespace UndertaleModLib
                 if (disposableType.IsAssignableFrom(list.GetType().GetGenericArguments()[0]))
                 {
                     foreach (IDisposable disposable in list)
-                        disposable.Dispose();
+                        disposable?.Dispose();
                 }
 
                 list.Clear();

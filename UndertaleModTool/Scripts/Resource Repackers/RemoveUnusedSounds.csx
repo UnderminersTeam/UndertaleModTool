@@ -211,5 +211,8 @@ byte[] GetSoundData(UndertaleSound sound)
 void ProcessSounds() 
 {
     foreach (UndertaleSound sound in Data.Sounds)
-        GetSoundData(sound);
+    {
+        if (sound is not null)
+            GetSoundData(sound);
+    }
 }

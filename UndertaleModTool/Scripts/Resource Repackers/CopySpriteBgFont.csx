@@ -383,6 +383,8 @@ void TexturePageItemsUsedUpdate()
     }
     foreach(UndertaleSprite sprite in Data.Sprites)
     {
+        if (sprite is null)
+            continue;
         for (int i = 0; i < sprite.Textures.Count; i++)
         {
             if (sprite.Textures[i]?.Texture != null)
@@ -393,6 +395,8 @@ void TexturePageItemsUsedUpdate()
     }
     foreach (UndertaleBackground bg in Data.Backgrounds)
     {
+        if (bg is null)
+            continue;
         if (bg.Texture != null)
         {
             TexturePageItemsUsed[Data.TexturePageItems.IndexOf(bg.Texture)] = true;
@@ -400,6 +404,8 @@ void TexturePageItemsUsedUpdate()
     }
     foreach (UndertaleFont fnt in Data.Fonts)
     {
+        if (fnt is null)
+            continue;
         if (fnt.Texture != null)
         {
             TexturePageItemsUsed[Data.TexturePageItems.IndexOf(fnt.Texture)] = true;
@@ -410,6 +416,8 @@ void SpriteSheetsUsedUpdate()
 {
     foreach(UndertaleSprite sprite in Data.Sprites)
     {
+        if (sprite is null)
+            continue;
         for (int i = 0; i < sprite.Textures.Count; i++)
         {
             if (sprite.Textures[i]?.Texture != null)
@@ -420,6 +428,8 @@ void SpriteSheetsUsedUpdate()
     }
     foreach (UndertaleBackground bg in Data.Backgrounds)
     {
+        if (bg is null)
+            continue;
         if (bg.Texture != null)
         {
             SpriteSheetsUsed[Data.EmbeddedTextures.IndexOf(bg.Texture.TexturePage)] = true;
@@ -427,6 +437,8 @@ void SpriteSheetsUsedUpdate()
     }
     foreach (UndertaleFont fnt in Data.Fonts)
     {
+        if (fnt is null)
+            continue;
         if (fnt.Texture != null)
         {
             SpriteSheetsUsed[Data.EmbeddedTextures.IndexOf(fnt.Texture.TexturePage)] = true;
