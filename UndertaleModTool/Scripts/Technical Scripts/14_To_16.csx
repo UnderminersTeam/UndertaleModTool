@@ -35,8 +35,7 @@ If they do, you may file an issue on GitHub, but no warranty is given."); // War
     // Convert variables
     int id = 0;
     UndertaleVariable variable;
-    BuiltinList list = new BuiltinList();
-    list.Initialize(Data);
+    BuiltinList list = new BuiltinList(Data);
     foreach (var code in Data.Code)
     {
         for (int j = 0; j < code.Instructions.Count; j++)
@@ -200,7 +199,7 @@ Data.Variables.Insert(2, arguments);
 
 // Fix variables
 
-Data.GeneralInfo.DisableDebugger = true; 
+Data.GeneralInfo.IsDebuggerDisabled = true; 
 Data.MaxLocalVarCount = 1; 
 int globalNum = 0;
 int selfNum = 0;

@@ -48,7 +48,7 @@ string GetFolder(string path)
     return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }
 
-void DumpCode()
+async void DumpCode()
 {
     //Because 2.3 code names get way too long, we're gonna convert it to an index based system, starting with a lookup system
     string indexPath = Path.Combine(codeFolder, "LookUpTable.txt");
