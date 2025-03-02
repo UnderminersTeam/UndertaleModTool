@@ -279,6 +279,21 @@ namespace UndertaleModLib
                 UndertaleEmbeddedTexture.FindAllTextureInfo(data);
             }
 
+            // Iterate over function names to see if 2023.11+ naming process was used (if necessary)
+            if (data.Functions is not null && data.IsVersionAtLeast(2023, 8) && !data.IsVersionAtLeast(2023, 11))
+            {
+                foreach (UndertaleFunction function in data.Functions)
+                {
+                    // If name starts with "gml_Script" and contains a @ character, it should be from 2023.11
+                    if (function.Name.Content is string functionName &&
+                        functionName.StartsWith("gml_Script_") && functionName.Contains('@'))
+                    {
+                        data.SetGMS2Version(2023, 11);
+                        break;
+                    }
+                }
+            }
+
             ProcessCountExc(poolSize);
 
             return data;

@@ -111,6 +111,12 @@ namespace UndertaleModTool
                 // If no settings were supplied at all, generate a new one (can be caused from downgrading)
                 Instance.DecompilerSettings ??= new();
 
+                // Auto-remove "argument{0}" syntax (become "arg{0}" by default)
+                if (Instance.DecompilerSettings.UnknownArgumentNamePattern == "argument{0}")
+                {
+                    Instance.DecompilerSettings.UnknownArgumentNamePattern = "arg{0}";
+                }
+
                 // Update the version to this version
                 Instance.Version = MainWindow.Version;
                 if (changed)
@@ -162,7 +168,7 @@ namespace UndertaleModTool
         [JsonIgnore]
         private DecompileSettings InnerSettings { get; } = new DecompileSettings()
         {
-            UnknownArgumentNamePattern = "argument{0}",
+            UnknownArgumentNamePattern = "arg{0}",
             RemoveSingleLineBlockBraces = true,
             EmptyLineAroundBranchStatements = true,
             EmptyLineBeforeSwitchCases = true

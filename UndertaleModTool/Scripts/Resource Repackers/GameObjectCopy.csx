@@ -28,15 +28,11 @@ string DonorDataPath = PromptLoadFile(null, null);
 if (DonorDataPath == null)
     throw new ScriptException("The donor data path was not set.");
 
-bool compContextState = CompileContext.GMS2_3;
-
 using (var stream = new FileStream(DonorDataPath, FileMode.Open, FileAccess.Read))
     DonorData = UndertaleIO.Read(stream, warning => ScriptMessage("A warning occured while trying to load " + DonorDataPath + ":\n" + warning));
 var DonorDataEmbeddedTexturesCount = DonorData.EmbeddedTextures.Count;
 DonorData.BuiltinList = new BuiltinList(DonorData);
 GameSpecificResolver.Initialize(DonorData);
-
-CompileContext.GMS2_3 = compContextState;
 
 bool donorIs2_3 = DonorData.IsVersionAtLeast(2, 3);
 
@@ -135,14 +131,10 @@ for (var j = 0; j < splitStringsList.Count; j++)
                                 string codeToCopy = "";
                                 try
                                 {
-                                    CompileContext.GMS2_3 = donorIs2_3;
-
                                     codeToCopy = (donorACT.CodeId != null 
                                         ? new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, donorACT.CodeId, Data.ToolInfo.DecompilerSettings)
                                                 .DecompileToString() 
                                         : "");
-
-                                    CompileContext.GMS2_3 = compContextState;
                                 }
                                 catch (Exception e)
                                 {

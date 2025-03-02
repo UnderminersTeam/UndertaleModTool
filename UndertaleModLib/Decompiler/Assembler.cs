@@ -175,8 +175,9 @@ namespace UndertaleModLib.Decompiler
                                 if (line.StartsWith("[variable]"))
                                 {
                                     line = line.Substring("[variable]".Length);
-                                    instr.Value = new UndertaleInstruction.Reference<UndertaleVariable>(data.Variables.EnsureDefined(line,
-                                        UndertaleInstruction.InstanceType.Self, false, data.Strings, data));
+                                    instr.Value = new UndertaleInstruction.Reference<UndertaleVariable>(data.Variables.EnsureDefined(
+                                        data.Strings.MakeString(line, out int nameStringId), nameStringId,
+                                        UndertaleInstruction.InstanceType.Self, false, data));
                                 }
                                 else if (line.StartsWith("[function]"))
                                 {

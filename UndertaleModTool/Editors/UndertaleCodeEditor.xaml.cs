@@ -949,48 +949,40 @@ namespace UndertaleModTool
                 // This is still a problem in rare cases for some unknown reason
             }
 
-            CompileContext compileContext = null;
+            CompileResult compileResult = new();
+            string rootException = null;
             string text = DecompiledEditor.Text;
             var dispatcher = Dispatcher;
             Task t = Task.Run(() =>
             {
                 try
                 {
-                    compileContext = Compiler.CompileGMLText(text, data, code, (f) => { dispatcher.Invoke(() => f()); });
+                    CompileGroup group = new(data);
+                    group.MainThreadAction = (f) => { dispatcher.Invoke(() => f()); };
+                    group.QueueCodeReplace(code, text);
+                    compileResult = group.Compile();
                 }
                 catch (Exception ex)
                 {
-                    compileContext = new(data, code)
-                    {
-                        HasError = true,
-                        ResultError = ex.ToString()
-                    };
+                    rootException = ex.ToString();
                 }
             });
             await t;
 
-            if (compileContext == null)
+            if (rootException is not null)
             {
                 dialog.TryClose();
-                mainWindow.ShowError("Compile context was null for some reason...", "This shouldn't happen");
+                mainWindow.ShowError(Truncate(rootException, 512), "Compiler error");
                 return;
             }
 
-            if (compileContext.HasError)
+            if (!compileResult.Successful)
             {
                 dialog.TryClose();
-                mainWindow.ShowError(Truncate(compileContext.ResultError, 512), "Compiler error");
+                mainWindow.ShowError(Truncate(compileResult.PrintAllErrors(false), 512), "Compiler error");
                 return;
             }
 
-            if (!compileContext.SuccessfulCompile)
-            {
-                dialog.TryClose();
-                mainWindow.ShowError("(unknown error message)", "Compile failed");
-                return;
-            }
-
-            code.Replace(compileContext.ResultAssembly);
             try
             {
                 string path = Path.Combine(TempPath, code.Name.Content + ".gml");
