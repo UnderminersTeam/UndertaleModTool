@@ -341,15 +341,6 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         else if (reader.AllChunkNames.Contains("TGIN")) // 2.2.1
             detectedVer = (2, 2, 1, 0, BranchType.Pre2022_0);
 
-        if (detectedVer.Major > 2 || (detectedVer.Major == 2 && detectedVer.Minor >= 3))
-        {
-            CompileContext.GMS2_3 = true;
-        }
-        else
-        {
-            CompileContext.GMS2_3 = false;
-        }
-
         return detectedVer;
     }
 
