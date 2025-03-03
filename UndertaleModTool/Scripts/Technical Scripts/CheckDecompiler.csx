@@ -24,20 +24,53 @@ Regex setownerRegex = new Regex(@"pushi?\.[eil] \d+(\n|\r\n)setowner\.e(\n|\r\n)
 
 List<UndertaleCode> toCheck = Data.Code.Where(c => c.ParentEntry is null).ToList();
 
+int numStrings = Data.Strings.Count;
+int numCode = Data.Code.Count;
+int numFunctions = Data.Functions.Count;
+int numVariables = Data.Variables.Count;
+int numScripts = Data.Scripts.Count;
+
+List<string> failedCompileList = new();
 List<string> failedAssemblyList = new();
 List<string> failedDecompiledList = new();
 CheckCode();
 
+string failedCompilePath = Path.Combine(Path.GetDirectoryName(FilePath), "failed-compile.txt");
+File.WriteAllText(failedCompilePath, string.Join('\n', failedCompileList));
 string failedAssemblyPath = Path.Combine(Path.GetDirectoryName(FilePath), "failed-assembly.txt");
 File.WriteAllText(failedAssemblyPath, string.Join('\n', failedAssemblyList));
 string failedDecompiledPath = Path.Combine(Path.GetDirectoryName(FilePath), "failed-decompiled.txt");
 File.WriteAllText(failedDecompiledPath, string.Join('\n', failedDecompiledList));
 
+string assetInfo = "";
+if (numStrings != Data.Strings.Count)
+{
+    assetInfo += $"String count changed from {numStrings} to {Data.Strings.Count}\n";
+}
+if (numCode != Data.Code.Count)
+{
+    assetInfo += $"Code count changed from {numCode} to {Data.Code.Count}\n";
+}
+if (numFunctions != Data.Functions.Count)
+{
+    assetInfo += $"Function count changed from {numFunctions} to {Data.Functions.Count}\n";
+}
+if (numVariables != Data.Variables.Count)
+{
+    assetInfo += $"Variable count changed from {numVariables} to {Data.Variables.Count}\n";
+}
+if (numScripts != Data.Scripts.Count)
+{
+    assetInfo += $"Script count changed from {numScripts} to {Data.Scripts.Count}\n";
+}
+
 ScriptMessage(
     $"Decompiler and compiler check complete.\n" +
+    $"{failedCompileList.Count}/{toCheck.Count} ({(failedCompileList.Count / (double)toCheck.Count) * 100.0:0.###}%) failed to compile at all\n" +
     $"{failedAssemblyList.Count}/{toCheck.Count} ({(failedAssemblyList.Count / (double)toCheck.Count) * 100.0:0.###}%) failed to exactly recompile\n" +
     $"{failedDecompiledList.Count}/{toCheck.Count} ({(failedDecompiledList.Count / (double)toCheck.Count) * 100.0:0.###}%) failed to recompile to same decompilation\n\n" +
-    $"More details written to failed-assembly.txt and failed-decompiled.txt");
+    assetInfo +
+    "More details written to failed-compile.txt, failed-assembly.txt, and failed-decompiled.txt");
 
 void CheckCode()
 {
@@ -62,6 +95,7 @@ void CheckCode()
             CompileResult result = group.Compile();
             if (!result.Successful)
             {
+                failedCompileList.Add(code.Name?.Content ?? "<null>");
                 throw new Exception("Compile failed");
             }
 

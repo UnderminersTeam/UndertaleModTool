@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Xml.Linq;
 using Underanalyzer;
 using Underanalyzer.Compiler;
 using Underanalyzer.Compiler.Bytecode;
@@ -64,8 +63,16 @@ public sealed class CompileGroup
     // During linking, a unique number to use for struct variables.
     private int _linkingStructCounter = 0;
 
-    // During linking, a lookup of local variable names to variables.
-    private Dictionary<string, UndertaleVariable> _linkingLocalsLookup = null;
+    // During linking, a lookup of all variable names that have been patched so far,
+    // to the index they appear in the order of variable patches.
+    private Dictionary<string, int> _linkingVariableOrderLookup = null;
+
+    // During linking, a list of all variable names that have been patched so far,
+    // along with whether they have ever been used as a local variable.
+    private List<(string Name, bool IsEverLocal)> _linkingVariableOrder = null;
+
+    // During linking, a lookup of local variable names to references of those local variables.
+    private Dictionary<string, List<UndertaleInstruction.Reference<UndertaleVariable>>> _linkingLocalReferences = null;
 
     /// <summary>
     /// Initializes a new compile context.
@@ -149,11 +156,46 @@ public sealed class CompileGroup
     }
 
     /// <summary>
-    /// Looks up a local variable during linking.
+    /// Registers a non-local variable during linking.
     /// </summary>
-    internal UndertaleVariable LookupLocal(string name)
+    internal void RegisterNonLocalVariable(string name)
     {
-        return _linkingLocalsLookup[name];
+        if (!_linkingVariableOrderLookup.ContainsKey(name))
+        {
+            // Add to variable order list, but not as a local
+            _linkingVariableOrderLookup.Add(name, _linkingVariableOrder.Count);
+            _linkingVariableOrder.Add((name, false));
+        }
+    }
+
+    /// <summary>
+    /// Registers a local variable during linking, queuing the reference to be patched later.
+    /// </summary>
+    internal void RegisterLocalVariable(UndertaleInstruction.Reference<UndertaleVariable> reference, string name)
+    {
+        // Queue reference to be patched later
+        if (!_linkingLocalReferences.TryGetValue(name, out List<UndertaleInstruction.Reference<UndertaleVariable>> referenceList))
+        {
+            referenceList = new(16);
+            _linkingLocalReferences[name] = referenceList;
+        }
+        referenceList.Add(reference);
+
+        // Update variable order
+        if (_linkingVariableOrderLookup.TryGetValue(name, out int existingIndex))
+        {
+            // If not already marked as "ever local," mark it as such now
+            if (!_linkingVariableOrder[existingIndex].IsEverLocal)
+            {
+                _linkingVariableOrder[existingIndex] = (name, true);
+            }
+        }
+        else
+        {
+            // Add to variable order list as a local
+            _linkingVariableOrderLookup.Add(name, _linkingVariableOrder.Count);
+            _linkingVariableOrder.Add((name, true));
+        }
     }
 
     /// <summary>
@@ -336,38 +378,6 @@ public sealed class CompileGroup
                 // Setup for linking
                 InitializeLinkingLookups();
                 GlobalContext.LinkingCompileGroup = this;
-
-                // Create/find local variables (and create lookup for them) - note that this skips "arguments" as it is pretty useless
-                IList<UndertaleVariable> variables = Data.Variables;
-                ISet<UndertaleVariable> referencedLocals = operation.CodeEntry.FindReferencedLocalVars();
-                _linkingLocalsLookup ??= new(context.OutputLocalsOrder.Count);
-                int createLocalsIndex = 1;
-                foreach (string local in context.OutputLocalsOrder)
-                {
-                    // Ensure local name string is generated
-                    UndertaleString localString = MakeString(local, out int localStringIndex);
-
-                    // Get variable ID for this local (GM 2.3+ uses string index, prior uses local index)
-                    int varId = linkingModern ? localStringIndex : createLocalsIndex;
-
-                    // Use existing registered variables if possible
-                    UndertaleVariable variable = null;
-                    foreach (UndertaleVariable referenced in referencedLocals)
-                    {
-                        if (referenced.Name == localString && referenced.VarID == varId)
-                        {
-                            variable = referenced;
-                            break;
-                        }
-                    }
-
-                    // If not already referenced, define a new variable, and store in lookup
-                    variable ??= variables.DefineLocal(Data, varId, localString, localStringIndex);
-
-                    // Add to lookup, and increment local index
-                    _linkingLocalsLookup[local] = variable;
-                    createLocalsIndex++;
-                }
 
                 // Make list of reusable child code entry names (and set of child entries remaining)
                 List<string> originalChildEntryNames = new(operation.CodeEntry.ChildEntries.Count);
@@ -570,6 +580,11 @@ public sealed class CompileGroup
 
                 // TODO: maybe throw an error if there's any remaining child code entries that are also global functions
 
+                // Create structures for linking local variables
+                _linkingVariableOrderLookup ??= new(16);
+                _linkingVariableOrder ??= new(16);
+                _linkingLocalReferences ??= new(16);
+
                 // Perform main link
                 try
                 {
@@ -593,8 +608,52 @@ public sealed class CompileGroup
                     errors.Add(new CompileError(operation.CodeEntry, e));
                 }
 
-                // Clear out locals lookup for any further operations
-                _linkingLocalsLookup.Clear();
+                // Collect all local variable names, and resolve references (if not errored)
+                List<string> localsOrder = null;
+                if (errors is null)
+                {
+                    localsOrder = new(_linkingLocalReferences.Count);
+                    ISet<UndertaleVariable> originalReferencedLocals = operation.CodeEntry.FindReferencedLocalVars();
+                    foreach ((string name, bool isEverLocal) in _linkingVariableOrder)
+                    {
+                        if (isEverLocal)
+                        {
+                            // Add to local order
+                            localsOrder.Add(name);
+
+                            // Ensure local name string is generated
+                            UndertaleString localString = MakeString(name, out int nameStringIndex);
+
+                            // Get variable ID for this local (GM 2.3+ uses string index, prior uses local index)
+                            int varId = linkingModern ? nameStringIndex : localsOrder.Count;
+
+                            // Use existing registered variables if possible
+                            UndertaleVariable variable = null;
+                            foreach (UndertaleVariable referenced in originalReferencedLocals)
+                            {
+                                if (referenced.Name == localString && referenced.VarID == varId)
+                                {
+                                    variable = referenced;
+                                    break;
+                                }
+                            }
+
+                            // If not already referenced, define a new variable, and store in lookup
+                            variable ??= Data.Variables.DefineLocal(Data, varId, localString, nameStringIndex);
+
+                            // Update all references
+                            foreach (UndertaleInstruction.Reference<UndertaleVariable> reference in _linkingLocalReferences[name])
+                            {
+                                reference.Target = variable;
+                            }
+                        }
+                    }
+                }
+
+                // Clear out local variable structures for any further operations
+                _linkingVariableOrderLookup.Clear();
+                _linkingVariableOrder.Clear();
+                _linkingLocalReferences.Clear();
 
                 // Undo setup for linking
                 GlobalContext.LinkingCompileGroup = null;
@@ -616,8 +675,8 @@ public sealed class CompileGroup
                     return;
                 }
 
-                // Update max local variable count
-                uint codeLocalsCount = (uint)(1 + context.OutputLocalsOrder.Count);
+                // Set max local variable count, if applicable
+                uint codeLocalsCount = (uint)(1 + localsOrder.Count);
                 if (codeLocalsCount > Data.MaxLocalVarCount)
                 {
                     Data.MaxLocalVarCount = codeLocalsCount;
@@ -634,7 +693,7 @@ public sealed class CompileGroup
 
                     // Create new locals
                     uint codeLocalsIndex = 1;
-                    foreach (string local in context.OutputLocalsOrder)
+                    foreach (string local in localsOrder)
                     {
                         DefineCodeLocal(locals, linkingModern, local, codeLocalsIndex);
                         codeLocalsIndex++;
@@ -809,7 +868,9 @@ public sealed class CompileGroup
     {
         _linkingStringIdLookup = null;
         _linkingFunctionLookup = null;
-        _linkingLocalsLookup = null;
+        _linkingVariableOrderLookup = null;
+        _linkingVariableOrder = null;
+        _linkingLocalReferences = null;
         _linkingStructCounter = 0;
     }
 

@@ -786,30 +786,6 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                 short val = (short)(b0 | (b1 << 8));
                 DataType type1 = (DataType)b2;
 
-                // Modify opcode of instruction, if in bytecode 14
-                if (bytecode14)
-                {
-                    if (type1 == DataType.Variable)
-                    {
-                        switch (val)
-                        {
-                            case -5:
-                                kind = Opcode.PushGlb;
-                                break;
-                            case -6: // builtin
-                                kind = Opcode.PushBltn;
-                                break;
-                            case -7:
-                                kind = Opcode.PushLoc;
-                                break;
-                        }
-                    }
-                    else if (type1 == DataType.Int16)
-                    {
-                        kind = Opcode.PushI;
-                    }
-                }
-
                 // Parse data being pushed
                 switch (type1)
                 {
