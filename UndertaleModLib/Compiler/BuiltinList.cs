@@ -8,7 +8,7 @@ namespace UndertaleModLib.Compiler;
 /// <summary>
 /// Record of builtin variable information.
 /// </summary>
-public record VariableInfo(string Name, bool IsGlobal, bool CanSet) : IBuiltinVariable;
+public record VariableInfo(string Name, bool IsGlobal, bool CanSet, bool IsAutomaticArray = false) : IBuiltinVariable;
 
 /// <summary>
 /// Record of builtin function information.
@@ -2881,6 +2881,8 @@ public class BuiltinList : IBuiltins
         Constants["bm_add"] = 1.0;
         Constants["bm_max"] = 2.0;
         Constants["bm_subtract"] = 3.0;
+        Constants["bm_min"] = 4.0;
+        Constants["bm_reverse_subtract"] = 5.0;
         Constants["bm_zero"] = 1.0;
         Constants["bm_one"] = 2.0;
         Constants["bm_src_color"] = 3.0;
@@ -3825,41 +3827,41 @@ public class BuiltinList : IBuiltins
         GlobalNotArray["background_showcolour"] = new VariableInfo("background_showcolour", true, true);
         if (data?.GeneralInfo?.Major < 2)
         {
-            GlobalArray["background_visible"] = new VariableInfo("background_visible", true, true);
-            GlobalArray["background_foreground"] = new VariableInfo("background_foreground", true, true);
-            GlobalArray["background_index"] = new VariableInfo("background_index", true, true);
-            GlobalArray["background_x"] = new VariableInfo("background_x", true, true);
-            GlobalArray["background_y"] = new VariableInfo("background_y", true, true);
-            GlobalArray["background_width"] = new VariableInfo("background_width", true, false);
-            GlobalArray["background_height"] = new VariableInfo("background_height", true, false);
-            GlobalArray["background_htiled"] = new VariableInfo("background_htiled", true, true);
-            GlobalArray["background_vtiled"] = new VariableInfo("background_vtiled", true, true);
-            GlobalArray["background_xscale"] = new VariableInfo("background_xscale", true, true);
-            GlobalArray["background_yscale"] = new VariableInfo("background_yscale", true, true);
-            GlobalArray["background_hspeed"] = new VariableInfo("background_hspeed", true, true);
-            GlobalArray["background_vspeed"] = new VariableInfo("background_vspeed", true, true);
-            GlobalArray["background_blend"] = new VariableInfo("background_blend", true, true);
-            GlobalArray["background_alpha"] = new VariableInfo("background_alpha", true, true);
+            GlobalArray["background_visible"] = new VariableInfo("background_visible", true, true, true);
+            GlobalArray["background_foreground"] = new VariableInfo("background_foreground", true, true, true);
+            GlobalArray["background_index"] = new VariableInfo("background_index", true, true, true);
+            GlobalArray["background_x"] = new VariableInfo("background_x", true, true, true);
+            GlobalArray["background_y"] = new VariableInfo("background_y", true, true, true);
+            GlobalArray["background_width"] = new VariableInfo("background_width", true, false, true);
+            GlobalArray["background_height"] = new VariableInfo("background_height", true, false, true);
+            GlobalArray["background_htiled"] = new VariableInfo("background_htiled", true, true, true);
+            GlobalArray["background_vtiled"] = new VariableInfo("background_vtiled", true, true, true);
+            GlobalArray["background_xscale"] = new VariableInfo("background_xscale", true, true, true);
+            GlobalArray["background_yscale"] = new VariableInfo("background_yscale", true, true, true);
+            GlobalArray["background_hspeed"] = new VariableInfo("background_hspeed", true, true, true);
+            GlobalArray["background_vspeed"] = new VariableInfo("background_vspeed", true, true, true);
+            GlobalArray["background_blend"] = new VariableInfo("background_blend", true, true, true);
+            GlobalArray["background_alpha"] = new VariableInfo("background_alpha", true, true, true);
         }
         GlobalNotArray["view_enabled"] = new VariableInfo("view_enabled", true, true);
         GlobalNotArray["view_current"] = new VariableInfo("view_current", true, false);
         GlobalNotArray["view_visible"] = new VariableInfo("view_visible", true, true);
-        GlobalArray["view_xview"] = new VariableInfo("view_xview", true, true);
-        GlobalArray["view_yview"] = new VariableInfo("view_yview", true, true);
-        GlobalArray["view_wview"] = new VariableInfo("view_wview", true, true);
-        GlobalArray["view_hview"] = new VariableInfo("view_hview", true, true);
-        GlobalArray["view_angle"] = new VariableInfo("view_angle", true, true);
-        GlobalArray["view_hborder"] = new VariableInfo("view_hborder", true, true);
-        GlobalArray["view_vborder"] = new VariableInfo("view_vborder", true, true);
-        GlobalArray["view_hspeed"] = new VariableInfo("view_hspeed", true, true);
-        GlobalArray["view_vspeed"] = new VariableInfo("view_vspeed", true, true);
-        GlobalArray["view_object"] = new VariableInfo("view_object", true, true);
-        GlobalArray["view_xport"] = new VariableInfo("view_xport", true, true);
-        GlobalArray["view_yport"] = new VariableInfo("view_yport", true, true);
-        GlobalArray["view_wport"] = new VariableInfo("view_wport", true, true);
-        GlobalArray["view_hport"] = new VariableInfo("view_hport", true, true);
-        GlobalArray["view_surface_id"] = new VariableInfo("view_surface_id", true, true);
-        GlobalArray["view_camera"] = new VariableInfo("view_camera", true, true);
+        GlobalArray["view_xview"] = new VariableInfo("view_xview", true, true, true);
+        GlobalArray["view_yview"] = new VariableInfo("view_yview", true, true, true);
+        GlobalArray["view_wview"] = new VariableInfo("view_wview", true, true, true);
+        GlobalArray["view_hview"] = new VariableInfo("view_hview", true, true, true);
+        GlobalArray["view_angle"] = new VariableInfo("view_angle", true, true, true);
+        GlobalArray["view_hborder"] = new VariableInfo("view_hborder", true, true, true);
+        GlobalArray["view_vborder"] = new VariableInfo("view_vborder", true, true, true);
+        GlobalArray["view_hspeed"] = new VariableInfo("view_hspeed", true, true, true);
+        GlobalArray["view_vspeed"] = new VariableInfo("view_vspeed", true, true, true);
+        GlobalArray["view_object"] = new VariableInfo("view_object", true, true, true);
+        GlobalArray["view_xport"] = new VariableInfo("view_xport", true, true, true);
+        GlobalArray["view_yport"] = new VariableInfo("view_yport", true, true, true);
+        GlobalArray["view_wport"] = new VariableInfo("view_wport", true, true, true);
+        GlobalArray["view_hport"] = new VariableInfo("view_hport", true, true, true);
+        GlobalArray["view_surface_id"] = new VariableInfo("view_surface_id", true, true, true);
+        GlobalArray["view_camera"] = new VariableInfo("view_camera", true, true, true);
         GlobalNotArray["mouse_x"] = new VariableInfo("mouse_x", true, false);
         GlobalNotArray["mouse_y"] = new VariableInfo("mouse_y", true, false);
         GlobalNotArray["mouse_button"] = new VariableInfo("mouse_button", true, true);
@@ -3993,10 +3995,10 @@ public class BuiltinList : IBuiltins
         // There are some of them that are only available in certain physics events
         InstanceLimitedEvent = new Dictionary<string, VariableInfo>
         {
-            ["phy_collision_x"] = new VariableInfo("phy_collision_x", false, false),
-            ["phy_collision_y"] = new VariableInfo("phy_collision_y", false, false),
-            ["phy_col_normal_x"] = new VariableInfo("phy_col_normal_x", false, false),
-            ["phy_col_normal_y"] = new VariableInfo("phy_col_normal_y", false, false)
+            ["phy_collision_x"] = new VariableInfo("phy_collision_x", false, false, true),
+            ["phy_collision_y"] = new VariableInfo("phy_collision_y", false, false, true),
+            ["phy_col_normal_x"] = new VariableInfo("phy_col_normal_x", false, false, true),
+            ["phy_col_normal_y"] = new VariableInfo("phy_col_normal_y", false, false, true)
         };
     }
 }

@@ -21,13 +21,36 @@ internal class CodeBuilder : ICodeBuilder
         _globalContext = globalContext;
     }
 
+    /// <summary>
+    /// Maps an opcode from Underanalyzer to an UndertaleInstruction opcode.
+    /// Also handles bytecode 14 mappings.
+    /// </summary>
+    private UndertaleInstruction.Opcode MapOpcode(Opcode opcode)
+    {
+        UndertaleInstruction.Opcode utOpcode = (UndertaleInstruction.Opcode)opcode;
+
+        if (!_globalContext.Bytecode14OrLower)
+        {
+            return utOpcode;
+        }
+
+        return utOpcode switch
+        {
+            UndertaleInstruction.Opcode.PushBltn => UndertaleInstruction.Opcode.Push,
+            UndertaleInstruction.Opcode.PushLoc => UndertaleInstruction.Opcode.Push,
+            UndertaleInstruction.Opcode.PushGlb => UndertaleInstruction.Opcode.Push,
+            UndertaleInstruction.Opcode.PushI => UndertaleInstruction.Opcode.Push,
+            _ => utOpcode
+        };
+    }
+
     /// <inheritdoc/>
     public IGMInstruction CreateInstruction(int address, Opcode opcode)
     {
         return new UndertaleInstruction()
         {
             Address = (uint)(address / 4),
-            Kind = (UndertaleInstruction.Opcode)opcode
+            Kind = MapOpcode(opcode)
         };
     }
 
@@ -37,7 +60,7 @@ internal class CodeBuilder : ICodeBuilder
         return new UndertaleInstruction()
         {
             Address = (uint)(address / 4),
-            Kind = (UndertaleInstruction.Opcode)opcode,
+            Kind = MapOpcode(opcode),
             Type1 = (UndertaleInstruction.DataType)dataType
         };
     }
@@ -48,7 +71,7 @@ internal class CodeBuilder : ICodeBuilder
         return new UndertaleInstruction()
         {
             Address = (uint)(address / 4),
-            Kind = (UndertaleInstruction.Opcode)opcode,
+            Kind = MapOpcode(opcode),
             Type1 = (UndertaleInstruction.DataType)dataType1,
             Type2 = (UndertaleInstruction.DataType)dataType2
         };
@@ -60,7 +83,7 @@ internal class CodeBuilder : ICodeBuilder
         return new UndertaleInstruction()
         {
             Address = (uint)(address / 4),
-            Kind = (UndertaleInstruction.Opcode)opcode,
+            Kind = MapOpcode(opcode),
             Type1 = (UndertaleInstruction.DataType)dataType1,
             Type2 = (UndertaleInstruction.DataType)dataType2,
             Value = value
@@ -73,7 +96,7 @@ internal class CodeBuilder : ICodeBuilder
         return new UndertaleInstruction()
         {
             Address = (uint)(address / 4),
-            Kind = (UndertaleInstruction.Opcode)opcode,
+            Kind = MapOpcode(opcode),
             Type1 = (UndertaleInstruction.DataType)dataType1,
             Type2 = (UndertaleInstruction.DataType)dataType2,
             Value = value
@@ -86,7 +109,7 @@ internal class CodeBuilder : ICodeBuilder
         return new UndertaleInstruction()
         {
             Address = (uint)(address / 4),
-            Kind = (UndertaleInstruction.Opcode)opcode,
+            Kind = MapOpcode(opcode),
             Type1 = (UndertaleInstruction.DataType)dataType1,
             Type2 = (UndertaleInstruction.DataType)dataType2,
             Value = value
@@ -99,7 +122,7 @@ internal class CodeBuilder : ICodeBuilder
         return new UndertaleInstruction()
         {
             Address = (uint)(address / 4),
-            Kind = (UndertaleInstruction.Opcode)opcode,
+            Kind = MapOpcode(opcode),
             Type1 = (UndertaleInstruction.DataType)dataType1,
             Type2 = (UndertaleInstruction.DataType)dataType2,
             Value = value
@@ -112,7 +135,7 @@ internal class CodeBuilder : ICodeBuilder
         return new UndertaleInstruction()
         {
             Address = (uint)(address / 4),
-            Kind = (UndertaleInstruction.Opcode)opcode,
+            Kind = MapOpcode(opcode),
             ComparisonKind = (UndertaleInstruction.ComparisonType)comparisonType,
             Type1 = (UndertaleInstruction.DataType)dataType1,
             Type2 = (UndertaleInstruction.DataType)dataType2
@@ -237,16 +260,28 @@ internal class CodeBuilder : ICodeBuilder
                 isBuiltin = false;
             }
 
+            // Transform irregular instance types to Self (including Other, apparently)
+            if (variableInstanceType is not (InstanceType.Self or InstanceType.Local or InstanceType.Builtin or 
+                                             InstanceType.Global or InstanceType.Static))
+            {
+                variableInstanceType = InstanceType.Self;
+            }
+
+            // Create blank reference that will be populated with a target later
+            UndertaleInstruction.Reference<UndertaleVariable> reference = new(null, (UndertaleInstruction.VariableType)variableType);
+
             // Lookup variable (or create new one)
-            UndertaleVariable variable;
             if (variableInstanceType == InstanceType.Local)
             {
-                variable = _globalContext.LinkingCompileGroup.LookupLocal(variableName);
+                // Queue reference to be patched later
+                _globalContext.LinkingCompileGroup.RegisterLocalVariable(reference, variableName);
             }
             else
             {
+                // Register/define non-local variable, and update reference immediately
+                _globalContext.LinkingCompileGroup.RegisterNonLocalVariable(variableName);
                 UndertaleString nameString = _globalContext.LinkingCompileGroup.MakeString(variableName, out int nameStringId);
-                variable = _globalContext.Data.Variables.EnsureDefined(
+                reference.Target = _globalContext.Data.Variables.EnsureDefined(
                     nameString, nameStringId, (UndertaleInstruction.InstanceType)variableInstanceType, isBuiltin, _globalContext.Data);
             }
 
@@ -254,12 +289,12 @@ internal class CodeBuilder : ICodeBuilder
             if (utInstruction.Kind == UndertaleInstruction.Opcode.Pop)
             {
                 // Pop instruction, set instruction's destination
-                utInstruction.Destination = new UndertaleInstruction.Reference<UndertaleVariable>(variable, (UndertaleInstruction.VariableType)variableType);
+                utInstruction.Destination = reference;
             }
             else
             {
                 // All other instructions, just set instruction's value
-                utInstruction.Value = new UndertaleInstruction.Reference<UndertaleVariable>(variable, (UndertaleInstruction.VariableType)variableType);
+                utInstruction.Value = reference;
             }
             if (variableType is VariableType.Normal or VariableType.Instance)
             {

@@ -28,12 +28,14 @@ public class GlobalDecompileContext : IGameContext
     public bool UsingGMLv2 => Data?.IsVersionAtLeast(2, 3) ?? false;
     public bool Bytecode14OrLower => (Data?.GeneralInfo?.BytecodeVersion ?? 15) <= 14;
     public bool UsingGMS2OrLater => Data?.IsVersionAtLeast(2) ?? false;
+    public bool UsingStringRealOptimizations => (Data?.GeneralInfo.Major is >= 2 || Data?.GeneralInfo.Build is 1539 or >= 1763);
     public bool UsingFinallyBeforeThrow => !(Data?.IsVersionAtLeast(2024, 6) ?? false);
     public IGlobalFunctions GlobalFunctions => Data?.GlobalFunctions;
     public bool UsingTypedBooleans => Data?.IsVersionAtLeast(2, 3, 7) ?? false;
     public bool UsingAssetReferences => Data?.IsVersionAtLeast(2023, 8) ?? false;
     public bool UsingRoomInstanceReferences => Data?.IsVersionAtLeast(2024, 2) ?? false;
     public bool UsingLogicalShortCircuit => Data?.ShortCircuit ?? true;
+    public bool UsingLongCompoundBitwise => Data?.IsVersionAtLeast(2, 3, 2) ?? false;
     public bool UsingExtraRepeatInstruction => !(Data?.IsNonLTSVersionAtLeast(2022, 11) ?? false);
     public bool UsingConstructorSetStatic => Data?.IsVersionAtLeast(2024, 11) ?? false;
     public bool UsingReentrantStatic => !(Data?.IsVersionAtLeast(2024, 11) ?? false);
