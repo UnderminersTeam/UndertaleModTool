@@ -48,7 +48,7 @@ public sealed class CompileGroup
     /// Stores a code entry, script, and function for a newly-created child code entry during linking.
     /// </summary>
     /// <remarks>
-    /// Each of these may individually be <see langword="null"/>.
+    /// Each component (code, script, and function) may individually be <see langword="null"/>.
     /// </remarks>
     private readonly record struct ChildCodeEntryData(
         string Name, FunctionEntry FunctionEntry,
