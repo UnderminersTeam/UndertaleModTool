@@ -286,7 +286,8 @@ namespace UndertaleModLib
                 {
                     // If name starts with "gml_Script" and contains a @ character, it should be from 2023.11
                     if (function.Name.Content is string functionName &&
-                        functionName.StartsWith("gml_Script_") && functionName.Contains('@'))
+                        functionName.StartsWith("gml_Script_", StringComparison.Ordinal) && 
+                        functionName.Contains('@'))
                     {
                         data.SetGMS2Version(2023, 11);
                         break;

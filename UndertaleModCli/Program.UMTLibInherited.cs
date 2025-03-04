@@ -769,7 +769,7 @@ public partial class Program : IScriptInterface
         if (doParse)
         {
             // This portion links code.
-            if (codeName.StartsWith("gml_Script"))
+            if (codeName.StartsWith("gml_Script", StringComparison.Ordinal))
             {
                 // Add code to scripts section.
                 if (Data.Scripts.ByName(codeName.Substring(11)) == null)
@@ -785,7 +785,7 @@ public partial class Program : IScriptInterface
                     scr.Code = code;
                 }
             }
-            else if (codeName.StartsWith("gml_GlobalScript"))
+            else if (codeName.StartsWith("gml_GlobalScript", StringComparison.Ordinal))
             {
                 // Add code to global init section.
                 UndertaleGlobalInit initEntry = null;
@@ -810,7 +810,7 @@ public partial class Program : IScriptInterface
                     NewInit.Code = code;
                 }
             }
-            else if (codeName.StartsWith("gml_Object"))
+            else if (codeName.StartsWith("gml_Object", StringComparison.Ordinal))
             {
                 string afterPrefix = codeName.Substring(11);
                 int underCount = 0;

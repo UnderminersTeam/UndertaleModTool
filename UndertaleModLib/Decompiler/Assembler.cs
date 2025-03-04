@@ -172,14 +172,14 @@ namespace UndertaleModLib.Decompiler
                                 instr.Value = ival;
                             else
                             {
-                                if (line.StartsWith("[variable]"))
+                                if (line.StartsWith("[variable]", StringComparison.Ordinal))
                                 {
                                     line = line.Substring("[variable]".Length);
                                     instr.Value = new UndertaleInstruction.Reference<UndertaleVariable>(data.Variables.EnsureDefined(
                                         data.Strings.MakeString(line, out int nameStringId), nameStringId,
                                         UndertaleInstruction.InstanceType.Self, false, data));
                                 }
-                                else if (line.StartsWith("[function]"))
+                                else if (line.StartsWith("[function]", StringComparison.Ordinal))
                                 {
                                     line = line.Substring("[function]".Length);
                                     instr.Value = new UndertaleInstruction.Reference<UndertaleFunction>(data.Functions.ByName(line));

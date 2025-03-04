@@ -74,6 +74,8 @@ ScriptMessage(
 
 void CheckCode()
 {
+    CompileGroup group = new(Data, globalDecompileContext);
+    group.PersistLinkingLookups = true;
     foreach (UndertaleCode code in toCheck)
     {
         // Skip child code entries
@@ -90,7 +92,6 @@ void CheckCode()
             string decompiled = new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, decompilerSettings).DecompileToString();
 
             // Perform re-compilation
-            CompileGroup group = new(Data, globalDecompileContext);
             group.QueueCodeReplace(code, decompiled);
             CompileResult result = group.Compile();
             if (!result.Successful)

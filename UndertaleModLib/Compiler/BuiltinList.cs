@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Underanalyzer.Compiler;
 using UndertaleModLib.Models;
 using static UndertaleModLib.Models.UndertaleGeneralInfo;
@@ -143,7 +144,7 @@ public class BuiltinList : IBuiltins
         HashSet<string> scriptLookup = new(data.Scripts.Count);
         foreach (UndertaleScript script in data.Scripts)
         {
-            if (script.Name?.Content is string name && !name.StartsWith("gml_Script_"))
+            if (script.Name?.Content is string name && !name.StartsWith("gml_Script_", StringComparison.Ordinal))
             {
                 scriptLookup.Add(name);
             }
@@ -153,7 +154,7 @@ public class BuiltinList : IBuiltins
         Functions ??= new(data.Functions.Count);
         foreach (UndertaleFunction function in data.Functions)
         {
-            if (function.Name?.Content is string name && !name.StartsWith("gml_Script_") && 
+            if (function.Name?.Content is string name && !name.StartsWith("gml_Script_", StringComparison.Ordinal) && 
                 !scriptLookup.Contains(name) && !Functions.ContainsKey(name))
             {
                 DefineFunction(name);
