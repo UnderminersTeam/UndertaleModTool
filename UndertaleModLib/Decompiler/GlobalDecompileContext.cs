@@ -104,11 +104,22 @@ public class GlobalDecompileContext : IGameContext
                 !data.GlobalFunctions.FunctionNameExists(name) &&
                 data.Functions.ByName(name) is UndertaleFunction function)
             {
+                // Regular script asset (pre and post 2.3)
                 data.GlobalFunctions.DefineFunction(name, function);
+            }
+            else if (script.Code is UndertaleCode { ParentEntry: null } code)
+            {
+                // If code name starts with "gml_Script_", and there's no parent code entry,
+                // then this is probably a GML-defined extension function.
+                if (code.Name?.Content is string codeName && codeName.StartsWith("gml_Script_") &&
+                    data.Functions.ByName(codeName) is UndertaleFunction extFunction)
+                {
+                    data.GlobalFunctions.DefineFunction(codeName["gml_Script_".Length..], extFunction);
+                }
             }
         }
 
-        // Add extension functions to global functions lookup
+        // Add remaining extension functions to global functions lookup
         if (data.Extensions is not null)
         {
             foreach (UndertaleExtension extension in data.Extensions)
