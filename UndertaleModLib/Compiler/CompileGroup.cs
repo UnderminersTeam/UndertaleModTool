@@ -30,6 +30,16 @@ public sealed class CompileGroup
     public Action<Action> MainThreadAction { get; set; } = static (f) => f();
 
     /// <summary>
+    /// Whether certain linking lookups (for strings, assets, etc.) should persist between multiple compiles.
+    /// This should not be preferred: generally, multiple code operations should be queued instead.
+    /// </summary>
+    /// <remarks>
+    /// This should be used with care. When enabled, no game data should be modified between each compile; otherwise,
+    /// string or asset duplication may occur, which can corrupt the data permanently.
+    /// </remarks>
+    public bool PersistLinkingLookups { get; set; } = false;
+
+    /// <summary>
     /// Stores a code entry and corresponding GML code to be compiled during an operation.
     /// </summary>
     private readonly record struct QueuedOperation(UndertaleCode CodeEntry, string Code);
@@ -61,7 +71,7 @@ public sealed class CompileGroup
     private Dictionary<string, UndertaleScript> _linkingScriptLookup = null;
 
     // During linking, a unique number to use for struct variables.
-    private int _linkingStructCounter = 0;
+    private int _linkingStructCounter = -1;
 
     // During linking, a lookup of all variable names that have been patched so far,
     // to the index they appear in the order of variable patches.
@@ -322,7 +332,7 @@ public sealed class CompileGroup
     public CompileResult Compile()
     {
         // Ensure global context is prepared for compilation
-        GlobalContext.PrepareForCompilation();
+        GlobalContext.PrepareForCompilation(!PersistLinkingLookups);
 
         // List to use for any errors generated, but don't allocate memory unless needed
         List<CompileError> errors = null;
@@ -848,14 +858,19 @@ public sealed class CompileGroup
         }
 
         // Check for next usable struct ID
-        foreach (UndertaleVariable variable in Data.Variables)
+        if (_linkingStructCounter == -1)
         {
-            if (variable.Name?.Content is string name)
+            _linkingStructCounter = 0;
+            foreach (UndertaleVariable variable in Data.Variables)
             {
-                const string structPrefix = "___struct___";
-                if (name.StartsWith(structPrefix) && int.TryParse(name.AsSpan(structPrefix.Length), out int id))
+                if (variable.Name?.Content is string name)
                 {
-                    _linkingStructCounter = Math.Max(_linkingStructCounter, id + 1);
+                    const string structPrefix = "___struct___";
+                    if (name.StartsWith(structPrefix, StringComparison.Ordinal) && 
+                        int.TryParse(name.AsSpan(structPrefix.Length), out int id))
+                    {
+                        _linkingStructCounter = Math.Max(_linkingStructCounter, id + 1);
+                    }
                 }
             }
         }
@@ -866,12 +881,15 @@ public sealed class CompileGroup
     /// </summary>
     private void UnreferenceLinkingLookups()
     {
-        _linkingStringIdLookup = null;
-        _linkingFunctionLookup = null;
+        if (!PersistLinkingLookups)
+        {
+            _linkingStringIdLookup = null;
+            _linkingFunctionLookup = null;
+            _linkingStructCounter = -1;
+        }
         _linkingVariableOrderLookup = null;
         _linkingVariableOrder = null;
         _linkingLocalReferences = null;
-        _linkingStructCounter = 0;
     }
 
     /// <summary>
@@ -887,24 +905,24 @@ public sealed class CompileGroup
 
         // Compare prefixes against known ones
         const string globalScriptPrefix = "gml_GlobalScript_";
-        if (codeName.StartsWith(globalScriptPrefix))
+        if (codeName.StartsWith(globalScriptPrefix, StringComparison.Ordinal))
         {
             // Output global script name as well
             return (CompileScriptKind.GlobalScript, codeName[globalScriptPrefix.Length..]);
         }
-        if (codeName.StartsWith("gml_Script"))
+        if (codeName.StartsWith("gml_Script", StringComparison.Ordinal))
         {
             return (CompileScriptKind.Script, null);
         }
-        if (codeName.StartsWith("gml_Object"))
+        if (codeName.StartsWith("gml_Object", StringComparison.Ordinal))
         {
             return (CompileScriptKind.ObjectEvent, null);
         }
-        if (codeName.StartsWith("gml_Room"))
+        if (codeName.StartsWith("gml_Room", StringComparison.Ordinal))
         {
             return (CompileScriptKind.RoomCreationCode, null);
         }
-        if (codeName.StartsWith("Timeline"))
+        if (codeName.StartsWith("Timeline", StringComparison.Ordinal))
         {
             return (CompileScriptKind.Timeline, null);
         }

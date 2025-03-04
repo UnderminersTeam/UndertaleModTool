@@ -242,7 +242,7 @@ namespace UndertaleModTool
             if (doParse)
             {
                 // This portion links code.
-                if (codeName.StartsWith("gml_Script"))
+                if (codeName.StartsWith("gml_Script", StringComparison.Ordinal))
                 {
                     // Add code to scripts section.
                     if (Data.Scripts.ByName(codeName.Substring(11)) == null)
@@ -258,7 +258,7 @@ namespace UndertaleModTool
                         scr.Code = code;
                     }
                 }
-                else if (codeName.StartsWith("gml_GlobalScript"))
+                else if (codeName.StartsWith("gml_GlobalScript", StringComparison.Ordinal))
                 {
                     // Add code to global init section.
                     UndertaleGlobalInit init_entry = null;
@@ -283,7 +283,7 @@ namespace UndertaleModTool
                         NewInit.Code = code;
                     }
                 }
-                else if (codeName.StartsWith("gml_Object"))
+                else if (codeName.StartsWith("gml_Object", StringComparison.Ordinal))
                 {
                     string afterPrefix = codeName.Substring(11);
                     int underCount = 0;

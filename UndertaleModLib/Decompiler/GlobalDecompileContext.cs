@@ -100,7 +100,7 @@ public class GlobalDecompileContext : IGameContext
         // Add scripts to global functions lookup, if they aren't already there
         foreach (UndertaleScript script in data.Scripts)
         {
-            if (script.Name?.Content is string name && !name.StartsWith("gml_Script_") &&
+            if (script.Name?.Content is string name && !name.StartsWith("gml_Script_", StringComparison.Ordinal) &&
                 !data.GlobalFunctions.FunctionNameExists(name) &&
                 data.Functions.ByName(name) is UndertaleFunction function)
             {
@@ -111,7 +111,7 @@ public class GlobalDecompileContext : IGameContext
             {
                 // If code name starts with "gml_Script_", and there's no parent code entry,
                 // then this is probably a GML-defined extension function.
-                if (code.Name?.Content is string codeName && codeName.StartsWith("gml_Script_") &&
+                if (code.Name?.Content is string codeName && codeName.StartsWith("gml_Script_", StringComparison.Ordinal) &&
                     data.Functions.ByName(codeName) is UndertaleFunction extFunction)
                 {
                     data.GlobalFunctions.DefineFunction(codeName["gml_Script_".Length..], extFunction);
