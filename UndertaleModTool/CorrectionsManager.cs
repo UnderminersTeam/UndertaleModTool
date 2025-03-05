@@ -11,6 +11,11 @@ namespace UndertaleModTool
     {
         public void ReplaceTempWithMain(bool imAnExpertBtw = false)
         {
+            if (!SettingsWindow.ProfileModeEnabled)
+            {
+                return;
+            }
+
             try
             {
                 if (!imAnExpertBtw && (!(ScriptQuestion("Warning: This may cause desyncs! The intended purpose is for reverting incorrect code corrections.\nOnly use this if you know what you're doing! Continue?"))))
@@ -30,6 +35,11 @@ namespace UndertaleModTool
         }
         public void ReplaceMainWithTemp(bool imAnExpertBtw = false)
         {
+            if (!SettingsWindow.ProfileModeEnabled)
+            {
+                return;
+            }
+
             try
             {
                 if (!imAnExpertBtw && (!(ScriptQuestion("Warning: This may cause desyncs! The intended purpose is for pushing code corrections (such as asset resolutions)\nOnly use this if you know what you're doing! Continue?"))))
@@ -49,6 +59,11 @@ namespace UndertaleModTool
         }
         public void ReplaceTempWithCorrections(bool imAnExpertBtw = false)
         {
+            if (!SettingsWindow.ProfileModeEnabled)
+            {
+                return;
+            }
+
             try
             {
                 if (!imAnExpertBtw && (!(ScriptQuestion("If you messed up royally while developing your corrections, you can use this to revert all of the changes to them in your Temp folder to what is in the Corrections folder. Only use this if you know what you're doing! Continue?"))))
@@ -74,6 +89,11 @@ namespace UndertaleModTool
         }
         public void ReplaceCorrectionsWithTemp(bool imAnExpertBtw = false)
         {
+            if (!SettingsWindow.ProfileModeEnabled)
+            {
+                return;
+            }
+
             try
             {
                 if (!imAnExpertBtw && (!(ScriptQuestion("The intended purpose is for pushing your custom made code corrections (your entire temporary profile) to the code corrections folder bundled with UndertaleModTool, making them permanent. Only use this if you know what you're doing! Continue?"))))
@@ -90,6 +110,11 @@ namespace UndertaleModTool
         }
         public void UpdateCorrections(bool imAnExpertBtw = false)
         {
+            if (!SettingsWindow.ProfileModeEnabled)
+            {
+                return;
+            }
+
             if (!imAnExpertBtw && (!(ScriptQuestion("Update Main with Temp, Temp with Main, Corrections with Temp. Only use this if you know what you're doing! Continue?"))))
                 return;
             ReplaceMainWithTemp(imAnExpertBtw);

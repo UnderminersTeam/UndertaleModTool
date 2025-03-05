@@ -61,6 +61,11 @@ namespace UndertaleModTool
 
         public void CrashCheck()
         {
+            if (!SettingsWindow.ProfileModeEnabled)
+            {
+                return;
+            }
+
             try
             {
                 string lastEditedLocation = Path.Combine(ProfilesFolder, "LastEdited.txt");
@@ -139,6 +144,11 @@ namespace UndertaleModTool
 
         public void ApplyCorrections()
         {
+            if (!SettingsWindow.ProfileModeEnabled)
+            {
+                return;
+            }
+
             try
             {
                 DirectoryCopy(CorrectionsFolder, ProfilesFolder, true);
@@ -151,6 +161,11 @@ namespace UndertaleModTool
 
         public void CreateUMTLastEdited(string filename)
         {
+            if (!SettingsWindow.ProfileModeEnabled)
+            {
+                return;
+            }
+
             try
             {
                 File.WriteAllText(Path.Combine(ProfilesFolder, "LastEdited.txt"), ProfileHash + "\n" + filename);
@@ -163,6 +178,11 @@ namespace UndertaleModTool
 
         public void DestroyUMTLastEdited()
         {
+            if (!SettingsWindow.ProfileModeEnabled)
+            {
+                return;
+            }
+
             try
             {
                 string path = Path.Combine(ProfilesFolder, "LastEdited.txt");
@@ -177,10 +197,13 @@ namespace UndertaleModTool
 
         public void RevertProfile()
         {
+            if (!SettingsWindow.ProfileModeEnabled)
+            {
+                return;
+            }
+
             try
             {
-                // We need to do this regardless, as the "Temp" folder can still change in non-profile mode.
-                // If we don't, it could cause desynchronization between modes.
                 string mainFolder = Path.Combine(ProfilesFolder, ProfileHash, "Main");
                 Directory.CreateDirectory(mainFolder);
                 string tempFolder = Path.Combine(ProfilesFolder, ProfileHash, "Temp");
@@ -193,99 +216,76 @@ namespace UndertaleModTool
                 this.ShowError("RevertProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
             }
         }
-        public void SaveTempToMainProfile()
-        {
-            try
-            {
-                // This extra step needs to happen for non-profile mode because the "Temp" folder can be modified in non-profile mode.
-                // If we don't, it could cause desynchronization between modes.
-                if (!SettingsWindow.ProfileModeEnabled)
-                {
-                    string mainFolder = Path.Combine(ProfilesFolder, ProfileHash, "Main");
-                    string tempFolder = Path.Combine(ProfilesFolder, ProfileHash, "Temp");
-                    Directory.CreateDirectory(tempFolder);
-                    if (Directory.Exists(mainFolder))
-                        Directory.Delete(mainFolder, true);
-                    DirectoryCopy(tempFolder, mainFolder, true);
-                }
-            }
-            catch (Exception exc)
-            {
-                this.ShowError("SaveTempToMainProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
-            }
-        }
         public async Task UpdateProfile(UndertaleData data, string filename)
         {
-            FileMessageEvent?.Invoke("Calculating MD5 hash...");
+            if (!SettingsWindow.ProfileModeEnabled)
+            {
+                return;
+            }
 
             try
             {
+                FileMessageEvent?.Invoke("Calculating MD5 hash...");
+
                 await Task.Run(() =>
                 {
-                    using (var md5Instance = MD5.Create())
-                    {
-                        using (var stream = File.OpenRead(filename))
-                        {
-                            MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
-                            MD5PreviouslyLoaded = MD5CurrentlyLoaded;
-                            ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
-                        }
-                    }
+                    using var md5Instance = MD5.Create();
+                    using var stream = File.OpenRead(filename);
+                    MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
+                    MD5PreviouslyLoaded = MD5CurrentlyLoaded;
+                    ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
                 });
 
                 string profDir = Path.Combine(ProfilesFolder, ProfileHash);
                 string profDirTemp = Path.Combine(profDir, "Temp");
                 string profDirMain = Path.Combine(profDir, "Main");
 
-                if (SettingsWindow.ProfileModeEnabled)
+                Directory.CreateDirectory(ProfilesFolder);
+                if (Directory.Exists(profDir))
                 {
-                    Directory.CreateDirectory(ProfilesFolder);
-                    if (Directory.Exists(profDir))
+                    if (!Directory.Exists(profDirTemp) && Directory.Exists(profDirMain))
                     {
-                        if (!Directory.Exists(profDirTemp) && Directory.Exists(profDirMain))
+                        // Get the subdirectories for the specified directory.
+                        DirectoryInfo dir = new DirectoryInfo(profDirMain);
+                        Directory.CreateDirectory(profDirTemp);
+                        // Get the files in the directory and copy them to the new location.
+                        FileInfo[] files = dir.GetFiles();
+                        foreach (FileInfo file in files)
                         {
-                            // Get the subdirectories for the specified directory.
-                            DirectoryInfo dir = new DirectoryInfo(profDirMain);
-                            Directory.CreateDirectory(profDirTemp);
-                            // Get the files in the directory and copy them to the new location.
-                            FileInfo[] files = dir.GetFiles();
-                            foreach (FileInfo file in files)
-                            {
-                                string tempPath = Path.Combine(profDirTemp, file.Name);
-                                file.CopyTo(tempPath, false);
-                            }
-                        }
-                        else if (!Directory.Exists(profDirMain) && Directory.Exists(profDirTemp))
-                        {
-                            // Get the subdirectories for the specified directory.
-                            DirectoryInfo dir = new DirectoryInfo(profDirTemp);
-                            Directory.CreateDirectory(profDirMain);
-                            // Get the files in the directory and copy them to the new location.
-                            FileInfo[] files = dir.GetFiles();
-                            foreach (FileInfo file in files)
-                            {
-                                string tempPath = Path.Combine(profDirMain, file.Name);
-                                file.CopyTo(tempPath, false);
-                            }
+                            string tempPath = Path.Combine(profDirTemp, file.Name);
+                            file.CopyTo(tempPath, false);
                         }
                     }
-
-                    // First generation no longer exists, it will be generated on demand while you edit.
-                    Directory.CreateDirectory(profDir);
-                    Directory.CreateDirectory(profDirMain);
-                    Directory.CreateDirectory(profDirTemp);
-                    if (!Directory.Exists(profDir) || !Directory.Exists(profDirMain) || !Directory.Exists(profDirTemp))
+                    else if (!Directory.Exists(profDirMain) && Directory.Exists(profDirTemp))
                     {
-                        this.ShowWarning("Profile should exist, but does not. Insufficient permissions? Profile mode is disabled.");
-                        SettingsWindow.ProfileModeEnabled = false;
-                        return;
+                        // Get the subdirectories for the specified directory.
+                        DirectoryInfo dir = new DirectoryInfo(profDirTemp);
+                        Directory.CreateDirectory(profDirMain);
+                        // Get the files in the directory and copy them to the new location.
+                        FileInfo[] files = dir.GetFiles();
+                        foreach (FileInfo file in files)
+                        {
+                            string tempPath = Path.Combine(profDirMain, file.Name);
+                            file.CopyTo(tempPath, false);
+                        }
                     }
+                }
 
-                    if (!SettingsWindow.ProfileMessageShown)
-                    {
-                        this.ShowMessage(@"The profile for your game loaded successfully!
+                // First generation no longer exists, it will be generated on demand while you edit.
+                Directory.CreateDirectory(profDir);
+                Directory.CreateDirectory(profDirMain);
+                Directory.CreateDirectory(profDirTemp);
+                if (!Directory.Exists(profDir) || !Directory.Exists(profDirMain) || !Directory.Exists(profDirTemp))
+                {
+                    this.ShowWarning("Profile should exist, but does not. Insufficient permissions? Profile mode is disabled.");
+                    SettingsWindow.ProfileModeEnabled = false;
+                    return;
+                }
 
-UndertaleModTool now uses the ""Profile"" system by default for code.
+                if (!SettingsWindow.ProfileMessageShown)
+                {
+                    this.ShowMessage(@"The profile for your game loaded successfully!
+
 Using the profile system, many new features are available to you!
 For example, the code is fully editable (you can even add comments)
 and it will be saved exactly as you wrote it. In addition, if the
@@ -298,15 +298,16 @@ to the ""File"" tab at the top and then opening the ""Settings""
 (the ""Enable profile mode"" option toggles it on or off).
 You may wish to disable it for purposes such as collaborative
 modding projects, or when performing technical operations.
-For more in depth information, please read ""About_Profile_Mode.txt"".
+Be warned that scripts are likely to mess with this system,
+and that enabling the profile mode setting won't have an immediate
+effect. (You must re-open a game first.)
 
 It should be noted that this system is somewhat experimental, so
 should you encounter any problems, please let us know or leave
 an issue on GitHub.");
-                        SettingsWindow.ProfileMessageShown = true;
-                    }
-                    CreateUMTLastEdited(filename);
+                    SettingsWindow.ProfileMessageShown = true;
                 }
+                CreateUMTLastEdited(filename);
             }
             catch (Exception exc)
             {
@@ -315,78 +316,70 @@ an issue on GitHub.");
         }
         public async Task ProfileSaveEvent(UndertaleData data, string filename)
         {
-            FileMessageEvent?.Invoke("Calculating MD5 hash...");
+            if (!SettingsWindow.ProfileModeEnabled)
+            {
+                return;
+            }
 
             try
             {
+                FileMessageEvent?.Invoke("Calculating MD5 hash...");
+
                 string deleteIfModeActive = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
                 bool copyProfile = false;
                 await Task.Run(() =>
                 {
-                    using (var md5Instance = MD5.Create())
+                    using var md5Instance = MD5.Create();
+                    using var stream = File.OpenRead(filename);
+                    MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
+                    if (!BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").Equals(BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", ""), StringComparison.InvariantCultureIgnoreCase))
                     {
-                        using (var stream = File.OpenRead(filename))
-                        {
-                            MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
-                            if (BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant() != BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant())
-                            {
-                                copyProfile = true;
-                            }
-                        }
+                        copyProfile = true;
                     }
                 });
 
                 Directory.CreateDirectory(Path.Combine(ProfilesFolder, ProfileHash, "Main"));
                 Directory.CreateDirectory(Path.Combine(ProfilesFolder, ProfileHash, "Temp"));
-                if (!SettingsWindow.ProfileModeEnabled || data.IsYYC())
+                string profDir;
+                string MD5DirNameOld;
+                string MD5DirPathOld;
+                string MD5DirPathOldMain;
+                string MD5DirPathOldTemp;
+                string MD5DirNameNew;
+                string MD5DirPathNew;
+                if (copyProfile)
                 {
-                    MD5PreviouslyLoaded = MD5CurrentlyLoaded;
-                    ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
-                    return;
-                }
-                else if (SettingsWindow.ProfileModeEnabled)
-                {
-                    Directory.CreateDirectory(ProfilesFolder);
-                    string profDir;
-                    string MD5DirNameOld;
-                    string MD5DirPathOld;
-                    string MD5DirPathOldMain;
-                    string MD5DirPathOldTemp;
-                    string MD5DirNameNew;
-                    string MD5DirPathNew;
-                    if (copyProfile)
-                    {
-                        MD5DirNameOld = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
-                        MD5DirPathOld = Path.Combine(ProfilesFolder, MD5DirNameOld);
-                        MD5DirPathOldMain = Path.Combine(MD5DirPathOld, "Main");
-                        MD5DirPathOldTemp = Path.Combine(MD5DirPathOld, "Temp");
-                        MD5DirNameNew = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
-                        MD5DirPathNew = Path.Combine(ProfilesFolder, MD5DirNameNew);
-                        DirectoryCopy(MD5DirPathOld, MD5DirPathNew, true);
-                        if (Directory.Exists(MD5DirPathOldMain) && Directory.Exists(MD5DirPathOldTemp))
-                        {
-                            Directory.Delete(MD5DirPathOldTemp, true);
-                        }
-                        DirectoryCopy(MD5DirPathOldMain, MD5DirPathOldTemp, true);
-                    }
-                    MD5PreviouslyLoaded = MD5CurrentlyLoaded;
-                    // Get the subdirectories for the specified directory.
-                    MD5DirNameOld = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
+                    MD5DirNameOld = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
                     MD5DirPathOld = Path.Combine(ProfilesFolder, MD5DirNameOld);
                     MD5DirPathOldMain = Path.Combine(MD5DirPathOld, "Main");
                     MD5DirPathOldTemp = Path.Combine(MD5DirPathOld, "Temp");
-                    if ((Directory.Exists(MD5DirPathOldMain)) && (Directory.Exists(MD5DirPathOldTemp)) && copyProfile)
+                    MD5DirNameNew = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
+                    MD5DirPathNew = Path.Combine(ProfilesFolder, MD5DirNameNew);
+                    DirectoryCopy(MD5DirPathOld, MD5DirPathNew, true);
+                    if (Directory.Exists(MD5DirPathOldMain) && Directory.Exists(MD5DirPathOldTemp))
                     {
-                        Directory.Delete(MD5DirPathOldMain, true);
+                        Directory.Delete(MD5DirPathOldTemp, true);
                     }
-                    DirectoryCopy(MD5DirPathOldTemp, MD5DirPathOldMain, true);
-
-                    ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
-                    profDir = Path.Combine(ProfilesFolder, ProfileHash);
-                    Directory.CreateDirectory(profDir);
-                    Directory.CreateDirectory(Path.Combine(profDir, "Main"));
-                    Directory.CreateDirectory(Path.Combine(profDir, "Temp"));
+                    DirectoryCopy(MD5DirPathOldMain, MD5DirPathOldTemp, true);
                 }
+                MD5PreviouslyLoaded = MD5CurrentlyLoaded;
+                // Get the subdirectories for the specified directory.
+                MD5DirNameOld = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
+                MD5DirPathOld = Path.Combine(ProfilesFolder, MD5DirNameOld);
+                MD5DirPathOldMain = Path.Combine(MD5DirPathOld, "Main");
+                MD5DirPathOldTemp = Path.Combine(MD5DirPathOld, "Temp");
+                if ((Directory.Exists(MD5DirPathOldMain)) && (Directory.Exists(MD5DirPathOldTemp)) && copyProfile)
+                {
+                    Directory.Delete(MD5DirPathOldMain, true);
+                }
+                DirectoryCopy(MD5DirPathOldTemp, MD5DirPathOldMain, true);
+
+                ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                profDir = Path.Combine(ProfilesFolder, ProfileHash);
+                Directory.CreateDirectory(profDir);
+                Directory.CreateDirectory(Path.Combine(profDir, "Main"));
+                Directory.CreateDirectory(Path.Combine(profDir, "Temp"));
+
                 if (SettingsWindow.DeleteOldProfileOnSave && copyProfile)
                 {
                     Directory.Delete(Path.Combine(ProfilesFolder, deleteIfModeActive), true);
