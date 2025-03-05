@@ -29,6 +29,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.TextFormatting;
 using System.Windows.Navigation;
+using System.Windows.Shell;
 using System.Xml;
 using UndertaleModLib;
 using UndertaleModLib.Compiler;
@@ -49,9 +50,6 @@ namespace UndertaleModTool
         public UndertaleCode CurrentDisassembled = null;
         public UndertaleCode CurrentDecompiled = null;
         public List<string> CurrentLocals = new();
-        public string ProfileHash = mainWindow.ProfileHash;
-        public string MainPath = Path.Combine(Settings.ProfilesFolder, mainWindow.ProfileHash, "Main");
-        public string TempPath = Path.Combine(Settings.ProfilesFolder, mainWindow.ProfileHash, "Temp");
 
         public bool DecompiledFocused = false;
         public bool DecompiledChanged = false;
@@ -259,8 +257,6 @@ namespace UndertaleModTool
         private async void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             UndertaleCode code = this.DataContext as UndertaleCode;
-            Directory.CreateDirectory(MainPath);
-            Directory.CreateDirectory(TempPath);
             if (code == null)
                 return;
 
@@ -564,14 +560,14 @@ namespace UndertaleModTool
             gettext = new Dictionary<string, string>();
             string[] decompilationOutput;
             GlobalDecompileContext context = new(data);
-            if (!SettingsWindow.ProfileModeEnabled)
+            if (!SettingsWindow.ProfileModeEnabled || data.ToolInfo.CurrentMD5 is not string currentMD5)
             {
                 decompilationOutput = new Underanalyzer.Decompiler.DecompileContext(context, gettextCode, data.ToolInfo.DecompilerSettings)
                     .DecompileToString().Split('\n');
             }
             else
             {
-                string path = Path.Combine(TempPath, gettextCode.Name.Content + ".gml");
+                string path = Path.Combine(MainWindow.ProfilesFolder, currentMD5, "Temp", gettextCode.Name.Content + ".gml");
                 if (File.Exists(path))
                 {
                     try
@@ -740,15 +736,23 @@ namespace UndertaleModTool
                     Exception e = null;
                     try
                     {
-                        string path = Path.Combine(TempPath, code.Name.Content + ".gml");
-                        if (!SettingsWindow.ProfileModeEnabled || !File.Exists(path))
+                        if (!SettingsWindow.ProfileModeEnabled || dataa.ToolInfo.CurrentMD5 is not string currentMD5)
                         {
                             decompiled = new Underanalyzer.Decompiler.DecompileContext(context, code, dataa.ToolInfo.DecompilerSettings)
                                 .DecompileToString();
                         }
                         else
                         {
-                            decompiled = File.ReadAllText(path);
+                            string path = Path.Combine(MainWindow.ProfilesFolder, currentMD5, "Temp", code.Name.Content + ".gml");
+                            if (!File.Exists(path))
+                            {
+                                decompiled = new Underanalyzer.Decompiler.DecompileContext(context, code, dataa.ToolInfo.DecompilerSettings)
+                                    .DecompileToString();
+                            }
+                            else
+                            {
+                                decompiled = File.ReadAllText(path);
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -983,26 +987,18 @@ namespace UndertaleModTool
                 return;
             }
 
-            try
+            if (SettingsWindow.ProfileModeEnabled && data.ToolInfo.CurrentMD5 is string currentMD5)
             {
-                string path = Path.Combine(TempPath, code.Name.Content + ".gml");
-                if (SettingsWindow.ProfileModeEnabled)
+                try
                 {
                     // Write text, only if in the profile mode.
+                    string path = Path.Combine(MainWindow.ProfilesFolder, currentMD5, "Temp", code.Name.Content + ".gml");
                     File.WriteAllText(path, DecompiledEditor.Text);
                 }
-                else
+                catch (Exception exc)
                 {
-                    // Destroy file with comments if it's been edited outside the profile mode.
-                    // We're dealing with the decompiled code only, it has to happen.
-                    // Otherwise it will cause a desync, which is more important to prevent.
-                    if (File.Exists(path))
-                        File.Delete(path);
+                    mainWindow.ShowError("Error during writing of GML code to profile:\n" + exc);
                 }
-            }
-            catch (Exception exc)
-            {
-                mainWindow.ShowError("Error during writing of GML code to profile:\n" + exc);
             }
 
             // Invalidate gettext if necessary

@@ -1672,20 +1672,23 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
         Append(context.ResultAssembly);
 
         data.GMLCacheChanged?.Add(Name?.Content);
-
-        try
+        
+        // When necessary, write to profile.
+        if (data.ToolInfo.ProfileMode && data.ToolInfo.CurrentMD5 is string currentMD5)
         {
-            // Attempt to write text in all modes, because this is a special case.
-            string tempPath = Path.Combine(data.ToolInfo.AppDataProfiles, data.ToolInfo.CurrentMD5, "Temp", Name?.Content + ".gml");
-            if (File.Exists(tempPath))
+            try
             {
-                string readText = File.ReadAllText(tempPath) + "\n" + gmlCode;
-                File.WriteAllText(tempPath, readText);
+                string tempPath = Path.Combine(data.ToolInfo.AppDataProfiles, currentMD5, "Temp", Name?.Content + ".gml");
+                if (File.Exists(tempPath))
+                {
+                    string readText = File.ReadAllText(tempPath) + "\n" + gmlCode;
+                    File.WriteAllText(tempPath, readText);
+                }
             }
-        }
-        catch (Exception exc)
-        {
-            throw new Exception("Error during writing of GML code to profile:\n" + exc);
+            catch (Exception exc)
+            {
+                throw new Exception("Error during writing of GML code to profile:\n" + exc);
+            }
         }
         */
     }
@@ -1713,17 +1716,18 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
 
         data.GMLCacheChanged?.Add(Name?.Content);
 
-        //TODO: only do this if profile mode is enabled in the first place
-        try
+        // When necessary, write to profile.
+        if (data.ToolInfo.ProfileMode && data.ToolInfo.CurrentMD5 is string currentMD5)
         {
-            // When necessary, write to profile.
-            string tempPath = Path.Combine(data.ToolInfo.AppDataProfiles, data.ToolInfo.CurrentMD5, "Temp", Name?.Content + ".gml");
-            if (data.ToolInfo.ProfileMode || File.Exists(tempPath))
+            try
+            {
+                string tempPath = Path.Combine(data.ToolInfo.AppDataProfiles, currentMD5, "Temp", Name?.Content + ".gml");
                 File.WriteAllText(tempPath, gmlCode);
-        }
-        catch (Exception exc)
-        {
-            throw new Exception("Error during writing of GML code to profile:\n" + exc);
+            }
+            catch (Exception exc)
+            {
+                throw new Exception("Error during writing of GML code to profile:\n" + exc);
+            }
         }
     }
 

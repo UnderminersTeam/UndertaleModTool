@@ -189,11 +189,11 @@ namespace UndertaleModTool
         private LoaderDialog scriptDialog;
 
         // Related to profile system and appdata
-        public byte[] MD5PreviouslyLoaded = new byte[13];
-        public byte[] MD5CurrentlyLoaded = new byte[15];
+        public byte[] MD5PreviouslyLoaded = null;
+        public byte[] MD5CurrentlyLoaded = null;
         public static string AppDataFolder => Settings.AppDataFolder;
-        public static string ProfilesFolder = Path.Combine(Settings.AppDataFolder, "Profiles");
-        public static string CorrectionsFolder = Path.Combine(Program.GetExecutableDirectory(), "Corrections");
+        public static string ProfilesFolder { get; } = Path.Combine(Settings.AppDataFolder, "Profiles");
+        public static string CorrectionsFolder { get; } = Path.Combine(Program.GetExecutableDirectory(), "Corrections");
         public string ProfileHash = "Unknown";
         public bool CrashedWhileEditing = false;
 
@@ -1065,7 +1065,7 @@ namespace UndertaleModTool
                                 data.ToolInfo.ProfileMode = SettingsWindow.ProfileModeEnabled;
                                 data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
                                 data.ToolInfo.InstanceIdPrefix = () => SettingsWindow.InstanceIdPrefix;
-                                data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
+                                data.ToolInfo.CurrentMD5 = MD5CurrentlyLoaded is null ? null : BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
                             }
                         }
                         if (data.IsYYC())
@@ -1278,7 +1278,6 @@ namespace UndertaleModTool
 
                         // Also make the changes to the profile system.
                         await ProfileSaveEvent(Data, filename);
-                        SaveTempToMainProfile();
                     }
                     else
                     {
@@ -1298,10 +1297,10 @@ namespace UndertaleModTool
 
                     SaveSucceeded = false;
                 }
-                if (Data != null)
+                if (Data is not null)
                 {
                     Data.ToolInfo.ProfileMode = SettingsWindow.ProfileModeEnabled;
-                    Data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
+                    Data.ToolInfo.CurrentMD5 = MD5CurrentlyLoaded is null ? null : BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
                 }
 
                 UndertaleCodeEditor.gettextJSON = null;

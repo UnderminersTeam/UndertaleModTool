@@ -57,8 +57,13 @@ namespace UndertaleModTool
 
         public void NukeProfileGML(string codeName)
         {
+            if (!SettingsWindow.ProfileModeEnabled || Data.ToolInfo.CurrentMD5 is not string currentMD5)
+            {
+                return;
+            }
+
             // This is written as intended
-            string path = Path.Combine(ProfilesFolder, Data.ToolInfo.CurrentMD5, "Temp", codeName + ".gml");
+            string path = Path.Combine(ProfilesFolder, currentMD5, "Temp", codeName + ".gml");
             if (File.Exists(path))
             {
                 File.Delete(path);
@@ -66,9 +71,14 @@ namespace UndertaleModTool
         }
         public void ReapplyProfileCode()
         {
+            if (!SettingsWindow.ProfileModeEnabled || Data.ToolInfo.CurrentMD5 is not string currentMD5)
+            {
+                return;
+            }
+
             foreach (UndertaleCode code in Data.Code)
             {
-                string path = Path.Combine(ProfilesFolder, Data.ToolInfo.CurrentMD5, "Temp", code.Name.Content + ".gml");
+                string path = Path.Combine(ProfilesFolder, currentMD5, "Temp", code.Name.Content + ".gml");
                 if (File.Exists(path))
                 {
                     ImportGMLFile(path, false, false);
@@ -117,7 +127,7 @@ namespace UndertaleModTool
             string codeName = code.Name.Content;
             GlobalDecompileContext globalDecompileContext = context is null ? new(Data) : context;
 
-            if (!Data.ToolInfo.ProfileMode)
+            if (!Data.ToolInfo.ProfileMode || Data.ToolInfo.CurrentMD5 is null)
             {
                 try
                 {
@@ -436,9 +446,14 @@ namespace UndertaleModTool
                     code.ReplaceGML(gmlCode, Data);
 
                     // Write to profile if necessary.
-                    string path = Path.Combine(ProfilesFolder, Data.ToolInfo.CurrentMD5, "Temp", codeName + ".gml");
-                    if (File.Exists(path))
-                        File.WriteAllText(path, GetDecompiledText(code));
+                    if (SettingsWindow.ProfileModeEnabled && Data.ToolInfo.CurrentMD5 is string currentMD5)
+                    {
+                        string path = Path.Combine(ProfilesFolder, currentMD5, "Temp", codeName + ".gml");
+                        if (File.Exists(path))
+                        {
+                            File.WriteAllText(path, GetDecompiledText(code));
+                        }
+                    }
                 }
                 else
                 {
