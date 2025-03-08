@@ -14,22 +14,26 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
 
 bool enable = ScriptQuestion("Debug Manager by krzys-h and Kneesnap\n\nYes = Enable Debug\nNo = Disable Debug");
 
-var scr_debug = Data.Scripts.ByName("scr_debug")?.Code;
-if (scr_debug != null) // Deltarune debug check script.
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
 {
-    scr_debug.ReplaceGML("global.debug = " + (enable ? "1" : "0") + ";" + "\r\n" + "return global.debug;", Data);
+    ThrowOnNoOpFindReplace = true
+};
+
+var scr_debug = Data.Scripts.ByName("scr_debug")?.Code;
+if (scr_debug is not null) // Deltarune debug check script.
+{
+    importGroup.QueueReplace(scr_debug, "global.debug = " + (enable ? "1" : "0") + ";" + "\r\n" + "return global.debug;");
+    importGroup.Import();
     ChangeSelection(scr_debug); // Show.
     ScriptMessage("Debug Mode " + (enable ? "enabled" : "disabled") + ".");
     return;
 }
 
 var SCR_GAMESTART = Data.Scripts.ByName("SCR_GAMESTART", true)?.Code;
-if (SCR_GAMESTART != null) // Undertale debug check script.
+if (SCR_GAMESTART is not null) // Undertale debug check script.
 {
-    GlobalDecompileContext globalDecompileContext = new(Data);
-    Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = new Underanalyzer.Decompiler.DecompileSettings();
-
-    ReplaceTextInGML("gml_Script_SCR_GAMESTART", "global.debug = ", "global.debug = " + (enable ? "1;" : "0;") + "//", false, false, globalDecompileContext, decompilerSettings);
+    importGroup.QueueFindReplace(SCR_GAMESTART, "global.debug = ", "global.debug = " + (enable ? "1;" : "0;") + "//");
+    importGroup.Import();
     ChangeSelection(SCR_GAMESTART); // Show.
     ScriptMessage("Debug Mode " + (enable ? "enabled" : "disabled") + ".");
     return;

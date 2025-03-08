@@ -113,6 +113,27 @@ public class UndertaleCodeLocals : UndertaleNamedResource, IDisposable
     /// </summary>
     public ObservableCollection<LocalVar> Locals { get; private set; } = new ObservableCollection<LocalVar>();
 
+    /// <summary>
+    /// Creates an empty code locals entry with the given name.
+    /// </summary>
+    /// <param name="data">Data to add the new code to.</param>
+    /// <param name="name">Name of the new code locals entry to create.</param>
+    /// <returns>The new code locals entry.</returns>
+    public static UndertaleCodeLocals CreateEmptyEntry(UndertaleData data, UndertaleString name)
+    {
+        UndertaleCodeLocals locals = new()
+        {
+            Name = name
+        };
+        locals.Locals.Add(new()
+        {
+            Name = data.Strings.MakeString("arguments", out int argumentsStringId),
+            Index = data.IsVersionAtLeast(2, 3) ? (uint)argumentsStringId : 0
+        });
+        data.CodeLocals.Add(locals);
+        return locals;
+    }
+
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
     {

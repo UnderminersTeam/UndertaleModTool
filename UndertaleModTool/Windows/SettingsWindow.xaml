@@ -63,10 +63,8 @@
             <CheckBox Grid.Row="4" Grid.Column="2" Margin="3" Content="" IsChecked="{Binding TempRunMessageShow}"/>
             <TextBlock Grid.Row="4" Grid.Column="2" Margin="25 2 2 2" Text="Warn about temp running" ToolTip="Warn about temp running. Enabled by default."/>
 
-            <CheckBox Grid.Row="5" Grid.Column="0" Margin="3" Content="" IsChecked="{Binding UseGMLCache}"/>
-            <TextBlock Grid.Row="5" Grid.Column="0" Margin="25 2 2 2" Text="Use decompiled code cache (experimental)" ToolTip="Used when searching for acceleration. Disabled by default."/>
-            <CheckBox Grid.Row="5" Grid.Column="2" Margin="3" Content="" IsChecked="{Binding ShowDebuggerOption}"/>
-            <TextBlock Grid.Row="5" Grid.Column="2" Margin="25 2 2 2" Text="Show &quot;Run game under GMS debugger&quot; file option" ToolTip="Whether to show the option in the &quot;File&quot; menu. Disabled by default."/>
+            <CheckBox Grid.Row="5" Grid.Column="0" Margin="3" Content="" IsChecked="{Binding ShowDebuggerOption}"/>
+            <TextBlock Grid.Row="5" Grid.Column="0" Margin="25 2 2 2" Text="Show &quot;Run game under GMS debugger&quot; file option" ToolTip="Whether to show the option in the &quot;File&quot; menu. Disabled by default."/>
 
             <Separator Grid.Row="6" Grid.ColumnSpan="4" Margin="10"/>
 

@@ -326,6 +326,12 @@ internal class CodeBuilder : ICodeBuilder
             {
                 reference = new((UndertaleFunction)function);
             }
+            else if (_globalContext.GetScriptId(functionName, out int _))
+            {
+                reference = new(
+                    _globalContext.Data.Functions.EnsureDefined(functionName, _globalContext.Data.Strings)
+                );
+            }
             else
             {
                 throw new CompilerException($"Failed to look up function \"{functionName}\"");

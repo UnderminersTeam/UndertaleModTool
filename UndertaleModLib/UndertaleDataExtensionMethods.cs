@@ -10,29 +10,103 @@ namespace UndertaleModLib;
 /// </summary>
 public static class UndertaleDataExtensionMethods
 {
-	/// <summary>
-	/// An extension method, that returns the element in a <see cref="List{T}"/> of <see cref="UndertaleNamedResource"/>s
-	/// that has a specified <paramref name="name"/>.
-	/// </summary>
-	/// <param name="list">The <see cref="List{T}"/> of <see cref="UndertaleNamedResource"/>s to search in.</param>
-	/// <param name="name">The name of the <see cref="UndertaleNamedResource"/> to find.</param>
-	/// <param name="ignoreCase">Whether casing should be ignored for searching.</param>
-	/// <typeparam name="T">A type of <see cref="UndertaleNamedResource"/>.</typeparam>
-	/// <returns>The element that has the specified name.</returns>
-	public static T ByName<T>(this IList<T> list, string name, bool ignoreCase = false) where T : UndertaleNamedResource
-	{
-		StringComparison comparisonType = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+    /// <summary>
+    /// An extension method, that returns the element in a <see cref="IList{T}"/> of <see cref="UndertaleNamedResource"/>s
+    /// that has a specified <paramref name="name"/>.
+    /// </summary>
+    /// <param name="list">The <see cref="IList{T}"/> of <see cref="UndertaleNamedResource"/>s to search in.</param>
+    /// <param name="name">The name of the <see cref="UndertaleNamedResource"/> to find.</param>
+    /// <param name="ignoreCase">Whether casing should be ignored for searching.</param>
+    /// <typeparam name="T">A type of <see cref="UndertaleNamedResource"/>.</typeparam>
+    /// <returns>The element that has the specified name.</returns>
+    public static T ByName<T>(this IList<T> list, string name, bool ignoreCase = false) where T : UndertaleNamedResource
+    {
+        StringComparison comparisonType = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
 
-		foreach (T item in list)
-		{
+        foreach (T item in list)
+        {
 			if (item.Name.Content.Equals(name, comparisonType))
+			{
 				return item;
-		}
+			}
+        }
 
-		return default(T);
-	}
+        return default;
+    }
 
-	public static UndertaleCodeLocals For(this IList<UndertaleCodeLocals> list, UndertaleCode code)
+    /// <summary>
+    /// An extension method, that returns the index of an element in a <see cref="IList{T}"/> of <see cref="UndertaleNamedResource"/>s
+    /// that has a specified <paramref name="name"/>.
+    /// </summary>
+    /// <param name="list">The <see cref="IList{T}"/> of <see cref="UndertaleNamedResource"/>s to search in.</param>
+    /// <param name="name">The name of the <see cref="UndertaleNamedResource"/> to find.</param>
+    /// <param name="ignoreCase">Whether casing should be ignored for searching.</param>
+    /// <typeparam name="T">A type of <see cref="UndertaleNamedResource"/>.</typeparam>
+    /// <returns>The index of the element that has the specified name, or -1 if none is found.</returns>
+    public static int IndexOfName<T>(this IList<T> list, string name, bool ignoreCase = false) where T : UndertaleNamedResource
+    {
+        StringComparison comparisonType = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
+		for (int i = 0; i < list.Count; i++)
+		{
+			if (list[i].Name.Content.Equals(name, comparisonType))
+			{
+				return i;
+			}
+        }
+
+		return -1;
+    }
+
+    /// <summary>
+    /// An extension method, that returns the element in a <see cref="IList{T}"/> of <see cref="UndertaleNamedResource"/>s
+    /// that has a specified <paramref name="name"/>.
+    /// </summary>
+    /// <param name="list">The <see cref="IList{T}"/> of <see cref="UndertaleNamedResource"/>s to search in.</param>
+    /// <param name="name">The name of the <see cref="UndertaleNamedResource"/> to find.</param>
+    /// <param name="ignoreCase">Whether casing should be ignored for searching.</param>
+    /// <typeparam name="T">A type of <see cref="UndertaleNamedResource"/>.</typeparam>
+    /// <returns>The element that has the specified name.</returns>
+    public static T ByName<T>(this IList<T> list, ReadOnlySpan<char> name, bool ignoreCase = false) where T : UndertaleNamedResource
+    {
+        StringComparison comparisonType = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
+        foreach (T item in list)
+        {
+			if (item.Name.Content.AsSpan().Equals(name, comparisonType))
+			{
+				return item;
+			}
+        }
+
+        return default;
+    }
+
+    /// <summary>
+    /// An extension method, that returns the index of an element in a <see cref="IList{T}"/> of <see cref="UndertaleNamedResource"/>s
+    /// that has a specified <paramref name="name"/>.
+    /// </summary>
+    /// <param name="list">The <see cref="IList{T}"/> of <see cref="UndertaleNamedResource"/>s to search in.</param>
+    /// <param name="name">The name of the <see cref="UndertaleNamedResource"/> to find.</param>
+    /// <param name="ignoreCase">Whether casing should be ignored for searching.</param>
+    /// <typeparam name="T">A type of <see cref="UndertaleNamedResource"/>.</typeparam>
+    /// <returns>The index of the element that has the specified name, or -1 if none is found.</returns>
+    public static int IndexOfName<T>(this IList<T> list, ReadOnlySpan<char> name, bool ignoreCase = false) where T : UndertaleNamedResource
+    {
+        StringComparison comparisonType = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
+        for (int i = 0; i < list.Count; i++)
+        {
+            if (list[i].Name.Content.AsSpan().Equals(name, comparisonType))
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    public static UndertaleCodeLocals For(this IList<UndertaleCodeLocals> list, UndertaleCode code)
 	{
 		// TODO: I'm not sure if the runner looks these up by name or by index
 		return list.FirstOrDefault(x => code.Name == x.Name);
@@ -49,20 +123,23 @@ public static class UndertaleDataExtensionMethods
 	/// <exception cref="ArgumentNullException"><paramref name="content"/> is null.</exception>
 	public static UndertaleString MakeString(this IList<UndertaleString> list, string content, bool createNew = false)
 	{
-		if (content == null)
-			throw new ArgumentNullException(nameof(content));
+        ArgumentNullException.ThrowIfNull(content);
 
-		if (!createNew)
+		// Search through all existing strings if desired
+        if (!createNew)
 		{
 			// TODO: without reference counting the strings, this may leave unused strings in the array
 			foreach (UndertaleString str in list)
 			{
 				if (str.Content == content)
+				{
 					return str;
+				}
 			}
 		}
 
-		UndertaleString newString = new UndertaleString(content);
+		// Create a brand-new string
+		UndertaleString newString = new(content);
 		list.Add(newString);
 		return newString;
 	}

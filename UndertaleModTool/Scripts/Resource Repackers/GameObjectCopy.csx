@@ -142,7 +142,9 @@ for (var j = 0; j < splitStringsList.Count; j++)
                                 }
                                 try
                                 {
-                                    ImportGMLString(donorACT.CodeId?.Name?.Content, codeToCopy, false, false);
+                                    UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+                                    importGroup.QueueReplace(donorACT.CodeId?.Name?.Content, codeToCopy);
+                                    importGroup.Import();
                                 }
                                 catch (Exception ec)
                                 {

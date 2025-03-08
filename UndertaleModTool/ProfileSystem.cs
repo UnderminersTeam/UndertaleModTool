@@ -90,30 +90,7 @@ namespace UndertaleModTool
                         if (Directory.Exists(Path.Combine(ProfilesFolder, reportedHashOfCrashedFile)) &&
                             profileHashOfCrashedFile == reportedHashOfCrashedFile)
                         {
-                            if (this.ShowQuestion("UndertaleModTool crashed during usage last time while editing " + pathOfCrashedFile + ", would you like to recover your code now?") == MessageBoxResult.Yes)
-                            {
-                                LoadFile(pathOfCrashedFile, true).ContinueWith((t) => { });
-                                if (Data == null)
-                                {
-                                    this.ShowError("Failed to load data when recovering.");
-                                    return;
-                                }
-                                string[] dirFiles = Directory.GetFiles(dataRecoverLocation);
-                                int progress = 0;
-                                LoaderDialog codeLoadDialog = new LoaderDialog("Script in progress...", "Please wait...");
-                                codeLoadDialog.PreventClose = true;
-                                codeLoadDialog.Update(null, "Code entries processed: ", progress++, dirFiles.Length);
-                                codeLoadDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
-                                foreach (string file in dirFiles)
-                                {
-                                    ImportGMLFile(file);
-                                    codeLoadDialog.Update(null, "Code entries processed: ", progress++, dirFiles.Length);
-                                    codeLoadDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
-                                }
-                                codeLoadDialog.TryClose();
-                                this.ShowMessage("Completed.");
-                            }
-                            else if (this.ShowQuestion("Would you like to move this code to the \"Recovered\" folder now? Any previous code there will be cleared!") == MessageBoxResult.Yes)
+                            if (this.ShowQuestion("UndertaleModTool crashed during usage last time while editing " + pathOfCrashedFile + ". Profile mode code from that session still exists. Would you like to move the code to the \"Recovered\" folder now? Any previous code there will be cleared!") == MessageBoxResult.Yes)
                             {
                                 this.ShowMessage("Your code can be recovered from the \"Recovered\" folder at any time.");
                                 string recoveredDir = Path.Combine(AppDataFolder, "Recovered", reportedHashOfCrashedFile);
@@ -138,7 +115,7 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                this.ShowError("CrashCheck error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
+                this.ShowError("CrashCheck error! (Note that profile mode is highly experimental.)\n" + exc);
             }
         }
 
@@ -155,13 +132,13 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                this.ShowError("ApplyCorrections error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
+                this.ShowError("ApplyCorrections error! (Note that profile mode is highly experimental.)\n" + exc);
             }
         }
 
         public void CreateUMTLastEdited(string filename)
         {
-            if (!SettingsWindow.ProfileModeEnabled)
+            if (!SettingsWindow.ProfileModeEnabled || ProfileHash is null)
             {
                 return;
             }
@@ -172,7 +149,7 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                this.ShowError("CreateUMTLastEdited error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
+                this.ShowError("CreateUMTLastEdited error! (Note that profile mode is highly experimental.)\n" + exc);
             }
         }
 
@@ -191,13 +168,13 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                this.ShowError("DestroyUMTLastEdited error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
+                this.ShowError("DestroyUMTLastEdited error! (Note that profile mode is highly experimental.)\n" + exc);
             }
         }
 
         public void RevertProfile()
         {
-            if (!SettingsWindow.ProfileModeEnabled)
+            if (!SettingsWindow.ProfileModeEnabled || ProfileHash is null)
             {
                 return;
             }
@@ -213,7 +190,7 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                this.ShowError("RevertProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
+                this.ShowError("RevertProfile error! (Note that profile mode is highly experimental.)\n" + exc);
             }
         }
         public async Task UpdateProfile(UndertaleData data, string filename)
@@ -311,12 +288,12 @@ an issue on GitHub.");
             }
             catch (Exception exc)
             {
-                this.ShowError("UpdateProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
+                this.ShowError("UpdateProfile error! (Note that profile mode is highly experimental.)\n" + exc);
             }
         }
         public async Task ProfileSaveEvent(UndertaleData data, string filename)
         {
-            if (!SettingsWindow.ProfileModeEnabled)
+            if (!SettingsWindow.ProfileModeEnabled || ProfileHash is null)
             {
                 return;
             }
@@ -387,7 +364,7 @@ an issue on GitHub.");
             }
             catch (Exception exc)
             {
-                this.ShowError("ProfileSaveEvent error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
+                this.ShowError("ProfileSaveEvent error! (Note that profile mode is highly experimental.)\n" + exc);
             }
         }
         public void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
@@ -438,7 +415,7 @@ an issue on GitHub.");
             }
             catch (Exception exc)
             {
-                this.ShowError("DirectoryCopy error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
+                this.ShowError("DirectoryCopy error! (Note that profile mode is highly experimental.)\n" + exc);
             }
         }
     }
