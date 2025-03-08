@@ -17,12 +17,16 @@ using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
+
 GlobalDecompileContext globalDecompileContext = new(Data);
 Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = Data.ToolInfo.DecompilerSettings;
 
 Regex setownerRegex = new Regex(@"pushi?\.[eil] \d+(\n|\r\n)setowner\.e(\n|\r\n)");
 
 List<UndertaleCode> toCheck = Data.Code.Where(c => c.ParentEntry is null).ToList();
+
+SetProgressBar(null, "Checking all code entries", 0, toCheck.Count);
+StartProgressBarUpdater();
 
 int numStrings = Data.Strings.Count;
 int numCode = Data.Code.Count;
@@ -33,7 +37,10 @@ int numScripts = Data.Scripts.Count;
 List<string> failedCompileList = new();
 List<string> failedAssemblyList = new();
 List<string> failedDecompiledList = new();
-CheckCode();
+
+SyncBinding("Strings, Code, CodeLocals, Scripts, GlobalInitScripts, GameObjects, Functions, Variables", true);
+await Task.Run(() => CheckCode());
+DisableAllSyncBindings();
 
 string failedCompilePath = Path.Combine(Path.GetDirectoryName(FilePath), "failed-compile.txt");
 File.WriteAllText(failedCompilePath, string.Join('\n', failedCompileList));
@@ -64,6 +71,8 @@ if (numScripts != Data.Scripts.Count)
     assetInfo += $"Script count changed from {numScripts} to {Data.Scripts.Count}\n";
 }
 
+await StopProgressBarUpdater();
+HideProgressBar();
 ScriptMessage(
     $"Decompiler and compiler check complete.\n" +
     $"{failedCompileList.Count}/{toCheck.Count} ({(failedCompileList.Count / (double)toCheck.Count) * 100.0:0.###}%) failed to compile at all\n" +
@@ -78,12 +87,6 @@ void CheckCode()
     group.PersistLinkingLookups = true;
     foreach (UndertaleCode code in toCheck)
     {
-        // Skip child code entries
-        if (code.ParentEntry is not null)
-        {
-            continue;
-        }
-
         try
         {
             // Perform initial decompilation & disassembly

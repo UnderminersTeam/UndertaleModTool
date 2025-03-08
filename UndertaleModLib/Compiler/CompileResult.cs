@@ -79,7 +79,20 @@ public readonly struct CompileResult
     /// <remarks>
     /// If <see cref="Successful"/> is <see langword="true"/>, this is <see langword="null"/>.
     /// </remarks>
-    public IEnumerable<CompileError> Errors { get; } = null;
+    public IEnumerable<CompileError> Errors => _errors;
+
+    /// <summary>
+    /// A standard successful result instance.
+    /// </summary>
+    public static readonly CompileResult SuccessfulResult = new(true, null);
+
+    /// <summary>
+    /// A standard unsuccessful result instance, with no errors.
+    /// </summary>
+    public static readonly CompileResult UnsuccessfulResult = new(false, null);
+
+    // List of errors generated during compilation, or null.
+    private readonly List<CompileError> _errors = null;
 
     /// <summary>
     /// Creates a compile result struct with the given information.
@@ -89,7 +102,30 @@ public readonly struct CompileResult
     internal CompileResult(bool successful, List<CompileError> errors)
     {
         Successful = successful;
-        Errors = errors;
+        _errors = errors;
+    }
+
+    /// <summary>
+    /// Combines two compile results together, including any potential errors.
+    /// </summary>
+    /// <param name="otherResult">Other compile result to combine with.</param>
+    /// <returns>A new combined compile result.</returns>
+    public CompileResult CombineWith(CompileResult otherResult)
+    {
+        if (!Successful || !otherResult.Successful)
+        {
+            List<CompileError> combinedErrors = new((_errors?.Count ?? 0) + (otherResult._errors?.Count ?? 0));
+            if (_errors is not null)
+            {
+                combinedErrors.AddRange(_errors);
+            }
+            if (otherResult._errors is not null)
+            {
+                combinedErrors.AddRange(otherResult._errors);
+            }
+            return new CompileResult(false, combinedErrors);
+        }
+        return SuccessfulResult;
     }
 
     /// <summary>

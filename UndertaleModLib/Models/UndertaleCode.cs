@@ -1366,6 +1366,45 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     internal uint _bytecodeAbsoluteAddress;
     internal byte[] _unsupportedBuffer;
 
+    /// <summary>
+    /// Creates an empty root code entry with the given name, along with an empty code locals entry (when necessary).
+    /// </summary>
+    /// <remarks>
+    /// The code entry (and possibly code locals entry) will be immediately added to the data.
+    /// </remarks>
+    /// <param name="data">Data to add the new code to.</param>
+    /// <param name="name">Name of the new code entry to create.</param>
+    /// <returns>The new code entry.</returns>
+    public static UndertaleCode CreateEmptyEntry(UndertaleData data, string name)
+    {
+        return CreateEmptyEntry(data, data.Strings.MakeString(name));
+    }
+
+    /// <summary>
+    /// Creates an empty root code entry with the given name, along with an empty code locals entry (when necessary).
+    /// </summary>
+    /// <param name="data">Data to add the new code to.</param>
+    /// <param name="name">Name of the new code entry to create.</param>
+    /// <returns>The new code entry.</returns>
+    public static UndertaleCode CreateEmptyEntry(UndertaleData data, UndertaleString name)
+    {
+        // Create entry
+        UndertaleCode newEntry = new()
+        {
+            Name = name,
+            LocalsCount = 1
+        };
+        data.Code.Add(newEntry);
+
+        // Also attach code locals if necessary
+        if (data.CodeLocals is not null)
+        {
+            UndertaleCodeLocals.CreateEmptyEntry(data, name);
+        }
+
+        return newEntry;
+    }
+
     public void SerializeBlobBefore(UndertaleWriter writer)
     {
         if (writer.undertaleData.UnsupportedBytecodeVersion || writer.Bytecode14OrLower)
@@ -1648,87 +1687,6 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
 
         Instructions.Clear();
         Append(instructions);
-    }
-
-    /// <summary>
-    /// Append GML instructions at the end of this code entry.
-    /// </summary>
-    /// <param name="gmlCode">The GML code to append.</param>
-    /// <param name="data">From which data file the GML code is coming from.</param>
-    /// <exception cref="Exception"> if the GML code does not compile or if there's an error writing the code to the profile entry.</exception>
-    public void AppendGML(string gmlCode, UndertaleData data)
-    {
-        if (ParentEntry is not null)
-            return;
-        throw new NotImplementedException("TODO"); // TODO
-        /*
-        CompileGroup context = Compiler.Compiler.CompileGMLText(gmlCode, data, this);
-        if (!context.SuccessfulCompile || context.HasError)
-        {
-            Console.WriteLine(gmlCode);
-            throw new Exception("GML Compile Error: " + context.ResultError);
-        }
-
-        Append(context.ResultAssembly);
-
-        data.GMLCacheChanged?.Add(Name?.Content);
-        
-        // When necessary, write to profile.
-        if (data.ToolInfo.ProfileMode && data.ToolInfo.CurrentMD5 is string currentMD5)
-        {
-            try
-            {
-                string tempPath = Path.Combine(data.ToolInfo.AppDataProfiles, currentMD5, "Temp", Name?.Content + ".gml");
-                if (File.Exists(tempPath))
-                {
-                    string readText = File.ReadAllText(tempPath) + "\n" + gmlCode;
-                    File.WriteAllText(tempPath, readText);
-                }
-            }
-            catch (Exception exc)
-            {
-                throw new Exception("Error during writing of GML code to profile:\n" + exc);
-            }
-        }
-        */
-    }
-
-    /// <summary>
-    /// Replaces <b>all</b> instructions currently existing in this code entry with another set of GML instructions.
-    /// </summary>
-    /// <param name="gmlCode">The new GML code for this code entry.</param>
-    /// <param name="data">The data file the GML code comes from.</param>
-    /// <param name="globalContext">A reusable global decompile context, for caching certain data (if available).</param>
-    /// <exception cref="Exception">If the GML code does not compile or if there's an error writing the code to the profile entry.</exception>
-    public void ReplaceGML(string gmlCode, UndertaleData data, GlobalDecompileContext globalContext = null)
-    {
-        if (ParentEntry is not null)
-            return;
-
-        CompileGroup group = new(data, globalContext);
-        group.QueueCodeReplace(this, gmlCode);
-        CompileResult result = group.Compile();
-        if (!result.Successful)
-        {
-            Console.WriteLine(gmlCode);
-            throw new Exception("GML compile failed:\n" + result.PrintAllErrors(false));
-        }
-
-        data.GMLCacheChanged?.Add(Name?.Content);
-
-        // When necessary, write to profile.
-        if (data.ToolInfo.ProfileMode && data.ToolInfo.CurrentMD5 is string currentMD5)
-        {
-            try
-            {
-                string tempPath = Path.Combine(data.ToolInfo.AppDataProfiles, currentMD5, "Temp", Name?.Content + ".gml");
-                File.WriteAllText(tempPath, gmlCode);
-            }
-            catch (Exception exc)
-            {
-                throw new Exception("Error during writing of GML code to profile:\n" + exc);
-            }
-        }
     }
 
     /// <inheritdoc />

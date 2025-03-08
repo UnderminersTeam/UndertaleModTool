@@ -35,6 +35,7 @@ Directory.CreateDirectory(langFolder);
 
 GlobalDecompileContext globalDecompileContext = new(Data);
 IDecompileSettings decompilerSettings = new DecompileSettings();
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data, globalDecompileContext, decompilerSettings);
 
 ScriptMessage("JSONifies Undertale versions 1.05+");
 ScriptMessage(@"Switch languages using F11.
@@ -60,26 +61,24 @@ void IncProgressLocal()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ImportGMLString("gml_Script_scr_change_language", @"");
-ImportGMLString("gml_Script_scr_84_load_map_json", @"");
 if (Data.GeneralInfo.Major < 2) // Undertale PC (GMS1)
 {
-    ImportGMLString("gml_Script_textdata_en", @"
+    importGroup.QueueReplace("gml_Script_textdata_en", @"
     if (variable_global_exists(""text_data_en""))
         ds_map_destroy(global.text_data_en);
     global.text_data_en = scr_84_load_map_json(program_directory + ""\lang\"" + ""lang_en.json"");");
-    ImportGMLString("gml_Script_textdata_ja", @"
+    importGroup.QueueReplace("gml_Script_textdata_ja", @"
     if (variable_global_exists(""text_data_ja""))
         ds_map_destroy(global.text_data_ja);
     global.text_data_ja = scr_84_load_map_json(program_directory + ""\lang\"" + ""lang_ja.json"");");
 }
 else
 {
-    ImportGMLString("gml_Script_textdata_en", @"
+    importGroup.QueueReplace("gml_Script_textdata_en", @"
     if (variable_global_exists(""text_data_en""))
         ds_map_destroy(global.text_data_en);
     global.text_data_en = scr_84_load_map_json(program_directory + ""\lang\\"" + ""lang_en.json"");");
-    ImportGMLString("gml_Script_textdata_ja", @"
+    importGroup.QueueReplace("gml_Script_textdata_ja", @"
     if (variable_global_exists(""text_data_ja""))
         ds_map_destroy(global.text_data_ja);
     global.text_data_ja = scr_84_load_map_json(program_directory + ""\lang\\"" + ""lang_ja.json"");");
@@ -87,22 +86,22 @@ else
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f11, Data).ReplaceGML(@"
+importGroup.QueueReplace(Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f11, Data), @"
 scr_change_language();
-", Data);
+");
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f12, Data).ReplaceGML(@"
+importGroup.QueueReplace(Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f12, Data), @"
 if (global.language == ""en"")
     textdata_en();
 else
     textdata_ja();
-", Data);
+");
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    ImportGMLString("gml_Script_scr_change_language", @"
+importGroup.QueueReplace("gml_Script_scr_change_language", @"
 // Read the language from the INI file
 if (global.language == ""en"")
     global.language = ""ja"";
@@ -115,13 +114,15 @@ ossafe_ini_close();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    ImportGMLString("gml_Script_scr_84_load_map_json", @"
+importGroup.QueueReplace("gml_Script_scr_84_load_map_json", @"
 var filename = argument0;
 var file_buffer = buffer_load(filename);
 var json = buffer_read(file_buffer, buffer_string);
 buffer_delete(file_buffer);
 return json_decode(json);
 ");
+
+importGroup.Import();
 
 HideProgressBar();
 ScriptMessage("Complete.");

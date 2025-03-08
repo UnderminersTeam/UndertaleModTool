@@ -560,7 +560,7 @@ namespace UndertaleModTool
             gettext = new Dictionary<string, string>();
             string[] decompilationOutput;
             GlobalDecompileContext context = new(data);
-            if (!SettingsWindow.ProfileModeEnabled || data.ToolInfo.CurrentMD5 is not string currentMD5)
+            if (!SettingsWindow.ProfileModeEnabled || mainWindow.ProfileHash is not string currentMD5)
             {
                 decompilationOutput = new Underanalyzer.Decompiler.DecompileContext(context, gettextCode, data.ToolInfo.DecompilerSettings)
                     .DecompileToString().Split('\n');
@@ -736,7 +736,7 @@ namespace UndertaleModTool
                     Exception e = null;
                     try
                     {
-                        if (!SettingsWindow.ProfileModeEnabled || dataa.ToolInfo.CurrentMD5 is not string currentMD5)
+                        if (!SettingsWindow.ProfileModeEnabled || mainWindow.ProfileHash is not string currentMD5)
                         {
                             decompiled = new Underanalyzer.Decompiler.DecompileContext(context, code, dataa.ToolInfo.DecompilerSettings)
                                 .DecompileToString();
@@ -848,9 +848,6 @@ namespace UndertaleModTool
 
                             if (existingDialog is not null)                      //if code was edited (and compiles after it)
                             {
-                                dataa.GMLCacheChanged.Add(code.Name.Content);
-                                dataa.GMLCacheFailed?.Remove(code.Name.Content); //remove that code name, since that code compiles now
-
                                 openSaveDialog = mainWindow.IsSaving;
                             }
                         }
@@ -987,7 +984,7 @@ namespace UndertaleModTool
                 return;
             }
 
-            if (SettingsWindow.ProfileModeEnabled && data.ToolInfo.CurrentMD5 is string currentMD5)
+            if (SettingsWindow.ProfileModeEnabled && mainWindow.ProfileHash is string currentMD5)
             {
                 try
                 {
@@ -1018,8 +1015,6 @@ namespace UndertaleModTool
 
             // Decompile new code
             await DecompileCode(code, false, dialog);
-
-            //GMLCacheChanged.Add() is inside DecompileCode()
         }
         private void DecompiledEditor_LostFocus(object sender, RoutedEventArgs e)
         {
@@ -1074,7 +1069,6 @@ namespace UndertaleModTool
             {
                 var instructions = Assembler.Assemble(DisassemblyEditor.Text, data);
                 code.Replace(instructions);
-                mainWindow.NukeProfileGML(code.Name.Content);
             }
             catch (Exception ex)
             {
@@ -1095,8 +1089,6 @@ namespace UndertaleModTool
 
             if (!DisassemblyEditor.IsReadOnly)
             {
-                data.GMLCacheChanged.Add(code.Name.Content);
-
                 if (mainWindow.IsSaving)
                 {
                     mainWindow.IsSaving = false;

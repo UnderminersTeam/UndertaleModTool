@@ -18,7 +18,9 @@ if (obj_safeblaster == null)
     Data.GameObjects.Add(obj_safeblaster);
 }
 
-obj_safeblaster.EventHandlerFor(EventType.Create, Data).ReplaceGML(@"
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+
+importGroup.QueueReplace(obj_safeblaster.EventHandlerFor(EventType.Create, Data), @"
 con = 0
 idealx = 200
 idealy = 200
@@ -41,10 +43,10 @@ beamsfx = caster_load(""music/sfx/sfx_rainbowbeam_1.ogg"")
 beamsfx_a = caster_load(""music/sfx/sfx_a_gigatalk.ogg"")
 beam_up_sfx = caster_load(""music/sfx/sfx_segapower.ogg"")
 
-", Data);
+");
 
 
-obj_safeblaster.EventHandlerFor(EventType.Draw, Data).ReplaceGML(@"
+importGroup.QueueReplace(obj_safeblaster.EventHandlerFor(EventType.Draw, Data), @"
 
 draw_sprite_ext(sprite_index, image_index, x, y, image_xscale, image_yscale, image_angle, image_blend, image_alpha)
 if(con == 0) {
@@ -197,12 +199,12 @@ if (con == 7)
     draw_set_alpha(1)
 }
 
-", Data);
+");
 
-obj_safeblaster.EventHandlerFor(EventType.Alarm, (uint)4, Data).ReplaceGML("con += 1", Data);
+importGroup.QueueReplace(obj_safeblaster.EventHandlerFor(EventType.Alarm, (uint)4, Data), "con += 1");
 
 // Removes unneeded caster_free calls from earlier versions
-obj_safeblaster.EventHandlerFor(EventType.Destroy, Data).ReplaceGML("", Data);
+importGroup.QueueReplace(obj_safeblaster.EventHandlerFor(EventType.Destroy, Data), "");
 
 
 // Generator
@@ -217,16 +219,18 @@ if (obj_safebl_gen == null)
     Data.GameObjects.Add(obj_safebl_gen);
 }
 
-obj_safebl_gen.EventHandlerFor(EventType.Create, Data).ReplaceGML(@"
+importGroup.QueueReplace(obj_safebl_gen.EventHandlerFor(EventType.Create, Data), @"
 type = 0
 num = 0
-", Data);
+");
 
 var obj_gasterbl_gen = Data.GameObjects.ByName("obj_gasterbl_gen");
 UndertaleCode codeToDecompile = obj_gasterbl_gen.EventHandlerFor(EventType.Alarm, (uint)0, Data);
 string decomp = GetDecompiledText(codeToDecompile, null, new Underanalyzer.Decompiler.DecompileSettings());
-obj_safebl_gen.EventHandlerFor(EventType.Alarm, (uint)0, Data).ReplaceGML(decomp.Replace("obj_gasterblaster", "obj_safeblaster"), Data);
+importGroup.QueueReplace(obj_safebl_gen.EventHandlerFor(EventType.Alarm, (uint)0, Data), 
+                         decomp.Replace("obj_gasterblaster", "obj_safeblaster"));
 
+importGroup.Import();
 
 ScriptMessage("Done! Use obj_safeblaster & obj_safebl_gen where you would normally use obj_gasterblaster & obj_safebl_gen.\nYou can set the amount of damage an individual blaster would do by setting the 'dmg' variable on the blaster instance (defaults to 9)");
 

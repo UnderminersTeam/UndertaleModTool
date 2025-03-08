@@ -58,9 +58,6 @@ public sealed class CompileGroup
     // Queued list of code to replace the contents of
     private List<QueuedOperation> _queuedCodeReplacements = null;
 
-    // Queued list of code to append code to
-    private List<QueuedOperation> _queuedCodeAppends = null;
-
     // During linking, a lookup of string contents to string IDs.
     private Dictionary<string, int> _linkingStringIdLookup = null;
 
@@ -88,10 +85,12 @@ public sealed class CompileGroup
     /// Initializes a new compile context.
     /// </summary>
     /// <remarks>
-    /// If <paramref name="globalContext"/> is not passed in, a new global context will be created.
+    /// If <paramref name="globalContext"/> is not provided, a new global context will be created.
     /// </remarks>
     public CompileGroup(UndertaleData data, GlobalDecompileContext globalContext = null)
     {
+        ArgumentNullException.ThrowIfNull(data);
+
         Data = data;
         GlobalContext = globalContext ?? new(data);
     }
@@ -103,19 +102,11 @@ public sealed class CompileGroup
     /// <param name="gmlCode">GML source code to compile as replacement code.</param>
     public void QueueCodeReplace(UndertaleCode codeToModify, string gmlCode)
     {
+        ArgumentNullException.ThrowIfNull(codeToModify);
+        ArgumentNullException.ThrowIfNull(gmlCode);
+
         _queuedCodeReplacements ??= new();
         _queuedCodeReplacements.Add(new(codeToModify, gmlCode));
-    }
-
-    /// <summary>
-    /// Queues a code append operation on this compile context.
-    /// </summary>
-    /// <param name="codeToModify">Existing (root) code entry to modify.</param>
-    /// <param name="gmlCode">GML source code to compile and use for appending.</param>
-    public void QueueCodeAppend(UndertaleCode codeToModify, string gmlCode)
-    {
-        _queuedCodeAppends ??= new();
-        _queuedCodeAppends.Add(new(codeToModify, gmlCode));
     }
 
     /// <summary>
@@ -394,12 +385,14 @@ public sealed class CompileGroup
                 Dictionary<string, UndertaleCode> remainingChildEntries = new(operation.CodeEntry.ChildEntries.Count);
                 foreach (UndertaleCode childEntry in operation.CodeEntry.ChildEntries)
                 {
-                    originalChildEntryNames.Add(childEntry.Name.Content);
-                    remainingChildEntries[childEntry.Name.Content] = childEntry;
+                    string currentChildName = childEntry.Name.Content;
+                    originalChildEntryNames.Add(currentChildName);
+                    remainingChildEntries[currentChildName] = childEntry;
                 }
 
                 // Resolve function entries. Either pair up with existing child code entries, or make new ones.
                 List<ChildCodeEntryData> childDataList = new(context.OutputFunctionEntries.Count);
+                HashSet<string> usedChildEntryNames = new(operation.CodeEntry.ChildEntries.Count);
                 List<(string Name, IGMFunction NewFunction, IGMFunction OldFunction)> newlyDefinedGlobalFunctions = new();
                 string rootCodeEntryName = operation.CodeEntry.Name.Content;
                 int anonCounter = 0;
@@ -514,6 +507,18 @@ public sealed class CompileGroup
                     }
                     if (existingCodeEntry is null)
                     {
+                        // Verify that code entry name isn't used; if it is, as a contingency, add a suffix
+                        if (usedChildEntryNames.Contains(codeEntryName))
+                        {
+                            int suffixId = 0;
+                            string baseCodeEntryName = codeEntryName;
+                            do
+                            {
+                                codeEntryName = $"{baseCodeEntryName}_{suffixId++}";
+                            }
+                            while (usedChildEntryNames.Contains(codeEntryName));
+                        }
+
                         // Need to make a new code entry
                         newCodeEntry = new()
                         {
@@ -574,6 +579,7 @@ public sealed class CompileGroup
                     }
 
                     // Add data to list for later addition to main data
+                    usedChildEntryNames.Add(codeEntryName);
                     childDataList.Add(
                         new(
                             codeEntryName,
@@ -793,12 +799,8 @@ public sealed class CompileGroup
             });
         }
 
-        // Work through append queue
-        // TODO
-
         // Clear queues
         _queuedCodeReplacements?.Clear();
-        _queuedCodeAppends?.Clear();
 
         // Unreference other structures
         UnreferenceLinkingLookups();
@@ -806,7 +808,7 @@ public sealed class CompileGroup
         // Return result
         if (errors is null)
         {
-            return new CompileResult(true, null);
+            return CompileResult.SuccessfulResult;
         }
         return new CompileResult(false, errors);
     }
