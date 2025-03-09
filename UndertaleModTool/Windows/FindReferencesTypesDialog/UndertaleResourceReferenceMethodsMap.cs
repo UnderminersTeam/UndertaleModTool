@@ -32,6 +32,8 @@ namespace UndertaleModTool.Windows
     public class PredicateForVersion
     {
         public (uint Major, uint Minor, uint Release) Version { get; set; }
+        public (uint Major, uint Minor, uint Release) BeforeVersion { get; set; } = (uint.MaxValue, uint.MaxValue, uint.MaxValue);
+        public bool DisableForLTS2022 { get; set; } = false;
         public Func<object, HashSetTypesOverride, bool, Dictionary<string, object[]>> Predicate { get; set; }
     }
 
@@ -168,6 +170,7 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (2023, 2, 0),
+                        DisableForLTS2022 = true,
                         Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(UndertaleParticleSystemEmitter)))
@@ -607,6 +610,7 @@ namespace UndertaleModTool.Windows
                     {
                         // Bytecode version 15
                         Version = (15, uint.MaxValue, uint.MaxValue),
+                        BeforeVersion = (2024, 8, 0),
                         Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(UndertaleCodeLocals)))
@@ -971,6 +975,7 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (2023, 2, 0),
+                        DisableForLTS2022 = true,
                         Predicate = (objSrc, types, checkOne) =>
                         {
                             if (objSrc is not UndertaleString obj)
@@ -1342,6 +1347,7 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (2023, 2, 0),
+                        DisableForLTS2022 = true,
                         Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(UndertaleRoom.ParticleSystemInstance)))
@@ -1382,6 +1388,7 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (2023, 2, 0),
+                        DisableForLTS2022 = true,
                         Predicate = (objSrc, types, checkOne) =>
                         {
                             if (objSrc is not UndertaleParticleSystemEmitter obj)
@@ -1434,7 +1441,17 @@ namespace UndertaleModTool.Windows
                 else
                     isAtLeast = predicateForVer.Version.CompareTo(ver) <= 0;
 
-                if (isAtLeast)
+                bool isAboveMost = false;
+                if (predicateForVer.BeforeVersion.Minor == uint.MaxValue)
+                    isAboveMost = predicateForVer.BeforeVersion.Major <= data.GeneralInfo.BytecodeVersion;
+                else
+                    isAboveMost = predicateForVer.BeforeVersion.CompareTo(ver) <= 0;
+
+                bool disableDueToLTS = false;
+                if (data.GeneralInfo.Branch == UndertaleGeneralInfo.BranchType.LTS2022_0)
+                    disableDueToLTS = predicateForVer.DisableForLTS2022;
+
+                if (isAtLeast && !isAboveMost && !disableDueToLTS)
                 {
                     var result = predicateForVer.Predicate(obj, types, checkOne);
                     if (result is null)
