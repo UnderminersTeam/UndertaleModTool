@@ -120,7 +120,10 @@ await Task.Run(() =>
                     Data.Sprites.Add(nativeSPR);
                 }
                 for (var i = 0; i < donorSPR.CollisionMasks.Count; i++)
-                    nativeSPR.CollisionMasks.Add(new UndertaleSprite.MaskEntry(donorSPR.CollisionMasks[i].Data));
+                    nativeSPR.CollisionMasks.Add(new UndertaleSprite.MaskEntry(
+                        donorSPR.CollisionMasks[i].Data,
+                        donorSPR.CollisionMasks[i].Width,
+                        donorSPR.CollisionMasks[i].Height));
                 nativeSPR.Width = donorSPR.Width;
                 nativeSPR.Height = donorSPR.Height;
                 nativeSPR.MarginLeft = donorSPR.MarginLeft;
