@@ -786,30 +786,6 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                 short val = (short)(b0 | (b1 << 8));
                 DataType type1 = (DataType)b2;
 
-                // Modify opcode of instruction, if in bytecode 14
-                if (bytecode14)
-                {
-                    if (type1 == DataType.Variable)
-                    {
-                        switch (val)
-                        {
-                            case -5:
-                                kind = Opcode.PushGlb;
-                                break;
-                            case -6: // builtin
-                                kind = Opcode.PushBltn;
-                                break;
-                            case -7:
-                                kind = Opcode.PushLoc;
-                                break;
-                        }
-                    }
-                    else if (type1 == DataType.Int16)
-                    {
-                        kind = Opcode.PushI;
-                    }
-                }
-
                 // Parse data being pushed
                 switch (type1)
                 {
@@ -1390,6 +1366,45 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     internal uint _bytecodeAbsoluteAddress;
     internal byte[] _unsupportedBuffer;
 
+    /// <summary>
+    /// Creates an empty root code entry with the given name, along with an empty code locals entry (when necessary).
+    /// </summary>
+    /// <remarks>
+    /// The code entry (and possibly code locals entry) will be immediately added to the data.
+    /// </remarks>
+    /// <param name="data">Data to add the new code to.</param>
+    /// <param name="name">Name of the new code entry to create.</param>
+    /// <returns>The new code entry.</returns>
+    public static UndertaleCode CreateEmptyEntry(UndertaleData data, string name)
+    {
+        return CreateEmptyEntry(data, data.Strings.MakeString(name));
+    }
+
+    /// <summary>
+    /// Creates an empty root code entry with the given name, along with an empty code locals entry (when necessary).
+    /// </summary>
+    /// <param name="data">Data to add the new code to.</param>
+    /// <param name="name">Name of the new code entry to create.</param>
+    /// <returns>The new code entry.</returns>
+    public static UndertaleCode CreateEmptyEntry(UndertaleData data, UndertaleString name)
+    {
+        // Create entry
+        UndertaleCode newEntry = new()
+        {
+            Name = name,
+            LocalsCount = 1
+        };
+        data.Code.Add(newEntry);
+
+        // Also attach code locals if necessary
+        if (data.CodeLocals is not null)
+        {
+            UndertaleCodeLocals.CreateEmptyEntry(data, name);
+        }
+
+        return newEntry;
+    }
+
     public void SerializeBlobBefore(UndertaleWriter writer)
     {
         if (writer.undertaleData.UnsupportedBytecodeVersion || writer.Bytecode14OrLower)
@@ -1614,17 +1629,18 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     }
 
     /// <summary>
-    /// Finds and returns a list of all variables this code entry references.
+    /// Finds and returns a set of all variables this code entry references.
     /// </summary>
-    /// <returns>A list of all variables this code entry references.</returns>
-    public IList<UndertaleVariable> FindReferencedVars()
+    /// <returns>A set of all variables this code entry references.</returns>
+    public ISet<UndertaleVariable> FindReferencedVars()
     {
-        List<UndertaleVariable> vars = new List<UndertaleVariable>();
+        HashSet<UndertaleVariable> vars = new();
         foreach (UndertaleInstruction instr in Instructions)
         {
-            var v = instr.GetReference<UndertaleVariable>()?.Target;
-            if (v != null && !vars.Contains(v))
+            if (instr.GetReference<UndertaleVariable>()?.Target is UndertaleVariable v)
+            {
                 vars.Add(v);
+            }
         }
         return vars;
     }
@@ -1632,17 +1648,26 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     /// <summary>
     /// Finds and returns a list of all local variables this code entry references.
     /// </summary>
-    /// <returns>A list of all local variables this code entry references.</returns>
-    public IList<UndertaleVariable> FindReferencedLocalVars()
+    /// <returns>A set of all local variables this code entry references.</returns>
+    public ISet<UndertaleVariable> FindReferencedLocalVars()
     {
-        return FindReferencedVars().Where((x) => x.InstanceType == UndertaleInstruction.InstanceType.Local).ToList();
+        HashSet<UndertaleVariable> vars = new();
+        foreach (UndertaleInstruction instr in Instructions)
+        {
+            if (instr.GetReference<UndertaleVariable>()?.Target is UndertaleVariable v &&
+                v.InstanceType == UndertaleInstruction.InstanceType.Local)
+            {
+                vars.Add(v);
+            }
+        }
+        return vars;
     }
 
     /// <summary>
     /// Append instructions at the end of this code entry.
     /// </summary>
     /// <param name="instructions">The instructions to append.</param>
-    public void Append(IList<UndertaleInstruction> instructions)
+    public void Append(IEnumerable<UndertaleInstruction> instructions)
     {
         if (ParentEntry is not null)
             return;
@@ -1655,87 +1680,13 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     /// Replaces <b>all</b> instructions currently existing in this code entry with another set of instructions.
     /// </summary>
     /// <param name="instructions">The new instructions for this code entry.</param>
-    public void Replace(IList<UndertaleInstruction> instructions)
+    public void Replace(IEnumerable<UndertaleInstruction> instructions)
     {
         if (ParentEntry is not null)
             return;
 
         Instructions.Clear();
         Append(instructions);
-    }
-
-    /// <summary>
-    /// Append GML instructions at the end of this code entry.
-    /// </summary>
-    /// <param name="gmlCode">The GML code to append.</param>
-    /// <param name="data">From which data file the GML code is coming from.</param>
-    /// <exception cref="Exception"> if the GML code does not compile or if there's an error writing the code to the profile entry.</exception>
-    public void AppendGML(string gmlCode, UndertaleData data)
-    {
-        if (ParentEntry is not null)
-            return;
-
-        CompileContext context = Compiler.Compiler.CompileGMLText(gmlCode, data, this);
-        if (!context.SuccessfulCompile || context.HasError)
-        {
-            Console.WriteLine(gmlCode);
-            throw new Exception("GML Compile Error: " + context.ResultError);
-        }
-
-        Append(context.ResultAssembly);
-
-        data.GMLCacheChanged?.Add(Name?.Content);
-
-        try
-        {
-            // Attempt to write text in all modes, because this is a special case.
-            string tempPath = Path.Combine(data.ToolInfo.AppDataProfiles, data.ToolInfo.CurrentMD5, "Temp", Name?.Content + ".gml");
-            if (File.Exists(tempPath))
-            {
-                string readText = File.ReadAllText(tempPath) + "\n" + gmlCode;
-                File.WriteAllText(tempPath, readText);
-            }
-        }
-        catch (Exception exc)
-        {
-            throw new Exception("Error during writing of GML code to profile:\n" + exc);
-        }
-    }
-
-    /// <summary>
-    /// Replaces <b>all</b> instructions currently existing in this code entry with another set of GML instructions.
-    /// </summary>
-    /// <param name="gmlCode">The new GML code for this code entry.</param>
-    /// <param name="data">From which data file the GML code is coming from.</param>
-    /// <exception cref="Exception">If the GML code does not compile or if there's an error writing the code to the profile entry.</exception>
-    public void ReplaceGML(string gmlCode, UndertaleData data)
-    {
-        if (ParentEntry is not null)
-            return;
-
-        CompileContext context = Compiler.Compiler.CompileGMLText(gmlCode, data, this);
-        if (!context.SuccessfulCompile || context.HasError)
-        {
-            Console.WriteLine(gmlCode);
-            throw new Exception("GML Compile Error: " + context.ResultError);
-        }
-
-        Replace(context.ResultAssembly);
-
-        data.GMLCacheChanged?.Add(Name?.Content);
-
-        //TODO: only do this if profile mode is enabled in the first place
-        try
-        {
-            // When necessary, write to profile.
-            string tempPath = Path.Combine(data.ToolInfo.AppDataProfiles, data.ToolInfo.CurrentMD5, "Temp", Name?.Content + ".gml");
-            if (data.ToolInfo.ProfileMode || File.Exists(tempPath))
-                File.WriteAllText(tempPath, gmlCode);
-        }
-        catch (Exception exc)
-        {
-            throw new Exception("Error during writing of GML code to profile:\n" + exc);
-        }
     }
 
     /// <inheritdoc />

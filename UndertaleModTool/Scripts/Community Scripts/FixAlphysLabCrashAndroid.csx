@@ -16,9 +16,8 @@ if (Data.GeneralInfo?.DisplayName?.Content.ToLower() != "undertale")
     }
 }
 
-GlobalDecompileContext globalDecompileContext = new(Data);
-Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = new Underanalyzer.Decompiler.DecompileSettings();
-
-Data.Code.ByName("gml_Object_obj_labdarkness_Create_0").ReplaceGML("", Data);
-Data.Code.ByName("gml_Object_obj_labdarkness_Draw_0").ReplaceGML("", Data);
-ReplaceTextInGML("gml_Object_obj_labcamera_Create_0", "if (global.osflavor == 2)", "if (global.osflavor == 4)", false, false, globalDecompileContext, decompilerSettings);
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+importGroup.QueueReplace("gml_Object_obj_labdarkness_Create_0", "");
+importGroup.QueueReplace("gml_Object_obj_labdarkness_Draw_0", "");
+importGroup.QueueFindReplace("gml_Object_obj_labcamera_Create_0", "if (global.osflavor == 2)", "if (global.osflavor == 4)");
+importGroup.Import();

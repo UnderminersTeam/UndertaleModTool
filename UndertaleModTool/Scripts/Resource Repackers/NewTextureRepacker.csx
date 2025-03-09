@@ -524,7 +524,7 @@ await Task.Run(() =>
     }
 });
 
-SyncBinding(false);
+DisableAllSyncBindings();
 f.Close();
 
 // Done.

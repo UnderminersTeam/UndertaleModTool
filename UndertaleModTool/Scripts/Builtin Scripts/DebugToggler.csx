@@ -15,20 +15,27 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
 
 ScriptMessage("Toggle debug mode with F1\nby krzys-h, Kneesnap");
 
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+
 var code = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f1, Data);
 
 // Toggle global.debug.
-code.ReplaceGML(@"
+importGroup.QueueReplace(code, @"
 if (global.debug) {
     global.debug = false;
 } else{
     global.debug = true;
-}", Data);
+}");
 
 // Deltarune.
 var scr_debug = Data.Scripts.ByName("scr_debug")?.Code;
-if (scr_debug != null) // Deltarune. scr_debug will always return false for global.debug, so we modify it to return global.debug
-    scr_debug.ReplaceGML(@"return global.debug;", Data);
+if (scr_debug is not null)
+{
+    // scr_debug will always return false for global.debug, so we modify it to return global.debug
+    importGroup.QueueReplace(scr_debug, @"return global.debug;");
+}
+
+importGroup.Import();
 
 ChangeSelection(code);
 ScriptMessage("F1 will now toggle debug mode.");
