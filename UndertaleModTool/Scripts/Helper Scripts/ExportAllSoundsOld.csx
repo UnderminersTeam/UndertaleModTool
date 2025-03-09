@@ -38,7 +38,7 @@ async Task DumpSounds()
 
 void DumpSound(UndertaleSound sound)
 {
-    if (sound.AudioFile != null && !File.Exists(sndFolder + sound.File.Content))
+    if (sound is not null && sound.AudioFile != null && !File.Exists(sndFolder + sound.File.Content))
         File.WriteAllBytes(sndFolder + sound.File.Content, sound.AudioFile.Data);
 
     IncrementProgress();

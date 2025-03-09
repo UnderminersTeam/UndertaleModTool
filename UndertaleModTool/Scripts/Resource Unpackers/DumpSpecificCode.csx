@@ -39,6 +39,8 @@ for (var j = 0; j < splitStringsList.Count; j++)
 {
     foreach (UndertaleGameObject obj in Data.GameObjects)
     {
+        if (obj is null)
+            continue;
         if (splitStringsList[j].ToLower() == obj.Name.Content.ToLower())
         {
             gameObjectCandidates.Add(obj.Name.Content);
@@ -46,7 +48,7 @@ for (var j = 0; j < splitStringsList.Count; j++)
     }
     foreach (UndertaleScript scr in Data.Scripts)
     {
-        if (scr.Code == null)
+        if (scr is null || scr.Code == null)
             continue;
         if (splitStringsList[j].ToLower() == scr.Name.Content.ToLower())
         {
@@ -55,7 +57,7 @@ for (var j = 0; j < splitStringsList.Count; j++)
     }
     foreach (UndertaleGlobalInit globalInit in Data.GlobalInitScripts)
     {
-        if (globalInit.Code == null)
+        if (globalInit is null || globalInit.Code == null)
             continue;
         if (splitStringsList[j].ToLower() == globalInit.Code.Name.Content.ToLower())
         {
@@ -64,6 +66,8 @@ for (var j = 0; j < splitStringsList.Count; j++)
      }
     foreach (UndertaleCode code in Data.Code)
     {
+        if (code is null)
+            continue;
         if (splitStringsList[j].ToLower() == code.Name.Content.ToLower())
         {
             codeToDump.Add(code.Name.Content);

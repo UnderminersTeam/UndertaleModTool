@@ -68,6 +68,8 @@ for (var j = 0; j < searchNamesList.Length; j++)
 {
     foreach (UndertaleGameObject obj in Data.GameObjects)
     {
+        if (obj is null)
+            continue;
         if (searchNamesList[j].ToLower() == obj.Name.Content.ToLower())
         {
             gameObjectCandidates.Add(obj.Name.Content);
@@ -75,6 +77,8 @@ for (var j = 0; j < searchNamesList.Length; j++)
     }
     foreach (UndertaleCode code in Data.Code)
     {
+        if (code is null)
+            continue;
         if (searchNamesList[j].ToLower() == code.Name.Content.ToLower())
         {
             codeToDump.Add(code.Name.Content);
