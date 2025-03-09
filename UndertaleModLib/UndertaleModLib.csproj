@@ -6,9 +6,9 @@
     <!-- AssemblyInfo -->
     <AssemblyTitle>UndertaleModLib</AssemblyTitle>
     <ProductName>UndertaleModLib</ProductName>
-    <Copyright>Copyright ©  2018-2024, licensed under GPLv3</Copyright>
-    <AssemblyVersion>0.6.1.0</AssemblyVersion>
-    <FileVersion>0.6.1.0</FileVersion>
+    <Copyright>Copyright ©  2018-2025, licensed under GPLv3</Copyright>
+    <AssemblyVersion>0.7.0.0</AssemblyVersion>
+    <FileVersion>0.7.0.0</FileVersion>
     <DebugType>embedded</DebugType>
     <Platforms>AnyCPU;x64</Platforms>
     <RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
