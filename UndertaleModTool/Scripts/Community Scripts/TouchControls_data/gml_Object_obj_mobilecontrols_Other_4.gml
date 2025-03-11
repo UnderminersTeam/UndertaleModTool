@@ -1,5 +1,5 @@
 var ratio = display_get_gui_width() / 640
-var ratioVertical = display_get_gui_height() / 640
+var ratioVertical = display_get_gui_height() / 480
 virtual_key_zp = virtual_key_add((zx * ratio), (zy * ratioVertical), (27 * button_scale * ratio), (29 * button_scale * ratioVertical), 125)
 virtual_key_xp = virtual_key_add((xx * ratio), (xy * ratioVertical), (27 * button_scale * ratio), (29 * button_scale * ratioVertical), 124)
 virtual_key_cp = virtual_key_add((cx * ratio), (cy * ratioVertical), (27 * button_scale * ratio), (29 * button_scale * ratioVertical), 94)
