@@ -128,10 +128,14 @@ public class GameSpecificResolver
     /// <summary>
     /// Forces a full reload of all game-specific definition files.
     /// </summary>
+    /// <remarks>
+    /// This is not thread-safe.
+    /// </remarks>
     public static void ReloadDefinitions()
     {
         // Mark definitions as loaded, and reset existing definitions
         _loadedDefinitions = true;
+        _definitions.Clear();
 
         // Scan directory for files, if it exists
         string dir = Path.Combine(BaseDirectory, "GameSpecificData", "Definitions");
@@ -150,6 +154,9 @@ public class GameSpecificResolver
     /// <summary>
     /// Loads game-specific definitions, if not loaded already. Call <see cref="ReloadDefinitions"/> to force a full reload.
     /// </summary>
+    /// <remarks>
+    /// This is not thread-safe.
+    /// </remarks>
     public static void LoadDefinitions()
     {
         if (!_loadedDefinitions)
@@ -161,6 +168,9 @@ public class GameSpecificResolver
     /// <summary>
     /// Initializes the registry of game-specific data for the given game.
     /// </summary>
+    /// <remarks>
+    /// This is not thread-safe.
+    /// </remarks>
     public static void Initialize(UndertaleData data)
     {
         // Ensure all definitions are loaded
