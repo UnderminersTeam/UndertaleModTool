@@ -233,16 +233,14 @@ namespace UndertaleModLib
         public IList GetList() => List;
         public void GenerateIndexDict()
         {
-            if (IndexDict is not null)
-                return;
-
-            IndexDict = new();
+            IndexDict = new(List.Count);
             for (int i = 0; i < List.Count; i++)
+            {
                 IndexDict[List[i]] = i;
+            }
         }
         public void ClearIndexDict()
         {
-            IndexDict.Clear();
             IndexDict = null;
         }
     }
@@ -250,7 +248,7 @@ namespace UndertaleModLib
     public abstract class UndertaleAlignUpdatedListChunk<T> : UndertaleListChunk<T> where T : UndertaleObject, new()
     {
         public bool Align = true;
-        protected static int Alignment = 4;
+        protected int Alignment = 4;
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {

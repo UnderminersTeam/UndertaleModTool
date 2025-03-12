@@ -1138,8 +1138,6 @@ namespace UndertaleModTool
                         });
                     }
 
-                    QoiConverter.ClearSharedBuffer();
-
                     if (debugMode != DebugDataDialog.DebugDataMode.NoDebug)
                     {
                         FileMessageEvent?.Invoke("Generating debugger data...");
@@ -1225,21 +1223,6 @@ namespace UndertaleModTool
                 }
                 catch (Exception e)
                 {
-                    if (!UndertaleIO.IsDictionaryCleared)
-                    {
-                        try
-                        {
-                            var listChunks = Data.FORM.Chunks.Values.Select(x => x as IUndertaleListChunk);
-                            Parallel.ForEach(listChunks.Where(x => x is not null), (chunk) =>
-                            {
-                                chunk.ClearIndexDict();
-                            });
-
-                            UndertaleIO.IsDictionaryCleared = true;
-                        }
-                        catch { }
-                    }
-
                     Dispatcher.Invoke(() =>
                     {
                         this.ShowError("An error occured while trying to save:\n" + e.Message, "Save error");

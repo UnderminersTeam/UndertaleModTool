@@ -223,8 +223,6 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
     public byte Extra { get; set; }
     public ushort SwapExtra { get; set; }
 
-    public UndertaleCode Entry { get; set; } // Set for the first instruction
-
     public interface ReferencedObject
     {
         uint Occurrences { get; set; }
@@ -1335,16 +1333,17 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     /// </summary>
     public UndertaleString Name { get; set; }
 
-
+    /// <summary>
+    /// Length of the code entry, in bytes.
+    /// </summary>
     public uint Length { get; set; }
 
-    public static int CurrCodeIndex { get; set; }
-
-
     /// <summary>
-    /// The amount of local variables this code entry has. <br/>
-    /// Warning: This is actually a ushort internally, it's an uint here for compatibility.
+    /// The amount of local variables this code entry has.
     /// </summary>
+    /// <remarks>
+    /// Warning: This is actually a ushort internally, but it's an uint here for compatibility.
+    /// </remarks>
     public uint LocalsCount { get; set; }
 
     /// <summary>
@@ -1352,19 +1351,39 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     /// </summary>
     public ushort ArgumentsCount { get; set; }
 
+    /// <summary>
+    /// Offset, in bytes, where code should begin executing from within the bytecode of this code entry.
+    /// </summary>
+    /// <remarks>
+    /// Should be 0 for root-level (parent) code entries, and nonzero for child code entries.
+    /// </remarks>
     public uint Offset { get; set; }
-
 
     /// <summary>
     /// A list of bytecode instructions this code entry has.
     /// </summary>
     public List<UndertaleInstruction> Instructions { get; } = new List<UndertaleInstruction>();
+
+    /// <summary>
+    /// A flag set on certain code entries, which usually don't have locals attached to them.
+    /// </summary>
     public bool WeirdLocalFlag { get; set; }
+
+    /// <summary>
+    /// Parent entry of this code entry, if this is a child entry; <see langword="null"/> otherwise.
+    /// </summary>
     public UndertaleCode ParentEntry { get; set; } = null;
+
+    /// <summary>
+    /// Child entries of this code entry, if a root-level (parent) entry; empty if a child entry.
+    /// </summary>
     public List<UndertaleCode> ChildEntries { get; set; } = new List<UndertaleCode>();
 
-    internal uint _bytecodeAbsoluteAddress;
-    internal byte[] _unsupportedBuffer;
+    // Bytecode address to use during (de)serialization, since bytecode can be a separate blob
+    private uint _bytecodeAbsoluteAddress;
+
+    // If instruction data cannot be parsed due to an unsupported bytecode version, this is where it gets stored (raw).
+    private byte[] _unsupportedBuffer;
 
     /// <summary>
     /// Creates an empty root code entry with the given name, along with an empty code locals entry (when necessary).
@@ -1405,41 +1424,51 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
         return newEntry;
     }
 
+    /// <inheritdoc />
     public void SerializeBlobBefore(UndertaleWriter writer)
     {
+        // If in bytecode 14 or lower (or an unsupported version), we don't have a separate instruction blob
         if (writer.undertaleData.UnsupportedBytecodeVersion || writer.Bytecode14OrLower)
-            return;
-        if (ParentEntry != null)
         {
-            // In GMS 2.3, code entries repeat often
+            return;
+        }
+
+        if (ParentEntry is not null)
+        {
+            // If this is a child code entry, simply update address and length of bytecode
             _bytecodeAbsoluteAddress = writer.LastBytecodeAddress;
             Length = writer.Position - _bytecodeAbsoluteAddress;
-            // todo? set Flags to something else?
         }
         else
         {
+            // If this is a root code entry, write all of the instructions,
+            // then update address and length of bytecode
             writer.LastBytecodeAddress = writer.Position;
             _bytecodeAbsoluteAddress = writer.Position;
             uint start = writer.Position;
             foreach (UndertaleInstruction instr in Instructions)
                 writer.WriteUndertaleObject(instr);
             Length = writer.Position - start;
-            // todo? clear Flags? how?
         }
     }
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
     {
+        // Write name only (length isn't necessarily known yet)
         writer.WriteUndertaleString(Name);
+
+        // Change logic depending on bytecode version
         if (writer.undertaleData.UnsupportedBytecodeVersion)
         {
+            // Unsupported version: simply write the buffer of data, and ignore contents
             Length = (uint)_unsupportedBuffer.Length;
             writer.Write(Length);
             writer.Write(_unsupportedBuffer);
         }
         else if (writer.Bytecode14OrLower)
         {
+            // Bytecode 14 or lower: write instructions immediately, and patch in the length
             uint patch = writer.Position;
             writer.Write(0xDEADC0DE);
             uint start = writer.Position;
@@ -1453,11 +1482,13 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
         }
         else
         {
+            // Bytecode 15 and above: write the rest of the fields
+            // (no instructions get written here; they're in a separate blob)
             writer.Write(Length);
             writer.Write((ushort)LocalsCount);
             writer.Write((ushort)(ArgumentsCount | (WeirdLocalFlag ? (ushort)0x8000 : 0)));
-            int BytecodeRelativeAddress = (int)_bytecodeAbsoluteAddress - (int)writer.Position;
-            writer.Write(BytecodeRelativeAddress);
+            int bytecodeRelativeAddress = (int)_bytecodeAbsoluteAddress - (int)writer.Position;
+            writer.Write(bytecodeRelativeAddress);
             writer.Write(Offset);
         }
     }
@@ -1465,72 +1496,88 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     /// <inheritdoc />
     public void Unserialize(UndertaleReader reader)
     {
+        // Parse basic fields
         Name = reader.ReadUndertaleString();
         Length = reader.ReadUInt32();
+
+        // Change logic depending on bytecode version
         if (reader.undertaleData.UnsupportedBytecodeVersion)
         {
+            // Unsupported version: simply read in a buffer of data, and ignore contents
             _unsupportedBuffer = reader.ReadBytes((int)Length);
         }
         else if (reader.Bytecode14OrLower)
         {
+            // Bytecode 14 or lower: parse instructions immediately.
+            long instructionStartPos = reader.AbsPosition;
+            long instructionEndPos = instructionStartPos + Length;
             Instructions.Clear();
-            if (reader.InstructionArraysLengths is not null)
-                Instructions.Capacity = reader.InstructionArraysLengths[CurrCodeIndex];
-
-            long here = reader.AbsPosition;
-            long stop = here + Length;
-            while (reader.AbsPosition < stop)
+            Instructions.Capacity = (int)reader.BytecodeAddresses[(uint)instructionStartPos].InstructionCount;
+            while (reader.AbsPosition < instructionEndPos)
             {
-                uint a = (uint)(reader.AbsPosition - here) / 4;
+                uint address = (uint)(reader.AbsPosition - instructionStartPos) / 4;
                 UndertaleInstruction instr = reader.ReadUndertaleObject<UndertaleInstruction>();
-                instr.Address = a;
+                instr.Address = address;
                 Instructions.Add(instr);
             }
+
+            // Set this flag for code editor, etc. to not get confused later
             WeirdLocalFlag = true;
         }
         else
         {
+            // Bytecode 15 or above: parse locals & arguments count, then follow bytecode address to parse instructions
             LocalsCount = reader.ReadUInt16();
             ArgumentsCount = reader.ReadUInt16();
             if ((ArgumentsCount & 0x8000) == 0x8000)
             {
+                // Locals flag is set; bitmask it out
                 ArgumentsCount &= 0x7FFF;
                 WeirdLocalFlag = true;
             }
-            int BytecodeRelativeAddress = reader.ReadInt32();
-            _bytecodeAbsoluteAddress = (uint)((int)reader.AbsPosition - 4 + BytecodeRelativeAddress);
-           
-            if (Length > 0 && reader.undertaleData.IsVersionAtLeast(2, 3) && reader.GetOffsetMap().TryGetValue(_bytecodeAbsoluteAddress, out var i))
-            {
-                ParentEntry = (i as UndertaleInstruction).Entry;
-                ParentEntry.ChildEntries.Add(this);
+            int bytecodeRelativeAddress = reader.ReadInt32();
+            _bytecodeAbsoluteAddress = (uint)((int)reader.AbsPosition - 4 + bytecodeRelativeAddress);
 
-                Offset = reader.ReadUInt32();
-                return;
+            // Check if this is a child code entry (which shares the same bytecode address as its parent)
+            UndertaleReader.BytecodeInformation info = reader.BytecodeAddresses[_bytecodeAbsoluteAddress];
+            if (Length > 0 && info.RootEntry is UndertaleCode parentEntry)
+            {
+                // This is a child code entry; attach to parent. No need to parse any instructions.
+                ParentEntry = parentEntry;
+                parentEntry.ChildEntries.Add(this);
+            }
+            else
+            {
+                // Update information to mark this entry as the root (if we have at least 1 instruction)
+                if (Length > 0)
+                {
+                    reader.BytecodeAddresses[_bytecodeAbsoluteAddress] = new(info.InstructionCount, this);
+                }
+
+                // Jump to instruction blob, storing position to return to for later
+                long returnTo = reader.AbsPosition;
+                reader.AbsPosition = _bytecodeAbsoluteAddress;
+
+                // Parse instructions
+                long instructionStartPos = _bytecodeAbsoluteAddress;
+                long instructionEndPos = instructionStartPos + Length;
+                Instructions.Clear();
+                Instructions.Capacity = (int)info.InstructionCount;
+                while (reader.AbsPosition < instructionEndPos)
+                {
+                    uint address = (uint)(reader.AbsPosition - instructionStartPos) / 4;
+                    UndertaleInstruction instr = reader.ReadUndertaleObject<UndertaleInstruction>();
+                    instr.Address = address;
+                    Instructions.Add(instr);
+                }
+
+                // Return from instruction blob
+                reader.AbsPosition = returnTo;
             }
 
-            long here = reader.AbsPosition;
-            reader.AbsPosition = _bytecodeAbsoluteAddress;
-
-            Instructions.Clear();
-            if (reader.InstructionArraysLengths is not null)
-                Instructions.Capacity = reader.InstructionArraysLengths[CurrCodeIndex];
-            while (reader.AbsPosition < _bytecodeAbsoluteAddress + Length)
-            {
-                uint a = (uint)(reader.AbsPosition - _bytecodeAbsoluteAddress) / 4;
-                UndertaleInstruction instr = reader.ReadUndertaleObject<UndertaleInstruction>();
-                instr.Address = a;
-                Instructions.Add(instr);
-            }
-            if (ParentEntry == null && Instructions.Count != 0)
-                Instructions[0].Entry = this;
-
-            reader.AbsPosition = here;
+            // Read final offset field
             Offset = reader.ReadUInt32();
         }
-
-        if (reader.InstructionArraysLengths is not null)
-            CurrCodeIndex++;
     }
 
     /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
@@ -1543,19 +1590,19 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
 
         if (reader.Bytecode14OrLower)
         {
-            long here = reader.Position;
-            long stop = here + length;
+            long instructionStart = reader.AbsPosition;
+            long instructionStop = instructionStart + length;
 
             // Get instructions count
             uint instrCount = 0;
             uint instrSubCount = 0;
-            while (reader.Position < stop)
+            while (reader.AbsPosition < instructionStop)
             {
                 instrCount++;
                 instrSubCount += UndertaleInstruction.UnserializeChildObjectCount(reader);
             }
 
-            reader.InstructionArraysLengths[CurrCodeIndex] = (int)instrCount;
+            reader.BytecodeAddresses.Add((uint)instructionStart, new(instrCount, null));
 
             count += instrCount + instrSubCount;
         }
@@ -1564,37 +1611,33 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
             reader.Position += 4;
 
             int bytecodeRelativeAddress = reader.ReadInt32();
-            uint bytecodeAbsoluteAddress = (uint)((int)reader.Position - 4 + bytecodeRelativeAddress);
+            uint bytecodeAbsoluteAddress = (uint)((int)reader.AbsPosition - 4 + bytecodeRelativeAddress);
 
-            if (length == 0 || reader.GMS2BytecodeAddresses.Contains(bytecodeAbsoluteAddress))
+            if (length == 0 || reader.BytecodeAddresses.ContainsKey(bytecodeAbsoluteAddress))
             {
                 reader.Position += 4; // "Offset"
                 return count;
             }
 
-            reader.GMS2BytecodeAddresses.Add(bytecodeAbsoluteAddress);
-
-            long here = reader.Position;
-            reader.Position = bytecodeAbsoluteAddress;
+            long here = reader.AbsPosition;
+            reader.AbsPosition = bytecodeAbsoluteAddress;
 
             // Get instructions counts
             uint instrCount = 0;
             uint instrSubCount = 0;
-            while (reader.Position < bytecodeAbsoluteAddress + length)
+            while (reader.AbsPosition < bytecodeAbsoluteAddress + length)
             {
                 instrCount++;
                 instrSubCount += UndertaleInstruction.UnserializeChildObjectCount(reader);
             }
 
-            reader.InstructionArraysLengths[CurrCodeIndex] = (int)instrCount;
+            reader.BytecodeAddresses.Add(bytecodeAbsoluteAddress, new(instrCount, null));
 
-            reader.Position = here;
+            reader.AbsPosition = here;
             reader.Position += 4; // "Offset"
 
             count += instrCount + instrSubCount;
         }
-
-        CurrCodeIndex++;
 
         return count;
     }
