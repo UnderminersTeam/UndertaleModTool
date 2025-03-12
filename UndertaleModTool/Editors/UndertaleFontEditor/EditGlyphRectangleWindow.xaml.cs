@@ -134,7 +134,8 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
             var mousePos = e.GetPosition(TextureScroll);
             var transform = TextureViewbox.LayoutTransform as MatrixTransform;
             var matrix = transform.Matrix;
-            var scale = e.Delta >= 0 ? 1.1 : (1.0 / 1.1); // choose appropriate scaling factor
+            var pow = Math.Pow(2, 1.0 / 8.0);
+            var scale = e.Delta >= 0 ? pow : (1.0 / pow); // choose appropriate scaling factor
 
             if ((matrix.M11 > 0.001 || (matrix.M11 <= 0.001 && scale > 1)) && (matrix.M11 < 1000 || (matrix.M11 >= 1000 && scale < 1)))
             {
