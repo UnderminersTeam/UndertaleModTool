@@ -779,7 +779,7 @@ namespace UndertaleModTool
                 var matrix = transform.Matrix;
                 var scale = e.Delta >= 0 ? 1.1 : (1.0 / 1.1); // choose appropriate scaling factor
 
-                if ((matrix.M11 > 0.2 || (matrix.M11 <= 0.2 && scale > 1)) && (matrix.M11 < 6 || (matrix.M11 >= 6 && scale < 1)))
+                if ((matrix.M11 > 0.001 || (matrix.M11 <= 0.001 && scale > 1)) && (matrix.M11 < 1000 || (matrix.M11 >= 1000 && scale < 1)))
                 {
                     matrix.ScaleAtPrepend(scale, scale, mousePos.X, mousePos.Y);
                 }
