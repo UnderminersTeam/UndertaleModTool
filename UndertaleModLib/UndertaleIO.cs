@@ -60,9 +60,10 @@ namespace UndertaleModLib
         private static ChunkT FindListChunk(UndertaleData data)
         {
             if (data.FORM.ChunksTypeDict.TryGetValue(typeof(ChunkT), out UndertaleChunk chunk))
-                return chunk as ChunkT;
-            else
-                return null;
+            {
+                return (ChunkT)chunk;
+            }
+            return null;
         }
 
         public int SerializeById(UndertaleWriter writer)
@@ -135,8 +136,7 @@ namespace UndertaleModLib
 
         public void Serialize(UndertaleWriter writer)
         {
-            writer.resourceIDRefsToWrite.Add(new ValueTuple<uint, UndertaleResourceRef>(writer.Position, this));
-            writer.Write((int)0);
+            writer.Write(SerializeById(writer));
         }
 
         public void Unserialize(UndertaleReader reader)
@@ -748,32 +748,9 @@ namespace UndertaleModLib
         private Dictionary<UndertaleObject, uint> objectPool = new();
         private Dictionary<UndertaleObject, List<uint>> pendingWrites = new();
         private Dictionary<UndertaleObject, List<uint>> pendingStringWrites = new();
-        private List<ValueTuple<uint, uint>> intsToWriteParallel = new();
-        internal List<ValueTuple<uint, UndertaleResourceRef>> resourceIDRefsToWrite = new();
 
         public void Flush(UndertaleData data)
         {
-            SubmitMessage("Writing object references...");
-
-            var intsToWriteParallelSorted = intsToWriteParallel.AsParallel()
-                                                               .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
-                                                               .OrderBy(x => x.Item1);
-            foreach (var pair in intsToWriteParallelSorted)
-            {
-                Position = pair.Item1;
-                Write(pair.Item2);
-            }
-
-            var resourceIDRefsToWriteSorted = resourceIDRefsToWrite.AsParallel()
-                                                                   .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
-                                                                   .OrderBy(x => x.Item1);
-            foreach (var pair in resourceIDRefsToWriteSorted)
-            {
-                int id = pair.Item2.SerializeById(this);
-                Position = pair.Item1;
-                Write(id);
-            }
-
             // Clear out index dictionaries (no longer needed)
             foreach (var chunk in data.FORM.Chunks.Values)
             {
@@ -805,30 +782,52 @@ namespace UndertaleModLib
         {
             try
             {
+                // Store object address before writing it
                 uint objectAddr = Position;
+
                 if (typeof(T) == typeof(UndertaleString))
                 {
-                    if (pendingStringWrites.ContainsKey(obj))
-                    {
-                        foreach (uint pointerAddr in pendingStringWrites[obj])
-                            intsToWriteParallel.Add(new ValueTuple<uint, uint>(pointerAddr, objectAddr + 4));
+                    // Can skip adding strings to object pool (nothing later in the file references them).
+                    obj.Serialize(this);
 
+                    // Patch all pointers to this string, if applicable
+                    if (pendingStringWrites.TryGetValue(obj, out List<uint> patches))
+                    {
+                        uint returnTo = Position;
+                        objectAddr += 4; // Destination is where the string starts, not its length
+                        foreach (uint pointerAddr in patches)
+                        {
+                            Position = pointerAddr;
+                            Write(objectAddr);
+                        }
+                        Position = returnTo;
+
+                        // Remove pending write
                         pendingStringWrites.Remove(obj);
                     }
                 }
                 else
                 {
-                    objectPool.Add(obj, objectAddr); // strings come later in the file, so no need to add them to the pool
-                }
-                
-                obj.Serialize(this);
+                    // Add object to pool
+                    objectPool.Add(obj, objectAddr);
 
-                if (pendingWrites.ContainsKey(obj))
-                {
-                    foreach (uint pointerAddr in pendingWrites[obj])
-                        intsToWriteParallel.Add(new ValueTuple<uint, uint>(pointerAddr, objectAddr));
+                    // Serialize object
+                    obj.Serialize(this);
 
-                    pendingWrites.Remove(obj);
+                    // Patch all pointers to this object, if applicable
+                    if (pendingWrites.TryGetValue(obj, out List<uint> patches))
+                    {
+                        uint returnTo = Position;
+                        foreach (uint pointerAddr in patches)
+                        {
+                            Position = pointerAddr;
+                            Write(objectAddr);
+                        }
+                        Position = returnTo;
+
+                        // Remove pending write
+                        pendingWrites.Remove(obj);
+                    }
                 }
             }
             catch (Exception e)
@@ -851,9 +850,11 @@ namespace UndertaleModLib
             }
             else
             {
-                if (!pendingWrites.ContainsKey(obj))
-                    pendingWrites.Add(obj, new List<uint>());
-                pendingWrites[obj].Add(Position);
+                if (!pendingWrites.TryGetValue(obj, out List<uint> list))
+                {
+                    pendingWrites.Add(obj, list = new List<uint>());
+                }
+                list.Add(Position);
                 Write(0xDEADC0DEu);
             }
         }
@@ -866,9 +867,11 @@ namespace UndertaleModLib
                 return;
             }
 
-            if (!pendingStringWrites.ContainsKey(obj))
-                pendingStringWrites.Add(obj, new List<uint>());
-            pendingStringWrites[obj].Add(Position);
+            if (!pendingStringWrites.TryGetValue(obj, out List<uint> list))
+            {
+                pendingStringWrites.Add(obj, list = new List<uint>());
+            }
+            list.Add(Position);
             Write(0xDEADC0DEu);
         }
 
@@ -934,7 +937,7 @@ namespace UndertaleModLib
                                                         UndertaleReader.MessageHandlerDelegate messageHandler = null,
                                                         bool onlyGeneralInfo = false)
         {
-            UndertaleReader reader = new UndertaleReader(stream, warningHandler, messageHandler, onlyGeneralInfo);
+            UndertaleReader reader = new(stream, warningHandler, messageHandler, onlyGeneralInfo);
             var data = reader.ReadUndertaleData();
             reader.ThrowIfUnreadObjects();
             return data;
@@ -942,7 +945,7 @@ namespace UndertaleModLib
 
         public static void Write(Stream stream, UndertaleData data, UndertaleWriter.MessageHandlerDelegate messageHandler = null)
         {
-            UndertaleWriter writer = new UndertaleWriter(stream, messageHandler);
+            UndertaleWriter writer = new(stream, messageHandler);
             writer.WriteUndertaleData(data);
             writer.ThrowIfUnwrittenObjects();
             writer.Flush(data);
@@ -950,7 +953,7 @@ namespace UndertaleModLib
 
         public static Dictionary<uint, UndertaleObject> GenerateOffsetMap(Stream stream)
         {
-            UndertaleReader reader = new UndertaleReader(stream);
+            UndertaleReader reader = new(stream);
             reader.ReadUndertaleData();
             reader.ThrowIfUnreadObjects();
             return reader.GetOffsetMap();
