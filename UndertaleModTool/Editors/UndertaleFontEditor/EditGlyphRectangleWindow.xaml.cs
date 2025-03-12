@@ -114,8 +114,8 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
                 double oldExtentWidth = e.ExtentWidth - e.ExtentWidthChange;
                 double oldExtentHeight = e.ExtentHeight - e.ExtentHeightChange;
 
-                double relx = offsetX / oldExtentWidth;
-                double rely = offsetY / oldExtentHeight;
+                double relx = oldExtentWidth != 0 ? offsetX / oldExtentWidth : 0;
+                double rely = oldExtentHeight != 0 ? offsetY / oldExtentHeight : 0;
 
                 offsetX = Math.Max(relx * e.ExtentWidth - xMousePositionOnScrollViewer, 0);
                 offsetY = Math.Max(rely * e.ExtentHeight - yMousePositionOnScrollViewer, 0);
@@ -136,7 +136,7 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
             var matrix = transform.Matrix;
             var scale = e.Delta >= 0 ? 1.1 : (1.0 / 1.1); // choose appropriate scaling factor
 
-            if ((matrix.M11 > 0.2 || (matrix.M11 <= 0.2 && scale > 1)) && (matrix.M11 < 3 || (matrix.M11 >= 3 && scale < 1)))
+            if ((matrix.M11 > 0.001 || (matrix.M11 <= 0.001 && scale > 1)) && (matrix.M11 < 1000 || (matrix.M11 >= 1000 && scale < 1)))
             {
                 matrix.ScaleAtPrepend(scale, scale, mousePos.X, mousePos.Y);
             }
