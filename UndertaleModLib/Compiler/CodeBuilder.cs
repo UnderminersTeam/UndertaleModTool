@@ -149,7 +149,7 @@ internal class CodeBuilder : ICodeBuilder
         {
             Address = (uint)(address / 4),
             Kind = UndertaleInstruction.Opcode.Break,
-            Value = (short)extendedOpcode,
+            ExtendedKind = (short)extendedOpcode,
             Type1 = UndertaleInstruction.DataType.Int16
         };
     }
@@ -161,7 +161,7 @@ internal class CodeBuilder : ICodeBuilder
         {
             Address = (uint)(address / 4),
             Kind = UndertaleInstruction.Opcode.Break,
-            Value = (short)extendedOpcode,
+            ExtendedKind = (short)extendedOpcode,
             Type1 = UndertaleInstruction.DataType.Int32,
             IntArgument = value
         };
@@ -213,7 +213,7 @@ internal class CodeBuilder : ICodeBuilder
             Address = (uint)(address / 4),
             Kind = UndertaleInstruction.Opcode.PopEnv,
             JumpOffsetPopenvExitMagic = true,
-            JumpOffset = _globalContext.Bytecode14OrLower ? -1048576 /* encoded in little endian as 00 00 F0 */ : 0
+            JumpOffset = 0xF00000
         };
     }
 
