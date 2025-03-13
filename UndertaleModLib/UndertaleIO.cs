@@ -668,7 +668,7 @@ namespace UndertaleModLib
                 if (length != expectedLength)
                 {
                     int diff = (int)expectedLength - (int)length;
-                    reader.SubmitMessage("WARNING: File specified length " + expectedLength + ", but read only " + length + " (" + diff + " padding?)");
+                    reader.SubmitWarning("WARNING: File specified length " + expectedLength + ", but read only " + length + " (" + diff + " padding?)");
                     if (diff > 0)
                         reader.Position += (uint)diff;
                     else
@@ -760,7 +760,7 @@ namespace UndertaleModLib
                 }
             }
 
-            SubmitMessage("Flushing remaining file buffer data to disk...");
+            SubmitMessage("Flushing remaining buffer data...");
             base.Flush();
         }
 
