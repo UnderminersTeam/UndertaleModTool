@@ -93,7 +93,10 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
             double initScale = 1;
             int textureWidth = Font.Texture?.BoundingWidth ?? 1;
             if (textureWidth < scrollPres.ActualWidth)
+            {
                 initScale = scrollPres.ActualWidth / textureWidth;
+                initScale = Math.Pow(2, Math.Floor(Math.Log2(initScale))); // Round down to nearest power of 2
+            }
 
             TextureViewbox.LayoutTransform = new MatrixTransform(initScale, 0, 0, initScale, 0, 0); ;
             TextureViewbox.UpdateLayout();

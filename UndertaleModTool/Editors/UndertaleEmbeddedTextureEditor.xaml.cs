@@ -165,19 +165,11 @@ namespace UndertaleModTool
             if (scrollPres is null)
                 return;
 
-            double initScale = 1;
-            if (DataContext is UndertaleEmbeddedTexture texturePage)
-            {
-                int textureWidth = texturePage.TextureData?.Width ?? 1;
-                if (textureWidth < scrollPres.ActualWidth)
-                    initScale = scrollPres.ActualWidth / textureWidth;
-            }
-
             Transform t;
             double top, left;
             if (OverriddenPreviewState == default)
             {
-                t = new MatrixTransform(initScale, 0, 0, initScale, 0, 0);
+                t = new MatrixTransform(Matrix.Identity);
                 top = 0;
                 left = 0;
             }
