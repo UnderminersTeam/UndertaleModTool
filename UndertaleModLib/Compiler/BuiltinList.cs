@@ -140,6 +140,12 @@ public class BuiltinList : IBuiltins
     /// </summary>
     private void LoadFunctionsFromData(UndertaleData data)
     {
+        if (data.Functions is null)
+        {
+            // No functions (probably YYC), so don't do this
+            return;
+        }
+
         // First, make script lookup to avoid script names being marked as builtin
         HashSet<string> scriptLookup = new(data.Scripts.Count);
         foreach (UndertaleScript script in data.Scripts)
