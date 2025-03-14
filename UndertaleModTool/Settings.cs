@@ -62,6 +62,8 @@ namespace UndertaleModTool
         public DecompilerSettings DecompilerSettings { get; set; }
         public string InstanceIdPrefix { get; set; } = "inst_";
 
+        public bool ShowNullEntriesInDataHierarchy { get; set; } = false;
+
         public static Settings Instance;
 
         public static JsonSerializerOptions JsonOptions = new()

@@ -40,7 +40,7 @@ async Task DumpFonts()
 
 void DumpFont(UndertaleFont font)
 {
-    if (arrayString.Contains(font.Name.ToString().Replace("\"", "")))
+    if (font is not null && arrayString.Contains(font.Name.ToString().Replace("\"", "")))
     {
         worker.ExportAsPNG(font.Texture, Path.Combine(fntFolder, $"{font.Name.Content}.png"));
         using (StreamWriter writer = new(Path.Combine(fntFolder, $"glyphs_{font.Name.Content}.csv")))
@@ -71,7 +71,8 @@ private DialogResult ShowInputDialog()
     //fonts_list.Items.Add("All");
     foreach (var x in Data.Fonts)
     {
-        fonts_list.Items.Add(x.Name.ToString().Replace("\"", ""));
+        if (x is not null)
+            fonts_list.Items.Add(x.Name.ToString().Replace("\"", ""));
     }
 
     fonts_list.Size = new System.Drawing.Size(size.Width - 10, size.Height - 50);

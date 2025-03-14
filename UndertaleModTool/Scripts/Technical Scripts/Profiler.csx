@@ -487,6 +487,11 @@ void ProfileModeOperations()
     Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = new Underanalyzer.Decompiler.DecompileSettings();
     foreach (UndertaleCode c in Data.Code)
     {
+        if (c is null)
+        {
+            progress++;
+            continue;
+        }
         UpdateProgressBar(null, "Code entries processed", progress++, Data.Code.Count);
         string gmlCode = GetDecompiledText(c.Name.Content, globalDecompileContext, decompilerSettings);
         gmlCode = gmlCode.Replace("\r\n", "\n");
@@ -506,6 +511,8 @@ void ProfileModeExempt()
     // Process bytecode, patching in script calls where needed
     foreach (UndertaleCode c in Data.Code)
     {
+        if (c is null)
+            continue;
         // global.interact get/set patches
         for (int i = 0; i < c.Instructions.Count; i++)
         {
@@ -689,6 +696,8 @@ void PersistentObjectSetup(string objectName)
                 uint layer_id = 0;
                 foreach (var room in Data.Rooms)
                 {
+                    if (room is null)
+                        continue;
                     foreach (var layer in room.Layers)
                     {
                         if (layer.LayerId > layer_id)

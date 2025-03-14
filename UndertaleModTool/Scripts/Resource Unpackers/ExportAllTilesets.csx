@@ -36,7 +36,7 @@ async Task DumpTilesets()
 
 void DumpTileset(UndertaleBackground tileset)
 {
-    if (tileset.Texture != null)
+    if (tileset is not null && tileset.Texture != null)
         worker.ExportAsPNG(tileset.Texture, Path.Combine(texFolder, $"{tileset.Name.Content}.png"));
 
     IncrementProgressParallel();
