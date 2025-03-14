@@ -32,6 +32,7 @@ public class GlobalDecompileContext : IGameContext
     public bool UsingFinallyBeforeThrow => !(Data?.IsVersionAtLeast(2024, 6) ?? false);
     public IGlobalFunctions GlobalFunctions => Data?.GlobalFunctions;
     public bool UsingTypedBooleans => Data?.IsVersionAtLeast(2, 3, 7) ?? false;
+    public bool UsingNullishOperator => Data?.IsVersionAtLeast(2, 3, 7) ?? false;
     public bool UsingAssetReferences => Data?.IsVersionAtLeast(2023, 8) ?? false;
     public bool UsingRoomInstanceReferences => Data?.IsVersionAtLeast(2024, 2) ?? false;
     public bool UsingLogicalShortCircuit => Data?.ShortCircuit ?? true;
