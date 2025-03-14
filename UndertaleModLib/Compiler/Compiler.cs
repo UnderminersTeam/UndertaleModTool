@@ -175,25 +175,31 @@ namespace UndertaleModLib.Compiler
             AddAssetsFromList(Data.Sequences, RefType.Sequence);
             AddAssetsFromList(Data.ParticleSystems, RefType.ParticleSystem);
 
-            foreach (UndertaleScript s in Data.Scripts)
+            if (Data.Scripts is not null)
             {
-                if (s is null)
-                    continue;
-                scripts.Add(s.Name.Content);
-            }
-            foreach (UndertaleExtension e in Data.Extensions)
-            {
-                if (e is null)
-                    continue;
-                foreach (UndertaleExtensionFile file in e.Files)
+                foreach (UndertaleScript s in Data.Scripts)
                 {
-                    if (file is null)
+                    if (s is null)
                         continue;
-                    foreach (UndertaleExtensionFunction func in file.Functions)
+                    scripts.Add(s.Name.Content);
+                }
+            }
+            if (Data.Extensions is not null)
+            {
+                foreach (UndertaleExtension e in Data.Extensions)
+                {
+                    if (e is null)
+                        continue;
+                    foreach (UndertaleExtensionFile file in e.Files)
                     {
-                        if (func is null)
+                        if (file is null)
                             continue;
-                        scripts.Add(func.Name.Content);
+                        foreach (UndertaleExtensionFunction func in file.Functions)
+                        {
+                            if (func is null)
+                                continue;
+                            scripts.Add(func.Name.Content);
+                        }
                     }
                 }
             }
