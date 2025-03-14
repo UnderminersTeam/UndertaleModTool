@@ -218,15 +218,18 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
     /// </summary>
     public static void FindAllTextureInfo(UndertaleData data)
     {
-        foreach (var info in data.TextureGroupInfo)
+        if (data.TextureGroupInfo is not null)
         {
-            if (info is null)
-                continue;
-            foreach (var tex in info.TexturePages)
+            foreach (var info in data.TextureGroupInfo)
             {
-                if (tex is null)
+                if (info is null)
                     continue;
-                tex.Resource.TextureInfo = info;
+                foreach (var tex in info.TexturePages)
+                {
+                    if (tex is null)
+                        continue;
+                    tex.Resource.TextureInfo = info;
+                }
             }
         }
     }
