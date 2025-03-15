@@ -21,7 +21,7 @@ EnsureDataLoaded();
 GlobalDecompileContext globalDecompileContext = new(Data);
 Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = Data.ToolInfo.DecompilerSettings;
 
-Regex setownerRegex = new Regex(@"pushi?\.[eil] \d+(\n|\r\n)setowner\.e(\n|\r\n)");
+Regex setownerRegex = new Regex(@"pushi?\.[ei] \d+(\n|\r\n)setowner\.e", RegexOptions.Compiled);
 
 List<UndertaleCode> toCheck = Data.Code.Where(c => c.ParentEntry is null).ToList();
 
@@ -91,7 +91,7 @@ void CheckCode()
         {
             // Perform initial decompilation & disassembly
             string disassembled = code.Disassemble(Data.Variables, Data.CodeLocals?.For(code));
-            disassembled = setownerRegex.Replace(disassembled, "");
+            disassembled = setownerRegex.Replace(disassembled, "setowner.e");
             string decompiled = new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, decompilerSettings).DecompileToString();
 
             // Perform re-compilation
@@ -105,7 +105,7 @@ void CheckCode()
 
             // Perform second decompilation & disassembly
             string secondDisassembled = code.Disassemble(Data.Variables, Data.CodeLocals?.For(code));
-            secondDisassembled = setownerRegex.Replace(secondDisassembled, "");
+            secondDisassembled = setownerRegex.Replace(secondDisassembled, "setowner.e");
             string secondDecompilation = new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, decompilerSettings).DecompileToString();
 
             // Collect results

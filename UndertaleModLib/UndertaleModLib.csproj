@@ -76,6 +76,11 @@
   <ItemGroup>
     <ProjectReference Include="..\Underanalyzer\Underanalyzer\Underanalyzer.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+       <_Parameter1>UndertaleModLibTests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
   <!--A prebuild responsible for creating a git commit name and branch name -->
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <!--Create the gitversion.txt file first, in case any of the later commands fail -->
