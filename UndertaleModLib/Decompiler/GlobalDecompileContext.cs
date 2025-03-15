@@ -45,14 +45,16 @@ public class GlobalDecompileContext : IGameContext
     public bool UsingGlobalConstantFunction => Data?.IsVersionAtLeast(2023, 11) ?? false;
     public bool UsingObjectFunctionForesight => Data?.IsVersionAtLeast(2024, 11) ?? false;
     public bool UsingBetterTryBreakContinue => Data?.IsVersionAtLeast(2024, 11) ?? false;
+    public bool UsingArrayCopyOnWrite => Data?.ArrayCopyOnWrite ?? false;
+    public bool UsingNewArrayOwners => Data?.IsVersionAtLeast(2, 3, 2) ?? false;
     public GameSpecificRegistry GameSpecificRegistry => Data?.GameSpecificRegistry;
     public IBuiltins Builtins { get; private set; } = null;
     public ICodeBuilder CodeBuilder { get; private set; } = null;
 
     /// <summary>
-    /// The current compile group being used for linking.
+    /// The current compile group being used for main compile, and for linking.
     /// </summary>
-    internal CompileGroup LinkingCompileGroup { get; set; } = null;
+    internal CompileGroup CurrentCompileGroup { get; set; } = null;
 
     // Lookup from asset name to index (and potentially encoded asset type)
     private Dictionary<string, int> _assetIdLookup = null;

@@ -40,6 +40,11 @@ public sealed class CompileGroup
     public bool PersistLinkingLookups { get; set; } = false;
 
     /// <summary>
+    /// Hash code of the name of the current code entry being compiled.
+    /// </summary>
+    internal int CurrentCodeEntryNameHash { get; private set; }
+
+    /// <summary>
     /// Stores a code entry and corresponding GML code to be compiled during an operation.
     /// </summary>
     private readonly record struct QueuedOperation(UndertaleCode CodeEntry, string Code);
@@ -80,6 +85,10 @@ public sealed class CompileGroup
 
     // During linking, a lookup of local variable names to references of those local variables.
     private Dictionary<string, List<UndertaleInstruction.Reference<UndertaleVariable>>> _linkingLocalReferences = null;
+
+    // During main compile (not linking), and when array copy-on-write is enabled, this is a lookup of name to ID.
+    private int _nextNameId = 100000;
+    private Dictionary<string, int> _parsedNameIds = null;
 
     /// <summary>
     /// Initializes a new compile context.
@@ -197,6 +206,18 @@ public sealed class CompileGroup
             _linkingVariableOrderLookup.Add(name, _linkingVariableOrder.Count);
             _linkingVariableOrder.Add((name, true));
         }
+    }
+
+    /// <summary>
+    /// Registers a name token during initial main compile/parse, and returns its ID.
+    /// </summary>
+    internal int RegisterName(string name)
+    {
+        if (_parsedNameIds.TryGetValue(name, out int id))
+        {
+            return id;
+        }
+        return _parsedNameIds[name] = _nextNameId++;
     }
 
     /// <summary>
@@ -350,11 +371,22 @@ public sealed class CompileGroup
         bool staticAnonymousNames = Data.IsVersionAtLeast(2024, 2);
         bool childFunctionNameFix = Data.IsVersionAtLeast(2024, 4);
 
+        // Mark this group as compiling
+        GlobalContext.CurrentCompileGroup = this;
+
         // Work through replacement queue
         foreach (QueuedOperation operation in _queuedCodeReplacements)
         {
             // Guess script kind and global script name, based on code entry name
             (CompileScriptKind scriptKind, string globalScriptName) = GuessScriptKindFromName(operation.CodeEntry.Name?.Content);
+
+            // Prepare for array copy-on-write
+            CurrentCodeEntryNameHash = operation.CodeEntry.Name.Content.GetHashCode();
+            if (Data.ArrayCopyOnWrite)
+            {
+                _parsedNameIds = new();
+                _nextNameId = 100000;
+            }
 
             // Perform initial compile step
             CompileContext context = new(operation.Code, scriptKind, globalScriptName, GlobalContext);
@@ -380,6 +412,12 @@ public sealed class CompileGroup
                 errors.Add(new CompileError(operation.CodeEntry, e));
             }
 
+            // Un-prepare for array copy-on-write
+            if (Data.ArrayCopyOnWrite)
+            {
+                _parsedNameIds = null;
+            }
+
             // If any errors have occurred in general (even in other operations), don't proceed to linking
             if (errors is not null)
             {
@@ -391,7 +429,6 @@ public sealed class CompileGroup
             {
                 // Setup for linking
                 InitializeLinkingLookups();
-                GlobalContext.LinkingCompileGroup = this;
 
                 // Make list of reusable child code entry names (and set of child entries remaining)
                 List<string> originalChildEntryNames = new(operation.CodeEntry.ChildEntries.Count);
@@ -715,9 +752,6 @@ public sealed class CompileGroup
                 _linkingVariableOrder.Clear();
                 _linkingLocalReferences.Clear();
 
-                // Undo setup for linking
-                GlobalContext.LinkingCompileGroup = null;
-
                 // If any errors occurred, don't commit any further modifications to main data (avoid too much corruption)
                 if (errors is not null)
                 {
@@ -861,6 +895,9 @@ public sealed class CompileGroup
                 operation.CodeEntry.LocalsCount = (uint)(1 + context.OutputRootScope.LocalCount);
             });
         }
+
+        // Unmark this group as compiling
+        GlobalContext.CurrentCompileGroup = null;
 
         // Clear queues
         _queuedCodeReplacements?.Clear();

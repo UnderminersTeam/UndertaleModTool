@@ -320,6 +320,11 @@ namespace UndertaleModLib
         public bool ShortCircuit = true;
 
         /// <summary>
+        /// Whether the data file has array copy-on-write enabled.
+        /// </summary>
+        public bool ArrayCopyOnWrite = false;
+
+        /// <summary>
         /// Some info for the editor to store data on.
         /// </summary>
         public readonly ToolInfo ToolInfo = new ToolInfo();
