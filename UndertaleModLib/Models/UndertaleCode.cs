@@ -275,8 +275,8 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
         set => _firstWord = (_firstWord & 0xFFFF0000) | ((uint)value & 0xFFFF);
     }
     public object Value { get; set; }
-    public Reference<UndertaleVariable> Destination { get; set; }
-    public Reference<UndertaleFunction> Function { get; set; }
+    public Reference<UndertaleVariable> Destination { get => Value as Reference<UndertaleVariable>; set => Value = value; }
+    public Reference<UndertaleFunction> Function { get => Value as Reference<UndertaleFunction>; set => Value = value; }
     public int JumpOffset
     {
         get
