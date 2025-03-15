@@ -249,8 +249,10 @@ if (Data.Code.ByName("gml_Script_SCR_TEXTTYPE") != null)
     SCR_TEXTTYPE = SCR_TEXTTYPE.Replace("else if (global.typer == 1)", "if (global.typer == 1)");
     SCR_TEXTTYPE += @"else
     script_execute_wrapper(149, 2, 16777215, (x + 20), (y + 20), (view_xview[view_current] + 290), 0, 1, 101, 8, 18)";
-    ImportGMLString("gml_Script_SCR_TEXTTYPE", SCR_TEXTTYPE);
-    ImportGMLString("gml_Script_array_create_wrapper", @"
+
+    UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+    importGroup.QueueReplace("gml_Script_SCR_TEXTTYPE", SCR_TEXTTYPE);
+    importGroup.QueueReplace("gml_Script_array_create_wrapper", @"
     var _arr, i;
     _arr[(argument0 - 1)] = 0
     if (argument_count > 1)
@@ -260,11 +262,12 @@ if (Data.Code.ByName("gml_Script_SCR_TEXTTYPE") != null)
     }
     return _arr;
     ");
-    ImportGMLString("gml_Script_script_execute_wrapper", @"
+    importGroup.QueueReplace("gml_Script_script_execute_wrapper", @"
     var args = array_create_wrapper(16, 0)
     for (var i = 0; i < argument_count; i++)
         args[i] = argument[i];
     script_execute(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12], args[13], args[14], args[15])");
+    importGroup.Import();
 }
 
 ScriptMessage("Upgraded from " + currentBytecodeVersion + " to 16 successfully. Save the game to apply the changes.");

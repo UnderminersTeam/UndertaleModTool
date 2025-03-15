@@ -88,6 +88,7 @@ namespace UndertaleModTests
                 {
                     string errMsg = "Instruction at " + code.Instructions[i].Address.ToString("D5") + " didn't match for script: " + code.Name.Content;
                     Assert.AreEqual(code.Instructions[i].Kind, reasm[i].Kind, errMsg);
+                    Assert.AreEqual(code.Instructions[i].ExtendedKind, reasm[i].ExtendedKind, errMsg);
                     Assert.AreEqual(code.Instructions[i].ComparisonKind, reasm[i].ComparisonKind, errMsg);
                     Assert.AreEqual(code.Instructions[i].Type1, reasm[i].Type1, errMsg);
                     Assert.AreEqual(code.Instructions[i].Type2, reasm[i].Type2, errMsg);

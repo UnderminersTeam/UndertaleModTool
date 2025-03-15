@@ -19,7 +19,6 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
     /// <summary>
     /// Possible opcodes an instruction can use.
     /// </summary>
-    //TODO: document all these. i ain't smart enough to understand these.
     public enum Opcode : byte
     {
         Conv = 0x07, // Push((Types.Second)Pop) // DoubleTypeInstruction
@@ -115,7 +114,7 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
     /// <summary>
     /// Converts from bytecode 14 instruction opcodes to modern opcodes.
     /// </summary>
-    private static byte ConvertInstructionKind(byte kind)
+    private static byte ConvertOldKindToNewKind(byte kind)
     {
         kind = kind switch
         {
@@ -134,20 +133,63 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
             0x0F => 0x13,
             0x10 => 0x14,
             0x11 or 0x12 or 0x13 or 0x14 or 0x16 => 0x15,
-            0xDA => 0xD9,
             0x41 => 0x45,
             0x82 => 0x86,
             0xB7 => 0xB6,
             0xB8 => 0xB7,
             0xB9 => 0xB8,
+            0xBB => 0xBA,
             0x9D => 0x9C,
             0x9E => 0x9D,
             0x9F => 0x9E,
-            0xBB => 0xBA,
             0xBC => 0xBB,
+            0xDA => 0xD9,
             _ => kind
         };
-        
+
+        return kind;
+    }
+
+    /// <summary>
+    /// Converts from modern instruction opcodes to bytecode 14 opcodes.
+    /// </summary>
+    private static byte ConvertNewKindToOldKind(byte kind, ComparisonType comparisonKind = default)
+    {
+        kind = kind switch
+        {
+            0x07 => 0x03,
+            0x08 => 0x04,
+            0x09 => 0x05,
+            0x0A => 0x06,
+            0x0B => 0x07,
+            0x0C => 0x08,
+            0x0D => 0x09,
+            0x0E => 0x0A,
+            0x0F => 0x0B,
+            0x10 => 0x0C,
+            0x11 => 0x0D,
+            0x12 => 0x0E,
+            0x13 => 0x0F,
+            0x14 => 0x10,
+            0x15 => (byte)(comparisonKind + 0x10), // Comparison kind is encoded into opcode
+            0x45 => 0x41,
+            0x84 => 0xC0,
+            0x86 => 0x82,
+            0x9C => 0x9D,
+            0x9D => 0x9E,
+            0x9E => 0x9F,
+            0xB6 => 0xB7,
+            0xB7 => 0xB8,
+            0xB8 => 0xB9,
+            0xBA => 0xBB,
+            0xBB => 0xBC,
+            0xD9 => 0xDA,
+            0xC1 => 0xC0,
+            0xC2 => 0xC0,
+            0xC3 => 0xC0,
+            _ => kind
+        };
+
         return kind;
     }
 
@@ -207,23 +249,82 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
     }
 
     public uint Address { get; internal set; }
-    public Opcode Kind { get; set; }
-    public ComparisonType ComparisonKind { get; set; }
-    public DataType Type1 { get; set; }
-    public DataType Type2 { get; set; }
-    public InstanceType TypeInst { get; set; }
+    public Opcode Kind 
+    { 
+        get => (Opcode)(_firstWord >> 24); 
+        set => _firstWord = (_firstWord & 0x00FFFFFF) | (((uint)value & 0xFF) << 24); 
+    }
+    public ComparisonType ComparisonKind 
+    { 
+        get => (ComparisonType)((_firstWord & 0x0000FF00) >> 8);
+        set => _firstWord = (_firstWord & 0xFFFF00FF) | (((uint)value & 0xFF) << 8);
+    }
+    public DataType Type1
+    {
+        get => (DataType)((_firstWord & 0x000F0000) >> 16);
+        set => _firstWord = (_firstWord & 0xFFF0FFFF) | (((uint)value & 0xF) << 16);
+    }
+    public DataType Type2
+    {
+        get => (DataType)((_firstWord & 0x00F00000) >> 20);
+        set => _firstWord = (_firstWord & 0xFF0FFFFF) | (((uint)value & 0xF) << 20);
+    }
+    public InstanceType TypeInst
+    {
+        get => (InstanceType)(_firstWord & 0x0000FFFF);
+        set => _firstWord = (_firstWord & 0xFFFF0000) | ((uint)value & 0xFFFF);
+    }
     public object Value { get; set; }
     public Reference<UndertaleVariable> Destination { get; set; }
     public Reference<UndertaleFunction> Function { get; set; }
-    private int _IntegerArgument;
-    public int JumpOffset { get => _IntegerArgument; set => _IntegerArgument = value; }
-    public int IntArgument { get => _IntegerArgument; set => _IntegerArgument = value; }
-    public bool JumpOffsetPopenvExitMagic { get; set; }
-    public ushort ArgumentsCount { get; set; }
-    public byte Extra { get; set; }
-    public ushort SwapExtra { get; set; }
+    public int JumpOffset
+    {
+        get
+        {
+            if ((_firstWord & 0x800000) != 0)
+            {
+                // Sign bit of 24-bit integer is set; sign extend to full 32 bits for usage.
+                return (int)(_firstWord | 0xFF000000);
+            }
 
-    public UndertaleCode Entry { get; set; } // Set for the first instruction
+            // Presumably, a positive number.
+            return (int)(_firstWord & 0xFFFFFF);
+        }
+        set
+        {
+            // Remove sign-extended bits, but keep sign bit.
+            _firstWord = (_firstWord & 0xFF000000) | ((uint)value & 0x00FFFFFF);
+        }
+    }
+    public bool JumpOffsetPopenvExitMagic
+    {
+        get => (_firstWord & 0xFFFFFF) == 0xF00000;
+        set => _firstWord = (_firstWord & 0xFF000000) | (value ? 0xF00000u : 0);
+    }
+    public ushort ArgumentsCount
+    {
+        get => (ushort)(_firstWord & 0x0000FFFF);
+        set => _firstWord = (_firstWord & 0xFFFF0000) | value;
+    }
+    public byte Extra
+    {
+        get => (byte)(_firstWord & 0x000000FF);
+        set => _firstWord = (_firstWord & 0xFFFFFF00) | value;
+    }
+    public ushort SwapExtra
+    {
+        get => (ushort)(_firstWord & 0x0000FFFF);
+        set => _firstWord = (_firstWord & 0xFFFF0000) | value;
+    }
+    public short ExtendedKind
+    {
+        get => (short)(_firstWord & 0x0000FFFF);
+        set => _firstWord = (_firstWord & 0xFFFF0000) | (ushort)value;
+    }
+    public int IntArgument { get => _integerArgument; set => _integerArgument = value; }
+
+    private uint _firstWord;
+    private int _integerArgument;
 
     public interface ReferencedObject
     {
@@ -370,7 +471,7 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
         Reference<T> res = (Destination as Reference<T>) ?? (Function as Reference<T>) ?? (Value as Reference<T>);
         if (allowResolve && res == null)
         {
-            if (Kind == Opcode.Break && Value is short breakType && breakType == -11 /* pushref */)
+            if (Kind == Opcode.Break && ExtendedKind == -11 /* pushref */)
             {
                 Function = new Reference<UndertaleFunction>(IntArgument);
                 return Function as Reference<T>;
@@ -395,147 +496,75 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
         {
             case InstructionType.SingleTypeInstruction:
             case InstructionType.DoubleTypeInstruction:
-            case InstructionType.ComparisonInstruction:
             {
-                // Write "extra" byte, used on some instructions
-                writer.Write(Extra);
-
-                // Write comparison kind, if present
-                if (bytecode14 && Kind == Opcode.Cmp)
-                {
-                    // Bytecode 14 encodes its comparison in the opcode itself, not here
-                    writer.Write((byte)0);
-                }
-                else
-                {
-                    // Bytecode 15 and above encode a comparison kind outside of the opcode
-                    writer.Write((byte)ComparisonKind);
-                }
-
-                // Write types
-                byte typePair = (byte)((byte)Type2 << 4 | (byte)Type1);
-                writer.Write(typePair);
-
-                // Write opcode
+                // Write word, transforming opcode as needed for bytecode 14
+                uint firstWord = _firstWord;
                 if (bytecode14)
                 {
-                    // Translate relevant opcodes to their old bytecode 14 equivalents
-                    byte k = Kind switch
-                    {
-                        Opcode.Conv => 0x03,
-                        Opcode.Mul => 0x04,
-                        Opcode.Div => 0x05,
-                        Opcode.Rem => 0x06,
-                        Opcode.Mod => 0x07,
-                        Opcode.Add => 0x08,
-                        Opcode.Sub => 0x09,
-                        Opcode.And => 0x0A,
-                        Opcode.Or => 0x0B,
-                        Opcode.Xor => 0x0C,
-                        Opcode.Neg => 0x0D,
-                        Opcode.Not => 0x0E,
-                        Opcode.Shl => 0x0F,
-                        Opcode.Shr => 0x10,
-                        Opcode.Dup => 0x82,
-                        Opcode.Cmp => (byte)(ComparisonKind + 0x10), // Comparison kind is encoded into opcode
-                        Opcode.Ret => 0x9D,
-                        Opcode.Exit => 0x9E,
-                        Opcode.Popz => 0x9F,
-                        _ => (byte)Kind,
-                    };
-                    writer.Write(k);
+                    firstWord = (firstWord & 0xFFFFFF) | ((uint)ConvertNewKindToOldKind((byte)(firstWord >> 24)) << 24);
                 }
-                else
-                {
-                    // Write opcode verbatim on modern bytecode versions
-                    writer.Write((byte)Kind);
-                }
+                writer.Write(firstWord);
+                break;
+            }
 
+            case InstructionType.ComparisonInstruction:
+            {
+                // Write word
+                uint firstWord = _firstWord;
+                if (bytecode14)
+                {
+                    // Transform opcode for bytecode 14
+                    firstWord = (firstWord & 0xFFFFFF) | 
+                                 ((uint)ConvertNewKindToOldKind((byte)(firstWord >> 24), 
+                                                                (ComparisonType)((firstWord & 0x0000FF00) >> 8)) << 24);
+
+                    // Get rid of comparison type as well
+                    firstWord &= ~0x0000FF00u;
+                }
+                writer.Write(firstWord);
                 break;
             }
 
             case InstructionType.GotoInstruction:
             {
-                // Write jump offset
+                // Write word
+                uint firstWord = _firstWord;
                 if (bytecode14)
                 {
-                    // Bytecode 14 writes the offset verbatim
-                    writer.WriteInt24(JumpOffset);
-                }
-                else if (JumpOffsetPopenvExitMagic)
-                {
-                    // If popenv exit magic is used, write that specifically
-                    writer.WriteInt24(0xF00000);
+                    // Transform opcode as needed for bytecode 14
+                    firstWord = (firstWord & 0xFFFFFF) | ((uint)ConvertNewKindToOldKind((byte)(firstWord >> 24)) << 24);
                 }
                 else
                 {
-                    // If not using popenv exit magic, encode jump offset as 23-bit signed integer
-                    uint jumpOffsetFixed = (uint)JumpOffset;
-                    jumpOffsetFixed &= ~0xFF800000;
-                    writer.WriteInt24((int)jumpOffsetFixed);
-                }
-
-                // Write opcode
-                if (bytecode14)
-                {
-                    // Translate relevant opcodes to their old bytecode 14 equivalents
-                    byte k = Kind switch
+                    // Additionally, after bytecode 14, transform 24-bit negative branch into a 23-bit negative branch
+                    if ((firstWord & 0xFFFFFF) != 0xF00000 && (firstWord & 0x800000) != 0)
                     {
-                        Opcode.B => 0xB7,
-                        Opcode.Bt => 0xB8,
-                        Opcode.Bf => 0xB9,
-                        Opcode.PushEnv => 0xBB,
-                        Opcode.PopEnv => 0xBC,
-                        _ => (byte)Kind
-                    };
-                    writer.Write(k);
-                }
-                else
-                {
-                    // Write opcode verbatim on modern bytecode versions
-                    writer.Write((byte)Kind);
-                }
+                        // Unset 24-bit sign bit
+                        firstWord &= ~0x800000u;
 
+                        // Set 23-bit sign bit
+                        firstWord |= 0x400000;
+                    }
+                }
+                writer.Write(firstWord);
                 break;
             }
 
             case InstructionType.PopInstruction:
             {
-                if (Type1 == DataType.Int16)
+                // Write first word, transforming opcode as needed for bytecode 14
+                uint firstWord = _firstWord;
+                if (bytecode14)
                 {
-                    // Special scenario - the swap instruction (see #129)
-                    // Write swap value
-                    writer.Write(SwapExtra);
-
-                    // Write types
-                    byte typePair = (byte)((byte)Type2 << 4 | (byte)Type1);
-                    writer.Write(typePair);
-
-                    // Write opcode (if writing bytecode 14, translate to the old opcode)
-                    if (bytecode14 && Kind == Opcode.Pop)
-                        writer.Write((byte)0x41);
-                    else
-                        writer.Write((byte)Kind);
+                    firstWord = (firstWord & 0xFFFFFF) | ((uint)ConvertNewKindToOldKind((byte)(firstWord >> 24)) << 24);
                 }
-                else
+                writer.Write(firstWord);
+
+                if (Type1 != DataType.Int16)
                 {
-                    // Write instance type
-                    writer.Write((short)TypeInst);
-
-                    // Write types
-                    byte typePair = (byte)((byte)Type2 << 4 | (byte)Type1);
-                    writer.Write(typePair);
-
-                    // Write opcode (if writing bytecode 14, translate to the old opcode)
-                    if (bytecode14 && Kind == Opcode.Pop)
-                        writer.Write((byte)0x41);
-                    else
-                        writer.Write((byte)Kind);
-
                     // Write actual variable being stored to
                     writer.WriteUndertaleObject(Destination);
                 }
-
                 break;
             }
 
@@ -604,17 +633,13 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
 
             case InstructionType.CallInstruction:
             {
-                // Write number of arguments being used in call
-                writer.Write(ArgumentsCount);
-
-                // Write type (no second type is used)
-                writer.Write((byte)Type1);
-
-                // Write opcode (if writing bytecode 14, translate to the old opcode)
-                if (bytecode14 && Kind == Opcode.Call)
-                    writer.Write((byte)0xDA);
-                else
-                    writer.Write((byte)Kind);
+                // Write first word, transforming opcode as needed for bytecode 14
+                uint firstWord = _firstWord;
+                if (bytecode14)
+                {
+                    firstWord = (firstWord & 0xFFFFFF) | ((uint)ConvertNewKindToOldKind((byte)(firstWord >> 24)) << 24);
+                }
+                writer.Write(firstWord);
 
                 // Write reference to the function being called
                 writer.WriteUndertaleObject(Function);
@@ -624,14 +649,8 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
 
             case InstructionType.BreakInstruction:
             {
-                // Write type of break instruction (encoded in Value)
-                writer.Write((short)Value);
-
-                // Write type (no second type is used)
-                writer.Write((byte)Type1);
-
-                // Write opcode
-                writer.Write((byte)Kind);
+                // Write first word
+                writer.Write(_firstWord);
 
                 // Write integer argument, or function, if either is present
                 if (Type1 == DataType.Int32)
@@ -641,7 +660,6 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                     else
                         writer.Write(IntArgument);
                 }
-
                 break;
             }
 
@@ -658,6 +676,7 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
 
         // Read first word from instruction
         uint firstWord = reader.ReadUInt32();
+        _firstWord = firstWord;
 
         // Read opcode from most significant byte
         byte kindByte = (byte)((firstWord & 0xFF000000) >> 24);
@@ -665,7 +684,7 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
         if (bytecode14)
         {
             // Convert opcode from old format to new format
-            kind = (Opcode)ConvertInstructionKind(kindByte);
+            Kind = kind = (Opcode)ConvertOldKindToNewKind(kindByte);
         }
 
         // Extract first three bytes from first word
@@ -683,26 +702,25 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
             {
                 // Parse instruction components from bytes
                 byte extra = b0;
-                ComparisonType comparisonKind = (ComparisonType)b1;
                 DataType type1 = (DataType)(b2 & 0xf);
                 DataType type2 = (DataType)(b2 >> 4);
 
-                // Ensure basic conditions hold
-                if (extra != 0 && kind != Opcode.Dup && kind != Opcode.CallV)
+#if DEBUG
+                // Ensure basic conditions hold, at least when in debug
+                if (extra != 0 && kind is not (Opcode.Dup or Opcode.CallV))
                 {
                     throw new IOException($"Invalid padding in {kind.ToString().ToUpper(CultureInfo.InvariantCulture)}");
                 }
-
                 if (instructionType == InstructionType.SingleTypeInstruction && type2 != 0)
                 {
                     throw new IOException($"Second type should be 0 in {kind.ToString().ToUpper(CultureInfo.InvariantCulture)}");
                 }
-
+#endif
 
                 // In bytecode 14, the comparison kind is encoded in the opcode itself
                 if (bytecode14 && kind == Opcode.Cmp)
                 {
-                    comparisonKind = (ComparisonType)(kindByte - 0x10);
+                    ComparisonKind = (ComparisonType)(kindByte - 0x10);
                 }
 
                 // Check for "and.b.b" or "or.b.b", which imply the code was compiled without short-circuiting
@@ -710,73 +728,28 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                 {
                     reader.undertaleData.ShortCircuit = false;
                 }
-
-                // Assign to instruction
-                Extra = extra;
-                ComparisonKind = comparisonKind;
-                Type1 = type1;
-                Type2 = type2;
-
                 break;
             }
 
             case InstructionType.GotoInstruction:
             {
-                if (bytecode14)
+                // If after bytecode 14, make sure that negative 23-bit integers are sign extended to 24-bit.
+                if (!bytecode14 && (firstWord & 0xFFFFFF) != 0xF00000 && (firstWord & 0x400000) != 0)
                 {
-                    // Bytecode 14 has slightly different parsing
-                    int jumpOffset = b0 | (b1 << 8) | ((sbyte)b2 << 16);
-                    JumpOffset = jumpOffset;
-                    JumpOffsetPopenvExitMagic = (jumpOffset == -1048576); // encoded in little endian as 00 00 F0 (same as below)
-                    break;
+                    _firstWord |= 0x800000;
                 }
-
-                // Parse normally
-                uint v = (uint)(b0 | (b1 << 8) | (b2 << 16));
-                bool popenvExitMagic = (v & 0x800000) != 0;
-                if (popenvExitMagic && v != 0xF00000)
-                {
-                    throw new Exception("Popenv magic doesn't work, call issue #90 again");
-                }
-
-                // The rest is int23 signed value, so make sure
-                uint r = v & 0x003FFFFF;
-                if ((v & 0x00C00000) != 0)
-                {
-                    r |= 0xFFC00000;
-                }
-
-                // Assign to instruction
-                JumpOffset = (int)r;
-                JumpOffsetPopenvExitMagic = popenvExitMagic;
-
                 break;
             }
 
             case InstructionType.PopInstruction:
             {
                 // Parse instruction components from bytes
-                InstanceType typeInst = (InstanceType)(b0 | (b1 << 8));
                 DataType type1 = (DataType)(b2 & 0xf);
-                DataType type2 = (DataType)(b2 >> 4);
-
-                if (type1 == DataType.Int16)
-                {
-                    // Special scenario - the swap instruction (see #129)
-                    SwapExtra = (ushort)typeInst;
-                    typeInst = 0;
-                }
-                else
+                if (type1 != DataType.Int16)
                 {
                     // Destination is an actual variable
                     Destination = reader.ReadUndertaleObject<Reference<UndertaleVariable>>();
                 }
-
-                // Assign remaining values to instruction
-                TypeInst = typeInst;
-                Type1 = type1;
-                Type2 = type2;
-
                 break;
             }
 
@@ -785,30 +758,6 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                 // Parse instruction components from bytes
                 short val = (short)(b0 | (b1 << 8));
                 DataType type1 = (DataType)b2;
-
-                // Modify opcode of instruction, if in bytecode 14
-                if (bytecode14)
-                {
-                    if (type1 == DataType.Variable)
-                    {
-                        switch (val)
-                        {
-                            case -5:
-                                kind = Opcode.PushGlb;
-                                break;
-                            case -6: // builtin
-                                kind = Opcode.PushBltn;
-                                break;
-                            case -7:
-                                kind = Opcode.PushLoc;
-                                break;
-                        }
-                    }
-                    else if (type1 == DataType.Int16)
-                    {
-                        kind = Opcode.PushI;
-                    }
-                }
 
                 // Parse data being pushed
                 switch (type1)
@@ -840,18 +789,11 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                         break;
                 }
 
-                // Assign remaining values to instruction
-                Type1 = type1;
-
                 break;
             }
 
             case InstructionType.CallInstruction:
             {
-                // Parse instruction components from bytes
-                ArgumentsCount = (ushort)(b0 | (b1 << 8));
-                Type1 = (DataType)b2;
-
                 // Parse function being called
                 Function = reader.ReadUndertaleObject<Reference<UndertaleFunction>>();
 
@@ -883,28 +825,23 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                     }
                 }
 
-                // If this is a chknullish instruction (ID -10), then this implies GameMaker 2.3.7 or above
-                if (value == -10 && reader.undertaleData.IsVersionAtLeast(2, 3))
+                // If this is a setowner instruction, array copy-on-write is enabled
+                if (value == -5)
                 {
-                    if (!reader.undertaleData.IsVersionAtLeast(2, 3, 7))
-                    {
-                        reader.undertaleData.SetGMS2Version(2, 3, 7);
-                    }
+                    reader.undertaleData.ArrayCopyOnWrite = true;
                 }
 
-                // Assign remaining values to instruction
-                Value = value;
-                Type1 = type1;
-
+                // If this is a chknullish instruction (ID -10), then this implies GameMaker 2.3.7 or above
+                if (value == -10 && !reader.undertaleData.IsVersionAtLeast(2, 3, 7))
+                {
+                    reader.undertaleData.SetGMS2Version(2, 3, 7);
+                }
                 break;
             }
 
             default:
                 throw new IOException($"Unknown opcode {Kind.ToString().ToUpper(CultureInfo.InvariantCulture)}");
         }
-
-        // Assign final opcode to instruction
-        Kind = kind;
     }
 
     /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
@@ -921,7 +858,7 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
         if (bytecode14)
         {
             // Convert opcode from old format to new format
-            kind = (Opcode)ConvertInstructionKind((byte)kind);
+            kind = (Opcode)ConvertOldKindToNewKind((byte)kind);
         }
 
         // Extract third byte from first word
@@ -1038,7 +975,7 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
         bool unknownBreak = false;
         if (type == InstructionType.BreakInstruction)
         {
-            if (!Assembler.BreakIDToName.TryGetValue((short)Value, out kind))
+            if (!Assembler.BreakIDToName.TryGetValue(ExtendedKind, out kind))
             {
                 kind = kind.ToLower(CultureInfo.InvariantCulture);
                 unknownBreak = true;
@@ -1175,7 +1112,7 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                 if (unknownBreak)
                 {
                     sbh.Append(stringBuilder, ' ');
-                    sbh.Append(stringBuilder, Value);
+                    sbh.Append(stringBuilder, ExtendedKind);
                 }
                 if (Type1 == DataType.Int32)
                 {
@@ -1206,7 +1143,7 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
     // Underanalyzer implementations
     int IGMInstruction.Address => (int)Address * 4;
     IGMInstruction.Opcode IGMInstruction.Kind => (IGMInstruction.Opcode)Kind;
-    IGMInstruction.ExtendedOpcode IGMInstruction.ExtKind => (IGMInstruction.ExtendedOpcode)Value;
+    IGMInstruction.ExtendedOpcode IGMInstruction.ExtKind => (IGMInstruction.ExtendedOpcode)ExtendedKind;
     IGMInstruction.ComparisonType IGMInstruction.ComparisonKind => (IGMInstruction.ComparisonType)ComparisonKind;
     IGMInstruction.DataType IGMInstruction.Type1 => (IGMInstruction.DataType)Type1;
     IGMInstruction.DataType IGMInstruction.Type2 => (IGMInstruction.DataType)Type2;
@@ -1359,16 +1296,17 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     /// </summary>
     public UndertaleString Name { get; set; }
 
-
+    /// <summary>
+    /// Length of the code entry, in bytes.
+    /// </summary>
     public uint Length { get; set; }
 
-    public static int CurrCodeIndex { get; set; }
-
-
     /// <summary>
-    /// The amount of local variables this code entry has. <br/>
-    /// Warning: This is actually a ushort internally, it's an uint here for compatibility.
+    /// The amount of local variables this code entry has.
     /// </summary>
+    /// <remarks>
+    /// Warning: This is actually a ushort internally, but it's an uint here for compatibility.
+    /// </remarks>
     public uint LocalsCount { get; set; }
 
     /// <summary>
@@ -1376,55 +1314,124 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     /// </summary>
     public ushort ArgumentsCount { get; set; }
 
+    /// <summary>
+    /// Offset, in bytes, where code should begin executing from within the bytecode of this code entry.
+    /// </summary>
+    /// <remarks>
+    /// Should be 0 for root-level (parent) code entries, and nonzero for child code entries.
+    /// </remarks>
     public uint Offset { get; set; }
-
 
     /// <summary>
     /// A list of bytecode instructions this code entry has.
     /// </summary>
     public List<UndertaleInstruction> Instructions { get; } = new List<UndertaleInstruction>();
+
+    /// <summary>
+    /// A flag set on certain code entries, which usually don't have locals attached to them.
+    /// </summary>
     public bool WeirdLocalFlag { get; set; }
+
+    /// <summary>
+    /// Parent entry of this code entry, if this is a child entry; <see langword="null"/> otherwise.
+    /// </summary>
     public UndertaleCode ParentEntry { get; set; } = null;
+
+    /// <summary>
+    /// Child entries of this code entry, if a root-level (parent) entry; empty if a child entry.
+    /// </summary>
     public List<UndertaleCode> ChildEntries { get; set; } = new List<UndertaleCode>();
 
-    internal uint _bytecodeAbsoluteAddress;
-    internal byte[] _unsupportedBuffer;
+    // Bytecode address to use during (de)serialization, since bytecode can be a separate blob
+    private uint _bytecodeAbsoluteAddress;
 
+    // If instruction data cannot be parsed due to an unsupported bytecode version, this is where it gets stored (raw).
+    private byte[] _unsupportedBuffer;
+
+    /// <summary>
+    /// Creates an empty root code entry with the given name, along with an empty code locals entry (when necessary).
+    /// </summary>
+    /// <remarks>
+    /// The code entry (and possibly code locals entry) will be immediately added to the data.
+    /// </remarks>
+    /// <param name="data">Data to add the new code to.</param>
+    /// <param name="name">Name of the new code entry to create.</param>
+    /// <returns>The new code entry.</returns>
+    public static UndertaleCode CreateEmptyEntry(UndertaleData data, string name)
+    {
+        return CreateEmptyEntry(data, data.Strings.MakeString(name));
+    }
+
+    /// <summary>
+    /// Creates an empty root code entry with the given name, along with an empty code locals entry (when necessary).
+    /// </summary>
+    /// <param name="data">Data to add the new code to.</param>
+    /// <param name="name">Name of the new code entry to create.</param>
+    /// <returns>The new code entry.</returns>
+    public static UndertaleCode CreateEmptyEntry(UndertaleData data, UndertaleString name)
+    {
+        // Create entry
+        UndertaleCode newEntry = new()
+        {
+            Name = name,
+            LocalsCount = 1
+        };
+        data.Code.Add(newEntry);
+
+        // Also attach code locals if necessary
+        if (data.CodeLocals is not null)
+        {
+            UndertaleCodeLocals.CreateEmptyEntry(data, name);
+        }
+
+        return newEntry;
+    }
+
+    /// <inheritdoc />
     public void SerializeBlobBefore(UndertaleWriter writer)
     {
+        // If in bytecode 14 or lower (or an unsupported version), we don't have a separate instruction blob
         if (writer.undertaleData.UnsupportedBytecodeVersion || writer.Bytecode14OrLower)
-            return;
-        if (ParentEntry != null)
         {
-            // In GMS 2.3, code entries repeat often
+            return;
+        }
+
+        if (ParentEntry is not null)
+        {
+            // If this is a child code entry, simply update address and length of bytecode
             _bytecodeAbsoluteAddress = writer.LastBytecodeAddress;
             Length = writer.Position - _bytecodeAbsoluteAddress;
-            // todo? set Flags to something else?
         }
         else
         {
+            // If this is a root code entry, write all of the instructions,
+            // then update address and length of bytecode
             writer.LastBytecodeAddress = writer.Position;
             _bytecodeAbsoluteAddress = writer.Position;
             uint start = writer.Position;
             foreach (UndertaleInstruction instr in Instructions)
                 writer.WriteUndertaleObject(instr);
             Length = writer.Position - start;
-            // todo? clear Flags? how?
         }
     }
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
     {
+        // Write name only (length isn't necessarily known yet)
         writer.WriteUndertaleString(Name);
+
+        // Change logic depending on bytecode version
         if (writer.undertaleData.UnsupportedBytecodeVersion)
         {
+            // Unsupported version: simply write the buffer of data, and ignore contents
             Length = (uint)_unsupportedBuffer.Length;
             writer.Write(Length);
             writer.Write(_unsupportedBuffer);
         }
         else if (writer.Bytecode14OrLower)
         {
+            // Bytecode 14 or lower: write instructions immediately, and patch in the length
             uint patch = writer.Position;
             writer.Write(0xDEADC0DE);
             uint start = writer.Position;
@@ -1438,11 +1445,13 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
         }
         else
         {
+            // Bytecode 15 and above: write the rest of the fields
+            // (no instructions get written here; they're in a separate blob)
             writer.Write(Length);
             writer.Write((ushort)LocalsCount);
             writer.Write((ushort)(ArgumentsCount | (WeirdLocalFlag ? (ushort)0x8000 : 0)));
-            int BytecodeRelativeAddress = (int)_bytecodeAbsoluteAddress - (int)writer.Position;
-            writer.Write(BytecodeRelativeAddress);
+            int bytecodeRelativeAddress = (int)_bytecodeAbsoluteAddress - (int)writer.Position;
+            writer.Write(bytecodeRelativeAddress);
             writer.Write(Offset);
         }
     }
@@ -1450,72 +1459,88 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     /// <inheritdoc />
     public void Unserialize(UndertaleReader reader)
     {
+        // Parse basic fields
         Name = reader.ReadUndertaleString();
         Length = reader.ReadUInt32();
+
+        // Change logic depending on bytecode version
         if (reader.undertaleData.UnsupportedBytecodeVersion)
         {
+            // Unsupported version: simply read in a buffer of data, and ignore contents
             _unsupportedBuffer = reader.ReadBytes((int)Length);
         }
         else if (reader.Bytecode14OrLower)
         {
+            // Bytecode 14 or lower: parse instructions immediately.
+            long instructionStartPos = reader.AbsPosition;
+            long instructionEndPos = instructionStartPos + Length;
             Instructions.Clear();
-            if (reader.InstructionArraysLengths is not null)
-                Instructions.Capacity = reader.InstructionArraysLengths[CurrCodeIndex];
-
-            long here = reader.AbsPosition;
-            long stop = here + Length;
-            while (reader.AbsPosition < stop)
+            Instructions.Capacity = (int)reader.BytecodeAddresses[(uint)instructionStartPos].InstructionCount;
+            while (reader.AbsPosition < instructionEndPos)
             {
-                uint a = (uint)(reader.AbsPosition - here) / 4;
+                uint address = (uint)(reader.AbsPosition - instructionStartPos) / 4;
                 UndertaleInstruction instr = reader.ReadUndertaleObject<UndertaleInstruction>();
-                instr.Address = a;
+                instr.Address = address;
                 Instructions.Add(instr);
             }
+
+            // Set this flag for code editor, etc. to not get confused later
             WeirdLocalFlag = true;
         }
         else
         {
+            // Bytecode 15 or above: parse locals & arguments count, then follow bytecode address to parse instructions
             LocalsCount = reader.ReadUInt16();
             ArgumentsCount = reader.ReadUInt16();
             if ((ArgumentsCount & 0x8000) == 0x8000)
             {
+                // Locals flag is set; bitmask it out
                 ArgumentsCount &= 0x7FFF;
                 WeirdLocalFlag = true;
             }
-            int BytecodeRelativeAddress = reader.ReadInt32();
-            _bytecodeAbsoluteAddress = (uint)((int)reader.AbsPosition - 4 + BytecodeRelativeAddress);
-           
-            if (Length > 0 && reader.undertaleData.IsVersionAtLeast(2, 3) && reader.GetOffsetMap().TryGetValue(_bytecodeAbsoluteAddress, out var i))
-            {
-                ParentEntry = (i as UndertaleInstruction).Entry;
-                ParentEntry.ChildEntries.Add(this);
+            int bytecodeRelativeAddress = reader.ReadInt32();
+            _bytecodeAbsoluteAddress = (uint)((int)reader.AbsPosition - 4 + bytecodeRelativeAddress);
 
-                Offset = reader.ReadUInt32();
-                return;
+            // Check if this is a child code entry (which shares the same bytecode address as its parent)
+            UndertaleReader.BytecodeInformation info = reader.BytecodeAddresses[_bytecodeAbsoluteAddress];
+            if (Length > 0 && info.RootEntry is UndertaleCode parentEntry)
+            {
+                // This is a child code entry; attach to parent. No need to parse any instructions.
+                ParentEntry = parentEntry;
+                parentEntry.ChildEntries.Add(this);
+            }
+            else
+            {
+                // Update information to mark this entry as the root (if we have at least 1 instruction)
+                if (Length > 0)
+                {
+                    reader.BytecodeAddresses[_bytecodeAbsoluteAddress] = new(info.InstructionCount, this);
+                }
+
+                // Jump to instruction blob, storing position to return to for later
+                long returnTo = reader.AbsPosition;
+                reader.AbsPosition = _bytecodeAbsoluteAddress;
+
+                // Parse instructions
+                long instructionStartPos = _bytecodeAbsoluteAddress;
+                long instructionEndPos = instructionStartPos + Length;
+                Instructions.Clear();
+                Instructions.Capacity = (int)info.InstructionCount;
+                while (reader.AbsPosition < instructionEndPos)
+                {
+                    uint address = (uint)(reader.AbsPosition - instructionStartPos) / 4;
+                    UndertaleInstruction instr = reader.ReadUndertaleObject<UndertaleInstruction>();
+                    instr.Address = address;
+                    Instructions.Add(instr);
+                }
+
+                // Return from instruction blob
+                reader.AbsPosition = returnTo;
             }
 
-            long here = reader.AbsPosition;
-            reader.AbsPosition = _bytecodeAbsoluteAddress;
-
-            Instructions.Clear();
-            if (reader.InstructionArraysLengths is not null)
-                Instructions.Capacity = reader.InstructionArraysLengths[CurrCodeIndex];
-            while (reader.AbsPosition < _bytecodeAbsoluteAddress + Length)
-            {
-                uint a = (uint)(reader.AbsPosition - _bytecodeAbsoluteAddress) / 4;
-                UndertaleInstruction instr = reader.ReadUndertaleObject<UndertaleInstruction>();
-                instr.Address = a;
-                Instructions.Add(instr);
-            }
-            if (ParentEntry == null && Instructions.Count != 0)
-                Instructions[0].Entry = this;
-
-            reader.AbsPosition = here;
+            // Read final offset field
             Offset = reader.ReadUInt32();
         }
-
-        if (reader.InstructionArraysLengths is not null)
-            CurrCodeIndex++;
     }
 
     /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
@@ -1528,19 +1553,19 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
 
         if (reader.Bytecode14OrLower)
         {
-            long here = reader.Position;
-            long stop = here + length;
+            long instructionStart = reader.AbsPosition;
+            long instructionStop = instructionStart + length;
 
             // Get instructions count
             uint instrCount = 0;
             uint instrSubCount = 0;
-            while (reader.Position < stop)
+            while (reader.AbsPosition < instructionStop)
             {
                 instrCount++;
                 instrSubCount += UndertaleInstruction.UnserializeChildObjectCount(reader);
             }
 
-            reader.InstructionArraysLengths[CurrCodeIndex] = (int)instrCount;
+            reader.BytecodeAddresses.Add((uint)instructionStart, new(instrCount, null));
 
             count += instrCount + instrSubCount;
         }
@@ -1549,37 +1574,33 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
             reader.Position += 4;
 
             int bytecodeRelativeAddress = reader.ReadInt32();
-            uint bytecodeAbsoluteAddress = (uint)((int)reader.Position - 4 + bytecodeRelativeAddress);
+            uint bytecodeAbsoluteAddress = (uint)((int)reader.AbsPosition - 4 + bytecodeRelativeAddress);
 
-            if (length == 0 || reader.GMS2BytecodeAddresses.Contains(bytecodeAbsoluteAddress))
+            if (length == 0 || reader.BytecodeAddresses.ContainsKey(bytecodeAbsoluteAddress))
             {
                 reader.Position += 4; // "Offset"
                 return count;
             }
 
-            reader.GMS2BytecodeAddresses.Add(bytecodeAbsoluteAddress);
-
-            long here = reader.Position;
-            reader.Position = bytecodeAbsoluteAddress;
+            long here = reader.AbsPosition;
+            reader.AbsPosition = bytecodeAbsoluteAddress;
 
             // Get instructions counts
             uint instrCount = 0;
             uint instrSubCount = 0;
-            while (reader.Position < bytecodeAbsoluteAddress + length)
+            while (reader.AbsPosition < bytecodeAbsoluteAddress + length)
             {
                 instrCount++;
                 instrSubCount += UndertaleInstruction.UnserializeChildObjectCount(reader);
             }
 
-            reader.InstructionArraysLengths[CurrCodeIndex] = (int)instrCount;
+            reader.BytecodeAddresses.Add(bytecodeAbsoluteAddress, new(instrCount, null));
 
-            reader.Position = here;
+            reader.AbsPosition = here;
             reader.Position += 4; // "Offset"
 
             count += instrCount + instrSubCount;
         }
-
-        CurrCodeIndex++;
 
         return count;
     }
@@ -1614,17 +1635,18 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     }
 
     /// <summary>
-    /// Finds and returns a list of all variables this code entry references.
+    /// Finds and returns a set of all variables this code entry references.
     /// </summary>
-    /// <returns>A list of all variables this code entry references.</returns>
-    public IList<UndertaleVariable> FindReferencedVars()
+    /// <returns>A set of all variables this code entry references.</returns>
+    public ISet<UndertaleVariable> FindReferencedVars()
     {
-        List<UndertaleVariable> vars = new List<UndertaleVariable>();
+        HashSet<UndertaleVariable> vars = new();
         foreach (UndertaleInstruction instr in Instructions)
         {
-            var v = instr.GetReference<UndertaleVariable>()?.Target;
-            if (v != null && !vars.Contains(v))
+            if (instr.GetReference<UndertaleVariable>()?.Target is UndertaleVariable v)
+            {
                 vars.Add(v);
+            }
         }
         return vars;
     }
@@ -1632,17 +1654,45 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     /// <summary>
     /// Finds and returns a list of all local variables this code entry references.
     /// </summary>
-    /// <returns>A list of all local variables this code entry references.</returns>
-    public IList<UndertaleVariable> FindReferencedLocalVars()
+    /// <returns>A set of all local variables this code entry references.</returns>
+    public ISet<UndertaleVariable> FindReferencedLocalVars()
     {
-        return FindReferencedVars().Where((x) => x.InstanceType == UndertaleInstruction.InstanceType.Local).ToList();
+        HashSet<UndertaleVariable> vars = new();
+        foreach (UndertaleInstruction instr in Instructions)
+        {
+            if (instr.GetReference<UndertaleVariable>()?.Target is UndertaleVariable v &&
+                v.InstanceType == UndertaleInstruction.InstanceType.Local)
+            {
+                vars.Add(v);
+            }
+        }
+        return vars;
+    }
+
+    /// <summary>
+    /// Finds and returns the index of the first try variable used, or -1 if none is found.
+    /// </summary>
+    public int FindFirstTryLocalIndex()
+    {
+        const string variablePrefix = "__yy_breakEx";
+        foreach (UndertaleInstruction instr in Instructions)
+        {
+            if (instr.GetReference<UndertaleVariable>()?.Target is UndertaleVariable v &&
+                v.InstanceType == UndertaleInstruction.InstanceType.Local &&
+                v.Name.Content.StartsWith(variablePrefix, StringComparison.Ordinal) &&
+                int.TryParse(v.Name.Content[variablePrefix.Length..], out int index))
+            {
+                return index;
+            }
+        }
+        return -1;
     }
 
     /// <summary>
     /// Append instructions at the end of this code entry.
     /// </summary>
     /// <param name="instructions">The instructions to append.</param>
-    public void Append(IList<UndertaleInstruction> instructions)
+    public void Append(IEnumerable<UndertaleInstruction> instructions)
     {
         if (ParentEntry is not null)
             return;
@@ -1655,87 +1705,13 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     /// Replaces <b>all</b> instructions currently existing in this code entry with another set of instructions.
     /// </summary>
     /// <param name="instructions">The new instructions for this code entry.</param>
-    public void Replace(IList<UndertaleInstruction> instructions)
+    public void Replace(IEnumerable<UndertaleInstruction> instructions)
     {
         if (ParentEntry is not null)
             return;
 
         Instructions.Clear();
         Append(instructions);
-    }
-
-    /// <summary>
-    /// Append GML instructions at the end of this code entry.
-    /// </summary>
-    /// <param name="gmlCode">The GML code to append.</param>
-    /// <param name="data">From which data file the GML code is coming from.</param>
-    /// <exception cref="Exception"> if the GML code does not compile or if there's an error writing the code to the profile entry.</exception>
-    public void AppendGML(string gmlCode, UndertaleData data)
-    {
-        if (ParentEntry is not null)
-            return;
-
-        CompileContext context = Compiler.Compiler.CompileGMLText(gmlCode, data, this);
-        if (!context.SuccessfulCompile || context.HasError)
-        {
-            Console.WriteLine(gmlCode);
-            throw new Exception("GML Compile Error: " + context.ResultError);
-        }
-
-        Append(context.ResultAssembly);
-
-        data.GMLCacheChanged?.Add(Name?.Content);
-
-        try
-        {
-            // Attempt to write text in all modes, because this is a special case.
-            string tempPath = Path.Combine(data.ToolInfo.AppDataProfiles, data.ToolInfo.CurrentMD5, "Temp", Name?.Content + ".gml");
-            if (File.Exists(tempPath))
-            {
-                string readText = File.ReadAllText(tempPath) + "\n" + gmlCode;
-                File.WriteAllText(tempPath, readText);
-            }
-        }
-        catch (Exception exc)
-        {
-            throw new Exception("Error during writing of GML code to profile:\n" + exc);
-        }
-    }
-
-    /// <summary>
-    /// Replaces <b>all</b> instructions currently existing in this code entry with another set of GML instructions.
-    /// </summary>
-    /// <param name="gmlCode">The new GML code for this code entry.</param>
-    /// <param name="data">From which data file the GML code is coming from.</param>
-    /// <exception cref="Exception">If the GML code does not compile or if there's an error writing the code to the profile entry.</exception>
-    public void ReplaceGML(string gmlCode, UndertaleData data)
-    {
-        if (ParentEntry is not null)
-            return;
-
-        CompileContext context = Compiler.Compiler.CompileGMLText(gmlCode, data, this);
-        if (!context.SuccessfulCompile || context.HasError)
-        {
-            Console.WriteLine(gmlCode);
-            throw new Exception("GML Compile Error: " + context.ResultError);
-        }
-
-        Replace(context.ResultAssembly);
-
-        data.GMLCacheChanged?.Add(Name?.Content);
-
-        //TODO: only do this if profile mode is enabled in the first place
-        try
-        {
-            // When necessary, write to profile.
-            string tempPath = Path.Combine(data.ToolInfo.AppDataProfiles, data.ToolInfo.CurrentMD5, "Temp", Name?.Content + ".gml");
-            if (data.ToolInfo.ProfileMode || File.Exists(tempPath))
-                File.WriteAllText(tempPath, gmlCode);
-        }
-        catch (Exception exc)
-        {
-            throw new Exception("Error during writing of GML code to profile:\n" + exc);
-        }
     }
 
     /// <inheritdoc />

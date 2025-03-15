@@ -130,8 +130,7 @@ namespace UndertaleModLib.Decompiler
                         if (line == "<drop>")
                         {
                             instr.JumpOffsetPopenvExitMagic = true;
-                            if (data?.GeneralInfo?.BytecodeVersion <= 14)
-                                instr.JumpOffset = -1048576; // I really don't know at this point. Magic for little endian 00 00 F0
+                            instr.JumpOffset = 0xF00000;
                         }
                         else if (line[0] == '[' && line[^1] == ']')
                             label = line.Substring(1, line.Length - 2);
@@ -172,13 +171,14 @@ namespace UndertaleModLib.Decompiler
                                 instr.Value = ival;
                             else
                             {
-                                if (line.StartsWith("[variable]"))
+                                if (line.StartsWith("[variable]", StringComparison.Ordinal))
                                 {
                                     line = line.Substring("[variable]".Length);
-                                    instr.Value = new UndertaleInstruction.Reference<UndertaleVariable>(data.Variables.EnsureDefined(line,
-                                        UndertaleInstruction.InstanceType.Self, false, data.Strings, data));
+                                    instr.Value = new UndertaleInstruction.Reference<UndertaleVariable>(data.Variables.EnsureDefined(
+                                        data.Strings.MakeString(line, out int nameStringId), nameStringId,
+                                        UndertaleInstruction.InstanceType.Self, false, data));
                                 }
-                                else if (line.StartsWith("[function]"))
+                                else if (line.StartsWith("[function]", StringComparison.Ordinal))
                                 {
                                     line = line.Substring("[function]".Length);
                                     instr.Value = new UndertaleInstruction.Reference<UndertaleFunction>(data.Functions.ByName(line));
@@ -238,7 +238,7 @@ namespace UndertaleModLib.Decompiler
                 case UndertaleInstruction.InstructionType.BreakInstruction:
                     if (breakId != 0)
                     {
-                        instr.Value = breakId;
+                        instr.ExtendedKind = breakId;
                         if (breakId == -11) // pushref
                         {
                             // Parse additional int argument
@@ -257,7 +257,7 @@ namespace UndertaleModLib.Decompiler
                         }
                     }
                     else
-                        instr.Value = Int16.Parse(line);
+                        instr.ExtendedKind = Int16.Parse(line);
                     line = "";
                     break;
             }

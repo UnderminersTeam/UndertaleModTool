@@ -3,7 +3,8 @@ ScriptMessage("DebugMsg - Displays dialogue messages\nwhile debug mode is enable
 
 var code = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data);
 
-code.AppendGML(@"
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+importGroup.QueueAppend(code, @"
 if global.debug 
 {
     draw_set_color(c_white);
@@ -17,7 +18,8 @@ if global.debug
             draw_text(10, (drawYPosition * 15 + 50), currentMessage)
         }
     }
-}", Data);
+}");
+importGroup.Import();
 
 ChangeSelection(code);
 ScriptMessage("DebugMsg - Finished.");

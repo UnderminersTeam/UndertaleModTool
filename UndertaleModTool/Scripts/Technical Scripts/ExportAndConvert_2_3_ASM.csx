@@ -6,12 +6,6 @@ using System.Threading.Tasks;
 
 EnsureDataLoaded();
 
-if (Data.ToolInfo.ProfileMode)
-{
-    ScriptMessage("This script is incompatible with profile mode.");
-    return;
-}
-
 string codeFolder = GetFolder(FilePath) + "Export_Assembly2" + Path.DirectorySeparatorChar;
 
 if (Directory.Exists(codeFolder))

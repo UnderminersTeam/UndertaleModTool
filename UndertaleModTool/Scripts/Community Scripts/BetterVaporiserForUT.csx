@@ -16,6 +16,7 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
     return;
 }
 
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
 
 string bepisCode = "bepis";
 
@@ -155,10 +156,10 @@ if (obj_whtpxlgrav == null)
     return;
 }
 
-obj_whtpxlgrav.EventHandlerFor(EventType.Create, Data).ReplaceGML(@"
+importGroup.QueueReplace(obj_whtpxlgrav.EventHandlerFor(EventType.Create, Data), @"
 image_speed = 0
 delay = 0
-", Data);
+");
 
 // Remove these lines in the code below if you don't want the colour black to be excluded
 // (Causes weird visual effects with the black battle background):
@@ -168,7 +169,7 @@ delay = 0
 //
 // You can also change/copy it to exclude other colours if you need to
 
-obj_whtpxlgrav.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data).ReplaceGML(@"
+importGroup.QueueReplace(obj_whtpxlgrav.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data), @"
 if (image_blend == make_color_rgb(0, 0, 0))
     instance_destroy()
 if (delay > 0)
@@ -181,36 +182,36 @@ else
     hspeed = (random(4) - 2)
     delay = 9999
 }
-", Data);
+");
 
 var obj_vaporized = Data.GameObjects.ByName("obj_vaporized");
 
-obj_vaporized.EventHandlerFor(EventType.Create, Data).ReplaceGML(@"
+importGroup.QueueReplace(obj_vaporized.EventHandlerFor(EventType.Create, Data), @"
 sprite_index = global.monstersprite
 snd_play(snd_vaporized)
-", Data);
+");
 
-obj_vaporized.EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data).ReplaceGML(bepisCode, Data);
+importGroup.QueueReplace(obj_vaporized.EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data), bepisCode);
 
-obj_vaporized.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data).ReplaceGML(@"
+importGroup.QueueReplace(obj_vaporized.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data), @"
 
-", Data);
+");
 
-obj_vaporized.EventHandlerFor(EventType.Alarm, (uint)0u, Data).ReplaceGML(@"
+importGroup.QueueReplace(obj_vaporized.EventHandlerFor(EventType.Alarm, (uint)0u, Data), @"
 
-", Data);
+");
 
 var obj_vaporized_new = Data.GameObjects.ByName("obj_vaporized_new");
 
-obj_vaporized_new.EventHandlerFor(EventType.Create, Data).ReplaceGML(@"
+importGroup.QueueReplace(obj_vaporized_new.EventHandlerFor(EventType.Create, Data), @"
 snd_play(snd_vaporized)
-", Data);
+");
 
-obj_vaporized_new.EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data).ReplaceGML(bepisCode, Data);
+importGroup.QueueReplace(obj_vaporized_new.EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data), bepisCode);
 
 var obj_vaporized_old = Data.GameObjects.ByName("obj_vaporized_old");
 
-obj_vaporized_old.EventHandlerFor(EventType.Create, Data).ReplaceGML(@"
+importGroup.QueueReplace(obj_vaporized_old.EventHandlerFor(EventType.Create, Data), @"
 sprite_index = global.monstersprite
 line = 0
 finished = 0
@@ -218,9 +219,11 @@ ht = sprite_get_height(sprite_index)
 wd = sprite_get_width(sprite_index)
 snd_play(snd_vaporized)
 action_set_alarm(2, 0)
-", Data);
+");
 
-obj_vaporized_old.EventHandlerFor(EventType.Alarm, (uint)0u, Data).ReplaceGML(bepisCode, Data);
+importGroup.QueueReplace(obj_vaporized_old.EventHandlerFor(EventType.Alarm, (uint)0u, Data), bepisCode);
+
+importGroup.Import();
 
 ChangeSelection(obj_whtpxlgrav);
 
