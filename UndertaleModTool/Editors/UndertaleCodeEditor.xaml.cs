@@ -488,8 +488,6 @@ namespace UndertaleModTool
 
         private void DisassembleCode(UndertaleCode code, bool first)
         {
-            code.UpdateAddresses();
-
             string text;
 
             int currLine = 1;

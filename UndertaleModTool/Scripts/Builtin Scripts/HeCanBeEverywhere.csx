@@ -264,7 +264,7 @@ for (int i = 0; i < obj_shop1_Draw.Instructions.Count; i++)
         }
     }
 }
-obj_shop1_Draw.UpdateAddresses();
+obj_shop1_Draw.UpdateLength();
 obj_shop1_Draw.Replace(Assembler.Assemble(obj_shop1_Draw.Disassemble(Data.Variables, Data.CodeLocals?.For(obj_shop1_Draw)), Data)); // TODO: no idea why this is needed
 
 importGroup.QueueReplace(Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f6, Data), @"

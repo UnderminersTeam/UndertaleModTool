@@ -290,11 +290,13 @@ namespace UndertaleModLib.Decompiler
         public static List<UndertaleInstruction> Assemble(string source, IList<UndertaleFunction> funcs, IList<UndertaleVariable> vars, IList<UndertaleString> strg, UndertaleData data = null)
         {
             StringReader strReader = new(source);
-            uint addr = 0;
-            Dictionary<string, uint> labels = new Dictionary<string, uint>();
-            Dictionary<UndertaleInstruction, string> labelTargets = new Dictionary<UndertaleInstruction, string>();
-            List<UndertaleInstruction> instructions = new List<UndertaleInstruction>();
-            Dictionary<string, UndertaleVariable> localvars = new Dictionary<string, UndertaleVariable>();
+
+            Dictionary<string, uint> labels = new();
+            List<(UndertaleInstruction Instruction, uint InstructionAddress, string Label)> labelTargets = new();
+            List<UndertaleInstruction> instructions = new(16);
+            Dictionary<string, UndertaleVariable> localvars = new();
+
+            uint address = 0;
             string fullLine;
             while ((fullLine = strReader.ReadLine()) is not null)
             {
@@ -310,9 +312,7 @@ namespace UndertaleModLib.Decompiler
                     line = line.Substring(2, line.Length - 2).Trim();
                     int space = line.IndexOf(' ', StringComparison.InvariantCulture);
                     string codeName = line.Substring(0, space);
-                    var code = data.Code.ByName(codeName);
-                    if (code == null)
-                        throw new Exception($"Failed to find code entry with name \"{codeName}\".");
+                    UndertaleCode code = data.Code.ByName(codeName) ?? throw new Exception($"Failed to find code entry with name \"{codeName}\".");
                     string info = line.Substring(space + 1);
 
                     Match match = codeEntryRegex.Match(info);
@@ -320,7 +320,7 @@ namespace UndertaleModLib.Decompiler
                         throw new Exception("Sub-code entry format error");
                     code.LocalsCount = ushort.Parse(match.Groups[1].Value);
                     code.ArgumentsCount = ushort.Parse(match.Groups[2].Value);
-                    code.Offset = addr * 4;
+                    code.Offset = address * 4;
                     continue;
                 }
                 if (line[0] == ':' && line.Length >= 3)
@@ -333,7 +333,7 @@ namespace UndertaleModLib.Decompiler
                         {
                             if (labels.ContainsKey(label))
                                 throw new Exception("Duplicate label: " + label);
-                            labels.Add(label, addr);
+                            labels.Add(label, address);
                         }
 
                         continue;
@@ -366,17 +366,16 @@ namespace UndertaleModLib.Decompiler
 
                 string labelTgt;
                 UndertaleInstruction instr = AssembleOne(line, funcs, vars, strg, localvars, out labelTgt, data);
-                instr.Address = addr;
                 if (labelTgt != null)
-                    labelTargets.Add(instr, labelTgt);
+                    labelTargets.Add((instr, address, labelTgt));
 
                 instructions.Add(instr);
 
-                addr += instr.CalculateInstructionSize();
+                address += instr.CalculateInstructionSize();
             }
-            foreach (var pair in labelTargets)
+            foreach ((UndertaleInstruction instr, uint instrAddress, string label) in labelTargets)
             {
-                pair.Key.JumpOffset = (int)labels[pair.Value] - (int)pair.Key.Address;
+                instr.JumpOffset = (int)labels[label] - (int)instrAddress;
             }
             return instructions;
         }

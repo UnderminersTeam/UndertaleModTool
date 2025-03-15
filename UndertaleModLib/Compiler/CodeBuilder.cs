@@ -49,7 +49,6 @@ internal class CodeBuilder : ICodeBuilder
     {
         return new UndertaleInstruction()
         {
-            Address = (uint)(address / 4),
             Kind = MapOpcode(opcode)
         };
     }
@@ -59,7 +58,6 @@ internal class CodeBuilder : ICodeBuilder
     {
         return new UndertaleInstruction()
         {
-            Address = (uint)(address / 4),
             Kind = MapOpcode(opcode),
             Type1 = (UndertaleInstruction.DataType)dataType
         };
@@ -70,7 +68,6 @@ internal class CodeBuilder : ICodeBuilder
     {
         return new UndertaleInstruction()
         {
-            Address = (uint)(address / 4),
             Kind = MapOpcode(opcode),
             Type1 = (UndertaleInstruction.DataType)dataType1,
             Type2 = (UndertaleInstruction.DataType)dataType2
@@ -82,7 +79,6 @@ internal class CodeBuilder : ICodeBuilder
     {
         return new UndertaleInstruction()
         {
-            Address = (uint)(address / 4),
             Kind = MapOpcode(opcode),
             Type1 = (UndertaleInstruction.DataType)dataType1,
             Type2 = (UndertaleInstruction.DataType)dataType2,
@@ -95,7 +91,6 @@ internal class CodeBuilder : ICodeBuilder
     {
         return new UndertaleInstruction()
         {
-            Address = (uint)(address / 4),
             Kind = MapOpcode(opcode),
             Type1 = (UndertaleInstruction.DataType)dataType1,
             Type2 = (UndertaleInstruction.DataType)dataType2,
@@ -108,7 +103,6 @@ internal class CodeBuilder : ICodeBuilder
     {
         return new UndertaleInstruction()
         {
-            Address = (uint)(address / 4),
             Kind = MapOpcode(opcode),
             Type1 = (UndertaleInstruction.DataType)dataType1,
             Type2 = (UndertaleInstruction.DataType)dataType2,
@@ -121,7 +115,6 @@ internal class CodeBuilder : ICodeBuilder
     {
         return new UndertaleInstruction()
         {
-            Address = (uint)(address / 4),
             Kind = MapOpcode(opcode),
             Type1 = (UndertaleInstruction.DataType)dataType1,
             Type2 = (UndertaleInstruction.DataType)dataType2,
@@ -134,7 +127,6 @@ internal class CodeBuilder : ICodeBuilder
     {
         return new UndertaleInstruction()
         {
-            Address = (uint)(address / 4),
             Kind = MapOpcode(opcode),
             ComparisonKind = (UndertaleInstruction.ComparisonType)comparisonType,
             Type1 = (UndertaleInstruction.DataType)dataType1,
@@ -147,7 +139,6 @@ internal class CodeBuilder : ICodeBuilder
     {
         return new UndertaleInstruction()
         {
-            Address = (uint)(address / 4),
             Kind = UndertaleInstruction.Opcode.Break,
             ExtendedKind = (short)extendedOpcode,
             Type1 = UndertaleInstruction.DataType.Int16
@@ -159,7 +150,6 @@ internal class CodeBuilder : ICodeBuilder
     {
         return new UndertaleInstruction()
         {
-            Address = (uint)(address / 4),
             Kind = UndertaleInstruction.Opcode.Break,
             ExtendedKind = (short)extendedOpcode,
             Type1 = UndertaleInstruction.DataType.Int32,
@@ -172,7 +162,6 @@ internal class CodeBuilder : ICodeBuilder
     {
         return new UndertaleInstruction()
         {
-            Address = (uint)(address / 4),
             Kind = UndertaleInstruction.Opcode.Dup,
             Type1 = (UndertaleInstruction.DataType)dataType,
             Extra = duplicationSize
@@ -184,7 +173,6 @@ internal class CodeBuilder : ICodeBuilder
     {
         return new UndertaleInstruction()
         {
-            Address = (uint)(address / 4),
             Kind = UndertaleInstruction.Opcode.Dup,
             Type1 = (UndertaleInstruction.DataType)dataType,
             Extra = duplicationSize,
@@ -197,7 +185,6 @@ internal class CodeBuilder : ICodeBuilder
     {
         return new UndertaleInstruction()
         {
-            Address = (uint)(address / 4),
             Kind = UndertaleInstruction.Opcode.Pop,
             Type1 = UndertaleInstruction.DataType.Int16,
             Type2 = UndertaleInstruction.DataType.Variable,
@@ -210,7 +197,6 @@ internal class CodeBuilder : ICodeBuilder
     {
         return new UndertaleInstruction()
         {
-            Address = (uint)(address / 4),
             Kind = UndertaleInstruction.Opcode.PopEnv,
             JumpOffsetPopenvExitMagic = true,
             JumpOffset = 0xF00000
@@ -222,7 +208,6 @@ internal class CodeBuilder : ICodeBuilder
     {
         return new UndertaleInstruction()
         {
-            Address = (uint)(address / 4),
             Kind = UndertaleInstruction.Opcode.Call,
             Type1 = UndertaleInstruction.DataType.Int32,
             ArgumentsCount = (ushort)argumentCount
@@ -234,7 +219,6 @@ internal class CodeBuilder : ICodeBuilder
     {
         return new UndertaleInstruction()
         {
-            Address = (uint)(address / 4),
             Kind = UndertaleInstruction.Opcode.CallV,
             Type1 = UndertaleInstruction.DataType.Variable,
             Extra = (byte)argumentCount
