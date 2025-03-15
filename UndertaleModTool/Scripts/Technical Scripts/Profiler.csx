@@ -459,6 +459,7 @@ void ProfileModeExempt()
     foreach (UndertaleCode c in Data.Code)
     {
         // global.interact get/set patches
+        uint addr = 0;
         for (int i = 0; i < c.Instructions.Count; i++)
         {
             UndertaleInstruction inst = c.Instructions[i];
@@ -499,25 +500,34 @@ void ProfileModeExempt()
 
                 // Now that instructions were inserted, adjust jump offsets in
                 // surrounding goto instructions to properly reflect that
+                uint adjustAddr = 0;
                 for (int j = 0; j < i; j++)
                 {
                     var currPatch = c.Instructions[j];
                     if (UndertaleInstruction.GetInstructionType(currPatch.Kind) == UndertaleInstruction.InstructionType.GotoInstruction)
                     {
-                        if (currPatch.Address + currPatch.JumpOffset > inst.Address)
+                        if (adjustAddr + currPatch.JumpOffset > addr)
                             currPatch.JumpOffset += 2;
                     }
+                    adjustAddr += currPatch.CalculateInstructionSize();
+                }
+                for (int j = i; j < i + 3; j++)
+                {
+                    adjustAddr += c.Instructions[i].CalculateInstructionSize();
                 }
                 for (int j = i + 3; j < c.Instructions.Count; j++)
                 {
                     var currPatch = c.Instructions[j];
                     if (UndertaleInstruction.GetInstructionType(currPatch.Kind) == UndertaleInstruction.InstructionType.GotoInstruction)
                     {
-                        if (currPatch.Address + currPatch.JumpOffset <= inst.Address)
+                        if (adjustAddr + currPatch.JumpOffset <= addr)
                             currPatch.JumpOffset -= 2;
                     }
+                    adjustAddr += currPatch.CalculateInstructionSize();
                 }
             }
+
+            addr += inst.CalculateInstructionSize();
         }
 
         if (c.Name.Content.StartsWith("gml_Object"))
@@ -553,9 +563,13 @@ void ProfileModeExempt()
             });
 
             // Patch every exit instruction to instead branch to the end of the code
-            c.UpdateAddresses();
-            var last = c.Instructions.Last();
-            uint endAddr = last.Address + last.CalculateInstructionSize();
+            c.UpdateLength();
+            uint endAddr = c.Length / 4;
+            uint exitPatchAddr = 0;
+            for (int i = 0; i < 4; i++)
+            {
+                exitPatchAddr += c.Instructions[i].CalculateInstructionSize();
+            }
             for (int i = 4; i < c.Instructions.Count; i++)
             {
                 if (c.Instructions[i].Kind == UndertaleInstruction.Opcode.Exit)
@@ -563,9 +577,10 @@ void ProfileModeExempt()
                     c.Instructions[i] = new UndertaleInstruction()
                     {
                         Kind = UndertaleInstruction.Opcode.B,
-                        JumpOffset = (int)(endAddr - c.Instructions[i].Address)
+                        JumpOffset = (int)(endAddr - exitPatchAddr)
                     };
                 }
+                exitPatchAddr += c.Instructions[i].CalculateInstructionSize();
             }
 
             // At the end of the code, insert function call to __scr_eventend__
@@ -584,6 +599,7 @@ void ProfileModeExempt()
                     Type1 = UndertaleInstruction.DataType.Variable
                 }
             });
+            c.UpdateLength();
         }
     }
 }

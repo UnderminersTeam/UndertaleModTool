@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text;
 using Underanalyzer;
-using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Util;
 
@@ -248,7 +246,6 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
         GT = 6,
     }
 
-    public uint Address { get; internal set; }
     public Opcode Kind 
     { 
         get => (Opcode)(_firstWord >> 24); 
@@ -474,7 +471,7 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                 if (reference == null)
                     throw new IOException("Failed to find reference at " + addr);
                 reference.Target = obj;
-                addr += (uint)reference.NextOccurrenceOffset;
+                addr += reference.NextOccurrenceOffset;
             }
             obj.NameStringID = (int)reference.NextOccurrenceOffset;
         }
@@ -934,38 +931,38 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
     /// <inheritdoc />
     public override string ToString()
     {
-        return ToString(null);
+        return ToString(null, 0);
     }
-    
+
     /// <summary>
     /// <inheritdoc cref="ToString()"/>
     /// </summary>
-    /// <param name="code">The <see cref="UndertaleCode"/> code entry for which these instructions belong to.</param>
-    /// <param name="blocks">A list of block addresses for the code entry for which these instructions belong to.</param>
+    /// <param name="code">The <see cref="UndertaleCode"/> code entry for which the instruction belongs.</param>
+    /// <param name="address">Address of the instruction within its code entry.</param>
+    /// <param name="blocks">A list of block addresses for the code entry for which the instruction belongs.</param>
     /// <returns></returns>
-    public string ToString(UndertaleCode code, List<uint> blocks = null)
+    public string ToString(UndertaleCode code, uint address, List<uint> blocks = null)
     {
-        StringBuilder sb = new StringBuilder();
-        ToString(sb, code, blocks);
+        StringBuilder sb = new();
+        ToString(sb, code, address, blocks);
         return sb.ToString();
     }
-    
+
     /// <summary>
     /// Inserts a string representation of this object at a specified index in a <see cref="StringBuilder"/>.
     /// </summary>
     /// <param name="stringBuilder">The <see cref="StringBuilder"/> instance on where to insert the string representation.</param>
-    /// <param name="code"><inheritdoc cref="ToString(UndertaleCode, List{uint})"/></param>
-    /// <param name="blocks"><inheritdoc cref="ToString(UndertaleCode, List{uint})"/></param>
+    /// <param name="code"><inheritdoc cref="ToString(UndertaleCode, uint, List{uint})"/></param>
+    /// <param name="address">Address of the instruction within its code entry.</param>
+    /// <param name="blocks"><inheritdoc cref="ToString(UndertaleCode, uint, List{uint})"/></param>
     /// <param name="index">The index on where to insert the string representation. If this is <see langword="null"/>
     /// it will use <paramref name="stringBuilder.Length"/> as the index instead.</param>
     /// <remarks>Note that performance of this function can be drastically different, depending on <paramref name="index"/>.
     /// For best results, it's recommended to leave it at <see langword="null"/>.</remarks>
-    public void ToString(StringBuilder stringBuilder, UndertaleCode code, List<uint> blocks = null, int? index = null)
+    public void ToString(StringBuilder stringBuilder, UndertaleCode code, uint address, List<uint> blocks = null, int? index = null)
     {
-        if (index is null)
-            index = stringBuilder.Length;
-
-        StringBuilderHelper sbh = new StringBuilderHelper(index.Value);
+        index ??= stringBuilder.Length;
+        StringBuilderHelper sbh = new(index.Value);
         
         string kind = Kind.ToString();
         var type = GetInstructionType(Kind);
@@ -1027,14 +1024,14 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
             case InstructionType.GotoInstruction:
                 sbh.Append(stringBuilder, ' ');
                 string targetGoto;
-                if (code is not null && Address + JumpOffset == code.Length / 4)
+                if (code is not null && address + JumpOffset == code.Length / 4)
                     targetGoto = "[end]";
                 else if (JumpOffsetPopenvExitMagic)
                     targetGoto = "<drop>";
                 else if (blocks is not null)
-                    targetGoto = $"[{blocks.IndexOf((uint)(Address + JumpOffset))}]";
+                    targetGoto = $"[{blocks.IndexOf((uint)(address + JumpOffset))}]";
                 else
-                    targetGoto = (Address + JumpOffset).ToString("D5");
+                    targetGoto = (address + JumpOffset).ToString("D5");
                 sbh.Append(stringBuilder, targetGoto);
                 break;
 
@@ -1506,10 +1503,7 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
             Instructions.Capacity = (int)reader.BytecodeAddresses[(uint)instructionStartPos].InstructionCount;
             while (reader.AbsPosition < instructionEndPos)
             {
-                uint address = (uint)(reader.AbsPosition - instructionStartPos) / 4;
-                UndertaleInstruction instr = reader.ReadUndertaleObject<UndertaleInstruction>();
-                instr.Address = address;
-                Instructions.Add(instr);
+                Instructions.Add(reader.ReadUndertaleObject<UndertaleInstruction>());
             }
 
             // Set this flag for code editor, etc. to not get confused later
@@ -1556,10 +1550,7 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
                 Instructions.Capacity = (int)info.InstructionCount;
                 while (reader.AbsPosition < instructionEndPos)
                 {
-                    uint address = (uint)(reader.AbsPosition - instructionStartPos) / 4;
-                    UndertaleInstruction instr = reader.ReadUndertaleObject<UndertaleInstruction>();
-                    instr.Address = address;
-                    Instructions.Add(instr);
+                    Instructions.Add(reader.ReadUndertaleObject<UndertaleInstruction>());
                 }
 
                 // Return from instruction blob
@@ -1633,33 +1624,17 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
         return count;
     }
 
-    public void UpdateAddresses()
+    /// <summary>
+    /// Recalculates this code entry's length, based on the size of all instructions contained within.
+    /// </summary>
+    public void UpdateLength()
     {
         uint addr = 0;
         foreach (UndertaleInstruction instr in Instructions)
         {
-            instr.Address = addr;
             addr += instr.CalculateInstructionSize();
         }
         Length = addr * 4;
-    }
-
-    public UndertaleInstruction GetInstructionFromAddress(uint address)
-    {
-        UpdateAddresses();
-        foreach (UndertaleInstruction instr in Instructions)
-            if (instr.Address == address)
-                return instr;
-        return null;
-    }
-
-    public UndertaleInstruction GetInstructionBeforeAddress(uint address)
-    {
-        UpdateAddresses();
-        foreach (UndertaleInstruction instr in Instructions)
-            if (instr.Address + instr.CalculateInstructionSize() == address)
-                return instr;
-        return null;
     }
 
     /// <summary>
@@ -1726,7 +1701,7 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
             return;
 
         Instructions.AddRange(instructions);
-        UpdateAddresses();
+        UpdateLength();
     }
 
     /// <summary>

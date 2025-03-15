@@ -1179,11 +1179,13 @@ namespace UndertaleModTool
                                 StringBuilder sb = new StringBuilder();
                                 UndertaleDebugInfo debugInfo = new UndertaleDebugInfo();
 
+                                uint addr = 0;
                                 foreach (var instr in code.Instructions)
                                 {
                                     if (debugMode == DebugDataDialog.DebugDataMode.FullAssembler || instr.Kind == UndertaleInstruction.Opcode.Pop || instr.Kind == UndertaleInstruction.Opcode.Popz || instr.Kind == UndertaleInstruction.Opcode.B || instr.Kind == UndertaleInstruction.Opcode.Bt || instr.Kind == UndertaleInstruction.Opcode.Bf || instr.Kind == UndertaleInstruction.Opcode.Ret || instr.Kind == UndertaleInstruction.Opcode.Exit)
-                                        debugInfo.Add(new UndertaleDebugInfo.DebugInfoPair() { SourceCodeOffset = (uint)sb.Length, BytecodeOffset = instr.Address * 4 });
-                                    instr.ToString(sb, code);
+                                        debugInfo.Add(new UndertaleDebugInfo.DebugInfoPair() { SourceCodeOffset = (uint)sb.Length, BytecodeOffset = addr * 4 });
+                                    instr.ToString(sb, code, addr);
+                                    addr += instr.CalculateInstructionSize();
                                     sb.Append('\n');
                                 }
                                 outputs[i] = sb.ToString();
