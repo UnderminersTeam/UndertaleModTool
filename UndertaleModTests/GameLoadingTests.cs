@@ -59,10 +59,10 @@ namespace UndertaleModTests
                 bool knownBug = false;
                 foreach(var instr in code.Instructions)
                 {
-                    if (instr.Value?.GetType() == typeof(UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>))
+                    if (instr.ValueString is not null)
                     {
-                        UndertaleString str = ((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)instr.Value).Resource;
-                        if (str.Content.Contains("\n") || str.Content.Contains("\"")) // see #28
+                        UndertaleString str = instr.ValueString.Resource;
+                        if (str.Content.Contains('\n') || str.Content.Contains('"')) // see #28
                             knownBug = true;
                     }
                 }
@@ -99,22 +99,21 @@ namespace UndertaleModTests
                     Assert.AreEqual(code.Instructions[i].JumpOffsetPopenvExitMagic, reasm[i].JumpOffsetPopenvExitMagic, errMsg);
                     if (!code.Instructions[i].JumpOffsetPopenvExitMagic)
                         Assert.AreEqual(code.Instructions[i].JumpOffset, reasm[i].JumpOffset, errMsg); // note: also handles IntArgument implicitly
-                    Assert.AreSame(code.Instructions[i].Destination?.Target, reasm[i].Destination?.Target, errMsg);
-                    Assert.AreEqual(code.Instructions[i].Destination?.Type, reasm[i].Destination?.Type, errMsg);
-                    Assert.AreSame(code.Instructions[i].Function?.Target, reasm[i].Function?.Target, errMsg);
-                    Assert.AreEqual(code.Instructions[i].Function?.Type, reasm[i].Function?.Type, errMsg);
+                    Assert.AreSame(code.Instructions[i].ValueVariable?.Target, reasm[i].ValueVariable?.Target, errMsg);
+                    Assert.AreEqual(code.Instructions[i].ValueVariable?.Type, reasm[i].ValueVariable?.Type, errMsg);
+                    Assert.AreSame(code.Instructions[i].ValueFunction?.Target, reasm[i].ValueFunction?.Target, errMsg);
+                    Assert.AreEqual(code.Instructions[i].ValueFunction?.Type, reasm[i].ValueFunction?.Type, errMsg);
 
-                    Assert.AreEqual(code.Instructions[i].Value?.GetType(), reasm[i].Value?.GetType(), errMsg);
-                    if (code.Instructions[i].Value?.GetType() == typeof(double))
-                        Assert.AreEqual((double)code.Instructions[i].Value, (double)reasm[i].Value, Math.Abs((double)code.Instructions[i].Value) * (1e-5), errMsg); // see issue #53
-                    else if (code.Instructions[i].Value?.GetType() == typeof(float))
-                        Assert.AreEqual((float)code.Instructions[i].Value, (float)reasm[i].Value, Math.Abs((float)code.Instructions[i].Value) * (1e-5), errMsg); // see issue #53
-                    else if (code.Instructions[i].Value?.GetType() == typeof(UndertaleInstruction.Reference<UndertaleVariable>))
-                        Assert.AreSame(((UndertaleInstruction.Reference<UndertaleVariable>)code.Instructions[i].Value).Target, ((UndertaleInstruction.Reference<UndertaleVariable>)reasm[i].Value).Target, errMsg);
-                    else if (code.Instructions[i].Value?.GetType() == typeof(UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>))
-                        Assert.AreSame(((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)code.Instructions[i].Value).Resource, ((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)reasm[i].Value).Resource, errMsg);
+                    if (code.Instructions[i].Kind == UndertaleInstruction.Opcode.Push && code.Instructions[i].Type1 == UndertaleInstruction.DataType.Double)
+                        Assert.AreEqual(code.Instructions[i].ValueDouble, reasm[i].ValueDouble, Math.Abs(code.Instructions[i].ValueDouble) * (1e-5), errMsg); // see issue #53
+                    else if (code.Instructions[i].ValueString is not null)
+                        Assert.AreSame(code.Instructions[i].ValueString.Resource, reasm[i].ValueString?.Resource, errMsg);
                     else
-                        Assert.AreEqual(code.Instructions[i].Value, reasm[i].Value, errMsg);
+                    {
+                        Assert.AreEqual(code.Instructions[i].ValueShort, reasm[i].ValueShort, errMsg);
+                        Assert.AreEqual(code.Instructions[i].ValueInt, reasm[i].ValueInt, errMsg);
+                        Assert.AreEqual(code.Instructions[i].ValueLong, reasm[i].ValueLong, errMsg);
+                    }
                 }
             });
         }

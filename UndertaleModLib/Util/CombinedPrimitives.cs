@@ -1,9 +1,10 @@
 ﻿using System.Runtime.InteropServices;
+using UndertaleModLib.Models;
 
 namespace UndertaleModLib.Util;
 
 /// <summary>
-/// Floating point storage, explicitly defined with a backing type as an integer.
+/// 32-bit floating point or integer storage, explicitly defined with a backing type as an integer.
 /// </summary>
 /// <remarks>
 /// This helps prevent issues with negative zero being inconsistently handled.
@@ -55,5 +56,48 @@ internal readonly struct FloatAsInt
     public uint AsUInt()
     {
         return _uint;
+    }
+}
+
+/// <summary>
+/// Storage for int, long, and double, taking exactly the size of a long (64 bits).
+/// </summary>
+/// <remarks>
+/// This is used to compact data sizes on <see cref="UndertaleInstruction"/>.
+/// </remarks>
+[StructLayout(LayoutKind.Explicit)]
+internal readonly struct InstructionPrimitiveType
+{
+    [FieldOffset(0)]
+    public readonly int AsInt;
+
+    [FieldOffset(0)]
+    public readonly double AsDouble;
+
+    [FieldOffset(0)]
+    public readonly long AsLong;
+
+    /// <summary>
+    /// Constructs from the given 32-bit integer.
+    /// </summary>
+    public InstructionPrimitiveType(int value)
+    {
+        AsInt = value;
+    }
+
+    /// <summary>
+    /// Constructs from the given 64-bit integer.
+    /// </summary>
+    public InstructionPrimitiveType(double value)
+    {
+        AsDouble = value;
+    }
+
+    /// <summary>
+    /// Constructs from the given 64-bit integer.
+    /// </summary>
+    public InstructionPrimitiveType(long value)
+    {
+        AsLong = value;
     }
 }
