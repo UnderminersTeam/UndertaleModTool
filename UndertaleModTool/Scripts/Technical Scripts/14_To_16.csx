@@ -69,7 +69,7 @@ If they do, you may file an issue on GitHub, but no warranty is given."); // War
                     {
                         if (i.Kind == UndertaleInstruction.Opcode.PushI)
                         {
-                            type = (UndertaleInstruction.InstanceType)(short)i.Value;
+                            type = (UndertaleInstruction.InstanceType)i.ValueShort;
                             break;
                         }
                         else if (i.Kind == UndertaleInstruction.Opcode.Dup)
@@ -81,26 +81,26 @@ If they do, you may file an issue on GitHub, but no warranty is given."); // War
                     }
                 }
                 // Do what you want to with `type` here
-                variable = curr.Destination?.Target;
+                variable = curr.ValueVariable?.Target;
                 if(variable != null && true)
                 {
-                    if (curr.Destination.Type == UndertaleInstruction.VariableType.StackTop && curr.Destination.Target.InstanceType == UndertaleInstruction.InstanceType.Undefined)
+                    if (curr.ValueVariable.Type == UndertaleInstruction.VariableType.StackTop && curr.ValueVariable.Target.InstanceType == UndertaleInstruction.InstanceType.Undefined)
                     {
-                        curr.Destination.Target.InstanceType = UndertaleInstruction.InstanceType.Self;
+                        curr.ValueVariable.Target.InstanceType = UndertaleInstruction.InstanceType.Self;
                     }
-                    if (list.GlobalNotArray.ContainsKey(curr.Destination?.Target.Name.Content))
+                    if (list.GlobalNotArray.ContainsKey(curr.ValueVariable?.Target.Name.Content))
                     {
                         if (curr.Kind == UndertaleInstruction.Opcode.Push)
                             curr.Kind = UndertaleInstruction.Opcode.PushBltn;
                         variable.InstanceType = UndertaleInstruction.InstanceType.Self;
                         variable.VarID = -6;
                     }
-                    if (list.GlobalArray.ContainsKey(curr.Destination?.Target.Name.Content))
+                    if (list.GlobalArray.ContainsKey(curr.ValueVariable?.Target.Name.Content))
                     {
                         variable.InstanceType = UndertaleInstruction.InstanceType.Self;
                         variable.VarID = -6;
                     }
-                    if (list.Instance.ContainsKey(curr.Destination?.Target.Name.Content))
+                    if (list.Instance.ContainsKey(curr.ValueVariable?.Target.Name.Content))
                     {
                         variable.InstanceType = UndertaleInstruction.InstanceType.Self;
                         variable.VarID = -6;
@@ -133,9 +133,9 @@ If they do, you may file an issue on GitHub, but no warranty is given."); // War
     {
         for (int j = 0; j < code.Instructions.Count; j++)
         {
-            if (code.Instructions[j].Value != null)
+            if (code.Instructions[j].ValueVariable != null)
             {
-                var evalme = code.Instructions[j].Value.ToString().Replace("\"", "").Replace("@", "");
+                var evalme = code.Instructions[j].ValueVariable.ToString().Replace("\"", "").Replace("@", "");
                 if ((list.GlobalNotArray.ContainsKey(evalme)) || (list.GlobalArray.ContainsKey(evalme)))
                 {
                     code.Instructions[j].Kind = UndertaleInstruction.Opcode.PushBltn;
@@ -322,11 +322,11 @@ public static int CalculateStackDiff(UndertaleInstruction instr)
             return 0;
 
         case UndertaleInstruction.Opcode.Pop:
-            if (instr.Destination == null)
+            if (instr.ValueVariable == null)
                 return instr.SwapExtra - 6;
-            if (instr.Destination.Type == UndertaleModLib.Models.UndertaleInstruction.VariableType.StackTop)
+            if (instr.ValueVariable.Type == UndertaleModLib.Models.UndertaleInstruction.VariableType.StackTop)
                 return -1 - 1;
-            if (instr.Destination.Type == UndertaleModLib.Models.UndertaleInstruction.VariableType.Array)
+            if (instr.ValueVariable.Type == UndertaleModLib.Models.UndertaleInstruction.VariableType.Array)
                 return -1 - 2;
             return -1;
 
@@ -335,11 +335,11 @@ public static int CalculateStackDiff(UndertaleInstruction instr)
         case UndertaleInstruction.Opcode.PushGlb:
         case UndertaleInstruction.Opcode.PushBltn:
         case UndertaleInstruction.Opcode.PushI:
-            if (instr.Value is UndertaleModLib.Models.UndertaleInstruction.Reference<UndertaleVariable>)
+            if (instr.ValueVariable is UndertaleModLib.Models.UndertaleInstruction.Reference<UndertaleVariable>)
             {
-                if ((instr.Value as UndertaleModLib.Models.UndertaleInstruction.Reference<UndertaleVariable>).Type == UndertaleModLib.Models.UndertaleInstruction.VariableType.StackTop)
+                if ((instr.ValueVariable as UndertaleModLib.Models.UndertaleInstruction.Reference<UndertaleVariable>).Type == UndertaleModLib.Models.UndertaleInstruction.VariableType.StackTop)
                     return 1 - 1;
-                if ((instr.Value as UndertaleModLib.Models.UndertaleInstruction.Reference<UndertaleVariable>).Type == UndertaleModLib.Models.UndertaleInstruction.VariableType.Array)
+                if ((instr.ValueVariable as UndertaleModLib.Models.UndertaleInstruction.Reference<UndertaleVariable>).Type == UndertaleModLib.Models.UndertaleInstruction.VariableType.Array)
                     return 1 - 2;
             }
             return 1;

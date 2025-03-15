@@ -55,11 +55,3 @@ void DumpCode(UndertaleCode code)
 
     IncrementProgressParallel();
 }
-void DumpCachedCode(KeyValuePair<string, string> code)
-{
-    string path = Path.Combine(codeFolder, code.Key + ".gml");
-
-    File.WriteAllText(path, code.Value);
-
-    IncrementProgressParallel();
-}

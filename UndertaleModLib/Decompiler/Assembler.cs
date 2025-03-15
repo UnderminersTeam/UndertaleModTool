@@ -150,7 +150,7 @@ namespace UndertaleModLib.Decompiler
                     else
                     {
                         UndertaleInstruction.InstanceType inst = instr.TypeInst;
-                        instr.Destination = ParseVariableReference(line, vars, localvars, ref inst, instr, data);
+                        instr.ValueVariable = ParseVariableReference(line, vars, localvars, ref inst, instr, data);
                         instr.TypeInst = inst;
                     }
                     line = "";
@@ -160,64 +160,70 @@ namespace UndertaleModLib.Decompiler
                     switch (instr.Type1)
                     {
                         case UndertaleInstruction.DataType.Double:
-                            instr.Value = Double.Parse(line, CultureInfo.InvariantCulture);
-                            break;
-                        case UndertaleInstruction.DataType.Float:
-                            instr.Value = Single.Parse(line, CultureInfo.InvariantCulture);
+                            instr.ValueDouble = double.Parse(line, CultureInfo.InvariantCulture);
                             break;
                         case UndertaleInstruction.DataType.Int32:
-                            int ival;
-                            if (Int32.TryParse(line, out ival))
-                                instr.Value = ival;
+                            if (int.TryParse(line, out int ival))
+                            {
+                                instr.ValueInt = ival;
+                            }
                             else
                             {
                                 if (line.StartsWith("[variable]", StringComparison.Ordinal))
                                 {
-                                    line = line.Substring("[variable]".Length);
-                                    instr.Value = new UndertaleInstruction.Reference<UndertaleVariable>(data.Variables.EnsureDefined(
+                                    line = line["[variable]".Length..];
+                                    instr.ValueVariable = new UndertaleInstruction.Reference<UndertaleVariable>(data.Variables.EnsureDefined(
                                         data.Strings.MakeString(line, out int nameStringId), nameStringId,
                                         UndertaleInstruction.InstanceType.Self, false, data));
                                 }
                                 else if (line.StartsWith("[function]", StringComparison.Ordinal))
                                 {
-                                    line = line.Substring("[function]".Length);
-                                    instr.Value = new UndertaleInstruction.Reference<UndertaleFunction>(data.Functions.ByName(line));
+                                    line = line["[function]".Length..];
+                                    instr.ValueFunction = new UndertaleInstruction.Reference<UndertaleFunction>(data.Functions.ByName(line));
                                 }
                                 else
                                 {
-                                    var f = data.Functions.ByName(line);
-                                    if (f == null)
-                                        instr.Value = (int)ParseResourceName(line, data);
+                                    if (data.Functions.ByName(line) is UndertaleFunction f)
+                                    {
+                                        instr.ValueFunction = new UndertaleInstruction.Reference<UndertaleFunction>(f);
+                                    }
                                     else
-                                        instr.Value = new UndertaleInstruction.Reference<UndertaleFunction>(f);
+                                    {
+                                        instr.ValueInt = ParseResourceName(line, data);
+                                    }
                                 }
                             }
                             break;
                         case UndertaleInstruction.DataType.Int64:
-                            long lval;
-                            if (Int64.TryParse(line, out lval))
-                                instr.Value = lval;
+                            if (long.TryParse(line, out long lval))
+                            {
+                                instr.ValueLong = lval;
+                            }
                             else
-                                instr.Value = (long)ParseResourceName(line, data);
-                            break;
-                        case UndertaleInstruction.DataType.Boolean:
-                            instr.Value = bool.Parse(line);
+                            {
+                                instr.ValueLong = ParseResourceName(line, data);
+                            }
                             break;
                         case UndertaleInstruction.DataType.Variable:
                             UndertaleInstruction.InstanceType inst2 = instr.TypeInst;
-                            instr.Value = ParseVariableReference(line, vars, localvars, ref inst2, instr, data);
+                            instr.ValueVariable = ParseVariableReference(line, vars, localvars, ref inst2, instr, data);
                             instr.TypeInst = inst2;
                             break;
                         case UndertaleInstruction.DataType.String:
-                            instr.Value = ParseStringReference(line, strg);
+                            instr.ValueString = ParseStringReference(line, strg);
                             break;
                         case UndertaleInstruction.DataType.Int16:
-                            short sval;
-                            if (Int16.TryParse(line, out sval))
-                                instr.Value = sval;
+                            if (short.TryParse(line, out short sval))
+                            {
+                                instr.ValueShort = sval;
+                            }
                             else
-                                instr.Value = (short)ParseResourceName(line, data);
+                            {
+                                instr.ValueShort = (short)ParseResourceName(line, data);
+                            }
                             break;
+                        default:
+                            throw new Exception("Invalid push data type");
                     }
                     line = "";
                     break;
@@ -230,7 +236,7 @@ namespace UndertaleModLib.Decompiler
                     UndertaleFunction func = funcs.ByName(match.Groups[1].Value);
                     if (func == null)
                         throw new Exception("Function not found: " + match.Groups[1].Value);
-                    instr.Function = new UndertaleInstruction.Reference<UndertaleFunction>() { Target = func };
+                    instr.ValueFunction = new UndertaleInstruction.Reference<UndertaleFunction>() { Target = func };
                     instr.ArgumentsCount = UInt16.Parse(match.Groups[2].Value);
                     line = "";
                     break;
@@ -252,7 +258,7 @@ namespace UndertaleModLib.Decompiler
                                 var f = data.Functions.ByName(line);
                                 if (f == null)
                                     throw new Exception("Function in pushref not found: " + line);
-                                instr.Function = new UndertaleInstruction.Reference<UndertaleFunction>(f);
+                                instr.ValueFunction = new UndertaleInstruction.Reference<UndertaleFunction>(f);
                             }
                         }
                     }

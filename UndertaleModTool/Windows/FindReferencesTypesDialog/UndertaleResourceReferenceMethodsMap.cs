@@ -421,9 +421,7 @@ namespace UndertaleModTool.Windows
                                     stringRefs = stringReferences.Where(x => x.Value.Contains(obj))
                                                                  .Select(x => x.Key);
                                 else
-                                    stringRefs = data.Code.Where(x => x.Instructions.Any(
-                                                                        i => i.Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG> strPtr
-                                                                             && strPtr.Resource == obj));
+                                    stringRefs = data.Code.Where(x => x.Instructions.Any(i => i.ValueString?.Resource == obj));
 
                                 codeEntries = codeEntries.Concat(stringRefs);
 
@@ -1245,10 +1243,7 @@ namespace UndertaleModTool.Windows
                                 funcRefs = funcReferences.Where(x => x.Value.Contains(obj))
                                                          .Select(x => x.Key);
                             else
-                                funcRefs = data.Code.Where(x => x.Instructions.Any(
-                                                                  i => i.Function?.Target == obj
-                                                                       || i.Value is UndertaleInstruction.Reference<UndertaleFunction> funcRef
-                                                                          && funcRef.Target == obj));
+                                funcRefs = data.Code.Where(x => x.Instructions.Any(i => i.ValueFunction?.Target == obj));
                             if (funcRefs.Any())
                                 return new() { { "Code", checkOne ? funcRefs.ToEmptyArray() : funcRefs.ToArray() } };
                             else
@@ -1277,10 +1272,7 @@ namespace UndertaleModTool.Windows
                                 variRefs = variReferences.Where(x => x.Value.Contains(obj))
                                                          .Select(x => x.Key);
                             else
-                                variRefs = data.Code.Where(x => x.Instructions.Any(
-                                                                  i => i.Destination?.Target == obj
-                                                                       || i.Value is UndertaleInstruction.Reference<UndertaleVariable> varRef
-                                                                          && varRef.Target == obj));
+                                variRefs = data.Code.Where(x => x.Instructions.Any(i => i.ValueVariable?.Target == obj));
                             if (variRefs.Any())
                                 return new() { { "Code", checkOne ? variRefs.ToEmptyArray() : variRefs.ToArray() } };
                             else
@@ -1488,18 +1480,14 @@ namespace UndertaleModTool.Windows
                 var variables = new HashSet<UndertaleVariable>();
                 foreach (var inst in code.Instructions)
                 {
-                    if (inst.Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG> strPtr)
-                        strings.Add(strPtr.Resource);
+                    if (inst.ValueString?.Resource is UndertaleString str)
+                        strings.Add(str);
 
-                    if (inst.Destination?.Target is not null)
-                        variables.Add(inst.Destination.Target);
-                    if (inst.Value is UndertaleInstruction.Reference<UndertaleVariable> varRef && varRef.Target is not null)
-                        variables.Add(varRef.Target);
+                    if (inst.ValueVariable?.Target is UndertaleVariable variable)
+                        variables.Add(variable);
 
-                    if (inst.Function?.Target is not null)
-                        functions.Add(inst.Function.Target);
-                    if (inst.Value is UndertaleInstruction.Reference<UndertaleFunction> funcRef && funcRef.Target is not null)
-                        functions.Add(funcRef.Target);
+                    if (inst.ValueFunction?.Target is UndertaleFunction function)
+                        functions.Add(function);
                 }
 
                 if (strings.Count != 0)

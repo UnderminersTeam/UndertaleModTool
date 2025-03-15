@@ -132,10 +132,9 @@ uint[] GetStringUsageCount()
             {
                 if ((int)Instruction.Kind == 0xC0 && (int)Instruction.Type1 == 6)
                 {
-                    if (((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Instruction.Value).Resource != null)
+                    if (Instruction.ValueString?.Resource is UndertaleString str)
                     {
-                        if ((((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Instruction.Value).Resource) != null)
-                            stringsUsageCountArray[Data.Strings.IndexOf(((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Instruction.Value).Resource)] += 1;
+                        stringsUsageCountArray[Data.Strings.IndexOf(str)] += 1;
                     }
                 }
             }

@@ -86,7 +86,7 @@ internal class CodeBuilder : ICodeBuilder
             Kind = MapOpcode(opcode),
             Type1 = (UndertaleInstruction.DataType)dataType1,
             Type2 = (UndertaleInstruction.DataType)dataType2,
-            Value = value
+            ValueShort = value
         };
     }
 
@@ -99,7 +99,7 @@ internal class CodeBuilder : ICodeBuilder
             Kind = MapOpcode(opcode),
             Type1 = (UndertaleInstruction.DataType)dataType1,
             Type2 = (UndertaleInstruction.DataType)dataType2,
-            Value = value
+            ValueInt = value
         };
     }
 
@@ -112,7 +112,7 @@ internal class CodeBuilder : ICodeBuilder
             Kind = MapOpcode(opcode),
             Type1 = (UndertaleInstruction.DataType)dataType1,
             Type2 = (UndertaleInstruction.DataType)dataType2,
-            Value = value
+            ValueLong = value
         };
     }
 
@@ -125,7 +125,7 @@ internal class CodeBuilder : ICodeBuilder
             Kind = MapOpcode(opcode),
             Type1 = (UndertaleInstruction.DataType)dataType1,
             Type2 = (UndertaleInstruction.DataType)dataType2,
-            Value = value
+            ValueDouble = value
         };
     }
 
@@ -286,16 +286,7 @@ internal class CodeBuilder : ICodeBuilder
             }
 
             // Update instruction
-            if (utInstruction.Kind == UndertaleInstruction.Opcode.Pop)
-            {
-                // Pop instruction, set instruction's destination
-                utInstruction.Destination = reference;
-            }
-            else
-            {
-                // All other instructions, just set instruction's value
-                utInstruction.Value = reference;
-            }
+            utInstruction.ValueVariable = reference;
             if (variableType is VariableType.Normal or VariableType.Instance)
             {
                 utInstruction.TypeInst = (UndertaleInstruction.InstanceType)instructionInstanceType;
@@ -338,14 +329,7 @@ internal class CodeBuilder : ICodeBuilder
             }
 
             // Put reference on instruction
-            if (utInstruction.Kind == UndertaleInstruction.Opcode.Push)
-            {
-                utInstruction.Value = reference;
-            }
-            else
-            {
-                utInstruction.Function = reference;
-            }
+            utInstruction.ValueFunction = reference;
         }
     }
 
@@ -359,14 +343,7 @@ internal class CodeBuilder : ICodeBuilder
                 functionEntry.Function as UndertaleFunction ?? throw new InvalidOperationException("Function not resolved for function entry"));
 
             // Put reference on instruction
-            if (utInstruction.Kind == UndertaleInstruction.Opcode.Push)
-            {
-                utInstruction.Value = reference;
-            }
-            else
-            {
-                utInstruction.Function = reference;
-            }
+            utInstruction.ValueFunction = reference;
         }
     }
 
@@ -379,7 +356,7 @@ internal class CodeBuilder : ICodeBuilder
             UndertaleString str = _globalContext.CurrentCompileGroup.MakeString(stringContent, out int strIndex);
 
             // Update instruction
-            utInstruction.Value = new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>(str, strIndex); 
+            utInstruction.ValueString = new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>(str, strIndex); 
         }
     }
 
@@ -390,7 +367,7 @@ internal class CodeBuilder : ICodeBuilder
         {
             if (utInstruction.Kind == UndertaleInstruction.Opcode.Push)
             {
-                utInstruction.Value = value;
+                utInstruction.ValueInt = value;
             }
             else
             {
