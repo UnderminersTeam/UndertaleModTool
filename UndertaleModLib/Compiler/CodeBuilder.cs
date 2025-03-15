@@ -242,12 +242,12 @@ internal class CodeBuilder : ICodeBuilder
     }
 
     /// <inheritdoc/>
-    public void PatchInstruction(IGMInstruction instruction, string variableName, InstanceType variableInstanceType, InstanceType instructionInstanceType, VariableType variableType, bool isBuiltin, bool isStructVariable)
+    public void PatchInstruction(IGMInstruction instruction, string variableName, InstanceType variableInstanceType, InstanceType instructionInstanceType, VariableType variableType, bool isBuiltin, bool keepInstanceType)
     {
         if (instruction is UndertaleInstruction utInstruction)
         {
             // Transform instance type into Self when not using simple variables, either in GMLv2 or when instance type is an object/instance
-            if (!isStructVariable && (variableInstanceType >= 0 || _globalContext.UsingGMLv2) && variableType != VariableType.Normal && variableType != VariableType.Instance)
+            if (!keepInstanceType && (variableInstanceType >= 0 || _globalContext.UsingGMLv2) && variableType != VariableType.Normal && variableType != VariableType.Instance)
             {
                 variableInstanceType = InstanceType.Self;
                 instructionInstanceType = InstanceType.Self;
@@ -409,9 +409,7 @@ internal class CodeBuilder : ICodeBuilder
     /// <inheritdoc/>
     public int GenerateTryVariableID(int internalIndex)
     {
-        // Use the internal index that the compiler generates for now
-        // TODO: possibly allow compile context user to specify that this index should be global to the compile context?
-        return internalIndex;
+        return _globalContext.CurrentCompileGroup.NextTryVariableIndex++;
     }
 
     /// <inheritdoc/>

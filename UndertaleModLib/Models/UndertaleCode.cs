@@ -1670,6 +1670,25 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     }
 
     /// <summary>
+    /// Finds and returns the index of the first try variable used, or -1 if none is found.
+    /// </summary>
+    public int FindFirstTryLocalIndex()
+    {
+        const string variablePrefix = "__yy_breakEx";
+        foreach (UndertaleInstruction instr in Instructions)
+        {
+            if (instr.GetReference<UndertaleVariable>()?.Target is UndertaleVariable v &&
+                v.InstanceType == UndertaleInstruction.InstanceType.Local &&
+                v.Name.Content.StartsWith(variablePrefix, StringComparison.Ordinal) &&
+                int.TryParse(v.Name.Content[variablePrefix.Length..], out int index))
+            {
+                return index;
+            }
+        }
+        return -1;
+    }
+
+    /// <summary>
     /// Append instructions at the end of this code entry.
     /// </summary>
     /// <param name="instructions">The instructions to append.</param>

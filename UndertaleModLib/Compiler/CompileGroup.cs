@@ -6,6 +6,7 @@ using Underanalyzer.Compiler.Bytecode;
 using Underanalyzer.Compiler.Errors;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
+using UndertaleModLib.Util;
 
 namespace UndertaleModLib.Compiler;
 
@@ -43,6 +44,11 @@ public sealed class CompileGroup
     /// Hash code of the name of the current code entry being compiled.
     /// </summary>
     internal int CurrentCodeEntryNameHash { get; private set; }
+
+    /// <summary>
+    /// During main compile (not linking), this is the next try variable index that should be used.
+    /// </summary>
+    internal int NextTryVariableIndex { get; set; } = 0;
 
     /// <summary>
     /// Stores a code entry and corresponding GML code to be compiled during an operation.
@@ -380,12 +386,17 @@ public sealed class CompileGroup
             // Guess script kind and global script name, based on code entry name
             (CompileScriptKind scriptKind, string globalScriptName) = GuessScriptKindFromName(operation.CodeEntry.Name?.Content);
 
-            // Prepare for array copy-on-write
-            CurrentCodeEntryNameHash = operation.CodeEntry.Name.Content.GetHashCode();
-            if (Data.ArrayCopyOnWrite)
+            // Prepare data for main compile
+            CurrentCodeEntryNameHash = (int)MurmurHash.Hash(operation.CodeEntry.Name.Content);
+            if (linkingModern)
             {
-                _parsedNameIds = new();
-                _nextNameId = 100000;
+                NextTryVariableIndex = Math.Max(0, operation.CodeEntry.FindFirstTryLocalIndex());
+
+                if (Data.ArrayCopyOnWrite)
+                {
+                    _parsedNameIds = new();
+                    _nextNameId = 100000;
+                }
             }
 
             // Perform initial compile step
