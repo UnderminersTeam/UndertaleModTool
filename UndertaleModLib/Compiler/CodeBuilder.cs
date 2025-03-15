@@ -274,13 +274,13 @@ internal class CodeBuilder : ICodeBuilder
             if (variableInstanceType == InstanceType.Local)
             {
                 // Queue reference to be patched later
-                _globalContext.LinkingCompileGroup.RegisterLocalVariable(reference, variableName);
+                _globalContext.CurrentCompileGroup.RegisterLocalVariable(reference, variableName);
             }
             else
             {
                 // Register/define non-local variable, and update reference immediately
-                _globalContext.LinkingCompileGroup.RegisterNonLocalVariable(variableName);
-                UndertaleString nameString = _globalContext.LinkingCompileGroup.MakeString(variableName, out int nameStringId);
+                _globalContext.CurrentCompileGroup.RegisterNonLocalVariable(variableName);
+                UndertaleString nameString = _globalContext.CurrentCompileGroup.MakeString(variableName, out int nameStringId);
                 reference.Target = _globalContext.Data.Variables.EnsureDefined(
                     nameString, nameStringId, (UndertaleInstruction.InstanceType)variableInstanceType, isBuiltin, _globalContext.Data);
             }
@@ -376,7 +376,7 @@ internal class CodeBuilder : ICodeBuilder
         if (instruction is UndertaleInstruction utInstruction)
         {
             // Make/find string
-            UndertaleString str = _globalContext.LinkingCompileGroup.MakeString(stringContent, out int strIndex);
+            UndertaleString str = _globalContext.CurrentCompileGroup.MakeString(stringContent, out int strIndex);
 
             // Update instruction
             utInstruction.Value = new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>(str, strIndex); 
@@ -412,5 +412,30 @@ internal class CodeBuilder : ICodeBuilder
         // Use the internal index that the compiler generates for now
         // TODO: possibly allow compile context user to specify that this index should be global to the compile context?
         return internalIndex;
+    }
+
+    /// <inheritdoc/>
+    public long GenerateArrayOwnerID(string variableName, long functionIndex, bool isDot)
+    {
+        long id = _globalContext.UsingNewArrayOwners ? (functionIndex << 16) : 0;
+        if (isDot)
+        {
+            // Double the ID at this point, apparently...
+            id += id;
+        }
+        if (variableName is not null)
+        {
+            id += _globalContext.CurrentCompileGroup.RegisterName(variableName);
+        }
+        id += _globalContext.CurrentCompileGroup.CurrentCodeEntryNameHash;
+
+        // Wrap around 31-bit unsigned integer limit, to stay within a pushi.e or push.i instruction
+        return Math.Abs(id % int.MaxValue);
+    }
+
+    /// <inheritdoc/>
+    public void OnParseNameIdentifier(string name)
+    {
+        // TODO: possibly do things if enabling a setting (to try to replicate original ID numbers)
     }
 }

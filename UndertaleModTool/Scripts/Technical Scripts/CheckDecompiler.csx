@@ -105,6 +105,7 @@ void CheckCode()
 
             // Perform second decompilation & disassembly
             string secondDisassembled = code.Disassemble(Data.Variables, Data.CodeLocals?.For(code));
+            secondDisassembled = setownerRegex.Replace(secondDisassembled, "");
             string secondDecompilation = new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, decompilerSettings).DecompileToString();
 
             // Collect results

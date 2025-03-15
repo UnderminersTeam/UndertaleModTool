@@ -825,13 +825,16 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                     }
                 }
 
-                // If this is a chknullish instruction (ID -10), then this implies GameMaker 2.3.7 or above
-                if (value == -10 && reader.undertaleData.IsVersionAtLeast(2, 3))
+                // If this is a setowner instruction, array copy-on-write is enabled
+                if (value == -5)
                 {
-                    if (!reader.undertaleData.IsVersionAtLeast(2, 3, 7))
-                    {
-                        reader.undertaleData.SetGMS2Version(2, 3, 7);
-                    }
+                    reader.undertaleData.ArrayCopyOnWrite = true;
+                }
+
+                // If this is a chknullish instruction (ID -10), then this implies GameMaker 2.3.7 or above
+                if (value == -10 && !reader.undertaleData.IsVersionAtLeast(2, 3, 7))
+                {
+                    reader.undertaleData.SetGMS2Version(2, 3, 7);
                 }
                 break;
             }
