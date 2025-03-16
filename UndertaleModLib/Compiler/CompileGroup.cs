@@ -90,7 +90,7 @@ public sealed class CompileGroup
     private List<(string Name, bool IsEverLocal)> _linkingVariableOrder = null;
 
     // During linking, a lookup of local variable names to references of those local variables.
-    private Dictionary<string, List<UndertaleInstruction.Reference<UndertaleVariable>>> _linkingLocalReferences = null;
+    private Dictionary<string, List<UndertaleInstruction>> _linkingLocalReferences = null;
 
     // During main compile (not linking), and when array copy-on-write is enabled, this is a lookup of name to ID.
     private int _nextNameId = 100000;
@@ -187,10 +187,10 @@ public sealed class CompileGroup
     /// <summary>
     /// Registers a local variable during linking, queuing the reference to be patched later.
     /// </summary>
-    internal void RegisterLocalVariable(UndertaleInstruction.Reference<UndertaleVariable> reference, string name)
+    internal void RegisterLocalVariable(UndertaleInstruction reference, string name)
     {
         // Queue reference to be patched later
-        if (!_linkingLocalReferences.TryGetValue(name, out List<UndertaleInstruction.Reference<UndertaleVariable>> referenceList))
+        if (!_linkingLocalReferences.TryGetValue(name, out List<UndertaleInstruction> referenceList))
         {
             referenceList = new(16);
             _linkingLocalReferences[name] = referenceList;
@@ -750,9 +750,9 @@ public sealed class CompileGroup
                             variable ??= Data.Variables.DefineLocal(Data, varId, localString, nameStringIndex);
 
                             // Update all references
-                            foreach (UndertaleInstruction.Reference<UndertaleVariable> reference in _linkingLocalReferences[name])
+                            foreach (UndertaleInstruction reference in _linkingLocalReferences[name])
                             {
-                                reference.Target = variable;
+                                reference.ValueVariable = variable;
                             }
                         }
                     }

@@ -251,26 +251,23 @@ internal class CodeBuilder : ICodeBuilder
                 variableInstanceType = InstanceType.Self;
             }
 
-            // Create blank reference that will be populated with a target later
-            UndertaleInstruction.Reference<UndertaleVariable> reference = new(null, (UndertaleInstruction.VariableType)variableType);
-
             // Lookup variable (or create new one)
             if (variableInstanceType == InstanceType.Local)
             {
                 // Queue reference to be patched later
-                _globalContext.CurrentCompileGroup.RegisterLocalVariable(reference, variableName);
+                _globalContext.CurrentCompileGroup.RegisterLocalVariable(utInstruction, variableName);
             }
             else
             {
-                // Register/define non-local variable, and update reference immediately
+                // Register/define non-local variable, and update variable on instruction immediately
                 _globalContext.CurrentCompileGroup.RegisterNonLocalVariable(variableName);
                 UndertaleString nameString = _globalContext.CurrentCompileGroup.MakeString(variableName, out int nameStringId);
-                reference.Target = _globalContext.Data.Variables.EnsureDefined(
+                utInstruction.ValueVariable = _globalContext.Data.Variables.EnsureDefined(
                     nameString, nameStringId, (UndertaleInstruction.InstanceType)variableInstanceType, isBuiltin, _globalContext.Data);
             }
 
-            // Update instruction
-            utInstruction.ValueVariable = reference;
+            // Update other parts of instruction
+            utInstruction.ReferenceType = (UndertaleInstruction.VariableType)variableType;
             if (variableType is VariableType.Normal or VariableType.Instance)
             {
                 utInstruction.TypeInst = (UndertaleInstruction.InstanceType)instructionInstanceType;
@@ -284,28 +281,22 @@ internal class CodeBuilder : ICodeBuilder
         if (instruction is UndertaleInstruction utInstruction)
         {
             // Resolve reference
-            UndertaleInstruction.Reference<UndertaleFunction> reference;
+            UndertaleFunction reference;
             if (scope.TryGetDeclaredFunction(functionName, out FunctionEntry entry))
             {
-                reference = new(
-                    entry.Function as UndertaleFunction ?? throw new InvalidOperationException("Function not resolved for function entry")
-                );
+                reference = entry.Function as UndertaleFunction ?? throw new InvalidOperationException("Function not resolved for function entry");
             }
             else if (_globalContext.Builtins.LookupBuiltinFunction(functionName) is not null)
             {
-                reference = new(
-                    _globalContext.Data.Functions.EnsureDefined(functionName, _globalContext.Data.Strings)
-                );
+                reference = _globalContext.Data.Functions.EnsureDefined(functionName, _globalContext.Data.Strings);
             }
             else if (_globalContext.GlobalFunctions.TryGetFunction(functionName, out IGMFunction function))
             {
-                reference = new((UndertaleFunction)function);
+                reference = (UndertaleFunction)function;
             }
             else if (_globalContext.GetScriptId(functionName, out int _))
             {
-                reference = new(
-                    _globalContext.Data.Functions.EnsureDefined(functionName, _globalContext.Data.Strings)
-                );
+                reference = _globalContext.Data.Functions.EnsureDefined(functionName, _globalContext.Data.Strings);
             }
             else
             {
@@ -323,8 +314,7 @@ internal class CodeBuilder : ICodeBuilder
         if (instruction is UndertaleInstruction utInstruction)
         {
             // Resolve reference
-            UndertaleInstruction.Reference<UndertaleFunction> reference = new(
-                functionEntry.Function as UndertaleFunction ?? throw new InvalidOperationException("Function not resolved for function entry"));
+            UndertaleFunction reference = functionEntry.Function as UndertaleFunction ?? throw new InvalidOperationException("Function not resolved for function entry");
 
             // Put reference on instruction
             utInstruction.ValueFunction = reference;

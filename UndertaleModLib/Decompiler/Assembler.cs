@@ -13,7 +13,7 @@ namespace UndertaleModLib.Decompiler
 {
     public static class Assembler
     {
-        public static Dictionary<short, string> BreakIDToName = new Dictionary<short, string>()
+        internal static readonly Dictionary<short, string> BreakIDToName = new()
         {
             { -1,  "chkindex" },
             { -2,  "pushaf" },
@@ -27,7 +27,7 @@ namespace UndertaleModLib.Decompiler
             { -10, "chknullish" },
             { -11, "pushref" }
         };
-        public static Dictionary<string, short> NameToBreakID = new Dictionary<string, short>()
+        internal static readonly Dictionary<string, short> NameToBreakID = new()
         {
             { "chkindex", -1 },
             { "pushaf", -2 },
@@ -150,7 +150,7 @@ namespace UndertaleModLib.Decompiler
                     else
                     {
                         UndertaleInstruction.InstanceType inst = instr.TypeInst;
-                        instr.ValueVariable = ParseVariableReference(line, vars, localvars, ref inst, instr, data);
+                        (instr.ValueVariable, instr.ReferenceType) = ParseVariableReference(line, vars, localvars, ref inst, instr, data);
                         instr.TypeInst = inst;
                     }
                     line = "";
@@ -172,20 +172,20 @@ namespace UndertaleModLib.Decompiler
                                 if (line.StartsWith("[variable]", StringComparison.Ordinal))
                                 {
                                     line = line["[variable]".Length..];
-                                    instr.ValueVariable = new UndertaleInstruction.Reference<UndertaleVariable>(data.Variables.EnsureDefined(
+                                    instr.ValueVariable = data.Variables.EnsureDefined(
                                         data.Strings.MakeString(line, out int nameStringId), nameStringId,
-                                        UndertaleInstruction.InstanceType.Self, false, data));
+                                        UndertaleInstruction.InstanceType.Self, false, data);
                                 }
                                 else if (line.StartsWith("[function]", StringComparison.Ordinal))
                                 {
                                     line = line["[function]".Length..];
-                                    instr.ValueFunction = new UndertaleInstruction.Reference<UndertaleFunction>(data.Functions.ByName(line));
+                                    instr.ValueFunction = data.Functions.ByName(line);
                                 }
                                 else
                                 {
                                     if (data.Functions.ByName(line) is UndertaleFunction f)
                                     {
-                                        instr.ValueFunction = new UndertaleInstruction.Reference<UndertaleFunction>(f);
+                                        instr.ValueFunction = f;
                                     }
                                     else
                                     {
@@ -206,7 +206,7 @@ namespace UndertaleModLib.Decompiler
                             break;
                         case UndertaleInstruction.DataType.Variable:
                             UndertaleInstruction.InstanceType inst2 = instr.TypeInst;
-                            instr.ValueVariable = ParseVariableReference(line, vars, localvars, ref inst2, instr, data);
+                            (instr.ValueVariable, instr.ReferenceType) = ParseVariableReference(line, vars, localvars, ref inst2, instr, data);
                             instr.TypeInst = inst2;
                             break;
                         case UndertaleInstruction.DataType.String:
@@ -236,7 +236,7 @@ namespace UndertaleModLib.Decompiler
                     UndertaleFunction func = funcs.ByName(match.Groups[1].Value);
                     if (func == null)
                         throw new Exception("Function not found: " + match.Groups[1].Value);
-                    instr.ValueFunction = new UndertaleInstruction.Reference<UndertaleFunction>() { Target = func };
+                    instr.ValueFunction = func;
                     instr.ArgumentsCount = UInt16.Parse(match.Groups[2].Value);
                     line = "";
                     break;
@@ -248,7 +248,7 @@ namespace UndertaleModLib.Decompiler
                         if (breakId == -11) // pushref
                         {
                             // Parse additional int argument
-                            if (Int32.TryParse(line, out int intArgument))
+                            if (int.TryParse(line, out int intArgument))
                             {
                                 instr.IntArgument = intArgument;
                             }
@@ -258,7 +258,7 @@ namespace UndertaleModLib.Decompiler
                                 var f = data.Functions.ByName(line);
                                 if (f == null)
                                     throw new Exception("Function in pushref not found: " + line);
-                                instr.ValueFunction = new UndertaleInstruction.Reference<UndertaleFunction>(f);
+                                instr.ValueFunction = f;
                             }
                         }
                     }
@@ -421,7 +421,8 @@ namespace UndertaleModLib.Decompiler
             return new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>() { Resource = strobj, CachedId = (int)id.Value };
         }
 
-        private static UndertaleInstruction.Reference<UndertaleVariable> ParseVariableReference(string line, IList<UndertaleVariable> vars, Dictionary<string, UndertaleVariable> localvars, ref UndertaleInstruction.InstanceType instance, UndertaleInstruction instr, UndertaleData data = null)
+        private static (UndertaleVariable Variable, UndertaleInstruction.VariableType ReferenceType) ParseVariableReference(
+            string line, IList<UndertaleVariable> vars, Dictionary<string, UndertaleVariable> localvars, ref UndertaleInstruction.InstanceType instance, UndertaleInstruction instr, UndertaleData data = null)
         {
             ReadOnlySpan<char> str = line.AsSpan();
             int strPosition = 0;
@@ -533,7 +534,7 @@ namespace UndertaleModLib.Decompiler
             string variableName = str[strPosition..].ToString();
             if (variInstanceType == UndertaleInstruction.InstanceType.Local && data?.CodeLocals is not null)
             {
-                locatedVariable = localvars.ContainsKey(variableName) ? localvars[variableName] : null;
+                locatedVariable = localvars.TryGetValue(variableName, out UndertaleVariable value) ? value : null;
             }
             else
             {
@@ -547,7 +548,7 @@ namespace UndertaleModLib.Decompiler
             }
 
             // Return reference to be used in instruction
-            return new UndertaleInstruction.Reference<UndertaleVariable>(locatedVariable, type);
+            return (locatedVariable, type);
         }
     }
 }

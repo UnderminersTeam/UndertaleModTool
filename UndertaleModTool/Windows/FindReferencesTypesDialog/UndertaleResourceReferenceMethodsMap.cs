@@ -1243,7 +1243,7 @@ namespace UndertaleModTool.Windows
                                 funcRefs = funcReferences.Where(x => x.Value.Contains(obj))
                                                          .Select(x => x.Key);
                             else
-                                funcRefs = data.Code.Where(x => x.Instructions.Any(i => i.ValueFunction?.Target == obj));
+                                funcRefs = data.Code.Where(x => x.Instructions.Any(i => i.ValueFunction == obj));
                             if (funcRefs.Any())
                                 return new() { { "Code", checkOne ? funcRefs.ToEmptyArray() : funcRefs.ToArray() } };
                             else
@@ -1272,7 +1272,7 @@ namespace UndertaleModTool.Windows
                                 variRefs = variReferences.Where(x => x.Value.Contains(obj))
                                                          .Select(x => x.Key);
                             else
-                                variRefs = data.Code.Where(x => x.Instructions.Any(i => i.ValueVariable?.Target == obj));
+                                variRefs = data.Code.Where(x => x.Instructions.Any(i => i.ValueVariable == obj));
                             if (variRefs.Any())
                                 return new() { { "Code", checkOne ? variRefs.ToEmptyArray() : variRefs.ToArray() } };
                             else
@@ -1483,10 +1483,10 @@ namespace UndertaleModTool.Windows
                     if (inst.ValueString?.Resource is UndertaleString str)
                         strings.Add(str);
 
-                    if (inst.ValueVariable?.Target is UndertaleVariable variable)
+                    if (inst.ValueVariable is UndertaleVariable variable)
                         variables.Add(variable);
 
-                    if (inst.ValueFunction?.Target is UndertaleFunction function)
+                    if (inst.ValueFunction is UndertaleFunction function)
                         functions.Add(function);
                 }
 
