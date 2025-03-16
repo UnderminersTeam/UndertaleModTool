@@ -11,7 +11,7 @@ namespace UndertaleModLib.Models;
 /// A function entry as it's used in a GameMaker data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.ReferencedObject, IStaticChildObjectsSize, IDisposable, IGMFunction
+public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.IReferencedObject, IStaticChildObjectsSize, IDisposable, IGMFunction
 {
     /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
     public static readonly uint ChildObjectsSize = 12;
@@ -69,7 +69,7 @@ public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.Re
                 FirstAddress = reader.GetUndertaleObjectAtAddress<UndertaleInstruction>(reader.ReadUInt32() - 4);
             else
                 FirstAddress = reader.ReadUndertaleObjectPointer<UndertaleInstruction>();
-            UndertaleInstruction.Reference<UndertaleFunction>.ParseReferenceChain(reader, this);
+            UndertaleInstruction.ParseReferenceChain(reader, this);
         }
         else
         {

@@ -7,7 +7,7 @@ namespace UndertaleModLib.Models;
 /// A variable entry in a GameMaker data file.
 /// </summary>
 // TODO: INotifyPropertyChanged
-public class UndertaleVariable : UndertaleNamedResource, ISearchable, UndertaleInstruction.ReferencedObject, IDisposable, IGMVariable
+public class UndertaleVariable : UndertaleNamedResource, ISearchable, UndertaleInstruction.IReferencedObject, IDisposable, IGMVariable
 {
     /// The name of the Variable.
     public UndertaleString Name { get; set; }
@@ -67,7 +67,7 @@ public class UndertaleVariable : UndertaleNamedResource, ISearchable, UndertaleI
         if (Occurrences > 0)
         {
             FirstAddress = reader.ReadUndertaleObjectPointer<UndertaleInstruction>();
-            UndertaleInstruction.Reference<UndertaleVariable>.ParseReferenceChain(reader, this);
+            UndertaleInstruction.ParseReferenceChain(reader, this);
         }
         else
         {

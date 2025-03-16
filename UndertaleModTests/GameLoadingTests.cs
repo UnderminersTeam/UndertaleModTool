@@ -102,10 +102,9 @@ namespace UndertaleModTests
                     Assert.AreEqual(instr.JumpOffsetPopenvExitMagic, reasm[i].JumpOffsetPopenvExitMagic, errMsg);
                     if (!instr.JumpOffsetPopenvExitMagic)
                         Assert.AreEqual(instr.JumpOffset, reasm[i].JumpOffset, errMsg); // note: also handles IntArgument implicitly
-                    Assert.AreSame(instr.ValueVariable?.Target, reasm[i].ValueVariable?.Target, errMsg);
-                    Assert.AreEqual(instr.ValueVariable?.Type, reasm[i].ValueVariable?.Type, errMsg);
-                    Assert.AreSame(instr.ValueFunction?.Target, reasm[i].ValueFunction?.Target, errMsg);
-                    Assert.AreEqual(instr.ValueFunction?.Type, reasm[i].ValueFunction?.Type, errMsg);
+                    Assert.AreSame(instr.ValueVariable, reasm[i].ValueVariable, errMsg);
+                    Assert.AreSame(instr.ValueFunction, reasm[i].ValueFunction, errMsg);
+                    Assert.AreEqual(instr.ReferenceType, reasm[i].ReferenceType, errMsg);
 
                     if (instr.Kind == UndertaleInstruction.Opcode.Push && instr.Type1 == UndertaleInstruction.DataType.Double)
                         Assert.AreEqual(instr.ValueDouble, reasm[i].ValueDouble, Math.Abs(instr.ValueDouble) * (1e-5), errMsg); // see issue #53

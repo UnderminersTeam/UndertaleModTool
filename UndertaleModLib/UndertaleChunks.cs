@@ -1302,7 +1302,7 @@ namespace UndertaleModLib
             if (writer.undertaleData.UnsupportedBytecodeVersion)
                 return;
 
-            UndertaleInstruction.Reference<UndertaleVariable>.SerializeReferenceChain(writer, writer.undertaleData.Code, List);
+            UndertaleInstruction.SerializeReferenceChain(writer, writer.undertaleData.Code, List);
 
             if (!writer.Bytecode14OrLower)
             {
@@ -1421,7 +1421,7 @@ namespace UndertaleModLib
             if (Functions is null && CodeLocals is null)
                 return;
 
-            UndertaleInstruction.Reference<UndertaleFunction>.SerializeReferenceChain(writer, writer.undertaleData.Code, Functions);
+            UndertaleInstruction.SerializeReferenceChain(writer, writer.undertaleData.Code, Functions);
 
             if (writer.Bytecode14OrLower)
             {
