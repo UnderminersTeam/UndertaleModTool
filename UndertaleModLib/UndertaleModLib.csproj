@@ -12,7 +12,6 @@
     <DebugType>embedded</DebugType>
     <Platforms>AnyCPU;x64</Platforms>
     <RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NeutralLanguage>en</NeutralLanguage>
     <ResourceLanguages>en</ResourceLanguages>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
