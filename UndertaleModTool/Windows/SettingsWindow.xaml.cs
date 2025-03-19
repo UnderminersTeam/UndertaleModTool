@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -63,16 +64,6 @@ namespace UndertaleModTool
             }
         }
 
-        public static bool UseGMLCache
-        {
-            get => Settings.Instance.UseGMLCache;
-            set
-            {
-                Settings.Instance.UseGMLCache = value;
-                Settings.Save();
-            }
-        }
-
         public static bool ProfileMessageShown
         {
             get => Settings.Instance.ProfileMessageShown;
@@ -99,6 +90,22 @@ namespace UndertaleModTool
             {
                 Settings.Instance.AutomaticFileAssociation = value;
                 Settings.Save();
+
+                if (!value && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    // Prompt user if they want to unassociate
+                    if (mainWindow.ShowQuestion("Remove current file associations, if they exist?", MessageBoxImage.Question, "File associations") == MessageBoxResult.Yes)
+                    {
+                        try
+                        {
+                            FileAssociations.RemoveAssociations();
+                        }
+                        catch (Exception ex)
+                        {
+                            mainWindow.ScriptError(ex.ToString(), "Unassociation failed", false);
+                        }
+                    }
+                }
             }
         }
 

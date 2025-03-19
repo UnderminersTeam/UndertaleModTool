@@ -17,45 +17,46 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
 
 ScriptMessage("Border enabler (1080p edition)\nby krzys_h");
 
-GlobalDecompileContext globalDecompileContext = new(Data);
-Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = new Underanalyzer.Decompiler.DecompileSettings();
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
 
 // Change os_type == 14 checks in scr_draw_screen_border to always pass
-ReplaceTextInGML("gml_Script_scr_draw_screen_border", @"os_type == os_psvita", "0", true, false, globalDecompileContext, decompilerSettings);
-ReplaceTextInGML("gml_Script_scr_draw_screen_border", @"os_type == os_ps4", "1", true, false, globalDecompileContext, decompilerSettings);
+importGroup.QueueFindReplace("gml_Script_scr_draw_screen_border", "os_type == os_psvita", "0");
+importGroup.QueueFindReplace("gml_Script_scr_draw_screen_border", "os_type == os_ps4", "1");
 
 // Same for the code that calls it
-ReplaceTextInGML("gml_Object_obj_time_Draw_77", @"global.osflavor >= 3", "1", true, false, globalDecompileContext, decompilerSettings);
+importGroup.QueueFindReplace("gml_Object_obj_time_Draw_77", "global.osflavor >= 3", "1");
 
 // Remove checks from obj_time creation event
-ReplaceTextInGML("gml_Object_obj_time_Create_0", @"os_type == os_psvita", "0", true, false, globalDecompileContext, decompilerSettings);
-ReplaceTextInGML("gml_Object_obj_time_Create_0", @"os_type == os_ps4", "1", true, false, globalDecompileContext, decompilerSettings);
-ReplaceTextInGML("gml_Object_obj_time_Create_0", @"global.osflavor >= 4", "1", true, false, globalDecompileContext, decompilerSettings);
-ReplaceTextInGML("gml_Object_obj_time_Create_0", @"global.osflavor >= 3", "1", true, false, globalDecompileContext, decompilerSettings);
+importGroup.QueueFindReplace("gml_Object_obj_time_Create_0", "os_type == os_psvita", "0");
+importGroup.QueueFindReplace("gml_Object_obj_time_Create_0", "os_type == os_ps4", "1");
+importGroup.QueueFindReplace("gml_Object_obj_time_Create_0", "global.osflavor >= 4", "1");
+importGroup.QueueFindReplace("gml_Object_obj_time_Create_0", "global.osflavor >= 3", "1");
 
 // Now patch out the check for the window scale, make it always be true
-ReplaceTextInGML("gml_Object_obj_time_Draw_76", @"global.osflavor >= 4", "1", true, false, globalDecompileContext, decompilerSettings);
-ReplaceTextInGML("gml_Object_obj_time_Draw_76", @"os_type == os_switch_beta", "1", true, false, globalDecompileContext, decompilerSettings);
+importGroup.QueueFindReplace("gml_Object_obj_time_Draw_76", "global.osflavor >= 4", "1");
+importGroup.QueueFindReplace("gml_Object_obj_time_Draw_76", "os_type == os_switch_beta", "1");
 //Attempt border display fix in gml_Object_obj_time_Draw_76
 
 // Patch out the OS checks for gml_Script_scr_draw_background_ps4, make PS Vita always false, and PS4 always true, simplifying code.
-ReplaceTextInGML("gml_Script_scr_draw_background_ps4", @"os_type == os_psvita", "0", true, false, globalDecompileContext, decompilerSettings);
-ReplaceTextInGML("gml_Script_scr_draw_background_ps4", @"os_type == os_ps4", "1", true, false, globalDecompileContext, decompilerSettings);
+importGroup.QueueFindReplace("gml_Script_scr_draw_background_ps4", "os_type == os_psvita", "0");
+importGroup.QueueFindReplace("gml_Script_scr_draw_background_ps4", "os_type == os_ps4", "1");
 
 // Now, patch the settings menu!
-ReplaceTextInGML("gml_Object_obj_settingsmenu_Draw_0", @"obj_time.j_ch > 0", "0", true, false, globalDecompileContext, decompilerSettings);
-ReplaceTextInGML("gml_Object_obj_settingsmenu_Draw_0", @"global.osflavor <= 2", "0", true, false, globalDecompileContext, decompilerSettings);
-ReplaceTextInGML("gml_Object_obj_settingsmenu_Draw_0", @"global.osflavor >= 4", "1", true, false, globalDecompileContext, decompilerSettings);
+importGroup.QueueFindReplace("gml_Object_obj_settingsmenu_Draw_0", "obj_time.j_ch > 0", "0");
+importGroup.QueueFindReplace("gml_Object_obj_settingsmenu_Draw_0", "global.osflavor <= 2", "0");
+importGroup.QueueFindReplace("gml_Object_obj_settingsmenu_Draw_0", "global.osflavor >= 4", "1");
 
 // Remove code not applicable (PS Vita, Windows, <=2) and make some code always true (global.osflavor >= 4)
-ReplaceTextInGML("gml_Object_obj_time_Step_1", @"os_type == os_psvita", "0", true, false, globalDecompileContext, decompilerSettings);
-ReplaceTextInGML("gml_Object_obj_time_Step_1", @"global.osflavor <= 2", "0", true, false, globalDecompileContext, decompilerSettings);
-ReplaceTextInGML("gml_Object_obj_time_Step_1", @"global.osflavor == 1", "0", true, false, globalDecompileContext, decompilerSettings);
-ReplaceTextInGML("gml_Object_obj_time_Step_1", @"global.osflavor >= 4", "1", true, false, globalDecompileContext, decompilerSettings);
+importGroup.QueueFindReplace("gml_Object_obj_time_Step_1", "os_type == os_psvita", "0");
+importGroup.QueueFindReplace("gml_Object_obj_time_Step_1", "global.osflavor <= 2", "0");
+importGroup.QueueFindReplace("gml_Object_obj_time_Step_1", "global.osflavor == 1", "0");
+importGroup.QueueFindReplace("gml_Object_obj_time_Step_1", "global.osflavor >= 4", "1");
 
 // Also resize the window so that the border can be seen without going fullscreen
 Data.Functions.EnsureDefined("window_set_size", Data.Strings);
-Data.Code.ByName("gml_Object_obj_time_Create_0").AppendGML("window_set_size(960, 540);", Data);
+importGroup.QueueAppend(Data.Code.ByName("gml_Object_obj_time_Create_0"), "window_set_size(960, 540);");
+
+importGroup.Import();
 
 // Load border textures
 string bordersPath = Path.Combine(Path.GetDirectoryName(ScriptPath), "Borders");

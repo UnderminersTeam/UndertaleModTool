@@ -209,12 +209,6 @@ applying any changes to the game.";
     }
     Reorganize<UndertaleRoom>(Data.Rooms, currentList);
 
-    Data.GMLCache?.Clear();
-    Data.GMLCacheChanged?.Clear();
-    Data.GMLCacheFailed?.Clear();
-    Data.GMLEditedBefore?.Clear();
-    Data.GMLCacheWasSaved = false;
-
     ScriptMessage("Downgraded from GMS 2.3 to 16 successfully. Save the game to apply the changes.");
 }
 else

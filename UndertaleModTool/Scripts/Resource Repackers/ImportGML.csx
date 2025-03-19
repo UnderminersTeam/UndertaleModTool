@@ -24,19 +24,23 @@ else if (!dirFiles.Any(x => x.EndsWith(".gml")))
 // If yes, will try to add code to objects and scripts depending upon its name
 bool doParse = ScriptQuestion("Do you want to automatically attempt to link imported code?");
 
-bool stopOnError = ScriptQuestion("Stop importing on error?");
-
 SetProgressBar(null, "Files", 0, dirFiles.Length);
 StartProgressBarUpdater();
 
 SyncBinding("Strings, Code, CodeLocals, Scripts, GlobalInitScripts, GameObjects, Functions, Variables", true);
-await Task.Run(() => {
+await Task.Run(() =>
+{
+    UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
     foreach (string file in dirFiles)
     {
         IncrementProgress();
 
-        ImportGMLFile(file, doParse, false, stopOnError);
+        string code = File.ReadAllText(file);
+        string codeName = Path.GetFileNameWithoutExtension(file);
+        importGroup.QueueReplace(codeName, code);
     }
+    SetProgressBar(null, "Performing final import...", dirFiles.Length, dirFiles.Length);
+    importGroup.Import();
 });
 DisableAllSyncBindings();
 

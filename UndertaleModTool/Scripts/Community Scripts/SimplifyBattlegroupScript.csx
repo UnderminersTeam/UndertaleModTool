@@ -11,24 +11,27 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
     return;
 }
 
-GlobalDecompileContext globalDecompileContext = new(Data);
-Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = new Underanalyzer.Decompiler.DecompileSettings();
-
-ReplaceTextInGML("gml_Script_scr_battlegroup", @"global.monstertype[0] = 47", "", true, false, globalDecompileContext, decompilerSettings);
-ReplaceTextInGML("gml_Script_scr_battlegroup", @"global.monstertype[1] = 0", "", true, false, globalDecompileContext, decompilerSettings);
-ReplaceTextInGML("gml_Script_scr_battlegroup", @"global.monstertype[2] = 0", "", true, false, globalDecompileContext, decompilerSettings);
-ReplaceTextInGML("gml_Script_scr_battlegroup", @"global.batmusic = caster_load(""music/battle1.ogg"")", "", true, false, globalDecompileContext, decompilerSettings);
-ReplaceTextInGML("gml_Script_scr_battlegroup", @"global.actfirst = 0", "", true, false, globalDecompileContext, decompilerSettings);
-ReplaceTextInGML("gml_Script_scr_battlegroup", @"global.extraintro = 0", "", true, false, globalDecompileContext, decompilerSettings);
-ReplaceTextInGML("gml_Script_scr_battlegroup", @"global.battlelv = 0", "", true, false, globalDecompileContext, decompilerSettings);
-ReplaceTextInGML("gml_Script_scr_battlegroup", @"global.msc = 0", "", true, false, globalDecompileContext, decompilerSettings);
-string prepend = @"global.monstertype[0] = 47
-global.monstertype[1] = 0
-global.monstertype[2] = 0
-global.batmusic = caster_load(""music/battle1.ogg"")
-global.actfirst = 0
-global.extraintro = 0
-global.battlelv = 0
-global.msc = 0
-";
-ImportGMLString("gml_Script_scr_battlegroup", prepend + GetDecompiledText("gml_Script_scr_battlegroup", globalDecompileContext, decompilerSettings));
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
+{
+    ThrowOnNoOpFindReplace = true
+};
+importGroup.QueueFindReplace("gml_Script_scr_battlegroup", "global.monstertype[0] = 47", "");
+importGroup.QueueFindReplace("gml_Script_scr_battlegroup", "global.monstertype[1] = 0", "");
+importGroup.QueueFindReplace("gml_Script_scr_battlegroup", "global.monstertype[2] = 0", "");
+importGroup.QueueFindReplace("gml_Script_scr_battlegroup", @"global.batmusic = caster_load(""music/battle1.ogg"")", "");
+importGroup.QueueFindReplace("gml_Script_scr_battlegroup", "global.actfirst = 0", "");
+importGroup.QueueFindReplace("gml_Script_scr_battlegroup", "global.extraintro = 0", "");
+importGroup.QueueFindReplace("gml_Script_scr_battlegroup", "global.battlelv = 0", "");
+importGroup.QueueFindReplace("gml_Script_scr_battlegroup", "global.msc = 0", "");
+importGroup.QueuePrepend("gml_Script_scr_battlegroup", 
+    @"
+    global.monstertype[0] = 47
+    global.monstertype[1] = 0
+    global.monstertype[2] = 0
+    global.batmusic = caster_load(""music/battle1.ogg"")
+    global.actfirst = 0
+    global.extraintro = 0
+    global.battlelv = 0
+    global.msc = 0
+    ");
+importGroup.Import();

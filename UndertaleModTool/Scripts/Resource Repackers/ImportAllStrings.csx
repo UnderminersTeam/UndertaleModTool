@@ -9,18 +9,6 @@ using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
-if (Data.ToolInfo.ProfileMode)
-{
-    ScriptMessage("This script will not modify your existing edited GML code registered in your profile. Please use GML editing for text editing, or a script like FindAndReplace, for editing strings within these code entries.");
-}
-else
-{
-    if (!(ScriptQuestion("This script will recompile all code entries in your profile (if they exist) to the default decompiled output. Continue?")))
-        return;
-    foreach (UndertaleCode c in Data.Code)
-        NukeProfileGML(c.Name.Content);
-}
-
 string importFolder = PromptChooseDirectory();
 if (importFolder is null)
     throw new ScriptException("The import folder was not set.");
@@ -97,5 +85,3 @@ using (StreamReader reader = new StreamReader(stringsPath))
         line_no += 1;
     }
 }
-
-ReapplyProfileCode();

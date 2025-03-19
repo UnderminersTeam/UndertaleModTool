@@ -59,14 +59,12 @@
             <TextBlock Grid.Row="3" Grid.Column="2" Margin="25 2 2 2" Text="Warn about saving before closing" ToolTip="Warn about saving before closing. Enabled by default."/>
 
             <CheckBox Grid.Row="4" Grid.Column="0" Margin="3" Content="" IsChecked="{Binding AutomaticFileAssociation}"/>
-            <TextBlock Grid.Row="4" Grid.Column="0" Margin="25 2 2 2" Text="Automatically associate .win files" ToolTip="Automatic file association. Enabled by default."/>
+            <TextBlock Grid.Row="4" Grid.Column="0" Margin="25 2 2 2" Text="Automatically associate GameMaker data files" ToolTip="Automatic file association. Enabled by default."/>
             <CheckBox Grid.Row="4" Grid.Column="2" Margin="3" Content="" IsChecked="{Binding TempRunMessageShow}"/>
             <TextBlock Grid.Row="4" Grid.Column="2" Margin="25 2 2 2" Text="Warn about temp running" ToolTip="Warn about temp running. Enabled by default."/>
 
-            <CheckBox Grid.Row="5" Grid.Column="0" Margin="3" Content="" IsChecked="{Binding UseGMLCache}"/>
-            <TextBlock Grid.Row="5" Grid.Column="0" Margin="25 2 2 2" Text="Use decompiled code cache (experimental)" ToolTip="Used when searching for acceleration. Disabled by default."/>
-            <CheckBox Grid.Row="5" Grid.Column="2" Margin="3" Content="" IsChecked="{Binding ShowDebuggerOption}"/>
-            <TextBlock Grid.Row="5" Grid.Column="2" Margin="25 2 2 2" Text="Show &quot;Run game under GMS debugger&quot; file option" ToolTip="Whether to show the option in the &quot;File&quot; menu. Disabled by default."/>
+            <CheckBox Grid.Row="5" Grid.Column="0" Margin="3" Content="" IsChecked="{Binding ShowDebuggerOption}"/>
+            <TextBlock Grid.Row="5" Grid.Column="0" Margin="25 2 2 2" Text="Show &quot;Run game under GMS debugger&quot; file option" ToolTip="Whether to show the option in the &quot;File&quot; menu. Disabled by default."/>
 
             <Separator Grid.Row="6" Grid.ColumnSpan="4" Margin="10"/>
 
@@ -99,7 +97,7 @@
 
             <Separator Grid.Row="13" Grid.ColumnSpan="4" Margin="10"/>
 
-            <TextBlock Grid.Row="14" Grid.Column="0" Grid.ColumnSpan="4" Margin="3" TextWrapping="Wrap" Foreground="Red" FontWeight="Bold" Text="Warning: the following options are currently experimental, as the profile system is a work in progress. Usage of the system is at your own risk, and though it is relatively stable, it may not be compatible in the future."/>
+            <TextBlock Grid.Row="14" Grid.Column="0" Grid.ColumnSpan="4" Margin="3" TextWrapping="Wrap" Foreground="Red" FontWeight="Bold" Text="Warning: the following options are currently experimental. Usage of any options below is at your own risk, and they may not be compatible in the future."/>
 
             <CheckBox Grid.Row="15" Grid.Column="0" Margin="3" VerticalAlignment="Center" Content="" IsChecked="{Binding ProfileModeEnabled}"/>
             <TextBlock Grid.Row="15" Grid.Column="0" Margin="25 2 2 2" VerticalAlignment="Center" Text="Enable profile mode" ToolTip="Toggles the 'decompile once and compile many' profile mode. Enabled by default. May need to be disabled for certain operations."/>
