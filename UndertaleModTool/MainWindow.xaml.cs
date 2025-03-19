@@ -307,12 +307,6 @@ namespace UndertaleModTool
             ((Label)this.FindName("ObjectLabel")).Content = str;
         }
 
-        [DllImport("shell32.dll")]
-        static extern void SHChangeNotify(long wEventId, uint uFlags, IntPtr dwItem1, IntPtr dwItem2);
-        const long SHCNE_ASSOCCHANGED = 0x08000000;
-
-        public static readonly string[] IFF_EXTENSIONS = new string[] { ".win", ".unx", ".ios", ".droid", ".3ds", ".symbian" };
-
         // "attr" is actually "DwmWindowAttribute", but I only need the one value from it
         [DllImport("dwmapi.dll", PreserveSig = true)]
         private static extern int DwmSetWindowAttribute(IntPtr hwnd, uint attr, ref int attrValue, int attrSize);
@@ -368,31 +362,34 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    string procFileName = Environment.ProcessPath;
-                    var HKCU_Classes = Registry.CurrentUser.OpenSubKey(@"Software\Classes", true);
-                    var UndertaleModTool_app = HKCU_Classes.CreateSubKey(@"UndertaleModTool");
-
-                    UndertaleModTool_app.SetValue("", "UndertaleModTool");
-                    UndertaleModTool_app.CreateSubKey(@"shell\open\command").SetValue("", "\"" + procFileName + "\" \"%1\"", RegistryValueKind.String);
-                    UndertaleModTool_app.CreateSubKey(@"shell\launch\command").SetValue("", "\"" + procFileName + "\" \"%1\" launch", RegistryValueKind.String);
-                    UndertaleModTool_app.CreateSubKey(@"shell\launch").SetValue("", "Run game normally", RegistryValueKind.String);
-                    UndertaleModTool_app.CreateSubKey(@"shell\special_launch\command").SetValue("", "\"" + procFileName + "\" \"%1\" special_launch", RegistryValueKind.String);
-                    UndertaleModTool_app.CreateSubKey(@"shell\special_launch").SetValue("", "Run extended options", RegistryValueKind.String);
-
+                    // Load settings to see if we should associate files
+                    if (Settings.Instance is null)
+                    {
+                        Settings.Load();
+                    }
+                    bool shouldAssociate = true;
                     if (File.Exists("dna.txt"))
                     {
-                        ScriptMessage("Opt out detected.");
-                        SettingsWindow.AutomaticFileAssociation = false;
+                        shouldAssociate = false;
+                    }
+                    if (shouldAssociate && Settings.ShouldPromptForAssociations)
+                    {
+                        if (this.ShowQuestion("First-time setup: Would you like to associate GameMaker data files (like .win) with UndertaleModTool?", MessageBoxImage.Question, "File associations") != MessageBoxResult.Yes)
+                        {
+                            shouldAssociate = false;
+                        }
+                    }
+                    if (!shouldAssociate)
+                    {
+                        // Shouldn't associate, so turn it off and save that setting
+                        Settings.Instance.AutomaticFileAssociation = false;
                         Settings.Save();
                     }
-                    if (SettingsWindow.AutomaticFileAssociation)
+
+                    // Associate file types if enabled
+                    if (Settings.Instance.AutomaticFileAssociation)
                     {
-                        foreach (var extStr in IFF_EXTENSIONS)
-                        {
-                            var ext = HKCU_Classes.CreateSubKey(extStr);
-                            ext.SetValue("", "UndertaleModTool", RegistryValueKind.String);
-                        }
-                        SHChangeNotify(SHCNE_ASSOCCHANGED, 0, IntPtr.Zero, IntPtr.Zero);
+                        FileAssociations.CreateAssociations();
                     }
                 }
                 catch (Exception ex)
@@ -727,7 +724,7 @@ namespace UndertaleModTool
                         if (this.ShowQuestion($"Run {filepath} as a script?") == MessageBoxResult.Yes)
                             await RunScript(filepath);
                     }
-                    else if (IFF_EXTENSIONS.Contains(fileext) || fileext == ".dat" /* audiogroup */)
+                    else if (FileAssociations.Extensions.Contains(fileext) || fileext == ".dat" /* audiogroup */)
                     {
                         if (this.ShowQuestion($"Open {filepath} as a data file?") == MessageBoxResult.Yes)
                             await LoadFile(filepath, true);
