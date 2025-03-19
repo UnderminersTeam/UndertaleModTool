@@ -59,7 +59,7 @@
             <TextBlock Grid.Row="3" Grid.Column="2" Margin="25 2 2 2" Text="Warn about saving before closing" ToolTip="Warn about saving before closing. Enabled by default."/>
 
             <CheckBox Grid.Row="4" Grid.Column="0" Margin="3" Content="" IsChecked="{Binding AutomaticFileAssociation}"/>
-            <TextBlock Grid.Row="4" Grid.Column="0" Margin="25 2 2 2" Text="Automatically associate .win files" ToolTip="Automatic file association. Enabled by default."/>
+            <TextBlock Grid.Row="4" Grid.Column="0" Margin="25 2 2 2" Text="Automatically associate GameMaker data files" ToolTip="Automatic file association. Enabled by default."/>
             <CheckBox Grid.Row="4" Grid.Column="2" Margin="3" Content="" IsChecked="{Binding TempRunMessageShow}"/>
             <TextBlock Grid.Row="4" Grid.Column="2" Margin="25 2 2 2" Text="Warn about temp running" ToolTip="Warn about temp running. Enabled by default."/>
 
