@@ -1,6 +1,6 @@
 using System.Linq;
 using System.Text;
-using System.Windows.Forms;
+using System.Windows.Forms; // Needed for SaveFileDialog prompt
 
 EnsureDataLoaded();
 
@@ -25,7 +25,7 @@ json.Length -= suffix.Length;
 json.Append("\r\n    ]\r\n}");
 
 File.WriteAllText(saveFileDialog.FileName, json.ToString());
-MessageBox.Show($"Successfully exported to\n{saveFileDialog.FileName}", "String export");
+ScriptMessage($"Successfully exported to\n{saveFileDialog.FileName}");
 
 static string JsonifyString(string str)
 {

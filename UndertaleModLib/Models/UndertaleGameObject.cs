@@ -139,17 +139,21 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// <summary>
     /// The vertices used for a <see cref="CollisionShape"/> of type <see cref="CollisionShapeFlags.Custom"/>.
     /// </summary>
-    public List<UndertalePhysicsVertex> PhysicsVertices { get; private set; } = new List<UndertalePhysicsVertex>();
+    public List<UndertalePhysicsVertex> PhysicsVertices { get; set; } = new List<UndertalePhysicsVertex>();
 
     #endregion
 
     /// <summary>
     /// All the events that this game object has.
     /// </summary>
-    public UndertalePointerList<UndertalePointerList<Event>> Events { get; private set; } = new();
+    public UndertalePointerList<UndertalePointerList<Event>> Events { get; set; } = new();
 
     /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
+    
+    /// <summary>
+    /// Invoked whenever the effective value of any dependency property has been updated.
+    /// </summary>
     protected void OnPropertyChanged([CallerMemberName] string name = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
@@ -272,119 +276,129 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     }
 
     #region EventHandlerFor() overloads
-    // TODO: Add documentation for these methods.
-    // These methods are used by scripts for getting a code entry for a certain event of the game object.
 
-    public UndertaleCode EventHandlerFor(EventType type, uint subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
-    {
-        Event subtypeObj = Events[(int)type].Where((x) => x.EventSubtype == subtype).FirstOrDefault();
-        if (subtypeObj == null)
-            Events[(int)type].Add(subtypeObj = new Event() { EventSubtype = subtype });
-        EventAction action = subtypeObj.Actions.FirstOrDefault();
-        if (action == null)
-        {
-            subtypeObj.Actions.Add(action = new EventAction());
-            action.ActionName = strg.MakeString("");
-        }
-        UndertaleCode code = action.CodeId;
-        if (code == null)
-        {
-            var name = strg.MakeString("gml_Object_" + Name.Content + "_" + type.ToString() + "_" + subtype);
-            code = new UndertaleCode()
-            {
-                Name = name,
-                LocalsCount = 1
-            };
-            action.CodeId = code;
-            codelist.Add(code);
-
-            UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
-            argsLocal.Name = strg.MakeString("arguments");
-            argsLocal.Index = 0;
-
-            var locals = new UndertaleCodeLocals()
-            {
-                Name = name
-            };
-            locals.Locals.Add(argsLocal);
-            localslist.Add(locals);
-        }
-        return code;
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, UndertaleData data)
-    {
-        return EventHandlerFor(type, data.Strings, data.Code, data.CodeLocals);
-    }
-
+    /// <summary>
+    /// Finds or creates a code entry for the given event type and subtype, on this object.
+    /// </summary>
+    /// <param name="type">Main event type for the event.</param>
+    /// <param name="subtype">Subtype for the event.</param>
+    /// <param name="data">Data that this object belongs to.</param>
+    /// <returns>New or existing code entry corresponding to the event.</returns>
     public UndertaleCode EventHandlerFor(EventType type, uint subtype, UndertaleData data)
     {
-        return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
+        // Under the given event type, find an event with the given subtype, or create a new one if none exists
+        UndertalePointerList<Event> subEvents = Events[(int)type];
+        Event targetEvent = null;
+        foreach (Event ev in subEvents)
+        {
+            if (ev.EventSubtype == subtype)
+            {
+                targetEvent = ev;
+                break;
+            }
+        }
+        if (targetEvent is null)
+        {
+            subEvents.Add(targetEvent = new() { EventSubtype = subtype });
+        }
+
+        // Find action for event, or create a new one if none exists
+        EventAction targetAction = targetEvent.Actions.FirstOrDefault();
+        if (targetAction is null)
+        {
+            targetEvent.Actions.Add(targetAction = new());
+            targetAction.ActionName = data.Strings.MakeString("");
+        }
+
+        // Create and attach a new code entry, if one doesn't already exist
+        if (targetAction.CodeId is not UndertaleCode existingCode)
+        {
+            return targetAction.CodeId = UndertaleCode.CreateEmptyEntry(data, $"gml_Object_{Name.Content}_{type}_{subtype}");
+        }
+
+        // Return existing code entry
+        return existingCode;
     }
 
-    public UndertaleCode EventHandlerFor(EventType type, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
+    /// <summary>
+    /// Finds or creates a code entry for the given main event type (no subtype), on this object.
+    /// </summary>
+    /// <param name="type">Main event type for the event.</param>
+    /// <param name="data">Data that this object belongs to.</param>
+    /// <returns>New or existing code entry corresponding to the event.</returns>
+    public UndertaleCode EventHandlerFor(EventType type, UndertaleData data)
     {
-        return EventHandlerFor(type, 0u, strg, codelist, localslist);
+        return EventHandlerFor(type, 0u, data);
     }
 
+    /// <summary>
+    /// Finds or creates a code entry for the given keyboard event type and subtype, on this object.
+    /// </summary>
+    /// <param name="type">Main keyboard event type for the event.</param>
+    /// <param name="subtype">Keyboard subtype for the event.</param>
+    /// <param name="data">Data that this object belongs to.</param>
+    /// <returns>New or existing code entry corresponding to the event.</returns>
     public UndertaleCode EventHandlerFor(EventType type, EventSubtypeKey subtype, UndertaleData data)
-    {
-        return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, EventSubtypeKey subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
     {
         if (type != EventType.Keyboard && type != EventType.KeyPress && type != EventType.KeyRelease)
             throw new InvalidOperationException();
-        return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
+        return EventHandlerFor(type, (uint)subtype, data);
     }
 
+    /// <summary>
+    /// Finds or creates a code entry for the given step event type and subtype, on this object.
+    /// </summary>
+    /// <param name="type">Main step event type for the event.</param>
+    /// <param name="subtype">Step subtype for the event.</param>
+    /// <param name="data">Data that this object belongs to.</param>
+    /// <returns>New or existing code entry corresponding to the event.</returns>
     public UndertaleCode EventHandlerFor(EventType type, EventSubtypeStep subtype, UndertaleData data)
-    {
-        return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, EventSubtypeStep subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
     {
         if (type != EventType.Step)
             throw new InvalidOperationException();
-        return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
+        return EventHandlerFor(type, (uint)subtype, data);
     }
 
+    /// <summary>
+    /// Finds or creates a code entry for the given mouse event type and subtype, on this object.
+    /// </summary>
+    /// <param name="type">Main mouse event type for the event.</param>
+    /// <param name="subtype">Mouse subtype for the event.</param>
+    /// <param name="data">Data that this object belongs to.</param>
+    /// <returns>New or existing code entry corresponding to the event.</returns>
     public UndertaleCode EventHandlerFor(EventType type, EventSubtypeMouse subtype, UndertaleData data)
-    {
-        return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, EventSubtypeMouse subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
     {
         if (type != EventType.Mouse)
             throw new InvalidOperationException();
-        return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
+        return EventHandlerFor(type, (uint)subtype, data);
     }
 
+    /// <summary>
+    /// Finds or creates a code entry for the given "other" event type and subtype, on this object.
+    /// </summary>
+    /// <param name="type">Main "other" event type for the event.</param>
+    /// <param name="subtype">"Other" subtype for the event.</param>
+    /// <param name="data">Data that this object belongs to.</param>
+    /// <returns>New or existing code entry corresponding to the event.</returns>
     public UndertaleCode EventHandlerFor(EventType type, EventSubtypeOther subtype, UndertaleData data)
-    {
-        return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, EventSubtypeOther subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
     {
         if (type != EventType.Other)
             throw new InvalidOperationException();
-        return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
+        return EventHandlerFor(type, (uint)subtype, data);
     }
 
+    /// <summary>
+    /// Finds or creates a code entry for the given draw event type and subtype, on this object.
+    /// </summary>
+    /// <param name="type">Main draw event type for the event.</param>
+    /// <param name="subtype">Draw subtype for the event.</param>
+    /// <param name="data">Data that this object belongs to.</param>
+    /// <returns>New or existing code entry corresponding to the event.</returns>
     public UndertaleCode EventHandlerFor(EventType type, EventSubtypeDraw subtype, UndertaleData data)
-    {
-        return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, EventSubtypeDraw subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
     {
         if (type != EventType.Draw)
             throw new InvalidOperationException();
-        return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
+        return EventHandlerFor(type, (uint)subtype, data);
     }
     #endregion
 
@@ -428,7 +442,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         /// The available actions that will be performed for this event.
         /// </summary>
         /// <remarks>This seems to always have 1 entry, it would need testing if maybe the games using drag-and-drop code are different</remarks>
-        public UndertalePointerList<EventAction> Actions { get; private set; } = new UndertalePointerList<EventAction>();
+        public UndertalePointerList<EventAction> Actions { get; set; } = new UndertalePointerList<EventAction>();
 
         //TODO: not used, condense. Also UMT specific.
         public EventSubtypeKey EventSubtypeKey
@@ -537,6 +551,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         public bool IsNot { get; set; } // always 0
         public uint UnknownAlwaysZero { get; set; } // always 0
 
+        /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <inheritdoc />
@@ -685,7 +700,7 @@ public enum EventType : uint
     /// </summary>
     Gesture = 13,
     /// <summary>
-    /// A pre-create event type. Unknown subtype. TODO?
+    /// A pre-create event type. Has no subtypes, always 0.
     /// </summary>
     PreCreate = 14
 }

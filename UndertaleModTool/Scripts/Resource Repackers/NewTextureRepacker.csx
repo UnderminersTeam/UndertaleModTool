@@ -26,11 +26,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Drawing;
 using UndertaleModLib.Scripting;
 using UndertaleModLib.Util;
 using UndertaleModLib.Models;
 using System.Numerics;
+using ImageMagick;
 
 public class Rect
 {
@@ -96,16 +96,18 @@ public class Split : Rect
 public class TextureAtlas
 {
 
-    public int Size;
+    public int Width;
+    public int Height;
     public int Padding;
     public List<Split> Splits;
     public List<Rect> Textures;
 
-    public TextureAtlas(int Size, int Padding)
+    public TextureAtlas(int Width, int Height, int Padding)
     {
-        this.Splits = new List<Split> { new Split(0, 0, Size, Size) };
+        this.Splits = new List<Split> { new Split(0, 0, Width, Height) };
         this.Textures = new List<Rect>();
-        this.Size = Size;
+        this.Width = Width;
+        this.Height = Height;
         this.Padding = Padding;
     }
 
@@ -131,7 +133,7 @@ public class TextureAtlas
 
         // Best Long Side fit.
         var bestFit = findBestFit(pWidth, pHeight,
-            split => Math.Min(pWidth - split.Width, pHeight - split.Height)
+            split => Math.Max(split.Width - pWidth, split.Height - pHeight)
         );
 
         // No space available, return null
@@ -236,14 +238,13 @@ TPageItem dumpTexturePageItem(UndertaleTexturePageItem pageItem, TextureWorker w
 
 async Task<List<TPageItem>> dumpTexturePageItems(string dir, bool reuse)
 {
-    var worker = new TextureWorker();
+    using var worker = new TextureWorker();
 
     var tpageitems = await Task.Run(() => Data.TexturePageItems
         .AsParallel()
         .Select(item => dumpTexturePageItem(item, worker, Path.Combine(dir, $"texture_page_{Data.TexturePageItems.IndexOf(item)}.png"), reuse))
         .ToList());
 
-    worker.Cleanup();
     return tpageitems;
 }
 
@@ -289,12 +290,12 @@ int doItemGrouping(TPageItem item)
 //     return false;
 // }
 
-List<TextureAtlas> layoutPageItemList(List<TPageItem> items, int pageSize, int padding)
+List<TextureAtlas> layoutPageItemList(List<TPageItem> items, int pageSizeWidth, int pageSizeHeight, int padding)
 {
     var atlas_list = new List<TextureAtlas>();
     while (items.Count > 0)
     {
-        var atlas = new TextureAtlas(pageSize, padding);
+        var atlas = new TextureAtlas(pageSizeWidth, pageSizeHeight, padding);
         foreach (var page in items)
         {
             // If failed to allocate atlas space, then retry with a new one
@@ -320,11 +321,11 @@ List<TextureAtlas> layoutPageItemList(List<TPageItem> items, int pageSize, int p
     return atlas_list;
 }
 
-async Task<List<TextureAtlas>> layoutPageItemLists<K>(ILookup<K, TPageItem> lookup, int pageSize, int padding)
+async Task<List<TextureAtlas>> layoutPageItemLists<K>(ILookup<K, TPageItem> lookup, int pageSizeWidth, int pageSizeHeight, int padding)
 {
     return await Task.Run(() => lookup
         .AsParallel()
-        .Select(list => layoutPageItemList(list.ToList(), pageSize, padding))
+        .Select(list => layoutPageItemList(list.ToList(), pageSizeWidth, pageSizeHeight, padding))
         .SelectMany(item => item)
         .ToList());
 }
@@ -338,8 +339,10 @@ private static int NearestPowerOf2(uint x)
 EnsureDataLoaded();
 
 // User Configurable:: Atlas page size and item padding
-var pageSize = 512;
-var padding = 2;
+var pageSizeWidth = 1024;
+var pageSizeHeight = 1024;
+
+var padding = 1;
 
 // User Configurable:: Dimension cutoffs (gets thrown off the atlas pool)
 var maxDims = 256;
@@ -353,17 +356,9 @@ List<TPageItem> potBlacklist = new List<TPageItem>();
 // Ensure pageSize is POT
 if (forcePOT)
 {
-    pageSize = NearestPowerOf2((uint)pageSize);
+    pageSizeWidth = NearestPowerOf2((uint)pageSizeWidth);
+    pageSizeHeight = NearestPowerOf2((uint)pageSizeHeight);
 }
-
-// Sanity checks
-if (maxDims <= 0 || maxDims + padding * 2 >= pageSize)
-{
-    maxDims = pageSize - padding * 2;
-    maxArea = maxDims * maxDims;
-}
-if (maxArea <= 0)
-    maxArea = maxDims * maxDims;
 
 bool reuseTextures = false;
 
@@ -417,7 +412,7 @@ await Task.Run(() =>
 
 // Layout all the texture items (grouped by doItemGrouping) into atlases
 ResetProgress("Laying out texture items");
-var atlases = await layoutPageItemLists(texPageLookup, pageSize, padding);
+var atlases = await layoutPageItemLists(texPageLookup, pageSizeWidth, pageSizeHeight, padding);
 
 int lastTextPage = Data.EmbeddedTextures.Count - 1;
 
@@ -442,14 +437,11 @@ await Task.Run(() =>
         {
             // Textures that are contained into an atlas
             UndertaleEmbeddedTexture tex = new UndertaleEmbeddedTexture();
-            tex.Name = new UndertaleString("Texture " + ++lastTextPage);
+            tex.Name = new UndertaleString($"Texture {++lastTextPage}");
             Data.EmbeddedTextures.Add(tex);
-            Bitmap img = new Bitmap(atlas.Size, atlas.Size, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            
+            using MagickImage newAtlasImage = new(MagickColors.Transparent, atlas.Width, atlas.Height);
 
-            // DPI fix
-            img.SetResolution(96.0F, 96.0F);
-
-            Graphics g = Graphics.FromImage(img);
             tex.Scaled = group.First().Scaled; // Make sure the original pane "Scaled" value is mantained.
 
             // Dump debug info regarding splits
@@ -461,8 +453,10 @@ await Task.Run(() =>
             {
                 f.WriteLine($"tex: {texPageItems.IndexOf(item)}: {item.NewRect.X}, {item.NewRect.Y}, {item.NewRect.Width}, {item.NewRect.Height}");
 
-                using (Bitmap source = new Bitmap(item.Filename))
-                    g.DrawImage(source, item.NewRect.X, item.NewRect.Y);
+                using (MagickImage source = TextureWorker.ReadBGRAImageFromFile(item.Filename))
+                {
+                    newAtlasImage.Composite(source, item.NewRect.X, item.NewRect.Y, CompositeOperator.Copy);
+                }
 
                 item.Item.TexturePage = tex;
                 item.Item.SourceX = (ushort)item.NewRect.X;
@@ -472,12 +466,12 @@ await Task.Run(() =>
                 UpdateProgress(1);
             }
 
-            // Save atlas into a file and load it back into 
+            // Save atlas into a file
             string atlasFile = Path.Combine(packagerDirectory, $"atlas_{atlasName}.png");
-            img.Save(atlasFile, System.Drawing.Imaging.ImageFormat.Png);
-            tex.TextureData.TextureBlob = File.ReadAllBytes(atlasFile);
+            TextureWorker.SaveImageToFile(newAtlasImage, atlasFile);
 
-            img.Dispose();
+            // Assign new texture image
+            tex.TextureData.Image = GMImage.FromMagickImage(newAtlasImage).ConvertToPng(); // TODO: generate other formats
         }
         else
         {
@@ -487,7 +481,7 @@ await Task.Run(() =>
                 f.WriteLine($"tex: {texPageItems.IndexOf(item)}: {0}, {0}, {item.OriginalRect.Width}, {item.OriginalRect.Height}");
 
                 UndertaleEmbeddedTexture tex = new UndertaleEmbeddedTexture();
-                tex.Name = new UndertaleString("Texture " + ++lastTextPage);
+                tex.Name = new UndertaleString($"Texture {++lastTextPage}");
                 Data.EmbeddedTextures.Add(tex);
 
                 // Create POT texture if needed
@@ -497,24 +491,26 @@ await Task.Run(() =>
                     int potw = NearestPowerOf2((uint)item.OriginalRect.Width),
                         poth = NearestPowerOf2((uint)item.OriginalRect.Height);
 
-                    Bitmap img = new Bitmap(potw, poth, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    using MagickImage newAtlasImage = new(MagickColors.Transparent, potw, poth);
 
-                    // DPI fix
-                    img.SetResolution(96.0F, 96.0F);
-
-                    Graphics g = Graphics.FromImage(img);
-
-                    // Load texture
-                    using (Bitmap source = new Bitmap(item.Filename))
-                        g.DrawImage(source, 0, 0);
+                    // Load texture, composite onto top left of new atlas
+                    using (MagickImage source = TextureWorker.ReadBGRAImageFromFile(item.Filename))
+                    {
+                        newAtlasImage.Composite(source, 0, 0, CompositeOperator.Copy);
+                    }
 
                     itemFile = Path.Combine(packagerDirectory, $"pot_{texPageItems.IndexOf(item)}.png");
-                    img.Save(itemFile, System.Drawing.Imaging.ImageFormat.Png);
+                    TextureWorker.SaveImageToFile(newAtlasImage, itemFile);
 
-                    img.Dispose();
+                    // Assign new texture image
+                    tex.TextureData.Image = GMImage.FromMagickImage(newAtlasImage).ConvertToPng(); // TODO: generate other formats
+                }
+                else
+                {
+                    // Load image from file, and assign it
+                    tex.TextureData.Image = GMImage.FromPng(File.ReadAllBytes(itemFile)); // TODO: generate other formats
                 }
 
-                tex.TextureData.TextureBlob = File.ReadAllBytes(itemFile);
                 tex.Scaled = item.Scaled;
 
                 item.Item.TexturePage = tex;
@@ -528,7 +524,7 @@ await Task.Run(() =>
     }
 });
 
-SyncBinding(false);
+DisableAllSyncBindings();
 f.Close();
 
 // Done.

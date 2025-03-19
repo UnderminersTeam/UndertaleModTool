@@ -11,16 +11,17 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
     return;
 }
 
-
 // Remove all current fonts
 // This is necessary because I need to add fonts under IDs that are normally used by these resources
-// TODO: Japanese fonts won't work at all because I didn""t add support for that
+// TODO: Japanese fonts won't work at all because I didn't add support for that
 Data.Fonts.Clear();
 
 var obj_time = Data.GameObjects.ByName("obj_time");
 
 Data.Functions.EnsureDefined("font_add", Data.Strings);
-obj_time.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+importGroup.QueueAppend(obj_time.EventHandlerFor(EventType.Create, Data), @"
 // NOTE: According to GMS documentation the font ranges are ignored with ttf fonts, and that seems to be indeed the case
 font_add(""wingding.ttf"", 8, false, false, 32, 127);
 font_add(""8bitoperator_jve.ttf"", 10, false, false, 32, 127);
@@ -32,6 +33,7 @@ font_add(""hachicro.ttf"", 10, true, false, 32, 127);
 font_add(""Mars Needs Cunnilingus.ttf"", 9, false, false, 32, 127);
 font_add(""comic.ttf"", 10, true, false, 32, 127);
 font_add(""PAPYRUS.TTF"", 8, true, false, 32, 127);
-", Data);
+");
+importGroup.Import();
 
 ChangeSelection(obj_time);

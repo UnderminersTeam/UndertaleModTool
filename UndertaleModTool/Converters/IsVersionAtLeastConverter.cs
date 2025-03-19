@@ -16,7 +16,8 @@ namespace UndertaleModTool
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (mainWindow.Data?.GeneralInfo is null
+            if (mainWindow is null
+                || mainWindow.Data?.GeneralInfo is null
                 || parameter is not string verStr
                 || verStr.Length == 0)
                 return Visibility.Hidden;

@@ -33,7 +33,7 @@ public class UndertalePath : UndertaleNamedResource, IDisposable
     /// <summary>
     /// The amount of <see cref="PathPoint"/>s this <see cref="UndertalePath"/> has.
     /// </summary>
-    public UndertaleSimpleList<PathPoint> Points { get; private set; } = new UndertaleSimpleList<PathPoint>();
+    public UndertaleSimpleList<PathPoint> Points { get; set; } = new UndertaleSimpleList<PathPoint>();
 
     /// <summary>
     /// A point in a <see cref="UndertalePath"/>.

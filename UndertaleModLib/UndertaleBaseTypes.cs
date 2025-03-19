@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UndertaleModLib.Models;
+﻿using UndertaleModLib.Models;
 
 namespace UndertaleModLib
 {
@@ -36,6 +31,10 @@ namespace UndertaleModLib
 
     public interface UndertaleObjectWithBlobs
     {
+        /// <summary>
+        /// TODO!
+        /// </summary>
+        /// <param name="writer">Where to serialize to.</param>
         void SerializeBlobBefore(UndertaleWriter writer);
     }
 

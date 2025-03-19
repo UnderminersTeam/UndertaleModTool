@@ -77,6 +77,7 @@ StartProgressBarUpdater();
 
 SyncBinding("Strings, Code, CodeLocals, Scripts, GlobalInitScripts, GameObjects, Functions, Variables", true);
 await Task.Run(() => {
+    UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
     foreach (string file in dirFiles)
     {
         IncrementProgress();
@@ -118,7 +119,7 @@ await Task.Run(() => {
             code.Name = Data.Strings.MakeString(codeName);
             Data.Code.Add(code);
         }
-        if ((Data?.GeneralInfo.BytecodeVersion > 14) && (Data.CodeLocals.ByName(codeName) == null))
+        if (Data.CodeLocals is not null && Data.CodeLocals.ByName(codeName) is null)
         {
             UndertaleCodeLocals locals = new UndertaleCodeLocals();
             locals.Name = code.Name;
@@ -189,18 +190,7 @@ await Task.Run(() => {
                     }
                     else
                     {
-                        try
-                        {
-                            code.ReplaceGML(gmlCode, Data);
-                        }
-                        catch (Exception ex)
-                        {
-                            string errorMSG = "Error in " + codeName + ":\r\n" + ex.ToString() + "\r\nAborted";
-                            ScriptMessage(errorMSG);
-                            SetUMTConsoleText(errorMSG);
-                            SetFinishedMessage(false);
-                            return;
-                        }
+                        importGroup.QueueReplace(code, gmlCode);
                         continue;
                     }
                 }
@@ -243,20 +233,10 @@ await Task.Run(() => {
         }
         else
         {
-            try
-            {
-                code.ReplaceGML(gmlCode, Data);
-            }
-            catch (Exception ex)
-            {
-                string errorMSG = "Error in " + codeName + ":\r\n" + ex.ToString() + "\r\nAborted";
-                ScriptMessage(errorMSG);
-                SetUMTConsoleText(errorMSG);
-                SetFinishedMessage(false);
-                return;
-            }
+            importGroup.QueueReplace(code, gmlCode);
         }
     }
+    importGroup.Import();
 });
 DisableAllSyncBindings();
 

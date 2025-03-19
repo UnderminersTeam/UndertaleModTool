@@ -11,8 +11,9 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
     return;
 }
 
-
 ScriptMessage("Adds... a new room?\nJust start playing the game as usual and you'll see\nFor Undertale 1.08\nby krzys_h and Kneesnap");
+
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
 
 var room_ruins1 = Data.Rooms.ByName("room_ruins1");
 var room_water_dogroom = Data.Rooms.ByName("room_water_dogroom");
@@ -111,9 +112,9 @@ room_of_determination.GameObjects.Add(new UndertaleRoom.GameObject()
 });
 
 // Actually link the door
-obj_door_ruins13.EventHandlerFor(EventType.Alarm, 2, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+importGroup.QueueAppend(obj_door_ruins13.EventHandlerFor(EventType.Alarm, 2, Data), @"
 if (room == room_ruins1)
-    room_goto(room_of_determination);", Data);
+    room_goto(room_of_determination);");
 
 // A floor would be nice
 for (int x = 0; x <= 940; x += 20)
@@ -130,7 +131,7 @@ for (int x = 0; x <= 940; x += 20)
         // bg_ruinseasynam1, 100, 80 = ruins line bottom left
         // bg_ruinseasynam1, 120, 0 = ruins line bottom
         var bg = bg_ruinsplaceholder;
-        uint sx = 0, sy = 0; // ruins ground tile
+        int sx = 0, sy = 0; // ruins ground tile
         if (y == 100 || y == 120) // And a road in the middle would be cool
         {
             sx = 20; sy = 20; // ruins path file
@@ -210,12 +211,12 @@ var obj_something_changed_trigger = new UndertaleGameObject()
     Visible = false
 };
 
-obj_something_changed_trigger.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+importGroup.QueueAppend(obj_something_changed_trigger.EventHandlerFor(EventType.Create, Data), @"
 con = 0;
-alarm[0] = 30;", Data);
+alarm[0] = 30;");
 
 
-obj_something_changed_trigger.EventHandlerFor(EventType.Alarm, (uint)0, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+importGroup.QueueAppend(obj_something_changed_trigger.EventHandlerFor(EventType.Alarm, (uint)0, Data), @"
 global.typer = 5;
 global.msc = 0;
 global.facechoice = 0;
@@ -229,9 +230,9 @@ if (room != room_of_determination) {
 
 instance_create(0, 0, obj_dialoguer);
 global.interact = 1;
-con = 1;", Data);
+con = 1;");
 
-obj_something_changed_trigger.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+importGroup.QueueAppend(obj_something_changed_trigger.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data), @"
 // Toby, please, why can't you just make the obj_dialoguer block movement automatically
 // writing this every time will get really painful really fast
 
@@ -243,7 +244,7 @@ obj_something_changed_trigger.EventHandlerFor(EventType.Step, EventSubtypeStep.S
 if (con == 1 && instance_exists(OBJ_WRITER) == 0) {
     global.interact = 0;
     global.con = 0;
-}", Data);
+}");
 Data.GameObjects.Add(obj_something_changed_trigger);
 
 room_ruins1.GameObjects.Add(new UndertaleRoom.GameObject()
@@ -267,15 +268,15 @@ var obj_readable_determination = new UndertaleGameObject()
     ParentId = obj_readable,
     Visible = false
 };
-obj_readable_determination.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+importGroup.QueueAppend(obj_readable_determination.EventHandlerFor(EventType.Create, Data), @"
 myinteract = 0;
 specialread = 0;
 cantalk = 1;
 mydialoguer = 438274832;
 image_xscale = 1;
-image_yscale = 1;", Data);
+image_yscale = 1;");
 
-obj_readable_determination.EventHandlerFor(EventType.Alarm, (uint)0, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+importGroup.QueueAppend(obj_readable_determination.EventHandlerFor(EventType.Alarm, (uint)0, Data), @"
 myinteract = 3;
 global.msc = 0;
 global.typer = 5;
@@ -298,7 +299,7 @@ if (x >= 700) {
 } else {
     global.msg[0] = ""* It's broken%  Assembly scripting is hard/%%"";
 }
-mydialoguer = instance_create(0, 0, obj_dialoguer);", Data);
+mydialoguer = instance_create(0, 0, obj_dialoguer);");
 Data.GameObjects.Add(obj_readable_determination);
 
 for (int i = 0; i < 6; i++)
@@ -334,33 +335,33 @@ var obj_determined_rarependant = new UndertaleGameObject()
     Solid = obj_rarependant.Solid,
     ParentId = obj_rarependant.ParentId
 };
-obj_determined_rarependant.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+importGroup.QueueAppend(obj_determined_rarependant.EventHandlerFor(EventType.Create, Data), @"
 myinteract = 0;
 facing = 0;
 direction = 270;
 image_speed = 0;
-con = 0;", Data);
+con = 0;");
 
-obj_determined_rarependant.EventHandlerFor(EventType.Alarm, (uint)0, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+importGroup.QueueAppend(obj_determined_rarependant.EventHandlerFor(EventType.Alarm, (uint)0, Data), @"
 myinteract = 3;
 global.msc = 11337;
 global.typer = 5;
 global.facechoice = 0;
 global.faceemotion = 0;
 con = 1;
-mydialoguer = instance_create(0, 0, obj_dialoguer);", Data);
+mydialoguer = instance_create(0, 0, obj_dialoguer);");
 
-obj_determined_rarependant.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+importGroup.QueueAppend(obj_determined_rarependant.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data), @"
 if (con == 1 && instance_exists(OBJ_WRITER) == 0 && global.choice == 0) {
     alarm[1] = 40;
     con = 0;
 }
-event_inherited();", Data);
+event_inherited();");
 
-obj_determined_rarependant.EventHandlerFor(EventType.Alarm, (uint)1, Data.Strings, Data.Code, Data.CodeLocals).AppendGML("room_goto(room_of_dog);", Data);
+importGroup.QueueAppend(obj_determined_rarependant.EventHandlerFor(EventType.Alarm, (uint)1, Data), "room_goto(room_of_dog);");
 Data.GameObjects.Add(obj_determined_rarependant);
 
-SCR_TEXT.Code.AppendGML(@"
+importGroup.QueueAppend(SCR_TEXT.Code, @"
 if (argument0 == 11337) {
     global.msg[0] = ""* (It's a legendary artifact.)/"";
     global.msg[1] = ""* (Will you take it?)& &         Take it     Leave it  \C "";
@@ -369,7 +370,9 @@ if (argument0 == 11337) {
     global.msg[0] = ""* (You took the legendary&  artifact.)/%%"";
     if (global.choice == 1)
         global.msg[0] = "" %%"";
-}", Data);
+}");
+
+importGroup.Import();
 
 // Okay, now for some copying
 var room_of_determined_dog = new UndertaleRoom()

@@ -1,6 +1,6 @@
 Looking for an excuse to play Undertale again but don't have a Switch? I might have something for you!
 
-The (probably) first mod that is not just another string/texture swap. Made with my [UndertaleModTool](https://github.com/krzys-h/UndertaleModTool).
+The (probably) first mod that is not just another string/texture swap. Made with my [UndertaleModTool](https://github.com/UnderminersTeam/UndertaleModTool).
 
 It's **Undertale, But Every Time A Song Plays Its A Random Remix From YouTube Instead!** (or MixMod for short)
 
@@ -8,7 +8,7 @@ And it does exactly that. Every time a song plays, it searches YouTube for "[son
 
 **Installation instructions**:
 1. Make sure you are on Undertale version >= 1.08 (older ones are not supported by UndertaleModTool because of bytecode changes) on Windows (because I didn't manage to figure out how to access GMS surfaces from extensions so I have to pass the whole DirectX context and draw manually - seriously, there is like no documentation on extensions at all)
-2. Download [UndertaleModTool](https://github.com/krzys-h/UndertaleModTool/releases) (the mod script is bundled with the download because I'm too lazy to create a github repo for one file) and [GMWebExtension](https://github.com/krzys-h/GMWebExtension/releases) (the libs only zip file)
+2. Download [UndertaleModTool](https://github.com/UnderminersTeam/UndertaleModTool/releases) (the mod script is bundled with the download because I'm too lazy to create a github repo for one file) and [GMWebExtension](https://github.com/krzys-h/GMWebExtension/releases) (the libs only zip file)
 3. Make sure you backed up your Undertale installation
 4. Open UndertaleModTool, load the data.win file from the Undertale directory
 5. Select Scripts > Run builtin script > MixMod

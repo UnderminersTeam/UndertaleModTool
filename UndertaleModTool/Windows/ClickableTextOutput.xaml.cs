@@ -13,7 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using static UndertaleModTool.MainWindow;
+using static UndertaleModTool.UndertaleCodeEditor;
 
 namespace UndertaleModTool.Windows
 {
@@ -28,12 +28,13 @@ namespace UndertaleModTool.Windows
         public string Query { get; }
         public int ResultsCount { get; }
 
-        private IDictionary<string, List<string>> resultsDict;
-        private IEnumerable<string> failedList;
-        private CodeEditorMode editorDecompile;
+        private readonly IDictionary<string, List<(int lineNum, string codeLine)>> resultsDict;
+        private readonly IEnumerable<string> failedList;
+        private readonly CodeEditorTab editorTab;
         
-        public ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
+        public ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int lineNum, string codeLine)>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
         {
+            #pragma warning disable CA1416
             InitializeComponent();
 
             linkContextMenu = FindResource("linkContextMenu") as ContextMenuDark;
@@ -42,11 +43,13 @@ namespace UndertaleModTool.Windows
             Query = query;
             ResultsCount = resultsCount;
             this.resultsDict = resultsDict.ToDictionary(x => x.Key, x => x.Value);
-            this.editorDecompile = editorDecompile ? CodeEditorMode.Decompile : CodeEditorMode.DontDecompile;
+            this.editorTab = editorDecompile ? CodeEditorTab.Decompiled : CodeEditorTab.Disassembly;
             this.failedList = failedList?.ToList();
+            #pragma warning restore CA1416
         }
-        public ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
+        public ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<(int lineNum, string codeLine)>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
         {
+            #pragma warning disable CA1416
             InitializeComponent();
 
             linkContextMenu = FindResource("linkContextMenu") as ContextMenuDark;
@@ -55,8 +58,9 @@ namespace UndertaleModTool.Windows
             Query = query;
             ResultsCount = resultsCount;
             this.resultsDict = resultsDict;
-            this.editorDecompile = editorDecompile ? CodeEditorMode.Decompile : CodeEditorMode.DontDecompile;
+            this.editorTab = editorDecompile ? CodeEditorTab.Decompiled : CodeEditorTab.Disassembly;
             this.failedList = failedList;
+            #pragma warning restore CA1416
         }
         private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
@@ -131,7 +135,12 @@ namespace UndertaleModTool.Windows
             headerPara.Inlines.Add(new LineBreak());
             doc.Blocks.Add(headerPara);
 
-            foreach (KeyValuePair<string, List<string>> result in resultsDict)
+            int totalLineCount = resultsDict.Select(x => x.Value.Count).Sum();
+            bool tooManyLines = totalLineCount > 10000;
+            if (tooManyLines)
+                mainWindow.ShowWarning($"There are too many code lines to display ({totalLineCount}), so the line numbers aren't clickable.");
+
+            foreach (KeyValuePair<string, List<(int lineNum, string codeLine)>> result in resultsDict)
             {
                 int lineCount = result.Value.Count;
                 Paragraph resPara = new();
@@ -144,9 +153,24 @@ namespace UndertaleModTool.Windows
                 resPara.Inlines.Add(resHeader);
 
                 int i = 1;
-                foreach (string line in result.Value)
+                foreach (var (lineNum, codeLine) in result.Value)
                 {
-                    resPara.Inlines.Add(new Run(line));
+                    if (!tooManyLines)
+                    {
+                        Hyperlink lineLink = new(new Run($"Line {lineNum}")
+                        {
+                            Tag = result.Key // code entry name
+                        });
+
+                        resPara.Inlines.Add(lineLink);
+                        resPara.Inlines.Add(new Run($": {codeLine}"));
+                    }
+                    else
+                    {
+                        Run lineRun = new($"Line {lineNum}: {codeLine}");
+
+                        resPara.Inlines.Add(lineRun);
+                    }
 
                     if (i < lineCount)
                         resPara.Inlines.Add(new LineBreak());
@@ -197,27 +221,54 @@ namespace UndertaleModTool.Windows
         {
             if (mainWindow is null)
                 return;
-            if (e.OriginalSource is not Run linkRun || linkRun.Parent is not Hyperlink)
+            if (e.OriginalSource is not Run linkRun || linkRun.Parent is not Hyperlink
+                || String.IsNullOrEmpty(linkRun.Text))
                 return;
 
-            string codeName = linkRun.Text;
-            if (e.ChangedButton == MouseButton.Right && linkContextMenu is not null)
+            if (linkRun.Text.StartsWith("Line "))
             {
-                linkContextMenu.DataContext = codeName;
-                linkContextMenu.IsOpen = true;
+                if (!Int32.TryParse(linkRun.Text[5..], out int lineNum))
+                {
+                    e.Handled = true;
+                    return;
+                }
+
+                string codeName = linkRun.Tag as string;
+                if (String.IsNullOrEmpty(codeName))
+                {
+                    e.Handled = true;
+                    return;
+                }
+                    
+                if (e.ChangedButton == MouseButton.Right && linkContextMenu is not null)
+                {
+                    linkContextMenu.DataContext = (lineNum, codeName);
+                    linkContextMenu.IsOpen = true;
+                }
+                else
+                    mainWindow.OpenCodeEntry(codeName, lineNum, editorTab, e.ChangedButton == MouseButton.Middle);
             }
             else
-                mainWindow.OpenCodeFile(codeName, editorDecompile, e.ChangedButton == MouseButton.Middle);
+            {
+                string codeName = linkRun.Text;
+                if (e.ChangedButton == MouseButton.Right && linkContextMenu is not null)
+                {
+                    linkContextMenu.DataContext = (1, codeName);
+                    linkContextMenu.IsOpen = true;
+                }
+                else
+                    mainWindow.OpenCodeEntry(codeName, editorTab, e.ChangedButton == MouseButton.Middle);
+            }
 
             e.Handled = true;
         }
         private void OpenInNewTabItem_Click(object sender, RoutedEventArgs e)
         {
-            string codeName = (sender as FrameworkElement)?.DataContext as string;
-            if (String.IsNullOrEmpty(codeName))
+            if ((sender as FrameworkElement)?.DataContext is not ValueTuple<int, string> codeNamePair
+                || String.IsNullOrEmpty(codeNamePair.Item2))
                 return;
 
-            mainWindow.OpenCodeFile(codeName, editorDecompile, true);
+            mainWindow.OpenCodeEntry(codeNamePair.Item2, codeNamePair.Item1, editorTab, true);
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)

@@ -35,7 +35,9 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
         private short initShift;
         private Canvas canvas;
 
+#pragma warning disable CS0067 // Event is never used (this is actually used)
         public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067
 
         public EditGlyphRectangleWindow(UndertaleFont font, UndertaleFont.Glyph selectedGlyph)
         {
@@ -91,7 +93,10 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
             double initScale = 1;
             int textureWidth = Font.Texture?.BoundingWidth ?? 1;
             if (textureWidth < scrollPres.ActualWidth)
+            {
                 initScale = scrollPres.ActualWidth / textureWidth;
+                initScale = Math.Pow(2, Math.Floor(Math.Log2(initScale))); // Round down to nearest power of 2
+            }
 
             TextureViewbox.LayoutTransform = new MatrixTransform(initScale, 0, 0, initScale, 0, 0); ;
             TextureViewbox.UpdateLayout();
@@ -112,8 +117,8 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
                 double oldExtentWidth = e.ExtentWidth - e.ExtentWidthChange;
                 double oldExtentHeight = e.ExtentHeight - e.ExtentHeightChange;
 
-                double relx = offsetX / oldExtentWidth;
-                double rely = offsetY / oldExtentHeight;
+                double relx = oldExtentWidth != 0 ? offsetX / oldExtentWidth : 0;
+                double rely = oldExtentHeight != 0 ? offsetY / oldExtentHeight : 0;
 
                 offsetX = Math.Max(relx * e.ExtentWidth - xMousePositionOnScrollViewer, 0);
                 offsetY = Math.Max(rely * e.ExtentHeight - yMousePositionOnScrollViewer, 0);
@@ -132,9 +137,10 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
             var mousePos = e.GetPosition(TextureScroll);
             var transform = TextureViewbox.LayoutTransform as MatrixTransform;
             var matrix = transform.Matrix;
-            var scale = e.Delta >= 0 ? 1.1 : (1.0 / 1.1); // choose appropriate scaling factor
+            var pow = Math.Pow(2, 1.0 / 8.0);
+            var scale = e.Delta >= 0 ? pow : (1.0 / pow); // choose appropriate scaling factor
 
-            if ((matrix.M11 > 0.2 || (matrix.M11 <= 0.2 && scale > 1)) && (matrix.M11 < 3 || (matrix.M11 >= 3 && scale < 1)))
+            if ((matrix.M11 > 0.001 || (matrix.M11 <= 0.001 && scale > 1)) && (matrix.M11 < 1000 || (matrix.M11 >= 1000 && scale < 1)))
             {
                 matrix.ScaleAtPrepend(scale, scale, mousePos.X, mousePos.Y);
             }

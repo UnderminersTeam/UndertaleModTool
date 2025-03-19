@@ -6,7 +6,7 @@ namespace UndertaleModLib.Models;
 /// A string entry a data file can have.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleString : UndertaleResource, ISearchable, IDisposable
+public class UndertaleString : UndertaleResource, ISearchable, IDisposable, Underanalyzer.IGMString
 {
     /// <summary>
     /// The contents of the string.
@@ -62,6 +62,7 @@ public class UndertaleString : UndertaleResource, ISearchable, IDisposable
     /// <returns>A string that represents the current object.</returns>
     public string ToString(bool isGMS2)
     {
+        // TODO: someone clean this up please. this seems insane for a tostring method.
         if (Content == null)
             return "\"null\""; // NPE Fix.
 
@@ -69,6 +70,8 @@ public class UndertaleString : UndertaleResource, ISearchable, IDisposable
             return "\"" + Content.Replace("\\", "\\\\").Replace("\r", "\\r").Replace("\n", "\\n").Replace("\"", "\\\"") + "\"";
 
         // Handle GM:S 1's lack of escaping
+        // Yes, in GM:S 1 you cannot escape quotation marks. You are expected to concatenate
+        // single-quote strings with double-quote strings.
         string res = Content;
         bool front, back;
         if (res.StartsWith('"'))
@@ -102,6 +105,8 @@ public class UndertaleString : UndertaleResource, ISearchable, IDisposable
     /// <inheritdoc />
     public bool SearchMatches(string filter)
     {
+        // TODO: should this throw instead?
+        if (filter is null) return false;
         return Content?.ToLower().Contains(filter.ToLower()) ?? false;
     }
 
@@ -109,9 +114,10 @@ public class UndertaleString : UndertaleResource, ISearchable, IDisposable
     /// Unescapes text for the assembler.
     /// </summary>
     /// <param name="text">The text to unescape.</param>
-    /// <returns>A string with <c>\n</c>, <c>\r</c>, <c>"</c> and <c>\</c> being properly escaped.</returns>
+    /// <returns>A string which features the <b>text</b> <c>\n</c>, <c>\r</c>, <c>"</c> and <c>\</c> being properly unescaped.</returns>
     public static string UnescapeText(string text)
     {
+        // TODO: optimize this? seems like a very whacky thing to do... why do they have escaped text in the first place?
         return text.Replace("\\r", "\r").Replace("\\n", "\n").Replace("\\\"", "\"").Replace("\\\\", "\\");
     }
 }

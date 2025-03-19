@@ -33,14 +33,15 @@ var YVIEW = gms2 ? "__view_get(1, 0)" : "view_yview[0]";
 var WVIEW = gms2 ? "__view_get(2, 0)" : "view_wview[0]";
 var HVIEW = gms2 ? "__view_get(3, 0)" : "view_hview[0]";
 
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
 
-selector.EventHandlerFor(EventType.Create, Data).ReplaceGML(@"
+importGroup.QueueReplace(selector.EventHandlerFor(EventType.Create, Data), @"
 battlegroup = 0
 digits = 0
 depth = -1000
-", Data);
+");
 
-selector.EventHandlerFor(EventType.Draw, Data).ReplaceGML(@"
+importGroup.QueueReplace(selector.EventHandlerFor(EventType.Draw, Data), @"
 if (view_current != 0)
     return;
 
@@ -95,21 +96,25 @@ draw_set_color(c_lime)
 draw_text(x + 4, y - string_height(str) - 4, str)
 
 global.battlegroup = battlegroup
-".Replace("XVIEW", XVIEW).Replace("YVIEW", YVIEW).Replace("WVIEW", WVIEW).Replace("HVIEW", HVIEW), Data);
+".Replace("XVIEW", XVIEW).Replace("YVIEW", YVIEW).Replace("WVIEW", WVIEW).Replace("HVIEW", HVIEW));
 
 var mainchara = Data.GameObjects.ByName("obj_mainchara");
 
 for(var i = 0; i < 5; i++) {
-    mainchara.EventHandlerFor(EventType.KeyPress, (uint)(48 + i), Data)
-             .ReplaceGML("if global.debug == 1 && !instance_exists(obj_battlegroup_input) global.filechoice = " + i, Data);
+    importGroup.QueueReplace(
+        mainchara.EventHandlerFor(EventType.KeyPress, (uint)(48 + i), Data),
+        "if global.debug == 1 && !instance_exists(obj_battlegroup_input) global.filechoice = " + i
+    );
 }
 
-mainchara.EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_home, Data).ReplaceGML(@"
+importGroup.QueueReplace(mainchara.EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_home, Data), @"
 if (global.debug == 1 && global.interact == 0 && !instance_exists(obj_battler) && !instance_exists(obj_battlegroup_input)) {
     global.interact = 1
     keyboard_clear(vk_home)
     instance_create(0, 0, obj_battlegroup_input)
 }
-", Data);
+");
+
+importGroup.Import();
 
 ScriptMessage("Done! Press 'Home' to open the battlegroup selector.");

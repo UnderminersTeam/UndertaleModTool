@@ -3,7 +3,7 @@
 //Need to test this, once I do then I can obsolete the other two scripts
 if (Data.IsVersionAtLeast(2, 3))
 {
-    bool x = RunUMTScript(Path.Combine(ExePath, "Scripts", "Helper Scripts", "ConvertFrom17to16_for_2.3.csx"));
+    bool x = RunUMTScript(Path.Combine(ExePath, "Scripts", "Technical Scripts", "ConvertFrom17to16_for_2.3.csx"));
     if (x == false)
         ScriptError("ConvertFrom17to16_for_2.3.csx failed!");
     return;

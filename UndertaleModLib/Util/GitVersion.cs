@@ -1,7 +1,5 @@
 using System;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 
 namespace UndertaleModLib.Util;
@@ -18,7 +16,7 @@ public static class GitVersion
     /// <returns>The git commit and branch name.</returns>
     public static string GetGitVersion()
     {
-        string gitOutput = "";
+        string gitOutput;
 
         // try to access the embedded resource
         try

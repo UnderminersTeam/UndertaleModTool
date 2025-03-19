@@ -19,6 +19,12 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
 }
 
 ScriptMessage("Add a run button to Undertale (Backspace)");
-ReplaceTextInGML(("gml_Object_obj_mainchara_Step_0"), @"(global.debug == true)", "(true)", true);
+
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
+{
+    ThrowOnNoOpFindReplace = true
+};
+importGroup.QueueFindReplace("gml_Object_obj_mainchara_Step_0", "(global.debug == 1)", "(true)");
+importGroup.Import();
 
 ScriptMessage("Run button in Undertale enabled!");

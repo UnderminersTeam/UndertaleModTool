@@ -7,15 +7,16 @@ using System.Linq;
 
 EnsureDataLoaded();
 
-string codeFolder = GetFolder(FilePath) + "Export_Code" + Path.DirectorySeparatorChar;
-ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
-
+string codeFolder = Path.Combine(Path.GetDirectoryName(FilePath), "Export_Code");
 if (Directory.Exists(codeFolder))
 {
-    codeFolder = GetFolder(FilePath) + "Export_Code_2" + Path.DirectorySeparatorChar;
+    codeFolder = Path.Combine(Path.GetDirectoryName(FilePath), "Export_Code_2");
 }
 
 Directory.CreateDirectory(codeFolder);
+
+GlobalDecompileContext globalDecompileContext = new(Data);
+Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = Data.ToolInfo.DecompilerSettings;
 
 List<UndertaleCode> toDump = Data.Code.Where(c => c.ParentEntry is null)
                                       .ToList();
@@ -30,52 +31,54 @@ await StopProgressBarUpdater();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + codeFolder + " " + failed.ToString() + " failed");
 
-string GetFolder(string path)
-{
-    return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
-}
-
 
 void DumpCode()
 {
-    foreach(UndertaleCode code in toDump)
+    foreach (UndertaleCode code in toDump)
     {
         string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
         if (code.ParentEntry == null)
         {
             try
             {
-                File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
+                File.WriteAllText(path, (code != null 
+                    ? new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, decompilerSettings).DecompileToString() 
+                    : ""));
             }
             catch (Exception e)
             {
-                if (!(Directory.Exists(codeFolder + "/Failed/")))
+                string failedFolder = Path.Combine(codeFolder, "Failed");
+                if (!Directory.Exists(failedFolder))
                 {
-                    Directory.CreateDirectory(codeFolder + "/Failed/");
+                    Directory.CreateDirectory(failedFolder);
                 }
-                path = Path.Combine(codeFolder + "/Failed/", code.Name.Content + ".gml");
+                path = Path.Combine(failedFolder, code.Name.Content + ".gml");
                 File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
                 failed += 1;
             }
         }
         else
         {
-            if (!(Directory.Exists(codeFolder + "/Duplicates/")))
+            string duplicatesFolder = Path.Combine(codeFolder, "Duplicates");
+            if (!Directory.Exists(duplicatesFolder))
             {
-                Directory.CreateDirectory(codeFolder + "/Duplicates/");
+                Directory.CreateDirectory(duplicatesFolder);
             }
             try
             {
-                path = Path.Combine(codeFolder + "/Duplicates/", code.Name.Content + ".gml");
-                File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
+                path = Path.Combine(duplicatesFolder, code.Name.Content + ".gml");
+                File.WriteAllText(path, (code != null
+                    ? new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, decompilerSettings).DecompileToString()
+                    : ""));
             }
             catch (Exception e)
             {
-                if (!(Directory.Exists(codeFolder + "/Duplicates/Failed/")))
+                string duplicatesFailed = Path.Combine(duplicatesFolder, "Failed");
+                if (!Directory.Exists(duplicatesFailed))
                 {
-                    Directory.CreateDirectory(codeFolder + "/Duplicates/Failed/");
+                    Directory.CreateDirectory(duplicatesFailed);
                 }
-                path = Path.Combine(codeFolder + "/Duplicates/Failed/", code.Name.Content + ".gml");
+                path = Path.Combine(duplicatesFailed, code.Name.Content + ".gml");
                 File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
                 failed += 1;
             }

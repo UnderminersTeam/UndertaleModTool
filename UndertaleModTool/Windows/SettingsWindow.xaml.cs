@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -63,16 +64,6 @@ namespace UndertaleModTool
             }
         }
 
-        public static bool UseGMLCache
-        {
-            get => Settings.Instance.UseGMLCache;
-            set
-            {
-                Settings.Instance.UseGMLCache = value;
-                Settings.Save();
-            }
-        }
-
         public static bool ProfileMessageShown
         {
             get => Settings.Instance.ProfileMessageShown;
@@ -99,6 +90,22 @@ namespace UndertaleModTool
             {
                 Settings.Instance.AutomaticFileAssociation = value;
                 Settings.Save();
+
+                if (!value && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    // Prompt user if they want to unassociate
+                    if (mainWindow.ShowQuestion("Remove current file associations, if they exist?", MessageBoxImage.Question, "File associations") == MessageBoxResult.Yes)
+                    {
+                        try
+                        {
+                            FileAssociations.RemoveAssociations();
+                        }
+                        catch (Exception ex)
+                        {
+                            mainWindow.ScriptError(ex.ToString(), "Unassociation failed", false);
+                        }
+                    }
+                }
             }
         }
 
@@ -181,6 +188,38 @@ namespace UndertaleModTool
             }
         }
 
+        public static string TransparencyGridColor1
+        {
+            get => Settings.Instance.TransparencyGridColor1;
+            set
+            {
+                try
+                {
+                    MainWindow.SetTransparencyGridColors(value, TransparencyGridColor2);
+
+                    Settings.Instance.TransparencyGridColor1 = value;
+                    Settings.Save();
+                }
+                catch (FormatException) { }
+            }
+        }
+
+        public static string TransparencyGridColor2
+        {
+            get => Settings.Instance.TransparencyGridColor2;
+            set
+            {
+                try
+                {
+                    MainWindow.SetTransparencyGridColors(TransparencyGridColor1, value);
+
+                    Settings.Instance.TransparencyGridColor2 = value;
+                    Settings.Save();
+                }
+                catch (FormatException) { }
+            }
+        }
+
         public static bool EnableDarkMode
         {
             get => Settings.Instance.EnableDarkMode;
@@ -209,11 +248,29 @@ namespace UndertaleModTool
             }
         }
 
+        public static DecompilerSettings DecompilerSettings => Settings.Instance.DecompilerSettings;
+
+        public static string InstanceIdPrefix
+        {
+            get => Settings.Instance.InstanceIdPrefix;
+            set
+            {
+                Settings.Instance.InstanceIdPrefix = value;
+                Settings.Save();
+            }
+        }
+
         public bool UpdateButtonEnabled
         {
             get => UpdateAppButton.IsEnabled;
             set => UpdateAppButton.IsEnabled = value;
         }
+
+#if DEBUG
+        public static Visibility UpdaterButtonVisibility => Visibility.Visible;
+#else
+        public static Visibility UpdaterButtonVisibility => Visibility.Hidden;
+#endif
 
         public SettingsWindow()
         {
@@ -221,6 +278,7 @@ namespace UndertaleModTool
             this.DataContext = this;
             Settings.Load();
         }
+
         private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (!IsVisible || IsLoaded)
@@ -238,6 +296,14 @@ namespace UndertaleModTool
         private void UpdateAppButton_Click(object sender, RoutedEventArgs e)
         {
             ((MainWindow)Owner).UpdateApp(this);
+        }
+
+        private void GMLSettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            GMLSettingsWindow settings = new(Settings.Instance);
+            settings.Owner = this;
+            settings.ShowDialog();
+            Settings.Save();
         }
     }
 }

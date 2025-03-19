@@ -1,4 +1,5 @@
 ﻿using System;
+using Underanalyzer;
 
 namespace UndertaleModLib.Models;
 
@@ -6,7 +7,7 @@ namespace UndertaleModLib.Models;
 /// A variable entry in a GameMaker data file.
 /// </summary>
 // TODO: INotifyPropertyChanged
-public class UndertaleVariable : UndertaleNamedResource, ISearchable, UndertaleInstruction.ReferencedObject, IDisposable
+public class UndertaleVariable : UndertaleNamedResource, ISearchable, UndertaleInstruction.IReferencedObject, IDisposable, IGMVariable
 {
     /// The name of the Variable.
     public UndertaleString Name { get; set; }
@@ -66,7 +67,7 @@ public class UndertaleVariable : UndertaleNamedResource, ISearchable, UndertaleI
         if (Occurrences > 0)
         {
             FirstAddress = reader.ReadUndertaleObjectPointer<UndertaleInstruction>();
-            UndertaleInstruction.Reference<UndertaleVariable>.ParseReferenceChain(reader, this);
+            UndertaleInstruction.ParseReferenceChain(reader, this);
         }
         else
         {
@@ -96,4 +97,9 @@ public class UndertaleVariable : UndertaleNamedResource, ISearchable, UndertaleI
     {
         return Name?.SearchMatches(filter) ?? false;
     }
+
+    // Underanalyzer implementations
+    IGMString IGMVariable.Name => Name;
+    IGMInstruction.InstanceType IGMVariable.InstanceType => (IGMInstruction.InstanceType)InstanceType;
+    int IGMVariable.VariableID => VarID;
 }
