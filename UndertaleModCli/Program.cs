@@ -18,6 +18,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Models;
 using Newtonsoft.Json;
+using UndertaleModLib.Compiler;
 
 namespace UndertaleModCli;
 
@@ -160,7 +161,7 @@ public partial class Program : IScriptInterface
             dumpCommand,
             replaceCommand
         };
-        rootCommand.Description = "CLI tool for modding, decompiling and unpacking Undertale (and other Game Maker: Studio games)!";
+        rootCommand.Description = "CLI tool for modding, decompiling and unpacking Undertale (and other GameMaker games)!";
         Parser commandLine = new CommandLineBuilder(rootCommand)
             .UseDefaults() // automatically configures dotnet-suggest
             .Build();
@@ -195,7 +196,8 @@ public partial class Program : IScriptInterface
                 typeof(JsonConvert).GetTypeInfo().Assembly,
                 typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly,
                 typeof(TextureWorker).GetTypeInfo().Assembly,
-                typeof(ImageMagick.MagickImage).GetTypeInfo().Assembly)
+                typeof(ImageMagick.MagickImage).GetTypeInfo().Assembly,
+                typeof(Underanalyzer.Decompiler.DecompileContext).Assembly)
             // "WithEmitDebugInformation(true)" not only lets us to see a script line number which threw an exception,
             // but also provides other useful debug info when we run UMT in "Debug".
             .WithEmitDebugInformation(true);
@@ -584,7 +586,8 @@ public partial class Program : IScriptInterface
         if (!Data.IsYYC())
         {
             Console.WriteLine($"{Data.Code.Count} Code Entries, {Data.Variables.Count} Variables, {Data.Functions.Count} Functions");
-            Console.WriteLine($"{Data.CodeLocals.Count} Code locals, {Data.Strings.Count} Strings, {Data.EmbeddedTextures.Count} Embedded Textures");
+            var codeLocalsInfo = Data.CodeLocals is not null ? $"{Data.CodeLocals.Count} Code locals, " : "";
+            Console.WriteLine($"{codeLocalsInfo}{Data.Strings.Count} Strings, {Data.EmbeddedTextures.Count} Embedded Textures");
         }
         else
         {
@@ -670,18 +673,138 @@ public partial class Program : IScriptInterface
     /// <param name="fileToReplace">File path which should replace the code entry.</param>
     private void ReplaceCodeEntryWithFile(string codeEntry, FileInfo fileToReplace)
     {
-        UndertaleCode code = Data.Code.ByName(codeEntry);
-
-        if (code == null)
-        {
-            Console.Error.WriteLine($"Data file does not contain a code entry named {codeEntry}!");
-            return;
-        }
-
         if (Verbose)
             Console.WriteLine("Replacing " + codeEntry);
 
-        ImportGMLString(codeEntry, File.ReadAllText(fileToReplace.FullName));
+        // Read source code from file
+        string gmlCode = File.ReadAllText(fileToReplace.FullName);
+
+        // Link code to object events manually only if collision events are used
+        CompileResult result = CompileResult.UnsuccessfulResult;
+        bool manualLink = false;
+        const string objectPrefix = "gml_Object_";
+        if (codeEntry.StartsWith(objectPrefix, StringComparison.Ordinal))
+        {
+            // Parse object event. First, find positions of last two underscores in name.
+            int lastUnderscore = codeEntry.LastIndexOf('_');
+            int secondLastUnderscore = codeEntry.LastIndexOf('_', lastUnderscore - 1);
+            if (lastUnderscore <= 0 || secondLastUnderscore <= 0)
+            {
+                Console.Error.WriteLine($"Failed to parse object code entry name: \"{codeEntry}\"");
+                return;
+            }
+
+            // Extract object name, event type, and event subtype
+            ReadOnlySpan<char> objectName = codeEntry.AsSpan(new Range(objectPrefix.Length, secondLastUnderscore));
+            ReadOnlySpan<char> eventType = codeEntry.AsSpan(new Range(secondLastUnderscore + 1, lastUnderscore));
+            if (!uint.TryParse(codeEntry.AsSpan(lastUnderscore + 1), out uint eventSubtype))
+            {
+                // No number at the end of the name; parse it out as best as possible (may technically be ambiguous sometimes...).
+                // It should be a collision event, though.
+                manualLink = true;
+                ReadOnlySpan<char> nameAfterPrefix = codeEntry.AsSpan(objectPrefix.Length);
+                const string collisionSeparator = "_Collision_";
+                int collisionSeparatorPos = nameAfterPrefix.LastIndexOf(collisionSeparator);
+                if (collisionSeparatorPos != -1)
+                {
+                    // Split out the actual object name and the collision subtype
+                    objectName = nameAfterPrefix[0..collisionSeparatorPos];
+                    ReadOnlySpan<char> collisionSubtype = nameAfterPrefix[(collisionSeparatorPos + collisionSeparator.Length)..];
+
+                    if (Data.IsVersionAtLeast(2, 3))
+                    {
+                        // GameMaker 2.3+ uses the object name for the collision subtype
+                        int objectIndex = Data.GameObjects.IndexOfName(collisionSubtype);
+                        if (objectIndex >= 0)
+                        {
+                            // Object already exists; use its ID as a subtype
+                            eventSubtype = (uint)objectIndex;
+                        }
+                        else
+                        {
+                            // Need to create a new object
+                            eventSubtype = (uint)Data.GameObjects.Count;
+                            Data.GameObjects.Add(new()
+                            {
+                                Name = Data.Strings.MakeString(collisionSubtype.ToString())
+                            });
+                        }
+                    }
+                    else
+                    {
+                        // Pre-2.3 GMS2 versions use GUIDs... need to resolve it
+                        eventSubtype = ReduceCollisionValue(GetCollisionValueFromCodeNameGUID(codeEntry));
+                        ReassignGUIDs(collisionSubtype.ToString(), ReduceCollisionValue(GetCollisionValueFromCodeNameGUID(codeEntry)));
+                    }
+                }
+                else
+                {
+                    Console.Error.WriteLine($"Failed to parse event type and subtype for \"{codeEntry}\".");
+                    return;
+                }
+            }
+            else if (eventType.SequenceEqual("Collision"))
+            {
+                // Handle collision events with object ID at the end of the name
+                manualLink = true;
+                if (eventSubtype >= Data.GameObjects.Count)
+                {
+                    if (ScriptQuestion($"Object of ID {eventSubtype} was not found.\nAdd new object? (will be ID {Data.GameObjects.Count})"))
+                    {
+                        // Create new object at end of game object list
+                        eventSubtype = (uint)Data.GameObjects.Count;
+                        Data.GameObjects.Add(new()
+                        {
+                            Name = Data.Strings.MakeString(
+                                SimpleTextInput("Enter object name", $"Enter object name for ID {eventSubtype}", "", false))
+                        });
+                    }
+                    else
+                    {
+                        // It *needs* to have a valid value, make the user specify one
+                        eventSubtype = ReduceCollisionValue([uint.MaxValue]);
+                    }
+                }
+            }
+
+            // If manually linking, do so
+            if (manualLink)
+            {
+                // Create new object if necessary
+                UndertaleGameObject obj = Data.GameObjects.ByName(objectName);
+                if (obj is null)
+                {
+                    obj = new()
+                    {
+                        Name = Data.Strings.MakeString(objectName.ToString())
+                    };
+                    Data.GameObjects.Add(obj);
+                }
+
+                // Link to object's event with a blank code entry
+                UndertaleCode manualCode = UndertaleCode.CreateEmptyEntry(Data, codeEntry);
+                CodeImportGroup.LinkEvent(obj, manualCode, EventType.Collision, eventSubtype);
+
+                // Perform code import using manual code entry
+                CodeImportGroup group = new(Data);
+                group.QueueReplace(manualCode, gmlCode);
+                result = group.Import();
+            }
+        }
+
+        // When not manually linking, just let a code import group do it during importing
+        if (!manualLink)
+        {
+            CodeImportGroup group = new(Data);
+            group.QueueReplace(codeEntry, gmlCode);
+            result = group.Import();
+        }
+
+        // Error if import failed
+        if (!result.Successful)
+        {
+            Console.Error.WriteLine("Code import unsuccessful:\n" + result.PrintAllErrors(false));
+        }
     }
 
     /// <summary>

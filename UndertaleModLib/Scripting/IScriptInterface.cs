@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Underanalyzer.Decompiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 
@@ -90,11 +91,6 @@ public interface IScriptInterface
     string ScriptErrorType { get; }
 
     /// <summary>
-    /// Indicates whether the user has enabled the setting to use decompiled code cache.
-    /// </summary>
-    bool GMLCacheEnabled { get; }
-
-    /// <summary>
     /// Indicating whether the Program is currently closed.
     /// //TODO: Only GUI + ExportAllRoomsToPng.csx uses this, but nothing should ever need to access this value.
     /// <c>"somehow Dispatcher.Invoke() in a loop creates executable code queue that doesn't clear on app closing."</c>
@@ -113,22 +109,8 @@ public interface IScriptInterface
     /// <summary>
     /// Creates a new Data file asynchronously.
     /// </summary>
-    /// <returns><see langword="true"/> if task was successful, <see langword="false"/> if not.</returns>
-    Task<bool> MakeNewDataFile();
-
-    /// <summary> Obsolete. Use <see cref="MakeNewDataFile"/>. </summary>
-    [Obsolete("Use MakeNewDataFile instead!")]
-    sealed Task<bool> Make_New_File()
-    {
-        return MakeNewDataFile();
-    }
-
-    //TODO: i have absolutely no idea what any of these do.
-    void ReplaceTempWithMain(bool imAnExpertBtw = false);
-    void ReplaceMainWithTemp(bool imAnExpertBtw = false);
-    void ReplaceTempWithCorrections(bool imAnExpertBtw = false);
-    void ReplaceCorrectionsWithTemp(bool imAnExpertBtw = false);
-    void UpdateCorrections(bool imAnExpertBtw = false);
+    /// <returns><see langword="true"/> if successful, <see langword="false"/> if not.</returns>
+    bool MakeNewDataFile();
 
     /// <summary>
     /// Used in Scripts in order to show a message to the user.
@@ -184,29 +166,27 @@ public interface IScriptInterface
     /// </summary>
     void InitializeScriptDialog();
 
-    //TODO: some profile mod stuff, not quite sure on what its supposed to do.
-    void ReapplyProfileCode();
-    void NukeProfileGML(string codeName);
-
     /// <summary>
     ///Get the decompiled text from a code entry (like <c>gml_Script_moveTo</c>).
     /// </summary>
     /// <param name="codeName">The name of the code entry from which to get the decompiled code from.</param>
-    /// <param name="context">The GlobalDecompileContext</param>
+    /// <param name="context">The GlobalDecompileContext to use for decompilation.</param>
+    /// <param name="settings">The settings to use for decompilation, or <see langword="null"/> to use the default.</param>
     /// <returns>Decompiled text as a <see cref="string"/>.</returns>
     /// <remarks>This will return a string, even if the decompilation failed! Usually commented out and featuring
     /// <c>DECOMPILER FAILED!</c> .</remarks>
-    string GetDecompiledText(string codeName, GlobalDecompileContext context = null);
+    string GetDecompiledText(string codeName, GlobalDecompileContext context = null, IDecompileSettings settings = null);
 
     /// <summary>
     /// Get the decompiled text from an <see cref="UndertaleCode"/> object.
     /// </summary>
     /// <param name="code">The object from which to get the decompiled code from.</param>
-    /// <param name="context">The GlobalDecompileContext</param>
+    /// <param name="context">The GlobalDecompileContext to use for decompilation.</param>
+    /// <param name="settings">The settings to use for decompilation, or <see langword="null"/> to use the default.</param>
     /// <returns>Decompiled text as a <see cref="string"/>.</returns>
     /// <remarks>This will return a string, even if the decompilation failed! Usually commented out and featuring
     /// <c>DECOMPILER FAILED!</c> .</remarks>
-    string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null);
+    string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null, IDecompileSettings settings = null);
 
     /// <summary>
     ///  Get the disassembly from a code entry (like <c>gml_Script_moveTo</c>).
@@ -367,15 +347,6 @@ public interface IScriptInterface
     void IncrementProgress();
 
     /// <summary>
-    /// Obsolete.
-    /// </summary>
-    [Obsolete("Use IncrementProgress instead!")]
-    sealed void IncProgress()
-    {
-        IncrementProgress();
-    }
-
-    /// <summary>
     /// Adds a certain amount to the variable holding a progress value in.
     /// Used for parallel operations, as it is thread-safe.
     /// </summary>
@@ -383,28 +354,10 @@ public interface IScriptInterface
     void AddProgressParallel(int amount);
 
     /// <summary>
-    /// Obsolete.
-    /// </summary>
-    [Obsolete("Use AddProgressParallel instead!")]
-    sealed void AddProgressP(int amount)
-    {
-        AddProgressParallel(amount);
-    }
-
-    /// <summary>
     /// Increments the variable holding a progress value by one.
     /// Used for parallel operations, as it is thread-safe.
     /// </summary>
     void IncrementProgressParallel();
-
-    /// <summary>
-    /// Obsolete.
-    /// </summary>
-    [Obsolete("Use IncrementProgressParallel instead!")]
-    sealed void IncProgressP()
-    {
-        IncrementProgressParallel();
-    }
 
     /// <summary>
     /// Gets the value of the variable holding a progress value.
@@ -443,53 +396,15 @@ public interface IScriptInterface
     void DisableAllSyncBindings();
 
     /// <summary>
-    /// Obsolete
-    /// </summary>
-    /// <param name="enable"></param>
-    [Obsolete("Use DisableAllSyncBindings() instead!")]
-    sealed void SyncBinding(bool enable = false)
-    {
-        DisableAllSyncBindings();
-    }
-
-    /// <summary>
     /// Starts the task that updates a progress bar in parallel.
     /// </summary>
     void StartProgressBarUpdater();
-
-    /// <summary>
-    /// Obsolete.
-    /// </summary>
-    [Obsolete("Use StartProgressBarUpdater instead!")]
-    sealed void StartUpdater()
-    {
-        StartProgressBarUpdater();
-    }
 
     /// <summary>
     /// Stops the task that updates a progress bar in parallel.
     /// </summary>
     /// <returns>A task that represents the stopped progress updater.</returns>
     Task StopProgressBarUpdater();
-
-    /// <summary>
-    /// Obsolete.
-    /// </summary>
-    [Obsolete("Use StopProgressBarUpdater instead!")]
-    sealed Task StopUpdater ()
-    {
-        return StopProgressBarUpdater();
-    }
-
-    /// <summary>
-    /// Generates a decompiled code cache to accelerate operations that need to access code often.
-    /// </summary>
-    /// <param name="decompileContext">The GlobalDecompileContext.</param>
-    /// <param name="dialog">The dialog that should be shown. If <see langword="null"/> then a new dialog will be automatically created and shown.</param>
-    /// <param name="clearGMLEditedBefore">Whether to clear <see cref="UndertaleData.GMLEditedBefore"/> from <see cref="Data"/>.</param>
-    /// <returns>Whether the decompiled GML cache was generated or not. <see langword="true"/> if it was successful,
-    /// <see langword="false"/> if it wasn't or <see cref="GMLCacheEnabled"/> is disabled.</returns>
-    Task<bool> GenerateGMLCache(ThreadLocal<Decompiler.GlobalDecompileContext> decompileContext = null, object dialog = null, bool clearGMLEditedBefore = false);
 
     /// <summary>
     /// Changes the currently selected in the GUI.
@@ -505,123 +420,10 @@ public interface IScriptInterface
     string PromptChooseDirectory();
 
     /// <summary>
-    /// Obsolete
-    /// </summary>
-    [Obsolete("Use this parameters, as it is not used.")]
-    sealed string PromptChooseDirectory(string prompt)
-    {
-        return PromptChooseDirectory();
-    }
-
-    /// <summary>
     /// Used to prompt the user for a file.
     /// </summary>
     /// <param name="defaultExt">The default extension that should be selected.</param>
     /// <param name="filter">The filters used for the file select.</param>
     /// <returns>The file selected by the user.</returns>
     string PromptLoadFile(string defaultExt, string filter);
-
-    //TODO: so much stuff....
-    /// <summary>
-    /// Replaces/Imports all GML in a specific code entry with a specified string.
-    /// </summary>
-    /// <param name="codeName">The name of the code entry that shall get replaced. <br/>
-    /// <b> If the entry does not exist, it will be created!</b></param>
-    /// <param name="gmlCode">The new GML code that shall replace the current GML code of <paramref name="codeName"/>.</param>
-    /// <param name="doParse">Whether the code entry should get linked.
-    /// In other words, have special handling for scripts, globals and object code.</param>
-    /// <param name="checkDecompiler">If this is <see langword="false"/> an empty string
-    /// will be used for replacing the code entry in the case that anything fails.
-    /// If this is <see langword="true"/> then an error will be shown instead and the code entry will not get replaced.</param>
-    void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool checkDecompiler = false);
-
-    /// <summary>
-    /// Replaces/Imports all GM-Bytecode ASM in a specific code entry with a specified string.
-    /// </summary>
-    /// <param name="codeName">The name of the code entry that shall get replaced. <br/>
-    /// <b> If the entry does not exist, it will be created!</b></param>
-    /// <param name="gmlCode">The new ASM code that shall replace the current GML code of <paramref name="codeName"/>.</param>
-    /// <param name="doParse">Whether the code entry should get linked.
-    /// In other words, have special handling for scripts, globals and object code.</param>
-    /// <param name="nukeProfile">Whether or not to nuke the profile entry for profile mode.</param>
-    /// <param name="checkDecompiler">If this is <see langword="false"/> an empty string
-    /// will be used for replacing the code entry in the case that anything fails.
-    /// If this is <see langword="true"/> then an error will be shown instead and the code entry will not get replaced.</param>
-    void ImportASMString(string codeName, string gmlCode, bool doParse = true, bool nukeProfile = true, bool checkDecompiler = false);
-
-    /// <summary>
-    /// Replaces/Imports all GML in a specific code entry with a specified file.
-    /// </summary>
-    /// <param name="fileName">The path to the GML file. This file needs to
-    /// <b>A)</b> contain valid GML and <b>B)</b> the filename needs to be the name of the code entry that shall get replaced <br/>
-    /// <b> If the entry does not exist, it will be created!</b>
-    /// </param>
-    /// <param name="doParse">Whether the code entry should get linked.
-    /// In other words, have special handling for scripts, globals and object code.</param>
-    /// <param name="checkDecompiler">If this is <see langword="false"/> an empty string
-    /// will be used for replacing the code entry in the case that anything fails.</param>
-    /// <param name="throwOnError">Whether a <see cref="ScriptException"/> will be thrown on any errors.</param>
-    void ImportGMLFile(string fileName, bool doParse = true, bool checkDecompiler = false, bool throwOnError = false);
-
-    /// <summary>
-    /// Replaces/Imports all GM-Bytecode ASM in a specific code entry with a specified file.
-    /// </summary>
-    /// <param name="fileName">The path to the ASM file. This file needs to
-    /// <b>A)</b> contain valid GM-Bytecode ASM and <b>B)</b> the filename needs to be the name of the code entry that shall get replaced <br/>
-    /// <b> If the entry does not exist, it will be created!</b></param>
-    /// <param name="doParse">Whether the code entry should get linked.
-    /// In other words, have special handling for scripts, globals and object code.</param>
-    /// <param name="nukeProfile">Whether or not to nuke the profile entry for profile mode.</param>
-    /// <param name="checkDecompiler">If this is <see langword="false"/> an empty string
-    /// will be used for replacing the code entry in the case that anything fails.</param>
-    /// <param name="throwOnError">Whether a <see cref="ScriptException"/> will be thrown on any errors.</param>
-    void ImportASMFile(string fileName, bool doParse = true, bool nukeProfile = true, bool checkDecompiler = false, bool throwOnError = false);
-
-    /// <summary>
-    /// Find a keyword in a GML code entry and replaces it with a replacement string.
-    /// </summary>
-    /// <param name="codeName">The name of the code entry that shall get replaced.</param>
-    /// <param name="keyword">The search term.</param>
-    /// <param name="replacement">The replacement term.</param>
-    /// <param name="caseSensitive">Whether the keyword search should be case-sensitive.</param>
-    /// <param name="isRegex">Whether <paramref name="keyword"/> should be treated as RegEx.</param>
-    /// <param name="context">The global decompile context.</param>
-    void ReplaceTextInGML(string codeName, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null);
-
-    /// <summary>
-    /// Find a keyword in a GML code entry and replaces it with a replacement string.
-    /// </summary>
-    /// <param name="code">The code entry that shall get replaced.</param>
-    /// <param name="keyword">The search term.</param>
-    /// <param name="replacement">The replacement term.</param>
-    /// <param name="caseSensitive">Whether the keyword search should be case-sensitive.</param>
-    /// <param name="isRegex">Whether <paramref name="keyword"/> should be treated as RegEx.</param>
-    /// <param name="context">The global decompile context.</param>
-    void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null);
-
-    /// <summary>
-    /// Method returning a dummy boolean value.
-    /// </summary>
-    /// <returns>Returns a dummy boolean value</returns>
-    bool DummyBool()
-    {
-        return true;
-    }
-
-    /// <summary>
-    /// Method doing nothing.
-    /// </summary>
-    void DummyVoid()
-    {
-
-    }
-
-    /// <summary>
-    /// Method returning a dummy string value.
-    /// </summary>
-    /// <returns>Returns a dummy string value.</returns>
-    string DummyString()
-    {
-        return "";
-    }
 }

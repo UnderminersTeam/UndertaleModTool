@@ -11,10 +11,12 @@ if(obj == null) {
     Data.GameObjects.Add(obj);
 }
 
-if(Data.GeneralInfo.Name.Content.StartsWith("UNDERTALE")) {
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+
+if (Data.GeneralInfo.Name.Content.StartsWith("UNDERTALE")) {
     // Remove existing F3 handler to avoid accidentally 
     // creating system_information_962
-    Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, (uint)114, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML("", Data);
+    importGroup.QueueReplace(Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, (uint)114, Data), "");
 }
 
 bool gms2 = Data.IsGameMaker2();
@@ -93,7 +95,7 @@ else {
 
 
 
-obj.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+importGroup.QueueReplace(obj.EventHandlerFor(EventType.Create, Data), @"
 if (instance_number(object_index) > 1)
 {
     instance_destroy(id, false)
@@ -133,9 +135,9 @@ ww = -1
 hh = -1
 xx = 0
 yy = 0
-", Data);
+");
 
-obj.EventHandlerFor(EventType.Step, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+importGroup.QueueReplace(obj.EventHandlerFor(EventType.Step, Data), @"
 if selector_active
 {
     global.interact = 1
@@ -284,9 +286,9 @@ if selector_active
         }
     }
 }
-", Data);
+");
 
-obj.EventHandlerFor(EventType.Draw, (uint)64, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+importGroup.QueueReplace(obj.EventHandlerFor(EventType.Draw, (uint)64, Data), @"
 if selector_active
 {
     if sprite_exists(ss)
@@ -356,25 +358,25 @@ if selector_active
     draw_text((xx + 10), ((yy + 13) + string_height(results_str)), ((""Case-"" + casing) + "" (toggle with Tab)""))
     draw_set_alpha(1)
 }
-", Data);
+");
 
-obj.EventHandlerFor(EventType.Destroy, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+importGroup.QueueReplace(obj.EventHandlerFor(EventType.Destroy, Data), @"
 ds_list_destroy(suggestions)
 sprite_delete(ss)
 font_delete(fnt)
-", Data);
+");
 
-obj.EventHandlerFor(EventType.Other, (uint)5, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+importGroup.QueueReplace(obj.EventHandlerFor(EventType.Other, (uint)5, Data), @"
 if selector_active
     event_user(1)
-", Data);
+");
 
-obj.EventHandlerFor(EventType.KeyPress, (uint)114, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+importGroup.QueueReplace(obj.EventHandlerFor(EventType.KeyPress, (uint)114, Data), @"
 if (!selector_active)
     event_user(0)
-", Data);
+");
 
-obj.EventHandlerFor(EventType.Other, (uint)10, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+importGroup.QueueReplace(obj.EventHandlerFor(EventType.Other, (uint)10, Data), @"
 selector_active = 1
 if (!selector_initialized)
     fnt = font_add(""8bitoperator_jve.ttf"", 24, 0, 0, 32, 127)
@@ -395,9 +397,9 @@ global.interact = 1
 image_alpha = 0
 exiting = 0
 update = 1
-", Data);
+");
 
-obj.EventHandlerFor(EventType.Other, (uint)11, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+importGroup.QueueReplace(obj.EventHandlerFor(EventType.Other, (uint)11, Data), @"
 display_set_gui_size(-1, -1)
 instance_activate_all()
 keyboard_clear(vk_f3)
@@ -405,7 +407,9 @@ sprite_delete(ss)
 global.interact = 0
 selector_active = 0
 exiting = 0
-", Data);
+");
+
+importGroup.Import();
 
 string version;
 if (Data.IsVersionAtLeast(2, 3))

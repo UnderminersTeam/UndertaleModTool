@@ -33,7 +33,7 @@ if (String.IsNullOrEmpty(searchQuery) || String.IsNullOrWhiteSpace(searchQuery))
 }
 
 SetProgressBar(null, "Game objects", 0, Data.GameObjects.Count);
-StartUpdater();
+StartProgressBarUpdater();
 
 Regex searchRegex;
 if (regexCheck)
@@ -63,7 +63,7 @@ else
 
 string[] objectNames = Data.GameObjects.Select(x => x.Name?.Content).ToArray(); // for "OrderBy()" acceleration
 
-await StopUpdater();
+await StopProgressBarUpdater();
 SimpleTextOutput("Search results.", label, string.Join('\n', resultList.Distinct().OrderBy(x => Array.IndexOf(objectNames, x))), true);
 
 EnableUI();
@@ -76,7 +76,7 @@ void CheckObject(UndertaleGameObject obj)
     if (sprName is not null && spriteNames.Contains(sprName))
         resultList.Add(obj.Name.Content);
 
-    IncProgressP();
+    IncrementProgressParallel();
 }
 void CheckObjectRegex(UndertaleGameObject obj)
 {
@@ -85,5 +85,5 @@ void CheckObjectRegex(UndertaleGameObject obj)
     if (sprName is not null && searchRegex.Match(sprName).Success)
         resultList.Add(obj.Name.Content);
 
-    IncProgressP();
+    IncrementProgressParallel();
 }

@@ -6,7 +6,7 @@ namespace UndertaleModLib.Models;
 /// A string entry a data file can have.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleString : UndertaleResource, ISearchable, IDisposable
+public class UndertaleString : UndertaleResource, ISearchable, IDisposable, Underanalyzer.IGMString
 {
     /// <summary>
     /// The contents of the string.
