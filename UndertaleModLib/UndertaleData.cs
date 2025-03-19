@@ -320,6 +320,11 @@ namespace UndertaleModLib
         public bool ShortCircuit = true;
 
         /// <summary>
+        /// Whether the data file has array copy-on-write enabled.
+        /// </summary>
+        public bool ArrayCopyOnWrite = false;
+
+        /// <summary>
         /// Some info for the editor to store data on.
         /// </summary>
         public readonly ToolInfo ToolInfo = new ToolInfo();
@@ -343,41 +348,6 @@ namespace UndertaleModLib
         /// Registry for macro types, their resolvers, and other data specific to this game.
         /// </summary>
         public GameSpecificRegistry GameSpecificRegistry;
-
-        //Profile mode related properties
-
-        //TODO: Why are the functions that deal with the cache in a completely different place than the cache parameters? These have *no* place of being here.
-        /// <summary>
-        /// A <see cref="Dictionary{TKey,TValue}"/> of cached decompiled code,
-        /// with the code name as the Key and the decompiled code text as the value.
-        /// </summary>
-        public ConcurrentDictionary<string, string> GMLCache { get; set; }
-
-        /// <summary>
-        /// A list of names of code entries which failed to compile or decompile.
-        /// </summary>
-        public List<string> GMLCacheFailed { get; set; }
-
-        /// <summary>
-        /// A list of names of modified code entries.
-        /// </summary>
-        public ConcurrentBag<string> GMLCacheChanged { get; set; } = new();
-
-        /// <summary>
-        /// A list of names of code entries that were edited before the "Use decompiled code cache" setting was enabled.
-        /// </summary>
-        public List<string> GMLEditedBefore { get; set; }
-
-        /// <summary>
-        /// Whether the decompiled code cache has been saved to disk with no new cache changes happening since then.
-        /// </summary>
-        public bool GMLCacheWasSaved { get; set; }
-
-        /// <summary>
-        /// Whether the decompiled code cache is generated. This will be <see langword="false"/> if it's currently generating and
-        /// <see langword="true"/> otherwise.
-        /// </summary>
-        public bool GMLCacheIsReady { get; set; } = true;
 
         /// <summary>
         /// An array of a <see cref="UndertaleData"/> properties with <see cref="IList{T}"/> as their type.
@@ -700,10 +670,6 @@ namespace UndertaleModLib
             FORM = null;
             GlobalFunctions = null;
             GameSpecificRegistry = null;
-            GMLCache = null;
-            GMLCacheFailed = null;
-            GMLCacheChanged = new();
-            GMLEditedBefore = null;
         }
     }
 
@@ -712,21 +678,6 @@ namespace UndertaleModLib
     /// </summary>
     public class ToolInfo
     {
-        /// <summary>
-        /// Whether profile mode is enabled.
-        /// </summary>
-        public bool ProfileMode = false;
-
-        /// <summary>
-        /// The location of the profiles folder.
-        /// </summary>
-        public string AppDataProfiles = "";
-
-        /// <summary>
-        /// The MD5 hash of the current file.
-        /// </summary>
-        public string CurrentMD5 = "Unknown";
-
         /// <summary>
         /// Default settings to be used by the Underanalyzer decompiler,
         /// for a tool and in any scripts that desire matching the same settings.

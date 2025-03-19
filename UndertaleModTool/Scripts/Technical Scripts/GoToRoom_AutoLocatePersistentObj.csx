@@ -24,9 +24,12 @@ if (!pers)
 var code = obj_pers.EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f3, Data);
 
 Data.Functions.EnsureDefined("get_integer", Data.Strings);
-code.ReplaceGML(@"
+
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+importGroup.QueueReplace(code, @"
 room_goto(get_integer(""Go to room"", room));
-", Data);
+");
+importGroup.Import();
 
 ChangeSelection(code);
 ScriptMessage("Patched!");

@@ -28,13 +28,10 @@ if (code == null)
 
 GlobalDecompileContext globalDecompileContext = new(Data);
 Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = new Underanalyzer.Decompiler.DecompileSettings();
-
-bool case_sensitive = true;
-bool multiline = false;
-bool isRegex = true;
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
 
 string preValue = GetPreviousValue();
-if (!ScriptQuestion("Change the battlegroup in \"gml_Object_obj_mainchara_KeyPress_36\" (when you press \"HOME\" in debug mode)?" + ((preValue == "None") ? "" : " The current battlegroup value is: " + preValue)))
+if (!ScriptQuestion("Change the battlegroup in \"gml_Object_obj_mainchara_KeyPress_36\" (when you press \"HOME\" in debug mode)?" + ((preValue == "None") ? "" : "\n\nThe current battlegroup value is: " + preValue)))
 {
     ScriptError("Cancelled!");
     return;
@@ -42,7 +39,8 @@ if (!ScriptQuestion("Change the battlegroup in \"gml_Object_obj_mainchara_KeyPre
 if (GetPreviousValue() == "None")
 {
     String replacement = SimpleTextInput("Enter new battle group value for when you press \"HOME\"", "New battle group value", GetDecompiledText("gml_Object_obj_mainchara_KeyPress_36", globalDecompileContext, decompilerSettings), true);
-    ImportGMLString("gml_Object_obj_mainchara_KeyPress_36", replacement);
+    importGroup.QueueReplace("gml_Object_obj_mainchara_KeyPress_36", replacement);
+    importGroup.Import();
     ScriptMessage("Completed");
     return;
 }
@@ -55,12 +53,13 @@ bool success = false;
 int number;
 while (!success)
 {
-    success = Int32.TryParse(SimpleTextInput("Enter new battle group value for when you press \"HOME\"", "New battle group value", "", multiline), out number);
+    success = Int32.TryParse(SimpleTextInput("Enter new battle group value for when you press \"HOME\"", "New battle group value", "", false), out number);
 }
 
 //Substitute in group 1, the new value, and group 3
 //And the groups are specified using curly brackets to prevent the regex from misinterpreting the request.
-ReplaceTextInGML(code.Name.Content, keyword, ("${1}" + number.ToString() + "${3}"), case_sensitive, isRegex, globalDecompileContext, decompilerSettings);
+importGroup.QueueRegexFindReplace(code, keyword, ("${1}" + number.ToString() + "${3}"));
+importGroup.Import();
 
 ScriptMessage("Completed");
 
