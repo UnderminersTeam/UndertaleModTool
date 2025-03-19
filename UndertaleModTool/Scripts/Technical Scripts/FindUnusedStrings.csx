@@ -132,10 +132,9 @@ uint[] GetStringUsageCount()
             {
                 if ((int)Instruction.Kind == 0xC0 && (int)Instruction.Type1 == 6)
                 {
-                    if (((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Instruction.Value).Resource != null)
+                    if (Instruction.ValueString?.Resource is UndertaleString str)
                     {
-                        if ((((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Instruction.Value).Resource) != null)
-                            stringsUsageCountArray[Data.Strings.IndexOf(((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Instruction.Value).Resource)] += 1;
+                        stringsUsageCountArray[Data.Strings.IndexOf(str)] += 1;
                     }
                 }
             }
@@ -619,8 +618,8 @@ Dictionary<UndertaleVariable, List<UndertaleInstruction>> CollectReferencesVar()
             continue;
         foreach (UndertaleInstruction instr in code.Instructions)
         {
-            UndertaleVariable obj = instr.GetReference<UndertaleVariable>()?.Target;
-            if (obj != null)
+            UndertaleVariable obj = instr.ValueVariable;
+            if (obj is not null)
             {
                 if (!list.ContainsKey(obj))
                     list.Add(obj, new List<UndertaleInstruction>());
@@ -640,8 +639,8 @@ Dictionary<UndertaleFunction, List<UndertaleInstruction>> CollectReferencesFunc(
             continue;
         foreach (UndertaleInstruction instr in code.Instructions)
         {
-            UndertaleFunction obj = instr.GetReference<UndertaleFunction>()?.Target;
-            if (obj != null)
+            UndertaleFunction obj = instr.ValueFunction;
+            if (obj is not null)
             {
                 if (!list.ContainsKey(obj))
                     list.Add(obj, new List<UndertaleInstruction>());

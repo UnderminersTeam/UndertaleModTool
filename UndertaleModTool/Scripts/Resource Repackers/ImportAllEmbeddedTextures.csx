@@ -5,37 +5,36 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
 // Setup root export folder.
-string winFolder = GetFolder(FilePath); // The folder data.win is located in.
-
-string GetFolder(string path)
-{
-    return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
-}
+string embeddedTexturesPath = Path.Combine(Path.GetDirectoryName(FilePath), "EmbeddedTextures");
 
 // Folder Check One
-if (!Directory.Exists(winFolder + "EmbeddedTextures\\"))
+if (!Directory.Exists(embeddedTexturesPath))
 {
     ScriptError("There is no 'EmbeddedTextures' folder to import.", "Error: Nothing to import.");
     return;
 }
 
-string subPath = winFolder + "EmbeddedTextures";
+string subPath = embeddedTexturesPath;
 int i = 0;
 foreach (var txtr in Data.EmbeddedTextures) 
 {
     UndertaleEmbeddedTexture target = txtr as UndertaleEmbeddedTexture;
-    try 
+    string filename = $"{i}.png";
+    try
     {
-        byte[] data = File.ReadAllBytes(subPath + "\\" + i + ".png");
-        target.TextureData.TextureBlob = data;
+        target.TextureData.Image = GMImage.FromPng(File.ReadAllBytes(Path.Combine(subPath, filename)))
+                                          .ConvertToFormat(target.TextureData.Image.Format);
     }
     catch (Exception ex) 
     {
-        ScriptMessage("Failed to import file number " + i + " due to: " + ex.Message);
+        ScriptMessage($"Failed to import {filename}: {ex.Message}");
     }
     i++;
 }
+
+ScriptMessage("Import complete.");

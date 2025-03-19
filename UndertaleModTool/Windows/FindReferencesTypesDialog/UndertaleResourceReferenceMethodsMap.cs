@@ -32,6 +32,8 @@ namespace UndertaleModTool.Windows
     public class PredicateForVersion
     {
         public (uint Major, uint Minor, uint Release) Version { get; set; }
+        public (uint Major, uint Minor, uint Release) BeforeVersion { get; set; } = (uint.MaxValue, uint.MaxValue, uint.MaxValue);
+        public bool DisableForLTS2022 { get; set; } = false;
         public Func<object, HashSetTypesOverride, bool, Dictionary<string, object[]>> Predicate { get; set; }
     }
 
@@ -168,6 +170,7 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (2023, 2, 0),
+                        DisableForLTS2022 = true,
                         Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(UndertaleParticleSystemEmitter)))
@@ -420,9 +423,7 @@ namespace UndertaleModTool.Windows
                                     stringRefs = stringReferences.Where(x => x.Value.Contains(obj))
                                                                  .Select(x => x.Key);
                                 else
-                                    stringRefs = data.Code.Where(x => x.Instructions.Any(
-                                                                        i => i.Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG> strPtr
-                                                                             && strPtr.Resource == obj));
+                                    stringRefs = data.Code.Where(x => x.Instructions.Any(i => i.ValueString?.Resource == obj));
 
                                 codeEntries = codeEntries.Concat(stringRefs);
 
@@ -560,15 +561,6 @@ namespace UndertaleModTool.Windows
                                     outDict["Game options constants"] = new object[] { new GeneralInfoEditor(data.GeneralInfo, data.Options, data.Language) };
                             }
 
-                            if (types.Contains(typeof(UndertaleLanguage)))
-                            {
-                                bool langsMatches = data.Language.EntryIDs.Contains(obj)
-                                                    || data.Language.Languages.Any(x => x.Name == obj || x.Region == obj
-                                                                                        || x.Entries.Contains(obj));
-                                if (langsMatches)
-                                    outDict["Languages"] = new object[] { new GeneralInfoEditor(data.GeneralInfo, data.Options, data.Language) };
-                            }
-
                             if (types.Contains(typeof(UndertalePath)))
                             {
                                 var paths = data.Paths.Where(x => x.Name == obj);
@@ -616,6 +608,7 @@ namespace UndertaleModTool.Windows
                     {
                         // Bytecode version 15
                         Version = (15, uint.MaxValue, uint.MaxValue),
+                        BeforeVersion = (2024, 8, 0),
                         Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(UndertaleCodeLocals)))
@@ -627,6 +620,28 @@ namespace UndertaleModTool.Windows
                             var codeLocals = data.CodeLocals.Where(x => x.Name == obj || x.Locals.Any(l => l.Name == obj));
                             if (codeLocals.Any())
                                 return new() { { "Code locals", checkOne ? codeLocals.ToEmptyArray() : codeLocals.ToArray() } };
+                            else
+                                return null;
+                        }
+                    },
+                    new PredicateForVersion()
+                    {
+                        // Bytecode version 16
+                        Version = (16, uint.MaxValue, uint.MaxValue),
+                        Predicate = (objSrc, types, checkOne) =>
+                        {
+                            if (!types.Contains(typeof(UndertaleLanguage)))
+                                return null;
+
+                            if (objSrc is not UndertaleString obj)
+                                return null;
+
+                            bool langsMatches = data.Language.EntryIDs.Contains(obj)
+                                                || data.Language.Languages.Any(x => x.Name == obj || x.Region == obj
+                                                                                    || x.Entries.Contains(obj));
+
+                            if (langsMatches)
+                                return new() { { "Languages",  new object[] { new GeneralInfoEditor(data.GeneralInfo, data.Options, data.Language) } } };
                             else
                                 return null;
                         }
@@ -958,6 +973,7 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (2023, 2, 0),
+                        DisableForLTS2022 = true,
                         Predicate = (objSrc, types, checkOne) =>
                         {
                             if (objSrc is not UndertaleString obj)
@@ -1230,10 +1246,7 @@ namespace UndertaleModTool.Windows
                                 funcRefs = funcReferences.Where(x => x.Value.Contains(obj))
                                                          .Select(x => x.Key);
                             else
-                                funcRefs = data.Code.Where(x => x.Instructions.Any(
-                                                                  i => i.Function?.Target == obj
-                                                                       || i.Value is UndertaleInstruction.Reference<UndertaleFunction> funcRef
-                                                                          && funcRef.Target == obj));
+                                funcRefs = data.Code.Where(x => x.Instructions.Any(i => i.ValueFunction == obj));
                             if (funcRefs.Any())
                                 return new() { { "Code", checkOne ? funcRefs.ToEmptyArray() : funcRefs.ToArray() } };
                             else
@@ -1262,10 +1275,7 @@ namespace UndertaleModTool.Windows
                                 variRefs = variReferences.Where(x => x.Value.Contains(obj))
                                                          .Select(x => x.Key);
                             else
-                                variRefs = data.Code.Where(x => x.Instructions.Any(
-                                                                  i => i.Destination?.Target == obj
-                                                                       || i.Value is UndertaleInstruction.Reference<UndertaleVariable> varRef
-                                                                          && varRef.Target == obj));
+                                variRefs = data.Code.Where(x => x.Instructions.Any(i => i.ValueVariable == obj));
                             if (variRefs.Any())
                                 return new() { { "Code", checkOne ? variRefs.ToEmptyArray() : variRefs.ToArray() } };
                             else
@@ -1329,6 +1339,7 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (2023, 2, 0),
+                        DisableForLTS2022 = true,
                         Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(UndertaleRoom.ParticleSystemInstance)))
@@ -1369,6 +1380,7 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         Version = (2023, 2, 0),
+                        DisableForLTS2022 = true,
                         Predicate = (objSrc, types, checkOne) =>
                         {
                             if (objSrc is not UndertaleParticleSystemEmitter obj)
@@ -1421,7 +1433,17 @@ namespace UndertaleModTool.Windows
                 else
                     isAtLeast = predicateForVer.Version.CompareTo(ver) <= 0;
 
-                if (isAtLeast)
+                bool isAboveMost = false;
+                if (predicateForVer.BeforeVersion.Minor == uint.MaxValue)
+                    isAboveMost = predicateForVer.BeforeVersion.Major <= data.GeneralInfo.BytecodeVersion;
+                else
+                    isAboveMost = predicateForVer.BeforeVersion.CompareTo(ver) <= 0;
+
+                bool disableDueToLTS = false;
+                if (data.GeneralInfo.Branch == UndertaleGeneralInfo.BranchType.LTS2022_0)
+                    disableDueToLTS = predicateForVer.DisableForLTS2022;
+
+                if (isAtLeast && !isAboveMost && !disableDueToLTS)
                 {
                     var result = predicateForVer.Predicate(obj, types, checkOne);
                     if (result is null)
@@ -1441,8 +1463,6 @@ namespace UndertaleModTool.Windows
         public static async Task<Dictionary<string, List<object>>> GetUnreferencedObjects(UndertaleData data, Dictionary<Type, string> typesDict)
         {
             UndertaleResourceReferenceMethodsMap.data = data;
-
-            var ver = (data.GeneralInfo.Major, data.GeneralInfo.Minor, data.GeneralInfo.Release);
 
             Dictionary<string, List<object>> outDict = new();
 
@@ -1469,18 +1489,14 @@ namespace UndertaleModTool.Windows
                 var variables = new HashSet<UndertaleVariable>();
                 foreach (var inst in code.Instructions)
                 {
-                    if (inst.Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG> strPtr)
-                        strings.Add(strPtr.Resource);
+                    if (inst.ValueString?.Resource is UndertaleString str)
+                        strings.Add(str);
 
-                    if (inst.Destination?.Target is not null)
-                        variables.Add(inst.Destination.Target);
-                    if (inst.Value is UndertaleInstruction.Reference<UndertaleVariable> varRef && varRef.Target is not null)
-                        variables.Add(varRef.Target);
+                    if (inst.ValueVariable is UndertaleVariable variable)
+                        variables.Add(variable);
 
-                    if (inst.Function?.Target is not null)
-                        functions.Add(inst.Function.Target);
-                    if (inst.Value is UndertaleInstruction.Reference<UndertaleFunction> funcRef && funcRef.Target is not null)
-                        functions.Add(funcRef.Target);
+                    if (inst.ValueFunction is UndertaleFunction function)
+                        functions.Add(function);
                 }
 
                 if (strings.Count != 0)
@@ -1498,39 +1514,42 @@ namespace UndertaleModTool.Windows
                 mainWindow.SetProgressBar(null, "Assets", 0, assets.Count);
                 mainWindow.StartProgressBarUpdater();
 
-                var assetsPart = Partitioner.Create(0, assets.Count);
-
                 List<Dictionary<string, List<object>>> dicts = new();
 
-                await Task.Run(() =>
+                if (assets.Count > 0) // A Partitioner can't be created on an empty list.
                 {
-                    Parallel.ForEach(assetsPart, (range) =>
-                    {
-                        var resultDict = new Dictionary<string, List<object>>();
+                    var assetsPart = Partitioner.Create(0, assets.Count);
 
-                        for (int i = range.Item1; i < range.Item2; i++)
+                    await Task.Run(() =>
+                    {
+                        Parallel.ForEach(assetsPart, (range) =>
                         {
-                            var asset = assets[i];
-                            var assetReferences = GetReferencesOfObject(asset.Item1, data,
-                                                                        new HashSetTypesOverride(true, data.Code is null), true);
-                            if (assetReferences is null)
+                            var resultDict = new Dictionary<string, List<object>>();
+
+                            for (int i = range.Item1; i < range.Item2; i++)
                             {
-                                if (resultDict.TryGetValue(asset.Item2, out var list))
+                                var asset = assets[i];
+                                var assetReferences = GetReferencesOfObject(asset.Item1, data,
+                                                                            new HashSetTypesOverride(true, data.Code is null), true);
+                                if (assetReferences is null)
                                 {
-                                    list.Add(asset.Item1);
+                                    if (resultDict.TryGetValue(asset.Item2, out var list))
+                                    {
+                                        list.Add(asset.Item1);
+                                    }
+                                    else
+                                    {
+                                        resultDict[asset.Item2] = new() { asset.Item1 };
+                                    }
                                 }
-                                else
-                                {
-                                    resultDict[asset.Item2] = new() { asset.Item1 };
-                                }
+
+                                mainWindow.IncrementProgressParallel();
                             }
 
-                            mainWindow.IncrementProgressParallel();
-                        }
-
-                        dicts.Add(resultDict);
+                            dicts.Add(resultDict);
+                        });
                     });
-                });
+                }
 
                 Dictionary<string, int> outArrSizes = new();
                 foreach (var dict in dicts)
@@ -1563,23 +1582,17 @@ namespace UndertaleModTool.Windows
                         }
                     }
                 }
-
+            }
+            finally
+            {
                 await mainWindow.StopProgressBarUpdater();
                 mainWindow.HideProgressBar();
-            }
-            catch
-            {
+
                 mainWindow.IsEnabled = true;
                 stringReferences = null;
                 funcReferences = null;
                 variReferences = null;
-
-                throw;
             }
-            mainWindow.IsEnabled = true;
-            stringReferences = null;
-            funcReferences = null;
-            variReferences = null;
 
             if (outDict.Count == 0)
                 return null;

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.IO;
 using System.Reflection;
 using UndertaleModLib.Models;
@@ -391,7 +390,7 @@ namespace UndertaleModLib
                 return count + count * subCount;
             }
 
-            uint[] pointers = reader.utListPtrsPool.Rent((int)count);
+            uint[] pointers = reader.ListPtrsPool.Rent((int)count);
             for (uint i = 0; i < count; i++)
                 pointers[i] = reader.ReadUInt32();
 
@@ -415,12 +414,12 @@ namespace UndertaleModLib
                 }
                 catch (UndertaleSerializationException e)
                 {
-                    reader.utListPtrsPool.Return(pointers);
+                    reader.ListPtrsPool.Return(pointers);
                     throw new UndertaleSerializationException(e.Message + "\nwhile reading child object count of item " + (i + 1) + " of " + count + " in a list of " + typeof(T).FullName, e);
                 }
             }
 
-            reader.utListPtrsPool.Return(pointers);
+            reader.ListPtrsPool.Return(pointers);
 
             return totalCount;
         }

@@ -206,6 +206,21 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     public UndertaleString Name { get; set; }
 
     /// <summary>
+    /// Different GameMaker release branches. LTS has some but not all features of equivalent newer versions.
+    /// </summary>
+    public enum BranchType
+    {
+        Pre2022_0,
+        LTS2022_0,
+        Post2022_0
+    }
+
+    /// <summary>
+    /// The GameMaker release branch of the data file. May be set to <see cref="BranchType.Post2022_0"/> when features exempted from LTS are detected.
+    /// </summary>
+    public BranchType Branch = BranchType.Pre2022_0;
+
+    /// <summary>
     /// The major version of the data file.
     /// If greater than 1, serialization produces "2.0.0.0" due to the flag no longer updating in data.win
     /// </summary>
@@ -282,7 +297,7 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     /// <summary>
     /// The room order of the data file.
     /// </summary>
-    public UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM> RoomOrder { get; private set; } = new();
+    public UndertaleSimpleResourcesList<UndertaleRoom, UndertaleChunkROOM> RoomOrder { get; set; } = new();
 
     /// <summary>
     /// TODO: unknown, some sort of checksum.
@@ -309,33 +324,22 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     /// </summary>
     public bool InfoTimestampOffset { get; set; } = true;
 
-    public static (uint, uint, uint, uint) TestForCommonGMSVersions(UndertaleReader reader,
-                                                                    (uint, uint, uint, uint) readVersion)
+    public static (uint, uint, uint, uint, BranchType) TestForCommonGMSVersions(UndertaleReader reader,
+                                                                    (uint, uint, uint, uint, BranchType) readVersion)
     {
-        (uint Major, uint Minor, uint Release, uint Build) detectedVer = readVersion;
+        (uint Major, uint Minor, uint Release, uint Build, BranchType Branch) detectedVer = readVersion;
 
         // Some GMS2+ version detection. The rest is spread around, mostly in UndertaleChunks.cs
-        if (reader.AllChunkNames.Contains("PSEM"))      // 2023.2
-            detectedVer = (2023, 2, 0, 0);
+        if (reader.AllChunkNames.Contains("PSEM"))      // 2023.2, not present on LTS
+            detectedVer = (2023, 2, 0, 0, BranchType.Post2022_0);
         else if (reader.AllChunkNames.Contains("FEAT")) // 2022.8
-            detectedVer = (2022, 8, 0, 0);
+            detectedVer = (2022, 8, 0, 0, BranchType.Pre2022_0);
         else if (reader.AllChunkNames.Contains("FEDS")) // 2.3.6
-            detectedVer = (2, 3, 6, 0);
+            detectedVer = (2, 3, 6, 0, BranchType.Pre2022_0);
         else if (reader.AllChunkNames.Contains("SEQN")) // 2.3
-            detectedVer = (2, 3, 0, 0);
+            detectedVer = (2, 3, 0, 0, BranchType.Pre2022_0);
         else if (reader.AllChunkNames.Contains("TGIN")) // 2.2.1
-            detectedVer = (2, 2, 1, 0);
-
-        if (detectedVer.Major > 2 || (detectedVer.Major == 2 && detectedVer.Minor >= 3))
-        {
-            CompileContext.GMS2_3 = true;
-            DecompileContext.GMS2_3 = true;
-        }
-        else
-        {
-            CompileContext.GMS2_3 = false;
-            DecompileContext.GMS2_3 = false;
-        }
+            detectedVer = (2, 2, 1, 0, BranchType.Pre2022_0);
 
         return detectedVer;
     }
@@ -466,24 +470,13 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         if (reader.ReadOnlyGEN8)
             return;
 
-        var detectedVer = TestForCommonGMSVersions(reader, (Major, Minor, Release, Build));
-        (Major, Minor, Release, Build) = detectedVer;
-
-        if (reader.undertaleData.GeneralInfo is not null)
-        {
-            var prevGenInfo = reader.undertaleData.GeneralInfo;
-            // If previous version is greater than current
-            if (prevGenInfo.Major > Major
-                || prevGenInfo.Major == Major && prevGenInfo.Minor > Minor
-                || prevGenInfo.Major == Major && prevGenInfo.Minor == Minor && prevGenInfo.Release > Release
-                || prevGenInfo.Major == Major && prevGenInfo.Minor == Minor && prevGenInfo.Release == Release && prevGenInfo.Build > Build)
-            {
-                Major = prevGenInfo.Major;
-                Minor = prevGenInfo.Minor;
-                Release = prevGenInfo.Release;
-                Build = prevGenInfo.Build;
-            }
-        }
+        // TestForCommonGMSVersions is run during the object counting phase, so the previous general info is always accurate.
+        var prevGenInfo = reader.undertaleData.GeneralInfo;
+        Major = prevGenInfo.Major;
+        Minor = prevGenInfo.Minor;
+        Release = prevGenInfo.Release;
+        Build = prevGenInfo.Build;
+        Branch = prevGenInfo.Branch;
 
         DefaultWindowWidth = reader.ReadUInt32();
         DefaultWindowHeight = reader.ReadUInt32();
@@ -590,16 +583,23 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
                 sb.Append(" (GMS ");
             else
                 sb.Append(" (GM ");
-            sb.Append(Major);
-            sb.Append(".");
-            sb.Append(Minor);
+            if (Branch == BranchType.LTS2022_0) // TODO: Is there some way to dynamically get this from the enum?
+            {
+                sb.Append("2022.0");
+            }
+            else
+            {
+                sb.Append(Major);
+                sb.Append('.');
+                sb.Append(Minor);
+            }
             if (Release != 0)
             {
-                sb.Append(".");
+                sb.Append('.');
                 sb.Append(Release);
                 if (Build != 0)
                 {
-                    sb.Append(".");
+                    sb.Append('.');
                     sb.Append(Build);
                 }
             }
@@ -608,7 +608,7 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
                 sb.Append(", bytecode ");
                 sb.Append(BytecodeVersion);
             }
-            sb.Append(")");
+            sb.Append(')');
             return sb.ToString();
         }
     }
@@ -692,7 +692,8 @@ public class UndertaleOptions : UndertaleObject, IDisposable
         UseRearTouch = 0x2000000,
         UseFastCollision = 0x4000000,
         FastCollisionCompatibility = 0x8000000,
-        DisableSandbox = 0x10000000
+        DisableSandbox = 0x10000000,
+        EnableCopyOnWrite = 0x20000000
     }
 
     /// <summary>
@@ -711,50 +712,64 @@ public class UndertaleOptions : UndertaleObject, IDisposable
     public OptionsFlags Info { get; set; } = OptionsFlags.InterpolatePixels | OptionsFlags.UseNewAudio | OptionsFlags.ShowCursor | OptionsFlags.ScreenKey | OptionsFlags.QuitKey | OptionsFlags.SaveKey | OptionsFlags.ScreenShotKey | OptionsFlags.CloseSec | OptionsFlags.ScaleProgress | OptionsFlags.DisplayErrors | OptionsFlags.VariableErrors | OptionsFlags.CreationEventOrder;
 
     /// <summary>
-    /// The window scale.
+    /// The window scale. // TODO: is this a legacy gm thing, or still used today? 
     /// </summary>
     public int Scale { get; set; } = -1;
 
     /// <summary>
-    /// The window color. TODO: unused? Legacy GM remnant?
+    /// The window color. TODO: unused? Legacy GM remnant? Is this the "Color outside the room region" thing?
     /// </summary>
     public uint WindowColor { get; set; } = 0;
 
     /// <summary>
-    /// The Color depth. TODO: unused? Legacy GM remnant?
+    /// The Color depth the game uses. Used only in Game Maker 8 and earlier.
     /// </summary>
     public uint ColorDepth { get; set; } = 0;
 
     /// <summary>
-    /// The game's resolution. TODO: unused? Legacy GM remnant?
+    /// The game's resolution. Used only in Game Maker 8 and earlier.
     /// </summary>
     public uint Resolution { get; set; } = 0;
 
     /// <summary>
-    /// The game's refresh rate. TODO: unused? Legacy GM remnant?
+    /// The game's refresh rate. Used only in Game Maker 8 and earlier.
     /// </summary>
     public uint Frequency { get; set; } = 0;
 
     /// <summary>
-    /// Whether the game uses V-Sync. TODO: unused? Legacy GM remnant?
+    /// Whether the game uses V-Sync. Used only in Game Maker 8 and earlier.
     /// </summary>
     public uint VertexSync { get; set; } = 0;
 
     /// <summary>
-    /// TODO: unused? Legacy GM remnant?
+    /// The priority of the game process. The higher the number, the more priority will be given to the game. Used only in Game Maker 8 and earlier.
     /// </summary>
     public uint Priority { get; set; } = 0;
-
-    // Apparently these exist, but I can't find any examples of it. They're also only used in "old format".
+    
+    /// <summary>
+    /// The background of the loading bar when loading GameMaker 8 games.
+    /// </summary>
     public UndertaleSprite.TextureEntry BackImage { get; set; } = new UndertaleSprite.TextureEntry();
+    
+    /// <summary>
+    /// The image of the loading bar when loading GameMaker 8 games.
+    /// </summary>
     public UndertaleSprite.TextureEntry FrontImage { get; set; } = new UndertaleSprite.TextureEntry();
+    
+    /// <summary>
+    /// The image that gets shown when loading GameMaker 8 games.
+    /// </summary>
     public UndertaleSprite.TextureEntry LoadImage { get; set; } = new UndertaleSprite.TextureEntry();
+    
+    /// <summary>
+    /// The transparency value of <see cref="LoadImage"/>. 255 indicates fully opaque, 0 means fully transparent. 
+    /// </summary>
     public uint LoadAlpha { get; set; } = 255;
 
     /// <summary>
     /// A list of Constants that the game uses.
     /// </summary>
-    public UndertaleSimpleList<Constant> Constants { get; private set; } = new UndertaleSimpleList<Constant>();
+    public UndertaleSimpleList<Constant> Constants { get; set; } = new UndertaleSimpleList<Constant>();
 
     //TODO: not shown in GUI right now!!!
     public bool NewFormat { get; set; } = true;
@@ -865,7 +880,7 @@ public class UndertaleOptions : UndertaleObject, IDisposable
     /// <inheritdoc />
     public void Unserialize(UndertaleReader reader)
     {
-        NewFormat = reader.ReadInt32() == int.MinValue;
+        NewFormat = reader.ReadInt32() == Int32.MinValue;
         reader.Position -= 4;
         if (NewFormat)
         {
@@ -931,7 +946,7 @@ public class UndertaleOptions : UndertaleObject, IDisposable
     public static uint UnserializeChildObjectCount(UndertaleReader reader)
     {
         uint count = 0;
-        bool newFormat = reader.ReadInt32() == int.MinValue;
+        bool newFormat = reader.ReadInt32() == Int32.MinValue;
         reader.Position -= 4;
 
         reader.Position += newFormat ? 60u : 140u;
@@ -952,7 +967,7 @@ public class UndertaleOptions : UndertaleObject, IDisposable
         {
             foreach (Constant constant in Constants)
                 constant?.Dispose();
-         }
+        }
         BackImage = new();
         FrontImage = new();
         LoadImage = new();

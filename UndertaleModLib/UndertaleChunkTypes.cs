@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UndertaleModLib.Models;
 
 namespace UndertaleModLib
@@ -237,16 +233,14 @@ namespace UndertaleModLib
         public IList GetList() => List;
         public void GenerateIndexDict()
         {
-            if (IndexDict is not null)
-                return;
-
-            IndexDict = new();
+            IndexDict = new(List.Count);
             for (int i = 0; i < List.Count; i++)
+            {
                 IndexDict[List[i]] = i;
+            }
         }
         public void ClearIndexDict()
         {
-            IndexDict.Clear();
             IndexDict = null;
         }
     }
@@ -254,7 +248,7 @@ namespace UndertaleModLib
     public abstract class UndertaleAlignUpdatedListChunk<T> : UndertaleListChunk<T> where T : UndertaleObject, new()
     {
         public bool Align = true;
-        protected static int Alignment = 4;
+        protected int Alignment = 4;
 
         internal override void SerializeChunk(UndertaleWriter writer)
         {
@@ -281,10 +275,22 @@ namespace UndertaleModLib
         {
             uint count = reader.ReadUInt32();
             List.SetCapacity(count);
+            uint realCount = count;
 
             for (int i = 0; i < count; i++)
-                Align &= (reader.ReadUInt32() % Alignment == 0);
-            for (int i = 0; i < count; i++)
+            {
+                uint readValue = reader.ReadUInt32();
+                Align &= (readValue % Alignment == 0);
+                if (readValue != 0) continue;
+
+                if (reader.undertaleData.GeneralInfo.BytecodeVersion >= 13)
+                {
+                    reader.SubmitWarning("Zero values in an AlignUpdatedListChunk encountered on Bytecode 13 or higher!");
+                }
+                realCount--;
+            }
+
+            for (int i = 0; i < realCount; i++)
             {
                 if (Align)
                 {

@@ -9,24 +9,13 @@ using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
-if (Data.ToolInfo.ProfileMode)
-{
-    ScriptMessage("This script will not modify your existing edited GML code registered in your profile. Please use GML editing for text editing, or a script like FindAndReplace, for editing strings within these code entries.");
-}
-else
-{
-    if (!(ScriptQuestion("This script will recompile all code entries in your profile (if they exist) to the default decompiled output. Continue?")))
-        return;
-    foreach (UndertaleCode c in Data.Code)
-        NukeProfileGML(c.Name.Content);
-}
-
 string importFolder = PromptChooseDirectory();
-if (importFolder == null)
+if (importFolder is null)
     throw new ScriptException("The import folder was not set.");
 
-//Overwrite Check One
-if (!File.Exists(importFolder + "\\strings.txt"))
+// Overwrite Check One
+string stringsPath = Path.Combine(importFolder, "strings.txt");
+if (!File.Exists(stringsPath))
 {
     ScriptError("No 'strings.txt' file exists!", "Error");
     return;
@@ -34,9 +23,9 @@ if (!File.Exists(importFolder + "\\strings.txt"))
 
 int file_length = 0;
 string line = "";
-using (StreamReader reader = new StreamReader(importFolder + "\\strings.txt"))
+using (StreamReader reader = new StreamReader(stringsPath))
 {
-    while ((line = reader.ReadLine()) != null)
+    while ((line = reader.ReadLine()) is not null)
     {
         file_length += 1;
     }
@@ -61,7 +50,7 @@ else if (file_length > validStringsCount)
     return;
 }
 
-using (StreamReader reader = new StreamReader(importFolder + "\\strings.txt"))
+using (StreamReader reader = new StreamReader(stringsPath))
 {
     int line_no = 1;
     line = "";
@@ -69,7 +58,7 @@ using (StreamReader reader = new StreamReader(importFolder + "\\strings.txt"))
     {
         if (str.Content.Contains("\n") || str.Content.Contains("\r"))
             continue;
-        if (!((line = reader.ReadLine()) != null))
+        if (!((line = reader.ReadLine()) is not null))
         {
             ScriptError("ERROR 2: Unexpected end of file at line: " + line_no.ToString() + ". Expected file length was: " + validStringsCount.ToString() + ". No changes have been made.", "Error");
             return;
@@ -78,7 +67,7 @@ using (StreamReader reader = new StreamReader(importFolder + "\\strings.txt"))
     }
 }
 
-using (StreamReader reader = new StreamReader(importFolder + "\\strings.txt"))
+using (StreamReader reader = new StreamReader(stringsPath))
 {
     int line_no = 1;
     line = "";
@@ -86,7 +75,7 @@ using (StreamReader reader = new StreamReader(importFolder + "\\strings.txt"))
     {
         if (str.Content.Contains("\n") || str.Content.Contains("\r"))
             continue;
-        if ((line = reader.ReadLine()) != null)
+        if ((line = reader.ReadLine()) is not null)
             str.Content = line;
         else
         {
@@ -96,5 +85,3 @@ using (StreamReader reader = new StreamReader(importFolder + "\\strings.txt"))
         line_no += 1;
     }
 }
-
-ReapplyProfileCode();

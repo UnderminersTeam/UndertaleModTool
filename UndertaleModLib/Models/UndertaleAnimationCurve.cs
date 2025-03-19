@@ -3,14 +3,23 @@
 namespace UndertaleModLib.Models;
 
 /// <summary>
-/// An animation curve entry in a data file.
+/// An animation curve entry in a data file. These were introduced in GameMaker 2.3.0
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
 {
+    /// <summary>
+    /// TODO: unknown
+    /// </summary>
     public enum GraphTypeEnum : uint
     {
+        /// <summary>
+        /// Unknown
+        /// </summary>
         Unknown0 = 0,
+        /// <summary>
+        /// Unknown
+        /// </summary>
         Unknown1 = 1
     }
 
@@ -23,8 +32,10 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
     /// The graph type of this animation curve.
     /// </summary>
     public GraphTypeEnum GraphType { get; set; }
-
-
+    
+    /// <summary>
+    /// The channels this animation curve has. 
+    /// </summary>
     public UndertaleSimpleList<Channel> Channels { get; set; }
 
     /// <inheritdoc />
@@ -99,30 +110,56 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
         {
             foreach (Channel channel in Channels)
                 channel?.Dispose();
-         }
+        }
         Name = null;
         Channels = null;
     }
-
+    
+    /// <summary>
+    /// A channel in an animation curve.
+    /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class Channel : UndertaleObject, IDisposable
+    public class Channel : UndertaleNamedResource, IDisposable
     {
-        public enum FunctionType : uint
+        /// <summary>
+        /// The curve type determines how points flow to each other in a channel.
+        /// </summary>
+        public enum CurveType : uint
         {
+            /// <summary>
+            /// Creates a linear progression between points.
+            /// </summary>
             Linear = 0,
+            /// <summary>
+            /// Creates a smooth progression between points using catmull-rom interpolation.
+            /// </summary>
             Smooth = 1
+            // TODO: What about bezier?
         }
 
+        /// <inheritdoc />
         public UndertaleString Name { get; set; }
-        public FunctionType Function { get; set; }
+        
+        /// <summary>
+        /// The curve type this channel uses. 
+        /// </summary>
+        public CurveType Curve { get; set; }
+        
+        /// <summary>
+        /// TODO: document this
+        /// </summary>
         public uint Iterations { get; set; }
+        
+        /// <summary>
+        /// The points in the channel.
+        /// </summary>
         public UndertaleSimpleList<Point> Points { get; set; }
 
         /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
-            writer.Write((uint)Function);
+            writer.Write((uint)Curve);
             writer.Write(Iterations);
             Points.Serialize(writer);
         }
@@ -131,8 +168,9 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
-            Function = (FunctionType)reader.ReadUInt32();
+            Curve = (CurveType)reader.ReadUInt32();
             Iterations = reader.ReadUInt32();
+
             Points = reader.ReadUndertaleObject<UndertaleSimpleList<Point>>();
         }
 
@@ -141,14 +179,38 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
         {
             reader.Position += 12;
 
-            // "Points"
-            uint count = reader.ReadUInt32();
-            if (reader.undertaleData.IsVersionAtLeast(2, 3, 1))
-                reader.Position += 24 * count;
-            else
-                reader.Position += 12 * count;
+            // Read the number of points in the curve
+            uint pointCount = reader.ReadUInt32();
 
-            return 1 + count;
+            // This check is partly duplicated from UndertaleChunks.cs, but it's necessary to handle embedded curves
+            // (For example, those in SEQN in the TS!Underswap v1.0 demo; see issue #1414)
+            if (!reader.undertaleData.IsVersionAtLeast(2, 3, 1))
+            {
+                long returnPosition = reader.AbsPosition;
+                if (pointCount > 0)
+                {
+                    reader.AbsPosition += 8;
+                    if (reader.ReadUInt32() != 0) // In 2.3 an int with the value of 0 would be set here,
+                    {                             // It cannot be version 2.3 if this value isn't 0
+                        reader.undertaleData.SetGMS2Version(2, 3, 1);
+                    }
+                    else
+                    {
+                        if (reader.ReadUInt32() == 0)                      // At all points (besides the first one)
+                            reader.undertaleData.SetGMS2Version(2, 3, 1);  // If BezierX0 equals to 0 (the above check)
+                                                                           // Then BezierY0 equals to 0 as well (the current check)
+                    }
+                }
+                reader.AbsPosition = returnPosition;
+            }
+
+            // "Points"
+            if (reader.undertaleData.IsVersionAtLeast(2, 3, 1))
+                reader.Position += 24 * pointCount;
+            else
+                reader.Position += 12 * pointCount;
+
+            return 1 + pointCount;
         }
 
         /// <inheritdoc/>
@@ -160,14 +222,39 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
             Points = null;
         }
 
+        /// <summary>
+        /// A point which can exist on a <see cref="Channel"/>.
+        /// </summary>
         public class Point : UndertaleObject
         {
+            /// <summary>
+            /// The X coordinate of this point. GameMaker abbreviates this to "h".
+            /// </summary>
             public float X;
+            
+            /// <summary>
+            /// The Y coordinate of this point. GameMaker abbreviates this to "v".
+            /// </summary>
             public float Value;
 
-            public float BezierX0; // Bezier only
+            /// <summary>
+            /// The Y position for the first bezier handle. Only used if the Channel is set to Bezier.
+            /// </summary>
+            public float BezierX0;
+            
+            /// <summary>
+            /// The Y position for the first bezier handle. Only used if the Channel is set to Bezier.
+            /// </summary>
             public float BezierY0;
+            
+            /// <summary>
+            /// The X position for the second bezier handle. Only used if the Channel is set to Bezier.
+            /// </summary>
             public float BezierX1;
+            
+            /// <summary>
+            /// The Y position for the second bezier handle. Only used if the Channel is set to Bezier.
+            /// </summary>
             public float BezierY1;
 
             /// <inheritdoc />

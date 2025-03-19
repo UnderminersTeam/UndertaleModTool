@@ -14,6 +14,14 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
 
 ScriptMessage("HeCanBeEverywhere mod by krzys_h and Kneesnap\nVersion 3");
 
+// Create code import group
+GlobalDecompileContext globalDecompileContext = new(Data);
+Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = new Underanalyzer.Decompiler.DecompileSettings();
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data, globalDecompileContext, decompilerSettings)
+{
+    ThrowOnNoOpFindReplace = true
+};
+
 // spr_joker_main has an offset, so we need to make our own one
 var spr_joker_main = Data.Sprites.ByName("spr_joker_main");
 var spr_joker_enemy = new UndertaleSprite()
@@ -38,38 +46,37 @@ Data.Sprites.Add(spr_joker_enemy);
 var obj_joker = Data.GameObjects.ByName("obj_joker");
 
 var obj_chaseenemy = Data.GameObjects.ByName("obj_chaseenemy");
-obj_chaseenemy.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+importGroup.QueueAppend(obj_chaseenemy.EventHandlerFor(EventType.Create, Data), @"
 myencounter = 25; // Jevil.
 touchsprite = spr_joker_enemy;
 sprite_index = spr_joker_enemy;
 chasetype = 0;
-pacetype = 1;", Data);
+pacetype = 1;");
 
 var obj_testoverworldenemy = Data.GameObjects.ByName("obj_testoverworldenemy");
-var obj_testoverworldenemy_User0 = obj_testoverworldenemy.EventHandlerFor(EventType.Other, EventSubtypeOther.User0, Data.Strings, Data.Code, Data.CodeLocals);
-obj_testoverworldenemy_User0.AppendGML("snd_play(snd_joker_laugh0);", Data);
+var obj_testoverworldenemy_User0 = obj_testoverworldenemy.EventHandlerFor(EventType.Other, EventSubtypeOther.User0, Data);
+importGroup.QueueAppend(obj_testoverworldenemy_User0, "snd_play(snd_joker_laugh0);");
+importGroup.Import();
 obj_testoverworldenemy_User0.Instructions[3].JumpOffset += 5; // Ugly hack to redirect exit of if()
 
-var obj_joker_User10 = obj_joker.EventHandlerFor(EventType.Other, EventSubtypeOther.User10, Data.Strings, Data.Code, Data.CodeLocals);
+var obj_joker_User10 = obj_joker.EventHandlerFor(EventType.Other, EventSubtypeOther.User10, Data);
 for (int i = 0; i < obj_joker_User10.Instructions.Count; i++)
 {
-    if (obj_joker_User10.Instructions[i].Kind == UndertaleInstruction.Opcode.Pop && obj_joker_User10.Instructions[i].Destination.Target.Name.Content == "skipvictory")
+    if (obj_joker_User10.Instructions[i].Kind == UndertaleInstruction.Opcode.Pop && obj_joker_User10.Instructions[i].ValueVariable.Target.Name.Content == "skipvictory")
     {
-        obj_joker_User10.Instructions[i-1].Value = (short)0;
+        obj_joker_User10.Instructions[i-1].ValueShort = 0;
     }
-    if (obj_joker_User10.Instructions[i].Kind == UndertaleInstruction.Opcode.Call && obj_joker_User10.Instructions[i].Function.Target.Name.Content == "snd_free_all")
+    if (obj_joker_User10.Instructions[i].Kind == UndertaleInstruction.Opcode.Call && obj_joker_User10.Instructions[i].ValueFunction.Target.Name.Content == "snd_free_all")
     {
-        obj_joker_User10.Instructions[i].Function.Target = Data.Functions.ByName("scr_84_debug"); // just redirect it to something useless
+        obj_joker_User10.Instructions[i].ValueFunction.Target = Data.Functions.ByName("scr_84_debug"); // just redirect it to something useless
     }
 }
-obj_joker_User10.AppendGML(@"
+importGroup.QueueAppend(obj_joker_User10, @"
 if (room != room_cc_joker)
-    instance_destroy(obj_joker_body);", Data);
-
-Data.Variables.EnsureDefined("jevilizer", UndertaleInstruction.InstanceType.Global, false, Data.Strings, Data);
+    instance_destroy(obj_joker_body);");
 
 var scr_encountersetup = Data.Scripts.ByName("scr_encountersetup");
-scr_encountersetup.Code.AppendGML(@"
+importGroup.QueueAppend(scr_encountersetup.Code, @"
 if (argument0 == 25) {
     if (global.flag[241] < 1)
         global.flag[241] = 1;
@@ -107,10 +114,10 @@ if (argument0 == 25) {
         if (global.jevilizer < 0.15)
             global.battlemsg[0] = choose(""* JEVIL TURNED ON THE CAROUSEL FOR REAL"", ""* WHO KEEPS SPINNING THE WORLD AROUND"", ""* LOOKS LIKE THE WORLD IS LITERALLY REVOLVING"");
     }
-}", Data);
+}");
 
 var scr_text = Data.Scripts.ByName("scr_text");
-scr_text.Code.AppendGML(@"
+importGroup.QueueAppend(scr_text.Code, @"
 if ((argument0 == 405) || (argument0 == 410)) {
     if (global.flag[241] < 5)
         global.flag[241] = 5;
@@ -129,7 +136,7 @@ if ((argument0 == 405) || (argument0 == 410)) {
     global.msg[12] = ""* (You will regret this. Don't say I didn't warn you.)/%"";
     with(obj_event_room)
         con = 10;
-}", Data);
+}");
 
 var spr_jokerdoor = Data.Sprites.ByName("spr_jokerdoor");
 spr_jokerdoor.Textures[0].Texture = spr_jokerdoor.Textures[2].Texture;
@@ -137,7 +144,7 @@ spr_jokerdoor.Textures[1].Texture = spr_jokerdoor.Textures[2].Texture;
 
 
 var obj_doorX_musfade = Data.GameObjects.ByName("obj_doorX_musfade");
-obj_doorX_musfade.EventHandlerFor(EventType.Other, EventSubtypeOther.User9, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+importGroup.QueueReplace(obj_doorX_musfade.EventHandlerFor(EventType.Other, EventSubtypeOther.User9, Data), @"
 if (room == room_cc_prison_prejoker && global.flag[241] < 6) {
     global.typer = 666;
     global.fc = 0;
@@ -155,10 +162,10 @@ if (touched == 0) {
     alarm[2] = 15;
     alarm[3] = 14;
     touched = 1;
-}", Data);
+}");
 
 var obj_jokerbattleevent = Data.GameObjects.ByName("obj_jokerbattleevent");
-obj_jokerbattleevent.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+importGroup.QueueAppend(obj_jokerbattleevent.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data), @"
 if (instance_exists(obj_battlecontroller) && global.jevilizer < 0.15) {
     __view_set(4, 0, ((__view_get(4, 0) + (sin((global.time / 15)) / 2)) + 1));
     __view_set(11, 0, (__view_get(11, 0) + (cos((global.time / 10)) * 1.5)));
@@ -208,30 +215,28 @@ if (con == 1345) {
     global.msg[4] = ""\\E2* Then^1, I gotta warn you.../%"";
     instance_create(0, 0, obj_dialoguer);
     con = 15.1;
-}", Data);
+}");
 
-obj_jokerbattleevent.EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+importGroup.QueueAppend(obj_jokerbattleevent.EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data), @"
 if (global.debug) {
     draw_set_color(0xFFFF);
     draw_text(50, 50, global.jevilizer);
-}", Data);
+}");
 
-obj_jokerbattleevent.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+importGroup.QueueAppend(obj_jokerbattleevent.EventHandlerFor(EventType.Create, Data), @"
 if (!snd_is_playing(global.currentsong[1])) {
     global.currentsong[0] = snd_init(""prejoker.ogg"");
     global.currentsong[1] = mus_loop_ext(global.currentsong[0], 1, 0.85);
-}", Data);
+}");
 
 var scr_roomname = Data.Scripts.ByName("scr_roomname");
-scr_roomname.Code.Instructions.RemoveAt(scr_roomname.Code.Instructions.Count - 1); // push.v self.roomname
-scr_roomname.Code.Instructions.RemoveAt(scr_roomname.Code.Instructions.Count - 1); // ret.v
-scr_roomname.Code.AppendGML(@"
+importGroup.QueueFindReplace(scr_roomname.Code, "return roomname;", @"
 if (argument0 == room_cc_joker)
     roomname = ""CHAOS, CHAOS!"";
-return roomname;", Data);
+return roomname;");
 
 var obj_shop1 = Data.GameObjects.ByName("obj_shop1");
-var obj_shop1_Draw = obj_shop1.EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data.Strings, Data.Code, Data.CodeLocals);
+var obj_shop1_Draw = obj_shop1.EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data);
 var obj_shop1_Patches = new Dictionary<string, string>()
 {
     { "obj_shop1_slash_Draw_0_gml_474_0", @"\E3* ... I see^1.&* After all the trouble I went through to lock him up^1, he managed to escape?/" },
@@ -248,35 +253,37 @@ for (int i = 0; i < obj_shop1_Draw.Instructions.Count; i++)
 {
     if (obj_shop1_Draw.Instructions[i].Kind == UndertaleInstruction.Opcode.Push && obj_shop1_Draw.Instructions[i].Type1 == UndertaleInstruction.DataType.String)
     {
-        string id = ((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)obj_shop1_Draw.Instructions[i].Value).Resource.Content;
+        string id = obj_shop1_Draw.Instructions[i].ValueString.Resource.Content;
         if (obj_shop1_Patches.ContainsKey(id))
         {
             obj_shop1_Draw.Instructions[i + 0] = Assembler.AssembleOne(@"push.s """"", Data);
             obj_shop1_Draw.Instructions[i + 1] = Assembler.AssembleOne(@"popz.s", Data);
             obj_shop1_Draw.Instructions[i + 2] = Assembler.AssembleOne(@"push.s """"", Data);
-            obj_shop1_Draw.Instructions[i + 2].Value = new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>() { Resource = Data.Strings.MakeString(obj_shop1_Patches[id]) };
+            obj_shop1_Draw.Instructions[i + 2].ValueString = new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>() { Resource = Data.Strings.MakeString(obj_shop1_Patches[id]) };
             obj_shop1_Draw.Instructions[i + 5] = Assembler.AssembleOne(@"pop.v.s [array]global.msg", Data);
         }
     }
 }
-obj_shop1_Draw.UpdateAddresses();
-obj_shop1_Draw.Replace(Assembler.Assemble(obj_shop1_Draw.Disassemble(Data.Variables, Data.CodeLocals.For(obj_shop1_Draw)), Data)); // TODO: no idea why this is needed
+obj_shop1_Draw.UpdateLength();
+obj_shop1_Draw.Replace(Assembler.Assemble(obj_shop1_Draw.Disassemble(Data.Variables, Data.CodeLocals?.For(obj_shop1_Draw)), Data)); // TODO: no idea why this is needed
 
-Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f6, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+importGroup.QueueReplace(Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f6, Data), @"
 if (global.debug == 1)
-    global.flag[241] = 1;", Data);
+    global.flag[241] = 1;");
 
-Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f7, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+importGroup.QueueReplace(Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f7, Data), @"
 if (global.debug == 1)
-    global.flag[241] = 7;", Data);
+    global.flag[241] = 7;");
 
-Data.GameObjects.ByName("obj_jokerbg_triangle_real").EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+importGroup.QueueReplace(Data.GameObjects.ByName("obj_jokerbg_triangle_real").EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data), @"
 if (room == room_cc_joker) {
     on = (instance_number(obj_joker) != 0);
     rotspeed = (instance_number(obj_joker) * instance_number(obj_joker));
-}", Data);
+}");
 
-ReplaceTextInGML("gml_Object_obj_joker_Draw_0", "global.flag[241] = 6", "");
+importGroup.QueueFindReplace("gml_Object_obj_joker_Draw_0", "global.flag[241] = 6", "");
+
+importGroup.Import();
 
 ChangeSelection(spr_joker_enemy);
 

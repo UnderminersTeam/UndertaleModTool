@@ -66,6 +66,18 @@ namespace UndertaleModTool
                 typeof(UndertaleObjectReference),
                 new FrameworkPropertyMetadata(true,
                     FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+					
+        public static DependencyProperty CanChangeProperty =
+            DependencyProperty.Register("CanChange", typeof(bool),
+                typeof(UndertaleObjectReference),
+                new FrameworkPropertyMetadata(true,
+                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+				
+
+        public static readonly DependencyProperty GameObjectProperty =
+            DependencyProperty.Register("GameObject", typeof(UndertaleGameObject),
+                typeof(UndertaleObjectReference),
+                new PropertyMetadata(null));
 
         public static DependencyProperty ObjectEventTypeProperty =
             DependencyProperty.Register("ObjectEventType", typeof(EventType),
@@ -79,6 +91,15 @@ namespace UndertaleModTool
                 new FrameworkPropertyMetadata((uint) 0,
                     FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
+        public static readonly DependencyProperty RoomProperty =
+            DependencyProperty.Register("Room", typeof(UndertaleRoom),
+                typeof(UndertaleObjectReference),
+                new PropertyMetadata(null));
+
+        public static readonly DependencyProperty RoomGameObjectProperty =
+           DependencyProperty.Register("RoomGameObject", typeof(UndertaleRoom.GameObject),
+               typeof(UndertaleObjectReference),
+               new PropertyMetadata(null));
 
         public object ObjectReference
         {
@@ -94,8 +115,20 @@ namespace UndertaleModTool
 
         public bool CanRemove
         {
-            get { return (bool)GetValue(ObjectTypeProperty); }
-            set { SetValue(ObjectTypeProperty, value); }
+            get { return (bool)GetValue(CanRemoveProperty); }
+            set { SetValue(CanRemoveProperty, value); }
+        }
+
+        public bool CanChange
+        {
+            get { return (bool)GetValue(CanChangeProperty); }
+            set { SetValue(CanChangeProperty, value); }
+        }
+
+        public UndertaleGameObject GameObject
+        {
+            get { return (UndertaleGameObject)GetValue(GameObjectProperty); }
+            set { SetValue(GameObjectProperty, value); }
         }
 
         public EventType ObjectEventType
@@ -110,6 +143,19 @@ namespace UndertaleModTool
             set { SetValue(ObjectEventSubtypeProperty, value); }
         }
 
+        public UndertaleRoom Room
+        {
+            get { return (UndertaleRoom)GetValue(RoomProperty); }
+            set { SetValue(RoomProperty, value); }
+        }
+
+        public UndertaleRoom.GameObject RoomGameObject
+        {
+            get { return (UndertaleRoom.GameObject)GetValue(RoomGameObjectProperty); }
+            set { SetValue(RoomGameObjectProperty, value); }
+        }
+
+        public bool IsPreCreate { get; set; } = false;
 
         public UndertaleObjectReference()
         {
@@ -124,7 +170,7 @@ namespace UndertaleModTool
             var label = TryFindResource("emptyReferenceLabel") as Label;
             if (label is null)
                 return;
-            
+
             string typeName = ObjectType.ToString();
             string n = "";
             if (typeName.StartsWith("UndertaleModLib.Models.Undertale"))
@@ -136,8 +182,11 @@ namespace UndertaleModTool
             // If the first letter is a vowel
             if (Array.IndexOf(vowels, typeName[0]) != -1)
                 n = "n";
-                
-            label.Content = $"(drag & drop a{n} {typeName})";
+
+            if (CanChange)
+                label.Content = $"(drag & drop a{n} {typeName})";
+            else
+                label.Content = $"(empty {typeName} reference)";
         }
 
         public void ClearRemoveClickHandler()
@@ -149,22 +198,48 @@ namespace UndertaleModTool
         {
             if (ObjectReference is null)
             {
-                if (mainWindow.Selected is null)
+                if (GameObject is not null)
                 {
-                    mainWindow.ShowError("Nothing currently selected! This is currently unsupported.");
-                    return;
+                    ObjectReference = GameObject.EventHandlerFor(ObjectEventType, ObjectEventSubtype, mainWindow.Data);
                 }
-                else if (mainWindow.Selected is UndertaleGameObject gameObject)
+                else if (Room is not null)
                 {
-                    // Generate the code entry
-                    UndertaleCode code = gameObject.EventHandlerFor(ObjectEventType, ObjectEventSubtype, mainWindow.Data.Strings, mainWindow.Data.Code, mainWindow.Data.CodeLocals);
+                    if (RoomGameObject is null)
+                    {
+                        // Generate base name
+                        string name = $"gml_Room_{Room.Name.Content}_Create";
 
-                    ObjectReference = code;
+                        // If code already exists, use it (otherwise create new code)
+                        if (mainWindow.Data.Code.ByName(name) is UndertaleCode existing)
+                        {
+                            mainWindow.ShowWarning("Code entry for room already exists; reusing it.");
+                            ObjectReference = existing;
+                        }
+                        else
+                        {
+                            ObjectReference = UndertaleCode.CreateEmptyEntry(mainWindow.Data, name);
+                        }
+                    }
+                    else
+                    {
+                        // Generate base name
+                        string beginning = $"gml_RoomCC_{Room.Name.Content}_{RoomGameObject.InstanceID}";
+                        string suffix = !IsPreCreate ? "_Create" : "_PreCreate";
+                        string name = beginning + suffix;
+
+                        // Ensure no duplicate names (in case instance IDs change)
+                        int i = 0;
+                        while (mainWindow.Data.Code.ByName(name) is not null)
+                        {
+                            name = beginning + "_" + (i++).ToString() + suffix;
+                        }
+
+                        ObjectReference = UndertaleCode.CreateEmptyEntry(mainWindow.Data, name);
+                    }
                 }
                 else
                 {
-                    mainWindow.ShowError("Adding to non-objects is currently unsupported.");
-                    return;
+                    mainWindow.ShowError("Adding not supported in this situation.");
                 }
             }
             else
@@ -218,7 +293,7 @@ namespace UndertaleModTool
             }
             catch (Exception ex)
             {
-                mainWindow.ShowError("An error occured in the object references related window.\n" +
+                mainWindow.ShowError("An error occurred in the object references related window.\n" +
                                      $"Please report this on GitHub.\n\n{ex}");
             }
             finally
@@ -244,7 +319,7 @@ namespace UndertaleModTool
         {
             UndertaleObject sourceItem = e.Data.GetData(e.Data.GetFormats()[0]) as UndertaleObject;
 
-            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) && sourceItem != null && sourceItem.GetType() == ObjectType ? DragDropEffects.Link : DragDropEffects.None;
+            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) && sourceItem != null && CanChange && sourceItem.GetType() == ObjectType ? DragDropEffects.Link : DragDropEffects.None;
             e.Handled = true;
         }
 
@@ -252,7 +327,7 @@ namespace UndertaleModTool
         {
             UndertaleObject sourceItem = e.Data.GetData(e.Data.GetFormats()[0]) as UndertaleObject;
 
-            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) && sourceItem != null && sourceItem.GetType() == ObjectType ? DragDropEffects.Link : DragDropEffects.None;
+            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) && sourceItem != null && CanChange && sourceItem.GetType() == ObjectType ? DragDropEffects.Link : DragDropEffects.None;
             if (e.Effects == DragDropEffects.Link)
             {
                 ObjectReference = sourceItem;
