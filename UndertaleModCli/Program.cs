@@ -897,24 +897,23 @@ public partial class Program : IScriptInterface
     {
         if (Verbose)
             Console.WriteLine($"Saving new data file to '{outputPath}'");
-        try {
+        try 
+        {
             // Save data.win to temp file
-            using (var fs = new FileStream(outputPath + "temp", FileMode.Create, FileAccess.Write))
+            using (FileStream fs = new(outputPath + "temp", FileMode.Create, FileAccess.Write))
             {
                 UndertaleIO.Write(fs, Data, MessageHandler);
             }
 
             // If we're executing this, the saving was successful. So we can replace the new temp file
             // with the older file, if it exists.
-
-            if (File.Exists(outputPath))
-                File.Delete(outputPath);
-            File.Move(outputPath + "temp", outputPath);
+            File.Move(outputPath + "temp", outputPath, true);
 
             if (Verbose)
                 Console.WriteLine($"Saved data file to '{outputPath}'");
         }
-        catch (Exception e) {
+        catch (Exception e) 
+        {
             // Delete the temporary file in case we partially wrote it
             if (File.Exists(outputPath + "temp"))
                 File.Delete(outputPath + "temp");

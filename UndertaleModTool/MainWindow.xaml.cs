@@ -1235,11 +1235,9 @@ namespace UndertaleModTool
                     if (SaveSucceeded)
                     {
                         // It saved successfully!
-                        // If we're overwriting a previously existing data file, we're going to delete it now.
+                        // If we're overwriting a previously existing data file, we're going to overwrite it now.
                         // Then, we're renaming it back to the proper (non-temp) file name.
-                        if (File.Exists(filename))
-                            File.Delete(filename);
-                        File.Move(filename + "temp", filename);
+                        File.Move(filename + "temp", filename, true);
 
                         // Also make the changes to the profile system.
                         await ProfileSaveEvent(Data, filename);
