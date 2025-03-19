@@ -545,7 +545,7 @@ class FontEditorGUI : Form
         //Generate font sheet image and glyph points
         Bitmap fontSheetImg = new Bitmap(font.Texture.SourceWidth, font.Texture.SourceHeight);
         List<Point> glyphPoints = new List<Point>();
-        int gap = 1;
+        int gap = 2;
         
         int xPos = gap;
         int yPos = gap;
