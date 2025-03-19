@@ -892,15 +892,34 @@ public partial class Program : IScriptInterface
     /// Saves the currently loaded <see cref="Data"/> to an output path.
     /// </summary>
     /// <param name="outputPath">The path where to save the data.</param>
+    /// <exception cref="IOException">If saving fails</exception>
     private void SaveDataFile(string outputPath)
     {
         if (Verbose)
             Console.WriteLine($"Saving new data file to '{outputPath}'");
+        try {
+            // Save data.win to temp file
+            using (var fs = new FileStream(outputPath + "temp", FileMode.Create, FileAccess.Write))
+            {
+                UndertaleIO.Write(fs, Data, MessageHandler);
+            }
 
-        using FileStream fs = new FileInfo(outputPath).OpenWrite();
-        UndertaleIO.Write(fs, Data, MessageHandler);
-        if (Verbose)
-            Console.WriteLine($"Saved data file to '{outputPath}'");
+            // If we're executing this, the saving was successful. So we can replace the new temp file
+            // with the older file, if it exists.
+
+            if (File.Exists(outputPath))
+                File.Delete(outputPath);
+            File.Move(outputPath + "temp", outputPath);
+
+            if (Verbose)
+                Console.WriteLine($"Saved data file to '{outputPath}'");
+        }
+        catch (Exception e) {
+            // Delete the temporary file in case we partially wrote it
+            if (File.Exists(outputPath + "temp"))
+                File.Delete(outputPath + "temp");
+            throw new IOException($"Could not save data file: {e.Message}");
+        }
     }
 
     /// <summary>
