@@ -11,9 +11,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModTests", "Undert
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModCli", "UndertaleModCli\UndertaleModCli.csproj", "{CC5FDC60-A955-4D0C-B59F-8BD451778237}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UndertaleModToolUpdater", "UndertaleModToolUpdater\UndertaleModToolUpdater.csproj", "{1E004B65-F3C8-4A62-B649-1465EA6A3B01}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModToolUpdater", "UndertaleModToolUpdater\UndertaleModToolUpdater.csproj", "{1E004B65-F3C8-4A62-B649-1465EA6A3B01}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UndertaleModLibTests", "UndertaleModLibTests\UndertaleModLibTests.csproj", "{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModLibTests", "UndertaleModLibTests\UndertaleModLibTests.csproj", "{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Underanalyzer", "Underanalyzer\Underanalyzer\Underanalyzer.csproj", "{A171D18F-274E-427A-AFB3-D7A161F5B9CF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -71,6 +73,14 @@ Global
 		{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}.Release|x64.ActiveCfg = Release|Any CPU
 		{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}.Release|x64.Build.0 = Release|Any CPU
+		{A171D18F-274E-427A-AFB3-D7A161F5B9CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A171D18F-274E-427A-AFB3-D7A161F5B9CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A171D18F-274E-427A-AFB3-D7A161F5B9CF}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A171D18F-274E-427A-AFB3-D7A161F5B9CF}.Debug|x64.Build.0 = Debug|Any CPU
+		{A171D18F-274E-427A-AFB3-D7A161F5B9CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A171D18F-274E-427A-AFB3-D7A161F5B9CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A171D18F-274E-427A-AFB3-D7A161F5B9CF}.Release|x64.ActiveCfg = Release|Any CPU
+		{A171D18F-274E-427A-AFB3-D7A161F5B9CF}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

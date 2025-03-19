@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Underanalyzer.Decompiler;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
@@ -32,7 +33,6 @@ namespace UndertaleModTests
         public string ScriptErrorMessage => throw new NotImplementedException();
         public string ExePath => throw new NotImplementedException();
         public string ScriptErrorType => throw new NotImplementedException();
-        public bool GMLCacheEnabled => throw new NotImplementedException();
 
         public bool IsAppClosed => throw new NotImplementedException();
 
@@ -43,28 +43,9 @@ namespace UndertaleModTests
         public void EnsureDataLoaded()
         {
         }
-        public async Task<bool> MakeNewDataFile()
+        public bool MakeNewDataFile()
         {
-            await Task.Delay(1); //dummy await
             return true;
-        }
-        public void ReplaceTempWithMain(bool imAnExpertBtw = false)
-        {
-        }
-        public void ReplaceMainWithTemp(bool imAnExpertBtw = false)
-        {
-        }
-        public void ReplaceTempWithCorrections(bool imAnExpertBtw = false)
-        {
-        }
-        public void ReplaceCorrectionsWithTemp(bool imAnExpertBtw = false)
-        {
-        }
-        public void UpdateCorrections(bool imAnExpertBtw = false)
-        {
-        }
-        public void ReapplyProfileCode()
-        {
         }
         public void InitializeScriptDialog()
         {
@@ -93,10 +74,6 @@ namespace UndertaleModTests
         public void ScriptOpenURL(string url)
         {
             Console.WriteLine("Open: " + url);
-        }
-        public void NukeProfileGML(string codeName)
-        {
-            Console.WriteLine("NukeProfileGML(): " + codeName);
         }
         public void UpdateProgressBar(string message, string status, double progressValue, double maxValue)
         {
@@ -177,30 +154,6 @@ namespace UndertaleModTests
         {
             Console.Write("SetUMTConsoleText(): " + message);
         }
-        public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
-        {
-            Console.Write("ReplaceTextInGML(): " + codeName + ", " + keyword + ", " + replacement + ", " + caseSensitive.ToString() + ", " + isRegex.ToString() + ", " + context?.ToString());
-        }
-        public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
-        {
-            Console.Write("ReplaceTextInGML(): " + code.ToString() + ", " + keyword + ", " + replacement + ", " + caseSensitive.ToString() + ", " + isRegex.ToString() + ", " + context?.ToString());
-        }
-        public void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool checkDecompiler = false)
-        {
-            Console.Write("ImportGMLString(): " + codeName + ", " + gmlCode + ", " + doParse.ToString());
-        }
-        public void ImportASMString(string codeName, string gmlCode, bool doParse = true, bool nukeProfile = true, bool checkDecompiler = false)
-        {
-            Console.Write("ImportASMString(): " + codeName + ", " + gmlCode + ", " + doParse.ToString());
-        }
-        public void ImportGMLFile(string fileName, bool doParse = true, bool checkDecompiler = false, bool throwOnError = false)
-        {
-            Console.Write($"ImportGMLFile(): \"{fileName}\", {doParse}, {checkDecompiler}, {throwOnError}");
-        }
-        public void ImportASMFile(string fileName, bool doParse = true, bool nukeProfile = true, bool checkDecompiler = false, bool throwOnError = false)
-        {
-            Console.Write($"ImportASMFile(): \"{fileName}\", {doParse}, {nukeProfile}, {checkDecompiler}, {throwOnError}");
-        }
 
         public void SetFinishedMessage(bool isFinishedMessageEnabled)
         {
@@ -234,19 +187,6 @@ namespace UndertaleModTests
             await Task.Delay(1); //dummy await
         }
 
-        public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool clearGMLEditedBefore = false)
-        {
-            Console.WriteLine(String.Format("GenerateGMLCache(): *decompileContext*{0}, *dialog*{1}, {2}",
-                                            decompileContext is null ? " (null)" : "",
-                                            dialog is null ? " (null)" : "",
-                                            clearGMLEditedBefore.ToString().ToLower())
-                              );
-
-            await Task.Delay(1); //dummy await
-
-            return false;
-        }
-
         protected async Task<object> RunScript(string path)
         {
             string scriptpath = Path.Combine("../../../UndertaleModTool/Scripts/Builtin Scripts/", path);
@@ -256,7 +196,8 @@ namespace UndertaleModTests
 
                 var script = CSharpScript.Create<object>(File.ReadAllText(scriptpath), ScriptOptions.Default
                     .WithImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler", "UndertaleModLib.Scripting", "System", "System.IO", "System.Collections.Generic")
-                    .WithReferences(typeof(UndertaleObject).GetTypeInfo().Assembly),
+                    .WithReferences(typeof(UndertaleObject).GetTypeInfo().Assembly)
+                    .WithReferences(typeof(Underanalyzer.Decompiler.DecompileContext).GetTypeInfo().Assembly),
                     typeof(IScriptInterface), loader);
 
                 return await script.RunAsync(this);
@@ -273,13 +214,13 @@ namespace UndertaleModTests
             throw new NotImplementedException();
         }
 
-        public string GetDecompiledText(string codeName, GlobalDecompileContext context = null)
+        public string GetDecompiledText(string codeName, GlobalDecompileContext context = null, IDecompileSettings settings = null)
         {
             string output = "GetDecompiledText(): " + codeName;
             Console.Write(output);
             return output;
         }
-        public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null)
+        public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null, IDecompileSettings settings = null)
         {
             string output = "GetDecompiledText(): " + code?.ToString();
             Console.Write(output);
@@ -306,18 +247,6 @@ namespace UndertaleModTests
         public string PromptLoadFile(string defaultExt, string filter)
         {
             throw new NotImplementedException();
-        }
-        public bool DummyBool()
-        {
-            return true;
-        }
-
-        public void DummyVoid()
-        {
-        }
-        public string DummyString()
-        {
-            return "";
         }
 
         public Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int lineNum, string codeLine)>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null)

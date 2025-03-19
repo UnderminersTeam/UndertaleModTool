@@ -5,6 +5,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Underanalyzer.Decompiler;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
@@ -33,13 +34,13 @@ namespace UndertaleModTests
         [TestMethod]
         public void DecompileAllScripts()
         {
-            GlobalDecompileContext context = new GlobalDecompileContext(data, true);
+            GlobalDecompileContext context = new GlobalDecompileContext(data);
             Parallel.ForEach(data.Code, (code) =>
             {
                 //Console.WriteLine(code.Name.Content);
                 try
                 {
-                    Decompiler.Decompile(code, context);
+                    new DecompileContext(context, code, data.ToolInfo.DecompilerSettings).DecompileToString();
                 }
                 catch (Exception e)
                 {
@@ -58,10 +59,10 @@ namespace UndertaleModTests
                 bool knownBug = false;
                 foreach(var instr in code.Instructions)
                 {
-                    if (instr.Value?.GetType() == typeof(UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>))
+                    if (instr.ValueString is not null)
                     {
-                        UndertaleString str = ((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)instr.Value).Resource;
-                        if (str.Content.Contains("\n") || str.Content.Contains("\"")) // see #28
+                        UndertaleString str = instr.ValueString.Resource;
+                        if (str.Content.Contains('\n') || str.Content.Contains('"')) // see #28
                             knownBug = true;
                     }
                 }
@@ -74,7 +75,7 @@ namespace UndertaleModTests
                 string disasm;
                 try
                 {
-                    disasm = code.Disassemble(data.Variables, data.CodeLocals.For(code));
+                    disasm = code.Disassemble(data.Variables, data.CodeLocals?.For(code));
                 }
                 catch (Exception e)
                 {
@@ -83,36 +84,40 @@ namespace UndertaleModTests
 
                 IList<UndertaleInstruction> reasm = Assembler.Assemble(disasm, data.Functions, data.Variables, data.Strings);
                 Assert.AreEqual(code.Instructions.Count, reasm.Count, "Reassembled instruction count didn't match the disassembly for script " + code.Name.Content);
+                uint address = 0;
                 for(int i = 0; i < code.Instructions.Count; i++)
                 {
-                    string errMsg = "Instruction at " + code.Instructions[i].Address.ToString("D5") + " didn't match for script: " + code.Name.Content;
-                    Assert.AreEqual(code.Instructions[i].Kind, reasm[i].Kind, errMsg);
-                    Assert.AreEqual(code.Instructions[i].ComparisonKind, reasm[i].ComparisonKind, errMsg);
-                    Assert.AreEqual(code.Instructions[i].Type1, reasm[i].Type1, errMsg);
-                    Assert.AreEqual(code.Instructions[i].Type2, reasm[i].Type2, errMsg);
-                    Assert.AreEqual(code.Instructions[i].TypeInst, reasm[i].TypeInst, errMsg);
-                    Assert.AreEqual(code.Instructions[i].Extra, reasm[i].Extra, errMsg);
-                    Assert.AreEqual(code.Instructions[i].SwapExtra, reasm[i].SwapExtra, errMsg);
-                    Assert.AreEqual(code.Instructions[i].ArgumentsCount, reasm[i].ArgumentsCount, errMsg);
-                    Assert.AreEqual(code.Instructions[i].JumpOffsetPopenvExitMagic, reasm[i].JumpOffsetPopenvExitMagic, errMsg);
-                    if (!code.Instructions[i].JumpOffsetPopenvExitMagic)
-                        Assert.AreEqual(code.Instructions[i].JumpOffset, reasm[i].JumpOffset, errMsg); // note: also handles IntArgument implicitly
-                    Assert.AreSame(code.Instructions[i].Destination?.Target, reasm[i].Destination?.Target, errMsg);
-                    Assert.AreEqual(code.Instructions[i].Destination?.Type, reasm[i].Destination?.Type, errMsg);
-                    Assert.AreSame(code.Instructions[i].Function?.Target, reasm[i].Function?.Target, errMsg);
-                    Assert.AreEqual(code.Instructions[i].Function?.Type, reasm[i].Function?.Type, errMsg);
+                    UndertaleInstruction instr = code.Instructions[i];
 
-                    Assert.AreEqual(code.Instructions[i].Value?.GetType(), reasm[i].Value?.GetType(), errMsg);
-                    if (code.Instructions[i].Value?.GetType() == typeof(double))
-                        Assert.AreEqual((double)code.Instructions[i].Value, (double)reasm[i].Value, Math.Abs((double)code.Instructions[i].Value) * (1e-5), errMsg); // see issue #53
-                    else if (code.Instructions[i].Value?.GetType() == typeof(float))
-                        Assert.AreEqual((float)code.Instructions[i].Value, (float)reasm[i].Value, Math.Abs((float)code.Instructions[i].Value) * (1e-5), errMsg); // see issue #53
-                    else if (code.Instructions[i].Value?.GetType() == typeof(UndertaleInstruction.Reference<UndertaleVariable>))
-                        Assert.AreSame(((UndertaleInstruction.Reference<UndertaleVariable>)code.Instructions[i].Value).Target, ((UndertaleInstruction.Reference<UndertaleVariable>)reasm[i].Value).Target, errMsg);
-                    else if (code.Instructions[i].Value?.GetType() == typeof(UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>))
-                        Assert.AreSame(((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)code.Instructions[i].Value).Resource, ((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)reasm[i].Value).Resource, errMsg);
+                    string errMsg = "Instruction at " + address.ToString("D5") + " didn't match for script: " + code.Name.Content;
+                    Assert.AreEqual(instr.Kind, reasm[i].Kind, errMsg);
+                    Assert.AreEqual(instr.ExtendedKind, reasm[i].ExtendedKind, errMsg);
+                    Assert.AreEqual(instr.ComparisonKind, reasm[i].ComparisonKind, errMsg);
+                    Assert.AreEqual(instr.Type1, reasm[i].Type1, errMsg);
+                    Assert.AreEqual(instr.Type2, reasm[i].Type2, errMsg);
+                    Assert.AreEqual(instr.TypeInst, reasm[i].TypeInst, errMsg);
+                    Assert.AreEqual(instr.Extra, reasm[i].Extra, errMsg);
+                    Assert.AreEqual(instr.SwapExtra, reasm[i].SwapExtra, errMsg);
+                    Assert.AreEqual(instr.ArgumentsCount, reasm[i].ArgumentsCount, errMsg);
+                    Assert.AreEqual(instr.JumpOffsetPopenvExitMagic, reasm[i].JumpOffsetPopenvExitMagic, errMsg);
+                    if (!instr.JumpOffsetPopenvExitMagic)
+                        Assert.AreEqual(instr.JumpOffset, reasm[i].JumpOffset, errMsg); // note: also handles IntArgument implicitly
+                    Assert.AreSame(instr.ValueVariable, reasm[i].ValueVariable, errMsg);
+                    Assert.AreSame(instr.ValueFunction, reasm[i].ValueFunction, errMsg);
+                    Assert.AreEqual(instr.ReferenceType, reasm[i].ReferenceType, errMsg);
+
+                    if (instr.Kind == UndertaleInstruction.Opcode.Push && instr.Type1 == UndertaleInstruction.DataType.Double)
+                        Assert.AreEqual(instr.ValueDouble, reasm[i].ValueDouble, Math.Abs(instr.ValueDouble) * (1e-5), errMsg); // see issue #53
+                    else if (instr.ValueString is not null)
+                        Assert.AreSame(instr.ValueString.Resource, reasm[i].ValueString?.Resource, errMsg);
                     else
-                        Assert.AreEqual(code.Instructions[i].Value, reasm[i].Value, errMsg);
+                    {
+                        Assert.AreEqual(instr.ValueShort, reasm[i].ValueShort, errMsg);
+                        Assert.AreEqual(instr.ValueInt, reasm[i].ValueInt, errMsg);
+                        Assert.AreEqual(instr.ValueLong, reasm[i].ValueLong, errMsg);
+                    }
+
+                    address += instr.CalculateInstructionSize();
                 }
             });
         }

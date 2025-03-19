@@ -18,8 +18,9 @@ else
     ScriptError("Use the regular ExportAllCode please!", "Incompatible");
 }
 
-string codeFolder = GetFolder(FilePath) + "Export_Code" + Path.DirectorySeparatorChar;
-ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
+string codeFolder = Path.Combine(Path.GetDirectoryName(FilePath), "Export_Code");
+GlobalDecompileContext globalDecompileContext = new(Data);
+Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = Data.ToolInfo.DecompilerSettings;
 
 if (Directory.Exists(codeFolder))
 {
@@ -37,20 +38,15 @@ SetProgressBar(null, "Code Entries", 0, toDump.Count);
 StartProgressBarUpdater();
 
 int failed = 0;
-await Task.Run(DumpCode);
+await DumpCode();
 
 await StopProgressBarUpdater();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + codeFolder + "\n" + failed.ToString() + " failed");
 
-string GetFolder(string path)
+async Task DumpCode()
 {
-    return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
-}
-
-async void DumpCode()
-{
-    //Because 2.3 code names get way too long, we're gonna convert it to an index based system, starting with a lookup system
+    // Because 2.3 code names get way too long, we're gonna convert it to an index based system, starting with a lookup system
     string indexPath = Path.Combine(codeFolder, "LookUpTable.txt");
     StringBuilder indexText = new("This is zero indexed, index 0 starts at line 2.");
     for (var i = 0; i < toDump.Count; i++)
@@ -58,36 +54,39 @@ async void DumpCode()
 
     File.WriteAllText(indexPath, indexText.ToString());
 
-    if (Data.KnownSubFunctions is null) // if we run script before opening any code
+    if (Data.GlobalFunctions is null) // if we run script before opening any code
     {
-        SetProgressBar(null, "Building the cache of all sub-functions...", 0, 0);
-        await Task.Run(() => Decompiler.BuildSubFunctionCache(Data));
+        SetProgressBar(null, "Building the cache of all global functions...", 0, 0);
+        await Task.Run(() => GlobalDecompileContext.BuildGlobalFunctionCache(Data));
         SetProgressBar(null, "Code Entries", 0, toDump.Count);
     }
 
-    Parallel.For(0, toDump.Count - 1, (i, _) =>
+    await Task.Run(() => Parallel.For(0, toDump.Count - 1, (i, _) =>
     {
         UndertaleCode code = toDump[i];
         string path = Path.Combine(codeFolder, i.ToString() + ".gml");
         try
         {
-            File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
+            File.WriteAllText(path, (code != null 
+                ? new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, decompilerSettings).DecompileToString()
+                : ""));
         }
         catch (Exception e)
         {
+            string failedFolder = Path.Combine(codeFolder, "Failed");
             lock (lockObj)
             {
-                if (!(Directory.Exists(codeFolder + "/Failed/")))
+                if (!Directory.Exists(failedFolder))
                 {
-                    Directory.CreateDirectory(codeFolder + "/Failed/");
+                    Directory.CreateDirectory(failedFolder);
                 }
             }
             
-            path = Path.Combine(codeFolder + "/Failed/", i.ToString() + ".gml");
+            path = Path.Combine(failedFolder, i.ToString() + ".gml");
             File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
             failed += 1;
         }
 
         IncrementProgressParallel();
-    });
+    }));
 }

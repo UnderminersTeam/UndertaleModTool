@@ -42,6 +42,7 @@ jobs:
       run: |
         cp ./README.md ./CLI-${{ matrix.os }}/
         cp ./LICENSE.txt ./CLI-${{ matrix.os }}/
+        cp -r ./UndertaleModLib/GameSpecificData/ ./CLI-${{ matrix.os }}/GameSpecificData/
     - name: Upload ${{ matrix.os }} CLI
       uses: actions/upload-artifact@v4
       with:

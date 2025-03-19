@@ -207,7 +207,7 @@ namespace UndertaleModTool
                     if (RoomGameObject is null)
                     {
                         // Generate base name
-                        string name = "gml_Room_" + Room.Name.Content + "_Create";
+                        string name = $"gml_Room_{Room.Name.Content}_Create";
 
                         // If code already exists, use it (otherwise create new code)
                         if (mainWindow.Data.Code.ByName(name) is UndertaleCode existing)
@@ -217,13 +217,13 @@ namespace UndertaleModTool
                         }
                         else
                         {
-                            ObjectReference = CreateCode(mainWindow.Data, name);
+                            ObjectReference = UndertaleCode.CreateEmptyEntry(mainWindow.Data, name);
                         }
                     }
                     else
                     {
                         // Generate base name
-                        string beginning = "gml_RoomCC_" + Room.Name.Content + "_" + RoomGameObject.InstanceID.ToString();
+                        string beginning = $"gml_RoomCC_{Room.Name.Content}_{RoomGameObject.InstanceID}";
                         string suffix = !IsPreCreate ? "_Create" : "_PreCreate";
                         string name = beginning + suffix;
 
@@ -234,7 +234,7 @@ namespace UndertaleModTool
                             name = beginning + "_" + (i++).ToString() + suffix;
                         }
 
-                        ObjectReference = CreateCode(mainWindow.Data, name);
+                        ObjectReference = UndertaleCode.CreateEmptyEntry(mainWindow.Data, name);
                     }
                 }
                 else
@@ -246,40 +246,6 @@ namespace UndertaleModTool
             {
                 mainWindow.ChangeSelection(ObjectReference);
             }
-        }
-
-        // TODO: move this to the models
-        static UndertaleCode CreateCode(UndertaleData data, string name)
-        {
-            UndertaleString nameString = data.Strings.MakeString(name);
-
-            UndertaleCode code = new()
-            {
-                LocalsCount = 1,
-                Name = nameString
-            };
-
-            data.Code.Add(code);
-
-            if (data.CodeLocals is not null)
-            {
-                UndertaleCodeLocals.LocalVar argsLocal = new()
-                {
-                    Name = data.Strings.MakeString("arguments"),
-                    Index = 0
-                };
-
-                UndertaleCodeLocals locals = new()
-                {
-                    Name = nameString
-                };
-
-                locals.Locals.Add(argsLocal);
-
-                data.CodeLocals.Add(locals);
-            }
-
-            return code;
         }
 
         private void Details_MouseDown(object sender, MouseButtonEventArgs e)

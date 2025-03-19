@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using Underanalyzer.Decompiler;
+using Underanalyzer.Decompiler.GameSpecific;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Models;
 
@@ -318,6 +320,11 @@ namespace UndertaleModLib
         public bool ShortCircuit = true;
 
         /// <summary>
+        /// Whether the data file has array copy-on-write enabled.
+        /// </summary>
+        public bool ArrayCopyOnWrite = false;
+
+        /// <summary>
         /// Some info for the editor to store data on.
         /// </summary>
         public readonly ToolInfo ToolInfo = new ToolInfo();
@@ -333,44 +340,14 @@ namespace UndertaleModLib
         public BuiltinList BuiltinList;
 
         /// <summary>
-        /// Cache for known 2.3-style function names for compiler speedups. Can be re-built by setting this to null.
+        /// Cache for 2.3-style functions defined in global scripts. Can be re-built by setting this to null.
         /// </summary>
-        public Dictionary<string, UndertaleFunction> KnownSubFunctions;
-
-        //Profile mode related properties
-
-        //TODO: Why are the functions that deal with the cache in a completely different place than the cache parameters? These have *no* place of being here.
-        /// <summary>
-        /// A <see cref="Dictionary{TKey,TValue}"/> of cached decompiled code,
-        /// with the code name as the Key and the decompiled code text as the value.
-        /// </summary>
-        public ConcurrentDictionary<string, string> GMLCache { get; set; }
+        public GlobalFunctions GlobalFunctions;
 
         /// <summary>
-        /// A list of names of code entries which failed to compile or decompile.
+        /// Registry for macro types, their resolvers, and other data specific to this game.
         /// </summary>
-        public List<string> GMLCacheFailed { get; set; }
-
-        /// <summary>
-        /// A list of names of modified code entries.
-        /// </summary>
-        public ConcurrentBag<string> GMLCacheChanged { get; set; } = new();
-
-        /// <summary>
-        /// A list of names of code entries that were edited before the "Use decompiled code cache" setting was enabled.
-        /// </summary>
-        public List<string> GMLEditedBefore { get; set; }
-
-        /// <summary>
-        /// Whether the decompiled code cache has been saved to disk with no new cache changes happening since then.
-        /// </summary>
-        public bool GMLCacheWasSaved { get; set; }
-
-        /// <summary>
-        /// Whether the decompiled code cache is generated. This will be <see langword="false"/> if it's currently generating and
-        /// <see langword="true"/> otherwise.
-        /// </summary>
-        public bool GMLCacheIsReady { get; set; } = true;
+        public GameSpecificRegistry GameSpecificRegistry;
 
         /// <summary>
         /// An array of a <see cref="UndertaleData"/> properties with <see cref="IList{T}"/> as their type.
@@ -644,7 +621,7 @@ namespace UndertaleModLib
             data.Options.Constants.Add(new UndertaleOptions.Constant() { Name = data.Strings.MakeString("@@DrawColour"), Value = data.Strings.MakeString(0xFFFFFFFF.ToString()) });
             data.Rooms.Add(new UndertaleRoom() { Name = data.Strings.MakeString("room0"), Caption = data.Strings.MakeString("") });
             data.BuiltinList = new BuiltinList(data);
-            Decompiler.AssetTypeResolver.InitializeTypes(data);
+            Decompiler.GameSpecificResolver.Initialize(data);
             return data;
         }
 
@@ -691,11 +668,8 @@ namespace UndertaleModLib
 
             // Clear other references
             FORM = null;
-            KnownSubFunctions = null;
-            GMLCache = null;
-            GMLCacheFailed = null;
-            GMLCacheChanged = new();
-            GMLEditedBefore = null;
+            GlobalFunctions = null;
+            GameSpecificRegistry = null;
         }
     }
 
@@ -705,18 +679,15 @@ namespace UndertaleModLib
     public class ToolInfo
     {
         /// <summary>
-        /// Whether profile mode is enabled.
+        /// Default settings to be used by the Underanalyzer decompiler,
+        /// for a tool and in any scripts that desire matching the same settings.
         /// </summary>
-        public bool ProfileMode = false;
+        public IDecompileSettings DecompilerSettings = new DecompileSettings();
 
         /// <summary>
-        /// The location of the profiles folder.
+        /// Function that returns the prefix to be used when 
+        /// resolving instance ID references in the compiler and decompiler.
         /// </summary>
-        public string AppDataProfiles = "";
-
-        /// <summary>
-        /// The MD5 hash of the current file.
-        /// </summary>
-        public string CurrentMD5 = "Unknown";
+        public Func<string> InstanceIdPrefix = () => "inst_";
     }
 }

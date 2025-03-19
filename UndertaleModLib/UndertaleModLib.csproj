@@ -35,11 +35,51 @@
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="GameSpecificData\Definitions\deltarune.json" />
+    <None Remove="GameSpecificData\Definitions\gamemaker.json" />
+    <None Remove="GameSpecificData\Definitions\undertale.json" />
+    <None Remove="GameSpecificData\deltarune.json" />
+    <None Remove="GameSpecificData\empty.json" />
+    <None Remove="GameSpecificData\gamemaker.json" />
+    <None Remove="GameSpecificData\README.txt" />
+    <None Remove="GameSpecificData\undertale.json" />
     <None Remove="version.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="gitversion.txt" />
+    <Content Include="GameSpecificData\README.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GameSpecificData\Underanalyzer\deltarune.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GameSpecificData\Underanalyzer\template.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GameSpecificData\Underanalyzer\gamemaker.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GameSpecificData\Underanalyzer\undertale.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GameSpecificData\Definitions\deltarune.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GameSpecificData\Definitions\gamemaker.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GameSpecificData\Definitions\undertale.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <EmbeddedResource Include="gitversion.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Underanalyzer\Underanalyzer\Underanalyzer.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+       <_Parameter1>UndertaleModLibTests</_Parameter1>
+    </AssemblyAttribute>
   </ItemGroup>
   <!--A prebuild responsible for creating a git commit name and branch name -->
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">

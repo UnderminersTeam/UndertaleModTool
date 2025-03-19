@@ -61,7 +61,7 @@ Data.Variables.EnsureDefined("youtube_song_title", UndertaleInstruction.Instance
 Data.Variables.EnsureDefined("youtube_last_song", UndertaleInstruction.InstanceType.Self, false, Data.Strings, Data);
 Data.Variables.EnsureDefined("youtube_cache", UndertaleInstruction.InstanceType.Self, false, Data.Strings, Data);
 
-Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Create, Data).AppendGML(@"
 __webextension_set_device(window_device())
 my_browser = browser_create("""");
 youtube_current_song = """";
@@ -70,14 +70,14 @@ youtube_song_title = """";
 youtube_last_song = """";
 youtube_cache = ds_map_create();", Data);
 
-Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Draw, EventSubtypeDraw.PostDraw, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Draw, EventSubtypeDraw.PostDraw, Data).AppendGML(@"
 var w = (window_get_width() / 6.5);
 var h = ((w / 16) * 9);
 browser_resize(my_browser, w, h);
 browser_draw(my_browser, 5, 5);
 window_set_caption(youtube_current_song);", Data);
 
-Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data).AppendGML(@"
 draw_set_font(fnt_maintext);
 draw_set_color(0xFFFF);
 draw_text(((((surface_get_width(application_surface) * global.window_scale) - string_width(youtube_song_title)) / 2) + global.window_yofs), 0, youtube_song_title);", Data);
@@ -388,7 +388,7 @@ Data.CodeLocals.Add(new UndertaleCodeLocals() { Name = youtube_is_playing.Name }
 Data.Scripts.Add(new UndertaleScript() { Name = Data.Strings.MakeString("youtube_is_playing"), Code = youtube_is_playing });
 Data.Functions.EnsureDefined("youtube_is_playing", Data.Strings);
 
-Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Other, (uint)62u, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Other, (uint)62u, Data).AppendGML(@"
 var data;
 if (ds_map_find_value(async_load, ""id"") == youtube_request && ds_map_find_value(async_load, ""status"") == 0) {
     data = json_decode(ds_map_find_value(async_load, ""result""));
@@ -397,7 +397,7 @@ if (ds_map_find_value(async_load, ""id"") == youtube_request && ds_map_find_valu
     youtube_load_song();
 }", Data);
 
-Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Other, (uint)70u, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Other, (uint)70u, Data).AppendGML(@"
 if (ds_map_find_value(async_load, ""id"") == 103)
     trophy_handle_load_state();
 if (ds_map_find_value(async_load, ""id"") == 1337) {
@@ -408,7 +408,7 @@ if (ds_map_find_value(async_load, ""id"") == 1337) {
     }
 }", Data);
 
-Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, 32, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, 32, Data).AppendGML(@"
 if (youtube_current_song != """")
     youtube_load_song();", Data);
 
@@ -439,7 +439,7 @@ if (argument0 != all) {
     youtube_stop();
 }", Data);
 
-Data.GameObjects.ByName("obj_titleimage").EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data.Strings, Data.Code, Data.CodeLocals).AppendGML(@"
+Data.GameObjects.ByName("obj_titleimage").EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data).AppendGML(@"
 draw_set_color(0xFFFF);
 scr_setfont(fnt_small);
 scr_drawtext_centered_scaled(160, 150, ""But Every Time A Song Plays\nIts A Random Remix From YouTube Instead"", 1, 1);

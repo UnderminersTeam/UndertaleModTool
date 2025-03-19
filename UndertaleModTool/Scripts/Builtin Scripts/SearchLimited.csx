@@ -17,6 +17,12 @@ using System.Text.RegularExpressions;
 
 EnsureDataLoaded();
 
+if (Data.IsYYC())
+{
+    ScriptError("You cannot do a code search on a YYC game! There is no code to search!");
+    return;
+}
+
 int resultCount = 0;
 StringBuilder results = new();
 string searchNames = "";
@@ -25,12 +31,8 @@ List<string> failedList = new();
 List<string> codeToDump = new();
 List<string> gameObjectCandidates = new();
 
-ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
-if (Data.IsYYC())
-{
-    ScriptError("You cannot do a code search on a YYC game! There is no code to search!");
-    return;
-}
+GlobalDecompileContext globalDecompileContext = new(Data);
+Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = Data.ToolInfo.DecompilerSettings;
 
 bool caseSensitive = ScriptQuestion("Case sensitive?");
 bool regexCheck = ScriptQuestion("Regex search?");
@@ -123,12 +125,6 @@ await ClickableSearchOutput("Search results.", keyword, resultCount, resultsDict
 HideProgressBar();
 EnableUI();
 
-
-string GetFolder(string path)
-{
-    return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
-}
-
 bool RegexContains(in string s)
 {
     return keywordRegex.Match(s).Success;
@@ -140,13 +136,18 @@ void DumpCode(UndertaleCode code)
         if (code.ParentEntry is null)
         {
             int lineNumber = 1;
-            StringReader decompiledText = new(code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : "");
+            StringReader decompiledText = new(code != null
+                ? new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, decompilerSettings).DecompileToString()
+                : "");
             bool nameWritten = false;
             string lineInt;
             while ((lineInt = decompiledText.ReadLine()) is not null)
             {
                 if (lineInt == string.Empty)
+                {
+                    lineNumber += 1;
                     continue;
+                }
 
                 if (((regexCheck && RegexContains(in lineInt)) || ((!regexCheck && caseSensitive) ? lineInt.Contains(keyword) : lineInt.ToLower().Contains(keyword.ToLower()))))
                 {

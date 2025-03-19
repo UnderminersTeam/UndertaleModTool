@@ -31,8 +31,6 @@ namespace UndertaleModTool.Windows
         bool isInAssembly;
         string text;
 
-        bool usingGMLCache;
-
         int progressCount = 0;
         int resultCount = 0;
 
@@ -47,7 +45,7 @@ namespace UndertaleModTool.Windows
         
         Regex keywordRegex;
 
-        ThreadLocal<GlobalDecompileContext> decompileContext;
+        GlobalDecompileContext decompileContext;
 
         LoaderDialog loaderDialog;
 
@@ -130,33 +128,13 @@ namespace UndertaleModTool.Windows
 
             if (!isInAssembly)
             {
-                decompileContext = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(mainWindow.Data, false));
-
-                // HACK: This could be problematic
-                usingGMLCache = await mainWindow.GenerateGMLCache(decompileContext, loaderDialog);
-
-                // If we run script before opening any code
-                if (!usingGMLCache && mainWindow.Data.KnownSubFunctions is null)
-                {
-                    loaderDialog.Maximum = null;
-                    loaderDialog.Update("Building the cache of all sub-functions...");
-
-                    await Task.Run(() => Decompiler.BuildSubFunctionCache(mainWindow.Data));
-                }
+                decompileContext = new GlobalDecompileContext(mainWindow.Data);
             }
 
             loaderDialog.SavedStatusText = "Code entries";
             loaderDialog.Update(null, "Code entries", 0, mainWindow.Data.Code.Count);
 
-            if (!isInAssembly && usingGMLCache)
-            {
-                await Task.Run(() => Parallel.ForEach(mainWindow.Data.GMLCache, SearchInGMLCache));
-            }
-            else
-            {
-                await Task.Run(() => Parallel.ForEach(mainWindow.Data.Code, SearchInUndertaleCode));
-            }
-
+            await Task.Run(() => Parallel.ForEach(mainWindow.Data.Code, SearchInUndertaleCode));
             await Task.Run(SortResults);
 
             loaderDialog.Maximum = null;
@@ -176,14 +154,6 @@ namespace UndertaleModTool.Windows
             isSearchInProgress = false;
         }
 
-        void SearchInGMLCache(KeyValuePair<string, string> code)
-        {
-            SearchInCodeText(code.Key, TryGetProfileModeGML(code.Key) ?? code.Value);
-
-            Interlocked.Increment(ref progressCount);
-            Dispatcher.Invoke(() => loaderDialog.ReportProgress(progressCount));
-        }
-
         void SearchInUndertaleCode(UndertaleCode code)
         {
             try
@@ -193,7 +163,7 @@ namespace UndertaleModTool.Windows
                     var codeText = isInAssembly
                         ? code.Disassemble(mainWindow.Data.Variables, mainWindow.Data.CodeLocals.For(code))
                         : TryGetProfileModeGML(code.Name.Content)
-                            ?? Decompiler.Decompile(code, decompileContext.Value);
+                            ?? new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, mainWindow.Data.ToolInfo.DecompilerSettings).DecompileToString();
                     SearchInCodeText(code.Name.Content, codeText);
                 }
                 
@@ -210,7 +180,7 @@ namespace UndertaleModTool.Windows
 
         static string TryGetProfileModeGML(string codeName)
         {
-            if (SettingsWindow.ProfileModeEnabled)
+            if (SettingsWindow.ProfileModeEnabled && mainWindow.ProfileHash is not null)
             {
                 string path = Path.Join(Settings.ProfilesFolder, mainWindow.ProfileHash, "Temp", codeName + ".gml");
                 if (File.Exists(path))
@@ -282,12 +252,7 @@ namespace UndertaleModTool.Windows
             string[] codeNames = mainWindow.Data.Code.Select(x => x.Name.Content).ToArray();
 
             resultsDictSorted = resultsDict.OrderBy(c => Array.IndexOf(codeNames, c.Key));
-            failedListSorted = failedList;
-
-            if (!isInAssembly && mainWindow.Data.GMLCacheFailed?.Count > 0)
-                failedListSorted = failedListSorted.Concat(mainWindow.Data.GMLCacheFailed);
-
-            failedListSorted = failedListSorted.OrderBy(c => Array.IndexOf(codeNames, c));
+            failedListSorted = failedList.OrderBy(c => Array.IndexOf(codeNames, c));
         }
 
         public void ShowResults()
