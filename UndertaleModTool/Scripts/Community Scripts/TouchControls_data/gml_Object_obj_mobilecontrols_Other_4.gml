@@ -1,5 +1,19 @@
-var ratio = display_get_gui_width() / 640
-var ratioVertical = display_get_gui_height() / 480
+latestGuiW = display_get_gui_width()
+latestGuiH = display_get_gui_height()
+var ratio = latestGuiW / 640
+var ratioVertical = latestGuiH / 480
+virtual_key_delete(virtual_key_up)
+virtual_key_delete(virtual_key_down)
+virtual_key_delete(virtual_key_left)
+virtual_key_delete(virtual_key_right)
+virtual_key_delete(virtual_key_z)
+virtual_key_delete(virtual_key_x)
+virtual_key_delete(virtual_key_c)
+virtual_key_delete(virtual_key_zp)
+virtual_key_delete(virtual_key_xp)
+virtual_key_delete(virtual_key_cp)
+virtual_key_delete(virtual_key_analog)
+virtual_key_delete(virtual_key_analogp)
 virtual_key_zp = virtual_key_add((zx * ratio), (zy * ratioVertical), (27 * button_scale * ratio), (29 * button_scale * ratioVertical), 125)
 virtual_key_xp = virtual_key_add((xx * ratio), (xy * ratioVertical), (27 * button_scale * ratio), (29 * button_scale * ratioVertical), 124)
 virtual_key_cp = virtual_key_add((cx * ratio), (cy * ratioVertical), (27 * button_scale * ratio), (29 * button_scale * ratioVertical), 94)
