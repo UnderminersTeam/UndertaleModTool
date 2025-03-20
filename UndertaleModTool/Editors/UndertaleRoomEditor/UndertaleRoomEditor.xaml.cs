@@ -1231,22 +1231,23 @@ namespace UndertaleModTool
                     var snappedPos = GetGridMouseCoordinates(mousePos, room);
 
                     if (
-                        (mainWindow.IsGMS2 == Visibility.Visible && layer == null) ||
-                        (layer != null && layer.InstancesData == null)
+                        mainWindow.IsGMS2 == Visibility.Visible &&
+                        (layer == null || (layer != null && layer.InstancesData == null))
                     )
                     {
                         // Try to find a valid layer.
                         // If there isn't one, create one.
+                        bool foundLayer = false;
                         foreach (Layer Layer in room.Layers)
                         {
-                            Debug.WriteLine(Layer);
                             if (Layer.InstancesData != null)
                             {
                                 layer = Layer;
+                                foundLayer = true;
                                 break;
                             }
                         }
-                        if (layer == null)
+                        if (!foundLayer)
                         {
                             layer = AddLayer<Layer.LayerInstancesData>(LayerType.Instances, "Instances");
                         }
