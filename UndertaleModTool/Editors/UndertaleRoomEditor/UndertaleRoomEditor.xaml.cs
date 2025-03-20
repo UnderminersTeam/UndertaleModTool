@@ -46,6 +46,8 @@ namespace UndertaleModTool
                 typeof(UndertaleRoomEditor),
                 new FrameworkPropertyMetadata(null));
 
+        public static RoutedUICommand PasteShiftCommand = new("Alternate paste command", "PasteShift", typeof(UndertaleRoomEditor));
+
         public static readonly PropertyInfo visualOffProp = typeof(Canvas).GetProperty("VisualOffset", BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
         private static readonly Regex trailingNumberRegex = new(@"\d+$", RegexOptions.Compiled);
@@ -1438,6 +1440,14 @@ namespace UndertaleModTool
 
         public void Command_Paste(object sender, ExecutedRoutedEventArgs e)
         {
+            Paste();
+        }
+        public void Command_PasteShift(object sender, ExecutedRoutedEventArgs e)
+        {
+            Paste(true);
+        }
+        public void Paste(bool shiftPressed = false)
+        {
             /*IDataObject data = Clipboard.GetDataObject();
             UndertaleObject obj = data.GetData(data.GetFormats()[0]) as UndertaleObject;
             if (obj != null)
@@ -1470,6 +1480,12 @@ namespace UndertaleModTool
 
                 RoomCanvas roomCanvas = GetRoomCanvas();
                 Point mousePos = roomCanvas.IsMouseOver ? Mouse.GetPosition(roomCanvas) : new();
+                if (!shiftPressed)
+                {
+                    int gridWidth = Math.Max(Convert.ToInt32(room.GridWidth), 1);
+                    int gridHeight = Math.Max(Convert.ToInt32(room.GridHeight), 1);
+                    mousePos = new Point(Math.Floor(mousePos.X / gridWidth) * gridWidth, Math.Floor(mousePos.Y / gridHeight) * gridHeight);
+                }
                 UndertaleObject newObj = AddObjectCopy(room, layer, copied, true, -1, mousePos);
 
                 if (newObj is not null)
