@@ -1419,6 +1419,8 @@ namespace UndertaleModTool
                 {
                     toChange.X = undoGameObject.X;
                     toChange.Y = undoGameObject.Y;
+                    toChange.ScaleX = undoGameObject.ScaleX;
+                    toChange.ScaleY = undoGameObject.ScaleY;
                 }
             }
             if (undoObject is Tile && ObjectEditor.Content is Tile)
