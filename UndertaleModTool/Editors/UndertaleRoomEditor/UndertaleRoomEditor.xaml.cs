@@ -2325,29 +2325,36 @@ namespace UndertaleModTool
                 Thickness canvasOffset = roomCanvas.Margin;
                 var currentPosition = e.GetPosition(scrollViewer);
                 var offset = roomCanvas.startPosition - currentPosition;
-                roomCanvas.startPosition = currentPosition;
 
+                var transform = RoomGraphics.LayoutTransform as MatrixTransform;
+
+                var scrollX = scrollViewer.HorizontalOffset + offset.X;
+                var scrollY = scrollViewer.VerticalOffset + offset.Y;
+                var multX = (scrollViewer.ScrollableWidth == 0 ? 2.0 : 1.0) / transform.Matrix.M11;
+                var multY = (scrollViewer.ScrollableHeight == 0 ? 2.0 : 1.0) / transform.Matrix.M22;
+
+                roomCanvas.startPosition = currentPosition;
                 // Change margins if outside view
-                if (offset.X < 0 && scrollViewer.HorizontalOffset == 0)
+                if (offset.X < 0 && scrollX <= 0)
                 {
-                    canvasOffset.Left -= offset.X;
+                    canvasOffset.Left -= offset.X * multX;
                 }
-                else if (offset.X > 0 && scrollViewer.HorizontalOffset == scrollViewer.ScrollableWidth)
+                else if (offset.X > 0 && scrollX >= scrollViewer.ScrollableWidth)
                 {
-                    canvasOffset.Right += offset.X;
+                    canvasOffset.Right += offset.X * multX;
                 }
-                if (offset.Y < 0 && scrollViewer.VerticalOffset == 0)
+                if (offset.Y < 0 && scrollY <= 0)
                 {
-                    canvasOffset.Top -= offset.Y;
+                    canvasOffset.Top -= offset.Y * multY;
                 }
-                else if (offset.Y > 0 && scrollViewer.VerticalOffset == scrollViewer.ScrollableHeight)
+                else if (offset.Y > 0 && scrollY >= scrollViewer.ScrollableHeight)
                 {
-                    canvasOffset.Bottom += offset.Y;
+                    canvasOffset.Bottom += offset.Y * multY;
                 }
                 roomCanvas.Margin = canvasOffset;
 
-                scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset + offset.Y);
-                scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset + offset.X);
+                scrollViewer.ScrollToVerticalOffset(scrollY);
+                scrollViewer.ScrollToHorizontalOffset(scrollX);
             }
         }
     }
