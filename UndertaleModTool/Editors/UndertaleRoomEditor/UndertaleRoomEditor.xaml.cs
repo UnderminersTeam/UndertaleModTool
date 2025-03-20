@@ -2227,14 +2227,18 @@ namespace UndertaleModTool
                     mainWindow.ShowMessage("The layer must have a tileset set!");
                     return;
                 }
-                if (data.TilesX <= 0)
+                if (data.TilesX <= 0 && data.TilesY <= 0)
                 {
-                    mainWindow.ShowMessage("The layer's horizontal size must be larger than 0 tiles!");
+                    mainWindow.ShowMessage("The layer's horizontal and vertical size must be larger than 0 tiles!\n(Use the Auto button to set the tilemap size based on the room size.)");
                     return;
                 }
-                if (data.TilesY <= 0)
+                else if (data.TilesX <= 0)
                 {
-                    mainWindow.ShowMessage("The layer's horizontal size must be larger than 0 tiles!");
+                    mainWindow.ShowMessage("The layer's horizontal size must be larger than 0 tiles!\n(Use the Auto button to set the tilemap size based on the room size.)");
+                    return;
+                } else if (data.TilesY <= 0)
+                {
+                    mainWindow.ShowMessage("The layer's vertical size must be larger than 0 tiles!\n(Use the Auto button to set the tilemap size based on the room size.)");
                     return;
                 }
 
