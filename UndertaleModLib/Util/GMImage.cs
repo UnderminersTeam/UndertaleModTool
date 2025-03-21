@@ -457,8 +457,8 @@ public class GMImage
     {
         var settings = new MagickReadSettings()
         {
-            Width = Width,
-            Height = Height,
+            Width = (uint)Width,
+            Height = (uint)Height,
             Format = MagickFormat.Bgra,
             Compression = CompressionMethod.NoCompression
         };
@@ -830,8 +830,8 @@ public class GMImage
                     // Parse the raw data
                     MagickReadSettings settings = new()
                     {
-                        Width = Width,
-                        Height = Height,
+                        Width = (uint)Width,
+                        Height = (uint)Height,
                         Format = MagickFormat.Bgra,
                         Compression = CompressionMethod.NoCompression
                     };
@@ -858,6 +858,6 @@ public class GMImage
     {
         image.Format = MagickFormat.Bgra;
         image.SetCompression(CompressionMethod.NoCompression);
-        return new GMImage(ImageFormat.RawBgra, image.Width, image.Height, image.ToByteArray());
+        return new GMImage(ImageFormat.RawBgra, (int)image.Width, (int)image.Height, image.ToByteArray());
     }
 }

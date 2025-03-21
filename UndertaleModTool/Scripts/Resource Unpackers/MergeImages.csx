@@ -31,13 +31,13 @@ foreach (FileInfo fileA in filesA)
     // Load both images, and calculate dimensions of resulting image
     using MagickImage imageA = TextureWorker.ReadBGRAImageFromFile(Path.Combine(importFolderA, fileA.Name));
     using MagickImage imageB = TextureWorker.ReadBGRAImageFromFile(Path.Combine(importFolderB, fileA.Name));
-    int width = imageA.Width + imageB.Width;
-    int height = Math.Max(imageA.Height, imageB.Height);
+    uint width = imageA.Width + imageB.Width;
+    uint height = Math.Max(imageA.Height, imageB.Height);
 
     // Make combined image, and composite both images onto it
     using MagickImage outputImage = new(MagickColor.FromRgba(0, 0, 0, 0), width, height);
     outputImage.Composite(imageA, 0, 0, CompositeOperator.Copy);
-    outputImage.Composite(imageB, imageA.Width, 0, CompositeOperator.Copy);
+    outputImage.Composite(imageB, (int)imageA.Width, 0, CompositeOperator.Copy);
 
     // Save image to output folder
     TextureWorker.SaveImageToFile(outputImage, Path.Combine(exportFolder, fileA.Name));
