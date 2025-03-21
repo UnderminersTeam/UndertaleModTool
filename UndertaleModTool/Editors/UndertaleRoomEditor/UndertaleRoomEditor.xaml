@@ -58,11 +58,13 @@
     <UserControl.CommandBindings>
         <CommandBinding Command="Copy" Executed="Command_Copy" />
         <CommandBinding Command="Paste" Executed="Command_Paste" />
+        <CommandBinding Command="{x:Static local:UndertaleRoomEditor.PasteShiftCommand}" Executed="Command_PasteShift" />
         <CommandBinding Command="Undo" Executed="Command_Undo" />
     </UserControl.CommandBindings>
     <UserControl.InputBindings>
         <KeyBinding Modifiers="Control" Key="C" Command="Copy"/>
         <KeyBinding Modifiers="Control" Key="P" Command="Paste"/>
+        <KeyBinding Modifiers="Control+Shift" Key="V" Command="{x:Static local:UndertaleRoomEditor.PasteShiftCommand}"/>
         <KeyBinding Modifiers="Control" Key="Z" Command="Undo"/>
     </UserControl.InputBindings>
 
