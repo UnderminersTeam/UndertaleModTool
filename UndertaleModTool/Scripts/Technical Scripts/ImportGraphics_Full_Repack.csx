@@ -698,7 +698,7 @@ public class Packer
 
     private MagickImage CreateAtlasImage(Atlas _Atlas)
     {
-        MagickImage img = new(MagickColors.Transparent, _Atlas.Width, _Atlas.Height);
+        MagickImage img = new(MagickColors.Transparent, (uint)_Atlas.Width, (uint)_Atlas.Height);
 
         foreach (Node n in _Atlas.Nodes)
         {
