@@ -46,6 +46,8 @@ namespace UndertaleModTool
                 typeof(UndertaleRoomEditor),
                 new FrameworkPropertyMetadata(null));
 
+        public static RoutedUICommand PasteShiftCommand = new("Alternate paste command", "PasteShift", typeof(UndertaleRoomEditor));
+
         public static readonly PropertyInfo visualOffProp = typeof(Canvas).GetProperty("VisualOffset", BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
         private static readonly Regex trailingNumberRegex = new(@"\d+$", RegexOptions.Compiled);
@@ -1229,22 +1231,23 @@ namespace UndertaleModTool
                     var snappedPos = GetGridMouseCoordinates(mousePos, room);
 
                     if (
-                        (mainWindow.IsGMS2 == Visibility.Visible && layer == null) ||
-                        (layer != null && layer.InstancesData == null)
+                        mainWindow.IsGMS2 == Visibility.Visible &&
+                        (layer == null || (layer != null && layer.InstancesData == null))
                     )
                     {
                         // Try to find a valid layer.
                         // If there isn't one, create one.
+                        bool foundLayer = false;
                         foreach (Layer Layer in room.Layers)
                         {
-                            Debug.WriteLine(Layer);
                             if (Layer.InstancesData != null)
                             {
                                 layer = Layer;
+                                foundLayer = true;
                                 break;
                             }
                         }
-                        if (layer == null)
+                        if (!foundLayer)
                         {
                             layer = AddLayer<Layer.LayerInstancesData>(LayerType.Instances, "Instances");
                         }
@@ -1438,6 +1441,14 @@ namespace UndertaleModTool
 
         public void Command_Paste(object sender, ExecutedRoutedEventArgs e)
         {
+            Paste();
+        }
+        public void Command_PasteShift(object sender, ExecutedRoutedEventArgs e)
+        {
+            Paste(true);
+        }
+        public void Paste(bool shiftPressed = false)
+        {
             /*IDataObject data = Clipboard.GetDataObject();
             UndertaleObject obj = data.GetData(data.GetFormats()[0]) as UndertaleObject;
             if (obj != null)
@@ -1470,6 +1481,12 @@ namespace UndertaleModTool
 
                 RoomCanvas roomCanvas = GetRoomCanvas();
                 Point mousePos = roomCanvas.IsMouseOver ? Mouse.GetPosition(roomCanvas) : new();
+                if (!shiftPressed)
+                {
+                    int gridWidth = Math.Max(Convert.ToInt32(room.GridWidth), 1);
+                    int gridHeight = Math.Max(Convert.ToInt32(room.GridHeight), 1);
+                    mousePos = new Point(Math.Floor(mousePos.X / gridWidth) * gridWidth, Math.Floor(mousePos.Y / gridHeight) * gridHeight);
+                }
                 UndertaleObject newObj = AddObjectCopy(room, layer, copied, true, -1, mousePos);
 
                 if (newObj is not null)
@@ -2210,14 +2227,18 @@ namespace UndertaleModTool
                     mainWindow.ShowMessage("The layer must have a tileset set!");
                     return;
                 }
-                if (data.TilesX <= 0)
+                if (data.TilesX <= 0 && data.TilesY <= 0)
                 {
-                    mainWindow.ShowMessage("The layer's horizontal size must be larger than 0 tiles!");
+                    mainWindow.ShowMessage("The layer's horizontal and vertical size must be larger than 0 tiles!\n(Use the Auto button to set the tilemap size based on the room size.)");
                     return;
                 }
-                if (data.TilesY <= 0)
+                else if (data.TilesX <= 0)
                 {
-                    mainWindow.ShowMessage("The layer's horizontal size must be larger than 0 tiles!");
+                    mainWindow.ShowMessage("The layer's horizontal size must be larger than 0 tiles!\n(Use the Auto button to set the tilemap size based on the room size.)");
+                    return;
+                } else if (data.TilesY <= 0)
+                {
+                    mainWindow.ShowMessage("The layer's vertical size must be larger than 0 tiles!\n(Use the Auto button to set the tilemap size based on the room size.)");
                     return;
                 }
 
@@ -2309,29 +2330,36 @@ namespace UndertaleModTool
                 Thickness canvasOffset = roomCanvas.Margin;
                 var currentPosition = e.GetPosition(scrollViewer);
                 var offset = roomCanvas.startPosition - currentPosition;
-                roomCanvas.startPosition = currentPosition;
 
+                var transform = RoomGraphics.LayoutTransform as MatrixTransform;
+
+                var scrollX = scrollViewer.HorizontalOffset + offset.X;
+                var scrollY = scrollViewer.VerticalOffset + offset.Y;
+                var multX = (scrollViewer.ScrollableWidth == 0 ? 2.0 : 1.0) / transform.Matrix.M11;
+                var multY = (scrollViewer.ScrollableHeight == 0 ? 2.0 : 1.0) / transform.Matrix.M22;
+
+                roomCanvas.startPosition = currentPosition;
                 // Change margins if outside view
-                if (offset.X < 0 && scrollViewer.HorizontalOffset == 0)
+                if (offset.X < 0 && scrollX <= 0)
                 {
-                    canvasOffset.Left -= offset.X;
+                    canvasOffset.Left -= offset.X * multX;
                 }
-                else if (offset.X > 0 && scrollViewer.HorizontalOffset == scrollViewer.ScrollableWidth)
+                else if (offset.X > 0 && scrollX >= scrollViewer.ScrollableWidth)
                 {
-                    canvasOffset.Right += offset.X;
+                    canvasOffset.Right += offset.X * multX;
                 }
-                if (offset.Y < 0 && scrollViewer.VerticalOffset == 0)
+                if (offset.Y < 0 && scrollY <= 0)
                 {
-                    canvasOffset.Top -= offset.Y;
+                    canvasOffset.Top -= offset.Y * multY;
                 }
-                else if (offset.Y > 0 && scrollViewer.VerticalOffset == scrollViewer.ScrollableHeight)
+                else if (offset.Y > 0 && scrollY >= scrollViewer.ScrollableHeight)
                 {
-                    canvasOffset.Bottom += offset.Y;
+                    canvasOffset.Bottom += offset.Y * multY;
                 }
                 roomCanvas.Margin = canvasOffset;
 
-                scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset + offset.Y);
-                scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset + offset.X);
+                scrollViewer.ScrollToVerticalOffset(scrollY);
+                scrollViewer.ScrollToHorizontalOffset(scrollX);
             }
         }
     }
