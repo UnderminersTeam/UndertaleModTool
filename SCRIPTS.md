@@ -40,6 +40,7 @@ These scripts are self-explanatory from their names, but for clarification:
 - `ExportASM.csx`: Exports GML assembly.
 - `ExportAllCode.csx`: Exports GML code. It has a GMS2.3 counterpart, as code entry names can be too long.
 - `ExportAllSprites.csx`: Exports sprites to PNG files. Creates and saves in `Export_Sprites` directory where `data.win` is opened from. Will ask whether to preserve padding or not.
+- `ExportMasks.csx`: For exporting sprite collision mask information.
 - `ExportSpritesAsGIF.csx`: Exports sprites to animated GIF files. Creates and saves to a user-specified directory. Will always preserve padding.
 - `MergeImages.csx`: A script that can bulk merge images together for comparisons, from different folders.
 - `DumpSpecificCode.csx`: Used to export specific code entries should you have object names.
