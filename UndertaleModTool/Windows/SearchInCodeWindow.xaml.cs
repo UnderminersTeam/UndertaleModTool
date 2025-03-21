@@ -162,8 +162,7 @@ namespace UndertaleModTool.Windows
                 {
                     var codeText = isInAssembly
                         ? code.Disassemble(mainWindow.Data.Variables, mainWindow.Data.CodeLocals.For(code))
-                        : TryGetProfileModeGML(code.Name.Content)
-                            ?? new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, mainWindow.Data.ToolInfo.DecompilerSettings).DecompileToString();
+                        : new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, mainWindow.Data.ToolInfo.DecompilerSettings).DecompileToString(); // TODO: search project source instead if available
                     SearchInCodeText(code.Name.Content, codeText);
                 }
                 
@@ -176,17 +175,6 @@ namespace UndertaleModTool.Windows
 
             Interlocked.Increment(ref progressCount);
             Dispatcher.Invoke(() => loaderDialog.ReportProgress(progressCount));
-        }
-
-        static string TryGetProfileModeGML(string codeName)
-        {
-            if (SettingsWindow.ProfileModeEnabled && mainWindow.ProfileHash is not null)
-            {
-                string path = Path.Join(Settings.ProfilesFolder, mainWindow.ProfileHash, "Temp", codeName + ".gml");
-                if (File.Exists(path))
-                    return File.ReadAllText(path).Replace("\r\n", "\n");
-            }
-            return null;
         }
 
         void SearchInCodeText(string codeName, string codeText)

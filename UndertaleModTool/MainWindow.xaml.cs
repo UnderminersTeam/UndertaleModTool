@@ -49,6 +49,7 @@ using System.Windows.Controls.Primitives;
 using System.Runtime.CompilerServices;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
+using Underanalyzer.Decompiler;
 
 namespace UndertaleModTool
 {
@@ -186,14 +187,8 @@ namespace UndertaleModTool
 
         private LoaderDialog scriptDialog;
 
-        // Related to profile system and appdata
-        public byte[] MD5PreviouslyLoaded = null;
-        public byte[] MD5CurrentlyLoaded = null;
+        // Folder used for configuration, etc.
         public static string AppDataFolder => Settings.AppDataFolder;
-        public static string ProfilesFolder { get; } = Path.Combine(Settings.AppDataFolder, "Profiles");
-        public static string CorrectionsFolder { get; } = Path.Combine(Program.GetExecutableDirectory(), "Corrections");
-        public string ProfileHash = null;
-        public bool CrashedWhileEditing = false;
 
         // Scripting interface-related
         private ScriptOptions scriptOptions;
@@ -501,10 +496,6 @@ namespace UndertaleModTool
                     _ = ListenChildConnection(args[2]);
                 }
             }
-
-            // Copy the known code corrections into the profile, if they don't already exist.
-            ApplyCorrections();
-            CrashCheck();
 
             RunGMSDebuggerItem.Visibility = Settings.Instance.ShowDebuggerOption
                                             ? Visibility.Visible : Visibility.Collapsed;
@@ -857,12 +848,6 @@ namespace UndertaleModTool
                         return;
                     }
                 }
-                else
-                {
-                    RevertProfile();
-                }
-
-                DestroyUMTLastEdited();
 
                 CloseOtherWindows();
 
@@ -1028,7 +1013,7 @@ namespace UndertaleModTool
                     return;
                 }
 
-                Dispatcher.Invoke(async () =>
+                Dispatcher.Invoke(() =>
                 {
                     if (data != null)
                     {
@@ -1048,7 +1033,6 @@ namespace UndertaleModTool
                         {
                             CanSave = true;
                             CanSafelySave = true;
-                            await UpdateProfile(data, filename);
                             if (data != null)
                             {
                                 data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
@@ -1121,7 +1105,7 @@ namespace UndertaleModTool
             DebugDataDialog.DebugDataMode debugMode = DebugDataDialog.DebugDataMode.NoDebug;
             if (!suppressDebug && Data.GeneralInfo != null && !Data.GeneralInfo.IsDebuggerDisabled)
                 this.ShowWarning("You are saving the game in GameMaker Studio debug mode. Unless the debugger is running, the normal runtime will simply hang after loading. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger");
-            Task t = Task.Run(async () =>
+            Task t = Task.Run(() =>
             {
                 bool SaveSucceeded = true;
 
@@ -1238,9 +1222,6 @@ namespace UndertaleModTool
                         // If we're overwriting a previously existing data file, we're going to overwrite it now.
                         // Then, we're renaming it back to the proper (non-temp) file name.
                         File.Move(filename + "temp", filename, true);
-
-                        // Also make the changes to the profile system.
-                        await ProfileSaveEvent(Data, filename);
                     }
                     else
                     {
@@ -1248,7 +1229,6 @@ namespace UndertaleModTool
                         // We need to delete the temp file though (if it exists).
                         if (File.Exists(filename + "temp"))
                             File.Delete(filename + "temp");
-                        // No profile system changes, since the save failed, like a save was never attempted.
                     }
                 }
                 catch (Exception exc)
@@ -2388,6 +2368,47 @@ namespace UndertaleModTool
 
             GC.Collect();
             scriptText = null;
+        }
+
+        public string GetDecompiledText(string codeName, GlobalDecompileContext context = null, IDecompileSettings settings = null)
+        {
+            return GetDecompiledText(Data.Code.ByName(codeName), context, settings);
+        }
+        public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null, IDecompileSettings settings = null)
+        {
+            if (code.ParentEntry is not null)
+                return $"// This code entry is a reference to an anonymous function within \"{code.ParentEntry.Name.Content}\", decompile that instead.";
+
+            GlobalDecompileContext globalDecompileContext = context is null ? new(Data) : context;
+            try
+            {
+                return code != null
+                    ? new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, settings ?? Data.ToolInfo.DecompilerSettings).DecompileToString()
+                    : "";
+            }
+            catch (Exception e)
+            {
+                return "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/";
+            }
+        }
+
+        public string GetDisassemblyText(UndertaleCode code)
+        {
+            if (code.ParentEntry is not null)
+                return $"; This code entry is a reference to an anonymous function within \"{code.ParentEntry.Name.Content}\", disassemble that instead.";
+
+            try
+            {
+                return code != null ? code.Disassemble(Data.Variables, Data.CodeLocals?.For(code)) : "";
+            }
+            catch (Exception e)
+            {
+                return "/*\nDISASSEMBLY FAILED!\n\n" + e.ToString() + "\n*/"; // Please don't
+            }
+        }
+        public string GetDisassemblyText(string codeName)
+        {
+            return GetDisassemblyText(Data.Code.ByName(codeName));
         }
 
         public string PromptLoadFile(string defaultExt, string filter)

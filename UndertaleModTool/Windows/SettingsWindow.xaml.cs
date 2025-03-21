@@ -54,25 +54,6 @@ namespace UndertaleModTool
             }
         }
 
-        public static bool ProfileModeEnabled
-        {
-            get => Settings.Instance.ProfileModeEnabled;
-            set
-            {
-                Settings.Instance.ProfileModeEnabled = value;
-                Settings.Save();
-            }
-        }
-
-        public static bool ProfileMessageShown
-        {
-            get => Settings.Instance.ProfileMessageShown;
-            set
-            {
-                Settings.Instance.ProfileMessageShown = value;
-                Settings.Save();
-            }
-        }
         public static bool TempRunMessageShow
         {
             get => Settings.Instance.TempRunMessageShow;
@@ -109,15 +90,6 @@ namespace UndertaleModTool
             }
         }
 
-        public static bool DeleteOldProfileOnSave
-        {
-            get => Settings.Instance.DeleteOldProfileOnSave;
-            set
-            {
-                Settings.Instance.DeleteOldProfileOnSave = value;
-                Settings.Save();
-            }
-        }
         public static bool WarnOnClose
         {
             get => Settings.Instance.WarnOnClose;

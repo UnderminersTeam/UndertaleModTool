@@ -553,36 +553,19 @@ namespace UndertaleModTool
         }
 
         public static Dictionary<string, string> gettext = null;
-        private void UpdateGettext(UndertaleData data, UndertaleCode gettextCode)
+        private static void UpdateGettext(UndertaleData data, UndertaleCode gettextCode)
         {
             gettext = new Dictionary<string, string>();
-            string[] decompilationOutput;
             GlobalDecompileContext context = new(data);
-            if (!SettingsWindow.ProfileModeEnabled || mainWindow.ProfileHash is not string currentMD5)
+            string[] decompilationOutput;
+            try
             {
-                decompilationOutput = new Underanalyzer.Decompiler.DecompileContext(context, gettextCode, data.ToolInfo.DecompilerSettings)
-                    .DecompileToString().Split('\n');
+                decompilationOutput =
+                    new Underanalyzer.Decompiler.DecompileContext(context, gettextCode, data.ToolInfo.DecompilerSettings).DecompileToString().Split('\n');
             }
-            else
+            catch (Exception)
             {
-                string path = Path.Combine(MainWindow.ProfilesFolder, currentMD5, "Temp", gettextCode.Name.Content + ".gml");
-                if (File.Exists(path))
-                {
-                    try
-                    {
-                        decompilationOutput = File.ReadAllText(path).Replace("\r\n", "\n").Split('\n');
-                    }
-                    catch
-                    {
-                        decompilationOutput = new Underanalyzer.Decompiler.DecompileContext(context, gettextCode, data.ToolInfo.DecompilerSettings)
-                            .DecompileToString().Split('\n');
-                    }
-                }
-                else
-                {
-                    decompilationOutput = new Underanalyzer.Decompiler.DecompileContext(context, gettextCode, data.ToolInfo.DecompilerSettings)
-                        .DecompileToString().Split('\n');
-                }
+                decompilationOutput = Array.Empty<string>();
             }
             Regex textdataRegex = new("^ds_map_add\\(global\\.text_data_en, \\\"(.*)\\\", \\\"(.*)\\\"\\)", RegexOptions.Compiled);
             Regex textdataRegex2 = new("^ds_map_add\\(global\\.text_data_en, \\\"(.*)\\\", '(.*)'\\)", RegexOptions.Compiled);
@@ -734,24 +717,8 @@ namespace UndertaleModTool
                     Exception e = null;
                     try
                     {
-                        if (!SettingsWindow.ProfileModeEnabled || mainWindow.ProfileHash is not string currentMD5)
-                        {
-                            decompiled = new Underanalyzer.Decompiler.DecompileContext(context, code, dataa.ToolInfo.DecompilerSettings)
-                                .DecompileToString();
-                        }
-                        else
-                        {
-                            string path = Path.Combine(MainWindow.ProfilesFolder, currentMD5, "Temp", code.Name.Content + ".gml");
-                            if (!File.Exists(path))
-                            {
-                                decompiled = new Underanalyzer.Decompiler.DecompileContext(context, code, dataa.ToolInfo.DecompilerSettings)
-                                    .DecompileToString();
-                            }
-                            else
-                            {
-                                decompiled = File.ReadAllText(path);
-                            }
-                        }
+                        // TODO: project source if available
+                        decompiled = new Underanalyzer.Decompiler.DecompileContext(context, code, dataa.ToolInfo.DecompilerSettings).DecompileToString();
                     }
                     catch (Exception ex)
                     {
@@ -801,7 +768,7 @@ namespace UndertaleModTool
                             while ((line = decompLinesReader.ReadLine()) is not null)
                             {
                                 // Not `currRegex.Match()`, because one line could contain several calls
-                                // if the "Profile mode" is enabled.
+                                // if non-decompiled source code is being used.
                                 var matches = currRegex.Matches(line).Where(m => m.Success).ToArray();
                                 if (matches.Length > 0)
                                 {
@@ -980,20 +947,6 @@ namespace UndertaleModTool
                 dialog.TryClose();
                 mainWindow.ShowError(Truncate(compileResult.PrintAllErrors(false), 512), "Compiler error");
                 return;
-            }
-
-            if (SettingsWindow.ProfileModeEnabled && mainWindow.ProfileHash is string currentMD5)
-            {
-                try
-                {
-                    // Write text, only if in the profile mode.
-                    string path = Path.Combine(MainWindow.ProfilesFolder, currentMD5, "Temp", code.Name.Content + ".gml");
-                    File.WriteAllText(path, DecompiledEditor.Text);
-                }
-                catch (Exception exc)
-                {
-                    mainWindow.ShowError("Error during writing of GML code to profile:\n" + exc);
-                }
             }
 
             // Invalidate gettext if necessary
