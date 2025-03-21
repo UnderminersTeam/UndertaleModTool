@@ -1,17 +1,19 @@
-// ImportGraphics but it can also set sprite properties and import more types of files
-// Edits made by CST1229
+// ImportGraphics but it can also set sprite properties and import more types of files.
+
 // Based off of ImportGraphics.csx by the UTMT team
 // and ImportGraphicsWithParameters.csx by someone, I don't remember (AwfulNasty???)
+// ImportGraphicsAdvanced-specific edits (extra formats and animation speed) made by CST1229
+
+// Texture packer by Samuel Roy
+// Uses code from https://github.com/mfascia/TexturePacker
 
 // revision 2: fixed gif import not working unless the folder was named Sprites,
 // fixed the default origin being Top Center instead of Top Left and
 // reworded Is special type?'s boolean and the background import error message
 // revision 3: added optional support for single-frame sprites if a frame number is not specified
 // revision 4: added support for the texture handling refactor
-// revision 5: handle breaking Magick.NET changes, disabled animation speed options in GMS1 games
-
-// Texture packer by Samuel Roy
-// Uses code from https://github.com/mfascia/TexturePacker
+// revision 5: handle breaking Magick.NET changes, disabled animation speed options in GMS1 games, hi-DPI support,
+// renamed from ImportGraphicsWithParametersPlus to ImportGraphicsAdvanced
 
 using System;
 using System.IO;
