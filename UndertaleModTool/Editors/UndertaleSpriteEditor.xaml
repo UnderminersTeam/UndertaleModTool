@@ -192,7 +192,15 @@
                 <DataGridTemplateColumn Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Margin="20,0,0,0" Text="(CollisionMask)"/>
+                            <Grid Margin="20,0,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="(CollisionMask)"/>
+                                <local:ButtonDark Grid.Column="1" x:Name="RemoveButton" Content=" X " Click="RemoveMask_Clicked" ToolTip="Remove">
+                                </local:ButtonDark>
+                            </Grid>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
