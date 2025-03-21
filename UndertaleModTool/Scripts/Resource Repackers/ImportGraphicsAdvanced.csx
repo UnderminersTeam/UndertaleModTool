@@ -1,4 +1,4 @@
-// ImportGraphicsWithParameters but it can also set animation speeds and import more types of files
+// ImportGraphics but it can also set sprite properties and import more types of files
 // Edits made by CST1229
 // Based off of ImportGraphics.csx by the UTMT team
 // and ImportGraphicsWithParameters.csx by someone, I don't remember (AwfulNasty???)
@@ -15,7 +15,7 @@
 
 using System;
 using System.IO;
-using System.Drawing;
+using System.Drawing; 
 using System.Collections;
 using System.IO.Compression;
 using System.Collections.Generic;
@@ -966,26 +966,29 @@ public void OffsetResult()
 	Form form = new Form()
 	{
 		Size = new Size(300, 200),
-		MinimumSize = new Size(300, 200),
-		MaximumSize = new Size(300, 200),
+        Text = "Select Sprite Parameters",
+        FormBorderStyle = FormBorderStyle.FixedDialog,
 		MaximizeBox = false,
 		MinimizeBox = false,
-		Text = "Select Sprite Parameters",
-		StartPosition = FormStartPosition.CenterScreen
+		StartPosition = FormStartPosition.CenterScreen,
+		AutoScaleMode = AutoScaleMode.Dpi,
+		AutoScaleDimensions = new Size(96, 96),
 	};
 
-	ToolTip toolTip = new ToolTip();
+    Func<int, int, Size> logicalSize = (w, h) => form.LogicalToDeviceUnits(new Size(w, h));
 
-	Label specialLabel = new Label();
+    ToolTip toolTip = new ToolTip();
+
+    Label specialLabel = new Label();
 	specialLabel.Location = new Point(5, 10);
 	specialLabel.Text = "Special Version:";
-	specialLabel.Size = new Size(110, 30);
+	specialLabel.Size = logicalSize(110, 30);
 	form.Controls.Add(specialLabel);
 
 	CheckBox isSpecialBox = new System.Windows.Forms.CheckBox();
     isSpecialBox.Enabled = Data.IsGameMaker2();
     isSpecialBox.Location = new Point(specialLabel.Width + 5, 10);
-	isSpecialBox.Size = new Size(20, 20);
+	isSpecialBox.Size = logicalSize(20, 20);
 	toolTip.SetToolTip(isSpecialBox, "Is special type? (required for setting animation speed)");
 	form.Controls.Add(isSpecialBox);
 
@@ -998,14 +1001,14 @@ public void OffsetResult()
 	specialVerBox.Text = "1";
 	specialVerBox.Name = "Special Version";
 	specialVerBox.Location = new Point(specialLabel.Width + 5 + 20, 10);
-	specialVerBox.Size = new Size(30, 30);
+	specialVerBox.Size = logicalSize(30, 30);
 	specialVerBox.Anchor = AnchorStyles.Right;
 	form.Controls.Add(specialVerBox);
 
 	Label label1 = new Label();
 	label1.Location = new Point(5, specialVerBox.Height + 15);
 	label1.Text = "Animation Speed:";
-	label1.Size = new Size(110, 30);
+	label1.Size = logicalSize(110, 30);
 	form.Controls.Add(label1);
 
 	TextBox textBox = new System.Windows.Forms.TextBox();
@@ -1017,14 +1020,14 @@ public void OffsetResult()
 	textBox.Text = "1";
 	textBox.Name = "Animation Speed";
 	textBox.Location = new Point(label1.Width + 5, specialVerBox.Height + 15);
-	textBox.Size = new Size(30, 30);
+	textBox.Size = logicalSize(30, 30);
 	textBox.Anchor = AnchorStyles.Right;
 	form.Controls.Add(textBox);
 
 	Label label2 = new Label();
 	label2.Location = new Point(5, 20 + specialVerBox.Height + textBox.Height);
 	label2.Text = "Playback Type:";
-	label2.Size = new Size(110, 30);
+	label2.Size = logicalSize(110, 30);
 	form.Controls.Add(label2);
 
 	ComboBox comboBox = new ComboBox();
@@ -1032,7 +1035,7 @@ public void OffsetResult()
     comboBox.Name = "Playback Type";
 	comboBox.DropDownStyle = ComboBoxStyle.DropDownList;
 	comboBox.Location = new Point(label2.Width + 5, 20 + specialVerBox.Height + textBox.Height);
-	comboBox.Size = new Size(160, 30);
+	comboBox.Size = logicalSize(160, 30);
 	comboBox.Anchor = AnchorStyles.Right;
 	foreach (string play in playbacks)
 		comboBox.Items.Add(play);
@@ -1043,14 +1046,14 @@ public void OffsetResult()
 	Label label3 = new Label();
 	label3.Location = new Point(5, 25 + specialVerBox.Height + textBox.Height + comboBox.Height);
 	label3.Text = "Origin Position:";
-	label3.Size = new Size(110, 30);
+	label3.Size = logicalSize(110, 30);
 	form.Controls.Add(label3);
 
 	ComboBox comboBox2 = new ComboBox();
 	comboBox2.Name = "Origin Position";
 	comboBox2.DropDownStyle = ComboBoxStyle.DropDownList;
 	comboBox2.Location = new Point(label2.Width + 5, 25 + specialVerBox.Height + textBox.Height + comboBox.Height);
-	comboBox2.Size = new Size(160, 30);
+	comboBox2.Size = logicalSize(160, 30);
 	comboBox2.Anchor = AnchorStyles.Right;
 	foreach (string off in offsets)
 		comboBox2.Items.Add(off);
@@ -1062,7 +1065,7 @@ public void OffsetResult()
 
 	Button okBtn = new Button();
 	okBtn.Text = "&Confirm";
-	okBtn.Size = new Size(90, 30);
+	okBtn.Size = logicalSize(90, 30);
 	okBtn.Location = new Point(5, 35 + specialVerBox.Height + textBox.Height + comboBox.Height + comboBox2.Height);
 	okBtn.Anchor = AnchorStyles.Left;
 	form.Controls.Add(okBtn);
