@@ -210,5 +210,10 @@ namespace UndertaleModTool
             if (DataContext is UndertaleSprite sprite && (sender as FrameworkElement).DataContext is UndertaleSprite.TextureEntry entry)
                 sprite.Textures.Remove(entry);
         }
+        private void RemoveMask_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is UndertaleSprite sprite && (sender as FrameworkElement).DataContext is UndertaleSprite.MaskEntry entry)
+                sprite.CollisionMasks.Remove(entry);
+        }
     }
 }
