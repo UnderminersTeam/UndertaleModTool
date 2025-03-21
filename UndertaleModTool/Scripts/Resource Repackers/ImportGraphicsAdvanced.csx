@@ -979,10 +979,14 @@ public void OffsetResult()
 
     ToolTip toolTip = new ToolTip();
 
+	// for some reason the labels cover eachother on hi-dpi screens,
+	// so this is a bit of a hack for that
+	int labelCover = 3;
+
     Label specialLabel = new Label();
-	specialLabel.Location = new Point(5, 10);
+    specialLabel.Location = new Point(5, 10);
 	specialLabel.Text = "Special Version:";
-	specialLabel.Size = logicalSize(110, 30);
+	specialLabel.Size = logicalSize(110, 30 - labelCover);
 	form.Controls.Add(specialLabel);
 
 	CheckBox isSpecialBox = new System.Windows.Forms.CheckBox();
@@ -1000,15 +1004,15 @@ public void OffsetResult()
 	specialVerBox.Multiline = false;
 	specialVerBox.Text = "1";
 	specialVerBox.Name = "Special Version";
-	specialVerBox.Location = new Point(specialLabel.Width + 5 + 20, 10);
+	specialVerBox.Location = new Point(specialLabel.Width + 5 + isSpecialBox.Width, 10);
 	specialVerBox.Size = logicalSize(30, 30);
 	specialVerBox.Anchor = AnchorStyles.Right;
 	form.Controls.Add(specialVerBox);
 
 	Label label1 = new Label();
-	label1.Location = new Point(5, specialVerBox.Height + 15);
+    label1.Location = new Point(5, specialVerBox.Height + 15);
 	label1.Text = "Animation Speed:";
-	label1.Size = logicalSize(110, 30);
+	label1.Size = logicalSize(110, 30 - labelCover);
 	form.Controls.Add(label1);
 
 	TextBox textBox = new System.Windows.Forms.TextBox();
@@ -1027,7 +1031,7 @@ public void OffsetResult()
 	Label label2 = new Label();
 	label2.Location = new Point(5, 20 + specialVerBox.Height + textBox.Height);
 	label2.Text = "Playback Type:";
-	label2.Size = logicalSize(110, 30);
+	label2.Size = logicalSize(110, 30 - labelCover);
 	form.Controls.Add(label2);
 
 	ComboBox comboBox = new ComboBox();
@@ -1046,7 +1050,7 @@ public void OffsetResult()
 	Label label3 = new Label();
 	label3.Location = new Point(5, 25 + specialVerBox.Height + textBox.Height + comboBox.Height);
 	label3.Text = "Origin Position:";
-	label3.Size = logicalSize(110, 30);
+	label3.Size = logicalSize(110, 30 - labelCover);
 	form.Controls.Add(label3);
 
 	ComboBox comboBox2 = new ComboBox();
