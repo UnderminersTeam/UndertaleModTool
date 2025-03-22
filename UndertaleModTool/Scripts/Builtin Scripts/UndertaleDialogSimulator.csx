@@ -290,6 +290,8 @@ public uint GetLastLayerID()
     uint a_last_layer_id = 0;
     foreach (UndertaleRoom Room in Data.Rooms) 
     {
+        if (Room is null)
+            continue;
         foreach (UndertaleRoom.Layer Layer in Room.Layers) 
         {
             if (Layer.LayerId > a_last_layer_id) 

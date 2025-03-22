@@ -458,6 +458,8 @@ void ProfileModeExempt()
     // Process bytecode, patching in script calls where needed
     foreach (UndertaleCode c in Data.Code)
     {
+        if (c is null)
+            continue;
         // global.interact get/set patches
         uint addr = 0;
         for (int i = 0; i < c.Instructions.Count; i++)
@@ -656,6 +658,8 @@ void PersistentObjectSetup(string objectName)
                 uint layer_id = 0;
                 foreach (var room in Data.Rooms)
                 {
+                    if (room is null)
+                        continue;
                     foreach (var layer in room.Layers)
                     {
                         if (layer.LayerId > layer_id)
