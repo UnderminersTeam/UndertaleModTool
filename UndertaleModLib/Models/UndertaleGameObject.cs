@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using UndertaleModLib.Project;
 
 namespace UndertaleModLib.Models;
 
@@ -29,11 +30,11 @@ public enum CollisionShapeFlags : uint
 /// <summary>
 /// A game object in a data file.
 /// </summary>
-public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChanged, IDisposable
+public class UndertaleGameObject : UndertaleNamedResource, IProjectAsset, INotifyPropertyChanged, IDisposable
 {
-    public UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _sprite = new();
-    public UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _parentId = new();
-    public UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _textureMaskId = new();
+    private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _sprite = new();
+    private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _parentId = new();
+    private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _textureMaskId = new();
 
     public static readonly int EventTypeCount = Enum.GetValues(typeof(EventType)).Length;
 
@@ -424,6 +425,12 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         }
         Name = null;
         Events = new();
+    }
+
+    /// <inheritdoc/>
+    ISerializableProjectAsset IProjectAsset.GenerateSerializableProjectAsset(ProjectContext projectContext)
+    {
+        throw new NotImplementedException();
     }
 
     /// <summary>
