@@ -67,7 +67,7 @@ namespace UndertaleModTool
         private void ComboBox_DropDownClosed(object sender, EventArgs e)
         {
             handleMouseScroll = true;
-        }        
+        }
         private void UndertaleObjectReference_Loaded(object sender, RoutedEventArgs e)
         {
             var objRef = sender as UndertaleObjectReference;
@@ -82,23 +82,27 @@ namespace UndertaleModTool
             var btn = (ButtonDark)sender;
             var objRef = (UndertaleObjectReference)((Grid)btn.Parent).Parent;
 
-            if (objRef.ObjectReference is not null)
-            {
-                objRef.ObjectReference = null;
-                return;
-            }
-
             var obj = (UndertaleGameObject)DataContext;
             var evType = objRef.ObjectEventType;
             var evSubtype = objRef.ObjectEventSubtype;
             var action = (UndertaleGameObject.EventAction)btn.DataContext;
             var evList = ((UndertaleGameObject)DataContext).Events[(int)evType];
-            var ev = evList[(int)evSubtype];
-            ev.Actions.Remove(action);
-            if (ev.Actions.Count <= 0)
+
+            UndertaleGameObject.Event foundEvent = null;
+            foreach (var ev in evList)
             {
-                evList.Remove(ev);
+                if (ev.EventSubtype == evSubtype)
+                {
+                    foundEvent = ev;
+                    break;
+                }
             }
-    }
+            if (foundEvent is null) return;
+            foundEvent.Actions.Remove(action);
+            if (foundEvent.Actions.Count <= 0)
+            {
+                evList.Remove(foundEvent);
+            }
+        }
     }
 }
