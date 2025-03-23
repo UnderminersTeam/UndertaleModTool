@@ -460,8 +460,11 @@ namespace UndertaleModLib
                 // Go to sprite's start position
                 reader.Position = returnTo + 4 + (4 * i);
                 uint spritePtr = reader.ReadUInt32();
+                if (spritePtr == 0)
+                    continue;
                 uint nextSpritePtr = 0;
-                if ((i + 1) < spriteCount)
+                int j = i;
+                while (nextSpritePtr == 0 && (++j) < spriteCount)
                     nextSpritePtr = reader.ReadUInt32();
                 reader.AbsPosition = spritePtr + 4; // Skip past "Name"
 
@@ -791,7 +794,7 @@ namespace UndertaleModLib
             }
 
             long positionToReturn = reader.AbsPosition;
-            bool GMS2023_6 = false;
+            bool GMS2023_6 = true;
             bool GMS2024_11 = false;
 
             uint possibleFontCount = reader.ReadUInt32();
@@ -834,7 +837,6 @@ namespace UndertaleModLib
                 reader.AbsPosition += 4;                                // (detected by PSEM/PSYS chunk existence)
 
             uint glyphsLength = reader.ReadUInt32();
-            GMS2023_6 = true;
             if (glyphsLength * 4 > firstAndNextFontPointers[1] - reader.AbsPosition)
             {
                 GMS2023_6 = false;
