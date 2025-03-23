@@ -661,6 +661,11 @@ public partial class Program : IScriptInterface
         {
             if (Verbose)
                 Console.WriteLine($"Dumping {texture.Name}");
+            if (texture.TextureData.Image is not GMImage image)
+            {
+                Console.WriteLine($"{texture.Name} has no image assigned, skipping");
+                continue;
+            }
             using FileStream fs = new($"{directory}/{texture.Name.Content}.png", FileMode.Create);
             texture.TextureData.Image.SavePng(fs);
         }

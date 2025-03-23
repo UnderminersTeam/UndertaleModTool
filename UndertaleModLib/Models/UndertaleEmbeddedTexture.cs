@@ -375,6 +375,10 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         /// </summary>
         public void Serialize(FileBinaryWriter writer, bool gm2022_5)
         {
+            if (Image is null)
+            {
+                throw new Exception("No image assigned to embedded texture");
+            }
             if (Image.Format == GMImage.ImageFormat.RawBgra)
             {
                 throw new Exception("Unexpected raw RGBA image");
