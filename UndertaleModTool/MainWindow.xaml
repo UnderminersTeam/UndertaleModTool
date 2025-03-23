@@ -252,7 +252,7 @@
                             <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>
                         </local:ContextMenuDark>
 
-                        <Style TargetType="{x:Type TreeViewItem}">
+                        <Style x:Key="BaseTreeViewItemStyle" TargetType="{x:Type TreeViewItem}">
                             <EventSetter Event="TreeViewItem.DragOver" Handler="TreeView_DragOver"/>
                             <EventSetter Event="TreeViewItem.Drop" Handler="TreeView_Drop"/>
                             <EventSetter Event="TreeViewItem.MouseMove" Handler="TreeView_MouseMove"/>
@@ -263,24 +263,34 @@
                                 <DataTrigger Binding="{Binding ItemsSource, RelativeSource={RelativeSource Self}, Converter={StaticResource ImplementsInterfaceConverter}, ConverterParameter={x:Type cmod:ICollectionView}}" Value="True">
                                     <Setter Property="ContextMenu" Value="{StaticResource AddMenu}"/>
                                 </DataTrigger>
+                                <Trigger Property="Tag" Value="StandaloneTab">
+                                    <Setter Property="ContextMenu" Value="{StaticResource StandaloneTabMenu}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+
+                        <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource BaseTreeViewItemStyle}"/>
+
+                        <!-- FIXME: Ideally this would belong in ResourceListTreeViewItem.xaml resources, however I couldn't figure out
+                             the inheritance. -->
+                        <Style TargetType="{x:Type local:ResourceListTreeViewItem}" BasedOn="{StaticResource BaseTreeViewItemStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ItemsSource, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                                <!--
+                                    Every header should be visible if a data file is not loaded, as seen in previous versions of
+                                    the tool.
+                                -->
+                                <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </TreeView.Resources>
                     <TreeViewItem Header="Data" IsExpanded="True">
-                        <TreeViewItem Header="General info" Visibility="{Binding GeneralInfo, Converter={StaticResource VisibleIfNotNull}}" Tag="StandaloneTab">
-                            <TreeViewItem.Style>
-                                <Style TargetType="{x:Type TreeViewItem}">
-                                    <Setter Property="ContextMenu" Value="{StaticResource StandaloneTabMenu}"/>
-                                </Style>
-                            </TreeViewItem.Style>
-                        </TreeViewItem>
-                        <TreeViewItem Header="Global init" Visibility="{Binding GlobalInitScripts, Converter={StaticResource VisibleIfNotNull}}" Tag="StandaloneTab">
-                            <TreeViewItem.Style>
-                                <Style TargetType="{x:Type TreeViewItem}">
-                                    <Setter Property="ContextMenu" Value="{StaticResource StandaloneTabMenu}"/>
-                                </Style>
-                            </TreeViewItem.Style>
-                        </TreeViewItem>
+                        <TreeViewItem Header="General info" Visibility="{Binding GeneralInfo, Converter={StaticResource VisibleIfNotNull}}" Tag="StandaloneTab"/>
+                        <TreeViewItem Header="Global init" Visibility="{Binding GlobalInitScripts, Converter={StaticResource VisibleIfNotNull}}" Tag="StandaloneTab"/>
                         <TreeViewItem Header="Game End scripts" Visibility="{Binding GameEndScripts, Converter={StaticResource VisibleIfNotNull}}"/>
                         <local:ResourceListTreeViewItem Header="Audio groups" ItemsSource="{Binding AudioGroups, Converter={StaticResource FilteredViewConverter}}">
                             <local:ResourceListTreeViewItem.DefaultItemTemplate>
