@@ -88,20 +88,12 @@ namespace UndertaleModTool
             var action = (UndertaleGameObject.EventAction)btn.DataContext;
             var evList = ((UndertaleGameObject)DataContext).Events[(int)evType];
 
-            UndertaleGameObject.Event foundEvent = null;
-            foreach (var ev in evList)
+            var ev = evList.FirstOrDefault(x => x.EventSubtype == evSubtype);
+            if (ev is null) return;
+            ev.Actions.Remove(action);
+            if (ev.Actions.Count <= 0)
             {
-                if (ev.EventSubtype == evSubtype)
-                {
-                    foundEvent = ev;
-                    break;
-                }
-            }
-            if (foundEvent is null) return;
-            foundEvent.Actions.Remove(action);
-            if (foundEvent.Actions.Count <= 0)
-            {
-                evList.Remove(foundEvent);
+                evList.Remove(ev);
             }
         }
     }
