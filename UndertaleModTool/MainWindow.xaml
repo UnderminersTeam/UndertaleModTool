@@ -49,6 +49,10 @@
         <CommandBinding Command="NavigationCommands.BrowseBack" Executed="Command_GoBack" />
         <CommandBinding Command="NavigationCommands.BrowseForward" Executed="Command_GoForward" />
         <CommandBinding Command="{x:Static local:MainWindow.SearchInCodeCommand}" Executed="Command_SearchInCode"/>
+        <CommandBinding Command="{x:Static local:MainWindow.NewProjectCommand}" Executed="Command_NewProject" />
+        <CommandBinding Command="{x:Static local:MainWindow.OpenProjectCommand}" Executed="Command_OpenProject" />
+        <CommandBinding Command="{x:Static local:MainWindow.SaveProjectCommand}" Executed="Command_SaveProject" />
+        <CommandBinding Command="{x:Static local:MainWindow.CloseProjectCommand}" Executed="Command_CloseProject" />
     </Window.CommandBindings>
     <Window.InputBindings>
         <KeyBinding Modifiers="Control" Key="N" Command="New"/>
@@ -126,6 +130,41 @@
                     </MenuItem.Resources>
                     <MenuItem Header="_Search in code" Command="{x:Static local:MainWindow.SearchInCodeCommand}" InputGestureText="Ctrl+Shift+F"></MenuItem>
                     <MenuItem Header="Find unreferenced _assets" Name="FindUnreferencedAssetsItem" Click="MenuItem_FindUnreferencedAssets_Click"/>
+                </local:MenuItemDark>
+                <local:MenuItemDark Header="_Project">
+                    <MenuItem.Resources>
+                        <Style TargetType="MenuItem">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Data, Mode=OneWay}" Value="{x:Null}">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </MenuItem.Resources>
+                    <MenuItem Header="_New project" Command="{x:Static local:MainWindow.NewProjectCommand}"></MenuItem>
+                    <MenuItem Header="_Open project" Command="{x:Static local:MainWindow.OpenProjectCommand}"></MenuItem>
+                    <MenuItem Header="_Save project" Command="{x:Static local:MainWindow.SaveProjectCommand}">
+                        <MenuItem.Style>
+                            <Style TargetType="{x:Type MenuItem}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Project, Mode=OneWay}" Value="{x:Null}">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </MenuItem.Style>
+                    </MenuItem>
+                    <MenuItem Header="_Close project" Command="{x:Static local:MainWindow.CloseProjectCommand}">
+                        <MenuItem.Style>
+                            <Style TargetType="{x:Type MenuItem}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Project, Mode=OneWay}" Value="{x:Null}">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </MenuItem.Style>
+                    </MenuItem>
                 </local:MenuItemDark>
                 <local:MenuItemDark Header="_Help">
                     <MenuItem Header="_GitHub" Click="MenuItem_GitHub_Click"/>

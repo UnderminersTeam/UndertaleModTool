@@ -59,12 +59,23 @@ public enum SerializableAssetType
 /// <summary>
 /// Extensions for serializable asset types.
 /// </summary>
-internal static class SerializableAssetTypeExtensions
+public static class SerializableAssetTypeExtensions
 {
+    /// <summary>
+    /// Converts the serializable asset type to its friendly interface name representation.
+    /// </summary>
+    public static string ToInterfaceName(this SerializableAssetType assetType)
+    {
+        return assetType switch
+        {
+            GameObject => "Game Object",
+            _ => throw new NotImplementedException()
+        };
+    }
     /// <summary>
     /// Converts the serializable asset type to its filesystem/directory name representation.
     /// </summary>
-    public static string ToFilesystemName(this SerializableAssetType assetType)
+    internal static string ToFilesystemName(this SerializableAssetType assetType)
     {
         return assetType switch
         {

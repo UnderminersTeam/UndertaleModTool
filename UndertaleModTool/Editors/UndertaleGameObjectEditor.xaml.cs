@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -24,18 +27,137 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertaleGameObjectEditor : DataUserControl
     {
+        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+
         private bool handleMouseScroll = true;
 
         public UndertaleGameObjectEditor()
         {
             InitializeComponent();
+            DataContextChanged += OnDataContextChanged;
+            Unloaded += OnUnloaded;
+        }
+
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is UndertaleGameObject oldObj)
+            {
+                oldObj.PropertyChanged -= OnPropertyChanged;
+            }
+        }
+
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.OldValue is UndertaleGameObject oldObj)
+            {
+                oldObj.PropertyChanged -= OnPropertyChanged;
+            }
+            if (e.NewValue is UndertaleGameObject newObj)
+            {
+                newObj.PropertyChanged += OnPropertyChanged;
+            }
+        }
+
+        private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            OnAssetUpdated();
+        }
+
+        private void OnAssetUpdated()
+        {
+            if (mainWindow.Project is null)
+            {
+                return;
+            }
+            if (DataContext is UndertaleGameObject obj)
+            {
+                Dispatcher.BeginInvoke(() =>
+                {
+                    mainWindow.ShowMessage("Test!");
+                });
+            }
         }
 
         private void DataGrid_AddingNewItem(object sender, AddingNewItemEventArgs e)
         {
-            UndertaleGameObject.Event obj = new UndertaleGameObject.Event();
+            UndertaleGameObject.Event obj = new();
             obj.Actions.Add(new UndertaleGameObject.EventAction());
             e.NewItem = obj;
+        }
+
+        private void DataGrid_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Attach to collection changed events
+            if (sender is not DataGrid dg || dg.ItemsSource is not ObservableCollection<UndertaleGameObject.Event> collection)
+            {
+                return;
+            }
+            collection.CollectionChanged += DataGrid_CollectionChanged;
+        }
+
+        private void DataGrid_Unloaded(object sender, RoutedEventArgs e)
+        {
+            // Detach to collection changed events
+            if (sender is not DataGrid dg || dg.ItemsSource is not ObservableCollection<UndertaleGameObject.Event> collection)
+            {
+                return;
+            }
+            collection.CollectionChanged -= DataGrid_CollectionChanged;
+        }
+
+        private void DataGrid_Actions_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Attach to collection changed events
+            if (sender is not DataGrid dg || dg.ItemsSource is not ObservableCollection<UndertaleGameObject.EventAction> collection)
+            {
+                return;
+            }
+            collection.CollectionChanged += DataGrid_CollectionChanged;
+        }
+
+        private void DataGrid_Actions_Unloaded(object sender, RoutedEventArgs e)
+        {
+            // Detach to collection changed events
+            if (sender is not DataGrid dg || dg.ItemsSource is not ObservableCollection<UndertaleGameObject.EventAction> collection)
+            {
+                return;
+            }
+            collection.CollectionChanged -= DataGrid_CollectionChanged;
+        }
+
+        private void DataGrid_PhysicsVertices_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Attach to collection changed events
+            if (sender is not DataGrid dg || dg.ItemsSource is not ObservableCollection<UndertaleGameObject.UndertalePhysicsVertex> collection)
+            {
+                return;
+            }
+            collection.CollectionChanged += DataGrid_CollectionChanged;
+        }
+
+        private void DataGrid_PhysicsVertices_Unloaded(object sender, RoutedEventArgs e)
+        {
+            // Detach to collection changed events
+            if (sender is not DataGrid dg || dg.ItemsSource is not ObservableCollection<UndertaleGameObject.UndertalePhysicsVertex> collection)
+            {
+                return;
+            }
+            collection.CollectionChanged -= DataGrid_CollectionChanged;
+        }
+
+        private void DataGrid_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            OnAssetUpdated();
+        }
+
+        private void PhysicsVertex_ValueUpdated(object sender, DataTransferEventArgs e)
+        {
+            OnAssetUpdated();
+        }
+
+        private void UndertaleObjectReference_ObjectReferenceChanged_ActionCode(object sender, UndertaleObjectReference.ObjectReferenceChangedEventArgs e)
+        {
+            OnAssetUpdated();
         }
 
         // mouse wheel scrolling fix

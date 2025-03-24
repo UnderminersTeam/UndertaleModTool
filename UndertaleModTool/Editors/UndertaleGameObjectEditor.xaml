@@ -275,6 +275,7 @@
                                 AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True"
                                 HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray"
                                 HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
+                                Loaded="DataGrid_PhysicsVertices_Loaded" Unloaded="DataGrid_PhysicsVertices_Unloaded"
                                 ScrollViewer.CanContentScroll="False" PreviewMouseWheel="HandlePreviewMouseWheel">
                 <DataGrid.Resources>
                     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
@@ -305,14 +306,14 @@
                     <DataGridTemplateColumn Header="X" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <local:TextBoxDark Text="{Binding X, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0" />
+                                <local:TextBoxDark Text="{Binding X, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}" SourceUpdated="PhysicsVertex_ValueUpdated" Margin="20,0,0,0" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                     <DataGridTemplateColumn Header="Y" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <local:TextBoxDark Text="{Binding Y, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                <local:TextBoxDark Text="{Binding Y, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}" SourceUpdated="PhysicsVertex_ValueUpdated" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -332,7 +333,8 @@
                         <TextBlock Margin="3" Text="{Binding Path=(ItemsControl.AlternationIndex), RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource EventNameConverter}}" Name="EventTypeName"/>
                         <local:DataGridDark ItemsSource="{Binding .}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True"
                                             HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray"
-                                            AddingNewItem="DataGrid_AddingNewItem" PreviewMouseWheel="HandlePreviewMouseWheel"
+                                            AddingNewItem="DataGrid_AddingNewItem" Loaded="DataGrid_Loaded" Unloaded="DataGrid_Unloaded"
+                                            PreviewMouseWheel="HandlePreviewMouseWheel"
                                             HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
                                             ScrollViewer.CanContentScroll="False">
                             <DataGrid.Resources>
@@ -482,12 +484,13 @@
                                 <DataGridTemplateColumn Header="Actions" Width="5*">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <local:DataGridDark ItemsSource="{Binding Actions}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow">
+                                            <local:DataGridDark ItemsSource="{Binding Actions}" Loaded="DataGrid_Actions_Loaded" Unloaded="DataGrid_Actions_Unloaded" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow">
                                                 <DataGrid.Columns>
                                                     <DataGridTemplateColumn Header="Code" Width="*">
                                                         <DataGridTemplateColumn.CellTemplate>
                                                             <DataTemplate>
                                                                 <local:UndertaleObjectReference ObjectReference="{Binding CodeId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleCode}"
+                                                                                                ObjectReferenceChanged="UndertaleObjectReference_ObjectReferenceChanged_ActionCode"
                                                                                                 Margin="23,3,3,3" CanRemove="False"
                                                                                                 GameObject="{Binding DataContext, RelativeSource={RelativeSource AncestorType=local:DataUserControl}}"
                                                                                                 ObjectEventType="{Binding Text, Mode=OneTime, ElementName=EventTypeName, Converter={StaticResource EventNameConverter}, ConverterParameter=EventType}"

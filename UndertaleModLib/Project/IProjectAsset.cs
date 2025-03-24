@@ -6,6 +6,16 @@
 public interface IProjectAsset
 {
     /// <summary>
+    /// User-friendly name to be used in project-related interfaces.
+    /// </summary>
+    public string ProjectName { get; }
+
+    /// <summary>
+    /// Serializble asset type to be used in project-related interfaces.
+    /// </summary>
+    public SerializableAssetType ProjectAssetType { get; }
+
+    /// <summary>
     /// Generates a serializable project version of this asset, within the given project context.
     /// </summary>
     /// <param name="projectContext">Context of the project.</param>

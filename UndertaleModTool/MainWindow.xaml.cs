@@ -50,6 +50,7 @@ using System.Runtime.CompilerServices;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
 using Underanalyzer.Decompiler;
+using UndertaleModLib.Project;
 
 namespace UndertaleModTool
 {
@@ -66,6 +67,7 @@ namespace UndertaleModTool
 
         public UndertaleData Data { get; set; }
         public string FilePath { get; set; }
+        public ProjectContext Project { get; set; } = null;
         public string ScriptPath { get; set; } // For the scripting interface specifically
 
         public string TitleMain { get; set; }
@@ -76,6 +78,10 @@ namespace UndertaleModTool
         public static RoutedUICommand SwitchToNextTabCommand = new RoutedUICommand("Switch to the next tab", "SwitchToNextTab", typeof(MainWindow));
         public static RoutedUICommand SwitchToPrevTabCommand = new RoutedUICommand("Switch to the previous tab", "SwitchToPrevTab", typeof(MainWindow));
         public static RoutedUICommand SearchInCodeCommand = new("Search in code", "SearchInCode", typeof(MainWindow));
+        public static RoutedUICommand NewProjectCommand = new("New project", "NewProject", typeof(MainWindow));
+        public static RoutedUICommand OpenProjectCommand = new("Open project", "OpenProject", typeof(MainWindow));
+        public static RoutedUICommand SaveProjectCommand = new("Save project", "SaveProject", typeof(MainWindow));
+        public static RoutedUICommand CloseProjectCommand = new("Close project", "CloseProject", typeof(MainWindow));
 
         public ObservableCollection<Tab> Tabs { get; set; } = new();
         public Tab CurrentTab
@@ -3701,6 +3707,146 @@ result in loss of work.");
             }
 
             return false;
+        }
+
+        private void Command_NewProject(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (Data is null)
+            {
+                // No data set; this should be impossible, but abort if this does occur
+                return;
+            }
+            if (Project is not null)
+            {
+                if (this.ShowQuestionWithCancel("A project is currently open - create a new project and discard all unsaved changes?", MessageBoxImage.Warning, "Project already open") != MessageBoxResult.Yes)
+                {
+                    // Abort new project creation
+                    return;
+                }
+            }
+
+            // Ask for name
+            string projectName = SimpleTextInput("Choose project name", "Choose a name for the new project", $"{Data.GeneralInfo?.DisplayName?.Content ?? "New"} Mod", false, true);
+            if (projectName is null)
+            {
+                // Name prompt was canceled
+                return;
+            }
+            projectName = projectName.Trim();
+
+            // Prompt location for project file
+            string directory = PromptChooseDirectory();
+            if (directory is null)
+            {
+                // Directory prompt was canceled
+                return;
+            }
+
+            // Attempt making project at the specified location (will fail if the folder isn't empty, etc.)
+            ProjectContext newProjectContext;
+            try
+            {
+                newProjectContext = new(Data, Path.Combine(directory, "project.json"), projectName);
+            }
+            catch (ProjectException ex)
+            {
+                this.ShowError(ex.Message, "Failed to create new project");
+                return;
+            }
+            catch (Exception ex)
+            {
+                this.ShowError($"Error occurred when creating new project:\n{ex}");
+                return;
+            }
+
+            // Start using new project context
+            Project = newProjectContext;
+        }
+
+        private async void Command_OpenProject(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (Data is null)
+            {
+                // No data set; this should be impossible, but abort if this does occur
+                return;
+            }
+            if (Project is not null)
+            {
+                if (this.ShowQuestionWithCancel("A project is currently open - open another project and discard all unsaved changes?", MessageBoxImage.Warning, "Project already open") != MessageBoxResult.Yes)
+                {
+                    // Abort opening project
+                    return;
+                }
+            }
+
+            OpenFileDialog dlg = new()
+            {
+                DefaultExt = "json",
+                Filter = "UndertaleModTool project files (.json)|*.json|All files|*"
+            };
+            if (dlg.ShowDialog(this) == true)
+            {
+                ProjectContext newProjectContext = null;
+
+                // Attempt loading project from the specific JSON
+                // TODO: make sure that you can't do anything while this load occurs, without becoming unresponsive
+                await Task.Run(() =>
+                {
+                    try
+                    {
+                        newProjectContext = new(Data, dlg.FileName);
+                    }
+                    catch (ProjectException ex)
+                    {
+                        this.ShowError(ex.Message, "Failed to load project");
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        this.ShowError($"Error occurred when loading project:\n{ex}");
+                        return;
+                    }
+                });
+
+                // Don't assign new project context if load failed
+                if (newProjectContext is null)
+                {
+                    return;
+                }
+
+                // Start using new project context
+                Project = newProjectContext;
+            }
+        }
+
+        private void Command_SaveProject(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (Data is null)
+            {
+                // No data set; this should be impossible, but abort if this does occur
+                return;
+            }
+            if (Project is null)
+            {
+                // No project set; this should also be impossible
+                return;
+            }
+
+            // Open project save window to handle the rest
+            ProjectSaveWindow projectSaveWindow = new()
+            {
+                Owner = this
+            };
+            projectSaveWindow.ShowDialog();
+        }
+
+        private void Command_CloseProject(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (Data is null)
+            {
+                // No data set; this should be impossible, but abort if this does occur
+                return;
+            }
         }
     }
 

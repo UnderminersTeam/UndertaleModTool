@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using UndertaleModLib.Project;
+using UndertaleModLib.Project.SerializableAssets;
 
 namespace UndertaleModLib.Models;
 
@@ -140,7 +141,7 @@ public class UndertaleGameObject : UndertaleNamedResource, IProjectAsset, INotif
     /// <summary>
     /// The vertices used for a <see cref="CollisionShape"/> of type <see cref="CollisionShapeFlags.Custom"/>.
     /// </summary>
-    public List<UndertalePhysicsVertex> PhysicsVertices { get; set; } = new List<UndertalePhysicsVertex>();
+    public UndertaleObservableList<UndertalePhysicsVertex> PhysicsVertices { get; set; } = new();
 
     #endregion
 
@@ -248,12 +249,12 @@ public class UndertaleGameObject : UndertaleNamedResource, IProjectAsset, INotif
         Awake = reader.ReadBoolean();
         Kinematic = reader.ReadBoolean();
         // Needs to be done manually because count is separated
-        PhysicsVertices.Capacity = physicsShapeVertexCount;
+        PhysicsVertices.SetCapacity(physicsShapeVertexCount);
         for (int i = 0; i < physicsShapeVertexCount; i++)
         {
-            UndertalePhysicsVertex v = new UndertalePhysicsVertex();
+            UndertalePhysicsVertex v = new();
             v.Unserialize(reader);
-            PhysicsVertices.Add(v);
+            PhysicsVertices.InternalAdd(v);
         }
         Events = reader.ReadUndertaleObject<UndertalePointerList<UndertalePointerList<Event>>>();
     }
@@ -430,8 +431,17 @@ public class UndertaleGameObject : UndertaleNamedResource, IProjectAsset, INotif
     /// <inheritdoc/>
     ISerializableProjectAsset IProjectAsset.GenerateSerializableProjectAsset(ProjectContext projectContext)
     {
-        throw new NotImplementedException();
+        SerializableGameObject serializable = new();
+        serializable.PopulateFromData(projectContext, this);
+        return serializable;
     }
+
+    /// <inheritdoc/>
+    public string ProjectName { get => Name?.Content ?? "<unknown name>"; }
+
+    /// <inheritdoc/>
+    public SerializableAssetType ProjectAssetType { get => SerializableAssetType.GameObject; }
+
 
     /// <summary>
     /// Generic events that an <see cref="UndertaleGameObject"/> uses.

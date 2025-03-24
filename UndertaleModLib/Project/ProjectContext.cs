@@ -14,6 +14,16 @@ namespace UndertaleModLib.Project;
 public sealed class ProjectContext
 {
     /// <summary>
+    /// Name of the project.
+    /// </summary>
+    public string Name { get => _mainOptions.Name; }
+
+    /// <summary>
+    /// Whether this context has any unexported assets.
+    /// </summary>
+    public bool HasUnexportedAssets { get => _assetsMarkedForExport.Count > 0; }
+
+    /// <summary>
     /// Current data context associated with this project.
     /// </summary>
     internal UndertaleData Data { get; }
@@ -47,10 +57,14 @@ public sealed class ProjectContext
     /// </summary>
     /// <param name="currentData">Current data context to associate with the project.</param>
     /// <param name="mainFilePath">Main file path for the project.</param>
+    /// <exception cref="ProjectException">When a project-specific exception occurs</exception>
     public ProjectContext(UndertaleData currentData, string mainFilePath)
     {
         Data = currentData;
-        _mainOptions = JsonSerializer.Deserialize<ProjectMainOptions>(mainFilePath);
+        using (FileStream fs = new(mainFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+        {
+            _mainOptions = JsonSerializer.Deserialize<ProjectMainOptions>(fs, JsonOptions);
+        }
         _mainDirectory = Path.GetDirectoryName(mainFilePath);
 
         // Recursively find and load in all assets in subdirectories
@@ -86,7 +100,7 @@ public sealed class ProjectContext
                 }
                 catch (Exception e)
                 {
-                    throw new ProjectLoadException($"Failed to load asset file \"{Path.GetFileName(assetPath)}\": {e.Message}", e);
+                    throw new ProjectException($"Failed to load asset file \"{Path.GetFileName(assetPath)}\": {e.Message}", e);
                 }
 
                 // Add to list for later processing
@@ -95,7 +109,7 @@ public sealed class ProjectContext
                 // Associate the data name (and type) of this asset with its path
                 if (!_assetDataNamesToPaths.TryAdd((asset.DataName, asset.AssetType), assetPath))
                 {
-                    throw new ProjectLoadException($"Found multiple {asset.AssetType} assets with name \"{asset.DataName}\"");
+                    throw new ProjectException($"Found multiple {asset.AssetType} assets with name \"{asset.DataName}\"");
                 }
             }
         }
@@ -119,6 +133,7 @@ public sealed class ProjectContext
     /// <param name="currentData">Current data context to associate with the project.</param>
     /// <param name="mainFilePath">Main file path for the project.</param>
     /// <param name="newProjectName">Name of the new project being created.</param>
+    /// <exception cref="ProjectException">When a project-specific exception occurs</exception>
     public ProjectContext(UndertaleData currentData, string mainFilePath, string newProjectName)
     {
         Data = currentData;
@@ -128,14 +143,14 @@ public sealed class ProjectContext
         // If the file already exists, we cannot overwrite it (give a friendly message)
         if (File.Exists(mainFilePath))
         {
-            throw new IOException($"Project file already exists at \"{mainFilePath}\"");
+            throw new ProjectException($"Project file already exists at \"{mainFilePath}\"");
         }
 
         // If the directory isn't empty, we don't want to overwrite anything else accidentally
         Directory.CreateDirectory(_mainDirectory);
         if (Directory.EnumerateFileSystemEntries(_mainDirectory).Any())
         {
-            throw new IOException("Project directory is not empty");
+            throw new ProjectException("Project directory is not empty");
         }
 
         // Create new main options and save it
@@ -144,7 +159,7 @@ public sealed class ProjectContext
             Name = newProjectName
         };
         using FileStream fs = new(mainFilePath, FileMode.CreateNew);
-        JsonSerializer.Serialize(fs, _mainOptions);
+        JsonSerializer.Serialize(fs, _mainOptions, JsonOptions);
     }
 
     /// <summary>
@@ -178,10 +193,26 @@ public sealed class ProjectContext
     }
 
     /// <summary>
+    /// Returns an enumerable over all currently unexported assets, in an arbitrary order.
+    /// </summary>
+    public IEnumerable<IProjectAsset> EnumerateUnexportedAssets()
+    {
+        return _assetsMarkedForExport;
+    }
+
+    /// <summary>
     /// Exports all assets that are marked for export.
     /// </summary>
+    /// <param name="clearMarkedAssets">Whether to clear the current set of assets marked for export.</param>
+    /// <exception cref="ProjectException">When a project-specific exception occurs</exception>
     public void Export(bool clearMarkedAssets)
     {
+        // Ensure project file still exists, just in case the user did something strange...
+        if (!File.Exists(_mainFilePath))
+        {
+            throw new ProjectException($"Main project file no longer exists at \"{_mainFilePath}\"");
+        }
+
         // Export all assets that are marked as such
         foreach (IProjectAsset asset in _assetsMarkedForExport)
         {
@@ -221,7 +252,7 @@ public sealed class ProjectContext
                 }
                 if (attempts > 0 && File.Exists(destinationFile))
                 {
-                    throw new IOException($"Too many naming conflicts for \"{friendlyName}\"");
+                    throw new ProjectException($"Too many naming conflicts for \"{friendlyName}\"");
                 }
             }
 
@@ -291,7 +322,7 @@ public sealed class ProjectContext
         }
 
         return Data.Sprites.ByName(spriteNameOrNull) ??
-            throw new ProjectLoadException($"Failed to find sprite \"{spriteNameOrNull}\" for \"{forAsset.DataName}\"");
+            throw new ProjectException($"Failed to find sprite \"{spriteNameOrNull}\" for \"{forAsset.DataName}\"");
     }
 
     /// <summary>
@@ -306,7 +337,7 @@ public sealed class ProjectContext
         }
 
         return Data.GameObjects.ByName(gameObjectNameOrNull) ??
-            throw new ProjectLoadException($"Failed to find object \"{gameObjectNameOrNull}\" for \"{forAsset.DataName}\"");
+            throw new ProjectException($"Failed to find object \"{gameObjectNameOrNull}\" for \"{forAsset.DataName}\"");
     }
 
     /// <summary>
@@ -317,7 +348,7 @@ public sealed class ProjectContext
     {
         if (string.IsNullOrWhiteSpace(gameObjectNameOrNull))
         {
-            throw new ProjectLoadException($"No object name specified in property of \"{forAsset.DataName}\"");
+            throw new ProjectException($"No object name specified in property of \"{forAsset.DataName}\"");
         }
 
         int index = Data.GameObjects.IndexOfName(gameObjectNameOrNull);
@@ -329,7 +360,7 @@ public sealed class ProjectContext
                 return fallbackIndex;
             }
 
-            throw new ProjectLoadException($"Failed to find object \"{gameObjectNameOrNull}\" for \"{forAsset.DataName}\"");
+            throw new ProjectException($"Failed to find object \"{gameObjectNameOrNull}\" for \"{forAsset.DataName}\"");
         }
         return index;
     }
@@ -346,6 +377,6 @@ public sealed class ProjectContext
         }
 
         return Data.Code.ByName(codeEntryNameOrNull) ??
-            throw new ProjectLoadException($"Failed to find code entry \"{codeEntryNameOrNull}\" for \"{forAsset.DataName}\"");
+            throw new ProjectException($"Failed to find code entry \"{codeEntryNameOrNull}\" for \"{forAsset.DataName}\"");
     }
 }
