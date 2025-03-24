@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>net8.0-windows</TargetFramework>
         <RollForward>LatestMajor</RollForward>
@@ -67,7 +67,7 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="log4net" Version="3.0.3" />
+        <PackageReference Include="log4net" Version="3.0.4" />
         <PackageReference Include="Microsoft-WindowsAPICodePack-Shell">
             <Version>1.1.5</Version>
         </PackageReference>
