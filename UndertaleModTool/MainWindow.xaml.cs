@@ -3819,6 +3819,7 @@ result in loss of work.");
             if (projectName is null)
             {
                 // Name prompt was canceled
+                SetUMTConsoleText("Cancelled new project creation.");
                 return;
             }
             projectName = projectName.Trim();
@@ -3828,6 +3829,7 @@ result in loss of work.");
             if (directory is null)
             {
                 // Directory prompt was canceled
+                SetUMTConsoleText("Cancelled new project creation.");
                 return;
             }
 
@@ -3835,21 +3837,24 @@ result in loss of work.");
             ProjectContext newProjectContext;
             try
             {
-                newProjectContext = new(Data, Path.Combine(directory, "project.json"), projectName);
+                newProjectContext = new(Data, Path.Combine(directory, "project.json"), projectName, (f) => Dispatcher.Invoke(f));
             }
             catch (ProjectException ex)
             {
                 this.ShowError(ex.Message, "Failed to create new project");
+                SetUMTConsoleText("Project creation failed.");
                 return;
             }
             catch (Exception ex)
             {
                 this.ShowError($"Error occurred when creating new project:\n{ex}");
+                SetUMTConsoleText("Project creation failed.");
                 return;
             }
 
             // Start using new project context
             AssignNewProject(newProjectContext);
+            SetUMTConsoleText($"Project \"{projectName}\" created successfully!");
         }
 
         private async void Command_OpenProject(object sender, ExecutedRoutedEventArgs e)
@@ -3878,32 +3883,37 @@ result in loss of work.");
                 ProjectContext newProjectContext = null;
 
                 // Attempt loading project from the specific JSON
-                try
+                IsEnabled = false;
+                await Task.Run(() =>
                 {
-                    newProjectContext = new(Data, dlg.FileName);
-                }
-                catch (ProjectException ex)
-                {
-                    this.ShowError(ex.Message, "Failed to load project");
-                    return;
-                }
-                catch (Exception ex)
-                {
-                    this.ShowError($"Error occurred when loading project:\n{ex}");
-                    return;
-                }
+                    try
+                    {
+                        newProjectContext = new(Data, dlg.FileName, (f) => Dispatcher.Invoke(f));
+                    }
+                    catch (ProjectException ex)
+                    {
+                        this.ShowError(ex.Message, "Failed to load project");
+                    }
+                    catch (Exception ex)
+                    {
+                        this.ShowError($"Error occurred when loading project:\n{ex}");
+                    }
+                });
+                IsEnabled = true;
 
                 // Don't assign new project context if load failed
                 if (newProjectContext is null)
                 {
+                    SetUMTConsoleText("Project failed to open.");
                     return;
                 }
 
                 // Start using new project context
                 AssignNewProject(newProjectContext);
+                SetUMTConsoleText($"Opened project \"{newProjectContext.Name}\".");
             }
         }
-        private void Command_SaveProject(object sender, ExecutedRoutedEventArgs e)
+        private async void Command_SaveProject(object sender, ExecutedRoutedEventArgs e)
         {
             if (Data is null)
             {
@@ -3917,20 +3927,26 @@ result in loss of work.");
             }
 
             // Attempt saving project
-            try
+            IsEnabled = false;
+            bool success = false;
+            await Task.Run(() =>
             {
-                Project.Export(true);
-            }
-            catch (ProjectException ex)
-            {
-                this.ShowError(ex.Message, "Failed to save project");
-                return;
-            }
-            catch (Exception ex)
-            {
-                this.ShowError($"Error occurred when saving project:\n{ex}");
-                return;
-            }
+                try
+                {
+                    Project.Export(true);
+                    success = true;
+                }
+                catch (ProjectException ex)
+                {
+                    this.ShowError(ex.Message, "Failed to save project");
+                }
+                catch (Exception ex)
+                {
+                    this.ShowError($"Error occurred when saving project:\n{ex}");
+                }
+            });
+            IsEnabled = true;
+            SetUMTConsoleText(success ? "Saved project successfully." : "Project failed to save.");
         }
 
         private void Command_ViewProjectAssets(object sender, ExecutedRoutedEventArgs e)
@@ -3991,6 +4007,7 @@ result in loss of work.");
 
             UnloadProject();
             UpdateObjectLabel(Selected);
+            SetUMTConsoleText("Project closed.");
         }
     }
 

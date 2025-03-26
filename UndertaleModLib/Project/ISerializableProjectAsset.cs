@@ -9,6 +9,7 @@ namespace UndertaleModLib.Project;
 /// A project asset that has been converted into a serializable form, to be put on disk.
 /// </summary>
 [JsonDerivedType(typeof(SerializableGameObject), nameof(GameObject))]
+[JsonDerivedType(typeof(SerializablePath), nameof(Path))]
 public interface ISerializableProjectAsset
 {
     /// <summary>
@@ -55,7 +56,8 @@ public interface ISerializableProjectAsset
 /// </remarks>
 public enum SerializableAssetType
 {
-    GameObject
+    GameObject,
+    Path
 }
 
 /// <summary>
@@ -71,6 +73,7 @@ public static class SerializableAssetTypeExtensions
         return assetType switch
         {
             GameObject => "Game Object",
+            Path => "Path",
             _ => throw new NotImplementedException()
         };
     }
@@ -82,6 +85,7 @@ public static class SerializableAssetTypeExtensions
         return assetType switch
         {
             GameObject => "object",
+            Path => "path",
             _ => throw new NotImplementedException()
         };
     }
@@ -94,6 +98,7 @@ public static class SerializableAssetTypeExtensions
         return assetType switch
         {
             GameObject => "objects",
+            Path => "paths",
             _ => throw new NotImplementedException()
         };
     }

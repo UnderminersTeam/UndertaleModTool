@@ -29,6 +29,11 @@ public sealed class ProjectContext
     public event EventHandler UnexportedAssetsChanged;
 
     /// <summary>
+    /// This action should be called when main-thread operations need to occur.
+    /// </summary>
+    internal Action<Action> MainThreadAction { get; set; } = static (f) => f();
+
+    /// <summary>
     /// Current data context associated with this project.
     /// </summary>
     internal UndertaleData Data { get; }
@@ -62,11 +67,20 @@ public sealed class ProjectContext
     /// </summary>
     /// <param name="currentData">Current data context to associate with the project.</param>
     /// <param name="mainFilePath">Main file path for the project.</param>
+    /// <param name="mainThreadAction">
+    /// For operations that should occur on the main thread, this will be 
+    /// called to invoke those operations, if provided. This will stick around
+    /// for the lifetime of the project context.
+    /// </param>
     /// <exception cref="ProjectException">When a project-specific exception occurs</exception>
-    public ProjectContext(UndertaleData currentData, string mainFilePath)
+    public ProjectContext(UndertaleData currentData, string mainFilePath, Action<Action> mainThreadAction = null)
     {
         Data = currentData;
         _mainFilePath = mainFilePath;
+        if (mainThreadAction is not null)
+        {
+            MainThreadAction = mainThreadAction;
+        }
         using (FileStream fs = new(mainFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
         {
             _mainOptions = JsonSerializer.Deserialize<ProjectMainOptions>(fs, JsonOptions);
@@ -120,17 +134,22 @@ public sealed class ProjectContext
             }
         }
 
-        // Perform pre-import on all loaded assets
-        foreach (ISerializableProjectAsset asset in loadedAssets)
-        {
-            asset.PreImport(this);
-        }
+        // TODO: code parsing and texture page generation goes here, in parallel
 
-        // Perform final import on all loaded assets
-        foreach (ISerializableProjectAsset asset in loadedAssets)
+        MainThreadAction(() =>
         {
-            asset.Import(this);
-        }
+            // Perform pre-import on all loaded assets
+            foreach (ISerializableProjectAsset asset in loadedAssets)
+            {
+                asset.PreImport(this);
+            }
+
+            // Perform final import on all loaded assets
+            foreach (ISerializableProjectAsset asset in loadedAssets)
+            {
+                asset.Import(this);
+            }
+        });
     }
 
     /// <summary>
@@ -139,11 +158,20 @@ public sealed class ProjectContext
     /// <param name="currentData">Current data context to associate with the project.</param>
     /// <param name="mainFilePath">Main file path for the project.</param>
     /// <param name="newProjectName">Name of the new project being created.</param>
+    /// <param name="mainThreadAction">
+    /// For operations that should occur on the main thread, this will be 
+    /// called to invoke those operations, if provided. This will stick around
+    /// for the lifetime of the project context.
+    /// </param>
     /// <exception cref="ProjectException">When a project-specific exception occurs</exception>
-    public ProjectContext(UndertaleData currentData, string mainFilePath, string newProjectName)
+    public ProjectContext(UndertaleData currentData, string mainFilePath, string newProjectName, Action<Action> mainThreadAction = null)
     {
         Data = currentData;
         _mainFilePath = mainFilePath;
+        if (mainThreadAction is not null)
+        {
+            MainThreadAction = mainThreadAction;
+        }
         _mainDirectory = Path.GetDirectoryName(mainFilePath);
 
         // If the file already exists, we cannot overwrite it (give a friendly message)
@@ -177,8 +205,11 @@ public sealed class ProjectContext
     {
         if (_assetsMarkedForExport.Add(asset))
         {
-            // Trigger event
-            UnexportedAssetsChanged?.Invoke(this, new());
+            MainThreadAction(() =>
+            {
+                // Trigger event
+                UnexportedAssetsChanged?.Invoke(this, new());
+            });
 
             return true;
         }
@@ -194,8 +225,11 @@ public sealed class ProjectContext
     {
         if (_assetsMarkedForExport.Remove(asset))
         {
-            // Trigger event
-            UnexportedAssetsChanged?.Invoke(this, new());
+            MainThreadAction(() =>
+            {
+                // Trigger event
+                UnexportedAssetsChanged?.Invoke(this, new());
+            });
 
             return true;
         }
@@ -288,8 +322,11 @@ public sealed class ProjectContext
         {
             _assetsMarkedForExport.Clear();
 
-            // Trigger event
-            UnexportedAssetsChanged?.Invoke(this, new());
+            MainThreadAction(() =>
+            {
+                // Trigger event
+                UnexportedAssetsChanged?.Invoke(this, new());
+            });
         }
     }
 

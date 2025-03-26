@@ -98,7 +98,7 @@ internal sealed class SerializableGameObject : ISerializableProjectAsset
     public List<PhysicsVertex> PhysicsVertices { get; set; }
 
     /// <inheritdoc cref="UndertaleGameObject.UndertalePhysicsVertex"/>
-    public class PhysicsVertex
+    public sealed class PhysicsVertex
     {
         /// <inheritdoc cref="UndertaleGameObject.UndertalePhysicsVertex.X"/>
         public float X { get; set; }
@@ -114,7 +114,7 @@ internal sealed class SerializableGameObject : ISerializableProjectAsset
     /// <summary>
     /// Simplified representation of <see cref="UndertaleGameObject.Event"/>, with one action, tied to a single code entry.
     /// </summary>
-    public class GameObjectEvent
+    public sealed class GameObjectEvent
     {
         /// <summary>
         /// Event category.

@@ -1,4 +1,7 @@
 ﻿using System;
+using System.ComponentModel;
+using UndertaleModLib.Project;
+using UndertaleModLib.Project.SerializableAssets;
 
 namespace UndertaleModLib.Models;
 
@@ -6,7 +9,7 @@ namespace UndertaleModLib.Models;
 /// A Path entry in a GameMaker data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertalePath : UndertaleNamedResource, IDisposable
+public class UndertalePath : UndertaleNamedResource, IProjectAsset, INotifyPropertyChanged, IDisposable
 {
     /// <summary>
     /// The name of <see cref="UndertalePath"/>.
@@ -31,15 +34,18 @@ public class UndertalePath : UndertaleNamedResource, IDisposable
     public uint Precision { get; set; } = 4;
 
     /// <summary>
-    /// The amount of <see cref="PathPoint"/>s this <see cref="UndertalePath"/> has.
+    /// The collection of <see cref="PathPoint"/>s this <see cref="UndertalePath"/> has.
     /// </summary>
     public UndertaleSimpleList<PathPoint> Points { get; set; } = new UndertaleSimpleList<PathPoint>();
+
+    /// <inheritdoc />
+    public event PropertyChangedEventHandler PropertyChanged;
 
     /// <summary>
     /// A point in a <see cref="UndertalePath"/>.
     /// </summary>
     [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class PathPoint : UndertaleObject, IStaticChildObjectsSize
+    public class PathPoint : UndertaleObject, INotifyPropertyChanged, IStaticChildObjectsSize
     {
         /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
         public static readonly uint ChildObjectsSize = 12;
@@ -58,6 +64,9 @@ public class UndertalePath : UndertaleNamedResource, IDisposable
         /// A percentage of how fast an <see cref="UndertaleGameObject"/> moves until it hits the next <see cref="PathPoint"/>. <br/>.
         /// </summary>
         public float Speed { get; set; } = 1f;
+
+        /// <inheritdoc />
+        public event PropertyChangedEventHandler PropertyChanged;
 
         /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
@@ -118,4 +127,18 @@ public class UndertalePath : UndertaleNamedResource, IDisposable
         Name = null;
         Points = new();
     }
+
+    /// <inheritdoc/>
+    ISerializableProjectAsset IProjectAsset.GenerateSerializableProjectAsset(ProjectContext projectContext)
+    {
+        SerializablePath serializable = new();
+        serializable.PopulateFromData(projectContext, this);
+        return serializable;
+    }
+
+    /// <inheritdoc/>
+    public string ProjectName { get => Name?.Content ?? "<unknown name>"; }
+
+    /// <inheritdoc/>
+    public SerializableAssetType ProjectAssetType { get => SerializableAssetType.Path; }
 }
