@@ -19,11 +19,13 @@ public interface ISerializableProjectAsset
     /// <summary>
     /// Static asset type for this asset.
     /// </summary>
+    [JsonIgnore]
     public SerializableAssetType AssetType { get; }
 
     /// <summary>
     /// Static boolean for whether this asset type requires an individual directory per each asset.
     /// </summary>
+    [JsonIgnore]
     public bool IndividualDirectory { get; }
 
     /// <summary>
@@ -75,11 +77,23 @@ public static class SerializableAssetTypeExtensions
     /// <summary>
     /// Converts the serializable asset type to its filesystem/directory name representation.
     /// </summary>
-    internal static string ToFilesystemName(this SerializableAssetType assetType)
+    internal static string ToFilesystemNameSingular(this SerializableAssetType assetType)
     {
         return assetType switch
         {
             GameObject => "object",
+            _ => throw new NotImplementedException()
+        };
+    }
+
+    /// <summary>
+    /// Converts the serializable asset type to its filesystem/directory name representation.
+    /// </summary>
+    internal static string ToFilesystemNamePlural(this SerializableAssetType assetType)
+    {
+        return assetType switch
+        {
+            GameObject => "objects",
             _ => throw new NotImplementedException()
         };
     }

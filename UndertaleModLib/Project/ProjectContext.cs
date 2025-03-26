@@ -24,6 +24,11 @@ public sealed class ProjectContext
     public bool HasUnexportedAssets { get => _assetsMarkedForExport.Count > 0; }
 
     /// <summary>
+    /// Event for when any assets are added to or removed from this project context.
+    /// </summary>
+    public event EventHandler UnexportedAssetsChanged;
+
+    /// <summary>
     /// Current data context associated with this project.
     /// </summary>
     internal UndertaleData Data { get; }
@@ -61,6 +66,7 @@ public sealed class ProjectContext
     public ProjectContext(UndertaleData currentData, string mainFilePath)
     {
         Data = currentData;
+        _mainFilePath = mainFilePath;
         using (FileStream fs = new(mainFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
         {
             _mainOptions = JsonSerializer.Deserialize<ProjectMainOptions>(fs, JsonOptions);
@@ -169,7 +175,14 @@ public sealed class ProjectContext
     /// <returns>If the asset was not marked for export previously, returns <see langword="true"/>; <see langword="false"/> otherwise.</returns>
     public bool MarkAssetForExport(IProjectAsset asset)
     {
-        return _assetsMarkedForExport.Add(asset);
+        if (_assetsMarkedForExport.Add(asset))
+        {
+            // Trigger event
+            UnexportedAssetsChanged?.Invoke(this, new());
+
+            return true;
+        }
+        return false;
     }
 
     /// <summary>
@@ -179,7 +192,14 @@ public sealed class ProjectContext
     /// <returns>If the asset was marked for export previously, returns <see langword="true"/>; <see langword="false"/> otherwise.</returns>
     public bool UnmarkAssetForExport(IProjectAsset asset)
     {
-        return _assetsMarkedForExport.Remove(asset);
+        if (_assetsMarkedForExport.Remove(asset))
+        {
+            // Trigger event
+            UnexportedAssetsChanged?.Invoke(this, new());
+
+            return true;
+        }
+        return false;
     }
 
     /// <summary>
@@ -234,12 +254,12 @@ public sealed class ProjectContext
                 if (serializableAsset.IndividualDirectory)
                 {
                     // Asset needs its own directory
-                    destinationFile = Path.Combine(_mainDirectory, serializableAsset.AssetType.ToFilesystemName(), friendlyName, $"{friendlyName}.json");
+                    destinationFile = Path.Combine(_mainDirectory, serializableAsset.AssetType.ToFilesystemNamePlural(), friendlyName, $"{friendlyName}.json");
                 }
                 else
                 {
                     // Asset doesn't need its own directory
-                    destinationFile = Path.Combine(_mainDirectory, serializableAsset.AssetType.ToFilesystemName(), $"{friendlyName}.json");
+                    destinationFile = Path.Combine(_mainDirectory, serializableAsset.AssetType.ToFilesystemNamePlural(), $"{friendlyName}.json");
                 }
 
                 // If file already exists, add a suffix until there is no conflict
@@ -257,7 +277,7 @@ public sealed class ProjectContext
             }
 
             // Ensure directories are created for this asset
-            Directory.CreateDirectory(destinationFile);
+            Directory.CreateDirectory(Path.GetDirectoryName(destinationFile));
 
             // Write out asset to disk
             serializableAsset.Serialize(this, destinationFile);
@@ -267,6 +287,9 @@ public sealed class ProjectContext
         if (clearMarkedAssets)
         {
             _assetsMarkedForExport.Clear();
+
+            // Trigger event
+            UnexportedAssetsChanged?.Invoke(this, new());
         }
     }
 
@@ -278,7 +301,7 @@ public sealed class ProjectContext
         // Ensure not empty/whitespace
         if (string.IsNullOrWhiteSpace(text))
         {
-            return $"unknown_{assetType.ToFilesystemName()}_name";
+            return $"unknown_{assetType.ToFilesystemNameSingular()}_name";
         }
 
         // If length is way too long, it needs to be shortened

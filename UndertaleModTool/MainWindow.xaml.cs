@@ -72,16 +72,17 @@ namespace UndertaleModTool
 
         public string TitleMain { get; set; }
 
-        public static RoutedUICommand CloseTabCommand = new RoutedUICommand("Close current tab", "CloseTab", typeof(MainWindow));
-        public static RoutedUICommand CloseAllTabsCommand = new RoutedUICommand("Close all tabs", "CloseAllTabs", typeof(MainWindow));
-        public static RoutedUICommand RestoreClosedTabCommand = new RoutedUICommand("Restore last closed tab", "RestoreClosedTab", typeof(MainWindow));
-        public static RoutedUICommand SwitchToNextTabCommand = new RoutedUICommand("Switch to the next tab", "SwitchToNextTab", typeof(MainWindow));
-        public static RoutedUICommand SwitchToPrevTabCommand = new RoutedUICommand("Switch to the previous tab", "SwitchToPrevTab", typeof(MainWindow));
-        public static RoutedUICommand SearchInCodeCommand = new("Search in code", "SearchInCode", typeof(MainWindow));
-        public static RoutedUICommand NewProjectCommand = new("New project", "NewProject", typeof(MainWindow));
-        public static RoutedUICommand OpenProjectCommand = new("Open project", "OpenProject", typeof(MainWindow));
-        public static RoutedUICommand SaveProjectCommand = new("Save project", "SaveProject", typeof(MainWindow));
-        public static RoutedUICommand CloseProjectCommand = new("Close project", "CloseProject", typeof(MainWindow));
+        public static readonly RoutedUICommand CloseTabCommand = new RoutedUICommand("Close current tab", "CloseTab", typeof(MainWindow));
+        public static readonly RoutedUICommand CloseAllTabsCommand = new RoutedUICommand("Close all tabs", "CloseAllTabs", typeof(MainWindow));
+        public static readonly RoutedUICommand RestoreClosedTabCommand = new RoutedUICommand("Restore last closed tab", "RestoreClosedTab", typeof(MainWindow));
+        public static readonly RoutedUICommand SwitchToNextTabCommand = new RoutedUICommand("Switch to the next tab", "SwitchToNextTab", typeof(MainWindow));
+        public static readonly RoutedUICommand SwitchToPrevTabCommand = new RoutedUICommand("Switch to the previous tab", "SwitchToPrevTab", typeof(MainWindow));
+        public static readonly RoutedUICommand SearchInCodeCommand = new("Search in code", "SearchInCode", typeof(MainWindow));
+        public static readonly RoutedUICommand NewProjectCommand = new("New project", "NewProject", typeof(MainWindow));
+        public static readonly RoutedUICommand OpenProjectCommand = new("Open project", "OpenProject", typeof(MainWindow));
+        public static readonly RoutedUICommand SaveProjectCommand = new("Save project", "SaveProject", typeof(MainWindow));
+        public static readonly RoutedUICommand ViewProjectAssetsCommand = new("View project assets", "ViewProjectAssets", typeof(MainWindow));
+        public static readonly RoutedUICommand CloseProjectCommand = new("Close project", "CloseProject", typeof(MainWindow));
 
         public ObservableCollection<Tab> Tabs { get; set; } = new();
         public Tab CurrentTab
@@ -115,6 +116,8 @@ namespace UndertaleModTool
 
         private List<(GMImage, WeakReference<BitmapSource>)> _bitmapSourceLookup { get; } = new();
         private object _bitmapSourceLookupLock = new();
+
+        private ProjectAssetsWindow _projectAssetsWindow = null;
 
         public bool CanSave { get; set; }
         public bool CanSafelySave = false;
@@ -301,11 +304,6 @@ namespace UndertaleModTool
                 _bitmapSourceLookup.Add((image, new WeakReference<BitmapSource>(bitmap)));
                 return bitmap;
             }
-        }
-
-        private void SetIDString(string str)
-        {
-            ((Label)this.FindName("ObjectLabel")).Content = str;
         }
 
         // "attr" is actually "DwmWindowAttribute", but I only need the one value from it
@@ -799,6 +797,15 @@ namespace UndertaleModTool
 
         private void Command_Open(object sender, ExecutedRoutedEventArgs e)
         {
+            if (Project is not null)
+            {
+                if (this.ShowQuestionWithCancel("A project is currently open - open another data file and discard all unsaved changes?", MessageBoxImage.Warning, "Project currently open") != MessageBoxResult.Yes)
+                {
+                    // Abort opening new file
+                    return;
+                }
+            }
+
             _ = DoOpenDialog();
         }
 
@@ -824,7 +831,16 @@ namespace UndertaleModTool
 
                 bool save = false;
 
-                if (SettingsWindow.WarnOnClose)
+                if (Project is not null && Project.HasUnexportedAssets)
+                {
+                    MessageBoxResult result = this.ShowQuestionWithCancel("There are assets marked to be exported in the current project. Really quit?");
+
+                    if (result != MessageBoxResult.Yes)
+                    {
+                        return;
+                    }
+                }
+                else if (SettingsWindow.WarnOnClose)
                 {
                     MessageBoxResult result = this.ShowQuestionWithCancel("Save changes before quitting?");
 
@@ -949,6 +965,9 @@ namespace UndertaleModTool
                 CurrentTab = null;
                 Tabs.Clear();
                 ClosedTabsHistory.Clear();
+
+                // Get rid of project
+                UnloadProject();
 
                 // Update GUI and wait for all background processes to finish
                 UpdateLayout();
@@ -3086,17 +3105,68 @@ result in loss of work.");
 
         public void UpdateObjectLabel(object obj)
         {
+            // Try to get index
             int foundIndex = obj is UndertaleResource res ? Data.IndexOf(res, false) : -1;
+
+            // Determine ID
             string idString;
-
             if (foundIndex == -1)
+            {
                 idString = "None";
+            }
             else if (foundIndex == -2)
+            {
                 idString = "N/A";
+            }
             else
-                idString = Convert.ToString(foundIndex);
+            {
+                idString = foundIndex.ToString();
+            }
 
-            SetIDString(idString);
+            // Update main label
+            ObjectLabel.Content = $"ID: {idString}";
+
+            // If this object is a project asset (and we're in an open project), then show/update marked for export status
+            if (Project is not null && obj is IProjectAsset projectAsset)
+            {
+                MarkedForExportGroup.Visibility = Visibility.Visible;
+                MarkedForExportCheckBox.IsChecked = Project.IsAssetMarkedForExport(projectAsset);
+            }
+            else
+            {
+                MarkedForExportGroup.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void MarkedForExport_CheckBoxChanged(object sender, RoutedEventArgs e)
+        {
+            // Ensure we actually have a bool value (could be null)
+            if (MarkedForExportCheckBox.IsChecked is not bool isChecked)
+            {
+                return;
+            }
+
+            // Ensure we're actually in a project
+            if (Project is null)
+            {
+                return;
+            }
+
+            // Ensure our current object is actually a project asset
+            if (Selected is not IProjectAsset projectAsset)
+            {
+                return;
+            }
+
+            // Change state in the project
+            if (isChecked)
+            {
+                Project.MarkAssetForExport(projectAsset);
+            }
+            else
+            {
+                Project.UnmarkAssetForExport(projectAsset);
+            }
         }
 
         public void HighlightObject(object obj, bool silent = true)
@@ -3709,6 +3779,25 @@ result in loss of work.");
             return false;
         }
 
+        private void UnloadProject()
+        {
+            Project = null;
+            _projectAssetsWindow?.Close();
+            _projectAssetsWindow = null;
+        }
+
+        private void AssignNewProject(ProjectContext project)
+        {
+            UnloadProject();
+
+            Project = project;
+            project.UnexportedAssetsChanged += (sender, args) =>
+            {
+                UpdateObjectLabel(Selected);
+            };
+            UpdateObjectLabel(Selected);
+        }
+
         private void Command_NewProject(object sender, ExecutedRoutedEventArgs e)
         {
             if (Data is null)
@@ -3716,9 +3805,9 @@ result in loss of work.");
                 // No data set; this should be impossible, but abort if this does occur
                 return;
             }
-            if (Project is not null)
+            if (Project is not null && Project.HasUnexportedAssets)
             {
-                if (this.ShowQuestionWithCancel("A project is currently open - create a new project and discard all unsaved changes?", MessageBoxImage.Warning, "Project already open") != MessageBoxResult.Yes)
+                if (this.ShowQuestionWithCancel("There are assets marked to be exported in the current project - create a new project and discard all unexported changes?", MessageBoxImage.Warning, "Project already open") != MessageBoxResult.Yes)
                 {
                     // Abort new project creation
                     return;
@@ -3760,7 +3849,7 @@ result in loss of work.");
             }
 
             // Start using new project context
-            Project = newProjectContext;
+            AssignNewProject(newProjectContext);
         }
 
         private async void Command_OpenProject(object sender, ExecutedRoutedEventArgs e)
@@ -3770,9 +3859,9 @@ result in loss of work.");
                 // No data set; this should be impossible, but abort if this does occur
                 return;
             }
-            if (Project is not null)
+            if (Project is not null && Project.HasUnexportedAssets)
             {
-                if (this.ShowQuestionWithCancel("A project is currently open - open another project and discard all unsaved changes?", MessageBoxImage.Warning, "Project already open") != MessageBoxResult.Yes)
+                if (this.ShowQuestionWithCancel("There are assets marked to be exported in the current project - open another new project and discard all unexported changes?", MessageBoxImage.Warning, "Project already open") != MessageBoxResult.Yes)
                 {
                     // Abort opening project
                     return;
@@ -3789,24 +3878,20 @@ result in loss of work.");
                 ProjectContext newProjectContext = null;
 
                 // Attempt loading project from the specific JSON
-                // TODO: make sure that you can't do anything while this load occurs, without becoming unresponsive
-                await Task.Run(() =>
+                try
                 {
-                    try
-                    {
-                        newProjectContext = new(Data, dlg.FileName);
-                    }
-                    catch (ProjectException ex)
-                    {
-                        this.ShowError(ex.Message, "Failed to load project");
-                        return;
-                    }
-                    catch (Exception ex)
-                    {
-                        this.ShowError($"Error occurred when loading project:\n{ex}");
-                        return;
-                    }
-                });
+                    newProjectContext = new(Data, dlg.FileName);
+                }
+                catch (ProjectException ex)
+                {
+                    this.ShowError(ex.Message, "Failed to load project");
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    this.ShowError($"Error occurred when loading project:\n{ex}");
+                    return;
+                }
 
                 // Don't assign new project context if load failed
                 if (newProjectContext is null)
@@ -3815,10 +3900,9 @@ result in loss of work.");
                 }
 
                 // Start using new project context
-                Project = newProjectContext;
+                AssignNewProject(newProjectContext);
             }
         }
-
         private void Command_SaveProject(object sender, ExecutedRoutedEventArgs e)
         {
             if (Data is null)
@@ -3832,12 +3916,53 @@ result in loss of work.");
                 return;
             }
 
+            // Attempt saving project
+            try
+            {
+                Project.Export(true);
+            }
+            catch (ProjectException ex)
+            {
+                this.ShowError(ex.Message, "Failed to save project");
+                return;
+            }
+            catch (Exception ex)
+            {
+                this.ShowError($"Error occurred when saving project:\n{ex}");
+                return;
+            }
+        }
+
+        private void Command_ViewProjectAssets(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (Data is null)
+            {
+                // No data set; this should be impossible, but abort if this does occur
+                return;
+            }
+            if (Project is null)
+            {
+                // No project set; this should also be impossible
+                return;
+            }
+
+            // Focus existing window if already there...
+            if (_projectAssetsWindow is not null)
+            {
+                _projectAssetsWindow.Focus();
+                return;
+            }
+
             // Open project save window to handle the rest
-            ProjectSaveWindow projectSaveWindow = new()
+            _projectAssetsWindow = new()
             {
                 Owner = this
             };
-            projectSaveWindow.ShowDialog();
+            _projectAssetsWindow.Closed += (sender, args) =>
+            {
+                _projectAssetsWindow = null;
+            };
+            _projectAssetsWindow.Show();
         }
 
         private void Command_CloseProject(object sender, ExecutedRoutedEventArgs e)
@@ -3847,6 +3972,25 @@ result in loss of work.");
                 // No data set; this should be impossible, but abort if this does occur
                 return;
             }
+            if (Project is null)
+            {
+                // No project set; this should also be impossible
+                return;
+            }
+
+            // Ensure user really wants to do this
+            if (Project is not null && Project.HasUnexportedAssets)
+            {
+                MessageBoxResult result = this.ShowQuestionWithCancel("There are assets marked to be exported in the current project. Really close?");
+
+                if (result != MessageBoxResult.Yes)
+                {
+                    return;
+                }
+            }
+
+            UnloadProject();
+            UpdateObjectLabel(Selected);
         }
     }
 

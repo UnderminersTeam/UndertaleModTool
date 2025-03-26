@@ -17,9 +17,11 @@ internal sealed class SerializableGameObject : ISerializableProjectAsset
     public string DataName { get; set; }
 
     /// <inheritdoc/>
+    [JsonIgnore]
     public SerializableAssetType AssetType => SerializableAssetType.GameObject;
 
     /// <inheritdoc/>
+    [JsonIgnore]
     public bool IndividualDirectory => false;
 
     /// <summary>
@@ -201,7 +203,7 @@ internal sealed class SerializableGameObject : ISerializableProjectAsset
     public void Serialize(ProjectContext projectContext, string destinationFile)
     {
         using FileStream fs = new(destinationFile, FileMode.Create);
-        JsonSerializer.Serialize(fs, this, ProjectContext.JsonOptions);
+        JsonSerializer.Serialize<ISerializableProjectAsset>(fs, this, ProjectContext.JsonOptions);
     }
 
     /// <inheritdoc/>

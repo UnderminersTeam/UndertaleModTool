@@ -275,7 +275,6 @@
                                 AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True"
                                 HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray"
                                 HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
-                                Loaded="DataGrid_PhysicsVertices_Loaded" Unloaded="DataGrid_PhysicsVertices_Unloaded"
                                 ScrollViewer.CanContentScroll="False" PreviewMouseWheel="HandlePreviewMouseWheel">
                 <DataGrid.Resources>
                     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>

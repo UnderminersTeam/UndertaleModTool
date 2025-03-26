@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.VisualBasic;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -43,6 +44,10 @@ namespace UndertaleModTool
             if (DataContext is UndertaleGameObject oldObj)
             {
                 oldObj.PropertyChanged -= OnPropertyChanged;
+                if (oldObj.PhysicsVertices is UndertaleObservableList<UndertaleGameObject.UndertalePhysicsVertex> vertices)
+                {
+                    vertices.CollectionChanged -= DataGrid_CollectionChanged;
+                }
             }
         }
 
@@ -51,10 +56,18 @@ namespace UndertaleModTool
             if (e.OldValue is UndertaleGameObject oldObj)
             {
                 oldObj.PropertyChanged -= OnPropertyChanged;
+                if (oldObj.PhysicsVertices is UndertaleObservableList<UndertaleGameObject.UndertalePhysicsVertex> vertices)
+                {
+                    vertices.CollectionChanged -= DataGrid_CollectionChanged;
+                }
             }
             if (e.NewValue is UndertaleGameObject newObj)
             {
                 newObj.PropertyChanged += OnPropertyChanged;
+                if (newObj.PhysicsVertices is UndertaleObservableList<UndertaleGameObject.UndertalePhysicsVertex> vertices)
+                {
+                    vertices.CollectionChanged += DataGrid_CollectionChanged;
+                }
             }
         }
 
@@ -73,7 +86,7 @@ namespace UndertaleModTool
             {
                 Dispatcher.BeginInvoke(() =>
                 {
-                    mainWindow.ShowMessage("Test!");
+                    mainWindow.Project?.MarkAssetForExport(obj);
                 });
             }
         }
@@ -119,26 +132,6 @@ namespace UndertaleModTool
         {
             // Detach to collection changed events
             if (sender is not DataGrid dg || dg.ItemsSource is not ObservableCollection<UndertaleGameObject.EventAction> collection)
-            {
-                return;
-            }
-            collection.CollectionChanged -= DataGrid_CollectionChanged;
-        }
-
-        private void DataGrid_PhysicsVertices_Loaded(object sender, RoutedEventArgs e)
-        {
-            // Attach to collection changed events
-            if (sender is not DataGrid dg || dg.ItemsSource is not ObservableCollection<UndertaleGameObject.UndertalePhysicsVertex> collection)
-            {
-                return;
-            }
-            collection.CollectionChanged += DataGrid_CollectionChanged;
-        }
-
-        private void DataGrid_PhysicsVertices_Unloaded(object sender, RoutedEventArgs e)
-        {
-            // Detach to collection changed events
-            if (sender is not DataGrid dg || dg.ItemsSource is not ObservableCollection<UndertaleGameObject.UndertalePhysicsVertex> collection)
             {
                 return;
             }

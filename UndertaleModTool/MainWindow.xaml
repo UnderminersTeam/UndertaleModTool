@@ -52,6 +52,7 @@
         <CommandBinding Command="{x:Static local:MainWindow.NewProjectCommand}" Executed="Command_NewProject" />
         <CommandBinding Command="{x:Static local:MainWindow.OpenProjectCommand}" Executed="Command_OpenProject" />
         <CommandBinding Command="{x:Static local:MainWindow.SaveProjectCommand}" Executed="Command_SaveProject" />
+        <CommandBinding Command="{x:Static local:MainWindow.ViewProjectAssetsCommand}" Executed="Command_ViewProjectAssets" />
         <CommandBinding Command="{x:Static local:MainWindow.CloseProjectCommand}" Executed="Command_CloseProject" />
     </Window.CommandBindings>
     <Window.InputBindings>
@@ -154,6 +155,17 @@
                             </Style>
                         </MenuItem.Style>
                     </MenuItem>
+                    <MenuItem Header="_View unexported assets" Command="{x:Static local:MainWindow.ViewProjectAssetsCommand}">
+                        <MenuItem.Style>
+                            <Style TargetType="{x:Type MenuItem}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Project, Mode=OneWay}" Value="{x:Null}">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </MenuItem.Style>
+                    </MenuItem>
                     <MenuItem Header="_Close project" Command="{x:Static local:MainWindow.CloseProjectCommand}">
                         <MenuItem.Style>
                             <Style TargetType="{x:Type MenuItem}">
@@ -171,11 +183,29 @@
                     <MenuItem Header="_About" Click="MenuItem_About_Click"/>
                 </local:MenuItemDark>
             </Menu>
-            <Grid DockPanel.Dock="Bottom">
-                <local:TextBoxDark x:Name="CommandBox" AcceptsReturn="True" PreviewKeyDown="CommandBox_PreviewKeyDown" Margin="0,0,35,0"/>
-                <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" VerticalContentAlignment="Top" Name="ObjectLabel"
-                       ToolTip="This is an ID (index) of the currently open asset, item, or object. It starts from 0."
-                       ToolTipService.InitialShowDelay="200"/>
+            <Grid DockPanel.Dock="Bottom" Margin="5,5,5,5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <local:TextBoxDark Margin="0,0,15,0" Grid.Column="0" x:Name="CommandBox" AcceptsReturn="True" PreviewKeyDown="CommandBox_PreviewKeyDown"/>
+                <Grid Name="MarkedForExportGroup" Visibility="Collapsed" Grid.Column="1" 
+                       ToolTip="Whether the currently open asset is marked to be exported to the currently open project, the next time it is saved."
+                       ToolTipService.InitialShowDelay="200" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Content="Marked for export:" VerticalAlignment="Top" VerticalContentAlignment="Top"/>
+                    <CheckBox Name="MarkedForExportCheckBox" Grid.Column="1" Margin="5,5,20,5" Visibility="Visible" 
+                              Checked="MarkedForExport_CheckBoxChanged" Unchecked="MarkedForExport_CheckBoxChanged"
+                              VerticalAlignment="Top" VerticalContentAlignment="Top"></CheckBox>
+                </Grid>
+                <Label Grid.Column="2" 
+                        ToolTip="This is an ID (index) of the currently open asset, item, or object. It starts from 0."
+                        ToolTipService.InitialShowDelay="200"
+                        Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" VerticalContentAlignment="Top" Name="ObjectLabel"/>
             </Grid>
             <Grid>
                 <Grid.RowDefinitions>
