@@ -34,7 +34,7 @@ public class StringTest
     [InlineData(null, null, false)]
     [InlineData("hi", null, false)]
     [InlineData(null, "null", false)]
-    public void TestSearchMatches(string text, string substring, bool expected)
+    public void TestSearchMatches(string? text, string? substring, bool expected)
     {
         UndertaleString utString = new UndertaleString(text);
 
@@ -72,5 +72,54 @@ public class StringTest
         utString.Unserialize(reader);
         
         Assert.Equal(utString.Content, expected);
+    }
+
+    [Fact]
+    public void TestToStringWithNull()
+    {
+        var s = new UndertaleString();
+        var result = s.ToString();
+        Assert.Equal("\"null\"", result);
+    }
+
+    [Theory]
+    [InlineData("", "\"\"")]
+    [InlineData("\"", "\"\\\"\"")]
+    [InlineData("Hi", "\"Hi\"")]
+    [InlineData("This is a string", "\"This is a string\"")]
+    [InlineData("\"A quote\"", "\"\\\"A quote\\\"\"")]
+    [InlineData("This string has \"quotes\"", "\"This string has \\\"quotes\\\"\"")]
+    [InlineData("This string has \n newline", "\"This string has \\n newline\"")]
+    [InlineData("This string has \r also newline", "\"This string has \\r also newline\"")]
+    [InlineData("This string has \\ backslashes", "\"This string has \\\\ backslashes\"")]
+    [InlineData("This \"string\" has \n all \r kinds of \\ stuff", "\"This \\\"string\\\" has \\n all \\r kinds of \\\\ stuff\"")]
+    [InlineData("Some cool characters: { } = () %$! ß? ´'`@", "\"Some cool characters: { } = () %$! ß? ´'`@\"")]
+    public void TestToStringWithGMS2(string content, string expected)
+    {
+        var s = new UndertaleString(content);
+        var result = s.ToString(true);
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
+    [InlineData("", "\"\"")]
+    [InlineData("\"", "'\"'")]
+    [InlineData("\"This starts with quotes", "'\"' + \"This starts with quotes\"")]
+    [InlineData("This ends with quotes\"", "\"This ends with quotes\" + '\"'")]
+    [InlineData("\"This has quotes in start and end\"", "'\"' + \"This has quotes in start and end\" + '\"'")]
+    [InlineData("This has quotes \" in middle", "\"This has quotes \" + '\"' + \" in middle\"")]
+    [InlineData("\"This starts and has \" quotes in middle", "'\"' + \"This starts and has \" + '\"' + \" quotes in middle\"")]
+    [InlineData("This ends and has \" quotes in middle\"", "\"This ends and has \" + '\"' + \" quotes in middle\" + '\"'")]
+    [InlineData("\"This starts, has \" quotes in middle and ends\"", "'\"' + \"This starts, has \" + '\"' + \" quotes in middle and ends\" + '\"'")]
+    [InlineData("Hi", "\"Hi\"")]
+    [InlineData("This is a string", "\"This is a string\"")]
+    [InlineData("This string has \n newline", "\"This string has \n newline\"")]
+    [InlineData("This \"string\" has \n all \r kinds of \\ stuff", "\"This \" + '\"' + \"string\" + '\"' + \" has \n all \r kinds of \\ stuff\"")]
+    [InlineData("Some cool characters: { } = () %$! ß? ´'`@", "\"Some cool characters: { } = () %$! ß? ´'`@\"")]
+    public void TestToStringWithGMS1(string content, string expected)
+    {
+        var s = new UndertaleString(content);
+        var result = s.ToString(false);
+        Assert.Equal(expected, result);
     }
 }

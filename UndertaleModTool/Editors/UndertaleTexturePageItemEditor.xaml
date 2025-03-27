@@ -7,6 +7,13 @@
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleTexturePageItem}">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Controls/TransparencyGridBrush.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
@@ -68,18 +75,7 @@
                           Click="FindReferencesButton_Click">Find all references to this page item</local:ButtonDark>
 
         <Viewbox Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Stretch="Uniform" StretchDirection="DownOnly" Margin="3">
-            <Border>
-                <Border.Background>
-                    <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
-                        <DrawingBrush.Drawing>
-                            <DrawingGroup>
-                                <GeometryDrawing Geometry="M0,0 L20,0 20,20, 0,20Z" Brush="White"/>
-                                <GeometryDrawing Geometry="M0,10 L20,10 20,20, 10,20 10,0 0,0Z" Brush="LightGray"/>
-                            </DrawingGroup>
-                        </DrawingBrush.Drawing>
-                    </DrawingBrush>
-                </Border.Background>
-                
+            <Border Background="{StaticResource TransparencyGridBrushBrush}">
                 <local:UndertaleTexturePageItemDisplay x:Name="ItemDisplay"/>
             </Border>
         </Viewbox>
@@ -97,28 +93,17 @@
 
         <Viewbox Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Stretch="Uniform" StretchDirection="DownOnly"
                  SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
-            <Grid>
+            <Grid Background="{StaticResource TransparencyGridBrushBrush}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                
-                <Grid.Background>
-                    <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
-                        <DrawingBrush.Drawing>
-                            <DrawingGroup>
-                                <GeometryDrawing Geometry="M0,0 L20,0 20,20, 0,20Z" Brush="White"/>
-                                <GeometryDrawing Geometry="M0,10 L20,10 20,20, 10,20 10,0 0,0Z" Brush="LightGray"/>
-                            </DrawingGroup>
-                        </DrawingBrush.Drawing>
-                    </DrawingBrush>
-                </Grid.Background>
 
-                <Image Grid.Row="0" Grid.Column="1" Source="{Binding TexturePage.TextureData.TextureBlob, Mode=OneWay}" Opacity="0.2"/>
+                <Image Grid.Row="0" Grid.Column="1" Name="ItemTextureBGImage" Opacity="0.2"/>
 
-                <Image Grid.Row="0" Grid.Column="1" Source="{Binding TexturePage.TextureData.TextureBlob, Mode=OneWay}">
+                <Image Grid.Row="0" Grid.Column="1" Name="ItemTextureImage">
                     <Image.Clip>
                         <RectangleGeometry>
                             <RectangleGeometry.Rect>

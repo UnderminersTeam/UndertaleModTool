@@ -1,30 +1,33 @@
 // Adds room ID and name display under the debug mode timer display
-
 EnsureDataLoaded();
-
-if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
-{
-    ScriptError("Error 0: Incompatible with the new Deltarune Chapter 1 & 2 demo");
-    return;
-}
-else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1&2")
-{
-    ScriptError("Error 1: Incompatible with the new Deltarune Chapter 1 & 2 demo");
-    return;
-}
-
-ScriptMessage("Show room name and ID in debug mode\nby krzys_h, Kneesnap");
-
+ScriptMessage("Show room name and ID in debug mode\nby krzys_h, Kneesnap\n");
 Data.Functions.EnsureDefined("room_get_name", Data.Strings); // required for Deltarune
+string displayName = Data?.GeneralInfo?.DisplayName?.Content.ToLower();
+bool isDeltarune = displayName.StartsWith("deltarune chapter");
 
-var gml_Object_obj_time_Draw_64 = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data.Strings, Data.Code, Data.CodeLocals);
-gml_Object_obj_time_Draw_64.AppendGML(@"
-if (global.debug)
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+var gml_Object_obj_time_Draw_64 = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data);
+if (isDeltarune)
 {
-    draw_set_color(0xFFFF);
-    draw_text(10, 30, room);
-    draw_text(50, 30, room_get_name(room));
-}", Data);
+    importGroup.QueueAppend(gml_Object_obj_time_Draw_64, @"
+    if (scr_debug())
+    {
+        draw_set_color(c_yellow);
+        draw_text(10, 30, room);
+        draw_text(50, 30, room_get_name(room));
+    }");
+}
+else
+{
+    importGroup.QueueAppend(gml_Object_obj_time_Draw_64, @"
+    if (global.debug)
+    {
+        draw_set_color(c_yellow);
+        draw_text(10, 30, room);
+        draw_text(50, 30, room_get_name(room));
+    }");
+}
+importGroup.Import();
 
 ChangeSelection(gml_Object_obj_time_Draw_64);
 ScriptMessage("Patched!");

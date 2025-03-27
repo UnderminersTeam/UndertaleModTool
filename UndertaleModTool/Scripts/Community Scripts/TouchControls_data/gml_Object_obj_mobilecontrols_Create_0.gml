@@ -1,13 +1,5 @@
-if (string_lower(game_display_name) == "undertale")
-{
-    settings_font = fnt_main
-    settings_num_x = 477
-}
-else
-{
-    settings_font = fnt_mainbig
-    settings_num_x = 502
-}
+settings_font = {_font}
+settings_num_x = {_settingsnumx}
 zx = 510
 zy = 340
 xx = 560
@@ -47,4 +39,18 @@ if file_exists("touchconfig.ini")
     controls_opacity = ini_read_real("CONFIG", "controls_opacity", controls_opacity)
     ini_close()
 }
-
+virtual_key_zp = virtual_key_add(0, 0, 0, 0, 1)
+virtual_key_xp = virtual_key_add(0, 0, 0, 0, 2)
+virtual_key_cp = virtual_key_add(0, 0, 0, 0, 3)
+virtual_key_analogp = virtual_key_add(0, 0, 0, 0, 4)
+virtual_key_settings = virtual_key_add(0, 0, 0, 0, 5)
+virtual_key_z = virtual_key_add(0, 0, 0, 0, 6)
+virtual_key_x = virtual_key_add(0, 0, 0, 0, 7)
+virtual_key_c = virtual_key_add(0, 0, 0, 0, 8)
+virtual_key_up = virtual_key_add(0, 0, 0, 0, 9)
+virtual_key_right = virtual_key_add(0, 0, 0, 0, 10)
+virtual_key_left = virtual_key_add(0, 0, 0, 0, 11)
+virtual_key_down = virtual_key_add(0, 0, 0, 0, 12)
+virtual_key_analog = virtual_key_add(0, 0, 0, 0, 13)
+latestGuiH = display_get_gui_height()
+latestGuiW = display_get_gui_width()

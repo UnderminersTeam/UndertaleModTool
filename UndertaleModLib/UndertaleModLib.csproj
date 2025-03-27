@@ -1,17 +1,20 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>11</LangVersion>
     <OutputType>Library</OutputType>
     <!-- AssemblyInfo -->
     <AssemblyTitle>UndertaleModLib</AssemblyTitle>
     <ProductName>UndertaleModLib</ProductName>
-    <Copyright>Copyright ©  2018-2023, licensed under GPLv3</Copyright>
-    <AssemblyVersion>0.5.1.0</AssemblyVersion>
-    <FileVersion>0.5.1.0</FileVersion>
+    <Copyright>Copyright ©  2018-2025, licensed under GPLv3</Copyright>
+    <AssemblyVersion>0.7.0.0</AssemblyVersion>
+    <FileVersion>0.7.0.0</FileVersion>
     <DebugType>embedded</DebugType>
     <Platforms>AnyCPU;x64</Platforms>
     <RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NeutralLanguage>en</NeutralLanguage>
+    <ResourceLanguages>en</ResourceLanguages>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <!-- Suppress all missing XML comment warnings -->
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
@@ -21,21 +24,61 @@
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Fody" Version="6.5.1">
+    <PackageReference Include="Fody" Version="6.9.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="14.5.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="PropertyChanged.Fody" Version="3.3.3" />
-    <PackageReference Include="SharpZipLib" Version="1.3.3" />
-    <PackageReference Include="System.Drawing.Common" Version="5.0.3" />
+    <PackageReference Include="PropertyChanged.Fody" Version="4.1.0" />
+    <PackageReference Include="SharpZipLib" Version="1.4.2" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="GameSpecificData\Definitions\deltarune.json" />
+    <None Remove="GameSpecificData\Definitions\gamemaker.json" />
+    <None Remove="GameSpecificData\Definitions\undertale.json" />
+    <None Remove="GameSpecificData\deltarune.json" />
+    <None Remove="GameSpecificData\empty.json" />
+    <None Remove="GameSpecificData\gamemaker.json" />
+    <None Remove="GameSpecificData\README.txt" />
+    <None Remove="GameSpecificData\undertale.json" />
     <None Remove="version.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="gitversion.txt" />
+    <Content Include="GameSpecificData\README.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GameSpecificData\Underanalyzer\deltarune.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GameSpecificData\Underanalyzer\template.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GameSpecificData\Underanalyzer\gamemaker.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GameSpecificData\Underanalyzer\undertale.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GameSpecificData\Definitions\deltarune.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GameSpecificData\Definitions\gamemaker.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GameSpecificData\Definitions\undertale.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <EmbeddedResource Include="gitversion.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Underanalyzer\Underanalyzer\Underanalyzer.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+       <_Parameter1>UndertaleModLibTests</_Parameter1>
+    </AssemblyAttribute>
   </ItemGroup>
   <!--A prebuild responsible for creating a git commit name and branch name -->
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
@@ -44,7 +87,7 @@
 
     <!--If on Windows check if git is in PATH-->
     <Exec Condition="$([MSBuild]::IsOsPlatform('Windows'))" Command="where /q git" IgnoreExitCode="true">
-      <Output TaskParameter="ExitCode" PropertyName="ErrorCode"/>
+      <Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
     </Exec>
     <PropertyGroup>
       <!--Assign the location of git to GitPath. By default it's "git", if the above PATH checked failed, it'll get set to the git path in VS -->
@@ -52,6 +95,6 @@
       <GitPath Condition="'$(ErrorCode)'=='1'">$(DevEnvDir)\CommonExtensions\Microsoft\TeamFoundation\Team Explorer\Git\cmd\git</GitPath>
     </PropertyGroup>
     <!-- Use GitPath and put the git commit name and branch name into gitversion.txt which is an embedded resource-->
-    <Exec Command="( &quot;$(GitPath)&quot; describe --always --dirty &amp;&amp; &quot;$(GitPath)&quot; rev-parse --abbrev-ref HEAD ) &gt; &quot;$(ProjectDir)/gitversion.txt&quot;" IgnoreExitCode="true"/>
+    <Exec Command="( &quot;$(GitPath)&quot; describe --always --dirty &amp;&amp; &quot;$(GitPath)&quot; rev-parse --abbrev-ref HEAD ) &gt; &quot;$(ProjectDir)/gitversion.txt&quot;" IgnoreExitCode="true" />
   </Target>
 </Project>

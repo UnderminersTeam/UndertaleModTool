@@ -6,14 +6,7 @@ using System.Threading.Tasks;
 
 EnsureDataLoaded();
 
-if (Data.ToolInfo.ProfileMode)
-{
-    ScriptMessage("This script is incompatible with profile mode.");
-    return;
-}
-
 string codeFolder = GetFolder(FilePath) + "Export_Assembly2" + Path.DirectorySeparatorChar;
-ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
 
 if (Directory.Exists(codeFolder))
 {
@@ -53,7 +46,7 @@ void DumpCode()
     foreach (UndertaleCode code_orig in Data.Code)
     {
         code_orig.Offset = 0;
-        if (Data.CodeLocals.ByName(code_orig.Name.Content) == null)
+        if (Data.CodeLocals is not null && Data.CodeLocals.ByName(code_orig.Name.Content) == null)
         {
             UndertaleCodeLocals locals = new UndertaleCodeLocals();
             locals.Name = code_orig.Name;
@@ -91,7 +84,7 @@ void DumpCode()
             string x = "";
             try
             {
-                string disasm_code = code_orig.Disassemble(Data.Variables, Data.CodeLocals.For(code_orig));
+                string disasm_code = code_orig.Disassemble(Data.Variables, Data.CodeLocals?.For(code_orig));
                 //ScriptMessage(code_orig.Name.Content);
                 //ScriptMessage("1 " + disasm_code);
                 int ix = -1;
@@ -121,7 +114,7 @@ void DumpCode()
                 string str_path_to_use = Path.Combine(codeFolder, code_orig.Name.Content + ".asm");
                 string code_output = "";
                 if (code_orig != null)
-                    code_output = code_orig.Disassemble(Data.Variables, Data.CodeLocals.For(code_orig));
+                    code_output = code_orig.Disassemble(Data.Variables, Data.CodeLocals?.For(code_orig));
                 File.WriteAllText(str_path_to_use, code_output);
             }
             catch (Exception e)
@@ -145,7 +138,7 @@ void DumpCode()
                 string str_path_to_use = Path.Combine(codeFolder, "Duplicates", code_orig.Name.Content + ".asm");
                 string code_output = "";
                 if (code_orig != null)
-                    code_output = code_orig.Disassemble(Data.Variables, Data.CodeLocals.For(code_orig));
+                    code_output = code_orig.Disassemble(Data.Variables, Data.CodeLocals?.For(code_orig));
                 File.WriteAllText(str_path_to_use, code_output);
             }
             catch (Exception e)
