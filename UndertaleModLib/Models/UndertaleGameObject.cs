@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using PropertyChanged.SourceGenerator;
 
 namespace UndertaleModLib.Models;
 
@@ -29,18 +30,18 @@ public enum CollisionShapeFlags : uint
 /// <summary>
 /// A game object in a data file.
 /// </summary>
-public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChanged, IDisposable
+public partial class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChanged, IDisposable
 {
-    public UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _sprite = new();
-    public UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _parentId = new();
-    public UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _textureMaskId = new();
+    private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _sprite = new();
+    private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _parentId = new();
+    private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _textureMaskId = new();
 
     public static readonly int EventTypeCount = Enum.GetValues(typeof(EventType)).Length;
 
     /// <summary>
     /// The name of the game object.
     /// </summary>
-    public UndertaleString Name { get; set; }
+    [Notify("Name")] private UndertaleString _name;
 
     /// <summary>
     /// The sprite this game object uses.
@@ -50,25 +51,28 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// <summary>
     /// Whether the game object is visible.
     /// </summary>
-    public bool Visible { get; set; } = true;
+    [Notify("Visible")] private bool _visible = true;
 
-    // TODO: This summary
-    public bool Managed { get; set; }
+    /// <summary>
+    /// Whether the game object is "managed," as used in a rollback multiplayer experiment that was
+    /// eventually discontinued on the GMS2 runtime.
+    /// </summary>
+    [Notify("Managed")] private bool _managed;
 
     /// <summary>
     /// Whether the game object is solid.
     /// </summary>
-    public bool Solid { get; set; }
+    [Notify("Solid")] private bool _solid;
 
     /// <summary>
     /// The depth level of the game object.
     /// </summary>
-    public int Depth { get; set; }
+    [Notify("Depth")] private int _depth;
 
     /// <summary>
     /// Whether the game object is persistent.
     /// </summary>
-    public bool Persistent { get; set; }
+    [Notify("Persistent")] private bool _persistent;
 
     /// <summary>
     /// The parent game object this is inheriting from.
@@ -84,69 +88,69 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// <summary>
     /// Whether this object uses Game Maker physics.
     /// </summary>
-    public bool UsesPhysics { get; set; }
+    [Notify("UsesPhysics")] private bool _usesPhysics;
 
     /// <summary>
     /// Whether this game object should act as a sensor fixture.
     /// </summary>
-    public bool IsSensor { get; set; }
+    [Notify("IsSensor")] private bool _isSensor;
 
     /// <summary>
     /// The collision shape the game object should use.
     /// </summary>
-    public CollisionShapeFlags CollisionShape { get; set; } = CollisionShapeFlags.Circle;
+    [Notify("CollisionShape")] private CollisionShapeFlags _collisionShape = CollisionShapeFlags.Circle;
 
     /// <summary>
     /// The physics density of the game object.
     /// </summary>
-    public float Density { get; set; } = 0.5f;
+    [Notify("Density")] private float _density = 0.5f;
 
     /// <summary>
     /// The physics restitution of the game object.
     /// </summary>
-    public float Restitution { get; set; } = 0.1f;
+    [Notify("Restitution")] private float _restitution = 0.1f;
 
     /// <summary>
     /// The physics collision group this game object belongs to.
     /// </summary>
-    public uint Group { get; set; }
+    [Notify("Group")] private uint _group;
 
     /// <summary>
     /// The physics linear damping this game object uses.
     /// </summary>
-    public float LinearDamping { get; set; } = 0.1f;
+    [Notify("LinearDamping")] private float _linearDamping = 0.1f;
 
     /// <summary>
     /// The physics angular damping this game object uses.
     /// </summary>
-    public float AngularDamping { get; set; } = 0.1f;
+    [Notify("AngularDamping")] private float _angularDamping = 0.1f;
 
     /// <summary>
     /// The physics friction this game object uses.
     /// </summary>
-    public float Friction { get; set; } = 0.2f;
+    [Notify("Friction")] private float _friction = 0.2f;
 
     /// <summary>
     /// Whether this game object should start awake in the physics simulation.
     /// </summary>
-    public bool Awake { get; set; }
+    [Notify("Awake")] private bool _awake;
 
     /// <summary>
     /// Whether this game object is kinematic.
     /// </summary>
-    public bool Kinematic { get; set; }
+    [Notify("Kinematic")] private bool _kinematic;
 
     /// <summary>
     /// The vertices used for a <see cref="CollisionShape"/> of type <see cref="CollisionShapeFlags.Custom"/>.
     /// </summary>
-    public List<UndertalePhysicsVertex> PhysicsVertices { get; set; } = new List<UndertalePhysicsVertex>();
+    [Notify("PhysicsVertices")] private UndertaleObservableList<UndertalePhysicsVertex> _physicsVertices = new();
 
     #endregion
 
     /// <summary>
     /// All the events that this game object has.
     /// </summary>
-    public UndertalePointerList<UndertalePointerList<Event>> Events { get; set; } = new();
+    [Notify("Events")] private UndertalePointerList<UndertalePointerList<Event>> _events = new();
 
     /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
@@ -164,22 +168,26 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// </summary>
     public UndertaleGameObject()
     {
-        Events.SetCapacity(EventTypeCount);
+        _events.SetCapacity(EventTypeCount);
         for (int i = 0; i < EventTypeCount; i++)
-            Events.InternalAdd(new UndertalePointerList<Event>());
+        {
+            _events.InternalAdd(new UndertalePointerList<Event>());
+        }
     }
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
     {
-        writer.WriteUndertaleString(Name);
+        writer.WriteUndertaleString(_name);
         writer.WriteUndertaleObject(_sprite);
-        writer.Write(Visible);
+        writer.Write(_visible);
         if (writer.undertaleData.IsVersionAtLeast(2022, 5))
-            writer.Write(Managed);
-        writer.Write(Solid);
-        writer.Write(Depth);
-        writer.Write(Persistent);
+        {
+            writer.Write(_managed);
+        }
+        writer.Write(_solid);
+        writer.Write(_depth);
+        writer.Write(_persistent);
         // This apparently has a different notation than everything else...
         if (_parentId.Resource == null)
         {
@@ -190,37 +198,39 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
             writer.WriteUndertaleObject(_parentId);
         }
         writer.WriteUndertaleObject(_textureMaskId);
-        writer.Write(UsesPhysics);
-        writer.Write(IsSensor);
-        writer.Write((uint)CollisionShape);
-        writer.Write(Density);
-        writer.Write(Restitution);
-        writer.Write(Group);
-        writer.Write(LinearDamping);
-        writer.Write(AngularDamping);
-        writer.Write(PhysicsVertices.Count); // possible (now confirmed) meaning: https://github.com/WarlockD/GMdsam/blob/26aefe3e90a7a7a1891cb83f468079546f32b4b7/GMdsam/GameMaker/ChunkTypes.cs#L553
-        writer.Write(Friction);
-        writer.Write(Awake);
-        writer.Write(Kinematic);
+        writer.Write(_usesPhysics);
+        writer.Write(_isSensor);
+        writer.Write((uint)_collisionShape);
+        writer.Write(_density);
+        writer.Write(_restitution);
+        writer.Write(_group);
+        writer.Write(_linearDamping);
+        writer.Write(_angularDamping);
+        writer.Write(_physicsVertices.Count); // possible (now confirmed) meaning: https://github.com/WarlockD/GMdsam/blob/26aefe3e90a7a7a1891cb83f468079546f32b4b7/GMdsam/GameMaker/ChunkTypes.cs#L553
+        writer.Write(_friction);
+        writer.Write(_awake);
+        writer.Write(_kinematic);
         // Need to write these manually because the count is unfortunately separated
-        foreach (UndertalePhysicsVertex v in PhysicsVertices)
+        foreach (UndertalePhysicsVertex v in _physicsVertices)
         {
             v.Serialize(writer);
         }
-        writer.WriteUndertaleObject(Events);
+        writer.WriteUndertaleObject(_events);
     }
 
     /// <inheritdoc />
     public void Unserialize(UndertaleReader reader)
     {
-        Name = reader.ReadUndertaleString();
+        _name = reader.ReadUndertaleString();
         _sprite = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>>();
-        Visible = reader.ReadBoolean();
+        _visible = reader.ReadBoolean();
         if (reader.undertaleData.IsVersionAtLeast(2022, 5))
-            Managed = reader.ReadBoolean();
-        Solid = reader.ReadBoolean();
-        Depth = reader.ReadInt32();
-        Persistent = reader.ReadBoolean();
+        {
+            _managed = reader.ReadBoolean();
+        }
+        _solid = reader.ReadBoolean();
+        _depth = reader.ReadInt32();
+        _persistent = reader.ReadBoolean();
         _parentId = new UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>();
         int parent = reader.ReadInt32();
         if (parent == -100)
@@ -230,31 +240,33 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         else
         {
             if (parent < 0 && parent != -1) // Technically can be -100 (undefined), -2 (other), or -1 (self). Other makes no sense here though
+            {
                 throw new Exception("Invalid value for parent - should be -100 or object id, got " + parent);
+            }
             _parentId.UnserializeById(reader, parent);
         }
         _textureMaskId = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>>();
-        UsesPhysics = reader.ReadBoolean();
-        IsSensor = reader.ReadBoolean();
-        CollisionShape = (CollisionShapeFlags)reader.ReadUInt32();
-        Density = reader.ReadSingle();
-        Restitution = reader.ReadSingle();
-        Group = reader.ReadUInt32();
-        LinearDamping = reader.ReadSingle();
-        AngularDamping = reader.ReadSingle();
+        _usesPhysics = reader.ReadBoolean();
+        _isSensor = reader.ReadBoolean();
+        _collisionShape = (CollisionShapeFlags)reader.ReadUInt32();
+        _density = reader.ReadSingle();
+        _restitution = reader.ReadSingle();
+        _group = reader.ReadUInt32();
+        _linearDamping = reader.ReadSingle();
+        _angularDamping = reader.ReadSingle();
         int physicsShapeVertexCount = reader.ReadInt32();
-        Friction = reader.ReadSingle();
-        Awake = reader.ReadBoolean();
-        Kinematic = reader.ReadBoolean();
+        _friction = reader.ReadSingle();
+        _awake = reader.ReadBoolean();
+        _kinematic = reader.ReadBoolean();
         // Needs to be done manually because count is separated
-        PhysicsVertices.Capacity = physicsShapeVertexCount;
+        _physicsVertices.SetCapacity(physicsShapeVertexCount);
         for (int i = 0; i < physicsShapeVertexCount; i++)
         {
-            UndertalePhysicsVertex v = new UndertalePhysicsVertex();
+            UndertalePhysicsVertex v = new();
             v.Unserialize(reader);
-            PhysicsVertices.Add(v);
+            _physicsVertices.InternalAdd(v);
         }
-        Events = reader.ReadUndertaleObject<UndertalePointerList<UndertalePointerList<Event>>>();
+        _events = reader.ReadUndertaleObject<UndertalePointerList<UndertalePointerList<Event>>>();
     }
 
     /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
@@ -416,65 +428,83 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         _sprite.Dispose();
         _parentId.Dispose();
         _textureMaskId.Dispose();
-        PhysicsVertices = new();
-        foreach (var ev in Events)
+        _physicsVertices = new();
+        foreach (var ev in _events)
         {
             foreach (var subEv in ev)
+            {
                 subEv?.Dispose();
+            }
         }
-        Name = null;
-        Events = new();
+        _name = null;
+        _events = new();
     }
 
     /// <summary>
     /// Generic events that an <see cref="UndertaleGameObject"/> uses.
     /// </summary>
-    [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class Event : UndertaleObject, IDisposable
+    public partial class Event : UndertaleObject, INotifyPropertyChanged, IDisposable
     {
         /// <summary>
         /// The subtype of this event.
         /// </summary>
-        /// <remarks>Game Maker suffixes the action names with this id.</remarks>
-        public uint EventSubtype { get; set; }
+        /// <remarks>GameMaker suffixes the action names with this ID.</remarks>
+        [Notify("EventSubtype")] private uint _eventSubtype;
 
         /// <summary>
         /// The available actions that will be performed for this event.
         /// </summary>
         /// <remarks>This seems to always have 1 entry, it would need testing if maybe the games using drag-and-drop code are different</remarks>
-        public UndertalePointerList<EventAction> Actions { get; set; } = new UndertalePointerList<EventAction>();
+        [Notify("Actions")] private UndertalePointerList<EventAction> _actions = new();
 
-        //TODO: not used, condense. Also UMT specific.
+        /// <summary>
+        /// Helper property to convert <see cref="EventSubtype"/> to an <see cref="Models.EventSubtypeKey"/>.
+        /// </summary>
         public EventSubtypeKey EventSubtypeKey
         {
             get => (EventSubtypeKey)EventSubtype;
             set => EventSubtype = (uint)value;
         }
 
+        /// <summary>
+        /// Helper property to convert <see cref="EventSubtype"/> to an <see cref="Models.EventSubtypeStep"/>.
+        /// </summary>
         public EventSubtypeStep EventSubtypeStep
         {
             get => (EventSubtypeStep)EventSubtype;
             set => EventSubtype = (uint)value;
         }
 
+        /// <summary>
+        /// Helper property to convert <see cref="EventSubtype"/> to an <see cref="Models.EventSubtypeMouse"/>.
+        /// </summary>
         public EventSubtypeMouse EventSubtypeMouse
         {
             get => (EventSubtypeMouse)EventSubtype;
             set => EventSubtype = (uint)value;
         }
 
+        /// <summary>
+        /// Helper property to convert <see cref="EventSubtype"/> to an <see cref="Models.EventSubtypeOther"/>.
+        /// </summary>
         public EventSubtypeOther EventSubtypeOther
         {
             get => (EventSubtypeOther)EventSubtype;
             set => EventSubtype = (uint)value;
         }
 
+        /// <summary>
+        /// Helper property to convert <see cref="EventSubtype"/> to an <see cref="Models.EventSubtypeDraw"/>.
+        /// </summary>
         public EventSubtypeDraw EventSubtypeDraw
         {
             get => (EventSubtypeDraw)EventSubtype;
             set => EventSubtype = (uint)value;
         }
 
+        /// <summary>
+        /// Helper property to convert <see cref="EventSubtype"/> to an <see cref="Models.EventSubtypeGesture"/>.
+        /// </summary>
         public EventSubtypeGesture EventSubtypeGesture
         {
             get => (EventSubtypeGesture)EventSubtype;
@@ -482,17 +512,20 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         }
 
         /// <inheritdoc />
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
-            writer.Write(EventSubtype);
-            writer.WriteUndertaleObject(Actions);
+            writer.Write(_eventSubtype);
+            writer.WriteUndertaleObject(_actions);
         }
 
         /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
-            EventSubtype = reader.ReadUInt32();
-            Actions = reader.ReadUndertaleObject<UndertalePointerList<EventAction>>();
+            _eventSubtype = reader.ReadUInt32();
+            _actions = reader.ReadUndertaleObject<UndertalePointerList<EventAction>>();
         }
 
         /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
@@ -508,17 +541,19 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         {
             GC.SuppressFinalize(this);
 
-            foreach (EventAction action in Actions)
+            foreach (EventAction action in _actions)
+            {
                 action?.Dispose();
-            Actions = new();
+            }
+            _actions = new();
         }
     }
 
     /// <summary>
     /// An action in an event.
     /// </summary>
-    public class EventAction : UndertaleObject, INotifyPropertyChanged, IDisposable,
-                               IStaticChildObjectsSize, IStaticChildObjCount
+    public partial class EventAction : UndertaleObject, INotifyPropertyChanged, IDisposable,
+                                       IStaticChildObjectsSize, IStaticChildObjCount
     {
         /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
         public static readonly uint ChildObjectCount = 1;
@@ -531,25 +566,27 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
 
         // Note from the future: these aren't always these values...
 
-        public uint LibID { get; set; } // always 1
-        public uint ID { get; set; } // always 603
-        public uint Kind { get; set; } // always 7
-        public bool UseRelative { get; set; } // always 0
-        public bool IsQuestion { get; set; } // always 0
-        public bool UseApplyTo { get; set; } // always 1
-        public uint ExeType { get; set; } // always 2
-        public UndertaleString ActionName { get; set; } // always ""
+        [Notify("LibID")] private uint _libID; // always 1
+        [Notify("ID")] private uint _ID; // always 603
+        [Notify("Kind")] private uint _kind; // always 7
+        [Notify("UseRelative")] private bool _useRelative; // always 0
+        [Notify("IsQuestion")] private bool _isQuestion; // always 0
+        [Notify("UseApplyTo")] private bool _useApplyTo; // always 1
+        [Notify("ExeType")] private uint _exeType; // always 2
+        [Notify("ActionName")] private UndertaleString _actionName; // always ""
+
         private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _codeId = new UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>();
 
         /// <summary>
         /// The code entry that gets executed.
         /// </summary>
         public UndertaleCode CodeId { get => _codeId.Resource; set { _codeId.Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CodeId))); } }
-        public uint ArgumentCount { get; set; } // always 1
-        public int Who { get; set; } // always -1
-        public bool Relative { get; set; } // always 0
-        public bool IsNot { get; set; } // always 0
-        public uint UnknownAlwaysZero { get; set; } // always 0
+
+        [Notify("ArgumentCount")] private uint _argumentCount; // always 1
+        [Notify("Who")] private int _who; // always -1
+        [Notify("Relative")] private bool _relative; // always 0
+        [Notify("IsNot")] private bool _isNot; // always 0
+        [Notify("UnknownAlwaysZero")] private uint _unknownAlwaysZero; // always 0
 
         /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
@@ -557,39 +594,39 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
-            writer.Write(LibID);
-            writer.Write(ID);
-            writer.Write(Kind);
-            writer.Write(UseRelative);
-            writer.Write(IsQuestion);
-            writer.Write(UseApplyTo);
-            writer.Write(ExeType);
-            writer.WriteUndertaleString(ActionName);
+            writer.Write(_libID);
+            writer.Write(_ID);
+            writer.Write(_kind);
+            writer.Write(_useRelative);
+            writer.Write(_isQuestion);
+            writer.Write(_useApplyTo);
+            writer.Write(_exeType);
+            writer.WriteUndertaleString(_actionName);
             writer.WriteUndertaleObject(_codeId);
-            writer.Write(ArgumentCount);
-            writer.Write(Who);
-            writer.Write(Relative);
-            writer.Write(IsNot);
-            writer.Write(UnknownAlwaysZero);
+            writer.Write(_argumentCount);
+            writer.Write(_who);
+            writer.Write(_relative);
+            writer.Write(_isNot);
+            writer.Write(_unknownAlwaysZero);
         }
 
         /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
-            LibID = reader.ReadUInt32();
-            ID = reader.ReadUInt32();
-            Kind = reader.ReadUInt32();
-            UseRelative = reader.ReadBoolean();
-            IsQuestion = reader.ReadBoolean();
-            UseApplyTo = reader.ReadBoolean();
-            ExeType = reader.ReadUInt32();
-            ActionName = reader.ReadUndertaleString();
+            _libID = reader.ReadUInt32();
+            _ID = reader.ReadUInt32();
+            _kind = reader.ReadUInt32();
+            _useRelative = reader.ReadBoolean();
+            _isQuestion = reader.ReadBoolean();
+            _useApplyTo = reader.ReadBoolean();
+            _exeType = reader.ReadUInt32();
+            _actionName = reader.ReadUndertaleString();
             _codeId = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>>();
-            ArgumentCount = reader.ReadUInt32();
-            Who = reader.ReadInt32();
-            Relative = reader.ReadBoolean();
-            IsNot = reader.ReadBoolean();
-            UnknownAlwaysZero = reader.ReadUInt32();
+            _argumentCount = reader.ReadUInt32();
+            _who = reader.ReadInt32();
+            _relative = reader.ReadBoolean();
+            _isNot = reader.ReadBoolean();
+            _unknownAlwaysZero = reader.ReadUInt32();
         }
 
         /// <inheritdoc/>
@@ -598,41 +635,43 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
             GC.SuppressFinalize(this);
 
             _codeId.Dispose();
-            ActionName = null;
+            _actionName = null;
         }
     }
 
     /// <summary>
     /// Class representing a physics vertex used for a <see cref="CollisionShape"/> of type <see cref="CollisionShapeFlags.Custom"/>.
     /// </summary>
-    [PropertyChanged.AddINotifyPropertyChangedInterface]
-    public class UndertalePhysicsVertex : UndertaleObject, IStaticChildObjectsSize
+    public partial class UndertalePhysicsVertex : UndertaleObject, INotifyPropertyChanged, IStaticChildObjectsSize
     {
         /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
         public static readonly uint ChildObjectsSize = 8;
 
         /// <summary>
-        /// The x position of the vertex.
+        /// The X coordinate of the vertex.
         /// </summary>
-        public float X { get; set; }
+        [Notify("X")] private float _x;
 
         /// <summary>
-        /// The y position of the vertex.
+        /// The Y coordinate of the vertex.
         /// </summary>
-        public float Y { get; set; }
+        [Notify("Y")] private float _y;
+
+        /// <inheritdoc />
+        public event PropertyChangedEventHandler PropertyChanged;
 
         /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
-            writer.Write(X);
-            writer.Write(Y);
+            writer.Write(_x);
+            writer.Write(_y);
         }
 
         /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
-            X = reader.ReadSingle();
-            Y = reader.ReadSingle();
+            _x = reader.ReadSingle();
+            _y = reader.ReadSingle();
         }
     }
 }
