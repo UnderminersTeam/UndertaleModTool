@@ -7,6 +7,8 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertaleSequenceEditor : DataUserControl
     {
+        public bool PartOfSprite { get; set; } = false;
+
         public UndertaleSequenceEditor()
         {
             InitializeComponent();
