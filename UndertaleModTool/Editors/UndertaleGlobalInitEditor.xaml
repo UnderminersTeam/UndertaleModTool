@@ -45,7 +45,7 @@
                 <DataGridTemplateColumn Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding Code, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertaleModels:UndertaleCode}" CanRemove="False"/>
+                            <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding Code, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Loaded="UndertaleObjectReference_Loaded" ObjectType="{x:Type undertaleModels:UndertaleCode}" CanRemove="True"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

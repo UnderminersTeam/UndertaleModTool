@@ -491,6 +491,7 @@
                                                                 <local:UndertaleObjectReference ObjectReference="{Binding CodeId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleCode}"
                                                                                                 ObjectReferenceChanged="UndertaleObjectReference_ObjectReferenceChanged_ActionCode"
                                                                                                 Margin="23,3,3,3" CanRemove="False"
+                                                                                                Loaded="UndertaleObjectReference_Loaded"
                                                                                                 GameObject="{Binding DataContext, RelativeSource={RelativeSource AncestorType=local:DataUserControl}}"
                                                                                                 ObjectEventType="{Binding Text, Mode=OneTime, ElementName=EventTypeName, Converter={StaticResource EventNameConverter}, ConverterParameter=EventType}"
                                                                                                 ObjectEventSubtype="{Binding DataContext.EventSubtype, Mode=OneWay, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>

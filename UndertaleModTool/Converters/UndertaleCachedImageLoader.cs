@@ -132,6 +132,10 @@ namespace UndertaleModTool
                 else
                     rect = new(texture.SourceX, texture.SourceY, texture.SourceWidth, texture.SourceHeight);
 
+                // Abort if rect is out of bounds of the texture item
+                if (rect.X >= (texture.SourceX + texture.SourceWidth) || rect.Y >= (texture.SourceY + texture.SourceHeight))
+                    return null;
+
                 spriteSrc = CreateSpriteSource(in rect, in texture, diffW, diffH, isTile);
 
                 if (cacheEnabled)
