@@ -150,7 +150,38 @@ public sealed class ProjectContext
                 // Associate the data name (and type) of this asset with its path
                 if (!_assetDataNamesToPaths.TryAdd((asset.DataName, asset.AssetType), assetPath))
                 {
-                    throw new ProjectException($"Found multiple {asset.AssetType} assets with name \"{asset.DataName}\"");
+                    throw new ProjectException($"Found multiple {asset.AssetType.ToFilesystemNameSingular()} assets with name \"{asset.DataName}\"");
+                }
+            }
+
+            // Iterate over all GML files in this directory
+            foreach (string assetPath in Directory.EnumerateFiles(directory, "*.gml", SearchOption.AllDirectories))
+            {
+                // If there's already a JSON file with the same filename as this one, ignore this GML file
+                string filename = Path.GetFileNameWithoutExtension(assetPath);
+                string fileDirectory = Path.GetDirectoryName(assetPath);
+                string jsonPath = Path.Combine(fileDirectory, $"{filename}.json");
+                if (File.Exists(jsonPath))
+                {
+                    continue;
+                }
+
+                // Create blank code asset for this
+                SerializableCode asset = new()
+                {
+                    DataName = filename,
+                    WeirdLocalFlag = false
+                };
+
+                // Add to list for later processing
+                loadedAssets.Add(asset);
+                loadedCodeAssets.Add(asset);
+
+                // Associate the data name (and type) of this asset with its path.
+                // Note that we store a theoretical JSON file path, which doesn't actually exist - just in case a JSON is required later.
+                if (!_assetDataNamesToPaths.TryAdd((asset.DataName, asset.AssetType), jsonPath))
+                {
+                    throw new ProjectException($"Found multiple {asset.AssetType.ToFilesystemNameSingular()} assets with name \"{asset.DataName}\"");
                 }
             }
         }
@@ -174,7 +205,14 @@ public sealed class ProjectContext
         {
             asset.ImportCode(this, importGroup);
         }
-        importGroup.Import(true);
+        try
+        {
+            importGroup.Import(true);
+        }
+        catch (Exception e)
+        {
+            throw new ProjectException(e.Message, e);
+        }
 
         // TODO: texture page generation goes here, in parallel
 

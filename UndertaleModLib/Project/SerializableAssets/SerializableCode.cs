@@ -47,9 +47,10 @@ internal sealed class SerializableCode : ISerializableProjectAsset
     /// <inheritdoc/>
     public void Serialize(ProjectContext projectContext, string destinationFile)
     {
-        // Write main JSON
-        using (FileStream fs = new(destinationFile, FileMode.Create))
+        // Write main JSON, only if non-default properties are required
+        if (DataName is not null || WeirdLocalFlag)
         {
+            using FileStream fs = new(destinationFile, FileMode.Create);
             JsonSerializer.Serialize<ISerializableProjectAsset>(fs, this, ProjectContext.JsonOptions);
         }
 
@@ -59,7 +60,10 @@ internal sealed class SerializableCode : ISerializableProjectAsset
         using (FileStream fs = new(Path.Combine(directory, filename), FileMode.Create))
         {
             projectContext.TryGetCodeSource(_foundAsset, out string source);
-            source ??= "// Project system failed to retrieve source code for GML"; // This should actually never happen, but as a failsafe...
+            if (source is null)
+            {
+                throw new ProjectException($"Failed to find source code for {_foundAsset.Name?.Content ?? "<unknown code entry name>"}");
+            }
             fs.Write(Encoding.UTF8.GetBytes(source));
         }
     }

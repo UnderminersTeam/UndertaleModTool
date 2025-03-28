@@ -833,7 +833,7 @@ namespace UndertaleModTool
 
                 if (Project is not null && Project.HasUnexportedAssets)
                 {
-                    MessageBoxResult result = this.ShowQuestionWithCancel("There are assets marked to be exported in the current project. Really quit?");
+                    MessageBoxResult result = this.ShowQuestionWithCancel("There are assets marked to be exported in the current project.\nReally quit?", MessageBoxImage.Warning, "Warning");
 
                     if (result != MessageBoxResult.Yes)
                     {
