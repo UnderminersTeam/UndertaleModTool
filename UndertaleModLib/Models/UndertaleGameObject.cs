@@ -437,10 +437,13 @@ public class UndertaleGameObject : UndertaleNamedResource, IProjectAsset, INotif
     }
 
     /// <inheritdoc/>
-    public string ProjectName { get => Name?.Content ?? "<unknown name>"; }
+    public string ProjectName => Name?.Content ?? "<unknown name>";
 
     /// <inheritdoc/>
-    public SerializableAssetType ProjectAssetType { get => SerializableAssetType.GameObject; }
+    public SerializableAssetType ProjectAssetType => SerializableAssetType.GameObject;
+
+    /// <inheritdoc/>
+    public bool ProjectExportable => true;
 
 
     /// <summary>

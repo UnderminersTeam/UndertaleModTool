@@ -3127,7 +3127,7 @@ result in loss of work.");
             ObjectLabel.Content = $"ID: {idString}";
 
             // If this object is a project asset (and we're in an open project), then show/update marked for export status
-            if (Project is not null && obj is IProjectAsset projectAsset)
+            if (Project is not null && obj is IProjectAsset { ProjectExportable: true } projectAsset)
             {
                 MarkedForExportGroup.Visibility = Visibility.Visible;
                 MarkedForExportCheckBox.IsChecked = Project.IsAssetMarkedForExport(projectAsset);

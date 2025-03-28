@@ -39,7 +39,9 @@ public class UndertalePath : UndertaleNamedResource, IProjectAsset, INotifyPrope
     public UndertaleSimpleList<PathPoint> Points { get; set; } = new UndertaleSimpleList<PathPoint>();
 
     /// <inheritdoc />
+#pragma warning disable CS0067 // TODO: remove this suppression once Fody is no longer in use
     public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067
 
     /// <summary>
     /// A point in a <see cref="UndertalePath"/>.
@@ -66,7 +68,9 @@ public class UndertalePath : UndertaleNamedResource, IProjectAsset, INotifyPrope
         public float Speed { get; set; } = 1f;
 
         /// <inheritdoc />
+#pragma warning disable CS0067 // TODO: remove this suppression once Fody is no longer in use
         public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067
 
         /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
@@ -137,8 +141,11 @@ public class UndertalePath : UndertaleNamedResource, IProjectAsset, INotifyPrope
     }
 
     /// <inheritdoc/>
-    public string ProjectName { get => Name?.Content ?? "<unknown name>"; }
+    public string ProjectName => Name?.Content ?? "<unknown name>";
 
     /// <inheritdoc/>
-    public SerializableAssetType ProjectAssetType { get => SerializableAssetType.Path; }
+    public SerializableAssetType ProjectAssetType => SerializableAssetType.Path;
+
+    /// <inheritdoc/>
+    public bool ProjectExportable => true;
 }

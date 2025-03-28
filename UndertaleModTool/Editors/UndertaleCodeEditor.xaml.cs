@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -35,6 +36,7 @@ using UndertaleModLib;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
+using UndertaleModLib.Project;
 using Input = System.Windows.Input;
 
 namespace UndertaleModTool
@@ -45,7 +47,7 @@ namespace UndertaleModTool
     [SupportedOSPlatform("windows7.0")]
     public partial class UndertaleCodeEditor : DataUserControl
     {
-        private static MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
 
         public UndertaleCode CurrentDisassembled = null;
         public UndertaleCode CurrentDecompiled = null;
@@ -195,6 +197,11 @@ namespace UndertaleModTool
 
         private void UndertaleCodeEditor_Unloaded(object sender, RoutedEventArgs e)
         {
+            if (DataContext is UndertaleCode oldObj)
+            {
+                oldObj.PropertyChanged -= OnCodePropertyChanged;
+            }
+
             OverriddenDecompPos = default;
             OverriddenDisasmPos = default;
         }
@@ -278,6 +285,15 @@ namespace UndertaleModTool
 
         private async void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
+            if (e.OldValue is UndertaleCode oldObj)
+            {
+                oldObj.PropertyChanged -= OnCodePropertyChanged;
+            }
+            if (e.NewValue is UndertaleCode newObj)
+            {
+                newObj.PropertyChanged += OnCodePropertyChanged;
+            }
+
             UndertaleCode code = this.DataContext as UndertaleCode;
             if (code == null)
                 return;
@@ -330,6 +346,26 @@ namespace UndertaleModTool
                 FillInCodeViewer(true);
         }
 
+        private void OnCodePropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            OnAssetUpdated();
+        }
+
+        private void OnAssetUpdated()
+        {
+            if (mainWindow.Project is null)
+            {
+                return;
+            }
+            if (DataContext is UndertaleCode obj)
+            {
+                Dispatcher.BeginInvoke(() =>
+                {
+                    mainWindow.Project?.MarkAssetForExport(obj);
+                });
+            }
+        }
+
         public static readonly RoutedEvent CtrlKEvent = EventManager.RegisterRoutedEvent(
             "CtrlK", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(UndertaleCodeEditor));
 
@@ -344,8 +380,6 @@ namespace UndertaleModTool
                 DisassemblyEditor_LostFocus(sender, new RoutedEventArgs(CtrlKEvent));
                 DisassemblyEditor_GotFocus(sender, null);
             }
-
-            await Task.Delay(1); //dummy await
         }
         private void Command_Compile(object sender, EventArgs e)
         {
@@ -712,13 +746,17 @@ namespace UndertaleModTool
                 var dataa = mainWindow.Data;
                 Task t = Task.Run(() =>
                 {
-                    GlobalDecompileContext context = new(dataa);
                     string decompiled = null;
                     Exception e = null;
                     try
                     {
-                        // TODO: project source if available
-                        decompiled = new Underanalyzer.Decompiler.DecompileContext(context, code, dataa.ToolInfo.DecompilerSettings).DecompileToString();
+                        // First, try to retrieve source from project (if available)
+                        if (mainWindow.Project is null || !mainWindow.Project.TryGetCodeSource(code, out decompiled))
+                        {
+                            // Source isn't available - perform decompile
+                            GlobalDecompileContext context = new(dataa);
+                            decompiled = new Underanalyzer.Decompiler.DecompileContext(context, code, dataa.ToolInfo.DecompilerSettings).DecompileToString();
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -902,13 +940,28 @@ namespace UndertaleModTool
                     return;
             }
 
-            UndertaleData data = mainWindow.Data;
+            // Get source code from editor
+            string sourceCode = DecompiledEditor.Text;
 
-            LoaderDialog dialog = new LoaderDialog("Compiling", "Compiling, please wait...");
-            dialog.Owner = Window.GetWindow(this);
+            // Before compiling, update project source code and mark as exportable, if applicable
+            if (mainWindow.Project is ProjectContext project)
+            {
+                project.UpdateCodeSource(code, sourceCode);
+                project.MarkAssetForExport(code);
+            }
+
+            // Create compiling dialog
+            LoaderDialog dialog = new("Compiling", "Compiling, please wait...")
+            {
+                Owner = Window.GetWindow(this)
+            };
             try
             {
-                _ = Dispatcher.BeginInvoke(new Action(() => { if (!dialog.IsClosed) dialog.TryShowDialog(); }));
+                _ = Dispatcher.BeginInvoke(() => 
+                { 
+                    if (!dialog.IsClosed) 
+                        dialog.TryShowDialog(); 
+                });
             }
             catch
             {
@@ -917,15 +970,16 @@ namespace UndertaleModTool
 
             CompileResult compileResult = new();
             string rootException = null;
-            string text = DecompiledEditor.Text;
             var dispatcher = Dispatcher;
             Task t = Task.Run(() =>
             {
                 try
                 {
-                    CompileGroup group = new(data);
-                    group.MainThreadAction = (f) => { dispatcher.Invoke(() => f()); };
-                    group.QueueCodeReplace(code, text);
+                    CompileGroup group = new(mainWindow.Data)
+                    {
+                        MainThreadAction = (f) => { dispatcher.Invoke(() => f()); }
+                    };
+                    group.QueueCodeReplace(code, sourceCode);
                     compileResult = group.Compile();
                 }
                 catch (Exception ex)
@@ -1037,6 +1091,16 @@ namespace UndertaleModTool
 
             // Disassemble new code
             DisassembleCode(code, false);
+
+            // Code was modified, so mark it for export in project if we need to
+            if (mainWindow.Project is ProjectContext project && project.TryGetCodeSource(code, out _))
+            {
+                // The user really shouldn't be editing disassembly - warn them about this in detail
+                mainWindow.ShowWarning("Editing disassembly while in an open project (even through scripts) can cause " +
+                                       "desyncs with source code in the project.\n\n" +
+                                       "The source code will not change unless you directly modify it, " +
+                                       "or if you remove the code asset from the project entirely.");
+            }
 
             if (!DisassemblyEditor.IsReadOnly)
             {

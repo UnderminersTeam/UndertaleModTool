@@ -16,6 +16,11 @@ public interface IProjectAsset
     public SerializableAssetType ProjectAssetType { get; }
 
     /// <summary>
+    /// Whether this asset is eligible for being exported to a project.
+    /// </summary>
+    public bool ProjectExportable { get; }
+
+    /// <summary>
     /// Generates a serializable project version of this asset, within the given project context.
     /// </summary>
     /// <param name="projectContext">Context of the project.</param>

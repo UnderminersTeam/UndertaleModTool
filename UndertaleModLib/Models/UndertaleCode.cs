@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Text;
 using Underanalyzer;
 using UndertaleModLib.Decompiler;
+using UndertaleModLib.Project;
+using UndertaleModLib.Project.SerializableAssets;
 using UndertaleModLib.Util;
 
 namespace UndertaleModLib.Models;
@@ -1313,7 +1316,7 @@ public static class UndertaleInstructionUtil
 /// A code entry in a data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, IDisposable, IGMCode
+public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, IProjectAsset, INotifyPropertyChanged, IDisposable, IGMCode
 {
     /// <summary>
     /// The name of the code entry.
@@ -1365,6 +1368,11 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     /// Child entries of this code entry, if a root-level (parent) entry; empty if a child entry.
     /// </summary>
     public List<UndertaleCode> ChildEntries { get; set; } = new List<UndertaleCode>();
+
+    /// <inheritdoc />
+#pragma warning disable CS0067 // TODO: remove this suppression once Fody is no longer in use
+    public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067
 
     // Bytecode address to use during (de)serialization, since bytecode can be a separate blob
     private uint _bytecodeAbsoluteAddress;
@@ -1732,7 +1740,24 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
         Name = null;
         _unsupportedBuffer = null;
     }
-    
+
+    /// <inheritdoc/>
+    ISerializableProjectAsset IProjectAsset.GenerateSerializableProjectAsset(ProjectContext projectContext)
+    {
+        SerializableCode serializable = new();
+        serializable.PopulateFromData(projectContext, this);
+        return serializable;
+    }
+
+    /// <inheritdoc/>
+    public string ProjectName => Name?.Content ?? "<unknown name>";
+
+    /// <inheritdoc/>
+    public SerializableAssetType ProjectAssetType => SerializableAssetType.Code;
+
+    /// <inheritdoc/>
+    public bool ProjectExportable => ParentEntry is null;
+
     // Underanalyzer implementations
     IGMString IGMCode.Name => Name;
     int IGMCode.Length => (int)Length;

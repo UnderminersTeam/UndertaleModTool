@@ -154,6 +154,17 @@ namespace UndertaleModTool.Windows
             isSearchInProgress = false;
         }
 
+        string GetCodeString(UndertaleCode code)
+        {
+            // First, try to retrieve source from project (if available)
+            if (mainWindow.Project is null || !mainWindow.Project.TryGetCodeSource(code, out string decompiled))
+            {
+                // Source isn't available - perform decompile
+                decompiled = new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, mainWindow.Data.ToolInfo.DecompilerSettings).DecompileToString();
+            }
+            return decompiled;
+        }
+
         void SearchInUndertaleCode(UndertaleCode code)
         {
             try
@@ -162,7 +173,7 @@ namespace UndertaleModTool.Windows
                 {
                     var codeText = isInAssembly
                         ? code.Disassemble(mainWindow.Data.Variables, mainWindow.Data.CodeLocals.For(code))
-                        : new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, mainWindow.Data.ToolInfo.DecompilerSettings).DecompileToString(); // TODO: search project source instead if available
+                        : GetCodeString(code);
                     SearchInCodeText(code.Name.Content, codeText);
                 }
                 

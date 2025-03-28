@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using Underanalyzer.Decompiler;
+using UndertaleModLib.Compiler;
+using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
+using UndertaleModLib.Project.SerializableAssets;
 
 namespace UndertaleModLib.Project;
 
@@ -39,6 +44,11 @@ public sealed class ProjectContext
     internal UndertaleData Data { get; }
 
     /// <summary>
+    /// Lookup of asset paths that existed when loading on disk, by data name and asset type.
+    /// </summary>
+    internal IReadOnlyDictionary<(string DataName, SerializableAssetType AssetType), string> AssetDataNamesToPaths => _assetDataNamesToPaths;
+
+    /// <summary>
     /// Generic options to use for writing JSON.
     /// </summary>
     internal static readonly JsonSerializerOptions JsonOptions = new()
@@ -61,6 +71,9 @@ public sealed class ProjectContext
 
     // Set of all assets in the current data that are marked for export
     private readonly HashSet<IProjectAsset> _assetsMarkedForExport = new(64);
+
+    // Set of all project source code, as associated with UndertaleCode objects
+    private readonly Dictionary<UndertaleCode, string> _codeSources = new(64);
 
     /// <summary>
     /// Initializes a project context based on its existing main file path, and imports all of its data.
@@ -89,6 +102,7 @@ public sealed class ProjectContext
 
         // Recursively find and load in all assets in subdirectories
         List<ISerializableProjectAsset> loadedAssets = new(128);
+        List<SerializableCode> loadedCodeAssets = new(64);
         HashSet<string> excludeDirectorySet = new(_mainOptions.ExcludeDirectories);
         foreach (string directory in Directory.EnumerateDirectories(_mainDirectory))
         {
@@ -125,6 +139,13 @@ public sealed class ProjectContext
 
                 // Add to list for later processing
                 loadedAssets.Add(asset);
+                if (asset is SerializableCode codeAsset)
+                {
+                    loadedCodeAssets.Add(codeAsset);
+                }
+
+                // If asset's data name is omitted, use the filename
+                asset.DataName ??= Path.GetFileNameWithoutExtension(assetPath);
 
                 // Associate the data name (and type) of this asset with its path
                 if (!_assetDataNamesToPaths.TryAdd((asset.DataName, asset.AssetType), assetPath))
@@ -134,17 +155,32 @@ public sealed class ProjectContext
             }
         }
 
-        // TODO: code parsing and texture page generation goes here, in parallel
-
+        // Perform pre-import on all loaded assets
         MainThreadAction(() =>
         {
-            // Perform pre-import on all loaded assets
             foreach (ISerializableProjectAsset asset in loadedAssets)
             {
                 asset.PreImport(this);
             }
+        });
 
-            // Perform final import on all loaded assets
+        // Import code
+        CodeImportGroup importGroup = new(Data)
+        {
+            AutoCreateAssets = false,
+            MainThreadAction = MainThreadAction
+        };
+        foreach (SerializableCode asset in loadedCodeAssets)
+        {
+            asset.ImportCode(this, importGroup);
+        }
+        importGroup.Import(true);
+
+        // TODO: texture page generation goes here, in parallel
+
+        // Perform final import on all loaded assets
+        MainThreadAction(() =>
+        {
             foreach (ISerializableProjectAsset asset in loadedAssets)
             {
                 asset.Import(this);
@@ -203,6 +239,13 @@ public sealed class ProjectContext
     /// <returns>If the asset was not marked for export previously, returns <see langword="true"/>; <see langword="false"/> otherwise.</returns>
     public bool MarkAssetForExport(IProjectAsset asset)
     {
+        // First, check if asset is eligible for export
+        if (!asset.ProjectExportable)
+        {
+            return false;
+        }
+
+        // Try to mark, and return whether anything was changed
         if (_assetsMarkedForExport.Add(asset))
         {
             MainThreadAction(() =>
@@ -255,6 +298,27 @@ public sealed class ProjectContext
     }
 
     /// <summary>
+    /// Attempts to retrieve project source code for the given code entry.
+    /// </summary>
+    /// <param name="codeEntry">Code entry to look for source code for.</param>
+    /// <param name="source">Output for source code, when found; <see langword="null"/> if nothing is found.</param>
+    /// <returns><see langword="true"/> if source was successfully retrived; <see langword="false"/> otherwise.</returns>
+    public bool TryGetCodeSource(UndertaleCode codeEntry, [NotNullWhen(true)] out string source)
+    {
+        return _codeSources.TryGetValue(codeEntry, out source);
+    }
+
+    /// <summary>
+    /// Updates the source code associated with the given code entry.
+    /// </summary>
+    /// <param name="codeEntry">Code entry to update the associated source code for.</param>
+    /// <param name="newSource">New source code to use.</param>
+    public void UpdateCodeSource(UndertaleCode codeEntry, string newSource)
+    {
+        _codeSources[codeEntry] = newSource;
+    }
+
+    /// <summary>
     /// Exports all assets that are marked for export.
     /// </summary>
     /// <param name="clearMarkedAssets">Whether to clear the current set of assets marked for export.</param>
@@ -265,6 +329,35 @@ public sealed class ProjectContext
         if (!File.Exists(_mainFilePath))
         {
             throw new ProjectException($"Main project file no longer exists at \"{_mainFilePath}\"");
+        }
+
+        // Before main asset export, ensure all code entries have source code - if they don't, use the decompiler to generate some
+        GlobalDecompileContext globalDecompileContext = null;
+        foreach (IProjectAsset asset in _assetsMarkedForExport)
+        {
+            if (asset is UndertaleCode code)
+            {
+                if (!_codeSources.ContainsKey(code))
+                {
+                    globalDecompileContext ??= new(Data);
+                    try
+                    {
+                        string source = new DecompileContext(globalDecompileContext, code, Data.ToolInfo.DecompilerSettings).DecompileToString();
+                        _codeSources[code] = source;
+                    }
+                    catch (Exception e)
+                    {
+                        _codeSources[code] = 
+                            $"""
+                            /*
+                            Decompiler failed on project export.
+                            Exception details:
+                            {e}
+                            */
+                            """;
+                    }
+                }
+            }
         }
 
         // Export all assets that are marked as such
@@ -312,6 +405,12 @@ public sealed class ProjectContext
 
             // Ensure directories are created for this asset
             Directory.CreateDirectory(Path.GetDirectoryName(destinationFile));
+
+            // If the serializable asset name is identical to the data name, it can be omitted for ease of renaming/copying
+            if (serializableAsset.DataName == Path.GetFileNameWithoutExtension(destinationFile))
+            {
+                serializableAsset.DataName = null;
+            }
 
             // Write out asset to disk
             serializableAsset.Serialize(this, destinationFile);

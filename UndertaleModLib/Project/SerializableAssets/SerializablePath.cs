@@ -123,46 +123,4 @@ internal sealed class SerializablePath : ISerializableProjectAsset
 
         return path;
     }
-
-    /// <summary>
-    /// Converts an event subtype (for a given category) to a string representation.
-    /// </summary>
-    private static string EventSubtypeToString(ProjectContext projectContext, EventType category, uint subtype)
-    {
-        return category switch
-        {
-            EventType.Create => "",
-            EventType.Destroy => "",
-            EventType.Step => ((EventSubtypeStep)subtype).ToString(),
-            EventType.Collision => projectContext.Data.GameObjects[(int)subtype]?.Name?.Content ?? subtype.ToString(),
-            EventType.Keyboard => ((EventSubtypeKey)subtype).ToString(),
-            EventType.Mouse => ((EventSubtypeMouse)subtype).ToString(),
-            EventType.Other => ((EventSubtypeOther)subtype).ToString(),
-            EventType.Draw => ((EventSubtypeDraw)subtype).ToString(),
-            EventType.KeyPress => ((EventSubtypeKey)subtype).ToString(),
-            EventType.KeyRelease => ((EventSubtypeKey)subtype).ToString(),
-            _ => $"{subtype}"
-        };
-    }
-
-    /// <summary>
-    /// Converts a string representation of an event subtype (for a given category) to its integer value.
-    /// </summary>
-    private uint StringToEventSubtype(ProjectContext projectContext, EventType category, string subtype)
-    {
-        return category switch
-        {
-            EventType.Create => 0,
-            EventType.Destroy => 0,
-            EventType.Step => (uint)(EventSubtypeStep)Enum.Parse(typeof(EventSubtypeStep), subtype, true),
-            EventType.Collision => (uint)projectContext.FindGameObjectIndex(subtype, this),
-            EventType.Keyboard => (uint)(EventSubtypeKey)Enum.Parse(typeof(EventSubtypeKey), subtype, true),
-            EventType.Mouse => (uint)(EventSubtypeMouse)Enum.Parse(typeof(EventSubtypeMouse), subtype, true),
-            EventType.Other => (uint)(EventSubtypeOther)Enum.Parse(typeof(EventSubtypeOther), subtype, true),
-            EventType.Draw => (uint)(EventSubtypeDraw)Enum.Parse(typeof(EventSubtypeDraw), subtype, true),
-            EventType.KeyPress => (uint)(EventSubtypeKey)Enum.Parse(typeof(EventSubtypeKey), subtype, true),
-            EventType.KeyRelease => (uint)(EventSubtypeKey)Enum.Parse(typeof(EventSubtypeKey), subtype, true),
-            _ => uint.Parse(subtype, NumberStyles.Integer)
-        };
-    }
 }
