@@ -78,7 +78,7 @@ namespace UndertaleModTool
 
         private void OnAssetUpdated()
         {
-            if (mainWindow.Project is null)
+            if (mainWindow.Project is null || !mainWindow.IsSelectedProjectExportable)
             {
                 return;
             }

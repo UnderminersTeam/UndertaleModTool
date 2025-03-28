@@ -353,7 +353,7 @@ namespace UndertaleModTool
 
         private void OnAssetUpdated()
         {
-            if (mainWindow.Project is null)
+            if (mainWindow.Project is null || !mainWindow.IsSelectedProjectExportable)
             {
                 return;
             }
@@ -944,7 +944,7 @@ namespace UndertaleModTool
             string sourceCode = DecompiledEditor.Text;
 
             // Before compiling, update project source code and mark as exportable, if applicable
-            if (mainWindow.Project is ProjectContext project)
+            if (mainWindow.Project is ProjectContext project && mainWindow.IsSelectedProjectExportable)
             {
                 project.UpdateCodeSource(code, sourceCode);
                 project.MarkAssetForExport(code);

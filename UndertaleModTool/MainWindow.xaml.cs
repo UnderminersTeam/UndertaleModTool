@@ -108,6 +108,11 @@ namespace UndertaleModTool
             } 
         }
 
+        /// <summary>
+        /// Whether the currently-selected object is exportable to a project.
+        /// </summary>
+        public bool IsSelectedProjectExportable { get; private set; }
+
         public Visibility IsGMS2 => (Data?.GeneralInfo?.Major ?? 0) >= 2 ? Visibility.Visible : Visibility.Collapsed;
         // God this is so ugly, if there's a better way, please, put in a pull request
         public Visibility IsExtProductIDEligible => (((Data?.GeneralInfo?.Major ?? 0) >= 2) || (((Data?.GeneralInfo?.Major ?? 0) == 1) && (((Data?.GeneralInfo?.Build ?? 0) >= 1773) || ((Data?.GeneralInfo?.Build ?? 0) == 1539)))) ? Visibility.Visible : Visibility.Collapsed;
@@ -1505,8 +1510,16 @@ namespace UndertaleModTool
             bool isLast = list.IndexOf(obj) == list.Count - 1;
             if (this.ShowQuestion("Delete " + obj + "?" + (!isLast ? "\n\nNote that the code often references objects by ID, so this operation is likely to break stuff because other items will shift up!" : ""), isLast ? MessageBoxImage.Question : MessageBoxImage.Warning, "Confirmation" ) == MessageBoxResult.Yes)
             {
+                // Remove object from list
                 list.Remove(obj);
 
+                // If we're in a project, and this asset is marked for export, unmark it
+                if (Project is not null && obj is IProjectAsset projectAsset)
+                {
+                    Project.UnmarkAssetForExport(projectAsset);
+                }
+
+                // Close tabs and update tree
                 while (CloseTab(obj)) ;
                 UpdateTree();
 
@@ -1791,6 +1804,9 @@ namespace UndertaleModTool
                     {
                         string prefix = Data.IsVersionAtLeast(2, 3) ? "gml_GlobalScript_" : "gml_Script_";
                         scriptResource.Code = UndertaleCode.CreateEmptyEntry(Data, prefix + newName);
+
+                        // If we're in a project, mark code entry for export
+                        Project?.MarkAssetForExport(scriptResource.Code);
                     }
                     else if (obj is UndertaleCode codeResource && Data.CodeLocals is not null)
                     {
@@ -1804,8 +1820,17 @@ namespace UndertaleModTool
                 }
             }
             else if (obj is UndertaleString str)
+            {
                 str.Content = "string" + list.Count;
+            }
             list.Add(obj);
+
+            // If object is a project asset type, and we're in a project, mark it for export
+            if (Project is not null && obj is IProjectAsset projectAsset)
+            {
+                Project.MarkAssetForExport(projectAsset);
+            }
+
             UpdateTree();
             HighlightObject(obj);
             OpenInTab(obj, true);
@@ -3127,13 +3152,15 @@ result in loss of work.");
             ObjectLabel.Content = $"ID: {idString}";
 
             // If this object is a project asset (and we're in an open project), then show/update marked for export status
-            if (Project is not null && obj is IProjectAsset { ProjectExportable: true } projectAsset)
+            if (Project is not null && foundIndex >= 0 && obj is IProjectAsset { ProjectExportable: true } projectAsset)
             {
+                IsSelectedProjectExportable = true;
                 MarkedForExportGroup.Visibility = Visibility.Visible;
                 MarkedForExportCheckBox.IsChecked = Project.IsAssetMarkedForExport(projectAsset);
             }
             else
             {
+                IsSelectedProjectExportable = false;
                 MarkedForExportGroup.Visibility = Visibility.Collapsed;
             }
         }

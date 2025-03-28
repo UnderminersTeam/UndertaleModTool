@@ -213,6 +213,7 @@ namespace UndertaleModTool
             if (ObjectReference is null)
             {
                 object oldObj = ObjectReference;
+                int oldCodeCount = mainWindow.Data.Code?.Count ?? -1;
 
                 if (GameObject is not null)
                 {
@@ -261,6 +262,13 @@ namespace UndertaleModTool
                 if (oldObj != ObjectReference)
                 {
                     ObjectReferenceChanged?.Invoke(this, new ObjectReferenceChangedEventArgs(oldObj, ObjectReference));
+
+                    // If a new code entry was added, mark it as new for the project system as well
+                    if (mainWindow.Project is not null && oldCodeCount != -1 && 
+                        oldCodeCount == mainWindow.Data.Code.Count - 1 && ObjectReference is UndertaleCode newCode)
+                    {
+                        mainWindow.Project.MarkAssetForExport(newCode);
+                    }
                 }
             }
             else
