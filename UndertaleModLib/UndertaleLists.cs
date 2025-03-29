@@ -504,14 +504,13 @@ namespace UndertaleModLib
         public static uint UnserializeChildObjectCount(UndertaleReader reader)
         {
             // Read base object count; short-circuit if there's no objects
-            uint count = reader.ReadUInt32();
+            uint count = reader.ReadUInt32(), pointerCount = count;
             if (count == 0)
             {
                 return 0;
             }
 
             // Read pointers of all objects
-            uint realCount = count;
             uint[] pointers = reader.ListPtrsPool.Rent((int)count);
             for (uint i = 0; i < count; i++)
             {
@@ -529,12 +528,13 @@ namespace UndertaleModLib
                     {
                         reader.SubmitWarning("Null pointers found in pointer list on file built with GMS pre-2!");
                     }
-                    realCount--;
+                    i--; count--;
+                    continue;
                 }
                 pointers[i] = pointer;
             }
 
-            if (realCount == 0)
+            if (count == 0)
             {
                 reader.ListPtrsPool.Return(pointers);
                 return 0;
@@ -552,13 +552,13 @@ namespace UndertaleModLib
                     subCount = reader.GetStaticChildCount(t);
                 }
 
-                reader.Position += (count * 4) + (realCount * subSize);
+                reader.Position += (pointerCount * 4) + (count * subSize);
 
-                return realCount + (realCount * subCount);
+                return count + (count * subCount);
             }
 
             // Advance to start of first object (particularly, if blobs exist)
-            uint pos = pointers.First(i => i != 0);
+            uint pos = pointers[0];
             if (reader.AbsPosition != pos)
             {
                 long skip = pos - reader.AbsPosition;
