@@ -1,7 +1,7 @@
 // ImportGraphics but it can also set sprite properties and import more types of files.
 
 // Based off of ImportGraphics.csx by the UTMT team
-// and ImportGraphicsWithParameters.csx by someone, I don't remember (AwfulNasty???)
+// and ImportGraphicsWithParameters.csx by @DonavinDraws
 // ImportGraphicsAdvanced-specific edits (extra formats and animation speed) made by CST1229
 
 // Texture packer by Samuel Roy
