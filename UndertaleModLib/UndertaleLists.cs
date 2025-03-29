@@ -448,8 +448,7 @@ namespace UndertaleModLib
             // Advance to start of first object (particularly, if blobs exist)
             if (realCount > 0)
             {
-                T firstItem = this.FirstOrDefault(i => i is not null);
-                DebugUtil.Assert(firstItem is not null, "Reached this point without actually having items");
+                T firstItem = this.First(i => i is not null);
                 uint pos = reader.GetAddressForUndertaleObject(firstItem);
                 if (reader.AbsPosition != pos)
                 {
@@ -559,8 +558,7 @@ namespace UndertaleModLib
             }
 
             // Advance to start of first object (particularly, if blobs exist)
-            uint pos = pointers.FirstOrDefault(i => i != 0);
-            DebugUtil.Assert(pos != 0, "Reached this point without actually having items");
+            uint pos = pointers.First(i => i != 0);
             if (reader.AbsPosition != pos)
             {
                 long skip = pos - reader.AbsPosition;
