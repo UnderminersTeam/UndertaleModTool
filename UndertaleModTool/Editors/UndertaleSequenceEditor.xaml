@@ -1,0 +1,365 @@
+﻿<local:DataUserControl x:Class="UndertaleModTool.UndertaleSequenceEditor"
+                       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                       xmlns:local="clr-namespace:UndertaleModTool"
+                       xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+                       xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                       mc:Ignorable="d" 
+                       d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleSequence}">
+    <UserControl.Resources>
+        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="PlaybackType">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="undertale:UndertaleSequence+PlaybackType" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="PlaybackSpeedType">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="undertale:AnimSpeedType" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <local:InvertBooleanConverter x:Key="InvertBooleanConverter"/>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
+        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}" 
+                                        IsEnabled="{Binding PartOfSprite, Converter={StaticResource InvertBooleanConverter}, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UndertaleSequenceEditor}}}"/>
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Origin</TextBlock>
+        <Grid Grid.Row="1" Grid.Column="1"
+              IsEnabled="{Binding PartOfSprite, Converter={StaticResource InvertBooleanConverter}, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UndertaleSequenceEditor}}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding OriginX}"/>
+            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding OriginY}"/>
+        </Grid>
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Playback type</TextBlock>
+        <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource PlaybackType}}" SelectedItem="{Binding Path=Playback}"
+                            Grid.Row="2" Grid.Column="1" Margin="3"
+                            IsEnabled="{Binding PartOfSprite, Converter={StaticResource InvertBooleanConverter}, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UndertaleSequenceEditor}}}"/>
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Playback speed type</TextBlock>
+        <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource PlaybackSpeedType}}" SelectedItem="{Binding Path=PlaybackSpeedType}"
+                            Grid.Row="3" Grid.Column="1" Margin="3"
+                            IsEnabled="{Binding PartOfSprite, Converter={StaticResource InvertBooleanConverter}, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UndertaleSequenceEditor}}}"/>
+
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Playback speed</TextBlock>
+        <local:TextBoxDark Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding PlaybackSpeed}"
+                           IsEnabled="{Binding PartOfSprite, Converter={StaticResource InvertBooleanConverter}, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UndertaleSequenceEditor}}}"/>
+
+        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Volume</TextBlock>
+        <local:TextBoxDark Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding Volume}"/>
+
+        <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Broadcast messages</TextBlock>
+        <Expander Grid.Row="6" Grid.Column="1" Margin="3" Header="List" Name="BroadcastMsgsListExpander">
+            <local:DataGridDark ItemsSource="{Binding BroadcastMessages}" x:Name="BroadcastMsgsListGrid"
+                                AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+                                ScrollViewer.CanContentScroll="True"
+                                VirtualizingPanel.IsVirtualizing="True"
+                                VirtualizingPanel.VirtualizationMode="Recycling"
+                                MaxHeight="300">
+                <DataGrid.Resources>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
+                    <Style TargetType="{x:Type DataGridCell}">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                    <Grid Background="{TemplateBinding Background}">
+                                        <ContentPresenter VerticalAlignment="Center" />
+                                    </Grid>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate>
+                                            <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.Resources>
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid Grid.Row="0" Grid.Column="0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto" MinWidth="80px"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Column="0" Content="Time (key):"/>
+                                        <local:TextBoxDark Grid.Column="1" Margin="5,3,15,3" Padding="5,0,5,0" 
+                                                           Text="{Binding Key, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}"/>
+                                    </Grid>
+                                    <Grid Grid.Row="0" Grid.Column="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto" MinWidth="80px"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Column="0" Content="Length:"/>
+                                        <local:TextBoxDark Grid.Column="1" Margin="5,3,15,3" Padding="5,0,5,0" 
+                                                           Text="{Binding Length, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}"/>
+                                    </Grid>
+                                    <Grid Grid.Row="0" Grid.Column="2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto" MinWidth="80px"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Column="0" Content="Stretch:"/>
+                                        <CheckBox Grid.Column="1" Margin="5,3,15,3" Padding="5,0,5,0"
+                                                  VerticalAlignment="Center"
+                                                  IsChecked="{Binding Stretch, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}"/>
+                                    </Grid>
+                                    <Grid Grid.Row="0" Grid.Column="3">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto" MinWidth="80px"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Column="0" Content="Disabled:"/>
+                                        <CheckBox Grid.Column="1" Margin="5,3,15,3" Padding="5,0,5,0"
+                                                  VerticalAlignment="Center"
+                                                  IsChecked="{Binding Disabled, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}"/>
+                                    </Grid>
+                                    <Expander Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Margin="3" Header="Channels">
+                                        <local:DataGridDark ItemsSource="{Binding Channels}"
+                                                            AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+                                                            ScrollViewer.CanContentScroll="True"
+                                                            VirtualizingPanel.IsVirtualizing="True"
+                                                            VirtualizingPanel.VirtualizationMode="Recycling"
+                                                            MaxHeight="300">
+                                            <DataGrid.Resources>
+                                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
+                                                <Style TargetType="{x:Type DataGridCell}">
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                                                <Grid Background="{TemplateBinding Background}">
+                                                                    <ContentPresenter VerticalAlignment="Center" />
+                                                                </Grid>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
+                                                            <Setter Property="Template">
+                                                                <Setter.Value>
+                                                                    <ControlTemplate>
+                                                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                                                    </ControlTemplate>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </DataGrid.Resources>
+                                            <DataGrid.Columns>
+                                                <DataGridTemplateColumn Width="*">
+                                                    <DataGridTemplateColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="3*"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <Grid Grid.Row="0" Grid.Column="0">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                        <ColumnDefinition Width="Auto" MinWidth="80px"/>
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <Label Grid.Column="0" Content="Channel ID:"/>
+                                                                    <local:TextBoxDark Grid.Column="1" Margin="5,3,15,3" Padding="5,0,5,0" VerticalAlignment="Top" MinHeight="20px"
+                                                                                       Text="{Binding Channel, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}"/>
+                                                                </Grid>
+                                                                <Grid Grid.Row="0" Grid.Column="1">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                        <ColumnDefinition Width="*"/>
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <Label Grid.Column="0" Content="Value:"/>
+                                                                    <Expander Grid.Column="1" Margin="3" Header="Messages">
+                                                                        <local:DataGridDark ItemsSource="{Binding Value.Messages}"
+                                                                                            AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+                                                                                            ScrollViewer.CanContentScroll="True"
+                                                                                            VirtualizingPanel.IsVirtualizing="True"
+                                                                                            VirtualizingPanel.VirtualizationMode="Recycling"
+                                                                                            MaxHeight="300">
+                                                                            <DataGrid.Resources>
+                                                                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
+                                                                                <Style TargetType="{x:Type DataGridCell}">
+                                                                                    <Setter Property="Template">
+                                                                                        <Setter.Value>
+                                                                                            <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                                                                                <Grid Background="{TemplateBinding Background}">
+                                                                                                    <ContentPresenter VerticalAlignment="Center" />
+                                                                                                </Grid>
+                                                                                            </ControlTemplate>
+                                                                                        </Setter.Value>
+                                                                                    </Setter>
+                                                                                    <Style.Triggers>
+                                                                                        <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
+                                                                                            <Setter Property="Template">
+                                                                                                <Setter.Value>
+                                                                                                    <ControlTemplate>
+                                                                                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                                                                                    </ControlTemplate>
+                                                                                                </Setter.Value>
+                                                                                            </Setter>
+                                                                                        </DataTrigger>
+                                                                                    </Style.Triggers>
+                                                                                </Style>
+                                                                            </DataGrid.Resources>
+                                                                            <DataGrid.Columns>
+                                                                                <DataGridTemplateColumn Width="*">
+                                                                                    <DataGridTemplateColumn.CellTemplate>
+                                                                                        <DataTemplate>
+                                                                                            <local:UndertaleStringReference Margin="3" ObjectReference="{Binding .}"/>
+                                                                                        </DataTemplate>
+                                                                                    </DataGridTemplateColumn.CellTemplate>
+                                                                                </DataGridTemplateColumn>
+                                                                            </DataGrid.Columns>
+                                                                        </local:DataGridDark>
+                                                                    </Expander>
+                                                                </Grid>
+                                                            </Grid>
+                                                        </DataTemplate>
+                                                    </DataGridTemplateColumn.CellTemplate>
+                                                </DataGridTemplateColumn>
+                                            </DataGrid.Columns>
+                                        </local:DataGridDark>
+                                    </Expander>
+                                </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </local:DataGridDark>
+        </Expander>
+
+        <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Moments</TextBlock>
+        <Expander Grid.Row="7" Grid.Column="1" Margin="3" Header="List" Name="MomentsListExpander">
+            <local:DataGridDark ItemsSource="{Binding Moments}" x:Name="MomentsMsgsListGrid"
+                        AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+                        ScrollViewer.CanContentScroll="True"
+                        VirtualizingPanel.IsVirtualizing="True"
+                        VirtualizingPanel.VirtualizationMode="Recycling"
+                        MaxHeight="300">
+                <DataGrid.Resources>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
+                    <Style TargetType="{x:Type DataGridCell}">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                    <Grid Background="{TemplateBinding Background}">
+                                        <ContentPresenter VerticalAlignment="Center" />
+                                    </Grid>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate>
+                                            <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.Resources>
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock>Test</TextBlock>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </local:DataGridDark>
+        </Expander>
+
+        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Tracks</TextBlock>
+        <Expander Grid.Row="8" Grid.Column="1" Margin="3" Header="List" Name="TracksListExpander">
+            <local:DataGridDark ItemsSource="{Binding Tracks}" x:Name="TracksListGrid"
+                AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+                ScrollViewer.CanContentScroll="True"
+                VirtualizingPanel.IsVirtualizing="True"
+                VirtualizingPanel.VirtualizationMode="Recycling"
+                MaxHeight="300">
+                <DataGrid.Resources>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
+                    <Style TargetType="{x:Type DataGridCell}">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                    <Grid Background="{TemplateBinding Background}">
+                                        <ContentPresenter VerticalAlignment="Center" />
+                                    </Grid>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate>
+                                            <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.Resources>
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock>Test</TextBlock>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </local:DataGridDark>
+        </Expander>
+    </Grid>
+</local:DataUserControl>
