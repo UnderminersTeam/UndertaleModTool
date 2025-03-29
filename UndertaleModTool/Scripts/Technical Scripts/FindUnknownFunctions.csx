@@ -35,10 +35,16 @@ List<String> unknownFunctions = new List<String>();
 List<String> unknownFunctions2 = new List<String>();
 foreach (UndertaleExtension extension in Data.Extensions)
 {
+    if (extension is null)
+        continue;
     foreach (UndertaleExtensionFile exFile in extension.Files)
     {
+        if (exFile is null)
+            continue;
         foreach (UndertaleExtensionFunction exFunc in exFile.Functions)
         {
+            if (exFunc is null)
+                continue;
             extensionFunctions.Add(exFunc.Name.Content);
         }
     }
@@ -48,6 +54,8 @@ using (StreamWriter writer = new StreamWriter(exportFolder + "unknown_functions.
 {
     foreach (var func in Data.Functions)
     {
+        if (func is null)
+            continue;
         if (func.Name.Content.Contains("\n") || func.Name.Content.Contains("\r"))
         {
             continue;
