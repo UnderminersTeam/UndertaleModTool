@@ -62,6 +62,9 @@ public class GlobalDecompileContext : IGameContext
     // Lookup from script name to index (and potentially encoded asset type)
     private Dictionary<string, int> _scriptIdLookup = null;
 
+    // Prefix used for instance IDs, cached per each context
+    private readonly string _instanceIdPrefix;
+
     /// <summary>
     /// Instantiates and initializes a global decompile context for the given <see cref="UndertaleData"/>.
     /// </summary>
@@ -72,6 +75,14 @@ public class GlobalDecompileContext : IGameContext
     public GlobalDecompileContext(UndertaleData data)
     {
         Data = data;
+        if (Data.ToolInfo?.InstanceIdPrefix is Func<string> prefixGetter)
+        {
+            _instanceIdPrefix = prefixGetter();
+        }
+        else
+        {
+            _instanceIdPrefix = "inst_";
+        }
         BuildGlobalFunctionCache(data);
     }
 
@@ -373,7 +384,7 @@ public class GlobalDecompileContext : IGameContext
                 {
                     return null;
                 }
-                return $"{Data.ToolInfo.InstanceIdPrefix()}{assetIndex}";
+                return $"{_instanceIdPrefix}{assetIndex}";
         }
 
         return null;
@@ -391,6 +402,31 @@ public class GlobalDecompileContext : IGameContext
 
         // Perform lookup
         return _assetIdLookup.TryGetValue(assetName, out assetId);
+    }
+
+    /// <inheritdoc/>
+    public bool GetRoomInstanceId(string roomInstanceName, out int assetId)
+    {
+        // Check for prefix, and parse ID if there
+        ReadOnlySpan<char> prefix = _instanceIdPrefix;
+        ReadOnlySpan<char> name = roomInstanceName;
+        if (name.StartsWith(prefix, StringComparison.Ordinal) &&
+            int.TryParse(name[prefix.Length..], out int instanceId) &&
+            instanceId >= 100000)
+        {
+            // Room instance ID found!
+            assetId = instanceId;
+            if (UsingRoomInstanceReferences)
+            {
+                // Additionally encode room instance asset type
+                assetId |= ((ConvertFromRefType(Data, RefType.RoomInstance) & 0x7f) << 24);
+            }
+            return true;
+        }
+
+        // Prefix or instance ID were not found
+        assetId = 0;
+        return false;
     }
 
     /// <inheritdoc/>
