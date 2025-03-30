@@ -15,7 +15,7 @@ namespace UndertaleModLib.Decompiler;
 /// A global game context to track data used by GML decompilation and compilation.
 /// </summary>
 /// <remarks>
-/// Can be used for multiple runs of both the Underanalyzer decompiler and compiler, and is generally thread-safe.
+/// Can be used for multiple runs of both the Underanalyzer decompiler and compiler, and is generally thread-safe after initialization.
 /// </remarks>
 public class GlobalDecompileContext : IGameContext
 {
@@ -62,6 +62,13 @@ public class GlobalDecompileContext : IGameContext
     // Lookup from script name to index (and potentially encoded asset type)
     private Dictionary<string, int> _scriptIdLookup = null;
 
+    /// <summary>
+    /// Instantiates and initializes a global decompile context for the given <see cref="UndertaleData"/>.
+    /// </summary>
+    /// <remarks>
+    /// Note: This will recalculate the global functions belonging to the given <see cref="UndertaleData"/>,
+    /// mutating its state. Therefore, this initialization operation is not thread-safe on its own.
+    /// </remarks>
     public GlobalDecompileContext(UndertaleData data)
     {
         Data = data;
@@ -73,7 +80,7 @@ public class GlobalDecompileContext : IGameContext
     /// </summary>
     public static void BuildGlobalFunctionCache(UndertaleData data)
     {
-        if (data == null || data.GlobalFunctions != null)
+        if (data is null)
         {
             // Nothing to calculate
             return;
@@ -100,10 +107,22 @@ public class GlobalDecompileContext : IGameContext
             data.GlobalFunctions = new GlobalFunctions();
         }
 
+        // Prefix used for sub-functions
+        const string subFunctionPrefix = "gml_Script_";
+
+        // Add all functions that aren't sub-functions
+        foreach (UndertaleFunction func in data.Functions)
+        {
+            if (func.Name?.Content is string name && !name.StartsWith(subFunctionPrefix, StringComparison.Ordinal))
+            {
+                data.GlobalFunctions.DefineFunction(name, func);
+            }
+        }
+
         // Add scripts to global functions lookup, if they aren't already there
         foreach (UndertaleScript script in data.Scripts)
         {
-            if (script.Name?.Content is string name && !name.StartsWith("gml_Script_", StringComparison.Ordinal) &&
+            if (script.Name?.Content is string name && !name.StartsWith(subFunctionPrefix, StringComparison.Ordinal) &&
                 !data.GlobalFunctions.FunctionNameExists(name) &&
                 data.Functions.ByName(name) is UndertaleFunction function)
             {
@@ -114,10 +133,10 @@ public class GlobalDecompileContext : IGameContext
             {
                 // If code name starts with "gml_Script_", and there's no parent code entry,
                 // then this is probably a GML-defined extension function.
-                if (code.Name?.Content is string codeName && codeName.StartsWith("gml_Script_", StringComparison.Ordinal) &&
+                if (code.Name?.Content is string codeName && codeName.StartsWith(subFunctionPrefix, StringComparison.Ordinal) &&
                     data.Functions.ByName(codeName) is UndertaleFunction extFunction)
                 {
-                    data.GlobalFunctions.DefineFunction(codeName["gml_Script_".Length..], extFunction);
+                    data.GlobalFunctions.DefineFunction(codeName[subFunctionPrefix.Length..], extFunction);
                 }
             }
         }
