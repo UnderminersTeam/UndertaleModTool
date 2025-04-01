@@ -66,6 +66,8 @@ namespace UndertaleModTool
         public DecompilerSettings DecompilerSettings { get; set; }
         public string InstanceIdPrefix { get; set; } = "inst_";
 
+        public WindowPlacementExtensions.WindowPlacement? MainWindowPlacement { get; set; } = null;
+
         public static Settings Instance { get; private set; }
 
         public static JsonSerializerOptions JsonOptions = new()
