@@ -344,6 +344,9 @@ namespace UndertaleModTool
                 return;
 
             Settings.Load();
+
+            this.SetPlacement(Settings.Instance.MainWindowPlacement);
+
             if (Settings.Instance.EnableDarkMode)
             {
                 SetDarkMode(true, true);
@@ -871,6 +874,9 @@ namespace UndertaleModTool
                 Closing -= DataWindow_Closing; // Disable "on window closed" event handler (prevent recursion)
                 _ = Task.Run(() => Dispatcher.Invoke(Close));
             }
+
+            Settings.Instance.MainWindowPlacement = this.GetPlacement();
+            Settings.Save();
         }
         private void Command_Close(object sender, ExecutedRoutedEventArgs e)
         {
