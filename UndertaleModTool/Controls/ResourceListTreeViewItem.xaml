@@ -21,13 +21,12 @@
             <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
         </local:ContextMenuDark>
 
-        <!-- TODO: Would need some way to know the ID, IndexOf won't be reliable
+        <!-- TODO: Would need some way to know the ID, IndexOf won't be reliable -->
         <local:ContextMenuDark x:Key="NullItemReplaceMenu" Opened="MenuItem_NullDataContext_ContextMenuOpened">
-            <MenuItem IsEnabled="False" Header="ID: " Name="ObjectIdLabel" />
-            <Separator />
-            <MenuItem Header="Add in place" />
+            <!--<MenuItem IsEnabled="False" Header="ID: " Name="ObjectIdLabel" />
+            <Separator />-->
+            <MenuItem IsEnabled="False" Header="Add in place (unimplemented)" />
         </local:ContextMenuDark>
-        -->
 
         <Style x:Key="UndertaleModTool.ResourceListTreeViewItem.ItemContainerStyle" TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">
             <Style.Triggers>
@@ -36,7 +35,7 @@
                 </DataTrigger>
                 <DataTrigger Binding="{Binding .}" Value="{x:Null}">
                     <Setter Property="Foreground" Value="Gray"/>
-                    <!--<Setter Property="ContextMenu" Value="{StaticResource NullItemReplaceMenu}"/>-->
+                    <Setter Property="ContextMenu" Value="{StaticResource NullItemReplaceMenu}"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
