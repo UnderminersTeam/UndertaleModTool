@@ -1511,6 +1511,8 @@ namespace UndertaleModTool
             // See #355
             foreach (UndertaleRoom Room in data.Rooms)
             {
+                if (Room is null)
+                    continue;
                 foreach (Layer Layer in Room.Layers)
                 {
                     if (Layer.LayerId > largest_layerid)
