@@ -345,7 +345,8 @@ namespace UndertaleModTool
 
             Settings.Load();
 
-            this.SetPlacement(Settings.Instance.MainWindowPlacement);
+            if (Settings.Instance.RememberWindowPlacements)
+                this.SetPlacement(Settings.Instance.MainWindowPlacement);
 
             if (Settings.Instance.EnableDarkMode)
             {
@@ -875,7 +876,10 @@ namespace UndertaleModTool
                 _ = Task.Run(() => Dispatcher.Invoke(Close));
             }
 
-            Settings.Instance.MainWindowPlacement = this.GetPlacement();
+            Settings.Instance.MainWindowPlacement = null;
+            if (Settings.Instance.RememberWindowPlacements)
+                Settings.Instance.MainWindowPlacement = this.GetPlacement();
+
             Settings.Save();
         }
         private void Command_Close(object sender, ExecutedRoutedEventArgs e)
