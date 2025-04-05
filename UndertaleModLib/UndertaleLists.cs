@@ -383,6 +383,12 @@ namespace UndertaleModLib
                 {
                     T obj = this[j];
 
+                    // Don't need to write anything if the object is null
+                    if (obj is null)
+                    {
+                        continue;
+                    }
+
                     // Serialize pre-padding, if this is a type that requires it
                     if (t.IsAssignableTo(typeof(PrePaddedObject)))
                     {
