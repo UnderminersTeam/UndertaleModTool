@@ -558,7 +558,7 @@ namespace UndertaleModLib
                     subCount = reader.GetStaticChildCount(t);
                 }
 
-                reader.Position += (pointerCount * 4) + (count * subSize);
+                reader.Position += (count * subSize);
 
                 return count + (count * subCount);
             }
