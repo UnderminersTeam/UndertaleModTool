@@ -24,6 +24,16 @@ public sealed class ProjectContext
     public string Name { get => _mainOptions.Name; }
 
     /// <summary>
+    /// Current data file path associated with this project, for loading only.
+    /// </summary>
+    public string LoadDataPath { get; }
+
+    /// <summary>
+    /// Current data file path to save to, when saving the game data (not the project itself).
+    /// </summary>
+    public string SaveDataPath { get; }
+
+    /// <summary>
     /// Whether this context has any unexported assets.
     /// </summary>
     public bool HasUnexportedAssets { get => _assetsMarkedForExport.Count > 0; }
@@ -75,10 +85,19 @@ public sealed class ProjectContext
     // Set of all project source code, as associated with UndertaleCode objects
     private readonly Dictionary<UndertaleCode, string> _codeSources = new(64);
 
+    // During project loading and saving *only*, this caches audio group data
+    private Dictionary<int, UndertaleData> _audioGroups = null;
+
+    // During project loading *only*, this holds a set of Filename strings on SerializableSound,
+    // for duplicate detection (to catch this user error early)
+    private HashSet<string> _streamedSoundFilenames = null;
+
     /// <summary>
     /// Initializes a project context based on its existing main file path, and imports all of its data.
     /// </summary>
     /// <param name="currentData">Current data context to associate with the project.</param>
+    /// <param name="loadedDataPath">Path of the data file that was loaded for the current data context.</param>
+    /// <param name="savingDataPath">Path of the data file to be saved to.</param>
     /// <param name="mainFilePath">Main file path for the project.</param>
     /// <param name="mainThreadAction">
     /// For operations that should occur on the main thread, this will be 
@@ -86,9 +105,11 @@ public sealed class ProjectContext
     /// for the lifetime of the project context.
     /// </param>
     /// <exception cref="ProjectException">When a project-specific exception occurs</exception>
-    public ProjectContext(UndertaleData currentData, string mainFilePath, Action<Action> mainThreadAction = null)
+    public ProjectContext(UndertaleData currentData, string loadedDataPath, string savingDataPath, string mainFilePath, Action<Action> mainThreadAction = null)
     {
         Data = currentData;
+        LoadDataPath = loadedDataPath;
+        SaveDataPath = savingDataPath;
         _mainFilePath = mainFilePath;
         if (mainThreadAction is not null)
         {
@@ -99,6 +120,10 @@ public sealed class ProjectContext
             _mainOptions = JsonSerializer.Deserialize<ProjectMainOptions>(fs, JsonOptions);
         }
         _mainDirectory = Path.GetDirectoryName(mainFilePath);
+
+        // Initialize loading structures
+        _audioGroups = new(currentData.AudioGroups?.Count ?? 4);
+        _streamedSoundFilenames = new(16);
 
         // Recursively find and load in all assets in subdirectories
         List<ISerializableProjectAsset> loadedAssets = new(128);
@@ -224,12 +249,39 @@ public sealed class ProjectContext
                 asset.Import(this);
             }
         });
+
+        // Save all audio groups that were loaded during import
+        foreach ((int groupId, UndertaleData group) in _audioGroups)
+        {
+            try
+            {
+                using FileStream stream = new(
+                    Path.Combine(Path.GetDirectoryName(SaveDataPath), $"audiogroup{groupId}.dat"), FileMode.Create, FileAccess.Write);
+                UndertaleIO.Write(stream, group);
+            }
+            catch (ProjectException)
+            {
+                // Propagate project-specific exceptions up
+                throw;
+            }
+            catch (Exception e)
+            {
+                // Wrap all other exceptions
+                throw new ProjectException($"Error occurred when saving audio group {groupId} during import: {e}", e);
+            }
+        }
+
+        // Clean up loading structures
+        _audioGroups = null;
+        _streamedSoundFilenames = null;
     }
 
     /// <summary>
     /// Initializes a project context for a new project based on its main file path, and a name to give to it.
     /// </summary>
     /// <param name="currentData">Current data context to associate with the project.</param>
+    /// <param name="loadedDataPath">Path of the data file that was loaded for the current data context.</param>
+    /// <param name="savingDataPath">Path of the data file to be saved to.</param>
     /// <param name="mainFilePath">Main file path for the project.</param>
     /// <param name="newProjectName">Name of the new project being created.</param>
     /// <param name="mainThreadAction">
@@ -238,9 +290,12 @@ public sealed class ProjectContext
     /// for the lifetime of the project context.
     /// </param>
     /// <exception cref="ProjectException">When a project-specific exception occurs</exception>
-    public ProjectContext(UndertaleData currentData, string mainFilePath, string newProjectName, Action<Action> mainThreadAction = null)
+    public ProjectContext(UndertaleData currentData, string loadedDataPath, string savingDataPath, string mainFilePath, 
+                          string newProjectName, Action<Action> mainThreadAction = null)
     {
         Data = currentData;
+        LoadDataPath = loadedDataPath;
+        SaveDataPath = savingDataPath;
         _mainFilePath = mainFilePath;
         if (mainThreadAction is not null)
         {
@@ -369,6 +424,9 @@ public sealed class ProjectContext
             throw new ProjectException($"Main project file no longer exists at \"{_mainFilePath}\"");
         }
 
+        // Initialize saving structures
+        _audioGroups = new(Data.AudioGroups?.Count ?? 4);
+
         // Before main asset export, ensure all code entries have source code - if they don't, use the decompiler to generate some
         GlobalDecompileContext globalDecompileContext = null;
         foreach (IProjectAsset asset in _assetsMarkedForExport)
@@ -465,6 +523,9 @@ public sealed class ProjectContext
                 UnexportedAssetsChanged?.Invoke(this, new());
             });
         }
+
+        // Clean up saving structures
+        _audioGroups = null;
     }
 
     /// <summary>
@@ -575,5 +636,72 @@ public sealed class ProjectContext
 
         return Data.Code.ByName(codeEntryNameOrNull) ??
             throw new ProjectException($"Failed to find code entry \"{codeEntryNameOrNull}\" for \"{forAsset.DataName}\"");
+    }
+
+    /// <summary>
+    /// Requests the <see cref="UndertaleData"/> for an audiogroup, from the loaded or saving data file's directory. Only works during loading a project.
+    /// </summary>
+    internal UndertaleData RequestAudiogroup(int index, bool fromLoadedDirectory, ISerializableProjectAsset forAsset)
+    {
+        // Check if cached, and return if so
+        if (_audioGroups.TryGetValue(index, out UndertaleData cached))
+        {
+            return cached;
+        }
+
+        // Not cached - perform full load
+        string filename = $"audiogroup{index}.dat";
+        string path = Path.Combine(Path.GetDirectoryName(fromLoadedDirectory ? LoadDataPath : SaveDataPath), filename);
+        if (File.Exists(path))
+        {
+            using FileStream stream = new(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+            try
+            {
+                // Read and cache data
+                return _audioGroups[index] = UndertaleIO.Read(stream, (string warning) =>
+                {
+                    throw new ProjectException($"Warning occurred when loading audio group {index}: {warning}");
+                });
+            }
+            catch (ProjectException)
+            {
+                // Propagate project-specific exceptions up
+                throw;
+            }
+            catch (Exception e)
+            {
+                // Wrap all other exceptions
+                throw new ProjectException($"Error occurred when loading audio group {index}: {e}", e);
+            }
+        }
+        else
+        {
+            throw new ProjectException($"Failed to find file \"{filename}\" for \"{forAsset.DataName}\"");
+        }
+    }
+
+    /// <summary>
+    /// Copies an audio file from the source path, to the destination filename (relative to <see cref="SaveDataPath"/>'s directory).
+    /// </summary>
+    /// <remarks>
+    /// Only should be used during project loading.
+    /// </remarks>
+    internal void CopyStreamedSoundToSaveDirectory(string destinationFilename, string sourcePath, SerializableSound forSound)
+    {
+        // Perform duplicate destination filename check
+        if (!_streamedSoundFilenames.Add(destinationFilename))
+        {
+            throw new ProjectException($"Found duplicate Filename in JSON for streamed sound asset \"{forSound.DataName}\"");
+        }
+
+        // Perform copy (and overwrite)
+        try
+        {
+            File.Copy(sourcePath, Path.Combine(Path.GetDirectoryName(SaveDataPath), destinationFilename), true);
+        }
+        catch (Exception e)
+        {
+            throw new ProjectException($"Failed to copy streamed audio file for \"{forSound.DataName}\": {e}", e);
+        }
     }
 }

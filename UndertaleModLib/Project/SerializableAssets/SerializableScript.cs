@@ -27,11 +27,11 @@ internal sealed class SerializableScript : ISerializableProjectAsset
     /// <inheritdoc cref="UndertaleScript.Code"/>
     public string Code { get; set; }
 
-    // Data script that was located during pre-import.
-    private UndertaleScript _preImportAsset = null;
+    // Data asset that was located during pre-import.
+    private UndertaleScript _dataAsset = null;
 
     /// <summary>
-    /// Populates this serializable path with data from an actual path.
+    /// Populates this serializable script with data from an actual script.
     /// </summary>
     public void PopulateFromData(ProjectContext projectContext, UndertaleScript script)
     {
@@ -53,23 +53,23 @@ internal sealed class SerializableScript : ISerializableProjectAsset
         if (projectContext.Data.Scripts.ByName(DataName) is UndertaleScript existing)
         {
             // Script found
-            _preImportAsset = existing;
+            _dataAsset = existing;
         }
         else
         {
             // No script found; create new one
-            _preImportAsset = new()
+            _dataAsset = new()
             {
                 Name = projectContext.Data.Strings.MakeString(DataName)
             };
-            projectContext.Data.Scripts.Add(_preImportAsset);
+            projectContext.Data.Scripts.Add(_dataAsset);
         }
     }
 
     /// <inheritdoc/>
     public IProjectAsset Import(ProjectContext projectContext)
     {
-        UndertaleScript script = _preImportAsset;
+        UndertaleScript script = _dataAsset;
 
         // Update all main properties
         script.Code = projectContext.FindCode(Code, this);

@@ -63,13 +63,13 @@ namespace UndertaleModTool
             {
                 return;
             }
-            if (DataContext is UndertaleScript obj)
+            Dispatcher.BeginInvoke(() =>
             {
-                Dispatcher.BeginInvoke(() =>
+                if (DataContext is UndertaleScript obj)
                 {
                     mainWindow.Project?.MarkAssetForExport(obj);
-                });
-            }
+                }
+            });
         }
     }
 }

@@ -49,8 +49,8 @@ internal sealed class SerializablePath : ISerializableProjectAsset
         public float Speed { get; set; }
     }
 
-    // Data path that was located during pre-import.
-    private UndertalePath _preImportAsset = null;
+    // Data asset that was located during pre-import.
+    private UndertalePath _dataAsset = null;
 
     /// <summary>
     /// Populates this serializable path with data from an actual path.
@@ -87,23 +87,23 @@ internal sealed class SerializablePath : ISerializableProjectAsset
         if (projectContext.Data.Paths.ByName(DataName) is UndertalePath existing)
         {
             // Path found
-            _preImportAsset = existing;
+            _dataAsset = existing;
         }
         else
         {
             // No path found; create new one
-            _preImportAsset = new()
+            _dataAsset = new()
             {
                 Name = projectContext.Data.Strings.MakeString(DataName)
             };
-            projectContext.Data.Paths.Add(_preImportAsset);
+            projectContext.Data.Paths.Add(_dataAsset);
         }
     }
 
     /// <inheritdoc/>
     public IProjectAsset Import(ProjectContext projectContext)
     {
-        UndertalePath path = _preImportAsset;
+        UndertalePath path = _dataAsset;
 
         // Update all main properties
         path.IsSmooth = IsSmooth;

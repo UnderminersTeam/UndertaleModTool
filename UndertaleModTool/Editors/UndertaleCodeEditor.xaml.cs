@@ -357,13 +357,13 @@ namespace UndertaleModTool
             {
                 return;
             }
-            if (DataContext is UndertaleCode obj)
+            Dispatcher.BeginInvoke(() =>
             {
-                Dispatcher.BeginInvoke(() =>
+                if (DataContext is UndertaleCode obj)
                 {
                     mainWindow.Project?.MarkAssetForExport(obj);
-                });
-            }
+                }
+            });
         }
 
         public static readonly RoutedEvent CtrlKEvent = EventManager.RegisterRoutedEvent(

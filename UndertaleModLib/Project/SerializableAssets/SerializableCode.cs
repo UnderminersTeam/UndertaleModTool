@@ -29,11 +29,11 @@ internal sealed class SerializableCode : ISerializableProjectAsset
     [JsonIgnore]
     public bool IndividualDirectory => false;
 
-    // Data code that was located during pre-import, or during export.
-    private UndertaleCode _foundAsset = null;
+    // Data asset that was located during pre-import, or during export.
+    private UndertaleCode _dataAsset = null;
 
     /// <summary>
-    /// Populates this serializable path with data from an actual path.
+    /// Populates this serializable code with data from an actual code asset.
     /// </summary>
     public void PopulateFromData(ProjectContext projectContext, UndertaleCode code)
     {
@@ -41,7 +41,7 @@ internal sealed class SerializableCode : ISerializableProjectAsset
         DataName = code.Name.Content;
         WeirdLocalFlag = code.WeirdLocalFlag;
 
-        _foundAsset = code;
+        _dataAsset = code;
     }
 
     /// <inheritdoc/>
@@ -59,10 +59,10 @@ internal sealed class SerializableCode : ISerializableProjectAsset
         string directory = Path.GetDirectoryName(destinationFile);
         using (FileStream fs = new(Path.Combine(directory, filename), FileMode.Create))
         {
-            projectContext.TryGetCodeSource(_foundAsset, out string source);
+            projectContext.TryGetCodeSource(_dataAsset, out string source);
             if (source is null)
             {
-                throw new ProjectException($"Failed to find source code for {_foundAsset.Name?.Content ?? "<unknown code entry name>"}");
+                throw new ProjectException($"Failed to find source code for {_dataAsset.Name?.Content ?? "<unknown code entry name>"}");
             }
             fs.Write(Encoding.UTF8.GetBytes(source));
         }
@@ -74,21 +74,21 @@ internal sealed class SerializableCode : ISerializableProjectAsset
         if (projectContext.Data.Code.ByName(DataName) is UndertaleCode existing)
         {
             // Code found
-            _foundAsset = existing;
+            _dataAsset = existing;
         }
         else
         {
             // No code found; create new one
-            _foundAsset = new()
+            _dataAsset = new()
             {
                 Name = projectContext.Data.Strings.MakeString(DataName)
             };
-            projectContext.Data.Code.Add(_foundAsset);
+            projectContext.Data.Code.Add(_dataAsset);
 
             // Also create code locals, if applicable
             if (projectContext.Data.CodeLocals is not null)
             {
-                UndertaleCodeLocals.CreateEmptyEntry(projectContext.Data, _foundAsset.Name);
+                UndertaleCodeLocals.CreateEmptyEntry(projectContext.Data, _dataAsset.Name);
             }
         }
     }
@@ -96,7 +96,7 @@ internal sealed class SerializableCode : ISerializableProjectAsset
     /// <inheritdoc/>
     public IProjectAsset Import(ProjectContext projectContext)
     {
-        UndertaleCode code = _foundAsset;
+        UndertaleCode code = _dataAsset;
 
         // Update all main properties
         code.WeirdLocalFlag = WeirdLocalFlag;
@@ -112,7 +112,7 @@ internal sealed class SerializableCode : ISerializableProjectAsset
         // Get JSON filename (of main asset file)
         if (!projectContext.AssetDataNamesToPaths.TryGetValue((DataName, AssetType), out string jsonFilename))
         {
-            throw new Exception("Failed to get code asset path");
+            throw new ProjectException("Failed to get code asset path");
         }
 
         // Load GML from disk, to be compiled
@@ -124,10 +124,10 @@ internal sealed class SerializableCode : ISerializableProjectAsset
             string source = File.ReadAllText(Path.Combine(directory, filename));
 
             // Queue for code replacement
-            group.QueueReplace(_foundAsset, source);
+            group.QueueReplace(_dataAsset, source);
 
             // Update source within the project itself
-            projectContext.UpdateCodeSource(_foundAsset, source);
+            projectContext.UpdateCodeSource(_dataAsset, source);
         }
         catch (Exception e)
         {

@@ -138,8 +138,8 @@ internal sealed class SerializableGameObject : ISerializableProjectAsset
         public string CodeEntry { get; set; }
     }
 
-    // Data game object that was located during pre-import.
-    private UndertaleGameObject _preImportAsset = null;
+    // Data asset that was located during pre-import.
+    private UndertaleGameObject _dataAsset = null;
 
     /// <summary>
     /// Populates this serializable game object with data from an actual game object.
@@ -212,23 +212,23 @@ internal sealed class SerializableGameObject : ISerializableProjectAsset
         if (projectContext.Data.GameObjects.ByName(DataName) is UndertaleGameObject existing)
         {
             // Object found
-            _preImportAsset = existing;
+            _dataAsset = existing;
         }
         else
         {
             // No object found; create new one
-            _preImportAsset = new()
+            _dataAsset = new()
             {
                 Name = projectContext.Data.Strings.MakeString(DataName)
             };
-            projectContext.Data.GameObjects.Add(_preImportAsset);
+            projectContext.Data.GameObjects.Add(_dataAsset);
         }
     }
 
     /// <inheritdoc/>
     public IProjectAsset Import(ProjectContext projectContext)
     {
-        UndertaleGameObject obj = _preImportAsset;
+        UndertaleGameObject obj = _dataAsset;
 
         // Update all main properties
         obj.Sprite = projectContext.FindSprite(Sprite, this);

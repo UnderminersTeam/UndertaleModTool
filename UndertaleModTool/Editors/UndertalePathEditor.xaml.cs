@@ -79,13 +79,13 @@ namespace UndertaleModTool
             {
                 return;
             }
-            if (DataContext is UndertalePath obj)
+            Dispatcher.BeginInvoke(() =>
             {
-                Dispatcher.BeginInvoke(() =>
+                if (DataContext is UndertalePath obj)
                 {
                     mainWindow.Project?.MarkAssetForExport(obj);
-                });
-            }
+                }
+            });
         }
 
         private void PathPoint_ValueUpdated(object sender, DataTransferEventArgs e)

@@ -12,6 +12,7 @@ namespace UndertaleModLib.Project;
 [JsonDerivedType(typeof(SerializablePath), nameof(Path))]
 [JsonDerivedType(typeof(SerializableCode), nameof(Code))]
 [JsonDerivedType(typeof(SerializableScript), nameof(Script))]
+[JsonDerivedType(typeof(SerializableSound), nameof(Sound))]
 public interface ISerializableProjectAsset
 {
     /// <summary>
@@ -61,7 +62,8 @@ public enum SerializableAssetType
     GameObject,
     Path,
     Code,
-    Script
+    Script,
+    Sound
 }
 
 /// <summary>
@@ -80,6 +82,7 @@ public static class SerializableAssetTypeExtensions
             Path => "Path",
             Code => "Code",
             Script => "Script",
+            Sound => "Sound",
             _ => throw new NotImplementedException()
         };
     }
@@ -94,6 +97,7 @@ public static class SerializableAssetTypeExtensions
             Path => "path",
             Code => "code",
             Script => "script",
+            Sound => "sound",
             _ => throw new NotImplementedException()
         };
     }
@@ -109,6 +113,7 @@ public static class SerializableAssetTypeExtensions
             Path => "paths",
             Code => "code",
             Script => "scripts",
+            Sound => "sounds",
             _ => throw new NotImplementedException()
         };
     }

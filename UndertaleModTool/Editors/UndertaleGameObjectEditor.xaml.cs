@@ -82,13 +82,13 @@ namespace UndertaleModTool
             {
                 return;
             }
-            if (DataContext is UndertaleGameObject obj)
+            Dispatcher.BeginInvoke(() =>
             {
-                Dispatcher.BeginInvoke(() =>
+                if (DataContext is UndertaleGameObject obj)
                 {
                     mainWindow.Project?.MarkAssetForExport(obj);
-                });
-            }
+                }
+            });
         }
 
         private void DataGrid_AddingNewItem(object sender, AddingNewItemEventArgs e)

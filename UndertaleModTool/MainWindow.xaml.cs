@@ -236,6 +236,10 @@ namespace UndertaleModTool
             { SystemColors.InactiveSelectionHighlightBrushKey, new SolidColorBrush(Color.FromArgb(255, 112, 112, 112)) }
         };
 
+        // Filters for all data files, and for only main data files
+        private const string DataFileFilter = "GameMaker data files (.win, .unx, .ios, .droid, audiogroup*.dat)|*.win;*.unx;*.ios;*.droid;audiogroup*.dat|All files|*";
+        private const string MainDataFileFilter = "GameMaker main data files (.win, .unx, .ios, .droid)|*.win;*.unx;*.ios;*.droid|All files|*";
+
         public MainWindow()
         {
             InitializeComponent();
@@ -736,10 +740,11 @@ namespace UndertaleModTool
 
         public async Task<bool> DoOpenDialog()
         {
-            OpenFileDialog dlg = new OpenFileDialog();
-
-            dlg.DefaultExt = "win";
-            dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios, .droid, audiogroup*.dat)|*.win;*.unx;*.ios;*.droid;audiogroup*.dat|All files|*";
+            OpenFileDialog dlg = new()
+            {
+                DefaultExt = "win",
+                Filter = DataFileFilter
+            };
 
             if (dlg.ShowDialog(this) == true)
             {
@@ -750,12 +755,24 @@ namespace UndertaleModTool
         }
         public async Task<bool> DoSaveDialog(bool suppressDebug = false)
         {
-            SaveFileDialog dlg = new SaveFileDialog();
+            // If a project is open, save to its save data file specifically
+            if (Project is not null)
+            {
+                if (this.ShowQuestionWithCancel("Save to the project's designated data file for saving?") == MessageBoxResult.Yes)
+                {
+                    await SaveFile(Project.SaveDataPath, suppressDebug);
+                    return true;
+                }
+                return false;
+            }
 
-            dlg.DefaultExt = "win";
-            dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios, .droid, audiogroup*.dat)|*.win;*.unx;*.ios;*.droid;audiogroup*.dat|All files|*";
-            dlg.FileName = FilePath;
-
+            // Regular save dialog
+            SaveFileDialog dlg = new()
+            {
+                DefaultExt = "win",
+                Filter = DataFileFilter,
+                FileName = FilePath
+            };
             if (dlg.ShowDialog(this) == true)
             {
                 await SaveFile(dlg.FileName, suppressDebug);
@@ -1115,10 +1132,12 @@ namespace UndertaleModTool
             GC.Collect();
         }
 
-        private async Task SaveFile(string filename, bool suppressDebug = false)
+        private async Task<bool> SaveFile(string filename, bool suppressDebug = false)
         {
             if (Data == null || Data.UnsupportedBytecodeVersion)
-                return;
+            {
+                return false;
+            }
 
             bool isDifferentPath = FilePath != filename;
 
@@ -1135,9 +1154,9 @@ namespace UndertaleModTool
             DebugDataDialog.DebugDataMode debugMode = DebugDataDialog.DebugDataMode.NoDebug;
             if (!suppressDebug && Data.GeneralInfo != null && !Data.GeneralInfo.IsDebuggerDisabled)
                 this.ShowWarning("You are saving the game in GameMaker Studio debug mode. Unless the debugger is running, the normal runtime will simply hang after loading. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger");
-            Task t = Task.Run(() =>
+            Task<bool> t = Task.Run(() =>
             {
-                bool SaveSucceeded = true;
+                bool saveSucceeded = true;
 
                 try
                 {
@@ -1241,12 +1260,12 @@ namespace UndertaleModTool
                         this.ShowError("An error occurred while trying to save:\n" + e.Message, "Save error");
                     });
 
-                    SaveSucceeded = false;
+                    saveSucceeded = false;
                 }
                 // Don't make any changes unless the save succeeds.
                 try
                 {
-                    if (SaveSucceeded)
+                    if (saveSucceeded)
                     {
                         // It saved successfully!
                         // If we're overwriting a previously existing data file, we're going to overwrite it now.
@@ -1268,7 +1287,7 @@ namespace UndertaleModTool
                         this.ShowError("An error occurred while trying to save:\n" + exc.Message, "Save error");
                     });
 
-                    SaveSucceeded = false;
+                    saveSucceeded = false;
                 }
 
                 UndertaleCodeEditor.gettextJSON = null;
@@ -1277,12 +1296,16 @@ namespace UndertaleModTool
                 {
                     dialog.Hide();
                 });
+
+                return saveSucceeded;
             });
             dialog.ShowDialog();
-            await t;
+            bool succeeded = await t;
 
             GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
             GC.Collect();
+
+            return succeeded;
         }
 
         public string GenerateMD5(string filename)
@@ -2463,9 +2486,11 @@ namespace UndertaleModTool
 
         public string PromptLoadFile(string defaultExt, string filter)
         {
-            OpenFileDialog dlg = new OpenFileDialog();
-            dlg.DefaultExt = defaultExt ?? "win";
-            dlg.Filter = filter ?? "Game Maker Studio data files (.win, .unx, .ios, .droid, audiogroup*.dat)|*.win;*.unx;*.ios;*.droid;audiogroup*.dat|All files|*";
+            OpenFileDialog dlg = new()
+            {
+                DefaultExt = defaultExt ?? "win",
+                Filter = filter ?? DataFileFilter
+            };
             return dlg.ShowDialog() == true ? dlg.FileName : null;
         }
 
@@ -2946,70 +2971,85 @@ namespace UndertaleModTool
 
         private async void Command_Run(object sender, ExecutedRoutedEventArgs e)
         {
-            if (Data == null)
+            if (Data is null || FilePath is null)
             {
                 ScriptError("Nothing to run!");
                 return;
             }
-            if ((!WasWarnedAboutTempRun) && SettingsWindow.TempRunMessageShow)
+
+            // Get expected game EXE name
+            string gameExeName = Data?.GeneralInfo?.FileName?.Content;
+            if (gameExeName is null)
             {
-                ScriptMessage(@"WARNING:
+                ScriptError("Null game executable name or location");
+                return;
+            }
+
+            // Change behavior depending on whether a project is loaded currently
+            string saveDataFilePath, gameExePath;
+            bool saveSucceeded;
+            if (Project is not null)
+            {
+                // Project is loaded - try to find game EXE in save directory
+                saveDataFilePath = Project.SaveDataPath;
+                gameExePath = Path.Combine(Path.GetDirectoryName(saveDataFilePath), $"{gameExeName}.exe");
+                if (!File.Exists(gameExePath))
+                {
+                    ScriptError($"Cannot find game executable path, expected to find it at: {gameExePath}");
+                    return;
+                }
+
+                // Save to the file that was designated for the project
+                saveSucceeded = await SaveFile(saveDataFilePath, false);
+            }
+            else
+            {
+                // No project loaded - warn about temp run not permanently saving anything
+                if (!WasWarnedAboutTempRun && SettingsWindow.TempRunMessageShow)
+                {
+                    ScriptMessage(@"WARNING:
 Temp running the game does not permanently 
 save your changes. Please ""Save"" the game
 to save your changes. Closing UndertaleModTool
 without using the ""Save"" option can
 result in loss of work.");
-                WasWarnedAboutTempRun = true;
-            }
-            bool saveOk = true;
-            string oldFilePath = FilePath;
-            bool oldDisableDebuggerState = true;
-            int oldSteamValue = 0;
-            oldDisableDebuggerState = Data.GeneralInfo.IsDebuggerDisabled;
-            oldSteamValue = Data.GeneralInfo.SteamAppID;
-            Data.GeneralInfo.SteamAppID = 0;
-            Data.GeneralInfo.IsDebuggerDisabled = true;
-            string TempFilesFolder = (oldFilePath != null ? Path.Combine(Path.GetDirectoryName(oldFilePath), "MyMod.temp") : "");
-            await SaveFile(TempFilesFolder, false);
-            Data.GeneralInfo.SteamAppID = oldSteamValue;
-            FilePath = oldFilePath;
-            Data.GeneralInfo.IsDebuggerDisabled = oldDisableDebuggerState;
-            if (TempFilesFolder == null)
-            {
-                this.ShowWarning("Temp folder is null.");
-                return;
-            }
-            else if (saveOk)
-            {
-                string gameExeName = Data?.GeneralInfo?.FileName?.Content;
-                if (gameExeName == null || FilePath == null)
-                {
-                    ScriptError("Null game executable name or location");
-                    return;
+                    WasWarnedAboutTempRun = true;
                 }
-                string gameExePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(FilePath), gameExeName + ".exe");
+
+                // Try to find game EXE
+                gameExePath = Path.Combine(Path.GetDirectoryName(FilePath), $"{gameExeName}.exe");
                 if (!File.Exists(gameExePath))
                 {
-                    ScriptError("Cannot find game executable path, expected: " + gameExePath);
+                    ScriptError($"Cannot find game executable path, expected to find it at: {gameExePath}");
                     return;
                 }
-                if (!File.Exists(TempFilesFolder))
+
+                // Disable debugger/Steam, and save to the folder where the game was loaded from
+                bool oldDisableDebuggerState = Data.GeneralInfo.IsDebuggerDisabled;
+                int oldSteamValue = Data.GeneralInfo.SteamAppID;
+                Data.GeneralInfo.SteamAppID = 0;
+                Data.GeneralInfo.IsDebuggerDisabled = true;
+                saveDataFilePath = Path.Combine(Path.GetDirectoryName(FilePath), "mod_temprun.temp");
+                saveSucceeded = await SaveFile(saveDataFilePath, false);
+                Data.GeneralInfo.SteamAppID = oldSteamValue;
+                Data.GeneralInfo.IsDebuggerDisabled = oldDisableDebuggerState;
+            }
+            
+            // Run the game using new data file
+            if (saveSucceeded)
+            {
+                if (!File.Exists(saveDataFilePath))
                 {
-                    ScriptError("Cannot find game path, expected: " + TempFilesFolder);
+                    ScriptError($"Cannot find game path, expected to find it at: {saveDataFilePath}");
                     return;
                 }
-                if (gameExeName != null)
-                    Process.Start(gameExePath, "-game \"" + TempFilesFolder + "\" -debugoutput \"" + Path.ChangeExtension(TempFilesFolder, ".gamelog.txt") + "\"");
+                // TODO: possibly have a setting to add debug output via
+                //          -debugoutput \"{Path.ChangeExtension(saveDataFilePath, ".gamelog.txt")}\"
+                Process.Start(gameExePath, $"-game \"{saveDataFilePath}\"");
             }
-            else if (!saveOk)
+            else
             {
-                this.ShowWarning("Temp save failed, cannot run.");
-                return;
-            }
-            if (File.Exists(TempFilesFolder))
-            {
-                await Task.Delay(3000);
-                //File.Delete(TempFilesFolder);
+                this.ShowWarning("Save failed, cannot run.");
             }
         }
         private async void Command_RunSpecial(object sender, ExecutedRoutedEventArgs e)
@@ -3331,7 +3371,7 @@ result in loss of work.");
             OpenFileDialog dlg = new OpenFileDialog();
 
             dlg.DefaultExt = "win";
-            dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios, .droid)|*.win;*.unx;*.ios;*.droid|All files|*";
+            dlg.Filter = MainDataFileFilter;
 
             if (dlg.ShowDialog() == true)
             {
@@ -3825,6 +3865,48 @@ result in loss of work.");
             UpdateObjectLabel(Selected);
         }
 
+        private string ChooseProjectSaveFile()
+        {
+            // Choose data file to save project to (when loading or saving in general)
+            SaveFileDialog saveDataDialog = new()
+            {
+                DefaultExt = "win",
+                Filter = MainDataFileFilter,
+                Title = "Choose data file to save project to"
+            };
+            if (saveDataDialog.ShowDialog(this) != true)
+            {
+                return null;
+            }
+
+            // Check if the directories are the same and warn if so (note: not a fully exhaustive check, but decent)
+            string saveFilePath = saveDataDialog.FileName;
+            if (Path.GetFullPath(Path.GetDirectoryName(saveFilePath)).Equals(
+                    Path.GetFullPath(Path.GetDirectoryName(FilePath)), StringComparison.OrdinalIgnoreCase))
+            {
+                if (this.ShowQuestionWithCancel("The save file path was set to the same directory as the loaded file path. This may permanently overwrite external data files. Proceed?", MessageBoxImage.Warning, "Save file in same directory as loaded file") != MessageBoxResult.Yes)
+                {
+                    // Abort
+                    return null;
+                }
+            }
+
+            // Check if the save directory is empty, and warn if so
+            try
+            {
+                if (!Directory.EnumerateFileSystemEntries(Path.GetDirectoryName(saveFilePath)).Any())
+                {
+                    this.ShowWarning("Currently, the save file's directory is empty. You will likely want to copy all other game files to the save directory, so that external assets can be loaded correctly (both in-game and in this tool), and so the game can run from there.");
+                }
+            }
+            catch (Exception)
+            {
+                // Ignore filesystem errors on the above check; we don't really care
+            }
+
+            return saveFilePath;
+        }
+
         private void Command_NewProject(object sender, ExecutedRoutedEventArgs e)
         {
             if (Data is null)
@@ -3839,6 +3921,14 @@ result in loss of work.");
                     // Abort new project creation
                     return;
                 }
+            }
+
+            // Ask for save file directory
+            string saveFilePath = ChooseProjectSaveFile();
+            if (saveFilePath is null)
+            {
+                // Save file prompt failed or was cancelled
+                return;
             }
 
             // Ask for name
@@ -3864,7 +3954,7 @@ result in loss of work.");
             ProjectContext newProjectContext;
             try
             {
-                newProjectContext = new(Data, Path.Combine(directory, "project.json"), projectName, (f) => Dispatcher.Invoke(f));
+                newProjectContext = new(Data, FilePath, saveFilePath, Path.Combine(directory, "project.json"), projectName, (f) => Dispatcher.Invoke(f));
             }
             catch (ProjectException ex)
             {
@@ -3900,12 +3990,26 @@ result in loss of work.");
                 }
             }
 
-            OpenFileDialog dlg = new()
+            // Ask for save file directory
+            string saveFilePath = ChooseProjectSaveFile();
+            if (saveFilePath is null)
+            {
+                // Save file prompt failed or was cancelled
+                return;
+            }
+
+            // Change main file path to the save data file path
+            string loadFilePath = FilePath;
+            FilePath = saveFilePath;
+
+            // Choose project file to open
+            OpenFileDialog openProjectDialog = new()
             {
                 DefaultExt = "json",
-                Filter = "UndertaleModTool project files (.json)|*.json|All files|*"
+                Filter = "UndertaleModTool project files (.json)|*.json|All files|*",
+                Title = "Open project file"
             };
-            if (dlg.ShowDialog(this) == true)
+            if (openProjectDialog.ShowDialog(this) == true)
             {
                 ProjectContext newProjectContext = null;
 
@@ -3915,7 +4019,7 @@ result in loss of work.");
                 {
                     try
                     {
-                        newProjectContext = new(Data, dlg.FileName, (f) => Dispatcher.Invoke(f));
+                        newProjectContext = new(Data, loadFilePath, saveFilePath, openProjectDialog.FileName, (f) => Dispatcher.Invoke(f));
                     }
                     catch (ProjectException ex)
                     {
