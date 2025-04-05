@@ -107,6 +107,24 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
     public UndertaleString Name { get; set; }
 
     /// <summary>
+    /// A <see cref="Name"/> wrapper that also sets <see cref="V2Sequence"/> accordingly.
+    /// </summary>
+    /// <remarks>
+    /// This attribute is used only in UndertaleModTool and doesn't exist in GameMaker.
+    /// </remarks>
+    public UndertaleString NameWrapper
+    {
+        get => Name;
+        set
+        {
+            Name = value;
+
+            if (IsSpecialType && SVersion > 1 && V2Sequence is not null)
+                V2Sequence.Name = Name;
+        }
+    }
+
+    /// <summary>
     /// The width of the sprite.
     /// </summary>
     public uint Width { get; set; }
@@ -160,7 +178,6 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
     /// The separation mask type this sprite has.
     /// </summary>
     public SepMaskType SepMasks { get; set; }
-
 
     /// <summary>
     /// The x-coordinate of the origin of the sprite.
@@ -225,6 +242,42 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
     public AnimSpeedType GMS2PlaybackSpeedType { get; set; } = 0;
     public bool IsSpecialType { get; set; } = false;
 
+    /// <summary>
+    /// A <see cref="GMS2PlaybackSpeed"/> wrapper that also sets <see cref="V2Sequence"/> accordingly.
+    /// </summary>
+    /// <remarks>
+    /// This attribute is used only in UndertaleModTool and doesn't exist in GameMaker.
+    /// </remarks>
+    public float GMS2PlaybackSpeedWrapper
+    {
+        get => GMS2PlaybackSpeed;
+        set
+        {
+            GMS2PlaybackSpeed = value;
+
+            if (IsSpecialType && SVersion > 1 && V2Sequence is not null)
+                V2Sequence.PlaybackSpeed = value;
+        }
+    }
+
+    /// <summary>
+    /// A <see cref="GMS2PlaybackSpeedType"/> wrapper that also sets <see cref="V2Sequence"/> accordingly.
+    /// </summary>
+    /// <remarks>
+    /// This attribute is used only in UndertaleModTool and doesn't exist in GameMaker.
+    /// </remarks>
+    public AnimSpeedType GMS2PlaybackSpeedTypeWrapper
+    {
+        get => GMS2PlaybackSpeedType;
+        set
+        {
+            GMS2PlaybackSpeedType = value;
+
+            if (IsSpecialType && SVersion > 1 && V2Sequence is not null)
+                V2Sequence.PlaybackSpeedType = value;
+        }
+    }
+
     public int SpineVersion { get; set; }
     public int SpineCacheVersion { get; set; }
     public string SpineJSON { get; set; }
@@ -241,9 +294,9 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
     public int SWFVersion { get => _SWFVersion; set { _SWFVersion = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SWFVersion))); } }
     public UndertaleYYSWF YYSWF { get => _YYSWF; set { _YYSWF = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(YYSWF))); } }
 
-    public UndertaleSequence V2Sequence;
+    public UndertaleSequence V2Sequence { get; set; }
 
-    public NineSlice V3NineSlice;
+    public NineSlice V3NineSlice { get; set; }
 
     /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
