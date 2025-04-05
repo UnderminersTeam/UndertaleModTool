@@ -127,5 +127,7 @@ namespace UndertaleModTool
             if (mainWindow.Highlighted is UndertaleObject obj)
                 mainWindow.DeleteItem(obj);
         }
+
+        private void MenuItem_NullDataContext_ContextMenuOpened(object sender, RoutedEventArgs e) {}
     }
 }
