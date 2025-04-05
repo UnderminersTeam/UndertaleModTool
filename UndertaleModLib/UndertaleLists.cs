@@ -580,8 +580,6 @@ namespace UndertaleModLib
             {
                 for (; j < count; j++)
                 {
-                    if (pointers[j] == 0)
-                        continue;
                     reader.AbsPosition = pointers[j];
                     totalCount += 1 + unserializeFunc(reader);
                 }
