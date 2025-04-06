@@ -9,6 +9,7 @@ using Underanalyzer.Decompiler;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
+using UndertaleModLib.Project.Json;
 using UndertaleModLib.Project.SerializableAssets;
 
 namespace UndertaleModLib.Project;
@@ -584,6 +585,36 @@ public sealed class ProjectContext
     }
 
     /// <summary>
+    /// Tries to find a background with the given name, if not null or whitespace, for the given serializable project asset.
+    /// </summary>
+    /// <returns>Background that was found, or null.</returns>
+    internal UndertaleBackground FindBackground(string backgroundNameOrNull, ISerializableProjectAsset forAsset)
+    {
+        if (string.IsNullOrWhiteSpace(backgroundNameOrNull))
+        {
+            return null;
+        }
+
+        return Data.Backgrounds.ByName(backgroundNameOrNull) ??
+            throw new ProjectException($"Failed to find background \"{backgroundNameOrNull}\" for \"{forAsset.DataName}\"");
+    }
+
+    /// <summary>
+    /// Tries to find a font with the given name, if not null or whitespace, for the given serializable project asset.
+    /// </summary>
+    /// <returns>Font that was found, or null.</returns>
+    internal UndertaleFont FindFont(string fontNameOrNull, ISerializableProjectAsset forAsset)
+    {
+        if (string.IsNullOrWhiteSpace(fontNameOrNull))
+        {
+            return null;
+        }
+
+        return Data.Fonts.ByName(fontNameOrNull) ??
+            throw new ProjectException($"Failed to find font \"{fontNameOrNull}\" for \"{forAsset.DataName}\"");
+    }
+
+    /// <summary>
     /// Tries to find a game object with the given name, if not null or whitespace, for the given serializable project asset.
     /// </summary>
     /// <returns>Game object that was found, or null.</returns>
@@ -636,6 +667,50 @@ public sealed class ProjectContext
 
         return Data.Code.ByName(codeEntryNameOrNull) ??
             throw new ProjectException($"Failed to find code entry \"{codeEntryNameOrNull}\" for \"{forAsset.DataName}\"");
+    }
+
+    /// <summary>
+    /// Tries to find a sequence with the given name, if not null or whitespace, for the given serializable project asset.
+    /// </summary>
+    /// <returns>Sequence that was found, or null.</returns>
+    internal UndertaleSequence FindSequence(string sequenceNameOrNull, ISerializableProjectAsset forAsset)
+    {
+        if (string.IsNullOrWhiteSpace(sequenceNameOrNull))
+        {
+            return null;
+        }
+
+        return Data.Sequences.ByName(sequenceNameOrNull) ??
+            throw new ProjectException($"Failed to find sequence \"{sequenceNameOrNull}\" for \"{forAsset.DataName}\"");
+    }
+
+    /// <summary>
+    /// Tries to find a particle system with the given name, if not null or whitespace, for the given serializable project asset.
+    /// </summary>
+    /// <returns>Particle system that was found, or null.</returns>
+    internal UndertaleParticleSystem FindParticleSystem(string particleSystemNameOrNull, ISerializableProjectAsset forAsset)
+    {
+        if (string.IsNullOrWhiteSpace(particleSystemNameOrNull))
+        {
+            return null;
+        }
+
+        return Data.ParticleSystems.ByName(particleSystemNameOrNull) ??
+            throw new ProjectException($"Failed to find particle system \"{particleSystemNameOrNull}\" for \"{forAsset.DataName}\"");
+    }
+
+    /// <summary>
+    /// Finds or creates a string with the given string contents, or returns <see langword="null"/> if <paramref name="contents"/> is <see langword="null"/>.
+    /// </summary>
+    internal UndertaleString MakeString(string contents)
+    {
+        if (contents is null)
+        {
+            return null;
+        }
+
+        // TODO: possibly more optimized lookup later
+        return Data.Strings.MakeString(contents);
     }
 
     /// <summary>

@@ -68,7 +68,8 @@ internal sealed class SerializableGameObject : ISerializableProjectAsset
     public bool IsSensor { get; set; }
 
     /// <inheritdoc cref="UndertaleGameObject.CollisionShape"/>
-    [JsonConverter(typeof(JsonStringEnumConverter))] public CollisionShapeFlags CollisionShape { get; set; }
+    [JsonConverter(typeof(JsonStringEnumConverter))] 
+    public CollisionShapeFlags CollisionShape { get; set; }
 
     /// <inheritdoc cref="UndertaleGameObject.Density"/>
     public float Density { get; set; }
@@ -119,7 +120,8 @@ internal sealed class SerializableGameObject : ISerializableProjectAsset
         /// <summary>
         /// Event category.
         /// </summary>
-        [JsonConverter(typeof(JsonStringEnumConverter))] public EventType Category { get; set; }
+        [JsonConverter(typeof(JsonStringEnumConverter))] 
+        public EventType Category { get; set; }
 
         /// <summary>
         /// Event subtype, differing depending on <see cref="Category"/>.
@@ -219,7 +221,7 @@ internal sealed class SerializableGameObject : ISerializableProjectAsset
             // No object found; create new one
             _dataAsset = new()
             {
-                Name = projectContext.Data.Strings.MakeString(DataName)
+                Name = projectContext.MakeString(DataName)
             };
             projectContext.Data.GameObjects.Add(_dataAsset);
         }
@@ -297,7 +299,7 @@ internal sealed class SerializableGameObject : ISerializableProjectAsset
                         IsQuestion = false,
                         UseApplyTo = true,
                         ExeType = 2,
-                        ActionName = projectContext.Data.Strings.MakeString(""),
+                        ActionName = projectContext.MakeString(""),
                         CodeId = projectContext.FindCode(ev.CodeEntry, this),
                         ArgumentCount = 1,
                         Who = -1,

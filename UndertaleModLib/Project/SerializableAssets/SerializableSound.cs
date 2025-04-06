@@ -158,7 +158,7 @@ internal sealed class SerializableSound : ISerializableProjectAsset
             // No sound found; create new one
             _dataAsset = new()
             {
-                Name = projectContext.Data.Strings.MakeString(DataName)
+                Name = projectContext.MakeString(DataName)
             };
             projectContext.Data.Sounds.Add(_dataAsset);
         }
@@ -173,8 +173,8 @@ internal sealed class SerializableSound : ISerializableProjectAsset
         UndertaleSound sound = _dataAsset;
 
         // Update all main properties
-        sound.File = projectContext.Data.Strings.MakeString(Filename);
-        sound.Type = Type is null ? null : projectContext.Data.Strings.MakeString(Type);
+        sound.File = projectContext.MakeString(Filename);
+        sound.Type = projectContext.MakeString(Type);
         sound.Volume = Volume;
         sound.Pitch = Pitch;
         sound.Effects = Effects;

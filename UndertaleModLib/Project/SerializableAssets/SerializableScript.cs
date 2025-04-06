@@ -60,7 +60,7 @@ internal sealed class SerializableScript : ISerializableProjectAsset
             // No script found; create new one
             _dataAsset = new()
             {
-                Name = projectContext.Data.Strings.MakeString(DataName)
+                Name = projectContext.MakeString(DataName)
             };
             projectContext.Data.Scripts.Add(_dataAsset);
         }

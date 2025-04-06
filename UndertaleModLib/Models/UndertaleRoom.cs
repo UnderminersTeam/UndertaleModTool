@@ -7,6 +7,8 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using UndertaleModLib.Project;
+using UndertaleModLib.Project.SerializableAssets;
 using UndertaleModLib.Util;
 
 namespace UndertaleModLib.Models;
@@ -14,7 +16,7 @@ namespace UndertaleModLib.Models;
 /// <summary>
 /// A room in a data file.
 /// </summary>
-public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDisposable
+public class UndertaleRoom : UndertaleNamedResource, IProjectAsset, INotifyPropertyChanged, IDisposable
 {
     /// <summary>
     /// Certain flags a room can have.
@@ -125,18 +127,26 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     /// <summary>
     /// The width of the room grid in pixels.
     /// </summary>
+    /// <remarks>
+    /// This is an UndertaleModTool-only property; it doesn't exist in game data.
+    /// </remarks>
     public double GridWidth { get => _gridWidth; set { if (value >= 0) _gridWidth = value; } }
 
     /// <summary>
     /// The height of the room grid in pixels.
     /// </summary>
+    /// <remarks>
+    /// This is an UndertaleModTool-only property; it doesn't exist in game data.
+    /// </remarks>
     public double GridHeight { get => _gridHeight; set { if (value >= 0) _gridHeight = value; } }
 
     /// <summary>
     /// The thickness of the room grid in pixels.
     /// </summary>
+    /// <remarks>
+    /// This is an UndertaleModTool-only property; it doesn't exist in game data.
+    /// </remarks>
     public double GridThicknessPx { get; set; } = 1d;
-    private UndertalePointerList<Layer> _layers = new();
 
     /// <summary>
     /// The list of backgrounds this room uses.
@@ -157,6 +167,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     /// The list of tiles this room uses.
     /// </summary>
     public UndertalePointerList<Tile> Tiles { get; set; } = new UndertalePointerList<Tile>();
+
+    private UndertalePointerList<Layer> _layers = new();
 
     /// <summary>
     /// The list of layers this room uses. Used in Game Maker Studio: 2 only, as <see cref="Backgrounds"/> and <see cref="Tiles"/> are empty there.
@@ -556,6 +568,23 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         Caption = null;
         GameObjects = new();
     }
+
+    /// <inheritdoc/>
+    ISerializableProjectAsset IProjectAsset.GenerateSerializableProjectAsset(ProjectContext projectContext)
+    {
+        SerializableRoom serializable = new();
+        serializable.PopulateFromData(projectContext, this);
+        return serializable;
+    }
+
+    /// <inheritdoc/>
+    public string ProjectName => Name?.Content ?? "<unknown name>";
+
+    /// <inheritdoc/>
+    public SerializableAssetType ProjectAssetType => SerializableAssetType.Room;
+
+    /// <inheritdoc/>
+    public bool ProjectExportable => true;
 
     /// <summary>
     /// Interface for objects within rooms.
@@ -1345,7 +1374,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     //TODO: everything from here on is mostly gms2 related which i dont have much experience with
     public class Layer : UndertaleObject, INotifyPropertyChanged, IDisposable
     {
-        public interface LayerData : UndertaleObject, IDisposable
+        public interface LayerData : UndertaleObject, INotifyPropertyChanged, IDisposable
         {
         }
 
@@ -1355,6 +1384,9 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         /// <summary>
         /// The room this layer belongs to.
         /// </summary>
+        /// <remarks>
+        /// This is an UndertaleModTool-only property; it doesn't exist in game data.
+        /// </remarks>
         public UndertaleRoom ParentRoom { get => _parentRoom; set { _parentRoom = value; OnPropertyChanged(); UpdateParentRoom(); } }
 
         /// <summary>
@@ -1528,6 +1560,11 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             internal uint[] InstanceIds { get; set; } // 100000, 100001, 100002, 100003 - instance ids from GameObjects list in the room
             public ObservableCollection<GameObject> Instances { get; set; } = new();
 
+            /// <inheritdoc />
+#pragma warning disable CS0067 // TODO: remove this suppression once Fody is no longer in use
+            public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067
+
             public bool AreInstancesUnresolved()
             {
                 return InstanceIds?.Length > 0 && Instances?.Count == 0;
@@ -1573,7 +1610,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             }
         }
 
-        public class LayerTilesData : LayerData, INotifyPropertyChanged
+        public class LayerTilesData : LayerData
         {
             private UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND> _background = new(); // In GMS2 backgrounds are just tilesets
             private uint _tilesX;
@@ -1913,7 +1950,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             }
         }
 
-        public class LayerBackgroundData : LayerData, IStaticChildObjCount, IStaticChildObjectsSize, INotifyPropertyChanged
+        public class LayerBackgroundData : LayerData, IStaticChildObjCount, IStaticChildObjectsSize
         {
             /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
             public static readonly uint ChildObjectCount = 1;
@@ -2023,6 +2060,11 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             public UndertalePointerList<SpriteInstance> NineSlices { get; set; } // Removed in 2.3.2, before never used
             public UndertalePointerList<ParticleSystemInstance> ParticleSystems { get; set; }
             public UndertalePointerList<TextItemInstance> TextItems { get; set; }
+
+            /// <inheritdoc />
+#pragma warning disable CS0067 // TODO: remove this suppression once Fody is no longer in use
+            public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067
 
             /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
@@ -2176,8 +2218,13 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         [PropertyChanged.AddINotifyPropertyChangedInterface]
         public class LayerEffectData : LayerData
         {
-            public UndertaleString EffectType;
-            public UndertaleSimpleList<EffectProperty> Properties;
+            public UndertaleString EffectType { get; set; }
+            public UndertaleSimpleList<EffectProperty> Properties { get; set; }
+
+            /// <inheritdoc />
+#pragma warning disable CS0067 // TODO: remove this suppression once Fody is no longer in use
+            public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067
 
             /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)

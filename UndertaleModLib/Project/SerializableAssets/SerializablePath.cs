@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -94,7 +92,7 @@ internal sealed class SerializablePath : ISerializableProjectAsset
             // No path found; create new one
             _dataAsset = new()
             {
-                Name = projectContext.Data.Strings.MakeString(DataName)
+                Name = projectContext.MakeString(DataName)
             };
             projectContext.Data.Paths.Add(_dataAsset);
         }

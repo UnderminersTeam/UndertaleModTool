@@ -81,7 +81,7 @@ internal sealed class SerializableCode : ISerializableProjectAsset
             // No code found; create new one
             _dataAsset = new()
             {
-                Name = projectContext.Data.Strings.MakeString(DataName)
+                Name = projectContext.MakeString(DataName)
             };
             projectContext.Data.Code.Add(_dataAsset);
 
