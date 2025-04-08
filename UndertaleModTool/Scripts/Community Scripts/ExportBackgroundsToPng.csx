@@ -14,7 +14,7 @@ using System.Runtime;
 using UndertaleModLib;
 using UndertaleModLib.Util;
 using UndertaleModLib.Models;
-
+using ImageMagick;
 
 
 EnsureDataLoaded();
@@ -56,6 +56,8 @@ GC.Collect();
 
 ScriptMessage("Exported successfully.");
 
+var scale = 3;
+
 async Task DumpRooms()
 {
   for (int i = 0; i < roomCount; i++)
@@ -83,7 +85,10 @@ async Task DumpRooms()
     }
 
     DumpRoom(room.Name.Content, (i == roomCount - 1));
+    ResizeDumpedRoom(room.Name.Content); 
     room.GameObjects = savedGameObjects;
+
+    scale = 1; 
   }
 
   mainWindow.RoomRendererEnabled = false;
@@ -92,19 +97,40 @@ async Task DumpRooms()
 
 void DumpRoom(string roomName, bool last)
 {
-    using (var file = File.OpenWrite(exportedBackgroundsFolder + System.IO.Path.DirectorySeparatorChar + roomName + ".png"))
+  var path = exportedBackgroundsFolder + System.IO.Path.DirectorySeparatorChar + "!" + roomName + ".png";
+  using (var file = File.OpenWrite(path))
+  {
+    try
     {
-        try
-        {
-            roomRenderer.SaveImagePNG(file, false, last);
-        }
-        catch (Exception e)
-        {
-            throw new ScriptException($"An error occurred while exporting room \"{roomName}\".\n{e}");
-        }
+      roomRenderer.SaveImagePNG(file, false, last);
     }
+    catch (Exception e)
+    {
+      throw new ScriptException($"An error occurred while exporting room \"{roomName}\".\n{e}");
+    }
+  }
 
-    IncrementProgress();
+  
 }
 
-
+void ResizeDumpedRoom(string roomName)
+{
+  var path = exportedBackgroundsFolder + System.IO.Path.DirectorySeparatorChar + "!" + roomName + ".png";
+  try
+  {
+    using var collection = new MagickImageCollection(path);
+    collection.Coalesce();
+    var info = new MagickImageInfo();
+    info.Read(path);
+    foreach (var image in collection)
+    {
+      image.Resize(info.Width * 3, info.Height * 3);
+    }
+    collection.Write(path);
+    IncrementProgress();
+  }
+  catch (Exception e)
+  {
+    throw new ScriptException($"An error occurred while exporting room \"{roomName}\".\n{e}");
+  }
+}
