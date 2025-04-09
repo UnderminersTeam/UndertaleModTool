@@ -6,6 +6,8 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using FFMpegCore;
+using FFMpegCore.Pipes;
 
 EnsureDataLoaded();
 
@@ -228,10 +230,30 @@ void DumpSound(UndertaleSound sound)
         process = false;
     if (process && !File.Exists(soundFilePath + audioExt))
     {
-        if (usesAGRPs)
-            File.WriteAllBytes(soundFilePath + audioExt, GetSoundData(sound));
-        else
-            File.WriteAllBytes(soundFilePath + audioExt, sound.AudioFile.Data);
+      
+      if (usesAGRPs)
+      {
+          File.WriteAllBytes(soundFilePath + audioExt, GetSoundData(sound));
+          FFMpegArguments
+              .FromFileInput(soundFilePath + audioExt)
+              .OutputToFile(soundFilePath + ".ogg", true, options => options
+                  .WithConstantRateFactor(21)
+                  .WithVariableBitrate(4)
+                  .WithFastStart())
+              .ProcessSynchronously();
+      }
+
+      else
+      {
+        File.WriteAllBytes(soundFilePath + audioExt, sound.AudioFile.Data); 
+         FFMpegArguments
+              .FromFileInput(soundFilePath + audioExt)
+              .OutputToFile(soundFilePath + ".ogg", true, options => options
+                  .WithConstantRateFactor(21)
+                  .WithVariableBitrate(4)
+                  .WithFastStart())
+              .ProcessSynchronously();
+      } 
     }
 }
 

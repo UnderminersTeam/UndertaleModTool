@@ -63,6 +63,7 @@
         <PackageReference Include="AvalonEdit">
             <Version>6.3.0.90</Version>
         </PackageReference>
+        <PackageReference Include="FFMpegCore" Version="5.2.0" />
         <PackageReference Include="Fody" Version="6.9.2">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
