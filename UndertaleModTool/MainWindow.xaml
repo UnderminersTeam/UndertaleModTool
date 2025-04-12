@@ -22,7 +22,7 @@
     </Window.Title>
     <Window.Resources>
         <local:ImplementsInterfaceConverter x:Key="ImplementsInterfaceConverter"/>
-        <local:DataHierarchyFilteredViewConverter x:Key="FilteredViewConverter" Filter="{Binding Text, Source={x:Reference SearchBox}, UpdateSourceTrigger=PropertyChanged}"/>
+        <local:ResourceTreeFilteredViewConverter x:Key="FilteredViewConverter" Filter="{Binding Text, Source={x:Reference SearchBox}, UpdateSourceTrigger=PropertyChanged}"/>
         <local:NullToVisibilityConverter x:Key="VisibleIfNotNull"  nullValue="Collapsed" notNullValue="Visible"/>
         <local:CompareNumbersConverter x:Key="CompareNumbersConverter"/>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/> <!-- (built-in converter) -->
