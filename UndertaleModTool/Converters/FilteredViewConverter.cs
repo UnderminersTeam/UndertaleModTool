@@ -26,7 +26,7 @@ namespace UndertaleModTool
             set { SetValue(FilterProperty, value); }
         }
 
-        internal virtual Predicate<object> CreateFilter()
+        protected virtual Predicate<object> CreateFilter()
         {
             return (obj) =>
             {
@@ -45,7 +45,7 @@ namespace UndertaleModTool
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null)
+            if (value is null)
                 return null;
             ICollectionView filteredView = CollectionViewSource.GetDefaultView(value);
             filteredView.Filter = CreateFilter();
