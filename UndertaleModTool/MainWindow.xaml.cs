@@ -1730,8 +1730,10 @@ namespace UndertaleModTool
                     {
                         roomResource.Caption = Data.Strings.MakeString("");
 
-                        if (IsGMS2 == Visibility.Visible)
-                            roomResource.Flags |= UndertaleRoom.RoomEntryFlags.IsGMS2;
+                        if (Data?.IsGameMaker2() == true)
+                        {
+                            roomResource.Flags |= Data.IsVersionAtLeast(2024, 13) ? UndertaleRoom.RoomEntryFlags.IsGM2024_13 : UndertaleRoom.RoomEntryFlags.IsGMS2;
+                        }
                     }
                     else if (obj is UndertaleScript scriptResource)
                     {
