@@ -219,7 +219,7 @@ namespace UndertaleModLib
         {
             return UndertaleChunk.Unserialize(this);
         }
-        public uint CountChunkChildObjects()
+        public (uint, UndertaleChunk) CountChunkChildObjects()
         {
             return UndertaleChunk.CountChunkChildObjects(this);
         }
