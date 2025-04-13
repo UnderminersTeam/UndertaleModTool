@@ -65,17 +65,7 @@ namespace UndertaleModLib
                 name = reader.ReadChars(4);
                 uint length = reader.ReadUInt32();
 
-                // TODO: I can't think of a cleaner way to do this...
-                Type type = Type.GetType(typeof(UndertaleChunk).FullName + name);
-                if (type == null)
-                {
-                    throw new IOException("Unknown chunk " + name + "!!!");
-                    /*Debug.WriteLine("Unknown chunk " + name + "!!!");
-                    reader.Position = reader.Position + length;
-                    return null;*/
-                }
-
-                UndertaleChunk chunk = (UndertaleChunk)Activator.CreateInstance(type);
+                UndertaleChunk chunk = reader.undertaleData.FORM.Chunks[name];
                 Util.DebugUtil.Assert(chunk.Name == name,
                                       $"Chunk name mismatch: expected \"{name}\", got \"{chunk.Name}\".");
                 chunk.Length = length;
@@ -124,7 +114,7 @@ namespace UndertaleModLib
                 throw new UndertaleSerializationException(e.Message + "\nat " + reader.AbsPosition.ToString("X8") + " while reading chunk " + name, e);
             }
         }
-        public static uint CountChunkChildObjects(UndertaleReader reader)
+        public static (uint, UndertaleChunk) CountChunkChildObjects(UndertaleReader reader)
         {
             string name = "(unknown)";
             try
@@ -132,11 +122,12 @@ namespace UndertaleModLib
                 name = reader.ReadChars(4);
                 uint length = reader.ReadUInt32();
 
-                Type type = Type.GetType(typeof(UndertaleChunk).FullName + name);
-                if (type == null)
-                    throw new IOException("Unknown chunk " + name + "!!!");
+                if (!UndertaleChunkFORM.ChunkConstructors.TryGetValue(name, out Func<UndertaleChunk> instantiator))
+                {
+                    throw new IOException($"Unknown chunk \"{name}\"");
+                }
 
-                UndertaleChunk chunk = (UndertaleChunk)Activator.CreateInstance(type);
+                UndertaleChunk chunk = instantiator();
                 Util.DebugUtil.Assert(chunk.Name == name,
                                       $"Chunk name mismatch: expected \"{name}\", got \"{chunk.Name}\".");
                 chunk.Length = length;
@@ -150,7 +141,7 @@ namespace UndertaleModLib
                 reader.SwitchReaderType(false);
                 reader.Position = chunkStart + chunk.Length;
 
-                return count;
+                return (count, chunk);
             }
             catch (UndertaleSerializationException e)
             {
