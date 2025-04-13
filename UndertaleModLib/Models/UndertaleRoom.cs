@@ -35,13 +35,17 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         /// </summary>
         DoNotClearDisplayBuffer = 4,
         /// <summary>
-        /// Whether the room was made in Game Maker: Studio 2.
+        /// Whether the room was made in GameMaker Studio 2 or above.
         /// </summary>
         IsGMS2 = 131072,
         /// <summary>
-        /// Whether the room was made in Game Maker: Studio 2.3.
+        /// Whether the room was made in GameMaker Studio 2.3 or above.
         /// </summary>
-        IsGMS2_3 = 65536
+        IsGMS2_3 = 65536,
+        /// <summary>
+        /// Whether the room was made in GameMaker 2024.13 or above.
+        /// </summary>
+        IsGM2024_13 = 262144
     }
 
     /// <summary>
@@ -159,7 +163,12 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     public UndertalePointerList<Tile> Tiles { get; set; } = new UndertalePointerList<Tile>();
 
     /// <summary>
-    /// The list of layers this room uses. Used in Game Maker Studio: 2 only, as <see cref="Backgrounds"/> and <see cref="Tiles"/> are empty there.
+    /// List of instance creation order IDs, used for the first room in the room order only, in GameMaker 2024.13 and above.
+    /// </summary>
+    public InstanceIDList InstanceCreationOrderIDs { get; set; } = null;
+
+    /// <summary>
+    /// The list of layers this room uses. Used in GameMaker Studio 2 only, as <see cref="Backgrounds"/> and <see cref="Tiles"/> are empty there.
     /// </summary>
     public UndertalePointerList<Layer> Layers { get => _layers; set { _layers = value; UpdateBGColorLayer(); OnPropertyChanged(); } }
 
@@ -287,6 +296,10 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         writer.WriteUndertaleObjectPointer(Views);
         writer.WriteUndertaleObjectPointer(GameObjects);
         writer.WriteUndertaleObjectPointer(Tiles);
+        if (writer.undertaleData.IsVersionAtLeast(2024, 13))
+        {
+            writer.WriteUndertaleObjectPointer(InstanceCreationOrderIDs);
+        }
         writer.Write(World);
         writer.Write(Top);
         writer.Write(Left);
@@ -307,6 +320,10 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         writer.WriteUndertaleObject(Views);
         writer.WriteUndertaleObject(GameObjects);
         writer.WriteUndertaleObject(Tiles);
+        if (writer.undertaleData.IsVersionAtLeast(2024, 13))
+        {
+            writer.WriteUndertaleObject(InstanceCreationOrderIDs);
+        }
         if (writer.undertaleData.IsGameMaker2())
         {
             writer.WriteUndertaleObject(Layers);
@@ -333,6 +350,10 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         Views = reader.ReadUndertaleObjectPointer<UndertalePointerList<View>>();
         GameObjects = reader.ReadUndertaleObjectPointer<UndertalePointerList<GameObject>>();
         Tiles = reader.ReadUndertaleObjectPointer<UndertalePointerList<Tile>>();
+        if (reader.undertaleData.IsVersionAtLeast(2024, 13))
+        {
+            InstanceCreationOrderIDs = reader.ReadUndertaleObjectPointer<InstanceIDList>();
+        }
         World = reader.ReadBoolean();
         Top = reader.ReadUInt32();
         Left = reader.ReadUInt32();
@@ -353,6 +374,10 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         reader.ReadUndertaleObject(Views);
         reader.ReadUndertaleObject(GameObjects);
         reader.ReadUndertaleObject(Tiles);
+        if (reader.undertaleData.IsVersionAtLeast(2024, 13))
+        {
+            reader.ReadUndertaleObject(InstanceCreationOrderIDs);
+        }
         if (reader.undertaleData.IsGameMaker2())
         {
             reader.ReadUndertaleObject(Layers);
@@ -414,6 +439,13 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         uint tilesPtr = reader.ReadUInt32();
         uint layersPtr = 0;
         uint sequencesPtr = 0;
+
+        if (reader.undertaleData.IsVersionAtLeast(2024, 13))
+        {
+            // InstanceCreationOrderIDs
+            reader.Position += 4;
+            count += 1;
+        }
 
         reader.Position += 32;
 
@@ -531,10 +563,11 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         GC.SuppressFinalize(this);
 
         _creationCodeId.Dispose();
-        if (Flags.HasFlag(RoomEntryFlags.IsGMS2))
+        if (Flags.HasFlag(RoomEntryFlags.IsGMS2) || Flags.HasFlag(RoomEntryFlags.IsGM2024_13))
         {
             foreach (Layer layer in _layers)
                 layer?.Dispose();
+            InstanceCreationOrderIDs = null;
             _layers = null;
             Sequences = new();
         }
@@ -2687,6 +2720,33 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             _font.Dispose();
             Name = null;
             Text = null;
+        }
+    }
+
+    /// <summary>
+    /// A simple list of instance IDs, as used in GameMaker 2024.13 and above.
+    /// </summary>
+    public class InstanceIDList : UndertaleObject
+    {
+        public UndertaleObservableList<int> InstanceIDs { get; set; } = new();
+
+        public void Serialize(UndertaleWriter writer)
+        {
+            writer.Write(InstanceIDs.Count);
+            foreach (int id in InstanceIDs)
+            {
+                writer.Write(id);
+            }
+        }
+
+        public void Unserialize(UndertaleReader reader)
+        {
+            int count = reader.ReadInt32();
+            InstanceIDs.SetCapacity(count);
+            for (int i = 0; i < count; i++)
+            {
+                InstanceIDs.Add(reader.ReadInt32());
+            }
         }
     }
 }

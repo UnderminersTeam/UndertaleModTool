@@ -49,6 +49,7 @@ namespace UndertaleModLib
             { "TMLN", () => new UndertaleChunkTMLN() },
             { "OBJT", () => new UndertaleChunkOBJT() },
             { "ROOM", () => new UndertaleChunkROOM() },
+            { "UILR", () => new UndertaleChunkUILR() },
             { "DAFL", () => new UndertaleChunkDAFL() },
             { "EMBI", () => new UndertaleChunkEMBI() },
             { "TPAG", () => new UndertaleChunkTPAG() },
@@ -85,6 +86,7 @@ namespace UndertaleModLib
         public UndertaleChunkTMLN TMLN => Chunks.GetValueOrDefault("TMLN") as UndertaleChunkTMLN;
         public UndertaleChunkOBJT OBJT => Chunks.GetValueOrDefault("OBJT") as UndertaleChunkOBJT;
         public UndertaleChunkROOM ROOM => Chunks.GetValueOrDefault("ROOM") as UndertaleChunkROOM;
+        public UndertaleChunkUILR UILR => Chunks.GetValueOrDefault("UILR") as UndertaleChunkUILR;
         public UndertaleChunkDAFL DAFL => Chunks.GetValueOrDefault("DAFL") as UndertaleChunkDAFL;
         public UndertaleChunkEMBI EMBI => Chunks.GetValueOrDefault("EMBI") as UndertaleChunkEMBI;
         public UndertaleChunkTPAG TPAG => Chunks.GetValueOrDefault("TPAG") as UndertaleChunkTPAG;
@@ -1369,6 +1371,21 @@ namespace UndertaleModLib
             reader.Position = returnTo;
             checkedFor2024_2 = true;
             checkedFor2024_4 = true;
+        }
+    }
+
+    public class UndertaleChunkUILR : UndertaleListChunk<UndertaleRoom> // TODO: correct type here
+    {
+        public override string Name => "UILR";
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            base.UnserializeChunk(reader);
+        }
+
+        internal override uint UnserializeObjectCount(UndertaleReader reader)
+        {
+            return 0;
         }
     }
 
