@@ -1379,6 +1379,7 @@ namespace UndertaleModLib
             }
 
             long returnPos = reader.Position;
+            long chunkEndPos = returnPos + Length;
 
             // The CodeLocals list was removed in 2024.8, so we check if Functions
             // is the only thing in here.
@@ -1386,7 +1387,7 @@ namespace UndertaleModLib
             // Skip over the (Simple)List
             // (3*4 is the size of an UndertaleFunction object)
             reader.Position += 3 * 4 * funcCount;
-            if (reader.Position == returnPos + Length)
+            if (reader.Position == chunkEndPos)
             {
                 // Whatever, let's consider this a win
                 reader.undertaleData.SetGMS2Version(2024, 8);
@@ -1399,9 +1400,9 @@ namespace UndertaleModLib
             int specAlign = reader.undertaleData.PaddingAlignException;
             while ((reader.AbsPosition & ((specAlign == -1 ? 16 : specAlign) - 1)) != 0)
             {
-                if (reader.ReadByte() != 0)
+                if (reader.Position >= chunkEndPos || reader.ReadByte() != 0)
                 {
-                    // If we hit a non-zero byte, it can't be padding
+                    // If we hit a non-zero byte (or exceed chunk boundaries), it can't be padding
                     reader.Position = returnPos;
                     checkedFor2024_8 = true;
                     return;
@@ -1409,8 +1410,10 @@ namespace UndertaleModLib
             }
 
             // Then check if we're at the end of the chunk
-            if (reader.Position == returnPos + Length)
+            if (reader.Position == chunkEndPos)
+            {
                 reader.undertaleData.SetGMS2Version(2024, 8);
+            }
 
             reader.Position = returnPos;
             checkedFor2024_8 = true;
