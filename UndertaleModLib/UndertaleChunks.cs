@@ -1289,6 +1289,11 @@ namespace UndertaleModLib
     {
         public override string Name => "CODE";
 
+        /// <summary>
+        /// Code count as determined during object counting.
+        /// </summary>
+        internal int CodeCount { get; private set; } = -1;
+
         internal override void SerializeChunk(UndertaleWriter writer)
         {
             if (List == null)
@@ -1318,13 +1323,13 @@ namespace UndertaleModLib
             if (reader.undertaleData.UnsupportedBytecodeVersion)
             {
                 // In unsupported bytecode versions, there's no instructions parsed (so count is equivalent to the code count)
-                return reader.ReadUInt32();
+                return (uint)(CodeCount = (int)reader.ReadUInt32());
             }
 
-            int codeCount = (int)reader.ReadUInt32();
+            CodeCount = (int)reader.ReadUInt32();
             reader.Position -= 4;
 
-            reader.BytecodeAddresses = new(codeCount);
+            reader.BytecodeAddresses = new(CodeCount);
             uint count = base.UnserializeObjectCount(reader);
 
             return count;
@@ -1468,7 +1473,7 @@ namespace UndertaleModLib
             // If we're at the end of the chunk after aligning padding, code locals are either empty
             // or do not exist altogether. If we read at least 4 padding bytes, we don't know for sure
             // unless we have at least one code entry.
-            if (reader.Position == chunkEndPos && (paddingBytesRead < 4 || reader.undertaleData.Code.Count > 0))
+            if (reader.Position == chunkEndPos && (paddingBytesRead < 4 || reader.undertaleData.FORM.CODE.CodeCount > 0))
             {
                 reader.undertaleData.SetGMS2Version(2024, 8);
             }
