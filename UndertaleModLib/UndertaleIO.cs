@@ -79,10 +79,25 @@ namespace UndertaleModLib
                 }
                 else
                 {
+                    int newCachedId;
                     if (typeof(ChunkT) == typeof(UndertaleChunkAGRP))
-                        CachedId = 0;
+                        newCachedId = 0;
                     else
-                        CachedId = -1;
+                        newCachedId = -1;
+                    if (CachedId > 0 || (typeof(ChunkT) != typeof(UndertaleChunkAGRP) && CachedId == 0))
+                    {
+                        if (chunk.List.Count > CachedId && chunk.List[CachedId] is not null)
+                        {
+                            int firstNullOccurrence = chunk.List.IndexOf(default);
+                            if (firstNullOccurrence != -1)
+                                newCachedId = firstNullOccurrence;
+                        }
+                        else
+                        {
+                            newCachedId = CachedId;
+                        }
+                    }
+                    CachedId = newCachedId;
                 }
             }
             return CachedId;
@@ -112,6 +127,20 @@ namespace UndertaleModLib
                     return;
                 }
                 Resource = CachedId >= 0 ? list[CachedId] : default;
+                if (Resource == null && CachedId >= 0)
+                {
+                    // Naturally this can only happen with 2024.11 data files.
+                    // FIXME: Is this a good idea?
+                    if (reader.undertaleData.IsGameMaker2())
+                    {
+                        if (!reader.undertaleData.IsVersionAtLeast(2024, 11))
+                            reader.undertaleData.SetGMS2Version(2024, 11);
+                    }
+                    else
+                    {
+                        reader.SubmitWarning("ID reference to null object found on file built with GMS pre-2!");
+                    }
+                }
             }
         }
 
@@ -563,7 +592,7 @@ namespace UndertaleModLib
         public T GetUndertaleObjectAtAddress<T>(uint address) where T : UndertaleObject, new()
         {
             if (address == 0)
-                return default(T);
+                return default;
             UndertaleObject obj;
             if (!objectPool.TryGetValue(address, out obj))
             {
@@ -587,6 +616,8 @@ namespace UndertaleModLib
             try
             {
                 var expectedAddress = GetAddressForUndertaleObject(obj);
+                if (expectedAddress == 0)
+                    return;
                 if (expectedAddress != AbsPosition)
                 {
                     SubmitWarning("Reading misaligned at " + AbsPosition.ToString("X8") + ", realigning back to " + expectedAddress.ToString("X8") + "\nHIGH RISK OF DATA LOSS! The file is probably corrupted, or uses unsupported features\nProceed at your own risk");
@@ -780,6 +811,14 @@ namespace UndertaleModLib
 
         public void WriteUndertaleObject<T>(T obj) where T : UndertaleObject, new()
         {
+            if (obj is null)
+            {
+                // We simply shouldn't write anything.
+                // Pointers to this "object" are simply written as 0, and we don't need to
+                // put it in the pool
+                return;
+            }
+
             try
             {
                 // Store object address before writing it

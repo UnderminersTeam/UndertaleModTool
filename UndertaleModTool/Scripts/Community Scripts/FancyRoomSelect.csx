@@ -48,6 +48,8 @@ if(gms2) {
         if(target_layer == null) {
             uint layer_id = 0;
             foreach(var room in Data.Rooms) {
+                if (room is null)
+                    continue;
                 foreach(var layer in room.Layers) {
                     if(layer.LayerId > layer_id) {
                         layer_id = (uint)layer.LayerId;

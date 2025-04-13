@@ -597,7 +597,10 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                 writer.Write(firstWord);
 
                 // Write reference to the function being called (reset next occurrence to string ID for now)
-                ReferenceNextOccurrenceOffset = (uint)ValueFunction.NameStringID;
+                if (ValueFunction is UndertaleFunction function)
+                {
+                    ReferenceNextOccurrenceOffset = (uint)function.NameStringID;
+                }
                 writer.Write(_primitiveValue.AsInt);
                 break;
             }
@@ -610,10 +613,10 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                 // Write integer argument, or function, if either is present
                 if (Type1 == DataType.Int32)
                 {
-                    if (ValueFunction is not null)
+                    if (ValueFunction is UndertaleFunction function)
                     {
                         // Write function (reset next occurrence to string ID for now)
-                        ReferenceNextOccurrenceOffset = (uint)ValueFunction.NameStringID;
+                        ReferenceNextOccurrenceOffset = (uint)function.NameStringID;
                         writer.Write(_primitiveValue.AsInt);
                     }
                     else
