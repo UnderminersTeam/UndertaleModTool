@@ -227,7 +227,8 @@ namespace UndertaleModLib
             IndexDict = new(List.Count);
             for (int i = 0; i < List.Count; i++)
             {
-                IndexDict[List[i]] = i;
+                if (List[i] is not null)
+                    IndexDict[List[i]] = i;
             }
         }
         public void ClearIndexDict()
@@ -254,6 +255,8 @@ namespace UndertaleModLib
                     while (writer.Position % Alignment != 0)
                         writer.Write((byte)0);
                 }
+                if (List[i] is null)
+                    continue;
                 uint returnTo = writer.Position;
                 writer.Position = baseAddr + ((uint)i * 4);
                 writer.Write(returnTo);
@@ -267,6 +270,9 @@ namespace UndertaleModLib
             uint count = reader.ReadUInt32();
             List.SetCapacity(count);
             uint realCount = count;
+            BitArray gm2024_11_WhatToSkip = null;
+            if (reader.undertaleData.IsVersionAtLeast(2024, 11) && count > 0)
+                gm2024_11_WhatToSkip = new((int)count, false);
 
             for (int i = 0; i < count; i++)
             {
@@ -274,15 +280,24 @@ namespace UndertaleModLib
                 Align &= (readValue % Alignment == 0);
                 if (readValue != 0) continue;
 
-                if (reader.undertaleData.GeneralInfo.BytecodeVersion >= 13)
+                if (reader.undertaleData.IsVersionAtLeast(2024, 11) && gm2024_11_WhatToSkip is not null)
                 {
-                    reader.SubmitWarning("Zero values in an AlignUpdatedListChunk encountered on Bytecode 13 or higher!");
+                    // This is "normal" and is likely a object removed by GMAC.
+                    gm2024_11_WhatToSkip.Set(i, true);
+                    continue;
                 }
+
                 realCount--;
             }
 
             for (int i = 0; i < realCount; i++)
             {
+                if (gm2024_11_WhatToSkip is not null && gm2024_11_WhatToSkip.Get(i))
+                {
+                    List.InternalAdd(default);
+                    continue;
+                }
+
                 if (Align)
                 {
                     while (reader.AbsPosition % Alignment != 0)
@@ -295,7 +310,22 @@ namespace UndertaleModLib
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
-            uint count = reader.ReadUInt32();
+            uint claimedCount = reader.ReadUInt32(), count = claimedCount;
+            if (count == 0)
+                return 0;
+
+            for (int i = 0; i < claimedCount; i++)
+            {
+                uint readValue = reader.ReadUInt32();
+                Align &= (readValue % Alignment == 0);
+                if (readValue != 0) continue;
+
+                if (reader.undertaleData.GeneralInfo.BytecodeVersion >= 13 && !reader.undertaleData.IsVersionAtLeast(2024, 11))
+                {
+                    reader.SubmitWarning("Zero values in an AlignUpdatedListChunk encountered on potential pre-2024.11 Bytecode 13+!");
+                }
+                count--;
+            }
             if (count == 0)
                 return 0;
 

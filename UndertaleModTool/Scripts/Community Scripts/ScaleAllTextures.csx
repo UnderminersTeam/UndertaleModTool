@@ -61,6 +61,8 @@ using (TextureWorker worker = new())
     }
     foreach (UndertaleFont fnt in Data.Fonts)
     {
+        if (fnt is null)
+            continue;
         //fnt.ScaleX = scale;
         //fnt.ScaleY = scale;
         foreach (UndertaleFont.Glyph glyph in fnt.Glyphs)
@@ -79,6 +81,8 @@ using (TextureWorker worker = new())
     }
     foreach (UndertaleRoom room in Data.Rooms)
     {
+        if (room is null)
+            continue;
         foreach (UndertaleRoom.Background background in room.Backgrounds)
         {
             if (background.Enabled)

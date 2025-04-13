@@ -142,7 +142,16 @@ void DumpSounds()
 {
     //MakeFolder("Exported_Sounds");
     foreach (UndertaleSound sound in Data.Sounds)
-        DumpSound(sound);
+    {
+        if (sound is not null)
+        {
+            DumpSound(sound);
+        }
+        else
+        {
+            IncProgressLocal();
+        }
+    }
 }
 
 void DumpSound(UndertaleSound sound)
