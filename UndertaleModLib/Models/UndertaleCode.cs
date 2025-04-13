@@ -1522,8 +1522,9 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
             int bytecodeRelativeAddress = reader.ReadInt32();
             _bytecodeAbsoluteAddress = (uint)((int)reader.AbsPosition - 4 + bytecodeRelativeAddress);
 
-            // Check if this is a child code entry (which shares the same bytecode address as its parent)
-            UndertaleReader.BytecodeInformation info = reader.BytecodeAddresses[_bytecodeAbsoluteAddress];
+            // Check if this is a child code entry (which shares the same bytecode address as its parent).
+            // Note that we use TryGetValue here to account for 0-length code entries at the very end of the code list.
+            reader.BytecodeAddresses.TryGetValue(_bytecodeAbsoluteAddress, out UndertaleReader.BytecodeInformation info);
             if (Length > 0 && info.RootEntry is UndertaleCode parentEntry)
             {
                 // This is a child code entry; attach to parent. No need to parse any instructions.
