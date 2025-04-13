@@ -320,9 +320,24 @@ public class Packer
                     atlas.Height /= 2;
                     leftovers = LayoutAtlas(textures, atlas);
                 }
-                // we need to go 1 step larger as we found the first size that is to small
-                atlas.Width *= 2;
-                atlas.Height *= 2;
+                // we need to go 1 step larger as we found the first size that is too small
+                // if the atlas is 0x0 then it should be 1x1 instead
+                if (atlas.Width == 0)
+                {
+                    atlas.Width = 1;
+                }
+                else
+                {
+                    atlas.Width *= 2;
+                }
+                if (atlas.Height == 0)
+                {
+                    atlas.Height = 1;
+                }
+                else
+                {
+                    atlas.Height *= 2;
+                }
                 leftovers = LayoutAtlas(textures, atlas);
             }
             Atlasses.Add(atlas);
@@ -405,14 +420,18 @@ public class Packer
                     {
                         ti.TargetX = bbox.X;
                         ti.TargetY = bbox.Y;
+                        // yes, .Trim() mutates the image...
+                        // it doesn't really matter though since it isn't written back or anything
+                        img.Trim();
                     }
                     else
                     {
-                        throw new ScriptException("ERROR: " + fi.FullName + "'s bounding box is null somehow");
+                        // Empty sprites should be 1x1
+                        ti.TargetX = 0;
+                        ti.TargetY = 0;
+                        img.Crop(1, 1);
                     }
-                    // yes, .Trim() mutates the image...
-                    // it doesn't really matter though since it isn't written back or anything
-                    img.Trim();
+                    img.ResetPage();
                 }
                 ti.Width = (int)img.Width;
                 ti.Height = (int)img.Height;
