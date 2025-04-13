@@ -17,8 +17,56 @@ namespace UndertaleModLib
     {
         public override string Name => "FORM";
 
+        /// <summary>
+        /// Lookup from a chunk name to its loaded instance.
+        /// </summary>
         public Dictionary<string, UndertaleChunk> Chunks = new();
+
+        /// <summary>
+        /// Lookup from a chunk type to its loaded instance.
+        /// </summary>
         public Dictionary<Type, UndertaleChunk> ChunksTypeDict = new();
+
+        /// <summary>
+        /// Constructors for all chunk types.
+        /// </summary>
+        public static readonly IReadOnlyDictionary<string, Func<UndertaleChunk>> ChunkConstructors = new Dictionary<string, Func<UndertaleChunk>>()
+        {
+            { "GEN8", () => new UndertaleChunkGEN8() },
+            { "OPTN", () => new UndertaleChunkOPTN() },
+            { "LANG", () => new UndertaleChunkLANG() },
+            { "EXTN", () => new UndertaleChunkEXTN() },
+            { "SOND", () => new UndertaleChunkSOND() },
+            { "AGRP", () => new UndertaleChunkAGRP() },
+            { "SPRT", () => new UndertaleChunkSPRT() },
+            { "BGND", () => new UndertaleChunkBGND() },
+            { "PATH", () => new UndertaleChunkPATH() },
+            { "SCPT", () => new UndertaleChunkSCPT() },
+            { "GLOB", () => new UndertaleChunkGLOB() },
+            { "GMEN", () => new UndertaleChunkGMEN() },
+            { "SHDR", () => new UndertaleChunkSHDR() },
+            { "FONT", () => new UndertaleChunkFONT() },
+            { "TMLN", () => new UndertaleChunkTMLN() },
+            { "OBJT", () => new UndertaleChunkOBJT() },
+            { "ROOM", () => new UndertaleChunkROOM() },
+            { "DAFL", () => new UndertaleChunkDAFL() },
+            { "EMBI", () => new UndertaleChunkEMBI() },
+            { "TPAG", () => new UndertaleChunkTPAG() },
+            { "TGIN", () => new UndertaleChunkTGIN() },
+            { "CODE", () => new UndertaleChunkCODE() },
+            { "VARI", () => new UndertaleChunkVARI() },
+            { "FUNC", () => new UndertaleChunkFUNC() },
+            { "STRG", () => new UndertaleChunkSTRG() },
+            { "TXTR", () => new UndertaleChunkTXTR() },
+            { "AUDO", () => new UndertaleChunkAUDO() },
+            { "ACRV", () => new UndertaleChunkACRV() },
+            { "SEQN", () => new UndertaleChunkSEQN() },
+            { "TAGS", () => new UndertaleChunkTAGS() },
+            { "FEAT", () => new UndertaleChunkFEAT() },
+            { "FEDS", () => new UndertaleChunkFEDS() },
+            { "PSEM", () => new UndertaleChunkPSEM() },
+            { "PSYS", () => new UndertaleChunkPSYS() },
+        };
 
         public UndertaleChunkGEN8 GEN8 => Chunks.GetValueOrDefault("GEN8") as UndertaleChunkGEN8;
         public UndertaleChunkOPTN OPTN => Chunks.GetValueOrDefault("OPTN") as UndertaleChunkOPTN;
@@ -68,9 +116,6 @@ namespace UndertaleModLib
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
-            if (Chunks.Count != 1 || Chunks.Keys.First() != "GEN8")
-                Chunks.Clear();
-            ChunksTypeDict.Clear();
             long startPos = reader.Position;
 
             // First, find the last chunk in the file because of padding changes
@@ -91,21 +136,17 @@ namespace UndertaleModLib
             while (reader.Position < startPos + Length)
             {
                 UndertaleChunk chunk = reader.ReadUndertaleChunk();
-                if (chunk != null)
+                if (chunk is not null)
                 {
-                    if (Chunks.ContainsKey(chunk.Name))
+                    if (!Chunks.ContainsKey(chunk.Name))
                     {
-                        if (Chunks.Count == 1 && chunk.Name == "GEN8")
-                            Chunks.Clear();
-                        else
-                            throw new IOException("Duplicate chunk " + chunk.Name);
+                        throw new IOException($"Missed chunk on object count pass \"{chunk.Name}\"");
                     }
 
-                    Chunks.Add(chunk.Name, chunk);
-                    ChunksTypeDict.Add(chunk.GetType(), chunk);
-
                     if (reader.ReadOnlyGEN8 && chunk.Name == "GEN8")
+                    {
                         return;
+                    }
                 }
             }
 
@@ -131,17 +172,30 @@ namespace UndertaleModLib
             }
             reader.Position = startPos;
 
+            // Read some basic data from GEN8 for version info, etc.
             if (reader.AllChunkNames[0] == "GEN8")
             {
                 UndertaleChunkGEN8 gen8Chunk = new();
                 gen8Chunk.UnserializeGeneralData(reader);
-                Chunks.Add("GEN8", gen8Chunk);
+                Chunks.Add(gen8Chunk.Name, gen8Chunk);
+                ChunksTypeDict.Add(gen8Chunk.GetType(), gen8Chunk);
 
                 reader.Position = startPos;
             }
 
+            // Read object counts for all chunks
             while (reader.Position < startPos + Length)
-                totalCount += reader.CountChunkChildObjects();
+            {
+                (uint count, UndertaleChunk chunk) = reader.CountChunkChildObjects();
+                totalCount += count;
+
+                // Don't register a new chunk for GEN8 specifically
+                if (chunk.Name != "GEN8")
+                {
+                    Chunks.Add(chunk.Name, chunk);
+                    ChunksTypeDict.Add(chunk.GetType(), chunk);
+                }
+            }
 
             return totalCount;
         }
@@ -1359,6 +1413,11 @@ namespace UndertaleModLib
     {
         public override string Name => "CODE";
 
+        /// <summary>
+        /// Code count as determined during object counting.
+        /// </summary>
+        internal int CodeCount { get; private set; } = -1;
+
         internal override void SerializeChunk(UndertaleWriter writer)
         {
             if (List == null)
@@ -1388,13 +1447,13 @@ namespace UndertaleModLib
             if (reader.undertaleData.UnsupportedBytecodeVersion)
             {
                 // In unsupported bytecode versions, there's no instructions parsed (so count is equivalent to the code count)
-                return reader.ReadUInt32();
+                return (uint)(CodeCount = (int)reader.ReadUInt32());
             }
 
-            int codeCount = (int)reader.ReadUInt32();
+            CodeCount = (int)reader.ReadUInt32();
             reader.Position -= 4;
 
-            reader.BytecodeAddresses = new(codeCount);
+            reader.BytecodeAddresses = new(CodeCount);
             uint count = base.UnserializeObjectCount(reader);
 
             return count;
@@ -1503,6 +1562,7 @@ namespace UndertaleModLib
             }
 
             long returnPos = reader.Position;
+            long chunkEndPos = returnPos + Length;
 
             // The CodeLocals list was removed in 2024.8, so we check if Functions
             // is the only thing in here.
@@ -1510,9 +1570,9 @@ namespace UndertaleModLib
             // Skip over the (Simple)List
             // (3*4 is the size of an UndertaleFunction object)
             reader.Position += 3 * 4 * funcCount;
-            if (reader.Position == returnPos + Length)
+            if (reader.Position == chunkEndPos)
             {
-                // Whatever, let's consider this a win
+                // Directly reached the end of the chunk after the function list, so code locals are *definitely* missing
                 reader.undertaleData.SetGMS2Version(2024, 8);
                 reader.Position = returnPos;
                 checkedFor2024_8 = true;
@@ -1521,20 +1581,26 @@ namespace UndertaleModLib
 
             // Then align the position
             int specAlign = reader.undertaleData.PaddingAlignException;
+            int paddingBytesRead = 0;
             while ((reader.AbsPosition & ((specAlign == -1 ? 16 : specAlign) - 1)) != 0)
             {
-                if (reader.ReadByte() != 0)
+                if (reader.Position >= chunkEndPos || reader.ReadByte() != 0)
                 {
-                    // If we hit a non-zero byte, it can't be padding
+                    // If we hit a non-zero byte (or exceed chunk boundaries), it can't be padding
                     reader.Position = returnPos;
                     checkedFor2024_8 = true;
                     return;
                 }
+                paddingBytesRead++;
             }
 
-            // Then check if we're at the end of the chunk
-            if (reader.Position == returnPos + Length)
+            // If we're at the end of the chunk after aligning padding, code locals are either empty
+            // or do not exist altogether. If we read at least 4 padding bytes, we don't know for sure
+            // unless we have at least one code entry.
+            if (reader.Position == chunkEndPos && (paddingBytesRead < 4 || reader.undertaleData.FORM.CODE.CodeCount > 0))
+            {
                 reader.undertaleData.SetGMS2Version(2024, 8);
+            }
 
             reader.Position = returnPos;
             checkedFor2024_8 = true;
