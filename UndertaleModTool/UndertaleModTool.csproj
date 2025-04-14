@@ -61,7 +61,7 @@
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="AvalonEdit">
-            <Version>6.3.0.90</Version>
+            <Version>6.3.1.120</Version>
         </PackageReference>
         <PackageReference Include="Fody" Version="6.9.2">
           <PrivateAssets>all</PrivateAssets>
