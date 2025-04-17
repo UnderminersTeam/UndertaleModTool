@@ -1121,7 +1121,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         public static readonly uint ChildObjectsSize = 48;
 
         /// <summary>
-        /// Whether this tile is from an asset layer.<br/>
+        /// Whether this tile represents a <see cref="UndertaleSprite"/> or a <see cref="UndertaleBackground"/>.<br/>
         /// <see langword="true"/> for GameMaker Studio: 2 games, otherwise <see langword="false"/>.
         /// </summary>
         /// <remarks>
@@ -1173,8 +1173,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
         /// <summary>
         /// From which object this tile stems from.<br/>
-        /// Will return a <see cref="UndertaleBackground"/> if <see cref="spriteMode"/> is <see langword="true"/>,
-        /// a <see cref="UndertaleSprite"/> if it's <see langword="false"/>.
+        /// Will return a <see cref="UndertaleSprite"/> if <see cref="spriteMode"/> is <see langword="true"/>,
+        /// a <see cref="UndertaleBackground"/> if it's <see langword="false"/>.
         /// </summary>
         public UndertaleNamedResource ObjectDefinition
         {
