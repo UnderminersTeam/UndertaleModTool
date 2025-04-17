@@ -927,15 +927,12 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     public class GameObject : UndertaleObject, IRoomObject, INotifyPropertyChanged, IDisposable,
                               IStaticChildObjCount, IStaticChildObjectsSize
     {
-        /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
-        public static readonly uint ChildObjectCount = 2;
-
         /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
         public static readonly uint ChildObjectsSize = 36;
 
-        private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _objectDefinition = new();
-        private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _creationCode = new();
-        private UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _preCreateCode = new();
+        private readonly UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _objectDefinition = new();
+        private readonly UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _creationCode = new();
+        private readonly UndertaleResourceById<UndertaleCode, UndertaleChunkCODE> _preCreateCode = new();
         private FloatAsInt _rotation;
 
         /// <summary>
@@ -1076,13 +1073,13 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         public int YOffset => Y + SpriteYOffset;
 
         /// <inheritdoc />
-        public void Serialize(UndertaleWriter writer)
+        public virtual void Serialize(UndertaleWriter writer)
         {
             writer.Write(X);
             writer.Write(Y);
-            writer.WriteUndertaleObject(_objectDefinition);
+            _objectDefinition.Serialize(writer);
             writer.Write(InstanceID);
-            writer.WriteUndertaleObject(_creationCode);
+            _creationCode.Serialize(writer);
             writer.Write(ScaleX);
             writer.Write(ScaleY);
             if (writer.undertaleData.IsVersionAtLeast(2, 2, 2, 302))
@@ -1093,17 +1090,17 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             writer.Write(Color);
             writer.Write(_rotation.AsUInt());
             if (writer.undertaleData.GeneralInfo.BytecodeVersion >= 16) // TODO: is that dependent on bytecode or something else?
-                writer.WriteUndertaleObject(_preCreateCode);         // Note: Appears in GM:S 1.4.9999 as well, so that's probably the closest it gets
+                _preCreateCode.Serialize(writer);                       // Note: Appears in GM:S 1.4.9999 as well, so that's probably the closest it gets
         }
 
         /// <inheritdoc />
-        public void Unserialize(UndertaleReader reader)
+        public virtual void Unserialize(UndertaleReader reader)
         {
             X = reader.ReadInt32();
             Y = reader.ReadInt32();
-            _objectDefinition = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT>>();
+            _objectDefinition.Unserialize(reader);
             InstanceID = reader.ReadUInt32();
-            _creationCode = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>>();
+            _creationCode.Unserialize(reader);
             ScaleX = reader.ReadSingle();
             ScaleY = reader.ReadSingle();
             if (reader.undertaleData.IsVersionAtLeast(2, 2, 2, 302))
@@ -1114,7 +1111,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             Color = reader.ReadUInt32();
             _rotation = new FloatAsInt(reader.ReadUInt32());
             if (reader.undertaleData.GeneralInfo.BytecodeVersion >= 16)
-                _preCreateCode = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleCode, UndertaleChunkCODE>>(); // Note: Appears in GM:S 1.4.9999 as well, so that's probably the closest it gets
+                _preCreateCode.Unserialize(reader); // Note: Appears in GM:S 1.4.9999 as well, so that's probably the closest it gets
         }
 
         public override string ToString()
@@ -2303,9 +2300,6 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
     public class SpriteInstance : UndertaleObject, INotifyPropertyChanged, IStaticChildObjCount, IStaticChildObjectsSize, IDisposable
     {
-        /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
-        public static readonly uint ChildObjectCount = 1;
-
         /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
         public static readonly uint ChildObjectsSize = 44;
 
@@ -2391,10 +2385,10 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         }
 
         /// <inheritdoc />
-        public void Serialize(UndertaleWriter writer)
+        public virtual void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
-            writer.WriteUndertaleObject(_sprite);
+            _sprite.Serialize(writer);
             writer.Write(X);
             writer.Write(Y);
             writer.Write(ScaleX);
@@ -2407,10 +2401,10 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         }
 
         /// <inheritdoc />
-        public void Unserialize(UndertaleReader reader)
+        public virtual void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
-            _sprite = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>>();
+            _sprite.Unserialize(reader);
             X = reader.ReadInt32();
             Y = reader.ReadInt32();
             ScaleX = reader.ReadSingle();
@@ -2450,9 +2444,6 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
     public class SequenceInstance : UndertaleObject, INotifyPropertyChanged, IStaticChildObjCount, IStaticChildObjectsSize, IDisposable
     {
-        /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
-        public static readonly uint ChildObjectCount = 1;
-
         /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
         public static readonly uint ChildObjectsSize = 44;
 
@@ -2473,10 +2464,10 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <inheritdoc />
-        public void Serialize(UndertaleWriter writer)
+        public virtual void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
-            writer.WriteUndertaleObject(_sequence);
+            _sequence.Serialize(writer);
             writer.Write(X);
             writer.Write(Y);
             writer.Write(ScaleX);
@@ -2489,10 +2480,10 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         }
 
         /// <inheritdoc />
-        public void Unserialize(UndertaleReader reader)
+        public virtual void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
-            _sequence = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSequence, UndertaleChunkSEQN>>();
+            _sequence.Unserialize(reader);
             X = reader.ReadInt32();
             Y = reader.ReadInt32();
             ScaleX = reader.ReadSingle();
@@ -2522,9 +2513,6 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
     public class ParticleSystemInstance : UndertaleObject, INotifyPropertyChanged, IStaticChildObjCount, IStaticChildObjectsSize, IDisposable
     {
-        /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
-        public static readonly uint ChildObjectCount = 1;
-
         /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
         public static readonly uint ChildObjectsSize = 32;
 
@@ -2565,7 +2553,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
-            writer.WriteUndertaleObject(_particleSys);
+            _particleSys.Serialize(writer);
             writer.Write(X);
             writer.Write(Y);
             writer.Write(ScaleX);
@@ -2578,7 +2566,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
-            _particleSys = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleParticleSystem, UndertaleChunkPSYS>>();
+            _particleSys.Unserialize(reader);
             X = reader.ReadInt32();
             Y = reader.ReadInt32();
             ScaleX = reader.ReadSingle();
@@ -2613,9 +2601,6 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
     public class TextItemInstance : UndertaleObject, INotifyPropertyChanged, IStaticChildObjCount, IStaticChildObjectsSize, IDisposable
     {
-        /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
-        public static readonly uint ChildObjectCount = 1;
-
         /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
         public static readonly uint ChildObjectsSize = 68;
 
@@ -2655,12 +2640,12 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         public bool Wrap { get; set; }
 
         /// <inheritdoc />
-        public void Serialize(UndertaleWriter writer)
+        public virtual void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
             writer.Write(X);
             writer.Write(Y);
-            writer.WriteUndertaleObject(_font);
+            _font.Serialize(writer);
             writer.Write(ScaleX);
             writer.Write(ScaleY);
             writer.Write(Rotation);
@@ -2677,12 +2662,12 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         }
 
         /// <inheritdoc />
-        public void Unserialize(UndertaleReader reader)
+        public virtual void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
             X = reader.ReadInt32();
             Y = reader.ReadInt32();
-            _font = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleFont, UndertaleChunkFONT>>();
+            _font.Unserialize(reader);
             ScaleX = reader.ReadSingle();
             ScaleY = reader.ReadSingle();
             Rotation = reader.ReadSingle();

@@ -1122,9 +1122,7 @@ namespace UndertaleModLib
 
                 Type gameObjType = typeof(GameObject);
 
-                uint newValue = GameObject.ChildObjectCount + 1;
-                reader.SetStaticChildCount(gameObjType, newValue);
-                newValue = GameObject.ChildObjectsSize + 4;
+                uint newValue = GameObject.ChildObjectsSize + 4;
                 reader.SetStaticChildObjectsSize(gameObjType, newValue);
             }
 
@@ -1374,7 +1372,7 @@ namespace UndertaleModLib
         }
     }
 
-    public class UndertaleChunkUILR : UndertaleListChunk<UndertaleRoom> // TODO: correct type here
+    public class UndertaleChunkUILR : UndertaleListChunk<UndertaleUIRootNode>
     {
         public override string Name => "UILR";
 
@@ -1385,7 +1383,7 @@ namespace UndertaleModLib
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
-            return 0;
+            return base.UnserializeObjectCount(reader);
         }
     }
 
