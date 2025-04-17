@@ -180,11 +180,14 @@ public class GameSpecificResolver
         data.GameSpecificRegistry = new();
 
         // Evaluate all definitions, and load all successful ones
-        foreach (var definition in _definitions)
+        lock (_lock)
         {
-            if (definition.Evaluate(data))
+            foreach (var definition in _definitions)
             {
-                definition.Load(data);
+                if (definition.Evaluate(data))
+                {
+                    definition.Load(data);
+                }
             }
         }
     }

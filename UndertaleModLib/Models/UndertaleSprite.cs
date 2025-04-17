@@ -1065,24 +1065,6 @@ public class UndertaleSpineTextureEntry : UndertaleObject, IDisposable
 }
 
 // TODO: make all these classes "IDisposable"
-/// <summary>
-/// Some dirty hacks to make SWF work, they'll be removed later. TODO:
-/// </summary>
-public static class UndertaleSpriteReadingUtils
-{
-    /// <summary>
-    /// Reads an <see cref="UndertaleObject"/> ignoring the <paramref name="reader"/>s object pool.
-    /// </summary>
-    /// <typeparam name="T"><see cref="UndertaleObject"/>s child.</typeparam>
-    /// <param name="reader">An instance of <see cref="UndertaleReader"/>.</param>
-    /// <returns>The object</returns>
-    internal static T ReadUndertaleObjectNoPool<T>(this UndertaleReader reader) where T : UndertaleObject, new()
-    {
-        T o = new T();
-        o.Unserialize(reader);
-        return o;
-    }
-}
 
 [PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleYYSWFMatrixColor : UndertaleObject
