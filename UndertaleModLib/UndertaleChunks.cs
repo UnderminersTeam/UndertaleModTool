@@ -1375,16 +1375,6 @@ namespace UndertaleModLib
     public class UndertaleChunkUILR : UndertaleListChunk<UndertaleUIRootNode>
     {
         public override string Name => "UILR";
-
-        internal override void UnserializeChunk(UndertaleReader reader)
-        {
-            base.UnserializeChunk(reader);
-        }
-
-        internal override uint UnserializeObjectCount(UndertaleReader reader)
-        {
-            return base.UnserializeObjectCount(reader);
-        }
     }
 
     public class UndertaleChunkDAFL : UndertaleEmptyChunk // DataFiles
