@@ -215,7 +215,9 @@ public readonly struct UndertaleFlexValue
 /// </summary>
 public interface IUndertaleFlexProperties
 {
-    // TODO: document everything here
+    /// <summary>
+    /// Alignment types that can be used for aligning content in a flexbox.
+    /// </summary>
     public enum AlignmentKind : int
     {
         Auto = 0,
@@ -229,6 +231,9 @@ public interface IUndertaleFlexProperties
         SpaceEvenly = 8
     }
 
+    /// <summary>
+    /// Flex direction types that can be used in a flexbox.
+    /// </summary>
     public enum FlexDirectionKind : int
     {
         Column = 0,
@@ -237,6 +242,9 @@ public interface IUndertaleFlexProperties
         RowReverse = 3
     }
 
+    /// <summary>
+    /// Wrap types that can be used in a flexbox.
+    /// </summary>
     public enum WrapKind : int
     {
         NoWrap = 0,
@@ -244,6 +252,9 @@ public interface IUndertaleFlexProperties
         WrapReverse = 2
     }
 
+    /// <summary>
+    /// Justification types that can be used in a flexbox.
+    /// </summary>
     public enum JustifyKind : int
     {
         FlexStart = 0,
@@ -253,7 +264,10 @@ public interface IUndertaleFlexProperties
         SpaceAround = 4,
         SpaceEvenly = 5
     }
-
+    
+    /// <summary>
+    /// Layout direction types that can be used in a flexbox.
+    /// </summary>
     public enum LayoutDirectionKind : int
     {
         Inherit = 0,
@@ -261,20 +275,69 @@ public interface IUndertaleFlexProperties
         RTL = 2
     }
 
+    /// <summary>
+    /// Alignment of child items within the container (along cross axis).
+    /// </summary>
     public AlignmentKind AlignItems { get; set; }
+
+    /// <summary>
+    /// Main direction that child items are laid out (affects direction of other properties).
+    /// </summary>
     public FlexDirectionKind FlexDirection { get; set; }
+
+    /// <summary>
+    /// Wrapping type for the flexbox (when items exceed the bounds).
+    /// </summary>
     public WrapKind FlexWrap { get; set; }
+
+    /// <summary>
+    /// Alignment of lines within the container (along cross axis), when items are wrapped to multiple lines.
+    /// </summary>
     public AlignmentKind AlignContent { get; set; }
+
+    /// <summary>
+    /// Gap between rows of items.
+    /// </summary>
     public float GapRow { get; set; }
+
+    /// <summary>
+    /// Gap between columns of items.
+    /// </summary>
     public float GapColumn { get; set; }
+
+    /// <summary>
+    /// Left padding of the container.
+    /// </summary>
     public UndertaleFlexValue PaddingLeft { get; set; }
+
+    /// <summary>
+    /// Right padding of the container.
+    /// </summary>
     public UndertaleFlexValue PaddingRight { get; set; }
+
+    /// <summary>
+    /// Top padding of the container.
+    /// </summary>
     public UndertaleFlexValue PaddingTop { get; set; }
+
+    /// <summary>
+    /// Bottom padding of the container.
+    /// </summary>
     public UndertaleFlexValue PaddingBottom { get; set; }
+
+    /// <summary>
+    /// Alignment of child items within the container (along main axis, i.e. main flex direction).
+    /// </summary>
     public JustifyKind JustifyContent { get; set; }
+
+    /// <summary>
+    /// Layout direction of the container.
+    /// </summary>
     public LayoutDirectionKind LayoutDirection { get; set; }
 
-
+    /// <summary>
+    /// Serializes flex properties to the given writer.
+    /// </summary>
     public static void Serialize(UndertaleWriter writer, IUndertaleFlexProperties props)
     {
         writer.Write((int)props.AlignItems);
@@ -291,6 +354,9 @@ public interface IUndertaleFlexProperties
         writer.Write((int)props.LayoutDirection);
     }
 
+    /// <summary>
+    /// Unserializes flex properties from the given reader.
+    /// </summary>
     public static void Unserialize(UndertaleReader reader, IUndertaleFlexProperties props)
     {
         props.AlignItems = (AlignmentKind)reader.ReadInt32();
@@ -320,15 +386,44 @@ public interface IUndertaleFlexProperties
 /// </summary>
 public interface IUndertaleFlexInstanceProperties
 {
-    // TODO: document
+    /// <summary>
+    /// Whether the instance is visible.
+    /// </summary>
     public bool Visible { get; set; }
-	public int Anchor { get; set; }
-	public bool StretchWidth { get; set; }
-	public bool StretchHeight { get; set; }
-	public bool TileH { get; set; }
-	public bool TileV { get; set; }
-	public bool KeepAspect { get; set; }
 
+    /// <summary>
+    /// Anchor of the instance's (0, 0) position, based on container.
+    /// </summary>
+    public int Anchor { get; set; }
+
+    /// <summary>
+    /// Whether the width of the instance is stretched to fit its container.
+    /// </summary>
+    public bool StretchWidth { get; set; }
+
+    /// <summary>
+    /// Whether the height of the instance is stretched to fit its container.
+    /// </summary>
+    public bool StretchHeight { get; set; }
+
+    /// <summary>
+    /// Whether the instance is tiled horizontally.
+    /// </summary>
+    public bool TileH { get; set; }
+
+    /// <summary>
+    /// Whether the instance is tiled vertically.
+    /// </summary>
+    public bool TileV { get; set; }
+
+    /// <summary>
+    /// Whether aspect ratio should be maintained when stretching width/height.
+    /// </summary>
+    public bool KeepAspect { get; set; }
+
+    /// <summary>
+    /// Serializes flex instance properties to the given writer.
+    /// </summary>
     public static void Serialize(UndertaleWriter writer, IUndertaleFlexInstanceProperties props)
     {
         writer.Write(props.Visible);
@@ -340,6 +435,9 @@ public interface IUndertaleFlexInstanceProperties
         writer.Write(props.KeepAspect);
     }
 
+    /// <summary>
+    /// Unserializes flex instance properties from the given reader.
+    /// </summary>
     public static void Unserialize(UndertaleReader reader, IUndertaleFlexInstanceProperties props)
     {
         props.Visible = reader.ReadBoolean();
