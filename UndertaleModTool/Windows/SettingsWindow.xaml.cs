@@ -261,6 +261,16 @@ namespace UndertaleModTool
             }
         }
 
+        public static bool RememberWindowPlacements
+        {
+            get => Settings.Instance.RememberWindowPlacements;
+            set
+            {
+                Settings.Instance.RememberWindowPlacements = value;
+                Settings.Save();
+            }
+        }
+
         public static DecompilerSettings DecompilerSettings => Settings.Instance.DecompilerSettings;
 
         public static string InstanceIdPrefix
