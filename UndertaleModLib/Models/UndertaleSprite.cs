@@ -1096,7 +1096,7 @@ public class UndertaleYYSWFMatrixColor : UndertaleObject
 }
 
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleYYSWFMatrix33 : UndertaleObject
+public class UndertaleVectorMatrix33 : UndertaleObject
 {
     private const int MATRIX_SIZE = 9;
     public float[] Values { get; set; }
@@ -1124,7 +1124,7 @@ public class UndertaleYYSWFTimelineObject : UndertaleObject
     public int CharIndex { get; set; }
     public int Depth { get; set; }
     public int ClippingDepth { get; set; }
-    public UndertaleYYSWFMatrix33 TransformationMatrix { get; set; }
+    public UndertaleVectorMatrix33 TransformationMatrix { get; set; }
     public UndertaleYYSWFMatrixColor ColorMatrix { get; set; }
     public float MinX { get; set; }
     public float MaxX { get; set; }
@@ -1158,14 +1158,14 @@ public class UndertaleYYSWFTimelineObject : UndertaleObject
         MaxX = reader.ReadSingle();
         MinY = reader.ReadSingle();
         MaxY = reader.ReadSingle();
-        TransformationMatrix = reader.ReadUndertaleObjectNoPool<UndertaleYYSWFMatrix33>();
+        TransformationMatrix = reader.ReadUndertaleObjectNoPool<UndertaleVectorMatrix33>();
     }
 }
 
 [PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleYYSWFTimelineFrame : UndertaleObject
 {
-    public UndertaleSimpleList<UndertaleYYSWFTimelineObject> FrameObjects { get; set; }
+    public UndertaleObservableList<UndertaleYYSWFTimelineObject> FrameObjects { get; set; }
     public float MinX { get; set; }
     public float MaxX { get; set; }
     public float MinY { get; set; }
@@ -1193,11 +1193,10 @@ public class UndertaleYYSWFTimelineFrame : UndertaleObject
         MaxX = reader.ReadSingle();
         MinY = reader.ReadSingle();
         MaxY = reader.ReadSingle();
-        FrameObjects = new UndertaleSimpleList<UndertaleYYSWFTimelineObject>();
+        FrameObjects = new UndertaleObservableList<UndertaleYYSWFTimelineObject>(ii);
         for (int i = 0; i < ii; i++)
         {
-            var frameObject = reader.ReadUndertaleObjectNoPool<UndertaleYYSWFTimelineObject>();
-            FrameObjects.Add(frameObject);
+            FrameObjects.InternalAdd(reader.ReadUndertaleObjectNoPool<UndertaleYYSWFTimelineObject>());
         }
     }
 }
@@ -1251,7 +1250,7 @@ public enum UndertaleYYSWFItemType
     ItemSprite
 }
 
-public enum UndertaleYYSWFFillType
+public enum UndertaleVectorFillType
 {
     FillInvalid,
     FillSolid,
@@ -1259,7 +1258,7 @@ public enum UndertaleYYSWFFillType
     FillBitmap
 }
 
-public enum UndertaleYYSWFBitmapFillType
+public enum UndertaleVectorBitmapFillType
 {
     FillRepeat,
     FillClamp,
@@ -1267,14 +1266,14 @@ public enum UndertaleYYSWFBitmapFillType
     FillClampPoint
 }
 
-public enum UndertaleYYSWFGradientFillType
+public enum UndertaleVectorGradientFillType
 {
     FillLinear,
     FillRadial
 }
 
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleYYSWFSolidFillData : UndertaleObject
+public class UndertaleVectorSolidFillData : UndertaleObject
 {
     public byte Red { get; set; }
     public byte Green { get; set; }
@@ -1301,7 +1300,7 @@ public class UndertaleYYSWFSolidFillData : UndertaleObject
 }
 
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleYYSWFGradientRecord : UndertaleObject
+public class UndertaleVectorGradientRecord : UndertaleObject
 {
     public int Ratio { get; set; }
     public byte Red { get; set; }
@@ -1331,25 +1330,28 @@ public class UndertaleYYSWFGradientRecord : UndertaleObject
 }
 
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleYYSWFGradientFillData : UndertaleObject
+public class UndertaleVectorGradientFillData : UndertaleObject
 {
-    public UndertaleYYSWFGradientFillType GradientFillType { get; set; }
-    public UndertaleYYSWFMatrix33 TransformationMatrix { get; set; }
-    public UndertaleSimpleList<UndertaleYYSWFGradientRecord> Records { get; set; }
+    public UndertaleVectorGradientFillType GradientFillType { get; set; }
+    public UndertaleVectorMatrix33 TransformationMatrix { get; set; }
+    public UndertaleSimpleList<UndertaleVectorGradientRecord> Records { get; set; }
+
     /// <summary>
     /// Unknown purpose. Probably to accomodate for new texture formats.
     /// </summary>
     /// <remarks>
     /// Presumably present in GM 2022.1+.
     /// </remarks>
-    public int? TPEIndex { get; set; }
+    public int TPEIndex { get; set; } = -1;
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
     {
         writer.Write((int)GradientFillType);
-        if (TPEIndex is not null)
-            writer.Write(TPEIndex.Value);
+        if (writer.undertaleData.IsVersionAtLeast(2022, 1))
+        {
+            writer.Write(TPEIndex);
+        }
         writer.WriteUndertaleObject(TransformationMatrix);
         writer.WriteUndertaleObject(Records);
     }
@@ -1357,27 +1359,29 @@ public class UndertaleYYSWFGradientFillData : UndertaleObject
     /// <inheritdoc />
     public void Unserialize(UndertaleReader reader)
     {
-        GradientFillType = (UndertaleYYSWFGradientFillType)reader.ReadInt32();
+        GradientFillType = (UndertaleVectorGradientFillType)reader.ReadInt32();
         if (reader.undertaleData.IsVersionAtLeast(2022, 1))
         {
             TPEIndex = reader.ReadInt32();
         }
-        TransformationMatrix = reader.ReadUndertaleObjectNoPool<UndertaleYYSWFMatrix33>();
-        Records = new UndertaleSimpleList<UndertaleYYSWFGradientRecord>();
+        TransformationMatrix = reader.ReadUndertaleObjectNoPool<UndertaleVectorMatrix33>();
+
         int count = reader.ReadInt32();
+        Records = new UndertaleSimpleList<UndertaleVectorGradientRecord>();
+        Records.SetCapacity(count);
         for (int i = 0; i < count; i++)
         {
-            Records.Add(reader.ReadUndertaleObjectNoPool<UndertaleYYSWFGradientRecord>());
+            Records.InternalAdd(reader.ReadUndertaleObjectNoPool<UndertaleVectorGradientRecord>());
         }
     }
 }
 
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleYYSWFBitmapFillData : UndertaleObject
+public class UndertaleVectorBitmapFillData : UndertaleObject
 {
-    public UndertaleYYSWFBitmapFillType BitmapFillType { get; set; }
+    public UndertaleVectorBitmapFillType BitmapFillType { get; set; }
     public int CharID { get; set; }
-    public UndertaleYYSWFMatrix33 TransformationMatrix { get; set; }
+    public UndertaleVectorMatrix33 TransformationMatrix { get; set; }
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
@@ -1390,19 +1394,19 @@ public class UndertaleYYSWFBitmapFillData : UndertaleObject
     /// <inheritdoc />
     public void Unserialize(UndertaleReader reader)
     {
-        BitmapFillType = (UndertaleYYSWFBitmapFillType)reader.ReadInt32();
+        BitmapFillType = (UndertaleVectorBitmapFillType)reader.ReadInt32();
         CharID = reader.ReadInt32();
-        TransformationMatrix = reader.ReadUndertaleObjectNoPool<UndertaleYYSWFMatrix33>();
+        TransformationMatrix = reader.ReadUndertaleObjectNoPool<UndertaleVectorMatrix33>();
     }
 }
 
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleYYSWFFillData : UndertaleObject
+public class UndertaleVectorFillData : UndertaleObject
 {
-    public UndertaleYYSWFFillType Type { get; set; }
-    public UndertaleYYSWFBitmapFillData BitmapFillData { get; set; }
-    public UndertaleYYSWFGradientFillData GradientFillData { get; set; }
-    public UndertaleYYSWFSolidFillData SolidFillData { get; set; }
+    public UndertaleVectorFillType Type { get; set; }
+    public UndertaleVectorBitmapFillData BitmapFillData { get; set; }
+    public UndertaleVectorGradientFillData GradientFillData { get; set; }
+    public UndertaleVectorSolidFillData SolidFillData { get; set; }
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
@@ -1410,25 +1414,25 @@ public class UndertaleYYSWFFillData : UndertaleObject
         writer.Write((int)Type);
         switch (Type)
         {
-            case UndertaleYYSWFFillType.FillBitmap:
+            case UndertaleVectorFillType.FillBitmap:
             {
                 writer.WriteUndertaleObject(BitmapFillData);
                 break;
             }
 
-            case UndertaleYYSWFFillType.FillGradient:
+            case UndertaleVectorFillType.FillGradient:
             {
                 writer.WriteUndertaleObject(GradientFillData);
                 break;
             }
 
-            case UndertaleYYSWFFillType.FillSolid:
+            case UndertaleVectorFillType.FillSolid:
             {
                 writer.WriteUndertaleObject(SolidFillData);
                 break;
             }
 
-            case UndertaleYYSWFFillType.FillInvalid:
+            case UndertaleVectorFillType.FillInvalid:
             {
                 // throw an exception maybe?
                 break;
@@ -1439,28 +1443,28 @@ public class UndertaleYYSWFFillData : UndertaleObject
     /// <inheritdoc />
     public void Unserialize(UndertaleReader reader)
     {
-        Type = (UndertaleYYSWFFillType)reader.ReadInt32();
+        Type = (UndertaleVectorFillType)reader.ReadInt32();
         switch (Type)
         {
-            case UndertaleYYSWFFillType.FillBitmap:
+            case UndertaleVectorFillType.FillBitmap:
             {
-                BitmapFillData = reader.ReadUndertaleObjectNoPool<UndertaleYYSWFBitmapFillData>();
+                BitmapFillData = reader.ReadUndertaleObjectNoPool<UndertaleVectorBitmapFillData>();
                 break;
             }
 
-            case UndertaleYYSWFFillType.FillGradient:
+            case UndertaleVectorFillType.FillGradient:
             {
-                GradientFillData = reader.ReadUndertaleObjectNoPool<UndertaleYYSWFGradientFillData>();
+                GradientFillData = reader.ReadUndertaleObjectNoPool<UndertaleVectorGradientFillData>();
                 break;
             }
 
-            case UndertaleYYSWFFillType.FillSolid:
+            case UndertaleVectorFillType.FillSolid:
             {
-                SolidFillData = reader.ReadUndertaleObjectNoPool<UndertaleYYSWFSolidFillData>();
+                SolidFillData = reader.ReadUndertaleObjectNoPool<UndertaleVectorSolidFillData>();
                 break;
             }
 
-            case UndertaleYYSWFFillType.FillInvalid:
+            case UndertaleVectorFillType.FillInvalid:
             default:
             {
                 reader.SubmitWarning("Tried to read invalid fill data.");
@@ -1471,7 +1475,7 @@ public class UndertaleYYSWFFillData : UndertaleObject
 }
 
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleYYSWFLineStyleData : UndertaleObject
+public class UndertaleLineStyleData : UndertaleObject
 {
     public byte Red { get; set; }
     public byte Green { get; set; }
@@ -1858,9 +1862,9 @@ public class UndertaleShapeData<T> : UndertaleObject where T : UndertaleObject, 
 [PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleStyleGroup<T> : UndertaleObject where T : UndertaleObject, new()
 {
-    public UndertaleSimpleList<UndertaleYYSWFFillData> FillStyles { get; set; }
-    public UndertaleSimpleList<UndertaleYYSWFLineStyleData> LineStyles { get; set; }
-    public UndertaleSimpleList<T> Subshapes { get; set; }
+    public UndertaleObservableList<UndertaleVectorFillData> FillStyles { get; set; }
+    public UndertaleObservableList<UndertaleLineStyleData> LineStyles { get; set; }
+    public UndertaleObservableList<T> Subshapes { get; set; }
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
@@ -1892,23 +1896,23 @@ public class UndertaleStyleGroup<T> : UndertaleObject where T : UndertaleObject,
         int l = reader.ReadInt32();
         int s = reader.ReadInt32();
 
-        FillStyles = new UndertaleSimpleList<UndertaleYYSWFFillData>();
-        LineStyles = new UndertaleSimpleList<UndertaleYYSWFLineStyleData>();
-        Subshapes = new UndertaleSimpleList<T>();
+        FillStyles = new UndertaleObservableList<UndertaleVectorFillData>(f);
+        LineStyles = new UndertaleObservableList<UndertaleLineStyleData>(l);
+        Subshapes = new UndertaleObservableList<T>(s);
 
         for (int i = 0; i < f; i++)
         {
-            FillStyles.Add(reader.ReadUndertaleObjectNoPool<UndertaleYYSWFFillData>());
+            FillStyles.InternalAdd(reader.ReadUndertaleObjectNoPool<UndertaleVectorFillData>());
         }
 
         for (int i = 0; i < l; i++)
         {
-            LineStyles.Add(reader.ReadUndertaleObjectNoPool<UndertaleYYSWFLineStyleData>());
+            LineStyles.InternalAdd(reader.ReadUndertaleObjectNoPool<UndertaleLineStyleData>());
         }
 
         for (int i = 0; i < s; i++)
         {
-            Subshapes.Add(reader.ReadUndertaleObjectNoPool<T>());
+            Subshapes.InternalAdd(reader.ReadUndertaleObjectNoPool<T>());
         }
     }
 }
@@ -2089,8 +2093,8 @@ public class UndertaleYYSWFTimeline : UndertaleObject
     public int MaskWidth { get; set; }
     public int MaskHeight { get; set; }
     public UndertaleSimpleList<UndertaleYYSWFItem> UsedItems { get; set; }
-    public UndertaleSimpleList<UndertaleYYSWFTimelineFrame> Frames { get; set; }
-    public UndertaleSimpleList<UndertaleYYSWFCollisionMask> CollisionMasks { get; set; }
+    public UndertaleObservableList<UndertaleYYSWFTimelineFrame> Frames { get; set; }
+    public UndertaleObservableList<UndertaleYYSWFCollisionMask> CollisionMasks { get; set; }
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
@@ -2120,12 +2124,12 @@ public class UndertaleYYSWFTimeline : UndertaleObject
     /// <inheritdoc />
     public void Unserialize(UndertaleReader reader)
     {
-        //UsedItems = reader.ReadUndertaleObject<UndertaleSimpleList<UndertaleYYSWFItem>>();
-        UsedItems = new UndertaleSimpleList<UndertaleYYSWFItem>();
         int uc = reader.ReadInt32();
+        UsedItems = new UndertaleSimpleList<UndertaleYYSWFItem>();
+        UsedItems.SetCapacity(uc);
         for (int i = 0; i < uc; i++)
         {
-            UsedItems.Add(reader.ReadUndertaleObjectNoPool<UndertaleYYSWFItem>());
+            UsedItems.InternalAdd(reader.ReadUndertaleObjectNoPool<UndertaleYYSWFItem>());
         }
 
         Framerate = reader.ReadInt32();
@@ -2138,18 +2142,16 @@ public class UndertaleYYSWFTimeline : UndertaleObject
         MaskWidth = reader.ReadInt32();
         MaskHeight = reader.ReadInt32();
 
-        Frames = new UndertaleSimpleList<UndertaleYYSWFTimelineFrame>();
+        Frames = new UndertaleObservableList<UndertaleYYSWFTimelineFrame>(fc);
         for (int f = 0; f < fc; f++)
         {
-            var yyswfFrame = reader.ReadUndertaleObjectNoPool<UndertaleYYSWFTimelineFrame>();
-            Frames.Add(yyswfFrame);
+            Frames.InternalAdd(reader.ReadUndertaleObjectNoPool<UndertaleYYSWFTimelineFrame>());
         }
 
-        CollisionMasks = new UndertaleSimpleList<UndertaleYYSWFCollisionMask>();
+        CollisionMasks = new UndertaleObservableList<UndertaleYYSWFCollisionMask>(mc);
         for (int m = 0; m < mc; m++)
         {
-            var yyswfMask = reader.ReadUndertaleObjectNoPool<UndertaleYYSWFCollisionMask>();
-            CollisionMasks.Add(yyswfMask);
+            CollisionMasks.InternalAdd(reader.ReadUndertaleObjectNoPool<UndertaleYYSWFCollisionMask>());
         }
     }
 }
