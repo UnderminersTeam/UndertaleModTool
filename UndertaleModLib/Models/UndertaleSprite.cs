@@ -1475,7 +1475,7 @@ public class UndertaleVectorFillData : UndertaleObject
 }
 
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleLineStyleData : UndertaleObject
+public class UndertaleVectorLineStyleData : UndertaleObject
 {
     public byte Red { get; set; }
     public byte Green { get; set; }
@@ -1503,7 +1503,7 @@ public class UndertaleLineStyleData : UndertaleObject
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"UndertaleYYSWFLineStyleData ({Red};{Green};{Blue};{Alpha})";
+        return $"UndertaleVectorLineStyleData ({Red};{Green};{Blue};{Alpha})";
     }
 }
 
@@ -1530,7 +1530,7 @@ public class UndertaleVector2 : UndertaleObject
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"UndertaleYYSWFVector2 ({X};{Y})";
+        return $"UndertaleVector2 ({X};{Y})";
     }
 }
 
@@ -1557,7 +1557,7 @@ public class UndertaleVector2F : UndertaleObject
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"UndertaleYYSWFVector2F ({X};{Y})";
+        return $"UndertaleVector2F ({X};{Y})";
     }
 }
 
@@ -1649,15 +1649,6 @@ public class UndertaleYYSWFSubShapeData : UndertaleObject
         FillStyleOne = reader.ReadInt32();
         FillStyleTwo = reader.ReadInt32();
         LineStyle = reader.ReadInt32();
-        Points = new UndertaleObservableList<UndertaleVector2F>();
-        Lines = new UndertaleObservableList<UndertaleVector2>();
-        Triangles = new UndertaleObservableList<int>();
-        LinePoints = new UndertaleObservableList<UndertaleVector2F>();
-        LineTriangles = new UndertaleObservableList<int>();
-        AALines = new UndertaleObservableList<UndertaleVector2>();
-        AAVectors = new UndertaleObservableList<UndertaleVector2F>();
-        LineAALines = new UndertaleObservableList<UndertaleVector2>();
-        LineAAVectors = new UndertaleObservableList<UndertaleVector2F>();
 
         int points = reader.ReadInt32();
         int lines = reader.ReadInt32();
@@ -1669,46 +1660,55 @@ public class UndertaleYYSWFSubShapeData : UndertaleObject
         int lineaalines = reader.ReadInt32();
         int lineaavectors = reader.ReadInt32();
 
+        Points = new UndertaleObservableList<UndertaleVector2F>(points);
         for (int i = 0; i < points; i++)
         {
             Points.InternalAdd(reader.ReadUndertaleObjectNoPool<UndertaleVector2F>());
         }
 
+        Lines = new UndertaleObservableList<UndertaleVector2>(lines);
         for (int i = 0; i < lines; i++)
         {
             Lines.InternalAdd(reader.ReadUndertaleObjectNoPool<UndertaleVector2>());
         }
 
+        Triangles = new UndertaleObservableList<int>(triangles);
         for (int i = 0; i < triangles; i++)
         {
             Triangles.InternalAdd(reader.ReadInt32());
         }
 
+        LinePoints = new UndertaleObservableList<UndertaleVector2F>(linepoints);
         for (int i = 0; i < linepoints; i++)
         {
             LinePoints.InternalAdd(reader.ReadUndertaleObjectNoPool<UndertaleVector2F>());
         }
 
+        LineTriangles = new UndertaleObservableList<int>(linetriangles);
         for (int i = 0; i < linetriangles; i++)
         {
             LineTriangles.InternalAdd(reader.ReadInt32());
         }
 
+        AALines = new UndertaleObservableList<UndertaleVector2>(aalines);
         for (int i = 0; i < aalines; i++)
         {
             AALines.InternalAdd(reader.ReadUndertaleObjectNoPool<UndertaleVector2>());
         }
 
+        AAVectors = new UndertaleObservableList<UndertaleVector2F>(aavectors);
         for (int i = 0; i < aavectors; i++)
         {
             AAVectors.InternalAdd(reader.ReadUndertaleObjectNoPool<UndertaleVector2F>());
         }
 
+        LineAALines = new UndertaleObservableList<UndertaleVector2>(lineaalines);
         for (int i = 0; i < lineaalines; i++)
         {
             LineAALines.InternalAdd(reader.ReadUndertaleObjectNoPool<UndertaleVector2>());
         }
 
+        LineAAVectors = new UndertaleObservableList<UndertaleVector2F>(lineaavectors);
         for (int i = 0; i < lineaavectors; i++)
         {
             LineAAVectors.InternalAdd(reader.ReadUndertaleObjectNoPool<UndertaleVector2F>());
@@ -1779,11 +1779,6 @@ public class UndertaleVectorSubShapeData : UndertaleObject
         FillStyleOne = reader.ReadInt32();
         FillStyleTwo = reader.ReadInt32();
         LineStyle = reader.ReadInt32();
-        Points = new UndertaleObservableList<UndertaleVector2F>();
-        PointColors = new UndertaleObservableList<uint>();
-        Triangles = new UndertaleObservableList<int>();
-        AALines = new UndertaleObservableList<UndertaleVector2>();
-        AAVectors = new UndertaleObservableList<UndertaleVector2F>();
 
         int points = reader.ReadInt32();
         int pointcolors = reader.ReadInt32();
@@ -1796,26 +1791,31 @@ public class UndertaleVectorSubShapeData : UndertaleObject
         reader.ReadInt32();
         reader.ReadInt32();
 
+        Points = new UndertaleObservableList<UndertaleVector2F>(points);
         for (int i = 0; i < points; i++)
         {
             Points.InternalAdd(reader.ReadUndertaleObjectNoPool<UndertaleVector2F>());
         }
 
+        PointColors = new UndertaleObservableList<uint>(pointcolors);
         for (int i = 0; i < pointcolors; i++)
         {
             PointColors.InternalAdd(reader.ReadUInt32());
         }
 
+        Triangles = new UndertaleObservableList<int>(triangles);
         for (int i = 0; i < triangles; i++)
         {
             Triangles.InternalAdd(reader.ReadInt32());
         }
 
+        AALines = new UndertaleObservableList<UndertaleVector2>(aalines);
         for (int i = 0; i < aalines; i++)
         {
             AALines.InternalAdd(reader.ReadUndertaleObjectNoPool<UndertaleVector2>());
         }
 
+        AAVectors = new UndertaleObservableList<UndertaleVector2F>(aavectors);
         for (int i = 0; i < aavectors; i++)
         {
             AAVectors.InternalAdd(reader.ReadUndertaleObjectNoPool<UndertaleVector2F>());
@@ -1863,7 +1863,7 @@ public class UndertaleShapeData<T> : UndertaleObject where T : UndertaleObject, 
 public class UndertaleStyleGroup<T> : UndertaleObject where T : UndertaleObject, new()
 {
     public UndertaleObservableList<UndertaleVectorFillData> FillStyles { get; set; }
-    public UndertaleObservableList<UndertaleLineStyleData> LineStyles { get; set; }
+    public UndertaleObservableList<UndertaleVectorLineStyleData> LineStyles { get; set; }
     public UndertaleObservableList<T> Subshapes { get; set; }
 
     /// <inheritdoc />
@@ -1897,7 +1897,7 @@ public class UndertaleStyleGroup<T> : UndertaleObject where T : UndertaleObject,
         int s = reader.ReadInt32();
 
         FillStyles = new UndertaleObservableList<UndertaleVectorFillData>(f);
-        LineStyles = new UndertaleObservableList<UndertaleLineStyleData>(l);
+        LineStyles = new UndertaleObservableList<UndertaleVectorLineStyleData>(l);
         Subshapes = new UndertaleObservableList<T>(s);
 
         for (int i = 0; i < f; i++)
@@ -1907,7 +1907,7 @@ public class UndertaleStyleGroup<T> : UndertaleObject where T : UndertaleObject,
 
         for (int i = 0; i < l; i++)
         {
-            LineStyles.InternalAdd(reader.ReadUndertaleObjectNoPool<UndertaleLineStyleData>());
+            LineStyles.InternalAdd(reader.ReadUndertaleObjectNoPool<UndertaleVectorLineStyleData>());
         }
 
         for (int i = 0; i < s; i++)
