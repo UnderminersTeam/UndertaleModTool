@@ -415,11 +415,14 @@ public class Packer
                 ti.TargetY = 0;
                 if (GetSpriteType(ti.Source) != SpriteType.Background)
                 {
+                    img.BorderColor = MagickColors.Transparent;
+                    img.BackgroundColor = MagickColors.Transparent;
+                    img.Border(1);
                     IMagickGeometry? bbox = img.BoundingBox;
                     if (bbox is not null)
                     {
-                        ti.TargetX = bbox.X;
-                        ti.TargetY = bbox.Y;
+                        ti.TargetX = bbox.X - 1;
+                        ti.TargetY = bbox.Y - 1;
                         // yes, .Trim() mutates the image...
                         // it doesn't really matter though since it isn't written back or anything
                         img.Trim();
