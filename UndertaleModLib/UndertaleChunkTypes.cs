@@ -65,17 +65,7 @@ namespace UndertaleModLib
                 name = reader.ReadChars(4);
                 uint length = reader.ReadUInt32();
 
-                // TODO: I can't think of a cleaner way to do this...
-                Type type = Type.GetType(typeof(UndertaleChunk).FullName + name);
-                if (type == null)
-                {
-                    throw new IOException("Unknown chunk " + name + "!!!");
-                    /*Debug.WriteLine("Unknown chunk " + name + "!!!");
-                    reader.Position = reader.Position + length;
-                    return null;*/
-                }
-
-                UndertaleChunk chunk = (UndertaleChunk)Activator.CreateInstance(type);
+                UndertaleChunk chunk = reader.undertaleData.FORM.Chunks[name];
                 Util.DebugUtil.Assert(chunk.Name == name,
                                       $"Chunk name mismatch: expected \"{name}\", got \"{chunk.Name}\".");
                 chunk.Length = length;
@@ -124,7 +114,7 @@ namespace UndertaleModLib
                 throw new UndertaleSerializationException(e.Message + "\nat " + reader.AbsPosition.ToString("X8") + " while reading chunk " + name, e);
             }
         }
-        public static uint CountChunkChildObjects(UndertaleReader reader)
+        public static (uint, UndertaleChunk) CountChunkChildObjects(UndertaleReader reader)
         {
             string name = "(unknown)";
             try
@@ -132,11 +122,12 @@ namespace UndertaleModLib
                 name = reader.ReadChars(4);
                 uint length = reader.ReadUInt32();
 
-                Type type = Type.GetType(typeof(UndertaleChunk).FullName + name);
-                if (type == null)
-                    throw new IOException("Unknown chunk " + name + "!!!");
+                if (!UndertaleChunkFORM.ChunkConstructors.TryGetValue(name, out Func<UndertaleChunk> instantiator))
+                {
+                    throw new IOException($"Unknown chunk \"{name}\"");
+                }
 
-                UndertaleChunk chunk = (UndertaleChunk)Activator.CreateInstance(type);
+                UndertaleChunk chunk = instantiator();
                 Util.DebugUtil.Assert(chunk.Name == name,
                                       $"Chunk name mismatch: expected \"{name}\", got \"{chunk.Name}\".");
                 chunk.Length = length;
@@ -150,7 +141,7 @@ namespace UndertaleModLib
                 reader.SwitchReaderType(false);
                 reader.Position = chunkStart + chunk.Length;
 
-                return count;
+                return (count, chunk);
             }
             catch (UndertaleSerializationException e)
             {
@@ -236,7 +227,8 @@ namespace UndertaleModLib
             IndexDict = new(List.Count);
             for (int i = 0; i < List.Count; i++)
             {
-                IndexDict[List[i]] = i;
+                if (List[i] is not null)
+                    IndexDict[List[i]] = i;
             }
         }
         public void ClearIndexDict()
@@ -263,6 +255,8 @@ namespace UndertaleModLib
                     while (writer.Position % Alignment != 0)
                         writer.Write((byte)0);
                 }
+                if (List[i] is null)
+                    continue;
                 uint returnTo = writer.Position;
                 writer.Position = baseAddr + ((uint)i * 4);
                 writer.Write(returnTo);
@@ -276,6 +270,9 @@ namespace UndertaleModLib
             uint count = reader.ReadUInt32();
             List.SetCapacity(count);
             uint realCount = count;
+            BitArray gm2024_11_WhatToSkip = null;
+            if (reader.undertaleData.IsVersionAtLeast(2024, 11) && count > 0)
+                gm2024_11_WhatToSkip = new((int)count, false);
 
             for (int i = 0; i < count; i++)
             {
@@ -283,15 +280,24 @@ namespace UndertaleModLib
                 Align &= (readValue % Alignment == 0);
                 if (readValue != 0) continue;
 
-                if (reader.undertaleData.GeneralInfo.BytecodeVersion >= 13)
+                if (reader.undertaleData.IsVersionAtLeast(2024, 11) && gm2024_11_WhatToSkip is not null)
                 {
-                    reader.SubmitWarning("Zero values in an AlignUpdatedListChunk encountered on Bytecode 13 or higher!");
+                    // This is "normal" and is likely a object removed by GMAC.
+                    gm2024_11_WhatToSkip.Set(i, true);
+                    continue;
                 }
+
                 realCount--;
             }
 
             for (int i = 0; i < realCount; i++)
             {
+                if (gm2024_11_WhatToSkip is not null && gm2024_11_WhatToSkip.Get(i))
+                {
+                    List.InternalAdd(default);
+                    continue;
+                }
+
                 if (Align)
                 {
                     while (reader.AbsPosition % Alignment != 0)
@@ -304,7 +310,22 @@ namespace UndertaleModLib
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
-            uint count = reader.ReadUInt32();
+            uint claimedCount = reader.ReadUInt32(), count = claimedCount;
+            if (count == 0)
+                return 0;
+
+            for (int i = 0; i < claimedCount; i++)
+            {
+                uint readValue = reader.ReadUInt32();
+                Align &= (readValue % Alignment == 0);
+                if (readValue != 0) continue;
+
+                if (reader.undertaleData.GeneralInfo.BytecodeVersion >= 13 && !reader.undertaleData.IsVersionAtLeast(2024, 11))
+                {
+                    reader.SubmitWarning("Zero values in an AlignUpdatedListChunk encountered on potential pre-2024.11 Bytecode 13+!");
+                }
+                count--;
+            }
             if (count == 0)
                 return 0;
 

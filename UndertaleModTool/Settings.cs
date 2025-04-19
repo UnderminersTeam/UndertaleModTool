@@ -66,6 +66,8 @@ namespace UndertaleModTool
         public DecompilerSettings DecompilerSettings { get; set; }
         public string InstanceIdPrefix { get; set; } = "inst_";
 
+        public bool ShowNullEntriesInResourceTree { get; set; } = false;
+
         public WindowPlacementExtensions.WindowPlacement? MainWindowPlacement { get; set; } = null;
         public bool RememberWindowPlacements { get; set; } = true;
 

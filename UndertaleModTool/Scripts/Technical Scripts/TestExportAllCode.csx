@@ -88,6 +88,11 @@ await Task.Run(() =>
 {
     foreach (UndertaleCode code in Data.Code)
     {
+        if (code is null)
+        {
+            IncrementProgress();
+            continue;
+        }
         if (write)
         {
             try

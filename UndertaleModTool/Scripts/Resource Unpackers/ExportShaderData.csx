@@ -12,8 +12,10 @@ if (exportFolder == null)
 
 Directory.CreateDirectory(exportFolder + "/Shader_Data/");
 
-foreach(UndertaleShader shader in Data.Shaders)
+foreach (UndertaleShader shader in Data.Shaders)
 {
+    if (shader is null)
+        continue;
     string exportBase = (exportFolder + "/Shader_Data/" + shader.Name.Content + "/");
     Directory.CreateDirectory(exportBase);
     File.WriteAllText(exportBase + "Type.txt", shader.Type.ToString());
