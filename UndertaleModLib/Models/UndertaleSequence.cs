@@ -22,6 +22,8 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
     public int OriginX { get; set; }
     public int OriginY { get; set; }
     public float Volume { get; set; }
+    public float Width { get; set; } // Added in GM 2024.13
+    public float Height { get; set; } // Added in GM 2024.13
     public UndertaleSimpleList<Keyframe<BroadcastMessage>> BroadcastMessages { get; set; }
     public UndertaleSimpleList<Keyframe<Moment>> Moments { get; set; }
     public UndertaleSimpleList<Track> Tracks { get; set; }
@@ -38,6 +40,11 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         writer.Write(OriginX);
         writer.Write(OriginY);
         writer.Write(Volume);
+        if (writer.undertaleData.IsVersionAtLeast(2024, 13))
+        {
+            writer.Write(Width);
+            writer.Write(Height);
+        }
 
         BroadcastMessages.Serialize(writer);
 
@@ -64,6 +71,11 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         OriginX = reader.ReadInt32();
         OriginY = reader.ReadInt32();
         Volume = reader.ReadSingle();
+        if (reader.undertaleData.IsVersionAtLeast(2024, 13))
+        {
+            Width = reader.ReadSingle();
+            Height = reader.ReadSingle();
+        }
 
         BroadcastMessages = reader.ReadUndertaleObject<UndertaleSimpleList<Keyframe<BroadcastMessage>>>();
 
@@ -85,7 +97,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
     {
         uint count = 0;
 
-        reader.Position += 32;
+        reader.Position += reader.undertaleData.IsVersionAtLeast(2024, 13) ? 40 : 32;
 
         count += 1 + UndertaleSimpleList<Keyframe<BroadcastMessage>>.UnserializeChildObjectCount(reader);
 

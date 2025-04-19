@@ -337,14 +337,18 @@ namespace UndertaleModLib
             resUpdate.Add(res);
         }
 
+        /// <summary>
+        /// Reads a boolean as 32 bits (0 or 1), maintaining alignment.
+        /// </summary>
         public override bool ReadBoolean()
         {
-            uint a = ReadUInt32();
-            if (a == 0)
-                return false;
-            if (a == 1)
-                return true;
-            throw new IOException("Invalid boolean value: " + a);
+            uint val = ReadUInt32();
+            return val switch
+            {
+                0 => false,
+                1 => true,
+                _ => throw new IOException($"Invalid boolean value: {val}")
+            };
         }
 
         private Dictionary<uint, UndertaleObject> objectPool;
@@ -615,12 +619,12 @@ namespace UndertaleModLib
         {
             try
             {
-                var expectedAddress = GetAddressForUndertaleObject(obj);
+                uint expectedAddress = GetAddressForUndertaleObject(obj);
                 if (expectedAddress == 0)
                     return;
                 if (expectedAddress != AbsPosition)
                 {
-                    SubmitWarning("Reading misaligned at " + AbsPosition.ToString("X8") + ", realigning back to " + expectedAddress.ToString("X8") + "\nHIGH RISK OF DATA LOSS! The file is probably corrupted, or uses unsupported features\nProceed at your own risk");
+                    SubmitWarning($"Reading misaligned at {AbsPosition:X8}, realigning back to {expectedAddress:X8}\nHIGH RISK OF DATA LOSS! The file is probably corrupted, or uses unsupported features\nProceed at your own risk");
                     AbsPosition = expectedAddress;
                 }
                 unreadObjects.Remove((uint)AbsPosition);
@@ -651,6 +655,13 @@ namespace UndertaleModLib
 
             result.Unserialize(this);
             return result;
+        }
+
+        public T ReadUndertaleObjectNoPool<T>() where T : UndertaleObject, new()
+        {
+            T o = new();
+            o.Unserialize(this);
+            return o;
         }
 
         public T ReadUndertaleObjectPointer<T>() where T : UndertaleObject, new()
@@ -751,6 +762,9 @@ namespace UndertaleModLib
             obj.Serialize(this);
         }
 
+        /// <summary>
+        /// Writes a boolean using 32 bits (0 or 1), maintaining alignment.
+        /// </summary>
         public override void Write(bool b)
         {
             Write(b ? (uint)1 : (uint)0);
@@ -809,7 +823,7 @@ namespace UndertaleModLib
             return res;
         }
 
-        public void WriteUndertaleObject<T>(T obj) where T : UndertaleObject, new()
+        public void WriteUndertaleObject<T>(T obj) where T : UndertaleObject
         {
             if (obj is null)
             {
@@ -871,11 +885,11 @@ namespace UndertaleModLib
             }
             catch (Exception e)
             {
-                throw new UndertaleSerializationException(e.Message + "\nat " + Position.ToString("X8") + " while writing object " + typeof(T).FullName, e);
+                throw new UndertaleSerializationException($"{e.Message}\nat {Position:X8} while writing object {typeof(T).FullName}", e);
             }
         }
 
-        public void WriteUndertaleObjectPointer<T>(T obj) where T : UndertaleObject, new()
+        public void WriteUndertaleObjectPointer<T>(T obj) where T : UndertaleObject
         {
             if (obj == null)
             {
