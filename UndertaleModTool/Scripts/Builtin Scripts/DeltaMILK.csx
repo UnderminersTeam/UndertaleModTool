@@ -5,6 +5,8 @@ ScriptMessage("Select the MILK that you prefer\nReplace every non-background spr
 var milk = Data.Sprites.ByName("spr_checkers_milk").Textures[0].Texture;
 foreach (var sprite in Data.Sprites)
 {
+    if (sprite is null)
+        continue;
     if (sprite.Name.Content.StartsWith("bg_"))
         continue;
     foreach (var tex in sprite.Textures)

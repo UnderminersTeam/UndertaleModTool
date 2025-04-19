@@ -315,7 +315,7 @@ namespace UndertaleModTool
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
-        private void UpdateTree()
+        public void UpdateTree()
         {
             foreach (var child in (MainTree.Items[0] as TreeViewItem).Items)
                 ((child as TreeViewItem).ItemsSource as ICollectionView)?.Refresh();
@@ -1502,7 +1502,7 @@ namespace UndertaleModTool
             return null;
         }
 
-        private void DeleteItem(UndertaleObject obj)
+        internal void DeleteItem(UndertaleObject obj)
         {
             TreeViewItem container = GetNearestParent<TreeViewItem>(GetTreeViewItemFor(obj));
             object source = container.ItemsSource;
@@ -1560,7 +1560,7 @@ namespace UndertaleModTool
                 }
             }
         }
-        private void CopyItemName(object obj)
+        internal void CopyItemName(object obj)
         {
             string name = null;
 
@@ -1679,59 +1679,10 @@ namespace UndertaleModTool
                 dialog?.Close();
             }
         }
-
-        private void MenuItem_ContextMenuOpened(object sender, RoutedEventArgs e)
-        {
-            var menu = sender as ContextMenu;
-            foreach (var item in menu.Items)
-            {
-                var menuItem = item as MenuItem;
-                if ((menuItem.Header as string) == "Find all references")
-                {
-                    menuItem.Visibility = UndertaleResourceReferenceMap.IsTypeReferenceable(menu.DataContext?.GetType())
-                                          ? Visibility.Visible : Visibility.Collapsed;
-
-                    break;
-                }
-            }
-        }
+    
         private void MenuItem_OpenInNewTab_Click(object sender, RoutedEventArgs e)
         {
             OpenInTab(Highlighted, true);
-        }
-        private void MenuItem_FindAllReferences_Click(object sender, RoutedEventArgs e)
-        {
-            var obj = (sender as FrameworkElement)?.DataContext as UndertaleResource;
-            if (obj is null)
-            {
-                this.ShowError("The selected object is not an \"UndertaleResource\".");
-                return;
-            }
-
-            FindReferencesTypesDialog dialog = null;
-            try
-            {
-                dialog = new(obj, Data);
-                dialog.ShowDialog();
-            }
-            catch (Exception ex)
-            {
-                this.ShowError("An error occurred in the object references related window.\n" +
-                               $"Please report this on GitHub.\n\n{ex}");
-            }
-            finally
-            {
-                dialog?.Close();
-            }
-        }
-        private void MenuItem_CopyName_Click(object sender, RoutedEventArgs e)
-        {
-            CopyItemName(Highlighted);
-        }
-        private void MenuItem_Delete_Click(object sender, RoutedEventArgs e)
-        {
-            if (Highlighted is UndertaleObject obj)
-                DeleteItem(obj);
         }
 
         private void MenuItem_Add_Click(object sender, RoutedEventArgs e)
@@ -3263,7 +3214,7 @@ result in loss of work.");
             }
         }
 
-        private void OpenInTab(object obj, bool isNewTab = false, string tabTitle = null)
+        internal void OpenInTab(object obj, bool isNewTab = false, string tabTitle = null)
         {
             if (obj is null)
                 return;

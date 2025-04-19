@@ -45,6 +45,12 @@ void DumpCode()
 {
     foreach (UndertaleCode code_orig in Data.Code)
     {
+        if (code_orig is null)
+        {
+            IncrementProgress();
+            continue;
+        }
+
         code_orig.Offset = 0;
         if (Data.CodeLocals is not null && Data.CodeLocals.ByName(code_orig.Name.Content) == null)
         {

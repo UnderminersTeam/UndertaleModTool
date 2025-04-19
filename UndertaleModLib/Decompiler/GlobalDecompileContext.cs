@@ -124,7 +124,7 @@ public class GlobalDecompileContext : IGameContext
         // Add all functions that aren't sub-functions
         foreach (UndertaleFunction func in data.Functions)
         {
-            if (func.Name?.Content is string name && !name.StartsWith(subFunctionPrefix, StringComparison.Ordinal))
+            if (func?.Name?.Content is string name && !name.StartsWith(subFunctionPrefix, StringComparison.Ordinal))
             {
                 data.GlobalFunctions.DefineFunction(name, func);
             }
@@ -133,14 +133,14 @@ public class GlobalDecompileContext : IGameContext
         // Add scripts to global functions lookup, if they aren't already there
         foreach (UndertaleScript script in data.Scripts)
         {
-            if (script.Name?.Content is string name && !name.StartsWith(subFunctionPrefix, StringComparison.Ordinal) &&
+            if (script?.Name?.Content is string name && !name.StartsWith(subFunctionPrefix, StringComparison.Ordinal) &&
                 !data.GlobalFunctions.FunctionNameExists(name) &&
                 data.Functions.ByName(name) is UndertaleFunction function)
             {
                 // Regular script asset (pre and post 2.3)
                 data.GlobalFunctions.DefineFunction(name, function);
             }
-            else if (script.Code is UndertaleCode { ParentEntry: null } code)
+            else if (script?.Code is UndertaleCode { ParentEntry: null } code)
             {
                 // If code name starts with "gml_Script_", and there's no parent code entry,
                 // then this is probably a GML-defined extension function.
@@ -157,6 +157,10 @@ public class GlobalDecompileContext : IGameContext
         {
             foreach (UndertaleExtension extension in data.Extensions)
             {
+                if (extension is null)
+                {
+                    continue;
+                }
                 foreach (UndertaleExtensionFile extensionFile in extension.Files)
                 {
                     foreach (UndertaleExtensionFunction extensionFunc in extensionFile.Functions)

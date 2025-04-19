@@ -8,6 +8,8 @@ bool pers = false;
 UndertaleGameObject obj_pers = null;
 foreach (UndertaleGameObject obj in Data.GameObjects)
 {
+    if (obj is null)
+        continue;
     if (obj.Persistent)
     {
         pers = true;

@@ -236,6 +236,8 @@ else
 
 foreach (var obj in Data.GameObjects)
 {
+    if (obj is null)
+        continue;
     if (!obj.Visible)
         continue;
     if (obj._sprite.CachedId >= 0)
