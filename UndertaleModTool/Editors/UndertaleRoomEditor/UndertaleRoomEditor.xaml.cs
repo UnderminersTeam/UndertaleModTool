@@ -2453,6 +2453,7 @@ namespace UndertaleModTool
                 switch ((item as Layer).LayerType)
                 {
                     case LayerType.Path:
+                    case LayerType.Path2:
                         return PathDataTemplate;
                     case LayerType.Instances:
                         return InstancesDataTemplate;
