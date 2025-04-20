@@ -50,7 +50,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
 
     /// <summary>
     /// The level of anti-aliasing that is applied. 0 for none, Game Maker: Studio 2 has 1 for <c>on</c>, while
-    /// Game Maker Studio: 1 and earlier have values 1-3 for different anti-aliasing levels.
+    /// GameMaker: Studio 1 and earlier have values 1-3 for different anti-aliasing levels.
     /// </summary>
     public byte AntiAliasing { get; set; }
 

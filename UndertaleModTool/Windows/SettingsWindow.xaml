@@ -44,7 +44,7 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <Label>Game Maker: Studio 1.4 path:</Label>
+                    <Label>GameMaker: Studio 1.4 path:</Label>
                     <local:TextBoxDark Grid.Column="1" Text="{Binding GameMakerStudioPath}"/>
                 </Grid>
 
@@ -54,7 +54,7 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <Label>Game Maker: Studio 2 runtimes path:</Label>
+                    <Label>GameMaker Studio 2 runtimes path:</Label>
                     <local:TextBoxDark Grid.Column="1" Text="{Binding GameMakerStudio2RuntimesPath}"/>
                 </Grid>
 
@@ -97,7 +97,7 @@
                     </StackPanel>
                     
                     <StackPanel Grid.Column="1">
-                        <local:ButtonDark Click="GMLSettingsButton_Click" HorizontalAlignment="Left" VerticalAlignment="Top">GML compiler/decompiler settings</local:ButtonDark>
+                        <local:ButtonDark Click="GMLSettingsButton_Click" Padding="8,2,8,2" HorizontalAlignment="Left" VerticalAlignment="Top">GML compiler/decompiler settings</local:ButtonDark>
                     </StackPanel>
                 </Grid>
 
@@ -170,8 +170,8 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <local:ButtonDark Grid.Column="0" Click="AppDataButton_Click" HorizontalAlignment="Left">Open application data folder</local:ButtonDark>
-                    <local:ButtonDark Grid.Column="1" Click="UpdateAppButton_Click" HorizontalAlignment="Right" x:Name="UpdateAppButton" Visibility="{Binding UpdaterButtonVisibility}">Update app to latest commit</local:ButtonDark>
+                    <local:ButtonDark Grid.Column="0" Click="AppDataButton_Click" Padding="8,2,8,2" HorizontalAlignment="Left">Open application data folder</local:ButtonDark>
+                    <local:ButtonDark Grid.Column="1" Click="UpdateAppButton_Click" Padding="8,2,8,2" HorizontalAlignment="Right" x:Name="UpdateAppButton" Visibility="{Binding UpdaterButtonVisibility}">Update app to latest commit</local:ButtonDark>
                 </Grid>
             </StackPanel>
         </Grid>

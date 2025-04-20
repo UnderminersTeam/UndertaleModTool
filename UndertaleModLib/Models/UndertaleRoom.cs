@@ -159,7 +159,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
     public UndertalePointerList<Tile> Tiles { get; set; } = new UndertalePointerList<Tile>();
 
     /// <summary>
-    /// The list of layers this room uses. Used in Game Maker Studio: 2 only, as <see cref="Backgrounds"/> and <see cref="Tiles"/> are empty there.
+    /// The list of layers this room uses. Used in GameMaker Studio 2 only, as <see cref="Backgrounds"/> and <see cref="Tiles"/> are empty there.
     /// </summary>
     public UndertalePointerList<Layer> Layers { get => _layers; set { _layers = value; UpdateBGColorLayer(); OnPropertyChanged(); } }
 
