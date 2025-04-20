@@ -2735,7 +2735,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             InstanceIDs.SetCapacity(count);
             for (int i = 0; i < count; i++)
             {
-                InstanceIDs.Add(reader.ReadInt32());
+                InstanceIDs.InternalAdd(reader.ReadInt32());
             }
         }
     }
