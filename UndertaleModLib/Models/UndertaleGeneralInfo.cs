@@ -305,12 +305,12 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     public List<long> GMS2RandomUID { get; set; } = new List<long>();
 
     /// <summary>
-    /// The FPS of the data file. Game Maker Studio: 2 only.
+    /// The FPS of the data file. GameMaker Studio 2 only.
     /// </summary>
     public float GMS2FPS { get; set; } = 30.0f;
 
     /// <summary>
-    /// Whether the data file allows statistics. Game Maker Studio: 2 only.
+    /// Whether the data file allows statistics. GameMaker Studio 2 only.
     /// </summary>
     public bool GMS2AllowStatistics { get; set; } = true;
 

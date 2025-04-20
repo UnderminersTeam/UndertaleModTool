@@ -9,7 +9,7 @@ using UndertaleModLib;
 OpenFileDialog dlg = new OpenFileDialog();
 
 dlg.DefaultExt = "win";
-dlg.Filter = "Game Maker Studio data files (.win, .unx, .ios)|*.win;*.unx;*.ios|All files|*";
+dlg.Filter = "GameMaker data files (.win, .unx, .ios)|*.win;*.unx;*.ios|All files|*";
 
 if (dlg.ShowDialog() == true)
 {
