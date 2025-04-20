@@ -58,7 +58,7 @@ public class UndertaleString : UndertaleResource, ISearchable, IDisposable, Unde
     /// <summary>
     /// Returns a string that represents the current object.
     /// </summary>
-    /// <param name="isGMS2">Whether the string is from a Game Maker: Studio 2 data file or not.</param>
+    /// <param name="isGMS2">Whether the string is from a GameMaker Studio 2 data file or not.</param>
     /// <returns>A string that represents the current object.</returns>
     public string ToString(bool isGMS2)
     {

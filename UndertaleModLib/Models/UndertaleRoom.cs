@@ -1366,7 +1366,11 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         /// <summary>
         /// The layer is an effects layer.
         /// </summary>
-        Effect = 6
+        Effect = 6,
+        /// <summary>
+        /// The layer is a path layer, in 2024.13+ only.
+        /// </summary>
+        Path2 = 7
     }
 
     /// <summary>
@@ -1463,6 +1467,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             switch (LayerType)
             {
                 case LayerType.Path: break;
+                case LayerType.Path2: break;
                 case LayerType.Instances: writer.WriteUndertaleObject(InstancesData); break;
                 case LayerType.Tiles: writer.WriteUndertaleObject(TilesData); break;
                 case LayerType.Background: writer.WriteUndertaleObject(BackgroundData); break;
@@ -1494,7 +1499,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
             Data = LayerType switch
             {
-                LayerType.Path => null,
+                LayerType.Path or LayerType.Path2 => null,
                 LayerType.Instances => reader.ReadUndertaleObject<LayerInstancesData>(),
                 LayerType.Tiles => reader.ReadUndertaleObject<LayerTilesData>(),
                 LayerType.Background => reader.ReadUndertaleObject<LayerBackgroundData>(),

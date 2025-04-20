@@ -1174,7 +1174,7 @@ namespace UndertaleModLib
 
                 LayerType layerType = (LayerType)reader.ReadInt32();
                 // This is the only way to repeat the loop, because each successful switch case terminates the loop
-                if (!Enum.IsDefined(layerType) || layerType == LayerType.Path)
+                if (!Enum.IsDefined(layerType) || layerType is LayerType.Path or LayerType.Path2)
                     continue;
 
                 switch (layerType)
