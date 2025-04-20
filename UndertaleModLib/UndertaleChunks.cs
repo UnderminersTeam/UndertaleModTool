@@ -49,6 +49,7 @@ namespace UndertaleModLib
             { "TMLN", () => new UndertaleChunkTMLN() },
             { "OBJT", () => new UndertaleChunkOBJT() },
             { "ROOM", () => new UndertaleChunkROOM() },
+            { "UILR", () => new UndertaleChunkUILR() },
             { "DAFL", () => new UndertaleChunkDAFL() },
             { "EMBI", () => new UndertaleChunkEMBI() },
             { "TPAG", () => new UndertaleChunkTPAG() },
@@ -85,6 +86,7 @@ namespace UndertaleModLib
         public UndertaleChunkTMLN TMLN => Chunks.GetValueOrDefault("TMLN") as UndertaleChunkTMLN;
         public UndertaleChunkOBJT OBJT => Chunks.GetValueOrDefault("OBJT") as UndertaleChunkOBJT;
         public UndertaleChunkROOM ROOM => Chunks.GetValueOrDefault("ROOM") as UndertaleChunkROOM;
+        public UndertaleChunkUILR UILR => Chunks.GetValueOrDefault("UILR") as UndertaleChunkUILR;
         public UndertaleChunkDAFL DAFL => Chunks.GetValueOrDefault("DAFL") as UndertaleChunkDAFL;
         public UndertaleChunkEMBI EMBI => Chunks.GetValueOrDefault("EMBI") as UndertaleChunkEMBI;
         public UndertaleChunkTPAG TPAG => Chunks.GetValueOrDefault("TPAG") as UndertaleChunkTPAG;
@@ -1120,9 +1122,7 @@ namespace UndertaleModLib
 
                 Type gameObjType = typeof(GameObject);
 
-                uint newValue = GameObject.ChildObjectCount + 1;
-                reader.SetStaticChildCount(gameObjType, newValue);
-                newValue = GameObject.ChildObjectsSize + 4;
+                uint newValue = GameObject.ChildObjectsSize + 4;
                 reader.SetStaticChildObjectsSize(gameObjType, newValue);
             }
 
@@ -1174,7 +1174,7 @@ namespace UndertaleModLib
 
                 LayerType layerType = (LayerType)reader.ReadInt32();
                 // This is the only way to repeat the loop, because each successful switch case terminates the loop
-                if (!Enum.IsDefined(layerType) || layerType == LayerType.Path)
+                if (!Enum.IsDefined(layerType) || layerType is LayerType.Path or LayerType.Path2)
                     continue;
 
                 switch (layerType)
@@ -1370,6 +1370,11 @@ namespace UndertaleModLib
             checkedFor2024_2 = true;
             checkedFor2024_4 = true;
         }
+    }
+
+    public class UndertaleChunkUILR : UndertaleListChunk<UndertaleUIRootNode>
+    {
+        public override string Name => "UILR";
     }
 
     public class UndertaleChunkDAFL : UndertaleEmptyChunk // DataFiles
