@@ -56,7 +56,7 @@ public class LocalGameListTest
             using (FileStream inputFs = new(file, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 // Read file
-                data = UndertaleIO.Read(inputFs, (string warning) =>
+                data = UndertaleIO.Read(inputFs, (string warning, bool _) =>
                 {
                     throw new Exception($"Warning occurred: {warning}");
                 });

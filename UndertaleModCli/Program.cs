@@ -183,7 +183,7 @@ public partial class Program : IScriptInterface
         this.ExePath = Environment.CurrentDirectory;
         this.Output = output;
 
-        this.Data = ReadDataFile(datafile, this.Verbose ? WarningHandler : DummyHandler, this.Verbose ? MessageHandler : DummyHandler);
+        this.Data = ReadDataFile(datafile, WarningHandler, this.Verbose ? MessageHandler : DummyHandler);
 
         FinishedMessageEnabled = true;
         this.CliScriptOptions = ScriptOptions.Default
@@ -930,8 +930,8 @@ public partial class Program : IScriptInterface
     /// Read supplied filename and return the data file.
     /// </summary>
     /// <param name="datafile">The datafile to read</param>
-    /// <param name="warningHandler">Handler for Warnings</param>
-    /// <param name="messageHandler">Handler for Messages</param>
+    /// <param name="warningHandler">Handler for warnings</param>
+    /// <param name="messageHandler">Handler for messages</param>
     /// <returns></returns>
     /// <exception cref="FileNotFoundException">If the data file cannot be found</exception>
     private static UndertaleData ReadDataFile(FileInfo datafile, WarningHandlerDelegate warningHandler = null, MessageHandlerDelegate messageHandler = null)
@@ -976,7 +976,8 @@ public partial class Program : IScriptInterface
     /// A simple warning handler that prints warnings to console.
     /// </summary>
     /// <param name="warning">The warning to print</param>
-    private static void WarningHandler(string warning) => Console.WriteLine($"[WARNING]: {warning}");
+    /// <param name="isImportant">Whether the warning is important (may lead to data corruption)</param>
+    private static void WarningHandler(string warning, bool isImportant) => Console.WriteLine($"[WARNING]: {warning}");
 
     /// <summary>
     /// A simple message handler that prints messages to console.
