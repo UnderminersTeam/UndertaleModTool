@@ -29,7 +29,7 @@ if (DonorDataPath == null)
     throw new ScriptException("The donor data path was not set.");
 
 using (var stream = new FileStream(DonorDataPath, FileMode.Open, FileAccess.Read))
-    DonorData = UndertaleIO.Read(stream, warning => ScriptMessage("A warning occured while trying to load " + DonorDataPath + ":\n" + warning));
+    DonorData = UndertaleIO.Read(stream, (warning, _) => ScriptMessage("A warning occured while trying to load " + DonorDataPath + ":\n" + warning));
 var DonorDataEmbeddedTexturesCount = DonorData.EmbeddedTextures.Count;
 DonorData.BuiltinList = new BuiltinList(DonorData);
 GameSpecificResolver.Initialize(DonorData);

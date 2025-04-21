@@ -177,17 +177,20 @@ namespace UndertaleModLib
     public class UndertaleReader : AdaptiveBinaryReader
     {
         /// <summary>
-        /// function to delegate warning messages to
+        /// Function to delegate warning messages to.
         /// </summary>
-        /// <param name="warning"></param>
-        public delegate void WarningHandlerDelegate(string warning);
+        /// <param name="warning">Warning message.</param>
+        /// <param name="isImportant">Whether the warning is deemed important (that is, may risk data loss when re-saving).</param>
+        public delegate void WarningHandlerDelegate(string warning, bool isImportant);
+
         /// <summary>
-        /// function to delegate informational messages to
+        /// Function to delegate informational messages to.
         /// </summary>
-        /// <param name="message"></param>
+        /// <param name="message">Informational message.</param>
         public delegate void MessageHandlerDelegate(string message);
-        private WarningHandlerDelegate WarningHandler;
-        private MessageHandlerDelegate MessageHandler;
+
+        private readonly WarningHandlerDelegate _warningHandler;
+        private readonly MessageHandlerDelegate _messageHandler;
 
         public bool ReadOnlyGEN8 { get; set; }
 
@@ -215,8 +218,8 @@ namespace UndertaleModLib
                                WarningHandlerDelegate warningHandler = null, MessageHandlerDelegate messageHandler = null,
                                bool onlyGeneralInfo = false) : base(input)
         {
-            WarningHandler = warningHandler;
-            MessageHandler = messageHandler;
+            _warningHandler = warningHandler;
+            _messageHandler = messageHandler;
             ReadOnlyGEN8 = onlyGeneralInfo;
             if (input is FileStream fs)
             {
@@ -228,18 +231,18 @@ namespace UndertaleModLib
         }
 
         // TODO: This would be more useful if it reported location like the exceptions did
-        public void SubmitWarning(string warning)
+        public void SubmitWarning(string warning, bool isImportant = true)
         {
-            if (WarningHandler != null)
-                WarningHandler.Invoke(warning);
+            if (_warningHandler != null)
+                _warningHandler.Invoke(warning, isImportant);
             else
                 throw new IOException(warning);
         }
 
         public void SubmitMessage(string message)
         {
-            if (MessageHandler != null)
-                MessageHandler.Invoke(message);
+            if (_messageHandler != null)
+                _messageHandler.Invoke(message);
             else
                 Debug.WriteLine(message);
         }
@@ -253,32 +256,37 @@ namespace UndertaleModLib
             return UndertaleChunk.CountChunkChildObjects(this);
         }
 
-        private List<UndertaleResourceRef> resUpdate = new List<UndertaleResourceRef>();
+        private readonly List<UndertaleResourceRef> _resourceRefsToResolve = new(256);
         internal UndertaleData undertaleData;
 
         public UndertaleData ReadUndertaleData()
         {
-            UndertaleData data = new UndertaleData();
+            // Create new data context
+            UndertaleData data = new();
             undertaleData = data;
 
-            resUpdate.Clear();
-
+            // Ensure root chunk is called "FORM"
             string name = ReadChars(4);
             if (name != "FORM")
-                throw new IOException("Root chunk is " + name + " not FORM");
+                throw new IOException($"Root chunk is \"{name}\", not FORM");
             uint length = ReadUInt32();
-            data.FORM = new UndertaleChunkFORM();
+            data.FORM = new UndertaleChunkFORM
+            {
+                Length = length
+            };
             DebugUtil.Assert(data.FORM.Name == name);
-            data.FORM.Length = length;
 
+            // Perform object counting pass on file
             long startPos = Position;
             uint poolSize = 0;
-            if (!ProcessCountExc()) // process an exception from "FillUnserializeCountDictionaries()"
+            if (!ProcessObjectCountingErrors()) // process an exception from "FillUnserializeCountDictionaries()"
             {
                 try
                 {
                     if (!ReadOnlyGEN8)
+                    {
                         poolSize = data.FORM.UnserializeObjectCount(this);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -290,51 +298,69 @@ namespace UndertaleModLib
             }
             ListPtrsPool = null;
 
+            // Initialize object pools
             InitializePools(poolSize);
 
+            // Read all of the main data
             Position = startPos;
-
-            var lenReader = EnsureLengthFromHere(data.FORM.Length);
+            EnsureLengthOperation lenReader = EnsureLengthFromHere(data.FORM.Length);
             data.FORM.UnserializeChunk(this);
             lenReader.ToHere();
 
+            // Resolve resource IDs
             SubmitMessage("Resolving resource IDs...");
-            foreach (UndertaleResourceRef res in resUpdate)
+            foreach (UndertaleResourceRef res in _resourceRefsToResolve)
+            {
                 res.PostUnserialize(this);
-            resUpdate.Clear();
-
-            // Skip if it's "audiogroup*.dat" file
-            if (!FilePath.EndsWith(".dat"))
-            {
-                data.BuiltinList = new BuiltinList(data);
-                Decompiler.GameSpecificResolver.Initialize(data);
-                UndertaleEmbeddedTexture.FindAllTextureInfo(data);
             }
+            _resourceRefsToResolve.Clear();
 
-            // Iterate over function names to see if 2023.11+ naming process was used (if necessary)
-            if (data.Functions is not null && data.IsVersionAtLeast(2023, 8) && !data.IsVersionAtLeast(2023, 11))
+            // Skip extra processing if it's not a regular data file (e.g., audio group files)
+            if (data.FORM.GEN8 is not null)
             {
-                foreach (UndertaleFunction function in data.Functions)
+                // Initialize GML builtins
+                data.BuiltinList = new BuiltinList(data);
+
+                // Initialize game-specific data resolver
+                try
                 {
-                    // If name starts with "gml_Script" and contains a @ character, it should be from 2023.11
-                    if (function.Name.Content is string functionName &&
-                        functionName.StartsWith("gml_Script_", StringComparison.Ordinal) && 
-                        functionName.Contains('@'))
+                    Decompiler.GameSpecificResolver.Initialize(data);
+                }
+                catch (Exception e)
+                {
+                    SubmitWarning($"Error initializing game-specific data resolver:\n{e.GetType().FullName}: {e.Message}", false);
+                    data.GameSpecificRegistry = new(); // Use a blank registry...
+                }
+
+                // Link texture group information, if relevant
+                UndertaleEmbeddedTexture.FindAllTextureInfo(data);
+
+                // Iterate over function names to see if 2023.11+ naming process was used (if necessary)
+                if (data.Functions is not null && data.IsVersionAtLeast(2023, 8) && !data.IsVersionAtLeast(2023, 11))
+                {
+                    foreach (UndertaleFunction function in data.Functions)
                     {
-                        data.SetGMS2Version(2023, 11);
-                        break;
+                        // If name starts with "gml_Script" and contains a @ character, it should be from 2023.11
+                        if (function.Name.Content is string functionName &&
+                            functionName.StartsWith("gml_Script_", StringComparison.Ordinal) &&
+                            functionName.Contains('@'))
+                        {
+                            data.SetGMS2Version(2023, 11);
+                            break;
+                        }
                     }
                 }
             }
 
-            ProcessCountExc(poolSize);
+            // Process any errors that may have occurred during object counting
+            ProcessObjectCountingErrors(poolSize);
 
             return data;
         }
 
         internal void RequestResourceUpdate(UndertaleResourceRef res)
         {
-            resUpdate.Add(res);
+            _resourceRefsToResolve.Add(res);
         }
 
         /// <summary>
@@ -366,7 +392,7 @@ namespace UndertaleModLib
         private readonly Type delegateType = typeof(Func<UndertaleReader, uint>);
         private readonly Func<UndertaleReader, uint> blankCountFunc = new(_ => { return 0; });
 
-        private bool ProcessCountExc(uint poolSize = 0)
+        private bool ProcessObjectCountingErrors(uint poolSize = 0)
         {
             if (countUnserializeExc is not null)
             {
@@ -393,7 +419,7 @@ namespace UndertaleModLib
             {
                 SubmitWarning("Warning - the estimated object pool size differs from the actual size.\n" +
                              $"Estimated: {poolSize}, Actual: {objectPool.Count}\n" +
-                              "Please report this on UndertaleModTool GitHub.");
+                              "Please report this on UndertaleModTool GitHub.", false);
             }
 
             return false;
@@ -991,7 +1017,7 @@ namespace UndertaleModLib
                                                         bool onlyGeneralInfo = false)
         {
             UndertaleReader reader = new(stream, warningHandler, messageHandler, onlyGeneralInfo);
-            var data = reader.ReadUndertaleData();
+            UndertaleData data = reader.ReadUndertaleData();
             reader.ThrowIfUnreadObjects();
             return data;
         }

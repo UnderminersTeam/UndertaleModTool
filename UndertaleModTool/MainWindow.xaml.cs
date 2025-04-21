@@ -998,20 +998,19 @@ namespace UndertaleModTool
 
             Task t = Task.Run(() =>
             {
-                bool hadWarnings = false;
+                bool hadImportantWarnings = false;
                 UndertaleData data = null;
                 try
                 {
                     using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read))
                     {
-                        data = UndertaleIO.Read(stream, warning =>
+                        data = UndertaleIO.Read(stream, (string warning, bool isImportant) =>
                         {
                             this.ShowWarning(warning, "Loading warning");
-                            if (warning.Contains("unserializeCountError.txt")
-                                || warning.Contains("object pool size"))
-                                return;
-
-                            hadWarnings = true;
+                            if (isImportant)
+                            {
+                                hadImportantWarnings = true;
+                            }
                         }, message =>
                         {
                             FileMessageEvent?.Invoke(message);
@@ -1048,7 +1047,7 @@ namespace UndertaleModTool
                             CanSave = false;
                             CanSafelySave = false;
                         }
-                        else if (hadWarnings)
+                        else if (hadImportantWarnings)
                         {
                             this.ShowWarning("Warnings occurred during loading. Data loss will likely occur when trying to save!", "Loading problems");
                             CanSave = true;
