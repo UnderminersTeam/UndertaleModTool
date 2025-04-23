@@ -24,6 +24,10 @@ internal sealed class SerializableScript : ISerializableProjectAsset
     [JsonIgnore]
     public bool IndividualDirectory => false;
 
+    /// <inheritdoc/>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public int OverrideOrder { get; set; }
+
     /// <inheritdoc cref="UndertaleScript.Code"/>
     public string Code { get; set; }
 

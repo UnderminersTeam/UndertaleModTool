@@ -617,7 +617,7 @@ public class UndertaleRoom : UndertaleNamedResource, IProjectAsset, INotifyPrope
     public SerializableAssetType ProjectAssetType => SerializableAssetType.Room;
 
     /// <inheritdoc/>
-    public bool ProjectExportable => true;
+    public bool ProjectExportable => Name?.Content is not null;
 
     /// <summary>
     /// Interface for objects within rooms.
@@ -2765,7 +2765,7 @@ public class UndertaleRoom : UndertaleNamedResource, IProjectAsset, INotifyPrope
     /// </summary>
     public class InstanceIDList : UndertaleObject
     {
-        public UndertaleObservableList<int> InstanceIDs { get; set; } = new();
+        public UndertaleObservableList<uint> InstanceIDs { get; set; } = new(8);
 
         public void Serialize(UndertaleWriter writer)
         {
@@ -2782,7 +2782,7 @@ public class UndertaleRoom : UndertaleNamedResource, IProjectAsset, INotifyPrope
             InstanceIDs.SetCapacity(count);
             for (int i = 0; i < count; i++)
             {
-                InstanceIDs.InternalAdd(reader.ReadInt32());
+                InstanceIDs.InternalAdd(reader.ReadUInt32());
             }
         }
     }

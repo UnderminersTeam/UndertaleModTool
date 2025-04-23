@@ -84,5 +84,5 @@ public class UndertaleScript : UndertaleNamedResource, IProjectAsset, INotifyPro
     public SerializableAssetType ProjectAssetType => SerializableAssetType.Script;
 
     /// <inheritdoc/>
-    public bool ProjectExportable => !IsConstructor && Code?.ParentEntry is null;
+    public bool ProjectExportable => Name?.Content is not null && !IsConstructor && Code?.ParentEntry is null;
 }

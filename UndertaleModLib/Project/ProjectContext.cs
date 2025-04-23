@@ -9,8 +9,8 @@ using Underanalyzer.Decompiler;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
-using UndertaleModLib.Project.Json;
 using UndertaleModLib.Project.SerializableAssets;
+using UndertaleModLib.Util;
 
 namespace UndertaleModLib.Project;
 
@@ -58,6 +58,11 @@ public sealed class ProjectContext
     /// Lookup of asset paths that existed when loading on disk, by data name and asset type.
     /// </summary>
     internal IReadOnlyDictionary<(string DataName, SerializableAssetType AssetType), string> AssetDataNamesToPaths => _assetDataNamesToPaths;
+
+    /// <summary>
+    /// Texture worker used during exporting.
+    /// </summary>
+    internal TextureWorker TextureWorker { get; set; }
 
     /// <summary>
     /// Generic options to use for writing JSON.
@@ -129,6 +134,7 @@ public sealed class ProjectContext
         // Recursively find and load in all assets in subdirectories
         List<ISerializableProjectAsset> loadedAssets = new(128);
         List<SerializableCode> loadedCodeAssets = new(64);
+        List<ISerializableTextureProjectAsset> loadedTextureAssets = new(64);
         HashSet<string> excludeDirectorySet = new(_mainOptions.ExcludeDirectories);
         foreach (string directory in Directory.EnumerateDirectories(_mainDirectory))
         {
@@ -168,6 +174,10 @@ public sealed class ProjectContext
                 if (asset is SerializableCode codeAsset)
                 {
                     loadedCodeAssets.Add(codeAsset);
+                }
+                else if (asset is ISerializableTextureProjectAsset textureAsset)
+                {
+                    loadedTextureAssets.Add(textureAsset);
                 }
 
                 // If asset's data name is omitted, use the filename
@@ -212,6 +222,11 @@ public sealed class ProjectContext
             }
         }
 
+        // Sort all assets so that they import deterministically
+        loadedAssets.Sort(CompareSerializableAssets);
+        loadedCodeAssets.Sort(CompareSerializableAssets);
+        loadedTextureAssets.Sort(CompareSerializableAssets);
+
         // Perform pre-import on all loaded assets
         MainThreadAction(() =>
         {
@@ -240,11 +255,20 @@ public sealed class ProjectContext
             throw new ProjectException(e.Message, e);
         }
 
-        // TODO: texture page generation goes here, in parallel
+        // Pack textures
+        // TODO: parallelize based on texture groups, and use their settings for the packer
+        //       may need to move this out of the constructor for that...
+        TextureGroupPacker packer = new();
+        foreach (ISerializableTextureProjectAsset asset in loadedTextureAssets)
+        {
+            asset.ImportTextures(this, packer);
+        }
+        packer.PackPages();
 
         // Perform final import on all loaded assets
         MainThreadAction(() =>
         {
+            packer.ImportToData(Data);
             foreach (ISerializableProjectAsset asset in loadedAssets)
             {
                 asset.Import(this);
@@ -275,6 +299,22 @@ public sealed class ProjectContext
         // Clean up loading structures
         _audioGroups = null;
         _streamedSoundFilenames = null;
+    }
+
+    /// <summary>
+    /// Comparer for two serializable project assets, for deterministic imports.
+    /// </summary>
+    private int CompareSerializableAssets(ISerializableProjectAsset a, ISerializableProjectAsset b)
+    {
+        if (a.OverrideOrder < b.OverrideOrder)
+        {
+            return -1;
+        }
+        if (a.OverrideOrder > b.OverrideOrder)
+        {
+            return 1;
+        }
+        return a.DataName.CompareTo(b.DataName);
     }
 
     /// <summary>
@@ -457,60 +497,72 @@ public sealed class ProjectContext
             }
         }
 
-        // Export all assets that are marked as such
-        foreach (IProjectAsset asset in _assetsMarkedForExport)
-        {
-            // Generate serializable version of the asset
-            ISerializableProjectAsset serializableAsset = asset.GenerateSerializableProjectAsset(this);
+        // Initialize texture worker for any image exports
+        TextureWorker = new();
 
-            // Figure out a destination file path
-            string destinationFile;
-            if (_assetDataNamesToPaths.TryGetValue((serializableAsset.DataName, serializableAsset.AssetType), out string existingPath) &&
-                File.Exists(existingPath))
+        // Export all assets that are marked as such
+        try
+        {
+            foreach (IProjectAsset asset in _assetsMarkedForExport)
             {
-                // Existing file path existed from project load, and the file still exists; use that again
-                destinationFile = existingPath;
-            }
-            else
-            {
-                // Generate new path
-                string friendlyName = MakeValidFilenameIdentifier(serializableAsset.AssetType, serializableAsset.DataName);
-                if (serializableAsset.IndividualDirectory)
+                // Generate serializable version of the asset
+                ISerializableProjectAsset serializableAsset = asset.GenerateSerializableProjectAsset(this);
+
+                // Figure out a destination file path
+                string destinationFile;
+                if (_assetDataNamesToPaths.TryGetValue((serializableAsset.DataName, serializableAsset.AssetType), out string existingPath) &&
+                    File.Exists(existingPath))
                 {
-                    // Asset needs its own directory
-                    destinationFile = Path.Combine(_mainDirectory, serializableAsset.AssetType.ToFilesystemNamePlural(), friendlyName, $"{friendlyName}.json");
+                    // Existing file path existed from project load, and the file still exists; use that again
+                    destinationFile = existingPath;
                 }
                 else
                 {
-                    // Asset doesn't need its own directory
-                    destinationFile = Path.Combine(_mainDirectory, serializableAsset.AssetType.ToFilesystemNamePlural(), $"{friendlyName}.json");
+                    // Generate new path
+                    string friendlyName = MakeValidFilenameIdentifier(serializableAsset.AssetType, serializableAsset.DataName);
+                    if (serializableAsset.IndividualDirectory)
+                    {
+                        // Asset needs its own directory
+                        destinationFile = Path.Combine(_mainDirectory, serializableAsset.AssetType.ToFilesystemNamePlural(), friendlyName, $"{friendlyName}.json");
+                    }
+                    else
+                    {
+                        // Asset doesn't need its own directory
+                        destinationFile = Path.Combine(_mainDirectory, serializableAsset.AssetType.ToFilesystemNamePlural(), $"{friendlyName}.json");
+                    }
+
+                    // If file already exists, add a suffix until there is no conflict
+                    int attempts = 0;
+                    while (File.Exists(destinationFile) && attempts < 10)
+                    {
+                        string directory = Path.GetDirectoryName(destinationFile);
+                        destinationFile = Path.Combine(directory, $"{friendlyName}_{attempts + 2}.json");
+                        attempts++;
+                    }
+                    if (attempts > 0 && File.Exists(destinationFile))
+                    {
+                        throw new ProjectException($"Too many naming conflicts for \"{friendlyName}\"");
+                    }
                 }
 
-                // If file already exists, add a suffix until there is no conflict
-                int attempts = 0;
-                while (File.Exists(destinationFile) && attempts < 10)
+                // Ensure directories are created for this asset
+                Directory.CreateDirectory(Path.GetDirectoryName(destinationFile));
+
+                // If the serializable asset name is identical to the data name, it can be omitted for ease of renaming/copying
+                if (serializableAsset.DataName == Path.GetFileNameWithoutExtension(destinationFile))
                 {
-                    string directory = Path.GetDirectoryName(destinationFile);
-                    destinationFile = Path.Combine(directory, $"{friendlyName}_{attempts + 2}.json");
-                    attempts++;
+                    serializableAsset.DataName = null;
                 }
-                if (attempts > 0 && File.Exists(destinationFile))
-                {
-                    throw new ProjectException($"Too many naming conflicts for \"{friendlyName}\"");
-                }
+
+                // Write out asset to disk
+                serializableAsset.Serialize(this, destinationFile);
             }
-
-            // Ensure directories are created for this asset
-            Directory.CreateDirectory(Path.GetDirectoryName(destinationFile));
-
-            // If the serializable asset name is identical to the data name, it can be omitted for ease of renaming/copying
-            if (serializableAsset.DataName == Path.GetFileNameWithoutExtension(destinationFile))
-            {
-                serializableAsset.DataName = null;
-            }
-
-            // Write out asset to disk
-            serializableAsset.Serialize(this, destinationFile);
+        }
+        finally
+        {
+            // Dispose of texture worker
+            TextureWorker?.Dispose();
+            TextureWorker = null;
         }
 
         // Clear out all assets marked for export, if desired
@@ -733,7 +785,7 @@ public sealed class ProjectContext
             try
             {
                 // Read and cache data
-                return _audioGroups[index] = UndertaleIO.Read(stream, (string warning) =>
+                return _audioGroups[index] = UndertaleIO.Read(stream, (string warning, bool _) =>
                 {
                     throw new ProjectException($"Warning occurred when loading audio group {index}: {warning}");
                 });

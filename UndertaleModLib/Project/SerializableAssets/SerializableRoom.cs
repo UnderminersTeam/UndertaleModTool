@@ -6,6 +6,7 @@ using System.Linq;
 using UndertaleModLib.Models;
 using UndertaleModLib.Project.Json;
 using System;
+using System.Reflection;
 
 namespace UndertaleModLib.Project.SerializableAssets;
 
@@ -24,6 +25,10 @@ internal sealed class SerializableRoom : ISerializableProjectAsset
     /// <inheritdoc/>
     [JsonIgnore]
     public bool IndividualDirectory => false;
+
+    /// <inheritdoc/>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public int OverrideOrder { get; set; }
 
     /// <inheritdoc cref="UndertaleRoom.Caption"/>
     public string Caption { get; set; }
@@ -93,6 +98,9 @@ internal sealed class SerializableRoom : ISerializableProjectAsset
     /// <inheritdoc cref="UndertaleRoom.Layers"/>
     public List<Layer> Layers { get; set; }
 
+    /// <inheritdoc cref="UndertaleRoom.InstanceCreationOrderIDs"/>
+    public List<int> InstanceCreationOrderIDs { get; set; }
+
     /// <inheritdoc cref="UndertaleRoom.Sequences"/>
     public List<string> Sequences { get; set; }
 
@@ -129,7 +137,6 @@ internal sealed class SerializableRoom : ISerializableProjectAsset
         /// <inheritdoc cref="UndertaleRoom.Background.TiledVertically"/>
         public bool TiledVertically { get; set; }
     }
-
 
     /// <inheritdoc cref="UndertaleRoom.View"/>
     public sealed class View
@@ -258,6 +265,8 @@ internal sealed class SerializableRoom : ISerializableProjectAsset
     [JsonDerivedType(typeof(BackgroundLayer), nameof(BackgroundLayer))]
     [JsonDerivedType(typeof(AssetsLayer), nameof(AssetsLayer))]
     [JsonDerivedType(typeof(EffectLayer), nameof(EffectLayer))]
+    [JsonDerivedType(typeof(PathLayer), nameof(PathLayer))]
+    [JsonDerivedType(typeof(PathLayer2), nameof(PathLayer2))]
     public abstract class Layer
     {
         /// <inheritdoc cref="UndertaleRoom.Layer.LayerName"/>
@@ -560,6 +569,16 @@ internal sealed class SerializableRoom : ISerializableProjectAsset
         }
     }
 
+    /// <inheritdoc cref="UndertaleRoom.LayerType.Path"/>
+    public sealed class PathLayer : Layer
+    {
+    }
+
+    /// <inheritdoc cref="UndertaleRoom.LayerType.Path2"/>
+    public sealed class PathLayer2 : Layer
+    {
+    }
+
     /// <inheritdoc cref="AnimationSpeedType"/>
     public enum AnimationSpeedType : uint
     {
@@ -571,7 +590,7 @@ internal sealed class SerializableRoom : ISerializableProjectAsset
     private UndertaleRoom _dataAsset = null;
 
     /// <summary>
-    /// Populates this serializable path with data from an actual path.
+    /// Populates this serializable room with data from an actual room.
     /// </summary>
     public void PopulateFromData(ProjectContext projectContext, UndertaleRoom room)
     {
@@ -640,10 +659,13 @@ internal sealed class SerializableRoom : ISerializableProjectAsset
         // Update game objects (and track indices if we have layers)
         Dictionary<UndertaleRoom.GameObject, int> gameObjectIndices =
             room.Layers is not null ? new(room.GameObjects.Count) : null;
+        Dictionary<uint, int> gameObjectIndicesById =
+            room.InstanceCreationOrderIDs is not null ? new(room.GameObjects.Count) : null;
         GameObjects = new(room.GameObjects.Count);
         foreach (UndertaleRoom.GameObject obj in room.GameObjects)
         {
             gameObjectIndices?.Add(obj, GameObjects.Count);
+            gameObjectIndicesById?.Add(obj.InstanceID, GameObjects.Count);
 
             GameObjects.Add(new()
             {
@@ -840,6 +862,8 @@ internal sealed class SerializableRoom : ISerializableProjectAsset
                             })
                             .ToList()
                     },
+                    UndertaleRoom.LayerType.Path => new PathLayer(),
+                    UndertaleRoom.LayerType.Path2 => new PathLayer2(),
                     _ => throw new ProjectException($"Failed to find valid layer type for {room.Name.Content}")
                 };
                 newLayer.Name = layer.LayerName?.Content;
@@ -863,6 +887,20 @@ internal sealed class SerializableRoom : ISerializableProjectAsset
                 Sequences.Add(seq.Resource?.Name?.Content);
             }
         }
+
+        // Update instance creation ID order, if it exists
+        if (room.InstanceCreationOrderIDs is not null)
+        {
+            InstanceCreationOrderIDs = new(room.InstanceCreationOrderIDs.InstanceIDs.Count);
+            foreach (uint id in room.InstanceCreationOrderIDs.InstanceIDs)
+            {
+                if (!gameObjectIndicesById.TryGetValue(id, out int gameObjectIndex))
+                {
+                    gameObjectIndex = -1;
+                }
+                InstanceCreationOrderIDs.Add(gameObjectIndex);
+            }
+        }
     }
 
     /// <inheritdoc/>
@@ -877,12 +915,12 @@ internal sealed class SerializableRoom : ISerializableProjectAsset
     {
         if (projectContext.Data.Rooms.ByName(DataName) is UndertaleRoom existing)
         {
-            // Path found
+            // Room found
             _dataAsset = existing;
         }
         else
         {
-            // No path found; create new one
+            // No room found; create new one
             _dataAsset = new()
             {
                 Name = projectContext.MakeString(DataName)
@@ -1040,6 +1078,8 @@ internal sealed class SerializableRoom : ISerializableProjectAsset
                         BackgroundLayer => UndertaleRoom.LayerType.Background,
                         AssetsLayer => UndertaleRoom.LayerType.Assets,
                         EffectLayer => UndertaleRoom.LayerType.Effect,
+                        PathLayer => UndertaleRoom.LayerType.Path,
+                        PathLayer2 => UndertaleRoom.LayerType.Path2,
                         _ => throw new ProjectException($"Failed to find valid layer type for {room.Name.Content}")
                     },
                     Data = layer switch
@@ -1201,6 +1241,7 @@ internal sealed class SerializableRoom : ISerializableProjectAsset
                                     Value = projectContext.MakeString(prop.Value)
                                 }))
                         },
+                        PathLayer or PathLayer2 => null,
                         _ => throw new ProjectException($"Failed to find valid layer type for {room.Name.Content}")
                     }
                 });
@@ -1214,6 +1255,27 @@ internal sealed class SerializableRoom : ISerializableProjectAsset
             foreach (string seq in Sequences)
             {
                 room.Sequences.Add(new(projectContext.FindSequence(seq, this)));
+            }
+        }
+
+        // Update instance creation ID order, if it exists
+        if (InstanceCreationOrderIDs is not null)
+        {
+            // TODO: possibly check whether the first room?
+            room.InstanceCreationOrderIDs ??= new();
+            room.InstanceCreationOrderIDs.InstanceIDs = new(InstanceCreationOrderIDs.Count);
+            foreach (int index in InstanceCreationOrderIDs)
+            {
+                uint id;
+                if (index < 0 || index >= room.GameObjects.Count)
+                {
+                    id = ++projectContext.Data.GeneralInfo.LastObj;
+                }
+                else
+                {
+                    id = room.GameObjects[index].InstanceID;
+                }
+                room.InstanceCreationOrderIDs.InstanceIDs.Add(id);
             }
         }
 

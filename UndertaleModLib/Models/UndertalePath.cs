@@ -147,5 +147,5 @@ public class UndertalePath : UndertaleNamedResource, IProjectAsset, INotifyPrope
     public SerializableAssetType ProjectAssetType => SerializableAssetType.Path;
 
     /// <inheritdoc/>
-    public bool ProjectExportable => true;
+    public bool ProjectExportable => Name?.Content is not null;
 }

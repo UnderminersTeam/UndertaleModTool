@@ -22,6 +22,10 @@ internal sealed class SerializablePath : ISerializableProjectAsset
     [JsonIgnore]
     public bool IndividualDirectory => false;
 
+    /// <inheritdoc/>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public int OverrideOrder { get; set; }
+
     /// <inheritdoc cref="UndertalePath.IsSmooth"/>
     public bool IsSmooth { get; set; }
 

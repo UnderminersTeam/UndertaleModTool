@@ -24,6 +24,10 @@ internal sealed class SerializableSound : ISerializableProjectAsset
     [JsonIgnore]
     public bool IndividualDirectory => true;
 
+    /// <inheritdoc/>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public int OverrideOrder { get; set; }
+
     /// <inheritdoc cref="UndertaleSound.File"/>
     public string Filename { get; set; }
 

@@ -443,7 +443,7 @@ public class UndertaleGameObject : UndertaleNamedResource, IProjectAsset, INotif
     public SerializableAssetType ProjectAssetType => SerializableAssetType.GameObject;
 
     /// <inheritdoc/>
-    public bool ProjectExportable => true;
+    public bool ProjectExportable => Name?.Content is not null;
 
 
     /// <summary>

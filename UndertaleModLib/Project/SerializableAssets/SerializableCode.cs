@@ -29,6 +29,10 @@ internal sealed class SerializableCode : ISerializableProjectAsset
     [JsonIgnore]
     public bool IndividualDirectory => false;
 
+    /// <inheritdoc/>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public int OverrideOrder { get; set; }
+
     // Data asset that was located during pre-import, or during export.
     private UndertaleCode _dataAsset = null;
 

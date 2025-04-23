@@ -881,6 +881,12 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                 if (type1 == DataType.Int32)
                 {
                     reader.Position += 4;
+
+                    // Existence of this argument implies GameMaker 2023.8 or above
+                    if (!reader.undertaleData.IsVersionAtLeast(2023, 8))
+                    {
+                        reader.undertaleData.SetGMS2Version(2023, 8);
+                    }
                 }
                 break;
             }
@@ -1760,7 +1766,7 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     public SerializableAssetType ProjectAssetType => SerializableAssetType.Code;
 
     /// <inheritdoc/>
-    public bool ProjectExportable => ParentEntry is null;
+    public bool ProjectExportable => Name?.Content is not null && ParentEntry is null;
 
     // Underanalyzer implementations
     IGMString IGMCode.Name => Name;

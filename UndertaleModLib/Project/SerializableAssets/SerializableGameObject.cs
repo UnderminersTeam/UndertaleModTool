@@ -24,6 +24,10 @@ internal sealed class SerializableGameObject : ISerializableProjectAsset
     [JsonIgnore]
     public bool IndividualDirectory => false;
 
+    /// <inheritdoc/>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public int OverrideOrder { get; set; }
+
     /// <summary>
     /// Data name of the sprite assigned to the object, or <see langword="null"/> if none is assigned.
     /// </summary>

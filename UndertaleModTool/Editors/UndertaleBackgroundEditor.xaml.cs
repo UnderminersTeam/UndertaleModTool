@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,6 +29,79 @@ namespace UndertaleModTool
             };
             item.Click += FindAllTileReferencesItem_Click;
             tileContextMenu.Items.Add(item);
+            
+            DataContextChanged += OnDataContextChanged;
+            Unloaded += OnUnloaded;
+        }
+
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is UndertaleBackground oldObj)
+            {
+                oldObj.PropertyChanged -= OnPropertyChanged;
+            }
+        }
+
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.OldValue is UndertaleBackground oldObj)
+            {
+                oldObj.PropertyChanged -= OnPropertyChanged;
+            }
+            if (e.NewValue is UndertaleBackground newObj)
+            {
+                newObj.PropertyChanged += OnPropertyChanged;
+            }
+        }
+
+        private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            OnAssetUpdated();
+        }
+
+        private void OnAssetUpdated()
+        {
+            if (mainWindow.Project is null || !mainWindow.IsSelectedProjectExportable)
+            {
+                return;
+            }
+            Dispatcher.BeginInvoke(() =>
+            {
+                if (DataContext is UndertaleBackground obj)
+                {
+                    mainWindow.Project?.MarkAssetForExport(obj);
+                }
+            });
+        }
+
+        private void DataGrid_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Attach to collection changed events
+            if (sender is not DataGrid dg || dg.ItemsSource is not ObservableCollection<UndertaleBackground.TileID> collection)
+            {
+                return;
+            }
+            collection.CollectionChanged += DataGrid_CollectionChanged;
+        }
+
+        private void DataGrid_Unloaded(object sender, RoutedEventArgs e)
+        {
+            // Detach to collection changed events
+            if (sender is not DataGrid dg || dg.ItemsSource is not ObservableCollection<UndertaleBackground.TileID> collection)
+            {
+                return;
+            }
+            collection.CollectionChanged -= DataGrid_CollectionChanged;
+        }
+
+        private void DataGrid_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            OnAssetUpdated();
+        }
+
+        private void TextBoxDark_TileID_SourceUpdated(object sender, System.Windows.Data.DataTransferEventArgs e)
+        {
+            OnAssetUpdated();
         }
 
         private void FindAllTileReferencesItem_Click(object sender, RoutedEventArgs e)

@@ -68,6 +68,12 @@ namespace UndertaleModLib
         {
             internalList.Add(item);
         }
+
+        /// <inheritdoc cref="List{T}.FindIndex(Predicate{T})"/>
+        public int FindIndex(Predicate<T> match)
+        {
+            return internalList.FindIndex(match);
+        }
     }
 
     /// <summary>

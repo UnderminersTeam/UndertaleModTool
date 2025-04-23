@@ -289,5 +289,5 @@ public class UndertaleSound : UndertaleNamedResource, IProjectAsset, INotifyProp
     public SerializableAssetType ProjectAssetType => SerializableAssetType.Sound;
 
     /// <inheritdoc/>
-    public bool ProjectExportable => true;
+    public bool ProjectExportable => Name?.Content is not null;
 }

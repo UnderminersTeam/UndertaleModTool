@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 using UndertaleModLib.Project.SerializableAssets;
+using UndertaleModLib.Util;
 using static UndertaleModLib.Project.SerializableAssetType;
 
 namespace UndertaleModLib.Project;
@@ -14,6 +15,7 @@ namespace UndertaleModLib.Project;
 [JsonDerivedType(typeof(SerializableScript), nameof(Script))]
 [JsonDerivedType(typeof(SerializableSound), nameof(Sound))]
 [JsonDerivedType(typeof(SerializableRoom), nameof(Room))]
+[JsonDerivedType(typeof(SerializableBackground), nameof(Background))]
 public interface ISerializableProjectAsset
 {
     /// <summary>
@@ -34,6 +36,13 @@ public interface ISerializableProjectAsset
     public bool IndividualDirectory { get; }
 
     /// <summary>
+    /// Optional integer override for asset importing order. 
+    /// This has higher precedence over all alphabetical <see cref="DataName"/> sorting, and is ordered ascending.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public int OverrideOrder { get; set; }
+
+    /// <summary>
     /// Serializes this project asset to a destination (main) filename, along with any other files that need to be saved.
     /// </summary>
     public void Serialize(ProjectContext projectContext, string destinationFile);
@@ -52,6 +61,16 @@ public interface ISerializableProjectAsset
     public IProjectAsset Import(ProjectContext projectContext);
 }
 
+public interface ISerializableTextureProjectAsset : ISerializableProjectAsset
+{
+    /// <summary>
+    /// Imports any textures for the asset.
+    /// </summary>
+    /// <param name="projectContext">Context of the project.</param>
+    /// <param name="texturePacker">Texture packer currently being used for packing.</param>
+    public void ImportTextures(ProjectContext projectContext, TextureGroupPacker texturePacker);
+}
+
 /// <summary>
 /// All supported serializable asset types.
 /// </summary>
@@ -65,7 +84,8 @@ public enum SerializableAssetType
     Code,
     Script,
     Sound,
-    Room
+    Room,
+    Background
 }
 
 /// <summary>
@@ -86,6 +106,7 @@ public static class SerializableAssetTypeExtensions
             Script => "Script",
             Sound => "Sound",
             Room => "Room",
+            Background => "Background",
             _ => throw new NotImplementedException()
         };
     }
@@ -102,6 +123,7 @@ public static class SerializableAssetTypeExtensions
             Script => "script",
             Sound => "sound",
             Room => "room",
+            Background => "background",
             _ => throw new NotImplementedException()
         };
     }
@@ -119,6 +141,7 @@ public static class SerializableAssetTypeExtensions
             Script => "scripts",
             Sound => "sounds",
             Room => "rooms",
+            Background => "backgrounds",
             _ => throw new NotImplementedException()
         };
     }
