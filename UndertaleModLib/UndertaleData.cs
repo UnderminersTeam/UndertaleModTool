@@ -13,7 +13,7 @@ using UndertaleModLib.Models;
 namespace UndertaleModLib
 {
     /// <summary>
-    /// An object representing a Game Maker: Studio data file.
+    /// An object representing a GameMaker Studio data file.
     /// </summary>
     /// <remarks>This is basically the heart of the data file, which is usually named <c>data.win</c>, <c>data.unx</c>,
     /// <c>data.ios</c> or <c>data.droid</c>, depending for which OS the game was compiled for.. <br/>
@@ -335,7 +335,7 @@ namespace UndertaleModLib
         public int PaddingAlignException = -1;
 
         /// <summary>
-        /// A list of known Game Maker: Studio constants and variables.
+        /// A list of known GameMaker Studio constants and variables.
         /// </summary>
         public BuiltinList BuiltinList;
 
@@ -420,7 +420,7 @@ namespace UndertaleModLib
         }
 
         /// <summary>
-        /// Reports whether the data file was build by Game Maker Studio 2.
+        /// Reports whether the data file was built by GameMaker Studio 2.
         /// </summary>
         /// <returns><see langword="true"/> if yes, <see langword="false"/> if not.</returns>
         public bool IsGameMaker2()
@@ -663,7 +663,7 @@ namespace UndertaleModLib
                 if (disposableType.IsAssignableFrom(list.GetType().GetGenericArguments()[0]))
                 {
                     foreach (IDisposable disposable in list)
-                        disposable.Dispose();
+                        disposable?.Dispose();
                 }
 
                 list.Clear();

@@ -963,7 +963,7 @@ public sealed class CompileGroup
             for (int i = 0; i < Data.Scripts.Count; i++)
             {
                 UndertaleScript script = Data.Scripts[i];
-                if (script.Name?.Content is string name)
+                if (script?.Name?.Content is string name)
                 {
                     if (_linkingScriptLookup.TryGetValue(name, out List<UndertaleScript> existing))
                     {

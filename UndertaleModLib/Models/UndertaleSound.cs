@@ -42,7 +42,7 @@ public class UndertaleSound : UndertaleNamedResource, IProjectAsset, INotifyProp
         /// <summary>
         /// Whether this sound uses the "new audio system".
         /// </summary>
-        /// <remarks>This is default for everything post Game Maker: Studio.
+        /// <remarks>This is default for everything post GameMaker Studio.
         /// The legacy sound system was used in pre Game Maker 8.</remarks>
         Regular = 0x64,
     }
@@ -87,7 +87,7 @@ public class UndertaleSound : UndertaleNamedResource, IProjectAsset, INotifyProp
     public UndertaleString File { get; set; }
 
     /// <summary>
-    /// A pre-Game Maker: Studio way of having certain effects on a sound effect.
+    /// A pre-GameMaker Studio way of having certain effects on a sound effect.
     /// </summary>
     /// <remarks>The exact way this works is unknown. But following values are possible:
     /// <c>Chorus</c>, <c>Echo</c>, <c>Flanger</c>, <c>Reverb</c>, <c>Gargle</c>, all possible to be combined with one another.</remarks>

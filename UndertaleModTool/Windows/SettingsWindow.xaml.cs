@@ -54,6 +54,19 @@ namespace UndertaleModTool
             }
         }
 
+        public static bool ShowNullEntriesInResourceTree
+        {
+            get => Settings.Instance.ShowNullEntriesInResourceTree;
+            set
+            {
+                Settings.Instance.ShowNullEntriesInResourceTree = value;
+                Settings.Save();
+
+                // Refresh the tree for the change to take effect
+                mainWindow.UpdateTree();
+            }
+        }
+
         public static bool TempRunMessageShow
         {
             get => Settings.Instance.TempRunMessageShow;
@@ -217,6 +230,16 @@ namespace UndertaleModTool
                 Settings.Save();
 
                 mainWindow.RunGMSDebuggerItem.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+        public static bool RememberWindowPlacements
+        {
+            get => Settings.Instance.RememberWindowPlacements;
+            set
+            {
+                Settings.Instance.RememberWindowPlacements = value;
+                Settings.Save();
             }
         }
 

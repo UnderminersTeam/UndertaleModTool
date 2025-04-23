@@ -98,6 +98,9 @@ namespace UndertaleModLib
 
     public interface UndertaleNamedResource : UndertaleResource
     {
+        /// <summary>
+        /// Name of the resource.
+        /// </summary>
         UndertaleString Name { get; set; }
     }
 
