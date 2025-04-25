@@ -31,7 +31,7 @@
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Flags</TextBlock>
-        <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding Flags}"/>
+        <local:FlagsBox Grid.Row="1" Grid.Column="1" Margin="3" Value="{Binding Flags}"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Type</TextBlock>
         <local:UndertaleStringReference Grid.Row="2" Grid.Column="1" Margin="3" ObjectReference="{Binding Type}"/>

@@ -74,7 +74,17 @@ ScriptMessage("Externalization Complete.\nExternalized " + sounds.ToString() + "
 void ExternalizeSounds()
 {
     foreach (UndertaleSound sound in Data.Sounds)
-        ExternalizeSound(sound);
+    {
+        if (sound is not null)
+        {
+            ExternalizeSound(sound);
+        }
+        else
+        {
+            sounds++;
+            IncrementProgress();
+        }
+    }
 }
 
 string GetFolder(string path)
@@ -169,7 +179,7 @@ IList<UndertaleEmbeddedAudio> GetAudioGroupData(UndertaleSound sound)
     {
         UndertaleData data = null;
         using (var stream = new FileStream(groupFilePath, FileMode.Open, FileAccess.Read))
-            data = UndertaleIO.Read(stream, warning => ScriptMessage("A warning occured while trying to load " + audioGroupName + ":\n" + warning));
+            data = UndertaleIO.Read(stream, (warning, _) => ScriptMessage("A warning occured while trying to load " + audioGroupName + ":\n" + warning));
 
         loadedAudioGroups[audioGroupName] = data.EmbeddedAudio;
         return data.EmbeddedAudio;
@@ -197,7 +207,10 @@ byte[] GetSoundData(UndertaleSound sound)
 void DumpSounds()
 {
     foreach (UndertaleSound sound in Data.Sounds)
-        DumpSound(sound);
+    {
+        if (sound is not null)
+            DumpSound(sound);
+    }
 }
 
 void DumpSound(UndertaleSound sound)

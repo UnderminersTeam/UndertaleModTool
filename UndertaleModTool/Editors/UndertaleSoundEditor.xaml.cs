@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable CA1416 // Validate platform compatibility
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -116,13 +118,12 @@ namespace UndertaleModTool
                         if (loadedPath != path)
                         {
                             loadedPath = path;
-                            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read))
+
+                            using FileStream stream = new(path, FileMode.Open, FileAccess.Read);
+                            audioGroupData = UndertaleIO.Read(stream, (warning, _) =>
                             {
-                                audioGroupData = UndertaleIO.Read(stream, warning =>
-                                {
-                                    throw new Exception(warning);
-                                });
-                            }
+                                throw new Exception(warning);
+                            });
                         }
 
                         target = audioGroupData.EmbeddedAudio[sound.AudioID];
@@ -180,3 +181,5 @@ namespace UndertaleModTool
         }
     }
 }
+
+#pragma warning restore CA1416 // Validate platform compatibility

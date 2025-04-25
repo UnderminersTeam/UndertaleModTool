@@ -16,6 +16,8 @@
                         <MenuItem Command="ApplicationCommands.Copy" />
                         <MenuItem Command="ApplicationCommands.Paste" />
                     </ContextMenu>
+                    <SolidColorBrush x:Key="TransparencyGridColor1" Color="#FF666666"/>
+                    <SolidColorBrush x:Key="TransparencyGridColor2" Color="#FF999999"/>
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

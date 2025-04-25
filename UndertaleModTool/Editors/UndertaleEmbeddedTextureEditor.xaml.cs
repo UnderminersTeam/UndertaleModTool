@@ -145,7 +145,7 @@ namespace UndertaleModTool
             }
             catch (Exception ex)
             {
-                mainWindow.ShowError("An error occured in the object references related window.\n" +
+                mainWindow.ShowError("An error occurred in the object references related window.\n" +
                                      $"Please report this on GitHub.\n\n{ex}");
             }
             finally
@@ -165,19 +165,11 @@ namespace UndertaleModTool
             if (scrollPres is null)
                 return;
 
-            double initScale = 1;
-            if (DataContext is UndertaleEmbeddedTexture texturePage)
-            {
-                int textureWidth = texturePage.TextureData?.Width ?? 1;
-                if (textureWidth < scrollPres.ActualWidth)
-                    initScale = scrollPres.ActualWidth / textureWidth;
-            }
-
             Transform t;
             double top, left;
             if (OverriddenPreviewState == default)
             {
-                t = new MatrixTransform(initScale, 0, 0, initScale, 0, 0);
+                t = new MatrixTransform(Matrix.Identity);
                 top = 0;
                 left = 0;
             }
@@ -230,7 +222,7 @@ namespace UndertaleModTool
                     {
                         // Import PNG data verbatim, without attempting to modify it
                         image = GMImage.FromPng(File.ReadAllBytes(dlg.FileName), true)
-                                       .ConvertToFormat(target.TextureData.Image.Format);
+                                       .ConvertToFormat(target.TextureData.Image?.Format ?? GMImage.ImageFormat.Png);
                     }
                     else
                     {
@@ -242,7 +234,7 @@ namespace UndertaleModTool
 
                         // Import image
                         image = GMImage.FromMagickImage(magickImage)
-                                       .ConvertToFormat(target.TextureData.Image.Format);
+                                       .ConvertToFormat(target.TextureData.Image?.Format ?? GMImage.ImageFormat.Png);
                     }
 
                     // Check dimensions
@@ -373,9 +365,10 @@ namespace UndertaleModTool
             var mousePos = e.GetPosition(TextureViewbox);
             var transform = TextureViewbox.LayoutTransform as MatrixTransform;
             var matrix = transform.Matrix;
-            var scale = e.Delta >= 0 ? 1.1 : (1.0 / 1.1); // choose appropriate scaling factor
+            var pow = Math.Pow(2, 1.0 / 8.0);
+            var scale = e.Delta >= 0 ? pow : (1.0 / pow); // choose appropriate scaling factor
 
-            if ((matrix.M11 > 0.2 || (matrix.M11 <= 0.2 && scale > 1)) && (matrix.M11 < 3 || (matrix.M11 >= 3 && scale < 1)))
+            if ((matrix.M11 > 0.001 || (matrix.M11 <= 0.001 && scale > 1)) && (matrix.M11 < 1000 || (matrix.M11 >= 1000 && scale < 1)))
             {
                 matrix.ScaleAtPrepend(scale, scale, mousePos.X, mousePos.Y);
             }

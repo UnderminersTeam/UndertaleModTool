@@ -39,9 +39,9 @@ These scripts are self-explanatory from their names, but for clarification:
 - `ExportAllSoundsOld.csx`: This is an old version of the script to export sounds, which doesn't handle all types of sounds properly.
 - `ExportASM.csx`: Exports GML assembly.
 - `ExportAllCode.csx`: Exports GML code. It has a GMS2.3 counterpart, as code entry names can be too long.
-- `ExportAllSprites.csx`: Exports sprites with all padding removed. Creates and saves in `Export_Sprites` directory where `data.win` is opened from. Use `ExportAllSpritesWithPadding.csx` if you need to preserve the padding.
+- `ExportAllSprites.csx`: Exports sprites to PNG files. Creates and saves in `Export_Sprites` directory where `data.win` is opened from. Will ask whether to preserve padding or not.
 - `ExportMasks.csx`: For exporting sprite collision mask information.
-- `ExportAllSpritesWithPadding.csx`: Exports sprites preserving padding. Creates and saves in `Export_Textures` directory where `data.win` is opened from.
+- `ExportSpritesAsGIF.csx`: Exports sprites to animated GIF files. Creates and saves to a user-specified directory. Will always preserve padding.
 - `MergeImages.csx`: A script that can bulk merge images together for comparisons, from different folders.
 - `DumpSpecificCode.csx`: Used to export specific code entries should you have object names.
 
@@ -50,6 +50,8 @@ These scripts are self-explanatory from their names, but for clarification:
 These scripts are self-explanatory from their names, but for clarification:
 - `ImportASM.csx`: Imports GML assembly. It has a counterpart for GMS2.3 games, with longer code entry names.
 - `ImportGML.csx`: Imports GML code. It also has a 2.3 counterpart for the same reason.
+- `ImportGraphics.csx`: Imports sprites or backgrounds as PNG files from a folder. Sprites are in the format `filename_N.png`, where N is the frame number starting at 0. Put files in a folder named "Backgrounds" to import them as backgrounds.
+- `ImportGraphicsAdvanced.csx`: Imports sprites or backgrounds as PNG or GIF files from a folder. Supports a variety of formats (frame numbers starting at 1 or 0, GameMaker `_stripN`, animated GIFs, single-frame sprites). Has an additional dialog after importing to set sprite offsets and, for GMS2 games, animation speed.
 - `ImportMasks.csx`: For importing sprite collision mask information.
 - `ApplyBasicGraphicsMod.csx`: Imports graphics without a repacker, by swapping the sprite in place on its texture sheet, as long as it's the same size.
 

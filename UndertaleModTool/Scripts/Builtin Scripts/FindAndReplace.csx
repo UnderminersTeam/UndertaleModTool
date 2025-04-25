@@ -4,40 +4,46 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 EnsureDataLoaded();
-
-if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
-{
-    ScriptError("Error 0: Incompatible with the new Deltarune Chapter 1 & 2 demo");
-    return;
-}
-else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1&2")
-{
-    ScriptError("Error 1: Incompatible with the new Deltarune Chapter 1 & 2 demo");
-    return;
-}
 
 if (!ScriptQuestion("This will make changes across all of the code! Are you sure you'd like to continue?"))
 {
     return;
 }
-bool case_sensitive = ScriptQuestion("Case sensitive?");
+bool caseSensitive = ScriptQuestion("Case sensitive?");
 bool multiline = ScriptQuestion("Multi-line search?");
 bool isRegex = ScriptQuestion("Is regex search?");
 String keyword = SimpleTextInput("Enter search terms", "Search box below", "", multiline);
 String replacement = SimpleTextInput("Enter replacement term", "Search box below", "", multiline);
 
-SetProgressBar(null, "Code Entries", 0, Data.Code.Count);
+List<UndertaleCode> toDump = Data.Code.Where(c => c.ParentEntry is null).ToList();
+
+SetProgressBar(null, "Code Entries", 0, toDump.Count);
 StartProgressBarUpdater();
 
 SyncBinding("Strings, Variables, Functions", true);
-await Task.Run(() => {
-    foreach (UndertaleCode code in Data.Code)
+await Task.Run(() =>
+{
+    UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data, null, Data.ToolInfo.DecompilerSettings);
+    foreach (UndertaleCode code in toDump)
     {
-        ReplaceTextInGML(code.Name.Content, keyword, replacement, case_sensitive, isRegex);
+        if (code is not null)
+        {
+            if (isRegex)
+            {
+                importGroup.QueueRegexFindReplace(code, keyword, replacement, caseSensitive);
+            }
+            else
+            {
+                importGroup.QueueFindReplace(code, keyword, replacement, caseSensitive);
+            }
+        }
         IncrementProgress();
     }
+    SetProgressBar(null, "Final code import...", toDump.Count, toDump.Count);
+    importGroup.Import();
 });
 DisableAllSyncBindings();
 

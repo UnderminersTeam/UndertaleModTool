@@ -118,7 +118,7 @@
                 </Grid>
 
                 <TextBlock Grid.Row="12" Grid.Column="0" Margin="3">Flags</TextBlock>
-                <TextBox Grid.Row="12" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.Info}"/>
+                <local:FlagsBox Grid.Row="12" Grid.Column="1" Margin="3" Value="{Binding GeneralInfo.Info}" />
 
                 <TextBlock Grid.Row="13" Grid.Column="0" Margin="3">License MD5</TextBlock>
                 <TextBox Grid.Row="13" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.LicenseMD5, Mode=TwoWay, Converter={StaticResource byteArrayConverter}}"/>
@@ -148,7 +148,7 @@
                 <TextBox Grid.Row="17" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.ActiveTargets}"/>
 
                 <TextBlock Grid.Row="18" Grid.Column="0" Margin="3">Function classifications</TextBlock>
-                <TextBox Grid.Row="18" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.FunctionClassifications}"/>
+                <local:FlagsBox Grid.Row="18" Grid.Column="1" Margin="3" Value="{Binding GeneralInfo.FunctionClassifications}"/>
 
                 <TextBlock Grid.Row="19" Grid.Column="0" Margin="3">Steam AppID</TextBlock>
                 <TextBox Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding GeneralInfo.SteamAppID}"/>
@@ -252,7 +252,7 @@
                 </Grid>
 
                 <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Flags</TextBlock>
-                <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding Options.Info}"/>
+                <local:FlagsBox Grid.Row="1" Grid.Column="1" Margin="3" Value="{Binding Options.Info}" />
 
                 <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Scale</TextBlock>
                 <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding Options.Scale}"/>

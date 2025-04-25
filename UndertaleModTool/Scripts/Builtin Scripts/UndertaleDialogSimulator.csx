@@ -42,6 +42,7 @@ else
 
 bool GMS1_mode = !Data.IsGameMaker2();
 bool GMS2_3_mode = Data.IsVersionAtLeast(2, 3);
+bool GM2024_13_mode = Data.IsVersionAtLeast(2024, 13);
 bool isDeltarune = false;
 
 if (Data.GeneralInfo.Name.ToString() == "\"DELTARUNE\"")
@@ -60,13 +61,18 @@ if (objCheck != null)
     ScriptError("Object 'obj_dialog_sim' already exists.");
     return;
 }
-    
+
+GlobalDecompileContext globalDecompileContext = new(Data);
+Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = new Underanalyzer.Decompiler.DecompileSettings();
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data, globalDecompileContext, decompilerSettings);
+
 SetUpDialogueObject();
 
 //ScriptMessage("Adding new room...");
 uint last_layer_id = GetLastLayerID();
 HandleAddingNewRoom();
-AppendGML("gml_Object_obj_dialoguer_Create_0", @"gs = noone
+
+importGroup.QueueAppend("gml_Object_obj_dialoguer_Create_0", @"gs = noone
 if (room == room_dialoguer)
 {
     if (obj_dialog_sim.menu_x[3] == 1)
@@ -79,23 +85,24 @@ if (room == room_dialoguer)
 }
 ");
 
-AppendGML("gml_Object_obj_dialoguer_Destroy_0", @"if instance_exists(gs)
+importGroup.QueueAppend("gml_Object_obj_dialoguer_Destroy_0", @"if instance_exists(gs)
 {
     with (gs)
         instance_destroy()
 }
 ");
 
-AppendGML("gml_Object_obj_screen_Other_4", @"if (room == room_dialoguer)
+importGroup.QueueAppend("gml_Object_obj_screen_Other_4", @"if (room == room_dialoguer)
     window_set_caption(""UNDERTALE Dialog Simulator"")
 ");
 
-ReplaceTextInGML("gml_Object_obj_time_Step_1", "room_goto_next()", "room_goto(room_dialoguer)", true, false);
-ImportGMLStringEx("gml_Script_scr_msgup", @"
+importGroup.QueueFindReplace("gml_Object_obj_time_Step_1", "room_goto_next()", "room_goto(room_dialoguer)");
+
+importGroup.QueueReplace("gml_Script_scr_msgup", @"
 if (room != room_dialoguer)
 {
 "
-+ GetDecompiledText("gml_Script_scr_msgup")
++ GetDecompiledText("gml_Script_scr_msgup", globalDecompileContext, decompilerSettings)
 + @"
 }
 else
@@ -107,6 +114,8 @@ else
     alarm[0] = textspeed
 }
 ");
+
+importGroup.Import();
 
 ScriptMessage(@"Undertale Dialog Simulator is set up.
 
@@ -125,10 +134,17 @@ public void HandleAddingNewRoom()
     newRoom.Bottom = (uint)768;
     newRoom.Speed = (uint)(GMS1_mode ? 30 : 0);
     newRoom.Flags = (UndertaleRoom.RoomEntryFlags.EnableViews | UndertaleRoom.RoomEntryFlags.ShowColor);
-    if (!GMS1_mode)
-        newRoom.Flags = (newRoom.Flags | UndertaleRoom.RoomEntryFlags.IsGMS2);
-    if (GMS2_3_mode)
-        newRoom.Flags = (newRoom.Flags | UndertaleRoom.RoomEntryFlags.IsGMS2_3);
+    if (GM2024_13_mode)
+    {
+        newRoom.Flags = (newRoom.Flags | UndertaleRoom.RoomEntryFlags.IsGM2024_13);
+    }
+    else
+    {
+        if (!GMS1_mode)
+            newRoom.Flags = (newRoom.Flags | UndertaleRoom.RoomEntryFlags.IsGMS2);
+        if (GMS2_3_mode)
+            newRoom.Flags = (newRoom.Flags | UndertaleRoom.RoomEntryFlags.IsGMS2_3);
+    }
 
     Data.Rooms.Add(newRoom);
 
@@ -210,22 +226,6 @@ public void HandleAddingNewRoom()
         }
     }
 
-    /*
-    if (Data.Backgrounds.ByName("bg_ruinseasynam3") != null && GMS1_mode)
-    {
-        UndertaleRoom.Tile tile = new UndertaleRoom.Tile();
-        tile.InstanceID = Data.GeneralInfo.LastTile++;
-        tile.BackgroundDefinition = Data.Backgrounds.ByName("bg_ruinseasynam3");
-        tile.X = 240;
-        tile.Y = 10;
-        tile.SourceX = 20;
-        tile.SourceY = 240;
-        tile.Width = 20;
-        tile.Height = 20;
-        tile.TileDepth = 1000000;
-        newRoom.Tiles.Add(tile);
-    }
-    */
     if (Data.GameObjects.ByName("obj_darkcontroller") != null && !GMS1_mode)
     {
         UndertaleRoom.GameObject newControllerObj = new UndertaleRoom.GameObject();
@@ -245,22 +245,6 @@ public void HandleAddingNewRoom()
         var newLayer2 = AddNewTileLayer(newRoomName + "_Tiles_Layer_-9990", -9990, newRoom);
         var newLayer3 = AddNewTileLayer(newRoomName + "_Tiles_Layer_999990", 999990, newRoom);
         var newLayer4 = AddNewTileLayer(newRoomName + "_Tiles_Layer_1000000", 1000000, newRoom);
-        /*
-        if (Data.Sprites.ByName("bg_ruinseasynam3") != null)
-        {
-            AddNewTile(Data.Sprites.ByName("bg_ruinseasynam3"), Data.ByName("bg_ruinseasynam3"), 40, 10, 40, 0, 20, 20, 1, 1, 1000000, newLayer4);
-            AddNewTile(Data.Sprites.ByName("bg_ruinseasynam3"), Data.ByName("bg_ruinseasynam3"), 70, 10, 20, 240, 20, 20, 1, 1, 999990, newLayer3);
-            AddNewTile(Data.Sprites.ByName("bg_ruinseasynam3"), Data.ByName("bg_ruinseasynam3"), 100, 10, 120, 260, 20, 20, 1, 1, -9990, newLayer2);
-            AddNewTile(Data.Sprites.ByName("bg_ruinseasynam3"), Data.ByName("bg_ruinseasynam3"), 130, 10, 120, 220, 20, 20, 1, 1, -10000, newLayer1);
-        }
-        if (Data.Sprites.ByName("bg_darktiles1") != null)
-        {
-            AddNewTile(Data.Sprites.ByName("bg_darktiles1"), Data.ByName("bg_darktiles1"), 20, 20, 0, 40, 40, 40, 1, 1, 1000000, newLayer4);
-            AddNewTile(Data.Sprites.ByName("bg_darktiles1"), Data.ByName("bg_darktiles1"), 80, 20, 0, 120, 40, 40, 1, 1, 999990, newLayer3);
-            AddNewTile(Data.Sprites.ByName("bg_darktiles1"), Data.ByName("bg_darktiles1"), 140, 20, 80, 360, 40, 40, 1, 1, -9990, newLayer2);
-            AddNewTile(Data.Sprites.ByName("bg_darktiles1"), Data.ByName("bg_darktiles1"), 200, 20, 160, 0, 40, 40, 1, 1, -10000, newLayer1);
-        }
-        */
     }
 
     if (!GMS1_mode)
@@ -309,37 +293,13 @@ private UndertaleRoom.Layer AddNewTileLayer(string layername, int layerdepth, Un
     return newAssetsLayer;
 }
 
-private void AddNewTile(UndertaleSprite tilesprite, UndertaleNamedResource tileobject, int tilex, int tiley, uint tilesourcex, uint tilesourcey, uint tilewidth, uint tileheight, float tilescalex, float tilescaley, int tiledepth, UndertaleRoom.Layer tilelayer)
-{
-    if (tilelayer.AssetsData.LegacyTiles == null)
-        tilelayer.AssetsData.LegacyTiles = new UndertalePointerList<UndertaleRoom.Tile>();
-    
-    if (tilelayer.AssetsData.Sprites == null)
-        tilelayer.AssetsData.Sprites = new UndertalePointerList<UndertaleRoom.SpriteInstance>();
-    
-    UndertaleRoom.Tile tile = new UndertaleRoom.Tile();
-    tile.spriteMode = true;
-    tile.X = tilex;
-    tile.Y = tiley;
-    tile.SpriteDefinition = tilesprite;
-    tile.ObjectDefinition = tileobject;
-    tile.SourceX = tilesourcex;
-    tile.SourceY = tilesourcey;
-    tile.Width = tilewidth;
-    tile.Height = tileheight;
-    tile.ScaleX = tilescalex;
-    tile.ScaleY = tilescaley;
-    tile.TileDepth = tiledepth;
-    tile.InstanceID = Data.GeneralInfo.LastTile++;
-
-    tilelayer.AssetsData.LegacyTiles.Add(tile);
-}
-
 public uint GetLastLayerID()
 {
     uint a_last_layer_id = 0;
     foreach (UndertaleRoom Room in Data.Rooms) 
     {
+        if (Room is null)
+            continue;
         foreach (UndertaleRoom.Layer Layer in Room.Layers) 
         {
             if (Layer.LayerId > a_last_layer_id) 
@@ -349,18 +309,13 @@ public uint GetLastLayerID()
     return a_last_layer_id;
 }
 
-public void ImportGMLStringEx(string codeName, string gmlCode, bool doParse = true, bool CheckDecompiler = false)
-{
-    ImportGMLString(codeName, gmlCode, doParse, CheckDecompiler);
-}
-
 public void SetUpDialogueObject()
 {
 UndertaleGameObject nativeOBJ = new UndertaleGameObject();
 nativeOBJ.Name = Data.Strings.MakeString("obj_dialog_sim");
 Data.GameObjects.Add(nativeOBJ);
     
-ImportGMLStringEx("gml_Object_obj_dialog_sim_Create_0", @"
+importGroup.QueueReplace("gml_Object_obj_dialog_sim_Create_0", @"
 getstr = """"
 global.interact = 1
 global.flag[17] = 1
@@ -401,7 +356,7 @@ if ossafe_file_exists(""dialog_sim"")
 help = 0
 help_yoff = 0
 ");
-ImportGMLStringEx("gml_Object_obj_dialog_sim_Draw_0", @"
+importGroup.QueueReplace("gml_Object_obj_dialog_sim_Draw_0", @"
 var disstr, facetext, changetext, oporig;
 draw_set_colour(c_white)
 draw_set_alpha(1)
@@ -807,8 +762,8 @@ C - Shows button bound to Menu
 "")
 }
 ");
-ImportGMLStringEx("gml_Object_obj_dialog_sim_Other_10", "");
-ImportGMLStringEx("gml_Object_obj_dialog_sim_Other_5", @"
+importGroup.QueueReplace("gml_Object_obj_dialog_sim_Other_10", "");
+importGroup.QueueReplace("gml_Object_obj_dialog_sim_Other_5", @"
 mysave = ossafe_file_text_open_write(""dialog_sim"")
 ossafe_file_text_write_real(mysave, menu_x[1])
 ossafe_file_text_writeln(mysave)
@@ -825,7 +780,7 @@ for (i = 0; i <= 90; i++)
 }
 ossafe_file_text_close(mysave)
 ");
-ImportGMLStringEx("gml_Object_obj_dialog_sim_Step_0", @"
+importGroup.QueueReplace("gml_Object_obj_dialog_sim_Step_0", @"
 var mypath, myfile;
 if keyboard_check_pressed(vk_f1)
 {
@@ -1109,7 +1064,3 @@ if (help == 0)
 ");
 }
 
-public void AppendGML(string CodeName = "", string CodeContent = "")
-{
-    Data.Code.ByName(CodeName).AppendGML(CodeContent, Data);
-}

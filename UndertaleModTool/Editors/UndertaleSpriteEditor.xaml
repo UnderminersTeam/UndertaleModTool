@@ -9,22 +9,27 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleSprite}">
     <UserControl.Resources>
-        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="SpriteType">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="undertale:UndertaleSprite+SpriteType" />
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
-        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="SepMaskType">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="undertale:UndertaleSprite+SepMaskType" />
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
-        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="AnimSpeedType">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="undertale:AnimSpeedType" />
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
-        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <ResourceDictionary>
+            <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="SpriteType">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="undertale:UndertaleSprite+SpriteType" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+            <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="SepMaskType">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="undertale:UndertaleSprite+SepMaskType" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+            <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="AnimSpeedType">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="undertale:AnimSpeedType" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+            <BooleanToVisibilityConverter x:Key="BoolToVis" />
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Controls/TransparencyGridBrush.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -138,17 +143,7 @@
         </DataGrid>
 
         <Viewbox Grid.Row="11" Grid.Column="1" Stretch="Uniform" StretchDirection="DownOnly">
-            <Border>
-                <Border.Background>
-                    <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
-                        <DrawingBrush.Drawing>
-                            <DrawingGroup>
-                                <GeometryDrawing Geometry="M0,0 L20,0 20,20, 0,20Z" Brush="White"/>
-                                <GeometryDrawing Geometry="M0,10 L20,10 20,20, 10,20 10,0 0,0Z" Brush="LightGray"/>
-                            </DrawingGroup>
-                        </DrawingBrush.Drawing>
-                    </DrawingBrush>
-                </Border.Background>
+            <Border Background="{StaticResource TransparencyGridBrushBrush}">
                 <local:UndertaleTexturePageItemDisplay DataContext="{Binding SelectedItem.Texture, Mode=OneWay, ElementName=TextureList}" x:Name="TextureDisplay"/>
             </Border>
         </Viewbox>
@@ -176,7 +171,15 @@
                 <DataGridTemplateColumn Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Margin="20,0,0,0" Text="(CollisionMask)"/>
+                            <Grid Margin="20,0,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="(CollisionMask)"/>
+                                <Button Grid.Column="1" x:Name="RemoveButton" Content=" X " Click="RemoveMask_Clicked" ToolTip="Remove">
+                                </Button>
+                            </Grid>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

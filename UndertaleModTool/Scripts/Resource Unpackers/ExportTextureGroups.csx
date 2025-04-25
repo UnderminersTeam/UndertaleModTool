@@ -31,6 +31,8 @@ using (worker = new())
     {
         foreach (UndertaleTextureGroupInfo tgin in Data.TextureGroupInfo)
         {
+            if (tgin is null)
+                continue;
             int progress = 0;
             int sum = 0;
             if (tgin.TexturePages != null)

@@ -1,0 +1,47 @@
+<TreeViewItem x:Class="UndertaleModTool.ResourceListTreeViewItem"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UndertaleModTool"
+             xmlns:undertalelib="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
+             mc:Ignorable="d">
+
+    <TreeViewItem.Resources>
+        <DataTemplate x:Key="DefaultNullItemTemplate">
+            <TextBlock Text="(null)" Foreground="{DynamicResource ABrush.Foreground.Disabled}"/>
+        </DataTemplate>
+
+        <local:ImplementsInterfaceConverter x:Key="ImplementsInterfaceConverter"/>
+
+        <ContextMenu x:Key="UndertaleResourceMenu" Opened="MenuItem_ContextMenuOpened">
+            <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>
+            <MenuItem Header="Find all references" Click="MenuItem_FindAllReferences_Click" Name="FindAllReferences"/>
+            <MenuItem Header="Copy name to clipboard" Click="MenuItem_CopyName_Click"/>
+            <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
+        </ContextMenu>
+
+        <!-- TODO: Would need some way to know the ID, IndexOf won't be reliable -->
+        <ContextMenu x:Key="NullItemReplaceMenu" Opened="MenuItem_NullDataContext_ContextMenuOpened">
+            <!--<MenuItem IsEnabled="False" Header="ID: " Name="ObjectIdLabel" />
+            <Separator />-->
+            <MenuItem IsEnabled="False" Header="Add in place (unimplemented)" />
+        </ContextMenu>
+
+        <Style x:Key="UndertaleModTool.ResourceListTreeViewItem.ItemContainerStyle" TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ., Converter={StaticResource ImplementsInterfaceConverter}, ConverterParameter={x:Type undertalelib:UndertaleResource}}" Value="True">
+                    <Setter Property="ContextMenu" Value="{StaticResource UndertaleResourceMenu}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding .}" Value="{x:Null}">
+                    <Setter Property="ContextMenu" Value="{StaticResource NullItemReplaceMenu}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </TreeViewItem.Resources>
+
+    <TreeViewItem.ItemContainerStyle>
+        <StaticResource ResourceKey="UndertaleModTool.ResourceListTreeViewItem.ItemContainerStyle"/>
+    </TreeViewItem.ItemContainerStyle>
+
+</TreeViewItem>

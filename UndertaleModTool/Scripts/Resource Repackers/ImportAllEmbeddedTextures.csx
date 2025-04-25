@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
@@ -20,9 +21,13 @@ if (!Directory.Exists(embeddedTexturesPath))
 
 string subPath = embeddedTexturesPath;
 int i = 0;
-foreach (var txtr in Data.EmbeddedTextures) 
+foreach (UndertaleEmbeddedTexture target in Data.EmbeddedTextures) 
 {
-    UndertaleEmbeddedTexture target = txtr as UndertaleEmbeddedTexture;
+    if (target is null)
+    {
+        i++;
+        continue;
+    }
     string filename = $"{i}.png";
     try
     {

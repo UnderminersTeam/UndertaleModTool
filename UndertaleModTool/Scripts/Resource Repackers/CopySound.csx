@@ -169,7 +169,7 @@ UndertaleData LoadDonorDataFile()
     if (DonorDataPath == null)
         throw new ScriptException("The donor data path was not set.");
     using (var stream = new FileStream(DonorDataPath, FileMode.Open, FileAccess.Read))
-        DonorData = UndertaleIO.Read(stream, warning => ScriptMessage("A warning occured while trying to load " + DonorDataPath + ":\n" + warning));
+        DonorData = UndertaleIO.Read(stream, (warning, _) => ScriptMessage("A warning occured while trying to load " + DonorDataPath + ":\n" + warning));
     return DonorData;
 }
 
@@ -239,7 +239,7 @@ IList<UndertaleEmbeddedAudio> GetAudioGroupData(UndertaleSound sound, string win
     {
         UndertaleData data = null;
         using (var stream = new FileStream(groupFilePath, FileMode.Open, FileAccess.Read))
-            data = UndertaleIO.Read(stream, warning => ScriptMessage("A warning occured while trying to load " + audioGroupName + ":\n" + warning));
+            data = UndertaleIO.Read(stream, (warning, _) => ScriptMessage("A warning occured while trying to load " + audioGroupName + ":\n" + warning));
 
         loadedAudioGroups[audioGroupName] = data.EmbeddedAudio;
         return data.EmbeddedAudio;

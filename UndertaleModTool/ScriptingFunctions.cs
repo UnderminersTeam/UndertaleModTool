@@ -15,6 +15,7 @@ using Newtonsoft.Json;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using System.IO.Pipes;
+using System.Threading.Tasks;
 
 namespace UndertaleModTool
 {
@@ -29,7 +30,7 @@ namespace UndertaleModTool
                 ScriptError(path + " does not exist!");
                 return false;
             }
-            RunScript(path);
+            RunScript(path).GetAwaiter().GetResult();
             if (!ScriptExecutionSuccess)
                 ScriptError("An error of type \"" + ScriptErrorType + "\" occurred. The error is:\n\n" + ScriptErrorMessage, ScriptErrorType);
             return ScriptExecutionSuccess;

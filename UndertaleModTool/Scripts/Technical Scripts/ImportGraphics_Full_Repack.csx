@@ -128,14 +128,17 @@ async Task DumpFonts()
 
 void DumpSprite(UndertaleSprite sprite)
 {
-    for (int i = 0; i < sprite.Textures.Count; i++)
+    if (sprite is not null)
     {
-        if (sprite.Textures[i]?.Texture != null)
+        for (int i = 0; i < sprite.Textures.Count; i++)
         {
-            UndertaleTexturePageItem tex = sprite.Textures[i].Texture;
-            worker.ExportAsPNG(tex, Path.Combine(exportedTexturesFolder, $"{sprite.Name.Content}_{i}.png"));
-            assetCoordinateDict.Add($"{sprite.Name.Content}_{i}", new int[] { tex.TargetX, tex.TargetY, tex.TargetWidth, tex.TargetHeight, tex.BoundingWidth, tex.BoundingHeight });
-            assetTypeDict.Add($"{sprite.Name.Content}_{i}", "spr");
+            if (sprite.Textures[i]?.Texture != null)
+            {
+                UndertaleTexturePageItem tex = sprite.Textures[i].Texture;
+                worker.ExportAsPNG(tex, Path.Combine(exportedTexturesFolder, $"{sprite.Name.Content}_{i}.png"));
+                assetCoordinateDict.Add($"{sprite.Name.Content}_{i}", new int[] { tex.TargetX, tex.TargetY, tex.TargetWidth, tex.TargetHeight, tex.BoundingWidth, tex.BoundingHeight });
+                assetTypeDict.Add($"{sprite.Name.Content}_{i}", "spr");
+            }
         }
     }
 
@@ -144,6 +147,8 @@ void DumpSprite(UndertaleSprite sprite)
 
 void DumpFont(UndertaleFont font)
 {
+    if (font is null)
+        return;
     if (font.Texture != null)
     {
         UndertaleTexturePageItem tex = font.Texture;
@@ -157,6 +162,8 @@ void DumpFont(UndertaleFont font)
 
 void DumpBackground(UndertaleBackground background)
 {
+    if (background is null)
+        return;
     if (background.Texture != null)
     {
         UndertaleTexturePageItem tex = background.Texture;
@@ -342,6 +349,9 @@ foreach (Atlas atlas in packer.Atlasses)
                         for (int i = 0; i < frame; i++)
                             newSprite.Textures.Add(null);
                     }
+
+                    // FIXME: this needs support for 2024.6+ collision masks, which only use bounding box
+                    //        (should use newSprite.CalculateMaskDimensions(Data) as well as newSprite.NewMaskEntry(Data))
                     newSprite.CollisionMasks.Add(newSprite.NewMaskEntry());
 
                     int width = ((n.Bounds.Width + 7) / 8) * 8;
@@ -695,7 +705,7 @@ public class Packer
 
     private MagickImage CreateAtlasImage(Atlas _Atlas)
     {
-        MagickImage img = new(MagickColors.Transparent, _Atlas.Width, _Atlas.Height);
+        MagickImage img = new(MagickColors.Transparent, (uint)_Atlas.Width, (uint)_Atlas.Height);
 
         foreach (Node n in _Atlas.Nodes)
         {

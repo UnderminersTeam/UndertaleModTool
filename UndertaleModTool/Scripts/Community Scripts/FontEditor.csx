@@ -307,7 +307,7 @@ class FontEditorGUI : Form
         //Populate list from font
         using IMagickImage<byte> fontSheetMagickImg = textureWorker.GetTextureFor(font.Texture, null);
         IUnsafePixelCollection<byte> fontSheetMagickPixels = fontSheetMagickImg.GetPixelsUnsafe();
-        Bitmap fontSheetImg = new Bitmap(fontSheetMagickImg.Width, fontSheetMagickImg.Height, 4 * fontSheetMagickImg.Width, PixelFormat.Format32bppArgb,
+        Bitmap fontSheetImg = new Bitmap((int)fontSheetMagickImg.Width, (int)fontSheetMagickImg.Height, 4 * (int)fontSheetMagickImg.Width, PixelFormat.Format32bppArgb,
                                          fontSheetMagickPixels.GetAreaPointer(0, 0, fontSheetMagickImg.Width, fontSheetMagickImg.Height));
         List<Letter> letters = new List<Letter>();
         foreach (UndertaleFont.Glyph glyph in font.Glyphs)
@@ -545,7 +545,7 @@ class FontEditorGUI : Form
         //Generate font sheet image and glyph points
         Bitmap fontSheetImg = new Bitmap(font.Texture.SourceWidth, font.Texture.SourceHeight);
         List<Point> glyphPoints = new List<Point>();
-        int gap = 1;
+        int gap = 2;
         
         int xPos = gap;
         int yPos = gap;
@@ -1250,7 +1250,11 @@ UndertaleFont FontPickerResult()
     comboBox.Size = new Size(form.Size.Width - 25, comboBox.Size.Height);
     comboBox.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
     foreach (UndertaleFont font in Data.Fonts)
+    {
+        if (font is null || font.Name?.Content? is null)
+            continue;
         comboBox.Items.Add(font.Name.Content);
+    }
     int defaultSelection = comboBox.Items.IndexOf("fnt_maintext");
     comboBox.SelectedIndex = defaultSelection == -1 ? 0 : defaultSelection;
     form.Controls.Add(comboBox);

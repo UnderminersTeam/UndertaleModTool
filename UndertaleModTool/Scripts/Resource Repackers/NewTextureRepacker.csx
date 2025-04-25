@@ -384,6 +384,8 @@ if (Data.TextureGroupInfo != null)
 {
     foreach (var texInfo in Data.TextureGroupInfo)
     {
+        if (texInfo is null)
+            continue;
         texInfo.TexturePages.Clear();
     }
 }
@@ -440,7 +442,7 @@ await Task.Run(() =>
             tex.Name = new UndertaleString($"Texture {++lastTextPage}");
             Data.EmbeddedTextures.Add(tex);
             
-            using MagickImage newAtlasImage = new(MagickColors.Transparent, atlas.Width, atlas.Height);
+            using MagickImage newAtlasImage = new(MagickColors.Transparent, (uint)atlas.Width, (uint)atlas.Height);
 
             tex.Scaled = group.First().Scaled; // Make sure the original pane "Scaled" value is mantained.
 
@@ -491,7 +493,7 @@ await Task.Run(() =>
                     int potw = NearestPowerOf2((uint)item.OriginalRect.Width),
                         poth = NearestPowerOf2((uint)item.OriginalRect.Height);
 
-                    using MagickImage newAtlasImage = new(MagickColors.Transparent, potw, poth);
+                    using MagickImage newAtlasImage = new(MagickColors.Transparent, (uint)potw, (uint)poth);
 
                     // Load texture, composite onto top left of new atlas
                     using (MagickImage source = TextureWorker.ReadBGRAImageFromFile(item.Filename))
@@ -524,7 +526,7 @@ await Task.Run(() =>
     }
 });
 
-SyncBinding(false);
+DisableAllSyncBindings();
 f.Close();
 
 // Done.

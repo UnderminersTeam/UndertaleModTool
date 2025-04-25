@@ -9,12 +9,6 @@ using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
-if (Data.ToolInfo.ProfileMode)
-{
-    if (!ScriptQuestion("This will cause desyncs! As such, your copy of the code(s) you are importing will be cleared, and will be overwritten with a copy decompiled from this ASM. Continue?"))
-        return;
-}
-
 // Check code directory.
 string importFolder = PromptChooseDirectory();
 if (importFolder == null)
@@ -38,7 +32,8 @@ SetProgressBar(null, "Files", 0, dirFiles.Length);
 StartProgressBarUpdater();
 
 SyncBinding("Strings, Code, CodeLocals, Scripts, GlobalInitScripts, GameObjects, Functions, Variables", true);
-await Task.Run(() => {
+await Task.Run(() => 
+{
     foreach (string file in dirFiles)
     {
         ImportASMFile(file, doParse, true, false, stopOnError);
