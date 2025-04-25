@@ -30,6 +30,8 @@ foreach (string listElement in splitStringsList)
 {
     foreach (UndertaleSprite spr in Data.Sprites)
     {
+        if (spr is null)
+            continue;
         if (listElement.Equals(spr.Name.Content, StringComparison.InvariantCultureIgnoreCase))
         {
             spritesToDump.Add(spr);

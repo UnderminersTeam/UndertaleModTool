@@ -384,6 +384,8 @@ if (Data.TextureGroupInfo != null)
 {
     foreach (var texInfo in Data.TextureGroupInfo)
     {
+        if (texInfo is null)
+            continue;
         texInfo.TexturePages.Clear();
     }
 }

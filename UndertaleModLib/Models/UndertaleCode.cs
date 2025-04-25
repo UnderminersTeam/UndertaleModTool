@@ -597,7 +597,10 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                 writer.Write(firstWord);
 
                 // Write reference to the function being called (reset next occurrence to string ID for now)
-                ReferenceNextOccurrenceOffset = (uint)ValueFunction.NameStringID;
+                if (ValueFunction is UndertaleFunction function)
+                {
+                    ReferenceNextOccurrenceOffset = (uint)function.NameStringID;
+                }
                 writer.Write(_primitiveValue.AsInt);
                 break;
             }
@@ -610,10 +613,10 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                 // Write integer argument, or function, if either is present
                 if (Type1 == DataType.Int32)
                 {
-                    if (ValueFunction is not null)
+                    if (ValueFunction is UndertaleFunction function)
                     {
                         // Write function (reset next occurrence to string ID for now)
-                        ReferenceNextOccurrenceOffset = (uint)ValueFunction.NameStringID;
+                        ReferenceNextOccurrenceOffset = (uint)function.NameStringID;
                         writer.Write(_primitiveValue.AsInt);
                     }
                     else
@@ -1522,8 +1525,9 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
             int bytecodeRelativeAddress = reader.ReadInt32();
             _bytecodeAbsoluteAddress = (uint)((int)reader.AbsPosition - 4 + bytecodeRelativeAddress);
 
-            // Check if this is a child code entry (which shares the same bytecode address as its parent)
-            UndertaleReader.BytecodeInformation info = reader.BytecodeAddresses[_bytecodeAbsoluteAddress];
+            // Check if this is a child code entry (which shares the same bytecode address as its parent).
+            // Note that we use TryGetValue here to account for 0-length code entries at the very end of the code list.
+            reader.BytecodeAddresses.TryGetValue(_bytecodeAbsoluteAddress, out UndertaleReader.BytecodeInformation info);
             if (Length > 0 && info.RootEntry is UndertaleCode parentEntry)
             {
                 // This is a child code entry; attach to parent. No need to parse any instructions.

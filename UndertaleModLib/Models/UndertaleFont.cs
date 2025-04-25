@@ -50,7 +50,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
 
     /// <summary>
     /// The level of anti-aliasing that is applied. 0 for none, Game Maker: Studio 2 has 1 for <c>on</c>, while
-    /// Game Maker Studio: 1 and earlier have values 1-3 for different anti-aliasing levels.
+    /// GameMaker: Studio 1 and earlier have values 1-3 for different anti-aliasing levels.
     /// </summary>
     public byte AntiAliasing { get; set; }
 
@@ -158,6 +158,14 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
         /// </summary>
         public UndertaleSimpleListShort<GlyphKerning> Kerning { get; set; } = new UndertaleSimpleListShort<GlyphKerning>();
 
+        /// <summary>
+        /// Purpose unknown, always 0.
+        /// </summary>
+        /// <remarks>
+        /// Was introduced in GM 2024.11.
+        /// </remarks>
+        public short UnknownAlwaysZero { get; set; }
+
         /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
@@ -168,6 +176,8 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             writer.Write(SourceHeight);
             writer.Write(Shift);
             writer.Write(Offset);
+            if (writer.undertaleData.IsVersionAtLeast(2024, 11))
+                writer.Write(UnknownAlwaysZero);
             writer.WriteUndertaleObject(Kerning);
         }
 
@@ -181,6 +191,8 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             SourceHeight = reader.ReadUInt16();
             Shift = reader.ReadInt16();
             Offset = reader.ReadInt16(); // Potential assumption, see the conversation at https://github.com/UnderminersTeam/UndertaleModTool/issues/40#issuecomment-440208912
+            if (reader.undertaleData.IsVersionAtLeast(2024, 11))
+                UnknownAlwaysZero = reader.ReadInt16();
             Kerning = reader.ReadUndertaleObject<UndertaleSimpleListShort<GlyphKerning>>();
         }
 
@@ -188,6 +200,8 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
         public static uint UnserializeChildObjectCount(UndertaleReader reader)
         {
             reader.Position += 14;
+            if (reader.undertaleData.IsVersionAtLeast(2024, 11))
+                reader.Position += 2; // UnknownAlwaysZero
 
             return 1 + UndertaleSimpleListShort<GlyphKerning>.UnserializeChildObjectCount(reader);
         }

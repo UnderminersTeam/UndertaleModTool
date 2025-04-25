@@ -666,7 +666,7 @@ namespace UndertaleModTool
 
                             case GameObject gameObj:
                                 var room = roomEditor.DataContext as UndertaleRoom;
-                                if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
+                                if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2) || room.Flags.HasFlag(RoomEntryFlags.IsGM2024_13))
                                 {
                                     if (fromReferencesResults)
                                     {
@@ -685,7 +685,7 @@ namespace UndertaleModTool
 
                             case Tile tile:
                                 room = roomEditor.DataContext as UndertaleRoom;
-                                if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
+                                if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2) || room.Flags.HasFlag(RoomEntryFlags.IsGM2024_13))
                                 {
                                     if (fromReferencesResults)
                                     {

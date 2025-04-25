@@ -29,13 +29,16 @@ await Task.Run(() =>
     UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data, null, Data.ToolInfo.DecompilerSettings);
     foreach (UndertaleCode code in toDump)
     {
-        if (isRegex)
+        if (code is not null)
         {
-            importGroup.QueueRegexFindReplace(code, keyword, replacement, caseSensitive);
-        }
-        else
-        {
-            importGroup.QueueFindReplace(code, keyword, replacement, caseSensitive);
+            if (isRegex)
+            {
+                importGroup.QueueRegexFindReplace(code, keyword, replacement, caseSensitive);
+            }
+            else
+            {
+                importGroup.QueueFindReplace(code, keyword, replacement, caseSensitive);
+            }
         }
         IncrementProgress();
     }

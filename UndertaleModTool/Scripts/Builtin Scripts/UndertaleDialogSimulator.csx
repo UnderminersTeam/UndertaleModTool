@@ -42,6 +42,7 @@ else
 
 bool GMS1_mode = !Data.IsGameMaker2();
 bool GMS2_3_mode = Data.IsVersionAtLeast(2, 3);
+bool GM2024_13_mode = Data.IsVersionAtLeast(2024, 13);
 bool isDeltarune = false;
 
 if (Data.GeneralInfo.Name.ToString() == "\"DELTARUNE\"")
@@ -133,10 +134,17 @@ public void HandleAddingNewRoom()
     newRoom.Bottom = (uint)768;
     newRoom.Speed = (uint)(GMS1_mode ? 30 : 0);
     newRoom.Flags = (UndertaleRoom.RoomEntryFlags.EnableViews | UndertaleRoom.RoomEntryFlags.ShowColor);
-    if (!GMS1_mode)
-        newRoom.Flags = (newRoom.Flags | UndertaleRoom.RoomEntryFlags.IsGMS2);
-    if (GMS2_3_mode)
-        newRoom.Flags = (newRoom.Flags | UndertaleRoom.RoomEntryFlags.IsGMS2_3);
+    if (GM2024_13_mode)
+    {
+        newRoom.Flags = (newRoom.Flags | UndertaleRoom.RoomEntryFlags.IsGM2024_13);
+    }
+    else
+    {
+        if (!GMS1_mode)
+            newRoom.Flags = (newRoom.Flags | UndertaleRoom.RoomEntryFlags.IsGMS2);
+        if (GMS2_3_mode)
+            newRoom.Flags = (newRoom.Flags | UndertaleRoom.RoomEntryFlags.IsGMS2_3);
+    }
 
     Data.Rooms.Add(newRoom);
 
@@ -290,6 +298,8 @@ public uint GetLastLayerID()
     uint a_last_layer_id = 0;
     foreach (UndertaleRoom Room in Data.Rooms) 
     {
+        if (Room is null)
+            continue;
         foreach (UndertaleRoom.Layer Layer in Room.Layers) 
         {
             if (Layer.LayerId > a_last_layer_id) 

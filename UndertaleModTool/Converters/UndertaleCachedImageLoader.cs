@@ -125,14 +125,16 @@ namespace UndertaleModTool
 
                 if (isTile)
                 {
-                    diffW = (int)(tile.SourceX + tile.Width - texture.SourceWidth);
-                    diffH = (int)(tile.SourceY + tile.Height - texture.SourceHeight);
-                    rect = new((int)(texture.SourceX + tile.SourceX), (int)(texture.SourceY + tile.SourceY), (int)tile.Width, (int)tile.Height);
+                    int actualTileSourceX = tile.SourceX - texture.TargetX;
+                    int actualTileSourceY = tile.SourceY - texture.TargetY;
+                    diffW = (int)(actualTileSourceX + tile.Width - texture.SourceWidth);
+                    diffH = (int)(actualTileSourceY + tile.Height - texture.SourceHeight);
+                    rect = new((int)(texture.SourceX + actualTileSourceX), (int)(texture.SourceY + actualTileSourceY), (int)tile.Width, (int)tile.Height);
                 }
                 else
                     rect = new(texture.SourceX, texture.SourceY, texture.SourceWidth, texture.SourceHeight);
 
-                spriteSrc = CreateSpriteSource(in rect, in texture, diffW, diffH, isTile);
+                spriteSrc = CreateSpriteSource(in rect, in texture, diffW, diffH);
 
                 if (cacheEnabled)
                 {
@@ -159,38 +161,49 @@ namespace UndertaleModTool
             currBufferSize = 1048576;
         }
 
-        public static Bitmap CreateSpriteBitmap(Rectangle rect, in UndertaleTexturePageItem texture, int diffW = 0, int diffH = 0, bool isTile = false)
+        public static Bitmap CreateSpriteBitmap(Rectangle rect, in UndertaleTexturePageItem texture, int diffW = 0, int diffH = 0)
         {
             GMImage image = texture.TexturePage.TextureData.Image;
             BitmapSource bitmapSource = mainWindow.GetBitmapSourceForImage(image);
 
             Bitmap spriteBitmap = new(rect.Width, rect.Height);
 
+            // Clamp width/height in bounds (diffW/diffH represent how out of bounds they are)
             rect.Width -= (diffW > 0) ? diffW : 0;
             rect.Height -= (diffH > 0) ? diffH : 0;
-            int x = isTile ? texture.TargetX : 0;
-            int y = isTile ? texture.TargetY : 0;
 
-            // For safety, clamp the rectangle to be within spriteBitmap (not sure why this occurs, but apparently it can)
-            if (x + rect.Width > spriteBitmap.Width)
+            // Clamp X/Y in bounds
+            int offsetX = 0, offsetY = 0;
+            if (rect.X < texture.SourceX)
             {
-                rect.Width = spriteBitmap.Width - x;
+                offsetX = texture.SourceX - rect.X;
+                rect.Width -= offsetX;
+                rect.X = texture.SourceX;
             }
-            if (y + rect.Height > spriteBitmap.Height)
+            if (rect.Y < texture.SourceY)
             {
-                rect.Height = spriteBitmap.Height - y;
+                offsetY = texture.SourceY - rect.Y;
+                rect.Height -= offsetY;
+                rect.Y = texture.SourceY;
             }
 
-            var data = spriteBitmap.LockBits(new Rectangle(x, y, rect.Width, rect.Height), ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            // Abort if rect is out of bounds of the texture item
+            if (rect.X >= (texture.SourceX + texture.SourceWidth) || rect.Y >= (texture.SourceY + texture.SourceHeight))
+                return spriteBitmap;
+            if (rect.Width <= 0 || rect.Height <= 0)
+                return spriteBitmap;
+
+            // Copy data from texture
+            BitmapData data = spriteBitmap.LockBits(new Rectangle(offsetX, offsetY, rect.Width, rect.Height), ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             bitmapSource.CopyPixels(new Int32Rect(rect.X, rect.Y, rect.Width, rect.Height), data.Scan0, data.Height * data.Stride, data.Stride);
             spriteBitmap.UnlockBits(data);
 
             return spriteBitmap;
         }
-        private ImageSource CreateSpriteSource(in Rectangle rect, in UndertaleTexturePageItem texture, int diffW = 0, int diffH = 0, bool isTile = false)
+        private ImageSource CreateSpriteSource(in Rectangle rect, in UndertaleTexturePageItem texture, int diffW = 0, int diffH = 0)
         {
             ImageSource spriteSrc;
-            using (Bitmap spriteBitmap = CreateSpriteBitmap(rect, in texture, diffW, diffH, isTile))
+            using (Bitmap spriteBitmap = CreateSpriteBitmap(rect, in texture, diffW, diffH))
             {
                 IntPtr bmpPtr = spriteBitmap.GetHbitmap();
                 spriteSrc = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(bmpPtr, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
