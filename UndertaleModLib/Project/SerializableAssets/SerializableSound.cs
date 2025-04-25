@@ -71,7 +71,7 @@ internal sealed class SerializableSound : ISerializableProjectAsset
     /// <summary>
     /// Populates this serializable sound with data from an actual sound.
     /// </summary>
-    public void PopulateFromData(ProjectContext projectContext, UndertaleSound sound)
+    internal void PopulateFromData(ProjectContext projectContext, UndertaleSound sound)
     {
         // Update all main properties
         DataName = sound.Name.Content;

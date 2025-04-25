@@ -592,7 +592,7 @@ internal sealed class SerializableRoom : ISerializableProjectAsset
     /// <summary>
     /// Populates this serializable room with data from an actual room.
     /// </summary>
-    public void PopulateFromData(ProjectContext projectContext, UndertaleRoom room)
+    internal void PopulateFromData(ProjectContext projectContext, UndertaleRoom room)
     {
         // Update all main properties
         DataName = room.Name.Content;

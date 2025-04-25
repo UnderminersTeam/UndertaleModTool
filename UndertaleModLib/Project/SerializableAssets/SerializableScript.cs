@@ -37,7 +37,7 @@ internal sealed class SerializableScript : ISerializableProjectAsset
     /// <summary>
     /// Populates this serializable script with data from an actual script.
     /// </summary>
-    public void PopulateFromData(ProjectContext projectContext, UndertaleScript script)
+    internal void PopulateFromData(ProjectContext projectContext, UndertaleScript script)
     {
         // Update all main properties
         DataName = script.Name.Content;

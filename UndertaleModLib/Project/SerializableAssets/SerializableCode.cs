@@ -39,7 +39,7 @@ internal sealed class SerializableCode : ISerializableProjectAsset
     /// <summary>
     /// Populates this serializable code with data from an actual code asset.
     /// </summary>
-    public void PopulateFromData(ProjectContext projectContext, UndertaleCode code)
+    internal void PopulateFromData(ProjectContext projectContext, UndertaleCode code)
     {
         // Update all main properties
         DataName = code.Name.Content;

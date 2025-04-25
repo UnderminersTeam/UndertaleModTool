@@ -57,7 +57,7 @@ internal sealed class SerializablePath : ISerializableProjectAsset
     /// <summary>
     /// Populates this serializable path with data from an actual path.
     /// </summary>
-    public void PopulateFromData(ProjectContext projectContext, UndertalePath path)
+    internal void PopulateFromData(ProjectContext projectContext, UndertalePath path)
     {
         // Update all main properties
         DataName = path.Name.Content;

@@ -150,7 +150,7 @@ internal sealed class SerializableGameObject : ISerializableProjectAsset
     /// <summary>
     /// Populates this serializable game object with data from an actual game object.
     /// </summary>
-    public void PopulateFromData(ProjectContext projectContext, UndertaleGameObject obj)
+    internal void PopulateFromData(ProjectContext projectContext, UndertaleGameObject obj)
     {
         // Update all main properties
         DataName = obj.Name.Content;

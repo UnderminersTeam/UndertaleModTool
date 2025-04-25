@@ -505,6 +505,12 @@ public sealed class ProjectContext
         {
             foreach (IProjectAsset asset in _assetsMarkedForExport)
             {
+                // If the asset isn't exportable anymore, throw an exception
+                if (!asset.ProjectExportable)
+                {
+                    throw new ProjectException($"Project asset \"{asset.ProjectName}\" cannot currently be exported");
+                }
+
                 // Generate serializable version of the asset
                 ISerializableProjectAsset serializableAsset = asset.GenerateSerializableProjectAsset(this);
 

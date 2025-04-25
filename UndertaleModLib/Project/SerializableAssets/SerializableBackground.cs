@@ -80,7 +80,7 @@ internal sealed class SerializableBackground : ISerializableTextureProjectAsset
 
     /// <inheritdoc/>
     [JsonIgnore]
-    public bool IndividualDirectory => false;
+    public bool IndividualDirectory => true;
 
     /// <inheritdoc/>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
@@ -89,13 +89,13 @@ internal sealed class SerializableBackground : ISerializableTextureProjectAsset
     // Data asset that was located during pre-import.
     private UndertaleBackground _dataAsset = null;
 
-    // Texture image created for asset during texture import.
+    // Texture image created for the asset during texture import.
     private UndertaleTexturePageItem _textureImage = null;
 
     /// <summary>
     /// Populates this serializable background with data from an actual background.
     /// </summary>
-    public void PopulateFromData(ProjectContext projectContext, UndertaleBackground bg)
+    internal void PopulateFromData(ProjectContext projectContext, UndertaleBackground bg)
     {
         // Update all main properties
         DataName = bg.Name.Content;
