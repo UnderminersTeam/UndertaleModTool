@@ -2927,45 +2927,6 @@ public class BuiltinList : IBuiltins
             DefineFunction("immersion_play_effect", 1, FunctionClassification.Immersion);
             DefineFunction("immersion_stop", 0, FunctionClassification.Immersion);
         }
-        if (data?.IsVersionAtLeast(2, 3) == true)
-        {
-            DefineFunction("sequence_exists", 1);
-            DefineFunction("sequence_create", 0);
-            DefineFunction("sequence_destroy", 1);
-            DefineFunction("sequence_get", 1);
-            DefineFunction("sequence_track_new", 1);
-            DefineFunction("sequence_keyframe_new", 1);
-            DefineFunction("sequence_keyframedata_new", 1);
-            DefineFunction("sequence_get_objects", 1);
-            DefineFunction("sequence_instance_override_object", 3);
-
-            DefineFunction("layer_sequence_exists", 2);
-            DefineFunction("layer_sequence_create", 4);
-            DefineFunction("layer_sequence_destroy", 1);
-            DefineFunction("layer_sequence_x", 2);
-            DefineFunction("layer_sequence_y", 2);
-            DefineFunction("layer_sequence_angle", 2);
-            DefineFunction("layer_sequence_xscale", 2);
-            DefineFunction("layer_sequence_yscale", 2);
-            DefineFunction("layer_sequence_headpos", 2);
-            DefineFunction("layer_sequence_headdir", 2);
-            DefineFunction("layer_sequence_pause", 1);
-            DefineFunction("layer_sequence_play", 1);
-            DefineFunction("layer_sequence_speedscale", 2);
-            DefineFunction("layer_sequence_get_x", 1);
-            DefineFunction("layer_sequence_get_y", 1);
-            DefineFunction("layer_sequence_get_angle", 1);
-            DefineFunction("layer_sequence_get_xscale", 1);
-            DefineFunction("layer_sequence_get_yscale", 1);
-            DefineFunction("layer_sequence_get_headpos", 1);
-            DefineFunction("layer_sequence_get_headdir", 1);
-            DefineFunction("layer_sequence_get_speedscale", 1);
-            DefineFunction("layer_sequence_get_length", 1);
-            DefineFunction("layer_sequence_get_instance", 1);
-            DefineFunction("layer_sequence_get_sequence", 1);
-            DefineFunction("layer_sequence_is_paused", 1);
-            DefineFunction("layer_sequence_is_finished", 1);
-        }
 
         // TODO: narrow down the versions and move to the correct places?
         // (these are from 2023.11 fnames)
