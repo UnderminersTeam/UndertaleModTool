@@ -178,12 +178,19 @@ try
 
                     sprite.Textures[frame] = texentry;
 
+                    // Update sprite dimensions
+                    uint oldWidth = sprite.Width, oldHeight = sprite.Height;
+                    sprite.Width = (uint)n.Texture.BoundingWidth;
+                    sprite.Height = (uint)n.Texture.BoundingHeight;
+                    bool changedSpriteDimensions = (oldWidth != sprite.Width || oldHeight != sprite.Height);
+
                     // Grow bounding box depending on how much is trimmed
                     bool grewBoundingBox = false;
-                    int marginLeft = n.Texture.TargetX;
-                    int marginRight = n.Texture.TargetX + n.Bounds.Width - 1;
-                    int marginTop = n.Texture.TargetY;
-                    int marginBottom = n.Texture.TargetY + n.Bounds.Height - 1;
+                    bool fullImageBbox = sprite.BBoxMode == 1;
+                    int marginLeft = fullImageBbox ? 0 : n.Texture.TargetX;
+                    int marginRight = fullImageBbox ? ((int)sprite.Width - 1) : (n.Texture.TargetX + n.Bounds.Width - 1);
+                    int marginTop = fullImageBbox ? 0 : n.Texture.TargetY;
+                    int marginBottom = fullImageBbox ? ((int)sprite.Height - 1) : (n.Texture.TargetY + n.Bounds.Height - 1);
                     if (marginLeft < sprite.MarginLeft)
                     {
                         sprite.MarginLeft = marginLeft;
@@ -210,9 +217,12 @@ try
                         sprite.SepMasks is not (UndertaleSprite.SepMaskType.AxisAlignedRect or UndertaleSprite.SepMaskType.RotatedRect) || 
                         sprite.CollisionMasks.Count > 0)
                     {
-                        if ((bboxMasks && grewBoundingBox) || (sprite.SepMasks is UndertaleSprite.SepMaskType.Precise && sprite.CollisionMasks.Count == 0))
+                        if ((bboxMasks && grewBoundingBox) || 
+                            (sprite.SepMasks is UndertaleSprite.SepMaskType.Precise && sprite.CollisionMasks.Count == 0) || 
+                            (!bboxMasks && changedSpriteDimensions))
                         {
-                            // Use this node for the sprite's collision mask if the bounding box grew (or if no collision mask exists for a precise sprite)
+                            // Use this node for the sprite's collision mask if the bounding box grew, if no collision mask exists for a precise sprite,
+                            // or if the sprite's dimensions have been changed altogether when bbox masks are not active.
                             maskNodes[sprite] = n;
                         }
                     }
