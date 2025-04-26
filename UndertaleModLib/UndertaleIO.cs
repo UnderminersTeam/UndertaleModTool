@@ -77,7 +77,7 @@ namespace UndertaleModLib
                     if (CachedId < 0)
                         throw new IOException("Unregistered object");
                 }
-                else
+                else if (CachedId != -100)
                 {
                     int newCachedId;
                     if (typeof(ChunkT) == typeof(UndertaleChunkAGRP))
@@ -105,7 +105,8 @@ namespace UndertaleModLib
 
         public void UnserializeById(UndertaleReader reader, int id)
         {
-            if (id < -1)
+            // In rare cases -100 (undefined in GML) is used instead of -1
+            if (id < -1 && id != -100)
                 throw new IOException("Invalid value for resource ID (" + typeof(ChunkT).Name + "): " + id);
             CachedId = id;
             reader.RequestResourceUpdate(this);
@@ -747,7 +748,7 @@ namespace UndertaleModLib
 
         public void Align(int alignment, byte paddingbyte = 0x00)
         {
-            while ((AbsPosition & (alignment - 1)) != paddingbyte)
+            while ((AbsPosition & (alignment - 1)) != 0)
             {
                 DebugUtil.Assert(ReadByte() == paddingbyte, "Invalid alignment padding");
             }
@@ -969,7 +970,7 @@ namespace UndertaleModLib
 
         public void Align(int alignment, byte paddingbyte = 0x00)
         {
-            while ((Position & (alignment - 1)) != paddingbyte)
+            while ((Position & (alignment - 1)) != 0)
             {
                 Write(paddingbyte);
             }
