@@ -1,6 +1,6 @@
 # UndertaleModTool
 
-[![Underminers Discord](https://img.shields.io/discord/566861759210586112?label=Discord&logo=discord&logoColor=white)](https://discord.gg/hnyMDypMbN) [![GitHub](https://img.shields.io/github/license/krzys-h/UndertaleModTool?logo=github)](https://github.com/krzys-h/UndertaleModTool/blob/master/LICENSE.txt)
+[![Underminers Discord](https://img.shields.io/discord/566861759210586112?label=Discord&logo=discord&logoColor=white)](https://discord.gg/hnyMDypMbN) [![GitHub](https://img.shields.io/github/license/UnderminersTeam/UndertaleModTool?logo=github)](https://github.com/UnderminersTeam/UndertaleModTool/blob/master/LICENSE.txt)
 
 (seeing such an amazing tool fills you with DETERMINATION.)
 
@@ -16,7 +16,7 @@ Note, that you can update to the bleeding edge releases at any time from within 
 
 | Releases 	| Status 	|
 |:---:	|----------	|
-| Stable 	| [![Latest Stable Release](https://img.shields.io/github/downloads/UnderminersTeam/UndertaleModTool/0.7.0.0/total)](https://github.com/UnderminersTeam/UndertaleModTool/releases/tag/0.7.0.0) |
+| Stable 	| [![Latest Stable Release](https://img.shields.io/github/downloads/UnderminersTeam/UndertaleModTool/0.8.0.0/total)](https://github.com/UnderminersTeam/UndertaleModTool/releases/tag/0.8.0.0) |
 | Bleeding edge 	| [![Latest Bleeding Edge](https://img.shields.io/github/downloads/UnderminersTeam/UndertaleModTool/bleeding-edge/total)](https://github.com/UnderminersTeam/UndertaleModTool/releases/tag/bleeding-edge) |
 
 It's worth noting that UndertaleModTool has different builds per release. The differences are as follows:
@@ -74,7 +74,7 @@ All contributions are welcome! If you find a bug, a data file that does not load
 
 * Upgrading profile system to a better, more source-control friendly project system.
 * Continuing to improve support for a wider variety of GameMaker versions (especially recent ones).
-* Further GML compiler and decompiler work, mainly over on [Underanalyzer](https://github.com/UnderminersTeam/Underanalyzer) for versions beyond UndertaleModTool 0.7.x.
+* Further GML compiler and decompiler work, mainly over on [Underanalyzer](https://github.com/UnderminersTeam/Underanalyzer).
 * Making structural changes to clean up the library (an incremental effort).
 * Eventually, making the GUI cross-platform if possible, and improving it in general.
 * General usability improvements, bugfixes, and so on.
