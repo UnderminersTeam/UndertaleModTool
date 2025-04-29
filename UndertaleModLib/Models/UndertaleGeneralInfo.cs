@@ -695,7 +695,12 @@ public class UndertaleOptions : UndertaleObject, IDisposable
         UseFastCollision = 0x4000000,
         FastCollisionCompatibility = 0x8000000,
         DisableSandbox = 0x10000000,
-        EnableCopyOnWrite = 0x20000000
+        EnableCopyOnWrite = 0x20000000,
+        LegacyJsonParsing = 0x40000000,
+        LegacyNumberConversion = 0x80000000,
+        LegacyOtherBehavior = 0x100000000,
+        AudioErrorBehavior = 0x200000000,
+        AllowInstanceChange = 0x400000000
     }
 
     /// <summary>

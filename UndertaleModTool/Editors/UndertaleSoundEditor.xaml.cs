@@ -112,7 +112,16 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    string path = Path.Combine(Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath), "audiogroup" + sound.GroupID + ".dat");
+                    string relativePath;
+                    if (sound.AudioGroup is UndertaleAudioGroup { Path.Content: string customRelativePath })
+                    {
+                        relativePath = customRelativePath;
+                    }
+                    else
+                    {
+                        relativePath = $"audiogroup{sound.GroupID}.dat";
+                    }
+                    string path = Path.Combine(Path.GetDirectoryName(mainWindow.FilePath), relativePath);
                     if (File.Exists(path))
                     {
                         if (loadedPath != path)

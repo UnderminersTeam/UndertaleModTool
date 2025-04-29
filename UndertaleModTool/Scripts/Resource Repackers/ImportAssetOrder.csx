@@ -12,7 +12,9 @@ using UndertaleModLib.Util;
 EnsureDataLoaded();
 
 if (Data.IsVersionAtLeast(2024, 11))
-    ScriptWarning("This script may act erroneusly on GM version 2024.11 and later.");
+{
+    ScriptWarning("This script may act erroneously on GameMaker version 2024.11 and later.");
+}
 
 string assetNamePath = PromptLoadFile("txt", "Text files (.txt)|*.txt|All files|*");
 if (assetNamePath == null)

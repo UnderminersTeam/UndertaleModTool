@@ -29,6 +29,10 @@ if (!usesAGRP)
     ScriptError("ERROR!\nThis game doesn't use audiogroups!\nImporting to external audiogroups is disabled.", "ImportSound");
     //return;
 }
+if (Data.IsVersionAtLeast(2024, 14))
+{
+    ScriptWarning("This script may act erroneously on GameMaker version 2024.14 and later.");
+}
 
 OpenFileDialog fileDialog   = new OpenFileDialog();
 fileDialog.InitialDirectory = Path.GetDirectoryName(FilePath) + Path.DirectorySeparatorChar;
