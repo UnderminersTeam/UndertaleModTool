@@ -179,13 +179,7 @@ namespace UndertaleModTool
 
         // Inner settings used to store values that we don't have any business reimplementing
         [JsonIgnore]
-        private DecompileSettings InnerSettings { get; } = new DecompileSettings()
-        {
-            UnknownArgumentNamePattern = "arg{0}",
-            RemoveSingleLineBlockBraces = true,
-            EmptyLineAroundBranchStatements = true,
-            EmptyLineBeforeSwitchCases = true
-        };
+        private DecompileSettings _innerSettings;
 
         /// <summary>
         /// Indentation style being used for decompilation.
@@ -206,35 +200,55 @@ namespace UndertaleModTool
         }
 
         // Interface implementation (passes through to inner settings instance)
-        public bool UseSemicolon { get => InnerSettings.UseSemicolon; set => InnerSettings.UseSemicolon = value; }
-        public bool UseCSSColors { get => InnerSettings.UseCSSColors; set => InnerSettings.UseCSSColors = value; }
-        public bool PrintWarnings { get => InnerSettings.PrintWarnings; set => InnerSettings.PrintWarnings = value; }
-        public bool MacroDeclarationsAtTop { get => InnerSettings.MacroDeclarationsAtTop; set => InnerSettings.MacroDeclarationsAtTop = value; }
-        public bool EmptyLineAfterBlockLocals { get => InnerSettings.EmptyLineAfterBlockLocals; set => InnerSettings.EmptyLineAfterBlockLocals = value; }
-        public bool EmptyLineAroundEnums { get => InnerSettings.EmptyLineAroundEnums; set => InnerSettings.EmptyLineAroundEnums = value; }
-        public bool EmptyLineAroundBranchStatements { get => InnerSettings.EmptyLineAroundBranchStatements; set => InnerSettings.EmptyLineAroundBranchStatements = value; }
-        public bool EmptyLineBeforeSwitchCases { get => InnerSettings.EmptyLineBeforeSwitchCases; set => InnerSettings.EmptyLineBeforeSwitchCases = value; }
-        public bool EmptyLineAfterSwitchCases { get => InnerSettings.EmptyLineAfterSwitchCases; set => InnerSettings.EmptyLineAfterSwitchCases = value; }
-        public bool EmptyLineAroundFunctionDeclarations { get => InnerSettings.EmptyLineAroundFunctionDeclarations; set => InnerSettings.EmptyLineAroundFunctionDeclarations = value; }
-        public bool EmptyLineAroundStaticInitialization { get => InnerSettings.EmptyLineAroundStaticInitialization; set => InnerSettings.EmptyLineAroundStaticInitialization = value; }
-        public bool OpenBlockBraceOnSameLine { get => InnerSettings.OpenBlockBraceOnSameLine; set => InnerSettings.OpenBlockBraceOnSameLine = value; }
-        public bool RemoveSingleLineBlockBraces { get => InnerSettings.RemoveSingleLineBlockBraces; set => InnerSettings.RemoveSingleLineBlockBraces = value; }
-        public bool CleanupTry { get => InnerSettings.CleanupTry; set => InnerSettings.CleanupTry = value; }
-        public bool CleanupElseToContinue { get => InnerSettings.CleanupElseToContinue; set => InnerSettings.CleanupElseToContinue = value; }
-        public bool CleanupDefaultArgumentValues { get => InnerSettings.CleanupDefaultArgumentValues; set => InnerSettings.CleanupDefaultArgumentValues = value; }
-        public bool CleanupBuiltinArrayVariables { get => InnerSettings.CleanupBuiltinArrayVariables; set => InnerSettings.CleanupBuiltinArrayVariables = value; }
-        public bool CleanupLocalVarDeclarations { get => InnerSettings.CleanupLocalVarDeclarations; set => InnerSettings.CleanupLocalVarDeclarations = value; }
-        public bool CreateEnumDeclarations { get => InnerSettings.CreateEnumDeclarations; set => InnerSettings.CreateEnumDeclarations = value; }
-        public string UnknownEnumName { get => InnerSettings.UnknownEnumName; set => InnerSettings.UnknownEnumName = value; }
-        public string UnknownEnumValuePattern { get => InnerSettings.UnknownEnumValuePattern; set => InnerSettings.UnknownEnumValuePattern = value; }
-        public string UnknownArgumentNamePattern { get => InnerSettings.UnknownArgumentNamePattern; set => InnerSettings.UnknownArgumentNamePattern = value; }
-        public bool AllowLeftoverDataOnStack { get => InnerSettings.AllowLeftoverDataOnStack; set => InnerSettings.AllowLeftoverDataOnStack = value; }
+        public bool UseSemicolon { get => _innerSettings.UseSemicolon; set => _innerSettings.UseSemicolon = value; }
+        public bool UseCSSColors { get => _innerSettings.UseCSSColors; set => _innerSettings.UseCSSColors = value; }
+        public bool PrintWarnings { get => _innerSettings.PrintWarnings; set => _innerSettings.PrintWarnings = value; }
+        public bool MacroDeclarationsAtTop { get => _innerSettings.MacroDeclarationsAtTop; set => _innerSettings.MacroDeclarationsAtTop = value; }
+        public bool EmptyLineAfterBlockLocals { get => _innerSettings.EmptyLineAfterBlockLocals; set => _innerSettings.EmptyLineAfterBlockLocals = value; }
+        public bool EmptyLineAroundEnums { get => _innerSettings.EmptyLineAroundEnums; set => _innerSettings.EmptyLineAroundEnums = value; }
+        public bool EmptyLineAroundBranchStatements { get => _innerSettings.EmptyLineAroundBranchStatements; set => _innerSettings.EmptyLineAroundBranchStatements = value; }
+        public bool EmptyLineBeforeSwitchCases { get => _innerSettings.EmptyLineBeforeSwitchCases; set => _innerSettings.EmptyLineBeforeSwitchCases = value; }
+        public bool EmptyLineAfterSwitchCases { get => _innerSettings.EmptyLineAfterSwitchCases; set => _innerSettings.EmptyLineAfterSwitchCases = value; }
+        public bool EmptyLineAroundFunctionDeclarations { get => _innerSettings.EmptyLineAroundFunctionDeclarations; set => _innerSettings.EmptyLineAroundFunctionDeclarations = value; }
+        public bool EmptyLineAroundStaticInitialization { get => _innerSettings.EmptyLineAroundStaticInitialization; set => _innerSettings.EmptyLineAroundStaticInitialization = value; }
+        public bool OpenBlockBraceOnSameLine { get => _innerSettings.OpenBlockBraceOnSameLine; set => _innerSettings.OpenBlockBraceOnSameLine = value; }
+        public bool RemoveSingleLineBlockBraces { get => _innerSettings.RemoveSingleLineBlockBraces; set => _innerSettings.RemoveSingleLineBlockBraces = value; }
+        public bool CleanupTry { get => _innerSettings.CleanupTry; set => _innerSettings.CleanupTry = value; }
+        public bool CleanupElseToContinue { get => _innerSettings.CleanupElseToContinue; set => _innerSettings.CleanupElseToContinue = value; }
+        public bool CleanupDefaultArgumentValues { get => _innerSettings.CleanupDefaultArgumentValues; set => _innerSettings.CleanupDefaultArgumentValues = value; }
+        public bool CleanupBuiltinArrayVariables { get => _innerSettings.CleanupBuiltinArrayVariables; set => _innerSettings.CleanupBuiltinArrayVariables = value; }
+        public bool CleanupLocalVarDeclarations { get => _innerSettings.CleanupLocalVarDeclarations; set => _innerSettings.CleanupLocalVarDeclarations = value; }
+        public bool CreateEnumDeclarations { get => _innerSettings.CreateEnumDeclarations; set => _innerSettings.CreateEnumDeclarations = value; }
+        public string UnknownEnumName { get => _innerSettings.UnknownEnumName; set => _innerSettings.UnknownEnumName = value; }
+        public string UnknownEnumValuePattern { get => _innerSettings.UnknownEnumValuePattern; set => _innerSettings.UnknownEnumValuePattern = value; }
+        public string UnknownArgumentNamePattern { get => _innerSettings.UnknownArgumentNamePattern; set => _innerSettings.UnknownArgumentNamePattern = value; }
+        public bool AllowLeftoverDataOnStack { get => _innerSettings.AllowLeftoverDataOnStack; set => _innerSettings.AllowLeftoverDataOnStack = value; }
+
+        public DecompilerSettings()
+        {
+            RestoreDefaults();
+        }
+
+        /// <summary>
+        /// Restores default values for all decompiler settings.
+        /// </summary>
+        public void RestoreDefaults()
+        {
+            _innerSettings = new DecompileSettings()
+            {
+                UnknownArgumentNamePattern = "arg{0}",
+                RemoveSingleLineBlockBraces = true,
+                EmptyLineAroundBranchStatements = true,
+                EmptyLineBeforeSwitchCases = true
+            };
+            IndentStyle = IndentStyleKind.FourSpaces;
+        }
 
         /// <inheritdoc/>
         public bool TryGetPredefinedDouble(double value, [MaybeNullWhen(false)] out string result, out bool isResultMultiPart)
         {
             // Pass through to inner settings instance, which has some predefined values already
-            return InnerSettings.TryGetPredefinedDouble(value, out result, out isResultMultiPart);
+            return _innerSettings.TryGetPredefinedDouble(value, out result, out isResultMultiPart);
         }
     }
 }

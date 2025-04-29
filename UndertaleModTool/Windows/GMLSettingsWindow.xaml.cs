@@ -37,7 +37,7 @@ namespace UndertaleModTool
 
         private void RestoreButton_Click(object sender, RoutedEventArgs e)
         {
-            Settings.Instance.DecompilerSettings = new();
+            Settings.Instance.DecompilerSettings.RestoreDefaults();
             Settings.Instance.InstanceIdPrefix = Settings.DefaultInstanceIdPrefix;
 
             // Force all bindings to be updated
