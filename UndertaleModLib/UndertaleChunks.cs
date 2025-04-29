@@ -1411,6 +1411,18 @@ namespace UndertaleModLib
             {
                 List[index].Name = new UndertaleString("PageItem " + index.ToString()); // not Data.MakeString
             }
+
+            if (reader.undertaleData.IsTPAG4ByteAligned)
+            {
+                while ((reader.Position % 4) != 0)
+                {
+                    if (reader.ReadByte() != 0)
+                    {
+                        reader.SubmitWarning("Missing expected TPAG padding");
+                        reader.Position--;
+                    }
+                }
+            }
         }
     }
 
