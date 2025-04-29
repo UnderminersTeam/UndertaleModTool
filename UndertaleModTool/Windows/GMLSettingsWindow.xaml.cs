@@ -34,6 +34,17 @@ namespace UndertaleModTool
             if (Settings.Instance.EnableDarkMode)
                 MainWindow.SetDarkTitleBarForWindow(this, true, false);
         }
+
+        private void RestoreButton_Click(object sender, RoutedEventArgs e)
+        {
+            Settings defaultSettings = new();
+            Settings.Instance.DecompilerSettings = new();
+            Settings.Instance.InstanceIdPrefix = defaultSettings.InstanceIdPrefix;
+
+            // Force all bindings to be updated
+            DataContext = defaultSettings;
+            DataContext = Settings.Instance;
+        }
     }
 
     [ValueConversion(typeof(DecompilerSettings.IndentStyleKind), typeof(string))]
