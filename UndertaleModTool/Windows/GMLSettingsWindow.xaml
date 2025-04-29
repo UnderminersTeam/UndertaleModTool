@@ -179,7 +179,7 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <local:ButtonDark Grid.Column="0" Click="RestoreButton_Click" Padding="8,2,8,2" HorizontalAlignment="Right" x:Name="RestoreButton">Restore settings to defaults</local:ButtonDark>
+                <local:ButtonDark Grid.Column="0" Click="RestoreButton_Click" Padding="8,2,8,2" HorizontalAlignment="Right" x:Name="RestoreButton">Restore to defaults</local:ButtonDark>
             </Grid>
         </StackPanel>
     </ScrollViewer>
