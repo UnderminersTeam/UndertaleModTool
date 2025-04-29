@@ -104,7 +104,16 @@ IList<UndertaleEmbeddedAudio> GetAudioGroupData(UndertaleSound sound)
     if (loadedAudioGroups.ContainsKey(audioGroupName))
         return loadedAudioGroups[audioGroupName];
 
-    string groupFilePath = Path.Combine(winFolder, "audiogroup" + sound.GroupID + ".dat");
+    string relativeAudioGroupPath;
+    if (sound.AudioGroup is UndertaleAudioGroup { Path.Content: string customRelativePath })
+    {
+        relativeAudioGroupPath = customRelativePath;
+    }
+    else
+    {
+        relativeAudioGroupPath = $"audiogroup{sound.GroupID}.dat";
+    }
+    string groupFilePath = Path.Combine(winFolder, relativeAudioGroupPath);
     if (!File.Exists(groupFilePath))
         return null; // Doesn't exist.
 

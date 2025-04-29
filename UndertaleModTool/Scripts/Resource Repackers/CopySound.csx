@@ -27,6 +27,10 @@ if ((DonorData.AudioGroups.ByName("audiogroup_default") == null) && DonorData.Ge
 {
     throw new ScriptException("This donor data file has no \"audiogroup_default\" but it is GMS2 or greater. AudioGroups count: " + DonorData.AudioGroups.Count.ToString());
 }
+if (Data.IsVersionAtLeast(2024, 14))
+{
+    ScriptWarning("This script may act erroneously on GameMaker version 2024.14 and later.");
+}
 List<string> splitStringsList = GetSplitStringsList("sound");
 List<UndertaleSound> soundsList = GetSoundsList(splitStringsList, DonorData);
 foreach (UndertaleSound snd in soundsList)

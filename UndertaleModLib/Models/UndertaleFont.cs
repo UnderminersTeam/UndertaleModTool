@@ -314,6 +314,8 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
         if (writer.undertaleData.IsVersionAtLeast(2023, 6))
             writer.Write(LineHeight);
         writer.WriteUndertaleObject(Glyphs);
+        if (writer.undertaleData.IsVersionAtLeast(2024, 14))
+            writer.Align(4);
     }
 
     /// <inheritdoc />
@@ -354,6 +356,8 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
         if (reader.undertaleData.IsVersionAtLeast(2023, 6))
             LineHeight = reader.ReadUInt32();
         Glyphs = reader.ReadUndertaleObject<UndertalePointerList<Glyph>>();
+        if (reader.undertaleData.IsVersionAtLeast(2024, 14))
+            reader.Align(4);
     }
 
     /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
@@ -371,7 +375,12 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
 
         reader.Position += skipSize;
 
-        return 1 + UndertalePointerList<Glyph>.UnserializeChildObjectCount(reader);
+        uint count = 1 + UndertalePointerList<Glyph>.UnserializeChildObjectCount(reader);
+
+        if (reader.undertaleData.IsVersionAtLeast(2024, 14))
+            reader.Align(4);
+
+        return count;
     }
 
     /// <inheritdoc />
