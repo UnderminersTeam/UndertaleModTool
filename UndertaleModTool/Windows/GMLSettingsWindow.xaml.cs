@@ -37,12 +37,11 @@ namespace UndertaleModTool
 
         private void RestoreButton_Click(object sender, RoutedEventArgs e)
         {
-            Settings defaultSettings = new();
             Settings.Instance.DecompilerSettings = new();
-            Settings.Instance.InstanceIdPrefix = defaultSettings.InstanceIdPrefix;
+            Settings.Instance.InstanceIdPrefix = Settings.DefaultInstanceIdPrefix;
 
             // Force all bindings to be updated
-            DataContext = defaultSettings;
+            DataContext = null;
             DataContext = Settings.Instance;
         }
     }
@@ -52,16 +51,17 @@ namespace UndertaleModTool
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            switch ((DecompilerSettings.IndentStyleKind)value)
+            if (value is not DecompilerSettings.IndentStyleKind kind)
             {
-                case DecompilerSettings.IndentStyleKind.FourSpaces:
-                    return "4 spaces";
-                case DecompilerSettings.IndentStyleKind.TwoSpaces:
-                    return "2 spaces";
-                case DecompilerSettings.IndentStyleKind.Tabs:
-                    return "Tabs";
+                return null;
             }
-            throw new Exception("Unknown indent style kind");
+            return kind switch
+            {
+                DecompilerSettings.IndentStyleKind.FourSpaces => "4 spaces",
+                DecompilerSettings.IndentStyleKind.TwoSpaces => "2 spaces",
+                DecompilerSettings.IndentStyleKind.Tabs => "Tabs",
+                _ => throw new Exception("Unknown indent style kind")
+            };
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

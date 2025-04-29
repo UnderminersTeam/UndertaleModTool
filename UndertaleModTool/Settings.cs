@@ -64,7 +64,8 @@ namespace UndertaleModTool
         public bool EnableDarkMode { get; set; } = false;
         public bool ShowDebuggerOption { get; set; } = false;
         public DecompilerSettings DecompilerSettings { get; set; }
-        public string InstanceIdPrefix { get; set; } = "inst_";
+        public const string DefaultInstanceIdPrefix = "inst_";
+        public string InstanceIdPrefix { get; set; } = DefaultInstanceIdPrefix;
 
         public bool ShowNullEntriesInResourceTree { get; set; } = false;
 
