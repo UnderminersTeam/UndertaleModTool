@@ -193,6 +193,13 @@ namespace UndertaleModTool
             if (rect.Width <= 0 || rect.Height <= 0)
                 return spriteBitmap;
 
+            // Abort if rect is out of bounds of bitmap source (e.g., texture was not loaded)
+            if (rect.X < 0 || rect.X >= bitmapSource.Width || rect.Y < 0 || rect.Y >= bitmapSource.Height ||
+                (rect.X + rect.Width) > bitmapSource.Width || (rect.Y + rect.Height) > bitmapSource.Height)
+            {
+                return spriteBitmap;
+            }
+
             // Copy data from texture
             BitmapData data = spriteBitmap.LockBits(new Rectangle(offsetX, offsetY, rect.Width, rect.Height), ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             bitmapSource.CopyPixels(new Int32Rect(rect.X, rect.Y, rect.Width, rect.Height), data.Scan0, data.Height * data.Stride, data.Stride);
