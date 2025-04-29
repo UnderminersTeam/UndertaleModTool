@@ -70,9 +70,9 @@ void DumpSprite(UndertaleSprite sprite)
                 worker.ExportAsPNG(tex, Path.Combine(sprFolder, $"{sprite.Name.Content}_{i}.png"));
             }
         }
-    }
 
-    AddProgressParallel(sprite.Textures.Count);
+        AddProgressParallel(sprite.Textures.Count);
+    }
 }
 
 void DumpFont(UndertaleFont font)
