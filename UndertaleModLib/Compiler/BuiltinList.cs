@@ -4183,6 +4183,30 @@ public class BuiltinList : IBuiltins
             Constants["kbv_autocapitalize_sentences"] = 2.0;
             Constants["kbv_autocapitalize_characters"] = 3.0;
         }
+        if (data?.IsVersionAtLeast(2, 3) == true)
+        {
+            Constants["seqtracktype_graphic"] = 1;
+            Constants["seqtracktype_audio"] = 2;
+            Constants["seqtracktype_instance"] = 14;
+            Constants["seqtracktype_sequence"] = 7;
+            Constants["seqtracktype_clipmask"] = 8;
+            Constants["seqtracktype_clipmask_mask"] = 9;
+            Constants["seqtracktype_clipmask_subject"] = 10;
+            Constants["seqtracktype_group"] = 11;
+            Constants["seqtracktype_colour"] = 4;
+            Constants["seqtracktype_real"] = 3;
+            Constants["seqtracktype_message"] = 15;
+            Constants["seqtracktype_moment"] = 16;
+            Constants["seqtracktype_text"] = 17;
+            Constants["seqtracktype_particlesystem"] = 18;
+            Constants["seqtracktype_bool"] = 5;
+            Constants["seqtracktype_string"] = 6;
+            Constants["seqtracktype_spriteframes"] = 13;
+            Constants["seqtracktype_empty"] = 12;
+
+            Constants["seqdir_right"] = 1;
+            Constants["seqdir_left"] = -1;
+        }
         // This one is a special case; it only exports to browser. I don't think this library supports
         // browser at all though, so we'll just assume it's -1. Wouldn't hurt anyway.
         Constants["os_browser"] = -1.0;

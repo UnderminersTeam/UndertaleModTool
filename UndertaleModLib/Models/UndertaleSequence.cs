@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 
 namespace UndertaleModLib.Models;
 
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleSequence : UndertaleNamedResource, IDisposable
+public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged, IDisposable
 {
     public enum PlaybackType : uint
     {
@@ -15,19 +16,22 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
     }
 
     public UndertaleString Name { get; set; }
-    public PlaybackType Playback { get; set; }
-    public float PlaybackSpeed { get; set; }
-    public AnimSpeedType PlaybackSpeedType { get; set; }
-    public float Length { get; set; }
+    public PlaybackType Playback { get; set; } = PlaybackType.Oneshot;
+    public float PlaybackSpeed { get; set; } = 60;
+    public AnimSpeedType PlaybackSpeedType { get; set; } = AnimSpeedType.FramesPerGameFrame;
+    public float Length { get; set; } = 60;
     public int OriginX { get; set; }
     public int OriginY { get; set; }
-    public float Volume { get; set; }
+    public float Volume { get; set; } = 1;
     public float Width { get; set; } // Added in GM 2024.13
     public float Height { get; set; } // Added in GM 2024.13
-    public UndertaleSimpleList<Keyframe<BroadcastMessage>> BroadcastMessages { get; set; }
-    public UndertaleSimpleList<Keyframe<Moment>> Moments { get; set; }
-    public UndertaleSimpleList<Track> Tracks { get; set; }
-    public Dictionary<int, UndertaleString> FunctionIDs { get; set; }
+    public UndertaleSimpleList<Keyframe<BroadcastMessage>> BroadcastMessages { get; set; } = new();
+    public UndertaleSimpleList<Keyframe<Moment>> Moments { get; set; } = new();
+    public UndertaleSimpleList<Track> Tracks { get; set; } = new();
+    public Dictionary<int, UndertaleString> FunctionIDs { get; set; } = new();
+
+    /// <inheritdoc />
+    public event PropertyChangedEventHandler PropertyChanged;
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
@@ -129,13 +133,75 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         FunctionIDs = null;
     }
 
-    public class Keyframe<T> : UndertaleObject where T : UndertaleObject, new()
+    /// <summary>
+    /// A keyframe of data stored within a sequence track, at a given time/duration, and for some number of channels.
+    /// </summary>
+    /// <typeparam name="T">Type of data this keyframe will hold.</typeparam>
+    public sealed class Keyframe<T> : UndertaleObject, INotifyPropertyChanged where T : UndertaleObject, new()
     {
+        /// <summary>
+        /// Start time of the keyframe.
+        /// </summary>
         public float Key { get; set; }
+
+        /// <summary>
+        /// Duration of the keyframe.
+        /// </summary>
         public float Length { get; set; }
+
+        /// <summary>
+        /// Whether the keyframe has "stretch" enabled. (TODO: unsure what this means.)
+        /// </summary>
         public bool Stretch { get; set; }
+
+        /// <summary>
+        /// Whether the keyframe is disabled.
+        /// </summary>
         public bool Disabled { get; set; }
-        public Dictionary<int, T> Channels { get; set; }
+
+        /// <summary>
+        /// Channels of the keyframe, containing actual values.
+        /// </summary>
+        /// <remarks>
+        /// Usually, there's 1 channel for 1D properties (such as image index/speed), and 2 channels for 2D properties (position, scale), etc.
+        /// </remarks>
+        public UndertaleSimpleList<KeyframeChannel> Channels { get; set; } = new();
+
+        /// <summary>
+        /// A channel for a keyframe, containing the channel number and the value for that channel.
+        /// </summary>
+        public sealed class KeyframeChannel : UndertaleObject, INotifyPropertyChanged
+        {
+            /// <summary>
+            /// Channel ID to use. Generally starts at 0, and increments per each channel.
+            /// </summary>
+            public int Channel { get; set; }
+
+            /// <summary>
+            /// Value of the keyframe for this channel.
+            /// </summary>
+            public T Value { get; set; } = new();
+
+            /// <inheritdoc />
+            public event PropertyChangedEventHandler PropertyChanged;
+
+            /// <inheritdoc />
+            public void Serialize(UndertaleWriter writer)
+            {
+                writer.Write(Channel);
+                Value.Serialize(writer);
+            }
+
+            /// <inheritdoc />
+            public void Unserialize(UndertaleReader reader)
+            {
+                Channel = reader.ReadInt32();
+                Value.Unserialize(reader);
+            }
+        }
+
+        /// <inheritdoc />
+        public event PropertyChangedEventHandler PropertyChanged;
 
         /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
@@ -144,12 +210,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
             writer.Write(Length);
             writer.Write(Stretch);
             writer.Write(Disabled);
-            writer.Write(Channels.Count);
-            foreach (KeyValuePair<int, T> kvp in Channels)
-            {
-                writer.Write(kvp.Key);
-                kvp.Value.Serialize(writer);
-            }
+            Channels.Serialize(writer);
         }
 
         /// <inheritdoc />
@@ -159,15 +220,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
             Length = reader.ReadSingle();
             Stretch = reader.ReadBoolean();
             Disabled = reader.ReadBoolean();
-            int count = reader.ReadInt32();
-            Channels = new Dictionary<int, T>();
-            for (int i = 0; i < count; i++)
-            {
-                int channel = reader.ReadInt32();
-                T data = new T();
-                data.Unserialize(reader);
-                Channels[channel] = data;
-            }
+            Channels.Unserialize(reader);
         }
 
         /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
@@ -189,23 +242,35 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
 
                 reader.Position += (uint)(chCount * 4 + chCount * subSize);
 
-                return (uint)chCount * subCount;
+                return (uint)chCount * (1 + subCount);
             }
 
             var unserializeFunc = reader.GetUnserializeCountFunc(t);
             for (int i = 0; i < chCount; i++)
             {
                 reader.Position += 4; // channel ID
-                count += unserializeFunc(reader);
+                count += 1 + unserializeFunc(reader);
             }
 
             return count;
         }
     }
 
-    public class BroadcastMessage : UndertaleObject
+    /// <summary>
+    /// A broadcast message, as stored in a keyframe within a sequence.
+    /// </summary>
+    /// <remarks>
+    /// Multiple messages can be stored in each of these objects.
+    /// </remarks>
+    public sealed class BroadcastMessage : UndertaleObject, INotifyPropertyChanged
     {
-        public UndertaleSimpleListString Messages;
+        /// <summary>
+        /// List of broadcast messages to broadcast.
+        /// </summary>
+        public UndertaleSimpleListString Messages { get; set; } = new();
+
+        /// <inheritdoc />
+        public event PropertyChangedEventHandler PropertyChanged;
 
         /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
@@ -216,7 +281,6 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         /// <inheritdoc />
         public void Unserialize(UndertaleReader reader)
         {
-            Messages = new UndertaleSimpleListString();
             Messages.Unserialize(reader);
         }
 
@@ -296,10 +360,10 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         public TrackBuiltinName BuiltinName { get; set; }
         public TrackTraits Traits { get; set; }
         public bool IsCreationTrack { get; set; }
-        public List<int> Tags { get; set; }
-        public List<Track> Tracks { get; set; } // Sub-tracks
+        public List<int> Tags { get; set; } = new();
+        public List<Track> Tracks { get; set; } = new(); // Sub-tracks
         public ITrackKeyframes Keyframes { get; set; }
-        public List<UndertaleResource> OwnedResources { get; set; }
+        public List<UndertaleResource> OwnedResources { get; set; } = new();
 
         public UndertaleString GMAnimCurveString;
 
@@ -899,7 +963,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
 
     public class RealKeyframes : TrackKeyframes<RealData>
     {
-        public int Interpolation;
+        public int Interpolation = 1;
 
         /// <inheritdoc />
         public override void Serialize(UndertaleWriter writer)
