@@ -314,29 +314,33 @@ try
                     // Grow bounding box depending on how much is trimmed
                     bool grewBoundingBox = false;
                     bool fullImageBbox = sprite.BBoxMode == 1;
-                    int marginLeft = fullImageBbox ? 0 : n.Texture.TargetX;
-                    int marginRight = fullImageBbox ? ((int)sprite.Width - 1) : (n.Texture.TargetX + n.Bounds.Width - 1);
-                    int marginTop = fullImageBbox ? 0 : n.Texture.TargetY;
-                    int marginBottom = fullImageBbox ? ((int)sprite.Height - 1) : (n.Texture.TargetY + n.Bounds.Height - 1);
-                    if (marginLeft < sprite.MarginLeft)
+                    bool manualBbox = sprite.BBoxMode == 2;
+                    if (!manualBbox)
                     {
-                        sprite.MarginLeft = marginLeft;
-                        grewBoundingBox = true;
-                    }
-                    if (marginTop < sprite.MarginTop)
-                    {
-                        sprite.MarginTop = marginTop;
-                        grewBoundingBox = true;
-                    }
-                    if (marginRight > sprite.MarginRight)
-                    {
-                        sprite.MarginRight = marginRight;
-                        grewBoundingBox = true;
-                    }
-                    if (marginBottom > sprite.MarginBottom)
-                    {
-                        sprite.MarginBottom = marginBottom;
-                        grewBoundingBox = true;
+                        int marginLeft = fullImageBbox ? 0 : n.Texture.TargetX;
+                        int marginRight = fullImageBbox ? ((int)sprite.Width - 1) : (n.Texture.TargetX + n.Bounds.Width - 1);
+                        int marginTop = fullImageBbox ? 0 : n.Texture.TargetY;
+                        int marginBottom = fullImageBbox ? ((int)sprite.Height - 1) : (n.Texture.TargetY + n.Bounds.Height - 1);
+                        if (marginLeft < sprite.MarginLeft)
+                        {
+                            sprite.MarginLeft = marginLeft;
+                            grewBoundingBox = true;
+                        }
+                        if (marginTop < sprite.MarginTop)
+                        {
+                            sprite.MarginTop = marginTop;
+                            grewBoundingBox = true;
+                        }
+                        if (marginRight > sprite.MarginRight)
+                        {
+                            sprite.MarginRight = marginRight;
+                            grewBoundingBox = true;
+                        }
+                        if (marginBottom > sprite.MarginBottom)
+                        {
+                            sprite.MarginBottom = marginBottom;
+                            grewBoundingBox = true;
+                        }
                     }
 
                     // Only generate collision masks for sprites that need them (in newer GameMaker versions)
