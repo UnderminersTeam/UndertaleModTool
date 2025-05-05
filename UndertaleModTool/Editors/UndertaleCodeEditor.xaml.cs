@@ -458,7 +458,7 @@ namespace UndertaleModTool
                 foreach (var obj in list)
                 {
                     if (obj is not UndertaleNamedResource namedObj)
-                        return;
+                        continue;
 
                     NamedObjDict[namedObj.Name.Content] = namedObj;
                 }
