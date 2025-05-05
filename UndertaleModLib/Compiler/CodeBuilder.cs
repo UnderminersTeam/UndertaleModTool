@@ -282,7 +282,7 @@ internal class CodeBuilder : ICodeBuilder
         {
             // Resolve reference
             UndertaleFunction reference;
-            if (scope.TryGetDeclaredFunction(functionName, out FunctionEntry entry))
+            if (scope.TryGetDeclaredFunction(_globalContext, functionName, out FunctionEntry entry))
             {
                 reference = entry.Function as UndertaleFunction ?? throw new InvalidOperationException("Function not resolved for function entry");
             }
