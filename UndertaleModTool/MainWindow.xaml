@@ -12,7 +12,8 @@
         xmlns:cmod="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         mc:Ignorable="d"
         Height="450" Width="800" Loaded="Window_Loaded"
-        AllowDrop="True" Drop="Window_Drop">
+        AllowDrop="True" Drop="Window_Drop"
+        Style="{DynamicResource DefaultWindowStyle}">
     <Window.Title>
         <MultiBinding StringFormat="{}{0} - {1} [{2}]">
             <Binding Path="TitleMain"/>
@@ -29,6 +30,7 @@
         <local:TabTitleConverter x:Key="TabTitleConverter"/>
         <local:StringTitleConverter x:Key="StringTitleConverter"/>
         <local:ForwardButtonEnabledConverter x:Key="ForwardButtonEnabledConverter"/>
+        <local:IsNullConverter x:Key="IsNullConverter"/>
     </Window.Resources>
     <Window.CommandBindings>
         <CommandBinding Command="New" Executed="Command_New" />
@@ -69,15 +71,13 @@
     </Window.InputBindings>
     <Grid>
         <DockPanel>
-            <Menu DockPanel.Dock="Top"
-                  Foreground="{DynamicResource {x:Static SystemColors.MenuTextBrushKey}}"
-                  Background="{DynamicResource {x:Static SystemColors.MenuBrushKey}}">
-                <local:MenuItemDark Header="_File">
+            <Menu DockPanel.Dock="Top">
+                <MenuItem Header="_File">
                     <MenuItem Header="_New" Command="New" InputGestureText="Ctrl+N"/>
                     <MenuItem Header="_Open" Command="Open" InputGestureText="Ctrl+O"/>
                     <MenuItem Header="_Save" Command="Save" InputGestureText="Ctrl+S">
                         <MenuItem.Style>
-                            <Style TargetType="{x:Type MenuItem}">
+                            <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
                                 <Setter Property="IsEnabled" Value="{Binding CanSave}"/>
                             </Style>
                         </MenuItem.Style>
@@ -86,21 +86,21 @@
                     <MenuItem Header="_Temp run game" Command="Print" InputGestureText="F5">
                         <!-- TODO: I think I need a custom command for that... -->
                         <MenuItem.Style>
-                            <Style TargetType="{x:Type MenuItem}">
+                            <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
                                 <Setter Property="IsEnabled" Value="{Binding CanSave}"/>
                             </Style>
                         </MenuItem.Style>
                     </MenuItem>
                     <MenuItem Name="RunGMSDebuggerItem" Header="Run game under GMS _debugger" Command="PrintPreview" InputGestureText="Shift+F5">
                         <MenuItem.Style>
-                            <Style TargetType="{x:Type MenuItem}">
+                            <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
                                 <Setter Property="IsEnabled" Value="{Binding CanSave}"/>
                             </Style>
                         </MenuItem.Style>
                     </MenuItem>
                     <MenuItem Header="Run game with other runner" Command="CancelPrint" InputGestureText="Alt+F5">
                         <MenuItem.Style>
-                            <Style TargetType="{x:Type MenuItem}">
+                            <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
                                 <Setter Property="IsEnabled" Value="{Binding CanSave}"/>
                             </Style>
                         </MenuItem.Style>
@@ -110,13 +110,13 @@
                     <Separator/>
                     <MenuItem Header="S_ettings" Command="Properties"/>
                     <MenuItem Header="_Close" Command="Close" InputGestureText="Ctrl+Q"/>
-                </local:MenuItemDark>
-                <local:MenuItemDark x:Name="RootScriptItem" Header="_Scripts" SubmenuOpened="RootMenuItem_SubmenuOpened">
+                </MenuItem>
+                <MenuItem x:Name="RootScriptItem" Header="_Scripts" SubmenuOpened="RootMenuItem_SubmenuOpened">
                     <MenuItem Header="(...loading...)" IsEnabled="False"/>
-                </local:MenuItemDark>
-                <local:MenuItemDark Header="_Find">
+                </MenuItem>
+                <MenuItem Header="_Find">
                     <MenuItem.Resources>
-                        <Style TargetType="MenuItem">
+                        <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding Data, Mode=OneWay}" Value="{x:Null}">
                                     <Setter Property="IsEnabled" Value="False"/>
@@ -126,14 +126,14 @@
                     </MenuItem.Resources>
                     <MenuItem Header="_Search in code" Command="{x:Static local:MainWindow.SearchInCodeCommand}" InputGestureText="Ctrl+Shift+F"></MenuItem>
                     <MenuItem Header="Find unreferenced _assets" Name="FindUnreferencedAssetsItem" Click="MenuItem_FindUnreferencedAssets_Click"/>
-                </local:MenuItemDark>
-                <local:MenuItemDark Header="_Help">
+                </MenuItem>
+                <MenuItem Header="_Help">
                     <MenuItem Header="_GitHub" Click="MenuItem_GitHub_Click"/>
                     <MenuItem Header="_About" Click="MenuItem_About_Click"/>
-                </local:MenuItemDark>
+                </MenuItem>
             </Menu>
             <Grid DockPanel.Dock="Bottom">
-                <local:TextBoxDark x:Name="CommandBox" AcceptsReturn="True" PreviewKeyDown="CommandBox_PreviewKeyDown" Margin="0,0,35,0"/>
+                <TextBox x:Name="CommandBox" AcceptsReturn="True" PreviewKeyDown="CommandBox_PreviewKeyDown" Margin="0,0,35,0"/>
                 <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" VerticalContentAlignment="Top" Name="ObjectLabel"
                        ToolTip="This is an ID (index) of the currently open asset, item, or object. It starts from 0."
                        ToolTipService.InitialShowDelay="200"/>
@@ -154,9 +154,9 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Margin="0,0,0,5" Orientation="Horizontal">
-                        <local:ButtonDark ToolTip="Back" Margin="0,0,2,0" x:Name="BackButton" Click="BackButton_Click">
+                        <Button ToolTip="Back" Margin="0,0,2,0" x:Name="BackButton" Click="BackButton_Click">
                             <Button.Style>
-                                <Style TargetType="Button">
+                                <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding CurrentTab.HistoryPosition}" Value="0">
                                             <Setter Property="IsEnabled" Value="False" />
@@ -181,8 +181,8 @@
                                     </Style>
                                 </Image.Style>
                             </Image>
-                        </local:ButtonDark>
-                        <local:ButtonDark ToolTip="Forward" x:Name="ForwardButton" Click="ForwardButton_Click">
+                        </Button>
+                        <Button ToolTip="Forward" x:Name="ForwardButton" Click="ForwardButton_Click">
                             <Button.IsEnabled>
                                 <MultiBinding Converter="{StaticResource ForwardButtonEnabledConverter}" Mode="OneWay">
                                     <Binding Path="CurrentTab.HistoryPosition" Mode="OneWay"/>
@@ -209,34 +209,29 @@
                                     </Style>
                                 </Image.Style>
                             </Image>
-                        </local:ButtonDark>
+                        </Button>
                     </StackPanel>
 
-                    <local:TextBoxDark Grid.Row="1" x:Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged">
-                        <!-- Source - https://stackoverflow.com/a/7433840/12136394 -->
+                    <TextBox Grid.Row="1" IsHitTestVisible="False" IsReadOnly="True" Focusable="False" BorderBrush="{x:Null}">
                         <TextBox.Style>
-                            <Style TargetType="TextBox">
-                                <Style.Resources>
-                                    <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
-                                        <VisualBrush.Visual>
-                                            <Label Content="Filter by name..." Foreground="Gray" />
-                                        </VisualBrush.Visual>
-                                    </VisualBrush>
-                                </Style.Resources>
+                            <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+                                <Setter Property="Foreground" Value="{DynamicResource ABrush.Foreground.Disabled}"/>
+                                <Setter Property="Text" Value=""/>
                                 <Style.Triggers>
-                                    <Trigger Property="Text" Value="">
-                                        <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
-                                    </Trigger>
-                                    <Trigger Property="Text" Value="{x:Null}">
-                                        <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
-                                    </Trigger>
-                                    <Trigger Property="IsKeyboardFocused" Value="True">
-                                        <Setter Property="Background" Value="{x:Null}" />
-                                    </Trigger>
+                                    <DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value="">
+                                        <Setter Property="Text" Value="Filter by name..."/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value="{x:Null}">
+                                        <Setter Property="Text" Value="Filter by name..."/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsKeyboardFocused, ElementName=SearchBox}" Value="True">
+                                        <Setter Property="Text" Value=""/>
+                                    </DataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </TextBox.Style>
-                    </local:TextBoxDark>
+                    </TextBox>
+                    <TextBox Grid.Row="1" x:Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged" Background="Transparent"/>
                 </Grid>
                 <TreeView Grid.Column="0" Grid.Row="1" Name="MainTree" Margin="5" DataContext="{Binding Data}" AllowDrop="True"
                           SelectedItemChanged="TreeView_SelectedItemChanged"
@@ -245,14 +240,14 @@
                           VirtualizingStackPanel.IsVirtualizing="True"
                           VirtualizingStackPanel.VirtualizationMode="Recycling">
                     <TreeView.Resources>
-                        <local:ContextMenuDark x:Key="AddMenu">
+                        <ContextMenu x:Key="AddMenu">
                             <MenuItem Header="Add" Click="MenuItem_Add_Click"/>
-                        </local:ContextMenuDark>
-                        <local:ContextMenuDark x:Key="StandaloneTabMenu">
+                        </ContextMenu>
+                        <ContextMenu x:Key="StandaloneTabMenu">
                             <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>
-                        </local:ContextMenuDark>
+                        </ContextMenu>
 
-                        <Style x:Key="BaseTreeViewItemStyle" TargetType="{x:Type TreeViewItem}">
+                        <Style x:Key="BaseTreeViewItemStyle" TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">
                             <EventSetter Event="TreeViewItem.DragOver" Handler="TreeView_DragOver"/>
                             <EventSetter Event="TreeViewItem.Drop" Handler="TreeView_Drop"/>
                             <EventSetter Event="TreeViewItem.MouseMove" Handler="TreeView_MouseMove"/>
@@ -386,21 +381,21 @@
                         <local:ResourceListTreeViewItem x:Name="CodeItemsList" Header="Code" ItemsSource="{Binding Code, Converter={StaticResource FilteredViewConverter}}">
                             <local:ResourceListTreeViewItem.ItemContainerStyle>
                                 <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource UndertaleModTool.ResourceListTreeViewItem.ItemContainerStyle}">
-                                    <Setter Property="Foreground" Value="Gray"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Path=ParentEntry}" Value="{x:Null}">
-                                            <Setter Property="Foreground">
-                                                <Setter.Value>
-                                                    <DynamicResource ResourceKey="{x:Static SystemColors.ControlTextBrushKey}"/>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </DataTrigger>
-                                    </Style.Triggers>
                                 </Style>
                             </local:ResourceListTreeViewItem.ItemContainerStyle>
                             <local:ResourceListTreeViewItem.DefaultItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleCode}">
-                                    <TextBlock Text="{Binding Name.Content}" />
+                                    <TextBlock Text="{Binding Name.Content}">
+                                        <TextBlock.Style>
+                                            <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Path=ParentEntry, Converter={StaticResource IsNullConverter}}" Value="False">
+                                                        <Setter Property="Foreground" Value="{DynamicResource ABrush.Foreground.Disabled}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
                                 </HierarchicalDataTemplate>
                             </local:ResourceListTreeViewItem.DefaultItemTemplate>
                         </local:ResourceListTreeViewItem>
@@ -493,14 +488,14 @@
                         <ScrollViewer Grid.Column="0" Name="TabScrollViewer" Height="26"
                                       HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"
                                       PreviewMouseWheel="TabScrollViewer_PreviewMouseWheel" PreviewMouseDown="TabScrollViewer_PreviewMouseDown">
-                            <local:TabControlDark x:Name="TabController" Height="22" TabStripPlacement="Top" ItemsSource="{Binding Tabs, Mode=OneWay}" SelectedIndex="{Binding CurrentTabIndex}"
+                            <TabControl x:Name="TabController" Height="22" TabStripPlacement="Top" ItemsSource="{Binding Tabs, Mode=OneWay}" SelectedIndex="{Binding CurrentTabIndex}"
                                                   SelectionChanged="TabController_SelectionChanged">
                                 <TabControl.Resources>
-                                    <local:ContextMenuDark x:Key="TabMenu">
+                                    <ContextMenu x:Key="TabMenu">
                                         <MenuItem Header="Close" Click="CloseTabMenuItem_Click" InputGestureText="Ctrl+W"/>
                                         <MenuItem Header="Close other tabs" Click="CloseOtherTabsMenuItem_Click">
                                             <MenuItem.Style>
-                                                <Style TargetType="MenuItem">
+                                                <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding Tabs.Count, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:MainWindow}, Mode=OneWay}" Value="1">
                                                             <Setter Property="IsEnabled" Value="False"/>
@@ -510,10 +505,10 @@
                                             </MenuItem.Style>
                                         </MenuItem>
                                         <MenuItem Header="Close all tabs" Command="{x:Static local:MainWindow.CloseAllTabsCommand}" InputGestureText="Ctrl+Shift+W"/>
-                                    </local:ContextMenuDark>
+                                    </ContextMenu>
                                 </TabControl.Resources>
                                 <TabControl.ItemContainerStyle>
-                                    <Style TargetType="TabItem">
+                                    <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource {x:Type TabItem}}">
                                         <Setter Property="TabIndex" Value="{Binding TabIndex, Mode=OneWay}"/>
                                         <Setter Property="ContextMenu" Value="{StaticResource TabMenu}"/>
                                         <Setter Property="AllowDrop" Value="True"/>
@@ -533,10 +528,10 @@
                                             <TextBlock Initialized="TabTitleText_Initialized">
                                             <!-- "TextBlock.Text" binding is set in code-behind -->
                                             </TextBlock>
-                                            <local:ButtonDark Background="Transparent" Width="16" Height="16" BorderThickness="0" Margin="12,0,0,0"
+                                            <Button Background="Transparent" Width="16" Height="16" BorderThickness="0" Margin="12,0,0,0"
                                                               Click="TabCloseButton_OnClick" MouseEnter="TabCloseButton_MouseEnter" MouseLeave="TabCloseButton_MouseLeave">
                                                 <Button.Style>
-                                                    <Style TargetType="Button">
+                                                    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding TabTitle, Mode=OneTime}" Value="Welcome!">
                                                                 <Setter Property="Visibility" Value="Collapsed"/>
@@ -545,14 +540,14 @@
                                                     </Style>
                                                 </Button.Style>
                                                 <Image Source="/Resources/X.png"/>
-                                            </local:ButtonDark>
+                                            </Button>
                                         </StackPanel>
                                     </DataTemplate>
                                 </TabControl.ItemTemplate>
                                 <TabControl.ContentTemplate>
                                     <DataTemplate DataType="{x:Type local:Tab}"/>
                                 </TabControl.ContentTemplate>
-                            </local:TabControlDark>
+                            </TabControl>
                         </ScrollViewer>
                         <StackPanel Grid.Column="1" Margin="5" Orientation="Horizontal" RenderOptions.BitmapScalingMode="NearestNeighbor">
                             <StackPanel.Visibility>
@@ -561,12 +556,12 @@
                                     <Binding Path="ActualWidth" Mode="OneWay" ElementName="TabsGrid"/>
                                 </MultiBinding>
                             </StackPanel.Visibility>
-                            <local:ButtonDark Width="16" Height="16" Click="TabsScrollLeftButton_Click">
+                            <Button Width="16" Height="16" Click="TabsScrollLeftButton_Click">
                                 <Image Source="/Resources/tabs_left_button.png" Stretch="None"/>
-                            </local:ButtonDark>
-                            <local:ButtonDark Width="16" Height="16" Click="TabsScrollRightButton_Click">
+                            </Button>
+                            <Button Width="16" Height="16" Click="TabsScrollRightButton_Click">
                                 <Image Source="/Resources/tabs_right_button.png" Stretch="None"/>
-                            </local:ButtonDark>
+                            </Button>
                         </StackPanel>
                     </Grid>
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">

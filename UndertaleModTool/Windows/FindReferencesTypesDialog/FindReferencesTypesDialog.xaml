@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:UndertaleModTool"
         mc:Ignorable="d"
         Title="The types of references" Height="555" Width="450" IsVisibleChanged="Window_IsVisibleChanged"
-        WindowStartupLocation="CenterOwner">
+        WindowStartupLocation="CenterOwner"
+        Style="{DynamicResource DefaultWindowStyle}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -16,15 +17,12 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Label Grid.Row="0" Content="Where to search the references?" HorizontalAlignment="Left" Margin="10,10,0,0" FontSize="22"/>
-        <Rectangle Grid.Row="1" Margin="10,0,20,0" Height="2" Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+        <Rectangle Grid.Row="1" Margin="10,0,20,0" Height="2" Fill="{DynamicResource ABrush.Foreground.Static}"/>
 
         <ScrollViewer Grid.Row="2" Margin="10,15,20,0" VerticalScrollBarVisibility="Auto">
             <ItemsControl Name="TypesList">
-                <ItemsControl.Background>
-                    <DynamicResource ResourceKey="{x:Static SystemColors.ControlLightBrushKey}"/>
-                </ItemsControl.Background>
                 <ItemsControl.Resources>
-                    <Style TargetType="CheckBox">
+                    <Style TargetType="{x:Type CheckBox}" BasedOn="{StaticResource {x:Type CheckBox}}">
                         <Setter Property="FontSize" Value="16"/>
                         <Setter Property="VerticalContentAlignment" Value="Center"/>
                         <Setter Property="Margin" Value="5,2"/>
@@ -34,10 +32,10 @@
         </ScrollViewer>
         
         <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="10,7,0,0">
-            <local:ButtonDark Content="Select all" Click="SelectAllButton_Click" Height="26" Width="63"/>
-            <local:ButtonDark Content="Deselect all" Margin="5,0,0,0" Click="DeselectAllButton_Click" Height="26" Width="71"/>
+            <Button Content="Select all" Click="SelectAllButton_Click" Height="26" Width="63"/>
+            <Button Content="Deselect all" Margin="5,0,0,0" Click="DeselectAllButton_Click" Height="26" Width="71"/>
         </StackPanel>
 
-        <local:ButtonDark Grid.Row="4" Content="Search" FontSize="18" Width="134" Height="40" Click="SearchButton_Click" Margin="0,15,0,15"/>
+        <Button Grid.Row="4" Content="Search" FontSize="18" Width="134" Height="40" Click="SearchButton_Click" Margin="0,15,0,15"/>
     </Grid>
 </Window>

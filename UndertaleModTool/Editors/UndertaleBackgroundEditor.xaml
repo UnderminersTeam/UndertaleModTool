@@ -66,50 +66,40 @@
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Unknown Always 2</TextBlock>
-            <local:TextBoxDark Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GMS2UnknownAlways2}"/>
+            <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GMS2UnknownAlways2}"/>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Tile Width</TextBlock>
-            <local:TextBoxDark Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GMS2TileWidth}"/>
+            <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GMS2TileWidth}"/>
 
             <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Tile Height</TextBlock>
-            <local:TextBoxDark Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding GMS2TileHeight}"/>
+            <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding GMS2TileHeight}"/>
 
             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Output Border X</TextBlock>
-            <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding GMS2OutputBorderX}"/>
+            <TextBox Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding GMS2OutputBorderX}"/>
 
             <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Output Border Y</TextBlock>
-            <local:TextBoxDark Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding GMS2OutputBorderY}"/>
+            <TextBox Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding GMS2OutputBorderY}"/>
 
             <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Tile Columns</TextBlock>
-            <local:TextBoxDark Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding GMS2TileColumns}"/>
+            <TextBox Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding GMS2TileColumns}"/>
 
             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Items/frames per tile</TextBlock>
-            <local:TextBoxDark Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding GMS2ItemsPerTileCount}"/>
+            <TextBox Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding GMS2ItemsPerTileCount}"/>
 
             <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Tile Count</TextBlock>
-            <local:TextBoxDark Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding GMS2TileCount}"/>
+            <TextBox Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding GMS2TileCount}"/>
 
             <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Unknown Always Zero</TextBlock>
-            <local:TextBoxDark Grid.Row="8" Grid.Column="1" Margin="3" Text="{Binding GMS2UnknownAlwaysZero}"/>
+            <TextBox Grid.Row="8" Grid.Column="1" Margin="3" Text="{Binding GMS2UnknownAlwaysZero}"/>
 
             <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Frame Time (microseconds)</TextBlock>
-            <local:TextBoxDark Grid.Row="9" Grid.Column="1" Margin="3" Text="{Binding GMS2FrameLength}"/>
+            <TextBox Grid.Row="9" Grid.Column="1" Margin="3" Text="{Binding GMS2FrameLength}"/>
 
             <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Tile IDs</TextBlock>
-            <local:DataGridDark Grid.Row="10" Grid.Column="1" x:Name="TileIdList" ItemsSource="{Binding GMS2TileIds}" MaxHeight="279" Margin="0,0,0,3" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True"
+            <DataGrid Grid.Row="10" Grid.Column="1" x:Name="TileIdList" ItemsSource="{Binding GMS2TileIds}" MaxHeight="279" Margin="0,0,0,3" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True"
                                 SelectionChanged="DataGrid_SelectionChanged">
                 <DataGrid.Resources>
-                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
-                    <Style TargetType="{x:Type DataGridCell}">
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="{x:Type DataGridCell}">
-                                    <Grid Background="{TemplateBinding Background}">
-                                        <ContentPresenter VerticalAlignment="Center" />
-                                    </Grid>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
+                    <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
                                 <Setter Property="Template">
@@ -127,12 +117,12 @@
                     <DataGridTemplateColumn Header="ID" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <local:TextBoxDark Margin="20,0,0,0" Text="{Binding ID, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                <TextBox Margin="20,0,0,0" Text="{Binding ID, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
-            </local:DataGridDark>
+            </DataGrid>
 
             <TextBlock Grid.Row="11" Grid.ColumnSpan="2" Margin="3" HorizontalAlignment="Center" Foreground="DarkGray" FontStyle="Italic" TextWrapping="Wrap" TextAlignment="Center">
                 Hint: You can click on any tile region below to highlight its ID above.

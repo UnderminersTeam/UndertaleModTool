@@ -32,7 +32,7 @@ namespace UndertaleModTool
     public partial class UndertaleEmbeddedTextureEditor : DataUserControl
     {
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
-        private readonly ContextMenuDark pageContextMenu = new();
+        private readonly ContextMenu pageContextMenu = new();
         private bool isMenuOpen;
         private UndertaleTexturePageItem[] items;
         private UndertaleTexturePageItem hoveredItem;

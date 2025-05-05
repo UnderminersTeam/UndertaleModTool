@@ -6,7 +6,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UndertaleModTool"
         mc:Ignorable="d"
-        Title="Settings" Height="Auto" Width="800" SizeToContent="Height" WindowStartupLocation="CenterOwner" UseLayoutRounding="False">
+        Title="Settings" Height="Auto" Width="800" SizeToContent="Height" WindowStartupLocation="CenterOwner" UseLayoutRounding="False"
+        Style="{DynamicResource DefaultWindowStyle}">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -17,23 +18,23 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid Margin="10">
             <Grid.Resources>
-                <Style TargetType="{x:Type Label}">
+                <Style TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
                     <Setter Property="Padding" Value="0"/>
                     <Setter Property="Margin" Value="3"/>
                 </Style>
-                <Style TargetType="{x:Type TextBlock}">
+                <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
                     <Setter Property="Margin" Value="3"/>
                 </Style>
-                <Style TargetType="{x:Type local:TextBoxDark}">
+                <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
                     <Setter Property="Margin" Value="3"/>
                 </Style>
-                <Style TargetType="{x:Type CheckBox}">
+                <Style TargetType="{x:Type CheckBox}" BasedOn="{StaticResource {x:Type CheckBox}}">
                     <Setter Property="Margin" Value="3"/>
                 </Style>
-                <Style TargetType="{x:Type local:ButtonDark}">
+                <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
                     <Setter Property="Margin" Value="3"/>
                 </Style>
-                <Style TargetType="{x:Type Separator}">
+                <Style TargetType="{x:Type Separator}" BasedOn="{StaticResource {x:Type Separator}}">
                     <Setter Property="Margin" Value="10"/>
                 </Style>
             </Grid.Resources>
@@ -45,7 +46,7 @@
                     </Grid.ColumnDefinitions>
 
                     <Label>GameMaker: Studio 1.4 path:</Label>
-                    <local:TextBoxDark Grid.Column="1" Text="{Binding GameMakerStudioPath}"/>
+                    <TextBox Grid.Column="1" Text="{Binding GameMakerStudioPath}"/>
                 </Grid>
 
                 <Grid ToolTip="Required only if you want to run GMS2 games using the Studio runner rather than the .exe">
@@ -55,7 +56,7 @@
                     </Grid.ColumnDefinitions>
 
                     <Label>GameMaker Studio 2 runtimes path:</Label>
-                    <local:TextBoxDark Grid.Column="1" Text="{Binding GameMakerStudio2RuntimesPath}"/>
+                    <TextBox Grid.Column="1" Text="{Binding GameMakerStudio2RuntimesPath}"/>
                 </Grid>
 
                 <Grid>
@@ -90,14 +91,14 @@
                         <CheckBox IsChecked="{Binding EnableDarkMode}" Content="Enable dark mode" ToolTip="Makes the program interface dark. Disabled by default."/>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="Transparency grid colors:"/>
-                            <local:TextBoxDark Width="80" Text="{Binding TransparencyGridColor1}" />
-                            <local:TextBoxDark Width="80" Text="{Binding TransparencyGridColor2}" />
+                            <TextBox Width="80" Text="{Binding TransparencyGridColor1}" />
+                            <TextBox Width="80" Text="{Binding TransparencyGridColor2}" />
                             <Canvas Margin="3" Width="16" Height="16" Background="{DynamicResource TransparencyGridBrushBrush}"></Canvas>
                         </StackPanel>
                     </StackPanel>
                     
                     <StackPanel Grid.Column="1">
-                        <local:ButtonDark Click="GMLSettingsButton_Click" Padding="8,2,8,2" HorizontalAlignment="Left" VerticalAlignment="Top">GML compiler/decompiler settings</local:ButtonDark>
+                        <Button Click="GMLSettingsButton_Click" Padding="8,2,8,2" HorizontalAlignment="Left" VerticalAlignment="Top">GML compiler/decompiler settings</Button>
                     </StackPanel>
                 </Grid>
 
@@ -117,7 +118,7 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <CheckBox Name="gridWidthCheckbox" IsChecked="{Binding GridWidthEnabled}" Content="Global grid width" />
-                                <local:TextBoxDark Grid.Column="1" IsEnabled="{Binding ElementName=gridWidthCheckbox, Path=IsChecked}" Text="{Binding GlobalGridWidth}"/>
+                                <TextBox Grid.Column="1" IsEnabled="{Binding ElementName=gridWidthCheckbox, Path=IsChecked}" Text="{Binding GlobalGridWidth}"/>
                             </Grid>
                             <Grid ToolTip="This option globally overrides the automatic assignment of a room's grid height based on the most used tile's height in that room.">
                                 <Grid.ColumnDefinitions>
@@ -125,7 +126,7 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <CheckBox Name="gridHeightCheckbox" IsChecked="{Binding GridHeightEnabled}" Content="Global grid height"/>
-                                <local:TextBoxDark  Grid.Column="1" IsEnabled="{Binding ElementName=gridHeightCheckbox, Path=IsChecked}" Text="{Binding GlobalGridHeight}"/>
+                                <TextBox Grid.Column="1" IsEnabled="{Binding ElementName=gridHeightCheckbox, Path=IsChecked}" Text="{Binding GlobalGridHeight}"/>
                             </Grid>
                         </StackPanel>
                         
@@ -136,7 +137,7 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <CheckBox Name="gridThicknessCheckBox" IsChecked="{Binding GridThicknessEnabled}" Content="Global grid thickness"/>
-                                <local:TextBoxDark Grid.Column="1" IsEnabled="{Binding ElementName=gridThicknessCheckBox, Path=IsChecked}" Text="{Binding GlobalGridThickness}"/>
+                                <TextBox Grid.Column="1" IsEnabled="{Binding ElementName=gridThicknessCheckBox, Path=IsChecked}" Text="{Binding GlobalGridThickness}"/>
                             </Grid>
                         </StackPanel>
                     </Grid>
@@ -170,8 +171,8 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <local:ButtonDark Grid.Column="0" Click="AppDataButton_Click" Padding="8,2,8,2" HorizontalAlignment="Left">Open application data folder</local:ButtonDark>
-                    <local:ButtonDark Grid.Column="1" Click="UpdateAppButton_Click" Padding="8,2,8,2" HorizontalAlignment="Right" x:Name="UpdateAppButton" Visibility="{Binding UpdaterButtonVisibility}">Update app to latest commit</local:ButtonDark>
+                    <Button Grid.Column="0" Click="AppDataButton_Click" Padding="8,2,8,2" HorizontalAlignment="Left">Open application data folder</Button>
+                    <Button Grid.Column="1" Click="UpdateAppButton_Click" Padding="8,2,8,2" HorizontalAlignment="Right" x:Name="UpdateAppButton" Visibility="{Binding UpdaterButtonVisibility}">Update app to latest commit</Button>
                 </Grid>
             </StackPanel>
         </Grid>

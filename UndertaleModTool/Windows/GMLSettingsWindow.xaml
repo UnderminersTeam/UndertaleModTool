@@ -8,7 +8,8 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:Settings}"
-        Title="Settings - GML compiler/decompiler" Height="Auto" Width="700" SizeToContent="Height" WindowStartupLocation="CenterOwner">
+        Title="Settings - GML compiler/decompiler" Height="Auto" Width="700" SizeToContent="Height" WindowStartupLocation="CenterOwner"
+        Style="{DynamicResource DefaultWindowStyle}">
     <Window.Resources>
         <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="IndentStyleKind">
             <ObjectDataProvider.MethodParameters>
@@ -37,7 +38,7 @@
                     IsChecked="{Binding DecompilerSettings.UseCSSColors}"/>
 
                 <TextBlock Grid.Row="1" Grid.Column="2" Margin="3" Text="Named instance ID prefix:" ToolTip="Prefix used for named instance IDs when found by decompiler, and for compilation. Change this value if it conflicts with variable names."/>
-                <local:TextBoxDark Grid.Row="1" Grid.Column="3" Margin="3" Grid.ColumnSpan="1" 
+                <TextBox Grid.Row="1" Grid.Column="3" Margin="3" Grid.ColumnSpan="1" 
                     Text="{Binding InstanceIdPrefix}"/>
             </Grid>
             <Separator Margin="10,0,10,0"/>
@@ -61,14 +62,14 @@
                     IsChecked="{Binding DecompilerSettings.UseSemicolon}"/>
 
                 <TextBlock Grid.Row="0" Grid.Column="2" Margin="3,3,6,3" Text="Indentation style:" ToolTip="Style of indentation to be used when printing decompiled code."/>
-                <local:ComboBoxDark Grid.Column="3" 
+                <ComboBox Grid.Column="3" 
                     ItemsSource="{Binding Source={StaticResource IndentStyleKind}}" SelectedItem="{Binding DecompilerSettings.IndentStyle}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Converter={StaticResource IndentStyleConverter}}"/>
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
-                </local:ComboBoxDark>
+                </ComboBox>
 
                 <CheckBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" Content="Open block braces on same line" ToolTip="If enabled, the curly braces used to open a block will be placed on the same line as the statement it belongs to, rather than placing the brace on its own line."
                     IsChecked="{Binding DecompilerSettings.OpenBlockBraceOnSameLine}"/>

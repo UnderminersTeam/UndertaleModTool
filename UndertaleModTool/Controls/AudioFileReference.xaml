@@ -7,9 +7,9 @@
              mc:Ignorable="d" 
              d:DesignHeight="20" d:DesignWidth="300">
     <UserControl.Resources>
-        <local:ContextMenuDark x:Key="contextMenu">
-            <local:MenuItemDark Header="Open in new tab" Click="OpenInNewTabItem_Click"/>
-        </local:ContextMenuDark>
+        <ContextMenu x:Key="contextMenu">
+            <MenuItem Header="Open in new tab" Click="OpenInNewTabItem_Click"/>
+        </ContextMenu>
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -18,9 +18,9 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <local:TextBoxDark Grid.Column="0" Text="{Binding AudioID}">
+        <TextBox Grid.Column="0" Text="{Binding AudioID}">
             <TextBox.Style>
-                <Style TargetType="{x:Type TextBox}">
+                <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding GroupID}" Value="0">
                             <DataTrigger.Setters>
@@ -30,13 +30,13 @@
                     </Style.Triggers>
                 </Style>
             </TextBox.Style>
-        </local:TextBoxDark>
-        <local:TextBoxDark Grid.Column="1" x:Name="ObjectText" IsReadOnly="True" Cursor="Arrow" AllowDrop="True"
+        </TextBox>
+        <TextBox Grid.Column="1" x:Name="ObjectText" IsReadOnly="True" Cursor="Arrow" AllowDrop="True"
                            ToolTip="This is an object reference. Drag and drop an object of matching type from the tree on the left to change it!"
                            ToolTipService.InitialShowDelay="250"
                            PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" PreviewMouseDoubleClick="TextBox_MouseDoubleClick" PreviewMouseDown="Details_MouseDown">
             <TextBox.Style>
-                <Style TargetType="{x:Type TextBox}">
+                <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
                     <Setter Property="Text">
                         <Setter.Value>
                             <MultiBinding StringFormat="{}(UndertaleEmbeddedAudio#{0})">
@@ -66,10 +66,10 @@
                     </Style.Triggers>
                 </Style>
             </TextBox.Style>
-        </local:TextBoxDark>
-        <local:ButtonDark Grid.Column="2" Click="Details_Click" MouseDown="Details_MouseDown" Content=" ... " ToolTip="Open referenced object">
+        </TextBox>
+        <Button Grid.Column="2" Click="Details_Click" MouseDown="Details_MouseDown" Content=" ... " ToolTip="Open referenced object">
             <Button.Style>
-                <Style TargetType="{x:Type Button}">
+                <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding AudioReference, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="{x:Null}">
                             <Setter Property="IsEnabled" Value="False"/>
@@ -77,10 +77,10 @@
                     </Style.Triggers>
                 </Style>
             </Button.Style>
-        </local:ButtonDark>
-        <local:ButtonDark Grid.Column="3" Click="Remove_Click" Content=" X " ToolTip="Remove reference">
+        </Button>
+        <Button Grid.Column="3" Click="Remove_Click" Content=" X " ToolTip="Remove reference">
             <Button.Style>
-                <Style TargetType="{x:Type Button}">
+                <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding AudioReference, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="{x:Null}">
                             <DataTrigger.Setters>
@@ -90,6 +90,6 @@
                     </Style.Triggers>
                 </Style>
             </Button.Style>
-        </local:ButtonDark>
+        </Button>
     </Grid>
 </UserControl>

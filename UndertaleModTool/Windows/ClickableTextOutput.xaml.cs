@@ -23,7 +23,7 @@ namespace UndertaleModTool.Windows
     public partial class ClickableTextOutput : Window
     {
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
-        private static ContextMenuDark linkContextMenu;
+        private static ContextMenu linkContextMenu;
 
         public string Query { get; }
         public int ResultsCount { get; }
@@ -37,7 +37,7 @@ namespace UndertaleModTool.Windows
             #pragma warning disable CA1416
             InitializeComponent();
 
-            linkContextMenu = FindResource("linkContextMenu") as ContextMenuDark;
+            linkContextMenu = FindResource("linkContextMenu") as ContextMenu;
 
             Title = title;
             Query = query;
@@ -52,7 +52,7 @@ namespace UndertaleModTool.Windows
             #pragma warning disable CA1416
             InitializeComponent();
 
-            linkContextMenu = FindResource("linkContextMenu") as ContextMenuDark;
+            linkContextMenu = FindResource("linkContextMenu") as ContextMenu;
 
             Title = title;
             Query = query;

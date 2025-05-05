@@ -65,8 +65,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding Width}"/>
-            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding Height}"/>
+            <TextBox Grid.Column="0" Margin="3" Text="{Binding Width}"/>
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding Height}"/>
         </Grid>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Margin Left/Right/Bottom/Top</TextBlock>
@@ -77,10 +77,10 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding MarginLeft}"/>
-            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding MarginRight}"/>
-            <local:TextBoxDark Grid.Column="2" Margin="3" Text="{Binding MarginBottom}"/>
-            <local:TextBoxDark Grid.Column="3" Margin="3" Text="{Binding MarginTop}"/>
+            <TextBox Grid.Column="0" Margin="3" Text="{Binding MarginLeft}"/>
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding MarginRight}"/>
+            <TextBox Grid.Column="2" Margin="3" Text="{Binding MarginBottom}"/>
+            <TextBox Grid.Column="3" Margin="3" Text="{Binding MarginTop}"/>
         </Grid>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Transparent</TextBlock>
@@ -93,10 +93,10 @@
         <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding Preload}"/>
 
         <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Bounding box mode</TextBlock>
-        <local:TextBoxDark Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding BBoxMode}"/>
+        <TextBox Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding BBoxMode}"/>
 
         <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">SepMasks</TextBlock>
-        <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource SepMaskType}}" SelectedItem="{Binding Path=SepMasks}"
+        <ComboBox ItemsSource="{Binding Source={StaticResource SepMaskType}}" SelectedItem="{Binding Path=SepMasks}"
                             Grid.Row="8" Grid.Column="1" Margin="3"/>
 
         <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Origin</TextBlock>
@@ -105,27 +105,16 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding OriginXWrapper}"/>
-            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding OriginYWrapper}"/>
+            <TextBox Grid.Column="0" Margin="3" Text="{Binding OriginXWrapper}"/>
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding OriginYWrapper}"/>
         </Grid>
 
         <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Textures</TextBlock>
-        <local:DataGridDark Grid.Row="10" Grid.Column="1" Margin="3" ItemsSource="{Binding Textures, Mode=OneWay}" x:Name="TextureList"
+        <DataGrid Grid.Row="10" Grid.Column="1" Margin="3" ItemsSource="{Binding Textures, Mode=OneWay}" x:Name="TextureList"
                             AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True"
-                            HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray"
                             HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True">
             <DataGrid.Resources>
-                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
-                <Style TargetType="{x:Type DataGridCell}">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="{x:Type DataGridCell}">
-                                <Grid Background="{TemplateBinding Background}">
-                                    <ContentPresenter VerticalAlignment="Center" />
-                                </Grid>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
+                <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
                             <Setter Property="Template">
@@ -151,7 +140,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
-        </local:DataGridDark>
+        </DataGrid>
 
         <Viewbox Grid.Row="11" Grid.Column="1" Stretch="Uniform" StretchDirection="DownOnly">
             <Border Background="{StaticResource TransparencyGridBrushBrush}">
@@ -159,22 +148,12 @@
             </Border>
         </Viewbox>
 
-        <local:ButtonDark Grid.Row="12" Grid.Column="1" Content="Export all frames (or Spine data if this is a Spine sprite)" Click="ExportAll_Click"/>
+        <Button Grid.Row="12" Grid.Column="1" Content="Export all frames (or Spine data if this is a Spine sprite)" Click="ExportAll_Click"/>
 
         <TextBlock Grid.Row="13" Grid.Column="0" Margin="3">Collision masks</TextBlock>
-        <local:DataGridDark Grid.Row="13" Grid.Column="1" Margin="3" ItemsSource="{Binding CollisionMasks, Mode=OneWay}" x:Name="MaskList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True" AddingNewItem="MaskList_AddingNewItem">
+        <DataGrid Grid.Row="13" Grid.Column="1" Margin="3" ItemsSource="{Binding CollisionMasks, Mode=OneWay}" x:Name="MaskList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True" AddingNewItem="MaskList_AddingNewItem">
             <DataGrid.Resources>
-                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
-                <Style TargetType="{x:Type DataGridCell}">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="{x:Type DataGridCell}">
-                                <Grid Background="{TemplateBinding Background}">
-                                    <ContentPresenter VerticalAlignment="Center" />
-                                </Grid>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
+                <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
                             <Setter Property="Template">
@@ -198,14 +177,14 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="(CollisionMask)"/>
-                                <local:ButtonDark Grid.Column="1" x:Name="RemoveButton" Content=" X " Click="RemoveMask_Clicked" ToolTip="Remove">
-                                </local:ButtonDark>
+                                <Button Grid.Column="1" x:Name="RemoveButton" Content=" X " Click="RemoveMask_Clicked" ToolTip="Remove">
+                                </Button>
                             </Grid>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
-        </local:DataGridDark>
+        </DataGrid>
 
         <ContentControl Grid.Row="14" Grid.Column="1" Margin="3" DataContext="{Binding SelectedItem, Mode=OneWay, ElementName=MaskList}">
             <ContentControl.Template>
@@ -241,8 +220,8 @@
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
-                            <local:ButtonDark Grid.Row="0" Grid.Column="0" Content="Import mask" Click="MaskImport_Click" x:Name="MaskImport"/>
-                            <local:ButtonDark Grid.Row="0" Grid.Column="3" Content="Export mask" Click="MaskExport_Click" x:Name="MaskExport"/>
+                            <Button Grid.Row="0" Grid.Column="0" Content="Import mask" Click="MaskImport_Click" x:Name="MaskImport"/>
+                            <Button Grid.Row="0" Grid.Column="3" Content="Export mask" Click="MaskExport_Click" x:Name="MaskExport"/>
                         </Grid>
                     </StackPanel>
                     <ControlTemplate.Triggers>
@@ -283,10 +262,10 @@
             </Grid.RowDefinitions>
             
             <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Version</TextBlock>
-            <local:TextBoxDark Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding SVersion}"/>
+            <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding SVersion}"/>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Type</TextBlock>
-            <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource SpriteType}}" SelectedItem="{Binding Path=SSpriteType}"
+            <ComboBox ItemsSource="{Binding Source={StaticResource SpriteType}}" SelectedItem="{Binding Path=SSpriteType}"
                                 Grid.Row="1" Grid.Column="1" Margin="3"/>
 
             <Grid Grid.Row="2" Grid.ColumnSpan="2" Margin="0" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">
@@ -300,10 +279,10 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Playback speed</TextBlock>
-                <local:TextBoxDark Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GMS2PlaybackSpeed}"/>
+                <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GMS2PlaybackSpeed}"/>
 
                 <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Playback speed type</TextBlock>
-                <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource AnimSpeedType}}" SelectedItem="{Binding Path=GMS2PlaybackSpeedType}"
+                <ComboBox ItemsSource="{Binding Source={StaticResource AnimSpeedType}}" SelectedItem="{Binding Path=GMS2PlaybackSpeedType}"
                                     Grid.Row="1" Grid.Column="1" Margin="3"/>
             </Grid>
         </Grid>

@@ -37,22 +37,12 @@
         <CheckBox Grid.Row="2" Grid.Column="1" Margin="3" IsChecked="{Binding IsClosed}"/>
         
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Precision</TextBlock>
-        <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Precision}"/>
+        <TextBox Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Precision}"/>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Points</TextBlock>
-        <local:DataGridDark Grid.Row="4" Grid.Column="1" Margin="3" ItemsSource="{Binding Points}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
+        <DataGrid Grid.Row="4" Grid.Column="1" Margin="3" ItemsSource="{Binding Points}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
             <DataGrid.Resources>
-                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
-                <Style TargetType="{x:Type DataGridCell}">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="{x:Type DataGridCell}">
-                                <Grid Background="{TemplateBinding Background}">
-                                    <ContentPresenter VerticalAlignment="Center" />
-                                </Grid>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
+                <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
                             <Setter Property="Template">
@@ -70,26 +60,26 @@
                 <DataGridTemplateColumn Header="X" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <local:TextBoxDark Text="{Binding X, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0" />
+                            <TextBox Text="{Binding X, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Y" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <local:TextBoxDark Text="{Binding Y, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                            <TextBox Text="{Binding Y, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Speed" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <local:TextBoxDark Text="{Binding Speed, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                            <TextBox Text="{Binding Speed, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
-        </local:DataGridDark>
+        </DataGrid>
 
         <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2">
             <TextBlock Foreground="DarkGray" FontStyle="Italic">TODO: The preview doesn't update live, I know, just close and reopen the object for now</TextBlock>

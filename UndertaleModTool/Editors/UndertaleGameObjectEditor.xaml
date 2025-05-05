@@ -55,49 +55,49 @@
             <GridViewColumn Header="Unknown1" Width="75">
                 <GridViewColumn.CellTemplate>
                     <DataTemplate>
-                        <local:TextBoxDark Text="{Binding Unknown1}" />
+                        <TextBox Text="{Binding Unknown1}" />
                     </DataTemplate>
                 </GridViewColumn.CellTemplate>
             </GridViewColumn>
             <GridViewColumn Header="Unknown2" Width="75">
                 <GridViewColumn.CellTemplate>
                     <DataTemplate>
-                        <local:TextBoxDark Text="{Binding Unknown2}" />
+                        <TextBox Text="{Binding Unknown2}" />
                     </DataTemplate>
                 </GridViewColumn.CellTemplate>
             </GridViewColumn>
             <GridViewColumn Header="Unknown3" Width="75">
                 <GridViewColumn.CellTemplate>
                     <DataTemplate>
-                        <local:TextBoxDark Text="{Binding Unknown3}" />
+                        <TextBox Text="{Binding Unknown3}" />
                     </DataTemplate>
                 </GridViewColumn.CellTemplate>
             </GridViewColumn>
             <GridViewColumn Header="Unknown4" Width="75">
                 <GridViewColumn.CellTemplate>
                     <DataTemplate>
-                        <local:TextBoxDark Text="{Binding Unknown4}" />
+                        <TextBox Text="{Binding Unknown4}" />
                     </DataTemplate>
                 </GridViewColumn.CellTemplate>
             </GridViewColumn>
             <GridViewColumn Header="Unknown5" Width="75">
                 <GridViewColumn.CellTemplate>
                     <DataTemplate>
-                        <local:TextBoxDark Text="{Binding Unknown5}" />
+                        <TextBox Text="{Binding Unknown5}" />
                     </DataTemplate>
                 </GridViewColumn.CellTemplate>
             </GridViewColumn>
             <GridViewColumn Header="Unknown6" Width="75">
                 <GridViewColumn.CellTemplate>
                     <DataTemplate>
-                        <local:TextBoxDark Text="{Binding Unknown6}" />
+                        <TextBox Text="{Binding Unknown6}" />
                     </DataTemplate>
                 </GridViewColumn.CellTemplate>
             </GridViewColumn>
             <GridViewColumn Header="Unknown7" Width="75">
                 <GridViewColumn.CellTemplate>
                     <DataTemplate>
-                        <local:TextBoxDark Text="{Binding Unknown7}" />
+                        <TextBox Text="{Binding Unknown7}" />
                     </DataTemplate>
                 </GridViewColumn.CellTemplate>
             </GridViewColumn>
@@ -118,35 +118,35 @@
             <GridViewColumn Header="Unknown10" Width="75">
                 <GridViewColumn.CellTemplate>
                     <DataTemplate>
-                        <local:TextBoxDark Text="{Binding Unknown10}" />
+                        <TextBox Text="{Binding Unknown10}" />
                     </DataTemplate>
                 </GridViewColumn.CellTemplate>
             </GridViewColumn>
             <GridViewColumn Header="Unknown11" Width="75">
                 <GridViewColumn.CellTemplate>
                     <DataTemplate>
-                        <local:TextBoxDark Text="{Binding Unknown11}" />
+                        <TextBox Text="{Binding Unknown11}" />
                     </DataTemplate>
                 </GridViewColumn.CellTemplate>
             </GridViewColumn>
             <GridViewColumn Header="Unknown12" Width="75">
                 <GridViewColumn.CellTemplate>
                     <DataTemplate>
-                        <local:TextBoxDark Text="{Binding Unknown12}" />
+                        <TextBox Text="{Binding Unknown12}" />
                     </DataTemplate>
                 </GridViewColumn.CellTemplate>
             </GridViewColumn>
             <GridViewColumn Header="Unknown13" Width="75">
                 <GridViewColumn.CellTemplate>
                     <DataTemplate>
-                        <local:TextBoxDark Text="{Binding Unknown13}" />
+                        <TextBox Text="{Binding Unknown13}" />
                     </DataTemplate>
                 </GridViewColumn.CellTemplate>
             </GridViewColumn>
             <GridViewColumn Header="Unknown14" Width="75">
                 <GridViewColumn.CellTemplate>
                     <DataTemplate>
-                        <local:TextBoxDark Text="{Binding Unknown14}" />
+                        <TextBox Text="{Binding Unknown14}" />
                     </DataTemplate>
                 </GridViewColumn.CellTemplate>
             </GridViewColumn>
@@ -219,7 +219,7 @@
             <CheckBox Grid.Row="4" Grid.Column="1" Margin="3" IsChecked="{Binding Solid}"/>
 
             <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}, Converter={StaticResource IsGMS2Converter}}">Depth</TextBlock>
-            <local:TextBoxDark Grid.Row="5" Grid.Column="1" Margin="3" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}, Converter={StaticResource IsGMS2Converter}}" Text="{Binding Depth}"/>
+            <TextBox Grid.Row="5" Grid.Column="1" Margin="3" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}, Converter={StaticResource IsGMS2Converter}}" Text="{Binding Depth}"/>
 
             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Persistent</TextBlock>
             <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding Persistent}"/>
@@ -237,32 +237,32 @@
             <CheckBox Grid.Row="10" Grid.Column="1" Margin="3" IsChecked="{Binding IsSensor}"/>
 
             <TextBlock Grid.Row="11" Grid.Column="0" Margin="3">Collision shape</TextBlock>
-            <local:ComboBoxDark Grid.Row="11" Grid.Column="1" Margin="3" ItemsSource="{Binding Source={StaticResource CollisionShapeFlags}}" SelectedItem="{Binding Path=CollisionShape}" />
+            <ComboBox Grid.Row="11" Grid.Column="1" Margin="3" ItemsSource="{Binding Source={StaticResource CollisionShapeFlags}}" SelectedItem="{Binding Path=CollisionShape}" />
 
             <Separator Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="2"/>
 
             <TextBlock Grid.Row="13" Grid.Column="0" Margin="3" FontWeight="Bold">Physics</TextBlock>
 
             <TextBlock Grid.Row="14" Grid.Column="0" Margin="3">Density</TextBlock>
-            <local:TextBoxDark Grid.Row="14" Grid.Column="1" Margin="3" Text="{Binding Density}"/>
+            <TextBox Grid.Row="14" Grid.Column="1" Margin="3" Text="{Binding Density}"/>
 
             <TextBlock Grid.Row="15" Grid.Column="0" Margin="3">Restitution</TextBlock>
-            <local:TextBoxDark Grid.Row="15" Grid.Column="1" Margin="3" Text="{Binding Restitution}"/>
+            <TextBox Grid.Row="15" Grid.Column="1" Margin="3" Text="{Binding Restitution}"/>
 
             <TextBlock Grid.Row="16" Grid.Column="0" Margin="3">Group</TextBlock>
-            <local:TextBoxDark Grid.Row="16" Grid.Column="1" Margin="3" Text="{Binding Group}"/>
+            <TextBox Grid.Row="16" Grid.Column="1" Margin="3" Text="{Binding Group}"/>
 
             <TextBlock Grid.Row="17" Grid.Column="0" Margin="3">Linear damping</TextBlock>
-            <local:TextBoxDark Grid.Row="17" Grid.Column="1" Margin="3" Text="{Binding LinearDamping}"/>
+            <TextBox Grid.Row="17" Grid.Column="1" Margin="3" Text="{Binding LinearDamping}"/>
 
             <TextBlock Grid.Row="18" Grid.Column="0" Margin="3">Angular damping</TextBlock>
-            <local:TextBoxDark Grid.Row="18" Grid.Column="1" Margin="3" Text="{Binding AngularDamping}"/>
+            <TextBox Grid.Row="18" Grid.Column="1" Margin="3" Text="{Binding AngularDamping}"/>
 
             <!--TextBlock Grid.Row="19" Grid.Column="0" Margin="3">Physics shape vertex count</>
-            <local:TextBoxDark Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding PhysicsShapeVertexCount}"/-->
+            <TextBox Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding PhysicsShapeVertexCount}"/-->
 
             <TextBlock Grid.Row="19" Grid.Column="0" Margin="3">Friction</TextBlock>
-            <local:TextBoxDark Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding Friction}"/>
+            <TextBox Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding Friction}"/>
 
             <TextBlock Grid.Row="20" Grid.Column="0" Margin="3">Is awake</TextBlock>
             <CheckBox Grid.Row="20" Grid.Column="1" Margin="3" IsChecked="{Binding Awake}"/>
@@ -271,23 +271,12 @@
             <CheckBox Grid.Row="21" Grid.Column="1" Margin="3" IsChecked="{Binding Kinematic}"/>
 
             <TextBlock Grid.Row="22" Grid.Column="0" Margin="3">Physics shape vertices</TextBlock>
-            <local:DataGridDark Grid.Row="22" Grid.Column="1" Margin="3" ItemsSource="{Binding PhysicsVertices, Mode=OneWay}"
+            <DataGrid Grid.Row="22" Grid.Column="1" Margin="3" ItemsSource="{Binding PhysicsVertices, Mode=OneWay}"
                                 AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True"
-                                HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray"
                                 HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
                                 ScrollViewer.CanContentScroll="False" PreviewMouseWheel="HandlePreviewMouseWheel">
                 <DataGrid.Resources>
-                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
-                    <Style TargetType="{x:Type DataGridCell}">
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="{x:Type DataGridCell}">
-                                    <Grid Background="{TemplateBinding Background}">
-                                        <ContentPresenter VerticalAlignment="Center" />
-                                    </Grid>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
+                    <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
                                 <Setter Property="Template">
@@ -305,19 +294,19 @@
                     <DataGridTemplateColumn Header="X" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <local:TextBoxDark Text="{Binding X, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0" />
+                                <TextBox Text="{Binding X, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                     <DataGridTemplateColumn Header="Y" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <local:TextBoxDark Text="{Binding Y, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                <TextBox Text="{Binding Y, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
-            </local:DataGridDark>
+            </DataGrid>
 
             <Separator Grid.Row="23" Grid.Column="0" Grid.ColumnSpan="2"/>
         </Grid>
@@ -330,23 +319,12 @@
                 <DataTemplate>
                     <StackPanel>
                         <TextBlock Margin="3" Text="{Binding Path=(ItemsControl.AlternationIndex), RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource EventNameConverter}}" Name="EventTypeName"/>
-                        <local:DataGridDark ItemsSource="{Binding .}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True"
-                                            HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray"
+                        <DataGrid ItemsSource="{Binding .}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True"
                                             AddingNewItem="DataGrid_AddingNewItem" PreviewMouseWheel="HandlePreviewMouseWheel"
                                             HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
                                             ScrollViewer.CanContentScroll="False">
                             <DataGrid.Resources>
-                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
-                                <Style TargetType="{x:Type DataGridCell}">
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="{x:Type DataGridCell}">
-                                                <Grid Background="{TemplateBinding Background}">
-                                                    <ContentPresenter VerticalAlignment="Center" />
-                                                </Grid>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
+                                <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
                                             <Setter Property="Template">
@@ -359,7 +337,7 @@
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                                <Style TargetType="{x:Type ComboBox}">
+                                <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource {x:Type ComboBox}}">
                                     <!-- DropDownX events are not routed events -->
                                     <EventSetter Event="Loaded" Handler="ComboBox_Loaded"/>
                                 </Style>
@@ -377,8 +355,8 @@
                                                                     <Setter.Value>
                                                                         <DataTemplate>
                                                                             <StackPanel>
-                                                                                <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                                                                <local:TextBoxDark Text="{Binding DataContext.EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                                                                <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                                                <TextBox Text="{Binding DataContext.EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                                                                             </StackPanel>
                                                                         </DataTemplate>
                                                                     </Setter.Value>
@@ -389,8 +367,8 @@
                                                                     <Setter.Value>
                                                                         <DataTemplate>
                                                                             <StackPanel>
-                                                                                <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                                                                <local:TextBoxDark Text="{Binding DataContext.EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                                                                <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                                                <TextBox Text="{Binding DataContext.EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                                                                             </StackPanel>
                                                                         </DataTemplate>
                                                                     </Setter.Value>
@@ -401,8 +379,8 @@
                                                                     <Setter.Value>
                                                                         <DataTemplate>
                                                                             <StackPanel>
-                                                                                <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                                                                <local:TextBoxDark Text="{Binding DataContext.EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                                                                <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeKey}}" SelectedItem="{Binding DataContext.EventSubtypeKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                                                <TextBox Text="{Binding DataContext.EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                                                                             </StackPanel>
                                                                         </DataTemplate>
                                                                     </Setter.Value>
@@ -430,7 +408,7 @@
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
-                                                                            <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource EventSubtypeStep}}" SelectedItem="{Binding DataContext.EventSubtypeStep, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                                            <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeStep}}" SelectedItem="{Binding DataContext.EventSubtypeStep, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                                                         </DataTemplate>
                                                                     </Setter.Value>
                                                                 </Setter>
@@ -439,7 +417,7 @@
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
-                                                                            <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource EventSubtypeMouse}}" SelectedItem="{Binding DataContext.EventSubtypeMouse, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                                            <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeMouse}}" SelectedItem="{Binding DataContext.EventSubtypeMouse, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                                                         </DataTemplate>
                                                                     </Setter.Value>
                                                                 </Setter>
@@ -448,7 +426,7 @@
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
-                                                                            <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource EventSubtypeOther}}" SelectedItem="{Binding DataContext.EventSubtypeOther, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                                            <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeOther}}" SelectedItem="{Binding DataContext.EventSubtypeOther, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                                                         </DataTemplate>
                                                                     </Setter.Value>
                                                                 </Setter>
@@ -457,7 +435,7 @@
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
-                                                                            <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource EventSubtypeDraw}}" SelectedItem="{Binding DataContext.EventSubtypeDraw, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                                            <ComboBox ItemsSource="{Binding Source={StaticResource EventSubtypeDraw}}" SelectedItem="{Binding DataContext.EventSubtypeDraw, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                                                         </DataTemplate>
                                                                     </Setter.Value>
                                                                 </Setter>
@@ -474,7 +452,7 @@
                                                         </Style.Triggers>
                                                     </Style>
                                                 </ContentControl.Style>
-                                                <local:TextBoxDark Text="{Binding EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                                <TextBox Text="{Binding EventSubtype, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                                             </ContentControl>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
@@ -482,7 +460,7 @@
                                 <DataGridTemplateColumn Header="Actions" Width="5*">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <local:DataGridDark ItemsSource="{Binding Actions}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow">
+                                            <DataGrid ItemsSource="{Binding Actions}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow">
                                                 <DataGrid.Columns>
                                                     <DataGridTemplateColumn Header="Code" Width="*">
                                                         <DataGridTemplateColumn.CellTemplate>
@@ -497,12 +475,12 @@
                                                         </DataGridTemplateColumn.CellTemplate>
                                                     </DataGridTemplateColumn>
                                                 </DataGrid.Columns>
-                                            </local:DataGridDark>
+                                            </DataGrid>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
                             </DataGrid.Columns>
-                        </local:DataGridDark>
+                        </DataGrid>
                         <Separator/>
                     </StackPanel>
                 </DataTemplate>

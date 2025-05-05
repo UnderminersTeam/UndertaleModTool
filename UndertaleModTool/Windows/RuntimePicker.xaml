@@ -6,7 +6,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UndertaleModTool"
         mc:Ignorable="d"
-        Title="Runtime picker" Height="300" Width="700" WindowStartupLocation="CenterOwner">
+        Title="Runtime picker" Height="300" Width="700" WindowStartupLocation="CenterOwner"
+        Style="{DynamicResource DefaultWindowStyle}">
     <Grid Margin="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -31,6 +32,6 @@
             </ListView.View>
         </ListView>
 
-        <local:ButtonDark Grid.Row="2" Grid.Column="3" Margin="3" Content="Continue" Click="Button_Click"/>
+        <Button Grid.Row="2" Grid.Column="3" Margin="3" Content="Continue" Click="Button_Click"/>
     </Grid>
 </Window>

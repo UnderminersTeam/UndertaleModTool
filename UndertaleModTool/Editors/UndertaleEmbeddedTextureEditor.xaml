@@ -32,11 +32,11 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Scaled</TextBlock>
-        <local:TextBoxDark Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding Scaled}"/>
+        <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding Scaled}"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="Generated mips"
                    Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2.0.6}"/>
-        <local:TextBoxDark Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GeneratedMips}"
+        <TextBox Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GeneratedMips}"
                  Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2.0.6}"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Size</TextBlock>
@@ -45,8 +45,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <local:TextBoxDark Grid.Column="0" x:Name="TexWidth" Margin="3" Text="{Binding TextureData.Width, Mode=OneWay}" IsReadOnly="True"/>
-            <local:TextBoxDark Grid.Column="1" x:Name="TexHeight" Margin="3" Text="{Binding TextureData.Height, Mode=OneWay}" IsReadOnly="True"/>
+            <TextBox Grid.Column="0" x:Name="TexWidth" Margin="3" Text="{Binding TextureData.Width, Mode=OneWay}" IsReadOnly="True"/>
+            <TextBox Grid.Column="1" x:Name="TexHeight" Margin="3" Text="{Binding TextureData.Height, Mode=OneWay}" IsReadOnly="True"/>
         </Grid>
 
         <TextBlock Grid.Row="3" Grid.Column="4" Margin="3" Foreground="Red" Text="Warning: Texture failed to load!">
@@ -76,9 +76,6 @@
             </TextBlock>
             <ScrollViewer Name="TextureScroll" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" MaxHeight="450"
                           HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" ScrollChanged="TextureScroll_ScrollChanged">
-                <ScrollViewer.Background>
-                    <DynamicResource ResourceKey="{x:Static SystemColors.MenuBrushKey}"/>
-                </ScrollViewer.Background>
                 <Viewbox Name="TextureViewbox" Stretch="Uniform" StretchDirection="DownOnly"
                          SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor" MouseWheel="TextureViewbox_MouseWheel">
                     <Border Background="{DynamicResource TransparencyGridBrushBrush}">
@@ -93,8 +90,8 @@
                 </Viewbox>
             </ScrollViewer>
 
-            <local:ButtonDark Grid.Row="2" Grid.Column="0" Margin="0,2" Content="Import" Click="Import_Click"/>
-            <local:ButtonDark Grid.Row="2" Grid.Column="3" Margin="0,2" Content="Export" Click="Export_Click"/>
+            <Button Grid.Row="2" Grid.Column="0" Margin="0,2" Content="Import" Click="Import_Click"/>
+            <Button Grid.Row="2" Grid.Column="3" Margin="0,2" Content="Export" Click="Export_Click"/>
         </Grid>
     </Grid>
 </local:DataUserControl>

@@ -28,32 +28,22 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding OriginX}"/>
-            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding OriginY}"/>
+            <TextBox Grid.Column="0" Margin="3" Text="{Binding OriginX}"/>
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding OriginY}"/>
         </Grid>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Draw order</TextBlock>
-        <local:TextBoxDark Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding DrawOrder}"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding DrawOrder}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Emitters</TextBlock>
         <Expander Grid.Row="3" Grid.Column="1" Margin="3" Header="List" Name="EmitterListExpander" IsExpanded="True">
-            <local:DataGridDark ItemsSource="{Binding Emitters}" x:Name="EmitterListGrid"
-                                AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
+            <DataGrid ItemsSource="{Binding Emitters}" x:Name="EmitterListGrid"
+                                AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
                                 ScrollViewer.CanContentScroll="True"
                                 VirtualizingPanel.IsVirtualizing="True"
                                 VirtualizingPanel.VirtualizationMode="Recycling">
                 <DataGrid.Resources>
-                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
-                    <Style TargetType="{x:Type DataGridCell}">
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="{x:Type DataGridCell}">
-                                    <Grid Background="{TemplateBinding Background}">
-                                        <ContentPresenter VerticalAlignment="Center" />
-                                    </Grid>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
+                    <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource {x:Type DataGridCell}}">
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Value="{x:Static CollectionView.NewItemPlaceholder}">
                                 <Setter Property="Template">
@@ -76,7 +66,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
-            </local:DataGridDark>
+            </DataGrid>
         </Expander>
     </Grid>
 </local:DataUserControl>

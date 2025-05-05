@@ -9,7 +9,7 @@ using System.Linq;
 namespace UndertaleModTool
 {
     /// <summary>
-    /// TreeViewItem for representing UndertaleResources in the MainWindow data hirearchy
+    /// TreeViewItem for representing UndertaleResources in the MainWindow data hierarchy
     /// </summary>
     public partial class ResourceListTreeViewItem : TreeViewItem
     {
@@ -108,7 +108,7 @@ namespace UndertaleModTool
             }
             catch (Exception ex)
             {
-                mainWindow.ShowError("An error occured in the object references related window.\n" +
+                mainWindow.ShowError("An error occurred in the object references related window.\n" +
                                $"Please report this on GitHub.\n\n{ex}");
             }
             finally

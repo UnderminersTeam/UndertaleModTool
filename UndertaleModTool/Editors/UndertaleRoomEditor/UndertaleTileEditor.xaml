@@ -11,6 +11,7 @@
         Title="Edit Tile Data"
         Height="400" Width="800" MinHeight="300" MinWidth="300"
         WindowStartupLocation="CenterOwner"
+        Style="{DynamicResource DefaultWindowStyle}"
 >
     <Window.Resources>
         <local:CachedTileDataLoader x:Key="CachedTileDataLoader"/>
@@ -74,24 +75,24 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
-                    <local:ButtonDark
+                    <Button
                         Margin="3,1" Padding="3,2" VerticalAlignment="Center"
                         Content="🡘" Click="Command_Mirror"
                         Width="22"
                         ToolTip="Mirror the brush around the X axis (X)"
-                    ></local:ButtonDark>
-                    <local:ButtonDark
+                    ></Button>
+                    <Button
                         Margin="3,1" Padding="3,2" VerticalAlignment="Center"
                         Width="22"
                         Content="🡙" Click="Command_Flip"
                         ToolTip="Flip the brush around the Y axis (Y/Z)"
-                    ></local:ButtonDark>
-                    <local:ButtonDark
+                    ></Button>
+                    <Button
                         Margin="3,1" Padding="3,2" VerticalAlignment="Center"
                         Content="⟳" Click="Command_RotateCW"
                         Width="22"
                         ToolTip="Rotate the brush 90 degrees (Q, R)"
-                    ></local:ButtonDark>
+                    ></Button>
                 </StackPanel>
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
                     <CheckBox 
@@ -106,18 +107,18 @@
                     <TextBlock Margin="3">Brush Tiling</TextBlock>
                     <CheckBox ToolTip="Show the tile grid (G)" Margin="9,3,3,3" IsChecked="{Binding settings.ShowGridBool}"/>
                     <TextBlock Margin="3">Grid</TextBlock>
-                    <local:ButtonDark
+                    <Button
                         Margin="3,1" Padding="3,2" VerticalAlignment="Center"
                         Content="↩" Click="Command_Undo"
                         Width="22"
                         ToolTip="Undo (Ctrl+Z)" IsEnabled="{Binding UndoEnabled, Mode=OneWay}"
-                    ></local:ButtonDark>
-                    <local:ButtonDark
+                    ></Button>
+                    <Button
                         Margin="3,1" Padding="3,2" VerticalAlignment="Center"
                         Content="↪" Click="Command_Redo"
                         Width="22"
                         ToolTip="Redo (Ctrl+Y, Ctrl+Shift+Z)" IsEnabled="{Binding RedoEnabled, Mode=OneWay}"
-                    ></local:ButtonDark>
+                    ></Button>
                 </StackPanel>
             </Grid>
 
@@ -257,7 +258,7 @@
                     <ColumnDefinition Width="96"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" Margin="3" TextAlignment="Right">Tileset columns</TextBlock>
-                <local:TextBoxDark Grid.Column="1" Margin="3,1" Padding="0,2" Text="{Binding PaletteColumns}" 
+                <TextBox Grid.Column="1" Margin="3,1" Padding="0,2" Text="{Binding PaletteColumns}" 
                         ToolTip="Number of columns to use for the tile palette. Adjust if the tileset looks broken.
 Persists when the tile editor is closed, but not when the file is saved and reopened."/>
             </Grid>
@@ -382,16 +383,16 @@ Persists when the tile editor is closed, but not when the file is saved and reop
                     Text="Ctrl+LMB: Fill (+Shift: Global)    Alt+LMB: Pick    MMB: Scroll/Pick"
                 ></TextBlock>
             </Grid>
-            <local:ButtonDark
+            <Button
                 x:Name="CancelButton"
                 Grid.Column="1" Margin="3,3" Padding="5,3"
                 VerticalAlignment="Center" Content="Cancel" Click="CancelButton_Click"
-            ></local:ButtonDark>
-            <local:ButtonDark
+            ></Button>
+            <Button
                 x:Name="ApplyButton"
                 Grid.Column="2" Margin="3,3" Padding="5,3"
                 VerticalAlignment="Center" Content="Apply" Click="ApplyButton_Click"
-            ></local:ButtonDark>
+            ></Button>
         </Grid>
 
     </Grid>

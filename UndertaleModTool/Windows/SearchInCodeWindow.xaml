@@ -7,41 +7,34 @@
         xmlns:UndertaleModTool="clr-namespace:UndertaleModTool" x:Class="UndertaleModTool.Windows.SearchInCodeWindow"
         mc:Ignorable="d"
         Title="Search in code" Height="500" Width="800" Closing="Window_Closing" IsVisibleChanged="Window_IsVisibleChanged" WindowStartupLocation="CenterScreen"
-        FocusManager.FocusedElement="{Binding ElementName=SearchTextBox}" DataContext="{Binding Mode=OneWay, RelativeSource={RelativeSource Self}}">
+        FocusManager.FocusedElement="{Binding ElementName=SearchTextBox}" DataContext="{Binding Mode=OneWay, RelativeSource={RelativeSource Self}}"
+        Style="{DynamicResource DefaultWindowStyle}">
     <Window.Resources>
-        <local:ContextMenuDark x:Key="ListViewItemContextMenu">
+        <ContextMenu x:Key="ListViewItemContextMenu">
             <MenuItem Header="Open" Click="MenuItemOpen_Click"/>
             <MenuItem Header="Open in new tab" Click="MenuItemOpenInNewTab_Click"/>
             <MenuItem Header="Copy" Command="Copy"/>
             <MenuItem Header="Copy all" Click="MenuItemCopyAll_Click"/>
-        </local:ContextMenuDark>
+        </ContextMenu>
     </Window.Resources>
     <DockPanel>
-        <StatusBar DockPanel.Dock="Bottom" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+        <StatusBar DockPanel.Dock="Bottom">
             <StatusBarItem>
                 <TextBlock Name="StatusBarTextBlock"></TextBlock>
             </StatusBarItem>
         </StatusBar>
         <Grid>
-            <UndertaleModTool:TextBoxDark x:Name="SearchTextBox" Margin="10,10,10,0" TextWrapping="Wrap" AcceptsReturn="True" Height="36" VerticalAlignment="Top" VerticalScrollBarVisibility="Auto" PreviewKeyDown="SearchTextBox_PreviewKeyDown"/>
-            <UndertaleModTool:ButtonDark x:Name="SearchButton" Content="Search" Margin="0,51,10,0" VerticalAlignment="Top" Click="SearchButton_Click" HorizontalAlignment="Right" Width="39" IsDefault="True"/>
+            <TextBox x:Name="SearchTextBox" Margin="10,10,10,0" TextWrapping="Wrap" AcceptsReturn="True" Height="36" VerticalAlignment="Top" VerticalScrollBarVisibility="Auto" PreviewKeyDown="SearchTextBox_PreviewKeyDown"/>
+            <Button x:Name="SearchButton" Content="Search" Margin="0,51,10,0" VerticalAlignment="Top" Click="SearchButton_Click" HorizontalAlignment="Right" Width="39" IsDefault="True"/>
             <CheckBox x:Name="CaseSensitiveCheckBox" Content="Case sensitive" HorizontalAlignment="Left" Margin="10,51,0,0" Height="15" VerticalAlignment="Top"/>
             <CheckBox x:Name="RegexSearchCheckBox" Content="Regex search" HorizontalAlignment="Left" Margin="108,51,0,0" VerticalAlignment="Top"/>
             <CheckBox x:Name="InAssemblyCheckBox" Content="In assembly" HorizontalAlignment="Left" Margin="204,51,0,0" VerticalAlignment="Top"/>
-            <ListView ItemsSource="{Binding Results}" x:Name="ResultsListView" Margin="10,76,10,10" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}">
+            <ListView ItemsSource="{Binding Results}" x:Name="ResultsListView" Margin="10,76,10,10">
                 <ListView.CommandBindings>
                     <CommandBinding Command="Copy" Executed="CopyCommand_Executed"/>
                 </ListView.CommandBindings>
                 <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="true">
-                                <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" />
-                            </Trigger>
-                            <Trigger Property="IsSelected" Value="true">
-                                <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" />
-                            </Trigger>
-                        </Style.Triggers>
+                    <Style TargetType="{x:Type ListViewItem}" BasedOn="{StaticResource {x:Type ListViewItem}}" >
                         <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_MouseDoubleClick"/>
                         <EventSetter Event="KeyDown" Handler="ListViewItem_KeyDown"/>
                         <Setter Property="FontFamily" Value="Consolas"/>
@@ -65,11 +58,6 @@
                 </ListView.ItemContainerStyle>
                 <ListView.View>
                     <GridView>
-                        <GridView.ColumnHeaderContainerStyle>
-                            <Style TargetType="{x:Type GridViewColumnHeader}">
-                                <Setter Property="Foreground" Value="Black" />
-                            </Style>
-                        </GridView.ColumnHeaderContainerStyle>
                         <GridViewColumn Header="Code" DisplayMemberBinding="{Binding Code}" Width="auto"/>
                         <GridViewColumn Header="Line" DisplayMemberBinding="{Binding LineNumber}" Width="auto"/>
                         <GridViewColumn Header="Text" DisplayMemberBinding="{Binding LineText}" Width="auto"/>

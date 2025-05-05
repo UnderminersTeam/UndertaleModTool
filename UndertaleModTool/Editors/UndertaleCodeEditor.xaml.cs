@@ -1208,10 +1208,10 @@ namespace UndertaleModTool
                                 possibleObjects.Add(data.ParticleSystems[id]);
                         }
 
-                        ContextMenuDark contextMenu = new();
+                        ContextMenu contextMenu = new();
                         foreach (UndertaleObject obj in possibleObjects)
                         {
-                            MenuItemDark item = new();
+                            MenuItem item = new();
                             item.Header = obj.ToString().Replace("_", "__");
                             item.PreviewMouseDown += (sender2, ev2) =>
                             {
@@ -1238,7 +1238,7 @@ namespace UndertaleModTool
                         }
                         if (id > 0x00050000)
                         {
-                            MenuItemDark item = new();
+                            MenuItem item = new();
                             item.Header = "0x" + id.ToString("X6") + " (color)";
                             item.Click += (sender2, ev2) =>
                             {
@@ -1255,7 +1255,7 @@ namespace UndertaleModTool
                         var myKey = list.Constants.FirstOrDefault(x => x.Value == (double)id).Key;
                         if (myKey != null)
                         {
-                            MenuItemDark item = new();
+                            MenuItem item = new();
                             item.Header = myKey.Replace("_", "__") + " (constant)";
                             item.Click += (sender2, ev2) =>
                             {
@@ -1268,7 +1268,7 @@ namespace UndertaleModTool
                             };
                             contextMenu.Items.Add(item);
                         }
-                        contextMenu.Items.Add(new MenuItemDark() { Header = id + " (number)", IsEnabled = false });
+                        contextMenu.Items.Add(new MenuItem() { Header = id + " (number)", IsEnabled = false });
 
                         contextMenu.IsOpen = true;
                     }
@@ -1290,7 +1290,7 @@ namespace UndertaleModTool
             private static readonly SolidColorBrush InstanceBrush = new(Color.FromRgb(0x58, 0xE3, 0x5A));
             private static readonly SolidColorBrush LocalBrush = new(Color.FromRgb(0xFF, 0xF8, 0x99));
 
-            private static ContextMenuDark contextMenu;
+            private static ContextMenu contextMenu;
 
             // <offset, length>
             private readonly Dictionary<int, int> lineNameSections = new();
@@ -1302,7 +1302,7 @@ namespace UndertaleModTool
                 highlighterInst = textAreaInst.GetService(typeof(IHighlighter)) as IHighlighter;
                 textEditorInst = textAreaInst.GetService(typeof(TextEditor)) as TextEditor;
 
-                var menuItem = new MenuItemDark()
+                var menuItem = new MenuItem()
                 {
                     Header = "Open in new tab"
                 };
