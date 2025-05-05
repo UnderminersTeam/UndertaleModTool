@@ -528,7 +528,7 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                 if (Type1 != DataType.Int16)
                 {
                     // Write actual variable being stored to (reset next occurrence to string ID for now)
-                    ReferenceNextOccurrenceOffset = (uint)ValueVariable.NameStringID;
+                    ReferenceNextOccurrenceOffset = (uint)(ValueVariable?.NameStringID ?? 0xDEAD);
                     writer.Write(_primitiveValue.AsInt);
                 }
                 break;
@@ -572,7 +572,7 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                         break;
                     case DataType.Variable:
                         // Write variable (reset next occurrence to string ID for now)
-                        ReferenceNextOccurrenceOffset = (uint)ValueVariable.NameStringID;
+                        ReferenceNextOccurrenceOffset = (uint)(ValueVariable?.NameStringID ?? 0xDEAD);
                         writer.Write(_primitiveValue.AsInt);
                         break;
                     case DataType.String:
