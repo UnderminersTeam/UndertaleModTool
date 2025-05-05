@@ -1,0 +1,44 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
+             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
+             xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
+             xmlns:AvaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.Views.UndertaleCodeView"
+             x:DataType="v:UndertaleCodeViewModel">
+    <Grid RowDefinitions="Auto,1*" ColumnDefinitions="1*" MaxHeight="{Binding $parent[ContentControl].Bounds.Height}">
+        <Grid Grid.Row="0" h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*" Margin="12,0,12,0">
+            <Label>Name</Label>
+            <c:UndertaleStringReferenceView Reference="{Binding Code.Name}" />
+        </Grid>
+        <TabControl Grid.Row="1">
+            <TabItem Header="GML">
+                <ThemeVariantScope RequestedThemeVariant="Dark">
+                    <!-- TODO: {DynamicResource ThemeBackgroundBrush} doesn't work. -->
+                    <AvaloniaEdit:TextEditor x:Name="GMLTextEditor"
+                                             Document="{Binding GMLTextDocument}"
+                                             LostFocus="GMLTextEditor_LostFocus"
+                                             ShowLineNumbers="True"
+                                             Background="#FF282828"
+                                             FontFamily="Cascadia Code,Consolas,Menlo,Monospace"
+                                         />
+                </ThemeVariantScope>
+            </TabItem>
+            <TabItem Header="ASM">
+                <ThemeVariantScope RequestedThemeVariant="Dark">
+                    <!-- TODO: {DynamicResource ThemeBackgroundBrush} doesn't work. -->
+                    <AvaloniaEdit:TextEditor x:Name="ASMTextEditor"
+                                             Document="{Binding ASMTextDocument}"
+                                             LostFocus="ASMTextEditor_LostFocus"
+                                             ShowLineNumbers="True"
+                                             Background="#FF282828"
+                                             FontFamily="Cascadia Code,Consolas,Menlo,Monospace"
+                                             />
+                </ThemeVariantScope>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>

@@ -1,0 +1,231 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
+             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
+             xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
+             xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.Views.UndertaleGameObjectView"
+             x:DataType="v:UndertaleGameObjectViewModel">
+    <UserControl.Resources>
+        <h:EnumTypeToValuesConverter x:Key="EnumTypeToValuesConverter" />
+        <h:EventsToExtendedEventConverter x:Key="EventsToExtendedEventConverter" />
+        <h:IdToUndertaleGameObjectConverter x:Key="IdToUndertaleGameObjectConverter" />
+    </UserControl.Resources>
+    <StackPanel Grid.IsSharedSizeScope="True" Margin="12,0,12,0">
+        <TextBlock FontWeight="Bold" Text="Game object" />
+        <Separator />
+
+        <Grid h:AutoGridBehavior.Enable="True">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="g1" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+
+            <Label>Name</Label>
+            <c:UndertaleStringReferenceView Reference="{Binding GameObject.Name}" />
+
+            <Label>Sprite</Label>
+            <c:UndertaleResourceReferenceView Reference="{Binding GameObject.Sprite}" ReferenceType="undertalem:UndertaleSprite"/>
+
+            <!-- TODO: Show sprite -->
+
+            <Label>Visible</Label>
+            <CheckBox IsChecked="{Binding GameObject.Visible}"/>
+
+            <Label>Solid</Label>
+            <CheckBox IsChecked="{Binding GameObject.Solid}"/>
+
+            <!-- TODO: Visible only in GMS2 -->
+            <Label>Depth</Label>
+            <TextBox Text="{Binding GameObject.Depth}" />
+
+            <Label>Persitent</Label>
+            <CheckBox IsChecked="{Binding GameObject.Persistent}"/>
+
+            <Label>Parent</Label>
+            <c:UndertaleResourceReferenceView Reference="{Binding GameObject.ParentId}" ReferenceType="undertalem:UndertaleGameObject"/>
+
+            <Label>Texture mask id</Label>
+            <c:UndertaleResourceReferenceView Reference="{Binding GameObject.TextureMaskId}" ReferenceType="undertalem:UndertaleSprite"/>
+
+            <Label>Uses physics</Label>
+            <CheckBox IsChecked="{Binding GameObject.UsesPhysics}"/>
+
+            <Label>Is sensor</Label>
+            <CheckBox IsChecked="{Binding GameObject.IsSensor}"/>
+
+            <Label>Collision shape</Label>
+            <ComboBox ItemsSource="{Binding Source={x:Type undertalem:CollisionShapeFlags}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                      SelectedItem="{Binding GameObject.CollisionShape}" />
+        </Grid>
+
+        <TextBlock FontWeight="Bold" Text="Physics" />
+        <Separator />
+
+        <Grid h:AutoGridBehavior.Enable="True">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="g1" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+
+            <Label>Density</Label>
+            <TextBox Text="{Binding GameObject.Density}" />
+
+            <Label>Restitution</Label>
+            <TextBox Text="{Binding GameObject.Restitution}" />
+
+            <Label>Group</Label>
+            <TextBox Text="{Binding GameObject.Group}" />
+
+            <Label>Linear damping</Label>
+            <TextBox Text="{Binding GameObject.LinearDamping}" />
+
+            <Label>Angular damping</Label>
+            <TextBox Text="{Binding GameObject.AngularDamping}" />
+
+            <Label>Friction</Label>
+            <TextBox Text="{Binding GameObject.Friction}" />
+
+            <Label>Is awake</Label>
+            <CheckBox IsChecked="{Binding GameObject.Awake}"/>
+
+            <Label>Is kinematic</Label>
+            <CheckBox IsChecked="{Binding GameObject.Kinematic}"/>
+
+            <Label>Physics shape vertices</Label>
+            <c:EditableDataGrid ItemsSource="{Binding GameObject.PhysicsVertices}" ItemFactory="{Binding CreatePhysicsVertex}">
+                <c:EditableDataGrid.Columns>
+                    <DataGridTemplateColumn Header="X" Width="1*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="undertalem:UndertaleGameObject+UndertalePhysicsVertex">
+                                <TextBox Text="{Binding X}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Y" Width="1*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="undertalem:UndertaleGameObject+UndertalePhysicsVertex">
+                                <TextBox Text="{Binding Y}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </c:EditableDataGrid.Columns>
+            </c:EditableDataGrid>
+        </Grid>
+
+        <TextBlock FontWeight="Bold" Text="Events"/>
+        <Separator />
+
+        <ItemsControl ItemsSource="{Binding GameObject.Events, Converter={StaticResource EventsToExtendedEventConverter}}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="h:ExtendedEvent">
+                    <StackPanel x:Name="ExtendedEvent">
+                        <TextBlock FontStyle="Italic" Text="{Binding EventName}" />
+
+                        <c:EditableDataGrid ItemsSource="{Binding SubEvents}"
+                                            ItemFactory="{Binding $parent[v:UndertaleGameObjectView].((v:UndertaleGameObjectViewModel)DataContext).CreateEvent}"
+                                            BorderThickness="1" BorderBrush="{DynamicResource SystemControlBackgroundListLowBrush}">
+                            <c:EditableDataGrid.Columns>
+                                <DataGridTemplateColumn Header="Subtype ID" Width="1*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="undertalem:UndertaleGameObject+Event">
+                                            <ContentControl x:Name="Event" Content="{Binding #ExtendedEvent.((h:ExtendedEvent)DataContext).EventType}">
+                                                <ContentControl.DataTemplates>
+                                                    <!-- Using ReflectionBinding because I can't seem to cast the DataContext to the correct type (UndertaleGameObject+Event). -->
+                                                    <h:ValueDataTemplate DataType="undertalem:EventType" Value="{x:Static undertalem:EventType.Create}">
+                                                        <TextBlock Text="N/A"/>
+                                                    </h:ValueDataTemplate>
+                                                    <h:ValueDataTemplate DataType="undertalem:EventType" Value="{x:Static undertalem:EventType.Destroy}">
+                                                        <TextBlock Text="N/A"/>
+                                                    </h:ValueDataTemplate>
+                                                    <h:ValueDataTemplate DataType="undertalem:EventType" Value="{x:Static undertalem:EventType.Alarm}">
+                                                        <StackPanel>
+                                                            <TextBox Text="{ReflectionBinding #Event.DataContext.EventSubtype}"/>
+                                                        </StackPanel>
+                                                    </h:ValueDataTemplate>
+                                                    <h:ValueDataTemplate DataType="undertalem:EventType" Value="{x:Static undertalem:EventType.Step}">
+                                                        <ComboBox ItemsSource="{Binding Source={x:Type undertalem:EventSubtypeStep}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                                  SelectedItem="{ReflectionBinding #Event.DataContext.EventSubtypeStep}" />
+                                                    </h:ValueDataTemplate>
+                                                    <h:ValueDataTemplate DataType="undertalem:EventType" Value="{x:Static undertalem:EventType.Collision}">
+                                                        <StackPanel>
+                                                            <c:UndertaleResourceReferenceView Reference="{ReflectionBinding #Event.DataContext.EventSubtype, Converter={StaticResource IdToUndertaleGameObjectConverter}}"
+                                                                                          ReferenceType="undertalem:UndertaleGameObject"/>
+                                                        </StackPanel>
+                                                    </h:ValueDataTemplate>
+                                                    <h:ValueDataTemplate DataType="undertalem:EventType" Value="{x:Static undertalem:EventType.Keyboard}">
+                                                        <ComboBox ItemsSource="{Binding Source={x:Type undertalem:EventSubtypeKey}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                                  SelectedItem="{ReflectionBinding #Event.DataContext.EventSubtypeKey}" />
+                                                    </h:ValueDataTemplate>
+                                                    <h:ValueDataTemplate DataType="undertalem:EventType" Value="{x:Static undertalem:EventType.Mouse}">
+                                                        <ComboBox ItemsSource="{Binding Source={x:Type undertalem:EventSubtypeMouse}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                                  SelectedItem="{ReflectionBinding #Event.DataContext.EventSubtypeMouse}" />
+                                                    </h:ValueDataTemplate>
+                                                    <h:ValueDataTemplate DataType="undertalem:EventType" Value="{x:Static undertalem:EventType.Other}">
+                                                        <ComboBox ItemsSource="{Binding Source={x:Type undertalem:EventSubtypeOther}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                                  SelectedItem="{ReflectionBinding #Event.DataContext.EventSubtypeOther}" />
+                                                    </h:ValueDataTemplate>
+                                                    <h:ValueDataTemplate DataType="undertalem:EventType" Value="{x:Static undertalem:EventType.Draw}">
+                                                        <ComboBox ItemsSource="{Binding Source={x:Type undertalem:EventSubtypeDraw}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                                  SelectedItem="{ReflectionBinding #Event.DataContext.EventSubtypeDraw}" />
+                                                    </h:ValueDataTemplate>
+                                                    <h:ValueDataTemplate DataType="undertalem:EventType" Value="{x:Static undertalem:EventType.KeyPress}">
+                                                        <ComboBox ItemsSource="{Binding Source={x:Type undertalem:EventSubtypeKey}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                                  SelectedItem="{ReflectionBinding #Event.DataContext.EventSubtypeKey}" />
+                                                    </h:ValueDataTemplate>
+                                                    <h:ValueDataTemplate DataType="undertalem:EventType" Value="{x:Static undertalem:EventType.KeyRelease}">
+                                                        <ComboBox ItemsSource="{Binding Source={x:Type undertalem:EventSubtypeKey}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                                  SelectedItem="{ReflectionBinding #Event.DataContext.EventSubtypeKey}" />
+                                                    </h:ValueDataTemplate>
+                                                    <h:ValueDataTemplate DataType="undertalem:EventType" Value="{x:Static undertalem:EventType.Trigger}">
+                                                        <TextBlock Text="N/A"/>
+                                                    </h:ValueDataTemplate>
+                                                    <h:ValueDataTemplate DataType="undertalem:EventType" Value="{x:Static undertalem:EventType.CleanUp}">
+                                                        <TextBlock Text="N/A"/>
+                                                    </h:ValueDataTemplate>
+                                                    <h:ValueDataTemplate DataType="undertalem:EventType" Value="{x:Static undertalem:EventType.Gesture}">
+                                                        <ComboBox ItemsSource="{Binding Source={x:Type undertalem:EventSubtypeGesture}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                                  SelectedItem="{ReflectionBinding #Event.DataContext.EventSubtypeGesture}" />
+                                                    </h:ValueDataTemplate>
+                                                    <h:ValueDataTemplate DataType="undertalem:EventType" Value="{x:Static undertalem:EventType.PreCreate}">
+                                                        <TextBlock Text="N/A"/>
+                                                    </h:ValueDataTemplate>
+                                                    <h:ValueDataTemplate DataType="undertalem:EventType">
+                                                        <StackPanel>
+                                                            <TextBox Text="{ReflectionBinding #Event.DataContext.EventSubtype}"/>
+                                                        </StackPanel>
+                                                    </h:ValueDataTemplate>
+                                                </ContentControl.DataTemplates>
+                                            </ContentControl>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Actions" Width="3*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate DataType="undertalem:UndertaleGameObject+Event">
+                                            <c:EditableDataGrid ItemsSource="{Binding Actions}"
+                                                                ItemFactory="{Binding $parent[v:UndertaleGameObjectView].((v:UndertaleGameObjectViewModel)DataContext).CreateEventAction}">
+                                                <c:EditableDataGrid.Columns>
+                                                    <DataGridTemplateColumn Header="Code" Width="1*">
+                                                        <DataGridTemplateColumn.CellTemplate>
+                                                            <DataTemplate DataType="undertalem:UndertaleGameObject+EventAction">
+                                                                <c:UndertaleResourceReferenceView Reference="{Binding CodeId}" ReferenceType="{x:Type undertalem:UndertaleCode}" />
+                                                            </DataTemplate>
+                                                        </DataGridTemplateColumn.CellTemplate>
+                                                    </DataGridTemplateColumn>
+                                                </c:EditableDataGrid.Columns>
+                                            </c:EditableDataGrid>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </c:EditableDataGrid.Columns>
+                        </c:EditableDataGrid>
+                    </StackPanel>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
+</UserControl>

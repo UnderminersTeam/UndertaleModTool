@@ -1,0 +1,111 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="UndertaleModToolAvalonia.App"
+             RequestedThemeVariant="Light">
+             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+
+    <Application.Styles>
+        <FluentTheme DensityStyle="Compact"/>
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+        <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
+        <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
+        
+        <Style Selector="Window">
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+        
+        <Style Selector=":is(ItemsControl)">
+            <Setter Property="ScrollViewer.AllowAutoHide" Value="False"/>
+        </Style>
+        <Style Selector="ScrollViewer">
+            <Setter Property="AllowAutoHide" Value="False"/>
+        </Style>
+        <Style Selector="ScrollBar">
+            <Setter Property="AllowAutoHide" Value="False"/>
+        </Style>
+        
+        <Style Selector="CheckBox">
+            <!-- https://github.com/AvaloniaUI/Avalonia/blob/master/src/Avalonia.Themes.Fluent/Controls/CheckBox.xaml -->
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Grid x:Name="RootGrid" ColumnDefinitions="16,*">
+                        <Border x:Name="PART_Border"
+                                Grid.ColumnSpan="2"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{TemplateBinding CornerRadius}" />
+
+                        <Grid VerticalAlignment="Top" Height="16">
+                            <Border x:Name="NormalRectangle"
+                                    BorderBrush="{DynamicResource CheckBoxCheckBackgroundStrokeUnchecked}"
+                                    Background="{DynamicResource CheckBoxCheckBackgroundFillUnchecked}"
+                                    BorderThickness="{DynamicResource CheckBoxBorderThemeThickness}"
+                                    CornerRadius="{TemplateBinding CornerRadius}"
+                                    UseLayoutRounding="False"
+                                    Height="16"
+                                    Width="16" />
+
+                            <Viewbox UseLayoutRounding="False">
+                                <Panel>
+                                    <Panel Height="16" Width="16" />
+                                    <Path x:Name="CheckGlyph"
+                                          Opacity="0"
+                                          Fill="{DynamicResource CheckBoxCheckGlyphForegroundUnchecked}"
+                                          Stretch="Uniform"
+                                          VerticalAlignment="Center"
+                                          FlowDirection="LeftToRight" />
+                                </Panel>
+                            </Viewbox>
+                        </Grid>
+                        <ContentPresenter x:Name="PART_ContentPresenter"
+                                        ContentTemplate="{TemplateBinding ContentTemplate}"
+                                        Content="{TemplateBinding Content}"
+                                        Margin="{TemplateBinding Padding}"
+                                        RecognizesAccessKey="True"
+                                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                        TextWrapping="Wrap"
+                                        Grid.Column="1" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        
+        <Style Selector="DataGrid /template/ DataGridRowsPresenter#PART_RowsPresenter">
+            <!-- Makes the rows not overlap with the scrollbars. -->
+            <Setter Property="Grid.RowSpan" Value="1" />
+            <Setter Property="Grid.ColumnSpan" Value="2" />
+        </Style>
+        <Style Selector="DataGridCell">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="MinHeight" Value="12" />
+        </Style>
+
+        <Style Selector="Menu">
+            <Setter Property="Height" Value="24" />
+        </Style>
+        
+        <Style Selector="TreeViewItem">
+            <Setter Property="MinHeight" Value="0" />
+        </Style>
+        
+        <Style Selector="TabControl">
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style Selector="TabItem">
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+
+        <Style Selector="GridSplitter">
+            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundListLowBrush}" />
+            <Setter Property="MinWidth" Value="3"/>
+        </Style>
+
+        <Style Selector="ColorPicker">
+            <Setter Property="HorizontalAlignment" Value="Left" />
+        </Style>
+    </Application.Styles>
+</Application>

@@ -1,0 +1,462 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
+             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
+             xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
+             xmlns:undertale="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
+             xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.Views.UndertaleRoomView"
+             x:DataType="v:UndertaleRoomViewModel">
+    <UserControl.Resources>
+        <h:EnumTypeToValuesConverter x:Key="EnumTypeToValuesConverter" />
+        <h:UndertaleColorToColorConverter x:Key="UndertaleColorToColorConverter" />
+        <h:VersionCompareConverter x:Key="VersionCompareConverter" />
+    </UserControl.Resources>
+    <Grid RowDefinitions="200,Auto,1*" ColumnDefinitions="1*" Margin="12,0,12,0" MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
+        <Grid Grid.Row="0" RowDefinitions="1*" ColumnDefinitions="1*,1*">
+            <Grid Grid.Column="0">
+                <!-- TreeView -->
+                <TreeView SelectedItem="{Binding RoomItemsSelectedItem}">
+                    <TreeView.DataTemplates>
+                        <DataTemplate DataType="undertalem:UndertaleRoom+Background">
+                            <TextBlock Text="{Binding BackgroundDefinition, TargetNullValue=(Background not set)}" />
+                        </DataTemplate>
+                        <DataTemplate DataType="undertalem:UndertaleRoom+View">
+                            <TextBlock Text="View" />
+                        </DataTemplate>
+                        <DataTemplate DataType="undertalem:UndertaleRoom+GameObject">
+                            <TextBlock Text="{Binding .}" />
+                        </DataTemplate>
+                        <DataTemplate DataType="undertalem:UndertaleRoom+Tile">
+                            <TextBlock Text="{Binding .}" />
+                        </DataTemplate>
+                        <h:LayerTypeTemplateSelector>
+                            <h:LayerTypeTemplateSelector.PathTemplate>
+                                <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer">
+                                    <TextBlock Text="{Binding LayerName.Content}" />
+                                </TreeDataTemplate>
+                            </h:LayerTypeTemplateSelector.PathTemplate>
+                            <h:LayerTypeTemplateSelector.BackgroundTemplate>
+                                <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer">
+                                    <TextBlock Text="{Binding LayerName.Content}" />
+                                </TreeDataTemplate>
+                            </h:LayerTypeTemplateSelector.BackgroundTemplate>
+                            <h:LayerTypeTemplateSelector.InstancesTemplate>
+                                <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer" ItemsSource="{Binding InstancesData.Instances}">
+                                    <TextBlock Text="{Binding LayerName.Content}" />
+                                </TreeDataTemplate>
+                            </h:LayerTypeTemplateSelector.InstancesTemplate>
+                            <h:LayerTypeTemplateSelector.AssetsTemplate>
+                                <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer" ItemsSource="{Binding AssetsData.AllAssets}">
+                                    <TextBlock Text="{Binding LayerName.Content}" />
+                                </TreeDataTemplate>
+                            </h:LayerTypeTemplateSelector.AssetsTemplate>
+                            <h:LayerTypeTemplateSelector.TilesTemplate>
+                                <!-- TODO: Not gonna show the tiles? -->
+                                <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer">
+                                    <TextBlock Text="{Binding LayerName.Content}" />
+                                </TreeDataTemplate>
+                            </h:LayerTypeTemplateSelector.TilesTemplate>
+                            <h:LayerTypeTemplateSelector.EffectTemplate>
+                                <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer">
+                                    <TextBlock Text="{Binding LayerName.Content}" />
+                                </TreeDataTemplate>
+                            </h:LayerTypeTemplateSelector.EffectTemplate>
+                        </h:LayerTypeTemplateSelector>
+                        
+                        <TreeDataTemplate ItemsSource="{Binding .}">
+                            <TreeDataTemplate.DataType>
+                                <x:Type TypeName="undertale:UndertalePointerList" x:TypeArguments="undertalem:UndertaleRoom+Tile"/>
+                            </TreeDataTemplate.DataType>
+                            <TextBlock Text="Legacy tiles"/>
+                        </TreeDataTemplate>
+                        <TreeDataTemplate ItemsSource="{Binding .}">
+                            <TreeDataTemplate.DataType>
+                                <x:Type TypeName="undertale:UndertalePointerList" x:TypeArguments="undertalem:UndertaleRoom+SpriteInstance"/>
+                            </TreeDataTemplate.DataType>
+                            <TextBlock Text="Sprites"/>
+                        </TreeDataTemplate>
+                        <TreeDataTemplate ItemsSource="{Binding .}">
+                            <TreeDataTemplate.DataType>
+                                <x:Type TypeName="undertale:UndertalePointerList" x:TypeArguments="undertalem:UndertaleRoom+SequenceInstance"/>
+                            </TreeDataTemplate.DataType>
+                            <TextBlock Text="Sequences"/>
+                        </TreeDataTemplate>
+                        <TreeDataTemplate ItemsSource="{Binding .}">
+                            <TreeDataTemplate.DataType>
+                                <x:Type TypeName="undertale:UndertalePointerList" x:TypeArguments="undertalem:UndertaleRoom+ParticleSystemInstance"/>
+                            </TreeDataTemplate.DataType>
+                            <TextBlock Text="Particle systems"/>
+                        </TreeDataTemplate>
+                        <TreeDataTemplate ItemsSource="{Binding .}">
+                            <TreeDataTemplate.DataType>
+                                <x:Type TypeName="undertale:UndertalePointerList" x:TypeArguments="undertalem:UndertaleRoom+TextItemInstance"/>
+                            </TreeDataTemplate.DataType>
+                            <TextBlock Text="Text items"/>
+                        </TreeDataTemplate>
+                    </TreeView.DataTemplates>
+                    <TreeViewItem x:Name="RoomTreeViewItem" Header="{Binding Room.Name.Content}" IsExpanded="True">
+                        <TreeViewItem Header="Backgrounds"
+                                      ItemsSource="{Binding Room.Backgrounds}"/>
+                        <TreeViewItem Header="Views"
+                                      ItemsSource="{Binding Room.Views}"/>
+                        <TreeViewItem Header="Game objects"
+                                      ItemsSource="{Binding Room.GameObjects}"/>
+                        <TreeViewItem Header="Tiles"
+                                      ItemsSource="{Binding Room.Tiles}"/>
+                        <TreeViewItem Header="Layers"
+                                      ItemsSource="{Binding Room.Layers}"/>
+                    </TreeViewItem>
+                </TreeView>
+            </Grid>
+            <Grid Grid.Column="1">
+                <!-- Properties -->
+                <ScrollViewer>
+                    <ContentControl Content="{Binding PropertiesContent}">
+                        <ContentControl.DataTemplates>
+                            <DataTemplate DataType="undertalem:UndertaleRoom">
+                                <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*">
+                                    <Label>Name</Label>
+                                    <c:UndertaleStringReferenceView Reference="{Binding Name}" />
+
+                                    <Label>Caption</Label>
+                                    <c:UndertaleStringReferenceView Reference="{Binding Caption}" />
+
+                                    <Label>Width/Height</Label>
+                                    <Grid ColumnDefinitions="1*,1*">
+                                        <TextBox Grid.Column="0" Text="{Binding Width}" />
+                                        <TextBox Grid.Column="1" Text="{Binding Height}" />
+                                    </Grid>
+
+                                    <Label>Speed</Label>
+                                    <TextBox Text="{Binding Speed}" />
+
+                                    <Label>Persistent</Label>
+                                    <CheckBox IsChecked="{Binding Persistent}" />
+
+                                    <Label>Background color</Label>
+                                    <ColorPicker Color="{Binding BackgroundColor, Converter={StaticResource UndertaleColorToColorConverter}}" />
+
+                                    <Label>Draw background color</Label>
+                                    <CheckBox IsChecked="{Binding DrawBackgroundColor}" />
+
+                                    <Label>Creation code</Label>
+                                    <c:UndertaleResourceReferenceView Reference="{Binding CreationCodeId}" ReferenceType="undertalem:UndertaleCode" />
+
+                                    <Label>Flags</Label>
+                                    <c:FlagsBoxView Value="{Binding Flags}" />
+
+                                    <Label>World</Label>
+                                    <CheckBox IsChecked="{Binding World}" />
+
+                                    <Label>Top/Left/Right/Bottom</Label>
+                                    <Grid ColumnDefinitions="1*,1*,1*,1*">
+                                        <TextBox Grid.Column="0" Text="{Binding Top}"/>
+                                        <TextBox Grid.Column="1" Text="{Binding Left}"/>
+                                        <TextBox Grid.Column="2" Text="{Binding Right}"/>
+                                        <TextBox Grid.Column="3" Text="{Binding Bottom}"/>
+                                    </Grid>
+
+                                    <Label>Gravity X/Y</Label>
+                                    <Grid ColumnDefinitions="1*,1*">
+                                        <TextBox Grid.Column="0" Text="{Binding GravityX}"/>
+                                        <TextBox Grid.Column="1" Text="{Binding GravityY}"/>
+                                    </Grid>
+                                </Grid>
+                            </DataTemplate>
+                            <DataTemplate DataType="undertalem:UndertaleRoom+Background">
+                                <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*">
+                                    <Label>Enabled</Label>
+                                    <CheckBox IsChecked="{Binding Enabled}"/>
+
+                                    <Label>Foreground</Label>
+                                    <CheckBox IsChecked="{Binding Foreground}"/>
+
+                                    <Label>Definition</Label>
+                                    <c:UndertaleResourceReferenceView Reference="{Binding BackgroundDefinition}" ReferenceType="undertalem:UndertaleBackground" />
+
+                                    <Label>Position (X/Y)</Label>
+                                    <Grid ColumnDefinitions="1*,1*">
+                                        <TextBox Grid.Column="0" Text="{Binding X}" />
+                                        <TextBox Grid.Column="1" Text="{Binding Y}" />
+                                    </Grid>
+
+                                    <Label>Tiling</Label>
+                                    <Grid ColumnDefinitions="1*,1*">
+                                        <CheckBox Grid.Column="0" IsChecked="{Binding TiledHorizontally}" Content="Horizontal" />
+                                        <CheckBox Grid.Column="1" IsChecked="{Binding TiledVertically}" Content="Vertical"/>
+                                    </Grid>
+
+                                    <Label>Speed (X/Y)</Label>
+                                    <Grid ColumnDefinitions="1*,1*">
+                                        <TextBox Grid.Column="0" Text="{Binding SpeedX}" />
+                                        <TextBox Grid.Column="1" Text="{Binding SpeedY}" />
+                                    </Grid>
+
+                                    <Label>Stretch</Label>
+                                    <CheckBox IsChecked="{Binding Stretch}" />
+                                </Grid>
+                            </DataTemplate>
+                            <DataTemplate DataType="undertalem:UndertaleRoom+View">
+                                <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*">
+                                    <Label>Enabled</Label>
+                                    <CheckBox IsChecked="{Binding Enabled}" />
+
+                                    <Label>View X/Y/Width/Height</Label>
+                                    <Grid ColumnDefinitions="1*,1*,1*,1*">
+                                        <TextBox Grid.Column="0" Text="{Binding ViewX}"/>
+                                        <TextBox Grid.Column="1" Text="{Binding ViewY}"/>
+                                        <TextBox Grid.Column="2" Text="{Binding ViewWidth}"/>
+                                        <TextBox Grid.Column="3" Text="{Binding ViewHeight}"/>
+                                    </Grid>
+
+                                    <Label>Port X/Y/Width/Height</Label>
+                                    <Grid ColumnDefinitions="1*,1*,1*,1*">
+                                        <TextBox Grid.Column="0" Text="{Binding PortX}"/>
+                                        <TextBox Grid.Column="1" Text="{Binding PortY}"/>
+                                        <TextBox Grid.Column="2" Text="{Binding PortWidth}"/>
+                                        <TextBox Grid.Column="3" Text="{Binding PortHeight}"/>
+                                    </Grid>
+
+                                    <Label>Border</Label>
+                                    <Grid ColumnDefinitions="1*,1*">
+                                        <TextBox Grid.Column="0" Text="{Binding BorderX}"/>
+                                        <TextBox Grid.Column="1" Text="{Binding BorderY}"/>
+                                    </Grid>
+
+                                    <Label>Speed</Label>
+                                    <Grid ColumnDefinitions="1*,1*">
+                                        <TextBox Grid.Column="0" Text="{Binding SpeedX}"/>
+                                        <TextBox Grid.Column="1" Text="{Binding SpeedY}"/>
+                                    </Grid>
+
+                                    <Label>Follows object</Label>
+                                    <c:UndertaleResourceReferenceView Reference="{Binding ObjectId}" ReferenceType="undertalem:UndertaleGameObject" />
+                                </Grid>
+                            </DataTemplate>
+                            <DataTemplate DataType="undertalem:UndertaleRoom+GameObject">
+                                <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*">
+                                    <Label>Position (X/Y)</Label>
+                                    <Grid ColumnDefinitions="1*,1*">
+                                        <TextBox Grid.Column="0" Text="{Binding X}" />
+                                        <TextBox Grid.Column="1" Text="{Binding Y}" />
+                                    </Grid>
+
+                                    <!-- TODO: Nonexistent? -->
+                                    <Label>Definition</Label>
+                                    <c:UndertaleResourceReferenceView Reference="{Binding ObjectDefinition}" ReferenceType="undertalem:UndertaleGameObject" />
+
+                                    <Label>Instance ID</Label>
+                                    <TextBox Text="{Binding InstanceID}" />
+
+                                    <Label>Creation code</Label>
+                                    <c:UndertaleResourceReferenceView Reference="{Binding CreationCode}" ReferenceType="undertalem:UndertaleCode" />
+
+                                    <Label>Scale X/Y</Label>
+                                    <Grid ColumnDefinitions="1*,1*">
+                                        <TextBox Grid.Column="0" Text="{Binding ScaleX}" />
+                                        <TextBox Grid.Column="1" Text="{Binding ScaleY}" />
+                                    </Grid>
+
+                                    <Label>Color</Label>
+                                    <ColorPicker Color="{Binding Color, Converter={StaticResource UndertaleColorToColorConverter}}" />
+
+                                    <Label>Rotation</Label>
+                                    <TextBox Text="{Binding Rotation}" />
+
+                                    <Label>Frame index</Label>
+                                    <TextBox Text="{Binding ImageIndex}" />
+
+                                    <Label>Image speed</Label>
+                                    <TextBox Text="{Binding ImageSpeed}" />
+
+                                    <Label>Pre Create code</Label>
+                                    <c:UndertaleResourceReferenceView Reference="{Binding PreCreateCode}" ReferenceType="undertalem:UndertaleCode" />
+                                </Grid>
+                            </DataTemplate>
+                            <DataTemplate DataType="undertalem:UndertaleRoom+Tile">
+                                <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*">
+                                    <Label>Definition</Label>
+
+                                    <Panel>
+                                        <Panel IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).Version,
+                                               Converter={StaticResource VersionCompareConverter},
+                                               ConverterParameter=GE2}">
+                                            <c:UndertaleResourceReferenceView Reference="{Binding ObjectDefinition}" ReferenceType="undertalem:UndertaleSprite"/>
+                                        </Panel>
+                                        <Panel IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).Version,
+                                               Converter={StaticResource VersionCompareConverter},
+                                               ConverterParameter=L2}">
+                                            <c:UndertaleResourceReferenceView Reference="{Binding ObjectDefinition}" ReferenceType="undertalem:UndertaleBackground"/>
+                                        </Panel>
+                                    </Panel>
+
+                                    <Label>Source X/Y/Width/Height</Label>
+                                    <Grid ColumnDefinitions="1*,1*,1*,1*">
+                                        <TextBox Grid.Column="0" Text="{Binding SourceX}" />
+                                        <TextBox Grid.Column="1" Text="{Binding SourceY}" />
+                                        <TextBox Grid.Column="2" Text="{Binding Width}" />
+                                        <TextBox Grid.Column="3" Text="{Binding Height}" />
+                                    </Grid>
+
+                                    <!-- TODO: Tile selector -->
+                                    <Label>Depth</Label>
+                                    <TextBox Text="{Binding TileDepth}" />
+
+                                    <Label>Instance ID</Label>
+                                    <TextBox Text="{Binding InstanceID}" />
+
+                                    <Label>Scale X/Y</Label>
+                                    <Grid ColumnDefinitions="1*,1*">
+                                        <TextBox Grid.Column="0" Text="{Binding ScaleX}" />
+                                        <TextBox Grid.Column="1" Text="{Binding ScaleY}" />
+                                    </Grid>
+
+                                    <Label>Color</Label>
+                                    <ColorPicker Color="{Binding Color, Converter={StaticResource UndertaleColorToColorConverter}}" />
+                                </Grid>
+                            </DataTemplate>
+                            <DataTemplate DataType="undertalem:UndertaleRoom+Layer">
+                                <StackPanel Name="Layer">
+                                    <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*">
+                                        <Label>Layer name</Label>
+                                        <c:UndertaleStringReferenceView Reference="{Binding LayerName}" />
+
+                                        <Label>Layer id</Label>
+                                        <TextBox Text="{Binding LayerId}" />
+
+                                        <Label>Layer type</Label>
+                                        <TextBlock Text="{Binding LayerType}" FontWeight="Bold" />
+
+                                        <Label>Depth</Label>
+                                        <TextBox Text="{Binding LayerDepth}" />
+
+                                        <Label>Visible</Label>
+                                        <CheckBox IsChecked="{Binding IsVisible}" />
+                                    </Grid>
+                                
+                                    <!-- TODO: Properties for all types of layers -->
+                                    <!-- TODO: Don't use ReflectionBinding. But {Binding #Layer.((undertalem:UndertaleRoom.Layer)DataContext).XOffset} doesn't work -->
+                                    <ContentControl Content="{Binding Data}">
+                                        <ContentControl.DataTemplates>
+                                            <DataTemplate DataType="undertalem:UndertaleRoom+Layer+LayerBackgroundData">
+                                                <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*">
+                                                    <Label>Offset X/Y</Label>
+                                                    <Grid ColumnDefinitions="1*,1*">
+                                                        <TextBox Grid.Column="0" Text="{ReflectionBinding #Layer.DataContext.XOffset}" />
+                                                        <TextBox Grid.Column="1" Text="{ReflectionBinding #Layer.DataContext.YOffset}" />
+                                                    </Grid>
+
+                                                    <Label>Speed H/V</Label>
+                                                    <Grid ColumnDefinitions="1*,1*">
+                                                        <TextBox Grid.Column="0" Text="{ReflectionBinding #Layer.DataContext.HSpeed}" />
+                                                        <TextBox Grid.Column="1" Text="{ReflectionBinding #Layer.DataContext.VSpeed}" />
+                                                    </Grid>
+
+                                                    <Label>Visible 2</Label>
+                                                    <CheckBox IsChecked="{Binding Visible}" />
+
+                                                    <Label>Foreground</Label>
+                                                    <CheckBox IsChecked="{Binding Foreground}" />
+                                                    
+                                                    <Label>Sprite</Label>
+                                                    <c:UndertaleResourceReferenceView Reference="{Binding Sprite}" ReferenceType="undertalem:UndertaleSprite" />
+
+                                                    <Label>Tiling</Label>
+                                                    <Grid ColumnDefinitions="1*,1*">
+                                                        <CheckBox Grid.Column="0" IsChecked="{Binding TiledHorizontally}" Content="Horizontal" />
+                                                        <CheckBox Grid.Column="1" IsChecked="{Binding TiledVertically}" Content="Vertical" />
+                                                    </Grid>
+
+                                                    <Label>Stretch</Label>
+                                                    <CheckBox IsChecked="{Binding Stretch}" />
+
+                                                    <Label>Color</Label>
+                                                    <ColorPicker Color="{Binding Color, Converter={StaticResource UndertaleColorToColorConverter}}" />
+
+                                                    <Label>First frame</Label>
+                                                    <TextBox Text="{Binding FirstFrame}" />
+
+                                                    <Label>Animation speed</Label>
+                                                    <Grid ColumnDefinitions="1*,1*">
+                                                        <TextBox Grid.Column="0" Text="{Binding AnimationSpeed}" />
+                                                        <ComboBox Grid.Column="1"
+                                                                  ItemsSource="{Binding Source={x:Type undertalem:AnimationSpeedType}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                                  SelectedItem="{Binding AnimationSpeedType}" />
+                                                    </Grid>
+                                                </Grid>
+                                            </DataTemplate>
+                                            <DataTemplate DataType="undertalem:UndertaleRoom+Layer+LayerInstancesData">
+                                                <TextBlock Text="Contains GameObject instances, listed in the tree on the left" />
+                                            </DataTemplate>
+                                            <DataTemplate DataType="undertalem:UndertaleRoom+Layer+LayerAssetsData">
+                                                <StackPanel>
+                                                    <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*">
+                                                        <Label>Offset X/Y</Label>
+                                                        <Grid ColumnDefinitions="1*,1*">
+                                                            <TextBox Grid.Column="0" Text="{ReflectionBinding #Layer.DataContext.XOffset}" />
+                                                            <TextBox Grid.Column="1" Text="{ReflectionBinding #Layer.DataContext.YOffset}" />
+                                                        </Grid>
+
+                                                        <Label>Speed H/V</Label>
+                                                        <Grid ColumnDefinitions="1*,1*">
+                                                            <TextBox Grid.Column="0" Text="{ReflectionBinding #Layer.DataContext.HSpeed}" />
+                                                            <TextBox Grid.Column="1" Text="{ReflectionBinding #Layer.DataContext.VSpeed}" />
+                                                        </Grid>
+                                                    </Grid>
+
+                                                    <TextBlock Text="Contains legacy tiles and sprites, listed in the tree on the left" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                            <DataTemplate DataType="undertalem:UndertaleRoom+Layer+LayerTilesData">
+                                                <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*">
+                                                    <Label>Offset X/Y</Label>
+                                                    <Grid ColumnDefinitions="1*,1*">
+                                                        <TextBox Grid.Column="0" Text="{ReflectionBinding #Layer.DataContext.XOffset}" />
+                                                        <TextBox Grid.Column="1" Text="{ReflectionBinding #Layer.DataContext.YOffset}" />
+                                                    </Grid>
+
+                                                    <Label>Speed H/V</Label>
+                                                    <Grid ColumnDefinitions="1*,1*">
+                                                        <TextBox Grid.Column="0" Text="{ReflectionBinding #Layer.DataContext.HSpeed}" />
+                                                        <TextBox Grid.Column="1" Text="{ReflectionBinding #Layer.DataContext.VSpeed}" />
+                                                    </Grid>
+
+                                                    <Label>Size</Label>
+                                                    <Grid ColumnDefinitions="1*,1*,1*">
+                                                        <TextBox Grid.Column="0" Text="{Binding TilesX, UpdateSourceTrigger=LostFocus}" />
+                                                        <TextBox Grid.Column="1" Text="{Binding TilesY, UpdateSourceTrigger=LostFocus}" />
+                                                        <!-- TODO: Auto button -->
+                                                        <Button Grid.Column="2">Auto</Button>
+                                                    </Grid>
+
+                                                    <Label>Tile set</Label>
+                                                    <c:UndertaleResourceReferenceView Reference="{Binding Background}" ReferenceType="undertalem:UndertaleBackground" />
+                                                    
+                                                    <!-- TODO: Edit/export/import tile data -->
+                                                </Grid>
+                                            </DataTemplate>
+                                            <DataTemplate DataType="undertalem:UndertaleRoom+Layer+LayerEffectData">
+                                                <TextBlock Text="Effect." />
+                                                
+                                                <!-- TODO: All effect data properties -->
+                                            </DataTemplate>
+                                        </ContentControl.DataTemplates>
+                                    </ContentControl>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ContentControl.DataTemplates>
+                    </ContentControl>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+        <GridSplitter Grid.Row="1" />
+        <Grid Grid.Row="2">
+            <!-- View -->
+            <c:UndertaleRoomEditor />
+        </Grid>
+    </Grid>
+</UserControl>

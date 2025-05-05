@@ -1,0 +1,230 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
+             xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
+             xmlns:undertale="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
+             xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.Views.MainView"
+             x:DataType="v:MainViewModel">
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <v:MainViewModel />
+    </Design.DataContext>
+    
+    <UserControl.Resources>
+        <h:DataItemToNameConverter x:Key="DataItemToNameConverter"/>
+    </UserControl.Resources>
+
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_New" Command="{Binding FileNew}"/>
+                <MenuItem Header="_Open" Command="{Binding FileOpen}"/>
+                <MenuItem Header="_Save"/>
+                <Separator/>
+                <MenuItem Header="_Temp run game"/>
+                <MenuItem Header="Run game under GMS _debugger"/>
+                <MenuItem Header="Run game with other runner"/>
+                <Separator/>
+                <MenuItem Header="Generate o_ffset map"/>
+                <Separator/>
+                <MenuItem Header="S_ettings"/>
+                <MenuItem Header="_Close"/>
+            </MenuItem>
+            <MenuItem Header="_Script"></MenuItem>
+            <MenuItem Header="_Find">
+                <MenuItem Header="_Search in code"/>
+                <MenuItem Header="Find unreferenced _assets"/>
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_GitHub" />
+                <MenuItem Header="_About" />
+            </MenuItem>
+        </Menu>
+        <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,auto">
+            <TextBox Grid.Column="0" />
+            <Label Grid.Column="1" Content="None"/>
+        </Grid>
+        <Grid ColumnDefinitions="1*,Auto,3*">
+            <Grid Grid.Column="0" RowDefinitions="Auto,1*" Margin="5">
+                <StackPanel Spacing="5">
+                    <StackPanel Orientation="Horizontal">
+                        <Button>Back</Button>
+                        <Button>Forward</Button>
+                    </StackPanel>
+                    <TextBox Watermark="Filter by name..."/>
+                </StackPanel>
+                <TreeView x:Name="DataTreeView" Grid.Row="1" Margin="0,5,0,0" DoubleTapped="TreeView_DoubleTapped">
+                    <TreeView.Styles>
+                        <Style Selector="TreeViewItem">
+                            <Setter Property="(Interaction.Behaviors)">
+                                <BehaviorCollectionTemplate>
+                                    <BehaviorCollection>
+                                        <ContextDragBehavior />
+                                    </BehaviorCollection>
+                                </BehaviorCollectionTemplate>
+                            </Setter>
+                        </Style>
+                    </TreeView.Styles>
+                    <TreeView.KeyBindings>
+                        <KeyBinding Gesture="Enter" Command="{Binding TabOpen}" CommandParameter="{Binding #DataTreeView.SelectedItem}"/>
+                    </TreeView.KeyBindings>
+                    <TreeView.DataTemplates>
+                        <DataTemplate DataType="undertale:UndertaleNamedResource">
+                            <TextBlock Text="{Binding Name.Content}"/>
+                        </DataTemplate>
+                        <DataTemplate DataType="undertalem:UndertaleString">
+                            <TextBlock Text="{Binding Content}"/>
+                        </DataTemplate>
+                    </TreeView.DataTemplates>
+                    <TreeViewItem Header="Data" IsExpanded="True">
+                        <TreeViewItem x:Name="GeneralInfo" Header="General info"
+                                      IsEnabled="{Binding Data.GeneralInfo, Converter={x:Static ObjectConverters.IsNotNull}, FallbackValue={x:False}}" />
+                        <TreeViewItem x:Name="GlobalInitScripts" Header="Global init scripts"
+                                      IsEnabled="{Binding Data.GlobalInitScripts, Converter={x:Static ObjectConverters.IsNotNull}, FallbackValue={x:False}}" />
+                        <TreeViewItem x:Name="GameEndScripts" Header="Game End scripts"
+                                      IsEnabled="{Binding Data.GameEndScripts, Converter={x:Static ObjectConverters.IsNotNull}, FallbackValue={x:False}}" />
+                        <TreeViewItem Header="Audio groups"
+                            ItemsSource="{Binding Data.AudioGroups}" />
+                        <TreeViewItem Header="Sounds"
+                            ItemsSource="{Binding Data.Sounds}" />
+                        <TreeViewItem Header="Sprites"
+                            ItemsSource="{Binding Data.Sprites}" />
+                        <TreeViewItem Header="Backgrounds &amp; Tile sets"
+                            ItemsSource="{Binding Data.Backgrounds}" />
+                        <TreeViewItem Header="Paths"
+                            ItemsSource="{Binding Data.Paths}" />
+                        <TreeViewItem Header="Scripts"
+                            ItemsSource="{Binding Data.Scripts}" />
+                        <TreeViewItem Header="Shaders"
+                            ItemsSource="{Binding Data.Shaders}" />
+                        <TreeViewItem Header="Fonts"
+                            ItemsSource="{Binding Data.Fonts}" />
+                        <TreeViewItem Header="Timelines"
+                            ItemsSource="{Binding Data.Timelines}" />
+                        <TreeViewItem Header="Game objects"
+                            ItemsSource="{Binding Data.GameObjects}" />
+                        <TreeViewItem Header="Rooms"
+                            ItemsSource="{Binding Data.Rooms}" />
+                        <TreeViewItem Header="Extensions"
+                            ItemsSource="{Binding Data.Extensions}" />
+                        <TreeViewItem Header="Texture page items"
+                            ItemsSource="{Binding Data.TexturePageItems}" />
+                        <TreeViewItem Header="Code"
+                            ItemsSource="{Binding Data.Code}" />
+                        <TreeViewItem Header="Variables"
+                            ItemsSource="{Binding Data.Variables}" />
+                        <TreeViewItem Header="Functions"
+                            ItemsSource="{Binding Data.Functions}" />
+                        <TreeViewItem Header="Code locals"
+                            ItemsSource="{Binding Data.CodeLocals}" />
+                        <TreeViewItem Header="Strings"
+                            ItemsSource="{Binding Data.Strings}" />
+                        <TreeViewItem Header="Embedded textures"
+                            ItemsSource="{Binding Data.EmbeddedTextures}" />
+                        <TreeViewItem Header="Embedded audio"
+                            ItemsSource="{Binding Data.EmbeddedAudio}" />
+                        <TreeViewItem Header="Texture group information"
+                            ItemsSource="{Binding Data.TextureGroupInfo}" />
+                        <TreeViewItem Header="Embedded images"
+                            ItemsSource="{Binding Data.EmbeddedImages}" />
+                        <TreeViewItem Header="Particle systems"
+                            ItemsSource="{Binding Data.ParticleSystems}" />
+                        <TreeViewItem Header="Particle system emitters"
+                            ItemsSource="{Binding Data.ParticleSystemEmitters}" />
+                    </TreeViewItem>
+                </TreeView>
+            </Grid>
+            
+            <GridSplitter Grid.Column="1" ResizeDirection="Columns"/>
+            
+            <TabControl Grid.Column="2" ItemsSource="{Binding Tabs}" SelectedItem="{Binding TabSelected}" SelectedIndex="{Binding TabSelectedIndex}" PointerReleased="TabControl_PointerReleased">
+                <TabControl.ItemTemplate>
+                    <DataTemplate DataType="v:TabItemViewModel">
+                        <StackPanel Orientation="Horizontal">
+                            <ContentControl Content="{Binding Content}">
+                                <ContentControl.DataTemplates>
+                                    <DataTemplate DataType="v:DescriptionViewModel">
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding Heading}"/>
+                                    </DataTemplate>
+                                    <DataTemplate DataType="v:GeneralInfoViewModel">
+                                        <TextBlock VerticalAlignment="Center" Text="General info"/>
+                                    </DataTemplate>
+                                    <DataTemplate DataType="v:GlobalInitScriptsViewModel">
+                                        <TextBlock VerticalAlignment="Center" Text="Global init scripts"/>
+                                    </DataTemplate>
+                                    <DataTemplate DataType="v:GameEndScriptsViewModel">
+                                        <TextBlock VerticalAlignment="Center" Text="Game End scripts"/>
+                                    </DataTemplate>
+                                    <!-- TODO: Temp, it doesn't update. -->
+                                    <DataTemplate DataType="undertale:UndertaleNamedResource">
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding ., Converter={StaticResource DataItemToNameConverter}}"/>
+                                    </DataTemplate>
+                                    <!-- Resources -->
+                                    <DataTemplate DataType="v:UndertaleGameObjectViewModel">
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding GameObject.Name.Content, StringFormat=Game object - {0}}"/>
+                                    </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleRoomViewModel">
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding Room.Name.Content, StringFormat=Room - {0}}"/>
+                                    </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleCodeViewModel">
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding Code.Name.Content, StringFormat=Code - {0}}"/>
+                                    </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleStringViewModel">
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding String.Content, StringFormat=String - {0}}"/>
+                                    </DataTemplate>
+                                </ContentControl.DataTemplates>
+                            </ContentControl>
+                            <Button Width="16" Height="16" Padding="0"
+                                Command="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).TabClose}"
+                                CommandParameter="{Binding .}">X</Button>
+                        </StackPanel>
+                    </DataTemplate>
+                </TabControl.ItemTemplate>
+                <TabControl.ContentTemplate>
+                    <DataTemplate DataType="v:TabItemViewModel">
+                        <ScrollViewer>
+                            <ContentControl Content="{Binding Content}">
+                                <ContentControl.DataTemplates>
+                                    <DataTemplate DataType="v:DescriptionViewModel">
+                                        <StackPanel Margin="12,0,12,0">
+                                            <TextBlock FontWeight="Bold" Text="{Binding Heading}"/>
+                                            <Separator/>
+                                            <TextBlock Text="{Binding Description}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                    <DataTemplate DataType="v:GeneralInfoViewModel">
+                                        <v:GeneralInfoView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="v:GlobalInitScriptsViewModel">
+                                        <v:GlobalInitScriptsView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="v:GameEndScriptsViewModel">
+                                        <v:GameEndScriptsView />
+                                    </DataTemplate>
+                                    <!-- Resources -->
+                                    <DataTemplate DataType="v:UndertaleGameObjectViewModel">
+                                        <v:UndertaleGameObjectView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleRoomViewModel">
+                                        <v:UndertaleRoomView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleCodeViewModel">
+                                        <v:UndertaleCodeView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleStringViewModel">
+                                        <v:UndertaleStringView />
+                                    </DataTemplate>
+                                </ContentControl.DataTemplates>
+                            </ContentControl>
+                        </ScrollViewer>
+                    </DataTemplate>
+                </TabControl.ContentTemplate>
+            </TabControl>
+        </Grid>
+    </DockPanel>
+</UserControl>
