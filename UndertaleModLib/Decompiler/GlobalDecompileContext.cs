@@ -124,10 +124,11 @@ public class GlobalDecompileContext : IGameContext
         // Prefix used for sub-functions
         const string subFunctionPrefix = "gml_Script_";
 
-        // Add all functions that aren't sub-functions
+        // Add all functions that aren't sub-functions, if they aren't already there
         foreach (UndertaleFunction func in data.Functions)
         {
-            if (func?.Name?.Content is string name && !name.StartsWith(subFunctionPrefix, StringComparison.Ordinal))
+            if (func?.Name?.Content is string name && !name.StartsWith(subFunctionPrefix, StringComparison.Ordinal) &&
+                !data.GlobalFunctions.FunctionNameExists(name))
             {
                 data.GlobalFunctions.DefineFunction(name, func);
             }
