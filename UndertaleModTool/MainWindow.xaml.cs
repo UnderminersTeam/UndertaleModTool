@@ -1684,6 +1684,29 @@ namespace UndertaleModTool
             OpenInTab(Highlighted, true);
         }
 
+        private static bool IsValidAssetIdentifier(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return false;
+            }
+
+            char firstChar = name[0];
+            if (!char.IsAsciiLetter(firstChar) && firstChar != '_')
+            {
+                return false;
+            }
+            foreach (char c in name.Skip(1))
+            {
+                if (!char.IsAsciiLetterOrDigit(c) && c != '_')
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         private void MenuItem_Add_Click(object sender, RoutedEventArgs e)
         {
             object source;
@@ -1708,11 +1731,6 @@ namespace UndertaleModTool
                 {
                     notDataNewName = "PageItem " + list.Count;
                 }
-                if ((obj is UndertaleExtension) && (IsExtProductIDEligible == Visibility.Visible))
-                {
-                    var newProductID = new byte[] { 0xBA, 0x5E, 0xBA, 0x11, 0xBA, 0xDD, 0x06, 0x60, 0xBE, 0xEF, 0xED, 0xBA, 0x0B, 0xAB, 0xBA, 0xBE };
-                    Data.FORM.EXTN.productIdData.Add(newProductID);
-                }
                 if (obj is UndertaleEmbeddedAudio)
                 {
                     notDataNewName = "EmbeddedSound " + list.Count;
@@ -1721,19 +1739,29 @@ namespace UndertaleModTool
                 {
                     notDataNewName = "Texture " + list.Count;
                 }
-                if (obj is UndertaleShader shader)
-                {
-                    shader.GLSL_ES_Vertex = Data.Strings.MakeString("", true);
-                    shader.GLSL_ES_Fragment = Data.Strings.MakeString("", true);
-                    shader.GLSL_Vertex = Data.Strings.MakeString("", true);
-                    shader.GLSL_Fragment = Data.Strings.MakeString("", true);
-                    shader.HLSL9_Vertex = Data.Strings.MakeString("", true);
-                    shader.HLSL9_Fragment = Data.Strings.MakeString("", true);
-                }
 
                 if (doMakeString)
                 {
-                    string newName = obj.GetType().Name.Replace("Undertale", "").Replace("GameObject", "Object").ToLower() + list.Count;
+                    string assetTypeName = obj.GetType().Name.Replace("Undertale", "").Replace("GameObject", "Object").ToLower();
+                    string newName = $"{assetTypeName}{list.Count}";
+                    string userNewName = ScriptInputDialog($"Choose new {assetTypeName} name", "Name of new asset:", newName, "Cancel", "Create", false, false);
+                    if (userNewName is null)
+                    {
+                        // Presume user canceled the action
+                        return;
+                    }
+                    if (IsValidAssetIdentifier(userNewName))
+                    {
+                        newName = userNewName;
+                    }
+                    else
+                    {
+                        if (this.ShowQuestionWithCancel($"Asset name \"{userNewName}\" is not a valid identifier. Add a new asset using an auto-generated name instead?",
+                            MessageBoxImage.Warning, "Invalid name") != MessageBoxResult.Yes)
+                        {
+                            return;
+                        }
+                    }
                     namedResource.Name = Data.Strings.MakeString(newName);
                     if (obj is UndertaleRoom roomResource)
                     {
@@ -1741,18 +1769,56 @@ namespace UndertaleModTool
 
                         if (Data?.IsGameMaker2() == true)
                         {
-                            roomResource.Flags |= Data.IsVersionAtLeast(2024, 13) ? UndertaleRoom.RoomEntryFlags.IsGM2024_13 : UndertaleRoom.RoomEntryFlags.IsGMS2;
+                            if (Data.IsVersionAtLeast(2024, 13))
+                            {
+                                roomResource.Flags |= Data.IsVersionAtLeast(2024, 13) ? UndertaleRoom.RoomEntryFlags.IsGM2024_13 : UndertaleRoom.RoomEntryFlags.IsGMS2;
+                            }
+                            else
+                            {
+                                roomResource.Flags |= UndertaleRoom.RoomEntryFlags.IsGMS2;
+                                if (Data.IsVersionAtLeast(2, 3))
+                                {
+                                    roomResource.Flags |= UndertaleRoom.RoomEntryFlags.IsGMS2_3;
+                                }
+                            }
                         }
                     }
                     else if (obj is UndertaleScript scriptResource)
                     {
-                        string prefix = Data.IsVersionAtLeast(2, 3) ? "gml_GlobalScript_" : "gml_Script_";
-                        scriptResource.Code = UndertaleCode.CreateEmptyEntry(Data, prefix + newName);
+                        if (Data.IsVersionAtLeast(2, 3))
+                        {
+                            scriptResource.Code = UndertaleCode.CreateEmptyEntry(Data, $"gml_GlobalScript_{newName}");
+                            if (Data.GlobalInitScripts is IList<UndertaleGlobalInit> globalInitScripts)
+                            {
+                                globalInitScripts.Add(new UndertaleGlobalInit()
+                                {
+                                    Code = scriptResource.Code
+                                });
+                            }
+                        }
+                        else
+                        {
+                            scriptResource.Code = UndertaleCode.CreateEmptyEntry(Data, $"gml_Script_{newName}");
+                        }
                     }
                     else if (obj is UndertaleCode codeResource && Data.CodeLocals is not null)
                     {
                         codeResource.LocalsCount = 1;
                         UndertaleCodeLocals.CreateEmptyEntry(Data, codeResource.Name);
+                    }
+                    else if (obj is UndertaleExtension && IsExtProductIDEligible == Visibility.Visible)
+                    {
+                        var newProductID = new byte[] { 0xBA, 0x5E, 0xBA, 0x11, 0xBA, 0xDD, 0x06, 0x60, 0xBE, 0xEF, 0xED, 0xBA, 0x0B, 0xAB, 0xBA, 0xBE };
+                        Data.FORM.EXTN.productIdData.Add(newProductID);
+                    }
+                    else if (obj is UndertaleShader shader)
+                    {
+                        shader.GLSL_ES_Vertex = Data.Strings.MakeString("", true);
+                        shader.GLSL_ES_Fragment = Data.Strings.MakeString("", true);
+                        shader.GLSL_Vertex = Data.Strings.MakeString("", true);
+                        shader.GLSL_Fragment = Data.Strings.MakeString("", true);
+                        shader.HLSL9_Vertex = Data.Strings.MakeString("", true);
+                        shader.HLSL9_Fragment = Data.Strings.MakeString("", true);
                     }
                 }
                 else
@@ -1761,7 +1827,9 @@ namespace UndertaleModTool
                 }
             }
             else if (obj is UndertaleString str)
+            {
                 str.Content = "string" + list.Count;
+            }
             list.Add(obj);
             UpdateTree();
             HighlightObject(obj);
@@ -2473,9 +2541,10 @@ namespace UndertaleModTool
 
         public string ScriptInputDialog(string title, string label, string defaultInput, string cancelText, string submitText, bool isMultiline, bool preventClose)
         {
-            TextInputDialog dlg = new TextInputDialog(title, label, defaultInput, cancelText, submitText, isMultiline, preventClose);
-            bool? dlgResult = dlg.ShowDialog();
+            TextInputDialog dlg = new(title, label, defaultInput, cancelText, submitText, isMultiline, preventClose);
+            dlg.Owner = this;
 
+            bool? dlgResult = dlg.ShowDialog();
             if (!dlgResult.HasValue || dlgResult == false)
             {
                 // returns null (not an empty!!!) string if the dialog has been closed, or an error has occurred.
