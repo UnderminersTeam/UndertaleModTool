@@ -523,7 +523,7 @@ namespace UndertaleModTool
                 try
                 {
                     var data = mainWindow.Data;
-                    text = code.Disassemble(data.Variables, data.CodeLocals?.For(code));
+                    text = code.Disassemble(data.Variables, data.CodeLocals?.For(code), data.CodeLocals is null);
 
                     CurrentLocals.Clear();
                 }

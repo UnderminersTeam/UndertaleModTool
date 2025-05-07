@@ -161,7 +161,7 @@ namespace UndertaleModTool.Windows
                 if (code is not null && code.ParentEntry is null)
                 {
                     var codeText = isInAssembly
-                        ? code.Disassemble(mainWindow.Data.Variables, mainWindow.Data.CodeLocals?.For(code))
+                        ? code.Disassemble(mainWindow.Data.Variables, mainWindow.Data.CodeLocals?.For(code), mainWindow.Data.CodeLocals is null)
                         : TryGetProfileModeGML(code.Name.Content)
                             ?? new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, mainWindow.Data.ToolInfo.DecompilerSettings).DecompileToString();
                     SearchInCodeText(code.Name.Content, codeText);
