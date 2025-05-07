@@ -1801,10 +1801,17 @@ namespace UndertaleModTool
                             scriptResource.Code = UndertaleCode.CreateEmptyEntry(Data, $"gml_Script_{newName}");
                         }
                     }
-                    else if (obj is UndertaleCode codeResource && Data.CodeLocals is not null)
+                    else if (obj is UndertaleCode codeResource)
                     {
-                        codeResource.LocalsCount = 1;
-                        UndertaleCodeLocals.CreateEmptyEntry(Data, codeResource.Name);
+                        if (Data.CodeLocals is not null)
+                        {
+                            codeResource.LocalsCount = 1;
+                            UndertaleCodeLocals.CreateEmptyEntry(Data, codeResource.Name);
+                        }
+                        else
+                        {
+                            codeResource.WeirdLocalFlag = true;
+                        }
                     }
                     else if (obj is UndertaleExtension && IsExtProductIDEligible == Visibility.Visible)
                     {

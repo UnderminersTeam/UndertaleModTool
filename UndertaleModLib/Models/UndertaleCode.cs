@@ -918,9 +918,9 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
     /// </summary>
     /// <param name="code">The <see cref="UndertaleCode"/> code entry for which the instruction belongs.</param>
     /// <param name="address">Address of the instruction within its code entry.</param>
-    /// <param name="blocks">A list of block addresses for the code entry for which the instruction belongs.</param>
+    /// <param name="blocks">A lookup of block addresses to block indices for the code entry for which the instruction belongs.</param>
     /// <returns></returns>
-    public string ToString(UndertaleCode code, uint address, List<uint> blocks = null)
+    public string ToString(UndertaleCode code, uint address, Dictionary<uint, uint> blocks = null)
     {
         StringBuilder sb = new();
         ToString(sb, code, address, blocks);
@@ -931,17 +931,20 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
     /// Inserts a string representation of this object at a specified index in a <see cref="StringBuilder"/>.
     /// </summary>
     /// <param name="stringBuilder">The <see cref="StringBuilder"/> instance on where to insert the string representation.</param>
-    /// <param name="code"><inheritdoc cref="ToString(UndertaleCode, uint, List{uint})"/></param>
+    /// <param name="code"><inheritdoc cref="ToString(UndertaleCode, uint, Dictionary{uint, uint})"/></param>
     /// <param name="address">Address of the instruction within its code entry.</param>
-    /// <param name="blocks"><inheritdoc cref="ToString(UndertaleCode, uint, List{uint})"/></param>
-    /// <param name="index">The index on where to insert the string representation. If this is <see langword="null"/>
+    /// <param name="blocks"><inheritdoc cref="ToString(UndertaleCode, uint, Dictionary{uint, uint})"/></param>
+    /// <param name="index">The index on where to insert the string representation. If this is -1,
     /// it will use <paramref name="stringBuilder.Length"/> as the index instead.</param>
     /// <remarks>Note that performance of this function can be drastically different, depending on <paramref name="index"/>.
-    /// For best results, it's recommended to leave it at <see langword="null"/>.</remarks>
-    public void ToString(StringBuilder stringBuilder, UndertaleCode code, uint address, List<uint> blocks = null, int? index = null)
+    /// For best results, it's recommended to leave it at -1.</remarks>
+    public void ToString(StringBuilder stringBuilder, UndertaleCode code, uint address, Dictionary<uint, uint> blocks = null, int index = -1)
     {
-        index ??= stringBuilder.Length;
-        StringBuilderHelper sbh = new(index.Value);
+        if (index < 0)
+        {
+            index = stringBuilder.Length;
+        }
+        StringBuilderHelper sbh = new(index);
         
         string kind = Kind.ToString();
         var type = GetInstructionType(Kind);
@@ -1007,8 +1010,8 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                     targetGoto = "[end]";
                 else if (JumpOffsetPopenvExitMagic)
                     targetGoto = "<drop>";
-                else if (blocks is not null)
-                    targetGoto = $"[{blocks.IndexOf((uint)(address + JumpOffset))}]";
+                else if (blocks is not null && blocks.TryGetValue((uint)(address + JumpOffset), out uint blockIndex))
+                    targetGoto = $"[{blockIndex}]";
                 else
                     targetGoto = (address + JumpOffset).ToString("D5");
                 sbh.Append(stringBuilder, targetGoto);
@@ -1409,6 +1412,10 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
         if (data.CodeLocals is not null)
         {
             UndertaleCodeLocals.CreateEmptyEntry(data, name);
+        }
+        else
+        {
+            newEntry.WeirdLocalFlag = true;
         }
 
         return newEntry;
