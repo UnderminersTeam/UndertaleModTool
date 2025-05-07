@@ -83,7 +83,7 @@ internal readonly record struct CodeFindReplaceOperation
             // End of line
             if (str[i] == '\n')
             {
-                lines.Add(new(lineWhitespaceStartIndex, lineStartIndex, lineEndIndex, i));
+                lines.Add(new(lineWhitespaceStartIndex, lineStartIndex, lineEndIndex, i + 1));
                 lineWhitespaceStartIndex = i + 1;
                 lineStartIndex = i + 1;
                 lineEndIndex = i + 1;
@@ -104,6 +104,10 @@ internal readonly record struct CodeFindReplaceOperation
                 lineEndIndex = i + 1;
             }
         }
+
+        // Handle final line
+        lines.Add(new(lineWhitespaceStartIndex, lineStartIndex, lineEndIndex, str.Length));
+
         return lines;
     }
 
@@ -149,14 +153,13 @@ internal readonly record struct CodeFindReplaceOperation
             if (match)
             {
                 sb.Append(Replacement);
-                i += searchLines.Count;
+                i += searchLines.Count - 1;
             }
             else
             {
                 TrimmedLine codeLine = codeLines[i];
                 ReadOnlySpan<char> fullCodeLineChars = code[codeLine.WhitespaceStartIndex..codeLine.WhitespaceEndIndex];
                 sb.Append(fullCodeLineChars);
-                sb.AppendLine();
             }
         }
 
