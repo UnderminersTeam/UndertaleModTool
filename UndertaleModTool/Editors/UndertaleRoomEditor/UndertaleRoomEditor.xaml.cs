@@ -1603,6 +1603,9 @@ namespace UndertaleModTool
                 // likewise
                 if (data.IsNonLTSVersionAtLeast(2023, 2))
                     layer.AssetsData.ParticleSystems ??= new UndertalePointerList<ParticleSystemInstance>();
+                // and likewise again
+                if (data.IsVersionAtLeast(2024, 6))
+                    layer.AssetsData.TextItems ??= new UndertalePointerList<TextItemInstance>();
             }
             else if (layer.LayerType == LayerType.Tiles)
             {
