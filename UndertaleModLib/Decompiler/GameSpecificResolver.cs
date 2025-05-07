@@ -148,7 +148,7 @@ public class GameSpecificResolver
             }
 
             // Sort all definitions by their load order
-            _definitions.Sort((a, b) => a.LoadOrder);
+            _definitions.Sort((a, b) => a.LoadOrder - b.LoadOrder);
         }
     }
 
