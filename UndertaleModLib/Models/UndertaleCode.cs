@@ -361,7 +361,11 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
         {
             return;
         }
+
+        // Get address of first instruction in the reference chain
         uint addr = reader.GetAddressForUndertaleObject(obj.FirstAddress);
+
+        // Loop over all occurrences in the chain, assigning the variable/function references
         UndertaleInstruction instr = null;
         for (int i = 0; i < obj.Occurrences; i++)
         {
@@ -374,9 +378,11 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
             {
                 instr.ValueFunction = obj as UndertaleFunction;
             }
-            addr += instr.ReferenceNextOccurrenceOffset; // For relevant instructions, this is equivalent to IntArgument/ValueInt
+            addr += instr.ReferenceNextOccurrenceOffset; // For relevant instructions (such as pushref.i, push.i), this is equivalent to IntArgument/ValueInt
         }
-        obj.NameStringID = (int)instr.ReferenceNextOccurrenceOffset;
+
+        // Name string ID uses only lower 24 bits, particularly in the case that the last reference is a pushref.i with a function
+        obj.NameStringID = (int)instr.ReferenceNextOccurrenceOffset & 0xFFFFFF;
     }
 
     /// <summary>
@@ -615,9 +621,10 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                 {
                     if (ValueFunction is UndertaleFunction function)
                     {
-                        // Write function (reset next occurrence to string ID for now)
+                        // Write function (reset next occurrence to string ID for now).
+                        // We additionally encode the script asset type, which can appear in files if this reference is the final one.
                         ReferenceNextOccurrenceOffset = (uint)function.NameStringID;
-                        writer.Write(_primitiveValue.AsInt);
+                        writer.Write(_primitiveValue.AsInt | (AdaptAssetTypeId(writer.undertaleData, AssetType.Script) << 24));
                     }
                     else
                     {
@@ -1226,6 +1233,53 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
             12 => AssetType.AnimCurve,
             13 => AssetType.ParticleSystem,
             14 => AssetType.RoomInstance,
+            _ => throw new Exception($"Unknown asset type {type}")
+        };
+    }
+
+    /// <summary>
+    /// Adapts the <see cref="Underanalyzer.AssetType"/> enum to asset type IDs, across versions.
+    /// </summary>
+    private static int AdaptAssetTypeId(UndertaleData data, AssetType type)
+    {
+        if (data.IsVersionAtLeast(2024, 4))
+        {
+            return type switch
+            {
+                AssetType.Object => 0,
+                AssetType.Sprite => 1,
+                AssetType.Sound => 2,
+                AssetType.Room => 3,
+                AssetType.Path => 4,
+                AssetType.Script => 5,
+                AssetType.Font => 6,
+                AssetType.Timeline => 7,
+                AssetType.Shader => 8,
+                AssetType.Sequence => 9,
+                AssetType.AnimCurve => 10,
+                AssetType.ParticleSystem => 11,
+                AssetType.Background => 13,
+                AssetType.RoomInstance => 14,
+                _ => throw new Exception($"Unknown asset type {type}")
+            };
+        }
+
+        return type switch
+        {
+            AssetType.Object => 0,
+            AssetType.Sprite => 1,
+            AssetType.Sound => 2,
+            AssetType.Room => 3,
+            AssetType.Background => 4,
+            AssetType.Path => 5,
+            AssetType.Script => 6,
+            AssetType.Font => 7,
+            AssetType.Timeline => 8,
+            AssetType.Shader => 10,
+            AssetType.Sequence => 11,
+            AssetType.AnimCurve => 12,
+            AssetType.ParticleSystem => 13,
+            AssetType.RoomInstance => 14,
             _ => throw new Exception($"Unknown asset type {type}")
         };
     }
