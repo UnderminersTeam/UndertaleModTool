@@ -1211,6 +1211,10 @@ namespace UndertaleModTool
                         ContextMenuDark contextMenu = new();
                         foreach (UndertaleObject obj in possibleObjects)
                         {
+                            if (obj is null)
+                            {
+                                continue;
+                            }
                             MenuItemDark item = new();
                             item.Header = obj.ToString().Replace("_", "__");
                             item.PreviewMouseDown += (sender2, ev2) =>
