@@ -1173,8 +1173,8 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
     IGMInstruction.DataType IGMInstruction.Type1 => (IGMInstruction.DataType)Type1;
     IGMInstruction.DataType IGMInstruction.Type2 => (IGMInstruction.DataType)Type2;
     IGMInstruction.InstanceType IGMInstruction.InstType => (IGMInstruction.InstanceType)TypeInst;
-    IGMVariable IGMInstruction.Variable => ValueVariable;
-    IGMFunction IGMInstruction.Function => ValueFunction;
+    IGMVariable IGMInstruction.ResolvedVariable => ValueVariable;
+    IGMFunction IGMInstruction.ResolvedFunction => ValueFunction;
     IGMInstruction.VariableType IGMInstruction.ReferenceVarType => (IGMInstruction.VariableType)ReferenceType;
     double IGMInstruction.ValueDouble => ValueDouble;
     short IGMInstruction.ValueShort => ValueShort;
@@ -1189,7 +1189,61 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
     int IGMInstruction.PopSwapSize => SwapExtra;
     int IGMInstruction.AssetReferenceId => IntArgument & 0xffffff;
     AssetType IGMInstruction.GetAssetReferenceType(IGameContext context) => AdaptAssetType((context as GlobalDecompileContext).Data, IntArgument >> 24);
+    
+    IGMVariable IGMInstruction.TryFindVariable(IGameContext context)
+    {
+        // Fast path - variable is already resolved
+        if (ValueVariable is IGMVariable variable)
+        {
+            return variable;
+        }
 
+        // Search for variable with the encoded string ID, as a last resort
+        if (context is not GlobalDecompileContext { Data: UndertaleData data })
+        {
+            return null;
+        }
+        int stringId = (int)ReferenceNextOccurrenceOffset;
+        if (stringId < 0 || stringId >= data.Strings.Count)
+        {
+            return null;
+        }
+        string variableName = data.Strings[stringId].Content;
+        return data.Variables.ByName(variableName) ?? new UndertaleVariable() { Name = new UndertaleString(variableName) };
+    }
+
+    IGMFunction IGMInstruction.TryFindFunction(IGameContext context)
+    {
+        // Fast path - function is already resolved
+        if (ValueFunction is IGMFunction function)
+        {
+            return function;
+        }
+
+        // Get ahold of data
+        if (context is not GlobalDecompileContext { Data: UndertaleData data })
+        {
+            return null;
+        }
+
+        // Pushref instructions with an asset type that isn't a script will never have
+        // a function on it (if unresolved after parsing reference chains)
+        if (Kind is Opcode.Break && (IGMInstruction.ExtendedOpcode)ExtendedKind is IGMInstruction.ExtendedOpcode.PushReference &&
+            AdaptAssetType(data, IntArgument >> 24) is not AssetType.Script)
+        {
+            return null;
+        }
+
+        // Search for function with the encoded string ID, as a last resort
+        int stringId = (int)ReferenceNextOccurrenceOffset;
+        if (stringId < 0 || stringId >= data.Strings.Count)
+        {
+            return null;
+        }
+        string functionName = data.Strings[stringId].Content;
+        return data.Functions.ByName(functionName) ?? new UndertaleFunction() { Name = new UndertaleString(functionName) };
+    }
+    
     /// <summary>
     /// Adapts asset type IDs to the <see cref="Underanalyzer.AssetType"/> enum, across versions.
     /// </summary>
