@@ -1765,10 +1765,10 @@ namespace UndertaleModTool
                     namedResource.Name = Data.Strings.MakeString(newName);
                     if (obj is UndertaleRoom roomResource)
                     {
-                        roomResource.Caption = Data.Strings.MakeString("");
-
-                        if (Data?.IsGameMaker2() == true)
+                        if (Data.IsGameMaker2())
                         {
+                            roomResource.Caption = null;
+                            roomResource.Backgrounds.Clear();
                             if (Data.IsVersionAtLeast(2024, 13))
                             {
                                 roomResource.Flags |= Data.IsVersionAtLeast(2024, 13) ? UndertaleRoom.RoomEntryFlags.IsGM2024_13 : UndertaleRoom.RoomEntryFlags.IsGMS2;
@@ -1781,6 +1781,15 @@ namespace UndertaleModTool
                                     roomResource.Flags |= UndertaleRoom.RoomEntryFlags.IsGMS2_3;
                                 }
                             }
+                        }
+                        else
+                        {
+                            roomResource.Caption = Data.Strings.MakeString("");
+                        }
+
+                        if (this.ShowQuestion("Add the new room to the end of the room order list?", MessageBoxImage.Question, "Add to room order list") == MessageBoxResult.Yes)
+                        {
+                            Data.GeneralInfo.RoomOrder.Add(new(roomResource));
                         }
                     }
                     else if (obj is UndertaleScript scriptResource)
