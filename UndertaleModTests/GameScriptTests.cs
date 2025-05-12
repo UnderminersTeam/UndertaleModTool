@@ -66,6 +66,11 @@ namespace UndertaleModTests
             Console.WriteLine(message);
         }
 
+        public void ScriptWarning(string message)
+        {
+            Console.WriteLine($"Warning: {message}");
+        }
+
         public bool ScriptQuestion(string message)
         {
             Console.WriteLine(message);

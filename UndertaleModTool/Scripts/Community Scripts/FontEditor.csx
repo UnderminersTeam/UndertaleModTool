@@ -1251,7 +1251,7 @@ UndertaleFont FontPickerResult()
     comboBox.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
     foreach (UndertaleFont font in Data.Fonts)
     {
-        if (font is null || font.Name?.Content? is null)
+        if (font is null || font.Name?.Content is null)
             continue;
         comboBox.Items.Add(font.Name.Content);
     }

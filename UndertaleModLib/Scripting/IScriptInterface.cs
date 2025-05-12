@@ -113,10 +113,16 @@ public interface IScriptInterface
     bool MakeNewDataFile();
 
     /// <summary>
-    /// Used in Scripts in order to show a message to the user.
+    /// Used in scripts in order to show a message to the user.
     /// </summary>
     /// <param name="message">The message to show.</param>
     void ScriptMessage(string message);
+
+    /// <summary>
+    /// Used in scripts in order to show a warning message to the user.
+    /// </summary>
+    /// <param name="message">The warning message to show.</param>
+    void ScriptWarning(string message);
 
     //TODO: currently should get repurposed/renamed?
     /// <summary>
@@ -133,7 +139,7 @@ public interface IScriptInterface
     bool ScriptQuestion(string message);
 
     /// <summary>
-    /// Used in Scripts in order to show an error to the user.
+    /// Used in scripts in order to show an error to the user.
     /// </summary>
     /// <param name="error">The error message to show.</param>
     /// <param name="title">A short-descriptive title.</param>
