@@ -348,7 +348,24 @@ public sealed class CodeImportGroup
         ArgumentException.ThrowIfNullOrEmpty(search);
         ArgumentNullException.ThrowIfNull(replacement);
 
-        _queuedOperations.Add(new CodeFindReplaceOperation(codeToModify, search.ReplaceLineEndings("\n"), replacement, false, caseSensitive));
+        _queuedOperations.Add(new CodeFindReplaceOperation(codeToModify, search.ReplaceLineEndings("\n"), replacement, false, caseSensitive, false));
+    }
+
+    /// <summary>
+    /// Queues a find and replace operation on this code import context, where string contents are compared on a line-by-line basis, 
+    /// trimming whitespace at the beginning and end of each.
+    /// </summary>
+    /// <param name="codeToModify">Existing (root) code entry to modify.</param>
+    /// <param name="search">Code to search for in decompilation.</param>
+    /// <param name="replacement">String to replace all occurrences of <paramref name="search"/> with.</param>
+    /// <param name="caseSensitive">Whether the search should be case sensitive or not.</param>
+    public void QueueTrimmedLinesFindReplace(UndertaleCode codeToModify, string search, string replacement, bool caseSensitive = true)
+    {
+        ArgumentNullException.ThrowIfNull(codeToModify);
+        ArgumentException.ThrowIfNullOrWhiteSpace(search);
+        ArgumentNullException.ThrowIfNull(replacement);
+
+        _queuedOperations.Add(new CodeFindReplaceOperation(codeToModify, search, replacement, false, caseSensitive, true));
     }
 
     /// <summary>
@@ -364,7 +381,7 @@ public sealed class CodeImportGroup
         ArgumentException.ThrowIfNullOrEmpty(search);
         ArgumentNullException.ThrowIfNull(replacement);
 
-        _queuedOperations.Add(new CodeFindReplaceOperation(codeToModify, search, replacement, true, caseSensitive));
+        _queuedOperations.Add(new CodeFindReplaceOperation(codeToModify, search, replacement, true, caseSensitive, false));
     }
 
     /// <summary>
@@ -428,6 +445,23 @@ public sealed class CodeImportGroup
         ArgumentNullException.ThrowIfNull(replacement);
 
         QueueFindReplace(FindOrCreateCodeEntry(codeEntryName), search.ReplaceLineEndings("\n"), replacement, caseSensitive);
+    }
+
+    /// <summary>
+    /// Queues a find and replace operation on this code import context, where string contents are compared on a line-by-line basis, 
+    /// trimming whitespace at the beginning and end of each.
+    /// </summary>
+    /// <param name="codeEntryName">Code entry that either already exists, or will be automatically created.</param>
+    /// <param name="search">Code to search for in decompilation.</param>
+    /// <param name="replacement">String to replace all occurrences of <paramref name="search"/> with.</param>
+    /// <param name="caseSensitive">Whether the search should be case sensitive or not.</param>
+    public void QueueTrimmedLinesFindReplace(string codeEntryName, string search, string replacement, bool caseSensitive = true)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(codeEntryName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(search);
+        ArgumentNullException.ThrowIfNull(replacement);
+
+        QueueTrimmedLinesFindReplace(FindOrCreateCodeEntry(codeEntryName), search, replacement, caseSensitive);
     }
 
     /// <summary>

@@ -57,6 +57,8 @@ string importFolder = CheckValidity();
 string packDir = Path.Combine(ExePath, "Packager");
 Directory.CreateDirectory(packDir);
 
+bool noMasksForBasicRectangles = Data.IsVersionAtLeast(2022, 9); // TODO: figure out the exact version, but this is pretty close
+
 try
 {
     string sourcePath = importFolder;
@@ -70,6 +72,9 @@ try
 
     int lastTextPage = Data.EmbeddedTextures.Count - 1;
     int lastTextPageItem = Data.TexturePageItems.Count - 1;
+
+    bool bboxMasks = Data.IsVersionAtLeast(2024, 6);
+    Dictionary<UndertaleSprite, Node> maskNodes = new();
 
     // Import everything into UTMT
     string prefix = outName.Replace(Path.GetExtension(outName), "");
@@ -178,8 +183,8 @@ try
                         UndertaleString spriteUTString = Data.Strings.MakeString(spriteName);
                         UndertaleSprite newSprite = new UndertaleSprite();
                         newSprite.Name = spriteUTString;
-                        newSprite.Width = (uint)n.Bounds.Width;
-                        newSprite.Height = (uint)n.Bounds.Height;
+                        newSprite.Width = (uint)n.Texture.BoundingWidth;
+                        newSprite.Height = (uint)n.Texture.BoundingHeight;
                         newSprite.MarginLeft = n.Texture.TargetX;
                         newSprite.MarginRight = n.Texture.TargetX + n.Bounds.Width - 1;
                         newSprite.MarginTop = n.Texture.TargetY;
@@ -232,31 +237,15 @@ try
                             for (int i = 0; i < frame; i++)
                                 newSprite.Textures.Add(null);
                         }
-                        newSprite.CollisionMasks.Add(newSprite.NewMaskEntry());
 
-                        int width = ((n.Bounds.Width + 7) / 8) * 8;
-                        BitArray maskingBitArray = new BitArray(width * n.Bounds.Height);
-                        for (int y = 0; y < n.Bounds.Height; y++)
+                        // Only generate collision masks for sprites that need them (in newer GameMaker versions)
+                        if (!noMasksForBasicRectangles ||
+                            newSprite.SepMasks is not (UndertaleSprite.SepMaskType.AxisAlignedRect or UndertaleSprite.SepMaskType.RotatedRect))
                         {
-                            for (int x = 0; x < n.Bounds.Width; x++)
-                            {
-                                IMagickColor<byte> pixelColor = atlasPixels.GetPixel(x + n.Bounds.X, y + n.Bounds.Y).ToColor();
-                                maskingBitArray[y * width + x] = (pixelColor.A > 0);
-                            }
+                            // Generate mask later (when the current atlas is about to be unloaded)
+                            maskNodes.Add(newSprite, n);
                         }
-                        BitArray tempBitArray = new BitArray(width * n.Bounds.Height);
-                        for (int i = 0; i < maskingBitArray.Length; i += 8)
-                        {
-                            for (int j = 0; j < 8; j++)
-                            {
-                                tempBitArray[j + i] = maskingBitArray[-(j - 7) + i];
-                            }
-                        }
-                        int numBytes = maskingBitArray.Length / 8;
-                        byte[] bytes = new byte[numBytes];
-                        tempBitArray.CopyTo(bytes, 0);
-                        for (int i = 0; i < bytes.Length; i++)
-                            newSprite.CollisionMasks[0].Data[i] = bytes[i];
+
                         newSprite.Textures.Add(texentry);
                         Data.Sprites.Add(newSprite);
                         continue;
@@ -274,6 +263,14 @@ try
                     sprite.GMS2PlaybackSpeed = animSpd;
                     sprite.IsSpecialType = isSpecial;
                     sprite.SVersion = specialVer;
+
+                    // Update sprite dimensions
+                    uint oldWidth = sprite.Width, oldHeight = sprite.Height;
+                    sprite.Width = (uint)n.Texture.BoundingWidth;
+                    sprite.Height = (uint)n.Texture.BoundingHeight;
+                    bool changedSpriteDimensions = (oldWidth != sprite.Width || oldHeight != sprite.Height);
+
+                    // Update origin
                     switch (offresult)
                     {
                         case ("Top Left"):
@@ -314,17 +311,97 @@ try
                             break;
                     }
 
-                    int MarginLeft = n.Texture.TargetX;
-                    int MarginRight = n.Texture.TargetX + n.Bounds.Width - 1;
-                    int MarginTop = n.Texture.TargetY;
-                    int MarginBottom = n.Texture.TargetY + n.Bounds.Height - 1;
-                    if (MarginLeft < sprite.MarginLeft) sprite.MarginLeft = MarginLeft;
-                    if (MarginTop < sprite.MarginTop) sprite.MarginTop = MarginTop;
-                    if (MarginRight > sprite.MarginRight) sprite.MarginRight = MarginRight;
-                    if (MarginBottom > sprite.MarginBottom) sprite.MarginBottom = MarginBottom;
+                    // Grow bounding box depending on how much is trimmed
+                    bool grewBoundingBox = false;
+                    bool fullImageBbox = sprite.BBoxMode == 1;
+                    bool manualBbox = sprite.BBoxMode == 2;
+                    if (!manualBbox)
+                    {
+                        int marginLeft = fullImageBbox ? 0 : n.Texture.TargetX;
+                        int marginRight = fullImageBbox ? ((int)sprite.Width - 1) : (n.Texture.TargetX + n.Bounds.Width - 1);
+                        int marginTop = fullImageBbox ? 0 : n.Texture.TargetY;
+                        int marginBottom = fullImageBbox ? ((int)sprite.Height - 1) : (n.Texture.TargetY + n.Bounds.Height - 1);
+                        if (marginLeft < sprite.MarginLeft)
+                        {
+                            sprite.MarginLeft = marginLeft;
+                            grewBoundingBox = true;
+                        }
+                        if (marginTop < sprite.MarginTop)
+                        {
+                            sprite.MarginTop = marginTop;
+                            grewBoundingBox = true;
+                        }
+                        if (marginRight > sprite.MarginRight)
+                        {
+                            sprite.MarginRight = marginRight;
+                            grewBoundingBox = true;
+                        }
+                        if (marginBottom > sprite.MarginBottom)
+                        {
+                            sprite.MarginBottom = marginBottom;
+                            grewBoundingBox = true;
+                        }
+                    }
+
+                    // Only generate collision masks for sprites that need them (in newer GameMaker versions)
+                    if (!noMasksForBasicRectangles ||
+                        sprite.SepMasks is not (UndertaleSprite.SepMaskType.AxisAlignedRect or UndertaleSprite.SepMaskType.RotatedRect) ||
+                        sprite.CollisionMasks.Count > 0)
+                    {
+                        if ((bboxMasks && grewBoundingBox) ||
+                            (sprite.SepMasks is UndertaleSprite.SepMaskType.Precise && sprite.CollisionMasks.Count == 0) ||
+                            (!bboxMasks && changedSpriteDimensions))
+                        {
+                            // Use this node for the sprite's collision mask if the bounding box grew (or if no collision mask exists for a precise sprite)
+                            maskNodes[sprite] = n;
+                        }
+                    }
                 }
             }
         }
+
+        // Update masks for when bounding box masks are enabled
+        foreach ((UndertaleSprite maskSpr, Node maskNode) in maskNodes)
+        {
+            // Generate collision mask using either bounding box or sprite dimensions
+            maskSpr.CollisionMasks.Clear();
+            maskSpr.CollisionMasks.Add(maskSpr.NewMaskEntry(Data));
+            (int maskWidth, int maskHeight) = maskSpr.CalculateMaskDimensions(Data);
+            int maskStride = ((maskWidth + 7) / 8) * 8;
+
+            BitArray maskingBitArray = new BitArray(maskStride * maskHeight);
+            for (int y = 0; y < maskHeight && y < maskNode.Bounds.Height; y++)
+            {
+                for (int x = 0; x < maskWidth && x < maskNode.Bounds.Width; x++)
+                {
+                    IMagickColor<byte> pixelColor = atlasPixels.GetPixel(x + maskNode.Bounds.X, y + maskNode.Bounds.Y).ToColor();
+                    if (bboxMasks)
+                    {
+                        maskingBitArray[(y * maskStride) + x] = (pixelColor.A > 0);
+                    }
+                    else
+                    {
+                        maskingBitArray[((y + maskNode.Texture.TargetY) * maskStride) + x + maskNode.Texture.TargetX] = (pixelColor.A > 0);
+                    }
+                }
+            }
+            BitArray tempBitArray = new BitArray(maskingBitArray.Length);
+            for (int i = 0; i < maskingBitArray.Length; i += 8)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    tempBitArray[j + i] = maskingBitArray[-(j - 7) + i];
+                }
+            }
+
+            int numBytes = maskingBitArray.Length / 8;
+            byte[] bytes = new byte[numBytes];
+            tempBitArray.CopyTo(bytes, 0);
+            for (int i = 0; i < bytes.Length; i++)
+                maskSpr.CollisionMasks[0].Data[i] = bytes[i];
+        }
+        maskNodes.Clear();
+
         // Increment atlas
         atlasCount++;
     }
@@ -572,7 +649,7 @@ public class Packer
                         throw new ScriptException(fi.FullName + " has 0 frames. Script has been stopped.");
                     }
 
-                    if (!isSprite && frames > 0)
+                    if (!isSprite && frames > 1)
                     {
                         throw new ScriptException(fi.FullName + " is not a sprite, but has more than 1 frame. Script has been stopped.");
                     }
@@ -913,14 +990,8 @@ Pressing ""No"" will cause the program to ignore these images.");*/
             try
             {
                 spriteName = stripped.Substring(0, lastUnderscore);
-                // check if the frame number is a valid string or not
 
-
-
-
-
-
-
+                // Check if the frame number is a valid string or not
                 Int32.Parse(stripped.Substring(lastUnderscore + 1));
             }
             catch
@@ -939,11 +1010,10 @@ Pressing ""No"" will cause the program to ignore these images.");
                 {
                     continue;
                 }
-                // throw new ScriptException("Getting the sprite name of " + FileNameWithExtension + " failed.");
             }
 
+            // If the sprite doesn't have an underscore, don't bother trying to parse it since it'll be single-frame anyways
             int frame = 0;
-            // if the sprite doesn't have an underscore, don't bother trying to parse it since it'll be single-frame anyways
             if (spriteName != stripped)
             {
                 Int32 validFrameNumber = 0;

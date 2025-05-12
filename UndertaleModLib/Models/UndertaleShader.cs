@@ -212,7 +212,7 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
     public void Serialize(UndertaleWriter writer)
     {
         writer.WriteUndertaleString(Name);
-        writer.Write((uint)Type | 0x80000000u); // in big-endian?
+        writer.Write((uint)Type | 0x80000000u);
 
         writer.WriteUndertaleString(GLSL_ES_Vertex);
         writer.WriteUndertaleString(GLSL_ES_Fragment);
@@ -228,7 +228,6 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
 
         if (writer.undertaleData.GeneralInfo.BytecodeVersion > 13)
         {
-
             writer.Write(Version);
 
             PSSL_VertexData.Serialize(writer);
@@ -312,7 +311,7 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
     public void Unserialize(UndertaleReader reader)
     {
         Name = reader.ReadUndertaleString();
-        Type = (ShaderType)(reader.ReadUInt32() & 0x7FFFFFFFu); // in big endian?
+        Type = (ShaderType)(reader.ReadUInt32() & 0x7FFFFFFFu);
 
         GLSL_ES_Vertex = reader.ReadUndertaleString();
         GLSL_ES_Fragment = reader.ReadUndertaleString();
@@ -552,7 +551,11 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
                     throw new UndertaleSerializationException("Failed to compute length of shader data: instructed to read less data than expected.");
                 else if (_Length < length)
                 {
-                    if (isLast && ((reader.AbsPosition + length) % 16 == 0)) // Normal for the last element due to chunk padding, just trust the system
+                    if (isLast && ((reader.AbsPosition + length) % 16) == 0) // Normal for the last element due to chunk padding, just trust the system
+                    {
+                        length = (int)_Length;
+                    }
+                    else if (!isLast && ((reader.AbsPosition + length) % 8) == 0) // Normal for 8-byte alignment to occur on all elements prior to the last one
                     {
                         length = (int)_Length;
                     }

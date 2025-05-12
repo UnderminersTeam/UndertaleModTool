@@ -491,6 +491,119 @@ namespace UndertaleModLib
     public class UndertaleChunkAGRP : UndertaleListChunk<UndertaleAudioGroup>
     {
         public override string Name => "AGRP";
+
+        private bool checkedFor2024_14 = false;
+        private void CheckForGM2024_14(UndertaleReader reader)
+        {
+            checkedFor2024_14 = true;
+
+            // Only perform check if at least 2024.13 (trivially detected by now), and if not already detected
+            if (!reader.undertaleData.IsVersionAtLeast(2024, 13) || reader.undertaleData.IsVersionAtLeast(2024, 14))
+            {
+                return;
+            }
+
+            // Check for new field added in 2024.14
+            long returnTo = reader.Position;
+            long chunkEndPos = reader.AbsPosition + Length;
+
+            uint agrpCount = reader.ReadUInt32();
+            if (agrpCount == 0)
+            {
+                // No way to check when there's no audio groups... abort
+                reader.Position = returnTo;
+                return;
+            }
+
+            // Scan for up to two valid audio group pointers
+            uint firstGroupPosition = 0, secondGroupPosition = 0;
+
+            // Scan until we find a non-null first pointer...
+            uint i = 0;
+            while (i < agrpCount)
+            {
+                firstGroupPosition = reader.ReadUInt32();
+                i++;
+
+                if (firstGroupPosition != 0)
+                {
+                    break;
+                }
+            }
+
+            // Scan until we find a non-null second pointer...
+            while (i < agrpCount)
+            {
+                secondGroupPosition = reader.ReadUInt32();
+                i++;
+
+                if (secondGroupPosition != 0)
+                {
+                    break;
+                }    
+            }
+
+            // Handle 0 audio groups (can't check anything)
+            if (firstGroupPosition == 0)
+            {
+                reader.Position = returnTo;
+                return;
+            }
+
+            // Separately handle the case with 1 audio group only, and cases with at least 2
+            if (secondGroupPosition == 0)
+            {
+                // Look for non-null bytes in the 4 bytes after the audio group name (and within bounds of the chunk)
+                reader.AbsPosition = firstGroupPosition + 4;
+
+                // Make sure the new field can fit in the remaining chunk space
+                if ((reader.AbsPosition + 4) > chunkEndPos)
+                {
+                    reader.Position = returnTo;
+                    return;
+                }
+
+                // If the field data is zero, it's not 2024.14
+                uint pathPtr = reader.ReadUInt32();
+                if (pathPtr == 0)
+                {
+                    reader.Position = returnTo;
+                    return;
+                }
+            }
+            else
+            {
+                // Compare offsets of two audio groups. If the difference is 4, then it's not 2024.14.
+                // Otherwise, it is at least 2024.14.
+                if ((secondGroupPosition - firstGroupPosition) == 4)
+                {
+                    reader.Position = returnTo;
+                    return;
+                }
+            }
+
+            // 2024.14 detected
+            reader.Position = returnTo;
+            reader.undertaleData.SetGMS2Version(2024, 14);
+            uint newSize = UndertaleAudioGroup.ChildObjectsSize + 4;
+            reader.SetStaticChildObjectsSize(typeof(UndertaleAudioGroup), newSize);
+        }
+
+        internal override void UnserializeChunk(UndertaleReader reader)
+        {
+            if (!checkedFor2024_14)
+                CheckForGM2024_14(reader);
+
+            base.UnserializeChunk(reader);
+        }
+
+        internal override uint UnserializeObjectCount(UndertaleReader reader)
+        {
+            checkedFor2024_14 = false;
+            CheckForGM2024_14(reader);
+
+            return base.UnserializeObjectCount(reader);
+        }
     }
 
     public class UndertaleChunkSPRT : UndertaleListChunk<UndertaleSprite>
@@ -752,6 +865,7 @@ namespace UndertaleModLib
 
         private bool checkedFor2022_2 = false;
         private bool checkedFor2023_6And2024_11 = false;
+        private bool checkedFor2024_14 = false;
         private void CheckForGM2022_2(UndertaleReader reader)
         {
            /* This code performs four checks to identify GM2022.2.
@@ -972,40 +1086,104 @@ namespace UndertaleModLib
             checkedFor2023_6And2024_11 = true;
         }
 
+        private void CheckForGM2024_14(UndertaleReader reader)
+        {
+            checkedFor2024_14 = true;
+
+            if (!reader.undertaleData.IsVersionAtLeast(2024, 13))// || reader.undertaleData.IsVersionAtLeast(2024, 14))
+            {
+                return;
+            }
+
+            // Check for new padding added (and final chunk "padding" removed) in 2024.14
+            long returnTo = reader.Position;
+            long chunkEndPos = reader.AbsPosition + Length;
+
+            // Scan for up to two valid font pointers
+            uint fontCount = reader.ReadUInt32();
+            uint lastFontPosition = 0;
+
+            // Scan to find the last non-null pointer...
+            for (uint i = 0; i < fontCount; i++)
+            {
+                uint ptr = reader.ReadUInt32();
+                if (ptr != 0)
+                {
+                    lastFontPosition = ptr;
+                }
+            }
+
+            // If we have a last font, advance to the end of its data (ignoring the new alignment added in 2024.14)
+            if (lastFontPosition != 0)
+            {
+                reader.AbsPosition = lastFontPosition + 56;
+
+                // Advance to last glyph in pointer list
+                uint glyphCount = reader.ReadUInt32();
+                reader.Position += (glyphCount - 1) * 4;
+                reader.AbsPosition = reader.ReadUInt32() + 16;
+
+                // Advance past kerning
+                ushort kerningCount = reader.ReadUInt16();
+                reader.Position += kerningCount * 4;
+            }
+
+            // Check for the final chunk padding being missing
+            if ((reader.AbsPosition + 512) > chunkEndPos)
+            {
+                // No padding can fit, so this is 2024.14
+                reader.undertaleData.SetGMS2Version(2024, 14);
+            }
+
+            reader.Position = returnTo;
+        }
+
         internal override void SerializeChunk(UndertaleWriter writer)
         {
             base.SerializeChunk(writer);
 
-            if (Padding == null)
+            if (!writer.undertaleData.IsVersionAtLeast(2024, 14))
             {
-                for (ushort i = 0; i < 0x80; i++)
-                    writer.Write(i);
-                for (ushort i = 0; i < 0x80; i++)
-                    writer.Write((ushort)0x3f);
-            } else
-                writer.Write(Padding);
+                if (Padding == null)
+                {
+                    for (ushort i = 0; i < 0x80; i++)
+                        writer.Write(i);
+                    for (ushort i = 0; i < 0x80; i++)
+                        writer.Write((ushort)0x3f);
+                }
+                else
+                {
+                    writer.Write(Padding);
+                }
+            }
         }
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
             if (!checkedFor2022_2)
                 CheckForGM2022_2(reader);
-
             if (!checkedFor2023_6And2024_11)
                 CheckForGM2023_6AndGM2024_11(reader);
+            if (!checkedFor2024_14)
+                CheckForGM2024_14(reader);
 
             base.UnserializeChunk(reader);
 
-            Padding = reader.ReadBytes(512);
+            if (!reader.undertaleData.IsVersionAtLeast(2024, 14))
+            {
+                Padding = reader.ReadBytes(512);
+            }
         }
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
             checkedFor2022_2 = false;
             checkedFor2023_6And2024_11 = false;
+            checkedFor2024_14 = false;
 
             CheckForGM2022_2(reader);
             CheckForGM2023_6AndGM2024_11(reader);
+            CheckForGM2024_14(reader);
 
             return base.UnserializeObjectCount(reader);
         }
@@ -1410,6 +1588,18 @@ namespace UndertaleModLib
             for (int index = 0; index < List.Count; index++)
             {
                 List[index].Name = new UndertaleString("PageItem " + index.ToString()); // not Data.MakeString
+            }
+
+            if (reader.undertaleData.IsTPAG4ByteAligned)
+            {
+                while ((reader.Position % 4) != 0)
+                {
+                    if (reader.ReadByte() != 0)
+                    {
+                        reader.SubmitWarning("Missing expected TPAG padding");
+                        reader.Position--;
+                    }
+                }
             }
         }
     }

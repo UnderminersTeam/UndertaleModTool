@@ -364,7 +364,11 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
         {
             return;
         }
+
+        // Get address of first instruction in the reference chain
         uint addr = reader.GetAddressForUndertaleObject(obj.FirstAddress);
+
+        // Loop over all occurrences in the chain, assigning the variable/function references
         UndertaleInstruction instr = null;
         for (int i = 0; i < obj.Occurrences; i++)
         {
@@ -377,9 +381,11 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
             {
                 instr.ValueFunction = obj as UndertaleFunction;
             }
-            addr += instr.ReferenceNextOccurrenceOffset; // For relevant instructions, this is equivalent to IntArgument/ValueInt
+            addr += instr.ReferenceNextOccurrenceOffset; // For relevant instructions (such as pushref.i, push.i), this is equivalent to IntArgument/ValueInt
         }
-        obj.NameStringID = (int)instr.ReferenceNextOccurrenceOffset;
+
+        // Name string ID uses only lower 24 bits, particularly in the case that the last reference is a pushref.i with a function
+        obj.NameStringID = (int)instr.ReferenceNextOccurrenceOffset & 0xFFFFFF;
     }
 
     /// <summary>
@@ -531,7 +537,7 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                 if (Type1 != DataType.Int16)
                 {
                     // Write actual variable being stored to (reset next occurrence to string ID for now)
-                    ReferenceNextOccurrenceOffset = (uint)ValueVariable.NameStringID;
+                    ReferenceNextOccurrenceOffset = (uint)(ValueVariable?.NameStringID ?? 0xDEAD);
                     writer.Write(_primitiveValue.AsInt);
                 }
                 break;
@@ -575,7 +581,7 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                         break;
                     case DataType.Variable:
                         // Write variable (reset next occurrence to string ID for now)
-                        ReferenceNextOccurrenceOffset = (uint)ValueVariable.NameStringID;
+                        ReferenceNextOccurrenceOffset = (uint)(ValueVariable?.NameStringID ?? 0xDEAD);
                         writer.Write(_primitiveValue.AsInt);
                         break;
                     case DataType.String:
@@ -618,9 +624,10 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                 {
                     if (ValueFunction is UndertaleFunction function)
                     {
-                        // Write function (reset next occurrence to string ID for now)
+                        // Write function (reset next occurrence to string ID for now).
+                        // We additionally encode the script asset type, which can appear in files if this reference is the final one.
                         ReferenceNextOccurrenceOffset = (uint)function.NameStringID;
-                        writer.Write(_primitiveValue.AsInt);
+                        writer.Write(_primitiveValue.AsInt | (AdaptAssetTypeId(writer.undertaleData, AssetType.Script) << 24));
                     }
                     else
                     {
@@ -927,9 +934,9 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
     /// </summary>
     /// <param name="code">The <see cref="UndertaleCode"/> code entry for which the instruction belongs.</param>
     /// <param name="address">Address of the instruction within its code entry.</param>
-    /// <param name="blocks">A list of block addresses for the code entry for which the instruction belongs.</param>
+    /// <param name="blocks">A lookup of block addresses to block indices for the code entry for which the instruction belongs.</param>
     /// <returns></returns>
-    public string ToString(UndertaleCode code, uint address, List<uint> blocks = null)
+    public string ToString(UndertaleCode code, uint address, Dictionary<uint, uint> blocks = null)
     {
         StringBuilder sb = new();
         ToString(sb, code, address, blocks);
@@ -940,17 +947,20 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
     /// Inserts a string representation of this object at a specified index in a <see cref="StringBuilder"/>.
     /// </summary>
     /// <param name="stringBuilder">The <see cref="StringBuilder"/> instance on where to insert the string representation.</param>
-    /// <param name="code"><inheritdoc cref="ToString(UndertaleCode, uint, List{uint})"/></param>
+    /// <param name="code"><inheritdoc cref="ToString(UndertaleCode, uint, Dictionary{uint, uint})"/></param>
     /// <param name="address">Address of the instruction within its code entry.</param>
-    /// <param name="blocks"><inheritdoc cref="ToString(UndertaleCode, uint, List{uint})"/></param>
-    /// <param name="index">The index on where to insert the string representation. If this is <see langword="null"/>
+    /// <param name="blocks"><inheritdoc cref="ToString(UndertaleCode, uint, Dictionary{uint, uint})"/></param>
+    /// <param name="index">The index on where to insert the string representation. If this is -1,
     /// it will use <paramref name="stringBuilder.Length"/> as the index instead.</param>
     /// <remarks>Note that performance of this function can be drastically different, depending on <paramref name="index"/>.
-    /// For best results, it's recommended to leave it at <see langword="null"/>.</remarks>
-    public void ToString(StringBuilder stringBuilder, UndertaleCode code, uint address, List<uint> blocks = null, int? index = null)
+    /// For best results, it's recommended to leave it at -1.</remarks>
+    public void ToString(StringBuilder stringBuilder, UndertaleCode code, uint address, Dictionary<uint, uint> blocks = null, int index = -1)
     {
-        index ??= stringBuilder.Length;
-        StringBuilderHelper sbh = new(index.Value);
+        if (index < 0)
+        {
+            index = stringBuilder.Length;
+        }
+        StringBuilderHelper sbh = new(index);
         
         string kind = Kind.ToString();
         var type = GetInstructionType(Kind);
@@ -1016,8 +1026,8 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                     targetGoto = "[end]";
                 else if (JumpOffsetPopenvExitMagic)
                     targetGoto = "<drop>";
-                else if (blocks is not null)
-                    targetGoto = $"[{blocks.IndexOf((uint)(address + JumpOffset))}]";
+                else if (blocks is not null && blocks.TryGetValue((uint)(address + JumpOffset), out uint blockIndex))
+                    targetGoto = $"[{blockIndex}]";
                 else
                     targetGoto = (address + JumpOffset).ToString("D5");
                 sbh.Append(stringBuilder, targetGoto);
@@ -1172,8 +1182,8 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
     IGMInstruction.DataType IGMInstruction.Type1 => (IGMInstruction.DataType)Type1;
     IGMInstruction.DataType IGMInstruction.Type2 => (IGMInstruction.DataType)Type2;
     IGMInstruction.InstanceType IGMInstruction.InstType => (IGMInstruction.InstanceType)TypeInst;
-    IGMVariable IGMInstruction.Variable => ValueVariable;
-    IGMFunction IGMInstruction.Function => ValueFunction;
+    IGMVariable IGMInstruction.ResolvedVariable => ValueVariable;
+    IGMFunction IGMInstruction.ResolvedFunction => ValueFunction;
     IGMInstruction.VariableType IGMInstruction.ReferenceVarType => (IGMInstruction.VariableType)ReferenceType;
     double IGMInstruction.ValueDouble => ValueDouble;
     short IGMInstruction.ValueShort => ValueShort;
@@ -1188,7 +1198,61 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
     int IGMInstruction.PopSwapSize => SwapExtra;
     int IGMInstruction.AssetReferenceId => IntArgument & 0xffffff;
     AssetType IGMInstruction.GetAssetReferenceType(IGameContext context) => AdaptAssetType((context as GlobalDecompileContext).Data, IntArgument >> 24);
+    
+    IGMVariable IGMInstruction.TryFindVariable(IGameContext context)
+    {
+        // Fast path - variable is already resolved
+        if (ValueVariable is IGMVariable variable)
+        {
+            return variable;
+        }
 
+        // Search for variable with the encoded string ID, as a last resort
+        if (context is not GlobalDecompileContext { Data: UndertaleData data })
+        {
+            return null;
+        }
+        int stringId = (int)ReferenceNextOccurrenceOffset;
+        if (stringId < 0 || stringId >= data.Strings.Count)
+        {
+            return null;
+        }
+        string variableName = data.Strings[stringId].Content;
+        return data.Variables.ByName(variableName) ?? new UndertaleVariable() { Name = new UndertaleString(variableName) };
+    }
+
+    IGMFunction IGMInstruction.TryFindFunction(IGameContext context)
+    {
+        // Fast path - function is already resolved
+        if (ValueFunction is IGMFunction function)
+        {
+            return function;
+        }
+
+        // Get ahold of data
+        if (context is not GlobalDecompileContext { Data: UndertaleData data })
+        {
+            return null;
+        }
+
+        // Pushref instructions with an asset type that isn't a script will never have
+        // a function on it (if unresolved after parsing reference chains)
+        if (Kind is Opcode.Break && (IGMInstruction.ExtendedOpcode)ExtendedKind is IGMInstruction.ExtendedOpcode.PushReference &&
+            AdaptAssetType(data, IntArgument >> 24) is not AssetType.Script)
+        {
+            return null;
+        }
+
+        // Search for function with the encoded string ID, as a last resort
+        int stringId = (int)ReferenceNextOccurrenceOffset;
+        if (stringId < 0 || stringId >= data.Strings.Count)
+        {
+            return null;
+        }
+        string functionName = data.Strings[stringId].Content;
+        return data.Functions.ByName(functionName) ?? new UndertaleFunction() { Name = new UndertaleString(functionName) };
+    }
+    
     /// <summary>
     /// Adapts asset type IDs to the <see cref="Underanalyzer.AssetType"/> enum, across versions.
     /// </summary>
@@ -1232,6 +1296,53 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
             12 => AssetType.AnimCurve,
             13 => AssetType.ParticleSystem,
             14 => AssetType.RoomInstance,
+            _ => throw new Exception($"Unknown asset type {type}")
+        };
+    }
+
+    /// <summary>
+    /// Adapts the <see cref="Underanalyzer.AssetType"/> enum to asset type IDs, across versions.
+    /// </summary>
+    private static int AdaptAssetTypeId(UndertaleData data, AssetType type)
+    {
+        if (data.IsVersionAtLeast(2024, 4))
+        {
+            return type switch
+            {
+                AssetType.Object => 0,
+                AssetType.Sprite => 1,
+                AssetType.Sound => 2,
+                AssetType.Room => 3,
+                AssetType.Path => 4,
+                AssetType.Script => 5,
+                AssetType.Font => 6,
+                AssetType.Timeline => 7,
+                AssetType.Shader => 8,
+                AssetType.Sequence => 9,
+                AssetType.AnimCurve => 10,
+                AssetType.ParticleSystem => 11,
+                AssetType.Background => 13,
+                AssetType.RoomInstance => 14,
+                _ => throw new Exception($"Unknown asset type {type}")
+            };
+        }
+
+        return type switch
+        {
+            AssetType.Object => 0,
+            AssetType.Sprite => 1,
+            AssetType.Sound => 2,
+            AssetType.Room => 3,
+            AssetType.Background => 4,
+            AssetType.Path => 5,
+            AssetType.Script => 6,
+            AssetType.Font => 7,
+            AssetType.Timeline => 8,
+            AssetType.Shader => 10,
+            AssetType.Sequence => 11,
+            AssetType.AnimCurve => 12,
+            AssetType.ParticleSystem => 13,
+            AssetType.RoomInstance => 14,
             _ => throw new Exception($"Unknown asset type {type}")
         };
     }
@@ -1423,6 +1534,10 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
         if (data.CodeLocals is not null)
         {
             UndertaleCodeLocals.CreateEmptyEntry(data, name);
+        }
+        else
+        {
+            newEntry.WeirdLocalFlag = true;
         }
 
         return newEntry;

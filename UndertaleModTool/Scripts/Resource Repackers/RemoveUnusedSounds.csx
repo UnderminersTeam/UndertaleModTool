@@ -10,6 +10,10 @@ using System.Linq;
 
 EnsureDataLoaded();
 
+if (Data.IsVersionAtLeast(2024, 14))
+{
+    ScriptWarning("This script may act erroneously on GameMaker version 2024.14 and later.");
+}
 if (!ScriptQuestion("Remove unused sounds?"))
 {
     return;
