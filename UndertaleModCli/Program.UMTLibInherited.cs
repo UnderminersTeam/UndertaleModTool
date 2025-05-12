@@ -85,6 +85,13 @@ public partial class Program : IScriptInterface
     }
 
     /// <inheritdoc/>
+    public void ScriptWarning(string message)
+    {
+        Console.WriteLine($"WARNING: {message}");
+        if (IsInteractive) Pause();
+    }
+
+    /// <inheritdoc/>
     public void SetUMTConsoleText(string message)
     {
         // Since the UMTConsole text messages are literally just messages that are shown,
