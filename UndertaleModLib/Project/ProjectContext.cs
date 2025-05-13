@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Underanalyzer.Decompiler;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
@@ -72,6 +73,7 @@ public sealed class ProjectContext
         WriteIndented = true,
         AllowTrailingCommas = true,
         ReadCommentHandling = JsonCommentHandling.Skip,
+        NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals,
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
@@ -673,6 +675,32 @@ public sealed class ProjectContext
     }
 
     /// <summary>
+    /// Tries to find a font index with the given name, if not null or whitespace, for the given serializable project asset.
+    /// </summary>
+    /// <returns>Font index that was found. If not found, an exception is thrown.</returns>
+    internal int FindFontIndex(string fontNameOrNull, ISerializableProjectAsset forAsset)
+    {
+        if (string.IsNullOrWhiteSpace(fontNameOrNull))
+        {
+            throw new ProjectException($"No font name specified in property of \"{forAsset.DataName}\"");
+        }
+
+        int index = Data.Fonts.IndexOfName(fontNameOrNull);
+        if (index < 0)
+        {
+            // Fallback option: parse integer and use that
+            if (int.TryParse(fontNameOrNull, out int fallbackIndex) && fallbackIndex >= 0 && fallbackIndex < Data.Fonts.Count &&
+                Data.Fonts[fallbackIndex] is not null)
+            {
+                return fallbackIndex;
+            }
+
+            throw new ProjectException($"Failed to find font \"{fontNameOrNull}\" for \"{forAsset.DataName}\"");
+        }
+        return index;
+    }
+
+    /// <summary>
     /// Tries to find a game object with the given name, if not null or whitespace, for the given serializable project asset.
     /// </summary>
     /// <returns>Game object that was found, or null.</returns>
@@ -702,7 +730,8 @@ public sealed class ProjectContext
         if (index < 0)
         {
             // Fallback option: parse integer and use that
-            if (int.TryParse(gameObjectNameOrNull, out int fallbackIndex) && fallbackIndex >= 0 && fallbackIndex < Data.GameObjects.Count)
+            if (int.TryParse(gameObjectNameOrNull, out int fallbackIndex) && fallbackIndex >= 0 && fallbackIndex < Data.GameObjects.Count &&
+                Data.GameObjects[fallbackIndex] is not null)
             {
                 return fallbackIndex;
             }
@@ -755,6 +784,36 @@ public sealed class ProjectContext
 
         return Data.ParticleSystems.ByName(particleSystemNameOrNull) ??
             throw new ProjectException($"Failed to find particle system \"{particleSystemNameOrNull}\" for \"{forAsset.DataName}\"");
+    }
+
+    /// <summary>
+    /// Tries to find a sound with the given name, if not null or whitespace, for the given serializable project asset.
+    /// </summary>
+    /// <returns>Sound that was found, or null.</returns>
+    internal UndertaleSound FindSound(string soundNameOrNull, ISerializableProjectAsset forAsset)
+    {
+        if (string.IsNullOrWhiteSpace(soundNameOrNull))
+        {
+            return null;
+        }
+
+        return Data.Sounds.ByName(soundNameOrNull) ??
+            throw new ProjectException($"Failed to find sound \"{soundNameOrNull}\" for \"{forAsset.DataName}\"");
+    }
+
+    /// <summary>
+    /// Tries to find an animation curve with the given name, if not null or whitespace, for the given serializable project asset.
+    /// </summary>
+    /// <returns>Animation curve that was found, or null.</returns>
+    internal UndertaleAnimationCurve FindAnimationCurve(string animCurveNameOrNull, ISerializableProjectAsset forAsset)
+    {
+        if (string.IsNullOrWhiteSpace(animCurveNameOrNull))
+        {
+            return null;
+        }
+
+        return Data.AnimationCurves.ByName(animCurveNameOrNull) ??
+            throw new ProjectException($"Failed to find animation curve \"{animCurveNameOrNull}\" for \"{forAsset.DataName}\"");
     }
 
     /// <summary>

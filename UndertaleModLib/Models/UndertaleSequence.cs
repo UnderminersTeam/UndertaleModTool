@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using UndertaleModLib.Project;
+using UndertaleModLib.Project.SerializableAssets;
 
 namespace UndertaleModLib.Models;
 
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleSequence : UndertaleNamedResource, IDisposable
+public class UndertaleSequence : UndertaleNamedResource, IProjectAsset, IDisposable
 {
     public enum PlaybackType : uint
     {
@@ -128,6 +130,31 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         Tracks = null;
         FunctionIDs = null;
     }
+
+    /// <inheritdoc/>
+    internal ISerializableProjectAsset GenerateSerializableProjectAsset(ProjectContext projectContext)
+    {
+        SerializableSequence serializable = new();
+        serializable.PopulateFromData(projectContext, this);
+        return serializable;
+    }
+
+    /// <inheritdoc/>
+    ISerializableProjectAsset IProjectAsset.GenerateSerializableProjectAsset(ProjectContext projectContext)
+    {
+        SerializableSequence serializable = new();
+        serializable.PopulateFromData(projectContext, this);
+        return serializable;
+    }
+
+    /// <inheritdoc/>
+    public string ProjectName => Name?.Content ?? "<unknown name>";
+
+    /// <inheritdoc/>
+    public SerializableAssetType ProjectAssetType => SerializableAssetType.Sequence;
+
+    /// <inheritdoc/>
+    public bool ProjectExportable => Name?.Content is not null;
 
     public class Keyframe<T> : UndertaleObject where T : UndertaleObject, new()
     {

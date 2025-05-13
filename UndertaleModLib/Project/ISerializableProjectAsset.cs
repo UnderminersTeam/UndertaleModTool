@@ -17,6 +17,8 @@ namespace UndertaleModLib.Project;
 [JsonDerivedType(typeof(SerializableRoom), nameof(Room))]
 [JsonDerivedType(typeof(SerializableBackground), nameof(Background))]
 [JsonDerivedType(typeof(SerializableSprite), nameof(Sprite))]
+[JsonDerivedType(typeof(SerializableSequence), nameof(Sequence))]
+[JsonDerivedType(typeof(SerializableAnimationCurve), nameof(AnimationCurve))]
 public interface ISerializableProjectAsset
 {
     /// <summary>
@@ -88,6 +90,8 @@ public enum SerializableAssetType
     Room,
     Background,
     Sprite,
+    Sequence,
+    AnimationCurve
 }
 
 /// <summary>
@@ -110,6 +114,8 @@ public static class SerializableAssetTypeExtensions
             Room => "Room",
             Background => "Background",
             Sprite => "Sprite",
+            Sequence => "Sequence",
+            AnimationCurve => "Animation Curve",
             _ => throw new NotImplementedException()
         };
     }
@@ -128,6 +134,8 @@ public static class SerializableAssetTypeExtensions
             Room => "room",
             Background => "background",
             Sprite => "sprite",
+            Sequence => "sequence",
+            AnimationCurve => "animcurve",
             _ => throw new NotImplementedException()
         };
     }
@@ -147,6 +155,8 @@ public static class SerializableAssetTypeExtensions
             Room => "rooms",
             Background => "backgrounds",
             Sprite => "sprites",
+            Sequence => "sequences",
+            AnimationCurve => "animcurves",
             _ => throw new NotImplementedException()
         };
     }

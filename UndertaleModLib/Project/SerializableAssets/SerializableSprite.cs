@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using UndertaleModLib.Models;
@@ -73,6 +74,17 @@ internal sealed class SerializableSprite : ISerializableTextureProjectAsset
     public ExtraProperties Extra { get; set; }
 
     /// <summary>
+    /// Sequence contained within the sprite, optionally defined.
+    /// </summary>
+    public SerializableSequence Sequence { get; set; }
+
+    /// <summary>
+    /// Nine-slice properties, optionally defined.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public NineSliceProperties NineSlice { get; set; }
+
+    /// <summary>
     /// Extra properties attached to sprites, but not always present in older versions of GameMaker.
     /// </summary>
     public struct ExtraProperties()
@@ -90,6 +102,41 @@ internal sealed class SerializableSprite : ISerializableTextureProjectAsset
         /// <inheritdoc cref="UndertaleSprite.GMS2PlaybackSpeedType"/>
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public ExtraAnimSpeedType PlaybackSpeedType { get; set; }
+    }
+
+    /// <summary>
+    /// Nine-slice properties attached to sprites, optionally.
+    /// </summary>
+    public struct NineSliceProperties()
+    {
+        /// <inheritdoc cref="UndertaleSprite.NineSlice.Enabled"/>
+        public bool Enabled { get; set; }
+
+        /// <inheritdoc cref="UndertaleSprite.NineSlice.Left"/>
+        public int Left { get; set; }
+
+        /// <inheritdoc cref="UndertaleSprite.NineSlice.Top"/>
+        public int Top { get; set; }
+
+        /// <inheritdoc cref="UndertaleSprite.NineSlice.Right"/>
+        public int Right { get; set; }
+
+        /// <inheritdoc cref="UndertaleSprite.NineSlice.Bottom"/>
+        public int Bottom { get; set; }
+
+        /// <inheritdoc cref="UndertaleSprite.NineSlice.TileModes"/>
+        public List<TileMode> TileModes { get; set; }
+
+        /// <inheritdoc cref="UndertaleSprite.NineSlice.TileMode"/>
+        [JsonConverter(typeof(JsonStringEnumConverter<TileMode>))]
+        public enum TileMode
+        {
+            Stretch = 0,
+            Repeat = 1,
+            Mirror = 2,
+            BlankRepeat = 3,
+            Hide = 4
+        }
     }
 
     /// <inheritdoc/>
@@ -179,6 +226,24 @@ internal sealed class SerializableSprite : ISerializableTextureProjectAsset
             };
         }
 
+        // Update sequence and nine slice properties, if they exist
+        if (spr.SVersion >= 2 && spr.V2Sequence is UndertaleSequence sequence)
+        {
+            Sequence = (SerializableSequence)sequence.GenerateSerializableProjectAsset(projectContext);
+        }
+        if (spr.SVersion >= 3 && spr.V3NineSlice is UndertaleSprite.NineSlice nineSlice)
+        {
+            NineSlice = new()
+            {
+                Enabled = nineSlice.Enabled,
+                Left = nineSlice.Left,
+                Top = nineSlice.Top,
+                Right = nineSlice.Right,
+                Bottom = nineSlice.Bottom,
+                TileModes = [.. nineSlice.TileModes.Select((mode) => (NineSliceProperties.TileMode)mode)]
+            };
+        }
+
         _dataAsset = spr;
     }
 
@@ -252,6 +317,31 @@ internal sealed class SerializableSprite : ISerializableTextureProjectAsset
             spr.SSpriteType = (UndertaleSprite.SpriteType)Extra.SpriteType;
             spr.GMS2PlaybackSpeed = Extra.PlaybackSpeed;
             spr.GMS2PlaybackSpeedType = (AnimSpeedType)Extra.PlaybackSpeedType;
+        }
+
+        // Update sequence and nine slice properties, if they exist
+        if (Extra.ExtraVersion >= 2)
+        {
+            spr.V2Sequence = Sequence?.ImportSubResource(projectContext);
+        }
+        if (Extra.ExtraVersion >= 3)
+        {
+            if (NineSlice.Equals(default(NineSliceProperties)))
+            {
+                spr.V3NineSlice = null;
+            }
+            else
+            {
+                spr.V3NineSlice = new()
+                {
+                    Enabled = NineSlice.Enabled,
+                    Left = NineSlice.Left,
+                    Top = NineSlice.Top,
+                    Right = NineSlice.Right,
+                    Bottom = NineSlice.Bottom,
+                    TileModes = [.. NineSlice.TileModes.Select((mode) => (UndertaleSprite.NineSlice.TileMode)mode)]
+                };
+            }
         }
 
         // Assign texture images and collision masks
