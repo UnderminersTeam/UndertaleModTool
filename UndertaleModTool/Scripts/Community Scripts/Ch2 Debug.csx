@@ -28,7 +28,7 @@ bool patch2 = false;
 bool patchProfiler = false;
 for(int i = 0; i < SCR_GAMESTART.Instructions.Count; i++) 
 {
-    if (SCR_GAMESTART.Instructions[i].Kind == UndertaleInstruction.Opcode.Pop && SCR_GAMESTART.Instructions[i].ValueVariable.Target.Name.Content == "debug") 
+    if (SCR_GAMESTART.Instructions[i].Kind == UndertaleInstruction.Opcode.Pop && SCR_GAMESTART.Instructions[i].ValueVariable.Name.Content == "debug") 
     {
         SCR_GAMESTART.Instructions[i-1].ValueShort = (short)(enable ? 1 : 0);
         patch2 = true;

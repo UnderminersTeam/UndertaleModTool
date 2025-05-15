@@ -62,13 +62,13 @@ obj_testoverworldenemy_User0.Instructions[3].JumpOffset += 5; // Ugly hack to re
 var obj_joker_User10 = obj_joker.EventHandlerFor(EventType.Other, EventSubtypeOther.User10, Data);
 for (int i = 0; i < obj_joker_User10.Instructions.Count; i++)
 {
-    if (obj_joker_User10.Instructions[i].Kind == UndertaleInstruction.Opcode.Pop && obj_joker_User10.Instructions[i].ValueVariable.Target.Name.Content == "skipvictory")
+    if (obj_joker_User10.Instructions[i].Kind == UndertaleInstruction.Opcode.Pop && obj_joker_User10.Instructions[i].ValueVariable.Name.Content == "skipvictory")
     {
         obj_joker_User10.Instructions[i-1].ValueShort = 0;
     }
-    if (obj_joker_User10.Instructions[i].Kind == UndertaleInstruction.Opcode.Call && obj_joker_User10.Instructions[i].ValueFunction.Target.Name.Content == "snd_free_all")
+    if (obj_joker_User10.Instructions[i].Kind == UndertaleInstruction.Opcode.Call && obj_joker_User10.Instructions[i].ValueFunction.Name.Content == "snd_free_all")
     {
-        obj_joker_User10.Instructions[i].ValueFunction.Target = Data.Functions.ByName("scr_84_debug"); // just redirect it to something useless
+        obj_joker_User10.Instructions[i].ValueFunction = Data.Functions.ByName("scr_84_debug"); // just redirect it to something useless
     }
 }
 importGroup.QueueAppend(obj_joker_User10, @"
