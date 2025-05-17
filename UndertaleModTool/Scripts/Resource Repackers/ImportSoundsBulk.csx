@@ -6,7 +6,6 @@
 // By Jockeholm & Nik the Neko - Version 3 03/01/2020 - Massive im_purr_ovements.
 // By Jockeholm                - Version 2 15/02/2020 - Currently supports embedded WAV files only
 
-using System.Windows.Forms;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 using static UndertaleModLib.Models.UndertaleSound;

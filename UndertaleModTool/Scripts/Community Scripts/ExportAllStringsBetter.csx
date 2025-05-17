@@ -1,15 +1,10 @@
 using System.Linq;
 using System.Text;
-using System.Windows.Forms; // Needed for SaveFileDialog prompt
 
 EnsureDataLoaded();
 
-SaveFileDialog saveFileDialog = new SaveFileDialog()
-{
-    InitialDirectory = FilePath,
-    Filter = "TXT files (*.txt)|*.txt|JSON files (*.json)|*.json|All files (*.*)|*.*"
-};
-if (saveFileDialog.ShowDialog() != DialogResult.OK)
+string path = PromptSaveFile(".json", "TXT files (*.txt)|*.txt|JSON files (*.json)|*.json|All files (*.*)|*.*");
+if (string.IsNullOrWhiteSpace(path))
     return;
 
 StringBuilder json = new StringBuilder("{\r\n    \"Strings\": [\r\n");
@@ -24,8 +19,8 @@ foreach (string str in Data.Strings.Select(str => str.Content))
 json.Length -= suffix.Length;
 json.Append("\r\n    ]\r\n}");
 
-File.WriteAllText(saveFileDialog.FileName, json.ToString());
-ScriptMessage($"Successfully exported to\n{saveFileDialog.FileName}");
+File.WriteAllText(path, json.ToString());
+ScriptMessage($"Successfully exported to\n{path}");
 
 static string JsonifyString(string str)
 {

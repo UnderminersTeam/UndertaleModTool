@@ -389,6 +389,28 @@ public partial class Program : IScriptInterface
         return path;
     }
 
+    public string PromptSaveFile(string defaultExt, string filter)
+    {
+        string path;
+        do
+        {
+            Console.WriteLine("Please type a path (or drag and drop) to save the file:");
+            Console.Write("Path: ");
+            path = RemoveQuotes(Console.ReadLine());
+
+            if (Directory.Exists(path))
+            {
+                Console.WriteLine("You selected a directory");
+            }
+
+            if (string.IsNullOrWhiteSpace(Path.GetExtension(path)))
+            {
+                path += defaultExt.StartsWith(".") ? defaultExt : "." + defaultExt;
+            }
+        } while (string.IsNullOrWhiteSpace(path));
+        return path;
+    }
+
     /// <inheritdoc/>
     public string GetDecompiledText(string codeName, GlobalDecompileContext context = null, IDecompileSettings settings = null)
     {
