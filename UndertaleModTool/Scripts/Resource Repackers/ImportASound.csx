@@ -5,7 +5,6 @@
 // By Jockeholm & Nik the Neko - Version 3 03/01/2020 - Massive im_purr_ovements.
 // By Jockeholm                - Version 2 15/02/2020 - Currently supports embedded WAV files only
 
-using System.Windows.Forms;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 using static UndertaleModLib.Models.UndertaleSound;
@@ -34,17 +33,13 @@ if (Data.IsVersionAtLeast(2024, 14))
     ScriptWarning("This script may act erroneously on GameMaker version 2024.14 and later.");
 }
 
-OpenFileDialog fileDialog   = new OpenFileDialog();
-fileDialog.InitialDirectory = Path.GetDirectoryName(FilePath) + Path.DirectorySeparatorChar;
-fileDialog.Filter           = "Sound files (*.WAV;*.OGG)|*.WAV;*.OGG"; // Limits the dialog to displaying WAV files only
-fileDialog.Title            = "Select a sound file to import"; // Sets the dialog title
-DialogResult dialogRet      = fileDialog.ShowDialog(); // opens a file select window
+string sound_path = PromptLoadFile("", "Sound files (*.WAV;*.OGG)|*.WAV;*.OGG");
 
-if (dialogRet == DialogResult.OK)
+if (!string.IsNullOrEmpty(sound_path))
 {
-    string fname      = fileDialog.SafeFileName;
+    string fname      = sound_path;
     string sound_name = fname.Substring(0, fname.LastIndexOf('.')); // creates a string of the wav file's filename without it's extension
-    bool   isOGG      = Path.GetExtension(fileDialog.FileName) == ".ogg";
+    bool   isOGG      = Path.GetExtension(sound_path) == ".ogg";
     bool   embedSound = false;
     bool   decodeLoad = false;
     if (isOGG)
@@ -63,7 +58,7 @@ if (dialogRet == DialogResult.OK)
         decodeLoad = false;
     }
     string AGRPname    = "";
-    string FolderName  = Path.GetFileName( Path.GetDirectoryName( fileDialog.FileName ) );
+    string FolderName  = Path.GetFileName( Path.GetDirectoryName( sound_path ) );
     bool   needAGRP    = false;
     bool   ifRightAGRP = false;
     string[] splitArr  = new string[2];
@@ -144,7 +139,7 @@ if (dialogRet == DialogResult.OK)
 
     if ((embedSound && !needAGRP) || (needAGRP))
     {
-        soundData = new UndertaleEmbeddedAudio() { Data = File.ReadAllBytes(fileDialog.FileName) };
+        soundData = new UndertaleEmbeddedAudio() { Data = File.ReadAllBytes(sound_path) };
         Data.EmbeddedAudio.Add(soundData);
         if (soundExists)
             Data.EmbeddedAudio.Remove(existing_snd.AudioFile);
