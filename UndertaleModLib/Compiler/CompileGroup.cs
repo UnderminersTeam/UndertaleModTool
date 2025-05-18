@@ -493,7 +493,7 @@ public sealed class CompileGroup
             }
             else
             {
-                // Reuse compile context from initial global script parse (may be null if an exception was thrown)
+                // Reuse compile context from initial global script parse
                 context = globalScriptContexts[globalScriptContextIndex];
                 globalScriptContextIndex++;
             }
