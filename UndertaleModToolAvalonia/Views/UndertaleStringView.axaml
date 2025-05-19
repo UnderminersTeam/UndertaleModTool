@@ -7,7 +7,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="UndertaleModToolAvalonia.Views.UndertaleStringView"
              x:DataType="v:UndertaleStringViewModel">
-    <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*">
+    <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*" Classes="PaddedProperties">
         <Label>Content</Label>
         <TextBox Text="{Binding String.Content}" />
     </Grid>

@@ -14,7 +14,7 @@
         <h:EventsToExtendedEventConverter x:Key="EventsToExtendedEventConverter" />
         <h:IdToUndertaleGameObjectConverter x:Key="IdToUndertaleGameObjectConverter" />
     </UserControl.Resources>
-    <StackPanel Grid.IsSharedSizeScope="True" Margin="12,0,12,0">
+    <StackPanel Grid.IsSharedSizeScope="True" Classes="PaddedProperties">
         <TextBlock FontWeight="Bold" Text="Game object" />
         <Separator />
 

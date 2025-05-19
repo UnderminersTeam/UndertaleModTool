@@ -107,5 +107,21 @@
         <Style Selector="ColorPicker">
             <Setter Property="HorizontalAlignment" Value="Left" />
         </Style>
+
+        <Style Selector="Grid#LeftPanel">
+            <Setter Property="Margin" Value="5" />
+        </Style>
+
+        <Style Selector="TreeView#DataTreeView">
+            <Setter Property="Margin" Value="0,5,0,0" />
+        </Style>
+
+        <Style Selector=":is(Control).PaddedProperties">
+            <Setter Property="Margin" Value="12,0,12,0" />
+        </Style>
+
+        <Style Selector=":is(Control).LeftPaddedProperties">
+            <Setter Property="Margin" Value="12,0,0,0" />
+        </Style>
     </Application.Styles>
 </Application>

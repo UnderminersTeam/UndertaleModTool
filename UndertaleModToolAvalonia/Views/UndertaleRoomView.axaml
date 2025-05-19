@@ -15,7 +15,7 @@
         <h:UndertaleColorToColorConverter x:Key="UndertaleColorToColorConverter" />
         <h:VersionCompareConverter x:Key="VersionCompareConverter" />
     </UserControl.Resources>
-    <Grid RowDefinitions="200,Auto,1*" ColumnDefinitions="1*" Margin="12,0,12,0" MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
+    <Grid RowDefinitions="200,Auto,1*" ColumnDefinitions="1*" Classes="PaddedProperties" MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
         <Grid Grid.Row="0" RowDefinitions="1*" ColumnDefinitions="1*,1*">
             <Grid Grid.Column="0">
                 <!-- TreeView -->
