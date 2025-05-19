@@ -71,7 +71,7 @@ public partial class MainViewModel : ViewModelBase
 
     public void FileNew()
     {
-        Data = UndertaleData.CreateNew();
+        SetData(UndertaleData.CreateNew());
 
         Tabs.Clear();
     }
@@ -103,7 +103,7 @@ public partial class MainViewModel : ViewModelBase
             Debug.WriteLine(files[0].TryGetLocalPath());
             using Stream stream = await files[0].OpenReadAsync();
 
-            Data = UndertaleIO.Read(stream,
+            SetData(UndertaleIO.Read(stream,
                 (string warning, bool isImportant) =>
                 {
                     Debug.WriteLine($"Data.Read warning: {(isImportant ? "(important) " : "")}{warning}");
@@ -111,7 +111,7 @@ public partial class MainViewModel : ViewModelBase
                 (string message) =>
                 {
                     Debug.WriteLine($"Data.Read message: {message}");
-                });
+                }));
 
             Tabs.Clear();
         }
