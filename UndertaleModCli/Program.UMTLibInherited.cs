@@ -389,6 +389,7 @@ public partial class Program : IScriptInterface
         return path;
     }
 
+    /// <inheritdoc/>
     public string PromptSaveFile(string defaultExt, string filter)
     {
         string path;
@@ -401,11 +402,6 @@ public partial class Program : IScriptInterface
             if (Directory.Exists(path))
             {
                 Console.WriteLine("You selected a directory");
-            }
-
-            if (string.IsNullOrWhiteSpace(Path.GetExtension(path)))
-            {
-                path += defaultExt.StartsWith(".") ? defaultExt : "." + defaultExt;
             }
         } while (string.IsNullOrWhiteSpace(path));
         return path;
