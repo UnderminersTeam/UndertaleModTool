@@ -1,23 +1,23 @@
 ﻿using Avalonia.Controls;
-using CommunityToolkit.Mvvm.ComponentModel;
+using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 using static UndertaleModLib.Models.UndertaleRoom;
 
 namespace UndertaleModToolAvalonia.Views;
 
-public partial class UndertaleRoomViewModel : ViewModelBase
+public partial class UndertaleRoomViewModel
 {
     public UndertaleRoom Room { get; set; }
 
-    [ObservableProperty]
+    [Notify]
     private object? _RoomItemsSelectedItem;
 
-    [ObservableProperty]
+    [Notify]
     private object? _PropertiesContent;
 
-    partial void OnRoomItemsSelectedItemChanged(object? value) {
-        PropertiesContent = value switch
+    private void OnRoomItemsSelectedItemChanged() {
+        PropertiesContent = RoomItemsSelectedItem switch
         {
             TreeViewItem { Name: "RoomTreeViewItem"} => Room,
             TreeViewItem => null,

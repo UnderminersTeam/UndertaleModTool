@@ -8,7 +8,7 @@ using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia.Views;
 
-public partial class UndertaleCodeViewModel : ViewModelBase
+public partial class UndertaleCodeViewModel
 {
     // TODO: A billion things. Syntax highlighting.
     public MainViewModel MainVM;

@@ -1,6 +1,6 @@
 ﻿namespace UndertaleModToolAvalonia.Views;
 
-public class DescriptionViewModel : ViewModelBase
+public class DescriptionViewModel
 {
     public string Heading { get; set; }
     public string Description { get; set; }

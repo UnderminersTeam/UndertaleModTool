@@ -2,7 +2,7 @@
 
 namespace UndertaleModToolAvalonia.Views;
 
-public class UndertaleGameObjectViewModel : ViewModelBase
+public class UndertaleGameObjectViewModel
 {
     public UndertaleGameObject GameObject { get; set; }
 

@@ -2,7 +2,7 @@
 
 namespace UndertaleModToolAvalonia.Views;
 
-public partial class UndertaleStringViewModel : ViewModelBase
+public partial class UndertaleStringViewModel
 {
     public UndertaleString String { get; set; }
 

@@ -3,7 +3,7 @@ using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia.Views;
 
-public class GameEndScriptsViewModel : ViewModelBase
+public class GameEndScriptsViewModel
 {
     public ObservableCollection<UndertaleGlobalInit> GameEndScripts { get; set; }
 

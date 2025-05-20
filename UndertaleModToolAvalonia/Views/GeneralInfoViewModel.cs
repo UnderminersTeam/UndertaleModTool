@@ -3,7 +3,7 @@ using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia.Views;
 
-public class GeneralInfoViewModel : ViewModelBase
+public class GeneralInfoViewModel
 {
     public UndertaleGeneralInfo GeneralInfo { get; set; }
     public UndertaleOptions Options { get; set; }

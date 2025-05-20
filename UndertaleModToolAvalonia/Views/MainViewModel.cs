@@ -7,30 +7,31 @@ using System.IO;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
-using CommunityToolkit.Mvvm.ComponentModel;
+using Avalonia.Styling;
+using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia.Views;
 
-public partial class MainViewModel : ViewModelBase
+public partial class MainViewModel
 {
     // Set this when testing.
     public Func<FilePickerOpenOptions, Task<IReadOnlyList<IStorageFile>>>? OpenFileDialog;
 
     // Data
-    [ObservableProperty]
+    [Notify]
     private UndertaleData? _Data;
 
-    [ObservableProperty]
+    [Notify]
     private (uint Major, uint Minor, uint Release, uint Build) _Version;
 
     // Tabs
     public ObservableCollection<TabItemViewModel> Tabs { get; set; }
 
-    [ObservableProperty]
+    [Notify]
     private TabItemViewModel? _TabSelected;
-    [ObservableProperty]
+    [Notify]
     private int _TabSelectedIndex;
 
     public MainViewModel()
@@ -69,11 +70,12 @@ public partial class MainViewModel : ViewModelBase
         }
     }
 
+    // Menus
     public void FileNew()
     {
-        SetData(UndertaleData.CreateNew());
-
         Tabs.Clear();
+
+        SetData(UndertaleData.CreateNew());
     }
 
     public async void FileOpen()
