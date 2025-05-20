@@ -130,6 +130,7 @@ public partial class MainViewModel
             TreeViewItem { Name: "GeneralInfo" } => new GeneralInfoViewModel(Data),
             TreeViewItem { Name: "GlobalInitScripts" } => new GlobalInitScriptsViewModel((Data.GlobalInitScripts as ObservableCollection<UndertaleGlobalInit>)!),
             TreeViewItem { Name: "GameEndScripts" } => new GameEndScriptsViewModel((Data.GameEndScripts as ObservableCollection<UndertaleGlobalInit>)!),
+            UndertaleSprite r => new UndertaleSpriteViewModel(r),
             UndertaleGameObject r => new UndertaleGameObjectViewModel(r),
             UndertaleRoom r => new UndertaleRoomViewModel(r),
             UndertaleCode r => new UndertaleCodeViewModel(r),

@@ -1,0 +1,99 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
+             xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
+             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
+             xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.Views.UndertaleSpriteView"
+             x:DataType="v:UndertaleSpriteViewModel">
+    <UserControl.Resources>
+        <h:EnumTypeToValuesConverter x:Key="EnumTypeToValuesConverter" />
+    </UserControl.Resources>
+    <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*" Classes="PaddedProperties">
+        <Label>Name</Label>
+        <c:UndertaleStringReferenceView Reference="{Binding Sprite.Name}" />
+
+        <Label>Size W/H</Label>
+        <Grid ColumnDefinitions="1*,1*">
+            <TextBox Grid.Column="0" Text="{Binding Sprite.Width}" />
+            <TextBox Grid.Column="1" Text="{Binding Sprite.Height}" />
+        </Grid>
+
+        <Label>Margin Left/Right/Bottom/Top</Label>
+        <Grid ColumnDefinitions="1*,1*,1*,1*">
+            <TextBox Grid.Column="0" Text="{Binding Sprite.MarginLeft}" />
+            <TextBox Grid.Column="1" Text="{Binding Sprite.MarginRight}" />
+            <TextBox Grid.Column="2" Text="{Binding Sprite.MarginBottom}" />
+            <TextBox Grid.Column="3" Text="{Binding Sprite.MarginTop}" />
+        </Grid>
+
+        <Label>Transparent</Label>
+        <CheckBox IsChecked="{Binding Sprite.Transparent}" />
+
+        <Label>Smooth</Label>
+        <CheckBox IsChecked="{Binding Sprite.Smooth}" />
+
+        <Label>Preload</Label>
+        <CheckBox IsChecked="{Binding Sprite.Preload}" />
+
+        <Label>Bounding box mode</Label>
+        <TextBox Text="{Binding Sprite.BBoxMode}" />
+
+        <Label>Separation mask type</Label>
+        <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleSprite+SepMaskType}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                  SelectedItem="{Binding Sprite.SepMasks}" />
+
+        <Label>Origin X/Y</Label>
+        <Grid ColumnDefinitions="1*,1*">
+            <TextBox Grid.Column="0" Text="{Binding Sprite.OriginXWrapper}" />
+            <TextBox Grid.Column="1" Text="{Binding Sprite.OriginYWrapper}" />
+        </Grid>
+
+        <Label>Textures</Label>
+        <c:EditableDataGrid ItemsSource="{Binding Sprite.Textures}" ItemFactory="{Binding CreateTextureEntry}">
+            <c:EditableDataGrid.Columns>
+                <DataGridTemplateColumn Header="Texture" Width="1*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="undertalem:UndertaleSprite+TextureEntry">
+                            <c:UndertaleResourceReferenceView Reference="{Binding Texture}" ReferenceType="undertalem:UndertaleTexturePageItem" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </c:EditableDataGrid.Columns>
+        </c:EditableDataGrid>
+
+        <Label>Collision masks</Label>
+        <c:EditableDataGrid ItemsSource="{Binding Sprite.CollisionMasks}" ItemFactory="{Binding CreateMaskEntry}">
+            <c:EditableDataGrid.Columns>
+                <DataGridTemplateColumn Header="Mask" Width="1*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="undertalem:UndertaleSprite+MaskEntry">
+                            <TextBlock FontStyle="Italic" Text="(Collision mask entry)" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </c:EditableDataGrid.Columns>
+        </c:EditableDataGrid>
+
+        <Label>Is special type</Label>
+        <CheckBox IsChecked="{Binding Sprite.IsSpecialType}" />
+
+        <Label>Version</Label>
+        <TextBox Text="{Binding Sprite.SVersion}" />
+
+        <Label>Type</Label>
+        <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleSprite+SpriteType}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                  SelectedItem="{Binding Sprite.SSpriteType}" />
+
+        <!-- TODO: Is GMS2 -->
+        <Label>Playback speed</Label>
+        <TextBox Text="{Binding Sprite.GMS2PlaybackSpeed}" />
+
+        <Label>Playback speed type</Label>
+        <ComboBox ItemsSource="{Binding Source={x:Type undertalem:AnimSpeedType}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                  SelectedItem="{Binding Sprite.GMS2PlaybackSpeedType}" />
+    </Grid>
+</UserControl>
