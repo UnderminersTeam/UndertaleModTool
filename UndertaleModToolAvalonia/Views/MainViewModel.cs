@@ -34,6 +34,9 @@ public partial class MainViewModel
     [Notify]
     private int _TabSelectedIndex;
 
+    // Image cache
+    public ImageCache ImageCache = new();
+
     public MainViewModel()
     {
         //Data = UndertaleData.CreateNew();
