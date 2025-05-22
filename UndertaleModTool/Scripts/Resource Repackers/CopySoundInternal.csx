@@ -3,7 +3,6 @@
 using System;
 using System.ComponentModel;
 using System.IO;
-using System.Windows;
 using UndertaleModLib;
 using UndertaleModLib.Scripting;
 using UndertaleModLib.Models;
@@ -220,7 +219,7 @@ IList<UndertaleEmbeddedAudio> GetAudioGroupData(UndertaleSound sound, string win
     {
         UndertaleData data = null;
         using (var stream = new FileStream(groupFilePath, FileMode.Open, FileAccess.Read))
-            data = UndertaleIO.Read(stream, warning => ScriptMessage("A warning occured while trying to load " + audioGroupName + ":\n" + warning));
+            data = UndertaleIO.Read(stream, (warning, _) => ScriptMessage("A warning occured while trying to load " + audioGroupName + ":\n" + warning));
 
         loadedAudioGroups[audioGroupName] = data.EmbeddedAudio;
         return data.EmbeddedAudio;

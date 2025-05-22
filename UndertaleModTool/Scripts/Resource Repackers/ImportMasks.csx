@@ -4,7 +4,7 @@
 
 using System;
 using System.IO;
-using System.Drawing;
+using ImageMagick;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,7 +42,7 @@ foreach (string file in dirFiles)
     {
         throw new ScriptException(FileNameWithExtension + " could not be imported as the sprite " + spriteName + " does not exist.");
     }
-    using (Image img = Image.FromFile(file))
+    using (MagickImage img = TextureWorker.ReadBGRAImageFromFile(file))
     {
         if ((Data.Sprites.ByName(spriteName).Width != (uint)img.Width) || (Data.Sprites.ByName(spriteName).Height != (uint)img.Height))
             throw new ScriptException(FileNameWithExtension + " is not the proper size to be imported! Please correct this before importing! The proper dimensions are width: " + Data.Sprites.ByName(spriteName).Width.ToString() + " px, height: " + Data.Sprites.ByName(spriteName).Height.ToString() + " px.");
