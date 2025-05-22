@@ -238,13 +238,21 @@ TPageItem dumpTexturePageItem(UndertaleTexturePageItem pageItem, TextureWorker w
 
 async Task<List<TPageItem>> dumpTexturePageItems(string dir, bool reuse)
 {
-    using var worker = new TextureWorker();
+    var groupedByTexturePage = Data.TexturePageItems
+        .GroupBy(item => item.TexturePage.ToString());
 
-    var tpageitems = await Task.Run(() => Data.TexturePageItems
-        .AsParallel()
-        .Select(item => dumpTexturePageItem(item, worker, Path.Combine(dir, $"texture_page_{Data.TexturePageItems.IndexOf(item)}.png"), reuse))
-        .ToList());
+    var tpageitems = new List<TPageItem>();
+    foreach (var group in groupedByTexturePage)
+    {
+        using var worker = new TextureWorker();
 
+        var tpageitemsNew = await Task.Run(() => group
+            .AsParallel()
+            .Select(item => dumpTexturePageItem(item, worker, Path.Combine(dir, $"texture_page_{Data.TexturePageItems.IndexOf(item)}.png"), reuse))
+            .ToList());
+
+        tpageitems.AddRange(tpageitemsNew);
+    }
     return tpageitems;
 }
 
