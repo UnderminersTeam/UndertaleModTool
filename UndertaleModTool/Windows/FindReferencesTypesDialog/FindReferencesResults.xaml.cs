@@ -299,7 +299,15 @@ namespace UndertaleModTool.Windows
                 else
                     itemName = item.DataContext.ToString();
 
-                Clipboard.SetText(itemName);
+                try
+                {
+                    Clipboard.SetText(itemName);
+                }
+                catch (Exception ex)
+                {
+                    this.ShowError("Can't copy the item name to clipboard due to this error:\n" +
+                                   ex.Message + ".\nYou probably should try again.");
+                }
             }
         }
         private void MenuItem_FindAllReferences_Click(object sender, RoutedEventArgs e)
