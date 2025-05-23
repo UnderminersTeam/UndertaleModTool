@@ -28,35 +28,35 @@ public partial class EditableDataGrid : UserControl
     }
 
     public ObservableCollection<DataGridColumn> Columns {
-        get => dataGrid.Columns;
+        get => DataGridControl.Columns;
         set
         {
-            dataGrid.Columns.Clear();
+            DataGridControl.Columns.Clear();
             foreach (DataGridColumn column in value)
             {
-                dataGrid.Columns.Add(column);
+                DataGridControl.Columns.Add(column);
             }
         }
     }
 
-    readonly DataGrid dataGrid;
+    public DataGrid DataGridControl { get; set; }
 
     public EditableDataGrid()
     {
         InitializeComponent();
 
-        dataGrid = this.Find<DataGrid>("DataGrid")!;
-        dataGrid.SelectionChanged += (object? sender, SelectionChangedEventArgs e) =>
+        DataGridControl = this.Find<DataGrid>("DataGrid")!;
+        DataGridControl.SelectionChanged += (object? sender, SelectionChangedEventArgs e) =>
         {
             // Hack to make it so a temporary deselection when moving items doesn't stop the repeat button.
             Dispatcher.UIThread.Post(() =>
             {
-                this.Find<InputElement>("RemoveButton")!.IsEnabled = (dataGrid.SelectedIndex != -1);
-                this.Find<InputElement>("MoveUpButton")!.IsEnabled = (dataGrid.SelectedIndex > 0);
-                this.Find<InputElement>("MoveDownButton")!.IsEnabled = (dataGrid.SelectedIndex < ItemsSource.Count - 1);
+                this.Find<InputElement>("RemoveButton")!.IsEnabled = (DataGridControl.SelectedIndex != -1);
+                this.Find<InputElement>("MoveUpButton")!.IsEnabled = (DataGridControl.SelectedIndex > 0);
+                this.Find<InputElement>("MoveDownButton")!.IsEnabled = (DataGridControl.SelectedIndex < ItemsSource.Count - 1);
             });
         };
-        dataGrid.GotFocus += (object? sender, GotFocusEventArgs e) =>
+        DataGridControl.GotFocus += (object? sender, GotFocusEventArgs e) =>
         {
             if (e.Source is Control control)
             {
@@ -74,45 +74,45 @@ public partial class EditableDataGrid : UserControl
         if (ItemFactory is not null)
         {
             ItemsSource.Add(ItemFactory());
-            dataGrid.SelectedIndex = ItemsSource.Count - 1;
+            DataGridControl.SelectedIndex = ItemsSource.Count - 1;
         }
     }
 
     public void Remove()
     {
-        if (dataGrid.SelectedItem is not null)
+        if (DataGridControl.SelectedItem is not null)
         {
-            int index = dataGrid.SelectedIndex;
+            int index = DataGridControl.SelectedIndex;
             ItemsSource.RemoveAt(index);
 
             if (index == ItemsSource.Count)
-                dataGrid.SelectedIndex = index - 1;
+                DataGridControl.SelectedIndex = index - 1;
             else
-                dataGrid.SelectedIndex = index;
+                DataGridControl.SelectedIndex = index;
         }
     }
 
     public void MoveUp()
     {
-        if (dataGrid.SelectedItem is not null && dataGrid.SelectedIndex > 0)
+        if (DataGridControl.SelectedItem is not null && DataGridControl.SelectedIndex > 0)
         {
-            int index = dataGrid.SelectedIndex;
+            int index = DataGridControl.SelectedIndex;
             object? item = ItemsSource[index];
             ItemsSource[index] = ItemsSource[index - 1];
             ItemsSource[index - 1] = item;
-            dataGrid.SelectedIndex = index - 1;
+            DataGridControl.SelectedIndex = index - 1;
         }
     }
 
     public void MoveDown()
     {
-        if (dataGrid.SelectedItem is not null && dataGrid.SelectedIndex < ItemsSource.Count - 1)
+        if (DataGridControl.SelectedItem is not null && DataGridControl.SelectedIndex < ItemsSource.Count - 1)
         {
-            int index = dataGrid.SelectedIndex;
+            int index = DataGridControl.SelectedIndex;
             object? item = ItemsSource[index];
             ItemsSource[index] = ItemsSource[index + 1];
             ItemsSource[index + 1] = item;
-            dataGrid.SelectedIndex = index + 1;
+            DataGridControl.SelectedIndex = index + 1;
         }
     }
 }
