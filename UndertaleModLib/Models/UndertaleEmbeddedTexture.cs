@@ -218,19 +218,25 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
     /// </summary>
     public static void FindAllTextureInfo(UndertaleData data)
     {
-        if (data.TextureGroupInfo != null)
+        if (data.TextureGroupInfo is not null)
         {
             foreach (var info in data.TextureGroupInfo)
             {
+                if (info is null)
+                    continue;
                 foreach (var tex in info.TexturePages)
+                {
+                    if (tex is null)
+                        continue;
                     tex.Resource.TextureInfo = info;
+                }
             }
         }
     }
 
     // 1x1 blank image
     private static readonly TexData _placeholderTexture = new() { Image = new GMImage(1, 1) };
-    private static readonly object _textureLoadLock = new();
+    private readonly object _textureLoadLock = new();
 
     /// <summary>
     /// Attempts to load the corresponding external texture. Should only happen in 2022.9 and above.
@@ -375,6 +381,10 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         /// </summary>
         public void Serialize(FileBinaryWriter writer, bool gm2022_5)
         {
+            if (Image is null)
+            {
+                throw new Exception("No image assigned to embedded texture");
+            }
             if (Image.Format == GMImage.ImageFormat.RawBgra)
             {
                 throw new Exception("Unexpected raw RGBA image");

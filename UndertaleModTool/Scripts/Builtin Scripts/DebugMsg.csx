@@ -1,9 +1,10 @@
 ﻿EnsureDataLoaded();
 ScriptMessage("DebugMsg - Displays dialogue messages\nwhile debug mode is enabled.\n\nAuthor: krzys-h, Kneesnap");
 
-var code = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data.Strings, Data.Code, Data.CodeLocals);
+var code = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data);
 
-code.AppendGML(@"
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+importGroup.QueueAppend(code, @"
 if global.debug 
 {
     draw_set_color(c_white);
@@ -17,7 +18,8 @@ if global.debug
             draw_text(10, (drawYPosition * 15 + 50), currentMessage)
         }
     }
-}", Data);
+}");
+importGroup.Import();
 
 ChangeSelection(code);
 ScriptMessage("DebugMsg - Finished.");

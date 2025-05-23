@@ -3,22 +3,16 @@
 using System.Text;
 using System;
 using System.IO;
-using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
+using UndertaleModLib.Util;
+using ImageMagick;
 
 EnsureDataLoaded();
 
 // Setup root export folder.
-string winFolder = GetFolder(FilePath); // The folder data.win is located in.
-
-string subPath = Path.Combine(winFolder, "Export_Tilesets");
+string subPath = Path.Combine(Path.GetDirectoryName(FilePath), "Export_Tilesets");
 int i = 0;
-
-string GetFolder(string path)
-{
-    return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
-}
 
 // Folder Check One
 if (!Directory.Exists(subPath))
@@ -34,7 +28,7 @@ await ImportTilesets();
 
 await StopProgressBarUpdater();
 HideProgressBar();
-ScriptMessage("Import Complete.");
+ScriptMessage("Import complete.");
 
 
 async Task ImportTilesets()
@@ -44,18 +38,22 @@ async Task ImportTilesets()
 
 void ImportTileset(UndertaleBackground tileset)
 {
-    try
+    if (tileset is not null)
     {
-        string path = Path.Combine(subPath, tileset.Name.Content + ".png");
-        if (File.Exists(path))
+        string filename = $"{tileset.Name.Content}.png";
+        try
         {
-            Bitmap img = new Bitmap(path);
-            tileset.Texture.ReplaceTexture((Image)img);
+            string path = Path.Combine(subPath, filename);
+            if (File.Exists(path))
+            {
+                using MagickImage img = TextureWorker.ReadBGRAImageFromFile(path);
+                tileset.Texture.ReplaceTexture(img);
+            }
         }
-    }
-    catch (Exception ex)
-    {
-        ScriptMessage($"Failed to import file {tileset.Name} (index - {Data.Backgrounds.IndexOf(tileset)}) due to: " + ex.Message);
+        catch (Exception ex)
+        {
+            ScriptMessage($"Failed to import {filename} (index {Data.Backgrounds.IndexOf(tileset)}): {ex.Message}");
+        }
     }
 
     IncrementProgress();

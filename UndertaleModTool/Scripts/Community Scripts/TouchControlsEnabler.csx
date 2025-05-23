@@ -24,7 +24,7 @@ string dataPath = Path.Combine(Path.GetDirectoryName(ScriptPath), "TouchControls
 Dictionary<string, UndertaleEmbeddedTexture> textures = new Dictionary<string, UndertaleEmbeddedTexture>();
 
 UndertaleEmbeddedTexture controlsTexturePage = new UndertaleEmbeddedTexture();
-controlsTexturePage.TextureData.TextureBlob = File.ReadAllBytes(Path.Combine(dataPath, "controls.png"));
+controlsTexturePage.TextureData.Image = GMImage.FromPng(File.ReadAllBytes(Path.Combine(dataPath, "controls.png"))); // TODO: generate other formats
 Data.EmbeddedTextures.Add(controlsTexturePage);
 textures.Add(Path.GetFileName(Path.Combine(dataPath, "controls.png")), controlsTexturePage);
 
@@ -38,7 +38,21 @@ UndertaleTexturePageItem AddNewTexturePageItem(ushort sourceX, ushort sourceY, u
     ushort boundingHeight = sourceHeight;
     var texturePage = textures["controls.png"];
 
-    UndertaleTexturePageItem tpItem = new UndertaleTexturePageItem { SourceX = sourceX, SourceY = sourceY, SourceWidth = sourceWidth, SourceHeight = sourceHeight, TargetX = targetX, TargetY = targetY, TargetWidth = targetWidth, TargetHeight = targetHeight, BoundingWidth = boundingWidth, BoundingHeight = boundingHeight, TexturePage = texturePage };
+    UndertaleTexturePageItem tpItem = new() 
+    { 
+        SourceX = sourceX, 
+        SourceY = sourceY, 
+        SourceWidth = sourceWidth, 
+        SourceHeight = sourceHeight, 
+        TargetX = targetX, 
+        TargetY = targetY, 
+        TargetWidth = targetWidth, 
+        TargetHeight = targetHeight, 
+        BoundingWidth = boundingWidth, 
+        BoundingHeight = boundingHeight, 
+        TexturePage = texturePage,
+        Name = new UndertaleString($"PageItem {Data.TexturePageItems.Count}")
+    };
     Data.TexturePageItems.Add(tpItem);
     return tpItem;
 }
@@ -73,9 +87,10 @@ void AddNewUndertaleSprite(string spriteName, ushort width, ushort height, Under
     int marginBottom = height - 1;
 
     var sItem = new UndertaleSprite { Name = name, Width = width, Height = height, MarginLeft = marginLeft, MarginRight = marginRight, MarginTop = marginTop, MarginBottom = marginBottom };
-    foreach (var spriteTexture in spriteTextures) {
+    foreach (var spriteTexture in spriteTextures) 
+    {
         sItem.Textures.Add(new UndertaleSprite.TextureEntry() { Texture = spriteTexture });
-    };
+    }
     Data.Sprites.Add(sItem);
 }
 
@@ -118,17 +133,19 @@ int settingsnumx = 0;
 if(currentFont == "fnt_main") {settingsnumx = 477; }
 else if(currentFont == "fnt_mainbig") { settingsnumx = 502; }
 
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+
 string mobileControlsCreate = File.ReadAllText(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Create_0.gml"));
 StringBuilder builder = new StringBuilder(mobileControlsCreate);
 builder.Replace("{_font}", currentFont);
 builder.Replace("{_settingsnumx}", Convert.ToString(settingsnumx));
 mobileControlsCreate = builder.ToString();
 
-ImportGMLString("gml_Object_obj_mobilecontrols_Create_0", mobileControlsCreate);
-ImportGMLFile(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Draw_64.gml"), true, false, true);
-ImportGMLFile(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Other_4.gml"), true, false, true);
+importGroup.QueueReplace("gml_Object_obj_mobilecontrols_Create_0", mobileControlsCreate);
+QueueGMLFile(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Draw_64.gml"));
+QueueGMLFile(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Other_4.gml"));
 Data.Scripts.Add(new UndertaleScript() { Name = Data.Strings.MakeString("scr_add_keys"), Code = Data.Code.ByName("gml_Object_obj_mobilecontrols_Other_4") });
-ImportGMLFile(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Step_0.gml"), true, false, true);
+QueueGMLFile(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Step_0.gml"));
 
 var mobileControls = Data.GameObjects.ByName("obj_mobilecontrols");
 mobileControls.Persistent = true;
@@ -136,16 +153,22 @@ mobileControls.Persistent = true;
 var obj_gamecontroller = Data.GameObjects.ByName("obj_gamecontroller");
 if (obj_gamecontroller is not null)
 {
-    Data.Code.ByName("gml_Object_obj_gamecontroller_Create_0").AppendGML("instance_create(0, 0, obj_mobilecontrols);", Data);
+    importGroup.QueueAppend(Data.Code.ByName("gml_Object_obj_gamecontroller_Create_0"), 
+                            "instance_create(0, 0, obj_mobilecontrols);");
+    importGroup.Import();
     return;
 }
 
 var obj_time = Data.GameObjects.ByName("obj_time");
 if (obj_time is not null)
 {
-    Data.Code.ByName("gml_Object_obj_time_Create_0").AppendGML("instance_create(0, 0, obj_mobilecontrols);", Data);
+    importGroup.QueueAppend(Data.Code.ByName("gml_Object_obj_time_Create_0"),
+                            "instance_create(0, 0, obj_mobilecontrols);");
+    importGroup.Import();
     return;
 }
+
+importGroup.Import();
 
 var firstRoom = Data.Rooms[0];
 var shouldAdd = !(firstRoom.GameObjects.Any(o => o.ObjectDefinition == mobileControls));
@@ -159,4 +182,8 @@ if (shouldAdd)
         X = 0, Y = 0
     });
 }
-return;
+
+void QueueGMLFile(string path)
+{
+    importGroup.QueueReplace(Path.GetFileNameWithoutExtension(path), File.ReadAllText(path));
+}

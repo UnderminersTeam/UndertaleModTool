@@ -31,6 +31,10 @@ namespace UndertaleModLib
 
     public interface UndertaleObjectWithBlobs
     {
+        /// <summary>
+        /// TODO!
+        /// </summary>
+        /// <param name="writer">Where to serialize to.</param>
         void SerializeBlobBefore(UndertaleWriter writer);
     }
 
@@ -94,6 +98,9 @@ namespace UndertaleModLib
 
     public interface UndertaleNamedResource : UndertaleResource
     {
+        /// <summary>
+        /// Name of the resource.
+        /// </summary>
         UndertaleString Name { get; set; }
     }
 

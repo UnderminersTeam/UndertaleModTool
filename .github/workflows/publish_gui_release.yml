@@ -41,6 +41,7 @@ jobs:
         cp ./README.md ./${{ matrix.os }}
         cp ./SCRIPTS.md ./${{ matrix.os }}
         cp ./LICENSE.txt ./${{ matrix.os }}
+        cp -r ./UndertaleModLib/GameSpecificData/ ./${{ matrix.os }}/GameSpecificData/
     - name: Create zip for stable release Windows GUI
       run: |
         7z a -tzip GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip ./${{ matrix.os }}/* -mx0 
@@ -49,4 +50,50 @@ jobs:
       with:
           name: GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}
           path: GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip
+  
+  build_cli:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+        configuration: [Release]
+        bundled: [true]
+        include:
+          - os: ubuntu-latest
+            rid: linux-x64
+          - os: macOS-latest
+            rid: osx-x64
+          - os: windows-latest
+            rid: win-x64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    - name: Restore dependencies
+      run: dotnet restore UndertaleModCli
+    - name: Build
+      run: dotnet build UndertaleModCli --no-restore
+    - name: Publish ${{ matrix.os }} CLI
+      run: dotnet publish UndertaleModCli -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false --output CLI-${{ matrix.os }}
+    - name: Copy external files
+      run: |
+        cp ./README.md ./CLI-${{ matrix.os }}/
+        cp ./LICENSE.txt ./CLI-${{ matrix.os }}/
+    - name: Create zip for stable release CLI
+      run: |
+        7z a -tzip CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}.zip ./CLI-${{ matrix.os }}/* -mx0 
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+          name: CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}
+          path: CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}.zip
+    
 

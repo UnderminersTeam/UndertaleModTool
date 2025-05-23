@@ -4,11 +4,11 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Linq;
 
 EnsureDataLoaded();
 
-string codeFolder = GetFolder(FilePath) + "Export_Code" + Path.DirectorySeparatorChar;
-ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
+string codeFolder = Path.Combine(Path.GetDirectoryName(FilePath), "Export_Code");
 if (Directory.Exists(codeFolder))
 {
     ScriptError("A code export already exists. Please remove it.", "Error");
@@ -17,30 +17,12 @@ if (Directory.Exists(codeFolder))
 
 Directory.CreateDirectory(codeFolder);
 
-bool exportFromCache = false;
-if (GMLCacheEnabled && Data.GMLCache is not null)
-    exportFromCache = ScriptQuestion("Export from the cache?");
+GlobalDecompileContext globalDecompileContext = new(Data);
+Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = Data.ToolInfo.DecompilerSettings;
 
-List<UndertaleCode> toDump;
-if (!exportFromCache)
-{
-    toDump = new();
-    foreach (UndertaleCode code in Data.Code)
-    {
-        if (code.ParentEntry != null)
-            continue;
-        toDump.Add(code);
-    }
-}
+List<UndertaleCode> toDump = Data.Code.Where(c => c.ParentEntry is null).ToList();
 
-bool cacheGenerated = false;
-if (exportFromCache)
-{
-    cacheGenerated = await GenerateGMLCache(DECOMPILE_CONTEXT);
-    await StopProgressBarUpdater();
-}
-
-SetProgressBar(null, "Code Entries", 0, exportFromCache ? Data.GMLCache.Count + Data.GMLCacheFailed.Count : toDump.Count);
+SetProgressBar(null, "Code Entries", 0, toDump.Count);
 StartProgressBarUpdater();
 
 await DumpCode();
@@ -49,42 +31,9 @@ await StopProgressBarUpdater();
 HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + codeFolder);
 
-
-string GetFolder(string path)
-{
-    return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
-}
-
-
 async Task DumpCode()
 {
-    if (cacheGenerated)
-    {
-        await Task.Run(() => Parallel.ForEach(Data.GMLCache, DumpCachedCode));
-
-        if (Data.GMLCacheFailed.Count > 0)
-        {
-            if (Data.KnownSubFunctions is null) //if we run script before opening any code
-            {
-                SetProgressBar(null, "Building the cache of all sub-functions...", 0, 0);
-                await Task.Run(() => Decompiler.BuildSubFunctionCache(Data));
-                SetProgressBar(null, "Code Entries", 0, Data.GMLCache.Count + Data.GMLCacheFailed.Count);
-            }   
-
-            await Task.Run(() => Parallel.ForEach(Data.GMLCacheFailed, (codeName) => DumpCode(Data.Code.ByName(codeName))));
-        }
-    }
-    else
-    {
-        if (Data.KnownSubFunctions is null) //if we run script before opening any code
-        {
-            SetProgressBar(null, "Building the cache of all sub-functions...", 0, 0);
-            await Task.Run(() => Decompiler.BuildSubFunctionCache(Data));
-            SetProgressBar(null, "Code Entries", 0, toDump.Count);
-        }
-
-        await Task.Run(() => Parallel.ForEach(toDump, DumpCode));
-    }
+    await Task.Run(() => Parallel.ForEach(toDump, DumpCode));
 }
 
 void DumpCode(UndertaleCode code)
@@ -94,21 +43,15 @@ void DumpCode(UndertaleCode code)
         string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
         try
         {
-            File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
+            File.WriteAllText(path, (code != null 
+                ? new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, decompilerSettings).DecompileToString() 
+                : ""));
         }
         catch (Exception e)
         {
             File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
         }
     }
-
-    IncrementProgressParallel();
-}
-void DumpCachedCode(KeyValuePair<string, string> code)
-{
-    string path = Path.Combine(codeFolder, code.Key + ".gml");
-
-    File.WriteAllText(path, code.Value);
 
     IncrementProgressParallel();
 }

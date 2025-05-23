@@ -104,7 +104,16 @@ IList<UndertaleEmbeddedAudio> GetAudioGroupData(UndertaleSound sound)
     if (loadedAudioGroups.ContainsKey(audioGroupName))
         return loadedAudioGroups[audioGroupName];
 
-    string groupFilePath = Path.Combine(winFolder, "audiogroup" + sound.GroupID + ".dat");
+    string relativeAudioGroupPath;
+    if (sound.AudioGroup is UndertaleAudioGroup { Path.Content: string customRelativePath })
+    {
+        relativeAudioGroupPath = customRelativePath;
+    }
+    else
+    {
+        relativeAudioGroupPath = $"audiogroup{sound.GroupID}.dat";
+    }
+    string groupFilePath = Path.Combine(winFolder, relativeAudioGroupPath);
     if (!File.Exists(groupFilePath))
         return null; // Doesn't exist.
 
@@ -112,7 +121,7 @@ IList<UndertaleEmbeddedAudio> GetAudioGroupData(UndertaleSound sound)
     {
         UndertaleData data = null;
         using (var stream = new FileStream(groupFilePath, FileMode.Open, FileAccess.Read))
-            data = UndertaleIO.Read(stream, warning => ScriptMessage("A warning occured while trying to load " + audioGroupName + ":\n" + warning));
+            data = UndertaleIO.Read(stream, (warning, _) => ScriptMessage("A warning occured while trying to load " + audioGroupName + ":\n" + warning));
 
         loadedAudioGroups[audioGroupName] = data.EmbeddedAudio;
         return data.EmbeddedAudio;
@@ -142,7 +151,16 @@ void DumpSounds()
 {
     //MakeFolder("Exported_Sounds");
     foreach (UndertaleSound sound in Data.Sounds)
-        DumpSound(sound);
+    {
+        if (sound is not null)
+        {
+            DumpSound(sound);
+        }
+        else
+        {
+            IncProgressLocal();
+        }
+    }
 }
 
 void DumpSound(UndertaleSound sound)

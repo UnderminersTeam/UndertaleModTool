@@ -77,7 +77,7 @@ namespace UndertaleModLib.Util
             IMagickImage<byte> croppedImage = null;
             lock (embeddedImage)
             {
-                croppedImage = embeddedImage.Clone(texPageItem.SourceX, texPageItem.SourceY, texPageItem.SourceWidth, texPageItem.SourceHeight);
+                croppedImage = embeddedImage.CloneArea(texPageItem.SourceX, texPageItem.SourceY, texPageItem.SourceWidth, texPageItem.SourceHeight);
             }
 
             // Resize the image, if necessary
@@ -92,7 +92,7 @@ namespace UndertaleModLib.Util
             IMagickImage<byte> returnImage = croppedImage;
             if (includePadding)
             {
-                returnImage = new MagickImage(MagickColor.FromRgba(0, 0, 0, 0), exportWidth, exportHeight);
+                returnImage = new MagickImage(MagickColors.Transparent, (uint)exportWidth, (uint)exportHeight);
                 returnImage.Composite(croppedImage, texPageItem.TargetX, texPageItem.TargetY, CompositeOperator.Copy);
                 croppedImage.Dispose();
             }
@@ -122,13 +122,14 @@ namespace UndertaleModLib.Util
         }
 
         /// <summary>
-        /// Performs a resize of the given image, if required, using bilinear interpolation. Always returns a new image.
+        /// Performs a resize of the given image, if required, using the specified interpolation (bilinear by default). Always returns a new image.
         /// </summary>
         /// <param name="image">Image to be resized (without being modified).</param>
         /// <param name="width">Desired width to resize to.</param>
         /// <param name="height">Desired height to resize to.</param>
+        /// <param name="interpolateMethod">Pixel interpolation method to use, or specify none to use bilinear interpolation.</param>
         /// <returns>A copy of the provided image, which is resized to the given dimensions when required.</returns>
-        public static IMagickImage<byte> ResizeImage(IMagickImage<byte> image, int width, int height)
+        public static IMagickImage<byte> ResizeImage(IMagickImage<byte> image, int width, int height, PixelInterpolateMethod interpolateMethod = PixelInterpolateMethod.Bilinear)
         {
             // Clone image
             IMagickImage<byte> newImage = image.Clone();
@@ -140,7 +141,7 @@ namespace UndertaleModLib.Util
             }
 
             // Resize using bilinear interpolation
-            newImage.InterpolativeResize(width, height, PixelInterpolateMethod.Bilinear);
+            newImage.InterpolativeResize((uint)width, (uint)height, interpolateMethod);
             return newImage;
         }
 
@@ -177,7 +178,7 @@ namespace UndertaleModLib.Util
                     {
                         byte fullByte = 0x00;
                         int pxStart = (xByte * 8);
-                        int pxEnd = Math.Min(pxStart + 8, image.Width);
+                        int pxEnd = Math.Min(pxStart + 8, (int)image.Width);
 
                         for (int x = pxStart; x < pxEnd; x++)
                         {
@@ -206,7 +207,7 @@ namespace UndertaleModLib.Util
         public static IMagickImage<byte> GetCollisionMaskImage(UndertaleSprite.MaskEntry mask, int maskWidth, int maskHeight)
         {
             // Create image to draw on
-            MagickImage image = new(MagickColor.FromRgba(0, 0, 0, 255), maskWidth, maskHeight);
+            MagickImage image = new(MagickColor.FromRgba(0, 0, 0, 255), (uint)maskWidth, (uint)maskHeight);
             IPixelCollection<byte> pixels = image.GetPixels();
 
             // Get black/white colors to use for drawing
@@ -263,7 +264,7 @@ namespace UndertaleModLib.Util
             try
             {
                 MagickImageInfo info = new(filePath);
-                return (info.Width, info.Height);
+                return ((int)info.Width, (int)info.Height);
             }
             catch (Exception)
             {

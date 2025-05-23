@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <LangVersion>11</LangVersion>
@@ -6,13 +6,12 @@
     <!-- AssemblyInfo -->
     <AssemblyTitle>UndertaleModLib</AssemblyTitle>
     <ProductName>UndertaleModLib</ProductName>
-    <Copyright>Copyright ©  2018-2024, licensed under GPLv3</Copyright>
-    <AssemblyVersion>0.6.1.0</AssemblyVersion>
-    <FileVersion>0.6.1.0</FileVersion>
+    <Copyright>Copyright ©  2018-2025, licensed under GPLv3</Copyright>
+    <AssemblyVersion>0.8.1.1</AssemblyVersion>
+    <FileVersion>0.8.1.1</FileVersion>
     <DebugType>embedded</DebugType>
     <Platforms>AnyCPU;x64</Platforms>
     <RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NeutralLanguage>en</NeutralLanguage>
     <ResourceLanguages>en</ResourceLanguages>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
@@ -25,21 +24,61 @@
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Fody" Version="6.8.1">
+    <PackageReference Include="Fody" Version="6.9.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="13.10.0" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="14.6.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="PropertyChanged.Fody" Version="4.1.0" />
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="GameSpecificData\Definitions\deltarune.json" />
+    <None Remove="GameSpecificData\Definitions\gamemaker.json" />
+    <None Remove="GameSpecificData\Definitions\undertale.json" />
+    <None Remove="GameSpecificData\deltarune.json" />
+    <None Remove="GameSpecificData\empty.json" />
+    <None Remove="GameSpecificData\gamemaker.json" />
+    <None Remove="GameSpecificData\README.txt" />
+    <None Remove="GameSpecificData\undertale.json" />
     <None Remove="version.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="gitversion.txt" />
+    <Content Include="GameSpecificData\README.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GameSpecificData\Underanalyzer\deltarune.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GameSpecificData\Underanalyzer\template.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GameSpecificData\Underanalyzer\gamemaker.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GameSpecificData\Underanalyzer\undertale.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GameSpecificData\Definitions\deltarune.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GameSpecificData\Definitions\gamemaker.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GameSpecificData\Definitions\undertale.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <EmbeddedResource Include="gitversion.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Underanalyzer\Underanalyzer\Underanalyzer.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+       <_Parameter1>UndertaleModLibTests</_Parameter1>
+    </AssemblyAttribute>
   </ItemGroup>
   <!--A prebuild responsible for creating a git commit name and branch name -->
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">

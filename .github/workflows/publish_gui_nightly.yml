@@ -37,7 +37,7 @@ jobs:
         dotnet build UndertaleModTool --no-restore
         dotnet build UndertaleModToolUpdater --no-restore
     - name: Publish ${{ matrix.os }} GUI
-      run: |
+      run: | # FIXME: debug constant isn't being applied here, which disables updater, etc., so need to fix that or possibly add a new constant
         dotnet publish UndertaleModTool -c ${{ matrix.configuration }} -r win-x64 -p:DefineConstants="SHOW_COMMIT_HASH" --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=${{ matrix.singlefile }} --output ${{ matrix.os }}
         dotnet publish UndertaleModToolUpdater -c ${{ matrix.configuration }} -r win-x64 --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false --output ${{ matrix.os }}/Updater
     - name: Copy external files
@@ -45,6 +45,7 @@ jobs:
         cp ./README.md ./${{ matrix.os }}
         cp ./SCRIPTS.md ./${{ matrix.os }}
         cp ./LICENSE.txt ./${{ matrix.os }}
+        cp -r ./UndertaleModLib/GameSpecificData/ ./${{ matrix.os }}/GameSpecificData/
     - name: Create zip for nightly release Windows GUI
       run: |
         7z a -tzip GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip ./${{ matrix.os }}/* -mx0 
@@ -90,6 +91,7 @@ jobs:
       run: |
         cp ./README.md ./CLI-${{ matrix.os }}/
         cp ./LICENSE.txt ./CLI-${{ matrix.os }}/
+        cp -r ./UndertaleModLib/GameSpecificData/ ./CLI-${{ matrix.os }}/GameSpecificData/
     - name: Create zip for nightly release CLI
       run: |
         7z a -tzip CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}.zip ./CLI-${{ matrix.os }}/* -mx0 

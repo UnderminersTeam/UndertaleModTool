@@ -28,18 +28,11 @@ string DonorDataPath = PromptLoadFile(null, null);
 if (DonorDataPath == null)
     throw new ScriptException("The donor data path was not set.");
 
-bool compContextState = CompileContext.GMS2_3;
-bool decompContextState = DecompileContext.GMS2_3;
-
 using (var stream = new FileStream(DonorDataPath, FileMode.Open, FileAccess.Read))
-    DonorData = UndertaleIO.Read(stream, warning => ScriptMessage("A warning occured while trying to load " + DonorDataPath + ":\n" + warning));
+    DonorData = UndertaleIO.Read(stream, (warning, _) => ScriptMessage("A warning occured while trying to load " + DonorDataPath + ":\n" + warning));
 var DonorDataEmbeddedTexturesCount = DonorData.EmbeddedTextures.Count;
 DonorData.BuiltinList = new BuiltinList(DonorData);
-AssetTypeResolver.InitializeTypes(DonorData);
-
-
-CompileContext.GMS2_3 = compContextState;
-DecompileContext.GMS2_3 = decompContextState;
+GameSpecificResolver.Initialize(DonorData);
 
 bool donorIs2_3 = DonorData.IsVersionAtLeast(2, 3);
 
@@ -134,17 +127,14 @@ for (var j = 0; j < splitStringsList.Count; j++)
                                 nativeACT.ActionName = Data.Strings.MakeString(donorACT.ActionName.Content);
                             if (donorACT.CodeId?.Name?.Content != null)
                             {
-                                ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(DonorData, false));
+                                GlobalDecompileContext globalDecompileContext = new(DonorData);
                                 string codeToCopy = "";
                                 try
                                 {
-                                    CompileContext.GMS2_3 = donorIs2_3;
-                                    DecompileContext.GMS2_3 = donorIs2_3;
-
-                                    codeToCopy = (donorACT.CodeId != null ? Decompiler.Decompile(donorACT.CodeId, DECOMPILE_CONTEXT.Value) : "");
-
-                                    CompileContext.GMS2_3 = compContextState;
-                                    DecompileContext.GMS2_3 = decompContextState;
+                                    codeToCopy = (donorACT.CodeId != null 
+                                        ? new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, donorACT.CodeId, Data.ToolInfo.DecompilerSettings)
+                                                .DecompileToString() 
+                                        : "");
                                 }
                                 catch (Exception e)
                                 {
@@ -152,7 +142,9 @@ for (var j = 0; j < splitStringsList.Count; j++)
                                 }
                                 try
                                 {
-                                    ImportGMLString(donorACT.CodeId?.Name?.Content, codeToCopy, false, false);
+                                    UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+                                    importGroup.QueueReplace(donorACT.CodeId?.Name?.Content, codeToCopy);
+                                    importGroup.Import();
                                 }
                                 catch (Exception ec)
                                 {
@@ -161,10 +153,9 @@ for (var j = 0; j < splitStringsList.Count; j++)
                                 nativeACT.CodeId = Data.Code.ByName(donorACT.CodeId?.Name?.Content);
                                 nativeACT.CodeId.LocalsCount = donorACT.CodeId.LocalsCount;
                                 nativeACT.CodeId.ArgumentsCount = donorACT.CodeId.ArgumentsCount;
-                                nativeACT.CodeId.WeirdLocalsFlag = donorACT.CodeId.WeirdLocalsFlag;
                                 nativeACT.CodeId.Offset = donorACT.CodeId.Offset;
                                 nativeACT.CodeId.WeirdLocalFlag = donorACT.CodeId.WeirdLocalFlag;
-                                if (Data?.GeneralInfo.BytecodeVersion > 14)
+                                if (Data.CodeLocals is not null)
                                 {
                                     UndertaleCodeLocals nativelocals = Data.CodeLocals.ByName(donorACT.CodeId?.Name?.Content);
                                     UndertaleCodeLocals donorlocals = DonorData.CodeLocals.ByName(donorACT.CodeId?.Name?.Content);

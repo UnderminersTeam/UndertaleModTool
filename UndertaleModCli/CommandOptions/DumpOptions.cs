@@ -2,7 +2,6 @@ using System.IO;
 
 namespace UndertaleModCli;
 
-// ReSharper disable NotNullMemberIsNotInitialized - Properties are applied via reflection.
 /// <summary>
 /// Cli options for the Dump command
 /// </summary>
@@ -16,7 +15,7 @@ public class DumpOptions
 	/// <summary>
 	/// Directory path to where to dump all contents
 	/// </summary>
-	public DirectoryInfo? Output { get; set; }
+	public DirectoryInfo Output { get; set; }
 
 	/// <summary>
 	/// Determines if Cli should print out verbose logs

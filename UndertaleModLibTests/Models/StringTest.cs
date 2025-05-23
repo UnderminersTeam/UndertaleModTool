@@ -34,7 +34,7 @@ public class StringTest
     [InlineData(null, null, false)]
     [InlineData("hi", null, false)]
     [InlineData(null, "null", false)]
-    public void TestSearchMatches(string text, string substring, bool expected)
+    public void TestSearchMatches(string? text, string? substring, bool expected)
     {
         UndertaleString utString = new UndertaleString(text);
 

@@ -12,11 +12,13 @@ No "".gamelog.txt"" is produced
 The "".gamelog.txt"" is produced but appears to fail after Steam initialization.
 The game window appears but is frozen indefinitely
 ");
-Data.GeneralInfo.DisableDebugger = true; 
+Data.GeneralInfo.IsDebuggerDisabled = true; 
 int globalNum = 0;
 int selfNum = 0;
 foreach(var vari in Data.Variables)
 {
+    if (vari is null)
+        continue;
     if (vari.InstanceType == UndertaleInstruction.InstanceType.Global)
     {
         vari.VarID = globalNum++;

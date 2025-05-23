@@ -1,3 +1,5 @@
+if ((!(display_get_gui_width() == latestGuiW)) || (!(display_get_gui_height() == latestGuiH)))
+    scr_add_keys()
 if keyboard_check(ord("~"))
 {
     if (device_mouse_x_to_gui(0) >= analog_posx && device_mouse_x_to_gui(0) <= (analog_posx + (59 * analog_scale)))
@@ -20,18 +22,6 @@ if keyboard_check_pressed(92)
     }
     else if (edit == 3)
     {
-        virtual_key_delete(virtual_key_up)
-        virtual_key_delete(virtual_key_down)
-        virtual_key_delete(virtual_key_left)
-        virtual_key_delete(virtual_key_right)
-        virtual_key_delete(virtual_key_z)
-        virtual_key_delete(virtual_key_x)
-        virtual_key_delete(virtual_key_c)
-        virtual_key_delete(virtual_key_zp)
-        virtual_key_delete(virtual_key_xp)
-        virtual_key_delete(virtual_key_cp)
-        virtual_key_delete(virtual_key_analog)
-        virtual_key_delete(virtual_key_analogp)
         ini_open("touchconfig.ini")
         ini_write_real("CONFIG", "zx", zx)
         ini_write_real("CONFIG", "zy", zy)
@@ -52,21 +42,7 @@ if keyboard_check_pressed(92)
         scr_add_keys()
     }
 }
-
 if (edit == 0) return;
-
-virtual_key_delete(virtual_key_up)
-virtual_key_delete(virtual_key_down)
-virtual_key_delete(virtual_key_left)
-virtual_key_delete(virtual_key_right)
-virtual_key_delete(virtual_key_z)
-virtual_key_delete(virtual_key_x)
-virtual_key_delete(virtual_key_c)
-virtual_key_delete(virtual_key_zp)
-virtual_key_delete(virtual_key_xp)
-virtual_key_delete(virtual_key_cp)
-virtual_key_delete(virtual_key_analog)
-virtual_key_delete(virtual_key_analogp)
 scr_add_keys()
 if keyboard_check(ord("}"))
 {

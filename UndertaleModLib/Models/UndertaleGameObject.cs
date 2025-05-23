@@ -82,7 +82,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
 
     #region Physics related properties
     /// <summary>
-    /// Whether this object uses Game Maker physics.
+    /// Whether this object uses GameMaker physics.
     /// </summary>
     public bool UsesPhysics { get; set; }
 
@@ -276,119 +276,129 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     }
 
     #region EventHandlerFor() overloads
-    // TODO: Add documentation for these methods.
-    // These methods are used by scripts for getting a code entry for a certain event of the game object.
 
-    public UndertaleCode EventHandlerFor(EventType type, uint subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
-    {
-        Event subtypeObj = Events[(int)type].FirstOrDefault(x => x.EventSubtype == subtype);
-        if (subtypeObj == null)
-            Events[(int)type].Add(subtypeObj = new Event() { EventSubtype = subtype });
-        EventAction action = subtypeObj.Actions.FirstOrDefault();
-        if (action == null)
-        {
-            subtypeObj.Actions.Add(action = new EventAction());
-            action.ActionName = strg.MakeString("");
-        }
-        UndertaleCode code = action.CodeId;
-        if (code == null)
-        {
-            var name = strg.MakeString("gml_Object_" + Name.Content + "_" + type + "_" + subtype);
-            code = new UndertaleCode()
-            {
-                Name = name,
-                LocalsCount = 1
-            };
-            action.CodeId = code;
-            codelist.Add(code);
-
-            UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
-            argsLocal.Name = strg.MakeString("arguments");
-            argsLocal.Index = 0;
-
-            var locals = new UndertaleCodeLocals()
-            {
-                Name = name
-            };
-            locals.Locals.Add(argsLocal);
-            localslist.Add(locals);
-        }
-        return code;
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, UndertaleData data)
-    {
-        return EventHandlerFor(type, data.Strings, data.Code, data.CodeLocals);
-    }
-
+    /// <summary>
+    /// Finds or creates a code entry for the given event type and subtype, on this object.
+    /// </summary>
+    /// <param name="type">Main event type for the event.</param>
+    /// <param name="subtype">Subtype for the event.</param>
+    /// <param name="data">Data that this object belongs to.</param>
+    /// <returns>New or existing code entry corresponding to the event.</returns>
     public UndertaleCode EventHandlerFor(EventType type, uint subtype, UndertaleData data)
     {
-        return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
+        // Under the given event type, find an event with the given subtype, or create a new one if none exists
+        UndertalePointerList<Event> subEvents = Events[(int)type];
+        Event targetEvent = null;
+        foreach (Event ev in subEvents)
+        {
+            if (ev.EventSubtype == subtype)
+            {
+                targetEvent = ev;
+                break;
+            }
+        }
+        if (targetEvent is null)
+        {
+            subEvents.Add(targetEvent = new() { EventSubtype = subtype });
+        }
+
+        // Find action for event, or create a new one if none exists
+        EventAction targetAction = targetEvent.Actions.FirstOrDefault();
+        if (targetAction is null)
+        {
+            targetEvent.Actions.Add(targetAction = new());
+            targetAction.ActionName = data.Strings.MakeString("");
+        }
+
+        // Create and attach a new code entry, if one doesn't already exist
+        if (targetAction.CodeId is not UndertaleCode existingCode)
+        {
+            return targetAction.CodeId = UndertaleCode.CreateEmptyEntry(data, $"gml_Object_{Name.Content}_{type}_{subtype}");
+        }
+
+        // Return existing code entry
+        return existingCode;
     }
 
-    public UndertaleCode EventHandlerFor(EventType type, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
+    /// <summary>
+    /// Finds or creates a code entry for the given main event type (no subtype), on this object.
+    /// </summary>
+    /// <param name="type">Main event type for the event.</param>
+    /// <param name="data">Data that this object belongs to.</param>
+    /// <returns>New or existing code entry corresponding to the event.</returns>
+    public UndertaleCode EventHandlerFor(EventType type, UndertaleData data)
     {
-        return EventHandlerFor(type, 0u, strg, codelist, localslist);
+        return EventHandlerFor(type, 0u, data);
     }
 
+    /// <summary>
+    /// Finds or creates a code entry for the given keyboard event type and subtype, on this object.
+    /// </summary>
+    /// <param name="type">Main keyboard event type for the event.</param>
+    /// <param name="subtype">Keyboard subtype for the event.</param>
+    /// <param name="data">Data that this object belongs to.</param>
+    /// <returns>New or existing code entry corresponding to the event.</returns>
     public UndertaleCode EventHandlerFor(EventType type, EventSubtypeKey subtype, UndertaleData data)
-    {
-        return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, EventSubtypeKey subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
     {
         if (type != EventType.Keyboard && type != EventType.KeyPress && type != EventType.KeyRelease)
             throw new InvalidOperationException();
-        return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
+        return EventHandlerFor(type, (uint)subtype, data);
     }
 
+    /// <summary>
+    /// Finds or creates a code entry for the given step event type and subtype, on this object.
+    /// </summary>
+    /// <param name="type">Main step event type for the event.</param>
+    /// <param name="subtype">Step subtype for the event.</param>
+    /// <param name="data">Data that this object belongs to.</param>
+    /// <returns>New or existing code entry corresponding to the event.</returns>
     public UndertaleCode EventHandlerFor(EventType type, EventSubtypeStep subtype, UndertaleData data)
-    {
-        return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, EventSubtypeStep subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
     {
         if (type != EventType.Step)
             throw new InvalidOperationException();
-        return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
+        return EventHandlerFor(type, (uint)subtype, data);
     }
 
+    /// <summary>
+    /// Finds or creates a code entry for the given mouse event type and subtype, on this object.
+    /// </summary>
+    /// <param name="type">Main mouse event type for the event.</param>
+    /// <param name="subtype">Mouse subtype for the event.</param>
+    /// <param name="data">Data that this object belongs to.</param>
+    /// <returns>New or existing code entry corresponding to the event.</returns>
     public UndertaleCode EventHandlerFor(EventType type, EventSubtypeMouse subtype, UndertaleData data)
-    {
-        return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, EventSubtypeMouse subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
     {
         if (type != EventType.Mouse)
             throw new InvalidOperationException();
-        return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
+        return EventHandlerFor(type, (uint)subtype, data);
     }
 
+    /// <summary>
+    /// Finds or creates a code entry for the given "other" event type and subtype, on this object.
+    /// </summary>
+    /// <param name="type">Main "other" event type for the event.</param>
+    /// <param name="subtype">"Other" subtype for the event.</param>
+    /// <param name="data">Data that this object belongs to.</param>
+    /// <returns>New or existing code entry corresponding to the event.</returns>
     public UndertaleCode EventHandlerFor(EventType type, EventSubtypeOther subtype, UndertaleData data)
-    {
-        return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, EventSubtypeOther subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
     {
         if (type != EventType.Other)
             throw new InvalidOperationException();
-        return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
+        return EventHandlerFor(type, (uint)subtype, data);
     }
 
+    /// <summary>
+    /// Finds or creates a code entry for the given draw event type and subtype, on this object.
+    /// </summary>
+    /// <param name="type">Main draw event type for the event.</param>
+    /// <param name="subtype">Draw subtype for the event.</param>
+    /// <param name="data">Data that this object belongs to.</param>
+    /// <returns>New or existing code entry corresponding to the event.</returns>
     public UndertaleCode EventHandlerFor(EventType type, EventSubtypeDraw subtype, UndertaleData data)
-    {
-        return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, EventSubtypeDraw subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
     {
         if (type != EventType.Draw)
             throw new InvalidOperationException();
-        return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
+        return EventHandlerFor(type, (uint)subtype, data);
     }
     #endregion
 
@@ -425,7 +435,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         /// <summary>
         /// The subtype of this event.
         /// </summary>
-        /// <remarks>Game Maker suffixes the action names with this id.</remarks>
+        /// <remarks>GameMaker suffixes the action names with this ID.</remarks>
         public uint EventSubtype { get; set; }
 
         /// <summary>
@@ -678,7 +688,7 @@ public enum EventType : uint
     /// </summary>
     KeyRelease = 10,
     /// <summary>
-    /// A trigger event type. Only used in Pre- Game Maker: Studio.
+    /// A trigger event type. Only used in Pre- GameMaker Studio.
     /// </summary>
     Trigger = 11, // no subtypes, always 0
     /// <summary>
@@ -690,7 +700,7 @@ public enum EventType : uint
     /// </summary>
     Gesture = 13,
     /// <summary>
-    /// A pre-create event type. Unknown subtype. TODO?
+    /// A pre-create event type. Has no subtypes, always 0.
     /// </summary>
     PreCreate = 14
 }
@@ -1188,99 +1198,99 @@ public enum EventSubtypeMouse : uint
     /// </summary>
     MouseLeave = 11,
     /// <summary>
-    /// The Joystick1 left event. Is only used in Pre-Game Maker: Studio.
+    /// The Joystick1 left event. Is only used in Pre-GameMaker Studio.
     /// </summary>
     Joystick1Left = 16,
     /// <summary>
-    /// The Joystick1 right event. Is only used in Pre-Game Maker: Studio.
+    /// The Joystick1 right event. Is only used in Pre-GameMaker Studio.
     /// </summary>
     Joystick1Right = 17,
     /// <summary>
-    /// The Joystick1 up event. Is only used in Pre-Game Maker: Studio.
+    /// The Joystick1 up event. Is only used in Pre-GameMaker Studio.
     /// </summary>
     Joystick1Up = 18,
     /// <summary>
-    /// The Joystick1 down event. Is only used in Pre-Game Maker: Studio.
+    /// The Joystick1 down event. Is only used in Pre-GameMaker Studio.
     /// </summary>
     Joystick1Down = 19,
     /// <summary>
-    /// The Joystick1 button1 event. Is only used in Pre-Game Maker: Studio.
+    /// The Joystick1 button1 event. Is only used in Pre-GameMaker Studio.
     /// </summary>
     Joystick1Button1 = 21,
     /// <summary>
-    /// The Joystick1 button2 event. Is only used in Pre-Game Maker: Studio.
+    /// The Joystick1 button2 event. Is only used in Pre-GameMaker Studio.
     /// </summary>
     Joystick1Button2 = 22,
     /// <summary>
-    /// The Joystick1 button3 event. Is only used in Pre-Game Maker: Studio.
+    /// The Joystick1 button3 event. Is only used in Pre-GameMaker Studio.
     /// </summary>
     Joystick1Button3 = 23,
     /// <summary>
-    /// The Joystick1 button4 event. Is only used in Pre-Game Maker: Studio.
+    /// The Joystick1 button4 event. Is only used in Pre-GameMaker Studio.
     /// </summary>
     Joystick1Button4 = 24,
     /// <summary>
-    /// The Joystick1 button5 event. Is only used in Pre-Game Maker: Studio.
+    /// The Joystick1 button5 event. Is only used in Pre-GameMaker Studio.
     /// </summary>
     Joystick1Button5 = 25,
     /// <summary>
-    /// The Joystick1 button6 event. Is only used in Pre-Game Maker: Studio.
+    /// The Joystick1 button6 event. Is only used in Pre-GameMaker Studio.
     /// </summary>
     Joystick1Button6 = 26,
     /// <summary>
-    /// The Joystick1 button7 event. Is only used in Pre-Game Maker: Studio.
+    /// The Joystick1 button7 event. Is only used in Pre-GameMaker Studio.
     /// </summary>
     Joystick1Button7 = 27,
     /// <summary>
-    /// The Joystick1 button8 event. Is only used in Pre-Game Maker: Studio.
+    /// The Joystick1 button8 event. Is only used in Pre-GameMaker Studio.
     /// </summary>
     Joystick1Button8 = 28,
     /// <summary>
-    /// The Joystick2 left event. Is only used in Pre-Game Maker: Studio.
+    /// The Joystick2 left event. Is only used in Pre-GameMaker Studio.
     /// </summary>
     Joystick2Left = 31,
     /// <summary>
-    /// The Joystick2 right event. Is only used in Pre-Game Maker: Studio.
+    /// The Joystick2 right event. Is only used in Pre-GameMaker Studio.
     /// </summary>
     Joystick2Right = 32,
     /// <summary>
-    /// The Joystick2 up event. Is only used in Pre-Game Maker: Studio.
+    /// The Joystick2 up event. Is only used in Pre-GameMaker Studio.
     /// </summary>
     Joystick2Up = 33,
     /// <summary>
-    /// The Joystick2 down event. Is only used in Pre-Game Maker: Studio.
+    /// The Joystick2 down event. Is only used in Pre-GameMaker Studio.
     /// </summary>
     Joystick2Down = 34,
     /// <summary>
-    /// The Joystick2 button1 event. Is only used in Pre-Game Maker: Studio.
+    /// The Joystick2 button1 event. Is only used in Pre-GameMaker Studio.
     /// </summary>
     Joystick2Button1 = 36,
     /// <summary>
-    /// The Joystick2 button2 event. Is only used in Pre-Game Maker: Studio.
+    /// The Joystick2 button2 event. Is only used in Pre-GameMaker Studio.
     /// </summary>
     Joystick2Button2 = 37,
     /// <summary>
-    /// The Joystick2 button3 event. Is only used in Pre-Game Maker: Studio.
+    /// The Joystick2 button3 event. Is only used in Pre-GameMaker Studio.
     /// </summary>
     Joystick2Button3 = 38,
     /// <summary>
-    /// The Joystick2 button4 event. Is only used in Pre-Game Maker: Studio.
+    /// The Joystick2 button4 event. Is only used in Pre-GameMaker Studio.
     /// </summary>
     Joystick2Button4 = 39,
     /// <summary>
-    /// The Joystick2 button5 event. Is only used in Pre-Game Maker: Studio.
+    /// The Joystick2 button5 event. Is only used in Pre-GameMaker Studio.
     /// </summary>
     Joystick2Button5 = 40,
     /// <summary>
-    /// The Joystick2 button6 event. Is only used in Pre-Game Maker: Studio.
+    /// The Joystick2 button6 event. Is only used in Pre-GameMaker Studio.
     /// </summary>
     Joystick2Button6 = 41,
     /// <summary>
-    /// The Joystick2 button7 event. Is only used in Pre-Game Maker: Studio.
+    /// The Joystick2 button7 event. Is only used in Pre-GameMaker Studio.
     /// </summary>
     Joystick2Button7 = 42,
     /// <summary>
-    /// The Joystick2 button8 event. Is only used in Pre-Game Maker: Studio.
+    /// The Joystick2 button8 event. Is only used in Pre-GameMaker Studio.
     /// </summary>
     Joystick2Button8 = 43,
     /// <summary>
@@ -1359,7 +1369,7 @@ public enum EventSubtypeOther : uint
     /// </summary>
     RoomEnd = 5,
     /// <summary>
-    /// The "No More Lives" event. Only used in Game Maker Studio: 1 and earlier.
+    /// The "No More Lives" event. Only used in GameMaker: Studio 1 and earlier.
     /// </summary>
     NoMoreLives = 6,
     /// <summary>
@@ -1371,7 +1381,7 @@ public enum EventSubtypeOther : uint
     /// </summary>
     EndOfPath = 8,
     /// <summary>
-    /// The "No More Health" event. Only used in Game Maker Studio: 1 and earlier.
+    /// The "No More Health" event. Only used in GameMaker: Studio 1 and earlier.
     /// </summary>
     NoMoreHealth = 9,
     #region User events

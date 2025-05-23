@@ -115,16 +115,27 @@ namespace UndertaleModTool
 
         private void OpenReference(bool inNewTab = false)
         {
+            MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+
             if (GroupID != 0 && AudioID != -1)
             {
-                (Application.Current.MainWindow as MainWindow).OpenChildFile("audiogroup" + GroupID + ".dat", "AUDO", AudioID);
+                string relativePath;
+                if (GroupReference is UndertaleAudioGroup { Path.Content: string customRelativePath })
+                {
+                    relativePath = customRelativePath;
+                }
+                else
+                {
+                    relativePath = $"audiogroup{GroupID}.dat";
+                }
+                mainWindow.OpenChildFile(relativePath, "AUDO", AudioID);
                 return;
             }
 
             if (AudioReference == null)
                 return;
 
-            (Application.Current.MainWindow as MainWindow).ChangeSelection(AudioReference, inNewTab);
+            mainWindow.ChangeSelection(AudioReference, inNewTab);
         }
 
         private void TextBox_DragOver(object sender, DragEventArgs e)

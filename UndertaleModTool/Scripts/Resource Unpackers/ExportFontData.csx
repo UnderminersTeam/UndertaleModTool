@@ -1,4 +1,5 @@
 // Made by mono21400
+// TODO: this heavily uses Windows stuff, should be made cross platform
 
 using System.Text;
 using System;
@@ -11,8 +12,7 @@ using System.Windows.Forms;
 
 EnsureDataLoaded();
 
-string fntFolder = GetFolder(FilePath) + "Export_Fonts" + Path.DirectorySeparatorChar;
-TextureWorker worker = new TextureWorker();
+string fntFolder = Path.Combine(Path.GetDirectoryName(FilePath), "Export_Fonts");
 Directory.CreateDirectory(fntFolder);
 List<string> input = new List<string>();
 if (ShowInputDialog() == System.Windows.Forms.DialogResult.Cancel)
@@ -23,18 +23,15 @@ string[] arrayString = input.ToArray();
 SetProgressBar(null, "Fonts", 0, Data.Fonts.Count);
 StartProgressBarUpdater();
 
-await DumpFonts();
-worker.Cleanup();
+TextureWorker worker = null;
+using (worker = new())
+{
+    await DumpFonts();
+}
 
 await StopProgressBarUpdater();
 HideProgressBar();
-ScriptMessage("Export Complete.\n\nLocation: " + fntFolder);
-
-
-string GetFolder(string path)
-{
-    return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
-}
+ScriptMessage($"Export Complete.\n\nLocation: {fntFolder}");
 
 async Task DumpFonts()
 {
@@ -43,16 +40,16 @@ async Task DumpFonts()
 
 void DumpFont(UndertaleFont font)
 {
-    if (arrayString.Contains(font.Name.ToString().Replace("\"", "")))
+    if (font is not null && arrayString.Contains(font.Name.ToString().Replace("\"", "")))
     {
-        worker.ExportAsPNG(font.Texture, fntFolder + font.Name.Content + ".png");
-        using (StreamWriter writer = new StreamWriter(fntFolder + "glyphs_" + font.Name.Content + ".csv"))
+        worker.ExportAsPNG(font.Texture, Path.Combine(fntFolder, $"{font.Name.Content}.png"));
+        using (StreamWriter writer = new(Path.Combine(fntFolder, $"glyphs_{font.Name.Content}.csv")))
         {
-            writer.WriteLine(font.DisplayName + ";" + font.EmSize + ";" + font.Bold + ";" + font.Italic + ";" + font.Charset + ";" + font.AntiAliasing + ";" + font.ScaleX + ";" + font.ScaleY);
+            writer.WriteLine($"{font.DisplayName};{font.EmSize};{font.Bold};{font.Italic};{font.Charset};{font.AntiAliasing};{font.ScaleX};{font.ScaleY}");
 
             foreach (var g in font.Glyphs)
             {
-                writer.WriteLine(g.Character + ";" + g.SourceX + ";" + g.SourceY + ";" + g.SourceWidth + ";" + g.SourceHeight + ";" + g.Shift + ";" + g.Offset);
+                writer.WriteLine($"{g.Character};{g.SourceX};{g.SourceY};{g.SourceWidth};{g.SourceHeight};{g.Shift};{g.Offset}");
             }
         }
     }
@@ -74,7 +71,8 @@ private DialogResult ShowInputDialog()
     //fonts_list.Items.Add("All");
     foreach (var x in Data.Fonts)
     {
-        fonts_list.Items.Add(x.Name.ToString().Replace("\"", ""));
+        if (x is not null)
+            fonts_list.Items.Add(x.Name.ToString().Replace("\"", ""));
     }
 
     fonts_list.Size = new System.Drawing.Size(size.Width - 10, size.Height - 50);

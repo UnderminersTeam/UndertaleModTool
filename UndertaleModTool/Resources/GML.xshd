@@ -59,7 +59,12 @@
             <Word>then</Word>
             <Word>mod</Word>
             <Word>div</Word>
-            <Word>@@this@@</Word>
+            <Word>throw</Word>
+            <Word>static</Word>
+            <Word>try</Word>
+            <Word>catch</Word>
+            <Word>finally</Word>
+            <Word>enum</Word>
         </Keywords>
 
         <!-- Some macros -->
@@ -77,10 +82,11 @@
         <!-- Digits -->
         <Rule color="Number">
             \b0x[0-9a-fA-F]+  # hex number
-        |   \$[0-9a-fA-F]+   # alternate hex number
+        |   \$[0-9a-fA-F]+    # alternate hex number
+        |   \#[0-9a-fA-F]{6}  # css color hex number
         |
             (?:    -?\d+(?:\.[0-9]+)?  # digits with optional . and -
-            |    -?\.[0-9]+        # start with ., then digits
+            |    -?\.[0-9]+            # start with ., then digits
             )
             \b
         </Rule>

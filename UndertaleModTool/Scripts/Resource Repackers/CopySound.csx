@@ -27,6 +27,10 @@ if ((DonorData.AudioGroups.ByName("audiogroup_default") == null) && DonorData.Ge
 {
     throw new ScriptException("This donor data file has no \"audiogroup_default\" but it is GMS2 or greater. AudioGroups count: " + DonorData.AudioGroups.Count.ToString());
 }
+if (Data.IsVersionAtLeast(2024, 14))
+{
+    ScriptWarning("This script may act erroneously on GameMaker version 2024.14 and later.");
+}
 List<string> splitStringsList = GetSplitStringsList("sound");
 List<UndertaleSound> soundsList = GetSoundsList(splitStringsList, DonorData);
 foreach (UndertaleSound snd in soundsList)
@@ -169,7 +173,7 @@ UndertaleData LoadDonorDataFile()
     if (DonorDataPath == null)
         throw new ScriptException("The donor data path was not set.");
     using (var stream = new FileStream(DonorDataPath, FileMode.Open, FileAccess.Read))
-        DonorData = UndertaleIO.Read(stream, warning => ScriptMessage("A warning occured while trying to load " + DonorDataPath + ":\n" + warning));
+        DonorData = UndertaleIO.Read(stream, (warning, _) => ScriptMessage("A warning occured while trying to load " + DonorDataPath + ":\n" + warning));
     return DonorData;
 }
 
@@ -239,7 +243,7 @@ IList<UndertaleEmbeddedAudio> GetAudioGroupData(UndertaleSound sound, string win
     {
         UndertaleData data = null;
         using (var stream = new FileStream(groupFilePath, FileMode.Open, FileAccess.Read))
-            data = UndertaleIO.Read(stream, warning => ScriptMessage("A warning occured while trying to load " + audioGroupName + ":\n" + warning));
+            data = UndertaleIO.Read(stream, (warning, _) => ScriptMessage("A warning occured while trying to load " + audioGroupName + ":\n" + warning));
 
         loadedAudioGroups[audioGroupName] = data.EmbeddedAudio;
         return data.EmbeddedAudio;
