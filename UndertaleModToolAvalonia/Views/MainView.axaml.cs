@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.Platform.Storage;
 
@@ -40,6 +42,51 @@ public partial class MainView : UserControl
                         vm.TabOpen(treeViewItem.DataContext);
                     else
                         vm.TabOpen(treeViewItem);
+                }
+            }
+        }
+    }
+
+    public void ListMenu_Add_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainViewModel vm && vm.Data is not null)
+        {
+            if (sender is MenuItem menuItem)
+            {
+                TreeViewItem? treeViewItem = menuItem.FindLogicalAncestorOfType<TreeViewItem>();
+                if (treeViewItem is not null)
+                {
+                    // Ideally I'd just get the ItemsSource, but it isn't set. Also ideally, it should be type of the resource.
+                    IList list = (treeViewItem.Name switch
+                    {
+                        "AudioGroups" => vm.Data.AudioGroups as IList,
+                        "Sounds" => vm.Data.Sounds as IList,
+                        "Sprites" => vm.Data.Sprites as IList,
+                        "Backgrounds" => vm.Data.Backgrounds as IList,
+                        "Paths" => vm.Data.Paths as IList,
+                        "Scripts" => vm.Data.Scripts as IList,
+                        "Shaders" => vm.Data.Shaders as IList,
+                        "Fonts" => vm.Data.Fonts as IList,
+                        "Timelines" => vm.Data.Timelines as IList,
+                        "GameObjects" => vm.Data.GameObjects as IList,
+                        "Rooms" => vm.Data.Rooms as IList,
+                        "Extensions" => vm.Data.Extensions as IList,
+                        "TexturePageItems" => vm.Data.TexturePageItems as IList,
+                        "Code" => vm.Data.Code as IList,
+                        "Variables" => vm.Data.Variables as IList,
+                        "Functions" => vm.Data.Functions as IList,
+                        "CodeLocals" => vm.Data.CodeLocals as IList,
+                        "Strings" => vm.Data.Strings as IList,
+                        "EmbeddedTextures" => vm.Data.EmbeddedTextures as IList,
+                        "EmbeddedAudio" => vm.Data.EmbeddedAudio as IList,
+                        "TextureGroupInformation" => vm.Data.TextureGroupInfo as IList,
+                        "EmbeddedImages" => vm.Data.EmbeddedImages as IList,
+                        "ParticleSystems" => vm.Data.ParticleSystems as IList,
+                        "ParticleSystemEmitters" => vm.Data.ParticleSystemEmitters as IList,
+                        _ => null,
+                    })!;
+
+                    vm.DataItemAdd(list);
                 }
             }
         }

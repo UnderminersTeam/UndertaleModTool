@@ -59,6 +59,11 @@
                     <TextBox Watermark="Filter by name..."/>
                 </StackPanel>
                 <TreeView x:Name="DataTreeView" Grid.Row="1" DoubleTapped="TreeView_DoubleTapped">
+                    <TreeView.Resources>
+                        <ContextMenu x:Key="ListMenu">
+                            <MenuItem Header="Add" Click="ListMenu_Add_Click"/>
+                        </ContextMenu>
+                    </TreeView.Resources>
                     <TreeView.Styles>
                         <Style Selector="TreeViewItem">
                             <Setter Property="(Interaction.Behaviors)">
@@ -88,54 +93,103 @@
                                       IsEnabled="{Binding Data.GlobalInitScripts, Converter={x:Static ObjectConverters.IsNotNull}, FallbackValue={x:False}}" />
                         <TreeViewItem x:Name="GameEndScripts" Header="Game End scripts"
                                       IsEnabled="{Binding Data.GameEndScripts, Converter={x:Static ObjectConverters.IsNotNull}, FallbackValue={x:False}}" />
-                        <TreeViewItem Header="Audio groups"
-                            ItemsSource="{Binding Data.AudioGroups}" />
-                        <TreeViewItem Header="Sounds"
-                            ItemsSource="{Binding Data.Sounds}" />
-                        <TreeViewItem Header="Sprites"
-                            ItemsSource="{Binding Data.Sprites}" />
-                        <TreeViewItem Header="Backgrounds &amp; Tile sets"
-                            ItemsSource="{Binding Data.Backgrounds}" />
-                        <TreeViewItem Header="Paths"
-                            ItemsSource="{Binding Data.Paths}" />
-                        <TreeViewItem Header="Scripts"
-                            ItemsSource="{Binding Data.Scripts}" />
-                        <TreeViewItem Header="Shaders"
-                            ItemsSource="{Binding Data.Shaders}" />
-                        <TreeViewItem Header="Fonts"
-                            ItemsSource="{Binding Data.Fonts}" />
-                        <TreeViewItem Header="Timelines"
-                            ItemsSource="{Binding Data.Timelines}" />
-                        <TreeViewItem Header="Game objects"
-                            ItemsSource="{Binding Data.GameObjects}" />
-                        <TreeViewItem Header="Rooms"
-                            ItemsSource="{Binding Data.Rooms}" />
-                        <TreeViewItem Header="Extensions"
-                            ItemsSource="{Binding Data.Extensions}" />
-                        <TreeViewItem Header="Texture page items"
-                            ItemsSource="{Binding Data.TexturePageItems}" />
-                        <TreeViewItem Header="Code"
-                            ItemsSource="{Binding Data.Code}" />
-                        <TreeViewItem Header="Variables"
-                            ItemsSource="{Binding Data.Variables}" />
-                        <TreeViewItem Header="Functions"
-                            ItemsSource="{Binding Data.Functions}" />
-                        <TreeViewItem Header="Code locals"
-                            ItemsSource="{Binding Data.CodeLocals}" />
-                        <TreeViewItem Header="Strings"
-                            ItemsSource="{Binding Data.Strings}" />
-                        <TreeViewItem Header="Embedded textures"
-                            ItemsSource="{Binding Data.EmbeddedTextures}" />
-                        <TreeViewItem Header="Embedded audio"
-                            ItemsSource="{Binding Data.EmbeddedAudio}" />
-                        <TreeViewItem Header="Texture group information"
-                            ItemsSource="{Binding Data.TextureGroupInfo}" />
-                        <TreeViewItem Header="Embedded images"
-                            ItemsSource="{Binding Data.EmbeddedImages}" />
-                        <TreeViewItem Header="Particle systems"
-                            ItemsSource="{Binding Data.ParticleSystems}" />
-                        <TreeViewItem Header="Particle system emitters"
-                            ItemsSource="{Binding Data.ParticleSystemEmitters}" />
+                        
+                        <TreeViewItem x:Name="AudioGroups" Header="Audio groups"
+                                      ItemsSource="{Binding Data.AudioGroups}"
+                                      ContextMenu="{StaticResource ListMenu}" />
+                        
+                        <TreeViewItem x:Name="Sounds" Header="Sounds"
+                                      ItemsSource="{Binding Data.Sounds}"
+                                      ContextMenu="{StaticResource ListMenu}" />
+                        
+                        <TreeViewItem x:Name="Sprites" Header="Sprites"
+                                      ItemsSource="{Binding Data.Sprites}"
+                                      ContextMenu="{StaticResource ListMenu}"/>
+                        
+                        <TreeViewItem x:Name="Backgrounds" Header="Backgrounds &amp; Tile sets"
+                                      ItemsSource="{Binding Data.Backgrounds}"
+                                      ContextMenu="{StaticResource ListMenu}" />
+                        
+                        <TreeViewItem x:Name="Paths" Header="Paths"
+                                      ItemsSource="{Binding Data.Paths}"
+                                      ContextMenu="{StaticResource ListMenu}" />
+
+                        <TreeViewItem x:Name="Scripts" Header="Scripts"
+                                      ItemsSource="{Binding Data.Scripts}"
+                                      ContextMenu="{StaticResource ListMenu}" />
+
+                        <TreeViewItem x:Name="Shaders" Header="Shaders"
+                                      ItemsSource="{Binding Data.Shaders}"
+                                      ContextMenu="{StaticResource ListMenu}" />
+
+                        <TreeViewItem x:Name="Fonts" Header="Fonts"
+                                      ItemsSource="{Binding Data.Fonts}"
+                                      ContextMenu="{StaticResource ListMenu}" />
+
+                        <TreeViewItem x:Name="Timelines" Header="Timelines"
+                                      ItemsSource="{Binding Data.Timelines}"
+                                      ContextMenu="{StaticResource ListMenu}" />
+
+                        <TreeViewItem x:Name="GameObjects" Header="Game objects"
+                                      ItemsSource="{Binding Data.GameObjects}"
+                                      ContextMenu="{StaticResource ListMenu}" />
+
+                        <TreeViewItem x:Name="Rooms" Header="Rooms"
+                                      ItemsSource="{Binding Data.Rooms}"
+                                      ContextMenu="{StaticResource ListMenu}" />
+
+                        <TreeViewItem x:Name="Extensions" Header="Extensions"
+                                      ItemsSource="{Binding Data.Extensions}"
+                                      ContextMenu="{StaticResource ListMenu}" />
+
+                        <TreeViewItem x:Name="TexturePageItems" Header="Texture page items"
+                                      ItemsSource="{Binding Data.TexturePageItems}"
+                                      ContextMenu="{StaticResource ListMenu}" />
+
+                        <TreeViewItem x:Name="Code" Header="Code"
+                                      ItemsSource="{Binding Data.Code}"
+                                      ContextMenu="{StaticResource ListMenu}" />
+
+                        <TreeViewItem x:Name="Variables" Header="Variables"
+                                      ItemsSource="{Binding Data.Variables}"
+                                      ContextMenu="{StaticResource ListMenu}" />
+
+                        <TreeViewItem x:Name="Functions" Header="Functions"
+                                      ItemsSource="{Binding Data.Functions}"
+                                      ContextMenu="{StaticResource ListMenu}" />
+
+                        <TreeViewItem x:Name="CodeLocals" Header="Code locals"
+                                      ItemsSource="{Binding Data.CodeLocals}"
+                                      ContextMenu="{StaticResource ListMenu}" />
+
+                        <TreeViewItem x:Name="Strings" Header="Strings"
+                                      ItemsSource="{Binding Data.Strings}"
+                                      ContextMenu="{StaticResource ListMenu}" />
+
+                        <TreeViewItem x:Name="EmbeddedTextures" Header="Embedded textures"
+                                      ItemsSource="{Binding Data.EmbeddedTextures}"
+                                      ContextMenu="{StaticResource ListMenu}" />
+
+                        <TreeViewItem x:Name="EmbeddedAudio" Header="Embedded audio"
+                                      ItemsSource="{Binding Data.EmbeddedAudio}"
+                                      ContextMenu="{StaticResource ListMenu}" />
+
+                        <TreeViewItem x:Name="TextureGroupInformation" Header="Texture group information"
+                                      ItemsSource="{Binding Data.TextureGroupInfo}"
+                                      ContextMenu="{StaticResource ListMenu}" />
+
+                        <TreeViewItem x:Name="EmbeddedImages" Header="Embedded images"
+                                      ItemsSource="{Binding Data.EmbeddedImages}"
+                                      ContextMenu="{StaticResource ListMenu}" />
+
+                        <TreeViewItem x:Name="ParticleSystems" Header="Particle systems"
+                                      ItemsSource="{Binding Data.ParticleSystems}"
+                                      ContextMenu="{StaticResource ListMenu}" />
+
+                        <TreeViewItem x:Name="ParticleSystemEmitters" Header="Particle system emitters"
+                                      ItemsSource="{Binding Data.ParticleSystemEmitters}"
+                                      ContextMenu="{StaticResource ListMenu}" />
+
                     </TreeViewItem>
                 </TreeView>
             </Grid>
