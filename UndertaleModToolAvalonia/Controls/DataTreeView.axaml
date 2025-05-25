@@ -40,7 +40,7 @@
                                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                     Padding="0" HorizontalContentAlignment="Center" Background="Transparent" BorderBrush="Transparent" />    
                         </Panel>
-                        <ContentControl Content="{Binding Header}" Classes="ListBoxContentControl" />
+                        <ContentControl IsHitTestVisible="False" Content="{Binding Header}" Classes="ListBoxContentControl" />
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>

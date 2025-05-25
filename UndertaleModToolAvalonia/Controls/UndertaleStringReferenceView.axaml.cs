@@ -83,7 +83,7 @@ public class UndertaleStringDropHandler : DropHandlerBase
     {
         if (targetContext is UndertaleStringReferenceView vm)
         {
-            if (sourceContext is UndertaleString resource)
+            if (sourceContext is TreeItemViewModel treeItem && treeItem.Value is UndertaleString resource)
             {
                 return true;
             }
@@ -94,7 +94,7 @@ public class UndertaleStringDropHandler : DropHandlerBase
     {
         if (targetContext is UndertaleStringReferenceView vm)
         {
-            if (sourceContext is UndertaleString resource)
+            if (sourceContext is TreeItemViewModel treeItem && treeItem.Value is UndertaleString resource)
             {
                 vm.Reference = resource;
                 return true;
