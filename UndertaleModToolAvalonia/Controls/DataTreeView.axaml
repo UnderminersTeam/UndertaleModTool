@@ -36,7 +36,7 @@
                         <Panel Width="{Binding Level, Converter={StaticResource LevelToWidthConverter}}"></Panel>
                         <Panel Width="20">
                             <Button Click="ExpandCollapseButton_Click" Command="{Binding ExpandCollapse}" Content="{Binding ExpanderIcon}"
-                                    IsVisible="{Binding Source, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                    IsVisible="{Binding IsExpanderVisible}"
                                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                     Padding="0" HorizontalContentAlignment="Center" Background="Transparent" BorderBrush="Transparent" />    
                         </Panel>
