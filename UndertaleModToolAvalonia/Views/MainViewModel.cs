@@ -5,8 +5,8 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
-using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
@@ -25,6 +25,9 @@ public partial class MainViewModel
 
     [Notify]
     private (uint Major, uint Minor, uint Release, uint Build) _Version;
+
+    // List
+    public ObservableCollection<TreeItemViewModel> TreeSource { get; set; } = [];
 
     // Tabs
     public ObservableCollection<TabItemViewModel> Tabs { get; set; }
@@ -46,6 +49,40 @@ public partial class MainViewModel
                 "Welcome to UndertaleModTool!",
                 "Open a data.win file to get started, then double click on the items on the left to view them.")),
         ];
+
+        TreeSource.Add(new TreeItemViewModel(TreeSource, value: "Data", header: "Data", source: new ObservableCollection<TreeItemViewModel>()
+        {
+            new(TreeSource, value: "GeneralInfo", header: "General info"),
+            new(TreeSource, value: "GlobalInitScripts", header: "Global init scripts"),
+            new(TreeSource, value: "GameEndScripts", header: "Game End scripts"),
+            new(TreeSource, tag: "list", value: "AudioGroups", header: "Audio groups"),
+            new(TreeSource, tag: "list", value: "Sounds", header: "Sounds"),
+            new(TreeSource, tag: "list", value: "Sprites", header: "Sprites"),
+            new(TreeSource, tag: "list", value: "Backgrounds", header: "Backgrounds & Tile sets"),
+            new(TreeSource, tag: "list", value: "Paths", header: "Paths"),
+            new(TreeSource, tag: "list", value: "Scripts", header: "Scripts"),
+            new(TreeSource, tag: "list", value: "Shaders", header: "Shaders"),
+            new(TreeSource, tag: "list", value: "Fonts", header: "Fonts"),
+            new(TreeSource, tag: "list", value: "Timelines", header: "Timelines"),
+            new(TreeSource, tag: "list", value: "GameObjects", header: "Game objects"),
+            new(TreeSource, tag: "list", value: "Rooms", header: "Rooms"),
+            new(TreeSource, tag: "list", value: "Extensions", header: "Extensions"),
+            new(TreeSource, tag: "list", value: "TexturePageItems", header: "Texture page items"),
+            new(TreeSource, tag: "list", value: "Code", header: "Code"),
+            new(TreeSource, tag: "list", value: "Variables", header: "Variables"),
+            new(TreeSource, tag: "list", value: "Functions", header: "Functions"),
+            new(TreeSource, tag: "list", value: "CodeLocals", header: "Code locals"),
+            new(TreeSource, tag: "list", value: "Strings", header: "Strings"),
+            new(TreeSource, tag: "list", value: "EmbeddedTextures", header: "Embedded textures"),
+            new(TreeSource, tag: "list", value: "EmbeddedAudio", header: "Embedded audio"),
+            new(TreeSource, tag: "list", value: "TextureGroupInformation", header: "Texture group information"),
+            new(TreeSource, tag: "list", value: "EmbeddedImages", header: "Embedded images"),
+            new(TreeSource, tag: "list", value: "ParticleSystems", header: "Particle systems"),
+            new(TreeSource, tag: "list", value: "ParticleSystemEmitters", header: "Particle system emitters"),
+        }));
+
+        TreeSource[0].UpdateSource();
+        TreeSource[0].ExpandCollapse();
     }
 
     public void SetData(UndertaleData? data)
@@ -60,6 +97,33 @@ public partial class MainViewModel
         if (Data is not null)
         {
             Data.GeneralInfo.PropertyChanged += DataGeneralInfoChangedHandler;
+
+            TreeSource.First(x => Equals(x.Value, "AudioGroups")).Source = Data.AudioGroups;
+            TreeSource.First(x => Equals(x.Value, "Sounds")).Source = Data.Sounds;
+            TreeSource.First(x => Equals(x.Value, "Sprites")).Source = Data.Sprites;
+            TreeSource.First(x => Equals(x.Value, "Backgrounds")).Source = Data.Backgrounds;
+            TreeSource.First(x => Equals(x.Value, "Paths")).Source = Data.Paths;
+            TreeSource.First(x => Equals(x.Value, "Scripts")).Source = Data.Scripts;
+            TreeSource.First(x => Equals(x.Value, "Shaders")).Source = Data.Shaders;
+            TreeSource.First(x => Equals(x.Value, "Fonts")).Source = Data.Fonts;
+            TreeSource.First(x => Equals(x.Value, "Timelines")).Source = Data.Timelines;
+            TreeSource.First(x => Equals(x.Value, "GameObjects")).Source = Data.GameObjects;
+            TreeSource.First(x => Equals(x.Value, "Rooms")).Source = Data.Rooms;
+            TreeSource.First(x => Equals(x.Value, "Extensions")).Source = Data.Extensions;
+            TreeSource.First(x => Equals(x.Value, "TexturePageItems")).Source = Data.TexturePageItems;
+            TreeSource.First(x => Equals(x.Value, "Code")).Source = Data.Code;
+            TreeSource.First(x => Equals(x.Value, "Variables")).Source = Data.Variables;
+            TreeSource.First(x => Equals(x.Value, "Functions")).Source = Data.Functions;
+            TreeSource.First(x => Equals(x.Value, "CodeLocals")).Source = Data.CodeLocals;
+            TreeSource.First(x => Equals(x.Value, "Strings")).Source = Data.Strings;
+            TreeSource.First(x => Equals(x.Value, "EmbeddedTextures")).Source = Data.EmbeddedTextures;
+            TreeSource.First(x => Equals(x.Value, "EmbeddedAudio")).Source = Data.EmbeddedAudio;
+            TreeSource.First(x => Equals(x.Value, "TextureGroupInformation")).Source = Data.TextureGroupInfo;
+            TreeSource.First(x => Equals(x.Value, "EmbeddedImages")).Source = Data.EmbeddedImages;
+            TreeSource.First(x => Equals(x.Value, "ParticleSystems")).Source = Data.ParticleSystems;
+            TreeSource.First(x => Equals(x.Value, "ParticleSystemEmitters")).Source = Data.ParticleSystemEmitters;
+
+            TreeSource[0].UpdateSource();
         }
     }
 
@@ -250,12 +314,23 @@ public partial class MainViewModel
         if (Data is null)
             return;
 
+        if (item is TreeItemViewModel treeItem)
+        {
+            item = treeItem.Value;
+        }
+
         object? content = item switch
         {
             DescriptionViewModel vm => vm,
-            TreeViewItem { Name: "GeneralInfo" } => new GeneralInfoViewModel(Data),
-            TreeViewItem { Name: "GlobalInitScripts" } => new GlobalInitScriptsViewModel((Data.GlobalInitScripts as ObservableCollection<UndertaleGlobalInit>)!),
-            TreeViewItem { Name: "GameEndScripts" } => new GameEndScriptsViewModel((Data.GameEndScripts as ObservableCollection<UndertaleGlobalInit>)!),
+
+            "GeneralInfo" => new GeneralInfoViewModel(Data),
+            "GlobalInitScripts" => new GlobalInitScriptsViewModel((Data.GlobalInitScripts as ObservableCollection<UndertaleGlobalInit>)!),
+            "GameEndScripts" => new GameEndScriptsViewModel((Data.GameEndScripts as ObservableCollection<UndertaleGlobalInit>)!),
+
+            //TreeViewItem { Name: "GeneralInfo" } => new GeneralInfoViewModel(Data),
+            //TreeViewItem { Name: "GlobalInitScripts" } => new GlobalInitScriptsViewModel((Data.GlobalInitScripts as ObservableCollection<UndertaleGlobalInit>)!),
+            //TreeViewItem { Name: "GameEndScripts" } => new GameEndScriptsViewModel((Data.GameEndScripts as ObservableCollection<UndertaleGlobalInit>)!),
+
             UndertaleSprite r => new UndertaleSpriteViewModel(r),
             UndertaleGameObject r => new UndertaleGameObjectViewModel(r),
             UndertaleRoom r => new UndertaleRoomViewModel(r),

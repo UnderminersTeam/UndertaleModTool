@@ -47,6 +47,21 @@ public partial class MainView : UserControl
         }
     }
 
+    public void ListBox_DoubleTapped(object? sender, TappedEventArgs e)
+    {
+        if (DataContext is MainViewModel vm)
+        {
+            if (e.Source is Control control)
+            {
+                ListBoxItem? listBoxItem = control.FindLogicalAncestorOfType<ListBoxItem>();
+                if (listBoxItem is not null)
+                {
+                    vm.TabOpen(listBoxItem.DataContext);
+                }
+            }
+        }
+    }
+
     public void ListMenu_Add_Click(object? sender, RoutedEventArgs e)
     {
         if (DataContext is MainViewModel vm && vm.Data is not null)

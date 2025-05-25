@@ -86,6 +86,14 @@
         <Style Selector="Menu">
             <Setter Property="Height" Value="24" />
         </Style>
+
+        <Style Selector="ListBoxItem">
+            <Setter Property="Padding" Value="4,0" />
+        </Style>
+
+        <Style Selector="ContentControl.ListBoxContentControl">
+            <Setter Property="Padding" Value="0,1" />
+        </Style>
         
         <Style Selector="TreeViewItem">
             <Setter Property="MinHeight" Value="0" />

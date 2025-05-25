@@ -17,6 +17,7 @@
     
     <UserControl.Resources>
         <h:DataItemToNameConverter x:Key="DataItemToNameConverter"/>
+        <h:LevelToWidthConverter x:Key="LevelToWidthConverter" />
     </UserControl.Resources>
 
     <DockPanel>
@@ -58,6 +59,50 @@
                     </StackPanel>
                     <TextBox Watermark="Filter by name..."/>
                 </StackPanel>
+                <ListBox Name="DataListBox" Grid.Row="1" ItemsSource="{Binding TreeSource}" DoubleTapped="ListBox_DoubleTapped">
+                    <ListBox.Resources>
+                        <ContextMenu x:Key="ListMenu">
+                            <MenuItem Header="Add" Click="ListMenu_Add_Click"/>
+                        </ContextMenu>
+                        <h:TreeItemViewModelToContextMenuConverter x:Key="TreeItemViewModelToContextMenuConverter" ListMenu="{StaticResource ListMenu}" />
+                    </ListBox.Resources>
+                    <ListBox.Styles>
+                        <Style Selector="ListBoxItem" x:DataType="v:TreeItemViewModel">
+                            <Setter Property="(Interaction.Behaviors)">
+                                <BehaviorCollectionTemplate>
+                                    <BehaviorCollection>
+                                        <ContextDragBehavior />
+                                    </BehaviorCollection>
+                                </BehaviorCollectionTemplate>
+                            </Setter>
+                            <Setter Property="ContextMenu" Value="{Binding ., Converter={StaticResource TreeItemViewModelToContextMenuConverter}}"/>
+                        </Style>
+                    </ListBox.Styles>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="v:TreeItemViewModel">
+                            <StackPanel Orientation="Horizontal" Background="Transparent">
+                                <Panel Width="{Binding Level, Converter={StaticResource LevelToWidthConverter}}"></Panel>
+                                <Panel Width="20">
+                                    <Button Command="{Binding ExpandCollapse}" Content="{Binding ExpanderIcon}"
+                                            IsVisible="{Binding Source, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                            Padding="0" HorizontalContentAlignment="Center" Background="Transparent" BorderBrush="Transparent" />    
+                                </Panel>
+                                <ContentControl Content="{Binding Header}" Classes="ListBoxContentControl" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <ListBox.DataTemplates>
+                        <DataTemplate DataType="undertale:UndertaleNamedResource">
+                            <TextBlock Text="{Binding Name.Content}"/>
+                        </DataTemplate>
+                        <DataTemplate DataType="undertalem:UndertaleString">
+                            <TextBlock Text="{Binding Content}"/>
+                        </DataTemplate>
+                    </ListBox.DataTemplates>
+                </ListBox>
+
+                <!--
                 <TreeView x:Name="DataTreeView" Grid.Row="1" DoubleTapped="TreeView_DoubleTapped">
                     <TreeView.Resources>
                         <ContextMenu x:Key="ListMenu">
@@ -192,6 +237,7 @@
 
                     </TreeViewItem>
                 </TreeView>
+                -->
             </Grid>
             
             <GridSplitter Grid.Column="1" ResizeDirection="Columns"/>
