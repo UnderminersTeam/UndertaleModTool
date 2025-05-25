@@ -1,0 +1,57 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
+             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
+             xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
+             xmlns:undertale="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
+             xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.Controls.DataTreeView">
+    <UserControl.Resources>
+        <ContextMenu x:Key="ListMenu">
+            <MenuItem Header="Add" Click="ListMenu_Add_Click"/>
+        </ContextMenu>
+        <h:LevelToWidthConverter x:Key="LevelToWidthConverter" />
+        <h:TreeItemViewModelToContextMenuConverter x:Key="TreeItemViewModelToContextMenuConverter" ListMenu="{StaticResource ListMenu}" />
+    </UserControl.Resources>
+    <ContentControl DataContext="{Binding $parent[c:DataTreeView]}">
+        <ListBox Name="DataListBox" Grid.Row="1" ItemsSource="{Binding TreeSource}" DoubleTapped="ListBox_DoubleTapped">
+            <ListBox.Styles>
+                <Style Selector="ListBoxItem" x:DataType="v:TreeItemViewModel">
+                    <Setter Property="(Interaction.Behaviors)">
+                        <BehaviorCollectionTemplate>
+                            <BehaviorCollection>
+                                <ContextDragBehavior />
+                            </BehaviorCollection>
+                        </BehaviorCollectionTemplate>
+                    </Setter>
+                    <Setter Property="ContextMenu" Value="{Binding ., Converter={StaticResource TreeItemViewModelToContextMenuConverter}}"/>
+                </Style>
+            </ListBox.Styles>
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="v:TreeItemViewModel">
+                    <StackPanel Orientation="Horizontal" Background="Transparent">
+                        <Panel Width="{Binding Level, Converter={StaticResource LevelToWidthConverter}}"></Panel>
+                        <Panel Width="20">
+                            <Button Click="ExpandCollapseButton_Click" Command="{Binding ExpandCollapse}" Content="{Binding ExpanderIcon}"
+                                    IsVisible="{Binding Source, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                    Padding="0" HorizontalContentAlignment="Center" Background="Transparent" BorderBrush="Transparent" />    
+                        </Panel>
+                        <ContentControl Content="{Binding Header}" Classes="ListBoxContentControl" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+            <ListBox.DataTemplates>
+                <DataTemplate DataType="undertale:UndertaleNamedResource">
+                    <TextBlock Text="{Binding Name.Content}"/>
+                </DataTemplate>
+                <DataTemplate DataType="undertalem:UndertaleString">
+                    <TextBlock Text="{Binding Content}"/>
+                </DataTemplate>
+            </ListBox.DataTemplates>
+        </ListBox>
+    </ContentControl>
+</UserControl>

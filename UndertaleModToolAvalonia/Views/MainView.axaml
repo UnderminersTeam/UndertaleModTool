@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
              xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
+             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
              xmlns:undertale="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
              xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -17,7 +18,6 @@
     
     <UserControl.Resources>
         <h:DataItemToNameConverter x:Key="DataItemToNameConverter"/>
-        <h:LevelToWidthConverter x:Key="LevelToWidthConverter" />
     </UserControl.Resources>
 
     <DockPanel>
@@ -59,185 +59,7 @@
                     </StackPanel>
                     <TextBox Watermark="Filter by name..."/>
                 </StackPanel>
-                <ListBox Name="DataListBox" Grid.Row="1" ItemsSource="{Binding TreeSource}" DoubleTapped="ListBox_DoubleTapped">
-                    <ListBox.Resources>
-                        <ContextMenu x:Key="ListMenu">
-                            <MenuItem Header="Add" Click="ListMenu_Add_Click"/>
-                        </ContextMenu>
-                        <h:TreeItemViewModelToContextMenuConverter x:Key="TreeItemViewModelToContextMenuConverter" ListMenu="{StaticResource ListMenu}" />
-                    </ListBox.Resources>
-                    <ListBox.Styles>
-                        <Style Selector="ListBoxItem" x:DataType="v:TreeItemViewModel">
-                            <Setter Property="(Interaction.Behaviors)">
-                                <BehaviorCollectionTemplate>
-                                    <BehaviorCollection>
-                                        <ContextDragBehavior />
-                                    </BehaviorCollection>
-                                </BehaviorCollectionTemplate>
-                            </Setter>
-                            <Setter Property="ContextMenu" Value="{Binding ., Converter={StaticResource TreeItemViewModelToContextMenuConverter}}"/>
-                        </Style>
-                    </ListBox.Styles>
-                    <ListBox.ItemTemplate>
-                        <DataTemplate DataType="v:TreeItemViewModel">
-                            <StackPanel Orientation="Horizontal" Background="Transparent">
-                                <Panel Width="{Binding Level, Converter={StaticResource LevelToWidthConverter}}"></Panel>
-                                <Panel Width="20">
-                                    <Button Command="{Binding ExpandCollapse}" Content="{Binding ExpanderIcon}"
-                                            IsVisible="{Binding Source, Converter={x:Static ObjectConverters.IsNotNull}}"
-                                            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                                            Padding="0" HorizontalContentAlignment="Center" Background="Transparent" BorderBrush="Transparent" />    
-                                </Panel>
-                                <ContentControl Content="{Binding Header}" Classes="ListBoxContentControl" />
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                    <ListBox.DataTemplates>
-                        <DataTemplate DataType="undertale:UndertaleNamedResource">
-                            <TextBlock Text="{Binding Name.Content}"/>
-                        </DataTemplate>
-                        <DataTemplate DataType="undertalem:UndertaleString">
-                            <TextBlock Text="{Binding Content}"/>
-                        </DataTemplate>
-                    </ListBox.DataTemplates>
-                </ListBox>
-
-                <!--
-                <TreeView x:Name="DataTreeView" Grid.Row="1" DoubleTapped="TreeView_DoubleTapped">
-                    <TreeView.Resources>
-                        <ContextMenu x:Key="ListMenu">
-                            <MenuItem Header="Add" Click="ListMenu_Add_Click"/>
-                        </ContextMenu>
-                    </TreeView.Resources>
-                    <TreeView.Styles>
-                        <Style Selector="TreeViewItem">
-                            <Setter Property="(Interaction.Behaviors)">
-                                <BehaviorCollectionTemplate>
-                                    <BehaviorCollection>
-                                        <ContextDragBehavior />
-                                    </BehaviorCollection>
-                                </BehaviorCollectionTemplate>
-                            </Setter>
-                        </Style>
-                    </TreeView.Styles>
-                    <TreeView.KeyBindings>
-                        <KeyBinding Gesture="Enter" Command="{Binding TabOpen}" CommandParameter="{Binding #DataTreeView.SelectedItem}"/>
-                    </TreeView.KeyBindings>
-                    <TreeView.DataTemplates>
-                        <DataTemplate DataType="undertale:UndertaleNamedResource">
-                            <TextBlock Text="{Binding Name.Content}"/>
-                        </DataTemplate>
-                        <DataTemplate DataType="undertalem:UndertaleString">
-                            <TextBlock Text="{Binding Content}"/>
-                        </DataTemplate>
-                    </TreeView.DataTemplates>
-                    <TreeViewItem Header="Data" IsExpanded="True">
-                        <TreeViewItem x:Name="GeneralInfo" Header="General info"
-                                      IsEnabled="{Binding Data.GeneralInfo, Converter={x:Static ObjectConverters.IsNotNull}, FallbackValue={x:False}}" />
-                        <TreeViewItem x:Name="GlobalInitScripts" Header="Global init scripts"
-                                      IsEnabled="{Binding Data.GlobalInitScripts, Converter={x:Static ObjectConverters.IsNotNull}, FallbackValue={x:False}}" />
-                        <TreeViewItem x:Name="GameEndScripts" Header="Game End scripts"
-                                      IsEnabled="{Binding Data.GameEndScripts, Converter={x:Static ObjectConverters.IsNotNull}, FallbackValue={x:False}}" />
-                        
-                        <TreeViewItem x:Name="AudioGroups" Header="Audio groups"
-                                      ItemsSource="{Binding Data.AudioGroups}"
-                                      ContextMenu="{StaticResource ListMenu}" />
-                        
-                        <TreeViewItem x:Name="Sounds" Header="Sounds"
-                                      ItemsSource="{Binding Data.Sounds}"
-                                      ContextMenu="{StaticResource ListMenu}" />
-                        
-                        <TreeViewItem x:Name="Sprites" Header="Sprites"
-                                      ItemsSource="{Binding Data.Sprites}"
-                                      ContextMenu="{StaticResource ListMenu}"/>
-                        
-                        <TreeViewItem x:Name="Backgrounds" Header="Backgrounds &amp; Tile sets"
-                                      ItemsSource="{Binding Data.Backgrounds}"
-                                      ContextMenu="{StaticResource ListMenu}" />
-                        
-                        <TreeViewItem x:Name="Paths" Header="Paths"
-                                      ItemsSource="{Binding Data.Paths}"
-                                      ContextMenu="{StaticResource ListMenu}" />
-
-                        <TreeViewItem x:Name="Scripts" Header="Scripts"
-                                      ItemsSource="{Binding Data.Scripts}"
-                                      ContextMenu="{StaticResource ListMenu}" />
-
-                        <TreeViewItem x:Name="Shaders" Header="Shaders"
-                                      ItemsSource="{Binding Data.Shaders}"
-                                      ContextMenu="{StaticResource ListMenu}" />
-
-                        <TreeViewItem x:Name="Fonts" Header="Fonts"
-                                      ItemsSource="{Binding Data.Fonts}"
-                                      ContextMenu="{StaticResource ListMenu}" />
-
-                        <TreeViewItem x:Name="Timelines" Header="Timelines"
-                                      ItemsSource="{Binding Data.Timelines}"
-                                      ContextMenu="{StaticResource ListMenu}" />
-
-                        <TreeViewItem x:Name="GameObjects" Header="Game objects"
-                                      ItemsSource="{Binding Data.GameObjects}"
-                                      ContextMenu="{StaticResource ListMenu}" />
-
-                        <TreeViewItem x:Name="Rooms" Header="Rooms"
-                                      ItemsSource="{Binding Data.Rooms}"
-                                      ContextMenu="{StaticResource ListMenu}" />
-
-                        <TreeViewItem x:Name="Extensions" Header="Extensions"
-                                      ItemsSource="{Binding Data.Extensions}"
-                                      ContextMenu="{StaticResource ListMenu}" />
-
-                        <TreeViewItem x:Name="TexturePageItems" Header="Texture page items"
-                                      ItemsSource="{Binding Data.TexturePageItems}"
-                                      ContextMenu="{StaticResource ListMenu}" />
-
-                        <TreeViewItem x:Name="Code" Header="Code"
-                                      ItemsSource="{Binding Data.Code}"
-                                      ContextMenu="{StaticResource ListMenu}" />
-
-                        <TreeViewItem x:Name="Variables" Header="Variables"
-                                      ItemsSource="{Binding Data.Variables}"
-                                      ContextMenu="{StaticResource ListMenu}" />
-
-                        <TreeViewItem x:Name="Functions" Header="Functions"
-                                      ItemsSource="{Binding Data.Functions}"
-                                      ContextMenu="{StaticResource ListMenu}" />
-
-                        <TreeViewItem x:Name="CodeLocals" Header="Code locals"
-                                      ItemsSource="{Binding Data.CodeLocals}"
-                                      ContextMenu="{StaticResource ListMenu}" />
-
-                        <TreeViewItem x:Name="Strings" Header="Strings"
-                                      ItemsSource="{Binding Data.Strings}"
-                                      ContextMenu="{StaticResource ListMenu}" />
-
-                        <TreeViewItem x:Name="EmbeddedTextures" Header="Embedded textures"
-                                      ItemsSource="{Binding Data.EmbeddedTextures}"
-                                      ContextMenu="{StaticResource ListMenu}" />
-
-                        <TreeViewItem x:Name="EmbeddedAudio" Header="Embedded audio"
-                                      ItemsSource="{Binding Data.EmbeddedAudio}"
-                                      ContextMenu="{StaticResource ListMenu}" />
-
-                        <TreeViewItem x:Name="TextureGroupInformation" Header="Texture group information"
-                                      ItemsSource="{Binding Data.TextureGroupInfo}"
-                                      ContextMenu="{StaticResource ListMenu}" />
-
-                        <TreeViewItem x:Name="EmbeddedImages" Header="Embedded images"
-                                      ItemsSource="{Binding Data.EmbeddedImages}"
-                                      ContextMenu="{StaticResource ListMenu}" />
-
-                        <TreeViewItem x:Name="ParticleSystems" Header="Particle systems"
-                                      ItemsSource="{Binding Data.ParticleSystems}"
-                                      ContextMenu="{StaticResource ListMenu}" />
-
-                        <TreeViewItem x:Name="ParticleSystemEmitters" Header="Particle system emitters"
-                                      ItemsSource="{Binding Data.ParticleSystemEmitters}"
-                                      ContextMenu="{StaticResource ListMenu}" />
-
-                    </TreeViewItem>
-                </TreeView>
-                -->
+                <c:DataTreeView Grid.Row="1" Name="DataTreeView" Data="{Binding Data}" />
             </Grid>
             
             <GridSplitter Grid.Column="1" ResizeDirection="Columns"/>
