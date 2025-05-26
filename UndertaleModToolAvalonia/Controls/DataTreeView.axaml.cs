@@ -27,12 +27,15 @@ public partial class DataTreeView : UserControl
     readonly MainViewModel mainVM = App.Services.GetRequiredService<MainViewModel>();
 
     public ObservableCollection<TreeItemViewModel> TreeSource { get; set; } = [];
+    
+    public TreeItemViewModel DataTreeItem;
+    public ObservableCollection<TreeItemViewModel> DataTreeItemSource;
 
     public DataTreeView()
     {
         InitializeComponent();
 
-        TreeSource.Add(new TreeItemViewModel(TreeSource, value: "Data", header: "Data", source: new ObservableCollection<TreeItemViewModel>()
+        DataTreeItemSource = new ObservableCollection<TreeItemViewModel>()
         {
             new(TreeSource, value: "GeneralInfo", header: "General info"),
             new(TreeSource, value: "GlobalInitScripts", header: "Global init scripts"),
@@ -61,10 +64,14 @@ public partial class DataTreeView : UserControl
             new(TreeSource, tag: "list", value: "EmbeddedImages", header: "Embedded images"),
             new(TreeSource, tag: "list", value: "ParticleSystems", header: "Particle systems"),
             new(TreeSource, tag: "list", value: "ParticleSystemEmitters", header: "Particle system emitters"),
-        }));
+        };
 
-        TreeSource[0].UpdateSource();
-        TreeSource[0].ExpandCollapse();
+        DataTreeItem = new TreeItemViewModel(TreeSource, value: "Data", header: "Data", source: DataTreeItemSource);
+
+        TreeSource.Add(DataTreeItem);
+
+        DataTreeItem.UpdateSource();
+        DataTreeItem.ExpandCollapse();
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -73,32 +80,32 @@ public partial class DataTreeView : UserControl
 
         if (change.Property == DataProperty)
         {
-            TreeSource.First(x => Equals(x.Value, "AudioGroups")).Source = Data?.AudioGroups;
-            TreeSource.First(x => Equals(x.Value, "Sounds")).Source = Data?.Sounds;
-            TreeSource.First(x => Equals(x.Value, "Sprites")).Source = Data?.Sprites;
-            TreeSource.First(x => Equals(x.Value, "Backgrounds")).Source = Data?.Backgrounds;
-            TreeSource.First(x => Equals(x.Value, "Paths")).Source = Data?.Paths;
-            TreeSource.First(x => Equals(x.Value, "Scripts")).Source = Data?.Scripts;
-            TreeSource.First(x => Equals(x.Value, "Shaders")).Source = Data?.Shaders;
-            TreeSource.First(x => Equals(x.Value, "Fonts")).Source = Data?.Fonts;
-            TreeSource.First(x => Equals(x.Value, "Timelines")).Source = Data?.Timelines;
-            TreeSource.First(x => Equals(x.Value, "GameObjects")).Source = Data?.GameObjects;
-            TreeSource.First(x => Equals(x.Value, "Rooms")).Source = Data?.Rooms;
-            TreeSource.First(x => Equals(x.Value, "Extensions")).Source = Data?.Extensions;
-            TreeSource.First(x => Equals(x.Value, "TexturePageItems")).Source = Data?.TexturePageItems;
-            TreeSource.First(x => Equals(x.Value, "Code")).Source = Data?.Code;
-            TreeSource.First(x => Equals(x.Value, "Variables")).Source = Data?.Variables;
-            TreeSource.First(x => Equals(x.Value, "Functions")).Source = Data?.Functions;
-            TreeSource.First(x => Equals(x.Value, "CodeLocals")).Source = Data?.CodeLocals;
-            TreeSource.First(x => Equals(x.Value, "Strings")).Source = Data?.Strings;
-            TreeSource.First(x => Equals(x.Value, "EmbeddedTextures")).Source = Data?.EmbeddedTextures;
-            TreeSource.First(x => Equals(x.Value, "EmbeddedAudio")).Source = Data?.EmbeddedAudio;
-            TreeSource.First(x => Equals(x.Value, "TextureGroupInformation")).Source = Data?.TextureGroupInfo;
-            TreeSource.First(x => Equals(x.Value, "EmbeddedImages")).Source = Data?.EmbeddedImages;
-            TreeSource.First(x => Equals(x.Value, "ParticleSystems")).Source = Data?.ParticleSystems;
-            TreeSource.First(x => Equals(x.Value, "ParticleSystemEmitters")).Source = Data?.ParticleSystemEmitters;
+            DataTreeItemSource.First(x => Equals(x.Value, "AudioGroups")).Source = Data?.AudioGroups;
+            DataTreeItemSource.First(x => Equals(x.Value, "Sounds")).Source = Data?.Sounds;
+            DataTreeItemSource.First(x => Equals(x.Value, "Sprites")).Source = Data?.Sprites;
+            DataTreeItemSource.First(x => Equals(x.Value, "Backgrounds")).Source = Data?.Backgrounds;
+            DataTreeItemSource.First(x => Equals(x.Value, "Paths")).Source = Data?.Paths;
+            DataTreeItemSource.First(x => Equals(x.Value, "Scripts")).Source = Data?.Scripts;
+            DataTreeItemSource.First(x => Equals(x.Value, "Shaders")).Source = Data?.Shaders;
+            DataTreeItemSource.First(x => Equals(x.Value, "Fonts")).Source = Data?.Fonts;
+            DataTreeItemSource.First(x => Equals(x.Value, "Timelines")).Source = Data?.Timelines;
+            DataTreeItemSource.First(x => Equals(x.Value, "GameObjects")).Source = Data?.GameObjects;
+            DataTreeItemSource.First(x => Equals(x.Value, "Rooms")).Source = Data?.Rooms;
+            DataTreeItemSource.First(x => Equals(x.Value, "Extensions")).Source = Data?.Extensions;
+            DataTreeItemSource.First(x => Equals(x.Value, "TexturePageItems")).Source = Data?.TexturePageItems;
+            DataTreeItemSource.First(x => Equals(x.Value, "Code")).Source = Data?.Code;
+            DataTreeItemSource.First(x => Equals(x.Value, "Variables")).Source = Data?.Variables;
+            DataTreeItemSource.First(x => Equals(x.Value, "Functions")).Source = Data?.Functions;
+            DataTreeItemSource.First(x => Equals(x.Value, "CodeLocals")).Source = Data?.CodeLocals;
+            DataTreeItemSource.First(x => Equals(x.Value, "Strings")).Source = Data?.Strings;
+            DataTreeItemSource.First(x => Equals(x.Value, "EmbeddedTextures")).Source = Data?.EmbeddedTextures;
+            DataTreeItemSource.First(x => Equals(x.Value, "EmbeddedAudio")).Source = Data?.EmbeddedAudio;
+            DataTreeItemSource.First(x => Equals(x.Value, "TextureGroupInformation")).Source = Data?.TextureGroupInfo;
+            DataTreeItemSource.First(x => Equals(x.Value, "EmbeddedImages")).Source = Data?.EmbeddedImages;
+            DataTreeItemSource.First(x => Equals(x.Value, "ParticleSystems")).Source = Data?.ParticleSystems;
+            DataTreeItemSource.First(x => Equals(x.Value, "ParticleSystemEmitters")).Source = Data?.ParticleSystemEmitters;
 
-            TreeSource[0].UpdateSource();
+            DataTreeItem.UpdateSource();
         }
     }
 
