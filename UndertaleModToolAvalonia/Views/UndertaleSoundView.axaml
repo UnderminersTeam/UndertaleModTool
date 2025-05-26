@@ -1,0 +1,45 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
+             xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
+             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
+             xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.Views.UndertaleSoundView"
+             x:DataType="v:UndertaleSoundViewModel">
+    <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*" Classes="PaddedProperties">
+        <Label>Name</Label>
+        <c:UndertaleStringReferenceView Reference="{Binding Sound.Name}" />
+
+        <Label>Flags</Label>
+        <c:FlagsBoxView Value="{Binding Sound.Flags}" />
+
+        <Label>Type</Label>
+        <c:UndertaleStringReferenceView Reference="{Binding Sound.Type}" />
+
+        <Label>File</Label>
+        <c:UndertaleStringReferenceView Reference="{Binding Sound.File}" />
+
+        <Label>Effects</Label>
+        <TextBox Text="{Binding Sound.Effects}" />
+
+        <Label>Volume</Label>
+        <TextBox Text="{Binding Sound.Volume}" />
+
+        <Label>Pitch</Label>
+        <TextBox Text="{Binding Sound.Pitch}" />
+
+        <Label>Audio group</Label>
+        <c:UndertaleResourceReferenceView Reference="{Binding Sound.AudioGroup}" ReferenceType="undertalem:UndertaleAudioGroup" />
+
+        <!-- TODO: Deal with audio groups. -->
+        <Label>Audio file</Label>
+        <TextBox Text="{Binding Sound.AudioID}" />
+
+        <Label>Preload (old audio system)</Label>
+        <CheckBox IsChecked="{Binding Sound.Preload}" />
+        
+    </Grid>
+</UserControl>

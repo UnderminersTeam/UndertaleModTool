@@ -87,6 +87,9 @@
                                         <TextBlock VerticalAlignment="Center" Text="{Binding ., Converter={StaticResource DataItemToNameConverter}}"/>
                                     </DataTemplate>
                                     <!-- Resources -->
+                                    <DataTemplate DataType="v:UndertaleSoundViewModel">
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding Sound.Name.Content, StringFormat=Sound - {0}}"/>
+                                    </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleSpriteViewModel">
                                         <TextBlock VerticalAlignment="Center" Text="{Binding Sprite.Name.Content, StringFormat=Sprite - {0}}"/>
                                     </DataTemplate>
@@ -132,6 +135,9 @@
                                         <v:GameEndScriptsView />
                                     </DataTemplate>
                                     <!-- Resources -->
+                                    <DataTemplate DataType="v:UndertaleSoundViewModel">
+                                        <v:UndertaleSoundView />
+                                    </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleSpriteViewModel">
                                         <v:UndertaleSpriteView />
                                     </DataTemplate>

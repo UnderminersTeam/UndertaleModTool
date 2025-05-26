@@ -257,15 +257,10 @@ public partial class MainViewModel
         object? content = item switch
         {
             DescriptionViewModel vm => vm,
-
             "GeneralInfo" => new GeneralInfoViewModel(Data),
             "GlobalInitScripts" => new GlobalInitScriptsViewModel((Data.GlobalInitScripts as ObservableCollection<UndertaleGlobalInit>)!),
             "GameEndScripts" => new GameEndScriptsViewModel((Data.GameEndScripts as ObservableCollection<UndertaleGlobalInit>)!),
-
-            //TreeViewItem { Name: "GeneralInfo" } => new GeneralInfoViewModel(Data),
-            //TreeViewItem { Name: "GlobalInitScripts" } => new GlobalInitScriptsViewModel((Data.GlobalInitScripts as ObservableCollection<UndertaleGlobalInit>)!),
-            //TreeViewItem { Name: "GameEndScripts" } => new GameEndScriptsViewModel((Data.GameEndScripts as ObservableCollection<UndertaleGlobalInit>)!),
-
+            UndertaleSound r => new UndertaleSoundViewModel(r),
             UndertaleSprite r => new UndertaleSpriteViewModel(r),
             UndertaleGameObject r => new UndertaleGameObjectViewModel(r),
             UndertaleRoom r => new UndertaleRoomViewModel(r),
