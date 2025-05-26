@@ -44,23 +44,7 @@ public partial class TreeItemViewModel
     {
         if (internalSource is not null)
         {
-            // Index of first child
-            int index = TreeSource.IndexOf(this) + 1;
-
-            for (int i = children.Count - 1; i >= 0; i--)
-            {
-                TreeItemViewModel child = children[i];
-
-                if (child.Source is INotifyCollectionChanged _sourceNotifyCollectionChanged)
-                    _sourceNotifyCollectionChanged.CollectionChanged -= Source_CollectionChanged;
-
-                if (child.IsExpanded)
-                    child.RemoveChildren();
-
-                TreeSource.RemoveAt(index + i);
-            }
-
-            children.Clear();
+            RemoveList(children, 0);
         }
     }
 
@@ -68,38 +52,7 @@ public partial class TreeItemViewModel
     {
         if (internalSource is IList _sourceList)
         {
-            // Find own position in list.
-            int index = TreeSource.IndexOf(this);
-
-            foreach (var obj in _sourceList)
-            {
-                // One below previous one.
-                index++;
-                // Add to list at the proper position.
-                TreeItemViewModel item;
-                if (obj is TreeItemViewModel _item)
-                {
-                    item = _item;
-                    item.Level = Level + 1;
-                }
-                else
-                {
-                    item = new(TreeSource, Level + 1, obj);
-                }
-
-                TreeSource.Insert(index, item);
-                children.Add(item);
-            }
-
-            foreach (var item in children)
-            {
-                // item.UpdateSource();
-                if (item.Source is INotifyCollectionChanged _sourceNotifyCollectionChanged)
-                    _sourceNotifyCollectionChanged.CollectionChanged += Source_CollectionChanged;
-
-                if (item.IsExpanded)
-                    item.AddChildren();
-            }
+            AddList(_sourceList, 0);
         }
     }
 
@@ -148,6 +101,68 @@ public partial class TreeItemViewModel
         }
     }
 
+    void RemoveList(IList list, int startingIndex)
+    {
+        int index = TreeSource.IndexOf(this) + 1;
+
+        for (int i = list.Count - 1; i >= 0; i--)
+        {
+            object? obj = list[i];
+
+            if (obj is TreeItemViewModel treeItem)
+            {
+                if (treeItem.Source is INotifyCollectionChanged sourceNotifyCollectionChanged)
+                    sourceNotifyCollectionChanged.CollectionChanged -= treeItem.Source_CollectionChanged;
+
+                if (treeItem.IsExpanded)
+                    treeItem.RemoveChildren();
+            }
+        }
+
+        for (int i = list.Count - 1; i >= 0; i--)
+        {
+            object? obj = list[i];
+
+            TreeSource.RemoveAt(index + i + startingIndex);
+            children.RemoveAt(i + startingIndex);
+        }
+    }
+
+    void AddList(IList list, int startingIndex)
+    {
+        int index = TreeSource.IndexOf(this) + 1;
+
+        for (int i = 0; i < list.Count; i++)
+        {
+            object? obj = list[i];
+
+            TreeItemViewModel item;
+            if (obj is TreeItemViewModel _item)
+            {
+                item = _item;
+                item.Level = Level + 1;
+            }
+            else
+            {
+                item = new(TreeSource, Level + 1, obj);
+            }
+
+            TreeSource.Insert(index + i + startingIndex, item);
+            children.Insert(i + startingIndex, item);
+        }
+
+        foreach (TreeItemViewModel treeItem in children)
+        {
+            treeItem.UpdateSource();
+
+            if (treeItem.Source is INotifyCollectionChanged sourceNotifyCollectionChanged)
+                sourceNotifyCollectionChanged.CollectionChanged += treeItem.Source_CollectionChanged;
+
+            if (treeItem.IsExpanded)
+                treeItem.AddChildren();
+        }
+    }
+
     private void Source_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         // TODO: Check if this works when moving
@@ -155,39 +170,11 @@ public partial class TreeItemViewModel
         {
             if (e.OldItems is not null)
             {
-                // Index doesn't change because items move up
-                int index = TreeSource.IndexOf(this) + 1;
-                foreach (object? obj in e.OldItems)
-                {
-                    TreeSource.RemoveAt(index + e.OldStartingIndex);
-                    children.RemoveAt(e.OldStartingIndex);
-                }
+                RemoveList(e.OldItems, e.OldStartingIndex);
             }
             if (e.NewItems is not null)
             {
-                int index = TreeSource.IndexOf(this) + 1;
-                foreach (object? obj in e.NewItems)
-                {
-                    TreeItemViewModel item;
-                    if (obj is TreeItemViewModel _item)
-                    {
-                        item = _item;
-                        item.Level = Level + 1;
-                    }
-                    else
-                    {
-                        item = new(TreeSource, Level + 1, obj);
-                    }
-
-                    TreeSource.Insert(index + e.NewStartingIndex, item);
-                    children.Insert(e.NewStartingIndex, item);
-                    index++;
-                }
-
-                foreach (var item in children)
-                {
-                    item.UpdateSource();
-                }
+                AddList(e.NewItems, e.NewStartingIndex);
             }
         }
 
