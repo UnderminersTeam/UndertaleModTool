@@ -15,8 +15,8 @@
         <h:UndertaleColorToColorConverter x:Key="UndertaleColorToColorConverter" />
         <h:VersionCompareConverter x:Key="VersionCompareConverter" />
     </UserControl.Resources>
-    <Grid RowDefinitions="200,Auto,1*" ColumnDefinitions="1*" Classes="PaddedProperties" MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
-        <Grid Grid.Row="0" RowDefinitions="1*" ColumnDefinitions="1*,1*">
+    <Grid RowDefinitions="250,Auto,1*" ColumnDefinitions="1*" Classes="PaddedProperties" MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
+        <Grid Grid.Row="0" RowDefinitions="1*" ColumnDefinitions="1*,Auto,1*">
             <Grid Grid.Column="0">
                 <!-- TreeView -->
                 <TreeView SelectedItem="{Binding RoomItemsSelectedItem}">
@@ -112,13 +112,14 @@
                     </TreeViewItem>
                 </TreeView>
             </Grid>
-            <Grid Grid.Column="1">
+            <GridSplitter Grid.Column="1" />
+            <Grid Grid.Column="2">
                 <!-- Properties -->
                 <ScrollViewer>
                     <ContentControl Content="{Binding PropertiesContent}">
                         <ContentControl.DataTemplates>
                             <DataTemplate DataType="undertalem:UndertaleRoom">
-                                <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*">
+                                <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
                                     <Label>Name</Label>
                                     <c:UndertaleStringReferenceView Reference="{Binding Name}" />
 
@@ -168,7 +169,7 @@
                                 </Grid>
                             </DataTemplate>
                             <DataTemplate DataType="undertalem:UndertaleRoom+Background">
-                                <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*">
+                                <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
                                     <Label>Enabled</Label>
                                     <CheckBox IsChecked="{Binding Enabled}"/>
 
@@ -201,7 +202,7 @@
                                 </Grid>
                             </DataTemplate>
                             <DataTemplate DataType="undertalem:UndertaleRoom+View">
-                                <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*">
+                                <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
                                     <Label>Enabled</Label>
                                     <CheckBox IsChecked="{Binding Enabled}" />
 
@@ -238,7 +239,7 @@
                                 </Grid>
                             </DataTemplate>
                             <DataTemplate DataType="undertalem:UndertaleRoom+GameObject">
-                                <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*">
+                                <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
                                     <Label>Position (X/Y)</Label>
                                     <Grid ColumnDefinitions="1*,1*">
                                         <TextBox Grid.Column="0" Text="{Binding X}" />
@@ -278,7 +279,7 @@
                                 </Grid>
                             </DataTemplate>
                             <DataTemplate DataType="undertalem:UndertaleRoom+Tile">
-                                <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*">
+                                <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
                                     <Label>Definition</Label>
 
                                     <Panel>
@@ -321,7 +322,7 @@
                             </DataTemplate>
                             <DataTemplate DataType="undertalem:UndertaleRoom+Layer">
                                 <StackPanel Name="Layer">
-                                    <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*">
+                                    <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
                                         <Label>Layer name</Label>
                                         <c:UndertaleStringReferenceView Reference="{Binding LayerName}" />
 
@@ -343,7 +344,7 @@
                                     <ContentControl Content="{Binding Data}">
                                         <ContentControl.DataTemplates>
                                             <DataTemplate DataType="undertalem:UndertaleRoom+Layer+LayerBackgroundData">
-                                                <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*">
+                                                <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
                                                     <Label>Offset X/Y</Label>
                                                     <Grid ColumnDefinitions="1*,1*">
                                                         <TextBox Grid.Column="0" Text="{ReflectionBinding #Layer.DataContext.XOffset}" />
@@ -394,7 +395,7 @@
                                             </DataTemplate>
                                             <DataTemplate DataType="undertalem:UndertaleRoom+Layer+LayerAssetsData">
                                                 <StackPanel>
-                                                    <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*">
+                                                    <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
                                                         <Label>Offset X/Y</Label>
                                                         <Grid ColumnDefinitions="1*,1*">
                                                             <TextBox Grid.Column="0" Text="{ReflectionBinding #Layer.DataContext.XOffset}" />
@@ -412,7 +413,7 @@
                                                 </StackPanel>
                                             </DataTemplate>
                                             <DataTemplate DataType="undertalem:UndertaleRoom+Layer+LayerTilesData">
-                                                <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*">
+                                                <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
                                                     <Label>Offset X/Y</Label>
                                                     <Grid ColumnDefinitions="1*,1*">
                                                         <TextBox Grid.Column="0" Text="{ReflectionBinding #Layer.DataContext.XOffset}" />

@@ -14,16 +14,11 @@
         <h:EventsToExtendedEventConverter x:Key="EventsToExtendedEventConverter" />
         <h:IdToUndertaleGameObjectConverter x:Key="IdToUndertaleGameObjectConverter" />
     </UserControl.Resources>
-    <StackPanel Grid.IsSharedSizeScope="True" Classes="PaddedProperties">
+    <StackPanel Classes="PaddedProperties">
         <TextBlock FontWeight="Bold" Text="Game object" />
         <Separator />
 
-        <Grid h:AutoGridBehavior.Enable="True">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" SharedSizeGroup="g1" />
-                <ColumnDefinition Width="1*" />
-            </Grid.ColumnDefinitions>
-
+        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
             <Label>Name</Label>
             <c:UndertaleStringReferenceView Reference="{Binding GameObject.Name}" />
 
@@ -65,12 +60,7 @@
         <TextBlock FontWeight="Bold" Text="Physics" />
         <Separator />
 
-        <Grid h:AutoGridBehavior.Enable="True">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" SharedSizeGroup="g1" />
-                <ColumnDefinition Width="1*" />
-            </Grid.ColumnDefinitions>
-
+        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
             <Label>Density</Label>
             <TextBox Text="{Binding GameObject.Density}" />
 

@@ -14,7 +14,7 @@
         <c:UndertaleTexturePageItemUpdaterConverter x:Key="UndertaleTexturePageItemUpdaterConverter"/>
     </UserControl.Resources>
     <StackPanel>
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*" Classes="PaddedProperties">
+        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
             <Label>Name</Label>
             <c:UndertaleStringReferenceView Reference="{Binding Background.Name}" />
 
@@ -31,7 +31,7 @@
             <c:UndertaleResourceReferenceView Reference="{Binding Background.Texture}" ReferenceType="undertalem:UndertaleTexturePageItem" />
         </Grid>
         
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*" Classes="PaddedProperties"
+        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties"
               IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).Version,
               Converter={StaticResource VersionCompareConverter},
               ConverterParameter=GE2}">
@@ -80,7 +80,7 @@
             </c:EditableDataGrid>
         </Grid>
         
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*" Classes="PaddedProperties">
+        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
             <Label>Image</Label>
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
                           MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">

@@ -111,6 +111,10 @@
             <Setter Property="MinWidth" Value="3"/>
         </Style>
 
+        <Style Selector="Label">
+            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+        </Style>
+
         <Style Selector="ColorPicker">
             <Setter Property="HorizontalAlignment" Value="Left" />
         </Style>

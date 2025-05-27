@@ -9,7 +9,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="UndertaleModToolAvalonia.Views.UndertaleSoundView"
              x:DataType="v:UndertaleSoundViewModel">
-    <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*" Classes="PaddedProperties">
+    <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
         <Label>Name</Label>
         <c:UndertaleStringReferenceView Reference="{Binding Sound.Name}" />
 
