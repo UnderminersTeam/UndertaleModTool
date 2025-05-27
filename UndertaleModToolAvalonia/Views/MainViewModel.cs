@@ -60,6 +60,13 @@ public partial class MainViewModel
         {
             Data.GeneralInfo.PropertyChanged += DataGeneralInfoChangedHandler;
         }
+
+        UpdateVersion();
+    }
+
+    public void UpdateVersion()
+    {
+        Version = Data is not null ? (Data.GeneralInfo.Major, Data.GeneralInfo.Minor, Data.GeneralInfo.Release, Data.GeneralInfo.Build) : default;
     }
 
     private void DataGeneralInfoChangedHandler(object? sender, PropertyChangedEventArgs e)
@@ -68,7 +75,7 @@ public partial class MainViewModel
             nameof(UndertaleGeneralInfo.Major) or nameof(UndertaleGeneralInfo.Minor) or
             nameof(UndertaleGeneralInfo.Release) or nameof(UndertaleGeneralInfo.Build))
         {
-            Version = (Data.GeneralInfo.Major, Data.GeneralInfo.Minor, Data.GeneralInfo.Release, Data.GeneralInfo.Build);
+            UpdateVersion();
         }
     }
 
@@ -87,7 +94,7 @@ public partial class MainViewModel
 
         var files = await OpenFileDialog(new FilePickerOpenOptions
         {
-            Title = "Testing.",
+            Title = "Testing.", // TODO: Change this
             AllowMultiple = false,
             FileTypeFilter =
             [
@@ -289,10 +296,10 @@ public partial class MainViewModel
 
         if (TabSelected != selected)
         {
-        if (index >= Tabs.Count)
-            index = Tabs.Count - 1;
+            if (index >= Tabs.Count)
+                index = Tabs.Count - 1;
 
-        TabSelectedIndex = index;
+            TabSelectedIndex = index;
+        }
     }
-}
 }
