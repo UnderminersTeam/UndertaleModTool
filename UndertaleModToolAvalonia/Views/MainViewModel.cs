@@ -281,11 +281,17 @@ public partial class MainViewModel
 
     public void TabClose(TabItemViewModel tab)
     {
-        int index = TabSelectedIndex;
+        var selected = TabSelected;
+        var index = TabSelectedIndex;
+
         Tabs.Remove(tab);
+
+        if (TabSelected != selected)
+        {
         if (index >= Tabs.Count)
             index = Tabs.Count - 1;
 
         TabSelectedIndex = index;
     }
+}
 }

@@ -116,7 +116,11 @@ public partial class DataTreeView : UserControl
             ListBoxItem? listBoxItem = control.FindLogicalAncestorOfType<ListBoxItem>();
             if (listBoxItem is not null)
             {
-                mainVM.TabOpen(listBoxItem.DataContext);
+                if (listBoxItem.DataContext is TreeItemViewModel treeItem)
+                {
+                    treeItem.ExpandCollapse();
+                    mainVM.TabOpen(treeItem);
+                }
             }
         }
     }
