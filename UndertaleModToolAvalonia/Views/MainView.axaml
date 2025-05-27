@@ -93,6 +93,9 @@
                                     <DataTemplate DataType="v:UndertaleSpriteViewModel">
                                         <TextBlock VerticalAlignment="Center" Text="{Binding Sprite.Name.Content, StringFormat=Sprite - {0}}"/>
                                     </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleBackgroundViewModel">
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding Background.Name.Content, StringFormat=Background - {0}}"/>
+                                    </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleGameObjectViewModel">
                                         <TextBlock VerticalAlignment="Center" Text="{Binding GameObject.Name.Content, StringFormat=Game object - {0}}"/>
                                     </DataTemplate>
@@ -140,6 +143,9 @@
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleSpriteViewModel">
                                         <v:UndertaleSpriteView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleBackgroundViewModel">
+                                        <v:UndertaleBackgroundView />
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleGameObjectViewModel">
                                         <v:UndertaleGameObjectView />

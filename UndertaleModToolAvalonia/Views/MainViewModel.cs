@@ -262,6 +262,7 @@ public partial class MainViewModel
             "GameEndScripts" => new GameEndScriptsViewModel((Data.GameEndScripts as ObservableCollection<UndertaleGlobalInit>)!),
             UndertaleSound r => new UndertaleSoundViewModel(r),
             UndertaleSprite r => new UndertaleSpriteViewModel(r),
+            UndertaleBackground r => new UndertaleBackgroundViewModel(r),
             UndertaleGameObject r => new UndertaleGameObjectViewModel(r),
             UndertaleRoom r => new UndertaleRoomViewModel(r),
             UndertaleCode r => new UndertaleCodeViewModel(r),

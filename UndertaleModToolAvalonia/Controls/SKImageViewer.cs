@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
@@ -65,8 +66,8 @@ public class SKImageViewer : Control
 
     public override void Render(DrawingContext context)
     {
-        customDrawOperation.Bounds = Bounds;
-        
+        customDrawOperation.Bounds = new Rect(0, 0, Bounds.Width, Bounds.Height);
+
         context.Custom(customDrawOperation);
     }
 
@@ -89,31 +90,39 @@ public class SKImageViewer : Control
 
         public void Render(ImmediateDrawingContext context)
         {
-            var leaseFeature = context.TryGetFeature<ISkiaSharpApiLeaseFeature>();
-            if (leaseFeature is null)
-                return;
-
-            using var lease = leaseFeature.Lease();
-            SKCanvas canvas = lease.SkCanvas;
-            canvas.Save();
-
-            if (skImageViewer.TexturePageItem is not null)
+            try
             {
-                // TODO: Checkerboard background
-                canvas.DrawRect(SKRect.Create(0, 0, skImageViewer.TexturePageItem.BoundingWidth, skImageViewer.TexturePageItem.BoundingHeight), new SKPaint { Color = SKColors.Gray });
+                var leaseFeature = context.TryGetFeature<ISkiaSharpApiLeaseFeature>();
+                if (leaseFeature is null)
+                    return;
 
-                var image = App.Services.GetRequiredService<MainViewModel>().ImageCache.GetCachedImageFromTexturePageItem(skImageViewer.TexturePageItem);
+                using var lease = leaseFeature.Lease();
+                SKCanvas canvas = lease.SkCanvas;
+                canvas.Save();
 
-                // TODO: TargetWidth/TargetHeight
-                canvas.DrawImage(image, skImageViewer.TexturePageItem.TargetX, skImageViewer.TexturePageItem.TargetY);
+                if (skImageViewer.TexturePageItem is not null)
+                {
+                    // TODO: Checkerboard background
+                    canvas.DrawRect(SKRect.Create(0, 0, skImageViewer.TexturePageItem.BoundingWidth, skImageViewer.TexturePageItem.BoundingHeight), new SKPaint { Color = SKColors.Gray });
+
+                    var image = App.Services.GetRequiredService<MainViewModel>().ImageCache.GetCachedImageFromTexturePageItem(skImageViewer.TexturePageItem);
+
+                    // TODO: TargetWidth/TargetHeight
+                    canvas.DrawImage(image, skImageViewer.TexturePageItem.TargetX, skImageViewer.TexturePageItem.TargetY);
+                }
+
+                canvas.Restore();
             }
-
-            canvas.Restore();
+            catch (Exception)
+            {
+                Debugger.Break();
+                throw;
+            }
         }
     }
 }
 
-public class ToSKImageUpdaterConverter : IMultiValueConverter
+public class UndertaleTexturePageItemUpdaterConverter : IMultiValueConverter
 {
     public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
     {

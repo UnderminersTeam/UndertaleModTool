@@ -11,7 +11,7 @@
              x:DataType="v:UndertaleSpriteViewModel">
     <UserControl.Resources>
         <h:EnumTypeToValuesConverter x:Key="EnumTypeToValuesConverter" />
-        <c:ToSKImageUpdaterConverter x:Key="ToSKImageUpdaterConverter"/>
+        <c:UndertaleTexturePageItemUpdaterConverter x:Key="UndertaleTexturePageItemUpdaterConverter"/>
     </UserControl.Resources>
     <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*" Classes="PaddedProperties">
         <Label>Name</Label>
@@ -66,12 +66,13 @@
             </c:EditableDataGrid.Columns>
         </c:EditableDataGrid>
 
+        <!-- TODO: Show first image initially -->
         <Label>Image</Label>
         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
                       MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
             <c:SKImageViewer>
                 <c:SKImageViewer.SKImage>
-                    <MultiBinding Converter="{StaticResource ToSKImageUpdaterConverter}">
+                    <MultiBinding Converter="{StaticResource UndertaleTexturePageItemUpdaterConverter}">
                         <ReflectionBinding Path="#TexturesDataGrid.DataGridControl.SelectedItem.Texture"/>
                         <ReflectionBinding Path="#TexturesDataGrid.DataGridControl.SelectedItem.Texture.TexturePage.TextureData.Image"/>
                         <ReflectionBinding Path="#TexturesDataGrid.DataGridControl.SelectedItem.Texture.SourceX"/>

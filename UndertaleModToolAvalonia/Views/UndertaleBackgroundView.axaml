@@ -1,0 +1,108 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
+             xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
+             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
+             xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.Views.UndertaleBackgroundView"
+             x:DataType="v:UndertaleBackgroundViewModel">
+    <UserControl.Resources>
+        <h:VersionCompareConverter x:Key="VersionCompareConverter" />
+        <c:UndertaleTexturePageItemUpdaterConverter x:Key="UndertaleTexturePageItemUpdaterConverter"/>
+    </UserControl.Resources>
+    <StackPanel>
+        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*" Classes="PaddedProperties">
+            <Label>Name</Label>
+            <c:UndertaleStringReferenceView Reference="{Binding Background.Name}" />
+
+            <Label>Transparent</Label>
+            <CheckBox IsChecked="{Binding Background.Transparent}" />
+
+            <Label>Smooth</Label>
+            <CheckBox IsChecked="{Binding Background.Smooth}" />
+        
+            <Label>Preload</Label>
+            <CheckBox IsChecked="{Binding Background.Preload}" />
+
+            <Label>Texture</Label>
+            <c:UndertaleResourceReferenceView Reference="{Binding Background.Texture}" ReferenceType="undertalem:UndertaleTexturePageItem" />
+        </Grid>
+        
+        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*" Classes="PaddedProperties"
+              IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).Version,
+              Converter={StaticResource VersionCompareConverter},
+              ConverterParameter=GE2}">
+            
+            <Label>Unknown Always 2</Label>
+            <TextBox Text="{Binding Background.GMS2UnknownAlways2}" />
+
+            <Label>Tile Width</Label>
+            <TextBox Text="{Binding Background.GMS2TileWidth}" />
+
+            <Label>Tile Height</Label>
+            <TextBox Text="{Binding Background.GMS2TileHeight}" />
+
+            <Label>Output Border X</Label>
+            <TextBox Text="{Binding Background.GMS2OutputBorderX}" />
+
+            <Label>Output Border Y</Label>
+            <TextBox Text="{Binding Background.GMS2OutputBorderY}" />
+
+            <Label>Tile Columns</Label>
+            <TextBox Text="{Binding Background.GMS2TileColumns}" />
+
+            <Label>Items/frames per tile</Label>
+            <TextBox Text="{Binding Background.GMS2ItemsPerTileCount}" />
+
+            <Label>Tile Count</Label>
+            <TextBox Text="{Binding Background.GMS2TileCount}" />
+
+            <Label>Unknown Always Zero</Label>
+            <TextBox Text="{Binding Background.GMS2UnknownAlwaysZero}" />
+
+            <Label>Frame Time (microseconds)</Label>
+            <TextBox Text="{Binding Background.GMS2FrameLength}" />
+
+            <Label>Tile IDs</Label>
+            <c:EditableDataGrid ItemsSource="{Binding Background.GMS2TileIds}" ItemFactory="{Binding CreateTileID}">
+                <c:EditableDataGrid.Columns>
+                    <DataGridTemplateColumn Header="Tile ID" Width="1*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="undertalem:UndertaleBackground+TileID">
+                                <TextBox Text="{Binding ID}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </c:EditableDataGrid.Columns>
+            </c:EditableDataGrid>
+        </Grid>
+        
+        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="Auto,1*" Classes="PaddedProperties">
+            <Label>Image</Label>
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
+                          MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
+                <c:SKImageViewer>
+                    <c:SKImageViewer.SKImage>
+                        <MultiBinding Converter="{StaticResource UndertaleTexturePageItemUpdaterConverter}">
+                            <ReflectionBinding Path="Background.Texture"/>
+                            <ReflectionBinding Path="Background.Texture.TexturePage.TextureData.Image"/>
+                            <ReflectionBinding Path="Background.Texture.SourceX"/>
+                            <ReflectionBinding Path="Background.Texture.SourceY"/>
+                            <ReflectionBinding Path="Background.Texture.SourceWidth"/>
+                            <ReflectionBinding Path="Background.Texture.SourceHeight"/>
+                            <ReflectionBinding Path="Background.Texture.TargetX"/>
+                            <ReflectionBinding Path="Background.Texture.TargetY"/>
+                            <ReflectionBinding Path="Background.Texture.TargetWidth"/>
+                            <ReflectionBinding Path="Background.Texture.TargetHeight"/>
+                            <ReflectionBinding Path="Background.Texture.BoundingWidth"/>
+                            <ReflectionBinding Path="Background.Texture.BoundingHeight"/>
+                        </MultiBinding>
+                    </c:SKImageViewer.SKImage>
+                </c:SKImageViewer>
+            </ScrollViewer>
+        </Grid>
+    </StackPanel>
+</UserControl>
