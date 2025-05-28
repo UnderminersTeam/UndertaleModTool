@@ -15,12 +15,19 @@ namespace UndertaleModToolAvalonia.Views;
 
 public partial class MainViewModel
 {
+    // Window
+    public string Title => $"UndertaleModToolAvalonia - v0.0.0.0" +
+        $"{(Data?.GeneralInfo is not null ? " - " + Data?.GeneralInfo.ToString() : "")}" +
+        $"{(DataPath is not null ? " [" + DataPath + "]" : "")}";
+
     // Set this when testing.
     public Func<FilePickerOpenOptions, Task<IReadOnlyList<IStorageFile>>>? OpenFileDialog;
 
     // Data
     [Notify]
     private UndertaleData? _Data;
+    [Notify]
+    private string? _DataPath;
 
     [Notify]
     private (uint Major, uint Minor, uint Release, uint Build) _Version;
@@ -85,6 +92,7 @@ public partial class MainViewModel
         Tabs.Clear();
 
         SetData(UndertaleData.CreateNew());
+        DataPath = null;
     }
 
     public async void FileOpen()
@@ -111,7 +119,8 @@ public partial class MainViewModel
 
         if (files.Count >= 1)
         {
-            Debug.WriteLine(files[0].TryGetLocalPath());
+            Tabs.Clear();
+
             using Stream stream = await files[0].OpenReadAsync();
 
             SetData(UndertaleIO.Read(stream,
@@ -124,7 +133,7 @@ public partial class MainViewModel
                     Debug.WriteLine($"Data.Read message: {message}");
                 }));
 
-            Tabs.Clear();
+            DataPath = files[0].TryGetLocalPath();
         }
     }
 
