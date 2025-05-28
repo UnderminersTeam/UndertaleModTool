@@ -380,6 +380,9 @@ public sealed class CompileGroup
         // Mark this group as compiling
         GlobalContext.CurrentCompileGroup = this;
 
+        // If queue hasn't been created yet, create an empty one
+        _queuedCodeReplacements ??= new();
+
         // If global scripts are present in the replacement queue, parse their code in advance to collect global functions
         List<CompileContext> globalScriptContexts = null;
         foreach (QueuedOperation operation in _queuedCodeReplacements)
