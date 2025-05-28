@@ -94,9 +94,21 @@ public class SKImageViewer : Control
                 SKCanvas canvas = lease.SkCanvas;
                 canvas.Save();
 
-                // TODO: Checkerboard background
-                canvas.DrawRect(SKRect.Create(0, 0, (float)Bounds.Width, (float)Bounds.Height), new SKPaint { Color = SKColors.Gray });
+                // Checkered background
+                int gridSize = 8;
+                SKPaint gridColor1 = new SKPaint { Color = new SKColor(102, 102, 102) };
+                SKPaint gridColor2 = new SKPaint { Color = new SKColor(153, 153, 153) };
 
+                canvas.DrawRect(SKRect.Create(0, 0, (float)Bounds.Width, (float)Bounds.Height), gridColor1);
+
+                for (int x = 0; x < Bounds.Width / gridSize; x++)
+                    for (int y = 0; y < Bounds.Height / gridSize; y++)
+                    {
+                        if ((x + y) % 2 != 0)
+                            canvas.DrawRect(SKRect.Create(x* gridSize, y* gridSize, gridSize, gridSize), gridColor2);
+                    }
+
+                // Image
                 if (SKImage is UndertaleTexturePageItem texturePageItem)
                 {
                     SKImage image = mainVM.ImageCache.GetCachedImageFromTexturePageItem(texturePageItem);
