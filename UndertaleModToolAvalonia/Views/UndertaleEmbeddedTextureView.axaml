@@ -12,31 +12,32 @@
         <c:ToSKImageUpdaterConverter x:Key="ToSKImageUpdaterConverter" />
         <h:VersionCompareConverter x:Key="VersionCompareConverter" />
     </UserControl.Resources>
-    <StackPanel>
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
-            <Label>Scaled</Label>
-            <TextBox Text="{Binding EmbeddedTexture.Scaled}" />
+    <Grid RowDefinitions="Auto,1*" MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
+        <StackPanel Grid.Column="0">
+            <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
+                <Label>Scaled</Label>
+                <TextBox Text="{Binding EmbeddedTexture.Scaled}" />
 
-            <Label>Size</Label>
-            <Grid ColumnDefinitions="1*,1*">
-                <TextBox Grid.Column="0" Text="{Binding EmbeddedTexture.TextureData.Width}" IsReadOnly="True" />
-                <TextBox Grid.Column="1" Text="{Binding EmbeddedTexture.TextureData.Height}" IsReadOnly="True" />
+                <Label>Size</Label>
+                <Grid ColumnDefinitions="1*,1*">
+                    <TextBox Grid.Column="0" Text="{Binding EmbeddedTexture.TextureData.Width}" IsReadOnly="True" />
+                    <TextBox Grid.Column="1" Text="{Binding EmbeddedTexture.TextureData.Height}" IsReadOnly="True" />
+                </Grid>
             </Grid>
-        </Grid>
         
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties"
-              IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).Version,
-              Converter={StaticResource VersionCompareConverter},
-              ConverterParameter=GE2.0.6}">
-            <Label>Generated mips</Label>
-            <TextBox Text="{Binding EmbeddedTexture.GeneratedMips}" />
-        </Grid>
+            <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties"
+                  IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).Version,
+                  Converter={StaticResource VersionCompareConverter},
+                  ConverterParameter=GE2.0.6}">
+                <Label>Generated mips</Label>
+                <TextBox Text="{Binding EmbeddedTexture.GeneratedMips}" />
+            </Grid>
+        </StackPanel>
         
         <!-- TODO: Click on item to open -->
         <!-- TODO: Failed to load message -->
         <!-- TODO: Import/export -->
-        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
-                      MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
+        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center">
             <c:SKImageViewer>
                 <c:SKImageViewer.SKImage>
                     <MultiBinding Converter="{StaticResource ToSKImageUpdaterConverter}">
@@ -45,5 +46,5 @@
                 </c:SKImageViewer.SKImage>
             </c:SKImageViewer>
         </ScrollViewer>
-    </StackPanel>
+    </Grid>
 </UserControl>
