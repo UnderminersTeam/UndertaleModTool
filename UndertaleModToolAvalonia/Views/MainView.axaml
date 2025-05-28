@@ -102,6 +102,9 @@
                                     <DataTemplate DataType="v:UndertaleRoomViewModel">
                                         <TextBlock VerticalAlignment="Center" Text="{Binding Room.Name.Content, StringFormat=Room - {0}}"/>
                                     </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleTexturePageItemViewModel">
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding TexturePageItem.Name.Content, StringFormat=Texture page item - {0}}"/>
+                                    </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleCodeViewModel">
                                         <TextBlock VerticalAlignment="Center" Text="{Binding Code.Name.Content, StringFormat=Code - {0}}"/>
                                     </DataTemplate>
@@ -155,6 +158,9 @@
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleRoomViewModel">
                                         <v:UndertaleRoomView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleTexturePageItemViewModel">
+                                        <v:UndertaleTexturePageItemView />
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleCodeViewModel">
                                         <v:UndertaleCodeView />

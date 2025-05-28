@@ -1,0 +1,68 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
+             xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
+             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
+             xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.Views.UndertaleTexturePageItemView"
+             x:DataType="v:UndertaleTexturePageItemViewModel">
+    <UserControl.Resources>
+        <c:ToSKImageUpdaterConverter x:Key="ToSKImageUpdaterConverter" />
+    </UserControl.Resources>
+    <StackPanel>
+        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
+            <Label>Source X/Y/W/H</Label>
+            <Grid ColumnDefinitions="1*,1*,1*,1*">
+                <TextBox Grid.Column="0" Text="{Binding TexturePageItem.SourceX}" />
+                <TextBox Grid.Column="1" Text="{Binding TexturePageItem.SourceY}" />
+                <TextBox Grid.Column="2" Text="{Binding TexturePageItem.SourceWidth}" />
+                <TextBox Grid.Column="3" Text="{Binding TexturePageItem.SourceHeight}" />
+            </Grid>
+
+            <Label>Target X/Y/W/H</Label>
+            <Grid ColumnDefinitions="1*,1*,1*,1*">
+                <TextBox Grid.Column="0" Text="{Binding TexturePageItem.TargetX}" />
+                <TextBox Grid.Column="1" Text="{Binding TexturePageItem.TargetY}" />
+                <TextBox Grid.Column="2" Text="{Binding TexturePageItem.TargetWidth}" />
+                <TextBox Grid.Column="3" Text="{Binding TexturePageItem.TargetHeight}" />
+            </Grid>
+
+            <Label>Bounding size</Label>
+            <Grid ColumnDefinitions="1*,1*">
+                <TextBox Grid.Column="2" Text="{Binding TexturePageItem.BoundingWidth}" />
+                <TextBox Grid.Column="3" Text="{Binding TexturePageItem.BoundingHeight}" />
+            </Grid>
+
+            <Label>Texture</Label>
+            <c:UndertaleResourceReferenceView Reference="{Binding TexturePageItem.TexturePage}" ReferenceType="undertalem:UndertaleEmbeddedTexture" />
+        </Grid>
+
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
+                      MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
+            <c:SKImageViewer>
+                <c:SKImageViewer.SKImage>
+                    <MultiBinding Converter="{StaticResource ToSKImageUpdaterConverter}">
+                        <ReflectionBinding Path="TexturePageItem"/>
+                        <ReflectionBinding Path="TexturePageItem.TexturePage.TextureData.Image"/>
+                        <ReflectionBinding Path="TexturePageItem.SourceX"/>
+                        <ReflectionBinding Path="TexturePageItem.SourceY"/>
+                        <ReflectionBinding Path="TexturePageItem.SourceWidth"/>
+                        <ReflectionBinding Path="TexturePageItem.SourceHeight"/>
+                        <ReflectionBinding Path="TexturePageItem.TargetX"/>
+                        <ReflectionBinding Path="TexturePageItem.TargetY"/>
+                        <ReflectionBinding Path="TexturePageItem.TargetWidth"/>
+                        <ReflectionBinding Path="TexturePageItem.TargetHeight"/>
+                        <ReflectionBinding Path="TexturePageItem.BoundingWidth"/>
+                        <ReflectionBinding Path="TexturePageItem.BoundingHeight"/>
+                    </MultiBinding>
+                </c:SKImageViewer.SKImage>
+            </c:SKImageViewer>
+        </ScrollViewer>
+
+        <!-- TODO: Import/Export -->
+        <!-- TODO: Show item in texture -->
+    </StackPanel>
+</UserControl>
