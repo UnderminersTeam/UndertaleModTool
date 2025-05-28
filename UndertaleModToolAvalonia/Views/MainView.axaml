@@ -108,6 +108,9 @@
                                     <DataTemplate DataType="v:UndertaleStringViewModel">
                                         <TextBlock VerticalAlignment="Center" Text="{Binding String.Content, StringFormat=String - {0}}"/>
                                     </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleEmbeddedTextureViewModel">
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding EmbeddedTexture.Name.Content, StringFormat=Embedded texture - {0}}"/>
+                                    </DataTemplate>
                                 </ContentControl.DataTemplates>
                             </ContentControl>
                             <Button Width="16" Height="16" Padding="0"
@@ -158,6 +161,9 @@
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleStringViewModel">
                                         <v:UndertaleStringView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleEmbeddedTextureViewModel">
+                                        <v:UndertaleEmbeddedTextureView />
                                     </DataTemplate>
                                 </ContentControl.DataTemplates>
                             </ContentControl>

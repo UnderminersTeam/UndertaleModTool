@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
+             xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
+             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.Views.UndertaleEmbeddedTextureView"
+             x:DataType="v:UndertaleEmbeddedTextureViewModel">
+    <UserControl.Resources>
+        <c:ToSKImageUpdaterConverter x:Key="ToSKImageUpdaterConverter" />
+        <h:VersionCompareConverter x:Key="VersionCompareConverter" />
+    </UserControl.Resources>
+    <StackPanel>
+        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
+            <Label>Scaled</Label>
+            <TextBox Text="{Binding EmbeddedTexture.Scaled}" />
+
+            <Label>Size</Label>
+            <Grid ColumnDefinitions="1*,1*">
+                <TextBox Grid.Column="0" Text="{Binding EmbeddedTexture.TextureData.Width}" IsReadOnly="True" />
+                <TextBox Grid.Column="1" Text="{Binding EmbeddedTexture.TextureData.Height}" IsReadOnly="True" />
+            </Grid>
+        </Grid>
+        
+        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties"
+              IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).Version,
+              Converter={StaticResource VersionCompareConverter},
+              ConverterParameter=GE2.0.6}">
+            <Label>Generated mips</Label>
+            <TextBox Text="{Binding EmbeddedTexture.GeneratedMips}" />
+        </Grid>
+        
+        <!-- TODO: Click on item to open -->
+        <!-- TODO: Failed to load message -->
+        <!-- TODO: Import/export -->
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
+                      MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
+            <c:SKImageViewer>
+                <c:SKImageViewer.SKImage>
+                    <MultiBinding Converter="{StaticResource ToSKImageUpdaterConverter}">
+                        <ReflectionBinding Path="EmbeddedTexture.TextureData.Image"/>
+                    </MultiBinding>
+                </c:SKImageViewer.SKImage>
+            </c:SKImageViewer>
+        </ScrollViewer>
+    </StackPanel>
+</UserControl>

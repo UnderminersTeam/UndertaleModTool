@@ -11,7 +11,7 @@
              x:DataType="v:UndertaleBackgroundViewModel">
     <UserControl.Resources>
         <h:VersionCompareConverter x:Key="VersionCompareConverter" />
-        <c:UndertaleTexturePageItemUpdaterConverter x:Key="UndertaleTexturePageItemUpdaterConverter"/>
+        <c:ToSKImageUpdaterConverter x:Key="ToSKImageUpdaterConverter"/>
     </UserControl.Resources>
     <StackPanel>
         <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
@@ -86,7 +86,7 @@
                           MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
                 <c:SKImageViewer>
                     <c:SKImageViewer.SKImage>
-                        <MultiBinding Converter="{StaticResource UndertaleTexturePageItemUpdaterConverter}">
+                        <MultiBinding Converter="{StaticResource ToSKImageUpdaterConverter}">
                             <ReflectionBinding Path="Background.Texture"/>
                             <ReflectionBinding Path="Background.Texture.TexturePage.TextureData.Image"/>
                             <ReflectionBinding Path="Background.Texture.SourceX"/>

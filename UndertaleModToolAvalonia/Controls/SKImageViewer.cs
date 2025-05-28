@@ -12,6 +12,7 @@ using Avalonia.Skia;
 using Microsoft.Extensions.DependencyInjection;
 using SkiaSharp;
 using UndertaleModLib.Models;
+using UndertaleModLib.Util;
 using UndertaleModToolAvalonia.Views;
 
 namespace UndertaleModToolAvalonia.Controls;
@@ -33,15 +34,6 @@ public class SKImageViewer : Control
 
         if (change.Property == SKImageProperty)
         {
-            if (change.NewValue is UndertaleTexturePageItem texturePageItem)
-            {
-                TexturePageItem = texturePageItem;
-            }
-            else
-            {
-                TexturePageItem = null;
-            }
-
             InvalidateMeasure();
             InvalidateVisual();
         }
@@ -49,17 +41,17 @@ public class SKImageViewer : Control
 
     readonly CustomDrawOperation customDrawOperation;
 
-    public UndertaleTexturePageItem? TexturePageItem;
-
     public SKImageViewer()
     {
-        customDrawOperation = new CustomDrawOperation(this);
+        customDrawOperation = new CustomDrawOperation();
     }
 
     protected override Size MeasureOverride(Size availableSize)
     {
-        if (TexturePageItem is not null)
-            return new Size(TexturePageItem.BoundingWidth, TexturePageItem.BoundingHeight);
+        if (SKImage is UndertaleTexturePageItem texturePageItem)
+            return new Size(texturePageItem.BoundingWidth, texturePageItem.BoundingHeight);
+        else if (SKImage is GMImage gmImage)
+            return new Size(gmImage.Width, gmImage.Height);
 
         return new Size(0, 0);
     }
@@ -67,6 +59,7 @@ public class SKImageViewer : Control
     public override void Render(DrawingContext context)
     {
         customDrawOperation.Bounds = new Rect(0, 0, Bounds.Width, Bounds.Height);
+        customDrawOperation.SKImage = SKImage;
 
         context.Custom(customDrawOperation);
     }
@@ -75,11 +68,12 @@ public class SKImageViewer : Control
     {
         public Rect Bounds { get; set; }
 
-        public SKImageViewer skImageViewer;
+        public object? SKImage;
 
-        public CustomDrawOperation(SKImageViewer skImageViewer)
+        readonly MainViewModel mainVM = App.Services.GetRequiredService<MainViewModel>();
+
+        public CustomDrawOperation()
         {
-            this.skImageViewer = skImageViewer;
         }
 
         public void Dispose() { }
@@ -100,15 +94,20 @@ public class SKImageViewer : Control
                 SKCanvas canvas = lease.SkCanvas;
                 canvas.Save();
 
-                if (skImageViewer.TexturePageItem is not null)
-                {
-                    // TODO: Checkerboard background
-                    canvas.DrawRect(SKRect.Create(0, 0, skImageViewer.TexturePageItem.BoundingWidth, skImageViewer.TexturePageItem.BoundingHeight), new SKPaint { Color = SKColors.Gray });
+                // TODO: Checkerboard background
+                canvas.DrawRect(SKRect.Create(0, 0, (float)Bounds.Width, (float)Bounds.Height), new SKPaint { Color = SKColors.Gray });
 
-                    var image = App.Services.GetRequiredService<MainViewModel>().ImageCache.GetCachedImageFromTexturePageItem(skImageViewer.TexturePageItem);
+                if (SKImage is UndertaleTexturePageItem texturePageItem)
+                {
+                    SKImage image = mainVM.ImageCache.GetCachedImageFromTexturePageItem(texturePageItem);
 
                     // TODO: TargetWidth/TargetHeight
-                    canvas.DrawImage(image, skImageViewer.TexturePageItem.TargetX, skImageViewer.TexturePageItem.TargetY);
+                    canvas.DrawImage(image, texturePageItem.TargetX, texturePageItem.TargetY);
+                }
+                else if (SKImage is GMImage gmImage)
+                {
+                    SKImage image = mainVM.ImageCache.GetCachedImageFromGMImage(gmImage);
+                    canvas.DrawImage(image, 0, 0);
                 }
 
                 canvas.Restore();
@@ -122,15 +121,16 @@ public class SKImageViewer : Control
     }
 }
 
-public class UndertaleTexturePageItemUpdaterConverter : IMultiValueConverter
+public class ToSKImageUpdaterConverter : IMultiValueConverter
 {
     public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
     {
         // Ignore other values, they're just for binding updates.
-        if (values[0] is UndertaleTexturePageItem texture)
+        if (values[0] is UndertaleTexturePageItem or GMImage)
         {
-            return texture;
+            return values[0];
         }
+
         return null;
     }
 }
