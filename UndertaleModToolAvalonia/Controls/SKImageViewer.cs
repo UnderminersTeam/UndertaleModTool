@@ -46,7 +46,7 @@ public class SKImageViewer : Control
         customDrawOperation = new CustomDrawOperation();
     }
 
-    protected override Size MeasureOverride(Size availableSize)
+    Size GetSize()
     {
         if (SKImage is UndertaleTexturePageItem texturePageItem)
             return new Size(texturePageItem.BoundingWidth, texturePageItem.BoundingHeight);
@@ -56,15 +56,21 @@ public class SKImageViewer : Control
         return new Size(0, 0);
     }
 
+    protected override Size MeasureOverride(Size availableSize)
+    {
+        return GetSize();
+    }
+
     public override void Render(DrawingContext context)
     {
-        customDrawOperation.Bounds = new Rect(0, 0, Bounds.Width, Bounds.Height);
+        Size size = GetSize();
+        customDrawOperation.Bounds = new Rect(0, 0, size.Width, size.Height);
         customDrawOperation.SKImage = SKImage;
 
         context.Custom(customDrawOperation);
     }
 
-    class CustomDrawOperation : ICustomDrawOperation
+    public class CustomDrawOperation : ICustomDrawOperation
     {
         public Rect Bounds { get; set; }
 
@@ -109,18 +115,7 @@ public class SKImageViewer : Control
                     }
 
                 // Image
-                if (SKImage is UndertaleTexturePageItem texturePageItem)
-                {
-                    SKImage image = mainVM.ImageCache.GetCachedImageFromTexturePageItem(texturePageItem);
-
-                    // TODO: TargetWidth/TargetHeight
-                    canvas.DrawImage(image, texturePageItem.TargetX, texturePageItem.TargetY);
-                }
-                else if (SKImage is GMImage gmImage)
-                {
-                    SKImage image = mainVM.ImageCache.GetCachedImageFromGMImage(gmImage);
-                    canvas.DrawImage(image, 0, 0);
-                }
+                RenderImage(canvas);
 
                 canvas.Restore();
             }
@@ -128,6 +123,22 @@ public class SKImageViewer : Control
             {
                 Debugger.Break();
                 throw;
+            }
+        }
+
+        public void RenderImage(SKCanvas canvas)
+        {
+            if (SKImage is UndertaleTexturePageItem texturePageItem)
+            {
+                SKImage image = mainVM.ImageCache.GetCachedImageFromTexturePageItem(texturePageItem);
+
+                // TODO: TargetWidth/TargetHeight
+                canvas.DrawImage(image, texturePageItem.TargetX, texturePageItem.TargetY);
+            }
+            else if (SKImage is GMImage gmImage)
+            {
+                SKImage image = mainVM.ImageCache.GetCachedImageFromGMImage(gmImage);
+                canvas.DrawImage(image, 0, 0);
             }
         }
     }

@@ -15,13 +15,14 @@ namespace UndertaleModToolAvalonia.Views;
 
 public partial class MainViewModel
 {
+    // Set this when testing.
+    public Func<FilePickerOpenOptions, Task<IReadOnlyList<IStorageFile>>>? OpenFileDialog;
+    public Func<FilePickerSaveOptions, Task<IStorageFile?>>? SaveFileDialog;
+
     // Window
     public string Title => $"UndertaleModToolAvalonia - v0.0.0.0" +
         $"{(Data?.GeneralInfo is not null ? " - " + Data?.GeneralInfo.ToString() : "")}" +
         $"{(DataPath is not null ? " [" + DataPath + "]" : "")}";
-
-    // Set this when testing.
-    public Func<FilePickerOpenOptions, Task<IReadOnlyList<IStorageFile>>>? OpenFileDialog;
 
     // Data
     [Notify]
@@ -102,7 +103,7 @@ public partial class MainViewModel
 
         var files = await OpenFileDialog(new FilePickerOpenOptions
         {
-            Title = "Testing.", // TODO: Change this
+            Title = "Open",
             AllowMultiple = false,
             FileTypeFilter =
             [

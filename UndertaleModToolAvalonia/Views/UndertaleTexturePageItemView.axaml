@@ -32,13 +32,17 @@
 
             <Label>Bounding size</Label>
             <Grid ColumnDefinitions="1*,1*">
-                <TextBox Grid.Column="2" Text="{Binding TexturePageItem.BoundingWidth}" />
-                <TextBox Grid.Column="3" Text="{Binding TexturePageItem.BoundingHeight}" />
+                <TextBox Grid.Column="0" Text="{Binding TexturePageItem.BoundingWidth}" />
+                <TextBox Grid.Column="1" Text="{Binding TexturePageItem.BoundingHeight}" />
             </Grid>
 
             <Label>Texture</Label>
             <c:UndertaleResourceReferenceView Reference="{Binding TexturePageItem.TexturePage}" ReferenceType="undertalem:UndertaleEmbeddedTexture" />
         </Grid>
+
+        <StackPanel Orientation="Horizontal">
+            <Button Command="{Binding SaveImage}">Save image</Button>
+        </StackPanel>
 
         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
                       MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
