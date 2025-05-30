@@ -600,7 +600,8 @@
       "gml_Script_c_stickto": [ "Id.InstanceOrObject", null ],
       "gml_Script_scr_monster_add": [ null, "Asset.Object" ],
       "gml_Script_scr_bullet_create": [ null, null, "Asset.Object" ],
-      "gml_Script_scr_childbullet": [ null, null, "Asset.Object" ]
+      "gml_Script_scr_childbullet": [ null, null, "Asset.Object" ],
+      "gml_Script_scr_debug_keycheck": [ "Constant.VirtualKey" ]
     },
     "FunctionReturn": {
       "scr_getbuttonsprite": {
