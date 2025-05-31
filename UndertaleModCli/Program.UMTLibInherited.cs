@@ -374,8 +374,7 @@ public partial class Program : IScriptInterface
                 return null;
             }
             directoryInfo = new DirectoryInfo(path);
-        } 
-        while (!directoryInfo.Exists);
+        } while (!directoryInfo.Exists);
         return path;
     }
 
@@ -394,8 +393,31 @@ public partial class Program : IScriptInterface
                 return null;
             }
             fileInfo = new FileInfo(path);
+        }
+        while (fileInfo.Exists);
+
+        return path;
+    }
+
+    /// <inheritdoc/>
+    public string PromptSaveFile(string defaultExt, string filter)
+    {
+        string path;
+        do
+        {
+            Console.WriteLine("Please enter a path (or drag and drop) to save the file:");
+            Console.Write("Path: ");
+            path = RemoveQuotes(Console.ReadLine());
+
+            if (Directory.Exists(path))
+            {
+                Console.WriteLine("Error: Directory exists at that path.");
+                path = null; // Ensuring that the loop will work correctly
+                continue;
+            }
         } 
-        while (!fileInfo.Exists);
+        while (string.IsNullOrWhiteSpace(path));
+
         return path;
     }
 

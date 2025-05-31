@@ -3,7 +3,6 @@
 using System;
 using System.ComponentModel;
 using System.IO;
-using System.Windows;
 using UndertaleModLib;
 using UndertaleModLib.Scripting;
 using UndertaleModLib.Models;

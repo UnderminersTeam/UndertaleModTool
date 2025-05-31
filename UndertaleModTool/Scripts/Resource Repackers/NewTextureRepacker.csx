@@ -21,7 +21,6 @@ using System;
 using System.Linq;
 using System.ComponentModel;
 using System.IO;
-using System.Windows.Forms;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -366,10 +365,7 @@ bool reuseTextures = false;
 string packagerDirectory = Path.Combine(ExePath, "Packager");
 if (Directory.Exists(packagerDirectory))
 {
-    DialogResult dr = MessageBox.Show("Do you want to reuse previously extracted page items?", 
-        "Texture Repacker", MessageBoxButtons.YesNo);
-
-    reuseTextures = dr == DialogResult.Yes;
+    reuseTextures = ScriptQuestion("Do you want to reuse previously extracted page items?");
 }
 
 Directory.CreateDirectory(packagerDirectory);
