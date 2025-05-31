@@ -1,10 +1,5 @@
-// Made by Grossley
-// Version 1
-// 12/07/2020
-
 using System;
 using System.IO;
-using ImageMagick;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,19 +9,22 @@ using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
-// Get import folder
+// Get import folder.
 string importFolder = PromptChooseDirectory();
-if (importFolder == null)
+if (importFolder is null)
+{
     throw new ScriptException("The import folder was not set.");
+}
 
-string[] dirFiles = Directory.GetFiles(importFolder);
+// Find all files in the folder.
+string[] dirFiles = Directory.GetFiles(importFolder, "*.png");
 
-//Stop the script if there's missing sprite entries or w/e.
+// Stop the script if there's missing sprite entries, or invalid data.
 foreach (string file in dirFiles)
 {
-    string FileNameWithExtension = Path.GetFileName(file);
-    if (!FileNameWithExtension.EndsWith(".png"))
-        continue; // Restarts loop if file is not a valid mask asset.
+    string fileNameWithExtension = Path.GetFileName(file);
+
+    // Get sprite name from filename.
     string stripped = Path.GetFileNameWithoutExtension(file);
     int lastUnderscore = stripped.LastIndexOf('_');
     string spriteName = "";
@@ -36,49 +34,56 @@ foreach (string file in dirFiles)
     }
     catch
     {
-        throw new ScriptException("Getting the sprite name of " + FileNameWithExtension + " failed.");
-    }
-    if (Data.Sprites.ByName(spriteName) == null) // Reject non-existing sprites
-    {
-        throw new ScriptException(FileNameWithExtension + " could not be imported as the sprite " + spriteName + " does not exist.");
-    }
-    using (MagickImage img = TextureWorker.ReadBGRAImageFromFile(file))
-    {
-        if ((Data.Sprites.ByName(spriteName).Width != (uint)img.Width) || (Data.Sprites.ByName(spriteName).Height != (uint)img.Height))
-            throw new ScriptException(FileNameWithExtension + " is not the proper size to be imported! Please correct this before importing! The proper dimensions are width: " + Data.Sprites.ByName(spriteName).Width.ToString() + " px, height: " + Data.Sprites.ByName(spriteName).Height.ToString() + " px.");
+        throw new ScriptException($"Getting the sprite name of {fileNameWithExtension} failed.");
     }
 
+    // Validate width/height based on existing sprite width/height.
+    UndertaleSprite foundSprite = Data.Sprites.ByName(spriteName);
+    if (foundSprite is null)
+    {
+        throw new ScriptException($"{fileNameWithExtension} could not be imported as the sprite {spriteName} does not exist.");
+    }
+    (int imgWidth, int imgHeight) = TextureWorker.GetImageSizeFromFile(file);
+    (int expectedMaskWidth, int expectedMaskHeight) = foundSprite.CalculateMaskDimensions(Data);
+    if (expectedMaskWidth != imgWidth || expectedMaskHeight != imgHeight)
+    {
+        throw new ScriptException($"{fileNameWithExtension} is not the proper size to be imported! Please correct this before importing! The proper dimensions are width: {expectedMaskWidth} px, height: {expectedMaskHeight} px.");
+    }
+
+    // Determine frame number and validate it.
     int validFrameNumber = 0;
     try
     {
-        validFrameNumber = Int32.Parse(stripped.Substring(lastUnderscore + 1));
+        validFrameNumber = int.Parse(stripped.Substring(lastUnderscore + 1));
     }
     catch
     {
-        throw new ScriptException("The index of " + FileNameWithExtension + " could not be determined.");
+        throw new ScriptException($"The index of {fileNameWithExtension} could not be determined.");
     }
     int frame = 0;
     try
     {
-        frame = Int32.Parse(stripped.Substring(lastUnderscore + 1));
+        frame = int.Parse(stripped.Substring(lastUnderscore + 1));
     }
     catch
     {
-        throw new ScriptException(FileNameWithExtension + " is using letters instead of numbers. The script has stopped for your own protection.");
+        throw new ScriptException($"{fileNameWithExtension} is using letters instead of numbers. The script has stopped for your own protection.");
     }
-    int prevframe = 0;
-    if (frame != 0)
+    if (frame == 0)
     {
-        prevframe = (frame - 1);
+        continue;
     }
     if (frame < 0)
     {
-        throw new ScriptException(spriteName + " is using an invalid numbering scheme. The script has stopped for your own protection.");
+        throw new ScriptException($"{spriteName} is using an invalid numbering scheme. The script has stopped for your own protection.");
     }
-    var prevFrameName = $"{spriteName}_{prevframe}.png";
+    int prevFrame = frame - 1;
+    string prevFrameName = $"{spriteName}_{prevFrame}.png";
     string[] previousFrameFiles = Directory.GetFiles(importFolder, prevFrameName);
     if (previousFrameFiles.Length < 1)
-        throw new ScriptException(spriteName + " is missing one or more indexes. The detected missing index is: " + prevFrameName);
+    {
+        throw new ScriptException($"{spriteName} is missing one or more indexes. The detected missing index is: {prevFrameName}");
+    }
 }
 
 SetProgressBar(null, "Files", 0, dirFiles.Length);
@@ -90,29 +95,24 @@ await Task.Run(() =>
     {
         IncrementProgress();
 
-        string FileNameWithExtension = Path.GetFileName(file);
-        if (!FileNameWithExtension.EndsWith(".png", StringComparison.InvariantCultureIgnoreCase))
-            continue; // Restarts loop if file is not a valid mask asset.
+        string fileNameWithExtension = Path.GetFileName(file);
+
+        // Get sprite name from filename.
         string stripped = Path.GetFileNameWithoutExtension(file);
         int lastUnderscore = stripped.LastIndexOf('_');
         string spriteName = stripped.Substring(0, lastUnderscore);
-        int frame = Int32.Parse(stripped.Substring(lastUnderscore + 1));
+        int frame = int.Parse(stripped.Substring(lastUnderscore + 1));
         UndertaleSprite sprite = Data.Sprites.ByName(spriteName);
-        int collision_mask_count = sprite.CollisionMasks.Count;
-        while (collision_mask_count <= frame)
+        int collisionMaskCount = sprite.CollisionMasks.Count;
+        while (collisionMaskCount <= frame)
         {
             sprite.CollisionMasks.Add(sprite.NewMaskEntry(Data));
-            collision_mask_count += 1;
+            collisionMaskCount += 1;
         }
-        try
-        {
-            (int maskWidth, int maskHeight) = sprite.CalculateMaskDimensions(Data);
-            sprite.CollisionMasks[frame].Data = TextureWorker.ReadMaskData(file, maskWidth, maskHeight);
-        }
-        catch
-        {
-            throw new ScriptException(FileNameWithExtension + " has an error that prevents its import and so the operation has been aborted! Please correct this before trying again!");
-        }
+
+        // Import the mask.
+        (int maskWidth, int maskHeight) = sprite.CalculateMaskDimensions(Data);
+        sprite.CollisionMasks[frame].Data = TextureWorker.ReadMaskData(file, maskWidth, maskHeight);
     }
 });
 

@@ -370,7 +370,9 @@ public partial class Program : IScriptInterface
             Console.Write("Path: ");
             path = RemoveQuotes(Console.ReadLine());
             directoryInfo = new DirectoryInfo(path);
-        } while (!directoryInfo.Exists);
+        } 
+        while (!directoryInfo.Exists);
+
         return path;
     }
 
@@ -378,14 +380,16 @@ public partial class Program : IScriptInterface
     public string PromptLoadFile(string defaultExt, string filter)
     {
         string path;
-        FileInfo directoryInfo;
+        FileInfo fileInfo;
         do
         {
             Console.WriteLine("Please type a path (or drag and drop) to a valid file:");
             Console.Write("Path: ");
             path = RemoveQuotes(Console.ReadLine());
-            directoryInfo = new FileInfo(path);
-        } while (directoryInfo.Exists);
+            fileInfo = new FileInfo(path);
+        }
+        while (fileInfo.Exists);
+
         return path;
     }
 
@@ -401,11 +405,13 @@ public partial class Program : IScriptInterface
 
             if (Directory.Exists(path))
             {
-                ScriptError("You selected a directory");
-                path = null; //Ensuring that the loop will work correctly
+                Console.WriteLine("Error: Directory exists at that path.");
+                path = null; // Ensuring that the loop will work correctly
                 continue;
             }
-        } while (string.IsNullOrWhiteSpace(path));
+        } 
+        while (string.IsNullOrWhiteSpace(path));
+
         return path;
     }
 

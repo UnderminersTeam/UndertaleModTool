@@ -434,7 +434,7 @@ public interface IScriptInterface
     string PromptLoadFile(string defaultExt, string filter);
 
     /// <summary>
-    /// Used to prompt the user to select a location and name to save a file..
+    /// Used to prompt the user for a location to save a file.
     /// </summary>
     /// <param name="defaultExt">The default extension that should be used when saving the file.</param>
     /// <param name="filter">The filters used to specify the file types in the dialog.</param>

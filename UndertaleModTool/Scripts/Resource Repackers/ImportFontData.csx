@@ -164,10 +164,11 @@ public struct Rectangle
     public int Y { get; set; }
     public int Height { get; set; }
     public int Width { get; set; }
-    public void Size(int width, int height)
+
+    public void SetSize(int width, int height)
     {
-        this.Width = width;
-        this.Height = height;
+        Width = width;
+        Height = height;
     }
 }
 
@@ -269,7 +270,7 @@ public class Packer
         {
             string atlasName = $"{prefix}{atlasCount:000}.png";
             //1: Save images
-            MagickImage img = CreateAtlasImage(atlas);
+            using MagickImage img = CreateAtlasImage(atlas);
             img.Write(atlasName, MagickFormat.Png);
             //2: save description in file
             foreach (Node n in atlas.Nodes)
@@ -301,25 +302,22 @@ public class Packer
         FileInfo[] files = di.GetFiles(_Wildcard, SearchOption.AllDirectories);
         foreach (FileInfo fi in files)
         {
-            var img = new MagickImage(fi.FullName);
-            if (img != null)
+            (int imgWidth, int imgHeight) = TextureWorker.GetImageSizeFromFile(fi.FullName);
+            if (imgWidth <= AtlasSize && imgHeight <= AtlasSize)
             {
-                if (img.Width <= AtlasSize && img.Height <= AtlasSize)
-                {
-                    TextureInfo ti = new TextureInfo();
+                TextureInfo ti = new TextureInfo();
 
-                    ti.Source = fi.FullName;
-                    ti.Width = (int)img.Width;
-                    ti.Height = (int)img.Height;
+                ti.Source = fi.FullName;
+                ti.Width = imgWidth;
+                ti.Height = imgHeight;
 
-                    SourceTextures.Add(ti);
+                SourceTextures.Add(ti);
 
-                    Log.WriteLine("Added " + fi.FullName);
-                }
-                else
-                {
-                    Error.WriteLine(fi.FullName + " is too large to fix in the atlas. Skipping!");
-                }
+                Log.WriteLine("Added " + fi.FullName);
+            }
+            else
+            {
+                Error.WriteLine(fi.FullName + " is too large to fix in the atlas. Skipping!");
             }
         }
     }
@@ -412,7 +410,7 @@ public class Packer
         _Atlas.Nodes = new List<Node>();
         textures = _Textures.ToList();
         Node root = new Node();
-        root.Bounds.Size(_Atlas.Width, _Atlas.Height);
+        root.Bounds.SetSize(_Atlas.Width, _Atlas.Height);
         root.SplitType = SplitType.Horizontal;
         freeList.Add(root);
         while (freeList.Count > 0 && textures.Count > 0)
@@ -442,13 +440,13 @@ public class Packer
 
     private MagickImage CreateAtlasImage(Atlas _Atlas)
     {
-        var atlas = new MagickImage(MagickColors.Transparent, (uint)_Atlas.Width, (uint)_Atlas.Height);
+        MagickImage atlas = new(MagickColors.Transparent, (uint)_Atlas.Width, (uint)_Atlas.Height);
 
         foreach (Node n in _Atlas.Nodes)
         {
             if (n.Texture != null)
             {
-                using (var src = new MagickImage(n.Texture.Source))
+                using (MagickImage src = new(n.Texture.Source))
                 {
                     atlas.Composite(src, n.Bounds.X, n.Bounds.Y, CompositeOperator.Over);
                 }
