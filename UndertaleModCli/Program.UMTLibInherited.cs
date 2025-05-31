@@ -366,13 +366,15 @@ public partial class Program : IScriptInterface
         DirectoryInfo directoryInfo;
         do
         {
-            Console.WriteLine("Please type a path (or drag and drop) to a valid directory:");
+            Console.WriteLine("Please enter a path (or drag and drop) to a valid directory:");
             Console.Write("Path: ");
             path = RemoveQuotes(Console.ReadLine());
+            if (string.IsNullOrEmpty(path))
+            {
+                return null;
+            }
             directoryInfo = new DirectoryInfo(path);
-        } 
-        while (!directoryInfo.Exists);
-
+        } while (!directoryInfo.Exists);
         return path;
     }
 
@@ -383,9 +385,13 @@ public partial class Program : IScriptInterface
         FileInfo fileInfo;
         do
         {
-            Console.WriteLine("Please type a path (or drag and drop) to a valid file:");
+            Console.WriteLine("Please enter a path (or drag and drop) to a valid file:");
             Console.Write("Path: ");
             path = RemoveQuotes(Console.ReadLine());
+            if (string.IsNullOrEmpty(path))
+            {
+                return null;
+            }
             fileInfo = new FileInfo(path);
         }
         while (fileInfo.Exists);
@@ -399,7 +405,7 @@ public partial class Program : IScriptInterface
         string path;
         do
         {
-            Console.WriteLine("Please type a path (or drag and drop) to save the file:");
+            Console.WriteLine("Please enter a path (or drag and drop) to save the file:");
             Console.Write("Path: ");
             path = RemoveQuotes(Console.ReadLine());
 
@@ -431,7 +437,7 @@ public partial class Program : IScriptInterface
         try
         {
             return code != null 
-                ? new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, settings ?? Data.ToolInfo.DecompilerSettings).DecompileToString() 
+                ? new DecompileContext(decompileContext, code, settings ?? Data.ToolInfo.DecompilerSettings).DecompileToString() 
                 : "";
         }
         catch (Exception e)
