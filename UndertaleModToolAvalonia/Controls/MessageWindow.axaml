@@ -1,0 +1,40 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
+        mc:Ignorable="d"
+        x:Class="UndertaleModToolAvalonia.Controls.MessageWindow"
+        x:DataType="c:MessageWindow"
+        DataContext="{Binding $self}"
+        Title="{Binding TitleText}"
+        Width="400"
+        SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner">
+    <Window.Styles>
+        <Style Selector="Window">
+            <Setter Property="Padding" Value="20,20,20,0" />
+        </Style>
+        <Style Selector="TextBlock#MessageText">
+            <Setter Property="Margin" Value="0,0,0,20" />
+        </Style>
+        <Style Selector="StackPanel#Buttons">
+            <Setter Property="Spacing" Value="20"/> 
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="Margin" Value="0,0,0,20" />
+            <Setter Property="MinWidth" Value="75" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+    </Window.Styles>
+    <StackPanel Name="Main">
+        <TextBlock Name="MessageText" Text="{Binding Message}"/>
+        <StackPanel Name="Buttons" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Command="{Binding OkClick}" IsVisible="{Binding HasOKButton}" IsDefault="True">OK</Button>
+            <Button IsVisible="{Binding HasYesButton}" IsDefault="True">Yes</Button>
+            <Button IsVisible="{Binding HasNoButton}">No</Button>
+            <Button IsVisible="{Binding HasCancelButton}">Cancel</Button>
+        </StackPanel>
+    </StackPanel>
+</Window>
