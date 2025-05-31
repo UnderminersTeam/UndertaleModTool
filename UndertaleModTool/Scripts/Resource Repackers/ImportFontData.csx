@@ -158,7 +158,7 @@ public void fontUpdate(UndertaleFont newFont)
     }
 }
 
-public class Rectangle
+public struct Rectangle
 {
     public int X { get; set; }
     public int Y { get; set; }
@@ -192,7 +192,7 @@ public enum BestFitHeuristic
 
 public class Node
 {
-    public Rectangle Bounds = new Rectangle();
+    public Rectangle Bounds;
     public TextureInfo Texture;
     public SplitType SplitType;
 }
@@ -270,9 +270,6 @@ public class Packer
             string atlasName = $"{prefix}{atlasCount:000}.png";
             //1: Save images
             MagickImage img = CreateAtlasImage(atlas);
-            //DPI fix start
-            img.Density = new Density(96, 96);
-            //DPI fix end
             img.Write(atlasName, MagickFormat.Png);
             //2: save description in file
             foreach (Node n in atlas.Nodes)
@@ -455,39 +452,7 @@ public class Packer
                 {
                     atlas.Composite(src, n.Bounds.X, n.Bounds.Y, CompositeOperator.Over);
                 }
-
-                if (DebugMode)
-                {
-                    // Desenhar retângulo e texto com Drawables
-                    var drawables = new Drawables()
-                    .FillColor(MagickColors.Black)
-                    .Rectangle(n.Bounds.X, n.Bounds.Y,
-                            n.Bounds.X + n.Bounds.Width, n.Bounds.Y + 15)
-                    .FillColor(MagickColors.White)
-                    .FontPointSize(12)
-                    .Text(n.Bounds.X, n.Bounds.Y + 12, Path.GetFileNameWithoutExtension(n.Texture.Source));
-
-                    drawables.Draw(atlas);
-                }
             }
-        else if (DebugMode)
-        {
-            // Área vazia
-            var drawables = new Drawables()
-                .FillColor(MagickColors.DarkMagenta)
-                .Rectangle(n.Bounds.X, n.Bounds.Y,
-                        n.Bounds.X + n.Bounds.Width, n.Bounds.Y + n.Bounds.Height);
-
-            string label = $"{n.Bounds.Width}x{n.Bounds.Height}";
-            drawables.FillColor(MagickColors.Black)
-                .Rectangle(n.Bounds.X, n.Bounds.Y,
-                        n.Bounds.X + 50, n.Bounds.Y + 15)
-                .FillColor(MagickColors.White)
-                .FontPointSize(12)
-                .Text(n.Bounds.X, n.Bounds.Y + 12, label);
-
-            drawables.Draw(atlas);
-        }
         }
 
         return atlas;
