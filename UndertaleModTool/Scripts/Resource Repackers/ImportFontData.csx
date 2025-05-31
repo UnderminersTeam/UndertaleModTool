@@ -1,15 +1,15 @@
 //Texture packer by Samuel Roy
 // Uses code from https://github.com/mfascia/TexturePacker
-// TODO: this heavily uses Windows stuff, should be made cross platform
 
 using System;
 using System.IO;
-using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UndertaleModLib.Util;
+using ImageMagick;
+using ImageMagick.Drawing;
 
 EnsureDataLoaded();
 
@@ -38,7 +38,6 @@ int atlasCount = 0;
 foreach (Atlas atlas in packer.Atlasses)
 {
     string atlasName = $"{prefix}{atlasCount:000}.png";
-    Bitmap atlasBitmap = new Bitmap(atlasName);
     UndertaleEmbeddedTexture texture = new UndertaleEmbeddedTexture();
     texture.Name = new UndertaleString($"Texture {++lastTextPage}");
     texture.TextureData.Image = GMImage.FromPng(File.ReadAllBytes(atlasName)); // TODO: generate other formats
@@ -159,6 +158,20 @@ public void fontUpdate(UndertaleFont newFont)
     }
 }
 
+public struct Rectangle
+{
+    public int X { get; set; }
+    public int Y { get; set; }
+    public int Height { get; set; }
+    public int Width { get; set; }
+
+    public void SetSize(int width, int height)
+    {
+        Width = width;
+        Height = height;
+    }
+}
+
 public class TextureInfo
 {
     public string Source;
@@ -257,13 +270,8 @@ public class Packer
         {
             string atlasName = $"{prefix}{atlasCount:000}.png";
             //1: Save images
-            Image img = CreateAtlasImage(atlas);
-            //DPI fix start
-            Bitmap ResolutionFix = new Bitmap(img);
-            ResolutionFix.SetResolution(96.0F, 96.0F);
-            Image img2 = ResolutionFix;
-            //DPI fix end
-            img2.Save(atlasName, System.Drawing.Imaging.ImageFormat.Png);
+            using MagickImage img = CreateAtlasImage(atlas);
+            img.Write(atlasName, MagickFormat.Png);
             //2: save description in file
             foreach (Node n in atlas.Nodes)
             {
@@ -294,25 +302,22 @@ public class Packer
         FileInfo[] files = di.GetFiles(_Wildcard, SearchOption.AllDirectories);
         foreach (FileInfo fi in files)
         {
-            Image img = Image.FromFile(fi.FullName);
-            if (img != null)
+            (int imgWidth, int imgHeight) = TextureWorker.GetImageSizeFromFile(fi.FullName);
+            if (imgWidth <= AtlasSize && imgHeight <= AtlasSize)
             {
-                if (img.Width <= AtlasSize && img.Height <= AtlasSize)
-                {
-                    TextureInfo ti = new TextureInfo();
+                TextureInfo ti = new TextureInfo();
 
-                    ti.Source = fi.FullName;
-                    ti.Width = img.Width;
-                    ti.Height = img.Height;
+                ti.Source = fi.FullName;
+                ti.Width = imgWidth;
+                ti.Height = imgHeight;
 
-                    SourceTextures.Add(ti);
+                SourceTextures.Add(ti);
 
-                    Log.WriteLine("Added " + fi.FullName);
-                }
-                else
-                {
-                    Error.WriteLine(fi.FullName + " is too large to fix in the atlas. Skipping!");
-                }
+                Log.WriteLine("Added " + fi.FullName);
+            }
+            else
+            {
+                Error.WriteLine(fi.FullName + " is too large to fix in the atlas. Skipping!");
             }
         }
     }
@@ -405,7 +410,7 @@ public class Packer
         _Atlas.Nodes = new List<Node>();
         textures = _Textures.ToList();
         Node root = new Node();
-        root.Bounds.Size = new Size(_Atlas.Width, _Atlas.Height);
+        root.Bounds.SetSize(_Atlas.Width, _Atlas.Height);
         root.SplitType = SplitType.Horizontal;
         freeList.Add(root);
         while (freeList.Count > 0 && textures.Count > 0)
@@ -433,42 +438,21 @@ public class Packer
         return textures;
     }
 
-    private Image CreateAtlasImage(Atlas _Atlas)
+    private MagickImage CreateAtlasImage(Atlas _Atlas)
     {
-        Image img = new Bitmap(_Atlas.Width, _Atlas.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-        Graphics g = Graphics.FromImage(img);
-        if (DebugMode)
-        {
-            g.FillRectangle(Brushes.Green, new Rectangle(0, 0, _Atlas.Width, _Atlas.Height));
-        }
+        MagickImage atlas = new(MagickColors.Transparent, (uint)_Atlas.Width, (uint)_Atlas.Height);
+
         foreach (Node n in _Atlas.Nodes)
         {
             if (n.Texture != null)
             {
-                Image sourceImg = Image.FromFile(n.Texture.Source);
-                g.DrawImage(sourceImg, n.Bounds);
-                if (DebugMode)
+                using (MagickImage src = new(n.Texture.Source))
                 {
-                    string label = Path.GetFileNameWithoutExtension(n.Texture.Source);
-                    SizeF labelBox = g.MeasureString(label, SystemFonts.MenuFont, new SizeF(n.Bounds.Size));
-                    RectangleF rectBounds = new Rectangle(n.Bounds.Location, new Size((int)labelBox.Width, (int)labelBox.Height));
-                    g.FillRectangle(Brushes.Black, rectBounds);
-                    g.DrawString(label, SystemFonts.MenuFont, Brushes.White, rectBounds);
-                }
-            }
-            else
-            {
-                g.FillRectangle(Brushes.DarkMagenta, n.Bounds);
-                if (DebugMode)
-                {
-                    string label = n.Bounds.Width.ToString() + "x" + n.Bounds.Height.ToString();
-                    SizeF labelBox = g.MeasureString(label, SystemFonts.MenuFont, new SizeF(n.Bounds.Size));
-                    RectangleF rectBounds = new Rectangle(n.Bounds.Location, new Size((int)labelBox.Width, (int)labelBox.Height));
-                    g.FillRectangle(Brushes.Black, rectBounds);
-                    g.DrawString(label, SystemFonts.MenuFont, Brushes.White, rectBounds);
+                    atlas.Composite(src, n.Bounds.X, n.Bounds.Y, CompositeOperator.Over);
                 }
             }
         }
-        return img;
+
+        return atlas;
     }
 }

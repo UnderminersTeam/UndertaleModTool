@@ -1,30 +1,19 @@
-using Microsoft.Win32;
 using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
 using UndertaleModLib;
 
-OpenFileDialog dlg = new OpenFileDialog();
+string dlg = PromptLoadFile("win", "GameMaker data files (.win, .unx, .ios)|*.win;*.unx;*.ios|All files|*");
 
-dlg.DefaultExt = "win";
-dlg.Filter = "GameMaker data files (.win, .unx, .ios)|*.win;*.unx;*.ios|All files|*";
-
-if (dlg.ShowDialog() == true)
+if (!string.IsNullOrEmpty(dlg))
 {
-    SaveFileDialog dlgout = new SaveFileDialog();
-    dlgout.DefaultExt = "txt";
-    dlgout.Filter = "Text files (.txt)|*.txt|All files|*";
-    dlgout.FileName = dlg.FileName + ".nulltrunc.txt";
+    string dlgout = PromptSaveFile("txt", "Text files (.txt)|*.txt|All files|*");
 
-    OpenFileDialog dlgin = new OpenFileDialog();
-    dlgin.DefaultExt = "txt";
-    dlgin.Filter = "Text files (.txt)|*.txt|All files|*";
-    dlgin.FileName = "Select the null_offsets.txt file.";
-    if (dlgin.ShowDialog() == false)
+    string dlgin = PromptLoadFile("txt", "Text files (.txt)|*.txt|All files|*");
+    if (string.IsNullOrEmpty(dlgin))
     {
-        MessageBox.Show("An error occured.", "Load error", MessageBoxButton.OK, MessageBoxImage.Error);
+        ScriptMessage("An error occured.");
         return;
     }
     uint scrutiny = 0;
@@ -38,19 +27,19 @@ if (dlg.ShowDialog() == true)
         {
         }
     }
-    if (dlgout.ShowDialog() == true)
+    if (!string.IsNullOrEmpty(dlgout))
     {
         Task t = Task.Run(() =>
         {
             try
             {
-                StreamReader file = new StreamReader(dlgin.FileName);
+                StreamReader file = new StreamReader(dlgin);
                 string line;
                 line = file.ReadLine();
-                using (var stream = new FileStream(dlg.FileName, FileMode.Open, FileAccess.Read))
+                using (var stream = new FileStream(dlg, FileMode.Open, FileAccess.Read))
                 {
                     var offsets = UndertaleIO.GenerateOffsetMap(stream);
-                    using (var writer = File.CreateText(dlgout.FileName))
+                    using (var writer = File.CreateText(dlgout))
                     {
                         while((line = file.ReadLine()) != null)
                         {
@@ -73,7 +62,7 @@ if (dlg.ShowDialog() == true)
             }
             catch (Exception ex)
             {
-                MessageBox.Show("An error occured while trying to load:\n" + ex.Message, "Load error", MessageBoxButton.OK, MessageBoxImage.Error);
+                ScriptError("An error occured while trying to load:\n" + ex.Message);
             }
 
         });

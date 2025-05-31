@@ -2,8 +2,6 @@ using System;
 using System.ComponentModel;
 using System.IO;
 using System.Threading;
-using System.Windows;
-using System.Windows.Threading;
 using UndertaleModLib;
 using UndertaleModLib.Scripting;
 using UndertaleModLib.Models;
@@ -18,7 +16,7 @@ if (donorDataPath == null)
     throw new ScriptException("The donor data path was not set.");
 
 using (var stream = new FileStream(donorDataPath, FileMode.Open, FileAccess.Read))
-    donorData = UndertaleIO.Read(stream, warning => ScriptMessage("A warning occured while trying to load " + donorDataPath + ":\n" + warning));
+    donorData = UndertaleIO.Read(stream, (warning, _) => ScriptMessage("A warning occured while trying to load " + donorDataPath + ":\n" + warning));
 
 foreach (var sprite in Data.Sprites)
 {
