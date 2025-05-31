@@ -401,7 +401,9 @@ public partial class Program : IScriptInterface
 
             if (Directory.Exists(path))
             {
-                Console.WriteLine("You selected a directory");
+                ScriptError("You selected a directory");
+                path = null; //Ensuring that the loop will work correctly
+                continue;
             }
         } while (string.IsNullOrWhiteSpace(path));
         return path;
