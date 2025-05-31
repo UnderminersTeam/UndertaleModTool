@@ -43,7 +43,7 @@
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="_GitHub" />
-                <MenuItem Header="_About" />
+                <MenuItem Header="_About" Command="{Binding HelpAbout}"/>
             </MenuItem>
         </Menu>
         <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,auto">

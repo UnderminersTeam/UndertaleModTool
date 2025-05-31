@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.LogicalTree;
 using Avalonia.Platform.Storage;
+using UndertaleModToolAvalonia.Controls;
 
 namespace UndertaleModToolAvalonia.Views;
 
@@ -19,6 +21,7 @@ public partial class MainView : UserControl
             {
                 vm.OpenFileDialog = OpenFileDialog;
                 vm.SaveFileDialog = SaveFileDialog;
+                vm.MessageDialog = MessageDialog;
             }
         };
     }
@@ -33,6 +36,13 @@ public partial class MainView : UserControl
     {
         TopLevel topLevel = TopLevel.GetTopLevel(this)!;
         return await topLevel.StorageProvider.SaveFilePickerAsync(options);
+    }
+
+    public async Task MessageDialog(string message, string? title = null, bool ok = false, bool yes = false, bool no = false, bool cancel = false)
+    {
+        Window window = this.FindLogicalAncestorOfType<Window>() ?? throw new InvalidOperationException();
+
+        await (new MessageWindow(message, title, ok, yes, no, cancel).ShowDialog<MessageWindow.Result>(window));
     }
 
     public void TabControl_PointerReleased(object? sender, PointerReleasedEventArgs e)

@@ -19,6 +19,9 @@ public partial class MainViewModel
     public Func<FilePickerOpenOptions, Task<IReadOnlyList<IStorageFile>>>? OpenFileDialog;
     public Func<FilePickerSaveOptions, Task<IStorageFile?>>? SaveFileDialog;
 
+    public delegate Task MessageDialogDelegate(string message, string? title = null, bool ok = false, bool yes = false, bool no = false, bool cancel = false);
+    public MessageDialogDelegate MessageDialog;
+
     // Window
     public string Title => $"UndertaleModToolAvalonia - v0.0.0.0" +
         $"{(Data?.GeneralInfo is not null ? " - " + Data?.GeneralInfo.ToString() : "")}" +
@@ -136,6 +139,11 @@ public partial class MainViewModel
 
             DataPath = files[0].TryGetLocalPath();
         }
+    }
+
+    public void HelpAbout()
+    {
+        MessageDialog("UndertaleModTool by the Underminers team\nLicensed under the GNU General Public License Version 3.", title: "About", ok: true);
     }
 
     public void DataItemAdd(IList list)
