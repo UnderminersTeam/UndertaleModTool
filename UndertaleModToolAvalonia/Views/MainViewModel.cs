@@ -289,6 +289,7 @@ public partial class MainViewModel
             UndertaleSound r => new UndertaleSoundViewModel(r),
             UndertaleSprite r => new UndertaleSpriteViewModel(r),
             UndertaleBackground r => new UndertaleBackgroundViewModel(r),
+            UndertaleScript r => new UndertaleScriptViewModel(r),
             UndertaleGameObject r => new UndertaleGameObjectViewModel(r),
             UndertaleRoom r => new UndertaleRoomViewModel(r),
             UndertaleTexturePageItem r => new UndertaleTexturePageItemViewModel(r),
