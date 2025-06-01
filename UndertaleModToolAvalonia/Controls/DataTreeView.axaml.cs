@@ -23,7 +23,7 @@ public partial class DataTreeView : UserControl
         get => GetValue(DataProperty);
         set => SetValue(DataProperty, value);
     }
-
+    
     readonly MainViewModel mainVM = App.Services.GetRequiredService<MainViewModel>();
 
     public ObservableCollection<TreeItemViewModel> TreeSource { get; set; } = [];
@@ -37,36 +37,36 @@ public partial class DataTreeView : UserControl
 
         DataTreeItemSource = new ObservableCollection<TreeItemViewModel>()
         {
-            new(TreeSource, value: "GeneralInfo", header: "General info"),
-            new(TreeSource, value: "GlobalInitScripts", header: "Global init scripts"),
-            new(TreeSource, value: "GameEndScripts", header: "Game End scripts"),
-            new(TreeSource, tag: "list", value: "AudioGroups", header: "Audio groups"),
-            new(TreeSource, tag: "list", value: "Sounds", header: "Sounds"),
-            new(TreeSource, tag: "list", value: "Sprites", header: "Sprites"),
-            new(TreeSource, tag: "list", value: "Backgrounds", header: "Backgrounds & Tile sets"),
-            new(TreeSource, tag: "list", value: "Paths", header: "Paths"),
-            new(TreeSource, tag: "list", value: "Scripts", header: "Scripts"),
-            new(TreeSource, tag: "list", value: "Shaders", header: "Shaders"),
-            new(TreeSource, tag: "list", value: "Fonts", header: "Fonts"),
-            new(TreeSource, tag: "list", value: "Timelines", header: "Timelines"),
-            new(TreeSource, tag: "list", value: "GameObjects", header: "Game objects"),
-            new(TreeSource, tag: "list", value: "Rooms", header: "Rooms"),
-            new(TreeSource, tag: "list", value: "Extensions", header: "Extensions"),
-            new(TreeSource, tag: "list", value: "TexturePageItems", header: "Texture page items"),
-            new(TreeSource, tag: "list", value: "Code", header: "Code"),
-            new(TreeSource, tag: "list", value: "Variables", header: "Variables"),
-            new(TreeSource, tag: "list", value: "Functions", header: "Functions"),
-            new(TreeSource, tag: "list", value: "CodeLocals", header: "Code locals"),
-            new(TreeSource, tag: "list", value: "Strings", header: "Strings"),
-            new(TreeSource, tag: "list", value: "EmbeddedTextures", header: "Embedded textures"),
-            new(TreeSource, tag: "list", value: "EmbeddedAudio", header: "Embedded audio"),
-            new(TreeSource, tag: "list", value: "TextureGroupInformation", header: "Texture group information"),
-            new(TreeSource, tag: "list", value: "EmbeddedImages", header: "Embedded images"),
-            new(TreeSource, tag: "list", value: "ParticleSystems", header: "Particle systems"),
-            new(TreeSource, tag: "list", value: "ParticleSystemEmitters", header: "Particle system emitters"),
+            new(this, value: "GeneralInfo", header: "General info"),
+            new(this, value: "GlobalInitScripts", header: "Global init scripts"),
+            new(this, value: "GameEndScripts", header: "Game End scripts"),
+            new(this, tag: "list", value: "AudioGroups", header: "Audio groups"),
+            new(this, tag: "list", value: "Sounds", header: "Sounds"),
+            new(this, tag: "list", value: "Sprites", header: "Sprites"),
+            new(this, tag: "list", value: "Backgrounds", header: "Backgrounds & Tile sets"),
+            new(this, tag: "list", value: "Paths", header: "Paths"),
+            new(this, tag: "list", value: "Scripts", header: "Scripts"),
+            new(this, tag: "list", value: "Shaders", header: "Shaders"),
+            new(this, tag: "list", value: "Fonts", header: "Fonts"),
+            new(this, tag: "list", value: "Timelines", header: "Timelines"),
+            new(this, tag: "list", value: "GameObjects", header: "Game objects"),
+            new(this, tag: "list", value: "Rooms", header: "Rooms"),
+            new(this, tag: "list", value: "Extensions", header: "Extensions"),
+            new(this, tag: "list", value: "TexturePageItems", header: "Texture page items"),
+            new(this, tag: "list", value: "Code", header: "Code"),
+            new(this, tag: "list", value: "Variables", header: "Variables"),
+            new(this, tag: "list", value: "Functions", header: "Functions"),
+            new(this, tag: "list", value: "CodeLocals", header: "Code locals"),
+            new(this, tag: "list", value: "Strings", header: "Strings"),
+            new(this, tag: "list", value: "EmbeddedTextures", header: "Embedded textures"),
+            new(this, tag: "list", value: "EmbeddedAudio", header: "Embedded audio"),
+            new(this, tag: "list", value: "TextureGroupInformation", header: "Texture group information"),
+            new(this, tag: "list", value: "EmbeddedImages", header: "Embedded images"),
+            new(this, tag: "list", value: "ParticleSystems", header: "Particle systems"),
+            new(this, tag: "list", value: "ParticleSystemEmitters", header: "Particle system emitters"),
         };
 
-        DataTreeItem = new TreeItemViewModel(TreeSource, value: "Data", header: "Data", source: DataTreeItemSource);
+        DataTreeItem = new TreeItemViewModel(this, value: "Data", header: "Data", source: DataTreeItemSource);
 
         TreeSource.Add(DataTreeItem);
 

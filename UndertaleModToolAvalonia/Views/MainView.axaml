@@ -57,7 +57,7 @@
                         <Button>Back</Button>
                         <Button>Forward</Button>
                     </StackPanel>
-                    <TextBox Watermark="Filter by name..."/>
+                    <TextBox Name="FilterTextBox" Watermark="Filter by name..."/>
                 </StackPanel>
                 <c:DataTreeView Grid.Row="1" Name="DataTreeView" Data="{Binding Data}" />
             </Grid>

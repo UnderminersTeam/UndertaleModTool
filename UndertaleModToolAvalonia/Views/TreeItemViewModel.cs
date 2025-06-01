@@ -7,12 +7,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PropertyChanged.SourceGenerator;
+using UndertaleModToolAvalonia.Controls;
 
 namespace UndertaleModToolAvalonia.Views;
 
 public partial class TreeItemViewModel
 {
-    public ObservableCollection<TreeItemViewModel> TreeSource { get; set; }
+    public DataTreeView DataTreeView;
     public int Level { get; set; }
     public object? Value { get; set; }
     public object? Header { get; set; }
@@ -29,10 +30,10 @@ public partial class TreeItemViewModel
     private object? internalSource = null;
     private List<TreeItemViewModel> children = [];
 
-    public TreeItemViewModel(ObservableCollection<TreeItemViewModel> treeSource, int level = 0,
+    public TreeItemViewModel(DataTreeView dataTreeView, int level = 0,
         object? value = null, object? header = null, object? tag = null, object? source = null)
     {
-        TreeSource = treeSource;
+        DataTreeView = dataTreeView;
         Level = level;
         Value = value;
         Header = header ?? value;
@@ -103,7 +104,7 @@ public partial class TreeItemViewModel
 
     void RemoveList(IList list, int startingIndex)
     {
-        int index = TreeSource.IndexOf(this) + 1;
+        int index = DataTreeView.TreeSource.IndexOf(this) + 1;
 
         for (int i = list.Count - 1; i >= 0; i--)
         {
@@ -123,14 +124,14 @@ public partial class TreeItemViewModel
         {
             object? obj = list[i];
 
-            TreeSource.RemoveAt(index + i + startingIndex);
+            DataTreeView.TreeSource.RemoveAt(index + i + startingIndex);
             children.RemoveAt(i + startingIndex);
         }
     }
 
     void AddList(IList list, int startingIndex)
     {
-        int index = TreeSource.IndexOf(this) + 1;
+        int index = DataTreeView.TreeSource.IndexOf(this) + 1;
 
         for (int i = 0; i < list.Count; i++)
         {
@@ -144,10 +145,10 @@ public partial class TreeItemViewModel
             }
             else
             {
-                item = new(TreeSource, Level + 1, obj);
+                item = new(DataTreeView, Level + 1, obj);
             }
 
-            TreeSource.Insert(index + i + startingIndex, item);
+            DataTreeView.TreeSource.Insert(index + i + startingIndex, item);
             children.Insert(i + startingIndex, item);
         }
 
