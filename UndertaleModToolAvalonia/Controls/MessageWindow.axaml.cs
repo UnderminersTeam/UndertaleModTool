@@ -45,4 +45,19 @@ public partial class MessageWindow : Window
     {
         Close(Result.OK);
     }
+
+    public void YesClick()
+    {
+        Close(Result.Yes);
+    }
+
+    public void NoClick()
+    {
+        Close(Result.No);
+    }
+
+    public void CancelClick()
+    {
+        Close(Result.Cancel);
+    }
 }

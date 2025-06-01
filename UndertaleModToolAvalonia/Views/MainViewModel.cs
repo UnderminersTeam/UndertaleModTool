@@ -10,6 +10,7 @@ using Avalonia.Platform.Storage;
 using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
 using UndertaleModLib.Models;
+using UndertaleModToolAvalonia.Controls;
 
 namespace UndertaleModToolAvalonia.Views;
 
@@ -19,7 +20,7 @@ public partial class MainViewModel
     public Func<FilePickerOpenOptions, Task<IReadOnlyList<IStorageFile>>>? OpenFileDialog;
     public Func<FilePickerSaveOptions, Task<IStorageFile?>>? SaveFileDialog;
 
-    public delegate Task MessageDialogDelegate(string message, string? title = null, bool ok = false, bool yes = false, bool no = false, bool cancel = false);
+    public delegate Task<MessageWindow.Result> MessageDialogDelegate(string message, string? title = null, bool ok = false, bool yes = false, bool no = false, bool cancel = false);
     public MessageDialogDelegate MessageDialog;
 
     // Window

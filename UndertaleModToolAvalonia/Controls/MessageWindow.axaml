@@ -11,30 +11,15 @@
         Width="400"
         SizeToContent="Height"
         CanResize="False"
-        WindowStartupLocation="CenterOwner">
-    <Window.Styles>
-        <Style Selector="Window">
-            <Setter Property="Padding" Value="20,20,20,0" />
-        </Style>
-        <Style Selector="TextBlock#MessageText">
-            <Setter Property="Margin" Value="0,0,0,20" />
-        </Style>
-        <Style Selector="StackPanel#Buttons">
-            <Setter Property="Spacing" Value="20"/> 
-        </Style>
-        <Style Selector="Button">
-            <Setter Property="Margin" Value="0,0,0,20" />
-            <Setter Property="MinWidth" Value="75" />
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
-        </Style>
-    </Window.Styles>
-    <StackPanel Name="Main">
+        WindowStartupLocation="CenterOwner"
+        Classes="MessageWindow">
+    <StackPanel>
         <TextBlock Name="MessageText" Text="{Binding Message}"/>
         <StackPanel Name="Buttons" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Command="{Binding OkClick}" IsVisible="{Binding HasOKButton}" IsDefault="True">OK</Button>
-            <Button IsVisible="{Binding HasYesButton}" IsDefault="True">Yes</Button>
-            <Button IsVisible="{Binding HasNoButton}">No</Button>
-            <Button IsVisible="{Binding HasCancelButton}">Cancel</Button>
+            <Button Command="{Binding YesClick}" IsVisible="{Binding HasYesButton}" IsDefault="True">Yes</Button>
+            <Button Command="{Binding NoClick}" IsVisible="{Binding HasNoButton}">No</Button>
+            <Button Command="{Binding CancelClick}" IsVisible="{Binding HasCancelButton}">Cancel</Button>
         </StackPanel>
     </StackPanel>
 </Window>
