@@ -114,6 +114,9 @@
                                     <DataTemplate DataType="v:UndertaleEmbeddedTextureViewModel">
                                         <TextBlock VerticalAlignment="Center" Text="{Binding EmbeddedTexture.Name.Content, StringFormat=Embedded texture - {0}}"/>
                                     </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleEmbeddedAudioViewModel">
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding EmbeddedAudio.Name.Content, StringFormat=Embedded audio - {0}}"/>
+                                    </DataTemplate>
                                 </ContentControl.DataTemplates>
                             </ContentControl>
                             <Button Width="16" Height="16" Padding="0"
@@ -170,6 +173,9 @@
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleEmbeddedTextureViewModel">
                                         <v:UndertaleEmbeddedTextureView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleEmbeddedAudioViewModel">
+                                        <v:UndertaleEmbeddedAudioView />
                                     </DataTemplate>
                                 </ContentControl.DataTemplates>
                             </ContentControl>

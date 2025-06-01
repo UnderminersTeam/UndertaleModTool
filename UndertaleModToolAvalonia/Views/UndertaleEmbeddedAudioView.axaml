@@ -1,0 +1,21 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.Views.UndertaleEmbeddedAudioView"
+             x:DataType="v:UndertaleEmbeddedAudioViewModel">
+    <StackPanel Classes="PaddedProperties">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="WAV data, length: " />
+            <TextBlock Text="{Binding EmbeddedAudio.Data.Length}" />
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal">
+            <Button Command="{Binding SaveAudio}">Save audio</Button>
+        </StackPanel>
+
+        <!-- TODO: Import and play-->
+    </StackPanel>
+</UserControl>
