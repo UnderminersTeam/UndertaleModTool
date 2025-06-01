@@ -111,6 +111,9 @@
                                     <DataTemplate DataType="v:UndertaleCodeViewModel">
                                         <TextBlock VerticalAlignment="Center" Text="{Binding Code.Name.Content, StringFormat=Code - {0}}"/>
                                     </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleVariableViewModel">
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding Variable.Name.Content, StringFormat=Variable - {0}}"/>
+                                    </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleStringViewModel">
                                         <TextBlock VerticalAlignment="Center" Text="{Binding String.Content, StringFormat=String - {0}}"/>
                                     </DataTemplate>
@@ -173,6 +176,9 @@
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleCodeViewModel">
                                         <v:UndertaleCodeView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleVariableViewModel">
+                                        <v:UndertaleVariableView />
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleStringViewModel">
                                         <v:UndertaleStringView />
