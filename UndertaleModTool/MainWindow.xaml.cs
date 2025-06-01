@@ -2454,7 +2454,7 @@ namespace UndertaleModTool
 
         public string PromptChooseDirectory()
         {
-            VistaFolderBrowserDialog folderBrowser = new VistaFolderBrowserDialog();
+            VistaFolderBrowserDialog folderBrowser = new();
             // vista dialog doesn't suffix the folder name with "/", so we're fixing it here.
             return folderBrowser.ShowDialog() == true ? folderBrowser.SelectedPath + "/" : null;
         }
@@ -3251,9 +3251,9 @@ result in loss of work.");
 
         public void EnsureDataLoaded()
         {
-            if (Data == null)
+            if (Data is null)
             {
-                throw new ScriptException("Please load data.win first!");
+                throw new ScriptException("No data file is currently loaded!");
             }
         }
 

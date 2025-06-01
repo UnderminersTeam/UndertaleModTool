@@ -374,7 +374,9 @@ public partial class Program : IScriptInterface
                 return null;
             }
             directoryInfo = new DirectoryInfo(path);
-        } while (!directoryInfo.Exists);
+        }
+        while (!directoryInfo.Exists);
+
         return path;
     }
 

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UndertaleModLib;
 
-string dlg = PromptLoadFile("win", "GameMaker data files (.win, .unx, .ios)|*.win;*.unx;*.ios|All files|*");
+string dlg = PromptLoadFile("win", "GameMaker data files (.win, .unx, .ios, .droid)|*.win;*.unx;*.ios;*.droid|All files|*");
 
 if (!string.IsNullOrEmpty(dlg))
 {
