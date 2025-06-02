@@ -96,6 +96,9 @@
                                     <DataTemplate DataType="v:UndertaleBackgroundViewModel">
                                         <TextBlock VerticalAlignment="Center" Text="{Binding Background.Name.Content, StringFormat=Background - {0}}"/>
                                     </DataTemplate>
+                                    <DataTemplate DataType="v:UndertalePathViewModel">
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding Path.Name.Content, StringFormat=Path - {0}}"/>
+                                    </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleScriptViewModel">
                                         <TextBlock VerticalAlignment="Center" Text="{Binding Script.Name.Content, StringFormat=Script - {0}}"/>
                                     </DataTemplate>
@@ -167,6 +170,9 @@
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleBackgroundViewModel">
                                         <v:UndertaleBackgroundView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="v:UndertalePathViewModel">
+                                        <v:UndertalePathView />
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleScriptViewModel">
                                         <v:UndertaleScriptView />
