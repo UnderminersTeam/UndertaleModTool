@@ -109,19 +109,47 @@ public partial class DataTreeView : UserControl
         }
     }
 
-    public void ListBox_DoubleTapped(object? sender, TappedEventArgs e)
+    TreeItemViewModel? GetItem(object? source)
     {
-        if (e.Source is Control control)
+        if (source is Control control)
         {
-            ListBoxItem? listBoxItem = control.FindLogicalAncestorOfType<ListBoxItem>();
+            ListBoxItem? listBoxItem;
+            if (control is ListBoxItem)
+                listBoxItem = control as ListBoxItem;
+            else
+                listBoxItem = control.FindLogicalAncestorOfType<ListBoxItem>();
+
             if (listBoxItem is not null)
             {
                 if (listBoxItem.DataContext is TreeItemViewModel treeItem)
                 {
-                    treeItem.ExpandCollapse();
-                    mainVM.TabOpen(treeItem);
+                    return treeItem;
                 }
             }
+        }
+        return null;
+    }
+
+    void OpenItem(object? source)
+    {
+        TreeItemViewModel? treeItem = GetItem(source);
+        if (treeItem is not null)
+        {
+            treeItem.ExpandCollapse();
+            mainVM.TabOpen(treeItem);
+        }
+    }
+
+    public void ListBox_DoubleTapped(object? sender, TappedEventArgs e)
+    {
+        OpenItem(e.Source);
+    }
+
+    public void ListBox_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.PhysicalKey == PhysicalKey.Enter)
+        {
+            OpenItem(e.Source);
         }
     }
 

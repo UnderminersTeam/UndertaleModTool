@@ -17,7 +17,7 @@
         <h:TreeItemViewModelToContextMenuConverter x:Key="TreeItemViewModelToContextMenuConverter" ListMenu="{StaticResource ListMenu}" />
     </UserControl.Resources>
     <ContentControl DataContext="{Binding $parent[c:DataTreeView]}">
-        <ListBox Name="DataListBox" Grid.Row="1" ItemsSource="{Binding TreeSource}" DoubleTapped="ListBox_DoubleTapped">
+        <ListBox Name="DataListBox" Grid.Row="1" ItemsSource="{Binding TreeSource}" DoubleTapped="ListBox_DoubleTapped" KeyDown="ListBox_KeyDown">
             <ListBox.Styles>
                 <Style Selector="ListBoxItem" x:DataType="v:TreeItemViewModel">
                     <Setter Property="(Interaction.Behaviors)">
