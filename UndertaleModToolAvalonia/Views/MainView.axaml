@@ -117,6 +117,9 @@
                                     <DataTemplate DataType="v:UndertaleFunctionViewModel">
                                         <TextBlock VerticalAlignment="Center" Text="{Binding Function.Name.Content, StringFormat=Function - {0}}"/>
                                     </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleCodeLocalsViewModel">
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding CodeLocals.Name.Content, StringFormat=Code locals - {0}}"/>
+                                    </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleStringViewModel">
                                         <TextBlock VerticalAlignment="Center" Text="{Binding String.Content, StringFormat=String - {0}}"/>
                                     </DataTemplate>
@@ -185,6 +188,9 @@
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleFunctionViewModel">
                                         <v:UndertaleFunctionView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleCodeLocalsViewModel">
+                                        <v:UndertaleCodeLocalsView />
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleStringViewModel">
                                         <v:UndertaleStringView />

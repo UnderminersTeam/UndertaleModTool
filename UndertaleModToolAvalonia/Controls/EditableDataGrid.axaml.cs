@@ -19,9 +19,9 @@ public partial class EditableDataGrid : UserControl
         set { SetValue(ItemsSourceProperty, value); }
     }
 
-    public static readonly StyledProperty<Func<object>?> ItemFactoryProperty = AvaloniaProperty.Register<EditableDataGrid, Func<object>?>(
+    public static readonly StyledProperty<Delegate?> ItemFactoryProperty = AvaloniaProperty.Register<EditableDataGrid, Delegate?>(
         nameof(ItemFactory));
-    public Func<object>? ItemFactory
+    public Delegate? ItemFactory
     {
         get { return GetValue(ItemFactoryProperty); }
         set { SetValue(ItemFactoryProperty, value); }
@@ -71,11 +71,22 @@ public partial class EditableDataGrid : UserControl
 
     public void Add()
     {
-        if (ItemFactory is not null)
+        object item;
+        if (ItemFactory is Func<object> itemFactory)
         {
-            ItemsSource.Add(ItemFactory());
-            DataGridControl.SelectedIndex = ItemsSource.Count - 1;
+            item = itemFactory();
         }
+        else if (ItemFactory is Func<int, object> itemFactoryWithIndex)
+        {
+            item = itemFactoryWithIndex(ItemsSource.Count);
+        }
+        else
+        {
+            throw new InvalidOperationException();
+        }
+
+        ItemsSource.Add(item);
+        DataGridControl.SelectedIndex = ItemsSource.Count - 1;
     }
 
     public void Remove()
