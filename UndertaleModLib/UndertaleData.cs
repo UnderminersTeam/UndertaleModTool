@@ -525,9 +525,9 @@ namespace UndertaleModLib
         }
 
         /// <summary>
-        /// TODO: needs to be documented on what this does.
+        /// Returns the ID of the builtin (i.e., embedded in the main data file) audio group. Varies depending on version.
         /// </summary>
-        /// <returns>TODO</returns>
+        /// <returns>ID of the builtin audio group; 0 or 1.</returns>
         public int GetBuiltinSoundGroupID()
         {
             // It is known it works this way in 1.0.1266. The exact version which changed this is unknown.
