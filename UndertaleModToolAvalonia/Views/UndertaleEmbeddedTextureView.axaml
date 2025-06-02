@@ -32,6 +32,10 @@
                 <Label>Generated mips</Label>
                 <TextBox Text="{Binding EmbeddedTexture.GeneratedMips}" />
             </Grid>
+
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding SaveImage}">Save image</Button>
+            </StackPanel>
         </StackPanel>
         
         <!-- TODO: Click on item to open -->
