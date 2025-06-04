@@ -102,6 +102,9 @@
                                     <DataTemplate DataType="v:UndertaleScriptViewModel">
                                         <TextBlock VerticalAlignment="Center" Text="{Binding Script.Name.Content, StringFormat=Script - {0}}"/>
                                     </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleFontViewModel">
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding Font.Name.Content, StringFormat=Font - {0}}"/>
+                                    </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleGameObjectViewModel">
                                         <TextBlock VerticalAlignment="Center" Text="{Binding GameObject.Name.Content, StringFormat=Game object - {0}}"/>
                                     </DataTemplate>
@@ -176,6 +179,9 @@
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleScriptViewModel">
                                         <v:UndertaleScriptView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleFontViewModel">
+                                        <v:UndertaleFontView />
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleGameObjectViewModel">
                                         <v:UndertaleGameObjectView />

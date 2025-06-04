@@ -7,8 +7,8 @@
              x:Class="UndertaleModToolAvalonia.Controls.EditableDataGrid">
     <ContentControl DataContext="{Binding $parent[c:EditableDataGrid]}">
         <Grid ColumnDefinitions="1*" RowDefinitions="1*,Auto" MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
-            <DataGrid Grid.Row="0" x:Name="DataGrid" SelectionMode="Single" ItemsSource="{Binding ItemsSource}"/>
-            <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <DataGrid Grid.Row="0" x:Name="DataGrid" SelectionMode="Single" ItemsSource="{Binding ItemsSource}" CanUserResizeColumns="True"/>
+            <StackPanel Grid.Row="1" Orientation="Horizontal" IsVisible="{Binding ItemsSource, Converter={x:Static ObjectConverters.IsNotNull}}">
                 <StackPanel.Styles>
                     <Style Selector="Button,RepeatButton">
                         <Setter Property="Width" Value="40" />
