@@ -21,7 +21,7 @@ public partial class MainViewModel
     public Func<FilePickerSaveOptions, Task<IStorageFile?>>? SaveFileDialog;
 
     public delegate Task<MessageWindow.Result> MessageDialogDelegate(string message, string? title = null, bool ok = false, bool yes = false, bool no = false, bool cancel = false);
-    public MessageDialogDelegate MessageDialog;
+    public MessageDialogDelegate? MessageDialog;
 
     // Window
     public string Title => $"UndertaleModToolAvalonia - v0.0.0.0" +
@@ -144,7 +144,7 @@ public partial class MainViewModel
 
     public void HelpAbout()
     {
-        MessageDialog("UndertaleModTool by the Underminers team\nLicensed under the GNU General Public License Version 3.", title: "About", ok: true);
+        MessageDialog?.Invoke("UndertaleModTool by the Underminers team\nLicensed under the GNU General Public License Version 3.", title: "About", ok: true);
     }
 
     public void DataItemAdd(IList list)

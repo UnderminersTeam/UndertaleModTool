@@ -54,8 +54,8 @@
             <Grid x:Name="LeftPanel" Grid.Column="0" RowDefinitions="Auto,1*">
                 <StackPanel Spacing="5">
                     <StackPanel Orientation="Horizontal">
-                        <Button>Back</Button>
-                        <Button>Forward</Button>
+                        <Button>←</Button>
+                        <Button>→</Button>
                     </StackPanel>
                     <TextBox Name="FilterTextBox" Watermark="Filter by name..."/>
                 </StackPanel>
@@ -137,9 +137,9 @@
                                     </DataTemplate>
                                 </ContentControl.DataTemplates>
                             </ContentControl>
-                            <Button Width="16" Height="16" Padding="0"
-                                Command="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).TabClose}"
-                                CommandParameter="{Binding .}">X</Button>
+                            <Button Command="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).TabClose}"
+                                    CommandParameter="{Binding .}"
+                                    Classes="TransparentButton">❌</Button>
                         </StackPanel>
                     </DataTemplate>
                 </TabControl.ItemTemplate>

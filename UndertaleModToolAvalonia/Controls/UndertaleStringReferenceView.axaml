@@ -9,7 +9,7 @@
         <Grid ColumnDefinitions="*,Auto">
             <!-- TODO: Make this look/work better -->
             <TextBox Grid.Column="0" Name="TextBox"
-                     Text="{Binding Reference.Content, UpdateSourceTrigger=Explicit}"
+                     Text="{Binding Reference.Content, UpdateSourceTrigger=Explicit, TargetNullValue=''}"
                      IsReadOnly="{Binding Reference, Converter={x:Static ObjectConverters.IsNull}}"
                      KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus">
                 <TextBox.Resources>

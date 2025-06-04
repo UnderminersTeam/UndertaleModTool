@@ -11,7 +11,7 @@ namespace UndertaleModToolAvalonia;
 
 public partial class App : Application
 {
-    public static IServiceProvider Services;
+    public static IServiceProvider Services = null!;
 
     public override void Initialize()
     {

@@ -143,10 +143,7 @@ public class UndertaleRoomEditor : Control
             this.editor = editor;
         }
 
-        public void Dispose()
-        {
-            // Release bitmapCache?
-        }
+        public void Dispose() { }
 
         public bool Equals(ICustomDrawOperation? other) => false;
 

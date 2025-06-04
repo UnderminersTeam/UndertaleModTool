@@ -5,7 +5,6 @@ using Avalonia.Data;
 using Avalonia.Data.Converters;
 using UndertaleModLib;
 using UndertaleModLib.Models;
-using static UndertaleModLib.Models.UndertaleGameObject;
 
 namespace UndertaleModToolAvalonia.Helpers;
 
@@ -13,17 +12,15 @@ public class EventsToExtendedEventConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value is UndertalePointerList<UndertalePointerList<Event>> list)
+        if (value is UndertalePointerList<UndertalePointerList<UndertaleGameObject.Event>> list)
         {
             List<ExtendedEvent> newList = new();
             for (int i = 0; i < list.Count; i++)
             {
-                newList.Add(new ExtendedEvent()
-                {
-                    SubEvents = list[i],
-                    EventType = (EventType)i,
-                    EventName = ((EventType)i).ToString(),
-                });
+                newList.Add(new ExtendedEvent(
+                    subEvents: list[i],
+                    eventType: (EventType)i,
+                    eventName: ((EventType)i).ToString()));
             }
             return newList;
         }
@@ -36,9 +33,9 @@ public class EventsToExtendedEventConverter : IValueConverter
     }
 }
 
-public class ExtendedEvent
+public class ExtendedEvent(UndertalePointerList<UndertaleGameObject.Event> subEvents, EventType eventType, string eventName)
 {
-    public UndertalePointerList<Event> SubEvents { get; set; }
-    public EventType EventType { get; set; }
-    public string EventName { get; set; }
+    public UndertalePointerList<UndertaleGameObject.Event> SubEvents { get; set; } = subEvents;
+    public EventType EventType { get; set; } = eventType;
+    public string EventName { get; set; } = eventName;
 }

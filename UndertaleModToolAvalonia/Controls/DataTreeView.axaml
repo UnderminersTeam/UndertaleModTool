@@ -37,8 +37,7 @@
                         <Panel Width="20">
                             <Button Click="ExpandCollapseButton_Click" Command="{Binding ExpandCollapse}" Content="{Binding ExpanderIcon}"
                                     IsVisible="{Binding IsExpanderVisible}"
-                                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                                    Padding="0" HorizontalContentAlignment="Center" Background="Transparent" BorderBrush="Transparent" />    
+                                    Classes="TransparentButton"/>
                         </Panel>
                         <ContentControl IsHitTestVisible="False" Content="{Binding Header}" Classes="ListBoxContentControl" />
                     </StackPanel>

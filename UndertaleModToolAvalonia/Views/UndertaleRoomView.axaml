@@ -295,7 +295,7 @@
                                         </Panel>
                                     </Panel>
 
-                                    <Label>Source X/Y/Width/Height</Label>
+                                    <Label>Source X/Y/W/H</Label>
                                     <Grid ColumnDefinitions="1*,1*,1*,1*">
                                         <TextBox Grid.Column="0" Text="{Binding SourceX}" />
                                         <TextBox Grid.Column="1" Text="{Binding SourceY}" />
