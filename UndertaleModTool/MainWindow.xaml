@@ -10,13 +10,15 @@
         xmlns:undertalelib="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
         xmlns:scol="clr-namespace:System.Collections;assembly=mscorlib"
         xmlns:cmod="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+        xmlns:lang="clr-namespace:UndertaleModTool.Resources.Languages;assembly=UndertaleModTool"
         mc:Ignorable="d"
         Height="450" Width="800" Loaded="Window_Loaded"
         AllowDrop="True" Drop="Window_Drop">
     <Window.Title>
-        <MultiBinding StringFormat="{}{0} - {1} [{2}]">
-            <Binding Path="TitleMain"/>
-            <Binding Path="Data.GeneralInfo" FallbackValue="No game loaded"/>
+        <MultiBinding StringFormat="{}{0}{1} - {2} [{3}]">
+            <Binding Source="{x:Static lang:Resource.App_Title_Main}" />
+            <Binding Source="{x:Static local:MainWindow.Version}"/>
+            <Binding Path="Data.GeneralInfo" FallbackValue="{x:Static lang:Resource.App_Title_NoGameLoaded}"/>
             <Binding Path="FilePath"/>
         </MultiBinding>
     </Window.Title>
@@ -72,10 +74,10 @@
             <Menu DockPanel.Dock="Top"
                   Foreground="{DynamicResource {x:Static SystemColors.MenuTextBrushKey}}"
                   Background="{DynamicResource {x:Static SystemColors.MenuBrushKey}}">
-                <local:MenuItemDark Header="_File">
-                    <MenuItem Header="_New" Command="New" InputGestureText="Ctrl+N"/>
-                    <MenuItem Header="_Open" Command="Open" InputGestureText="Ctrl+O"/>
-                    <MenuItem Header="_Save" Command="Save" InputGestureText="Ctrl+S">
+                <local:MenuItemDark Header="{x:Static lang:Resource.Menu_File}">
+                    <MenuItem Header="{x:Static lang:Resource.Menu_File_New}" Command="New" InputGestureText="Ctrl+N"/>
+                    <MenuItem Header="{x:Static lang:Resource.Menu_File_Open}" Command="Open" InputGestureText="Ctrl+O"/>
+                    <MenuItem Header="{x:Static lang:Resource.Menu_File_Save}" Command="Save" InputGestureText="Ctrl+S">
                         <MenuItem.Style>
                             <Style TargetType="{x:Type MenuItem}">
                                 <Setter Property="IsEnabled" Value="{Binding CanSave}"/>
@@ -83,7 +85,7 @@
                         </MenuItem.Style>
                     </MenuItem>
                     <Separator/>
-                    <MenuItem Header="_Temp run game" Command="Print" InputGestureText="F5">
+                    <MenuItem Header="{x:Static lang:Resource.Menu_File_TempRunGame}" Command="Print" InputGestureText="F5">
                         <!-- TODO: I think I need a custom command for that... -->
                         <MenuItem.Style>
                             <Style TargetType="{x:Type MenuItem}">
@@ -91,14 +93,14 @@
                             </Style>
                         </MenuItem.Style>
                     </MenuItem>
-                    <MenuItem Name="RunGMSDebuggerItem" Header="Run game under GMS _debugger" Command="PrintPreview" InputGestureText="Shift+F5">
+                    <MenuItem Name="RunGMSDebuggerItem" Header="{x:Static lang:Resource.Menu_File_RunGameUnderGMSDebugger}" Command="PrintPreview" InputGestureText="Shift+F5">
                         <MenuItem.Style>
                             <Style TargetType="{x:Type MenuItem}">
                                 <Setter Property="IsEnabled" Value="{Binding CanSave}"/>
                             </Style>
                         </MenuItem.Style>
                     </MenuItem>
-                    <MenuItem Header="Run game with other runner" Command="CancelPrint" InputGestureText="Alt+F5">
+                    <MenuItem Header="{x:Static lang:Resource.Menu_File_RunGameWithOtherRunner}" Command="CancelPrint" InputGestureText="Alt+F5">
                         <MenuItem.Style>
                             <Style TargetType="{x:Type MenuItem}">
                                 <Setter Property="IsEnabled" Value="{Binding CanSave}"/>
@@ -106,15 +108,15 @@
                         </MenuItem.Style>
                     </MenuItem>
                     <Separator/>
-                    <MenuItem Header="Generate o_ffset map" Click="MenuItem_OffsetMap_Click"/>
+                    <MenuItem Header="{x:Static lang:Resource.Menu_File_GenerateOffsetMap}" Click="MenuItem_OffsetMap_Click"/>
                     <Separator/>
-                    <MenuItem Header="S_ettings" Command="Properties"/>
-                    <MenuItem Header="_Close" Command="Close" InputGestureText="Ctrl+Q"/>
+                    <MenuItem Header="{x:Static lang:Resource.Menu_File_Settings}" Command="Properties"/>
+                    <MenuItem Header="{x:Static lang:Resource.Menu_File_Close}" Command="Close" InputGestureText="Ctrl+Q"/>
                 </local:MenuItemDark>
-                <local:MenuItemDark x:Name="RootScriptItem" Header="_Scripts" SubmenuOpened="RootMenuItem_SubmenuOpened">
-                    <MenuItem Header="(...loading...)" IsEnabled="False"/>
+                <local:MenuItemDark x:Name="RootScriptItem" Header="{x:Static lang:Resource.Menu_Scripts}" SubmenuOpened="RootMenuItem_SubmenuOpened">
+                    <MenuItem Header="{x:Static lang:Resource.Menu_Scripts_Loading}" IsEnabled="False"/>
                 </local:MenuItemDark>
-                <local:MenuItemDark Header="_Find">
+                <local:MenuItemDark Header="{x:Static lang:Resource.Menu_Find}">
                     <MenuItem.Resources>
                         <Style TargetType="MenuItem">
                             <Style.Triggers>
@@ -124,12 +126,12 @@
                             </Style.Triggers>
                         </Style>
                     </MenuItem.Resources>
-                    <MenuItem Header="_Search in code" Command="{x:Static local:MainWindow.SearchInCodeCommand}" InputGestureText="Ctrl+Shift+F"></MenuItem>
-                    <MenuItem Header="Find unreferenced _assets" Name="FindUnreferencedAssetsItem" Click="MenuItem_FindUnreferencedAssets_Click"/>
+                    <MenuItem Header="{x:Static lang:Resource.Menu_Find_SearchInCode}" Command="{x:Static local:MainWindow.SearchInCodeCommand}" InputGestureText="Ctrl+Shift+F"></MenuItem>
+                    <MenuItem Header="{x:Static lang:Resource.Menu_Find_FindUnreferencedAssets}" Name="FindUnreferencedAssetsItem" Click="MenuItem_FindUnreferencedAssets_Click"/>
                 </local:MenuItemDark>
-                <local:MenuItemDark Header="_Help">
-                    <MenuItem Header="_GitHub" Click="MenuItem_GitHub_Click"/>
-                    <MenuItem Header="_About" Click="MenuItem_About_Click"/>
+                <local:MenuItemDark Header="{x:Static lang:Resource.Menu_Help}">
+                    <MenuItem Header="{x:Static lang:Resource.Menu_Help_GitHub}" Click="MenuItem_GitHub_Click"/>
+                    <MenuItem Header="{x:Static lang:Resource.Menu_Help_About}" Click="MenuItem_About_Click"/>
                 </local:MenuItemDark>
             </Menu>
             <Grid DockPanel.Dock="Bottom">
@@ -219,7 +221,7 @@
                                 <Style.Resources>
                                     <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
                                         <VisualBrush.Visual>
-                                            <Label Content="Filter by name..." Foreground="Gray" />
+                                            <Label Content="{x:Static lang:Resource.Menu_Tree_FilterByName}" Foreground="Gray" />
                                         </VisualBrush.Visual>
                                     </VisualBrush>
                                 </Style.Resources>
