@@ -177,15 +177,6 @@
   <data name="Menu_Scripts_Loading" xml:space="preserve">
     <value>(...loading...)</value>
   </data>
-  <data name="Msg_GetStarted" xml:space="preserve">
-    <value>Open a data.win file to get started, then double click on the items on the left to view them.</value>
-  </data>
-  <data name="Msg_LoadDataWinFileFirst" xml:space="preserve">
-    <value>Load data.win file first</value>
-  </data>
-  <data name="Msg_Welcome" xml:space="preserve">
-    <value>Welcome to UndertaleModTool!</value>
-  </data>
   <data name="Tree_AudioGroups" xml:space="preserve">
     <value>Audio groups</value>
   </data>
@@ -272,5 +263,40 @@
   </data>
   <data name="Tree_Variables" xml:space="preserve">
     <value>Variables</value>
+  </data>
+  <data name="Msg_GetStarted" xml:space="preserve">
+    <value>Open a data.win file to get started, then double click on the items on the left to view them.</value>
+  </data>
+  <data name="Msg_LoadDataWinFileFirst" xml:space="preserve">
+    <value>Load data.win file first</value>
+  </data>
+  <data name="Msg_Welcome" xml:space="preserve">
+    <value>Welcome to UndertaleModTool!</value>
+  </data>
+  <data name="Window_About" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="Menu_Scripts_RunOtherScript" xml:space="preserve">
+    <value>Run _other script...</value>
+  </data>
+  <data name="Msg_GetStartedFromEmpty" xml:space="preserve">
+    <value>New file created, have fun making a game out of nothing
+I TOLD YOU to open a data.win, not create a new file! :P</value>
+  </data>
+  <data name="Tree_TileSets" xml:space="preserve">
+    <value>Tile sets</value>
+  </data>
+  <data name="Msg_DoubleClick" xml:space="preserve">
+    <value>Double click on the items on the left to view them</value>
+  </data>
+  <data name="Msg_OpenDataToStart" xml:space="preserve">
+    <value>Open data.win file to get started</value>
+  </data>
+  <data name="Msg_ExpandList" xml:space="preserve">
+    <value>Expand the list on the left to edit items</value>
+  </data>
+  <data name="Msg_About" xml:space="preserve">
+    <value>UndertaleModTool by krzys_h and the Underminers team
+Version </value>
   </data>
 </root>

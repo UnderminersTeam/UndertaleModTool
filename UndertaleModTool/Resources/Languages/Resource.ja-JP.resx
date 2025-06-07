@@ -177,15 +177,6 @@
   <data name="Menu_Scripts_Loading" xml:space="preserve">
     <value>(...読み込み中...)</value>
   </data>
-  <data name="Msg_GetStarted" xml:space="preserve">
-    <value>data.winファイルを開き、左側のリスト項目をダブルクリックしてください。</value>
-  </data>
-  <data name="Msg_LoadDataWinFileFirst" xml:space="preserve">
-    <value>初めにdata.winファイルを読み込んでください</value>
-  </data>
-  <data name="Msg_Welcome" xml:space="preserve">
-    <value>UndertaleModToolへようこそ！</value>
-  </data>
   <data name="Tree_AudioGroups" xml:space="preserve">
     <value>音声グループ</value>
   </data>
@@ -272,5 +263,40 @@
   </data>
   <data name="Tree_Variables" xml:space="preserve">
     <value>変数</value>
+  </data>
+  <data name="Msg_GetStarted" xml:space="preserve">
+    <value>data.winファイルを開き、左側のリスト項目をダブルクリックしてください。</value>
+  </data>
+  <data name="Msg_LoadDataWinFileFirst" xml:space="preserve">
+    <value>初めにdata.winファイルを読み込んでください</value>
+  </data>
+  <data name="Msg_Welcome" xml:space="preserve">
+    <value>UndertaleModToolへようこそ！</value>
+  </data>
+  <data name="Window_About" xml:space="preserve">
+    <value>UndertaleModToolについて</value>
+  </data>
+  <data name="Menu_Scripts_RunOtherScript" xml:space="preserve">
+    <value>他のスクリプトを実行...</value>
+  </data>
+  <data name="Msg_GetStartedFromEmpty" xml:space="preserve">
+    <value>新しいファイルが作成されました。1からゲームを作るのを楽しんでください！
+新しくファイルを作るんじゃなくてdata.winファイルを作るように言ったのに！:P</value>
+  </data>
+  <data name="Tree_TileSets" xml:space="preserve">
+    <value>タイルセット</value>
+  </data>
+  <data name="Msg_DoubleClick" xml:space="preserve">
+    <value>左のリスト項目をダブルクリックしてください</value>
+  </data>
+  <data name="Msg_OpenDataToStart" xml:space="preserve">
+    <value>data.winファイルを開いて始める</value>
+  </data>
+  <data name="Msg_ExpandList" xml:space="preserve">
+    <value>左のリスト項目を展開してアイテムを編集</value>
+  </data>
+  <data name="Msg_About" xml:space="preserve">
+    <value>UndertaleModTool 作 krzys_h およびUnderminersチーム
+バージョン </value>
   </data>
 </root>
