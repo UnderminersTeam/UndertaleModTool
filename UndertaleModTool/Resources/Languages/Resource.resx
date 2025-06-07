@@ -177,7 +177,91 @@
   <data name="Menu_Scripts_Loading" xml:space="preserve">
     <value>(...loading...)</value>
   </data>
-  <data name="Menu_Tree_FilterByName" xml:space="preserve">
+  <data name="Tree_AudioGroups" xml:space="preserve">
+    <value>Audio groups</value>
+  </data>
+  <data name="Tree_BackgroundsAndTileSets" xml:space="preserve">
+    <value>Backgrounds &amp;amp; Tile sets</value>
+  </data>
+  <data name="Tree_Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="Tree_CodeLocals" xml:space="preserve">
+    <value>Code locals</value>
+  </data>
+  <data name="Tree_Data" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="Tree_EmbeddedAudio" xml:space="preserve">
+    <value>Embedded audio</value>
+  </data>
+  <data name="Tree_EmbeddedImages" xml:space="preserve">
+    <value>Embedded images</value>
+  </data>
+  <data name="Tree_EmbeddedTextures" xml:space="preserve">
+    <value>Embedded textures</value>
+  </data>
+  <data name="Tree_Extensions" xml:space="preserve">
+    <value>Extensions</value>
+  </data>
+  <data name="Tree_FilterByName" xml:space="preserve">
     <value>Filter by name...</value>
+  </data>
+  <data name="Tree_Fonts" xml:space="preserve">
+    <value>Fonts</value>
+  </data>
+  <data name="Tree_Functions" xml:space="preserve">
+    <value>Functions</value>
+  </data>
+  <data name="Tree_GameEndScript" xml:space="preserve">
+    <value>Game End scripts</value>
+  </data>
+  <data name="Tree_GameObjects" xml:space="preserve">
+    <value>Game objects</value>
+  </data>
+  <data name="Tree_GeneralInfo" xml:space="preserve">
+    <value>General info</value>
+  </data>
+  <data name="Tree_GlobalInit" xml:space="preserve">
+    <value>Global init</value>
+  </data>
+  <data name="Tree_ParticleSystemEmitters" xml:space="preserve">
+    <value>Particle system emitters</value>
+  </data>
+  <data name="Tree_ParticleSystems" xml:space="preserve">
+    <value>Particle systems</value>
+  </data>
+  <data name="Tree_Paths" xml:space="preserve">
+    <value>Paths</value>
+  </data>
+  <data name="Tree_Rooms" xml:space="preserve">
+    <value>Rooms</value>
+  </data>
+  <data name="Tree_Scripts" xml:space="preserve">
+    <value>Scripts</value>
+  </data>
+  <data name="Tree_Shaders" xml:space="preserve">
+    <value>Shaders</value>
+  </data>
+  <data name="Tree_Sounds" xml:space="preserve">
+    <value>Sounds</value>
+  </data>
+  <data name="Tree_Sprites" xml:space="preserve">
+    <value>Sprites</value>
+  </data>
+  <data name="Tree_Strings" xml:space="preserve">
+    <value>Strings</value>
+  </data>
+  <data name="Tree_TextureGroupInfomation" xml:space="preserve">
+    <value>Texture group infomation</value>
+  </data>
+  <data name="Tree_TexturePageItems" xml:space="preserve">
+    <value>Texture page items</value>
+  </data>
+  <data name="Tree_Timelines" xml:space="preserve">
+    <value>Timelines</value>
+  </data>
+  <data name="Tree_Variables" xml:space="preserve">
+    <value>Variables</value>
   </data>
 </root>
