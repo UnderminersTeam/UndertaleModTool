@@ -701,10 +701,10 @@ namespace UndertaleModTool
             OnPropertyChanged("IsGMS2");
 
             BackgroundsItemsList.Header = IsGMS2 == Visibility.Visible
-                                          ? "Tile sets"
-                                          : "Backgrounds & Tile sets";
+                                          ? Resource.Tree_TileSets
+                                          : Resource.Tree_BackgroundsAndTileSets;
 
-            Highlighted = new DescriptionView(Resource.Msg_Welcome, "New file created, have fun making a game out of nothing\nI TOLD YOU to open a data.win, not create a new file! :P");
+            Highlighted = new DescriptionView(Resource.Msg_Welcome, Resource.Msg_GetStartedFromEmpty);
             OpenInTab(Highlighted);
 
             CanSave = true;
@@ -910,7 +910,7 @@ namespace UndertaleModTool
             CurrentTab = null;
 
             OpenInTab(new DescriptionView(Resource.Msg_Welcome,
-                                          "Open data.win file to get started, then double click on the items on the left to view them"));
+                                          Resource.Msg_GetStarted));
             CurrentTab = Tabs[CurrentTabIndex];
 
             UpdateObjectLabel(CurrentTab.CurrentObject);
@@ -992,7 +992,7 @@ namespace UndertaleModTool
             dialog.Owner = this;
 
             DisposeGameData();
-            Highlighted = new DescriptionView(Resource.Msg_Welcome, "Double click on the items on the left to view them!");
+            Highlighted = new DescriptionView(Resource.Msg_Welcome, Resource.Msg_DoubleClick);
             OpenInTab(Highlighted);
 
             GameSpecificResolver.BaseDirectory = ExePath;
@@ -1092,8 +1092,8 @@ namespace UndertaleModTool
                         OnPropertyChanged("IsGMS2");
 
                         BackgroundsItemsList.Header = IsGMS2 == Visibility.Visible
-                                                      ? "Tile sets"
-                                                      : "Backgrounds & Tile sets";
+                                                      ? Resource.Tree_TileSets
+                                                      : Resource.Tree_BackgroundsAndTileSets;
 
                         UndertaleCodeEditor.gettext = null;
                         UndertaleCodeEditor.gettextJSON = null;
@@ -1304,7 +1304,7 @@ namespace UndertaleModTool
 
                 if (item == "Data")
                 {
-                    Highlighted = new DescriptionView(Resource.Msg_Welcome, Data != null ? "Double click on the items on the left to view them" : "Open data.win file to get started");
+                    Highlighted = new DescriptionView(Resource.Msg_Welcome, Data != null ? Resource.Msg_DoubleClick : Resource.Msg_OpenDataToStart);
                     return;
                 }
 
@@ -1320,7 +1320,7 @@ namespace UndertaleModTool
                     "Global init" => new GlobalInitEditor(Data?.GlobalInitScripts),
                     "Game End scripts" => new GameEndEditor(Data?.GameEndScripts),
                     "Variables" => Data.FORM.Chunks["VARI"],
-                    _ => new DescriptionView(item, "Expand the list on the left to edit items"),
+                    _ => new DescriptionView(item, Resource.Msg_ExpandList),
                 };
             }
             else
@@ -1931,7 +1931,7 @@ namespace UndertaleModTool
             // If we're at the complete root, we need to add the "Run other script" button as well
             if (item.Name != "RootScriptItem") return;
 
-            var otherScripts = new MenuItem {Header = "Run _other script..."};
+            var otherScripts = new MenuItem {Header = Resource.Menu_Scripts_RunOtherScript};
             otherScripts.Click += MenuItem_RunOtherScript_Click;
             item.Items.Add(otherScripts);
         }
@@ -2587,7 +2587,7 @@ namespace UndertaleModTool
 
         private void MenuItem_About_Click(object sender, RoutedEventArgs e)
         {
-            this.ShowMessage("UndertaleModTool by krzys_h and the Underminers team\nVersion " + Version, "About");
+            this.ShowMessage(Resource.Msg_About + Version, Resource.Window_About);
         }
 
         /// From https://github.com/AvaloniaUI/Avalonia/blob/master/src/Avalonia.Dialogs/AboutAvaloniaDialog.xaml.cs

@@ -241,6 +241,43 @@ namespace UndertaleModTool.Resources.Languages {
         }
         
         /// <summary>
+        ///   Run _other script... に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Menu_Scripts_RunOtherScript {
+            get {
+                return ResourceManager.GetString("Menu_Scripts_RunOtherScript", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   UndertaleModTool by krzys_h and the Underminers team
+        ///Version  に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Msg_About {
+            get {
+                return ResourceManager.GetString("Msg_About", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Double click on the items on the left to view them に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Msg_DoubleClick {
+            get {
+                return ResourceManager.GetString("Msg_DoubleClick", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Expand the list on the left to edit items に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Msg_ExpandList {
+            get {
+                return ResourceManager.GetString("Msg_ExpandList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Open a data.win file to get started, then double click on the items on the left to view them. に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Msg_GetStarted {
@@ -250,11 +287,30 @@ namespace UndertaleModTool.Resources.Languages {
         }
         
         /// <summary>
+        ///   New file created, have fun making a game out of nothing
+        ///I TOLD YOU to open a data.win, not create a new file! :P に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Msg_GetStartedFromEmpty {
+            get {
+                return ResourceManager.GetString("Msg_GetStartedFromEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Load data.win file first に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Msg_LoadDataWinFileFirst {
             get {
                 return ResourceManager.GetString("Msg_LoadDataWinFileFirst", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Open data.win file to get started に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Msg_OpenDataToStart {
+            get {
+                return ResourceManager.GetString("Msg_OpenDataToStart", resourceCulture);
             }
         }
         
@@ -511,6 +567,15 @@ namespace UndertaleModTool.Resources.Languages {
         }
         
         /// <summary>
+        ///   Tile sets に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_TileSets {
+            get {
+                return ResourceManager.GetString("Tree_TileSets", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Timelines に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Tree_Timelines {
@@ -525,6 +590,15 @@ namespace UndertaleModTool.Resources.Languages {
         public static string Tree_Variables {
             get {
                 return ResourceManager.GetString("Tree_Variables", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   About に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Window_About {
+            get {
+                return ResourceManager.GetString("Window_About", resourceCulture);
             }
         }
     }
