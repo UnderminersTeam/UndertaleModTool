@@ -1,5 +1,7 @@
 # UndertaleModTool
 
+[“ú–{Œê”ÅREADME‚Í‚±‚¿‚ç](README-ja.md)
+
 [![Underminers Discord](https://img.shields.io/discord/566861759210586112?label=Discord&logo=discord&logoColor=white)](https://discord.gg/hnyMDypMbN) [![GitHub](https://img.shields.io/github/license/UnderminersTeam/UndertaleModTool?logo=github)](https://github.com/UnderminersTeam/UndertaleModTool/blob/master/LICENSE.txt)
 
 (seeing such an amazing tool fills you with DETERMINATION.)
