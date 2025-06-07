@@ -177,7 +177,91 @@
   <data name="Menu_Scripts_Loading" xml:space="preserve">
     <value>(...読み込み中...)</value>
   </data>
-  <data name="Menu_Tree_FilterByName" xml:space="preserve">
+  <data name="Tree_AudioGroups" xml:space="preserve">
+    <value>音声グループ</value>
+  </data>
+  <data name="Tree_BackgroundsAndTileSets" xml:space="preserve">
+    <value>背景とタイルセット</value>
+  </data>
+  <data name="Tree_Code" xml:space="preserve">
+    <value>コード</value>
+  </data>
+  <data name="Tree_CodeLocals" xml:space="preserve">
+    <value>ローカル変数</value>
+  </data>
+  <data name="Tree_Data" xml:space="preserve">
+    <value>データ</value>
+  </data>
+  <data name="Tree_EmbeddedAudio" xml:space="preserve">
+    <value>埋め込み音声</value>
+  </data>
+  <data name="Tree_EmbeddedImages" xml:space="preserve">
+    <value>埋め込み画像</value>
+  </data>
+  <data name="Tree_EmbeddedTextures" xml:space="preserve">
+    <value>埋め込みテクスチャ</value>
+  </data>
+  <data name="Tree_Extensions" xml:space="preserve">
+    <value>拡張機能</value>
+  </data>
+  <data name="Tree_FilterByName" xml:space="preserve">
     <value>名前でフィルタ...</value>
+  </data>
+  <data name="Tree_Fonts" xml:space="preserve">
+    <value>フォント</value>
+  </data>
+  <data name="Tree_Functions" xml:space="preserve">
+    <value>関数</value>
+  </data>
+  <data name="Tree_GameEndScript" xml:space="preserve">
+    <value>ゲーム終了処理</value>
+  </data>
+  <data name="Tree_GameObjects" xml:space="preserve">
+    <value>ゲームオブジェクト</value>
+  </data>
+  <data name="Tree_GeneralInfo" xml:space="preserve">
+    <value>一般情報</value>
+  </data>
+  <data name="Tree_GlobalInit" xml:space="preserve">
+    <value>ゲーム起動処理</value>
+  </data>
+  <data name="Tree_ParticleSystemEmitters" xml:space="preserve">
+    <value>パーティクルシステムエミッター</value>
+  </data>
+  <data name="Tree_ParticleSystems" xml:space="preserve">
+    <value>パーティクルシステム</value>
+  </data>
+  <data name="Tree_Paths" xml:space="preserve">
+    <value>パス</value>
+  </data>
+  <data name="Tree_Rooms" xml:space="preserve">
+    <value>ルーム</value>
+  </data>
+  <data name="Tree_Scripts" xml:space="preserve">
+    <value>スクリプト</value>
+  </data>
+  <data name="Tree_Shaders" xml:space="preserve">
+    <value>シェーダー</value>
+  </data>
+  <data name="Tree_Sounds" xml:space="preserve">
+    <value>音声</value>
+  </data>
+  <data name="Tree_Sprites" xml:space="preserve">
+    <value>スプライト</value>
+  </data>
+  <data name="Tree_Strings" xml:space="preserve">
+    <value>文字列</value>
+  </data>
+  <data name="Tree_TextureGroupInfomation" xml:space="preserve">
+    <value>テクスチャグループ情報</value>
+  </data>
+  <data name="Tree_TexturePageItems" xml:space="preserve">
+    <value>テクスチャページアイテム</value>
+  </data>
+  <data name="Tree_Timelines" xml:space="preserve">
+    <value>タイムライン</value>
+  </data>
+  <data name="Tree_Variables" xml:space="preserve">
+    <value>変数</value>
   </data>
 </root>

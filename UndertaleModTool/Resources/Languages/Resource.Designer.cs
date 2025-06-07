@@ -241,11 +241,263 @@ namespace UndertaleModTool.Resources.Languages {
         }
         
         /// <summary>
+        ///   Audio groups に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_AudioGroups {
+            get {
+                return ResourceManager.GetString("Tree_AudioGroups", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Backgrounds &amp;amp; Tile sets に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_BackgroundsAndTileSets {
+            get {
+                return ResourceManager.GetString("Tree_BackgroundsAndTileSets", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Code に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_Code {
+            get {
+                return ResourceManager.GetString("Tree_Code", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Code locals に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_CodeLocals {
+            get {
+                return ResourceManager.GetString("Tree_CodeLocals", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Data に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_Data {
+            get {
+                return ResourceManager.GetString("Tree_Data", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Embedded audio に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_EmbeddedAudio {
+            get {
+                return ResourceManager.GetString("Tree_EmbeddedAudio", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Embedded images に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_EmbeddedImages {
+            get {
+                return ResourceManager.GetString("Tree_EmbeddedImages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Embedded textures に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_EmbeddedTextures {
+            get {
+                return ResourceManager.GetString("Tree_EmbeddedTextures", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Extensions に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_Extensions {
+            get {
+                return ResourceManager.GetString("Tree_Extensions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Filter by name... に類似しているローカライズされた文字列を検索します。
         /// </summary>
-        public static string Menu_Tree_FilterByName {
+        public static string Tree_FilterByName {
             get {
-                return ResourceManager.GetString("Menu_Tree_FilterByName", resourceCulture);
+                return ResourceManager.GetString("Tree_FilterByName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Fonts に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_Fonts {
+            get {
+                return ResourceManager.GetString("Tree_Fonts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Functions に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_Functions {
+            get {
+                return ResourceManager.GetString("Tree_Functions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Game End scripts に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_GameEndScript {
+            get {
+                return ResourceManager.GetString("Tree_GameEndScript", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Game objects に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_GameObjects {
+            get {
+                return ResourceManager.GetString("Tree_GameObjects", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   General info に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_GeneralInfo {
+            get {
+                return ResourceManager.GetString("Tree_GeneralInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Global init に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_GlobalInit {
+            get {
+                return ResourceManager.GetString("Tree_GlobalInit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Particle system emitters に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_ParticleSystemEmitters {
+            get {
+                return ResourceManager.GetString("Tree_ParticleSystemEmitters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Particle systems に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_ParticleSystems {
+            get {
+                return ResourceManager.GetString("Tree_ParticleSystems", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Paths に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_Paths {
+            get {
+                return ResourceManager.GetString("Tree_Paths", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Rooms に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_Rooms {
+            get {
+                return ResourceManager.GetString("Tree_Rooms", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Scripts に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_Scripts {
+            get {
+                return ResourceManager.GetString("Tree_Scripts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Shaders に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_Shaders {
+            get {
+                return ResourceManager.GetString("Tree_Shaders", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sounds に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_Sounds {
+            get {
+                return ResourceManager.GetString("Tree_Sounds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sprites に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_Sprites {
+            get {
+                return ResourceManager.GetString("Tree_Sprites", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Strings に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_Strings {
+            get {
+                return ResourceManager.GetString("Tree_Strings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Texture group infomation に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_TextureGroupInfomation {
+            get {
+                return ResourceManager.GetString("Tree_TextureGroupInfomation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Texture page items に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_TexturePageItems {
+            get {
+                return ResourceManager.GetString("Tree_TexturePageItems", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Timelines に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_Timelines {
+            get {
+                return ResourceManager.GetString("Tree_Timelines", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Variables に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tree_Variables {
+            get {
+                return ResourceManager.GetString("Tree_Variables", resourceCulture);
             }
         }
     }
