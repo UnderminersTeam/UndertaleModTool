@@ -299,4 +299,7 @@
     <value>UndertaleModTool 作 krzys_h およびUnderminersチーム
 バージョン </value>
   </data>
+  <data name="Msg_SaveChangesBeforeQuitting" xml:space="preserve">
+    <value>終了する前にファイルを保存しますか？</value>
+  </data>
 </root>

@@ -315,6 +315,15 @@ namespace UndertaleModTool.Resources.Languages {
         }
         
         /// <summary>
+        ///   Save changes before quitting? に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Msg_SaveChangesBeforeQuitting {
+            get {
+                return ResourceManager.GetString("Msg_SaveChangesBeforeQuitting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Welcome to UndertaleModTool! に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Msg_Welcome {

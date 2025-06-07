@@ -299,4 +299,7 @@ I TOLD YOU to open a data.win, not create a new file! :P</value>
     <value>UndertaleModTool by krzys_h and the Underminers team
 Version </value>
   </data>
+  <data name="Msg_SaveChangesBeforeQuitting" xml:space="preserve">
+    <value>Save changes before quitting?</value>
+  </data>
 </root>

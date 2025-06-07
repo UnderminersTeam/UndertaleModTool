@@ -834,7 +834,7 @@ namespace UndertaleModTool
 
                 if (SettingsWindow.WarnOnClose)
                 {
-                    MessageBoxResult result = this.ShowQuestionWithCancel("Save changes before quitting?");
+                    MessageBoxResult result = this.ShowQuestionWithCancel(Resource.Msg_SaveChangesBeforeQuitting);
 
                     if (result == MessageBoxResult.Cancel)
                     {
