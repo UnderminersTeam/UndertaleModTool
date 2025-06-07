@@ -177,6 +177,15 @@
   <data name="Menu_Scripts_Loading" xml:space="preserve">
     <value>(...loading...)</value>
   </data>
+  <data name="Msg_GetStarted" xml:space="preserve">
+    <value>Open a data.win file to get started, then double click on the items on the left to view them.</value>
+  </data>
+  <data name="Msg_LoadDataWinFileFirst" xml:space="preserve">
+    <value>Load data.win file first</value>
+  </data>
+  <data name="Msg_Welcome" xml:space="preserve">
+    <value>Welcome to UndertaleModTool!</value>
+  </data>
   <data name="Tree_AudioGroups" xml:space="preserve">
     <value>Audio groups</value>
   </data>

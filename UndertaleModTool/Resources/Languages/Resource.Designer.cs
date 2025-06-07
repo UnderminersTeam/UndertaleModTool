@@ -241,6 +241,33 @@ namespace UndertaleModTool.Resources.Languages {
         }
         
         /// <summary>
+        ///   Open a data.win file to get started, then double click on the items on the left to view them. に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Msg_GetStarted {
+            get {
+                return ResourceManager.GetString("Msg_GetStarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Load data.win file first に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Msg_LoadDataWinFileFirst {
+            get {
+                return ResourceManager.GetString("Msg_LoadDataWinFileFirst", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Welcome to UndertaleModTool! に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Msg_Welcome {
+            get {
+                return ResourceManager.GetString("Msg_Welcome", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Audio groups に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Tree_AudioGroups {

@@ -31,6 +31,7 @@ using UndertaleModLib.ModelsDebug;
 using UndertaleModLib.Scripting;
 using UndertaleModLib.Util;
 using UndertaleModTool.Windows;
+using UndertaleModTool.Resources.Languages;
 using System.IO.Pipes;
 using Ookii.Dialogs.Wpf;
 
@@ -232,7 +233,7 @@ namespace UndertaleModTool
             InitializeComponent();
             this.DataContext = this;
 
-            Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open a data.win file to get started, then double click on the items on the left to view them.");
+            Highlighted = new DescriptionView(Resource.Msg_Welcome, Resource.Msg_GetStarted);
             OpenInTab(Highlighted);
 
             TitleMain = "UndertaleModTool by krzys_h v:" + Version;
@@ -703,7 +704,7 @@ namespace UndertaleModTool
                                           ? "Tile sets"
                                           : "Backgrounds & Tile sets";
 
-            Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open a data.win, not create a new file! :P");
+            Highlighted = new DescriptionView(Resource.Msg_Welcome, "New file created, have fun making a game out of nothing\nI TOLD YOU to open a data.win, not create a new file! :P");
             OpenInTab(Highlighted);
 
             CanSave = true;
@@ -908,7 +909,7 @@ namespace UndertaleModTool
             Tabs.Clear();
             CurrentTab = null;
 
-            OpenInTab(new DescriptionView("Welcome to UndertaleModTool!",
+            OpenInTab(new DescriptionView(Resource.Msg_Welcome,
                                           "Open data.win file to get started, then double click on the items on the left to view them"));
             CurrentTab = Tabs[CurrentTabIndex];
 
@@ -991,7 +992,7 @@ namespace UndertaleModTool
             dialog.Owner = this;
 
             DisposeGameData();
-            Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!");
+            Highlighted = new DescriptionView(Resource.Msg_Welcome, "Double click on the items on the left to view them!");
             OpenInTab(Highlighted);
 
             GameSpecificResolver.BaseDirectory = ExePath;
@@ -1303,13 +1304,13 @@ namespace UndertaleModTool
 
                 if (item == "Data")
                 {
-                    Highlighted = new DescriptionView("Welcome to UndertaleModTool!", Data != null ? "Double click on the items on the left to view them" : "Open data.win file to get started");
+                    Highlighted = new DescriptionView(Resource.Msg_Welcome, Data != null ? "Double click on the items on the left to view them" : "Open data.win file to get started");
                     return;
                 }
 
                 if (Data == null)
                 {
-                    Highlighted = new DescriptionView(item, "Load data.win file first");
+                    Highlighted = new DescriptionView(item, Resource.Msg_LoadDataWinFileFirst);
                     return;
                 }
 
@@ -3390,8 +3391,8 @@ result in loss of work.");
 
                     if (addDefaultTab)
                     {
-                        OpenInTab(new DescriptionView("Welcome to UndertaleModTool!",
-                                                      "Open a data.win file to get started, then double click on the items on the left to view them"));
+                        OpenInTab(new DescriptionView(Resource.Msg_Welcome,
+                                                      Resource.Msg_GetStarted));
                         CurrentTab = Tabs[CurrentTabIndex];
 
                         UpdateObjectLabel(CurrentTab.CurrentObject);
