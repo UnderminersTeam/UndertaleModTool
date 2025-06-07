@@ -177,6 +177,15 @@
   <data name="Menu_Scripts_Loading" xml:space="preserve">
     <value>(...読み込み中...)</value>
   </data>
+  <data name="Msg_GetStarted" xml:space="preserve">
+    <value>data.winファイルを開き、左側のリスト項目をダブルクリックしてください。</value>
+  </data>
+  <data name="Msg_LoadDataWinFileFirst" xml:space="preserve">
+    <value>初めにdata.winファイルを読み込んでください</value>
+  </data>
+  <data name="Msg_Welcome" xml:space="preserve">
+    <value>UndertaleModToolへようこそ！</value>
+  </data>
   <data name="Tree_AudioGroups" xml:space="preserve">
     <value>音声グループ</value>
   </data>
