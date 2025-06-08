@@ -302,4 +302,13 @@
   <data name="Msg_SaveChangesBeforeQuitting" xml:space="preserve">
     <value>終了する前にファイルを保存しますか？</value>
   </data>
+  <data name="Msg_LoadingTitle" xml:space="preserve">
+    <value>読み込み中</value>
+  </data>
+  <data name="Msg_LoadingPleaseWait" xml:space="preserve">
+    <value>読み込み中　お待ちください...</value>
+  </data>
+  <data name="Msg_PleaseWait" xml:space="preserve">
+    <value>お待ちください...</value>
+  </data>
 </root>
