@@ -83,7 +83,7 @@ void ExtractSprite(UndertaleSprite sprite, string folder, TextureWorker worker)
     using MagickImageCollection gif = new();
     for (int picCount = 0; picCount < sprite.Textures.Count; picCount++)
     {
-        if ((sprite.Textures[picCount]?.Texture != null))
+        if (sprite.Textures[picCount]?.Texture != null)
         {
             IMagickImage<byte> image = worker.GetTextureFor(sprite.Textures[picCount].Texture, sprite.Name.Content + " (frame " + picCount + ")", true);
             image.GifDisposeMethod = GifDisposeMethod.Previous;
