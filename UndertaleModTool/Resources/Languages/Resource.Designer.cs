@@ -483,11 +483,128 @@ namespace UndertaleModTool.Resources.Languages {
         }
         
         /// <summary>
+        ///   Audio file に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sound_AudioFile {
+            get {
+                return ResourceManager.GetString("Sound_AudioFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Audio group に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sound_AudioGroup {
+            get {
+                return ResourceManager.GetString("Sound_AudioGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Effects に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sound_Effects {
+            get {
+                return ResourceManager.GetString("Sound_Effects", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   File に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sound_File {
+            get {
+                return ResourceManager.GetString("Sound_File", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Flags に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sound_Flags {
+            get {
+                return ResourceManager.GetString("Sound_Flags", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Name に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sound_Name {
+            get {
+                return ResourceManager.GetString("Sound_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Pitch に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sound_Pitch {
+            get {
+                return ResourceManager.GetString("Sound_Pitch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Play に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sound_Play {
+            get {
+                return ResourceManager.GetString("Sound_Play", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Preload (old audio system) に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sound_Preload {
+            get {
+                return ResourceManager.GetString("Sound_Preload", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Stop に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sound_Stop {
+            get {
+                return ResourceManager.GetString("Sound_Stop", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Type に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sound_Type {
+            get {
+                return ResourceManager.GetString("Sound_Type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Volume に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sound_Volume {
+            get {
+                return ResourceManager.GetString("Sound_Volume", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Audio Group に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Tabs_AudioGroup {
             get {
                 return ResourceManager.GetString("Tabs_AudioGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sound に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tabs_Sound {
+            get {
+                return ResourceManager.GetString("Tabs_Sound", resourceCulture);
             }
         }
         

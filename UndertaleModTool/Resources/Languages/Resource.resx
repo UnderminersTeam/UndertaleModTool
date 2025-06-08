@@ -362,4 +362,43 @@ Are you sure you want to make a new project?</value>
   <data name="Tabs_AudioGroup" xml:space="preserve">
     <value>Audio Group</value>
   </data>
+  <data name="Tabs_Sound" xml:space="preserve">
+    <value>Sound</value>
+  </data>
+  <data name="Sound_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Sound_Flags" xml:space="preserve">
+    <value>Flags</value>
+  </data>
+  <data name="Sound_File" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="Sound_Effects" xml:space="preserve">
+    <value>Effects</value>
+  </data>
+  <data name="Sound_Volume" xml:space="preserve">
+    <value>Volume</value>
+  </data>
+  <data name="Sound_Pitch" xml:space="preserve">
+    <value>Pitch</value>
+  </data>
+  <data name="Sound_AudioGroup" xml:space="preserve">
+    <value>Audio group</value>
+  </data>
+  <data name="Sound_AudioFile" xml:space="preserve">
+    <value>Audio file</value>
+  </data>
+  <data name="Sound_Preload" xml:space="preserve">
+    <value>Preload (old audio system)</value>
+  </data>
+  <data name="Sound_Play" xml:space="preserve">
+    <value>Play</value>
+  </data>
+  <data name="Sound_Stop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="Sound_Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
 </root>
