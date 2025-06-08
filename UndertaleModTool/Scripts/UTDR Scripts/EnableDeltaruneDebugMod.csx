@@ -27,4 +27,4 @@ importGroup.Import();
 
 ChangeSelection(createCode);
 
-ScriptMessage("Debug mode is now permanently enabled! Coded By Ramona-Flower");
+ScriptMessage("Debug mode is now permanently enabled! Coded By Cyn-ically");
