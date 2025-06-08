@@ -311,4 +311,46 @@ Version </value>
   <data name="Msg_PleaseWait" xml:space="preserve">
     <value>Please wait...</value>
   </data>
+  <data name="RoomEditor_SaveAsPng" xml:space="preserve">
+    <value>Save as PNG</value>
+  </data>
+  <data name="Msg_TempRunWarn" xml:space="preserve">
+    <value>WARNING:
+Temp running the game does not permanently 
+save your changes. Please "Save" the game
+to save your changes. Closing UndertaleModTool
+without using the "Save" option can
+result in loss of work.</value>
+  </data>
+  <data name="Msg_TempRunNothingToRun" xml:space="preserve">
+    <value>Nothing to run!</value>
+  </data>
+  <data name="Msg_TempFolderIsNull" xml:space="preserve">
+    <value>Temp folder is null.</value>
+  </data>
+  <data name="Msg_TempRunNull" xml:space="preserve">
+    <value>Null game executable name or location</value>
+  </data>
+  <data name="Msg_TempRunCannotFindExecutable" xml:space="preserve">
+    <value>Cannot find game executable path, expected: </value>
+  </data>
+  <data name="Msg_TempRunCannotFindGamePath" xml:space="preserve">
+    <value>Cannot find game path, expected: </value>
+  </data>
+  <data name="Msg_TempRunSaveFailed" xml:space="preserve">
+    <value>Temp save failed, cannot run.</value>
+  </data>
+  <data name="Window_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Msg_SavingTitle" xml:space="preserve">
+    <value>Saving</value>
+  </data>
+  <data name="Msg_SavingPleaseWait" xml:space="preserve">
+    <value>Saving, please wait...</value>
+  </data>
+  <data name="Msg_AreYouSureYouWantToMakeANewProject" xml:space="preserve">
+    <value>Warning: you currently have a project open.
+Are you sure you want to make a new project?</value>
+  </data>
 </root>

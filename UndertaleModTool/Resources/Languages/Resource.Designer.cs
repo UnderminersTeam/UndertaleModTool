@@ -260,6 +260,16 @@ namespace UndertaleModTool.Resources.Languages {
         }
         
         /// <summary>
+        ///   Warning: you currently have a project open.
+        ///Are you sure you want to make a new project? に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Msg_AreYouSureYouWantToMakeANewProject {
+            get {
+                return ResourceManager.GetString("Msg_AreYouSureYouWantToMakeANewProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Double click on the items on the left to view them に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Msg_DoubleClick {
@@ -351,11 +361,106 @@ namespace UndertaleModTool.Resources.Languages {
         }
         
         /// <summary>
+        ///   Saving, please wait... に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Msg_SavingPleaseWait {
+            get {
+                return ResourceManager.GetString("Msg_SavingPleaseWait", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Saving に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Msg_SavingTitle {
+            get {
+                return ResourceManager.GetString("Msg_SavingTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Temp folder is null. に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Msg_TempFolderIsNull {
+            get {
+                return ResourceManager.GetString("Msg_TempFolderIsNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Cannot find game executable path, expected:  に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Msg_TempRunCannotFindExecutable {
+            get {
+                return ResourceManager.GetString("Msg_TempRunCannotFindExecutable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Cannot find game path, expected:  に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Msg_TempRunCannotFindGamePath {
+            get {
+                return ResourceManager.GetString("Msg_TempRunCannotFindGamePath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Nothing to run! に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Msg_TempRunNothingToRun {
+            get {
+                return ResourceManager.GetString("Msg_TempRunNothingToRun", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Null game executable name or location に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Msg_TempRunNull {
+            get {
+                return ResourceManager.GetString("Msg_TempRunNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Temp save failed, cannot run. に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Msg_TempRunSaveFailed {
+            get {
+                return ResourceManager.GetString("Msg_TempRunSaveFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   WARNING:
+        ///Temp running the game does not permanently 
+        ///save your changes. Please &quot;Save&quot; the game
+        ///to save your changes. Closing UndertaleModTool
+        ///without using the &quot;Save&quot; option can
+        ///result in loss of work. に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Msg_TempRunWarn {
+            get {
+                return ResourceManager.GetString("Msg_TempRunWarn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Welcome to UndertaleModTool! に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Msg_Welcome {
             get {
                 return ResourceManager.GetString("Msg_Welcome", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Save as PNG に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string RoomEditor_SaveAsPng {
+            get {
+                return ResourceManager.GetString("RoomEditor_SaveAsPng", resourceCulture);
             }
         }
         
@@ -635,6 +740,15 @@ namespace UndertaleModTool.Resources.Languages {
         public static string Window_About {
             get {
                 return ResourceManager.GetString("Window_About", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Error に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Window_Error {
+            get {
+                return ResourceManager.GetString("Window_Error", resourceCulture);
             }
         }
     }
