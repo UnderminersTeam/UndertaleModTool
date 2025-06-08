@@ -15,6 +15,7 @@ using UndertaleModLib;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
+using UndertaleModTool.Resources.Languages;
 using static UndertaleModLib.Models.UndertaleRoom;
 
 namespace UndertaleModTool
@@ -122,7 +123,7 @@ namespace UndertaleModTool
 
                 string header = obj switch
                 {
-                    UndertaleAudioGroup => "Audio Group",
+                    UndertaleAudioGroup => Resource.Tabs_AudioGroup,
                     UndertaleSound => "Sound",
                     UndertaleSprite => "Sprite",
                     UndertaleBackground => "Background",

@@ -181,7 +181,7 @@
     <value>Audio groups</value>
   </data>
   <data name="Tree_BackgroundsAndTileSets" xml:space="preserve">
-    <value>Backgrounds &amp;amp; Tile sets</value>
+    <value>Backgrounds &amp; Tile sets</value>
   </data>
   <data name="Tree_Code" xml:space="preserve">
     <value>Code</value>
@@ -352,5 +352,14 @@ result in loss of work.</value>
   <data name="Msg_AreYouSureYouWantToMakeANewProject" xml:space="preserve">
     <value>Warning: you currently have a project open.
 Are you sure you want to make a new project?</value>
+  </data>
+  <data name="AudioGroup_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="AudioGroup_Path" xml:space="preserve">
+    <value>Path (GM 2024.14+)</value>
+  </data>
+  <data name="Tabs_AudioGroup" xml:space="preserve">
+    <value>Audio Group</value>
   </data>
 </root>
