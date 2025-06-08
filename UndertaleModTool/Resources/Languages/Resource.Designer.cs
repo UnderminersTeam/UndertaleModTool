@@ -79,6 +79,24 @@ namespace UndertaleModTool.Resources.Languages {
         }
         
         /// <summary>
+        ///   Name に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string AudioGroup_Name {
+            get {
+                return ResourceManager.GetString("AudioGroup_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Path (GM 2024.14+) に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string AudioGroup_Path {
+            get {
+                return ResourceManager.GetString("AudioGroup_Path", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   _File に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Menu_File {
@@ -465,6 +483,15 @@ namespace UndertaleModTool.Resources.Languages {
         }
         
         /// <summary>
+        ///   Audio Group に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tabs_AudioGroup {
+            get {
+                return ResourceManager.GetString("Tabs_AudioGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Audio groups に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Tree_AudioGroups {
@@ -474,7 +501,7 @@ namespace UndertaleModTool.Resources.Languages {
         }
         
         /// <summary>
-        ///   Backgrounds &amp;amp; Tile sets に類似しているローカライズされた文字列を検索します。
+        ///   Backgrounds &amp; Tile sets に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Tree_BackgroundsAndTileSets {
             get {

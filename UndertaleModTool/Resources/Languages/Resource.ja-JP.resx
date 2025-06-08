@@ -354,4 +354,13 @@
     <value>現在すでにプロジェクトを開いています。
 新しいプロジェクトを作成してもよろしいですか？</value>
   </data>
+  <data name="AudioGroup_Name" xml:space="preserve">
+    <value>グループ名</value>
+  </data>
+  <data name="AudioGroup_Path" xml:space="preserve">
+    <value>パス (GM 2024.14以降)</value>
+  </data>
+  <data name="Tabs_AudioGroup" xml:space="preserve">
+    <value>音声グループ</value>
+  </data>
 </root>
