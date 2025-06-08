@@ -681,7 +681,7 @@ namespace UndertaleModTool
         {
             if (Data != null)
             {
-                if (this.ShowQuestion("Warning: you currently have a project open.\nAre you sure you want to make a new project?") == MessageBoxResult.No)
+                if (this.ShowQuestion(Resource.Msg_AreYouSureYouWantToMakeANewProject) == MessageBoxResult.No)
                     return false;
             }
             this.Dispatcher.Invoke(() =>
@@ -1118,7 +1118,7 @@ namespace UndertaleModTool
 
             bool isDifferentPath = FilePath != filename;
 
-            LoaderDialog dialog = new LoaderDialog("Saving", "Saving, please wait...");
+            LoaderDialog dialog = new LoaderDialog(Resource.Msg_SavingTitle, Resource.Msg_SavingTitle);
             dialog.PreventClose = true;
             IProgress<Tuple<int, string>> progress = new Progress<Tuple<int, string>>(i => { dialog.ReportProgress(i.Item2, i.Item1); });
             IProgress<double?> setMax = new Progress<double?>(i => { dialog.Maximum = i; });
@@ -2479,8 +2479,10 @@ namespace UndertaleModTool
         {
             this.ShowWarning(message, "Script warning");
         }
-        public void ScriptError(string error, string title = "Error", bool SetConsoleText = true)
+        public void ScriptError(string error, string title = null, bool SetConsoleText = true)
         {
+            if (title is null)
+                title = Resource.Window_Error;
             this.ShowError(error, title);
             if (SetConsoleText)
             {
@@ -2933,17 +2935,12 @@ namespace UndertaleModTool
         {
             if (Data == null)
             {
-                ScriptError("Nothing to run!");
+                ScriptError(Resource.Msg_TempRunNothingToRun);
                 return;
             }
             if ((!WasWarnedAboutTempRun) && SettingsWindow.TempRunMessageShow)
             {
-                ScriptMessage(@"WARNING:
-Temp running the game does not permanently 
-save your changes. Please ""Save"" the game
-to save your changes. Closing UndertaleModTool
-without using the ""Save"" option can
-result in loss of work.");
+                ScriptMessage(Resource.Msg_TempRunWarn);
                 WasWarnedAboutTempRun = true;
             }
             bool saveOk = true;
@@ -2961,7 +2958,7 @@ result in loss of work.");
             Data.GeneralInfo.IsDebuggerDisabled = oldDisableDebuggerState;
             if (TempFilesFolder == null)
             {
-                this.ShowWarning("Temp folder is null.");
+                this.ShowWarning(Resource.Msg_TempFolderIsNull);
                 return;
             }
             else if (saveOk)
@@ -2969,18 +2966,18 @@ result in loss of work.");
                 string gameExeName = Data?.GeneralInfo?.FileName?.Content;
                 if (gameExeName == null || FilePath == null)
                 {
-                    ScriptError("Null game executable name or location");
+                    ScriptError(Resource.Msg_TempRunNull);
                     return;
                 }
                 string gameExePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(FilePath), gameExeName + ".exe");
                 if (!File.Exists(gameExePath))
                 {
-                    ScriptError("Cannot find game executable path, expected: " + gameExePath);
+                    ScriptError(Resource.Msg_TempRunCannotFindExecutable + gameExePath);
                     return;
                 }
                 if (!File.Exists(TempFilesFolder))
                 {
-                    ScriptError("Cannot find game path, expected: " + TempFilesFolder);
+                    ScriptError(Resource.Msg_TempRunCannotFindGamePath + TempFilesFolder);
                     return;
                 }
                 if (gameExeName != null)
@@ -2988,7 +2985,7 @@ result in loss of work.");
             }
             else if (!saveOk)
             {
-                this.ShowWarning("Temp save failed, cannot run.");
+                this.ShowWarning(Resource.Msg_TempRunSaveFailed);
                 return;
             }
             if (File.Exists(TempFilesFolder))

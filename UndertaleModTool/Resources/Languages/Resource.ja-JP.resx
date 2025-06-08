@@ -311,4 +311,47 @@
   <data name="Msg_PleaseWait" xml:space="preserve">
     <value>お待ちください...</value>
   </data>
+  <data name="RoomEditor_SaveAsPng" xml:space="preserve">
+    <value>PNG形式で保存</value>
+  </data>
+  <data name="Msg_TempRunWarn" xml:space="preserve">
+    <value>注意:
+ゲームを一時的に実行しても、変更内容は保存されません。
+変更内容を保存するには、ゲームを「保存」してください。
+「保存」をせずにUndertaleModToolを終了すると、
+作業内容が失われる可能性があります。</value>
+  </data>
+  <data name="Msg_TempRunNothingToRun" xml:space="preserve">
+    <value>実行するゲームがありません！</value>
+  </data>
+  <data name="Msg_TempFolderIsNull" xml:space="preserve">
+    <value>Tempフォルダがありません。</value>
+  </data>
+  <data name="Msg_TempRunNull" xml:space="preserve">
+    <value>ゲームの実行ファイル名か場所が空です</value>
+  </data>
+  <data name="Msg_TempRunCannotFindExecutable" xml:space="preserve">
+    <value>ゲームの実行可能ファイルが見つかりません。
+ファイルパス: </value>
+  </data>
+  <data name="Msg_TempRunCannotFindGamePath" xml:space="preserve">
+    <value>ゲームのパスが見つかりません。
+ファイルパス: </value>
+  </data>
+  <data name="Msg_TempRunSaveFailed" xml:space="preserve">
+    <value>一時的なセーブに失敗し、実行できませんでした。</value>
+  </data>
+  <data name="Window_Error" xml:space="preserve">
+    <value>エラー</value>
+  </data>
+  <data name="Msg_SavingTitle" xml:space="preserve">
+    <value>保存中</value>
+  </data>
+  <data name="Msg_SavingPleaseWait" xml:space="preserve">
+    <value>保存中　お待ちください...</value>
+  </data>
+  <data name="Msg_AreYouSureYouWantToMakeANewProject" xml:space="preserve">
+    <value>現在すでにプロジェクトを開いています。
+新しいプロジェクトを作成してもよろしいですか？</value>
+  </data>
 </root>
