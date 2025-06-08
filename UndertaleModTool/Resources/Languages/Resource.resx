@@ -302,4 +302,13 @@ Version </value>
   <data name="Msg_SaveChangesBeforeQuitting" xml:space="preserve">
     <value>Save changes before quitting?</value>
   </data>
+  <data name="Msg_LoadingTitle" xml:space="preserve">
+    <value>Loading</value>
+  </data>
+  <data name="Msg_LoadingPleaseWait" xml:space="preserve">
+    <value>Loading, please wait...</value>
+  </data>
+  <data name="Msg_PleaseWait" xml:space="preserve">
+    <value>Please wait...</value>
+  </data>
 </root>

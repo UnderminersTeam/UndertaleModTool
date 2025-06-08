@@ -983,7 +983,7 @@ namespace UndertaleModTool
         }
         private async Task LoadFile(string filename, bool preventClose = false, bool onlyGeneralInfo = false)
         {
-            LoaderDialog dialog = new LoaderDialog("Loading", "Loading, please wait...");
+            LoaderDialog dialog = new LoaderDialog(Resource.Msg_LoadingTitle, Resource.Msg_LoadingPleaseWait);
             dialog.PreventClose = preventClose;
             this.Dispatcher.Invoke(() =>
             {

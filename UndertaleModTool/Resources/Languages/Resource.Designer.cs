@@ -306,11 +306,38 @@ namespace UndertaleModTool.Resources.Languages {
         }
         
         /// <summary>
+        ///   Loading, please wait... に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Msg_LoadingPleaseWait {
+            get {
+                return ResourceManager.GetString("Msg_LoadingPleaseWait", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Loading に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Msg_LoadingTitle {
+            get {
+                return ResourceManager.GetString("Msg_LoadingTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Open data.win file to get started に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Msg_OpenDataToStart {
             get {
                 return ResourceManager.GetString("Msg_OpenDataToStart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Please wait... に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Msg_PleaseWait {
+            get {
+                return ResourceManager.GetString("Msg_PleaseWait", resourceCulture);
             }
         }
         
