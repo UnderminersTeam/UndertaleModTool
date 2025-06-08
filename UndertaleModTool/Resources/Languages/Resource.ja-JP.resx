@@ -355,12 +355,51 @@
 新しいプロジェクトを作成してもよろしいですか？</value>
   </data>
   <data name="AudioGroup_Name" xml:space="preserve">
-    <value>グループ名</value>
+    <value>グループの名前</value>
   </data>
   <data name="AudioGroup_Path" xml:space="preserve">
     <value>パス (GM 2024.14以降)</value>
   </data>
   <data name="Tabs_AudioGroup" xml:space="preserve">
     <value>音声グループ</value>
+  </data>
+  <data name="Tabs_Sound" xml:space="preserve">
+    <value>音声</value>
+  </data>
+  <data name="Sound_Name" xml:space="preserve">
+    <value>音声の名前</value>
+  </data>
+  <data name="Sound_Flags" xml:space="preserve">
+    <value>フラグ</value>
+  </data>
+  <data name="Sound_File" xml:space="preserve">
+    <value>ファイル</value>
+  </data>
+  <data name="Sound_Effects" xml:space="preserve">
+    <value>エフェクト</value>
+  </data>
+  <data name="Sound_Volume" xml:space="preserve">
+    <value>音量</value>
+  </data>
+  <data name="Sound_Pitch" xml:space="preserve">
+    <value>ピッチ</value>
+  </data>
+  <data name="Sound_AudioGroup" xml:space="preserve">
+    <value>音声グループ</value>
+  </data>
+  <data name="Sound_AudioFile" xml:space="preserve">
+    <value>音声ファイル</value>
+  </data>
+  <data name="Sound_Preload" xml:space="preserve">
+    <value>プレロード (古い音声システム)</value>
+  </data>
+  <data name="Sound_Play" xml:space="preserve">
+    <value>再生</value>
+  </data>
+  <data name="Sound_Stop" xml:space="preserve">
+    <value>停止</value>
+  </data>
+  <data name="Sound_Type" xml:space="preserve">
+    <value>タイプ</value>
   </data>
 </root>
