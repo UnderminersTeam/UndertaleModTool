@@ -56,14 +56,20 @@ async Task ExtractSprites(string folder, string prefix)
             Parallel.ForEach(sprites, (sprite) => 
             {
                 IncrementProgressParallel();
-                ExtractSprite(sprite, folder, worker);
+                if (sprite.Textures.Count != 0) // fixes sprites with no frames
+                {
+                    ExtractSprite(sprite, folder, worker);
+                }
             });
         } 
         else 
         {
             foreach (UndertaleSprite sprite in sprites) 
             {
-                ExtractSprite(sprite, folder, worker);
+                if (sprite.Textures.Count != 0) // same as above
+                {
+                    ExtractSprite(sprite, folder, worker);
+                }
                 IncrementProgressParallel();
             }
         }
@@ -77,7 +83,7 @@ void ExtractSprite(UndertaleSprite sprite, string folder, TextureWorker worker)
     using MagickImageCollection gif = new();
     for (int picCount = 0; picCount < sprite.Textures.Count; picCount++)
     {
-        if (sprite.Textures[picCount]?.Texture != null)
+        if ((sprite.Textures[picCount]?.Texture != null))
         {
             IMagickImage<byte> image = worker.GetTextureFor(sprite.Textures[picCount].Texture, sprite.Name.Content + " (frame " + picCount + ")", true);
             image.GifDisposeMethod = GifDisposeMethod.Previous;
