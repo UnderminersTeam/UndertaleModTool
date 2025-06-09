@@ -458,4 +458,22 @@ Are you sure you want to make a new project?</value>
   <data name="Sprite_DoubleClickToAdd" xml:space="preserve">
     <value>Double click to add</value>
   </data>
+  <data name="EAudio_Import" xml:space="preserve">
+    <value>Import</value>
+  </data>
+  <data name="EAudio_Export" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="EAudio_Play" xml:space="preserve">
+    <value>Play</value>
+  </data>
+  <data name="EAudio_Stop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="Tabs_EmbeddedAudio" xml:space="preserve">
+    <value>Embedded Audio</value>
+  </data>
+  <data name="EAudio_WAVDataLength" xml:space="preserve">
+    <value>WAV data, length:</value>
+  </data>
 </root>

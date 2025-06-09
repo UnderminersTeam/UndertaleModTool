@@ -459,4 +459,22 @@
   <data name="Sprite_DoubleClickToAdd" xml:space="preserve">
     <value>ダブルクリックで追加</value>
   </data>
+  <data name="EAudio_Import" xml:space="preserve">
+    <value>インポート</value>
+  </data>
+  <data name="EAudio_Export" xml:space="preserve">
+    <value>エクスポート</value>
+  </data>
+  <data name="EAudio_Play" xml:space="preserve">
+    <value>再生</value>
+  </data>
+  <data name="EAudio_Stop" xml:space="preserve">
+    <value>停止</value>
+  </data>
+  <data name="Tabs_EmbeddedAudio" xml:space="preserve">
+    <value>埋め込み音声</value>
+  </data>
+  <data name="EAudio_WAVDataLength" xml:space="preserve">
+    <value>WAVデータ 長さ:</value>
+  </data>
 </root>
