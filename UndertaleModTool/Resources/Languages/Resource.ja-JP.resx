@@ -355,7 +355,7 @@
 新しいプロジェクトを作成してもよろしいですか？</value>
   </data>
   <data name="AudioGroup_Name" xml:space="preserve">
-    <value>グループの名前</value>
+    <value>グループ名</value>
   </data>
   <data name="AudioGroup_Path" xml:space="preserve">
     <value>パス (GM 2024.14以降)</value>
@@ -391,7 +391,7 @@
     <value>音声ファイル</value>
   </data>
   <data name="Sound_Preload" xml:space="preserve">
-    <value>プレロード (古い音声システム)</value>
+    <value>プレロード(古い音声システム)</value>
   </data>
   <data name="Sound_Play" xml:space="preserve">
     <value>再生</value>
@@ -401,5 +401,62 @@
   </data>
   <data name="Sound_Type" xml:space="preserve">
     <value>タイプ</value>
+  </data>
+  <data name="Sprite_Name" xml:space="preserve">
+    <value>スプライト名</value>
+  </data>
+  <data name="Sprite_Size" xml:space="preserve">
+    <value>サイズ</value>
+  </data>
+  <data name="Sprite_Margin" xml:space="preserve">
+    <value>余白 左/右/下/上</value>
+  </data>
+  <data name="Sprite_Transparent" xml:space="preserve">
+    <value>透明</value>
+  </data>
+  <data name="Sprite_Smooth" xml:space="preserve">
+    <value>スムーズ</value>
+  </data>
+  <data name="Sprite_Preload" xml:space="preserve">
+    <value>プレロード</value>
+  </data>
+  <data name="Sprite_BoundingBoxMode" xml:space="preserve">
+    <value>バウンディングボックスモード</value>
+  </data>
+  <data name="Sprite_SepMasks" xml:space="preserve">
+    <value>分離マスク</value>
+  </data>
+  <data name="Sprite_Origin" xml:space="preserve">
+    <value>基点</value>
+  </data>
+  <data name="Sprite_Textures" xml:space="preserve">
+    <value>テクスチャ</value>
+  </data>
+  <data name="Sprite_CollisionMasks" xml:space="preserve">
+    <value>コリジョンマスク</value>
+  </data>
+  <data name="Tabs_Sprite" xml:space="preserve">
+    <value>スプライト</value>
+  </data>
+  <data name="Sprite_ExportAllFrames" xml:space="preserve">
+    <value>全フレームをエクスポート(Spineスプライトの場合はSpineデータ)</value>
+  </data>
+  <data name="Sprite_IsSpecialType" xml:space="preserve">
+    <value>特殊タイプ？</value>
+  </data>
+  <data name="Sprite_Version" xml:space="preserve">
+    <value>バージョン</value>
+  </data>
+  <data name="Sprite_Type" xml:space="preserve">
+    <value>タイプ</value>
+  </data>
+  <data name="Sprite_PlaybackSpeed" xml:space="preserve">
+    <value>プレイバックスピード</value>
+  </data>
+  <data name="Sprite_PlaybackSpeedType" xml:space="preserve">
+    <value>プレイバックスピードタイプ</value>
+  </data>
+  <data name="Sprite_DoubleClickToAdd" xml:space="preserve">
+    <value>ダブルクリックで追加</value>
   </data>
 </root>
