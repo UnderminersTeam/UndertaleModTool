@@ -141,7 +141,7 @@ namespace UndertaleModTool
                     UndertaleFunction => "Function",
                     UndertaleCodeLocals => "Code Locals",
                     UndertaleEmbeddedTexture => "Embedded Texture",
-                    UndertaleEmbeddedAudio => "Embedded Audio",
+                    UndertaleEmbeddedAudio => Resource.Tabs_EmbeddedAudio,
                     UndertaleTextureGroupInfo => "Texture Group Info",
                     UndertaleEmbeddedImage => "Embedded Image",
                     UndertaleSequence => "Sequence",

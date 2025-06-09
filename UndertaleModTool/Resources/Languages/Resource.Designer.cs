@@ -97,6 +97,51 @@ namespace UndertaleModTool.Resources.Languages {
         }
         
         /// <summary>
+        ///   Export に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string EAudio_Export {
+            get {
+                return ResourceManager.GetString("EAudio_Export", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Import に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string EAudio_Import {
+            get {
+                return ResourceManager.GetString("EAudio_Import", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Play に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string EAudio_Play {
+            get {
+                return ResourceManager.GetString("EAudio_Play", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Stop に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string EAudio_Stop {
+            get {
+                return ResourceManager.GetString("EAudio_Stop", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   WAV data, length: に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string EAudio_WAVDataLength {
+            get {
+                return ResourceManager.GetString("EAudio_WAVDataLength", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   _File に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Menu_File {
@@ -758,6 +803,15 @@ namespace UndertaleModTool.Resources.Languages {
         public static string Tabs_AudioGroup {
             get {
                 return ResourceManager.GetString("Tabs_AudioGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Embedded Audio に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tabs_EmbeddedAudio {
+            get {
+                return ResourceManager.GetString("Tabs_EmbeddedAudio", resourceCulture);
             }
         }
         
