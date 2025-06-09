@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:lang="clr-namespace:UndertaleModTool.Resources.Languages;assembly=UndertaleModTool"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleSprite}">
     <UserControl.Resources>
@@ -56,10 +57,10 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="{x:Static lang:Resource.Sprite_Name}"/>
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Size</TextBlock>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="{x:Static lang:Resource.Sprite_Size}"/>
         <Grid Grid.Row="2" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -69,7 +70,7 @@
             <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding Height}"/>
         </Grid>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Margin Left/Right/Bottom/Top</TextBlock>
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="{x:Static lang:Resource.Sprite_Margin}"/>
         <Grid Grid.Row="3" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -83,23 +84,23 @@
             <local:TextBoxDark Grid.Column="3" Margin="3" Text="{Binding MarginTop}"/>
         </Grid>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Transparent</TextBlock>
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="{x:Static lang:Resource.Sprite_Transparent}"/>
         <CheckBox Grid.Row="4" Grid.Column="1" Margin="3" IsChecked="{Binding Transparent}"/>
-        
-        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Smooth</TextBlock>
+
+        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Text="{x:Static lang:Resource.Sprite_Smooth}"/>
         <CheckBox Grid.Row="5" Grid.Column="1" Margin="3" IsChecked="{Binding Smooth}"/>
-        
-        <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Preload</TextBlock>
+
+        <TextBlock Grid.Row="6" Grid.Column="0" Margin="3" Text="{x:Static lang:Resource.Sprite_Preload}"/>
         <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding Preload}"/>
 
-        <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Bounding box mode</TextBlock>
+        <TextBlock Grid.Row="7" Grid.Column="0" Margin="3" Text="{x:Static lang:Resource.Sprite_BoundingBoxMode}"/>
         <local:TextBoxDark Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding BBoxMode}"/>
 
-        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">SepMasks</TextBlock>
+        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3" Text="{x:Static lang:Resource.Sprite_SepMasks}"/>
         <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource SepMaskType}}" SelectedItem="{Binding Path=SepMasks}"
                             Grid.Row="8" Grid.Column="1" Margin="3"/>
 
-        <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Origin</TextBlock>
+        <TextBlock Grid.Row="9" Grid.Column="0" Margin="3" Text="{x:Static lang:Resource.Sprite_Origin}"/>
         <Grid Grid.Row="9" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -109,7 +110,7 @@
             <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding OriginYWrapper}"/>
         </Grid>
 
-        <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Textures</TextBlock>
+        <TextBlock Grid.Row="10" Grid.Column="0" Margin="3" Text="{x:Static lang:Resource.Sprite_Textures}"/>
         <local:DataGridDark Grid.Row="10" Grid.Column="1" Margin="3" ItemsSource="{Binding Textures, Mode=OneWay}" x:Name="TextureList"
                             AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True"
                             HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray"
@@ -131,7 +132,7 @@
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate>
-                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic" Text="{x:Static lang:Resource.Sprite_DoubleClickToAdd}"/>
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>
@@ -159,9 +160,9 @@
             </Border>
         </Viewbox>
 
-        <local:ButtonDark Grid.Row="12" Grid.Column="1" Content="Export all frames (or Spine data if this is a Spine sprite)" Click="ExportAll_Click"/>
+        <local:ButtonDark Grid.Row="12" Grid.Column="1" Content="{x:Static lang:Resource.Sprite_ExportAllFrames}" Click="ExportAll_Click"/>
 
-        <TextBlock Grid.Row="13" Grid.Column="0" Margin="3">Collision masks</TextBlock>
+        <TextBlock Grid.Row="13" Grid.Column="0" Margin="3" Text="{x:Static lang:Resource.Sprite_CollisionMasks}"/>
         <local:DataGridDark Grid.Row="13" Grid.Column="1" Margin="3" ItemsSource="{Binding CollisionMasks, Mode=OneWay}" x:Name="MaskList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True" AddingNewItem="MaskList_AddingNewItem">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
@@ -180,8 +181,7 @@
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate>
-                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
-                                    </ControlTemplate>
+                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic" Text="{x:Static lang:Resource.Sprite_DoubleClickToAdd}"/>                                    </ControlTemplate>
                                 </Setter.Value>
                             </Setter>
                         </DataTrigger>
@@ -268,7 +268,7 @@
             </ContentControl.Template>
         </ContentControl>
 
-        <TextBlock Grid.Row="15" Grid.Column="0" Margin="3">Is special type?</TextBlock>
+        <TextBlock Grid.Row="15" Grid.Column="0" Margin="3" Text="{x:Static lang:Resource.Sprite_IsSpecialType}"/>
         <CheckBox Grid.Row="15" Grid.Column="1" Margin="3" IsChecked="{Binding IsSpecialType}"/>
 
         <Grid Grid.Row="16" Grid.ColumnSpan="2" Margin="0" Visibility="{Binding Path=IsSpecialType, Mode=OneWay, Converter={StaticResource BoolToVis}}">
@@ -281,11 +281,11 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            
-            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Version</TextBlock>
+
+            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="{x:Static lang:Resource.Sprite_Version}"/>
             <local:TextBoxDark Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding SVersion}"/>
 
-            <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Type</TextBlock>
+            <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="{x:Static lang:Resource.Sprite_Type}"/>
             <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource SpriteType}}" SelectedItem="{Binding Path=SSpriteType}"
                                 Grid.Row="1" Grid.Column="1" Margin="3"/>
 
@@ -299,10 +299,10 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Playback speed</TextBlock>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="{x:Static lang:Resource.Sprite_PlaybackSpeed}"/>
                 <local:TextBoxDark Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GMS2PlaybackSpeed}"/>
 
-                <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Playback speed type</TextBlock>
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="{x:Static lang:Resource.Sprite_PlaybackSpeedType}"/>
                 <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource AnimSpeedType}}" SelectedItem="{Binding Path=GMS2PlaybackSpeedType}"
                                     Grid.Row="1" Grid.Column="1" Margin="3"/>
             </Grid>

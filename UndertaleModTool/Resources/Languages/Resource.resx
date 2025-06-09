@@ -401,4 +401,61 @@ Are you sure you want to make a new project?</value>
   <data name="Sound_Type" xml:space="preserve">
     <value>Type</value>
   </data>
+  <data name="Sprite_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Sprite_Size" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="Sprite_Margin" xml:space="preserve">
+    <value>Margin Left/Right/Bottom/Top</value>
+  </data>
+  <data name="Sprite_Transparent" xml:space="preserve">
+    <value>Transparent</value>
+  </data>
+  <data name="Sprite_Smooth" xml:space="preserve">
+    <value>Smooth</value>
+  </data>
+  <data name="Sprite_Preload" xml:space="preserve">
+    <value>Preload</value>
+  </data>
+  <data name="Sprite_BoundingBoxMode" xml:space="preserve">
+    <value>Bounding box mode</value>
+  </data>
+  <data name="Sprite_SepMasks" xml:space="preserve">
+    <value>SepMasks</value>
+  </data>
+  <data name="Sprite_Origin" xml:space="preserve">
+    <value>Origin</value>
+  </data>
+  <data name="Sprite_Textures" xml:space="preserve">
+    <value>Textures</value>
+  </data>
+  <data name="Sprite_CollisionMasks" xml:space="preserve">
+    <value>Collision masks</value>
+  </data>
+  <data name="Tabs_Sprite" xml:space="preserve">
+    <value>Sprite</value>
+  </data>
+  <data name="Sprite_ExportAllFrames" xml:space="preserve">
+    <value>Export all frames (or Spine data if this is a Spine sprite)</value>
+  </data>
+  <data name="Sprite_IsSpecialType" xml:space="preserve">
+    <value>Is special type?</value>
+  </data>
+  <data name="Sprite_Version" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="Sprite_Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Sprite_PlaybackSpeed" xml:space="preserve">
+    <value>Playback speed</value>
+  </data>
+  <data name="Sprite_PlaybackSpeedType" xml:space="preserve">
+    <value>Playback speed type</value>
+  </data>
+  <data name="Sprite_DoubleClickToAdd" xml:space="preserve">
+    <value>Double click to add</value>
+  </data>
 </root>

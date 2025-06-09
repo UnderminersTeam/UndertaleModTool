@@ -591,6 +591,168 @@ namespace UndertaleModTool.Resources.Languages {
         }
         
         /// <summary>
+        ///   Bounding box mode に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sprite_BoundingBoxMode {
+            get {
+                return ResourceManager.GetString("Sprite_BoundingBoxMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Collision masks に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sprite_CollisionMasks {
+            get {
+                return ResourceManager.GetString("Sprite_CollisionMasks", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Double click to add に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sprite_DoubleClickToAdd {
+            get {
+                return ResourceManager.GetString("Sprite_DoubleClickToAdd", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Export all frames (or Spine data if this is a Spine sprite) に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sprite_ExportAllFrames {
+            get {
+                return ResourceManager.GetString("Sprite_ExportAllFrames", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Is special type? に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sprite_IsSpecialType {
+            get {
+                return ResourceManager.GetString("Sprite_IsSpecialType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Margin Left/Right/Bottom/Top に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sprite_Margin {
+            get {
+                return ResourceManager.GetString("Sprite_Margin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Name に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sprite_Name {
+            get {
+                return ResourceManager.GetString("Sprite_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Origin に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sprite_Origin {
+            get {
+                return ResourceManager.GetString("Sprite_Origin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Playback speed に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sprite_PlaybackSpeed {
+            get {
+                return ResourceManager.GetString("Sprite_PlaybackSpeed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Playback speed type に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sprite_PlaybackSpeedType {
+            get {
+                return ResourceManager.GetString("Sprite_PlaybackSpeedType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Preload に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sprite_Preload {
+            get {
+                return ResourceManager.GetString("Sprite_Preload", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   SepMasks に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sprite_SepMasks {
+            get {
+                return ResourceManager.GetString("Sprite_SepMasks", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Size に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sprite_Size {
+            get {
+                return ResourceManager.GetString("Sprite_Size", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Smooth に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sprite_Smooth {
+            get {
+                return ResourceManager.GetString("Sprite_Smooth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Textures に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sprite_Textures {
+            get {
+                return ResourceManager.GetString("Sprite_Textures", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Transparent に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sprite_Transparent {
+            get {
+                return ResourceManager.GetString("Sprite_Transparent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Type に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sprite_Type {
+            get {
+                return ResourceManager.GetString("Sprite_Type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Version に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Sprite_Version {
+            get {
+                return ResourceManager.GetString("Sprite_Version", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Audio Group に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Tabs_AudioGroup {
@@ -605,6 +767,15 @@ namespace UndertaleModTool.Resources.Languages {
         public static string Tabs_Sound {
             get {
                 return ResourceManager.GetString("Tabs_Sound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sprite に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tabs_Sprite {
+            get {
+                return ResourceManager.GetString("Tabs_Sprite", resourceCulture);
             }
         }
         

@@ -124,8 +124,8 @@ namespace UndertaleModTool
                 string header = obj switch
                 {
                     UndertaleAudioGroup => Resource.Tabs_AudioGroup,
-                    UndertaleSound => "Sound",
-                    UndertaleSprite => "Sprite",
+                    UndertaleSound => Resource.Tabs_Sound,
+                    UndertaleSprite => Resource.Tabs_Sprite,
                     UndertaleBackground => "Background",
                     UndertalePath => "Path",
                     UndertaleScript => "Script",
