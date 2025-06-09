@@ -879,6 +879,15 @@ namespace UndertaleModTool.Resources.Languages {
         }
         
         /// <summary>
+        ///   Content に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string String_Content {
+            get {
+                return ResourceManager.GetString("String_Content", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Audio Group に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Tabs_AudioGroup {
@@ -929,6 +938,15 @@ namespace UndertaleModTool.Resources.Languages {
         public static string Tabs_Sprite {
             get {
                 return ResourceManager.GetString("Tabs_Sprite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   String に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tabs_String {
+            get {
+                return ResourceManager.GetString("Tabs_String", resourceCulture);
             }
         }
         

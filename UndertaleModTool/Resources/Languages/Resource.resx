@@ -509,4 +509,10 @@ Are you sure you want to make a new project?</value>
   <data name="ETexture_Scaled" xml:space="preserve">
     <value>Scaled</value>
   </data>
+  <data name="Tabs_String" xml:space="preserve">
+    <value>String</value>
+  </data>
+  <data name="String_Content" xml:space="preserve">
+    <value>Content</value>
+  </data>
 </root>

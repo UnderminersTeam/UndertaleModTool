@@ -171,7 +171,7 @@ namespace UndertaleModTool
                     }
                 }
 
-                title = "String - " + stringFirstLine;
+                title = $"{Resource.Tabs_String} - " + stringFirstLine;
             }
             else if (obj is UndertaleExtensionFile file)
             {
