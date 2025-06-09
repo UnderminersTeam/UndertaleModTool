@@ -486,4 +486,28 @@
   <data name="EImage_Texture" xml:space="preserve">
     <value>テクスチャ</value>
   </data>
+  <data name="Tabs_EmbeddedTexture" xml:space="preserve">
+    <value>埋め込みテクスチャ</value>
+  </data>
+  <data name="ETexture_Export" xml:space="preserve">
+    <value>エクスポート</value>
+  </data>
+  <data name="ETexture_Import" xml:space="preserve">
+    <value>インポート</value>
+  </data>
+  <data name="ETexture_Size" xml:space="preserve">
+    <value>サイズ</value>
+  </data>
+  <data name="ETexture_Hint" xml:space="preserve">
+    <value>ヒント: この画像はマウス操作が可能です (マウスボタン3つとマウスホイール)。</value>
+  </data>
+  <data name="ETexture_Warning" xml:space="preserve">
+    <value>エラー: テクスチャの読み込みに失敗しました。</value>
+  </data>
+  <data name="ETexture_GeneratedMips" xml:space="preserve">
+    <value>生成済みミップマップ</value>
+  </data>
+  <data name="ETexture_Scaled" xml:space="preserve">
+    <value>スケーリング</value>
+  </data>
 </root>
