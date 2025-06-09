@@ -476,4 +476,13 @@ Are you sure you want to make a new project?</value>
   <data name="EAudio_WAVDataLength" xml:space="preserve">
     <value>WAV data, length:</value>
   </data>
+  <data name="Tabs_EmbeddedImage" xml:space="preserve">
+    <value>Embedded Image</value>
+  </data>
+  <data name="EImage_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="EImage_Texture" xml:space="preserve">
+    <value>Texture</value>
+  </data>
 </root>

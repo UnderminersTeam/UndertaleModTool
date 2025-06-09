@@ -477,4 +477,13 @@
   <data name="EAudio_WAVDataLength" xml:space="preserve">
     <value>WAVデータ 長さ:</value>
   </data>
+  <data name="Tabs_EmbeddedImage" xml:space="preserve">
+    <value>埋め込み画像</value>
+  </data>
+  <data name="EImage_Name" xml:space="preserve">
+    <value>画像名</value>
+  </data>
+  <data name="EImage_Texture" xml:space="preserve">
+    <value>テクスチャ</value>
+  </data>
 </root>
