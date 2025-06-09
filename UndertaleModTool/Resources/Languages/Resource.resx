@@ -485,4 +485,28 @@ Are you sure you want to make a new project?</value>
   <data name="EImage_Texture" xml:space="preserve">
     <value>Texture</value>
   </data>
+  <data name="Tabs_EmbeddedTexture" xml:space="preserve">
+    <value>Embedded Texture</value>
+  </data>
+  <data name="ETexture_Export" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="ETexture_Import" xml:space="preserve">
+    <value>Import</value>
+  </data>
+  <data name="ETexture_Size" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="ETexture_Hint" xml:space="preserve">
+    <value>Hint: This image is mouse interactable (3 mouse buttons and mouse wheel).</value>
+  </data>
+  <data name="ETexture_Warning" xml:space="preserve">
+    <value>Warning: Texture failed to load!</value>
+  </data>
+  <data name="ETexture_GeneratedMips" xml:space="preserve">
+    <value>Generated mips</value>
+  </data>
+  <data name="ETexture_Scaled" xml:space="preserve">
+    <value>Scaled</value>
+  </data>
 </root>

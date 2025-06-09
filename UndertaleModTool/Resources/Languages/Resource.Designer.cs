@@ -160,6 +160,69 @@ namespace UndertaleModTool.Resources.Languages {
         }
         
         /// <summary>
+        ///   Export に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ETexture_Export {
+            get {
+                return ResourceManager.GetString("ETexture_Export", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Generated mips に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ETexture_GeneratedMips {
+            get {
+                return ResourceManager.GetString("ETexture_GeneratedMips", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Hint: This image is mouse interactable (3 mouse buttons and mouse wheel). に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ETexture_Hint {
+            get {
+                return ResourceManager.GetString("ETexture_Hint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Import に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ETexture_Import {
+            get {
+                return ResourceManager.GetString("ETexture_Import", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Scaled に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ETexture_Scaled {
+            get {
+                return ResourceManager.GetString("ETexture_Scaled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Size に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ETexture_Size {
+            get {
+                return ResourceManager.GetString("ETexture_Size", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Warning: Texture failed to load! に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string ETexture_Warning {
+            get {
+                return ResourceManager.GetString("ETexture_Warning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   _File に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Menu_File {
@@ -839,6 +902,15 @@ namespace UndertaleModTool.Resources.Languages {
         public static string Tabs_EmbeddedImage {
             get {
                 return ResourceManager.GetString("Tabs_EmbeddedImage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Embedded Texture に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tabs_EmbeddedTexture {
+            get {
+                return ResourceManager.GetString("Tabs_EmbeddedTexture", resourceCulture);
             }
         }
         
