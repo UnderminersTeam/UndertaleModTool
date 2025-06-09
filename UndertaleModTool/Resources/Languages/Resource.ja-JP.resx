@@ -510,4 +510,10 @@
   <data name="ETexture_Scaled" xml:space="preserve">
     <value>スケーリング</value>
   </data>
+  <data name="Tabs_String" xml:space="preserve">
+    <value>文字列</value>
+  </data>
+  <data name="String_Content" xml:space="preserve">
+    <value>内容</value>
+  </data>
 </root>
