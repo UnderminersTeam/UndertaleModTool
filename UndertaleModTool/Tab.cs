@@ -143,7 +143,7 @@ namespace UndertaleModTool
                     UndertaleEmbeddedTexture => "Embedded Texture",
                     UndertaleEmbeddedAudio => Resource.Tabs_EmbeddedAudio,
                     UndertaleTextureGroupInfo => "Texture Group Info",
-                    UndertaleEmbeddedImage => "Embedded Image",
+                    UndertaleEmbeddedImage => Resource.Tabs_EmbeddedImage,
                     UndertaleSequence => "Sequence",
                     UndertaleAnimationCurve => "Animation Curve",
                     UndertaleParticleSystem => "Particle System",

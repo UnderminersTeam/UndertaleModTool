@@ -142,6 +142,24 @@ namespace UndertaleModTool.Resources.Languages {
         }
         
         /// <summary>
+        ///   Name に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string EImage_Name {
+            get {
+                return ResourceManager.GetString("EImage_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Texture に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string EImage_Texture {
+            get {
+                return ResourceManager.GetString("EImage_Texture", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   _File に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Menu_File {
@@ -812,6 +830,15 @@ namespace UndertaleModTool.Resources.Languages {
         public static string Tabs_EmbeddedAudio {
             get {
                 return ResourceManager.GetString("Tabs_EmbeddedAudio", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Embedded Image に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tabs_EmbeddedImage {
+            get {
+                return ResourceManager.GetString("Tabs_EmbeddedImage", resourceCulture);
             }
         }
         
