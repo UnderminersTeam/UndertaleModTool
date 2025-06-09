@@ -609,6 +609,24 @@ namespace UndertaleModTool.Resources.Languages {
         }
         
         /// <summary>
+        ///   Code に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Script_Code {
+            get {
+                return ResourceManager.GetString("Script_Code", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Name に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Script_Name {
+            get {
+                return ResourceManager.GetString("Script_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Audio file に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Sound_AudioFile {
@@ -920,6 +938,15 @@ namespace UndertaleModTool.Resources.Languages {
         public static string Tabs_EmbeddedTexture {
             get {
                 return ResourceManager.GetString("Tabs_EmbeddedTexture", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Script に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tabs_Script {
+            get {
+                return ResourceManager.GetString("Tabs_Script", resourceCulture);
             }
         }
         

@@ -516,4 +516,13 @@
   <data name="String_Content" xml:space="preserve">
     <value>内容</value>
   </data>
+  <data name="Tabs_Script" xml:space="preserve">
+    <value>スクリプト</value>
+  </data>
+  <data name="Script_Code" xml:space="preserve">
+    <value>コード</value>
+  </data>
+  <data name="Script_Name" xml:space="preserve">
+    <value>スクリプト名</value>
+  </data>
 </root>

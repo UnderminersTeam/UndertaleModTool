@@ -128,7 +128,7 @@ namespace UndertaleModTool
                     UndertaleSprite => Resource.Tabs_Sprite,
                     UndertaleBackground => "Background",
                     UndertalePath => "Path",
-                    UndertaleScript => "Script",
+                    UndertaleScript => Resource.Tabs_Script,
                     UndertaleShader => "Shader",
                     UndertaleFont => "Font",
                     UndertaleTimeline => "Timeline",
