@@ -21,31 +21,8 @@
     </UserControl.Resources>
 
     <DockPanel>
-        <Menu DockPanel.Dock="Top">
-            <MenuItem Header="_File">
-                <MenuItem Header="_New" Command="{Binding FileNew}"/>
-                <MenuItem Header="_Open" Command="{Binding FileOpen}"/>
-                <MenuItem Header="_Save"/>
-                <Separator/>
-                <MenuItem Header="_Temp run game"/>
-                <MenuItem Header="Run game under GMS _debugger"/>
-                <MenuItem Header="Run game with other runner"/>
-                <Separator/>
-                <MenuItem Header="Generate o_ffset map"/>
-                <Separator/>
-                <MenuItem Header="S_ettings"/>
-                <MenuItem Header="_Close"/>
-            </MenuItem>
-            <MenuItem Header="_Script"></MenuItem>
-            <MenuItem Header="_Find">
-                <MenuItem Header="_Search in code"/>
-                <MenuItem Header="Find unreferenced _assets"/>
-            </MenuItem>
-            <MenuItem Header="_Help">
-                <MenuItem Header="_GitHub" />
-                <MenuItem Header="_About" Command="{Binding HelpAbout}"/>
-            </MenuItem>
-        </Menu>
+        <NativeMenuBar DockPanel.Dock="Top" />
+        
         <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,auto">
             <TextBox Grid.Column="0" />
             <Label Grid.Column="1" Content="None"/>

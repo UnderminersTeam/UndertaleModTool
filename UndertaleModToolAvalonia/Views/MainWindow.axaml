@@ -9,5 +9,40 @@
         Icon="/Assets/avalonia-logo.ico"
         x:DataType="v:MainViewModel"
         Title="{Binding Title}">
-        <v:MainView />
+    <NativeMenu.Menu>
+        <NativeMenu>
+            <NativeMenuItem Header="_File">
+                <NativeMenu>
+                    <NativeMenuItem Header="_New" Command="{Binding FileNew}"/>
+                    <NativeMenuItem Header="_Open" Command="{Binding FileOpen}"/>
+                    <NativeMenuItem Header="_Save"/>
+                    <NativeMenuItemSeparator Header="-" />
+                    <NativeMenuItem Header="_Temp run game"/>
+                    <NativeMenuItem Header="Run game under GMS _debugger"/>
+                    <NativeMenuItem Header="Run game with other runner"/>
+                    <NativeMenuItemSeparator Header="-" />
+                    <NativeMenuItem Header="Generate o_ffset map"/>
+                    <NativeMenuItemSeparator Header="-" />
+                    <NativeMenuItem Header="S_ettings"/>
+                    <NativeMenuItem Header="_Close"/>
+                </NativeMenu>
+            </NativeMenuItem>
+            <NativeMenuItem Header="_Script">
+            </NativeMenuItem>
+            <NativeMenuItem Header="_Find">
+                <NativeMenu>
+                    <NativeMenuItem Header="_Search in code"/>
+                    <NativeMenuItem Header="Find unreferenced _assets"/>
+                </NativeMenu>
+            </NativeMenuItem>
+            <NativeMenuItem Header="_Help">
+                <NativeMenu>
+                    <NativeMenuItem Header="_GitHub" />
+                    <NativeMenuItem Header="_About" Command="{Binding HelpAbout}"/>
+                </NativeMenu>
+            </NativeMenuItem>
+        </NativeMenu>
+    </NativeMenu.Menu>
+    
+    <v:MainView />
 </Window>
