@@ -1,9 +1,11 @@
-﻿using UndertaleModLib.Models;
+﻿using UndertaleModLib;
+using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia.Views;
 
-public class UndertalePathViewModel
+public partial class UndertalePathViewModel : IUndertaleResourceViewModel
 {
+    public UndertaleResource Resource => Path;
     public UndertalePath Path { get; set; }
 
     public UndertalePathViewModel(UndertalePath path)

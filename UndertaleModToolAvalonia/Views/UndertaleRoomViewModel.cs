@@ -6,8 +6,9 @@ using static UndertaleModLib.Models.UndertaleRoom;
 
 namespace UndertaleModToolAvalonia.Views;
 
-public partial class UndertaleRoomViewModel
+public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
 {
+    public UndertaleResource Resource => Room;
     public UndertaleRoom Room { get; set; }
 
     [Notify]

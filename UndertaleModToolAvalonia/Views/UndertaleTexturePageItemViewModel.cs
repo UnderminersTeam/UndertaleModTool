@@ -3,14 +3,16 @@ using System.IO;
 using Avalonia.Platform.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using SkiaSharp;
+using UndertaleModLib;
 using UndertaleModLib.Models;
 using UndertaleModToolAvalonia.Controls;
 
 namespace UndertaleModToolAvalonia.Views;
 
-public class UndertaleTexturePageItemViewModel
+public partial class UndertaleTexturePageItemViewModel : IUndertaleResourceViewModel
 {
     public MainViewModel MainVM;
+    public UndertaleResource Resource => TexturePageItem;
     public UndertaleTexturePageItem TexturePageItem { get; set; }
 
     public UndertaleTexturePageItemViewModel(UndertaleTexturePageItem texturePageItem, IServiceProvider? serviceProvider = null)

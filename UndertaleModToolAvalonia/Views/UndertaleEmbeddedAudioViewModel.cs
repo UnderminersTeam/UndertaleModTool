@@ -2,13 +2,15 @@
 using System.IO;
 using Avalonia.Platform.Storage;
 using Microsoft.Extensions.DependencyInjection;
+using UndertaleModLib;
 using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia.Views;
 
-public class UndertaleEmbeddedAudioViewModel
+public partial class UndertaleEmbeddedAudioViewModel : IUndertaleResourceViewModel
 {
     public MainViewModel MainVM;
+    public UndertaleResource Resource => EmbeddedAudio;
     public UndertaleEmbeddedAudio EmbeddedAudio { get; set; }
 
     public UndertaleEmbeddedAudioViewModel(UndertaleEmbeddedAudio embeddedAudio, IServiceProvider? serviceProvider = null)

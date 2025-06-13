@@ -1,9 +1,11 @@
-﻿using UndertaleModLib.Models;
+﻿using UndertaleModLib;
+using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia.Views;
 
-public class UndertaleGameObjectViewModel
+public partial class UndertaleGameObjectViewModel : IUndertaleResourceViewModel
 {
+    public UndertaleResource Resource => GameObject;
     public UndertaleGameObject GameObject { get; set; }
 
     public UndertaleGameObjectViewModel(UndertaleGameObject gameObject)

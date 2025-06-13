@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using UndertaleModLib;
 using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia.Views;
 
-public class UndertaleFontViewModel
+public partial class UndertaleFontViewModel : IUndertaleResourceViewModel
 {
+    public UndertaleResource Resource => Font;
     public UndertaleFont Font { get; set; }
 
     public UndertaleFontViewModel(UndertaleFont font)

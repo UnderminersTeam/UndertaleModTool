@@ -2,15 +2,17 @@
 using SkiaSharp;
 using System.IO;
 using System;
+using UndertaleModLib;
 using UndertaleModLib.Models;
 using UndertaleModToolAvalonia.Controls;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace UndertaleModToolAvalonia.Views;
 
-public class UndertaleEmbeddedTextureViewModel
+public partial class UndertaleEmbeddedTextureViewModel : IUndertaleResourceViewModel
 {
     public MainViewModel MainVM;
+    public UndertaleResource Resource => EmbeddedTexture;
     public UndertaleEmbeddedTexture EmbeddedTexture { get; set; }
 
     public UndertaleEmbeddedTextureViewModel(UndertaleEmbeddedTexture embeddedTexture, IServiceProvider? serviceProvider = null)

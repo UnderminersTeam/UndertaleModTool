@@ -1,9 +1,11 @@
-﻿using UndertaleModLib.Models;
+﻿using UndertaleModLib;
+using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia.Views;
 
-public class UndertaleBackgroundViewModel
+public partial class UndertaleBackgroundViewModel : IUndertaleResourceViewModel
 {
+    public UndertaleResource Resource => Background;
     public UndertaleBackground Background { get; set; }
 
     public UndertaleBackgroundViewModel(UndertaleBackground background)

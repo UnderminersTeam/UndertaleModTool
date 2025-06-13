@@ -44,6 +44,8 @@ public partial class MainViewModel
     private TabItemViewModel? _TabSelected;
     [Notify]
     private int _TabSelectedIndex;
+    [Notify]
+    private string _TabSelectedResourceIdString = "None";
 
     // Image cache
     public ImageCache ImageCache = new();
@@ -328,6 +330,18 @@ public partial class MainViewModel
                 index = Tabs.Count - 1;
 
             TabSelectedIndex = index;
+        }
+    }
+
+    private void OnTabSelectedChanged()
+    {
+        if (Data is not null && TabSelected?.Content is IUndertaleResourceViewModel vm)
+        {
+            TabSelectedResourceIdString = Data.IndexOf(vm.Resource).ToString();
+        }
+        else
+        {
+            TabSelectedResourceIdString = "None";
         }
     }
 }

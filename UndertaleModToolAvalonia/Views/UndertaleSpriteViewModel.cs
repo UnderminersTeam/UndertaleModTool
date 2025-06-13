@@ -1,9 +1,11 @@
-﻿using UndertaleModLib.Models;
+﻿using UndertaleModLib;
+using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia.Views;
 
-public class UndertaleSpriteViewModel
+public partial class UndertaleSpriteViewModel : IUndertaleResourceViewModel
 {
+    public UndertaleResource Resource => Sprite;
     public UndertaleSprite Sprite { get; set; }
 
     public UndertaleSpriteViewModel(UndertaleSprite sprite)

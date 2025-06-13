@@ -25,7 +25,8 @@
         
         <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,auto">
             <TextBox Grid.Column="0" />
-            <Label Grid.Column="1" Content="None"/>
+            <Label Grid.Column="1" Content="{Binding TabSelectedResourceIdString}"
+                   ToolTip.Tip="This is an ID (index) of the currently open asset, item, or object. It starts from 0."/>
         </Grid>
         <Grid ColumnDefinitions="1*,Auto,3*">
             <Grid x:Name="LeftPanel" Grid.Column="0" RowDefinitions="Auto,1*">

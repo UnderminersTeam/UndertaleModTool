@@ -1,9 +1,11 @@
-﻿using UndertaleModLib.Models;
+﻿using UndertaleModLib;
+using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia.Views;
 
-public class UndertaleVariableViewModel
+public partial class UndertaleVariableViewModel : IUndertaleResourceViewModel
 {
+    public UndertaleResource Resource => Variable;
     public UndertaleVariable Variable { get; set; }
 
     public UndertaleVariableViewModel(UndertaleVariable variable)

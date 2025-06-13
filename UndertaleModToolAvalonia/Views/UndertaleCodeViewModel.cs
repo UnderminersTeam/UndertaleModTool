@@ -8,10 +8,11 @@ using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia.Views;
 
-public partial class UndertaleCodeViewModel
+public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
 {
     // TODO: A billion things. Syntax highlighting.
     public MainViewModel MainVM;
+    public UndertaleResource Resource => Code;
     public UndertaleCode Code { get; set; }
 
     public TextDocument GMLTextDocument { get; set; } = new TextDocument();
