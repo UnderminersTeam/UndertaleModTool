@@ -870,6 +870,7 @@
       "draw_line_width_color": [ null, null, null, null, null, "Constant.Color", "Constant.Color" ],
       "draw_point_color": [ null, null, "Constant.Color" ],
       "draw_rectangle_color": [ null, null, null, null, "Constant.Color", "Constant.Color", "Constant.Color", "Constant.Color", null ],
+      "draw_triangle_color": [ null, null, null, null, null, null, "Constant.Color", null, null, null ],
       "draw_roundrect_color": [ null, null, null, null, "Constant.Color", "Constant.Color", null ],
       "draw_roundrect_color_ext": [ null, null, null, null, null, null, "Constant.Color", "Constant.Color", null ],
       "draw_set_colour": [ "Constant.Color" ],
@@ -879,6 +880,7 @@
       "draw_line_width_colour": [ null, null, null, null, null, "Constant.Color", "Constant.Color" ],
       "draw_point_colour": [ null, null, "Constant.Color" ],
       "draw_rectangle_colour": [ null, null, null, null, "Constant.Color", "Constant.Color", "Constant.Color", "Constant.Color", null ],
+      "draw_triangle_colour": [ null, null, null, null, null, null, "Constant.Color", null, null, null ],
       "draw_roundrect_colour": [ null, null, null, null, "Constant.Color", "Constant.Color", null ],
       "draw_roundrect_colour_ext": [ null, null, null, null, null, null, "Constant.Color", "Constant.Color", null ],
       "draw_healthbar": [ null, null, null, null, null, "Constant.Color", "Constant.Color", "Constant.Color", null, null, null ],
@@ -931,10 +933,14 @@
       "position_meeting": [ null, null, "Id.InstanceOrObject" ],
       "position_change": [ null, null, "Asset.Object", null ],
       "collision_circle": [ null, null, null, "Id.InstanceOrObject", null, null ],
+      "collision_circle_list": [ null, null, null, "Id.InstanceOrObject", null, null, null, null ],
       "collision_ellipse": [ null, null, null, null, "Id.InstanceOrObject", null, null ],
       "collision_line": [ null, null, null, null, "Id.InstanceOrObject", "Bool", "Bool" ],
+      "collision_line_list": [ null, null, null, null, "Id.InstanceOrObject", "Bool", "Bool", null, null ],
       "collision_point": [ null, null, "Id.InstanceOrObject", null, null ],
+      "collision_point_list": [ null, null, "Id.InstanceOrObject", null, null, null, null ],
       "collision_rectangle": [ null, null, null, null, "Id.InstanceOrObject", null, null ],
+      "collision_rectangle_list": [ null, null, null, null, "Id.InstanceOrObject", null, null, null, null ],
       "mp_linear_step_object": [ null, null, null, "Id.InstanceOrObject" ],
       "mp_linear_path": [ "Asset.Path", null, null, null, null ],
       "mp_linear_path_object": [ "Asset.Path", null, null, null, "Id.InstanceOrObject" ],
@@ -1011,9 +1017,32 @@
       "gpu_set_blendmode": [ "Constant.BlendMode" ],
       "draw_set_blend_mode": [ "Constant.BlendMode" ],
       "gml_Script_draw_set_blend_mode": [ "Constant.BlendMode" ],
-      "gpu_set_blendmode_ext": [ "Constant.BlendModeFactor", "Constant.BlendModeFactor" ],
+      "gpu_set_blendmode_ext": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Constant.BlendModeFactor", "Constant.BlendModeFactor" ],
+          [
+            {
+              "MacroType": "ArrayInit",
+              "Macro": "Constant.BlendModeFactor"
+            }
+          ]
+        ]
+      },
       "draw_set_blend_mode_ext": [ "Constant.BlendModeFactor", "Constant.BlendModeFactor" ],
       "gml_Script_draw_set_blend_mode_ext": [ "Constant.BlendModeFactor", "Constant.BlendModeFactor" ],
+      "gpu_set_blendmode_ext_sepalpha": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Constant.BlendModeFactor", "Constant.BlendModeFactor", "Constant.BlendModeFactor", "Constant.BlendModeFactor" ],
+          [
+            {
+              "MacroType": "ArrayInit",
+              "Macro": "Constant.BlendModeFactor"
+            }
+          ]
+        ]
+      },
       "__view_get": "FunctionArguments.__view_get",
       "__view_set": "FunctionArguments.__view_set",
       "gml_Script___view_get": "FunctionArguments.__view_get",
