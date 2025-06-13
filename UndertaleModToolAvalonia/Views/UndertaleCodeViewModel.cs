@@ -30,29 +30,50 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
 
     public void DecompileToGML()
     {
+        if (Code.ParentEntry is not null)
+            return;
+
+        // TODO: Decompiler settings
         GlobalDecompileContext context = new(MainVM.Data);
         GMLTextDocument.Text = new Underanalyzer.Decompiler.DecompileContext(context, Code).DecompileToString();
     }
 
     public void CompileFromGML()
     {
+        if (Code.ParentEntry is not null)
+            return;
+
         CompileGroup group = new(MainVM.Data);
+        // TODO: MainThreadAction
         group.QueueCodeReplace(Code, GMLTextDocument.Text);
         CompileResult result = group.Compile();
 
         if (!result.Successful)
         {
-            // Show errors
+            MainVM.MessageDialog!(result.PrintAllErrors(codeEntryNames: false), title: "GML compilation error", ok: true);
         }
     }
 
     public void DecompileToASM()
     {
+        if (Code.ParentEntry is not null)
+            return;
+
         ASMTextDocument.Text = Code.Disassemble(MainVM.Data!.Variables, MainVM.Data!.CodeLocals?.For(Code));
     }
 
     public void CompileFromASM()
     {
-        Code.Replace(Assembler.Assemble(ASMTextDocument.Text, MainVM.Data));
+        if (Code.ParentEntry is not null)
+            return;
+
+        try
+        {
+            Code.Replace(Assembler.Assemble(ASMTextDocument.Text, MainVM.Data));
+        }
+        catch (Exception e)
+        {
+            MainVM.MessageDialog!(e.ToString(), title: "ASM compilation error", ok: true);
+        }
     }
 }

@@ -5,6 +5,7 @@
              xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
              xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
              xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
+             xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              xmlns:AvaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="UndertaleModToolAvalonia.Views.UndertaleCodeView"
@@ -13,8 +14,12 @@
         <Grid Grid.Row="0" h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
             <Label>Name</Label>
             <c:UndertaleStringReferenceView Reference="{Binding Code.Name}" />
+
+            <Label>Parent</Label>
+            <c:UndertaleResourceReferenceView Reference="{Binding Code.ParentEntry}" ReferenceType="undertalem:UndertaleGameObject" />
         </Grid>
-        <TabControl Grid.Row="1">
+        
+        <TabControl Grid.Row="1" IsVisible="{Binding Code.ParentEntry, Converter={x:Static ObjectConverters.IsNull}}">
             <TabItem Header="GML">
                 <ThemeVariantScope RequestedThemeVariant="Dark">
                     <!-- TODO: {DynamicResource ThemeBackgroundBrush} doesn't work. -->
@@ -40,5 +45,9 @@
                 </ThemeVariantScope>
             </TabItem>
         </TabControl>
+        
+        <TextBlock Grid.Row="1" IsVisible="{Binding Code.ParentEntry, Converter={x:Static ObjectConverters.IsNotNull}}" Classes="PaddedProperties">
+            <Run Text="This code entry is a reference to an anonymous function within " /><Run Text="{Binding Code.ParentEntry.Name.Content}"/><Run Text=", view it there." />
+        </TextBlock>
     </Grid>
 </UserControl>

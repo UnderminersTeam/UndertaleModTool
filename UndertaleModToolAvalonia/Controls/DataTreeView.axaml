@@ -44,6 +44,15 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
             <ListBox.DataTemplates>
+                <DataTemplate DataType="undertalem:UndertaleCode">
+                    <TextBlock Text="{Binding Name.Content}">
+                        <Interaction.Behaviors>
+                            <DataTriggerBehavior Binding="{Binding ParentEntry}" ComparisonCondition="NotEqual" Value="{x:Null}">
+                                <ChangePropertyAction PropertyName="Foreground" Value="Gray" />
+                            </DataTriggerBehavior>
+                        </Interaction.Behaviors>
+                    </TextBlock>
+                </DataTemplate>
                 <DataTemplate DataType="undertale:UndertaleNamedResource">
                     <TextBlock Text="{Binding Name.Content}"/>
                 </DataTemplate>
