@@ -296,7 +296,8 @@
         "os_switch": 21,
         "os_ps5": 22,
         "os_gdk": 23,
-        "os_gxgames": 24
+        "os_gxgames": 24,
+        "os_switch2": 25
       },
       "Constant.BlendMode": {
         "bm_complex": -1,
