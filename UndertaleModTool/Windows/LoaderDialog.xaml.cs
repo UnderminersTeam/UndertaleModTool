@@ -17,6 +17,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Windows.Shell;
+using UndertaleModTool.Resources.Languages;
 
 namespace UndertaleModTool
 {
@@ -30,7 +31,7 @@ namespace UndertaleModTool
         public string Message { get; set; }
         public bool PreventClose { get; set; }
 
-        public string StatusText { get; set; } = "Please wait...";
+        public string StatusText { get; set; } = Resource.Msg_PleaseWait;
         public string SavedStatusText { get; set; }
         public double? Maximum
         {
