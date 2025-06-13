@@ -456,7 +456,50 @@
       "hintcol": "Constant.Color",
       "sprite_top": "Asset.Sprite",
       "shrink_sprite": "Asset.Sprite",
-      "_symbol_sprite": "Asset.Sprite"
+      "_symbol_sprite": "Asset.Sprite",
+      "castle_town_rooms": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Room"
+          },
+          "Asset.Room"
+        ]
+      },
+      "church_a_rooms": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Room"
+          },
+          "Asset.Room"
+        ]
+      },
+      "church_b_rooms": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Room"
+          },
+          "Asset.Room"
+        ]
+      },
+      "church_c_rooms": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Room"
+          },
+          "Asset.Room"
+        ]
+      },
+      "room_id": "Asset.Room",
+      "_border_image_layer": "Asset.Sprite",
+      "tile_sprite": "Asset.Sprite"
     },
     "FunctionArguments": {
       "snd_play": {
@@ -530,9 +573,11 @@
       "gml_Script_c_soundplay": [ "Asset.Sound" ],
       "gml_Script_c_sound_play": [ "Asset.Sound" ],
       "gml_Script_c_sndplay": [ "Asset.Sound" ],
+      "gml_Script_c_snd_play": [ "Asset.Sound" ],
       "gml_Script_c_soundplay_x": [ "Asset.Sound", null, null ],
       "gml_Script_c_sound_play_x": [ "Asset.Sound", null, null ],
       "gml_Script_c_sndplay_x": [ "Asset.Sound", null, null ],
+      "gml_Script_c_snd_play_x": [ "Asset.Sound", null, null ],
       "gml_Script_c_soundplay_wait": [ "Asset.Sound" ],
       "gml_Script_c_sprite": [ "Asset.Sprite" ],
       "gml_Script_c_jump_sprite": [ null, null, null, null, "Asset.Sprite", "Asset.Sprite" ],
@@ -548,6 +593,8 @@
         ]
       },
       "gml_Script_scr_dark_marker": [ null, null, "Asset.Sprite" ],
+      "gml_Script_scr_dark_marker_fancy": [ null, null, "Asset.Sprite" ],
+      "gml_Script_scr_custom_marker_depth": [ null, null, null, null, "Asset.Sprite" ],
       "gml_Script_scr_marker_playonce": [ null, null, "Asset.Sprite" ],
       "gml_Script_scr_marker_jitter": [ null, null, "Asset.Sprite" ],
       "gml_Script_scr_marker_jitterwobble": [ null, null, "Asset.Sprite" ],
@@ -893,7 +940,40 @@
           [ "Asset.Object", null, null ],
           [ "Asset.Object", null, null, null ]
         ]
-      }
+      },
+      "gml_Script_findsprite": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Sprite" ],
+          [ "Asset.Sprite", null ],
+          [ "Asset.Sprite", null, "Constant.Color" ],
+          [ "Asset.Sprite", null, "Constant.Color", null ],
+          [ "Asset.Sprite", null, "Constant.Color", null, null ],
+          [ "Asset.Sprite", null, "Constant.Color", null, null, null ],
+          [ "Asset.Sprite", null, "Constant.Color", null, null, null, null ]
+        ]
+      },
+      "gml_Script_findspriteinfo": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Sprite" ],
+          [ "Asset.Sprite", null ],
+          [ "Asset.Sprite", null, "Constant.Color" ],
+          [ "Asset.Sprite", null, "Constant.Color", null ],
+          [ "Asset.Sprite", null, "Constant.Color", null, null ],
+          [ "Asset.Sprite", null, "Constant.Color", null, null, null ],
+          [ "Asset.Sprite", null, "Constant.Color", null, null, null, null ]
+        ]
+      },
+      "gml_Script_scr_lerp_imageblend": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Id.InstanceOrObject", "Constant.Color", "Constant.Color", null ],
+          [ "Id.InstanceOrObject", "Constant.Color", "Constant.Color", null, null, null ]
+        ]
+      },
+      "set_tile_sprite": [ null, "Asset.Sprite" ],
+      "set_tile_sprite_ext": [ null, "Asset.Sprite", null ]
     },
     "FunctionReturn": {
       "scr_getbuttonsprite": {
@@ -1192,6 +1272,16 @@
         "low": "Asset.Sprite",
         "mid": "Asset.Sprite",
         "high": "Asset.Sprite"
+      }
+    },
+    "gml_Script_scr_rhythmgame_song_select": {
+      "Variables": {
+        "local_preview": "Asset.Sound"
+      }
+    },
+    "gml_Script_scr_get_border": {
+      "Variables": {
+        "argument0": "Asset.Room"
       }
     }
   }
