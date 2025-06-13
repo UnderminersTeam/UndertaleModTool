@@ -24,7 +24,7 @@
                     <NativeMenuItem Header="Generate o_ffset map"/>
                     <NativeMenuItemSeparator Header="-" />
                     <NativeMenuItem Header="S_ettings"/>
-                    <NativeMenuItem Header="_Close"/>
+                    <NativeMenuItem Header="_Close" Command="{Binding FileClose}"/>
                 </NativeMenu>
             </NativeMenuItem>
             <NativeMenuItem Header="_Script">
@@ -37,7 +37,7 @@
             </NativeMenuItem>
             <NativeMenuItem Header="_Help">
                 <NativeMenu>
-                    <NativeMenuItem Header="_GitHub" />
+                    <NativeMenuItem Header="_GitHub" Command="{Binding HelpGitHub}"/>
                     <NativeMenuItem Header="_About" Command="{Binding HelpAbout}"/>
                 </NativeMenu>
             </NativeMenuItem>

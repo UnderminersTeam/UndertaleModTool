@@ -40,13 +40,6 @@ public partial class App : Application
                 WindowState = WindowState.Maximized,
             };
         }
-        else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
-        {
-            singleViewPlatform.MainView = new MainView
-            {
-                DataContext = vm
-            };
-        }
 
         base.OnFrameworkInitializationCompleted();
     }

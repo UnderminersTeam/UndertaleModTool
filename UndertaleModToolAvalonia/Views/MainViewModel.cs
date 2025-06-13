@@ -6,6 +6,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
 using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
@@ -19,6 +21,8 @@ public partial class MainViewModel
     // Set this when testing.
     public Func<FilePickerOpenOptions, Task<IReadOnlyList<IStorageFile>>>? OpenFileDialog;
     public Func<FilePickerSaveOptions, Task<IStorageFile?>>? SaveFileDialog;
+    public Func<Uri, Task<bool>>? LaunchUriAsync;
+
 
     public delegate Task<MessageWindow.Result> MessageDialogDelegate(string message, string? title = null, bool ok = false, bool yes = false, bool no = false, bool cancel = false);
     public MessageDialogDelegate? MessageDialog;
@@ -149,6 +153,19 @@ public partial class MainViewModel
 
             DataPath = files[0].TryGetLocalPath();
         }
+    }
+
+    public void FileClose()
+    {
+        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            desktop.Shutdown();
+        }
+    }
+
+    public void HelpGitHub()
+    {
+        LaunchUriAsync?.Invoke(new Uri("https://github.com/UnderminersTeam/UndertaleModTool"));
     }
 
     public async void HelpAbout()

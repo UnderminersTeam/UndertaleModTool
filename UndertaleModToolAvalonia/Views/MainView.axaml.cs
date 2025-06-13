@@ -22,6 +22,7 @@ public partial class MainView : UserControl
                 vm.OpenFileDialog = OpenFileDialog;
                 vm.SaveFileDialog = SaveFileDialog;
                 vm.MessageDialog = MessageDialog;
+                vm.LaunchUriAsync = LaunchUriAsync;
             }
         };
     }
@@ -36,6 +37,12 @@ public partial class MainView : UserControl
     {
         TopLevel topLevel = TopLevel.GetTopLevel(this)!;
         return await topLevel.StorageProvider.SaveFilePickerAsync(options);
+    }
+
+    public async Task<bool> LaunchUriAsync(Uri uri)
+    {
+        TopLevel topLevel = TopLevel.GetTopLevel(this)!;
+        return await topLevel.Launcher.LaunchUriAsync(uri);
     }
 
     public async Task<MessageWindow.Result> MessageDialog(string message, string? title = null, bool ok = false, bool yes = false, bool no = false, bool cancel = false)
