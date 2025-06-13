@@ -1,3 +1,4 @@
+using System;
 using Avalonia.Controls;
 
 namespace UndertaleModToolAvalonia.Controls;
@@ -23,7 +24,7 @@ public partial class MessageWindow : Window
 
     public MessageWindow()
     {
-        InitializeComponent();
+        Initialize();
     }
 
     public MessageWindow(string message, string? title=null, bool ok=false, bool yes=false, bool no=false, bool cancel=false)
@@ -38,7 +39,14 @@ public partial class MessageWindow : Window
         HasNoButton = no;
         HasCancelButton = cancel;
 
+        Initialize();
+    }
+
+    public void Initialize()
+    {
         InitializeComponent();
+
+        MaxHeight = (Screens.Primary?.WorkingArea.Height - (FrameSize!.Value.Height - ClientSize.Height)) ?? Double.PositiveInfinity;
     }
 
     public void OkClick()

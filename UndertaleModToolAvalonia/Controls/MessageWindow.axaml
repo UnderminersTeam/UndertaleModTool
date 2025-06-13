@@ -10,16 +10,20 @@
         Title="{Binding TitleText}"
         Width="400"
         SizeToContent="Height"
-        CanResize="False"
         WindowStartupLocation="CenterOwner"
         Classes="MessageWindow">
-    <StackPanel>
-        <TextBlock Name="MessageText" Text="{Binding Message}"/>
-        <StackPanel Name="Buttons" Orientation="Horizontal" HorizontalAlignment="Right">
+    <Window.KeyBindings>
+        <KeyBinding Command="{Binding Close}" Gesture="Escape" />
+    </Window.KeyBindings>
+    <Grid RowDefinitions="1*,Auto">
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+            <TextBlock Name="MessageText" Text="{Binding Message}" TextWrapping="Wrap" />
+        </ScrollViewer>
+        <StackPanel Grid.Row="1" Name="Buttons" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Command="{Binding OkClick}" IsVisible="{Binding HasOKButton}" IsDefault="True">OK</Button>
             <Button Command="{Binding YesClick}" IsVisible="{Binding HasYesButton}" IsDefault="True">Yes</Button>
             <Button Command="{Binding NoClick}" IsVisible="{Binding HasNoButton}">No</Button>
             <Button Command="{Binding CancelClick}" IsVisible="{Binding HasCancelButton}">Cancel</Button>
         </StackPanel>
-    </StackPanel>
+    </Grid>
 </Window>

@@ -38,7 +38,7 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
         GMLTextDocument.Text = new Underanalyzer.Decompiler.DecompileContext(context, Code).DecompileToString();
     }
 
-    public void CompileFromGML()
+    public async void CompileFromGML()
     {
         if (Code.ParentEntry is not null)
             return;
@@ -50,7 +50,7 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
 
         if (!result.Successful)
         {
-            MainVM.MessageDialog!(result.PrintAllErrors(codeEntryNames: false), title: "GML compilation error", ok: true);
+            await MainVM.ShowMessageDialog(result.PrintAllErrors(codeEntryNames: false), title: "GML compilation error", ok: true);
         }
     }
 
@@ -62,7 +62,7 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
         ASMTextDocument.Text = Code.Disassemble(MainVM.Data!.Variables, MainVM.Data!.CodeLocals?.For(Code));
     }
 
-    public void CompileFromASM()
+    public async void CompileFromASM()
     {
         if (Code.ParentEntry is not null)
             return;
@@ -73,7 +73,7 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
         }
         catch (Exception e)
         {
-            MainVM.MessageDialog!(e.ToString(), title: "ASM compilation error", ok: true);
+            await MainVM.ShowMessageDialog(e.ToString(), title: "ASM compilation error", ok: true);
         }
     }
 }

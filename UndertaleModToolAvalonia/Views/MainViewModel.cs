@@ -61,6 +61,13 @@ public partial class MainViewModel
         ];
     }
 
+    public async Task<MessageWindow.Result> ShowMessageDialog(string message, string? title = null, bool ok = false, bool yes = false, bool no = false, bool cancel = false)
+    {
+        if (MessageDialog is not null)
+            return await MessageDialog.Invoke(message, title, ok, yes, no, cancel);
+        return MessageWindow.Result.None;
+    }
+
     public void SetData(UndertaleData? data)
     {
         if (Data is not null)
@@ -144,9 +151,10 @@ public partial class MainViewModel
         }
     }
 
-    public void HelpAbout()
+    public async void HelpAbout()
     {
-        MessageDialog?.Invoke("UndertaleModTool by the Underminers team\nLicensed under the GNU General Public License Version 3.", title: "About", ok: true);
+        await ShowMessageDialog("UndertaleModTool by the Underminers team\nLicensed under the GNU General Public License Version 3.",
+            title: "About", ok: true);
     }
 
     public void DataItemAdd(IList list)
