@@ -137,12 +137,23 @@
             <Setter Property="Padding" Value="0,1" />
         </Style>
 
+        <Style Selector="ContentControl.ListBoxContentControl TextBlock">
+            <Setter Property="TextWrapping" Value="NoWrap" />
+            <Setter Property="MaxLines" Value="1" />
+        </Style>
+
         <Style Selector=":is(Control).PaddedProperties">
             <Setter Property="Margin" Value="12,0,12,0" />
         </Style>
 
         <Style Selector=":is(Control).LeftPaddedProperties">
             <Setter Property="Margin" Value="12,0,0,0" />
+        </Style>
+
+        <Style Selector="ContentControl.TabItemContentControl TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+            <Setter Property="MaxLines" Value="1" />
         </Style>
 
         <Style Selector="Button.TransparentButton">

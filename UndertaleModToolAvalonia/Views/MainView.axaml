@@ -46,75 +46,75 @@
                 <TabControl.ItemTemplate>
                     <DataTemplate DataType="v:TabItemViewModel">
                         <StackPanel Orientation="Horizontal">
-                            <ContentControl Content="{Binding Content}">
+                            <ContentControl Content="{Binding Content}" Classes="TabItemContentControl">
                                 <ContentControl.DataTemplates>
                                     <DataTemplate DataType="v:DescriptionViewModel">
-                                        <TextBlock VerticalAlignment="Center" Text="{Binding Heading}"/>
+                                        <TextBlock Text="{Binding Heading}"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="v:GeneralInfoViewModel">
-                                        <TextBlock VerticalAlignment="Center" Text="General info"/>
+                                        <TextBlock Text="General info"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="v:GlobalInitScriptsViewModel">
-                                        <TextBlock VerticalAlignment="Center" Text="Global init scripts"/>
+                                        <TextBlock Text="Global init scripts"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="v:GameEndScriptsViewModel">
-                                        <TextBlock VerticalAlignment="Center" Text="Game End scripts"/>
+                                        <TextBlock Text="Game End scripts"/>
                                     </DataTemplate>
                                     <!-- TODO: Temp, it doesn't update. -->
                                     <DataTemplate DataType="undertale:UndertaleNamedResource">
-                                        <TextBlock VerticalAlignment="Center" Text="{Binding ., Converter={StaticResource DataItemToNameConverter}}"/>
+                                        <TextBlock Text="{Binding ., Converter={StaticResource DataItemToNameConverter}}"/>
                                     </DataTemplate>
                                     <!-- Resources -->
                                     <DataTemplate DataType="v:UndertaleAudioGroupViewModel">
-                                        <TextBlock VerticalAlignment="Center" Text="{Binding AudioGroup.Name.Content, StringFormat=Audio group - {0}}"/>
+                                        <TextBlock Text="{Binding AudioGroup.Name.Content, StringFormat=Audio group - {0}}"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleSoundViewModel">
-                                        <TextBlock VerticalAlignment="Center" Text="{Binding Sound.Name.Content, StringFormat=Sound - {0}}"/>
+                                        <TextBlock Text="{Binding Sound.Name.Content, StringFormat=Sound - {0}}"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleSpriteViewModel">
-                                        <TextBlock VerticalAlignment="Center" Text="{Binding Sprite.Name.Content, StringFormat=Sprite - {0}}"/>
+                                        <TextBlock Text="{Binding Sprite.Name.Content, StringFormat=Sprite - {0}}"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleBackgroundViewModel">
-                                        <TextBlock VerticalAlignment="Center" Text="{Binding Background.Name.Content, StringFormat=Background - {0}}"/>
+                                        <TextBlock Text="{Binding Background.Name.Content, StringFormat=Background - {0}}"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertalePathViewModel">
-                                        <TextBlock VerticalAlignment="Center" Text="{Binding Path.Name.Content, StringFormat=Path - {0}}"/>
+                                        <TextBlock Text="{Binding Path.Name.Content, StringFormat=Path - {0}}"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleScriptViewModel">
-                                        <TextBlock VerticalAlignment="Center" Text="{Binding Script.Name.Content, StringFormat=Script - {0}}"/>
+                                        <TextBlock Text="{Binding Script.Name.Content, StringFormat=Script - {0}}"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleFontViewModel">
-                                        <TextBlock VerticalAlignment="Center" Text="{Binding Font.Name.Content, StringFormat=Font - {0}}"/>
+                                        <TextBlock Text="{Binding Font.Name.Content, StringFormat=Font - {0}}"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleGameObjectViewModel">
-                                        <TextBlock VerticalAlignment="Center" Text="{Binding GameObject.Name.Content, StringFormat=Game object - {0}}"/>
+                                        <TextBlock Text="{Binding GameObject.Name.Content, StringFormat=Game object - {0}}"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleRoomViewModel">
-                                        <TextBlock VerticalAlignment="Center" Text="{Binding Room.Name.Content, StringFormat=Room - {0}}"/>
+                                        <TextBlock Text="{Binding Room.Name.Content, StringFormat=Room - {0}}"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleTexturePageItemViewModel">
-                                        <TextBlock VerticalAlignment="Center" Text="{Binding TexturePageItem.Name.Content, StringFormat=Texture page item - {0}}"/>
+                                        <TextBlock Text="{Binding TexturePageItem.Name.Content, StringFormat=Texture page item - {0}}"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleCodeViewModel">
-                                        <TextBlock VerticalAlignment="Center" Text="{Binding Code.Name.Content, StringFormat=Code - {0}}"/>
+                                        <TextBlock Text="{Binding Code.Name.Content, StringFormat=Code - {0}}"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleVariableViewModel">
-                                        <TextBlock VerticalAlignment="Center" Text="{Binding Variable.Name.Content, StringFormat=Variable - {0}}"/>
+                                        <TextBlock Text="{Binding Variable.Name.Content, StringFormat=Variable - {0}}"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleFunctionViewModel">
-                                        <TextBlock VerticalAlignment="Center" Text="{Binding Function.Name.Content, StringFormat=Function - {0}}"/>
+                                        <TextBlock Text="{Binding Function.Name.Content, StringFormat=Function - {0}}"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleCodeLocalsViewModel">
-                                        <TextBlock VerticalAlignment="Center" Text="{Binding CodeLocals.Name.Content, StringFormat=Code locals - {0}}"/>
+                                        <TextBlock Text="{Binding CodeLocals.Name.Content, StringFormat=Code locals - {0}}"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleStringViewModel">
-                                        <TextBlock VerticalAlignment="Center" Text="{Binding String.Content, StringFormat=String - {0}}"/>
+                                        <TextBlock Text="{Binding String.Content, StringFormat=String - {0}}"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleEmbeddedTextureViewModel">
-                                        <TextBlock VerticalAlignment="Center" Text="{Binding EmbeddedTexture.Name.Content, StringFormat=Embedded texture - {0}}"/>
+                                        <TextBlock Text="{Binding EmbeddedTexture.Name.Content, StringFormat=Embedded texture - {0}}"/>
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleEmbeddedAudioViewModel">
-                                        <TextBlock VerticalAlignment="Center" Text="{Binding EmbeddedAudio.Name.Content, StringFormat=Embedded audio - {0}}"/>
+                                        <TextBlock Text="{Binding EmbeddedAudio.Name.Content, StringFormat=Embedded audio - {0}}"/>
                                     </DataTemplate>
                                 </ContentControl.DataTemplates>
                             </ContentControl>
