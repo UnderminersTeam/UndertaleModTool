@@ -39,7 +39,15 @@
                                     IsVisible="{Binding IsExpanderVisible}"
                                     Classes="TransparentButton"/>
                         </Panel>
-                        <ContentControl IsHitTestVisible="False" Content="{Binding Header}" Classes="ListBoxContentControl" />
+                        <ContentControl IsHitTestVisible="False" Classes="ListBoxContentControl">
+                            <ContentControl.Content>
+                                <Binding Path="Header">
+                                    <Binding.TargetNullValue>
+                                        <TextBlock Text="(null)" Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                                    </Binding.TargetNullValue>
+                                </Binding>
+                            </ContentControl.Content>
+                        </ContentControl>
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
@@ -48,7 +56,7 @@
                     <TextBlock Text="{Binding Name.Content}">
                         <Interaction.Behaviors>
                             <DataTriggerBehavior Binding="{Binding ParentEntry}" ComparisonCondition="NotEqual" Value="{x:Null}">
-                                <ChangePropertyAction PropertyName="Foreground" Value="Gray" />
+                                <ChangePropertyAction PropertyName="Foreground" Value="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
                             </DataTriggerBehavior>
                         </Interaction.Behaviors>
                     </TextBlock>
