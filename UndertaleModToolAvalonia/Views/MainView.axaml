@@ -65,6 +65,9 @@
                                         <TextBlock VerticalAlignment="Center" Text="{Binding ., Converter={StaticResource DataItemToNameConverter}}"/>
                                     </DataTemplate>
                                     <!-- Resources -->
+                                    <DataTemplate DataType="v:UndertaleAudioGroupViewModel">
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding AudioGroup.Name.Content, StringFormat=Audio group - {0}}"/>
+                                    </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleSoundViewModel">
                                         <TextBlock VerticalAlignment="Center" Text="{Binding Sound.Name.Content, StringFormat=Sound - {0}}"/>
                                     </DataTemplate>
@@ -143,6 +146,9 @@
                                         <v:GameEndScriptsView />
                                     </DataTemplate>
                                     <!-- Resources -->
+                                    <DataTemplate DataType="v:UndertaleAudioGroupViewModel">
+                                        <v:UndertaleAudioGroupView />
+                                    </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleSoundViewModel">
                                         <v:UndertaleSoundView />
                                     </DataTemplate>

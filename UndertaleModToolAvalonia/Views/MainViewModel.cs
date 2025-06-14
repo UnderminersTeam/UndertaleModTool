@@ -74,14 +74,14 @@ public partial class MainViewModel
 
     public void SetData(UndertaleData? data)
     {
-        if (Data is not null)
+        if (Data is not null && Data.GeneralInfo is not null)
         {
             Data.GeneralInfo.PropertyChanged -= DataGeneralInfoChangedHandler;
         }
 
         Data = data;
 
-        if (Data is not null)
+        if (Data is not null && Data.GeneralInfo is not null)
         {
             Data.GeneralInfo.PropertyChanged += DataGeneralInfoChangedHandler;
         }
@@ -91,7 +91,7 @@ public partial class MainViewModel
 
     public void UpdateVersion()
     {
-        Version = Data is not null ? (Data.GeneralInfo.Major, Data.GeneralInfo.Minor, Data.GeneralInfo.Release, Data.GeneralInfo.Build) : default;
+        Version = Data is not null && Data.GeneralInfo is not null ? (Data.GeneralInfo.Major, Data.GeneralInfo.Minor, Data.GeneralInfo.Release, Data.GeneralInfo.Build) : default;
     }
 
     private void DataGeneralInfoChangedHandler(object? sender, PropertyChangedEventArgs e)
@@ -243,7 +243,7 @@ public partial class MainViewModel
                 room.Caption = Data.Strings.MakeString("", createNew: true);
             }
 
-            Data.GeneralInfo.RoomOrder.Add(new(room));
+            Data.GeneralInfo?.RoomOrder.Add(new(room));
         }
         else if (obj is UndertaleScript script)
         {
@@ -313,6 +313,7 @@ public partial class MainViewModel
             "GeneralInfo" => new GeneralInfoViewModel(Data),
             "GlobalInitScripts" => new GlobalInitScriptsViewModel((Data.GlobalInitScripts as ObservableCollection<UndertaleGlobalInit>)!),
             "GameEndScripts" => new GameEndScriptsViewModel((Data.GameEndScripts as ObservableCollection<UndertaleGlobalInit>)!),
+            UndertaleAudioGroup r => new UndertaleAudioGroupViewModel(r),
             UndertaleSound r => new UndertaleSoundViewModel(r),
             UndertaleSprite r => new UndertaleSpriteViewModel(r),
             UndertaleBackground r => new UndertaleBackgroundViewModel(r),
