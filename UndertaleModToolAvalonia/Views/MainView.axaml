@@ -89,6 +89,9 @@
                                     <DataTemplate DataType="v:UndertaleFontViewModel">
                                         <TextBlock Text="{Binding Font.Name.Content, StringFormat=Font - {0}}"/>
                                     </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleTimelineViewModel">
+                                        <TextBlock Text="{Binding Timeline.Name.Content, StringFormat=Timeline - {0}}"/>
+                                    </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleGameObjectViewModel">
                                         <TextBlock Text="{Binding GameObject.Name.Content, StringFormat=Game object - {0}}"/>
                                     </DataTemplate>
@@ -172,6 +175,9 @@
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleFontViewModel">
                                         <v:UndertaleFontView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleTimelineViewModel">
+                                        <v:UndertaleTimelineView />
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleGameObjectViewModel">
                                         <v:UndertaleGameObjectView />
