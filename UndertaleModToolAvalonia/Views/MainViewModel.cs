@@ -319,6 +319,7 @@ public partial class MainViewModel
             UndertaleBackground r => new UndertaleBackgroundViewModel(r),
             UndertalePath r => new UndertalePathViewModel(r),
             UndertaleScript r => new UndertaleScriptViewModel(r),
+            UndertaleShader r => new UndertaleShaderViewModel(r),
             UndertaleFont r => new UndertaleFontViewModel(r),
             UndertaleGameObject r => new UndertaleGameObjectViewModel(r),
             UndertaleRoom r => new UndertaleRoomViewModel(r),

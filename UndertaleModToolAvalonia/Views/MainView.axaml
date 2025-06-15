@@ -83,6 +83,9 @@
                                     <DataTemplate DataType="v:UndertaleScriptViewModel">
                                         <TextBlock Text="{Binding Script.Name.Content, StringFormat=Script - {0}}"/>
                                     </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleShaderViewModel">
+                                        <TextBlock Text="{Binding Shader.Name.Content, StringFormat=Shader - {0}}"/>
+                                    </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleFontViewModel">
                                         <TextBlock Text="{Binding Font.Name.Content, StringFormat=Font - {0}}"/>
                                     </DataTemplate>
@@ -163,6 +166,9 @@
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleScriptViewModel">
                                         <v:UndertaleScriptView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleShaderViewModel">
+                                        <v:UndertaleShaderView />
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleFontViewModel">
                                         <v:UndertaleFontView />
