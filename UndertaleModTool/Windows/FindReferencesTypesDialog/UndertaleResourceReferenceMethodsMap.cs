@@ -782,7 +782,7 @@ namespace UndertaleModTool.Windows
                             if (types.Contains(typeof(UndertaleSequence)))
                             {
                                 var sequences = data.Sequences.Where(x => x is not null).Where(x => x.Name == obj
-                                                                          || x.FunctionIDs.ContainsValue(obj));
+                                                                          || x.FunctionIDs.Any(f => f.FunctionName == obj));
                                 if (sequences.Any())
                                     outDict["Sequences"] = checkOne ? sequences.ToEmptyArray() : sequences.ToArray();
                             }
@@ -796,7 +796,7 @@ namespace UndertaleModTool.Windows
                                 trackChain.Insert(0, track);
                                 if (types.Contains(typeof(Track)))
                                 {
-                                    if (track.Name == obj || track.ModelName == obj || track.GMAnimCurveString == obj)
+                                    if (track.Name == obj || track.ModelName == obj)
                                         sequenceTracks.Add(trackChain.Append(seq).ToArray());
                                 }
 
@@ -809,7 +809,7 @@ namespace UndertaleModTool.Windows
                                             foreach (var strPair in data.Channels)
                                             {
                                                 if (strPair.Value.Value == obj)
-                                                    seqStringKeyframes.Add(new object[] { strPair.Key }.Concat(trackChain).Append(seq).ToArray());
+                                                    seqStringKeyframes.Add(new object[] { strPair.Channel }.Concat(trackChain).Append(seq).ToArray());
                                             }
                                         }
                                     }
@@ -841,7 +841,7 @@ namespace UndertaleModTool.Windows
                                         {
                                             foreach (var msgPair in keyframe.Channels)
                                                 if (msgPair.Value.Messages.Contains(obj))
-                                                    yield return new object[] { msgPair.Key, keyframe, seq };
+                                                    yield return new object[] { msgPair.Channel, keyframe, seq };
                                         }
                                     }
                                 }
@@ -859,8 +859,8 @@ namespace UndertaleModTool.Windows
                                         foreach (var keyframe in seq.Moments)
                                         {
                                             foreach (var momentPair in keyframe.Channels)
-                                                if (momentPair.Value.Event == obj)
-                                                    yield return new object[] { momentPair.Key, keyframe, seq };
+                                                if (momentPair.Value.Events.Contains(obj))
+                                                    yield return new object[] { momentPair.Channel, keyframe, seq };
                                         }
                                     }
                                 }
@@ -948,7 +948,7 @@ namespace UndertaleModTool.Windows
                                     {
                                         foreach (var textPair in keyframe.Channels)
                                             if (textPair.Value.Text == obj)
-                                                textKeyframesList.Add(new object[] { textPair.Key }.Concat(trackChain).Append(seq).ToArray());
+                                                textKeyframesList.Add(new object[] { textPair.Channel }.Concat(trackChain).Append(seq).ToArray());
                                     }
                                 }
 
@@ -1099,7 +1099,7 @@ namespace UndertaleModTool.Windows
                                     {
                                         foreach (var instPair in keyframe.Channels)
                                             if (instPair.Value.Resource.Resource == obj)
-                                                instKeyframesList.Add(new object[] { instPair.Key }.Concat(trackChain).Append(seq).ToArray());
+                                                instKeyframesList.Add(new object[] { instPair.Channel }.Concat(trackChain).Append(seq).ToArray());
                                     }
                                 }
 
