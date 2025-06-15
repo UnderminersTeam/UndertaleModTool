@@ -46,7 +46,8 @@ public partial class MessageWindow : Window
     {
         InitializeComponent();
 
-        MaxHeight = (Screens.Primary?.WorkingArea.Height - (FrameSize!.Value.Height - ClientSize.Height)) ?? Double.PositiveInfinity;
+        double frameHeight = (FrameSize is not null) ? (FrameSize!.Value.Height - ClientSize.Height) : 0;
+        MaxHeight = (Screens.Primary?.WorkingArea.Height - frameHeight) ?? Double.PositiveInfinity;
     }
 
     public void OkClick()
