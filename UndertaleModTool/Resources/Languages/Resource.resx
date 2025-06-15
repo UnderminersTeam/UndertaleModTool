@@ -524,4 +524,28 @@ Are you sure you want to make a new project?</value>
   <data name="Script_Name" xml:space="preserve">
     <value>Name</value>
   </data>
+  <data name="Font_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Font_DisplayName" xml:space="preserve">
+    <value>Display name</value>
+  </data>
+  <data name="Font_FontSize" xml:space="preserve">
+    <value>Font size</value>
+  </data>
+  <data name="Font_Bold" xml:space="preserve">
+    <value>Bold</value>
+  </data>
+  <data name="Font_Italic" xml:space="preserve">
+    <value>Italic</value>
+  </data>
+  <data name="Font_Texture" xml:space="preserve">
+    <value>Texture</value>
+  </data>
+  <data name="Font_Scale" xml:space="preserve">
+    <value>Scale</value>
+  </data>
+  <data name="Tabs_Font" xml:space="preserve">
+    <value>Font</value>
+  </data>
 </root>

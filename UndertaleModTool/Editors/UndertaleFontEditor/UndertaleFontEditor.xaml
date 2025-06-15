@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             xmlns:lang="clr-namespace:UndertaleModTool.Resources.Languages;assembly=UndertaleModTool"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleFont}">
     <Grid>
@@ -48,13 +49,13 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="{x:Static lang:Resource.Font_Name}"/>
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Display name</TextBlock>
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="{x:Static lang:Resource.Font_DisplayName}"/>
         <local:UndertaleStringReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding DisplayName}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Font size</TextBlock>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="{x:Static lang:Resource.Font_FontSize}"/>
         <Grid Grid.Row="2" Grid.Column="1" Margin="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -64,10 +65,10 @@
             <TextBlock Grid.Column="1" Text=" em"/>
         </Grid>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Bold</TextBlock>
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="{x:Static lang:Resource.Font_Bold}"/>
         <CheckBox Grid.Row="3" Grid.Column="1" Margin="3" IsChecked="{Binding Bold}"/>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Italic</TextBlock>
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="{x:Static lang:Resource.Font_Italic}"/>
         <CheckBox Grid.Row="4" Grid.Column="1" Margin="3" IsChecked="{Binding Italic}"/>
 
         <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Range</TextBlock>
@@ -88,10 +89,10 @@
         <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Anti Aliasing</TextBlock>
         <local:TextBoxDark Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding AntiAliasing}"/>
 
-        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Texture</TextBlock>
+        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3" Text="{x:Static lang:Resource.Font_Texture}"/>
         <local:UndertaleObjectReference Grid.Row="8" Grid.Column="1" Margin="3" ObjectReference="{Binding Texture}" ObjectType="{x:Type undertale:UndertaleTexturePageItem}"/>
 
-        <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Scale</TextBlock>
+        <TextBlock Grid.Row="9" Grid.Column="0" Margin="3" Text="{x:Static lang:Resource.Font_Scale}"/>
         <Grid Grid.Row="9" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>

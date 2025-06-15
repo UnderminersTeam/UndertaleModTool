@@ -223,6 +223,69 @@ namespace UndertaleModTool.Resources.Languages {
         }
         
         /// <summary>
+        ///   Bold に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Font_Bold {
+            get {
+                return ResourceManager.GetString("Font_Bold", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Display name に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Font_DisplayName {
+            get {
+                return ResourceManager.GetString("Font_DisplayName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Font size に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Font_FontSize {
+            get {
+                return ResourceManager.GetString("Font_FontSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Italic に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Font_Italic {
+            get {
+                return ResourceManager.GetString("Font_Italic", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Name に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Font_Name {
+            get {
+                return ResourceManager.GetString("Font_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Scale に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Font_Scale {
+            get {
+                return ResourceManager.GetString("Font_Scale", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Texture に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Font_Texture {
+            get {
+                return ResourceManager.GetString("Font_Texture", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   _File に類似しているローカライズされた文字列を検索します。
         /// </summary>
         public static string Menu_File {
@@ -938,6 +1001,15 @@ namespace UndertaleModTool.Resources.Languages {
         public static string Tabs_EmbeddedTexture {
             get {
                 return ResourceManager.GetString("Tabs_EmbeddedTexture", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Font に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        public static string Tabs_Font {
+            get {
+                return ResourceManager.GetString("Tabs_Font", resourceCulture);
             }
         }
         
