@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UndertaleModLib.Models;
+using UndertaleModLib.Resources.Languages;
 using static UndertaleModLib.UndertaleReader;
 
 namespace UndertaleModLib
@@ -24,7 +25,7 @@ namespace UndertaleModLib
                 writer.Write(Name.ToCharArray());
                 var lenWriter = writer.WriteLengthHere();
 
-                writer.SubmitMessage("Writing chunk " + Name);
+                writer.SubmitMessage(Resource.Msg_WritingChunk + Name);
                 lenWriter.FromHere();
                 SerializeChunk(writer);
                 
@@ -82,7 +83,7 @@ namespace UndertaleModLib
                 chunk.Length = length;
 
                 // Read chunk contents
-                reader.SubmitMessage("Reading chunk " + chunk.Name);
+                reader.SubmitMessage(Resource.Msg_ReadingChunk + chunk.Name);
                 EnsureLengthOperation lenReader = reader.EnsureLengthFromHere(chunk.Length);
                 reader.CopyChunkToBuffer(length);
                 chunk.UnserializeChunk(reader);
