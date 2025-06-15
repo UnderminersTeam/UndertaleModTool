@@ -85,8 +85,10 @@ jobs:
     - name: Copy external files
       run: |
         cp ./README.md ./CLI-${{ matrix.os }}/
+        cp ./SCRIPTS.md ./${{ matrix.os }}
         cp ./LICENSE.txt ./CLI-${{ matrix.os }}/
         cp -r ./UndertaleModLib/GameSpecificData/ ./CLI-${{ matrix.os }}/GameSpecificData/
+        cp -r ./UndertaleModTool/Scripts/ ./CLI-${{ matrix.os }}/Scripts/
     - name: Upload ${{ matrix.os }} CLI
       uses: actions/upload-artifact@v4
       with:

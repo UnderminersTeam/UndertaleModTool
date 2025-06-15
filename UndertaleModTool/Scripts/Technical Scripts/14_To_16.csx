@@ -81,26 +81,26 @@ If they do, you may file an issue on GitHub, but no warranty is given."); // War
                     }
                 }
                 // Do what you want to with `type` here
-                variable = curr.ValueVariable?.Target;
+                variable = curr.ValueVariable;
                 if(variable != null && true)
                 {
-                    if (curr.ValueVariable.Type == UndertaleInstruction.VariableType.StackTop && curr.ValueVariable.Target.InstanceType == UndertaleInstruction.InstanceType.Undefined)
+                    if (curr.ValueVariable.Type == UndertaleInstruction.VariableType.StackTop && curr.ValueVariable.InstanceType == UndertaleInstruction.InstanceType.Undefined)
                     {
-                        curr.ValueVariable.Target.InstanceType = UndertaleInstruction.InstanceType.Self;
+                        curr.ValueVariable.InstanceType = UndertaleInstruction.InstanceType.Self;
                     }
-                    if (list.GlobalNotArray.ContainsKey(curr.ValueVariable?.Target.Name.Content))
+                    if (list.GlobalNotArray.ContainsKey(curr.ValueVariable?.Name.Content))
                     {
                         if (curr.Kind == UndertaleInstruction.Opcode.Push)
                             curr.Kind = UndertaleInstruction.Opcode.PushBltn;
                         variable.InstanceType = UndertaleInstruction.InstanceType.Self;
                         variable.VarID = -6;
                     }
-                    if (list.GlobalArray.ContainsKey(curr.ValueVariable?.Target.Name.Content))
+                    if (list.GlobalArray.ContainsKey(curr.ValueVariable?.Name.Content))
                     {
                         variable.InstanceType = UndertaleInstruction.InstanceType.Self;
                         variable.VarID = -6;
                     }
-                    if (list.Instance.ContainsKey(curr.ValueVariable?.Target.Name.Content))
+                    if (list.Instance.ContainsKey(curr.ValueVariable?.Name.Content))
                     {
                         variable.InstanceType = UndertaleInstruction.InstanceType.Self;
                         variable.VarID = -6;
@@ -324,9 +324,9 @@ public static int CalculateStackDiff(UndertaleInstruction instr)
         case UndertaleInstruction.Opcode.Pop:
             if (instr.ValueVariable == null)
                 return instr.SwapExtra - 6;
-            if (instr.ValueVariable.Type == UndertaleModLib.Models.UndertaleInstruction.VariableType.StackTop)
+            if (instr.ReferenceType == UndertaleModLib.Models.UndertaleInstruction.VariableType.StackTop)
                 return -1 - 1;
-            if (instr.ValueVariable.Type == UndertaleModLib.Models.UndertaleInstruction.VariableType.Array)
+            if (instr.ReferenceType == UndertaleModLib.Models.UndertaleInstruction.VariableType.Array)
                 return -1 - 2;
             return -1;
 
@@ -335,11 +335,11 @@ public static int CalculateStackDiff(UndertaleInstruction instr)
         case UndertaleInstruction.Opcode.PushGlb:
         case UndertaleInstruction.Opcode.PushBltn:
         case UndertaleInstruction.Opcode.PushI:
-            if (instr.ValueVariable is UndertaleModLib.Models.UndertaleInstruction.Reference<UndertaleVariable>)
+            if (instr.ValueVariable is UndertaleVariable)
             {
-                if ((instr.ValueVariable as UndertaleModLib.Models.UndertaleInstruction.Reference<UndertaleVariable>).Type == UndertaleModLib.Models.UndertaleInstruction.VariableType.StackTop)
+                if (instr.ReferenceType == UndertaleModLib.Models.UndertaleInstruction.VariableType.StackTop)
                     return 1 - 1;
-                if ((instr.ValueVariable as UndertaleModLib.Models.UndertaleInstruction.Reference<UndertaleVariable>).Type == UndertaleModLib.Models.UndertaleInstruction.VariableType.Array)
+                if (instr.ReferenceType == UndertaleModLib.Models.UndertaleInstruction.VariableType.Array)
                     return 1 - 2;
             }
             return 1;
