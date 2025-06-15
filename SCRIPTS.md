@@ -71,10 +71,8 @@ These are scripts developed primarily for use in Undertale/Deltarune.
 - `BetterVaporiserForUT.csx`: Replaces the current vapor system in Undertale with a new one that generates vapor on the fly for the appropriate sprite and can vaporize colored sprites.
 - `BorderEnabler.csx`: Enables borders on PC Undertale for versions prior to Undertale Switch.
 - `BorderEnablerv1_11.csx`: Enables borders on PC Undertale for the 1.11 version of Undertale (Switch).
-- `Ch2 Debug.csx`: Enables debug mode for Deltarune chapters 1 and 2.
 - `ChangeHomeBattlegroup.csx`: Changes the target battlegroup when pressing the Home key in Undertale.
-- `DebugMsg.csx`: Displays the contents of `global.msg` on-screen while debug mode is enabled.
-- `DebugToggler.csx`: Makes it possible to switch debug mode on and off using F1 in Undertale.
+- `Debug.csx`: Enables or disables debug mode in all supported Undertale/Deltarune versions.
 - `DeltaruneClearShaderData.csx`: Clears shader data from Deltarune, allowing older versions of the game to run on ancient hardware.
 - `DisableDogcheck.csx`: Disables dogcheck in Undertale and Deltarune such that you can load any room in the game from your save file.
 - `FixAlphysLabCrashAndroid.csx`: Fixes a crash at Alphys's lab on Android devices.
@@ -87,6 +85,8 @@ These are scripts developed primarily for use in Undertale/Deltarune.
 - `TouchControlsEnabler.csx`: Adds mobile touch controls to Undertale or Deltarune.
 - `TTFFonts.csx`: Marks all fonts in Undertale to be externally loaded. Does not handle Japanese text.
 - `TTFFonts_Deltarune.csx`: Marks all fonts in Deltarune to be externally loaded. Does not handle Japanese text.
+- `UndertaleDebugMsg.csx`: Displays the contents of `global.msg` on-screen while debug mode is enabled in Undertale.
+- `UndertaleDebugToggler.csx`: Makes it possible to switch debug mode on and off using F1 in Undertale.
 - `UndertaleDialogSimulator.csx`: Adds a dialogue editor to Undertale.
 - `UndertaleRunButton.csx`: Removes the debug check from the Backspace hotkey speed boost in Undertale.
 - `UndertaleWithJSONs.csx`: This script JSONifies all Undertale versions with Japanese support, 1.05+. Switch languages using F11. Reload text for current language from JSON on command using F12.
