@@ -332,6 +332,7 @@ public partial class MainViewModel
             UndertaleString r => new UndertaleStringViewModel(r),
             UndertaleEmbeddedTexture r => new UndertaleEmbeddedTextureViewModel(r),
             UndertaleEmbeddedAudio r => new UndertaleEmbeddedAudioViewModel(r),
+            UndertaleTextureGroupInfo r => new UndertaleTextureGroupInfoViewModel(r),
             // temp
             UndertaleResource i => i,
             _ => null,
