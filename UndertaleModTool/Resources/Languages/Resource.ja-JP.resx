@@ -525,4 +525,28 @@
   <data name="Script_Name" xml:space="preserve">
     <value>スクリプト名</value>
   </data>
+  <data name="Font_Name" xml:space="preserve">
+    <value>フォント名</value>
+  </data>
+  <data name="Font_DisplayName" xml:space="preserve">
+    <value>表示名</value>
+  </data>
+  <data name="Font_FontSize" xml:space="preserve">
+    <value>フォントサイズ</value>
+  </data>
+  <data name="Font_Bold" xml:space="preserve">
+    <value>太字</value>
+  </data>
+  <data name="Font_Italic" xml:space="preserve">
+    <value>斜字</value>
+  </data>
+  <data name="Font_Texture" xml:space="preserve">
+    <value>テクスチャ</value>
+  </data>
+  <data name="Font_Scale" xml:space="preserve">
+    <value>スケール</value>
+  </data>
+  <data name="Tabs_Font" xml:space="preserve">
+    <value>フォント</value>
+  </data>
 </root>

@@ -130,7 +130,7 @@ namespace UndertaleModTool
                     UndertalePath => "Path",
                     UndertaleScript => Resource.Tabs_Script,
                     UndertaleShader => "Shader",
-                    UndertaleFont => "Font",
+                    UndertaleFont => Resource.Tabs_Font,
                     UndertaleTimeline => "Timeline",
                     UndertaleGameObject => "Game Object",
                     UndertaleRoom => "Room",
