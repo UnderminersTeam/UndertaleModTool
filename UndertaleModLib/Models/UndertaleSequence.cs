@@ -542,6 +542,7 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
                     writer.WriteUndertaleObject(Keyframes as IntKeyframes);
                     break;
                 case "GMRealTrack":
+                case "GMAudioEffectTrack":
                     writer.WriteUndertaleObject(Keyframes as RealKeyframes);
                     break;
                 case "GMTextTrack":     // Introduced in GM 2022.2
@@ -632,6 +633,7 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
                     Keyframes = reader.ReadUndertaleObject<IntKeyframes>();
                     break;
                 case "GMRealTrack":
+                case "GMAudioEffectTrack":
                     Keyframes = reader.ReadUndertaleObject<RealKeyframes>();
                     break;
                 case "GMTextTrack":     // Introduced in GM 2022.2
@@ -714,6 +716,7 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
                     count += 1 + IntKeyframes.UnserializeChildObjectCount(reader);
                     break;
                 case "GMRealTrack":
+                case "GMAudioEffectTrack":
                     count += 1 + RealKeyframes.UnserializeChildObjectCount(reader);
                     break;
                 case "GMTextTrack":     // Introduced in GM 2022.2
