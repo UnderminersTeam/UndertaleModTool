@@ -1,0 +1,191 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <FluentTheme DensityStyle="Compact"/>
+    <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+    <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
+    <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
+
+    <!-- Basic controls -->
+    <Style Selector="Window">
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <Style Selector="Menu">
+        <Setter Property="Height" Value="24" />
+    </Style>
+
+    <Style Selector="GridSplitter">
+        <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundListLowBrush}" />
+        <Setter Property="MinWidth" Value="3"/>
+    </Style>
+
+    <Style Selector="TabControl">
+        <Setter Property="Padding" Value="0" />
+    </Style>
+    <Style Selector="TabItem">
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <Style Selector="Label">
+        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style Selector="ListBoxItem">
+        <Setter Property="Padding" Value="4,0" />
+    </Style>
+
+    <Style Selector="TreeViewItem">
+        <Setter Property="MinHeight" Value="0" />
+    </Style>
+
+    <Style Selector="DataGridCell">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="MinHeight" Value="12" />
+    </Style>
+
+    <Style Selector="ColorPicker">
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <Style Selector="Expander">
+        <Setter Property="Padding" Value="4" />
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+    <Style Selector="Expander /template/ DockPanel > ToggleButton#ExpanderHeader">
+        <Setter Property="Padding" Value="8,0,0,0" />
+    </Style>
+
+    <Style Selector="Expander /template/ DockPanel > ToggleButton#ExpanderHeader /template/ Border#ExpandCollapseChevronBorder">
+        <Style.Resources>
+            <x:Double x:Key="ExpanderChevronButtonSize">24</x:Double>
+        </Style.Resources>
+    </Style>
+
+    <!-- Disable scroll auto hide -->
+    <Style Selector="ScrollViewer">
+        <Setter Property="AllowAutoHide" Value="False"/>
+    </Style>
+    <Style Selector="ScrollBar">
+        <Setter Property="AllowAutoHide" Value="False"/>
+    </Style>
+    <Style Selector=":is(ItemsControl)">
+        <Setter Property="ScrollViewer.AllowAutoHide" Value="False"/>
+    </Style>
+
+    <!-- Small checkbox -->
+    <!-- https://github.com/AvaloniaUI/Avalonia/blob/d6edb46ce04f983892a61d3abf906014d3f5ec8d/src/Avalonia.Themes.Fluent/Controls/CheckBox.xaml -->
+    <Style Selector="CheckBox">
+        <Style.Resources>
+            <x:Double x:Key="CheckBoxSize">16</x:Double>
+            <GridLength x:Key="CheckBoxSizeGridLength">16</GridLength>
+        </Style.Resources>
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid x:Name="RootGrid">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="{DynamicResource CheckBoxSizeGridLength}" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Border x:Name="PART_Border"
+                            Grid.ColumnSpan="2"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}" />
+
+                    <Grid VerticalAlignment="Top" Height="{DynamicResource CheckBoxSize}">
+                        <Border x:Name="NormalRectangle"
+                                BorderBrush="{DynamicResource CheckBoxCheckBackgroundStrokeUnchecked}"
+                                Background="{DynamicResource CheckBoxCheckBackgroundFillUnchecked}"
+                                BorderThickness="{DynamicResource CheckBoxBorderThemeThickness}"
+                                CornerRadius="{TemplateBinding CornerRadius}"
+                                UseLayoutRounding="False"
+                                Height="{DynamicResource CheckBoxSize}"
+                                Width="{DynamicResource CheckBoxSize}" />
+
+                        <Viewbox UseLayoutRounding="False">
+                            <Panel>
+                                <Panel Height="{DynamicResource CheckBoxSize}" Width="{DynamicResource CheckBoxSize}" />
+                                <Path x:Name="CheckGlyph"
+                                      Opacity="0"
+                                      Fill="{DynamicResource CheckBoxCheckGlyphForegroundUnchecked}"
+                                      Stretch="Uniform"
+                                      VerticalAlignment="Center"
+                                      FlowDirection="LeftToRight" />
+                            </Panel>
+                        </Viewbox>
+                    </Grid>
+                    <ContentPresenter x:Name="PART_ContentPresenter"
+                                    ContentTemplate="{TemplateBinding ContentTemplate}"
+                                    Content="{TemplateBinding Content}"
+                                    Margin="{TemplateBinding Padding}"
+                                    RecognizesAccessKey="True"
+                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                    TextWrapping="Wrap"
+                                    Grid.Column="1" />
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <!-- Make the rows not overlap with the scrollbars -->
+    <Style Selector="DataGrid /template/ DataGridRowsPresenter#PART_RowsPresenter">
+        <Setter Property="Grid.RowSpan" Value="1" />
+        <Setter Property="Grid.ColumnSpan" Value="2" />
+    </Style>
+
+    <!-- Custom -->
+    <Style Selector="Grid#LeftPanel">
+        <Setter Property="Margin" Value="5" />
+    </Style>
+
+    <Style Selector="ContentControl.ListBoxContentControl">
+        <Setter Property="Padding" Value="0,1" />
+    </Style>
+
+    <Style Selector="ContentControl.ListBoxContentControl TextBlock">
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="MaxLines" Value="1" />
+    </Style>
+
+    <Style Selector=":is(Control).PaddedProperties">
+        <Setter Property="Margin" Value="12,0,12,0" />
+    </Style>
+
+    <Style Selector=":is(Control).LeftPaddedProperties">
+        <Setter Property="Margin" Value="12,0,0,0" />
+    </Style>
+
+    <Style Selector="ContentControl.TabItemContentControl TextBlock">
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="MaxLines" Value="1" />
+    </Style>
+
+    <Style Selector="Button.TransparentButton">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Window.MessageWindow">
+        <Setter Property="Padding" Value="20,20,20,0" />
+    </Style>
+    <Style Selector="Window.MessageWindow TextBlock#MessageText">
+        <Setter Property="Margin" Value="0,0,0,20" />
+    </Style>
+    <Style Selector="Window.MessageWindow StackPanel#Buttons">
+        <Setter Property="Spacing" Value="20"/>
+    </Style>
+    <Style Selector="Window.MessageWindow StackPanel#Buttons > Button">
+        <Setter Property="Margin" Value="0,0,0,20" />
+        <Setter Property="MinWidth" Value="75" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+</Styles>
