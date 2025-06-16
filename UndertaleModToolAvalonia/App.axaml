@@ -52,6 +52,20 @@
         <Style Selector="ColorPicker">
             <Setter Property="HorizontalAlignment" Value="Left" />
         </Style>
+
+        <Style Selector="Expander">
+            <Setter Property="Padding" Value="4" />
+            <Setter Property="MinHeight" Value="0" />
+        </Style>
+        <Style Selector="Expander /template/ DockPanel > ToggleButton#ExpanderHeader">
+            <Setter Property="Padding" Value="8,0,0,0" />
+        </Style>
+        
+        <Style Selector="Expander /template/ DockPanel > ToggleButton#ExpanderHeader /template/ Border#ExpandCollapseChevronBorder">
+            <Style.Resources>
+                <x:Double x:Key="ExpanderChevronButtonSize">24</x:Double>
+            </Style.Resources>
+        </Style>
         
         <!-- Disable scroll auto hide -->
         <Style Selector="ScrollViewer">
