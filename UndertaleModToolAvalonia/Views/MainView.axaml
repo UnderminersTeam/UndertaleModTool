@@ -125,6 +125,9 @@
                                     <DataTemplate DataType="v:UndertaleTextureGroupInfoViewModel">
                                         <TextBlock Text="{Binding TextureGroupInfo.Name.Content, StringFormat=Texture group information - {0}}"/>
                                     </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleEmbeddedImageViewModel">
+                                        <TextBlock Text="{Binding EmbeddedImage.Name.Content, StringFormat=Embedded image - {0}}"/>
+                                    </DataTemplate>
                                 </ContentControl.DataTemplates>
                             </ContentControl>
                             <Button Command="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).TabClose}"
@@ -214,6 +217,9 @@
                                     </DataTemplate>
                                     <DataTemplate DataType="v:UndertaleTextureGroupInfoViewModel">
                                         <v:UndertaleTextureGroupInfoView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="v:UndertaleEmbeddedImageViewModel">
+                                        <v:UndertaleEmbeddedImageView />
                                     </DataTemplate>
                                 </ContentControl.DataTemplates>
                             </ContentControl>
