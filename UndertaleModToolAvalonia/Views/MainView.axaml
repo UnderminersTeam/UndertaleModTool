@@ -35,7 +35,7 @@
                         <Button>←</Button>
                         <Button>→</Button>
                     </StackPanel>
-                    <TextBox Name="FilterTextBox" Watermark="Filter by name..."/>
+                    <TextBox Name="FilterTextBox" Watermark="Filter by name..." TextChanged="FilterTextBox_TextChanged"/>
                 </StackPanel>
                 <c:DataTreeView Grid.Row="1" Name="DataTreeView" Data="{Binding Data}" />
             </Grid>

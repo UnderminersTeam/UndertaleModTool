@@ -9,6 +9,7 @@ using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using UndertaleModLib;
+using UndertaleModLib.Models;
 using UndertaleModToolAvalonia.Views;
 
 namespace UndertaleModToolAvalonia.Controls;
@@ -137,6 +138,27 @@ public partial class DataTreeView : UserControl
         {
             treeItem.ExpandCollapse();
             mainVM.TabOpen(treeItem);
+        }
+    }
+
+    public void SetFilter(string text)
+    {
+        foreach (TreeItemViewModel treeItem in DataTreeItemSource)
+        {
+            if (treeItem.Source is not null)
+            {
+                treeItem.SetFilter(value =>
+                {
+                    string name = value switch
+                    {
+                        UndertaleNamedResource namedResource => namedResource.Name.Content,
+                        UndertaleString _string => _string.Content,
+                        _ => "",
+                    };
+
+                    return name.Contains(text, System.StringComparison.CurrentCultureIgnoreCase);
+                });
+            }
         }
     }
 

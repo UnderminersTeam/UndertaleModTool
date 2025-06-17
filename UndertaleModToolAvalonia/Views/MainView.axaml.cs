@@ -52,6 +52,11 @@ public partial class MainView : UserControl
         return await (new MessageWindow(message, title, ok, yes, no, cancel).ShowDialog<MessageWindow.Result>(window));
     }
 
+    private void FilterTextBox_TextChanged(object? sender, TextChangedEventArgs e)
+    {
+        DataTreeView.SetFilter(FilterTextBox.Text ?? "");
+    }
+
     public void TabControl_PointerReleased(object? sender, PointerReleasedEventArgs e)
     {
         if (e.InitialPressMouseButton == MouseButton.Middle)
