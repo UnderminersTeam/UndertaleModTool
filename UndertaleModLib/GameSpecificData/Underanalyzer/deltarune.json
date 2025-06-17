@@ -382,10 +382,134 @@
       "master": "Id.InstanceOrObject",
       "cutscene_master": "Id.InstanceOrObject",
       "teacupTarget": "Asset.Object",
-      "_teacups": "Asset.Object"
+      "_teacups": "Asset.Object",
+      "custom_sprite": "Asset.Sprite",
+      "_screencolor": "Constant.Color",
+      "hurt_sprite": "Deltarune.Asset.ZeroOrSprite",
+      "writerobj": "Asset.Object",
+      "note_color": "Constant.Color",
+      "footcolor": "Constant.Color",
+      "_rouxls_sprite": "Asset.Sprite",
+      "_spadesprite": "Asset.Sprite",
+      "_actsprite": "Asset.Sprite",
+      "_heartsprite": "Asset.Sprite",
+      "_screensprite": "Asset.Sprite",
+      "doorRoom": "Asset.Room",
+      "_sprIdle": "Asset.Sprite",
+      "_sprAngry": "Asset.Sprite",
+      "_sprIdleOutline": "Asset.Sprite",
+      "_sprAngryOutline": "Asset.Sprite",
+      "current_color": "Constant.Color",
+      "tenna": "Deltarune.Asset.ZeroOrObject",
+      "targetTenna": "Deltarune.Asset.ZeroOrObject",
+      "head_sprite_default": "Asset.Sprite",
+      "body_sprite": "Asset.Sprite",
+      "head_sprites": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Sprite"
+          },
+          "Asset.Sprite"
+        ]
+      },
+      "spear_list": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Sprite"
+          },
+          "Asset.Sprite"
+        ]
+      },
+      "_sprite_pool": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Sprite"
+          },
+          "Asset.Sprite"
+        ]
+      },
+      "color_blend": "Constant.Color",
+      "tvbasesprite": "Asset.Sprite",
+      "tvbasecolor": "Constant.Color",
+      "shadcolor": "Constant.Color",
+      "swordscreencolor": "Constant.Color",
+      "prizeballcolor": "Constant.Color",
+      "myballcolor": "Constant.Color",
+      "noise_sprite": "Asset.Sprite",
+      "screencolor": "Constant.Color",
+      "lanino": "Deltarune.Asset.ZeroOrObject",
+      "elnina": "Deltarune.Asset.ZeroOrObject",
+      "cablecolor": "Constant.Color",
+      "score_color": "Constant.Color",
+      "floor_color": "Constant.Color",
+      "spotlight_color": "Constant.Color",
+      "guitar_sound": "Asset.Sound",
+      "miss_sound": "Asset.Sound",
+      "musicm": "Deltarune.Asset.ZeroOrObject",
+      "room_name": "Asset.Room",
+      "hintcol": "Constant.Color",
+      "sprite_top": "Asset.Sprite",
+      "shrink_sprite": "Asset.Sprite",
+      "_symbol_sprite": "Asset.Sprite",
+      "castle_town_rooms": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Room"
+          },
+          "Asset.Room"
+        ]
+      },
+      "church_a_rooms": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Room"
+          },
+          "Asset.Room"
+        ]
+      },
+      "church_b_rooms": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Room"
+          },
+          "Asset.Room"
+        ]
+      },
+      "church_c_rooms": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Room"
+          },
+          "Asset.Room"
+        ]
+      },
+      "room_id": "Asset.Room",
+      "_border_image_layer": "Asset.Sprite",
+      "tile_sprite": "Asset.Sprite"
     },
     "FunctionArguments": {
-      "snd_play": [ "Asset.Sound" ],
+      "snd_play": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Sound" ],
+          [ "Asset.Sound", null ],
+          [ "Asset.Sound", null, null ]
+        ]
+      },
       "snd_stop": [ "Asset.Sound" ],
       "snd_is_playing": [ "Asset.Sound" ],
       "snd_volume": [ "Asset.Sound", null, null ],
@@ -400,8 +524,44 @@
       "gml_Script_i_ex": [ "Asset.Object" ],
       "gml_Script_safe_delete": [ "Asset.Object" ],
       "gml_Script_scr_bulletspawner": [ null, null, "Asset.Object" ],
-      "gml_Script_snd_play": [ "Asset.Sound" ],
+      "gml_Script_snd_play": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Sound" ],
+          [ "Asset.Sound", null ],
+          [ "Asset.Sound", null, null ]
+        ]
+      },
+      "gml_Script_snd_play_delay": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Sound", null ],
+          [ "Asset.Sound", null, null ],
+          [ "Asset.Sound", null, null, null ]
+        ]
+      },
       "gml_Script_snd_play_x": [ "Asset.Sound", null, null ],
+      "gml_Script_soundplay_x": [ "Asset.Sound", null, null ],
+      "gml_Script_sound_play_x": [ "Asset.Sound", null, null ],
+      "gml_Script_snd_play_volume": [ "Asset.Sound", null ],
+      "gml_Script_soundplay_volume": [ "Asset.Sound", null ],
+      "gml_Script_sound_play_volume": [ "Asset.Sound", null ],
+      "gml_Script_soundplay": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Sound" ],
+          [ "Asset.Sound", null ],
+          [ "Asset.Sound", null, null ]
+        ]
+      },
+      "gml_Script_sound_play": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Sound" ],
+          [ "Asset.Sound", null ],
+          [ "Asset.Sound", null, null ]
+        ]
+      },
       "gml_Script_snd_stop": [ "Asset.Sound" ],
       "gml_Script_snd_is_playing": [ "Asset.Sound" ],
       "gml_Script_snd_play_pitch": [ "Asset.Sound", null ],
@@ -411,7 +571,13 @@
       "gml_Script_snd_loop": [ "Asset.Sound" ],
       "gml_Script_snd_pause": [ "Asset.Sound" ],
       "gml_Script_c_soundplay": [ "Asset.Sound" ],
+      "gml_Script_c_sound_play": [ "Asset.Sound" ],
+      "gml_Script_c_sndplay": [ "Asset.Sound" ],
+      "gml_Script_c_snd_play": [ "Asset.Sound" ],
       "gml_Script_c_soundplay_x": [ "Asset.Sound", null, null ],
+      "gml_Script_c_sound_play_x": [ "Asset.Sound", null, null ],
+      "gml_Script_c_sndplay_x": [ "Asset.Sound", null, null ],
+      "gml_Script_c_snd_play_x": [ "Asset.Sound", null, null ],
       "gml_Script_c_soundplay_wait": [ "Asset.Sound" ],
       "gml_Script_c_sprite": [ "Asset.Sprite" ],
       "gml_Script_c_jump_sprite": [ null, null, null, null, "Asset.Sprite", "Asset.Sprite" ],
@@ -427,11 +593,57 @@
         ]
       },
       "gml_Script_scr_dark_marker": [ null, null, "Asset.Sprite" ],
+      "gml_Script_scr_dark_marker_fancy": [ null, null, "Asset.Sprite" ],
+      "gml_Script_scr_custom_marker_depth": [ null, null, null, null, "Asset.Sprite" ],
+      "gml_Script_scr_marker_playonce": [ null, null, "Asset.Sprite" ],
+      "gml_Script_scr_marker_jitter": [ null, null, "Asset.Sprite" ],
+      "gml_Script_scr_marker_jitterwobble": [ null, null, "Asset.Sprite" ],
+      "gml_Script_scr_dark_marker_playonce": [ null, null, "Asset.Sprite" ],
       "gml_Script_scr_dark_marker_animated": {
         "MacroType": "Union",
         "Macros": [
           [ null, null, "Asset.Sprite" ],
           [ null, null, "Asset.Sprite", null ]
+        ]
+      },
+      "gml_Script_scr_board_marker": {
+        "MacroType": "Union",
+        "Macros": [
+          [ null, null, "Asset.Sprite" ],
+          [ null, null, "Asset.Sprite", null ],
+          [ null, null, "Asset.Sprite", null, null ],
+          [ null, null, "Asset.Sprite", null, null, null ],
+          [ null, null, "Asset.Sprite", null, null, null, null ]
+        ]
+      },
+      "gml_Script_scr_marker_blend": {
+        "MacroType": "Union",
+        "Macros": [
+          [ null, null, "Asset.Sprite" ],
+          [ null, null, "Asset.Sprite", null ],
+          [ null, null, "Asset.Sprite", null, null ],
+          [ null, null, "Asset.Sprite", null, null, null ],
+          [ null, null, "Asset.Sprite", null, null, null, null ],
+          [ null, null, "Asset.Sprite", null, null, null, null, null ],
+          [ null, null, "Asset.Sprite", null, null, null, null, null, null ],
+          [ null, null, "Asset.Sprite", null, null, null, null, null, null, "Constant.Color" ],
+          [ null, null, "Asset.Sprite", null, null, null, null, null, null, "Constant.Color", null ],
+          [ null, null, "Asset.Sprite", null, null, null, null, null, null, "Constant.Color", null, null ]
+        ]
+      },
+      "gml_Script_scr_marker_ext": {
+        "MacroType": "Union",
+        "Macros": [
+          [ null, null, "Asset.Sprite" ],
+          [ null, null, "Asset.Sprite", null ],
+          [ null, null, "Asset.Sprite", null, null ],
+          [ null, null, "Asset.Sprite", null, null, null ],
+          [ null, null, "Asset.Sprite", null, null, null, null ],
+          [ null, null, "Asset.Sprite", null, null, null, null, "Constant.Color" ],
+          [ null, null, "Asset.Sprite", null, null, null, null, "Constant.Color", null ],
+          [ null, null, "Asset.Sprite", null, null, null, null, "Constant.Color", null, null ],
+          [ null, null, "Asset.Sprite", null, null, null, null, "Constant.Color", null, null, null ],
+          [ null, null, "Asset.Sprite", null, null, null, null, "Constant.Color", null, null, null, null ]
         ]
       },
       "gml_Script_scr_dark_marker_depth": [ null, null, null, "Asset.Sprite" ],
@@ -447,7 +659,13 @@
       "gml_Script_draw_background_tiled_ext": [ "Asset.Sprite", null, null, null, null, "Constant.Color", null ],
       "gml_Script_scr_draw_background_ps4": [ "Asset.Sprite", null, null ],
       "gml_Script_scr_draw_sprite_crop_ext": [ "Asset.Sprite", null, null, null, null, null, null, null, null, null, null, null ],
-      "gml_Script_scr_textsetup": [ "Asset.Font", "Constant.Color", null, null, null, null, null, "Asset.Sound" ],
+      "gml_Script_scr_textsetup": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Font", "Constant.Color", null, null, null, null, null, "Asset.Sound" ],
+          [ "Asset.Font", "Constant.Color", null, null, null, null, null, "Asset.Sound", null, null, null ]
+        ]
+      },
       "gml_Script_draw_sprite_ext_glow": {
         "MacroType": "Union",
         "Macros": [
@@ -479,27 +697,40 @@
       "gml_Script_scr_custom_afterimage": [ "Asset.Object" ],
       "gml_Script_scr_custom_afterimage_ext": [ "Asset.Object", "Asset.Sprite", null, null, null, null, null ],
       "gml_Script_scr_following_afterimage": [ "Asset.Object", "Id.InstanceOrObject" ],
-      "gml_Script_c_var_instance": [
-        null,
-        {
-          "MacroType": "Union",
-          "Macros": [
+      "gml_Script_c_var_instance": {
+        "MacroType": "Union",
+        "Macros": [
+          [
+            null,
             {
-              "MacroType": "Match",
-              "ConditionalValue": "character_sprite"
+              "MacroType": "Union",
+              "Macros": [
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "character_sprite"
+                },
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "sprite_index"
+                },
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "head_sprite"
+                }
+              ]
             },
+            "Asset.Sprite"
+          ],
+          [
+            null,
             {
               "MacroType": "Match",
-              "ConditionalValue": "sprite_index"
+              "ConditionalValue": "color_blend"
             },
-            {
-              "MacroType": "Match",
-              "ConditionalValue": "head_sprite"
-            }
+            "Constant.Color"
           ]
-        },
-        "Asset.Sprite"
-      ],
+        ]
+      },
       "gml_Script_c_delaycmd": {
         "MacroType": "Union",
         "Macros": [
@@ -559,6 +790,14 @@
           ]
         ]
       },
+      "gml_Script_scr_var_delay": [
+        {
+          "MacroType": "Match",
+          "ConditionalValue": "sprite_index"
+        },
+        "Asset.Sprite",
+        null
+      ],
       "gml_Script_c_script_instance": [
         null,
         {
@@ -601,7 +840,140 @@
       "gml_Script_scr_monster_add": [ null, "Asset.Object" ],
       "gml_Script_scr_bullet_create": [ null, null, "Asset.Object" ],
       "gml_Script_scr_childbullet": [ null, null, "Asset.Object" ],
-      "gml_Script_scr_debug_keycheck": [ "Constant.VirtualKey" ]
+      "gml_Script_scr_debug_keycheck": [ "Constant.VirtualKey" ],
+      "set_custom_sprite": [ "Asset.Sprite" ],
+      "set_border": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Sprite" ],
+          [ "Asset.Sprite", null ]
+        ]
+      },
+      "hide_border": [ null, "Constant.Color" ],
+      "gml_Script_c_tenna_sprite": [ "Asset.Sprite" ],
+      "set_screen_sprite": [ "Asset.Sprite" ],
+      "set_screen_color": [ "Constant.Color" ],
+      "gml_Script_scr_funnytext_new_sound": [
+        "Asset.Sound",
+        {
+          "MacroType": "ArrayInit",
+          "Macro": "Asset.Sprite"
+        }
+      ],
+      "gml_Script_scr_music_event_add": [
+        null,
+        {
+          "MacroType": "Match",
+          "ConditionalValue": "sprite_index"
+        },
+        "Asset.Sprite",
+        null
+      ],
+      "gml_Script_scr_music_event_add_instance": {
+        "MacroType": "Union",
+        "Macros": [
+          [
+            null,
+            null,
+            {
+              "MacroType": "Match",
+              "ConditionalValue": "sprite_index"
+            },
+            "Asset.Sprite"
+          ],
+          [
+            null,
+            null,
+            {
+              "MacroType": "Match",
+              "ConditionalValue": "sprite_index"
+            },
+            "Asset.Sprite",
+            null
+          ],
+          [
+            null,
+            null,
+            {
+              "MacroType": "Match",
+              "ConditionalValue": "sprite_index"
+            },
+            "Asset.Sprite",
+            null,
+            null
+          ]
+        ]
+      },
+      "gml_Script_scr_music_beat_event_instance": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Object", null, null ],
+          [ "Asset.Object", null, null, null ]
+        ]
+      },
+      "gml_Script_instance_create_board": [ null, null, "Asset.Object" ],
+      "gml_Script_pal_swap_set": [ "Asset.Sprite", null, null ],
+      "gml_Script_scr_draw_beam": [ null, null, null, null, null, "Constant.Color", null, null ],
+      "gml_Script_scr_draw_beam_color": [ null, null, null, null, null, "Constant.Color", null, null, null ],
+      "gml_Script_scr_fire_bullet": {
+        "MacroType": "Union",
+        "Macros": [
+          [ null, null, "Asset.Object", null, null ],
+          [ null, null, "Asset.Object", null, null, "Asset.Sprite" ],
+          [ null, null, "Asset.Object", null, null, "Asset.Sprite", null ],
+          [ null, null, "Asset.Object", null, null, "Asset.Sprite", null, null ],
+          [ null, null, "Asset.Object", null, null, "Asset.Sprite", null, null, null ]
+        ]
+      },
+      "gml_Script_scr_fire_bullet_colorize": {
+        "MacroType": "Union",
+        "Macros": [
+          [ null, null, "Asset.Object", null, null, "Asset.Sprite", "Constant.Color" ],
+          [ null, null, "Asset.Object", null, null, "Asset.Sprite", "Constant.Color", null ]
+        ]
+      },
+      "create_highlight": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Object" ],
+          [ "Asset.Object", null ],
+          [ "Asset.Object", null, null ],
+          [ "Asset.Object", null, null, null ]
+        ]
+      },
+      "gml_Script_findsprite": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Sprite" ],
+          [ "Asset.Sprite", null ],
+          [ "Asset.Sprite", null, "Constant.Color" ],
+          [ "Asset.Sprite", null, "Constant.Color", null ],
+          [ "Asset.Sprite", null, "Constant.Color", null, null ],
+          [ "Asset.Sprite", null, "Constant.Color", null, null, null ],
+          [ "Asset.Sprite", null, "Constant.Color", null, null, null, null ]
+        ]
+      },
+      "gml_Script_findspriteinfo": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Sprite" ],
+          [ "Asset.Sprite", null ],
+          [ "Asset.Sprite", null, "Constant.Color" ],
+          [ "Asset.Sprite", null, "Constant.Color", null ],
+          [ "Asset.Sprite", null, "Constant.Color", null, null ],
+          [ "Asset.Sprite", null, "Constant.Color", null, null, null ],
+          [ "Asset.Sprite", null, "Constant.Color", null, null, null, null ]
+        ]
+      },
+      "gml_Script_scr_lerp_imageblend": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Id.InstanceOrObject", "Constant.Color", "Constant.Color", null ],
+          [ "Id.InstanceOrObject", "Constant.Color", "Constant.Color", null, null, null ]
+        ]
+      },
+      "set_tile_sprite": [ null, "Asset.Sprite" ],
+      "set_tile_sprite_ext": [ null, "Asset.Sprite", null ]
     },
     "FunctionReturn": {
       "scr_getbuttonsprite": {
@@ -874,6 +1246,42 @@
     "gml_Object_obj_sneo_final_forme_Step_0": {
       "Variables": {
         "_box": "Asset.Object"
+      }
+    },
+    "gml_Script_scr_rhythmgame_draw_border": {
+      "Variables": {
+        "_name": "Asset.Sprite"
+      }
+    },
+    "gml_Script_scr_setparty": {
+      "Variables": {
+        "kris": "Asset.Object"
+      }
+    },
+    "gml_Object_obj_rhythmgame_performer_Create_0": {
+      "Variables": {
+        "idle": "Asset.Sprite",
+        "low": "Asset.Sprite",
+        "mid": "Asset.Sprite",
+        "high": "Asset.Sprite"
+      }
+    },
+    "gml_Script_scr_rhythmgame_init": {
+      "Variables": {
+        "idle": "Asset.Sprite",
+        "low": "Asset.Sprite",
+        "mid": "Asset.Sprite",
+        "high": "Asset.Sprite"
+      }
+    },
+    "gml_Script_scr_rhythmgame_song_select": {
+      "Variables": {
+        "local_preview": "Asset.Sound"
+      }
+    },
+    "gml_Script_scr_get_border": {
+      "Variables": {
+        "argument0": "Asset.Room"
       }
     }
   }
