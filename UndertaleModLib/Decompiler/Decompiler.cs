@@ -79,7 +79,7 @@ namespace UndertaleModLib.Decompiler
             {
                 // TODO: This is expensive, move it somewhere else as a dictionary
                 // and have it update when events/objects are modified.
-                
+
                 // Currently using for loops on purpose, as foreach has memory issues due to IEnumerable
                 for (int i = 0; i < globalContext.Data.GameObjects.Count; i++)
                 {
@@ -396,102 +396,102 @@ namespace UndertaleModLib.Decompiler
                         return ((UndertaleInstruction.InstanceType)Value).ToString().ToLower(CultureInfo.InvariantCulture);
                 }
                 else switch (AssetType) // Need to put else because otherwise it gets terribly unoptimized with GameObject type
-                {
-                    case AssetIDType.e__VW:
-                        return "e__VW." + ConvertToEnumStr<e__VW>(Value);
-                    case AssetIDType.e__BG:
-                        return "e__BG." + ConvertToEnumStr<e__BG>(Value);
+                    {
+                        case AssetIDType.e__VW:
+                            return "e__VW." + ConvertToEnumStr<e__VW>(Value);
+                        case AssetIDType.e__BG:
+                            return "e__BG." + ConvertToEnumStr<e__BG>(Value);
 
-                    case AssetIDType.Enum_HAlign:
-                        return ConvertToEnumStr<HAlign>(Value);
-                    case AssetIDType.Enum_VAlign:
-                        return ConvertToEnumStr<VAlign>(Value);
-                    case AssetIDType.Enum_GameSpeed:
-                        return ConvertToEnumStr<GameSpeed>(Value);
-                    case AssetIDType.Enum_OSType:
-                        return ConvertToEnumStr<OSType>(Value);
-                    case AssetIDType.Enum_GamepadButton:
-                        return ConvertToEnumStr<GamepadButton>(Value);
-                    case AssetIDType.MouseButton:
-                        return ConvertToEnumStr<MouseButton>(Value);
-                    case AssetIDType.Enum_MouseCursor:
-                        return ConvertToEnumStr<MouseCursor>(Value);
-                    case AssetIDType.Enum_PathEndAction:
-                        return ConvertToEnumStr<PathEndAction>(Value);
-                    case AssetIDType.Enum_BufferKind:
-                        return ConvertToEnumStr<BufferKind>(Value);
-                    case AssetIDType.Enum_BufferType:
-                        return ConvertToEnumStr<BufferType>(Value);
-                    case AssetIDType.Enum_BufferSeek:
-                        return ConvertToEnumStr<BufferSeek>(Value);
-                    case AssetIDType.Enum_Steam_UGC_FileType:
-                        return ConvertToEnumStr<Steam_UGC_FileType>(Value);
-                    case AssetIDType.Enum_Steam_UGC_List:
-                        return ConvertToEnumStr<Steam_UGC_List>(Value);
-                    case AssetIDType.Enum_Steam_UGC_MatchType:
-                        return ConvertToEnumStr<Steam_UGC_MatchType>(Value);
-                    case AssetIDType.Enum_Steam_UGC_QueryType:
-                        return ConvertToEnumStr<Steam_UGC_QueryType>(Value);
-                    case AssetIDType.Enum_Steam_UGC_SortOrder:
-                        return ConvertToEnumStr<Steam_UGC_SortOrder>(Value);
-                    case AssetIDType.Enum_Steam_Overlay:
-                        return ConvertToEnumStr<Steam_Overlay>(Value);
-                    case AssetIDType.Enum_Steam_LeaderBoard_Display:
-                        return ConvertToEnumStr<Steam_LeaderBoard_Display>(Value);
-                    case AssetIDType.Enum_Steam_LeaderBoard_Sort:
-                        return ConvertToEnumStr<Steam_LeaderBoard_Sort>(Value);
-                    case AssetIDType.Boolean:
-                        return ConvertToEnumStr<Boolean>(Value);
-                    case AssetIDType.EventType:
-                        return ConvertToEnumStr<Enum_EventType>(Value);
-                    case AssetIDType.ContextDependent:
-                        {
-                            var func = context.currentFunction;
-                            if (func != null && (ContextualAssetResolver.resolvers?.ContainsKey(func.Function.Name.Content) ?? false))
+                        case AssetIDType.Enum_HAlign:
+                            return ConvertToEnumStr<HAlign>(Value);
+                        case AssetIDType.Enum_VAlign:
+                            return ConvertToEnumStr<VAlign>(Value);
+                        case AssetIDType.Enum_GameSpeed:
+                            return ConvertToEnumStr<GameSpeed>(Value);
+                        case AssetIDType.Enum_OSType:
+                            return ConvertToEnumStr<OSType>(Value);
+                        case AssetIDType.Enum_GamepadButton:
+                            return ConvertToEnumStr<GamepadButton>(Value);
+                        case AssetIDType.MouseButton:
+                            return ConvertToEnumStr<MouseButton>(Value);
+                        case AssetIDType.Enum_MouseCursor:
+                            return ConvertToEnumStr<MouseCursor>(Value);
+                        case AssetIDType.Enum_PathEndAction:
+                            return ConvertToEnumStr<PathEndAction>(Value);
+                        case AssetIDType.Enum_BufferKind:
+                            return ConvertToEnumStr<BufferKind>(Value);
+                        case AssetIDType.Enum_BufferType:
+                            return ConvertToEnumStr<BufferType>(Value);
+                        case AssetIDType.Enum_BufferSeek:
+                            return ConvertToEnumStr<BufferSeek>(Value);
+                        case AssetIDType.Enum_Steam_UGC_FileType:
+                            return ConvertToEnumStr<Steam_UGC_FileType>(Value);
+                        case AssetIDType.Enum_Steam_UGC_List:
+                            return ConvertToEnumStr<Steam_UGC_List>(Value);
+                        case AssetIDType.Enum_Steam_UGC_MatchType:
+                            return ConvertToEnumStr<Steam_UGC_MatchType>(Value);
+                        case AssetIDType.Enum_Steam_UGC_QueryType:
+                            return ConvertToEnumStr<Steam_UGC_QueryType>(Value);
+                        case AssetIDType.Enum_Steam_UGC_SortOrder:
+                            return ConvertToEnumStr<Steam_UGC_SortOrder>(Value);
+                        case AssetIDType.Enum_Steam_Overlay:
+                            return ConvertToEnumStr<Steam_Overlay>(Value);
+                        case AssetIDType.Enum_Steam_LeaderBoard_Display:
+                            return ConvertToEnumStr<Steam_LeaderBoard_Display>(Value);
+                        case AssetIDType.Enum_Steam_LeaderBoard_Sort:
+                            return ConvertToEnumStr<Steam_LeaderBoard_Sort>(Value);
+                        case AssetIDType.Boolean:
+                            return ConvertToEnumStr<Boolean>(Value);
+                        case AssetIDType.EventType:
+                            return ConvertToEnumStr<Enum_EventType>(Value);
+                        case AssetIDType.ContextDependent:
                             {
-                                List<Expression> actualArguments = new List<Expression>();
-                                foreach (var arg in func.Arguments)
+                                var func = context.currentFunction;
+                                if (func != null && (ContextualAssetResolver.resolvers?.ContainsKey(func.Function.Name.Content) ?? false))
                                 {
-                                    if (arg is ExpressionCast)
-                                        actualArguments.Add((arg as ExpressionCast).Argument);
-                                    else
-                                        actualArguments.Add(arg);
+                                    List<Expression> actualArguments = new List<Expression>();
+                                    foreach (var arg in func.Arguments)
+                                    {
+                                        if (arg is ExpressionCast)
+                                            actualArguments.Add((arg as ExpressionCast).Argument);
+                                        else
+                                            actualArguments.Add(arg);
+                                    }
+                                    string result = ContextualAssetResolver.resolvers[func.Function.Name.Content](context, func, actualArguments.IndexOf(this), this);
+                                    if (result != null)
+                                        return result;
                                 }
-                                string result = ContextualAssetResolver.resolvers[func.Function.Name.Content](context, func, actualArguments.IndexOf(this), this);
-                                if (result != null)
-                                    return result;
                             }
-                        }
-                        break;
+                            break;
 
-                    case AssetIDType.Color:
-                        if (Value is IFormattable formattable && !(Value is float) && !(Value is double) && !(Value is decimal))
-                        {
-                            int vint = Convert.ToInt32(Value);
-                            if (vint < 0) // negative value.
-                                return vint.ToString();
-                            else // guaranteed to be an unsigned int.
+                        case AssetIDType.Color:
+                            if (Value is IFormattable formattable && !(Value is float) && !(Value is double) && !(Value is decimal))
                             {
-                                uint vuint = (uint)vint;
-                                if (Decompiler.ColorDictionary.ContainsKey(vuint))
-                                    return Decompiler.ColorDictionary[vuint];
-                                else
-                                    return (context.GlobalContext.Data?.IsGameMaker2() ?? false ? "0x" : "$") + formattable.ToString("X6", CultureInfo.InvariantCulture); // not a known color and not negative.
+                                int vint = Convert.ToInt32(Value);
+                                if (vint < 0) // negative value.
+                                    return vint.ToString();
+                                else // guaranteed to be an unsigned int.
+                                {
+                                    uint vuint = (uint)vint;
+                                    if (Decompiler.ColorDictionary.ContainsKey(vuint))
+                                        return Decompiler.ColorDictionary[vuint];
+                                    else
+                                        return (context.GlobalContext.Data?.IsGameMaker2() ?? false ? "0x" : "$") + formattable.ToString("X6", CultureInfo.InvariantCulture); // not a known color and not negative.
+                                }
                             }
-                        }
-                        break;
+                            break;
 
-                    case AssetIDType.KeyboardKey:
-                        {
-                            string key = GetAsKeyboard(context);
-                            if (key != null)
-                                return key;
-                        }
-                        break;
-                    // Don't use this.
-                    // It will not recompile.
-                    case AssetIDType.Macro:
-                        throw new NotImplementedException();/*
+                        case AssetIDType.KeyboardKey:
+                            {
+                                string key = GetAsKeyboard(context);
+                                if (key != null)
+                                    return key;
+                            }
+                            break;
+                        // Don't use this.
+                        // It will not recompile.
+                        case AssetIDType.Macro:
+                            throw new NotImplementedException();/*
                         {
                             var macros = ContextualAssetResolver.macros;
                             var key = Value?.ToString();
@@ -500,7 +500,7 @@ namespace UndertaleModLib.Decompiler
                                 return macros[key];
                         }
                         break;*/
-                }
+                    }
 
                 if ((context.AssetResolutionEnabled || AssetType == AssetIDType.Script) && context.GlobalContext.Data != null && AssetType != AssetIDType.Other)
                 {
@@ -1526,7 +1526,7 @@ namespace UndertaleModLib.Decompiler
                                         gotFuncName = true;
                                     }
                                 }
-                                if(!gotFuncName)
+                                if (!gotFuncName)
                                     sb.Append((context.Statements[0].Last() as AssignmentStatement).Destination.Var.Name.Content);
                             }
                         }
@@ -1594,7 +1594,7 @@ namespace UndertaleModLib.Decompiler
                         context.IndentationLevel--;
                         sb.Append(context.Indentation);
                         sb.Append("}");
-                        if(!oldDecompilingStruct)
+                        if (!oldDecompilingStruct)
                             sb.Append("\n");
                     }
                     else
@@ -1688,7 +1688,8 @@ namespace UndertaleModLib.Decompiler
                         cast.Argument is ExpressionConstant constant &&
                         constant.Value is UndertaleInstruction.Reference<UndertaleFunction> reference)
                     {
-                        var call = new DirectFunctionCall(reference.Target, ReturnType, actualArgs) {
+                        var call = new DirectFunctionCall(reference.Target, ReturnType, actualArgs)
+                        {
                             OverridenName = constructor
                         };
 
@@ -2352,17 +2353,22 @@ namespace UndertaleModLib.Decompiler
 
                             // Check if instance type is "StackTop"
                             ExpressionConstant instanceTypeConstExpr = null;
-                            if (target.InstType is ExpressionConstant c1) {
+                            if (target.InstType is ExpressionConstant c1)
+                            {
                                 instanceTypeConstExpr = c1;
-                            } else if (target.InstType is ExpressionTempVar tempVar) {
+                            }
+                            else if (target.InstType is ExpressionTempVar tempVar)
+                            {
                                 TempVarAssignmentStatement assignment = context.TempVarMap[tempVar.Var.Var.Name];
-                                if (assignment != null && assignment.Value is ExpressionConstant c2) {
+                                if (assignment != null && assignment.Value is ExpressionConstant c2)
+                                {
                                     instanceTypeConstExpr = c2;
                                 }
                             }
                             if (instanceTypeConstExpr != null &&
                                 instanceTypeConstExpr.Type == UndertaleInstruction.DataType.Int16 &&
-                                (short)instanceTypeConstExpr.Value == (short)UndertaleInstruction.InstanceType.Stacktop) {
+                                (short)instanceTypeConstExpr.Value == (short)UndertaleInstruction.InstanceType.Stacktop)
+                            {
                                 target.InstType = stack.Pop();
                             }
 
@@ -2417,7 +2423,7 @@ namespace UndertaleModLib.Decompiler
                         {
                             ExpressionVar pushTarget = new ExpressionVar((instr.Value as UndertaleInstruction.Reference<UndertaleVariable>).Target, new ExpressionConstant(UndertaleInstruction.DataType.Int16, instr.TypeInst), (instr.Value as UndertaleInstruction.Reference<UndertaleVariable>).Type);
                             pushTarget.Opcode = instr.Kind;
-                            switch(pushTarget.VarType)
+                            switch (pushTarget.VarType)
                             {
                                 case UndertaleInstruction.VariableType.Normal:
                                 case UndertaleInstruction.VariableType.Instance:
@@ -2733,11 +2739,13 @@ namespace UndertaleModLib.Decompiler
                 if (i < tempvars.Count)
                 {
                     Expression val = stack.Pop();
-                    if (!(val is ExpressionTempVar) || (val as ExpressionTempVar).Var != tempvars[i]) {
+                    if (!(val is ExpressionTempVar) || (val as ExpressionTempVar).Var != tempvars[i])
+                    {
                         var assignment = new TempVarAssignmentStatement(tempvars[i], val);
                         statements.Add(assignment);
 
-                        if (val is ExpressionConstant) {
+                        if (val is ExpressionConstant)
+                        {
                             context.TempVarMap[tempvars[i].Var.Name] = assignment;
                         }
                     }
@@ -2754,7 +2762,8 @@ namespace UndertaleModLib.Decompiler
                     statements.Add(assignment);
                     leftovers.Add(varref);
 
-                    if (val is ExpressionConstant) {
+                    if (val is ExpressionConstant)
+                    {
                         context.TempVarMap[var.Name] = assignment;
                     }
                 }
@@ -2791,7 +2800,7 @@ namespace UndertaleModLib.Decompiler
         public static Dictionary<uint, Block> DecompileFlowGraph(UndertaleCode code, List<uint> entryPoints)
         {
             Dictionary<uint, Block> blockByAddress = new Dictionary<uint, Block>();
-            foreach(uint entryPoint in entryPoints)
+            foreach (uint entryPoint in entryPoints)
                 blockByAddress[entryPoint] = new Block(entryPoint);
             Block entryBlock = new Block(null);
             Block finalBlock = new Block(code.Length / 4);
@@ -3794,7 +3803,8 @@ namespace UndertaleModLib.Decompiler
                         {
                             block = block.nextBlockTrue;
                             popenvDrop = true;
-                        } else
+                        }
+                        else
                             block = ((lastKind != UndertaleInstruction.Opcode.Ret && lastKind != UndertaleInstruction.Opcode.Exit)
                                 || (block.nextBlockTrue != null && block.nextBlockTrue.nextBlockFalse == null)) ? block.nextBlockTrue : stopAt;
                     }
@@ -4077,7 +4087,7 @@ namespace UndertaleModLib.Decompiler
             // Preventing the same block and its children from being queued repeatedly
             // becomes increasingly important on large switches. The HashSet should give
             // good performance while preventing this type of duplication.
-            HashSet<Block> usedBlocks = new HashSet<Block>(); 
+            HashSet<Block> usedBlocks = new HashSet<Block>();
 
             blocks.Enqueue(start);
             usedBlocks.Add(start);
