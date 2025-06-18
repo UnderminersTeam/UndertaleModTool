@@ -7,10 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using UndertaleModLib;
-using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 using static UndertaleModLib.Models.UndertaleSequence;
-using static UndertaleModLib.Models.UndertaleInstruction;
 
 namespace UndertaleModTool.Windows
 {
@@ -28,7 +26,7 @@ namespace UndertaleModTool.Windows
                 return base.Contains(item);
 
             return !isYYC || !UndertaleResourceReferenceMap.CodeTypes.Contains(item);
-        } 
+        }
     }
 
     public class PredicateForVersion
@@ -41,260 +39,9 @@ namespace UndertaleModTool.Windows
     {
         private static UndertaleData data;
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
-        private static Dictionary<UndertaleCode, HashSet<UndertaleString>> stringCodeReferences;
-        private static Dictionary<UndertaleCode, HashSet<UndertaleFunction>> funcCodeReferences;
-        private static Dictionary<UndertaleCode, HashSet<UndertaleVariable>> variCodeReferences;
-
-        private static Dictionary<string, short> fontFunctions, gameObjFunctions, spriteFunctions, bgFunctions;
-        private static Dictionary<UndertaleCode, HashSet<UndertaleFont>> fontCodeReferences;
-        private static Dictionary<UndertaleCode, HashSet<UndertaleGameObject>> gameObjCodeReferences;
-        private static Dictionary<UndertaleCode, HashSet<UndertaleSprite>> spriteCodeReferences;
-        private static Dictionary<UndertaleCode, HashSet<UndertaleBackground>> bgCodeReferences;
-
-        #region Call instructions processing
-        private static bool isGMS2, isGMS2_3, isGM2023_8;
-        private static int dummyInt;
-        private static bool ConsumeCallArgument(bool isLastArg, ref int i, UndertaleCode code, ref int val, bool dontParse = false)
-        {
-            if (isLastArg && !dontParse)
-            {
-                // If it's an asset argument and we don't need to consume
-                // all instructions, then we only check one (GM 2023.8+) or two instructions.
-                // Also, it's possible that it will be `conv` + `pushi` in GM 2023.8+, but
-                // it would mean that the reference is not recognized, so
-                // we should also skip that.
-                var instr = code.Instructions[i];
-
-                if (isGM2023_8 && instr.Kind == Opcode.Break
-                    && instr.Value is short v && v == -11)
-                {
-                    int assetIndex = Decompiler.ExpressionAssetRef.DecodeResourceIndex(instr.IntArgument);
-                    if (assetIndex < 0)
-                        val = -1;
-                    else
-                        val = assetIndex;
-                }
-                else if (instr.Kind == Opcode.Conv && i - 1 >= 0)
-                {
-                    instr = code.Instructions[--i];
-                    if (instr.Kind != Opcode.PushI || instr.Value is not short v1)
-                        return false;
-
-                    if (v1 < 0)
-                        val = -1;
-                    else
-                        val = v1;
-                }
-                else
-                    return false;
-
-                return true;
-            }
-
-            short instrRemaining = 1;
-
-            while (instrRemaining > 0)
-            {
-                if (i - 1 < 0)
-                    return false;
-
-                var instr = code.Instructions[i--];
-
-                switch (instr.Kind)
-                {
-                    case Opcode.Conv:
-                        instrRemaining++;
-
-                        break;
-
-                    case Opcode.PushI:
-                    case Opcode.PushBltn or Opcode.PushGlb or Opcode.PushEnv or Opcode.PushLoc:
-                        break;
-                    case Opcode.Break when isGMS2_3:
-                        if (instr.Value is short v)
-                        {
-                            if (v == -2 || v == -4) // `pushaf`, `pushac`
-                                instrRemaining += 2;
-                        }
-                        break;
-
-                    case Opcode.Push:
-                        if (instr.Value is Reference<UndertaleVariable> varRef)
-                        {
-                            if (varRef.Type == VariableType.Array
-                                || varRef.Type == VariableType.ArrayPushAF)
-                            {
-                                instrRemaining += 2;
-                            }
-                            else if (varRef.Type == VariableType.StackTop)
-                            {
-                                instrRemaining++;
-                            }
-                        }
-                        break;
-
-                    case Opcode.Add or Opcode.Sub or Opcode.Mul
-                         or Opcode.Div or Opcode.And or Opcode.Rem
-                         or Opcode.Shl or Opcode.Shr or Opcode.Xor or Opcode.Or:
-                        instrRemaining += 2;
-
-                        break;
-
-                    case Opcode.Neg or Opcode.Not or Opcode.Ret or Opcode.Dup:
-                        instrRemaining++;
-
-                        break;
-
-                    case Opcode.Call:
-                        i++;
-                        ConsumeCallInstructions(instr.ArgumentsCount - 1, ref i, code);
-                        break;
-
-                    case Opcode.CallV:
-                        i++;
-                        ConsumeCallInstructions(instr.Extra - 1, ref i, code);
-                        break;
-                }
-
-                if (instrRemaining > 0)
-                    instrRemaining--;
-            }
-
-            return true;
-        }
-        private static int ProcessCallInstructions(int argIndex, ref int i, UndertaleCode code)
-        {
-            int assetIndex = -1;
-            int consumedCount = 0;
-            i--;
-            while (i >= 0 && consumedCount <= argIndex)
-            {
-                bool isLastArg = consumedCount == argIndex;
-                if (!ConsumeCallArgument(isLastArg, ref i, code, ref assetIndex))
-                    break;
-
-                consumedCount++;
-            }
-
-            return assetIndex;
-        }
-        private static void ConsumeCallInstructions(int argIndex, ref int i, UndertaleCode code)
-        {
-            int consumedCount = 0;
-            i--;
-            while (i >= 0 && consumedCount <= argIndex)
-            {
-                bool isLastArg = consumedCount == argIndex;
-                // `dummyInt` won't be changed because of `dontParse = true`
-                if (!ConsumeCallArgument(isLastArg, ref i, code, ref dummyInt, true))
-                    break;
-
-                consumedCount++;
-            }
-        }
-        #endregion
-
-        private delegate int GetAssetIndexDeleg(int argIndex, int argCount, int i, UndertaleCode code, int assetListLen);
-        private static readonly GetAssetIndexDeleg getAssetIndex = (int argIndex, int argCount, int i, UndertaleCode code, int assetListLen) =>
-        {
-            if (argCount == 1)
-            {
-                if (i - 2 < 0)
-                    return -1;
-
-                int assetInstrIndex = i - 1;
-                var assetInstr = code.Instructions[assetInstrIndex];
-                if (assetInstr.Kind != Opcode.Conv)
-                    return -1;
-
-                assetInstrIndex--;
-                assetInstr = code.Instructions[assetInstrIndex];
-                if (assetInstr.Kind != Opcode.PushI
-                    || assetInstr.Type1 != DataType.Int16
-                    || assetInstr.Value is not short val
-                    || val < 0 || val > assetListLen - 1)
-                    return -1;
-
-                return val;
-            }
-            else
-            {
-                int assetIndex = ProcessCallInstructions(argIndex, ref i, code);
-                if (assetIndex > assetListLen)
-                    return -1;
-
-                return assetIndex;
-            }
-        };
-        private static readonly GetAssetIndexDeleg getAssetIndexGM2023_8 = (int argIndex, int argCount, int i, UndertaleCode code, int assetListLen) =>
-        {
-            if (argCount == 1)
-            {
-                int assetInstrIndex = i - 1;
-                if (assetInstrIndex < 0)
-                    return -1;
-
-                var assetInstr = code.Instructions[assetInstrIndex];
-
-                // If not `pushref`
-                if (assetInstr.Kind != Opcode.Break
-                    || assetInstr.Value is not short val
-                    || val != -11)
-                    return -1;
-
-                int assetIndex = Decompiler.ExpressionAssetRef.DecodeResourceIndex(assetInstr.IntArgument);
-                if (assetIndex < 0 || assetIndex > assetListLen - 1)
-                    return -1;
-
-                return assetIndex;
-            }
-            else
-            {
-                int assetIndex = ProcessCallInstructions(argIndex, ref i, code);
-                if (assetIndex > assetListLen)
-                    return -1;
-
-                return assetIndex;
-            }
-        };
-        private static GetAssetIndexDeleg getAssetIndexCurr;
-        private static IEnumerable<UndertaleCode> GetCodeEntriesWithAsset<T>(Dictionary<string, short> assetFunctions, IList<T> assetList, T obj)
-                                                  where T : class, UndertaleResource
-        {
-            foreach (var code in data.Code)
-            {
-                UndertaleCode assetReference = null;
-
-                for (int i = 0; i < code.Instructions.Count; i++)
-                {
-                    var instr = code.Instructions[i];
-
-                    string funcName = instr.Function?.Target?.Name?.Content;
-                    if (funcName is null)
-                        continue;
-                    if (instr.ArgumentsCount == 0)
-                        continue;
-                    if (!assetFunctions.TryGetValue(funcName, out var argIndex))
-                        continue;
-                    if (argIndex > instr.ArgumentsCount - 1)
-                        continue;
-
-                    int assetIndex = getAssetIndexCurr(argIndex, instr.ArgumentsCount, i, code, assetList.Count);
-                    if (assetIndex == -1)
-                        continue;
-
-                    if (assetList[assetIndex] == obj)
-                    {
-                        assetReference = code;
-                        break;
-                    }
-                }
-
-                if (assetReference is not null)
-                    yield return assetReference;
-            }
-        }
-
+        private static Dictionary<UndertaleCode, HashSet<UndertaleString>> stringReferences;
+        private static Dictionary<UndertaleCode, HashSet<UndertaleFunction>> funcReferences;
+        private static Dictionary<UndertaleCode, HashSet<UndertaleVariable>> variReferences;
 
         private static readonly Dictionary<Type, PredicateForVersion[]> typeMap = new()
         {
@@ -307,37 +54,17 @@ namespace UndertaleModTool.Windows
                         Version = (1, 0, 0),
                         Predicate = (objSrc, types, checkOne) =>
                         {
+                            if (!types.Contains(typeof(UndertaleGameObject)))
+                                return null;
+
                             if (objSrc is not UndertaleSprite obj)
                                 return null;
 
-                            Dictionary<string, object[]> outDict = new();
-
-                            if (types.Contains(typeof(UndertaleGameObject)))
-                            {
-                                var gameObjects = data.GameObjects.Where(x => x.Sprite == obj);
-                                if (gameObjects.Any())
-                                    outDict["Game objects"] = checkOne ? gameObjects.ToEmptyArray() : gameObjects.ToArray();
-                            }
-
-                            if (types.Contains(typeof(UndertaleCode)))
-                            {
-                                IEnumerable<UndertaleCode> spriteRefs;
-                                if (spriteCodeReferences is not null)
-                                {
-                                    spriteRefs = spriteCodeReferences.Where(x => x.Value.Contains(obj))
-                                                                     .Select(x => x.Key);
-                                }
-                                else
-                                {
-                                    spriteRefs = GetCodeEntriesWithAsset(spriteFunctions, data.Sprites, obj);
-                                }
-                                if (spriteRefs.Any())
-                                    outDict["Code"] = checkOne ? spriteRefs.ToEmptyArray() : spriteRefs.ToArray();
-                            }
-
-                            if (outDict.Count == 0)
+                            var gameObjects = data.GameObjects.Where(x => x.Sprite == obj);
+                            if (gameObjects.Any())
+                                return new() { { "Game objects", checkOne ? gameObjects.ToEmptyArray() : gameObjects.ToArray() } };
+                            else
                                 return null;
-                            return outDict;
                         }
                     },
                     new PredicateForVersion()
@@ -507,21 +234,6 @@ namespace UndertaleModTool.Windows
                                 if (tiles.Any())
                                     outDict["Room tiles"] = checkOne ? tiles.ToEmptyArray() : tiles.ToArray();
                             }
-                            if (types.Contains(typeof(UndertaleCode)))
-                            {
-                                IEnumerable<UndertaleCode> bgRefs;
-                                if (bgCodeReferences is not null)
-                                {
-                                    bgRefs = bgCodeReferences.Where(x => x.Value.Contains(obj))
-                                                             .Select(x => x.Key);
-                                }
-                                else
-                                {
-                                    bgRefs = GetCodeEntriesWithAsset(bgFunctions, data.Backgrounds, obj);
-                                }
-                                if (bgRefs.Any())
-                                    outDict["Code"] = checkOne ? bgRefs.ToEmptyArray() : bgRefs.ToArray();
-                            }
 
                             if (outDict.Count == 0)
                                 return null;
@@ -589,9 +301,6 @@ namespace UndertaleModTool.Windows
                         Version = (1, 0, 0),
                         Predicate = (objSrc, types, checkOne) =>
                         {
-                            if (!types.Contains(typeof(UndertaleTexturePageItem)))
-                                return null;
-
                             if (objSrc is not UndertaleEmbeddedTexture obj)
                                 return null;
 
@@ -623,57 +332,6 @@ namespace UndertaleModTool.Windows
                 }
             },
             {
-                typeof(UndertaleFont),
-                new[]
-                {
-                    new PredicateForVersion()
-                    {
-                        Version = (1, 0, 0),
-                        Predicate = (objSrc, types, checkOne) =>
-                        {
-                            if (!types.Contains(typeof(UndertaleCode)))
-                                return null;
-
-                            if (objSrc is not UndertaleFont obj)
-                                return null;
-
-                            IEnumerable<UndertaleCode> fontRefs;
-                            if (fontCodeReferences is not null)
-                            {
-                                fontRefs = fontCodeReferences.Where(x => x.Value.Contains(obj))
-                                                             .Select(x => x.Key);
-                            }
-                            else
-                            {
-                                fontRefs = GetCodeEntriesWithAsset(fontFunctions, data.Fonts, obj);
-                            }
-                            if (fontRefs.Any())
-                                return new() { { "Code", checkOne ? fontRefs.ToEmptyArray() : fontRefs.ToArray() } };
-                            else
-                                return null;
-                        }
-                    },
-                    new PredicateForVersion()
-                    {
-                        Version = (2, 2, 1),
-                        Predicate = (objSrc, types, checkOne) =>
-                        {
-                            if (!types.Contains(typeof(UndertaleTextureGroupInfo)))
-                                return null;
-
-                            if (objSrc is not UndertaleFont obj)
-                                return null;
-
-                            var textGroups = data.TextureGroupInfo.Where(x => x.Fonts.Any(s => s.Resource == obj));
-                            if (textGroups.Any())
-                                return new() { { "Texture groups", checkOne ? textGroups.ToEmptyArray() : textGroups.ToArray() } };
-                            else
-                                return null;
-                        }
-                    }
-                }
-            },
-            {
                 typeof(UndertaleTexturePageItem),
                 new[]
                 {
@@ -682,10 +340,10 @@ namespace UndertaleModTool.Windows
                         Version = (1, 0, 0),
                         Predicate = (objSrc, types, checkOne) =>
                         {
+                            Dictionary<string, object[]> outDict = new();
+
                             if (objSrc is not UndertaleTexturePageItem obj)
                                 return null;
-
-                            Dictionary<string, object[]> outDict = new();
 
                             if (types.Contains(typeof(UndertaleSprite)))
                             {
@@ -758,9 +416,9 @@ namespace UndertaleModTool.Windows
                             {
                                 var codeEntries = data.Code.Where(x => x.Name == obj);
                                 IEnumerable<UndertaleCode> stringRefs;
-                                if (stringCodeReferences is not null)
-                                    stringRefs = stringCodeReferences.Where(x => x.Value.Contains(obj))
-                                                                     .Select(x => x.Key);
+                                if (stringReferences is not null)
+                                    stringRefs = stringReferences.Where(x => x.Value.Contains(obj))
+                                                                 .Select(x => x.Key);
                                 else
                                     stringRefs = data.Code.Where(x => x.Instructions.Any(
                                                                         i => i.Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG> strPtr
@@ -1360,72 +1018,45 @@ namespace UndertaleModTool.Windows
                         Version = (1, 0, 0),
                         Predicate = (objSrc, types, checkOne) =>
                         {
+                            if (!types.Contains(typeof(UndertaleRoom.GameObject)))
+                                return null;
+
                             if (objSrc is not UndertaleGameObject obj)
                                 return null;
 
-                            Dictionary<string, object[]> outDict = new();
-
-                            if (types.Contains(typeof(UndertaleGameObject)))
+                            IEnumerable<object[]> GetObjInstances()
                             {
-                                var gameObjects = data.GameObjects.Where(x => x.ParentId == obj);
-                                if (gameObjects.Any())
-                                    outDict["Game objects (parent entry)"] = checkOne ? gameObjects.ToEmptyArray() : gameObjects.ToArray();
-                            }
-
-                            if (types.Contains(typeof(UndertaleCode)))
-                            {
-                                IEnumerable<UndertaleCode> gameObjRefs;
-                                if (gameObjCodeReferences is not null)
+                                if (data.IsGameMaker2())
                                 {
-                                    gameObjRefs = gameObjCodeReferences.Where(x => x.Value.Contains(obj))
-                                                                       .Select(x => x.Key);
-                                }
-                                else
-                                {
-                                    gameObjRefs = GetCodeEntriesWithAsset(gameObjFunctions, data.GameObjects, obj);
-                                }
-                                if (gameObjRefs.Any())
-                                    outDict["Code"] = checkOne ? gameObjRefs.ToEmptyArray() : gameObjRefs.ToArray();
-                            }
-
-                            if (types.Contains(typeof(UndertaleRoom.GameObject)))
-                            {
-                                IEnumerable<object[]> GetObjInstances()
-                                {
-                                    if (data.IsGameMaker2())
+                                    foreach (var room in data.Rooms)
                                     {
-                                        foreach (var room in data.Rooms)
+                                        foreach (var layer in room.Layers)
                                         {
-                                            foreach (var layer in room.Layers)
+                                            if (layer.InstancesData is not null)
                                             {
-                                                if (layer.InstancesData is not null)
-                                                {
-                                                    foreach (var inst in layer.InstancesData.Instances)
-                                                        if (inst.ObjectDefinition == obj)
-                                                            yield return new object[] { inst, layer, room };
-                                                }
+                                                foreach (var inst in layer.InstancesData.Instances)
+                                                    if (inst.ObjectDefinition == obj)
+                                                        yield return new object[] { inst, layer, room };
                                             }
                                         }
                                     }
-                                    else
+                                }
+                                else
+                                {
+                                    foreach (var room in data.Rooms)
                                     {
-                                        foreach (var room in data.Rooms)
-                                        {
-                                            foreach (var inst in room.GameObjects)
-                                                if (inst.ObjectDefinition == obj)
-                                                    yield return new object[] { inst, room };
-                                        }
+                                        foreach (var inst in room.GameObjects)
+                                            if (inst.ObjectDefinition == obj)
+                                                yield return new object[] { inst, room };
                                     }
                                 }
-
-                                var objInstances = GetObjInstances();
-                                if (objInstances.Any())
-                                    outDict["Room object instance"] = checkOne ? objInstances.ToEmptyArray() : objInstances.ToArray();
                             }
 
-                            if (outDict.Count == 0)
+                            var objInstances = GetObjInstances();
+                            if (objInstances.Any())
+                                return new() { { "Room object instance", checkOne ? objInstances.ToEmptyArray() : objInstances.ToArray() } };
+                            else
                                 return null;
-                            return outDict;
                         }
                     },
                     new PredicateForVersion()
@@ -1595,13 +1226,13 @@ namespace UndertaleModTool.Windows
                                 return null;
 
                             IEnumerable<UndertaleCode> funcRefs;
-                            if (funcCodeReferences is not null)
-                                funcRefs = funcCodeReferences.Where(x => x.Value.Contains(obj))
-                                                             .Select(x => x.Key);
+                            if (funcReferences is not null)
+                                funcRefs = funcReferences.Where(x => x.Value.Contains(obj))
+                                                         .Select(x => x.Key);
                             else
                                 funcRefs = data.Code.Where(x => x.Instructions.Any(
                                                                   i => i.Function?.Target == obj
-                                                                       || i.Value is Reference<UndertaleFunction> funcRef
+                                                                       || i.Value is UndertaleInstruction.Reference<UndertaleFunction> funcRef
                                                                           && funcRef.Target == obj));
                             if (funcRefs.Any())
                                 return new() { { "Code", checkOne ? funcRefs.ToEmptyArray() : funcRefs.ToArray() } };
@@ -1627,13 +1258,13 @@ namespace UndertaleModTool.Windows
                                 return null;
 
                             IEnumerable<UndertaleCode> variRefs;
-                            if (variCodeReferences is not null)
-                                variRefs = variCodeReferences.Where(x => x.Value.Contains(obj))
-                                                             .Select(x => x.Key);
+                            if (variReferences is not null)
+                                variRefs = variReferences.Where(x => x.Value.Contains(obj))
+                                                         .Select(x => x.Key);
                             else
                                 variRefs = data.Code.Where(x => x.Instructions.Any(
                                                                   i => i.Destination?.Target == obj
-                                                                       || i.Value is Reference<UndertaleVariable> varRef
+                                                                       || i.Value is UndertaleInstruction.Reference<UndertaleVariable> varRef
                                                                           && varRef.Target == obj));
                             if (variRefs.Any())
                                 return new() { { "Code", checkOne ? variRefs.ToEmptyArray() : variRefs.ToArray() } };
@@ -1676,7 +1307,7 @@ namespace UndertaleModTool.Windows
                                                                                      .Select(x => x & 0x0FFFFFFF);
                                             if (allTileIDs.Contains(tileId))
                                                 yield return new object[] { layer, room };
-                                                    
+
                                         }
                                     }
                                 }
@@ -1769,41 +1400,6 @@ namespace UndertaleModTool.Windows
         };
 
 
-        private static void InitializeAssetFunctions()
-        {
-            if (fontFunctions is null)
-            {
-                var kvpList = AssetTypeResolver.builtin_funcs.Select(x =>
-                {
-                    return new KeyValuePair<string, short>(x.Key, (short)Array.IndexOf(x.Value, AssetIDType.Font));
-                }).Where(x => x.Value != -1);
-                fontFunctions = new(kvpList);
-            }
-            if (gameObjFunctions is null)
-            {
-                var kvpList = AssetTypeResolver.builtin_funcs.Select(x =>
-                {
-                    return new KeyValuePair<string, short>(x.Key, (short)Array.IndexOf(x.Value, AssetIDType.GameObject));
-                }).Where(x => x.Value != -1);
-                gameObjFunctions = new(kvpList);
-            }
-            if (spriteFunctions is null)
-            {
-                var kvpList = AssetTypeResolver.builtin_funcs.Select(x =>
-                {
-                    return new KeyValuePair<string, short>(x.Key, (short)Array.IndexOf(x.Value, AssetIDType.Sprite));
-                }).Where(x => x.Value != -1);
-                spriteFunctions = new(kvpList);
-            }
-            if (bgFunctions is null && !data.IsGameMaker2())
-            {
-                var kvpList = AssetTypeResolver.builtin_funcs.Select(x =>
-                {
-                    return new KeyValuePair<string, short>(x.Key, (short)Array.IndexOf(x.Value, AssetIDType.Background));
-                }).Where(x => x.Value != -1);
-                bgFunctions = new(kvpList);
-            }
-        }
 
         public static Dictionary<string, List<object>> GetReferencesOfObject(object obj, UndertaleData data, HashSetTypesOverride types, bool checkOne = false)
         {
@@ -1814,16 +1410,6 @@ namespace UndertaleModTool.Windows
                 return null;
 
             UndertaleResourceReferenceMethodsMap.data = data;
-
-            if (!checkOne)
-            {
-                InitializeAssetFunctions();
-
-                isGMS2 = data.IsGameMaker2();
-                isGMS2_3 = data.IsVersionAtLeast(2, 3);
-                isGM2023_8 = data.IsVersionAtLeast(2023, 8);
-                getAssetIndexCurr = isGM2023_8 ? getAssetIndexGM2023_8 : getAssetIndex;
-            }
 
             var ver = (data.GeneralInfo.Major, data.GeneralInfo.Minor, data.GeneralInfo.Release);
             Dictionary<string, List<object>> outDict = new();
@@ -1843,7 +1429,7 @@ namespace UndertaleModTool.Windows
 
                     foreach (var entry in result)
                         outDict.Add(entry.Key, new(entry.Value));
-                }  
+                }
             }
 
             if (outDict.Count == 0)
@@ -1856,12 +1442,7 @@ namespace UndertaleModTool.Windows
         {
             UndertaleResourceReferenceMethodsMap.data = data;
 
-            InitializeAssetFunctions();
-
-            isGMS2 = data.IsGameMaker2();
-            isGMS2_3 = data.IsVersionAtLeast(2, 3);
-            isGM2023_8 = data.IsVersionAtLeast(2023, 8);
-            getAssetIndexCurr = isGM2023_8 ? getAssetIndexGM2023_8 : getAssetIndex;
+            var ver = (data.GeneralInfo.Major, data.GeneralInfo.Minor, data.GeneralInfo.Release);
 
             Dictionary<string, List<object>> outDict = new();
 
@@ -1878,98 +1459,36 @@ namespace UndertaleModTool.Windows
                 assets.AddRange(list.Item1.Cast<UndertaleResource>()
                                           .Select(x => (x, list.Item2)));
 
-            #region Instruction processing
-            void ProcessInstruction(int i, UndertaleCode code, UndertaleInstruction instr,
-                                    ref HashSet<UndertaleFont> fonts, ref HashSet<UndertaleGameObject> gameObjects,
-                                    ref HashSet<UndertaleSprite> sprites, ref HashSet<UndertaleBackground> backgrounds)
-            {
-                string funcName = instr.Function.Target.Name?.Content;
-                if (funcName is null)
-                    return;
-                if (instr.ArgumentsCount == 0)
-                    return;
-
-                ProcessInstructionForAsset(i, code, funcName, in fonts, data.Fonts, fontFunctions);
-                ProcessInstructionForAsset(i, code, funcName, in gameObjects, data.GameObjects, gameObjFunctions);
-                ProcessInstructionForAsset(i, code, funcName, in sprites, data.Sprites, spriteFunctions);
-                if (!isGMS2)
-                    ProcessInstructionForAsset(i, code, funcName, in backgrounds, data.Backgrounds, bgFunctions);
-            }
-            void ProcessInstructionForAsset<T>(int i, UndertaleCode code, string funcName, in HashSet<T> assetSet,
-                                               IList<T> assetList, Dictionary<string, short> assetFunctions)
-                 where T : class, UndertaleResource
-            {
-                if (!assetFunctions.TryGetValue(funcName, out var argIndex))
-                    return;
-
-                int argCount = code.Instructions[i].ArgumentsCount;
-                if (argIndex > argCount - 1)
-                    return;
-
-                int assetIndex = getAssetIndexCurr(argIndex, argCount, i, code, assetList.Count);
-                if (assetIndex == -1)
-                    return;
-
-                assetSet.Add(assetList[assetIndex]);
-            }
-            #endregion
-
-            stringCodeReferences = new();
-            funcCodeReferences = new();
-            variCodeReferences = new();
-            fontCodeReferences = new();
-            gameObjCodeReferences = new();
-            spriteCodeReferences = new();
-            bgCodeReferences = new();
-            HashSet<UndertaleBackground> backgrounds = null;
+            stringReferences = new();
+            funcReferences = new();
+            variReferences = new();
             foreach (var code in data.Code)
             {
                 var strings = new HashSet<UndertaleString>();
                 var functions = new HashSet<UndertaleFunction>();
                 var variables = new HashSet<UndertaleVariable>();
-                var fonts = new HashSet<UndertaleFont>();
-                var gameObjects = new HashSet<UndertaleGameObject>();
-                var sprites = new HashSet<UndertaleSprite>();
-                if (!isGMS2)
-                    backgrounds = new();
-
-                for (int i = 0; i < code.Instructions.Count; i++)
+                foreach (var inst in code.Instructions)
                 {
-                    var instr = code.Instructions[i];
-
-                    if (instr.Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG> strPtr)
+                    if (inst.Value is UndertaleResourceById<UndertaleString, UndertaleChunkSTRG> strPtr)
                         strings.Add(strPtr.Resource);
 
-                    if (instr.Destination?.Target is not null)
-                        variables.Add(instr.Destination.Target);
-                    if (instr.Value is Reference<UndertaleVariable> varRef && varRef.Target is not null)
+                    if (inst.Destination?.Target is not null)
+                        variables.Add(inst.Destination.Target);
+                    if (inst.Value is UndertaleInstruction.Reference<UndertaleVariable> varRef && varRef.Target is not null)
                         variables.Add(varRef.Target);
 
-                    if (instr.Function?.Target is not null)
-                    {
-                        functions.Add(instr.Function.Target);
-
-                        ProcessInstruction(i, code, instr, ref fonts, ref gameObjects, ref sprites, ref backgrounds);
-                    }
-
-                    if (instr.Value is Reference<UndertaleFunction> funcRef && funcRef.Target is not null)
+                    if (inst.Function?.Target is not null)
+                        functions.Add(inst.Function.Target);
+                    if (inst.Value is UndertaleInstruction.Reference<UndertaleFunction> funcRef && funcRef.Target is not null)
                         functions.Add(funcRef.Target);
                 }
 
                 if (strings.Count != 0)
-                    stringCodeReferences[code] = strings;
+                    stringReferences[code] = strings;
                 if (functions.Count != 0)
-                    funcCodeReferences[code] = functions;
+                    funcReferences[code] = functions;
                 if (variables.Count != 0)
-                    variCodeReferences[code] = variables;
-                if (fonts.Count != 0)
-                    fontCodeReferences[code] = fonts;
-                if (gameObjects.Count != 0)
-                    gameObjCodeReferences[code] = gameObjects;
-                if (sprites.Count != 0)
-                    spriteCodeReferences[code] = sprites;
-                if (!isGMS2 && backgrounds.Count != 0)
-                    bgCodeReferences[code] = backgrounds;
+                    variReferences[code] = variables;
             }
 
             mainWindow.IsEnabled = false;
@@ -2051,36 +1570,20 @@ namespace UndertaleModTool.Windows
             catch
             {
                 mainWindow.IsEnabled = true;
-                stringCodeReferences = null;
-                funcCodeReferences = null;
-                variCodeReferences = null;
-                fontCodeReferences = null;
-                gameObjCodeReferences = null;
-                spriteCodeReferences = null;
-                bgCodeReferences = null;
+                stringReferences = null;
+                funcReferences = null;
+                variReferences = null;
 
                 throw;
             }
             mainWindow.IsEnabled = true;
-            stringCodeReferences = null;
-            funcCodeReferences = null;
-            variCodeReferences = null;
-            fontCodeReferences = null;
-            gameObjCodeReferences = null;
-            spriteCodeReferences = null;
-            bgCodeReferences = null;
+            stringReferences = null;
+            funcReferences = null;
+            variReferences = null;
 
             if (outDict.Count == 0)
                 return null;
             return outDict;
-        }
-
-        public static void ClearFunctionLists()
-        {
-            fontFunctions = null;
-            gameObjFunctions = null;
-            spriteFunctions = null;
-            bgFunctions = null;
         }
 
         private static T[] ToEmptyArray<T>(this IEnumerable<T> _) => Array.Empty<T>();
