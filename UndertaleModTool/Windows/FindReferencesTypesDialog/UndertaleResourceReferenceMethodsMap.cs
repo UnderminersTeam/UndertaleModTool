@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using Underanalyzer;
+using Underanalyzer.Decompiler.GameSpecific;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 using static UndertaleModLib.Models.UndertaleSequence;
@@ -41,9 +43,15 @@ namespace UndertaleModTool.Windows
     {
         private static UndertaleData data;
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
-        private static Dictionary<UndertaleCode, HashSet<UndertaleString>> stringReferences;
-        private static Dictionary<UndertaleCode, HashSet<UndertaleFunction>> funcReferences;
-        private static Dictionary<UndertaleCode, HashSet<UndertaleVariable>> variReferences;
+        private static Dictionary<UndertaleCode, HashSet<UndertaleString>> stringCodeReferences;
+        private static Dictionary<UndertaleCode, HashSet<UndertaleFunction>> funcReferences; private static Dictionary<UndertaleCode, HashSet<UndertaleFunction>> funcCodeReferences;
+        private static Dictionary<UndertaleCode, HashSet<UndertaleVariable>> variReferences; private static Dictionary<UndertaleCode, HashSet<UndertaleVariable>> variCodeReferences;
+
+        private static Dictionary<string, short> fontFunctions, gameObjFunctions, spriteFunctions, bgFunctions;
+        private static Dictionary<UndertaleCode, HashSet<UndertaleFont>> fontCodeReferences;
+        private static Dictionary<UndertaleCode, HashSet<UndertaleGameObject>> gameObjCodeReferences;
+        private static Dictionary<UndertaleCode, HashSet<UndertaleSprite>> spriteCodeReferences;
+        private static Dictionary<UndertaleCode, HashSet<UndertaleBackground>> bgCodeReferences;
 
         private static readonly Dictionary<Type, PredicateForVersion[]> typeMap = new()
         {
@@ -419,9 +427,9 @@ namespace UndertaleModTool.Windows
                             {
                                 var codeEntries = data.Code.Where(x => x is not null).Where(x => x.Name == obj);
                                 IEnumerable<UndertaleCode> stringRefs;
-                                if (stringReferences is not null)
-                                    stringRefs = stringReferences.Where(x => x.Value.Contains(obj))
-                                                                 .Select(x => x.Key);
+                                if (stringCodeReferences is not null)
+                                    stringRefs = stringCodeReferences.Where(x => x.Value.Contains(obj))
+                                                                     .Select(x => x.Key);
                                 else
                                     stringRefs = data.Code.Where(x => x is not null).Where(x => x.Instructions.Any(i => i.ValueString?.Resource == obj));
 
@@ -1412,6 +1420,49 @@ namespace UndertaleModTool.Windows
         };
 
 
+        private static void InitializeAssetFunctions()
+        {
+            
+            var builtinFuncs = data.GameSpecificRegistry.MacroResolver.GlobalNames.FunctionArguments
+                                   .Select(x => {
+                                       var typesRaw = (x.Value as FunctionArgsMacroType)?.Types;
+                                       var types = typesRaw?.Select(x => x as AssetMacroType)
+                                                            .Where(x => x is not null);
+                                       return KeyValuePair.Create(x.Key, types);
+                                   });
+            /*if (fontFunctions is null)
+            {
+                var kvpList = builtinFuncs.Select(x =>
+                {
+                    return new KeyValuePair<string, short>(x.Key, (short)x.Value.IndexOf(x.Value, AssetType.Font));
+                }).Where(x => x.Value != -1);
+                fontFunctions = new(kvpList);
+            }*/
+            /*if (gameObjFunctions is null)
+            {
+                var kvpList = AssetTypeResolver.builtin_funcs.Select(x =>
+                {
+                    return new KeyValuePair<string, short>(x.Key, (short)Array.IndexOf(x.Value, AssetIDType.GameObject));
+                }).Where(x => x.Value != -1);
+                gameObjFunctions = new(kvpList);
+            }
+            if (spriteFunctions is null)
+            {
+                var kvpList = AssetTypeResolver.builtin_funcs.Select(x =>
+                {
+                    return new KeyValuePair<string, short>(x.Key, (short)Array.IndexOf(x.Value, AssetIDType.Sprite));
+                }).Where(x => x.Value != -1);
+                spriteFunctions = new(kvpList);
+            }
+            if (bgFunctions is null && !data.IsGameMaker2())
+            {
+                var kvpList = AssetTypeResolver.builtin_funcs.Select(x =>
+                {
+                    return new KeyValuePair<string, short>(x.Key, (short)Array.IndexOf(x.Value, AssetIDType.Background));
+                }).Where(x => x.Value != -1);
+                bgFunctions = new(kvpList);
+            }*/
+        }
 
         public static Dictionary<string, List<object>> GetReferencesOfObject(object obj, UndertaleData data, HashSetTypesOverride types, bool checkOne = false)
         {
@@ -1479,7 +1530,7 @@ namespace UndertaleModTool.Windows
                 assets.AddRange(list.Item1.Cast<UndertaleResource>()
                                           .Select(x => (x, list.Item2)));
 
-            stringReferences = new();
+            stringCodeReferences = new();
             funcReferences = new();
             variReferences = new();
             foreach (var code in data.Code)
@@ -1500,7 +1551,7 @@ namespace UndertaleModTool.Windows
                 }
 
                 if (strings.Count != 0)
-                    stringReferences[code] = strings;
+                    stringCodeReferences[code] = strings;
                 if (functions.Count != 0)
                     funcReferences[code] = functions;
                 if (variables.Count != 0)
@@ -1589,7 +1640,7 @@ namespace UndertaleModTool.Windows
                 mainWindow.HideProgressBar();
 
                 mainWindow.IsEnabled = true;
-                stringReferences = null;
+                stringCodeReferences = null;
                 funcReferences = null;
                 variReferences = null;
             }

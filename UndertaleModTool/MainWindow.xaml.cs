@@ -973,7 +973,7 @@ namespace UndertaleModTool
                 UpdateLayout();
                 Dispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
 
-                UndertaleResourceReferenceMethodsMap.ClearFunctionLists();
+                //UndertaleResourceReferenceMethodsMap.ClearFunctionLists();
 
                 Data.Dispose();
                 Data = null;
