@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Threading.Tasks;
+using Avalonia.Threading;
 using AvaloniaEdit.Document;
 using Microsoft.Extensions.DependencyInjection;
 using UndertaleModLib;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
+using UndertaleModToolAvalonia.Controls;
 
 namespace UndertaleModToolAvalonia.Views;
 
@@ -18,54 +21,94 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
     public TextDocument GMLTextDocument { get; set; } = new TextDocument();
     public TextDocument ASMTextDocument { get; set; } = new TextDocument();
 
+    public bool IsCompilingOrDecompiling = false;
+
+    public bool GMLOutdated = true;
+    public bool ASMOutdated = true;
+
     public UndertaleCodeViewModel(UndertaleCode code, IServiceProvider? serviceProvider = null)
     {
         MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
 
         Code = code;
 
-        DecompileToGML();
-        DecompileToASM();
+        DecompileToGML().Wait();
+        DecompileToASM().Wait();
     }
 
-    public void DecompileToGML()
+    public async Task<bool> DecompileToGML()
     {
         if (Code.ParentEntry is not null)
-            return;
+            return false;
 
         // TODO: Decompiler settings
         GlobalDecompileContext context = new(MainVM.Data);
-        GMLTextDocument.Text = new Underanalyzer.Decompiler.DecompileContext(context, Code).DecompileToString();
+
+        try
+        {
+            GMLTextDocument.Text = new Underanalyzer.Decompiler.DecompileContext(context, Code).DecompileToString();
+            GMLOutdated = false;
+        }
+        catch (Underanalyzer.Decompiler.DecompilerException e)
+        {
+            await MainVM.ShowMessageDialog(e.ToString(), title: "GML decompilation error", ok: true);
+            return false;
+        }
+
+        return true;
     }
 
-    public async void CompileFromGML()
+    public async Task<bool> CompileFromGML()
     {
+        if (!GMLOutdated)
+            return false;
         if (Code.ParentEntry is not null)
-            return;
+            return false;
 
         CompileGroup group = new(MainVM.Data);
-        // TODO: MainThreadAction
+        group.MainThreadAction = Dispatcher.UIThread.Invoke;
         group.QueueCodeReplace(Code, GMLTextDocument.Text);
         CompileResult result = group.Compile();
 
         if (!result.Successful)
         {
-            await MainVM.ShowMessageDialog(result.PrintAllErrors(codeEntryNames: false), title: "GML compilation error", ok: true);
+            MessageWindow.Result undoChanges = await MainVM.ShowMessageDialog(result.PrintAllErrors(codeEntryNames: false)
+                + "\n\nUndo changes?", title: "GML compilation error", yes: true, no: true);
+            if (undoChanges == MessageWindow.Result.Yes)
+            {
+                await DecompileToGML();
+            }
+            return false;
         }
+
+        return true;
     }
 
-    public void DecompileToASM()
+    public async Task<bool> DecompileToASM()
     {
         if (Code.ParentEntry is not null)
-            return;
+            return false;
 
-        ASMTextDocument.Text = Code.Disassemble(MainVM.Data!.Variables, MainVM.Data!.CodeLocals?.For(Code));
+        try
+        {
+            ASMTextDocument.Text = Code.Disassemble(MainVM.Data!.Variables, MainVM.Data!.CodeLocals?.For(Code));
+            ASMOutdated = false;
+        }
+        catch (Exception e)
+        {
+            await MainVM.ShowMessageDialog(e.ToString(), title: "ASM decompilation error", ok: true);
+            return false;
+        }
+
+        return true;
     }
 
-    public async void CompileFromASM()
+    public async Task<bool> CompileFromASM()
     {
+        if (!ASMOutdated)
+            return false;
         if (Code.ParentEntry is not null)
-            return;
+            return false;
 
         try
         {
@@ -73,7 +116,48 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
         }
         catch (Exception e)
         {
-            await MainVM.ShowMessageDialog(e.ToString(), title: "ASM compilation error", ok: true);
+            MessageWindow.Result undoChanges = await MainVM.ShowMessageDialog(e.ToString()
+                + "\n\nUndo changes?", title: "ASM compilation error", yes: true, no: true);
+            if (undoChanges == MessageWindow.Result.Yes)
+            {
+                await DecompileToASM();
+            }
+
+            return false;
         }
+
+        return true;
+    }
+
+    public async void CompileAndDecompileGML()
+    {
+        if (IsCompilingOrDecompiling)
+            return;
+
+        IsCompilingOrDecompiling = true;
+
+        if (await CompileFromGML())
+        {
+            await DecompileToGML();
+            await DecompileToASM();
+        }
+
+        IsCompilingOrDecompiling = false;
+    }
+
+    public async void CompileAndDecompileASM()
+    {
+        if (IsCompilingOrDecompiling)
+            return;
+
+        IsCompilingOrDecompiling = true;
+
+        if (await CompileFromASM())
+        {
+            await DecompileToGML();
+            await DecompileToASM();
+        }
+
+        IsCompilingOrDecompiling = false;
     }
 }

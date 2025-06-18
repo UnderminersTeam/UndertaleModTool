@@ -22,26 +22,32 @@
         <TabControl Grid.Row="1" IsVisible="{Binding Code.ParentEntry, Converter={x:Static ObjectConverters.IsNull}}">
             <TabItem Header="GML">
                 <ThemeVariantScope RequestedThemeVariant="Dark">
-                    <!-- TODO: {DynamicResource ThemeBackgroundBrush} doesn't work. -->
                     <AvaloniaEdit:TextEditor x:Name="GMLTextEditor"
                                              Document="{Binding GMLTextDocument}"
                                              LostFocus="GMLTextEditor_LostFocus"
+                                             TextChanged="GMLTextEditor_TextChanged"
                                              ShowLineNumbers="True"
                                              Background="#FF282828"
-                                             FontFamily="Cascadia Code,Consolas,Menlo,Monospace"
-                                         />
+                                             FontFamily="Consolas,Liberation Mono,Menlo">
+                        <AvaloniaEdit:TextEditor.KeyBindings>
+                            <KeyBinding Gesture="Ctrl+K" Command="{Binding CompileAndDecompileGML}" />
+                        </AvaloniaEdit:TextEditor.KeyBindings>
+                    </AvaloniaEdit:TextEditor>
                 </ThemeVariantScope>
             </TabItem>
             <TabItem Header="ASM">
                 <ThemeVariantScope RequestedThemeVariant="Dark">
-                    <!-- TODO: {DynamicResource ThemeBackgroundBrush} doesn't work. -->
                     <AvaloniaEdit:TextEditor x:Name="ASMTextEditor"
                                              Document="{Binding ASMTextDocument}"
                                              LostFocus="ASMTextEditor_LostFocus"
+                                             TextChanged="ASMTextEditor_TextChanged"
                                              ShowLineNumbers="True"
                                              Background="#FF282828"
-                                             FontFamily="Cascadia Code,Consolas,Menlo,Monospace"
-                                             />
+                                             FontFamily="Consolas,Liberation Mono,Menlo">
+                        <AvaloniaEdit:TextEditor.KeyBindings>
+                            <KeyBinding Gesture="Ctrl+K" Command="{Binding CompileAndDecompileASM}" />
+                        </AvaloniaEdit:TextEditor.KeyBindings>
+                    </AvaloniaEdit:TextEditor>
                 </ThemeVariantScope>
             </TabItem>
         </TabControl>

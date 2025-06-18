@@ -1,4 +1,4 @@
-using System.Diagnostics;
+using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 
@@ -13,12 +13,9 @@ public partial class UndertaleCodeView : UserControl
 
     private void GMLTextEditor_LostFocus(object? sender, RoutedEventArgs e)
     {
-        Debug.WriteLine($"TextEditor_LostFocus {sender} {e}");
         if (DataContext is UndertaleCodeViewModel vm)
         {
-            vm.CompileFromGML();
-            vm.DecompileToGML();
-            vm.DecompileToASM();
+            vm.CompileAndDecompileGML();
         }
     }
 
@@ -26,9 +23,23 @@ public partial class UndertaleCodeView : UserControl
     {
         if (DataContext is UndertaleCodeViewModel vm)
         {
-            vm.CompileFromASM();
-            vm.DecompileToASM();
-            vm.DecompileToGML();
+            vm.CompileAndDecompileASM();
+        }
+    }
+
+    private void GMLTextEditor_TextChanged(object? sender, EventArgs e)
+    {
+        if (DataContext is UndertaleCodeViewModel vm)
+        {
+            vm.GMLOutdated = true;
+        }
+    }
+
+    private void ASMTextEditor_TextChanged(object? sender, EventArgs e)
+    {
+        if (DataContext is UndertaleCodeViewModel vm)
+        {
+            vm.ASMOutdated = true;
         }
     }
 }
