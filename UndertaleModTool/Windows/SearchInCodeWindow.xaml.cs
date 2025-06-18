@@ -26,33 +26,27 @@ namespace UndertaleModTool.Windows
     {
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
 
-        bool isCaseSensitive;
-        bool isRegexSearch;
-        bool isInAssembly;
-        string text;
+        private static bool isSearchInProgress = false;
 
-        int progressCount = 0;
-        int resultCount = 0;
+        private bool isCaseSensitive, isRegexSearch, isInAssembly;
+        private string text;
+
+        private int progressCount = 0;
+        private int resultCount = 0;
+
+        private ConcurrentDictionary<string, List<(int, string)>> resultsDict;
+        private ConcurrentBag<string> failedList;
+        private IEnumerable<KeyValuePair<string, List<(int, string)>>> resultsDictSorted;
+        private IEnumerable<string> failedListSorted;
+
+        private Regex keywordRegex, nameRegex;
+        private GlobalDecompileContext decompileContext;
+        private LoaderDialog loaderDialog;
+        private UndertaleCodeEditor.CodeEditorTab editorTab;
 
         public readonly record struct Result(string Code, int LineNumber, string LineText);
 
         public ObservableCollection<Result> Results { get; set; } = new();
-
-        ConcurrentDictionary<string, List<(int, string)>> resultsDict;
-        ConcurrentBag<string> failedList;
-        IEnumerable<KeyValuePair<string, List<(int, string)>>> resultsDictSorted;
-        IEnumerable<string> failedListSorted;
-        
-        Regex keywordRegex;
-        Regex nameRegex;
-
-        GlobalDecompileContext decompileContext;
-
-        LoaderDialog loaderDialog;
-
-        private UndertaleCodeEditor.CodeEditorTab editorTab;
-
-        static bool isSearchInProgress = false;
 
         public SearchInCodeWindow()
         {
