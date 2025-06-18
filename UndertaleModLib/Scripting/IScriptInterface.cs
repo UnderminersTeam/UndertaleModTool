@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Underanalyzer.Decompiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 
@@ -74,7 +75,7 @@ public interface IScriptInterface
     bool ScriptExecutionSuccess { get; }
 
     /// <summary>
-    /// Error message of the last executed script. Will be <c>""</c> (<see cref="String.Empty"/>) if no error occured.
+    /// Error message of the last executed script. Will be <c>""</c> (<see cref="String.Empty"/>) if no error occurred.
     /// </summary>
     string ScriptErrorMessage { get; }
 
@@ -88,11 +89,6 @@ public interface IScriptInterface
     /// A string, detailing the type of the last encountered error.
     /// </summary>
     string ScriptErrorType { get; }
-
-    /// <summary>
-    /// Indicates whether the user has enabled the setting to use decompiled code cache.
-    /// </summary>
-    bool GMLCacheEnabled { get; }
 
     /// <summary>
     /// Indicating whether the Program is currently closed.
@@ -113,28 +109,20 @@ public interface IScriptInterface
     /// <summary>
     /// Creates a new Data file asynchronously.
     /// </summary>
-    /// <returns><see langword="true"/> if task was successful, <see langword="false"/> if not.</returns>
-    Task<bool> MakeNewDataFile();
-
-    /// <summary> Obsolete. Use <see cref="MakeNewDataFile"/>. </summary>
-    [Obsolete("Use MakeNewDataFile instead!")]
-    sealed Task<bool> Make_New_File()
-    {
-        return MakeNewDataFile();
-    }
-
-    //TODO: i have absolutely no idea what any of these do.
-    void ReplaceTempWithMain(bool imAnExpertBtw = false);
-    void ReplaceMainWithTemp(bool imAnExpertBtw = false);
-    void ReplaceTempWithCorrections(bool imAnExpertBtw = false);
-    void ReplaceCorrectionsWithTemp(bool imAnExpertBtw = false);
-    void UpdateCorrections(bool imAnExpertBtw = false);
+    /// <returns><see langword="true"/> if successful, <see langword="false"/> if not.</returns>
+    bool MakeNewDataFile();
 
     /// <summary>
-    /// Used in Scripts in order to show a message to the user.
+    /// Used in scripts in order to show a message to the user.
     /// </summary>
     /// <param name="message">The message to show.</param>
     void ScriptMessage(string message);
+
+    /// <summary>
+    /// Used in scripts in order to show a warning message to the user.
+    /// </summary>
+    /// <param name="message">The warning message to show.</param>
+    void ScriptWarning(string message);
 
     //TODO: currently should get repurposed/renamed?
     /// <summary>
@@ -151,7 +139,7 @@ public interface IScriptInterface
     bool ScriptQuestion(string message);
 
     /// <summary>
-    /// Used in Scripts in order to show an error to the user.
+    /// Used in scripts in order to show an error to the user.
     /// </summary>
     /// <param name="error">The error message to show.</param>
     /// <param name="title">A short-descriptive title.</param>
@@ -184,29 +172,27 @@ public interface IScriptInterface
     /// </summary>
     void InitializeScriptDialog();
 
-    //TODO: some profile mod stuff, not quite sure on what its supposed to do.
-    void ReapplyProfileCode();
-    void NukeProfileGML(string codeName);
-
     /// <summary>
     ///Get the decompiled text from a code entry (like <c>gml_Script_moveTo</c>).
     /// </summary>
     /// <param name="codeName">The name of the code entry from which to get the decompiled code from.</param>
-    /// <param name="context">The GlobalDecompileContext</param>
+    /// <param name="context">The GlobalDecompileContext to use for decompilation.</param>
+    /// <param name="settings">The settings to use for decompilation, or <see langword="null"/> to use the default.</param>
     /// <returns>Decompiled text as a <see cref="string"/>.</returns>
     /// <remarks>This will return a string, even if the decompilation failed! Usually commented out and featuring
     /// <c>DECOMPILER FAILED!</c> .</remarks>
-    string GetDecompiledText(string codeName, GlobalDecompileContext context = null);
+    string GetDecompiledText(string codeName, GlobalDecompileContext context = null, IDecompileSettings settings = null);
 
     /// <summary>
     /// Get the decompiled text from an <see cref="UndertaleCode"/> object.
     /// </summary>
     /// <param name="code">The object from which to get the decompiled code from.</param>
-    /// <param name="context">The GlobalDecompileContext</param>
+    /// <param name="context">The GlobalDecompileContext to use for decompilation.</param>
+    /// <param name="settings">The settings to use for decompilation, or <see langword="null"/> to use the default.</param>
     /// <returns>Decompiled text as a <see cref="string"/>.</returns>
     /// <remarks>This will return a string, even if the decompilation failed! Usually commented out and featuring
     /// <c>DECOMPILER FAILED!</c> .</remarks>
-    string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null);
+    string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null, IDecompileSettings settings = null);
 
     /// <summary>
     ///  Get the disassembly from a code entry (like <c>gml_Script_moveTo</c>).
@@ -293,20 +279,11 @@ public interface IScriptInterface
     /// <param name="query">The query that was searched for.</param>
     /// <param name="resultsCount">How many results have been found.</param>
     /// <param name="resultsDict">An <see cref="IOrderedEnumerable{TElement}"/> of type <see cref="KeyValuePair{TKey,TValue}"/>,
-    /// with TKey being the name of the code entry an TValue being a list of matching code lines with their line number prepended.</param>
+    /// with TKey being the name of the code entry an TValue being a list of tuples where the first item is the matching code line number and the second one is the code line itself.</param>
     /// <param name="showInDecompiledView">Whether to open the "Decompiled" view or the "Disassembly" view when clicking on an entry name.</param>
     /// <param name="failedList">A list of code entries that encountered an error while searching.</param>
     /// <returns>A task that represents the search output.</returns>
-    Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null);
-
-    /// <summary>
-    /// Obsolete.
-    /// </summary>
-    [Obsolete("Use ClickableSearchOutput instead!")]
-    sealed Task ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null)
-    {
-        return ClickableSearchOutput(title, query, resultsCount, resultsDict, showInDecompiledView, failedList);
-    }
+    Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int lineNum, string codeLine)>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null);
 
     /// <summary>
     /// Shows search output with clickable text to the user.
@@ -315,25 +292,16 @@ public interface IScriptInterface
     /// <param name="query">The query that was searched for.</param>
     /// <param name="resultsCount">How many results have been found.</param>
     /// <param name="resultsDict">A <see cref="Dictionary{TKey,TValue}"/> with TKey being the name of the code entry and
-    /// TValue being a list of matching code lines with their line number prepended.</param>
+    /// TValue being a list of tuples where the first item is the matching code line number and the second one is the code line itself.</param>
     /// <param name="showInDecompiledView">Whether to open the "Decompiled" view or the "Disassembly" view when clicking on an entry name.</param>
     /// <param name="failedList">A list of code entries that encountered an error while searching.</param>
     /// <returns>A task that represents the search output.</returns>
-    Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null);
+    Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<(int lineNum, string codeLine)>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null);
 
     /// <summary>
-    /// Obsolete.
+    /// Sets whether or not the current script should show a message indicating that it completed.
     /// </summary>
-    [Obsolete("Use ClickableSearchOutput instead!")]
-    sealed Task ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null)
-    {
-        return ClickableSearchOutput(title, query, resultsCount, resultsDict, showInDecompiledView, failedList);
-    }
-
-    /// <summary>
-    /// Sets <see cref="isFinishedMessageEnabled"/>.
-    /// </summary>
-    /// <param name="isFinishedMessageEnabled">The state to set it to.</param>
+    /// <param name="isFinishedMessageEnabled">True to enable the finished message; false otherwise.</param>
     void SetFinishedMessage(bool isFinishedMessageEnabled);
 
     /// <summary>
@@ -385,15 +353,6 @@ public interface IScriptInterface
     void IncrementProgress();
 
     /// <summary>
-    /// Obsolete.
-    /// </summary>
-    [Obsolete("Use IncrementProgress instead!")]
-    sealed void IncProgress()
-    {
-        IncrementProgress();
-    }
-
-    /// <summary>
     /// Adds a certain amount to the variable holding a progress value in.
     /// Used for parallel operations, as it is thread-safe.
     /// </summary>
@@ -401,28 +360,10 @@ public interface IScriptInterface
     void AddProgressParallel(int amount);
 
     /// <summary>
-    /// Obsolete.
-    /// </summary>
-    [Obsolete("Use AddProgressParallel instead!")]
-    sealed void AddProgressP(int amount)
-    {
-        AddProgressParallel(amount);
-    }
-
-    /// <summary>
     /// Increments the variable holding a progress value by one.
     /// Used for parallel operations, as it is thread-safe.
     /// </summary>
     void IncrementProgressParallel();
-
-    /// <summary>
-    /// Obsolete.
-    /// </summary>
-    [Obsolete("Use IncrementProgressParallel instead!")]
-    sealed void IncProgressP()
-    {
-        IncrementProgressParallel();
-    }
 
     /// <summary>
     /// Gets the value of the variable holding a progress value.
@@ -461,53 +402,15 @@ public interface IScriptInterface
     void DisableAllSyncBindings();
 
     /// <summary>
-    /// Obsolete
-    /// </summary>
-    /// <param name="enable"></param>
-    [Obsolete("Use DisableAllSyncBindings() instead!")]
-    sealed void SyncBinding(bool enable = false)
-    {
-        DisableAllSyncBindings();
-    }
-
-    /// <summary>
     /// Starts the task that updates a progress bar in parallel.
     /// </summary>
     void StartProgressBarUpdater();
-
-    /// <summary>
-    /// Obsolete.
-    /// </summary>
-    [Obsolete("Use StartProgressBarUpdater instead!")]
-    sealed void StartUpdater()
-    {
-        StartProgressBarUpdater();
-    }
 
     /// <summary>
     /// Stops the task that updates a progress bar in parallel.
     /// </summary>
     /// <returns>A task that represents the stopped progress updater.</returns>
     Task StopProgressBarUpdater();
-
-    /// <summary>
-    /// Obsolete.
-    /// </summary>
-    [Obsolete("Use StopProgressBarUpdater instead!")]
-    sealed Task StopUpdater ()
-    {
-        return StopProgressBarUpdater();
-    }
-
-    /// <summary>
-    /// Generates a decompiled code cache to accelerate operations that need to access code often.
-    /// </summary>
-    /// <param name="decompileContext">The GlobalDecompileContext.</param>
-    /// <param name="dialog">The dialog that should be shown. If <see langword="null"/> then a new dialog will be automatically created and shown.</param>
-    /// <param name="clearGMLEditedBefore">Whether to clear <see cref="UndertaleData.GMLEditedBefore"/> from <see cref="Data"/>.</param>
-    /// <returns>Whether the decompiled GML cache was generated or not. <see langword="true"/> if it was successful,
-    /// <see langword="false"/> if it wasn't or <see cref="GMLCacheEnabled"/> is disabled.</returns>
-    Task<bool> GenerateGMLCache(ThreadLocal<Decompiler.GlobalDecompileContext> decompileContext = null, object dialog = null, bool clearGMLEditedBefore = false);
 
     /// <summary>
     /// Changes the currently selected in the GUI.
@@ -523,15 +426,6 @@ public interface IScriptInterface
     string PromptChooseDirectory();
 
     /// <summary>
-    /// Obsolete
-    /// </summary>
-    [Obsolete("Use this parameters, as it is not used.")]
-    sealed string PromptChooseDirectory(string prompt)
-    {
-        return PromptChooseDirectory();
-    }
-
-    /// <summary>
     /// Used to prompt the user for a file.
     /// </summary>
     /// <param name="defaultExt">The default extension that should be selected.</param>
@@ -539,107 +433,11 @@ public interface IScriptInterface
     /// <returns>The file selected by the user.</returns>
     string PromptLoadFile(string defaultExt, string filter);
 
-    //TODO: so much stuff....
     /// <summary>
-    /// Replaces/Imports all GML in a specific code entry with a specified string.
+    /// Used to prompt the user for a location to save a file.
     /// </summary>
-    /// <param name="codeName">The name of the code entry that shall get replaced. <br/>
-    /// <b> If the entry does not exist, it will be created!</b></param>
-    /// <param name="gmlCode">The new GML code that shall replace the current GML code of <paramref name="codeName"/>.</param>
-    /// <param name="doParse">Whether the code entry should get linked.
-    /// In other words, have special handling for scripts, globals and object code.</param>
-    /// <param name="checkDecompiler">If this is <see langword="false"/> an empty string
-    /// will be used for replacing the code entry in the case that anything fails.
-    /// If this is <see langword="true"/> then an error will be shown instead and the code entry will not get replaced.</param>
-    void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool checkDecompiler = false);
-
-    /// <summary>
-    /// Replaces/Imports all GM-Bytecode ASM in a specific code entry with a specified string.
-    /// </summary>
-    /// <param name="codeName">The name of the code entry that shall get replaced. <br/>
-    /// <b> If the entry does not exist, it will be created!</b></param>
-    /// <param name="gmlCode">The new ASM code that shall replace the current GML code of <paramref name="codeName"/>.</param>
-    /// <param name="doParse">Whether the code entry should get linked.
-    /// In other words, have special handling for scripts, globals and object code.</param>
-    /// <param name="nukeProfile">Whether or not to nuke the profile entry for profile mode.</param>
-    /// <param name="checkDecompiler">If this is <see langword="false"/> an empty string
-    /// will be used for replacing the code entry in the case that anything fails.
-    /// If this is <see langword="true"/> then an error will be shown instead and the code entry will not get replaced.</param>
-    void ImportASMString(string codeName, string gmlCode, bool doParse = true, bool nukeProfile = true, bool checkDecompiler = false);
-
-    /// <summary>
-    /// Replaces/Imports all GML in a specific code entry with a specified file.
-    /// </summary>
-    /// <param name="fileName">The path to the GML file. This file needs to
-    /// <b>A)</b> contain valid GML and <b>B)</b> the filename needs to be the name of the code entry that shall get replaced <br/>
-    /// <b> If the entry does not exist, it will be created!</b>
-    /// </param>
-    /// <param name="doParse">Whether the code entry should get linked.
-    /// In other words, have special handling for scripts, globals and object code.</param>
-    /// <param name="checkDecompiler">If this is <see langword="false"/> an empty string
-    /// will be used for replacing the code entry in the case that anything fails.</param>
-    /// <param name="throwOnError">Whether a <see cref="ScriptException"/> will be thrown on any errors.</param>
-    void ImportGMLFile(string fileName, bool doParse = true, bool checkDecompiler = false, bool throwOnError = false);
-
-    /// <summary>
-    /// Replaces/Imports all GM-Bytecode ASM in a specific code entry with a specified file.
-    /// </summary>
-    /// <param name="fileName">The path to the ASM file. This file needs to
-    /// <b>A)</b> contain valid GM-Bytecode ASM and <b>B)</b> the filename needs to be the name of the code entry that shall get replaced <br/>
-    /// <b> If the entry does not exist, it will be created!</b></param>
-    /// <param name="doParse">Whether the code entry should get linked.
-    /// In other words, have special handling for scripts, globals and object code.</param>
-    /// <param name="nukeProfile">Whether or not to nuke the profile entry for profile mode.</param>
-    /// <param name="checkDecompiler">If this is <see langword="false"/> an empty string
-    /// will be used for replacing the code entry in the case that anything fails.</param>
-    /// <param name="throwOnError">Whether a <see cref="ScriptException"/> will be thrown on any errors.</param>
-    void ImportASMFile(string fileName, bool doParse = true, bool nukeProfile = true, bool checkDecompiler = false, bool throwOnError = false);
-
-    /// <summary>
-    /// Find a keyword in a GML code entry and replaces it with a replacement string.
-    /// </summary>
-    /// <param name="codeName">The name of the code entry that shall get replaced.</param>
-    /// <param name="keyword">The search term.</param>
-    /// <param name="replacement">The replacement term.</param>
-    /// <param name="caseSensitive">Whether the keyword search should be case-sensitive.</param>
-    /// <param name="isRegex">Whether <paramref name="keyword"/> should be treated as RegEx.</param>
-    /// <param name="context">The global decompile context.</param>
-    void ReplaceTextInGML(string codeName, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null);
-
-    /// <summary>
-    /// Find a keyword in a GML code entry and replaces it with a replacement string.
-    /// </summary>
-    /// <param name="code">The code entry that shall get replaced.</param>
-    /// <param name="keyword">The search term.</param>
-    /// <param name="replacement">The replacement term.</param>
-    /// <param name="caseSensitive">Whether the keyword search should be case-sensitive.</param>
-    /// <param name="isRegex">Whether <paramref name="keyword"/> should be treated as RegEx.</param>
-    /// <param name="context">The global decompile context.</param>
-    void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null);
-
-    /// <summary>
-    /// Method returning a dummy boolean value.
-    /// </summary>
-    /// <returns>Returns a dummy boolean value</returns>
-    bool DummyBool()
-    {
-        return true;
-    }
-
-    /// <summary>
-    /// Method doing nothing.
-    /// </summary>
-    void DummyVoid()
-    {
-
-    }
-
-    /// <summary>
-    /// Method returning a dummy string value.
-    /// </summary>
-    /// <returns>Returns a dummy string value.</returns>
-    string DummyString()
-    {
-        return "";
-    }
+    /// <param name="defaultExt">The default extension that should be used when saving the file.</param>
+    /// <param name="filter">The filters used to specify the file types in the dialog.</param>
+    /// <returns>The file path specified by the user for saving.</returns>
+    string PromptSaveFile(string defaultExt, string filter);
 }

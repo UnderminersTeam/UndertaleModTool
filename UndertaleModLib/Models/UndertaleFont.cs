@@ -19,14 +19,14 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
     public UndertaleString DisplayName { get; set; }
 
     /// <summary>
-    /// Whether the Em size is a float.
+    /// A helper variable on whether the Em size is a float.
     /// </summary>
     public bool EmSizeIsFloat { get; set; }
 
     /// <summary>
-    /// The font size in Ems. In Game Maker: Studio 2.3 and above, this is a float instead.
+    /// The font size in Ems. In Game Maker: Studio 2.3 and above, this is a float instead. On versions below, it is an uint.
     /// </summary>
-    public uint EmSize { get; set; }
+    public float EmSize { get; set; }
 
     /// <summary>
     /// Whether to display the font in bold.
@@ -50,7 +50,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
 
     /// <summary>
     /// The level of anti-aliasing that is applied. 0 for none, Game Maker: Studio 2 has 1 for <c>on</c>, while
-    /// Game Maker Studio: 1 and earlier have values 1-3 for different anti-aliasing levels.
+    /// GameMaker: Studio 1 and earlier have values 1-3 for different anti-aliasing levels.
     /// </summary>
     public byte AntiAliasing { get; set; }
 
@@ -84,7 +84,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
     public uint Ascender { get; set; }
 
     /// <summary>
-    /// A spread value that's used for SDF rendering.
+    /// A spread value that's used for SDF rendering. TODO: what is spread, what is sdf?
     /// </summary>
     /// <remarks>
     /// Was introduced in GM 2023.2.
@@ -93,7 +93,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
     public uint SDFSpread { get; set; }
 
     /// <remarks>
-    /// Was introduced in GM 2023.6.
+    /// Was introduced in GM 2023.6. TODO: give an explanation of what this does
     /// </remarks>
     public uint LineHeight { get; set; }
 
@@ -103,7 +103,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
     public UndertalePointerList<Glyph> Glyphs { get; set; } = new UndertalePointerList<Glyph>();
 
     /// <summary>
-    /// The maximum offset from the baseline to the top of the font
+    /// The maximum offset from the baseline to the top of the font.
     /// </summary>
     /// <remarks>
     /// Exists since bytecode 17, but seems to be only get checked in GM 2022.2+.
@@ -158,6 +158,14 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
         /// </summary>
         public UndertaleSimpleListShort<GlyphKerning> Kerning { get; set; } = new UndertaleSimpleListShort<GlyphKerning>();
 
+        /// <summary>
+        /// Purpose unknown, always 0.
+        /// </summary>
+        /// <remarks>
+        /// Was introduced in GM 2024.11.
+        /// </remarks>
+        public short UnknownAlwaysZero { get; set; }
+
         /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
@@ -168,6 +176,8 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             writer.Write(SourceHeight);
             writer.Write(Shift);
             writer.Write(Offset);
+            if (writer.undertaleData.IsVersionAtLeast(2024, 11))
+                writer.Write(UnknownAlwaysZero);
             writer.WriteUndertaleObject(Kerning);
         }
 
@@ -180,7 +190,9 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             SourceWidth = reader.ReadUInt16();
             SourceHeight = reader.ReadUInt16();
             Shift = reader.ReadInt16();
-            Offset = reader.ReadInt16(); // potential assumption, see the conversation at https://github.com/krzys-h/UndertaleModTool/issues/40#issuecomment-440208912
+            Offset = reader.ReadInt16(); // Potential assumption, see the conversation at https://github.com/UnderminersTeam/UndertaleModTool/issues/40#issuecomment-440208912
+            if (reader.undertaleData.IsVersionAtLeast(2024, 11))
+                UnknownAlwaysZero = reader.ReadInt16();
             Kerning = reader.ReadUndertaleObject<UndertaleSimpleListShort<GlyphKerning>>();
         }
 
@@ -188,6 +200,8 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
         public static uint UnserializeChildObjectCount(UndertaleReader reader)
         {
             reader.Position += 14;
+            if (reader.undertaleData.IsVersionAtLeast(2024, 11))
+                reader.Position += 2; // UnknownAlwaysZero
 
             return 1 + UndertaleSimpleListShort<GlyphKerning>.UnserializeChildObjectCount(reader);
         }
@@ -201,7 +215,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             public static readonly uint ChildObjectsSize = 4;
 
             /// <summary>
-            /// The code point of the preceeding character.
+            /// The code point of the preceding character.
             /// </summary>
             public short Character { get; set; }
 
@@ -279,7 +293,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
         else
         {
             // pre-GMS2.3
-            writer.Write(EmSize);
+            writer.Write((uint)EmSize);
         }
 
         writer.Write(Bold);
@@ -295,11 +309,13 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             writer.Write(AscenderOffset);
         if (writer.undertaleData.IsVersionAtLeast(2022, 2))
             writer.Write(Ascender);
-        if (writer.undertaleData.IsVersionAtLeast(2023, 2))
+        if (writer.undertaleData.IsNonLTSVersionAtLeast(2023, 2))
             writer.Write(SDFSpread);
         if (writer.undertaleData.IsVersionAtLeast(2023, 6))
             writer.Write(LineHeight);
         writer.WriteUndertaleObject(Glyphs);
+        if (writer.undertaleData.IsVersionAtLeast(2024, 14))
+            writer.Align(4);
     }
 
     /// <inheritdoc />
@@ -307,15 +323,19 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
     {
         Name = reader.ReadUndertaleString();
         DisplayName = reader.ReadUndertaleString();
-        EmSize = reader.ReadUInt32();
+        uint readEmSize = reader.ReadUInt32();
         EmSizeIsFloat = false;
 
         // since the float is always written negated, it has the first bit set.
-        if ((EmSize & (1 << 31)) != 0)
+        if ((readEmSize & (1 << 31)) != 0)
         {
-            float fsize = -BitConverter.ToSingle(BitConverter.GetBytes(EmSize), 0);
-            EmSize = (uint)fsize;
+            float fsize = -BitConverter.ToSingle(BitConverter.GetBytes(readEmSize), 0);
+            EmSize = fsize;
             EmSizeIsFloat = true;
+        }
+        else
+        {
+            EmSize = readEmSize;
         }
 
         Bold = reader.ReadBoolean();
@@ -331,11 +351,13 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             AscenderOffset = reader.ReadInt32();
         if (reader.undertaleData.IsVersionAtLeast(2022, 2))
             Ascender = reader.ReadUInt32();
-        if (reader.undertaleData.IsVersionAtLeast(2023, 2))
+        if (reader.undertaleData.IsNonLTSVersionAtLeast(2023, 2))
             SDFSpread = reader.ReadUInt32();
         if (reader.undertaleData.IsVersionAtLeast(2023, 6))
             LineHeight = reader.ReadUInt32();
         Glyphs = reader.ReadUndertaleObject<UndertalePointerList<Glyph>>();
+        if (reader.undertaleData.IsVersionAtLeast(2024, 14))
+            reader.Align(4);
     }
 
     /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
@@ -346,14 +368,19 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             skipSize += 4; // AscenderOffset
         if (reader.undertaleData.IsVersionAtLeast(2022, 2))
             skipSize += 4; // Ascender
-        if (reader.undertaleData.IsVersionAtLeast(2023, 2))
+        if (reader.undertaleData.IsNonLTSVersionAtLeast(2023, 2))
             skipSize += 4; // SDFSpread
         if (reader.undertaleData.IsVersionAtLeast(2023, 6))
             skipSize += 4; // LineHeight
 
         reader.Position += skipSize;
 
-        return 1 + UndertalePointerList<Glyph>.UnserializeChildObjectCount(reader);
+        uint count = 1 + UndertalePointerList<Glyph>.UnserializeChildObjectCount(reader);
+
+        if (reader.undertaleData.IsVersionAtLeast(2024, 14))
+            reader.Align(4);
+
+        return count;
     }
 
     /// <inheritdoc />

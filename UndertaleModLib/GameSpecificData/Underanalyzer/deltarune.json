@@ -1,0 +1,1288 @@
+{
+  "Types": {
+    "Enums": {
+    },
+    "Constants": {
+    },
+    "General": {
+      "Deltarune.Asset.ZeroOrSprite": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "Intersect",
+            "Macros": [
+              {
+                "MacroType": "MatchNot",
+                "ConditionalType": "Integer",
+                "ConditionalValue": "0"
+              },
+              "Asset.Sprite"
+            ]
+          },
+          {
+            "MacroType": "Match",
+            "ConditionalType": "Integer",
+            "ConditionalValue": "0"
+          }
+        ]
+      },
+      "Deltarune.Asset.OneOrSprite": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "Intersect",
+            "Macros": [
+              {
+                "MacroType": "MatchNot",
+                "ConditionalType": "Integer",
+                "ConditionalValue": "1"
+              },
+              "Asset.Sprite"
+            ]
+          },
+          {
+            "MacroType": "Match",
+            "ConditionalType": "Integer",
+            "ConditionalValue": "1"
+          }
+        ]
+      },
+      "Deltarune.Asset.ZeroOneOrSprite": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "Intersect",
+            "Macros": [
+              {
+                "MacroType": "Intersect",
+                "Macros": [
+                  {
+                    "MacroType": "MatchNot",
+                    "ConditionalType": "Integer",
+                    "ConditionalValue": "0"
+                  },
+                  {
+                    "MacroType": "MatchNot",
+                    "ConditionalType": "Integer",
+                    "ConditionalValue": "1"
+                  }
+                ]
+              },
+              "Asset.Sprite"
+            ]
+          },
+          {
+            "MacroType": "Union",
+            "Macros": [
+              {
+                "MacroType": "Match",
+                "ConditionalType": "Integer",
+                "ConditionalValue": "0"
+              },
+              {
+                "MacroType": "Match",
+                "ConditionalType": "Integer",
+                "ConditionalValue": "1"
+              }
+            ]
+          }
+        ]
+      },
+      "Deltarune.Asset.ZeroOrObject": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "Intersect",
+            "Macros": [
+              {
+                "MacroType": "MatchNot",
+                "ConditionalType": "Integer",
+                "ConditionalValue": "0"
+              },
+              "Asset.Object"
+            ]
+          },
+          {
+            "MacroType": "Match",
+            "ConditionalType": "Integer",
+            "ConditionalValue": "0"
+          }
+        ]
+      }
+    }
+  },
+  "GlobalNames": {
+    "Variables": {
+      "actor": "Asset.Object",
+      "attachedobj": "Asset.Object",
+      "usprite": "Asset.Sprite",
+      "rsprite": "Asset.Sprite",
+      "dsprite": "Asset.Sprite",
+      "lsprite": "Asset.Sprite",
+      "utsprite": "Asset.Sprite",
+      "rtsprite": "Asset.Sprite",
+      "dtsprite": "Asset.Sprite",
+      "ltsprite": "Asset.Sprite",
+      "idlesprite": "Asset.Sprite",
+      "hurtsprite": "Asset.Sprite",
+      "sparedsprite": "Asset.Sprite",
+      "sprite_palette": "Asset.Sprite",
+      "smsprite": "Asset.Sprite",
+      "menuSprite": "Asset.Sprite",
+      "chsprite": "Asset.Sprite",
+      "character_sprite": "Asset.Sprite",
+      "button_sprite": "Asset.Sprite",
+      "_sprite": "Asset.Sprite",
+      "thissprite": "Asset.Sprite",
+      "slidesprite": "Asset.Sprite",
+      "contentsprite": "Asset.Sprite",
+      "timer_sprite": "Asset.Sprite",
+      "head_sprite": "Asset.Sprite",
+      "pilot_sprite": "Asset.Sprite",
+      "kr_sprite": "Asset.Sprite",
+      "su_sprite": "Asset.Sprite",
+      "ra_sprite": "Asset.Sprite",
+      "kris_sprite": "Asset.Sprite",
+      "ral_sprite": "Asset.Sprite",
+      "sussprite": "Asset.Sprite",
+      "hand_sprite": "Asset.Sprite",
+      "touchsprite": "Asset.Sprite",
+      "car_sprite": "Asset.Sprite",
+      "hsprite": "Asset.Sprite",
+      "vsprite": "Asset.Sprite",
+      "normalsprite": "Asset.Sprite",
+      "actreadysprite": "Asset.Sprite",
+      "actsprite": "Asset.Sprite",
+      "defendsprite": "Asset.Sprite",
+      "attackreadysprite": "Asset.Sprite",
+      "attacksprite": "Asset.Sprite",
+      "itemsprite": "Asset.Sprite",
+      "itemreadysprite": "Asset.Sprite",
+      "spellreadysprite": "Asset.Sprite",
+      "spellsprite": "Asset.Sprite",
+      "defeatsprite": "Asset.Sprite",
+      "victorysprite": "Asset.Sprite",
+      "handSprite": "Asset.Sprite",
+      "_headsprite": "Asset.Sprite",
+      "headsprite": "Asset.Sprite",
+      "onionsprite": "Asset.Sprite",
+      "leftTurnSprite": "Asset.Sprite",
+      "rightTurnSprite": "Asset.Sprite",
+      "hurt_character_sprite": "Asset.Sprite",
+      "lastSprite": "Asset.Sprite",
+      "mySprite": "Asset.Sprite",
+      "particlesprite": "Asset.Sprite",
+      "second_sprite": "Asset.Sprite",
+      "shopkeepsprite": "Asset.Sprite",
+      "heartsprite": "Asset.Sprite",
+      "sabersprite": "Asset.Sprite",
+      "rimsprite": "Asset.Sprite",
+      "cursor_sprite": "Asset.Sprite",
+      "s_sprite": "Asset.Sprite",
+      "queen_sprite": "Asset.Sprite",
+      "customSprite": "Asset.Sprite",
+      "indsprite": "Asset.Sprite",
+      "writerimg": "Asset.Sprite",
+      "partsprite": "Asset.Sprite",
+      "shieldpiece_sprite_index": "Asset.Sprite",
+      "doorSound": "Asset.Sound",
+      "doorSound2": "Asset.Sound",
+      "writersnd": "Asset.Sound",
+      "batmusic": "Asset.Sound",
+      "currentsong": "Asset.Sound",
+      "color": "Constant.Color",
+      "targetColor": "Constant.Color",
+      "startColor": "Constant.Color",
+      "basecolor": "Constant.Color",
+      "override_color": "Constant.Color",
+      "text_color": "Constant.Color",
+      "mycolor": "Constant.Color",
+      "xcolor": "Constant.Color",
+      "chosencolor": "Constant.Color",
+      "flashcolor": "Constant.Color",
+      "acidColor": "Constant.Color",
+      "linecolor": "Constant.Color",
+      "_itemTextColor": "Constant.Color",
+      "dcolor": "Constant.Color",
+      "particlecolor": "Constant.Color",
+      "bcolor": "Constant.Color",
+      "startcolor": "Constant.Color",
+      "start_color": "Constant.Color",
+      "end_color": "Constant.Color",
+      "play_color": "Constant.Color",
+      "not_color": "Constant.Color",
+      "floorShadowColor": "Constant.Color",
+      "frontShadowColor": "Constant.Color",
+      "nowcolor": "Constant.Color",
+      "reccolor": "Constant.Color",
+      "arrowcolor": "Constant.Color",
+      "housecolor": "Constant.Color",
+      "wincolor": "Constant.Color",
+      "poisoncolor": "Constant.Color",
+      "circle1color": "Constant.Color",
+      "smcolor": "Constant.Color",
+      "blend": "Constant.Color",
+      "menuTextColor": "Constant.Color",
+      "menuTextColorUnselectable": "Constant.Color",
+      "menuTextColorHover": "Constant.Color",
+      "menuTextColorInactive": "Constant.Color",
+      "menuTextColorSelected": "Constant.Color",
+      "optionCommentAColor": "Constant.Color",
+      "optionCommentBColor": "Constant.Color",
+      "optionCommentCColor": "Constant.Color",
+      "menuHeaderColor": "Constant.Color",
+      "hpcolor": "Constant.Color",
+      "gamepad_controls": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Constant.GamepadButton"
+          },
+          "Constant.GamepadButton"
+        ]
+      },
+      "pieceColours": {
+        "MacroType": "ArrayInit",
+        "Macro": "Constant.Color"
+      },
+      "textsound": "Asset.Sound",
+      "coasterSprite": "Asset.Sprite",
+      "usprite_blush": "Asset.Sprite",
+      "dsprite_blush": "Asset.Sprite",
+      "rsprite_blush": "Asset.Sprite",
+      "lsprite_blush": "Asset.Sprite",
+      "specialsprite": "Asset.Sprite",
+      "default_sprite_front": "Asset.Sprite",
+      "default_sprite_back": "Asset.Sprite",
+      "hurt_sprite_front": "Asset.Sprite",
+      "hurt_sprite_back": "Asset.Sprite",
+      "_spr": "Asset.Sprite",
+      "current_sprites": "Asset.Sprite",
+      "fireworksprite": "Asset.Sprite",
+      "recruitSprite": "Asset.Sprite",
+      "pic": "Asset.Sprite",
+      "spriteindex1": "Asset.Sprite",
+      "spriteindex2": "Asset.Sprite",
+      "item0pic": "Asset.Sprite",
+      "item1pic": "Asset.Sprite",
+      "item2pic": "Asset.Sprite",
+      "item3pic": "Asset.Sprite",
+      "endanimation": "Asset.Sprite",
+      "sourceobject": "Asset.Object",
+      "_instruments": "Asset.Sound",
+      "_instrumentsB": "Asset.Sound",
+      "_instrumentsAlt": "Asset.Sound",
+      "_border_image": "Asset.Sprite",
+      "addison_sprites": "Asset.Sprite",
+      "sprite_type": "Asset.Sprite",
+      "krspr": "Asset.Sprite",
+      "suspr": "Asset.Sprite",
+      "raspr": "Asset.Sprite",
+      "actor_startsprite": "Asset.Sprite",
+      "actor_endsprite": "Asset.Sprite",
+      "msprite": "Asset.Sprite",
+      "layersprites": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Sprite"
+          },
+          "Asset.Sprite"
+        ]
+      },
+      "pushSound": "Asset.Sound",
+      "puzzle_icon": "Asset.Sprite",
+      "firstsound": "Asset.Sound",
+      "lastsound": "Asset.Sound",
+      "sparesprite": "Asset.Sprite",
+      "_rollSprites": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Sprite"
+          },
+          "Asset.Sprite"
+        ]
+      },
+      "_sprites": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Sprite"
+          },
+          "Asset.Sprite"
+        ]
+      },
+      "_spritesTea": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Sprite"
+          },
+          "Asset.Sprite"
+        ]
+      },
+      "voiceclips": "Asset.Sound",
+      "colClose": "Constant.Color",
+      "colFar": "Constant.Color",
+      "heroobj": "Asset.Object",
+      "facetype": "Asset.Sprite",
+      "face": "Asset.Sprite",
+      "_character": "Asset.Object",
+      "_charinstance": "Asset.Object",
+      "charinstance": "Asset.Object",
+      "sprite": "Deltarune.Asset.ZeroOrSprite",
+      "victorySprite": "Deltarune.Asset.ZeroOrSprite",
+      "topsprite": "Deltarune.Asset.ZeroOrSprite",
+      "frozensprite": "Deltarune.Asset.ZeroOrSprite",
+      "monsterinstancetype": "Deltarune.Asset.ZeroOrObject",
+      "mask_index": "Deltarune.Asset.OneOrSprite",
+      "sus_sprite": "Deltarune.Asset.ZeroOrSprite",
+      "landsprite": "Deltarune.Asset.ZeroOrSprite",
+      "jumpsprite": "Deltarune.Asset.ZeroOrSprite",
+      "shieldpiece_alpha": "Deltarune.Asset.ZeroOneOrSprite",
+      "parent": "Asset.Object",
+      "box": "Asset.Object",
+      "roomchoice": "Asset.Room",
+      "button0": "Constant.GamepadButton",
+      "button1": "Constant.GamepadButton",
+      "button2": "Constant.GamepadButton",
+      "_control": "Constant.GamepadButton",
+      "new_gamepad_key": "Constant.GamepadButton",
+      "input_k": "Constant.VirtualKey",
+      "input_g": "Constant.GamepadButton",
+      "COL_A": "Constant.Color",
+      "COL_B": "Constant.Color",
+      "mybutton": "Constant.VirtualKey",
+      "bird_color": "Constant.Color",
+      "_colorA": "Constant.Color",
+      "_colorB": "Constant.Color",
+      "drawcolor": "Constant.Color",
+      "fadecolor": "Constant.Color",
+      "lettercolor": "Constant.Color",
+      "bossObject": "Asset.Object",
+      "pushChar": "Asset.Object",
+      "rotator_target": "Asset.Object",
+      "controlled": "Asset.Object",
+      "tiletype": "Asset.Object",
+      "simcity": "Asset.Object",
+      "returnroom": "Asset.Room",
+      "target_char": "Id.InstanceOrObject",
+      "writergod": "Asset.Object",
+      "source": "Id.InstanceOrObject",
+      "sneo": "Id.InstanceOrObject",
+      "heartobj": "Asset.Object",
+      "swatchbc": "Asset.Object",
+      "swatch_bc": "Asset.Object",
+      "master": "Id.InstanceOrObject",
+      "cutscene_master": "Id.InstanceOrObject",
+      "teacupTarget": "Asset.Object",
+      "_teacups": "Asset.Object",
+      "custom_sprite": "Asset.Sprite",
+      "_screencolor": "Constant.Color",
+      "hurt_sprite": "Deltarune.Asset.ZeroOrSprite",
+      "writerobj": "Asset.Object",
+      "note_color": "Constant.Color",
+      "footcolor": "Constant.Color",
+      "_rouxls_sprite": "Asset.Sprite",
+      "_spadesprite": "Asset.Sprite",
+      "_actsprite": "Asset.Sprite",
+      "_heartsprite": "Asset.Sprite",
+      "_screensprite": "Asset.Sprite",
+      "doorRoom": "Asset.Room",
+      "_sprIdle": "Asset.Sprite",
+      "_sprAngry": "Asset.Sprite",
+      "_sprIdleOutline": "Asset.Sprite",
+      "_sprAngryOutline": "Asset.Sprite",
+      "current_color": "Constant.Color",
+      "tenna": "Deltarune.Asset.ZeroOrObject",
+      "targetTenna": "Deltarune.Asset.ZeroOrObject",
+      "head_sprite_default": "Asset.Sprite",
+      "body_sprite": "Asset.Sprite",
+      "head_sprites": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Sprite"
+          },
+          "Asset.Sprite"
+        ]
+      },
+      "spear_list": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Sprite"
+          },
+          "Asset.Sprite"
+        ]
+      },
+      "_sprite_pool": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Sprite"
+          },
+          "Asset.Sprite"
+        ]
+      },
+      "color_blend": "Constant.Color",
+      "tvbasesprite": "Asset.Sprite",
+      "tvbasecolor": "Constant.Color",
+      "shadcolor": "Constant.Color",
+      "swordscreencolor": "Constant.Color",
+      "prizeballcolor": "Constant.Color",
+      "myballcolor": "Constant.Color",
+      "noise_sprite": "Asset.Sprite",
+      "screencolor": "Constant.Color",
+      "lanino": "Deltarune.Asset.ZeroOrObject",
+      "elnina": "Deltarune.Asset.ZeroOrObject",
+      "cablecolor": "Constant.Color",
+      "score_color": "Constant.Color",
+      "floor_color": "Constant.Color",
+      "spotlight_color": "Constant.Color",
+      "guitar_sound": "Asset.Sound",
+      "miss_sound": "Asset.Sound",
+      "musicm": "Deltarune.Asset.ZeroOrObject",
+      "room_name": "Asset.Room",
+      "hintcol": "Constant.Color",
+      "sprite_top": "Asset.Sprite",
+      "shrink_sprite": "Asset.Sprite",
+      "_symbol_sprite": "Asset.Sprite",
+      "castle_town_rooms": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Room"
+          },
+          "Asset.Room"
+        ]
+      },
+      "church_a_rooms": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Room"
+          },
+          "Asset.Room"
+        ]
+      },
+      "church_b_rooms": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Room"
+          },
+          "Asset.Room"
+        ]
+      },
+      "church_c_rooms": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "ArrayInit",
+            "Macro": "Asset.Room"
+          },
+          "Asset.Room"
+        ]
+      },
+      "room_id": "Asset.Room",
+      "_border_image_layer": "Asset.Sprite",
+      "tile_sprite": "Asset.Sprite"
+    },
+    "FunctionArguments": {
+      "snd_play": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Sound" ],
+          [ "Asset.Sound", null ],
+          [ "Asset.Sound", null, null ]
+        ]
+      },
+      "snd_stop": [ "Asset.Sound" ],
+      "snd_is_playing": [ "Asset.Sound" ],
+      "snd_volume": [ "Asset.Sound", null, null ],
+      "snd_pitch": [ "Asset.Sound", null ],
+      "snd_pitch_time": [ "Asset.Sound", null, null ],
+      "snd_loop": [ "Asset.Sound" ],
+      "snd_pause": [ "Asset.Sound" ],
+      "scr_textsetup": [ "Asset.Font", "Constant.Color", null, null, null, null, null, "Asset.Sound" ],
+      "scr_marker": [ null, null, "Asset.Sprite" ],
+      "scr_dark_marker": [ null, null, "Asset.Sprite" ],
+      "scr_draw_background_ps4": [ "Asset.Sprite", null, null ],
+      "gml_Script_i_ex": [ "Asset.Object" ],
+      "gml_Script_safe_delete": [ "Asset.Object" ],
+      "gml_Script_scr_bulletspawner": [ null, null, "Asset.Object" ],
+      "gml_Script_snd_play": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Sound" ],
+          [ "Asset.Sound", null ],
+          [ "Asset.Sound", null, null ]
+        ]
+      },
+      "gml_Script_snd_play_delay": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Sound", null ],
+          [ "Asset.Sound", null, null ],
+          [ "Asset.Sound", null, null, null ]
+        ]
+      },
+      "gml_Script_snd_play_x": [ "Asset.Sound", null, null ],
+      "gml_Script_soundplay_x": [ "Asset.Sound", null, null ],
+      "gml_Script_sound_play_x": [ "Asset.Sound", null, null ],
+      "gml_Script_snd_play_volume": [ "Asset.Sound", null ],
+      "gml_Script_soundplay_volume": [ "Asset.Sound", null ],
+      "gml_Script_sound_play_volume": [ "Asset.Sound", null ],
+      "gml_Script_soundplay": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Sound" ],
+          [ "Asset.Sound", null ],
+          [ "Asset.Sound", null, null ]
+        ]
+      },
+      "gml_Script_sound_play": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Sound" ],
+          [ "Asset.Sound", null ],
+          [ "Asset.Sound", null, null ]
+        ]
+      },
+      "gml_Script_snd_stop": [ "Asset.Sound" ],
+      "gml_Script_snd_is_playing": [ "Asset.Sound" ],
+      "gml_Script_snd_play_pitch": [ "Asset.Sound", null ],
+      "gml_Script_snd_volume": [ "Asset.Sound", null, null ],
+      "gml_Script_snd_pitch": [ "Asset.Sound", null ],
+      "gml_Script_snd_pitch_time": [ "Asset.Sound", null, null ],
+      "gml_Script_snd_loop": [ "Asset.Sound" ],
+      "gml_Script_snd_pause": [ "Asset.Sound" ],
+      "gml_Script_c_soundplay": [ "Asset.Sound" ],
+      "gml_Script_c_sound_play": [ "Asset.Sound" ],
+      "gml_Script_c_sndplay": [ "Asset.Sound" ],
+      "gml_Script_c_snd_play": [ "Asset.Sound" ],
+      "gml_Script_c_soundplay_x": [ "Asset.Sound", null, null ],
+      "gml_Script_c_sound_play_x": [ "Asset.Sound", null, null ],
+      "gml_Script_c_sndplay_x": [ "Asset.Sound", null, null ],
+      "gml_Script_c_snd_play_x": [ "Asset.Sound", null, null ],
+      "gml_Script_c_soundplay_wait": [ "Asset.Sound" ],
+      "gml_Script_c_sprite": [ "Asset.Sprite" ],
+      "gml_Script_c_jump_sprite": [ null, null, null, null, "Asset.Sprite", "Asset.Sprite" ],
+      "gml_Script_c_actortoobject": [ "Asset.Object" ],
+      "gml_Script_scr_pan_to_obj": [ "Asset.Object", null ],
+      "gml_Script_scr_pan_to_obj_ch1": [ "Asset.Object", null ],
+      "gml_Script_scr_marker": [ null, null, "Asset.Sprite" ],
+      "gml_Script_scr_marker_animated": {
+        "MacroType": "Union",
+        "Macros": [
+          [ null, null, "Asset.Sprite" ],
+          [ null, null, "Asset.Sprite", null ]
+        ]
+      },
+      "gml_Script_scr_dark_marker": [ null, null, "Asset.Sprite" ],
+      "gml_Script_scr_dark_marker_fancy": [ null, null, "Asset.Sprite" ],
+      "gml_Script_scr_custom_marker_depth": [ null, null, null, null, "Asset.Sprite" ],
+      "gml_Script_scr_marker_playonce": [ null, null, "Asset.Sprite" ],
+      "gml_Script_scr_marker_jitter": [ null, null, "Asset.Sprite" ],
+      "gml_Script_scr_marker_jitterwobble": [ null, null, "Asset.Sprite" ],
+      "gml_Script_scr_dark_marker_playonce": [ null, null, "Asset.Sprite" ],
+      "gml_Script_scr_dark_marker_animated": {
+        "MacroType": "Union",
+        "Macros": [
+          [ null, null, "Asset.Sprite" ],
+          [ null, null, "Asset.Sprite", null ]
+        ]
+      },
+      "gml_Script_scr_board_marker": {
+        "MacroType": "Union",
+        "Macros": [
+          [ null, null, "Asset.Sprite" ],
+          [ null, null, "Asset.Sprite", null ],
+          [ null, null, "Asset.Sprite", null, null ],
+          [ null, null, "Asset.Sprite", null, null, null ],
+          [ null, null, "Asset.Sprite", null, null, null, null ]
+        ]
+      },
+      "gml_Script_scr_marker_blend": {
+        "MacroType": "Union",
+        "Macros": [
+          [ null, null, "Asset.Sprite" ],
+          [ null, null, "Asset.Sprite", null ],
+          [ null, null, "Asset.Sprite", null, null ],
+          [ null, null, "Asset.Sprite", null, null, null ],
+          [ null, null, "Asset.Sprite", null, null, null, null ],
+          [ null, null, "Asset.Sprite", null, null, null, null, null ],
+          [ null, null, "Asset.Sprite", null, null, null, null, null, null ],
+          [ null, null, "Asset.Sprite", null, null, null, null, null, null, "Constant.Color" ],
+          [ null, null, "Asset.Sprite", null, null, null, null, null, null, "Constant.Color", null ],
+          [ null, null, "Asset.Sprite", null, null, null, null, null, null, "Constant.Color", null, null ]
+        ]
+      },
+      "gml_Script_scr_marker_ext": {
+        "MacroType": "Union",
+        "Macros": [
+          [ null, null, "Asset.Sprite" ],
+          [ null, null, "Asset.Sprite", null ],
+          [ null, null, "Asset.Sprite", null, null ],
+          [ null, null, "Asset.Sprite", null, null, null ],
+          [ null, null, "Asset.Sprite", null, null, null, null ],
+          [ null, null, "Asset.Sprite", null, null, null, null, "Constant.Color" ],
+          [ null, null, "Asset.Sprite", null, null, null, null, "Constant.Color", null ],
+          [ null, null, "Asset.Sprite", null, null, null, null, "Constant.Color", null, null ],
+          [ null, null, "Asset.Sprite", null, null, null, null, "Constant.Color", null, null, null ],
+          [ null, null, "Asset.Sprite", null, null, null, null, "Constant.Color", null, null, null, null ]
+        ]
+      },
+      "gml_Script_scr_dark_marker_depth": [ null, null, null, "Asset.Sprite" ],
+      "gml_Script_scr_battle_marker": [ null, null, "Asset.Sprite" ],
+      "gml_Script_scr_act_charsprite": [ null, "Asset.Sprite", null, null ],
+      "gml_Script_hexcolor": [ "Constant.Color" ],
+      "gml_Script_draw_sprite_ext_flash": [ "Asset.Sprite", null, null, null, null, null, null, "Constant.Color", null ],
+      "gml_Script_draw_background_ext": [ "Asset.Sprite", null, null, null, null, null, "Constant.Color", null ],
+      "gml_Script_draw_background_part_ext": [ "Asset.Sprite", null, null, null, null, null, null, null, null, "Constant.Color", null ],
+      "gml_Script_scr_draw_sprite_tiled_area": [ "Asset.Sprite", null, null, null, null, null, null, null, null, null, "Constant.Color", null ],
+      "gml_Script_draw_monster_body_part": [ "Asset.Sprite", null, null, null ],
+      "gml_Script_draw_monster_body_part_ext": [ "Asset.Sprite", null, null, null, null, null, null, "Constant.Color", null ],
+      "gml_Script_draw_background_tiled_ext": [ "Asset.Sprite", null, null, null, null, "Constant.Color", null ],
+      "gml_Script_scr_draw_background_ps4": [ "Asset.Sprite", null, null ],
+      "gml_Script_scr_draw_sprite_crop_ext": [ "Asset.Sprite", null, null, null, null, null, null, null, null, null, null, null ],
+      "gml_Script_scr_textsetup": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Font", "Constant.Color", null, null, null, null, null, "Asset.Sound" ],
+          [ "Asset.Font", "Constant.Color", null, null, null, null, null, "Asset.Sound", null, null, null ]
+        ]
+      },
+      "gml_Script_draw_sprite_ext_glow": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Sprite", null, null, null, null, null, null, "Constant.Color", null ],
+          [ "Asset.Sprite", null, null, null, null, null, null, "Constant.Color", null, "Constant.Color" ]
+        ]
+      },
+      "gml_Script_draw_sprite_part_ext_glow": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Sprite", null, null, null, null, null, null, null, null, null, "Constant.Color", null ],
+          [ "Asset.Sprite", null, null, null, null, null, null, null, null, null, "Constant.Color", null, "Constant.Color" ]
+        ]
+      },
+      "gml_Script_scr_draw_outline_ext": [ "Asset.Sprite", null, null, null, null, null, null, "Constant.Color", null, null ],
+      "gml_Script_scr_guardpeek": [ "Asset.Object" ],
+      "gml_Script_instance_create_ch1": [ null, null, "Asset.Object" ],
+      "gml_Script_snd_play_ch1": [ "Asset.Sound" ],
+      "gml_Script_snd_stop_ch1": [ "Asset.Sound" ],
+      "gml_Script_snd_is_playing_ch1": [ "Asset.Sound" ],
+      "gml_Script_snd_loop_ch1": [ "Asset.Sound" ],
+      "gml_Script_scr_marker_ch1": [ null, null, "Asset.Sprite" ],
+      "gml_Script_scr_dark_marker_ch1": [ null, null, "Asset.Sprite" ],
+      "gml_Script_draw_background_ext_ch1": [ "Asset.Sprite", null, null, null, null, null, "Constant.Color", null ],
+      "gml_Script_draw_background_part_ext_ch1": [ "Asset.Sprite", null, null, null, null, null, null, null, null, "Constant.Color", null ],
+      "gml_Script_draw_background_tiled_ext_ch1": [ "Asset.Sprite", null, null, null, null, "Constant.Color", null ],
+      "gml_Script_scr_draw_background_ps4_ch1": [ "Asset.Sprite", null, null ],
+      "gml_Script_scr_textsetup_ch1": [ "Asset.Font", "Constant.Color", null, null, null, null, null, "Asset.Sound" ],
+      "gml_Script_scr_custom_afterimage": [ "Asset.Object" ],
+      "gml_Script_scr_custom_afterimage_ext": [ "Asset.Object", "Asset.Sprite", null, null, null, null, null ],
+      "gml_Script_scr_following_afterimage": [ "Asset.Object", "Id.InstanceOrObject" ],
+      "gml_Script_c_var_instance": {
+        "MacroType": "Union",
+        "Macros": [
+          [
+            null,
+            {
+              "MacroType": "Union",
+              "Macros": [
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "character_sprite"
+                },
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "sprite_index"
+                },
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "head_sprite"
+                }
+              ]
+            },
+            "Asset.Sprite"
+          ],
+          [
+            null,
+            {
+              "MacroType": "Match",
+              "ConditionalValue": "color_blend"
+            },
+            "Constant.Color"
+          ]
+        ]
+      },
+      "gml_Script_c_delaycmd": {
+        "MacroType": "Union",
+        "Macros": [
+          [
+            null,
+            {
+              "MacroType": "Match",
+              "ConditionalValue": "sprite"
+            },
+            "Asset.Sprite"
+          ],
+          [
+            null,
+            {
+              "MacroType": "Match",
+              "ConditionalValue": "soundplay"
+            },
+            "Asset.Sound"
+          ]
+        ]
+      },
+      "gml_Script_scr_script_delayed": {
+        "MacroType": "Union",
+        "Macros": [
+          [
+            {
+              "MacroType": "Union",
+              "Macros": [
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "gml_Script_snd_play"
+                },
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "gml_Script_snd_volume"
+                },
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "gml_Script_snd_play_pitch"
+                }
+              ]
+            },
+            null,
+            "Asset.Sound"
+          ],
+          [
+            {
+              "MacroType": "Match",
+              "ConditionalValue": "gml_Script_scr_var"
+            },
+            null,
+            {
+              "MacroType": "Match",
+              "ConditionalValue": "sprite_index"
+            },
+            "Asset.Sprite"
+          ]
+        ]
+      },
+      "gml_Script_scr_var_delay": [
+        {
+          "MacroType": "Match",
+          "ConditionalValue": "sprite_index"
+        },
+        "Asset.Sprite",
+        null
+      ],
+      "gml_Script_c_script_instance": [
+        null,
+        {
+          "MacroType": "Union",
+          "Macros": [
+            {
+              "MacroType": "Match",
+              "ConditionalValue": "gml_Script_snd_play"
+            },
+            {
+              "MacroType": "Match",
+              "ConditionalValue": "gml_Script_snd_volume"
+            },
+            {
+              "MacroType": "Match",
+              "ConditionalValue": "gml_Script_snd_play_pitch"
+            }
+          ]
+        },
+        null,
+        "Asset.Sound"
+      ],
+      "gml_Script_c_actorsetsprites": [
+        null,
+        "Deltarune.Asset.ZeroOrSprite",
+        "Deltarune.Asset.ZeroOrSprite",
+        "Deltarune.Asset.ZeroOrSprite",
+        "Deltarune.Asset.ZeroOrSprite"
+      ],
+      "gml_Script_c_mus2": [
+        {
+          "MacroType": "Match",
+          "ConditionalValue": "loopsfx"
+        },
+        "Asset.Sound"
+      ],
+      "gml_Script_scr_room": [ "Asset.Room", null ],
+      "gml_Script_scr_stickto": [ "Id.InstanceOrObject", null ],
+      "gml_Script_c_stickto": [ "Id.InstanceOrObject", null ],
+      "gml_Script_scr_monster_add": [ null, "Asset.Object" ],
+      "gml_Script_scr_bullet_create": [ null, null, "Asset.Object" ],
+      "gml_Script_scr_childbullet": [ null, null, "Asset.Object" ],
+      "gml_Script_scr_debug_keycheck": [ "Constant.VirtualKey" ],
+      "set_custom_sprite": [ "Asset.Sprite" ],
+      "set_border": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Sprite" ],
+          [ "Asset.Sprite", null ]
+        ]
+      },
+      "hide_border": [ null, "Constant.Color" ],
+      "gml_Script_c_tenna_sprite": [ "Asset.Sprite" ],
+      "set_screen_sprite": [ "Asset.Sprite" ],
+      "set_screen_color": [ "Constant.Color" ],
+      "gml_Script_scr_funnytext_new_sound": [
+        "Asset.Sound",
+        {
+          "MacroType": "ArrayInit",
+          "Macro": "Asset.Sprite"
+        }
+      ],
+      "gml_Script_scr_music_event_add": [
+        null,
+        {
+          "MacroType": "Match",
+          "ConditionalValue": "sprite_index"
+        },
+        "Asset.Sprite",
+        null
+      ],
+      "gml_Script_scr_music_event_add_instance": {
+        "MacroType": "Union",
+        "Macros": [
+          [
+            null,
+            null,
+            {
+              "MacroType": "Match",
+              "ConditionalValue": "sprite_index"
+            },
+            "Asset.Sprite"
+          ],
+          [
+            null,
+            null,
+            {
+              "MacroType": "Match",
+              "ConditionalValue": "sprite_index"
+            },
+            "Asset.Sprite",
+            null
+          ],
+          [
+            null,
+            null,
+            {
+              "MacroType": "Match",
+              "ConditionalValue": "sprite_index"
+            },
+            "Asset.Sprite",
+            null,
+            null
+          ]
+        ]
+      },
+      "gml_Script_scr_music_beat_event_instance": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Object", null, null ],
+          [ "Asset.Object", null, null, null ]
+        ]
+      },
+      "gml_Script_instance_create_board": [ null, null, "Asset.Object" ],
+      "gml_Script_pal_swap_set": [ "Asset.Sprite", null, null ],
+      "gml_Script_scr_draw_beam": [ null, null, null, null, null, "Constant.Color", null, null ],
+      "gml_Script_scr_draw_beam_color": [ null, null, null, null, null, "Constant.Color", null, null, null ],
+      "gml_Script_scr_fire_bullet": {
+        "MacroType": "Union",
+        "Macros": [
+          [ null, null, "Asset.Object", null, null ],
+          [ null, null, "Asset.Object", null, null, "Asset.Sprite" ],
+          [ null, null, "Asset.Object", null, null, "Asset.Sprite", null ],
+          [ null, null, "Asset.Object", null, null, "Asset.Sprite", null, null ],
+          [ null, null, "Asset.Object", null, null, "Asset.Sprite", null, null, null ]
+        ]
+      },
+      "gml_Script_scr_fire_bullet_colorize": {
+        "MacroType": "Union",
+        "Macros": [
+          [ null, null, "Asset.Object", null, null, "Asset.Sprite", "Constant.Color" ],
+          [ null, null, "Asset.Object", null, null, "Asset.Sprite", "Constant.Color", null ]
+        ]
+      },
+      "create_highlight": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Object" ],
+          [ "Asset.Object", null ],
+          [ "Asset.Object", null, null ],
+          [ "Asset.Object", null, null, null ]
+        ]
+      },
+      "gml_Script_findsprite": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Sprite" ],
+          [ "Asset.Sprite", null ],
+          [ "Asset.Sprite", null, "Constant.Color" ],
+          [ "Asset.Sprite", null, "Constant.Color", null ],
+          [ "Asset.Sprite", null, "Constant.Color", null, null ],
+          [ "Asset.Sprite", null, "Constant.Color", null, null, null ],
+          [ "Asset.Sprite", null, "Constant.Color", null, null, null, null ]
+        ]
+      },
+      "gml_Script_findspriteinfo": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Sprite" ],
+          [ "Asset.Sprite", null ],
+          [ "Asset.Sprite", null, "Constant.Color" ],
+          [ "Asset.Sprite", null, "Constant.Color", null ],
+          [ "Asset.Sprite", null, "Constant.Color", null, null ],
+          [ "Asset.Sprite", null, "Constant.Color", null, null, null ],
+          [ "Asset.Sprite", null, "Constant.Color", null, null, null, null ]
+        ]
+      },
+      "gml_Script_scr_lerp_imageblend": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Id.InstanceOrObject", "Constant.Color", "Constant.Color", null ],
+          [ "Id.InstanceOrObject", "Constant.Color", "Constant.Color", null, null, null ]
+        ]
+      },
+      "set_tile_sprite": [ null, "Asset.Sprite" ],
+      "set_tile_sprite_ext": [ null, "Asset.Sprite", null ]
+    },
+    "FunctionReturn": {
+      "scr_getbuttonsprite": {
+        "MacroType": "Union",
+        "Macros": [ "Asset.Sprite", "Id.Instance" ]
+      },
+      "gml_Script_scr_getbuttonsprite": {
+        "MacroType": "Union",
+        "Macros": [ "Asset.Sprite", "Id.Instance" ]
+      },
+      "gml_Script_scr_getbuttonsprite_ch1": {
+        "MacroType": "Union",
+        "Macros": [ "Asset.Sprite", "Id.Instance" ]
+      }
+    }
+  },
+  "CodeEntryNames": {
+    "gml_Script_scr_getbuttonsprite": {
+      "Variables": {
+        "control": "Constant.GamepadButton",
+        "button": {
+          "MacroType": "Union",
+          "Macros": [ "Constant.GamepadButton", "Id.Instance", "Asset.Sprite" ]
+        }
+      }
+    },
+    "gml_Script_scr_getbuttonsprite_ch1": {
+      "Variables": {
+        "control": "Constant.GamepadButton",
+        "button": {
+          "MacroType": "Union",
+          "Macros": [ "Constant.GamepadButton", "Id.Instance", "Asset.Sprite" ]
+        }
+      }
+    },
+    "gml_Object_obj_ch2_sceneex2_special_Draw_0": {
+      "Variables": {
+        "color": "None"
+      }
+    },
+    "gml_Object_obj_ch2_sceneex2_special_Step_0": {
+      "Variables": {
+        "color": "None"
+      }
+    },
+    "gml_Object_obj_dbulletcontroller_Step_0": {
+      "Variables": {
+        "color": "None"
+      }
+    },
+    "gml_Script_scr_heartcolor": {
+      "Variables": {
+        "color": "None"
+      }
+    },
+    "gml_Object_obj_heart_Create_0": {
+      "Variables": {
+        "color": "None"
+      }
+    },
+    "gml_Object_obj_heart_Draw_0": {
+      "Variables": {
+        "color": "None"
+      }
+    },
+    "gml_Object_obj_heart_Step_0": {
+      "Variables": {
+        "color": "None"
+      }
+    },
+    "gml_Object_obj_sneo_fakeheart_Create_0": {
+      "Variables": {
+        "color": "None"
+      }
+    },
+    "gml_Object_obj_sneo_fakeheart_Destroy_0": {
+      "Variables": {
+        "color": "None"
+      }
+    },
+    "gml_Object_obj_sneo_fakeheart_Step_2": {
+      "Variables": {
+        "color": "None"
+      }
+    },
+    "gml_Object_obj_cybercity_balloon_cheese_Create_0": {
+      "Variables": {
+        "blend": "None"
+      }
+    },
+    "gml_Object_obj_cybercity_balloon_Create_0": {
+      "Variables": {
+        "blend": "None"
+      }
+    },
+    "gml_Object_obj_shadowMaker_Step_2": {
+      "Variables": {
+        "sprite_index": "Deltarune.Asset.OneOrSprite"
+      }
+    },
+    "gml_Script_scr_debug_keycheck": {
+      "Variables": {
+        "alt_key": {
+          "MacroType": "Union",
+          "Macros": [
+            "Constant.GamepadButton",
+            "Id.Instance"
+          ]
+        }
+      }
+    },
+    "gml_Object_obj_torielclass_event_Create_0": {
+      "Variables": {
+        "fruit": "Asset.Sprite"
+      }
+    },
+    "gml_Script_scr_guardpeek": {
+      "Variables": {
+        "argument0": "Asset.Object"
+      }
+    },
+    "gml_Object_obj_darkfountain_Draw_0": {
+      "Variables": {
+        "bg": "Asset.Sprite"
+      }
+    },
+    "gml_Object_obj_darkfountain_ch1_Draw_0": {
+      "Variables": {
+        "bg": "Asset.Sprite"
+      }
+    },
+    "gml_Object_obj_silhouette_cover_Create_0": {
+      "Variables": {
+        "top": "Asset.Sprite"
+      }
+    },
+    "gml_Object_obj_teacupParallaxer_Create_0": {
+      "Variables": {
+        "big": "Asset.Sprite",
+        "mid": "Asset.Sprite",
+        "smol": "Asset.Sprite"
+      }
+    },
+    "gml_Object_DEVICE_GONERMAKER_Draw_0": {
+      "Variables": {
+        "img": "Asset.Sprite"
+      }
+    },
+    "gml_Object_DEVICE_GONERMAKER_ch1_Draw_0": {
+      "Variables": {
+        "img": "Asset.Sprite"
+      }
+    },
+    "gml_Script_scr_84_init_localization": {
+      "FunctionArguments": {
+        "ds_map_add": {
+          "MacroType": "Union",
+          "Macros": [
+            [
+              {
+                "MacroType": "Match",
+                "ConditionalValue": "fm"
+              },
+              null,
+              "Asset.Font"
+            ],
+            [
+              {
+                "MacroType": "Match",
+                "ConditionalValue": "sm"
+              },
+              null,
+              "Asset.Sprite"
+            ],
+            [
+              {
+                "MacroType": "Match",
+                "ConditionalValue": "sndm"
+              },
+              null,
+              "Asset.Sound"
+            ]
+          ]
+        }
+      }
+    },
+    "gml_Script_scr_84_init_localization_ch1": {
+      "FunctionArguments": {
+        "ds_map_add": {
+          "MacroType": "Union",
+          "Macros": [
+            [
+              {
+                "MacroType": "Match",
+                "ConditionalValue": "fm"
+              },
+              null,
+              "Asset.Font"
+            ],
+            [
+              {
+                "MacroType": "Match",
+                "ConditionalValue": "sm"
+              },
+              null,
+              "Asset.Sprite"
+            ],
+            [
+              {
+                "MacroType": "Match",
+                "ConditionalValue": "sndm"
+              },
+              null,
+              "Asset.Sound"
+            ]
+          ]
+        }
+      }
+    },
+    "gml_Object_obj_debug_sprite_catalog_Create_0": {
+      "Variables": {
+        "myLastSprite": "Asset.Sprite"
+      }
+    },
+    "gml_Object_obj_move_to_point_Create_0": {
+      "Variables": {
+        "target": "Asset.Object"
+      }
+    },
+    "gml_Object_obj_move_to_point_Step_0": {
+      "Variables": {
+        "target": "Asset.Object"
+      }
+    },
+    "gml_Object_obj_move_to_point_ch1_Create_0": {
+      "Variables": {
+        "target": "Asset.Object"
+      }
+    },
+    "gml_Object_obj_move_to_point_ch1_Step_0": {
+      "Variables": {
+        "target": "Asset.Object"
+      }
+    },
+    "gml_Object_obj_sneo_tiny_susie_axe_Create_0": {
+      "Variables": {
+        "target": "Asset.Object"
+      }
+    },
+    "gml_Object_obj_sneo_tiny_susie_axe_Step_0": {
+      "Variables": {
+        "target": "Asset.Object"
+      }
+    },
+    "gml_Object_obj_power_up_thrash_Create_0": {
+      "Variables": {
+        "thrash": "Asset.Object"
+      }
+    },
+    "gml_Object_obj_queen_bulletcontroller_Create_0": {
+      "Variables": {
+        "queen": "Asset.Object"
+      }
+    },
+    "gml_Object_obj_queen_explodinghead_Step_0": {
+      "Variables": {
+        "_bullet": "Asset.Object"
+      }
+    },
+    "gml_Object_obj_sneo_final_forme_Step_0": {
+      "Variables": {
+        "_box": "Asset.Object"
+      }
+    },
+    "gml_Script_scr_rhythmgame_draw_border": {
+      "Variables": {
+        "_name": "Asset.Sprite"
+      }
+    },
+    "gml_Script_scr_setparty": {
+      "Variables": {
+        "kris": "Asset.Object"
+      }
+    },
+    "gml_Object_obj_rhythmgame_performer_Create_0": {
+      "Variables": {
+        "idle": "Asset.Sprite",
+        "low": "Asset.Sprite",
+        "mid": "Asset.Sprite",
+        "high": "Asset.Sprite"
+      }
+    },
+    "gml_Script_scr_rhythmgame_init": {
+      "Variables": {
+        "idle": "Asset.Sprite",
+        "low": "Asset.Sprite",
+        "mid": "Asset.Sprite",
+        "high": "Asset.Sprite"
+      }
+    },
+    "gml_Script_scr_rhythmgame_song_select": {
+      "Variables": {
+        "local_preview": "Asset.Sound"
+      }
+    },
+    "gml_Script_scr_get_border": {
+      "Variables": {
+        "argument0": "Asset.Room"
+      }
+    }
+  }
+}

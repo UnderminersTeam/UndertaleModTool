@@ -7,9 +7,11 @@ using System.Collections;
 
 EnsureDataLoaded();
 
-string codeFolder = GetFolder(FilePath) + "Export_Code" + Path.DirectorySeparatorChar;
-ThreadLocal<GlobalDecompileContext> DECOMPILE_CONTEXT = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(Data, false));
+string codeFolder = Path.Combine(Path.GetDirectoryName(FilePath), "Export_Code");
 Directory.CreateDirectory(codeFolder);
+
+GlobalDecompileContext globalDecompileContext = new(Data);
+Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = Data.ToolInfo.DecompilerSettings;
 
 string line;
 string path_error = Path.Combine(codeFolder, "Status.txt");
@@ -82,9 +84,15 @@ if (File.Exists(path_error2))
     file.Close();
 }
 
-await Task.Run(() => {
+await Task.Run(() => 
+{
     foreach (UndertaleCode code in Data.Code)
     {
+        if (code is null)
+        {
+            IncrementProgress();
+            continue;
+        }
         if (write)
         {
             try
@@ -105,12 +113,14 @@ await Task.Run(() => {
                     isErrorCodeEntry = true;
                 }
             }
-            if ((!isErrorCodeEntry) || (!skip))
+            if (!isErrorCodeEntry || !skip)
             {
                 string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
                 try
                 {
-                    File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
+                    File.WriteAllText(path, (code != null 
+                        ? new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, decompilerSettings).DecompileToString() 
+                        : ""));
                 }
                 catch (Exception e)
                 {
@@ -124,7 +134,9 @@ await Task.Run(() => {
             string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
             try
             {
-                File.WriteAllText(path, (code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT.Value) : ""));
+                File.WriteAllText(path, (code != null 
+                    ? new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, decompilerSettings).DecompileToString() 
+                    : ""));
             }
             catch (Exception e)
             {
@@ -152,7 +164,7 @@ HideProgressBar();
 ScriptMessage("Export Complete.\n\nLocation: " + codeFolder);
 if (File.Exists(path_error2))
 {
-    string asmFolder = GetFolder(FilePath) + "Error_Assembly" + Path.DirectorySeparatorChar;
+    string asmFolder = Path.Combine(Path.GetDirectoryName(FilePath), "Error_Assembly");
     Directory.CreateDirectory(asmFolder);
     if (errored_code_arr.Count > 0)
     {
@@ -163,7 +175,7 @@ if (File.Exists(path_error2))
             string asmPath = Path.Combine(asmFolder, code.Name.Content + ".asm");
             try
             {
-                File.WriteAllText(asmPath, (code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : ""));
+                File.WriteAllText(asmPath, (code != null ? code.Disassemble(Data.Variables, Data.CodeLocals?.For(code)) : ""));
             }
             catch (Exception e)
             {
@@ -172,9 +184,4 @@ if (File.Exists(path_error2))
         }
     }
     ScriptMessage("Please place the \"Error_Assembly\" folder into a zip file and send it to Grossley#2869 on Discord, along with what game you were playing, where you got it from, and any other pertinent information, so that these errors may be corrected.");
-}
-
-string GetFolder(string path)
-{
-    return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }

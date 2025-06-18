@@ -1,0 +1,10 @@
+{
+  "LoadOrder": 1,
+  "Conditions": [
+    {
+      "ConditionKind": "DisplayName.Regex",
+      "Value": "(?i)^undertale"
+    }
+  ],
+  "UnderanalyzerFilename": "undertale.json"
+}

@@ -77,6 +77,8 @@ applying any changes to the game.";
         Data.FORM.Chunks.Remove("TAGS");
     if (Data.FORM.Chunks.ContainsKey("EMBI"))
         Data.FORM.Chunks.Remove("EMBI");
+    if (Data.FORM.FUNC.CodeLocals is null)
+        Data.FORM.FUNC.CodeLocals = new UndertaleSimpleList<UndertaleCodeLocals>();
     Data.SetGMS2Version(2);
     //Data.IsTPAG4ByteAligned = false;
     for (int i = 0; i < Data.Code.Count; i++)
@@ -206,12 +208,6 @@ applying any changes to the game.";
         currentList.Add(stringBeforeChar);
     }
     Reorganize<UndertaleRoom>(Data.Rooms, currentList);
-
-    Data.GMLCache?.Clear();
-    Data.GMLCacheChanged?.Clear();
-    Data.GMLCacheFailed?.Clear();
-    Data.GMLEditedBefore?.Clear();
-    Data.GMLCacheWasSaved = false;
 
     ScriptMessage("Downgraded from GMS 2.3 to 16 successfully. Save the game to apply the changes.");
 }

@@ -13,7 +13,7 @@ jobs:
     if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v3
+      - uses: actions/github-script@v6
         with:
           script: |
             const {owner, repo} = context.repo;
@@ -23,7 +23,7 @@ jobs:
             // hack to get PR number - iterate through all PRs
             const issue_number = await (async () =>
             {
-              const pulls = await github.pulls.list({owner, repo});
+              const pulls = await github.rest.pulls.list({owner, repo});
               for await (const {data} of github.paginate.iterator(pulls))
               {
                 for (const pull of data)
@@ -39,7 +39,7 @@ jobs:
 
             core.info("Using pull request " + issue_number);
 
-            const {data: {artifacts}} = await github.actions.listWorkflowRunArtifacts({owner, repo, run_id});
+            const {data: {artifacts}} = await github.rest.actions.listWorkflowRunArtifacts({owner, repo, run_id});
             if (!artifacts.length)
                 return core.error("No artifacts found");
 
@@ -63,15 +63,15 @@ jobs:
             cli_part += "\n";
             body += gui_part + cli_part;
 
-            const {data: comments} = await github.issues.listComments({repo, owner, issue_number});
+            const {data: comments} = await github.rest.issues.listComments({repo, owner, issue_number});
             const doesCommentExist = comments.find((c) => c.user.login === "github-actions[bot]");
             if (doesCommentExist)
             {
                 core.info("Updating existing comment on PR " + issue_number);
-                await github.issues.updateComment({repo, owner, comment_id: doesCommentExist.id, body});
+                await github.rest.issues.updateComment({repo, owner, comment_id: doesCommentExist.id, body});
             }
             else
             {
                 core.info("Creating new comment on PR " + issue_number);
-                await github.issues.createComment({repo, owner, issue_number, body});
+                await github.rest.issues.createComment({repo, owner, issue_number, body});
             }

@@ -265,8 +265,15 @@ namespace UndertaleModTool
         }
 
         /// <summary>Saves the current tab content state.</summary>
-        public void SaveTabContentState()
+        /// <param name="overwrite">
+        /// Whether to overwrite the current tab content state if it's already set.
+        /// It's <see langword="false"/> by default.
+        /// </param>
+        public void SaveTabContentState(bool overwrite = false)
         {
+            if (!overwrite && LastContentState is not null)
+                return;
+
             ContentControl dataEditor = mainWindow.DataEditor;
             if (dataEditor is null
                 || dataEditor.Content is null
@@ -659,7 +666,7 @@ namespace UndertaleModTool
 
                             case GameObject gameObj:
                                 var room = roomEditor.DataContext as UndertaleRoom;
-                                if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
+                                if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2) || room.Flags.HasFlag(RoomEntryFlags.IsGM2024_13))
                                 {
                                     if (fromReferencesResults)
                                     {
@@ -678,7 +685,7 @@ namespace UndertaleModTool
 
                             case Tile tile:
                                 room = roomEditor.DataContext as UndertaleRoom;
-                                if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
+                                if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2) || room.Flags.HasFlag(RoomEntryFlags.IsGM2024_13))
                                 {
                                     if (fromReferencesResults)
                                     {
@@ -903,9 +910,9 @@ namespace UndertaleModTool
             {
                 #pragma warning disable CA1416
                 if (codeTabState.IsDecompiledOpen)
-                    MainWindow.CodeEditorDecompile = MainWindow.CodeEditorMode.Decompile;
+                    UndertaleCodeEditor.EditorTab = UndertaleCodeEditor.CodeEditorTab.Decompiled;
                 else
-                    MainWindow.CodeEditorDecompile = MainWindow.CodeEditorMode.DontDecompile;
+                    UndertaleCodeEditor.EditorTab = UndertaleCodeEditor.CodeEditorTab.Disassembly;
 
                 UndertaleCodeEditor.OverriddenDecompPos = codeTabState.DecompiledCodePosition;
                 UndertaleCodeEditor.OverriddenDisasmPos = codeTabState.DisassemblyCodePosition;

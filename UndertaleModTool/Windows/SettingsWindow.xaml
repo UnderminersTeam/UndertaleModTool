@@ -6,95 +6,174 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UndertaleModTool"
         mc:Ignorable="d"
-        Title="Settings" Height="Auto" Width="800" SizeToContent="Height" WindowStartupLocation="CenterOwner">
+        Title="Settings" Height="Auto" Width="800" SizeToContent="Height" WindowStartupLocation="CenterOwner" UseLayoutRounding="False">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Controls/TransparencyGridBrush.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid Margin="10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*" MinWidth="60"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+            <Grid.Resources>
+                <Style TargetType="{x:Type Label}">
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="Margin" Value="3"/>
+                </Style>
+                <Style TargetType="{x:Type TextBlock}">
+                    <Setter Property="Margin" Value="3"/>
+                </Style>
+                <Style TargetType="{x:Type local:TextBoxDark}">
+                    <Setter Property="Margin" Value="3"/>
+                </Style>
+                <Style TargetType="{x:Type CheckBox}">
+                    <Setter Property="Margin" Value="3"/>
+                </Style>
+                <Style TargetType="{x:Type local:ButtonDark}">
+                    <Setter Property="Margin" Value="3"/>
+                </Style>
+                <Style TargetType="{x:Type Separator}">
+                    <Setter Property="Margin" Value="10"/>
+                </Style>
+            </Grid.Resources>
+            <StackPanel Grid.IsSharedSizeScope="True">
+                <Grid ToolTip="Required only if you want to use the Studio runner rather than the .exe or run the game under debugger.">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="g1" Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="Game Maker: Studio 1.4 path" ToolTip="Required only if you want to use the Studio runner rather than the .exe or run the game under debugger."/>
-            <local:TextBoxDark Grid.Row="1" Grid.Column="1" Margin="3" Grid.ColumnSpan="3" Text="{Binding GameMakerStudioPath}"/>
+                    <Label>GameMaker: Studio 1.4 path:</Label>
+                    <local:TextBoxDark Grid.Column="1" Text="{Binding GameMakerStudioPath}"/>
+                </Grid>
 
-            <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="Game Maker: Studio 2 runtimes path" ToolTip="Required only if you want to run GMS2 games using the Studio runner rather than the .exe"/>
-            <local:TextBoxDark Grid.Row="2" Grid.Column="1" Margin="3" Grid.ColumnSpan="3" Text="{Binding GameMakerStudio2RuntimesPath}"/>
+                <Grid ToolTip="Required only if you want to run GMS2 games using the Studio runner rather than the .exe">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="g1" Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
 
-            <CheckBox Grid.Row="3" Grid.Column="0" Margin="3" Content="" IsChecked="{Binding AssetOrderSwappingEnabled}"/>
-            <TextBlock Grid.Row="3" Grid.Column="0" Margin="25 2 2 2" Text="Enable asset order swapping" ToolTip="Toggles dragging &amp; dropping assets in the asset tabs to different positions in the list. Disabled by default."/>
-            <CheckBox Grid.Row="3" Grid.Column="2" Margin="3" Content="" IsChecked="{Binding WarnOnClose}"/>
-            <TextBlock Grid.Row="3" Grid.Column="2" Margin="25 2 2 2" Text="Warn about saving before closing" ToolTip="Warn about saving before closing. Enabled by default."/>
+                    <Label>GameMaker Studio 2 runtimes path:</Label>
+                    <local:TextBoxDark Grid.Column="1" Text="{Binding GameMakerStudio2RuntimesPath}"/>
+                </Grid>
 
-            <CheckBox Grid.Row="4" Grid.Column="0" Margin="3" Content="" IsChecked="{Binding AutomaticFileAssociation}"/>
-            <TextBlock Grid.Row="4" Grid.Column="0" Margin="25 2 2 2" Text="Automatically associate .win files" ToolTip="Automatic file association. Enabled by default."/>
-            <CheckBox Grid.Row="4" Grid.Column="2" Margin="3" Content="" IsChecked="{Binding TempRunMessageShow}"/>
-            <TextBlock Grid.Row="4" Grid.Column="2" Margin="25 2 2 2" Text="Warn about temp running" ToolTip="Warn about temp running. Enabled by default."/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Grid.Column="0">
+                        <CheckBox IsChecked="{Binding AssetOrderSwappingEnabled}" Content="Enable asset order swapping" ToolTip="Toggles dragging &amp; dropping assets in the asset tabs to different positions in the list. Disabled by default."/>
+                        <CheckBox IsChecked="{Binding AutomaticFileAssociation}" Content="Automatically associate GameMaker data files" ToolTip="Automatic file association. Enabled by default."/>
+                        <CheckBox IsChecked="{Binding ShowDebuggerOption}" Content="Show &quot;Run game under GMS debugger&quot; file option" ToolTip="Whether to show the option in the &quot;File&quot; menu. Disabled by default."/>
+                        <CheckBox IsChecked="{Binding RememberWindowPlacements}" Content="Remember last window position and size"/>
+                    </StackPanel>
 
-            <CheckBox Grid.Row="5" Grid.Column="0" Margin="3" Content="" IsChecked="{Binding UseGMLCache}"/>
-            <TextBlock Grid.Row="5" Grid.Column="0" Margin="25 2 2 2" Text="Use decompiled code cache (experimental)" ToolTip="Used by some scripts (e.g. &quot;Search.csx&quot;) for acceleration. Disabled by default."/>
-            <CheckBox Grid.Row="5" Grid.Column="2" Margin="3" Content="" IsChecked="{Binding ShowDebuggerOption}"/>
-            <TextBlock Grid.Row="5" Grid.Column="2" Margin="25 2 2 2" Text="Show &quot;Run game under GMS debugger&quot; file option" ToolTip="Whether to show the option in the &quot;File&quot; menu. Disabled by default."/>
+                    <StackPanel Grid.Column="1">
+                        <CheckBox IsChecked="{Binding WarnOnClose}" Content="Warn about saving before closing" ToolTip="Warn about saving before closing. Enabled by default."/>
+                        <CheckBox IsChecked="{Binding TempRunMessageShow}" Content="Warn about temp running" ToolTip="Warn about temp running. Enabled by default."/>
+                        <CheckBox IsChecked="{Binding ShowNullEntriesInResourceTree}" Content="Show null entries in resource tree" ToolTip="Whether to show null entries in the resource tree, which in GM 2024.11+ games usually were unused assets removed by the compiler. Disabled by default due to limited support in the GUI."/>
+                    </StackPanel>
+                </Grid>
 
-            <Separator Grid.Row="6" Grid.ColumnSpan="4" Margin="10"/>
+                <Separator/>
 
-            <CheckBox Grid.Row="7" Grid.Column="0" Margin="3" Content="" IsChecked="{Binding EnableDarkMode}"/>
-            <TextBlock Grid.Row="7" Grid.Column="0" Margin="25 2 2 2" Text="Enable dark mode" ToolTip="Makes the program interface dark. Disabled by default."/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Grid.Column="0">
+                        <CheckBox IsChecked="{Binding EnableDarkMode}" Content="Enable dark mode" ToolTip="Makes the program interface dark. Disabled by default."/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Transparency grid colors:"/>
+                            <local:TextBoxDark Width="80" Text="{Binding TransparencyGridColor1}" />
+                            <local:TextBoxDark Width="80" Text="{Binding TransparencyGridColor2}" />
+                            <Canvas Margin="3" Width="16" Height="16" Background="{DynamicResource TransparencyGridBrushBrush}"></Canvas>
+                        </StackPanel>
+                    </StackPanel>
+                    
+                    <StackPanel Grid.Column="1">
+                        <local:ButtonDark Click="GMLSettingsButton_Click" Padding="8,2,8,2" HorizontalAlignment="Left" VerticalAlignment="Top">GML compiler/decompiler settings</local:ButtonDark>
+                    </StackPanel>
+                </Grid>
 
-            <Separator Grid.Row="8" Grid.ColumnSpan="4" Margin="10"/>
+                <Separator/>
 
-            <CheckBox Grid.Row="9" Grid.Column="0" Margin="3" VerticalAlignment="Center" Name="gridWidthCheckbox" Content="" IsChecked="{Binding GridWidthEnabled}"/>
-            <TextBlock Grid.Row="9" Grid.Column="0" Margin="25 2 2 2" VerticalAlignment="Center" Text="Global grid width" ToolTip="This option globally overrides the automatic assignment of a room's grid width based on the most used tile's width in that room."/>
-            <local:TextBoxDark Grid.Row="9" Grid.Column="1" Margin="3" IsEnabled="{Binding ElementName=gridWidthCheckbox, Path=IsChecked}" Text="{Binding GlobalGridWidth}"/>
+                <Grid>
+                    <Grid Grid.IsSharedSizeScope="True">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Grid.Column="0">
+                            <Grid ToolTip="This option globally overrides the automatic assignment of a room's grid width based on the most used tile's width in that room.">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition SharedSizeGroup="g2" Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <CheckBox Name="gridWidthCheckbox" IsChecked="{Binding GridWidthEnabled}" Content="Global grid width" />
+                                <local:TextBoxDark Grid.Column="1" IsEnabled="{Binding ElementName=gridWidthCheckbox, Path=IsChecked}" Text="{Binding GlobalGridWidth}"/>
+                            </Grid>
+                            <Grid ToolTip="This option globally overrides the automatic assignment of a room's grid height based on the most used tile's height in that room.">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition SharedSizeGroup="g2" Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <CheckBox Name="gridHeightCheckbox" IsChecked="{Binding GridHeightEnabled}" Content="Global grid height"/>
+                                <local:TextBoxDark  Grid.Column="1" IsEnabled="{Binding ElementName=gridHeightCheckbox, Path=IsChecked}" Text="{Binding GlobalGridHeight}"/>
+                            </Grid>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="1">
+                            <Grid ToolTip="This option globally overrides the automatic assignment of a room's grid thickness.">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition SharedSizeGroup="g2" Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <CheckBox Name="gridThicknessCheckBox" IsChecked="{Binding GridThicknessEnabled}" Content="Global grid thickness"/>
+                                <local:TextBoxDark Grid.Column="1" IsEnabled="{Binding ElementName=gridThicknessCheckBox, Path=IsChecked}" Text="{Binding GlobalGridThickness}"/>
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
 
-            <CheckBox Grid.Row="10" Grid.Column="0" Margin="3" VerticalAlignment="Center" Name="gridHeightCheckbox" Content="" IsChecked="{Binding GridHeightEnabled}"/>
-            <TextBlock Grid.Row="10" Grid.Column="0" Margin="25 2 2 2"  VerticalAlignment="Center" Text="Global grid height" ToolTip="This option globally overrides the automatic assignment of a room's grid height based on the most used tile's height in that room."/>
-            <local:TextBoxDark Grid.Row="10" Grid.Column="1" Margin="3" IsEnabled="{Binding ElementName=gridHeightCheckbox, Path=IsChecked}" Text="{Binding GlobalGridHeight}"/>
+                <Separator/>
 
-            <CheckBox Grid.Row="9" Grid.Column="2" Margin="3" VerticalAlignment="Center" Name="gridThicknessCheckBox" Content="" IsChecked="{Binding GridThicknessEnabled}"/>
-            <TextBlock Grid.Row="9" Grid.Column="2" Margin="25 2 2 2" VerticalAlignment="Center" Text="Global grid thickness" ToolTip="This option globally overrides the automatic assignment of a room's grid thickness."/>
-            <local:TextBoxDark Grid.Row="9" Grid.Column="3" Margin="3" IsEnabled="{Binding ElementName=gridThicknessCheckBox, Path=IsChecked}" Text="{Binding GlobalGridThickness}"/>
+                <TextBlock TextWrapping="Wrap" Foreground="Red" FontWeight="Bold" Text="Warning: the following options are currently experimental. Usage of any options below is at your own risk, and they may not be compatible in the future."/>
 
-            <Separator Grid.Row="13" Grid.ColumnSpan="4" Margin="10"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Grid.Column="0">
+                        <CheckBox IsChecked="{Binding ProfileModeEnabled}" Content="Enable profile mode" ToolTip="Toggles the 'decompile once and compile many' profile mode. Enabled by default. May need to be disabled for certain operations."/>
+                        <CheckBox IsChecked="{Binding DeleteOldProfileOnSave}" Content="Delete old profile on saving" ToolTip="Deletes the profile obsoleted on saving. Saves on file space at the expense of losing code information for variants. Enabled by default."/>
+                    </StackPanel>
+                    
+                    <StackPanel Grid.Column="1">
+                        <CheckBox IsChecked="{Binding ProfileMessageShown}" Content="Profile mode message shown" ToolTip="On first load, this will show you the profile mode loaded message. If this somehow breaks, you can manually toggle it here."/>
+                    </StackPanel>
+                </Grid>
 
-            <TextBlock Grid.Row="14" Grid.Column="0" Grid.ColumnSpan="4" Margin="3" TextWrapping="Wrap" Foreground="Red" FontWeight="Bold" Text="Warning: the following options are currently experimental, as the profile system is a work in progress. Usage of the system is at your own risk, and though it is relatively stable, it may not be compatible in the future."/>
+                <Separator/>
 
-            <CheckBox Grid.Row="15" Grid.Column="0" Margin="3" VerticalAlignment="Center" Content="" IsChecked="{Binding ProfileModeEnabled}"/>
-            <TextBlock Grid.Row="15" Grid.Column="0" Margin="25 2 2 2" VerticalAlignment="Center" Text="Enable profile mode" ToolTip="Toggles the 'decompile once and compile many' profile mode. Enabled by default. May need to be disabled for certain operations."/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-            <CheckBox Grid.Row="15" Grid.Column="2" Margin="3" VerticalAlignment="Center" Content="" IsChecked="{Binding ProfileMessageShown}"/>
-            <TextBlock Grid.Row="15" Grid.Column="2" Margin="25 2 2 2" VerticalAlignment="Center" Text="Profile mode message shown" ToolTip="On first load, this will show you the profile mode loaded message. If this somehow breaks, you can manually toggle it here."/>
-
-            <CheckBox Grid.Row="17" Grid.Column="0" Margin="3" VerticalAlignment="Center" Content="" IsChecked="{Binding DeleteOldProfileOnSave}"/>
-            <TextBlock Grid.Row="17" Grid.Column="0" Margin="25 2 2 2" VerticalAlignment="Center" Text="Delete old profile on saving" ToolTip="Deletes the profile obsoleted on saving. Saves on file space at the expense of losing code information for variants. Enabled by default."/>
-
-            <Separator Grid.Row="18" Grid.ColumnSpan="4" Margin="10"/>
-            <local:ButtonDark Grid.Row="19" Grid.Column="0" Grid.ColumnSpan="1" Margin="5" Click="AppDataButton_Click">Open application data folder</local:ButtonDark>
-            <local:ButtonDark Grid.Row="19" Grid.Column="2" Grid.ColumnSpan="2" Margin="5" Click="UpdateAppButton_Click" x:Name="UpdateAppButton" HorizontalAlignment="Right" Width="223">Update app to latest commit</local:ButtonDark>
+                    <local:ButtonDark Grid.Column="0" Click="AppDataButton_Click" Padding="8,2,8,2" HorizontalAlignment="Left">Open application data folder</local:ButtonDark>
+                    <local:ButtonDark Grid.Column="1" Click="UpdateAppButton_Click" Padding="8,2,8,2" HorizontalAlignment="Right" x:Name="UpdateAppButton" Visibility="{Binding UpdaterButtonVisibility}">Update app to latest commit</local:ButtonDark>
+                </Grid>
+            </StackPanel>
         </Grid>
     </ScrollViewer>
 </Window>

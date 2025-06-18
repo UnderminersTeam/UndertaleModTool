@@ -1,20 +1,10 @@
 ﻿using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 
@@ -51,15 +41,18 @@ namespace UndertaleModTool
                         Directory.CreateDirectory(path);
 
                         // textures
-                        foreach (var tex in sprite.SpineTextures.Select((tex, id) => new { id,tex }))
+                        if (sprite.SpineHasTextureData)
                         {
-                            try
+                            foreach (var tex in sprite.SpineTextures.Select((tex, id) => new { id, tex }))
                             {
-                                File.WriteAllBytes(Path.Combine(path, tex.id + ext), tex.tex.TexBlob);
-                            }
-                            catch (Exception ex)
-                            {
-                                mainWindow.ShowError("Failed to export file: " + ex.Message, "Failed to export file");
+                                try
+                                {
+                                    File.WriteAllBytes(Path.Combine(path, tex.id + ext), tex.tex.TexBlob);
+                                } 
+                                catch (Exception ex) 
+                                {
+                                    mainWindow.ShowError("Failed to export file: " + ex.Message, "Failed to export file");
+                                }
                             }
                         }
 
@@ -88,19 +81,17 @@ namespace UndertaleModTool
             if (sprite.IsSpineSprite)
             {
                 ExportAllSpine(dlg, sprite);
-                return;
+                if (sprite.SpineHasTextureData)
+                    return;
             }
-
-            TextureWorker worker = new TextureWorker();
 
             if (dlg.ShowDialog() == true)
             {
                 try
                 {
-                    bool includePadding = false;
-                    if (mainWindow.ShowQuestion("Include padding?") == MessageBoxResult.Yes)
-                        includePadding = true;
+                    bool includePadding = (mainWindow.ShowQuestion("Include padding?") == MessageBoxResult.Yes);
 
+                    using TextureWorker worker = new();
                     if (sprite.Textures.Count > 1)
                     {
                         string dir = Path.GetDirectoryName(dlg.FileName);
@@ -142,13 +133,11 @@ namespace UndertaleModTool
                     mainWindow.ShowError("Failed to export: " + ex.Message, "Failed to export sprite");
                 }
             }
-
-            worker.Cleanup();
         }
 
         private void MaskList_AddingNewItem(object sender, AddingNewItemEventArgs e)
         {
-            e.NewItem = (this.DataContext as UndertaleSprite).NewMaskEntry();
+            e.NewItem = (this.DataContext as UndertaleSprite).NewMaskEntry(mainWindow.Data);
         }
 
         private void MaskImport_Click(object sender, RoutedEventArgs e)
@@ -164,10 +153,10 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    System.Drawing.Image img = System.Drawing.Image.FromFile(dlg.FileName);
-                    if ((sprite.Width != (uint)img.Width) || (sprite.Height != (uint)img.Height))
-                        throw new System.Exception(dlg.FileName + " is not the proper size to be imported! Please correct this before importing! The proper dimensions are width: " + sprite.Width.ToString() + " px, height: " + sprite.Height.ToString() + " px.");
-                    target.Data = TextureWorker.ReadMaskData(dlg.FileName);
+                    (int maskWidth, int maskHeight) = sprite.CalculateMaskDimensions(mainWindow.Data);
+                    target.Data = TextureWorker.ReadMaskData(dlg.FileName, maskWidth, maskHeight);
+                    target.Width = maskWidth;
+                    target.Height = maskHeight;
                 }
                 catch (Exception ex)
                 {
@@ -190,7 +179,8 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    TextureWorker.ExportCollisionMaskPNG(sprite, target, dlg.FileName);
+                    (int maskWidth, int maskHeight) = sprite.CalculateMaskDimensions(mainWindow.Data);
+                    TextureWorker.ExportCollisionMaskPNG(target, dlg.FileName, maskWidth, maskHeight);
                 }
                 catch (Exception ex)
                 {
@@ -219,6 +209,11 @@ namespace UndertaleModTool
         {
             if (DataContext is UndertaleSprite sprite && (sender as FrameworkElement).DataContext is UndertaleSprite.TextureEntry entry)
                 sprite.Textures.Remove(entry);
+        }
+        private void RemoveMask_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is UndertaleSprite sprite && (sender as FrameworkElement).DataContext is UndertaleSprite.MaskEntry entry)
+                sprite.CollisionMasks.Remove(entry);
         }
     }
 }

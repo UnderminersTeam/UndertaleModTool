@@ -4,12 +4,15 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
+using Underanalyzer.Decompiler;
 using UndertaleModLib;
+using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 using UndertaleModLib.Scripting;
@@ -53,9 +56,6 @@ public partial class Program : IScriptInterface
     public string ScriptErrorType { get; set; }
 
     /// <inheritdoc/>
-    public bool GMLCacheEnabled => false; //TODO: not implemented yet, due to no code editing
-
-    /// <inheritdoc/>
     public bool IsAppClosed { get; set; }
 
     #endregion
@@ -70,11 +70,8 @@ public partial class Program : IScriptInterface
     }
 
     /// <inheritdoc/>
-    public async Task<bool> MakeNewDataFile()
+    public bool MakeNewDataFile()
     {
-        // This call has no use except to suppress the "method is not doing anything async" warning
-        await Task.Delay(1);
-
         Data = UndertaleData.CreateNew();
         Console.WriteLine("New file created.");
         return true;
@@ -84,6 +81,13 @@ public partial class Program : IScriptInterface
     public void ScriptMessage(string message)
     {
         Console.WriteLine(message);
+        if (IsInteractive) Pause();
+    }
+
+    /// <inheritdoc/>
+    public void ScriptWarning(string message)
+    {
+        Console.WriteLine($"WARNING: {message}");
         if (IsInteractive) Pause();
     }
 
@@ -285,29 +289,6 @@ public partial class Program : IScriptInterface
     }
 
     /// <inheritdoc/>
-    //TODO: revisit this once CLI gets code editor functionality
-    public void ReapplyProfileCode()
-    {
-        //CLI does not have any code editing tools (yet), nor a profile Mode thus since is completely useless
-    }
-
-    /// <inheritdoc/>
-    public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool isSaving = false)
-    {
-        await Task.Delay(1); //dummy await
-
-        //TODO: not implemented yet, due to no code editing / profile mode.
-
-        return false;
-    }
-
-    /// <inheritdoc/>
-    public void NukeProfileGML(string codeName)
-    {
-        //CLI does not have any code editing tools (yet), nor a profile Mode thus since is completely useless
-    }
-
-    /// <inheritdoc/>
     public void SetProgressBar()
     {
         //no progress bar that can be setup to show
@@ -385,11 +366,17 @@ public partial class Program : IScriptInterface
         DirectoryInfo directoryInfo;
         do
         {
-            Console.WriteLine("Please type a path (or drag and drop) to a valid directory:");
+            Console.WriteLine("Please enter a path (or drag and drop) to a valid directory:");
             Console.Write("Path: ");
             path = RemoveQuotes(Console.ReadLine());
+            if (string.IsNullOrEmpty(path))
+            {
+                return null;
+            }
             directoryInfo = new DirectoryInfo(path);
-        } while (!directoryInfo.Exists);
+        }
+        while (!directoryInfo.Exists);
+
         return path;
     }
 
@@ -397,33 +384,63 @@ public partial class Program : IScriptInterface
     public string PromptLoadFile(string defaultExt, string filter)
     {
         string path;
-        FileInfo directoryInfo;
+        FileInfo fileInfo;
         do
         {
-            Console.WriteLine("Please type a path (or drag and drop) to a valid file:");
+            Console.WriteLine("Please enter a path (or drag and drop) to a valid file:");
             Console.Write("Path: ");
             path = RemoveQuotes(Console.ReadLine());
-            directoryInfo = new FileInfo(path);
-        } while (directoryInfo.Exists);
+            if (string.IsNullOrEmpty(path))
+            {
+                return null;
+            }
+            fileInfo = new FileInfo(path);
+        }
+        while (fileInfo.Exists);
+
         return path;
     }
 
     /// <inheritdoc/>
-    public string GetDecompiledText(string codeName, GlobalDecompileContext context = null)
+    public string PromptSaveFile(string defaultExt, string filter)
     {
-        return GetDecompiledText(Data.Code.ByName(codeName), context);
+        string path;
+        do
+        {
+            Console.WriteLine("Please enter a path (or drag and drop) to save the file:");
+            Console.Write("Path: ");
+            path = RemoveQuotes(Console.ReadLine());
+
+            if (Directory.Exists(path))
+            {
+                Console.WriteLine("Error: Directory exists at that path.");
+                path = null; // Ensuring that the loop will work correctly
+                continue;
+            }
+        } 
+        while (string.IsNullOrWhiteSpace(path));
+
+        return path;
     }
 
     /// <inheritdoc/>
-    public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null)
+    public string GetDecompiledText(string codeName, GlobalDecompileContext context = null, IDecompileSettings settings = null)
+    {
+        return GetDecompiledText(Data.Code.ByName(codeName), context, settings);
+    }
+
+    /// <inheritdoc/>
+    public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null, IDecompileSettings settings = null)
     {
         if (code.ParentEntry is not null)
             return $"// This code entry is a reference to an anonymous function within \"{code.ParentEntry.Name.Content}\", decompile that instead.";
 
-        GlobalDecompileContext decompileContext = context is null ? new(Data, false) : context;
+        GlobalDecompileContext decompileContext = context is null ? new(Data) : context;
         try
         {
-            return code != null ? Decompiler.Decompile(code, decompileContext) : "";
+            return code != null 
+                ? new DecompileContext(decompileContext, code, settings ?? Data.ToolInfo.DecompilerSettings).DecompileToString() 
+                : "";
         }
         catch (Exception e)
         {
@@ -445,7 +462,7 @@ public partial class Program : IScriptInterface
 
         try
         {
-            return code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : "";
+            return code != null ? code.Disassemble(Data.Variables, Data.CodeLocals?.For(code), Data.CodeLocals is null) : "";
         }
         catch (Exception e)
         {
@@ -521,13 +538,13 @@ public partial class Program : IScriptInterface
     }
 
     /// <inheritdoc/>
-    public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
+    public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int lineNum, string codeLine)>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
     {
         await ClickableSearchOutput(title, query, resultsCount, resultsDict.ToDictionary(pair => pair.Key, pair => pair.Value), editorDecompile, failedList);
     }
 
     /// <inheritdoc/>
-    public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
+    public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<(int lineNum, string codeLine)>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
     {
         await Task.Delay(1); //dummy await
 
@@ -555,17 +572,17 @@ public partial class Program : IScriptInterface
         Console.WriteLine();
 
         // Print in a pattern of:
-        // results in code_file
-        // line3: code
-        // line6: code
+        // Results in code_file
+        // Line 3: line of code
+        // Line 6: line of code
         //
-        // results in a codefile2
-        //etc.
+        // Results in code_file_1
+        // etc.
         foreach (var dictEntry in resultsDict)
         {
             Console.WriteLine($"Results in {dictEntry.Key}:");
             foreach (var resultEntry in dictEntry.Value)
-                Console.WriteLine(resultEntry);
+                Console.WriteLine($"Line {resultEntry.lineNum}: {resultEntry.codeLine}");
 
             Console.WriteLine();
         }
@@ -586,7 +603,7 @@ public partial class Program : IScriptInterface
         {
             CancellationTokenSource source = new CancellationTokenSource(100);
             CancellationToken token = source.Token;
-            CSharpScript.EvaluateAsync(File.ReadAllText(path), CliScriptOptions, this, typeof(IScriptInterface), token);
+            CSharpScript.EvaluateAsync(File.ReadAllText(path, Encoding.UTF8), CliScriptOptions.WithFilePath(path).WithFileEncoding(Encoding.UTF8), this, typeof(IScriptInterface), token);
         }
         catch (CompilationErrorException exc)
         {
@@ -605,395 +622,6 @@ public partial class Program : IScriptInterface
             return true;
         }
         return true;
-    }
-
-    /// <inheritdoc/>
-    public void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool checkDecompiler = false)
-    {
-        ImportCode(codeName, gmlCode, true, doParse, true, checkDecompiler);
-    }
-
-    /// <inheritdoc/>
-    public void ImportASMString(string codeName, string gmlCode, bool doParse = true, bool destroyASM = true, bool checkDecompiler = false)
-    {
-        ImportCode(codeName, gmlCode, false, doParse, destroyASM, checkDecompiler);
-    }
-
-    /// <inheritdoc/>
-    public void ImportGMLFile(string fileName, bool doParse = true, bool checkDecompiler = false, bool throwOnError = false)
-    {
-        ImportCodeFromFile(fileName, true, doParse, true, checkDecompiler, throwOnError);
-    }
-
-    /// <inheritdoc/>
-    public void ImportASMFile(string fileName, bool doParse = true, bool destroyASM = true, bool checkDecompiler = false, bool throwOnError = false)
-    {
-        ImportCodeFromFile(fileName, false, doParse, destroyASM, checkDecompiler, throwOnError);
-    }
-
-    /// <inheritdoc/>
-    public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
-    {
-        UndertaleCode code = Data.Code.ByName(codeName);
-        if (code is null)
-            throw new ScriptException($"No code named \"{codeName}\" was found!");
-
-        ReplaceTextInGML(code, keyword, replacement, caseSensitive, isRegex, context);
-    }
-
-    /// <inheritdoc/>
-    public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
-    {
-        if (code == null) throw new ArgumentNullException(nameof(code));
-        if (code.ParentEntry is not null)
-            return;
-
-        EnsureDataLoaded();
-
-        string passBack = "";
-        GlobalDecompileContext decompileContext = context is null ? new(Data, false) : context;
-
-        if (!Data.ToolInfo.ProfileMode)
-        {
-            try
-            {
-                passBack = GetPassBack(Decompiler.Decompile(code, decompileContext), keyword, replacement, caseSensitive, isRegex);
-                code.ReplaceGML(passBack, Data);
-            }
-            catch (Exception exc)
-            {
-                throw new Exception("Error during GML code replacement:\n" + exc);
-            }
-        }
-        else if (Data.ToolInfo.ProfileMode)
-        {
-            try
-            {
-                try
-                {
-                    if (context is null)
-                        passBack = GetPassBack(Decompiler.Decompile(code, new GlobalDecompileContext(Data, false)), keyword, replacement, caseSensitive, isRegex);
-                    else
-                        passBack = GetPassBack(Decompiler.Decompile(code, context), keyword, replacement, caseSensitive, isRegex);
-                    code.ReplaceGML(passBack, Data);
-                }
-                catch (Exception exc)
-                {
-                    throw new Exception("Error during GML code replacement:\n" + exc);
-                }
-            }
-            catch (Exception exc)
-            {
-                throw new Exception("Error during writing of GML code to profile:\n" + exc + "\n\nCode:\n\n" + passBack);
-            }
-        }
-    }
-
-    #region Some dangerous functions I don't know what they do
-
-    //TODO: ask what these do and implement them.
-    /// <inheritdoc/>
-    public void ReplaceTempWithMain(bool imAnExpertBtw = false)
-    {
-        throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
-    }
-
-    /// <inheritdoc/>
-    public void ReplaceMainWithTemp(bool imAnExpertBtw = false)
-    {
-        throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
-    }
-
-    /// <inheritdoc/>
-    public void ReplaceTempWithCorrections(bool imAnExpertBtw = false)
-    {
-        throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
-    }
-
-    /// <inheritdoc/>
-    public void ReplaceCorrectionsWithTemp(bool imAnExpertBtw = false)
-    {
-        throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
-    }
-
-    /// <inheritdoc/>
-    public void UpdateCorrections(bool imAnExpertBtw = false)
-    {
-        throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
-    }
-    #endregion
-
-    #endregion
-
-    /// <inheritdoc/>
-    public bool DummyBool()
-    {
-        return false;
-    }
-
-    /// <inheritdoc/>
-    public void DummyVoid()
-    {
-        // i want hugs so bad :(
-    }
-
-    /// <inheritdoc/>
-    public string DummyString()
-    {
-        return "";
-    }
-
-    // Copy-pasted from GUI. TODO: Should probably get shared at one point, but there are some GUI only attributes accessed there and I don't want to touch the methods.
-    #region Helper functions for Code replacing
-
-    void ImportCode(string codeName, string gmlCode, bool isGML = true, bool doParse = true, bool destroyASM = true, bool checkDecompiler = false, bool throwOnError = false)
-    {
-        bool skipPortions = false;
-        UndertaleCode code = Data.Code.ByName(codeName);
-        if (code is null)
-        {
-            code = new UndertaleCode();
-            code.Name = Data.Strings.MakeString(codeName);
-            Data.Code.Add(code);
-        }
-        else if (code.ParentEntry is not null)
-            return;
-
-        if (Data?.GeneralInfo.BytecodeVersion > 14 && Data.CodeLocals.ByName(codeName) == null)
-        {
-            UndertaleCodeLocals locals = new UndertaleCodeLocals();
-            locals.Name = code.Name;
-
-            UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
-            argsLocal.Name = Data.Strings.MakeString("arguments");
-            argsLocal.Index = 0;
-
-            locals.Locals.Add(argsLocal);
-
-            code.LocalsCount = 1;
-            Data.CodeLocals.Add(locals);
-        }
-        if (doParse)
-        {
-            // This portion links code.
-            if (codeName.StartsWith("gml_Script"))
-            {
-                // Add code to scripts section.
-                if (Data.Scripts.ByName(codeName.Substring(11)) == null)
-                {
-                    UndertaleScript scr = new UndertaleScript();
-                    scr.Name = Data.Strings.MakeString(codeName.Substring(11));
-                    scr.Code = code;
-                    Data.Scripts.Add(scr);
-                }
-                else
-                {
-                    UndertaleScript scr = Data.Scripts.ByName(codeName.Substring(11));
-                    scr.Code = code;
-                }
-            }
-            else if (codeName.StartsWith("gml_GlobalScript"))
-            {
-                // Add code to global init section.
-                UndertaleGlobalInit initEntry = null;
-                // This doesn't work, have to do it the hard way: UndertaleGlobalInit init_entry = Data.GlobalInitScripts.ByName(scr_dup_code_name_con);
-                foreach (UndertaleGlobalInit globalInit in Data.GlobalInitScripts)
-                {
-                    if (globalInit.Code.Name.Content == codeName)
-                    {
-                        initEntry = globalInit;
-                        break;
-                    }
-                }
-                if (initEntry == null)
-                {
-                    UndertaleGlobalInit newInit = new UndertaleGlobalInit();
-                    newInit.Code = code;
-                    Data.GlobalInitScripts.Add(newInit);
-                }
-                else
-                {
-                    UndertaleGlobalInit NewInit = initEntry;
-                    NewInit.Code = code;
-                }
-            }
-            else if (codeName.StartsWith("gml_Object"))
-            {
-                string afterPrefix = codeName.Substring(11);
-                int underCount = 0;
-                string methodNumberStr = "", methodName = "", objName = "";
-                for (int i = afterPrefix.Length - 1; i >= 0; i--)
-                {
-                    if (afterPrefix[i] == '_')
-                    {
-                        underCount++;
-                        if (underCount == 1)
-                        {
-                            methodNumberStr = afterPrefix.Substring(i + 1);
-                        }
-                        else if (underCount == 2)
-                        {
-                            objName = afterPrefix.Substring(0, i);
-                            methodName = afterPrefix.Substring(i + 1, afterPrefix.Length - objName.Length - methodNumberStr.Length - 2);
-                            break;
-                        }
-                    }
-                }
-                int methodNumber = 0;
-                try
-                {
-                    methodNumber = int.Parse(methodNumberStr);
-                    if (methodName == "Collision" && (methodNumber >= Data.GameObjects.Count || methodNumber < 0))
-                    {
-                        bool doNewObj = ScriptQuestion("Object of ID " + methodNumber.ToString() + " was not found.\nAdd new object?");
-                        if (doNewObj)
-                        {
-                            UndertaleGameObject gameObj = new UndertaleGameObject();
-                            gameObj.Name = Data.Strings.MakeString(SimpleTextInput("Enter object name", "Enter object name", "This is a single text line input box test.", false));
-                            Data.GameObjects.Add(gameObj);
-                        }
-                        else
-                        {
-                            // It *needs* to have a valid value, make the user specify one.
-                            List<uint> possibleValues = new List<uint>();
-                            possibleValues.Add(uint.MaxValue);
-                            methodNumber = (int)ReduceCollisionValue(possibleValues);
-                        }
-                    }
-                }
-                catch
-                {
-                    if (afterPrefix.LastIndexOf("_Collision_") != -1)
-                    {
-                        string s2 = "_Collision_";
-                        objName = afterPrefix.Substring(0, (afterPrefix.LastIndexOf("_Collision_")));
-                        methodNumberStr = afterPrefix.Substring(afterPrefix.LastIndexOf("_Collision_") + s2.Length, afterPrefix.Length - (afterPrefix.LastIndexOf("_Collision_") + s2.Length));
-                        methodName = "Collision";
-                        // GMS 2.3+ use the object name for the one colliding, which is rather useful.
-                        if (Data.IsVersionAtLeast(2, 3))
-                        {
-                            if (Data.GameObjects.ByName(methodNumberStr) != null)
-                            {
-                                for (var i = 0; i < Data.GameObjects.Count; i++)
-                                {
-                                    if (Data.GameObjects[i].Name.Content == methodNumberStr)
-                                    {
-                                        methodNumber = i;
-                                        break;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                bool doNewObj = ScriptQuestion("Object " + objName + " was not found.\nAdd new object called " + objName + "?");
-                                if (doNewObj)
-                                {
-                                    UndertaleGameObject gameObj = new UndertaleGameObject();
-                                    gameObj.Name = Data.Strings.MakeString(objName);
-                                    Data.GameObjects.Add(gameObj);
-                                }
-                            }
-                            if (Data.GameObjects.ByName(methodNumberStr) != null)
-                            {
-                                // It *needs* to have a valid value, make the user specify one, silly.
-                                List<uint> possibleValues = new List<uint>();
-                                possibleValues.Add(uint.MaxValue);
-                                ReassignGUIDs(methodNumberStr, ReduceCollisionValue(possibleValues));
-                            }
-                        }
-                        else
-                        {
-                            // Let's try to get this going
-                            methodNumber = (int)ReduceCollisionValue(GetCollisionValueFromCodeNameGUID(codeName));
-                            ReassignGUIDs(methodNumberStr, ReduceCollisionValue(GetCollisionValueFromCodeNameGUID(codeName)));
-                        }
-                    }
-                }
-                UndertaleGameObject obj = Data.GameObjects.ByName(objName);
-                if (obj == null)
-                {
-                    bool doNewObj = ScriptQuestion("Object " + objName + " was not found.\nAdd new object called " + objName + "?");
-                    if (doNewObj)
-                    {
-                        UndertaleGameObject gameObj = new UndertaleGameObject();
-                        gameObj.Name = Data.Strings.MakeString(objName);
-                        Data.GameObjects.Add(gameObj);
-                    }
-                    else
-                    {
-                        skipPortions = true;
-                    }
-                }
-
-                if (!(skipPortions))
-                {
-                    obj = Data.GameObjects.ByName(objName);
-                    int eventIdx = Convert.ToInt32(Enum.Parse(typeof(EventType), methodName));
-                    bool duplicate = false;
-                    try
-                    {
-                        foreach (UndertaleGameObject.Event evnt in obj.Events[eventIdx])
-                        {
-                            foreach (UndertaleGameObject.EventAction action in evnt.Actions)
-                            {
-                                if (action.CodeId?.Name?.Content == codeName)
-                                    duplicate = true;
-                            }
-                        }
-                    }
-                    catch
-                    {
-                        // Something went wrong, but probably because it's trying to check something non-existent
-                        // Just keep going
-                    }
-                    if (duplicate == false)
-                    {
-                        UndertalePointerList<UndertaleGameObject.Event> eventList = obj.Events[eventIdx];
-                        UndertaleGameObject.EventAction action = new UndertaleGameObject.EventAction();
-                        UndertaleGameObject.Event evnt = new UndertaleGameObject.Event();
-
-                        action.ActionName = code.Name;
-                        action.CodeId = code;
-                        evnt.EventSubtype = (uint)methodNumber;
-                        evnt.Actions.Add(action);
-                        eventList.Add(evnt);
-                    }
-                }
-            }
-        }
-        SafeImport(codeName, gmlCode, isGML, destroyASM, checkDecompiler, throwOnError);
-    }
-
-    void ImportCodeFromFile(string file, bool isGML = true, bool doParse = true, bool destroyASM = true, bool checkDecompiler = false, bool throwOnError = false)
-    {
-        try
-        {
-            if (!Path.GetFileName(file).ToLower().EndsWith(isGML ? ".gml" : ".asm"))
-                return;
-            if (Path.GetFileName(file).ToLower().EndsWith("cleanup_0" + (isGML ? ".gml" : ".asm")) && (Data.GeneralInfo.Major < 2))
-                return;
-            if (Path.GetFileName(file).ToLower().EndsWith("precreate_0" + (isGML ? ".gml" : ".asm")) && (Data.GeneralInfo.Major < 2))
-                return;
-            string codeName = Path.GetFileNameWithoutExtension(file);
-            string gmlCode = File.ReadAllText(file);
-            ImportCode(codeName, gmlCode, isGML, doParse, destroyASM, checkDecompiler, throwOnError);
-        }
-        catch (ScriptException exc) when (throwOnError && exc.Message == "*codeImportError*")
-        {
-            throw new ScriptException("Code files importation stopped because of error(s).");
-        }
-        catch (Exception exc)
-        {
-            if (!checkDecompiler)
-            {
-                Console.Error.WriteLine("Import" + (isGML ? "GML" : "ASM") + "File error! Send the following error to Grossley#2869 (Discord) and make an issue on Github:\n\n" + exc);
-
-                if (throwOnError)
-                    throw new ScriptException("Code files importation stopped because of error(s).");
-            }
-            else
-                throw new Exception("Error!");
-        }
     }
 
     public void ReassignGUIDs(string guid, uint objectIndex)
@@ -1160,62 +788,6 @@ public partial class Program : IScriptInterface
         }
         else
             return "Invalid";
-    }
-
-    void SafeImport(string codeName, string gmlCode, bool isGML, bool destroyASM = true, bool checkDecompiler = false, bool throwOnError = false)
-    {
-        UndertaleCode code = Data.Code.ByName(codeName);
-        if (code?.ParentEntry is not null)
-            return;
-
-        try
-        {
-            if (isGML)
-            {
-                code.ReplaceGML(gmlCode, Data);
-            }
-            else
-            {
-                var instructions = Assembler.Assemble(gmlCode, Data);
-                code.Replace(instructions);
-                if (destroyASM)
-                    NukeProfileGML(codeName);
-            }
-        }
-        catch (Exception ex)
-        {
-            if (!checkDecompiler)
-            {
-                string errorText = $"Code import error at {(isGML ? "GML" : "ASM")} code \"{codeName}\":\n\n{ex.Message}";
-                Console.Error.WriteLine(errorText);
-
-                if (throwOnError)
-                    throw new ScriptException("*codeImportError*");
-            }
-            else
-            {
-                code.ReplaceGML("", Data);
-            }
-        }
-    }
-
-    public string GetPassBack(string decompiledText, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false)
-    {
-        keyword = keyword.Replace("\r\n", "\n");
-        replacement = replacement.Replace("\r\n", "\n");
-        string passBack;
-        if (!isRegex)
-        {
-            if (caseSensitive)
-                passBack = decompiledText.Replace(keyword, replacement);
-            else
-                passBack = Regex.Replace(decompiledText, Regex.Escape(keyword), replacement.Replace("$", "$$"), RegexOptions.IgnoreCase);
-        }
-        else
-        {
-            passBack = Regex.Replace(decompiledText, keyword, replacement, caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase);
-        }
-        return passBack;
     }
 
     #endregion

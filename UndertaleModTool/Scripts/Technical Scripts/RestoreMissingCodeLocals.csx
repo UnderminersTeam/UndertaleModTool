@@ -1,11 +1,14 @@
-if (Data?.GeneralInfo.BytecodeVersion < 15)
+EnsureDataLoaded();
+if (Data.CodeLocals is null)
 {
-    ScriptMessage("Cannot run on this game, bytecode >= 15 required!");
+    ScriptMessage("Cannot run on this game, bytecode >= 15 and GM < 2024.8 required!");
     return;
 }
 int newCount = 0;
 foreach (UndertaleCode code in Data.Code)
 {
+    if (code is null)
+        continue;
     if (Data.CodeLocals.ByName(code.Name.Content) == null)
     {
         UndertaleCodeLocals locals = new UndertaleCodeLocals();

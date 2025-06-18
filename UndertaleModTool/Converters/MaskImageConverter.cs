@@ -20,12 +20,12 @@ namespace UndertaleModTool
                 return null;
             }
             
-            uint width = (uint)values[0];
-            uint height = (uint)values[1];
+            int width = (int)values[0];
+            int height = (int)values[1];
             byte[] data = (byte[])values[2];
-            if (data == null || data.Length != (width + 7) / 8 * height || width == 0 || height == 0)
+            if (data == null || data.Length != (width + 7) / 8 * height || width <= 0 || height <= 0)
                 return null;
-            return BitmapSource.Create((int)width, (int)height, 96, 96, PixelFormats.BlackWhite, null, data, (int)((width + 7) / 8));
+            return BitmapSource.Create(width, height, 96, 96, PixelFormats.BlackWhite, null, data, ((width + 7) / 8));
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, System.Globalization.CultureInfo culture)

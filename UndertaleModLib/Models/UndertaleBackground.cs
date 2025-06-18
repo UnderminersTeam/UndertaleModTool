@@ -7,7 +7,7 @@ namespace UndertaleModLib.Models;
 /// <summary>
 /// A background or tileset entry in a data file.
 /// </summary>
-/// <remarks>For Game Maker Studio: 2, this will only ever be a tileset. For Game Maker Studio: 1, this is usually a background,
+/// <remarks>For GameMaker Studio 2, this will only ever be a tileset. For GameMaker: Studio 1, this is usually a background,
 /// but is sometimes repurposed as use for a tileset as well.</remarks>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleBackground : UndertaleNamedResource, IDisposable
@@ -67,27 +67,27 @@ public class UndertaleBackground : UndertaleNamedResource, IDisposable
 
 
     /// <summary>
-    /// TODO: Functionality currently unknown.
+    /// TODO: Functionality currently unknown. Game Maker Studio 2 only.
     /// </summary>
     public uint GMS2UnknownAlways2 { get; set; } = 2;
 
     /// <summary>
-    /// The tile width of the tileset. Game Maker Studio 2 only.
+    /// The width of a tile in this tileset. Game Maker Studio 2 only.
     /// </summary>
     public uint GMS2TileWidth { get; set; } = 32;
 
     /// <summary>
-    /// The tile height of the tileset. Game Maker Studio 2 only.
+    /// The height of a tile in this. Game Maker Studio 2 only.
     /// </summary>
     public uint GMS2TileHeight { get; set; } = 32;
 
     /// <summary>
-    /// The output border X of the tileset. Game Maker Studio 2 only.
+    /// The amount of extra empty pixels left and right next to a tile in this tileset. Game Maker Studio 2 only.
     /// </summary>
     public uint GMS2OutputBorderX { get; set; } = 2;
 
     /// <summary>
-    /// The output Border Y of the tileset. Game Maker Studio 2 only.
+    /// The amount of extra empty pixels above and below a tile in this tileset. Game Maker Studio 2 only.
     /// </summary>
     public uint GMS2OutputBorderY { get; set; } = 2;
 
@@ -107,12 +107,12 @@ public class UndertaleBackground : UndertaleNamedResource, IDisposable
     public uint GMS2TileCount { get; set; } = 1024;
 
     /// <summary>
-    /// TODO: Functionality currently unknown.
+    /// TODO: Functionality currently unknown. Game Maker Studio 2 only.
     /// </summary>
     public uint GMS2UnknownAlwaysZero { get; set; } = 0;
 
     /// <summary>
-    /// The time for each frame in microseconds.
+    /// The time for each frame in microseconds. Game Maker Studio 2 only.
     /// </summary>
     public long GMS2FrameLength { get; set; } = 66666;
 

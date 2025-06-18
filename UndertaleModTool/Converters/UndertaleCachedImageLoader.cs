@@ -17,6 +17,7 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using UndertaleModLib.Models;
+using UndertaleModLib.Util;
 using static UndertaleModLib.Models.UndertaleRoom;
 
 namespace UndertaleModTool
@@ -31,7 +32,7 @@ namespace UndertaleModTool
         private static extern bool DeleteObject([In] IntPtr hObject);
 
         private static readonly ConcurrentDictionary<string, ImageSource> imageCache = new();
-        private static readonly ConcurrentDictionary<Tuple<string, Tuple<uint, uint, uint, uint>>, ImageSource> tileCache = new();
+        private static readonly ConcurrentDictionary<Tuple<string, Tuple<int, int, uint, uint>>, ImageSource> tileCache = new();
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
 
         private static bool _reuseTileBuffer;
@@ -58,7 +59,7 @@ namespace UndertaleModTool
             bool generate = false;
 
             string par;
-            List<Tuple<uint, uint, uint, uint>> tileRectList = null;
+            List<Tuple<int, int, uint, uint>> tileRectList = null;
             if (parameter is string)
             {
                 par = parameter as string;
@@ -67,10 +68,10 @@ namespace UndertaleModTool
                 cacheEnabled = !par.Contains("nocache");
                 generate = par.Contains("generate");
             }
-            else if (parameter is List<Tuple<uint, uint, uint, uint>>)
+            else if (parameter is List<Tuple<int, int, uint, uint>>)
             {
                 generate = true;
-                tileRectList = parameter as List<Tuple<uint, uint, uint, uint>>;
+                tileRectList = parameter as List<Tuple<int, int, uint, uint>>;
             }
 
             Tile tile = null;
@@ -124,14 +125,16 @@ namespace UndertaleModTool
 
                 if (isTile)
                 {
-                    diffW = (int)(tile.SourceX + tile.Width - texture.SourceWidth);
-                    diffH = (int)(tile.SourceY + tile.Height - texture.SourceHeight);
-                    rect = new((int)(texture.SourceX + tile.SourceX), (int)(texture.SourceY + tile.SourceY), (int)tile.Width, (int)tile.Height);
+                    int actualTileSourceX = tile.SourceX - texture.TargetX;
+                    int actualTileSourceY = tile.SourceY - texture.TargetY;
+                    diffW = (int)(actualTileSourceX + tile.Width - texture.SourceWidth);
+                    diffH = (int)(actualTileSourceY + tile.Height - texture.SourceHeight);
+                    rect = new((int)(texture.SourceX + actualTileSourceX), (int)(texture.SourceY + actualTileSourceY), (int)tile.Width, (int)tile.Height);
                 }
                 else
                     rect = new(texture.SourceX, texture.SourceY, texture.SourceWidth, texture.SourceHeight);
 
-                spriteSrc = CreateSpriteSource(in rect, in texture, diffW, diffH, isTile);
+                spriteSrc = CreateSpriteSource(in rect, in texture, diffW, diffH);
 
                 if (cacheEnabled)
                 {
@@ -158,37 +161,66 @@ namespace UndertaleModTool
             currBufferSize = 1048576;
         }
 
-        public static Bitmap CreateSpriteBitmap(Rectangle rect, in UndertaleTexturePageItem texture, int diffW = 0, int diffH = 0, bool isTile = false)
+        public static Bitmap CreateSpriteBitmap(Rectangle rect, in UndertaleTexturePageItem texture, int diffW = 0, int diffH = 0)
         {
-            using MemoryStream stream = new(texture.TexturePage.TextureData.TextureBlob);
-            Bitmap spriteBMP = new(rect.Width, rect.Height);
+            GMImage image = texture.TexturePage.TextureData.Image;
+            BitmapSource bitmapSource = mainWindow.GetBitmapSourceForImage(image);
 
+            Bitmap spriteBitmap = new(rect.Width, rect.Height);
+
+            // Clamp width/height in bounds (diffW/diffH represent how out of bounds they are)
             rect.Width -= (diffW > 0) ? diffW : 0;
             rect.Height -= (diffH > 0) ? diffH : 0;
-            int x = isTile ? texture.TargetX : 0;
-            int y = isTile ? texture.TargetY : 0;
 
-            using (Graphics g = Graphics.FromImage(spriteBMP))
+            // Clamp X/Y in bounds
+            int offsetX = 0, offsetY = 0;
+            if (rect.X < texture.SourceX)
             {
-                using Image img = Image.FromStream(stream); // "ImageConverter.ConvertFrom()" does the same, except it doesn't explicitly dispose MemoryStream
-                g.DrawImage(img, new Rectangle(x, y, rect.Width, rect.Height), rect, GraphicsUnit.Pixel);
+                offsetX = texture.SourceX - rect.X;
+                rect.Width -= offsetX;
+                rect.X = texture.SourceX;
+            }
+            if (rect.Y < texture.SourceY)
+            {
+                offsetY = texture.SourceY - rect.Y;
+                rect.Height -= offsetY;
+                rect.Y = texture.SourceY;
             }
 
-            return spriteBMP;
-        }
-        private ImageSource CreateSpriteSource(in Rectangle rect, in UndertaleTexturePageItem texture, int diffW = 0, int diffH = 0, bool isTile = false)
-        {
-            Bitmap spriteBMP = CreateSpriteBitmap(rect, in texture, diffW, diffH, isTile);
+            // Abort if rect is out of bounds of the texture item
+            if (rect.X >= (texture.SourceX + texture.SourceWidth) || rect.Y >= (texture.SourceY + texture.SourceHeight))
+                return spriteBitmap;
+            if (rect.Width <= 0 || rect.Height <= 0)
+                return spriteBitmap;
 
-            IntPtr bmpPtr = spriteBMP.GetHbitmap();
-            ImageSource spriteSrc = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(bmpPtr, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-            DeleteObject(bmpPtr);
-            spriteBMP.Dispose();
+            // Abort if rect is out of bounds of bitmap source (e.g., texture was not loaded)
+            if (rect.X < 0 || rect.X >= bitmapSource.Width || rect.Y < 0 || rect.Y >= bitmapSource.Height ||
+                (rect.X + rect.Width) > bitmapSource.Width || (rect.Y + rect.Height) > bitmapSource.Height)
+            {
+                return spriteBitmap;
+            }
+
+            // Copy data from texture
+            BitmapData data = spriteBitmap.LockBits(new Rectangle(offsetX, offsetY, rect.Width, rect.Height), ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            bitmapSource.CopyPixels(new Int32Rect(rect.X, rect.Y, rect.Width, rect.Height), data.Scan0, data.Height * data.Stride, data.Stride);
+            spriteBitmap.UnlockBits(data);
+
+            return spriteBitmap;
+        }
+        private ImageSource CreateSpriteSource(in Rectangle rect, in UndertaleTexturePageItem texture, int diffW = 0, int diffH = 0)
+        {
+            ImageSource spriteSrc;
+            using (Bitmap spriteBitmap = CreateSpriteBitmap(rect, in texture, diffW, diffH))
+            {
+                IntPtr bmpPtr = spriteBitmap.GetHbitmap();
+                spriteSrc = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(bmpPtr, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                DeleteObject(bmpPtr);
+            }
             spriteSrc.Freeze(); // allow UI thread access
 
             return spriteSrc;
         }
-        private void ProcessTileSet(string textureName, Bitmap bmp, List<Tuple<uint, uint, uint, uint>> tileRectList, int targetX, int targetY)
+        private void ProcessTileSet(string textureName, Bitmap bmp, List<Tuple<int, int, uint, uint>> tileRectList, int targetX, int targetY)
         {
             BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, bmp.PixelFormat);
             int depth = Image.GetPixelFormatSize(data.PixelFormat) / 8;
@@ -212,8 +244,8 @@ namespace UndertaleModTool
 
             _ = Parallel.ForEach(tileRectList, (tileRect) =>
             {
-                int origX = (int)tileRect.Item1;
-                int origY = (int)tileRect.Item2;
+                int origX = tileRect.Item1;
+                int origY = tileRect.Item2;
                 int x = origX - targetX;
                 int y = origY - targetY;
                 int w = (int)tileRect.Item3;
@@ -260,7 +292,7 @@ namespace UndertaleModTool
 
                 spriteSrc.Freeze(); // allow UI thread access
 
-                Tuple<string, Tuple<uint, uint, uint, uint>> tileKey = new(textureName, new((uint)origX, (uint)origY, (uint)w, (uint)h));
+                Tuple<string, Tuple<int, int, uint, uint>> tileKey = new(textureName, new(origX, origY, (uint)w, (uint)h));
                 tileCache.TryAdd(tileKey, spriteSrc);
             });
 
@@ -455,7 +487,7 @@ namespace UndertaleModTool
             }
             catch (Exception ex)
             {
-                mainWindow.ShowError($"An error occured while rendering tile layer \"{tilesData.ParentLayer.LayerName.Content}\".\n\n{ex}");
+                mainWindow.ShowError($"An error occurred while rendering tile layer \"{tilesData.ParentLayer.LayerName.Content}\".\n\n{ex}");
                 return "Error";
             }
         }
@@ -504,13 +536,14 @@ namespace UndertaleModTool
                                 resBMP.RotateFlip(RotateFlipType.Rotate90FlipNone);
                                 break;
                             case 5:
-                                resBMP.RotateFlip(RotateFlipType.Rotate270FlipY);
-                                break;
-                            case 6:
+                                // axes flipped since flip/mirror is done before rotation
                                 resBMP.RotateFlip(RotateFlipType.Rotate90FlipY);
                                 break;
+                            case 6:
+                                resBMP.RotateFlip(RotateFlipType.Rotate90FlipX);
+                                break;
                             case 7:
-                                resBMP.RotateFlip(RotateFlipType.Rotate270FlipNone);
+                                resBMP.RotateFlip(RotateFlipType.Rotate90FlipXY);
                                 break;
 
                             default:

@@ -17,6 +17,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Models;
+using Newtonsoft.Json;
+using UndertaleModLib.Compiler;
 
 namespace UndertaleModCli;
 
@@ -26,6 +28,7 @@ namespace UndertaleModCli;
 public partial class Program : IScriptInterface
 {
     #region Properties
+
     // taken from the Linux programmer manual:
     /// <summary>
     /// Value that should be returned on a successful operation.
@@ -80,6 +83,7 @@ public partial class Program : IScriptInterface
     /// Determines if actions should show a "this is finished" text. Gets set by <see cref="SetFinishedMessage"/>.
     /// </summary>
     private bool FinishedMessageEnabled { get; set; }
+
     #endregion
 
     /// <summary>
@@ -89,41 +93,37 @@ public partial class Program : IScriptInterface
     /// <returns>Result code of the program.</returns>
     public static int Main(string[] args)
     {
-        var verboseOption = new Option<bool>(new []{"-v", "--verbose"}, "Detailed logs");
+        var verboseOption = new Option<bool>(new[] { "-v", "--verbose" }, "Detailed logs");
 
         var dataFileArgument = new Argument<FileInfo>("datafile", "Path to the data.win/.ios/.droid/.unx file");
 
         // Setup new command
         Command newCommand = new Command("new", "Generates a blank data file")
         {
-            new Option<FileInfo>(new []{"-o", "--output"}, () => new NewOptions().Output),
-            new Option<bool>(new []{"-f", "--overwrite"}, "Overwrite destination file if it already exists"),
-            new Option<bool>(new []{"-", "--stdout"}, "Write new data content to stdout"),  // "-" is often used in *nix land as a replacement for stdout
+            new Option<FileInfo>(new[] { "-o", "--output" }, () => new NewOptions().Output),
+            new Option<bool>(new[] { "-f", "--overwrite" }, "Overwrite destination file if it already exists"),
+            new Option<bool>(new[] { "-", "--stdout" }, "Write new data content to stdout"), // "-" is often used in *nix land as a replacement for stdout
             verboseOption
         };
         newCommand.Handler = CommandHandler.Create<NewOptions>(Program.New);
 
         // Setup load command
-        var scriptRunnerOption = new Option<FileInfo[]>(new []{ "-s", "--scripts"}, "Scripts to apply to the <datafile>. Ex. a.csx b.csx");
+        var scriptRunnerOption = new Option<FileInfo[]>(new[] { "-s", "--scripts" }, "Scripts to apply to the <datafile>. Ex. a.csx b.csx");
         Command loadCommand = new Command("load", "Load a data file and perform actions on it")
         {
             dataFileArgument,
             scriptRunnerOption,
             verboseOption,
             //TODO: why no force overwrite here, but needed for new?
-            new Option<FileInfo>(new []{"-o", "--output"}, "Where to save the modified data file"),
-            new Option<string>(new []{"-l","--line"}, "Run C# string. Runs AFTER everything else"),
+            new Option<FileInfo>(new[] { "-o", "--output" }, "Where to save the modified data file"),
+            new Option<string>(new[] { "-l", "--line" }, "Run C# string. Runs AFTER everything else"),
             //TODO: make interactive another Command
-            new Option<bool>(new []{"-i", "--interactive"}, "Interactive menu launch")
+            new Option<bool>(new[] { "-i", "--interactive" }, "Interactive menu launch")
         };
         loadCommand.Handler = CommandHandler.Create<LoadOptions>(Program.Load);
 
         // Setup info command
-        Command infoCommand = new Command("info", "Show basic info about the game data file")
-        {
-            dataFileArgument,
-            verboseOption
-        };
+        Command infoCommand = new Command("info", "Show basic info about the game data file") { dataFileArgument, verboseOption };
         infoCommand.Handler = CommandHandler.Create<InfoOptions>(Program.Info);
 
         // Setup dump command
@@ -131,11 +131,11 @@ public partial class Program : IScriptInterface
         {
             dataFileArgument,
             verboseOption,
-            new Option<DirectoryInfo>(new []{"-o", "--output"}, "Where to dump data file properties to. Will default to path of the data file"),
-            new Option<string[]>(new[] {"-c", "--code"},
+            new Option<DirectoryInfo>(new[] { "-o", "--output" }, "Where to dump data file properties to. Will default to path of the data file"),
+            new Option<string[]>(new[] { "-c", "--code" },
                 $"The code files to dump. Ex. gml_Script_init_map gml_Script_reset_map. Specify '{UMT_DUMP_ALL}' to dump all code entries"),
-            new Option<bool>(new[] {"-s", "--strings"}, "Whether to dump all strings"),
-            new Option<bool>(new[] {"-t", "--textures"}, "Whether to dump all embedded textures")
+            new Option<bool>(new[] { "-s", "--strings" }, "Whether to dump all strings"),
+            new Option<bool>(new[] { "-t", "--textures" }, "Whether to dump all embedded textures")
         };
         dumpCommand.Handler = CommandHandler.Create<DumpOptions>(Program.Dump);
 
@@ -144,10 +144,10 @@ public partial class Program : IScriptInterface
         {
             dataFileArgument,
             verboseOption,
-            new Option<FileInfo>(new []{"-o", "--output"}, "Where to save the modified data file"),
-            new Option<string[]>(new[] {"-c", "--code"},
+            new Option<FileInfo>(new[] { "-o", "--output" }, "Where to save the modified data file"),
+            new Option<string[]>(new[] { "-c", "--code" },
                 $"Which code files to replace with which file. Ex. 'gml_Script_init_map=./newCode.gml'. It is possible to replace everything by using '{UMT_REPLACE_ALL}'"),
-            new Option<string[]>(new []{"-t", "--textures"},
+            new Option<string[]>(new[] { "-t", "--textures" },
                 $"Which embedded texture entry to replace with which file. Ex. 'Texture 0=./newTexture.png'. It is possible to replace everything by using '{UMT_REPLACE_ALL}'")
         };
         replaceCommand.Handler = CommandHandler.Create<ReplaceOptions>(Program.Replace);
@@ -161,7 +161,7 @@ public partial class Program : IScriptInterface
             dumpCommand,
             replaceCommand
         };
-        rootCommand.Description = "CLI tool for modding, decompiling and unpacking Undertale (and other Game Maker: Studio games)!";
+        rootCommand.Description = "CLI tool for modding, decompiling and unpacking Undertale (and other GameMaker games)!";
         Parser commandLine = new CommandLineBuilder(rootCommand)
             .UseDefaults() // automatically configures dotnet-suggest
             .Build();
@@ -183,7 +183,7 @@ public partial class Program : IScriptInterface
         this.ExePath = Environment.CurrentDirectory;
         this.Output = output;
 
-        this.Data = ReadDataFile(datafile, this.Verbose ? WarningHandler : null, this.Verbose ? MessageHandler : null);
+        this.Data = ReadDataFile(datafile, WarningHandler, this.Verbose ? MessageHandler : DummyHandler);
 
         FinishedMessageEnabled = true;
         this.CliScriptOptions = ScriptOptions.Default
@@ -193,8 +193,11 @@ public partial class Program : IScriptInterface
                 "System.Text.RegularExpressions")
             .AddReferences(typeof(UndertaleObject).GetTypeInfo().Assembly,
                 GetType().GetTypeInfo().Assembly,
+                typeof(JsonConvert).GetTypeInfo().Assembly,
                 typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly,
-                typeof(TextureWorker).GetTypeInfo().Assembly)
+                typeof(TextureWorker).GetTypeInfo().Assembly,
+                typeof(ImageMagick.MagickImage).GetTypeInfo().Assembly,
+                typeof(Underanalyzer.Decompiler.DecompileContext).Assembly)
             // "WithEmitDebugInformation(true)" not only lets us to see a script line number which threw an exception,
             // but also provides other useful debug info when we run UMT in "Debug".
             .WithEmitDebugInformation(true);
@@ -347,7 +350,7 @@ public partial class Program : IScriptInterface
                               "There is thus no code to dump. Exiting.");
             return EXIT_SUCCESS;
         }
-        
+
         // If user provided code to dump, dump code
         if ((options.Code?.Length > 0) && (program.Data.Code?.Count > 0))
         {
@@ -551,6 +554,7 @@ public partial class Program : IScriptInterface
                     bool isInputYes = Console.ReadKey(false).Key == ConsoleKey.Y;
                     Console.WriteLine();
                     if (isInputYes) return;
+
                     break;
                 }
 
@@ -582,12 +586,14 @@ public partial class Program : IScriptInterface
         if (!Data.IsYYC())
         {
             Console.WriteLine($"{Data.Code.Count} Code Entries, {Data.Variables.Count} Variables, {Data.Functions.Count} Functions");
-            Console.WriteLine($"{Data.CodeLocals.Count} Code locals, {Data.Strings.Count} Strings, {Data.EmbeddedTextures.Count} Embedded Textures");
+            var codeLocalsInfo = Data.CodeLocals is not null ? $"{Data.CodeLocals.Count} Code locals, " : "";
+            Console.WriteLine($"{codeLocalsInfo}{Data.Strings.Count} Strings, {Data.EmbeddedTextures.Count} Embedded Textures");
         }
         else
         {
             Console.WriteLine("Unknown amount of Code entries and Code locals");
         }
+
         Console.WriteLine($"{Data.Strings.Count} Strings");
         Console.WriteLine($"{Data.EmbeddedTextures.Count} Embedded Textures");
         Console.WriteLine($"{Data.EmbeddedAudio.Count} Embedded Audio");
@@ -655,7 +661,13 @@ public partial class Program : IScriptInterface
         {
             if (Verbose)
                 Console.WriteLine($"Dumping {texture.Name}");
-            File.WriteAllBytes($"{directory}/{texture.Name.Content}.png", texture.TextureData.TextureBlob);
+            if (texture.TextureData.Image is not GMImage image)
+            {
+                Console.WriteLine($"{texture.Name} has no image assigned, skipping");
+                continue;
+            }
+            using FileStream fs = new($"{directory}/{texture.Name.Content}.png", FileMode.Create);
+            texture.TextureData.Image.SavePng(fs);
         }
     }
 
@@ -666,18 +678,138 @@ public partial class Program : IScriptInterface
     /// <param name="fileToReplace">File path which should replace the code entry.</param>
     private void ReplaceCodeEntryWithFile(string codeEntry, FileInfo fileToReplace)
     {
-        UndertaleCode code = Data.Code.ByName(codeEntry);
-
-        if (code == null)
-        {
-            Console.Error.WriteLine($"Data file does not contain a code entry named {codeEntry}!");
-            return;
-        }
-
         if (Verbose)
             Console.WriteLine("Replacing " + codeEntry);
 
-        ImportGMLString(codeEntry, File.ReadAllText(fileToReplace.FullName));
+        // Read source code from file
+        string gmlCode = File.ReadAllText(fileToReplace.FullName);
+
+        // Link code to object events manually only if collision events are used
+        CompileResult result = CompileResult.UnsuccessfulResult;
+        bool manualLink = false;
+        const string objectPrefix = "gml_Object_";
+        if (codeEntry.StartsWith(objectPrefix, StringComparison.Ordinal))
+        {
+            // Parse object event. First, find positions of last two underscores in name.
+            int lastUnderscore = codeEntry.LastIndexOf('_');
+            int secondLastUnderscore = codeEntry.LastIndexOf('_', lastUnderscore - 1);
+            if (lastUnderscore <= 0 || secondLastUnderscore <= 0)
+            {
+                Console.Error.WriteLine($"Failed to parse object code entry name: \"{codeEntry}\"");
+                return;
+            }
+
+            // Extract object name, event type, and event subtype
+            ReadOnlySpan<char> objectName = codeEntry.AsSpan(new Range(objectPrefix.Length, secondLastUnderscore));
+            ReadOnlySpan<char> eventType = codeEntry.AsSpan(new Range(secondLastUnderscore + 1, lastUnderscore));
+            if (!uint.TryParse(codeEntry.AsSpan(lastUnderscore + 1), out uint eventSubtype))
+            {
+                // No number at the end of the name; parse it out as best as possible (may technically be ambiguous sometimes...).
+                // It should be a collision event, though.
+                manualLink = true;
+                ReadOnlySpan<char> nameAfterPrefix = codeEntry.AsSpan(objectPrefix.Length);
+                const string collisionSeparator = "_Collision_";
+                int collisionSeparatorPos = nameAfterPrefix.LastIndexOf(collisionSeparator);
+                if (collisionSeparatorPos != -1)
+                {
+                    // Split out the actual object name and the collision subtype
+                    objectName = nameAfterPrefix[0..collisionSeparatorPos];
+                    ReadOnlySpan<char> collisionSubtype = nameAfterPrefix[(collisionSeparatorPos + collisionSeparator.Length)..];
+
+                    if (Data.IsVersionAtLeast(2, 3))
+                    {
+                        // GameMaker 2.3+ uses the object name for the collision subtype
+                        int objectIndex = Data.GameObjects.IndexOfName(collisionSubtype);
+                        if (objectIndex >= 0)
+                        {
+                            // Object already exists; use its ID as a subtype
+                            eventSubtype = (uint)objectIndex;
+                        }
+                        else
+                        {
+                            // Need to create a new object
+                            eventSubtype = (uint)Data.GameObjects.Count;
+                            Data.GameObjects.Add(new()
+                            {
+                                Name = Data.Strings.MakeString(collisionSubtype.ToString())
+                            });
+                        }
+                    }
+                    else
+                    {
+                        // Pre-2.3 GMS2 versions use GUIDs... need to resolve it
+                        eventSubtype = ReduceCollisionValue(GetCollisionValueFromCodeNameGUID(codeEntry));
+                        ReassignGUIDs(collisionSubtype.ToString(), ReduceCollisionValue(GetCollisionValueFromCodeNameGUID(codeEntry)));
+                    }
+                }
+                else
+                {
+                    Console.Error.WriteLine($"Failed to parse event type and subtype for \"{codeEntry}\".");
+                    return;
+                }
+            }
+            else if (eventType.SequenceEqual("Collision"))
+            {
+                // Handle collision events with object ID at the end of the name
+                manualLink = true;
+                if (eventSubtype >= Data.GameObjects.Count)
+                {
+                    if (ScriptQuestion($"Object of ID {eventSubtype} was not found.\nAdd new object? (will be ID {Data.GameObjects.Count})"))
+                    {
+                        // Create new object at end of game object list
+                        eventSubtype = (uint)Data.GameObjects.Count;
+                        Data.GameObjects.Add(new()
+                        {
+                            Name = Data.Strings.MakeString(
+                                SimpleTextInput("Enter object name", $"Enter object name for ID {eventSubtype}", "", false))
+                        });
+                    }
+                    else
+                    {
+                        // It *needs* to have a valid value, make the user specify one
+                        eventSubtype = ReduceCollisionValue([uint.MaxValue]);
+                    }
+                }
+            }
+
+            // If manually linking, do so
+            if (manualLink)
+            {
+                // Create new object if necessary
+                UndertaleGameObject obj = Data.GameObjects.ByName(objectName);
+                if (obj is null)
+                {
+                    obj = new()
+                    {
+                        Name = Data.Strings.MakeString(objectName.ToString())
+                    };
+                    Data.GameObjects.Add(obj);
+                }
+
+                // Link to object's event with a blank code entry
+                UndertaleCode manualCode = UndertaleCode.CreateEmptyEntry(Data, codeEntry);
+                CodeImportGroup.LinkEvent(obj, manualCode, EventType.Collision, eventSubtype);
+
+                // Perform code import using manual code entry
+                CodeImportGroup group = new(Data);
+                group.QueueReplace(manualCode, gmlCode);
+                result = group.Import();
+            }
+        }
+
+        // When not manually linking, just let a code import group do it during importing
+        if (!manualLink)
+        {
+            CodeImportGroup group = new(Data);
+            group.QueueReplace(codeEntry, gmlCode);
+            result = group.Import();
+        }
+
+        // Error if import failed
+        if (!result.Successful)
+        {
+            Console.Error.WriteLine("Code import unsuccessful:\n" + result.PrintAllErrors(false));
+        }
     }
 
     /// <summary>
@@ -698,7 +830,7 @@ public partial class Program : IScriptInterface
         if (Verbose)
             Console.WriteLine("Replacing " + textureEntry);
 
-        texture.TextureData.TextureBlob = File.ReadAllBytes(fileToReplace.FullName);
+        texture.TextureData.Image = GMImage.FromPng(File.ReadAllBytes(fileToReplace.FullName));
     }
 
     /// <summary>
@@ -710,7 +842,7 @@ public partial class Program : IScriptInterface
         string lines;
         try
         {
-            lines = File.ReadAllText(path);
+            lines = File.ReadAllText(path, Encoding.UTF8);
         }
         catch (Exception exc)
         {
@@ -728,8 +860,8 @@ public partial class Program : IScriptInterface
     /// Evaluates and executes given C# code.
     /// </summary>
     /// <param name="code">The C# string to execute</param>
-    /// <param name="scriptFile">The path to the script file where <see cref="code"/> was executed from.
-    /// Leave as null, if it wasn't executed from a script file</param>
+    /// <param name="scriptFile">The path to the script file where <paramref name="code"/> was loaded from.
+    /// Leave as null, if it wasn't executed from a script file.</param>
     private void RunCSharpCode(string code, string scriptFile = null)
     {
         if (Verbose)
@@ -737,7 +869,7 @@ public partial class Program : IScriptInterface
 
         try
         {
-            CSharpScript.EvaluateAsync(code, CliScriptOptions, this, typeof(IScriptInterface)).GetAwaiter().GetResult();
+            CSharpScript.EvaluateAsync(code, CliScriptOptions.WithFilePath(scriptFile ?? "").WithFileEncoding(Encoding.UTF8), this, typeof(IScriptInterface)).GetAwaiter().GetResult();
             ScriptExecutionSuccess = true;
             ScriptErrorMessage = "";
         }
@@ -765,23 +897,41 @@ public partial class Program : IScriptInterface
     /// Saves the currently loaded <see cref="Data"/> to an output path.
     /// </summary>
     /// <param name="outputPath">The path where to save the data.</param>
+    /// <exception cref="IOException">If saving fails</exception>
     private void SaveDataFile(string outputPath)
     {
         if (Verbose)
             Console.WriteLine($"Saving new data file to '{outputPath}'");
+        try 
+        {
+            // Save data.win to temp file
+            using (FileStream fs = new(outputPath + "temp", FileMode.Create, FileAccess.Write))
+            {
+                UndertaleIO.Write(fs, Data, MessageHandler);
+            }
 
-        using FileStream fs = new FileInfo(outputPath).OpenWrite();
-        UndertaleIO.Write(fs, Data, MessageHandler);
-        if (Verbose)
-            Console.WriteLine($"Saved data file to '{outputPath}'");
+            // If we're executing this, the saving was successful. So we can replace the new temp file
+            // with the older file, if it exists.
+            File.Move(outputPath + "temp", outputPath, true);
+
+            if (Verbose)
+                Console.WriteLine($"Saved data file to '{outputPath}'");
+        }
+        catch (Exception e) 
+        {
+            // Delete the temporary file in case we partially wrote it
+            if (File.Exists(outputPath + "temp"))
+                File.Delete(outputPath + "temp");
+            throw new IOException($"Could not save data file: {e.Message}");
+        }
     }
 
     /// <summary>
     /// Read supplied filename and return the data file.
     /// </summary>
     /// <param name="datafile">The datafile to read</param>
-    /// <param name="warningHandler">Handler for Warnings</param>
-    /// <param name="messageHandler">Handler for Messages</param>
+    /// <param name="warningHandler">Handler for warnings</param>
+    /// <param name="messageHandler">Handler for messages</param>
     /// <returns></returns>
     /// <exception cref="FileNotFoundException">If the data file cannot be found</exception>
     private static UndertaleData ReadDataFile(FileInfo datafile, WarningHandlerDelegate warningHandler = null, MessageHandlerDelegate messageHandler = null)
@@ -826,13 +976,21 @@ public partial class Program : IScriptInterface
     /// A simple warning handler that prints warnings to console.
     /// </summary>
     /// <param name="warning">The warning to print</param>
-    private static void WarningHandler(string warning) => Console.WriteLine($"[WARNING]: {warning}");
+    /// <param name="isImportant">Whether the warning is important (may lead to data corruption)</param>
+    private static void WarningHandler(string warning, bool isImportant) => Console.WriteLine($"[WARNING]: {warning}");
 
     /// <summary>
     /// A simple message handler that prints messages to console.
     /// </summary>
     /// <param name="message">The message to print</param>
     private static void MessageHandler(string message) => Console.WriteLine($"[MESSAGE]: {message}");
+
+    /// <summary>
+    /// A dummy handler that does nothing.
+    /// </summary>
+    /// <param name="message">Not used.</param>
+    private static void DummyHandler(string message)
+    {  }
 
     //TODO: document these as well
     private void ProgressUpdater()

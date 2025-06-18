@@ -1,6 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net6.0-windows</TargetFramework>
+        <TargetFramework>net8.0-windows</TargetFramework>
         <RollForward>LatestMajor</RollForward>
         <OutputType>WinExe</OutputType>
         <!-- TODO: this should properly get migrated and get rid of -->
@@ -14,10 +14,15 @@
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
         <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
         <StartupObject>UndertaleModTool.Program</StartupObject>
+        <NeutralLanguage>en</NeutralLanguage>
+        <ResourceLanguages>en</ResourceLanguages>
+        <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
         <!-- Suppress all missing XML comment warnings -->
         <NoWarn>1591</NoWarn>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
     </PropertyGroup>
     <ItemGroup>
+      <None Remove="Corrections\README.txt" />
       <None Remove="Resources\tabs_left_button.png" />
       <None Remove="Resources\tabs_right_button.png" />
       <None Remove="Resources\X_Down.png" />
@@ -32,6 +37,7 @@
         <Resource Include="Resources\X_Down.png" />
     </ItemGroup>
     <ItemGroup>
+        <ProjectReference Include="..\Underanalyzer\Underanalyzer\Underanalyzer.csproj" />
         <ProjectReference Include="..\UndertaleModLib\UndertaleModLib.csproj" />
     </ItemGroup>
     <ItemGroup>
@@ -55,35 +61,35 @@
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="AvalonEdit">
-            <Version>6.1.2.30</Version>
+            <Version>6.3.1.120</Version>
         </PackageReference>
-        <PackageReference Include="Fody" Version="6.5.1">
+        <PackageReference Include="Fody" Version="6.9.2">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="log4net" Version="2.0.12" />
+        <PackageReference Include="log4net" Version="3.0.4" />
         <PackageReference Include="Microsoft-WindowsAPICodePack-Shell">
-            <Version>1.1.4</Version>
+            <Version>1.1.5</Version>
         </PackageReference>
         <PackageReference Include="Microsoft.CodeAnalysis.Analyzers">
-            <Version>3.3.2</Version>
+            <Version>3.11.0</Version>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting">
-            <Version>3.9.0</Version>
+            <Version>4.13.0</Version>
         </PackageReference>
         <PackageReference Include="NAudio">
-            <Version>2.0.1</Version>
+            <Version>2.2.1</Version>
         </PackageReference>
         <PackageReference Include="NAudio.Vorbis">
-            <Version>1.3.1</Version>
+            <Version>1.5.0</Version>
         </PackageReference>
         <PackageReference Include="Newtonsoft.Json">
-            <Version>13.0.2</Version>
+            <Version>13.0.3</Version>
         </PackageReference>
         <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
-        <PackageReference Include="PropertyChanged.Fody" Version="3.3.3" />
+        <PackageReference Include="PropertyChanged.Fody" Version="4.1.0" />
         <PackageReference Include="System.AppContext">
             <Version>4.3.0</Version>
         </PackageReference>
@@ -123,7 +129,7 @@
         <PackageReference Include="System.Xml.XPath.XDocument">
             <Version>4.3.0</Version>
         </PackageReference>
-        <PackageReference Include="Microsoft.Windows.Compatibility" Version="5.0.2" />
+        <PackageReference Include="Microsoft.Windows.Compatibility" Version="9.0.4" />
     </ItemGroup>
     <Target Name="AfterResolveReferences">
         <ItemGroup>
@@ -147,7 +153,6 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </Content>
-        <Folder Include="Corrections" />
         <Content Include="Corrections/**">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
