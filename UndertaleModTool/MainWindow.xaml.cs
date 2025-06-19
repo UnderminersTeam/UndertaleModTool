@@ -956,11 +956,18 @@ namespace UndertaleModTool
 
         private void Command_SearchInCode(object sender, ExecutedRoutedEventArgs e)
         {
+            string selectedCode = null;
+            bool isDisassembly = false;
+
             var codeEditor = FindVisualChild<UndertaleCodeEditor>(DataEditor);
+            if (codeEditor is not null)
+            {
+                isDisassembly = codeEditor.DisassemblyTab?.IsSelected ?? false;
+                selectedCode = isDisassembly ? codeEditor.DisassemblyEditor?.SelectedText
+                                             : codeEditor.DecompiledEditor?.SelectedText;
+            }
 
-            string selectedCode = codeEditor?.DecompiledEditor?.SelectedText;
-
-            SearchInCodeWindow searchInCodeWindow = new(selectedCode);
+            SearchInCodeWindow searchInCodeWindow = new(selectedCode, isDisassembly);
             searchInCodeWindow.Show();
         }
 
