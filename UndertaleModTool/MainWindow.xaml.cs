@@ -956,7 +956,11 @@ namespace UndertaleModTool
 
         private void Command_SearchInCode(object sender, ExecutedRoutedEventArgs e)
         {
-            SearchInCodeWindow searchInCodeWindow = new();
+            var codeEditor = FindVisualChild<UndertaleCodeEditor>(DataEditor);
+
+            string selectedCode = codeEditor?.DecompiledEditor?.SelectedText;
+
+            SearchInCodeWindow searchInCodeWindow = new(selectedCode);
             searchInCodeWindow.Show();
         }
 
