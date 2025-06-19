@@ -89,7 +89,7 @@ namespace UndertaleModTool.Windows
             isRegexSearch = RegexSearchCheckBox.IsChecked ?? false;
             isInAssembly = InAssemblyCheckBox.IsChecked ?? false;
 
-            bool filterByName = FilterByNameCheckBox.IsChecked ?? false;
+            bool filterByName = FilterByNameExpander.IsExpanded;
             bool nameIsCaseSensitive, nameIsRegex;
             string name;
 
