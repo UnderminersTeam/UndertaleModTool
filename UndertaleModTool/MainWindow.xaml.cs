@@ -963,8 +963,16 @@ namespace UndertaleModTool
             if (codeEditor is not null)
             {
                 isDisassembly = codeEditor.DisassemblyTab?.IsSelected ?? false;
-                selectedCode = isDisassembly ? codeEditor.DisassemblyEditor?.SelectedText
-                                             : codeEditor.DecompiledEditor?.SelectedText;
+                if (isDisassembly)
+                {
+                    selectedCode = codeEditor.DisassemblyEditor?.SelectedText;
+                    if (String.IsNullOrEmpty(selectedCode))
+                        isDisassembly = false; // Don't check "In assembly" if there is nothing selected in there.
+                }
+                else
+                {
+                    selectedCode = codeEditor.DecompiledEditor?.SelectedText;
+                }
             }
 
             SearchInCodeWindow searchInCodeWindow = new(selectedCode, isDisassembly);
