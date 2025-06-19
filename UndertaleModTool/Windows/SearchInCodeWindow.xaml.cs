@@ -53,7 +53,7 @@ namespace UndertaleModTool.Windows
 
         static bool isSearchInProgress = false;
 
-        public SearchInCodeWindow(string query = null)
+        public SearchInCodeWindow(string query = null, bool inAssembly = false)
         {
             InitializeComponent();
 
@@ -65,6 +65,8 @@ namespace UndertaleModTool.Windows
                 SearchTextBox.Text = query;
                 SearchTextBox.SelectAll();
             }
+
+            InAssemblyCheckBox.IsChecked = inAssembly;
         }
 
         private async void SearchButton_Click(object sender, RoutedEventArgs e)
