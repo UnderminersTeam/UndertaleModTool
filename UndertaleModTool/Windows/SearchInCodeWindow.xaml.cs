@@ -274,7 +274,18 @@ namespace UndertaleModTool.Windows
                 int lineEndIndex = codeText.IndexOf('\n', index);
                 lineEndIndex = lineEndIndex == -1 ? codeText.Length : lineEndIndex;
 
-                string lineText = codeText[lineStartIndex..lineEndIndex];
+                string lineText;
+
+                // Limit the displayed line length to 128
+                if (lineEndIndex - lineStartIndex > 128)
+                {
+                    lineEndIndex = lineStartIndex + 128;
+                    lineText = codeText[lineStartIndex..lineEndIndex] + "...";
+                }
+                else
+                {
+                    lineText = codeText[lineStartIndex..lineEndIndex];
+                }
 
                 if (nameWritten == false)
                 {
