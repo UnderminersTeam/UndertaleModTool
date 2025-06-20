@@ -19,11 +19,12 @@
         <Setter Property="MinWidth" Value="3"/>
     </Style>
 
-    <Style Selector="TabControl">
+    <Style Selector="TabControl,TabStrip">
         <Setter Property="Padding" Value="0" />
     </Style>
-    <Style Selector="TabItem">
+    <Style Selector="TabItem,TabStripItem">
         <Setter Property="FontSize" Value="12" />
+        <Setter Property="MinHeight" Value="28" />
     </Style>
 
     <Style Selector="Label">

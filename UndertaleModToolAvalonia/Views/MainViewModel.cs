@@ -73,7 +73,8 @@ public partial class MainViewModel
         Tabs = [
             new TabItemViewModel(new DescriptionViewModel(
                 "Welcome to UndertaleModTool!",
-                "Open a data.win file to get started, then double click on the items on the left to view them.")),
+                "Open a data.win file to get started, then double click on the items on the left to view them."),
+                isSelected: true),
         ];
     }
 

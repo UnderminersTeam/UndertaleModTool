@@ -42,8 +42,14 @@
             
             <GridSplitter Grid.Column="1" ResizeDirection="Columns"/>
             
-            <TabControl Grid.Column="2" ItemsSource="{Binding Tabs}" SelectedItem="{Binding TabSelected}" SelectedIndex="{Binding TabSelectedIndex}" PointerReleased="TabControl_PointerReleased">
-                <TabControl.ItemTemplate>
+            <Grid Grid.Column="2" RowDefinitions="Auto,1*">
+                <TabStrip Grid.Row="0"
+                          ItemsSource="{Binding Tabs}"
+                          SelectedItem="{Binding TabSelected}"
+                          SelectedIndex="{Binding TabSelectedIndex}"
+                          PointerReleased="TabControl_PointerReleased"
+                          SelectionChanged="TabControl_SelectionChanged">
+                    <TabStrip.ItemTemplate>
                     <DataTemplate DataType="v:TabItemViewModel">
                         <StackPanel Orientation="Horizontal">
                             <ContentControl Content="{Binding Content}" Classes="TabItemContentControl">
@@ -135,10 +141,18 @@
                                     Classes="TransparentButton">❌</Button>
                         </StackPanel>
                     </DataTemplate>
-                </TabControl.ItemTemplate>
-                <TabControl.ContentTemplate>
+                    </TabStrip.ItemTemplate>
+                </TabStrip>
+
+                <ItemsControl Grid.Row="1" ItemsSource="{Binding Tabs}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <Panel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="v:TabItemViewModel">
-                        <ScrollViewer>
+                            <ScrollViewer IsVisible="{Binding IsSelected}">
                             <ContentControl Content="{Binding Content}">
                                 <ContentControl.DataTemplates>
                                     <DataTemplate DataType="v:DescriptionViewModel">
@@ -225,8 +239,9 @@
                             </ContentControl>
                         </ScrollViewer>
                     </DataTemplate>
-                </TabControl.ContentTemplate>
-            </TabControl>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
         </Grid>
     </DockPanel>
 </UserControl>

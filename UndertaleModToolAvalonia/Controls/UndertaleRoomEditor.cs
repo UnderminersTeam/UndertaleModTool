@@ -48,21 +48,24 @@ public class UndertaleRoomEditor : Control
 
     public override void Render(DrawingContext context)
     {
-        customDrawOperation.Bounds = Bounds;
+        if (IsEffectivelyVisible)
+        {
+            customDrawOperation.Bounds = Bounds;
 
-        Stopwatch stopWatch = new();
-        stopWatch.Start();
-        context.Custom(customDrawOperation);
-        stopWatch.Stop();
+            Stopwatch stopWatch = new();
+            stopWatch.Start();
+            context.Custom(customDrawOperation);
+            stopWatch.Stop();
 
-        // Debug text
-        context.DrawText(new FormattedText(
-            $"mouse: ({mousePosition.X}, {mousePosition.Y})\n" +
-            $"view: ({-translation.X}, {-translation.Y}, {-translation.X + Bounds.Width}, {-translation.Y + Bounds.Height}), zoom: {scaling}x\n" +
-            $"{vm?.Room.Name.Content} ({vm?.Room.Width}, {vm?.Room.Height})\n" +
-            $"custom render time: <{Math.Ceiling(stopWatch.Elapsed.TotalMilliseconds)} ms",
-            CultureInfo.CurrentCulture, FlowDirection.LeftToRight, Typeface.Default, 12, new SolidColorBrush(Colors.White)),
-            new Point(0, 0));
+            // Debug text
+            context.DrawText(new FormattedText(
+                $"mouse: ({mousePosition.X}, {mousePosition.Y})\n" +
+                $"view: ({-translation.X}, {-translation.Y}, {-translation.X + Bounds.Width}, {-translation.Y + Bounds.Height}), zoom: {scaling}x\n" +
+                $"{vm?.Room.Name.Content} ({vm?.Room.Width}, {vm?.Room.Height})\n" +
+                $"custom render time: <{Math.Ceiling(stopWatch.Elapsed.TotalMilliseconds)} ms",
+                CultureInfo.CurrentCulture, FlowDirection.LeftToRight, Typeface.Default, 12, new SolidColorBrush(Colors.White)),
+                new Point(0, 0));
+        }
 
         Dispatcher.UIThread.InvokeAsync(InvalidateVisual, DispatcherPriority.Background);
     }
@@ -106,6 +109,7 @@ public class UndertaleRoomEditor : Control
             translation /= 2;
             scaling /= 2;
         }
+        translation = new Vector(Math.Round(translation.X), Math.Round(translation.Y));
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
@@ -172,12 +176,16 @@ public class UndertaleRoomEditor : Control
                 // Fill background of entire control
                 canvas.DrawRect(0, 0, (float)editor.Bounds.Width, (float)editor.Bounds.Height, new SKPaint { Color = SKColors.Gray });
 
+                // Draw room outline
+                canvas.DrawRect((float)editor.translation.X - 1,
+                    (float)editor.translation.Y - 1,
+                    (float)Math.Ceiling(vm.Room.Width * editor.scaling + 1),
+                    (float)Math.Ceiling(vm.Room.Height * editor.scaling + 1),
+                    new SKPaint { Color = SKColors.White, Style = SKPaintStyle.Stroke });
+
                 // Transform
                 canvas.Translate((float)editor.translation.X, (float)editor.translation.Y);
                 canvas.Scale((float)editor.scaling);
-
-                // Draw room outline
-                canvas.DrawRect(-1, -1, vm.Room.Width, vm.Room.Height, new SKPaint { Color = SKColors.White, Style = SKPaintStyle.Stroke });
 
                 if (vm.Room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.IsGMS2))
                 {

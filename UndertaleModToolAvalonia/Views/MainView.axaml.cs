@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.Platform.Storage;
 using UndertaleModToolAvalonia.Controls;
@@ -57,7 +59,19 @@ public partial class MainView : UserControl
         DataTreeView.SetFilter(FilterTextBox.Text ?? "");
     }
 
-    public void TabControl_PointerReleased(object? sender, PointerReleasedEventArgs e)
+    private void TabControl_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (DataContext is MainViewModel vm)
+        {
+            object? tabSelected = e.AddedItems.Count > 0 ? e.AddedItems[0] : null;
+            foreach (TabItemViewModel tab in vm.Tabs)
+            {
+                tab.IsSelected = (tab == tabSelected);
+            }
+        }
+    }
+
+    private void TabControl_PointerReleased(object? sender, PointerReleasedEventArgs e)
     {
         if (e.InitialPressMouseButton == MouseButton.Middle)
         {
@@ -65,10 +79,10 @@ public partial class MainView : UserControl
             {
                 if (e.Source is Control control)
                 {
-                    TabControl? tabControl = control.FindLogicalAncestorOfType<TabControl>();
+                    TabStrip? tabControl = control.FindLogicalAncestorOfType<TabStrip>();
                     if (tabControl is not null && tabControl == sender)
                     {
-                        TabItem? tabItem = control.FindLogicalAncestorOfType<TabItem>();
+                        TabStripItem? tabItem = control.FindLogicalAncestorOfType<TabStripItem>();
                         if (tabItem is not null && tabItem.DataContext is TabItemViewModel vmTabItem)
                         {
                             vm.TabClose(vmTabItem);
