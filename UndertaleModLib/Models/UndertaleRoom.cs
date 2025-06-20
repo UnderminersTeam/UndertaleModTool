@@ -511,7 +511,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             {
                 if (layer.LayerType == LayerType.Assets)
                     tileList = tileList.Concat(layer.AssetsData.LegacyTiles);
-                else if (layer.LayerType == LayerType.Tiles && layer.TilesData.TileData.Length != 0)
+                else if (layer.LayerType == LayerType.Tiles && layer.TilesData.TileData.Length != 0 && layer.TilesData.Background is not null)
                 {
                     int w = (int)layer.TilesData.Background.GMS2TileWidth;
                     int h = (int)layer.TilesData.Background.GMS2TileHeight;
