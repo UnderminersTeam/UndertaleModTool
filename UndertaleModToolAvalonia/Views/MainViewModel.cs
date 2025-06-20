@@ -176,125 +176,20 @@ public partial class MainViewModel
 
     public void DataItemAdd(IList list)
     {
-        // TODO: This is terrible and should at least partially be in the lib.
         // TODO: Ask user for name etc.
 
-        if (Data is null)
-            return;
-        if (list is null)
+        if (Data is null || list is null)
             return;
 
-        Type type = list.GetType().GetGenericArguments()[0];
-        UndertaleResource obj = (Activator.CreateInstance(type) as UndertaleResource)!;
+        UndertaleResource res = UndertaleData.CreateResource(list);
+        Data.InitializeResource(res, list, UndertaleData.GetDefaultResourceName(list));
 
-        if (obj is UndertaleNamedResource namedResource)
+        if (res is UndertaleRoom room)
         {
-            string typeName = type.Name.Replace("Undertale", "").Replace("GameObject", "Object").ToLower();
-            string resourceName = typeName + list.Count;
-
-            namedResource.Name = obj switch
-            {
-                // UTMT only names.
-                UndertaleTexturePageItem => new UndertaleString("PageItem " + list.Count),
-                UndertaleEmbeddedAudio => new UndertaleString("EmbeddedSound " + list.Count),
-                UndertaleEmbeddedTexture => new UndertaleString("Texture " + list.Count),
-                // Data names.
-                UndertaleNamedResource => Data.Strings.MakeString(resourceName, createNew: true),
-                _ => null,
-            };
-
-            // TODO: Initialize each type. This should be done in the lib.
-            InitializeResource(namedResource);
-        }
-        else if (obj is UndertaleString _string)
-        {
-            _string.Content = "string" + list.Count;
-        }
-
-        list.Add(obj);
-    }
-
-    void InitializeResource(UndertaleNamedResource obj)
-    {
-        if (Data is null)
-            return;
-
-        if (obj is UndertaleRoom room)
-        {
-            if (Data.IsVersionAtLeast(2))
-            {
-                room.Caption = null;
-                room.Backgrounds.Clear();
-                if (Data.IsVersionAtLeast(2024, 13))
-                {
-                    room.Flags |= Data.IsVersionAtLeast(2024, 13) ? UndertaleRoom.RoomEntryFlags.IsGM2024_13 : UndertaleRoom.RoomEntryFlags.IsGMS2;
-                }
-                else
-                {
-                    room.Flags |= UndertaleRoom.RoomEntryFlags.IsGMS2;
-                    if (Data.IsVersionAtLeast(2, 3))
-                    {
-                        room.Flags |= UndertaleRoom.RoomEntryFlags.IsGMS2_3;
-                    }
-                }
-            }
-            else
-            {
-                room.Caption = Data.Strings.MakeString("", createNew: true);
-            }
-
             Data.GeneralInfo?.RoomOrder.Add(new(room));
         }
-        else if (obj is UndertaleScript script)
-        {
-            if (Data.IsVersionAtLeast(2, 3))
-            {
-                script.Code = UndertaleCode.CreateEmptyEntry(Data, Data.Strings.MakeString($"gml_GlobalScript_{script.Name.Content}", createNew: true));
-                if (Data.GlobalInitScripts is IList<UndertaleGlobalInit> globalInitScripts)
-                {
-                    globalInitScripts.Add(new UndertaleGlobalInit()
-                    {
-                        Code = script.Code,
-                    });
-                }
-            }
-            else
-            {
-                script.Code = UndertaleCode.CreateEmptyEntry(Data, Data.Strings.MakeString($"gml_Script_{script.Name.Content}", createNew: true));
-            }
-        }
-        else if (obj is UndertaleCode code)
-        {
-            if (Data.CodeLocals is not null)
-            {
-                code.LocalsCount = 1;
-                UndertaleCodeLocals.CreateEmptyEntry(Data, code.Name);
-            }
-            else
-            {
-                code.WeirdLocalFlag = true;
-            }
-        }
-        else if (obj is UndertaleExtension)
-        {
-            // TODO: This should absolutely not be here!
-            if (Data.GeneralInfo?.Major >= 2 ||
-                (Data.GeneralInfo?.Major == 1 && Data.GeneralInfo?.Build >= 1773) ||
-                (Data.GeneralInfo?.Major == 1 && Data.GeneralInfo?.Build == 1539))
-            {
-                var newProductID = new byte[] { 0xBA, 0x5E, 0xBA, 0x11, 0xBA, 0xDD, 0x06, 0x60, 0xBE, 0xEF, 0xED, 0xBA, 0x0B, 0xAB, 0xBA, 0xBE };
-                Data.FORM.EXTN.productIdData.Add(newProductID);
-            }
-        }
-        else if (obj is UndertaleShader shader)
-        {
-            shader.GLSL_ES_Vertex = Data.Strings.MakeString("", createNew: true);
-            shader.GLSL_ES_Fragment = Data.Strings.MakeString("", createNew: true);
-            shader.GLSL_Vertex = Data.Strings.MakeString("", createNew: true);
-            shader.GLSL_Fragment = Data.Strings.MakeString("", createNew: true);
-            shader.HLSL9_Vertex = Data.Strings.MakeString("", createNew: true);
-            shader.HLSL9_Fragment = Data.Strings.MakeString("", createNew: true);
-        }
+
+        list.Add(res);
     }
     
     public void TabOpen(object? item)
