@@ -13,9 +13,9 @@
         <NativeMenu>
             <NativeMenuItem Header="_File">
                 <NativeMenu>
-                    <NativeMenuItem Header="_New" Command="{Binding FileNew}"/>
-                    <NativeMenuItem Header="_Open" Command="{Binding FileOpen}"/>
-                    <NativeMenuItem Header="_Save"/>
+                    <NativeMenuItem Header="_New" Command="{Binding FileNew}" Gesture="Ctrl+N"/>
+                    <NativeMenuItem Header="_Open" Command="{Binding FileOpen}" Gesture="Ctrl+O"/>
+                    <NativeMenuItem Header="_Save" Command="{Binding FileSave}" Gesture="Ctrl+S"/>
                     <NativeMenuItemSeparator Header="-" />
                     <NativeMenuItem Header="_Temp run game"/>
                     <NativeMenuItem Header="Run game under GMS _debugger"/>
@@ -38,11 +38,18 @@
             <NativeMenuItem Header="_Help">
                 <NativeMenu>
                     <NativeMenuItem Header="_GitHub" Command="{Binding HelpGitHub}"/>
-                    <NativeMenuItem Header="_About" Command="{Binding HelpAbout}"/>
+                    <NativeMenuItem Header="_About" Command="{Binding HelpAbout}" Gesture="F1"/>
                 </NativeMenu>
             </NativeMenuItem>
         </NativeMenu>
     </NativeMenu.Menu>
+
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Ctrl+N" Command="{Binding FileNew}" />
+        <KeyBinding Gesture="Ctrl+O" Command="{Binding FileOpen}" />
+        <KeyBinding Gesture="Ctrl+S" Command="{Binding FileSave}" />
+        <KeyBinding Gesture="F1" Command="{Binding HelpAbout}" />
+    </Window.KeyBindings>
     
     <v:MainView />
 </Window>

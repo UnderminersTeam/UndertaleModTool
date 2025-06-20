@@ -41,6 +41,18 @@ public partial class MainViewModel
     [Notify]
     private (uint Major, uint Minor, uint Release, uint Build) _Version;
 
+    IReadOnlyList<FilePickerFileType> dataFileTypes =
+    [
+        new FilePickerFileType("GameMaker data files (.win, .unx, .ios, .droid, audiogroup*.dat)")
+        {
+            Patterns = ["*.win", "*.unx", "*.ios", "*.droid", "audiogroup*.dat"],
+        },
+        new FilePickerFileType("All files")
+        {
+            Patterns = ["*"],
+        },
+    ];
+
     // Tabs
     public ObservableCollection<TabItemViewModel> Tabs { get; set; }
 
@@ -115,44 +127,54 @@ public partial class MainViewModel
 
     public async void FileOpen()
     {
-        if (OpenFileDialog is null)
-            return;
-
-        var files = await OpenFileDialog(new FilePickerOpenOptions
+        var files = await OpenFileDialog!(new FilePickerOpenOptions()
         {
-            Title = "Open",
+            Title = "Open data file",
             AllowMultiple = false,
-            FileTypeFilter =
-            [
-                new FilePickerFileType("GameMaker data files (.win, .unx, .ios, .droid, audiogroup*.dat)")
-                {
-                    Patterns = ["*.win", "*.unx", "*.ios", "*.droid", "audiogroup*.dat"],
-                },
-                new FilePickerFileType("All files")
-                {
-                    Patterns = ["*"],
-                },
-            ],
+            FileTypeFilter = dataFileTypes,
         });
 
-        if (files.Count >= 1)
+        if (files.Count != 1)
+            return;
+
+        Tabs.Clear();
+
+        using Stream stream = await files[0].OpenReadAsync();
+
+        SetData(UndertaleIO.Read(stream,
+            (string warning, bool isImportant) =>
+            {
+                Debug.WriteLine($"Data.Read warning: {(isImportant ? "(important) " : "")}{warning}");
+            },
+            (string message) =>
+            {
+                Debug.WriteLine($"Data.Read message: {message}");
+            }));
+
+        DataPath = files[0].TryGetLocalPath();
+    }
+
+    public async void FileSave()
+    {
+        if (Data is null)
+            return;
+
+        IStorageFile? file = await SaveFileDialog!(new FilePickerSaveOptions()
         {
-            Tabs.Clear();
+            Title = "Save data file",
+            FileTypeChoices = dataFileTypes,
+            DefaultExtension = ".win",
+        });
 
-            using Stream stream = await files[0].OpenReadAsync();
+        if (file is null)
+            return;
 
-            SetData(UndertaleIO.Read(stream,
-                (string warning, bool isImportant) =>
-                {
-                    Debug.WriteLine($"Data.Read warning: {(isImportant ? "(important) " : "")}{warning}");
-                },
-                (string message) =>
-                {
-                    Debug.WriteLine($"Data.Read message: {message}");
-                }));
+        using Stream stream = await file.OpenWriteAsync();
 
-            DataPath = files[0].TryGetLocalPath();
-        }
+        UndertaleIO.Write(stream, Data, message =>
+        {
+            Debug.WriteLine($"Data.Write message: {message}");
+        });
     }
 
     public void FileClose()
