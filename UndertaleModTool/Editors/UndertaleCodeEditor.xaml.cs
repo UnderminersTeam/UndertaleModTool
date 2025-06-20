@@ -1628,5 +1628,61 @@ namespace UndertaleModTool
                 return res;
             }
         }
+
+        private void Command_Compile(object sender, ExecutedRoutedEventArgs e)
+        {
+
+        }
+
+        private void Grid_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                if (e.Delta > 0)
+                {
+                    if (DecompiledEditor.FontSize < 100)
+                    {
+                        DecompiledEditor.FontSize += 1;
+                        DisassemblyEditor.FontSize += 1;
+                    }
+                }
+                else
+                {
+                    if (DecompiledEditor.FontSize > 5)
+                    {
+                        DecompiledEditor.FontSize -= 1;
+                        DisassemblyEditor.FontSize -= 1;
+                    }
+                }
+            }
+        }
+
+        private void Grid_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.OemPlus || e.Key == Key.Add)
+            {
+                if (Keyboard.Modifiers == ModifierKeys.Control)
+                {
+                    if (DecompiledEditor.FontSize < 100)
+                    {
+                        DecompiledEditor.FontSize += 1;
+                        DisassemblyEditor.FontSize += 1;
+                    }
+                    e.Handled = true;
+                }
+            }
+            else if ((e.Key == Key.OemMinus || e.Key == Key.Subtract))
+            {
+                if (Keyboard.Modifiers == ModifierKeys.Control)
+                {
+                    if (DecompiledEditor.FontSize > 5)
+                    {
+                        DecompiledEditor.FontSize -= 1;
+                        DisassemblyEditor.FontSize -= 1;
+                    }
+                    e.Handled = true;
+                }
+            }
+        }
     }
 }
