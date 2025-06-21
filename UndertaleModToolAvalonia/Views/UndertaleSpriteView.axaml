@@ -91,7 +91,7 @@
         </ScrollViewer>
 
         <Label>Collision masks</Label>
-        <c:EditableDataGrid ItemsSource="{Binding Sprite.CollisionMasks}" ItemFactory="{Binding CreateMaskEntry}">
+        <c:EditableDataGrid ItemsSource="{Binding Sprite.CollisionMasks}" ItemFactory="{Binding CreateMaskEntry}" Name="CollisionMasksDataGrid">
             <c:EditableDataGrid.Columns>
                 <DataGridTemplateColumn Header="Mask" Width="1*">
                     <DataGridTemplateColumn.CellTemplate>
@@ -102,6 +102,18 @@
                 </DataGridTemplateColumn>
             </c:EditableDataGrid.Columns>
         </c:EditableDataGrid>
+
+        <Label>Collision mask data</Label>
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
+                      MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
+            <c:SKImageViewer>
+                <c:SKImageViewer.SKImage>
+                    <MultiBinding Converter="{StaticResource ToSKImageUpdaterConverter}">
+                        <ReflectionBinding Path="#CollisionMasksDataGrid.DataGridControl.SelectedItem"/>
+                    </MultiBinding>
+                </c:SKImageViewer.SKImage>
+            </c:SKImageViewer>
+        </ScrollViewer>
 
         <Label>Is special type</Label>
         <CheckBox IsChecked="{Binding Sprite.IsSpecialType}" />

@@ -34,6 +34,10 @@ public class SKImageViewer : Control
 
         if (change.Property == SKImageProperty)
         {
+            Size size = GetSize();
+            Width = size.Width;
+            Height = size.Height;
+
             InvalidateMeasure();
             InvalidateVisual();
         }
@@ -43,6 +47,7 @@ public class SKImageViewer : Control
 
     public SKImageViewer()
     {
+        ClipToBounds = true;
         customDrawOperation = new CustomDrawOperation();
     }
 
@@ -52,6 +57,8 @@ public class SKImageViewer : Control
             return new Size(texturePageItem.BoundingWidth, texturePageItem.BoundingHeight);
         else if (SKImage is GMImage gmImage)
             return new Size(gmImage.Width, gmImage.Height);
+        else if (SKImage is UndertaleSprite.MaskEntry maskEntry)
+            return new Size(maskEntry.Width, maskEntry.Height);
 
         return new Size(0, 0);
     }
@@ -140,6 +147,29 @@ public class SKImageViewer : Control
                 SKImage image = mainVM.ImageCache.GetCachedImageFromGMImage(gmImage);
                 canvas.DrawImage(image, 0, 0);
             }
+            else if (SKImage is UndertaleSprite.MaskEntry maskEntry)
+            {
+                int size = maskEntry.Width * maskEntry.Height;
+                byte[] pixels = new byte[size];
+
+                for (int y = 0; y < maskEntry.Height; y++)
+                {
+                    int rowWidth = (maskEntry.Width + 7) / 8;
+                    int byteRowIndex = y * rowWidth;
+
+                    for (int x = 0; x < maskEntry.Width; x++)
+                    {
+                        int i = y * maskEntry.Width + x;
+                        int byteIndex = byteRowIndex + (x / 8);
+                        int bitIndex = x % 8;
+
+                        pixels[i] = (maskEntry.Data[byteIndex] & (1 << (7 - bitIndex))) != 0 ? (byte)255 : (byte)0;
+                    }
+                }
+
+                SKImage image = SkiaSharp.SKImage.FromPixelCopy(new SKImageInfo(maskEntry.Width, maskEntry.Height, SKColorType.Gray8), pixels);
+                canvas.DrawImage(image, 0, 0);
+            }
         }
     }
 }
@@ -149,7 +179,7 @@ public class ToSKImageUpdaterConverter : IMultiValueConverter
     public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
     {
         // Ignore other values, they're just for binding updates.
-        if (values[0] is UndertaleTexturePageItem or GMImage)
+        if (values[0] is UndertaleTexturePageItem or GMImage or UndertaleSprite.MaskEntry)
         {
             return values[0];
         }
