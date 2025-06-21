@@ -1,0 +1,26 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.Controls.FlagsBoxView">
+    <ContentControl DataContext="{Binding $parent[c:FlagsBoxView]}">
+        <StackPanel>
+            <Label Content="{Binding Value}" />
+            <!-- TODO: Add the textbox back in. -->
+            <!-- <TextBox Text="{Binding Value}" /> -->
+            <Expander Header="Flags">
+                <ItemsControl ItemsSource="{Binding Flags}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <CheckBox Content="{Binding Name}" IsChecked="{Binding Checked}" Checked="CheckBox_Checked" Unchecked="CheckBox_Checked"></CheckBox>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Expander>
+        </StackPanel>
+    </ContentControl>
+</UserControl>

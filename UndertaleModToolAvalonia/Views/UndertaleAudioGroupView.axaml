@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
+             xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
+             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.Views.UndertaleAudioGroupView"
+             x:DataType="v:UndertaleAudioGroupViewModel">
+    <UserControl.Resources>
+        <h:VersionCompareConverter x:Key="VersionCompareConverter" />
+    </UserControl.Resources>
+
+    <StackPanel Classes="PaddedProperties">
+        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+            <Label>Name</Label>
+            <c:UndertaleStringReferenceView Reference="{Binding AudioGroup.Name}" />
+        </Grid>
+    
+        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
+              IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).Version,
+              Converter={StaticResource VersionCompareConverter},
+              ConverterParameter=GE2024.14}">
+            <Label>Path</Label>
+            <c:UndertaleStringReferenceView Reference="{Binding AudioGroup.Path}" />
+        </Grid>
+    </StackPanel>
+</UserControl>
