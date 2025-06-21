@@ -370,11 +370,17 @@ public partial class Program : IScriptInterface
         DirectoryInfo directoryInfo;
         do
         {
-            Console.WriteLine("Please type a path (or drag and drop) to a valid directory:");
+            Console.WriteLine("Please enter a path (or drag and drop) to a valid directory:");
             Console.Write("Path: ");
             path = RemoveQuotes(Console.ReadLine());
+            if (string.IsNullOrEmpty(path))
+            {
+                return null;
+            }
             directoryInfo = new DirectoryInfo(path);
-        } while (!directoryInfo.Exists);
+        }
+        while (!directoryInfo.Exists);
+
         return path;
     }
 
@@ -382,14 +388,42 @@ public partial class Program : IScriptInterface
     public string PromptLoadFile(string defaultExt, string filter)
     {
         string path;
-        FileInfo directoryInfo;
+        FileInfo fileInfo;
         do
         {
-            Console.WriteLine("Please type a path (or drag and drop) to a valid file:");
+            Console.WriteLine("Please enter a path (or drag and drop) to a valid file:");
             Console.Write("Path: ");
             path = RemoveQuotes(Console.ReadLine());
-            directoryInfo = new FileInfo(path);
-        } while (directoryInfo.Exists);
+            if (string.IsNullOrEmpty(path))
+            {
+                return null;
+            }
+            fileInfo = new FileInfo(path);
+        }
+        while (fileInfo.Exists);
+
+        return path;
+    }
+
+    /// <inheritdoc/>
+    public string PromptSaveFile(string defaultExt, string filter)
+    {
+        string path;
+        do
+        {
+            Console.WriteLine("Please enter a path (or drag and drop) to save the file:");
+            Console.Write("Path: ");
+            path = RemoveQuotes(Console.ReadLine());
+
+            if (Directory.Exists(path))
+            {
+                Console.WriteLine("Error: Directory exists at that path.");
+                path = null; // Ensuring that the loop will work correctly
+                continue;
+            }
+        } 
+        while (string.IsNullOrWhiteSpace(path));
+
         return path;
     }
 
@@ -409,7 +443,7 @@ public partial class Program : IScriptInterface
         try
         {
             return code != null 
-                ? new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, settings ?? Data.ToolInfo.DecompilerSettings).DecompileToString() 
+                ? new DecompileContext(decompileContext, code, settings ?? Data.ToolInfo.DecompilerSettings).DecompileToString() 
                 : "";
         }
         catch (Exception e)

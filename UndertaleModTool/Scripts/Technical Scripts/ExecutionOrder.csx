@@ -265,7 +265,7 @@ void ProfileModeExempt()
             UndertaleInstruction inst = c.Instructions[i];
 
             if (inst.Kind == UndertaleInstruction.Opcode.PushGlb &&
-                inst.ValueVariable.Target.Name.Content == "interact")
+                inst.ValueVariable.Name.Content == "interact")
             {
                 // global.interact getter
                 c.Instructions[i] = new UndertaleInstruction()
@@ -273,11 +273,11 @@ void ProfileModeExempt()
                     Kind = UndertaleInstruction.Opcode.Call,
                     Type1 = UndertaleInstruction.DataType.Int32,
                     ArgumentsCount = 0,
-                    ValueFunction = new UndertaleInstruction.Reference<UndertaleFunction>() { Target = getInteractFunc }
+                    ValueFunction = getInteractFunc
                 };
             }
             else if (inst.Kind == UndertaleInstruction.Opcode.Pop && 
-                     inst.ValueVariable.Target.Name.Content == "interact")
+                     inst.ValueVariable.Name.Content == "interact")
             {
                 // global.interact setter
                 c.Instructions[i] = new UndertaleInstruction()
@@ -296,7 +296,7 @@ void ProfileModeExempt()
                     Kind = UndertaleInstruction.Opcode.Call,
                     Type1 = UndertaleInstruction.DataType.Int32,
                     ArgumentsCount = 1,
-                    ValueFunction = new UndertaleInstruction.Reference<UndertaleFunction>() { Target = setInteractFunc }
+                    ValueFunction = setInteractFunc
                 });
 
                 // Now that instructions were inserted, adjust jump offsets in
@@ -354,7 +354,7 @@ void ProfileModeExempt()
                     Kind = UndertaleInstruction.Opcode.Call,
                     Type1 = UndertaleInstruction.DataType.Int32,
                     ArgumentsCount = 1,
-                    ValueFunction = new UndertaleInstruction.Reference<UndertaleFunction>() { Target = func }
+                    ValueFunction = func
                 },
                 new UndertaleInstruction()
                 {
@@ -392,7 +392,7 @@ void ProfileModeExempt()
                     Kind = UndertaleInstruction.Opcode.Call,
                     Type1 = UndertaleInstruction.DataType.Int32,
                     ArgumentsCount = 0,
-                    ValueFunction = new UndertaleInstruction.Reference<UndertaleFunction>() { Target = endFunc }
+                    ValueFunction = endFunc
                 },
                 new UndertaleInstruction()
                 {

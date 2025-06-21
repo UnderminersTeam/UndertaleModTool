@@ -489,27 +489,38 @@ public sealed class CodeImportGroup
     {
         // Use a lower-level compile group with persisted linking lookups (as this may require multiple passes)
         CompileResult result = CompileResult.SuccessfulResult;
-        CompileGroup = new(Data, GlobalContext)
+        try
         {
-            PersistLinkingLookups = true,
-            MainThreadAction = MainThreadAction
-        };
-        foreach (ICodeImportOperation operation in _queuedOperations)
-        {
-            // Force a compile pass if code entry is repeated
-            if (CompileQueuedCodeEntries.Contains(operation.CodeEntry))
+            CompileGroup = new(Data, GlobalContext)
             {
-                CompileQueuedCodeEntries.Clear();
-                result = result.CombineWith(CompileGroup.Compile());
+                PersistLinkingLookups = true,
+                MainThreadAction = MainThreadAction
+            };
+            foreach (ICodeImportOperation operation in _queuedOperations)
+            {
+                // Force a compile pass if code entry is repeated
+                if (CompileQueuedCodeEntries.Contains(operation.CodeEntry))
+                {
+                    CompileQueuedCodeEntries.Clear();
+                    result = result.CombineWith(CompileGroup.Compile());
+                }
+
+                // Perform actual import
+                CompileQueuedCodeEntries.Add(operation.CodeEntry);
+                operation.Import(this);
             }
-
-            // Perform actual import
-            CompileQueuedCodeEntries.Add(operation.CodeEntry);
-            operation.Import(this);
         }
-
-        // Clear queue
-        _queuedOperations.Clear();
+        catch
+        {
+            // Clear queued code entries that were processed, when an exception is thrown
+            CompileQueuedCodeEntries.Clear();
+            throw;
+        }
+        finally
+        {
+            // Clear queue
+            _queuedOperations.Clear();
+        }
 
         // Perform final compile if required
         if (CompileQueuedCodeEntries.Count > 0)
@@ -517,6 +528,9 @@ public sealed class CodeImportGroup
             CompileQueuedCodeEntries.Clear();
             result = result.CombineWith(CompileGroup.Compile());
         }
+
+        // Get rid of compile group, as it is no longer needed
+        CompileGroup = null;
 
         // Handle errors
         if (!result.Successful)
@@ -527,9 +541,6 @@ public sealed class CodeImportGroup
             }
             return result;
         }
-
-        // Get rid of compile group, as it is no longer needed
-        CompileGroup = null;
 
         // Return compile result
         return result;
