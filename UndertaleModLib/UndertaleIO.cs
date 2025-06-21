@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Models;
+using UndertaleModLib.Resources.Languages;
 using UndertaleModLib.Util;
 
 namespace UndertaleModLib
@@ -308,7 +309,7 @@ namespace UndertaleModLib
             lenReader.ToHere();
 
             // Resolve resource IDs
-            SubmitMessage("Resolving resource IDs...");
+            SubmitMessage(Resource.Msg_ResolvingResourceIDs);
             foreach (UndertaleResourceRef res in _resourceRefsToResolve)
             {
                 res.PostUnserialize(this);
@@ -834,7 +835,7 @@ namespace UndertaleModLib
                 }
             }
 
-            SubmitMessage("Flushing remaining buffer data...");
+            SubmitMessage(Resource.Msg_FlushingRemainingBufferData);
             base.Flush();
         }
 
