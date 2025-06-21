@@ -9,8 +9,9 @@ public partial class TabItemViewModel
     [Notify]
     private bool _IsSelected = false;
 
-    public TabItemViewModel(object content)
+    public TabItemViewModel(object content, bool isSelected=false)
     {
         Content = content;
+        IsSelected = isSelected;
     }
 }
