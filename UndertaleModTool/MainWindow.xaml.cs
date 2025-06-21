@@ -262,6 +262,107 @@ namespace UndertaleModTool
             resources[SystemColors.InactiveSelectionHighlightBrushKey] = inactiveSelectionBrush;
         }
 
+        class FontEntry
+        {
+            public FontEntry(UndertaleFont font, bool @checked)
+            {
+                Font = font;
+                FontNameSafe = font.Name?.Content.Replace("_", "__");
+                Checked = @checked;
+            }
+
+            public UndertaleFont Font { get; }
+            public string FontNameSafe { get; }
+            public bool Checked { get; set; }
+        }
+
+        public void Dummy()
+        {
+            Window window = new()
+            {
+                MinWidth = 420,
+                MinHeight = 400,
+                Width = MinWidth,
+                Height = MinHeight,
+                Title = "Select fonts to export"
+            };
+            window.IsVisibleChanged += (_, _) =>
+            {
+                // There is no check for `IsVisible` or `IsLoaded`,
+                // because, apparently, it works differently for programmatically created window
+
+                if (Settings.Instance.EnableDarkMode)
+                    SetDarkTitleBarForWindow(window, true, false);
+            };
+
+            FontEntry[] fonts = Data.Fonts?.Select(x => new FontEntry(x, true)).ToArray();
+
+            Grid contentGrid = new();
+            contentGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Star) });
+            contentGrid.RowDefinitions.Add(new() { Height = GridLength.Auto });
+
+            ListBox fontListBox = new()
+            {
+                ItemsSource = fonts,
+                Margin = new(10),
+                MinWidth = 380,
+                MinHeight = 380,
+                SelectionMode = SelectionMode.Multiple,
+                Background = appDarkStyle[SystemColors.ControlBrushKey] as SolidColorBrush
+            };
+
+            Style itemContStyle = new(typeof(ListBoxItem));
+            itemContStyle.Setters.Add(new Setter(ListBoxItem.IsSelectedProperty, new Binding("Checked") { Mode = BindingMode.TwoWay }));
+            fontListBox.ItemContainerStyle = itemContStyle;
+            
+            DataTemplate fontTemplate = new();
+            FrameworkElementFactory templateFactory = new(typeof(CheckBox));
+            templateFactory.SetValue(CheckBox.IsCheckedProperty, new Binding("Checked") { Mode = BindingMode.TwoWay });
+            templateFactory.SetValue(CheckBox.ContentProperty, new Binding("FontNameSafe") { Mode = BindingMode.OneTime });
+            fontTemplate.VisualTree = templateFactory;
+            fontListBox.ItemTemplate = fontTemplate;
+
+            ButtonDark okButton = new()
+            {
+                Content = "OK",
+                Margin = new Thickness(0, 16, 0, 16),
+                Width = 64,
+                Height = 32,
+                FontSize = 16
+            };
+            okButton.Click += (_, _) =>
+            {
+                var checkedFonts = fonts.Where(f => f.Checked)
+                                        .Select(f => f.Font)
+                                        .ToArray();
+                if (checkedFonts.Length == 0)
+                {
+                    window.ShowError("No fonts are selected.");
+                    return;
+                }
+
+                window.Tag = checkedFonts;
+                window.DialogResult = true;
+                window.Close();
+            };
+
+            contentGrid.Children.Add(fontListBox);
+            contentGrid.Children.Add(okButton);
+            Grid.SetRow(fontListBox, 0);
+            Grid.SetRow(okButton, 1);
+
+            window.Content = contentGrid;
+
+            if (window.ShowDialog() == true)
+            {
+                var selectedFonts = window.Tag as UndertaleFont[];
+                if (selectedFonts is null)
+                    return; // Shouldn't happen
+
+
+            }
+        }
+
         /// <summary>
         /// Returns a <see cref="BitmapSource"/> instance for the given <see cref="GMImage"/>.
         /// If a previously-created instance has not yet been garbage collected, this will return that instance.
@@ -748,6 +849,7 @@ namespace UndertaleModTool
             if (dlg.ShowDialog(this) == true)
             {
                 await LoadFile(dlg.FileName, true);
+                Dummy();
                 return true;
             }
             return false;
