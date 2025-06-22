@@ -1,0 +1,23 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
+        xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="UndertaleModToolAvalonia.Views.SettingsWindow"
+        x:DataType="v:SettingsViewModel"
+        Title="Settings"
+        CanResize="False"
+        Classes="SettingsWindow">
+    <StackPanel>
+        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+            <Label>Theme:</Label>
+            <ComboBox SelectedIndex="{Binding MainVM.Settings.Theme}">
+                <ComboBoxItem>System default</ComboBoxItem>
+                <ComboBoxItem>Light</ComboBoxItem>
+                <ComboBoxItem>Dark</ComboBoxItem>
+            </ComboBox>
+        </Grid>
+    </StackPanel>
+</Window>

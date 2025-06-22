@@ -1,4 +1,5 @@
-﻿using Avalonia;
+﻿using System;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 
@@ -20,9 +21,9 @@ public class AutoGridBehavior : AvaloniaObject
 
     private static void HandleEnableChanged(Grid grid, AvaloniaPropertyChangedEventArgs args)
     {
-        if (args.NewValue is bool enable && enable == true)
+        if (args.NewValue is not null && (bool)args.NewValue)
         {
-            grid.AttachedToLogicalTree += (object? sender, Avalonia.LogicalTree.LogicalTreeAttachmentEventArgs e) =>
+            grid.Initialized += (object? sender, EventArgs _) =>
             {
                 int totalColumns = grid.ColumnDefinitions.Count;
 

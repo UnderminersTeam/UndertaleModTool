@@ -13,6 +13,7 @@ using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 using UndertaleModToolAvalonia.Controls;
+using UndertaleModToolAvalonia.Core;
 
 namespace UndertaleModToolAvalonia.Views;
 
@@ -23,13 +24,17 @@ public partial class MainViewModel
     public Func<FilePickerSaveOptions, Task<IStorageFile?>>? SaveFileDialog;
     public Func<Uri, Task<bool>>? LaunchUriAsync;
 
-
     public delegate Task<MessageWindow.Result> MessageDialogDelegate(string message, string? title = null, bool ok = false, bool yes = false, bool no = false, bool cancel = false);
     public MessageDialogDelegate? MessageDialog;
 
+    public Func<Task>? SettingsDialog;
+
+    // Settings
+    public SettingsFile Settings { get; } = new();
+
     // Window
     public string Title => $"UndertaleModToolAvalonia - v0.0.0.0" +
-        $"{(Data?.GeneralInfo is not null ? " - " + Data?.GeneralInfo.ToString() : "")}" +
+        $"{(Data?.GeneralInfo is not null ? " - " + Data.GeneralInfo.ToString() : "")}" +
         $"{(DataPath is not null ? " [" + DataPath + "]" : "")}";
 
     // Data
@@ -68,8 +73,6 @@ public partial class MainViewModel
 
     public MainViewModel()
     {
-        //Data = UndertaleData.CreateNew();
-
         Tabs = [
             new TabItemViewModel(new DescriptionViewModel(
                 "Welcome to UndertaleModTool!",
@@ -176,6 +179,11 @@ public partial class MainViewModel
         {
             Debug.WriteLine($"Data.Write message: {message}");
         });
+    }
+
+    public async void FileSettings()
+    {
+        await SettingsDialog!();
     }
 
     public void FileClose()

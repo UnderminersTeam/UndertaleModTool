@@ -23,7 +23,7 @@
                     <NativeMenuItemSeparator Header="-" />
                     <NativeMenuItem Header="Generate o_ffset map"/>
                     <NativeMenuItemSeparator Header="-" />
-                    <NativeMenuItem Header="S_ettings"/>
+                    <NativeMenuItem Header="S_ettings" Command="{Binding FileSettings}"/>
                     <NativeMenuItem Header="_Close" Command="{Binding FileClose}"/>
                 </NativeMenu>
             </NativeMenuItem>

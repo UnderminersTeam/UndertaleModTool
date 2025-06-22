@@ -189,4 +189,8 @@
         <Setter Property="MinWidth" Value="75" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
     </Style>
+
+    <Style Selector="Window.SettingsWindow">
+        <Setter Property="Padding" Value="12" />
+    </Style>
 </Styles>
