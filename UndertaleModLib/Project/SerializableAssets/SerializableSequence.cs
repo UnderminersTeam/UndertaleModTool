@@ -269,7 +269,7 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
             Key = keyframe.Key, Length = keyframe.Length, Stretch = keyframe.Stretch, Disabled = keyframe.Disabled,
             Channels = [.. keyframe.Channels.Select((kvp) => new KeyframeChannel<List<string>>()
             {
-                Channel = kvp.Key,
+                Channel = kvp.Channel,
                 Value = [.. kvp.Value.Messages.Select((message) => message?.Content)]
             })]
         })];
@@ -280,8 +280,8 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
             Key = keyframe.Key, Length = keyframe.Length, Stretch = keyframe.Stretch, Disabled = keyframe.Disabled,
             Channels = [.. keyframe.Channels.Select((kvp) => new KeyframeChannel<List<string>>()
             {
-                Channel = kvp.Key,
-                Value = kvp.Value.InternalCount > 0 ? [kvp.Value.Event?.Content] : []
+                Channel = kvp.Channel,
+                Value = kvp.Value.Events.Select(e => e?.Content).ToList()
             })]
         })];
 
@@ -306,7 +306,7 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
                             Key = keyframe.Key, Length = keyframe.Length, Stretch = keyframe.Stretch, Disabled = keyframe.Disabled,
                             Channels = [.. keyframe.Channels.Select((kvp) => new KeyframeChannel<AudioKeyframes.AudioKeyframe>()
                             {
-                                Channel = kvp.Key,
+                                Channel = kvp.Channel,
                                 Value = new AudioKeyframes.AudioKeyframe()
                                 {
                                     Mode = kvp.Value.Mode,
@@ -323,7 +323,7 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
                             Key = keyframe.Key, Length = keyframe.Length, Stretch = keyframe.Stretch, Disabled = keyframe.Disabled,
                             Channels = [.. keyframe.Channels.Select((kvp) => new KeyframeChannel<string>()
                             {
-                                Channel = kvp.Key,
+                                Channel = kvp.Channel,
                                 Value = kvp.Value.Resource?.Resource?.Name?.Content
                             })]
                         })]
@@ -336,7 +336,7 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
                             Key = keyframe.Key, Length = keyframe.Length, Stretch = keyframe.Stretch, Disabled = keyframe.Disabled,
                             Channels = [.. keyframe.Channels.Select((kvp) => new KeyframeChannel<string>()
                             {
-                                Channel = kvp.Key,
+                                Channel = kvp.Channel,
                                 Value = kvp.Value.Resource?.Resource?.Name?.Content
                             })]
                         })]
@@ -349,7 +349,7 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
                             Key = keyframe.Key, Length = keyframe.Length, Stretch = keyframe.Stretch, Disabled = keyframe.Disabled,
                             Channels = [.. keyframe.Channels.Select((kvp) => new KeyframeChannel<string>()
                             {
-                                Channel = kvp.Key,
+                                Channel = kvp.Channel,
                                 Value = kvp.Value.Resource?.Resource?.Name?.Content
                             })]
                         })]
@@ -362,7 +362,7 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
                             Key = keyframe.Key, Length = keyframe.Length, Stretch = keyframe.Stretch, Disabled = keyframe.Disabled,
                             Channels = [.. keyframe.Channels.Select((kvp) => new KeyframeChannel<int>()
                             {
-                                Channel = kvp.Key,
+                                Channel = kvp.Channel,
                                 Value = kvp.Value.Value
                             })]
                         })]
@@ -375,7 +375,7 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
                             Key = keyframe.Key, Length = keyframe.Length, Stretch = keyframe.Stretch, Disabled = keyframe.Disabled,
                             Channels = [.. keyframe.Channels.Select((kvp) => new KeyframeChannel<int>()
                             {
-                                Channel = kvp.Key,
+                                Channel = kvp.Channel,
                                 Value = kvp.Value.Value
                             })]
                         })]
@@ -388,7 +388,7 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
                             Key = keyframe.Key, Length = keyframe.Length, Stretch = keyframe.Stretch, Disabled = keyframe.Disabled,
                             Channels = [.. keyframe.Channels.Select((kvp) => new KeyframeChannel<string>()
                             {
-                                Channel = kvp.Key,
+                                Channel = kvp.Channel,
                                 Value = kvp.Value.Value?.Content
                             })]
                         })]
@@ -401,7 +401,7 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
                             Key = keyframe.Key, Length = keyframe.Length, Stretch = keyframe.Stretch, Disabled = keyframe.Disabled,
                             Channels = [.. keyframe.Channels.Select((kvp) => new KeyframeChannel<RealKeyframes.RealKeyframe>()
                             {
-                                Channel = kvp.Key,
+                                Channel = kvp.Channel,
                                 Value = new RealKeyframes.RealKeyframe()
                                 {
                                     Value = kvp.Value.Value,
@@ -420,7 +420,7 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
                             Key = keyframe.Key, Length = keyframe.Length, Stretch = keyframe.Stretch, Disabled = keyframe.Disabled,
                             Channels = [.. keyframe.Channels.Select((kvp) => new KeyframeChannel<TextKeyframes.TextKeyframe>()
                             {
-                                Channel = kvp.Key,
+                                Channel = kvp.Channel,
                                 Value = new TextKeyframes.TextKeyframe()
                                 {
                                     Text = kvp.Value.Text?.Content,
@@ -443,7 +443,7 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
                             Key = keyframe.Key, Length = keyframe.Length, Stretch = keyframe.Stretch, Disabled = keyframe.Disabled,
                             Channels = [.. keyframe.Channels.Select((kvp) => new KeyframeChannel<string>()
                             {
-                                Channel = kvp.Key,
+                                Channel = kvp.Channel,
                                 Value = kvp.Value.Resource?.Resource?.Name?.Content
                             })]
                         })]
@@ -460,10 +460,10 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
         Tracks = [.. seq.Tracks.Select(convertTrack)];
 
         // Update function IDs
-        FunctionIDs = [.. seq.FunctionIDs.Select((kvp) => new FunctionIDEntry()
+        FunctionIDs = [.. seq.FunctionIDs.Select((entry) => new FunctionIDEntry()
         {
-            ID = kvp.Key,
-            Function = kvp.Value?.Content
+            ID = entry.ID,
+            Function = entry.FunctionName?.Content
         })];
     }
 
@@ -513,29 +513,30 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
         seq.BroadcastMessages = [.. BroadcastMessages.Select((keyframe) => new UndertaleSequence.Keyframe<UndertaleSequence.BroadcastMessage>()
         {
             Key = keyframe.Key, Length = keyframe.Length, Stretch = keyframe.Stretch, Disabled = keyframe.Disabled,
-            Channels = keyframe.Channels.Select((channel) => new KeyValuePair<int, UndertaleSequence.BroadcastMessage>
-                (
-                    channel.Channel, 
-                    new UndertaleSequence.BroadcastMessage()
+            Channels = [.. 
+                keyframe.Channels.Select((channel) => new UndertaleSequence.Keyframe<UndertaleSequence.BroadcastMessage>.KeyframeChannel()
+                {
+                    Channel = channel.Channel,
+                    Value = new UndertaleSequence.BroadcastMessage()
                     {
                         Messages = [.. channel.Value.Select((message) => projectContext.MakeString(message))],
                     }
-                )).ToDictionary(),
+                })]
         })];
 
         // Update moments
         seq.Moments = [.. Moments.Select((keyframe) => new UndertaleSequence.Keyframe<UndertaleSequence.Moment>()
         {
             Key = keyframe.Key, Length = keyframe.Length, Stretch = keyframe.Stretch, Disabled = keyframe.Disabled,
-            Channels = keyframe.Channels.Select((channel) => new KeyValuePair<int, UndertaleSequence.Moment>
-                (
-                    channel.Channel,
-                    new UndertaleSequence.Moment()
+            Channels = [..
+                keyframe.Channels.Select((channel) => new UndertaleSequence.Keyframe<UndertaleSequence.Moment>.KeyframeChannel()
+                {
+                    Channel = channel.Channel,
+                    Value = new UndertaleSequence.Moment()
                     {
-                        InternalCount = channel.Value.Count,
-                        Event = channel.Value.Count > 0 ? projectContext.MakeString(channel.Value[0]) : null
+                        Events = [.. channel.Value.Select(ev => projectContext.MakeString(ev)) ]
                     }
-                )).ToDictionary()
+                })]
         })];
 
         // Update tracks
@@ -556,15 +557,16 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
                     List = [.. keyframes.Keyframes.Select((keyframe) => new UndertaleSequence.Keyframe<UndertaleSequence.AudioKeyframes.Data>()
                     {
                         Key = keyframe.Key, Length = keyframe.Length, Stretch = keyframe.Stretch, Disabled = keyframe.Disabled,
-                        Channels = keyframe.Channels.Select((channel) => new KeyValuePair<int, UndertaleSequence.AudioKeyframes.Data>
-                            (
-                                channel.Channel,
-                                new UndertaleSequence.AudioKeyframes.Data()
+                        Channels = [.. 
+                            keyframe.Channels.Select((channel) => new UndertaleSequence.Keyframe<UndertaleSequence.AudioKeyframes.Data>.KeyframeChannel()
+                            {
+                                Channel = channel.Channel,
+                                Value = new UndertaleSequence.AudioKeyframes.Data()
                                 {
                                     Mode = channel.Value.Mode,
                                     Resource = new(projectContext.FindSound(channel.Value.SoundAsset, this))
                                 }
-                            )).ToDictionary()
+                            })]
                     })]
                 },
                 InstanceKeyframes keyframes => new UndertaleSequence.InstanceKeyframes()
@@ -572,14 +574,15 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
                     List = [.. keyframes.Keyframes.Select((keyframe) => new UndertaleSequence.Keyframe<UndertaleSequence.InstanceKeyframes.Data>()
                     {
                         Key = keyframe.Key, Length = keyframe.Length, Stretch = keyframe.Stretch, Disabled = keyframe.Disabled,
-                        Channels = keyframe.Channels.Select((channel) => new KeyValuePair<int, UndertaleSequence.InstanceKeyframes.Data>
-                            (
-                                channel.Channel,
-                                new UndertaleSequence.InstanceKeyframes.Data()
+                        Channels = [..
+                            keyframe.Channels.Select((channel) => new UndertaleSequence.Keyframe<UndertaleSequence.InstanceKeyframes.Data>.KeyframeChannel()
+                            {
+                                Channel = channel.Channel,
+                                Value = new UndertaleSequence.InstanceKeyframes.Data()
                                 {
                                     Resource = new(projectContext.FindGameObject(channel.Value, this))
                                 }
-                            )).ToDictionary()
+                            })]
                     })]
                 },
                 GraphicKeyframes keyframes => new UndertaleSequence.GraphicKeyframes()
@@ -587,14 +590,15 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
                     List = [.. keyframes.Keyframes.Select((keyframe) => new UndertaleSequence.Keyframe<UndertaleSequence.GraphicKeyframes.Data>()
                     {
                         Key = keyframe.Key, Length = keyframe.Length, Stretch = keyframe.Stretch, Disabled = keyframe.Disabled,
-                        Channels = keyframe.Channels.Select((channel) => new KeyValuePair<int, UndertaleSequence.GraphicKeyframes.Data>
-                            (
-                                channel.Channel,
-                                new UndertaleSequence.GraphicKeyframes.Data()
+                        Channels = [..
+                            keyframe.Channels.Select((channel) => new UndertaleSequence.Keyframe<UndertaleSequence.GraphicKeyframes.Data>.KeyframeChannel()
+                            {
+                                Channel = channel.Channel,
+                                Value = new UndertaleSequence.GraphicKeyframes.Data()
                                 {
                                     Resource = new(projectContext.FindSprite(channel.Value, this))
                                 }
-                            )).ToDictionary()
+                            })]
                     })]
                 },
                 SequenceKeyframes keyframes => new UndertaleSequence.SequenceKeyframes()
@@ -602,14 +606,15 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
                     List = [.. keyframes.Keyframes.Select((keyframe) => new UndertaleSequence.Keyframe<UndertaleSequence.SequenceKeyframes.Data>()
                     {
                         Key = keyframe.Key, Length = keyframe.Length, Stretch = keyframe.Stretch, Disabled = keyframe.Disabled,
-                        Channels = keyframe.Channels.Select((channel) => new KeyValuePair<int, UndertaleSequence.SequenceKeyframes.Data>
-                            (
-                                channel.Channel,
-                                new UndertaleSequence.SequenceKeyframes.Data()
+                        Channels = [..
+                            keyframe.Channels.Select((channel) => new UndertaleSequence.Keyframe<UndertaleSequence.SequenceKeyframes.Data>.KeyframeChannel()
+                            {
+                                Channel = channel.Channel,
+                                Value = new UndertaleSequence.SequenceKeyframes.Data()
                                 {
                                     Resource = new(projectContext.FindSequence(channel.Value, this))
                                 }
-                            )).ToDictionary()
+                            })]
                     })]
                 },
                 SpriteFramesKeyframes keyframes => new UndertaleSequence.SpriteFramesKeyframes()
@@ -617,14 +622,15 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
                     List = [.. keyframes.Keyframes.Select((keyframe) => new UndertaleSequence.Keyframe<UndertaleSequence.SpriteFramesKeyframes.Data>()
                     {
                         Key = keyframe.Key, Length = keyframe.Length, Stretch = keyframe.Stretch, Disabled = keyframe.Disabled,
-                        Channels = keyframe.Channels.Select((channel) => new KeyValuePair<int, UndertaleSequence.SpriteFramesKeyframes.Data>
-                            (
-                                channel.Channel,
-                                new UndertaleSequence.SpriteFramesKeyframes.Data()
+                        Channels = [..
+                            keyframe.Channels.Select((channel) => new UndertaleSequence.Keyframe<UndertaleSequence.SpriteFramesKeyframes.Data>.KeyframeChannel()
+                            {
+                                Channel = channel.Channel,
+                                Value = new UndertaleSequence.SpriteFramesKeyframes.Data()
                                 {
                                     Value = channel.Value
                                 }
-                            )).ToDictionary()
+                            })]
                     })]
                 },
                 BoolKeyframes keyframes => new UndertaleSequence.BoolKeyframes()
@@ -632,14 +638,15 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
                     List = [.. keyframes.Keyframes.Select((keyframe) => new UndertaleSequence.Keyframe<UndertaleSequence.BoolKeyframes.Data>()
                     {
                         Key = keyframe.Key, Length = keyframe.Length, Stretch = keyframe.Stretch, Disabled = keyframe.Disabled,
-                        Channels = keyframe.Channels.Select((channel) => new KeyValuePair<int, UndertaleSequence.BoolKeyframes.Data>
-                            (
-                                channel.Channel,
-                                new UndertaleSequence.BoolKeyframes.Data()
+                        Channels = [..
+                            keyframe.Channels.Select((channel) => new UndertaleSequence.Keyframe<UndertaleSequence.BoolKeyframes.Data>.KeyframeChannel()
+                            {
+                                Channel = channel.Channel,
+                                Value = new UndertaleSequence.BoolKeyframes.Data()
                                 {
                                     Value = channel.Value
                                 }
-                            )).ToDictionary()
+                            })]
                     })]
                 },
                 StringKeyframes keyframes => new UndertaleSequence.StringKeyframes()
@@ -647,14 +654,15 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
                     List = [.. keyframes.Keyframes.Select((keyframe) => new UndertaleSequence.Keyframe<UndertaleSequence.StringKeyframes.Data>()
                     {
                         Key = keyframe.Key, Length = keyframe.Length, Stretch = keyframe.Stretch, Disabled = keyframe.Disabled,
-                        Channels = keyframe.Channels.Select((channel) => new KeyValuePair<int, UndertaleSequence.StringKeyframes.Data>
-                            (
-                                channel.Channel,
-                                new UndertaleSequence.StringKeyframes.Data()
+                        Channels = [..
+                            keyframe.Channels.Select((channel) => new UndertaleSequence.Keyframe<UndertaleSequence.StringKeyframes.Data>.KeyframeChannel()
+                            {
+                                Channel = channel.Channel,
+                                Value = new UndertaleSequence.StringKeyframes.Data()
                                 {
                                     Value = projectContext.MakeString(channel.Value)
                                 }
-                            )).ToDictionary()
+                            })]
                     })]
                 },
                 RealKeyframes keyframes => new UndertaleSequence.RealKeyframes()
@@ -662,17 +670,18 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
                     List = [.. keyframes.Keyframes.Select((keyframe) => new UndertaleSequence.Keyframe<UndertaleSequence.RealData>()
                     {
                         Key = keyframe.Key, Length = keyframe.Length, Stretch = keyframe.Stretch, Disabled = keyframe.Disabled,
-                        Channels = keyframe.Channels.Select((channel) => new KeyValuePair<int, UndertaleSequence.RealData>
-                            (
-                                channel.Channel,
-                                new UndertaleSequence.RealData()
+                        Channels = [..
+                            keyframe.Channels.Select((channel) => new UndertaleSequence.Keyframe<UndertaleSequence.RealData>.KeyframeChannel()
+                            {
+                                Channel = channel.Channel,
+                                Value = new UndertaleSequence.RealData()
                                 {
                                     Value = channel.Value.Value,
                                     IsCurveEmbedded = channel.Value.AnimCurveEmbedded is not null,
                                     EmbeddedAnimCurve = channel.Value.AnimCurveEmbedded?.ImportSubResource(projectContext),
                                     AssetAnimCurve = new(projectContext.FindAnimationCurve(channel.Value.AnimCurveAsset, this))
                                 }
-                            )).ToDictionary()
+                            })]
                     })],
                     Interpolation = keyframes.Interpolation
                 },
@@ -681,10 +690,11 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
                     List = [.. keyframes.Keyframes.Select((keyframe) => new UndertaleSequence.Keyframe<UndertaleSequence.TextKeyframes.Data>()
                     {
                         Key = keyframe.Key, Length = keyframe.Length, Stretch = keyframe.Stretch, Disabled = keyframe.Disabled,
-                        Channels = keyframe.Channels.Select((channel) => new KeyValuePair<int, UndertaleSequence.TextKeyframes.Data>
-                            (
-                                channel.Channel,
-                                new UndertaleSequence.TextKeyframes.Data()
+                        Channels = [..
+                            keyframe.Channels.Select((channel) => new UndertaleSequence.Keyframe<UndertaleSequence.TextKeyframes.Data>.KeyframeChannel()
+                            {
+                                Channel = channel.Channel,
+                                Value = new UndertaleSequence.TextKeyframes.Data()
                                 {
                                     Text = projectContext.MakeString(channel.Value.Text),
                                     Wrap = channel.Value.Wrap,
@@ -692,7 +702,7 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
                                     AlignmentH = channel.Value.AlignmentH,
                                     FontIndex = projectContext.FindFontIndex(channel.Value.FontAsset, this)
                                 }
-                            )).ToDictionary()
+                            })]
                     })]
                 },
                 ParticleKeyframes keyframes => new UndertaleSequence.ParticleKeyframes()
@@ -700,14 +710,15 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
                     List = [.. keyframes.Keyframes.Select((keyframe) => new UndertaleSequence.Keyframe<UndertaleSequence.ParticleKeyframes.Data>()
                     {
                         Key = keyframe.Key, Length = keyframe.Length, Stretch = keyframe.Stretch, Disabled = keyframe.Disabled,
-                        Channels = keyframe.Channels.Select((channel) => new KeyValuePair<int, UndertaleSequence.ParticleKeyframes.Data>
-                            (
-                                channel.Channel,
-                                new UndertaleSequence.ParticleKeyframes.Data()
+                        Channels = [..
+                            keyframe.Channels.Select((channel) => new UndertaleSequence.Keyframe<UndertaleSequence.ParticleKeyframes.Data>.KeyframeChannel()
+                            {
+                                Channel = channel.Channel,
+                                Value = new UndertaleSequence.ParticleKeyframes.Data()
                                 {
                                     Resource = new(projectContext.FindParticleSystem(channel.Value, this))
                                 }
-                            )).ToDictionary()
+                            })]
                     })]
                 },
                 null => null,
@@ -717,17 +728,16 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
             {
                 SerializableAnimationCurve curve => curve.ImportSubResource(projectContext),
                 _ => throw new ProjectException($"Unknown owned resource type {resource.GetType().Name}")
-            })],
-            GMAnimCurveString = track.OwnedResources.Count > 0 ? projectContext.MakeString("GMAnimCurve") : null
+            })]
         };
         seq.Tracks = [.. Tracks.Select(convertTrack)];
 
         // Update function IDs
-        seq.FunctionIDs = FunctionIDs.Select((entry) => new KeyValuePair<int, UndertaleString>
-            (
-                entry.ID,
-                projectContext.MakeString(entry.Function)
-            )).ToDictionary();
+        seq.FunctionIDs = [.. FunctionIDs.Select((entry) => new UndertaleSequence.FunctionIDEntry()
+            {
+                ID = entry.ID,
+                FunctionName = projectContext.MakeString(entry.Function)
+            })];
 
         return seq;
     }
