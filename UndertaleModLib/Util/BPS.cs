@@ -144,92 +144,107 @@ public static class BPS
                 switch (command)
                 {
                     case 0:
-                        // Source read (copy identical data from the same exact position in the file)
-                        baseFile.Seek(outputOffset, SeekOrigin.Begin);
-                        outputOffset += length;
-
-                        // Copy bytes in chunks
-                        do
                         {
-                            int numBytesToCopy = (int)Math.Min(sharedBuffer.Length, length);
-                            baseFile.ReadExactly(sharedBuffer, 0, numBytesToCopy);
-                            outputFile.Write(sharedBuffer, 0, numBytesToCopy);
-                            length -= numBytesToCopy;
-                        }
-                        while (length > 0);
-                        break;
-                    case 1:
-                        // Target read (copy in new data directly from the patch file)
-                        outputOffset += length;
+                            // Source read (copy identical data from the same exact position in the file)
+                            baseFile.Seek(outputOffset, SeekOrigin.Begin);
+                            outputOffset += length;
 
-                        // Copy bytes in chunks
-                        do
-                        {
-                            int numBytesToCopy = (int)Math.Min(sharedBuffer.Length, length);
-                            patchFile.ReadExactly(sharedBuffer, 0, numBytesToCopy);
-                            outputFile.Write(sharedBuffer, 0, numBytesToCopy);
-                            length -= numBytesToCopy;
-                        }
-                        while (length > 0);
-                        break;
-                    case 2:
-                        // Source copy (copy data from an arbitrary location in the base file)
-                        long sourceOffsetData = DecodeNumber(patchFile);
-                        sourceRelativeOffset += ((sourceOffsetData & 1) != 0 ? -1 : 1) * (sourceOffsetData >> 1);
-                        baseFile.Seek(sourceRelativeOffset, SeekOrigin.Begin);
-                        sourceRelativeOffset += length;
-                        outputOffset += length;
-
-                        // Copy bytes in chunks
-                        do
-                        {
-                            int numBytesToCopy = (int)Math.Min(sharedBuffer.Length, length);
-                            baseFile.ReadExactly(sharedBuffer, 0, numBytesToCopy);
-                            outputFile.Write(sharedBuffer, 0, numBytesToCopy);
-                            length -= numBytesToCopy;
-                        }
-                        while (length > 0);
-                        break;
-                    case 3:
-                        // Target copy (copy data from an arbitrary location in the data already written to the output file)
-                        long targetOffsetData = DecodeNumber(patchFile);
-                        targetRelativeOffset += ((targetOffsetData & 1) != 0 ? -1 : 1) * (targetOffsetData >> 1);
-
-                        // Copy bytes in chunks while possible
-                        long possibleChunkedLength = Math.Min(length, outputOffset - targetRelativeOffset);
-                        length -= possibleChunkedLength;
-
-                        // Copy in chunks
-                        do
-                        {
-                            int numBytesToCopy = (int)Math.Min(sharedBuffer.Length, possibleChunkedLength);
-                            outputFile.Seek(targetRelativeOffset, SeekOrigin.Begin);
-                            outputFile.ReadExactly(sharedBuffer, 0, numBytesToCopy);
-                            outputFile.Seek(outputOffset, SeekOrigin.Begin);
-                            outputFile.Write(sharedBuffer, 0, numBytesToCopy);
-                            possibleChunkedLength -= numBytesToCopy;
-                            targetRelativeOffset += numBytesToCopy;
-                            outputOffset += numBytesToCopy;
-                        }
-                        while (possibleChunkedLength > 0);
-
-                        // Copy the last byte while needed
-                        if (length > 0)
-                        {
-                            outputFile.Seek(targetRelativeOffset, SeekOrigin.Begin);
-                            outputFile.ReadExactly(sharedBuffer, 0, 1);
-                            byte lastByte = sharedBuffer[0];
-                            outputFile.Seek(outputOffset, SeekOrigin.Begin);
+                            // Copy bytes in chunks
                             do
                             {
-                                outputFile.WriteByte(lastByte);
-                                length -= 1;
-                                targetRelativeOffset += 1;
-                                outputOffset += 1;
+                                int numBytesToCopy = (int)Math.Min(sharedBuffer.Length, length);
+                                baseFile.ReadExactly(sharedBuffer, 0, numBytesToCopy);
+                                outputFile.Write(sharedBuffer, 0, numBytesToCopy);
+                                length -= numBytesToCopy;
                             }
                             while (length > 0);
+                            break;
                         }
-                        break;
+                    case 1:
+                        {
+                            // Target read (copy in new data directly from the patch file)
+                            outputOffset += length;
+
+                            // Copy bytes in chunks
+                            do
+                            {
+                                int numBytesToCopy = (int)Math.Min(sharedBuffer.Length, length);
+                                patchFile.ReadExactly(sharedBuffer, 0, numBytesToCopy);
+                                outputFile.Write(sharedBuffer, 0, numBytesToCopy);
+                                length -= numBytesToCopy;
+                            }
+                            while (length > 0);
+                            break;
+                        }
+                    case 2:
+                        {
+                            // Source copy (copy data from an arbitrary location in the base file)
+                            long sourceOffsetData = DecodeNumber(patchFile);
+                            sourceRelativeOffset += ((sourceOffsetData & 1) != 0 ? -1 : 1) * (sourceOffsetData >> 1);
+                            baseFile.Seek(sourceRelativeOffset, SeekOrigin.Begin);
+                            sourceRelativeOffset += length;
+                            outputOffset += length;
+
+                            // Copy bytes in chunks
+                            do
+                            {
+                                int numBytesToCopy = (int)Math.Min(sharedBuffer.Length, length);
+                                baseFile.ReadExactly(sharedBuffer, 0, numBytesToCopy);
+                                outputFile.Write(sharedBuffer, 0, numBytesToCopy);
+                                length -= numBytesToCopy;
+                            }
+                            while (length > 0);
+                            break;
+                        }
+                    case 3:
+                        {
+                            // Target copy (copy data from an arbitrary location in the data already written to the output file)
+                            long targetOffsetData = DecodeNumber(patchFile);
+                            targetRelativeOffset += ((targetOffsetData & 1) != 0 ? -1 : 1) * (targetOffsetData >> 1);
+
+                            // Copy bytes in chunks while possible
+                            long possibleChunkedLength = Math.Min(length, outputOffset - targetRelativeOffset);
+                            length -= possibleChunkedLength;
+
+                            // Copy in chunks
+                            int numBytesToCopy;
+                            do
+                            {
+                                numBytesToCopy = (int)Math.Min(sharedBuffer.Length, possibleChunkedLength);
+                                outputFile.Seek(targetRelativeOffset, SeekOrigin.Begin);
+                                outputFile.ReadExactly(sharedBuffer, 0, numBytesToCopy);
+                                outputFile.Seek(outputOffset, SeekOrigin.Begin);
+                                outputFile.Write(sharedBuffer, 0, numBytesToCopy);
+                                possibleChunkedLength -= numBytesToCopy;
+                                targetRelativeOffset += numBytesToCopy;
+                                outputOffset += numBytesToCopy;
+                            }
+                            while (possibleChunkedLength > 0);
+
+                            // Copy the last byte while needed (in chunks)
+                            if (length > 0)
+                            {
+                                // Fill shared buffer with the last byte
+                                byte lastByte = sharedBuffer[numBytesToCopy - 1];
+                                numBytesToCopy = (int)Math.Min(sharedBuffer.Length, length);
+                                for (int i = 0; i < numBytesToCopy; i++)
+                                {
+                                    sharedBuffer[i] = lastByte;
+                                }
+
+                                // Write the shared buffer as many times as needed
+                                targetRelativeOffset += length;
+                                outputOffset += length;
+                                do
+                                {
+                                    numBytesToCopy = (int)Math.Min(sharedBuffer.Length, length);
+                                    outputFile.Write(sharedBuffer, 0, numBytesToCopy);
+                                    length -= numBytesToCopy;
+                                }
+                                while (length > 0);
+                            }
+                            break;
+                        }
                 }
             }
 

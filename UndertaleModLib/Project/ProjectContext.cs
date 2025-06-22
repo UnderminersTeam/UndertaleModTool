@@ -446,9 +446,19 @@ public sealed class ProjectContext
 
             // Apply patch
             using FileStream patchStream = new(fullPatchPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            using FileStream baseStream = new(baseFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            using FileStream outputStream = new(outputFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
-            BPS.ApplyPatch(baseStream, patchStream, outputStream);
+            if (Path.GetFullPath(baseFilePath) == Path.GetFullPath(outputFilePath))
+            {
+                byte[] baseFileBytes = File.ReadAllBytes(baseFilePath);
+                using MemoryStream baseStream = new(baseFileBytes);
+                using FileStream outputStream = new(outputFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
+                BPS.ApplyPatch(baseStream, patchStream, outputStream);
+            }
+            else
+            {
+                using FileStream baseStream = new(baseFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                using FileStream outputStream = new(outputFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
+                BPS.ApplyPatch(baseStream, patchStream, outputStream);
+            }
         }
     }
 
