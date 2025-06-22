@@ -30,7 +30,7 @@ public static class BPS
     // Lookup table for CRC32 calculations
     private static readonly uint[] _crcTable = new uint[256];
 
-    // Initializes CRC3 lookup table
+    // Initializes CRC32 lookup table
     static BPS()
     {
         for (uint n = 0; n < 256; n++)
