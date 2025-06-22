@@ -17,3 +17,19 @@ public class ProjectException : Exception
     {
     }
 }
+
+[Serializable]
+public class GameFileBackupException : Exception
+{
+    public GameFileBackupException()
+    {
+    }
+
+    public GameFileBackupException(string message) : base(message)
+    {
+    }
+
+    public GameFileBackupException(string message, Exception innerException) : base(message, innerException)
+    {
+    }
+}

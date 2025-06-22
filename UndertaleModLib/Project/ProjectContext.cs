@@ -26,14 +26,29 @@ public sealed class ProjectContext
     public string Name { get => _mainOptions.Name; }
 
     /// <summary>
-    /// Current data file path associated with this project, for loading only.
+    /// Project flags, denoting certain features that the project may use (including custom ones, which start with an underscore).
     /// </summary>
-    public string LoadDataPath { get; }
+    public List<string> Flags { get => _mainOptions.Flags; }
 
     /// <summary>
-    /// Current data file path to save to, when saving the game data (not the project itself).
+    /// Current directory associated with loading data for this project. Must always be set.
     /// </summary>
-    public string SaveDataPath { get; }
+    public string LoadDirectory { get; }
+
+    /// <summary>
+    /// Current directory associated with saving data for this project. Must always be set.
+    /// </summary>
+    public string SaveDirectory { get; }
+
+    /// <summary>
+    /// Current data file path associated with this project, for loading only, or <see langword="null"/> if none is assigned.
+    /// </summary>
+    public string LoadDataPath { get; private set; } = null;
+
+    /// <summary>
+    /// Current data file path to save to, when saving the game data (not the project itself), or <see langword="null"/> if none is assigned.
+    /// </summary>
+    public string SaveDataPath { get; private set; } = null;
 
     /// <summary>
     /// Whether this context has any unexported assets.
@@ -51,9 +66,9 @@ public sealed class ProjectContext
     internal Action<Action> MainThreadAction { get; set; } = static (f) => f();
 
     /// <summary>
-    /// Current data context associated with this project.
+    /// Current data context associated with this project, or <see langword="null"/> if none is assigned.
     /// </summary>
-    internal UndertaleData Data { get; }
+    internal UndertaleData Data { get; private set; } = null;
 
     /// <summary>
     /// Lookup of asset paths that existed when loading on disk, by data name and asset type.
@@ -64,6 +79,11 @@ public sealed class ProjectContext
     /// Texture worker used during exporting.
     /// </summary>
     internal TextureWorker TextureWorker { get; set; }
+
+    /// <summary>
+    /// Game file backup instance.
+    /// </summary>
+    internal IGameFileBackup FileBackup { get; private set; }
 
     /// <summary>
     /// Generic options to use for writing JSON.
@@ -82,7 +102,11 @@ public sealed class ProjectContext
     private readonly string _mainDirectory;
 
     // Main options of the project
-    private readonly ProjectMainOptions _mainOptions;
+    private ProjectMainOptions _mainOptions = null;
+
+    // Hashset of all fully-qualified paths to project JSONs, for when importing sub-projects (to avoid infinite recursion).
+    // This is shared with parent projects, if a sub-project.
+    private HashSet<string> _projectJsonPaths = null;
 
     // Lookup of asset paths that existed when loading on disk, by data name and asset type
     private readonly Dictionary<(string DataName, SerializableAssetType AssetType), string> _assetDataNamesToPaths = new(128);
@@ -101,48 +125,358 @@ public sealed class ProjectContext
     private HashSet<string> _streamedSoundFilenames = null;
 
     /// <summary>
-    /// Initializes a project context based on its existing main file path, and imports all of its data.
+    /// Initializes a project context based on its existing main file path, as well as load/save directories.
+    /// </summary>
+    /// <param name="loadDirectory">Path of the directory for game data to be loaded from.</param>
+    /// <param name="saveDirectory">Path of the directory for game data to be saved to.</param>
+    /// <param name="mainFilePath">Main file path for the project.</param>
+    private ProjectContext(string loadDirectory, string saveDirectory, string mainFilePath)
+    {
+        Data = null;
+        LoadDirectory = Path.GetFullPath(loadDirectory);
+        SaveDirectory = Path.GetFullPath(saveDirectory);
+        _mainFilePath = mainFilePath;
+        _mainDirectory = Path.GetFullPath(Path.GetDirectoryName(_mainFilePath));
+    }
+
+    /// <summary>
+    /// Initializes a project context based on its existing main file path, as well as load/save directories.
+    /// </summary>
+    /// <param name="loadDirectory">Path of the directory for game data to be loaded from.</param>
+    /// <param name="saveDirectory">Path of the directory for game data to be saved to.</param>
+    /// <param name="mainFilePath">Main file path for the project.</param>
+    public static ProjectContext CreateWithDirectories(string loadDirectory, string saveDirectory, string mainFilePath)
+    {
+        return new ProjectContext(loadDirectory, saveDirectory, mainFilePath);
+    }
+
+    /// <summary>
+    /// Initializes a project context based on its existing main file path, as well as load/save data file paths.
+    /// </summary>
+    /// <param name="loadPath">Path of the data file for game data to be loaded from.</param>
+    /// <param name="savePath">Path of the data file for game data to be saved to.</param>
+    /// <param name="mainFilePath">Main file path for the project.</param>
+    public static ProjectContext CreateWithDataFilePaths(string loadPath, string savePath, string mainFilePath)
+    {
+        return new ProjectContext(Path.GetDirectoryName(loadPath), Path.GetDirectoryName(savePath), mainFilePath)
+        {
+            LoadDataPath = Path.GetFullPath(loadPath),
+            SaveDataPath = Path.GetFullPath(savePath)
+        };
+    }
+
+    /// <summary>
+    /// Initializes a project context for a new project based on its main file path, and a name to give to it.
     /// </summary>
     /// <param name="currentData">Current data context to associate with the project.</param>
     /// <param name="loadedDataPath">Path of the data file that was loaded for the current data context.</param>
     /// <param name="savingDataPath">Path of the data file to be saved to.</param>
     /// <param name="mainFilePath">Main file path for the project.</param>
+    /// <param name="newProjectName">Name of the new project being created.</param>
     /// <param name="mainThreadAction">
     /// For operations that should occur on the main thread, this will be 
     /// called to invoke those operations, if provided. This will stick around
     /// for the lifetime of the project context.
     /// </param>
     /// <exception cref="ProjectException">When a project-specific exception occurs</exception>
-    public ProjectContext(UndertaleData currentData, string loadedDataPath, string savingDataPath, string mainFilePath, Action<Action> mainThreadAction = null)
+    public ProjectContext(UndertaleData currentData, string loadedDataPath, string savingDataPath, string mainFilePath,
+                          string newProjectName, Action<Action> mainThreadAction = null)
     {
         Data = currentData;
         LoadDataPath = loadedDataPath;
         SaveDataPath = savingDataPath;
+        LoadDirectory = Path.GetFullPath(Path.GetDirectoryName(loadedDataPath));
+        SaveDirectory = Path.GetFullPath(Path.GetDirectoryName(savingDataPath));
         _mainFilePath = mainFilePath;
         if (mainThreadAction is not null)
         {
             MainThreadAction = mainThreadAction;
         }
-        using (FileStream fs = new(mainFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+        _mainDirectory = Path.GetFullPath(Path.GetDirectoryName(mainFilePath));
+
+        // If the file already exists, we cannot overwrite it (give a friendly message)
+        if (File.Exists(mainFilePath))
+        {
+            throw new ProjectException($"Project file already exists at \"{mainFilePath}\"");
+        }
+
+        // If the directory isn't empty, we don't want to overwrite anything else accidentally
+        Directory.CreateDirectory(_mainDirectory);
+        if (Directory.EnumerateFileSystemEntries(_mainDirectory).Any())
+        {
+            throw new ProjectException("Project directory is not empty");
+        }
+
+        // Create new main options and save it
+        _mainOptions = new()
+        {
+            Name = newProjectName
+        };
+        using FileStream fs = new(mainFilePath, FileMode.CreateNew);
+        JsonSerializer.Serialize(fs, _mainOptions, JsonOptions);
+    }
+
+    /// <summary>
+    /// Imports all of the data of the project.
+    /// </summary>
+    /// <param name="currentData">Current data context to associate with the project.</param>
+    /// <param name="mainThreadAction">
+    /// For operations that should occur on the main thread, this will be 
+    /// called to invoke those operations, if provided. This will stick around
+    /// for the lifetime of the project context.
+    /// </param>
+    /// <param name="existingFileBackup">
+    /// If this project context is being invoked as part of larger changes to game data,
+    /// or an alternative backup implementation is desired (including no-op),
+    /// an existing <see cref="IGameFileBackup"/> instance can be used to back up files.
+    /// </param>
+    /// <exception cref="ProjectException">When a project-specific exception occurs</exception>
+    public void Import(UndertaleData currentData = null, IGameFileBackup existingFileBackup = null, Action<Action> mainThreadAction = null)
+    {
+        // Ensure project is imported
+        if (_mainOptions is not null)
+        {
+            throw new InvalidOperationException("Project has already been imported");
+        }
+
+        // Set main thread action, if supplied
+        if (mainThreadAction is not null)
+        {
+            MainThreadAction = mainThreadAction;
+        }
+
+        // Load options
+        using (FileStream fs = new(_mainFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
         {
             _mainOptions = JsonSerializer.Deserialize<ProjectMainOptions>(fs, JsonOptions);
         }
-        _mainDirectory = Path.GetDirectoryName(mainFilePath);
+
+        // Handle options
+        ProcessFlags();
+
+        if (currentData is not null)
+        {
+            Data = currentData;
+        }
+        else
+        {
+            // TODO: check options for data file that needs to be loaded/saved, and if one is found,
+            // set LoadDataPath/SaveDataPath, as well as adjust LoadDirectory/SaveDirectory (e.g. for sub-projects)
+        }
+
+        try
+        {
+            // Either use existing or create a new file backup
+            if (existingFileBackup is not null)
+            {
+                FileBackup = existingFileBackup;
+            }
+            else
+            {
+                CreateNewBackup();
+            }
+
+            // Perform import
+            RunPreImportScripts();
+            ImportSubProjects();
+            ApplyFilePatches();
+            if (LoadDataPath is not null)
+            {
+                // TODO: load data here
+                RunPreAssetImportScripts();
+                LoadProjectAssets();
+            }
+            RunPostImportScripts();
+            if (SaveDataPath is not null)
+            {
+                // TODO: save data here
+                FileBackup.BackupFile(SaveDataPath);
+            }
+        }
+        finally
+        {
+            // If not using an existing file backup instance, finish the backup process
+            if (existingFileBackup is null)
+            {
+                FinishNewBackup();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Handles non-custom flags defined in the project main options.
+    /// </summary>
+    private void ProcessFlags()
+    {
+        foreach (string flag in _mainOptions.Flags)
+        {
+            // Ignore custom flags
+            if (flag.StartsWith('_'))
+            {
+                continue;
+            }
+
+            // Currently, no non-custom flags are supported, so throw an exception.
+            throw new ProjectException($"Unsupported project flag \"{flag}\"");
+        }
+    }
+
+    /// <summary>
+    /// Creates a new backup using the default implementation, and restores game files to an unmodded state.
+    /// </summary>
+    private void CreateNewBackup()
+    {
+        try
+        {
+            FileBackup = new GameFileBackup(SaveDirectory);
+            FileBackup.RestoreFiles();
+        }
+        catch (GameFileBackupException ex)
+        {
+            throw new ProjectException($"Restoring game files using backup failed: {ex}", ex);
+        }
+        catch (Exception ex)
+        {
+            throw new ProjectException($"Fatal error restoring game files using backup: {ex}", ex);
+        }
+    }
+
+    /// <summary>
+    /// Finishes the backup process, assuming that the backup was created by this project context, for this project context.
+    /// </summary>
+    private void FinishNewBackup()
+    {
+        try
+        {
+            FileBackup.SaveManifest();
+        }
+        catch (Exception ex)
+        {
+            throw new ProjectException($"Fatal error backing up original game files: {ex}", ex);
+        }
+    }
+
+    /// <summary>
+    /// Executes all pre-import scripts, as defined in the project options.
+    /// </summary>
+    private void RunPreImportScripts()
+    {
+        // TODO
+    }
+
+    /// <summary>
+    /// Executes all pre-asset import scripts, as defined in the project options.
+    /// </summary>
+    private void RunPreAssetImportScripts()
+    {
+        // TODO
+    }
+
+    /// <summary>
+    /// Executes all pre-import scripts, as defined in the project options.
+    /// </summary>
+    private void RunPostImportScripts()
+    {
+        // TODO
+    }
+
+    /// <summary>
+    /// Imports all sub-projects, as defined in the project options.
+    /// </summary>
+    private void ImportSubProjects()
+    {
+        if (_mainOptions.SubProjects.Count == 0)
+        {
+            return;
+        }
+        _projectJsonPaths ??= [Path.GetFullPath(_mainFilePath)];
+        foreach (string subProjectRelativePath in _mainOptions.SubProjects)
+        {
+            string subProjectPath = Path.Join(_mainDirectory, subProjectRelativePath);
+            Paths.VerifyWithinDirectory(_mainDirectory, subProjectPath);
+            if (!_projectJsonPaths.Add(Path.GetFullPath(subProjectPath)))
+            {
+                throw new ProjectException("Infinite sub-project recursion detected");
+            }
+            ProjectContext subContext = new(LoadDirectory, SaveDirectory, subProjectPath)
+            {
+                _projectJsonPaths = _projectJsonPaths
+            };
+            subContext.Import(null, FileBackup, MainThreadAction);
+        }
+    }
+
+    /// <summary>
+    /// Applies all file patches, located as defined in the project options.
+    /// </summary>
+    private void ApplyFilePatches()
+    {
+        foreach (ProjectMainOptions.Patch patch in _mainOptions.Patches)
+        {
+            // Get path to patch file
+            string fullPatchPath = Path.Join(_mainDirectory, patch.PatchPath);
+            Paths.VerifyWithinDirectory(_mainDirectory, fullPatchPath);
+
+            // Try finding valid base file path
+            if (patch.DataFilePath.Paths.Count == 0)
+            {
+                throw new ProjectException("Data file patch is missing any data file paths");
+            }
+            string baseFilePath = null, baseFileRelativePath = null;
+            foreach (string path in patch.DataFilePath.Paths)
+            {
+                string attemptPath = Path.Join(LoadDirectory, path);
+                Paths.VerifyWithinDirectory(LoadDirectory, attemptPath);
+                if (!File.Exists(attemptPath))
+                {
+                    continue;
+                }
+                baseFilePath = attemptPath;
+                baseFileRelativePath = path;
+            }
+            if (baseFilePath is null)
+            {
+                throw new ProjectException($"Missing data file to be patched (first attempt was \"{patch.DataFilePath.Paths[0]}\")");
+            }
+
+            // Back up file
+            string outputFilePath = Path.Join(SaveDirectory, baseFileRelativePath);
+            Paths.VerifyWithinDirectory(SaveDirectory, outputFilePath);
+            FileBackup.BackupFile(outputFilePath);
+
+            // Apply patch
+            using FileStream patchStream = new(fullPatchPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using FileStream baseStream = new(baseFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using FileStream outputStream = new(outputFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
+            BPS.ApplyPatch(baseStream, patchStream, outputStream);
+        }
+    }
+
+    /// <summary>
+    /// Performs the main project asset import operations.
+    /// </summary>
+    private void LoadProjectAssets()
+    {
+        // Ensure data is actually loaded
+        if (Data is null)
+        {
+            throw new InvalidOperationException("Attempting to load project assets with no loaded game data");
+        }
 
         // Initialize loading structures
-        _audioGroups = new(currentData.AudioGroups?.Count ?? 4);
+        _audioGroups = new(Data.AudioGroups?.Count ?? 4);
         _streamedSoundFilenames = new(16);
 
         // Recursively find and load in all assets in subdirectories
         List<ISerializableProjectAsset> loadedAssets = new(128);
         List<SerializableCode> loadedCodeAssets = new(64);
         List<ISerializableTextureProjectAsset> loadedTextureAssets = new(64);
-        HashSet<string> excludeDirectorySet = new(_mainOptions.ExcludeDirectories);
+        HashSet<string> excludeDirectorySet = [.. _mainOptions.ExcludeDirectories];
         foreach (string directory in Directory.EnumerateDirectories(_mainDirectory))
         {
             // Skip directories that are irregular, start with ".", or are excluded based on main options
             DirectoryInfo info = new(directory);
-            if (info.Attributes.HasFlag(FileAttributes.Hidden) || info.Attributes.HasFlag(FileAttributes.ReadOnly) || 
+            if (info.Attributes.HasFlag(FileAttributes.Hidden) || info.Attributes.HasFlag(FileAttributes.ReadOnly) ||
                 info.Attributes.HasFlag(FileAttributes.System))
             {
                 continue;
@@ -198,7 +532,7 @@ public sealed class ProjectContext
                 // If there's already a JSON file with the same filename as this one, ignore this GML file
                 string filename = Path.GetFileNameWithoutExtension(assetPath);
                 string fileDirectory = Path.GetDirectoryName(assetPath);
-                string jsonPath = Path.Combine(fileDirectory, $"{filename}.json");
+                string jsonPath = Path.Join(fileDirectory, $"{filename}.json");
                 if (File.Exists(jsonPath))
                 {
                     continue;
@@ -282,8 +616,19 @@ public sealed class ProjectContext
         {
             try
             {
-                using FileStream stream = new(
-                    Path.Combine(Path.GetDirectoryName(SaveDataPath), $"audiogroup{groupId}.dat"), FileMode.Create, FileAccess.Write);
+                string relativeAudioGroupPath;
+                if (groupId < Data.AudioGroups.Count && Data.AudioGroups[groupId] is UndertaleAudioGroup { Path.Content: string customRelativePath })
+                {
+                    relativeAudioGroupPath = customRelativePath;
+                }
+                else
+                {
+                    relativeAudioGroupPath = $"audiogroup{groupId}.dat";
+                }
+                string fullAudioGroupPath = Path.Join(SaveDirectory, relativeAudioGroupPath);
+                Paths.VerifyWithinDirectory(SaveDirectory, fullAudioGroupPath);
+                FileBackup.BackupFile(fullAudioGroupPath);
+                using FileStream stream = new(fullAudioGroupPath, FileMode.Create, FileAccess.Write);
                 UndertaleIO.Write(stream, group);
             }
             catch (ProjectException)
@@ -317,55 +662,6 @@ public sealed class ProjectContext
             return 1;
         }
         return a.DataName.CompareTo(b.DataName);
-    }
-
-    /// <summary>
-    /// Initializes a project context for a new project based on its main file path, and a name to give to it.
-    /// </summary>
-    /// <param name="currentData">Current data context to associate with the project.</param>
-    /// <param name="loadedDataPath">Path of the data file that was loaded for the current data context.</param>
-    /// <param name="savingDataPath">Path of the data file to be saved to.</param>
-    /// <param name="mainFilePath">Main file path for the project.</param>
-    /// <param name="newProjectName">Name of the new project being created.</param>
-    /// <param name="mainThreadAction">
-    /// For operations that should occur on the main thread, this will be 
-    /// called to invoke those operations, if provided. This will stick around
-    /// for the lifetime of the project context.
-    /// </param>
-    /// <exception cref="ProjectException">When a project-specific exception occurs</exception>
-    public ProjectContext(UndertaleData currentData, string loadedDataPath, string savingDataPath, string mainFilePath, 
-                          string newProjectName, Action<Action> mainThreadAction = null)
-    {
-        Data = currentData;
-        LoadDataPath = loadedDataPath;
-        SaveDataPath = savingDataPath;
-        _mainFilePath = mainFilePath;
-        if (mainThreadAction is not null)
-        {
-            MainThreadAction = mainThreadAction;
-        }
-        _mainDirectory = Path.GetDirectoryName(mainFilePath);
-
-        // If the file already exists, we cannot overwrite it (give a friendly message)
-        if (File.Exists(mainFilePath))
-        {
-            throw new ProjectException($"Project file already exists at \"{mainFilePath}\"");
-        }
-
-        // If the directory isn't empty, we don't want to overwrite anything else accidentally
-        Directory.CreateDirectory(_mainDirectory);
-        if (Directory.EnumerateFileSystemEntries(_mainDirectory).Any())
-        {
-            throw new ProjectException("Project directory is not empty");
-        }
-
-        // Create new main options and save it
-        _mainOptions = new()
-        {
-            Name = newProjectName
-        };
-        using FileStream fs = new(mainFilePath, FileMode.CreateNew);
-        JsonSerializer.Serialize(fs, _mainOptions, JsonOptions);
     }
 
     /// <summary>
@@ -461,6 +757,12 @@ public sealed class ProjectContext
     /// <exception cref="ProjectException">When a project-specific exception occurs</exception>
     public void Export(bool clearMarkedAssets)
     {
+        // Ensure project is imported
+        if (_mainOptions is null)
+        {
+            throw new InvalidOperationException("Project has not yet been imported");
+        }
+
         // Ensure project file still exists, just in case the user did something strange...
         if (!File.Exists(_mainFilePath))
         {
@@ -531,12 +833,12 @@ public sealed class ProjectContext
                     if (serializableAsset.IndividualDirectory)
                     {
                         // Asset needs its own directory
-                        destinationFile = Path.Combine(_mainDirectory, serializableAsset.AssetType.ToFilesystemNamePlural(), friendlyName, $"{friendlyName}.json");
+                        destinationFile = Path.Join(_mainDirectory, serializableAsset.AssetType.ToFilesystemNamePlural(), friendlyName, $"{friendlyName}.json");
                     }
                     else
                     {
                         // Asset doesn't need its own directory
-                        destinationFile = Path.Combine(_mainDirectory, serializableAsset.AssetType.ToFilesystemNamePlural(), $"{friendlyName}.json");
+                        destinationFile = Path.Join(_mainDirectory, serializableAsset.AssetType.ToFilesystemNamePlural(), $"{friendlyName}.json");
                     }
 
                     // If file already exists, add a suffix until there is no conflict
@@ -544,7 +846,7 @@ public sealed class ProjectContext
                     while (File.Exists(destinationFile) && attempts < 10)
                     {
                         string directory = Path.GetDirectoryName(destinationFile);
-                        destinationFile = Path.Combine(directory, $"{friendlyName}_{attempts + 2}.json");
+                        destinationFile = Path.Join(directory, $"{friendlyName}_{attempts + 2}.json");
                         attempts++;
                     }
                     if (attempts > 0 && File.Exists(destinationFile))
@@ -842,8 +1144,18 @@ public sealed class ProjectContext
         }
 
         // Not cached - perform full load
-        string filename = $"audiogroup{index}.dat";
-        string path = Path.Combine(Path.GetDirectoryName(fromLoadedDirectory ? LoadDataPath : SaveDataPath), filename);
+        string relativeAudioGroupPath;
+        if (index < Data.AudioGroups.Count && Data.AudioGroups[index] is UndertaleAudioGroup { Path.Content: string customRelativePath })
+        {
+            relativeAudioGroupPath = customRelativePath;
+        }
+        else
+        {
+            relativeAudioGroupPath = $"audiogroup{index}.dat";
+        }
+        string baseDirectory = fromLoadedDirectory ? LoadDirectory : SaveDirectory;
+        string path = Path.Join(baseDirectory, relativeAudioGroupPath);
+        Paths.VerifyWithinDirectory(baseDirectory, path);
         if (File.Exists(path))
         {
             using FileStream stream = new(path, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -868,7 +1180,7 @@ public sealed class ProjectContext
         }
         else
         {
-            throw new ProjectException($"Failed to find file \"{filename}\" for \"{forAsset.DataName}\"");
+            throw new ProjectException($"Failed to find file \"{relativeAudioGroupPath}\" for \"{forAsset.DataName}\"");
         }
     }
 
@@ -889,7 +1201,10 @@ public sealed class ProjectContext
         // Perform copy (and overwrite)
         try
         {
-            File.Copy(sourcePath, Path.Combine(Path.GetDirectoryName(SaveDataPath), destinationFilename), true);
+            string destPath = Path.Join(SaveDirectory, destinationFilename);
+            Paths.VerifyWithinDirectory(SaveDirectory, destPath);
+            FileBackup.BackupFile(destPath);
+            File.Copy(sourcePath, destPath, true);
         }
         catch (Exception e)
         {

@@ -135,7 +135,7 @@ internal sealed class SerializableBackground : ISerializableTextureProjectAsset
         // Write image as a PNG
         string filename = $"{Path.GetFileNameWithoutExtension(destinationFile)}.png";
         string directory = Path.GetDirectoryName(destinationFile);
-        projectContext.TextureWorker.ExportAsPNG(_dataAsset.Texture, Path.Combine(directory, filename), DataName, true);
+        projectContext.TextureWorker.ExportAsPNG(_dataAsset.Texture, Path.Join(directory, filename), DataName, true);
     }
 
     /// <inheritdoc/>
@@ -210,7 +210,7 @@ internal sealed class SerializableBackground : ISerializableTextureProjectAsset
         try
         {
             // Add image to packer
-            _textureImage = texturePacker.AddImage(TextureWorker.ReadBGRAImageFromFile(Path.Combine(directory, filename)), 
+            _textureImage = texturePacker.AddImage(TextureWorker.ReadBGRAImageFromFile(Path.Join(directory, filename)), 
                                                    TextureGroupPacker.BorderFlags.Enabled | TextureGroupPacker.BorderFlags.ExtraBorder);
         }
         catch (Exception e)

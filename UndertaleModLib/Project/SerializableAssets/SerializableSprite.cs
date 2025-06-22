@@ -260,13 +260,13 @@ internal sealed class SerializableSprite : ISerializableTextureProjectAsset
         for (int i = 0; i < TextureCount; i++)
         {
             string filename = $"{baseFilename}_{i}.png";
-            projectContext.TextureWorker.ExportAsPNG(_dataAsset.Textures[i].Texture, Path.Combine(directory, filename), DataName, true);
+            projectContext.TextureWorker.ExportAsPNG(_dataAsset.Textures[i].Texture, Path.Join(directory, filename), DataName, true);
         }
         (int maskWidth, int maskHeight) = _dataAsset.CalculateMaskDimensions(projectContext.Data);
         for (int i = 0; i < MaskCount; i++)
         {
             string filename = $"{baseFilename}_{i}.mask.png";
-            TextureWorker.ExportCollisionMaskPNG(_dataAsset.CollisionMasks[i], Path.Combine(directory, filename), maskWidth, maskHeight);
+            TextureWorker.ExportCollisionMaskPNG(_dataAsset.CollisionMasks[i], Path.Join(directory, filename), maskWidth, maskHeight);
         }
     }
 
@@ -384,7 +384,7 @@ internal sealed class SerializableSprite : ISerializableTextureProjectAsset
             try
             {
                 // Add image to packer
-                _textureImages.Add(texturePacker.AddImage(TextureWorker.ReadBGRAImageFromFile(Path.Combine(directory, filename)),
+                _textureImages.Add(texturePacker.AddImage(TextureWorker.ReadBGRAImageFromFile(Path.Join(directory, filename)),
                                                           TextureGroupPacker.BorderFlags.Enabled));
             }
             catch (Exception e)
@@ -402,7 +402,7 @@ internal sealed class SerializableSprite : ISerializableTextureProjectAsset
             try
             {
                 // Add image to packer
-                _maskData.Add(TextureWorker.ReadMaskData(Path.Combine(directory, filename), maskWidth, maskHeight));
+                _maskData.Add(TextureWorker.ReadMaskData(Path.Join(directory, filename), maskWidth, maskHeight));
             }
             catch (Exception e)
             {

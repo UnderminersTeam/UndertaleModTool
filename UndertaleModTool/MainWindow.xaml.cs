@@ -4072,7 +4072,8 @@ result in loss of work.");
                 {
                     try
                     {
-                        newProjectContext = new(Data, loadFilePath, saveFilePath, openProjectDialog.FileName, (f) => Dispatcher.Invoke(f));
+                        newProjectContext = ProjectContext.CreateWithDataFilePaths(loadFilePath, saveFilePath, openProjectDialog.FileName);
+                        newProjectContext.Import(Data, null, (f) => Dispatcher.Invoke(f));
                     }
                     catch (ProjectException ex)
                     {

@@ -5,6 +5,7 @@ using UndertaleModLib.Models;
 using static UndertaleModLib.Models.UndertaleSound;
 using System;
 using System.Collections.Generic;
+using UndertaleModLib.Util;
 
 namespace UndertaleModLib.Project.SerializableAssets;
 
@@ -112,14 +113,17 @@ internal sealed class SerializableSound : ISerializableProjectAsset
                 // Add file extension if none already exists (assume OGG)
                 externalFilename += ".ogg";
             }
-            string externalPath = Path.Combine(Path.GetDirectoryName(projectContext.LoadDataPath), externalFilename);
+            string externalPath = Path.Join(projectContext.LoadDirectory, externalFilename);
+            Paths.VerifyWithinDirectory(projectContext.LoadDirectory, externalPath);
 
             // Try to copy that sound to the project
             if (!File.Exists(externalPath))
             {
                 throw new ProjectException($"Failed to find external sound to export with name \"{externalFilename}\"");
             }
-            File.Copy(externalPath, Path.Combine(directory, Path.GetFileName(externalFilename)), true);
+            string destFileName = Path.Join(directory, Path.GetFileName(externalFilename));
+            Paths.VerifyWithinDirectory(directory, destFileName);
+            File.Copy(externalPath, destFileName, true);
         }
         else if (_dataAsset.AudioFile is not null && (_dataAsset.AudioGroup is null || _dataAsset.GroupID == projectContext.Data.GetBuiltinSoundGroupID()))
         {
@@ -128,7 +132,9 @@ internal sealed class SerializableSound : ISerializableProjectAsset
             string extension = ((_dataAsset.Flags & wavFlags) == wavFlags) ? ".wav" : ".ogg";
 
             // Save data to disk
-            File.WriteAllBytes(Path.Combine(directory, $"{friendlyName}{extension}"), _dataAsset.AudioFile.Data);
+            string destFilePath = Path.Join(directory, $"{friendlyName}{extension}");
+            Paths.VerifyWithinDirectory(directory, destFilePath);
+            File.WriteAllBytes(destFilePath, _dataAsset.AudioFile.Data);
         }
         else if (_dataAsset.AudioID != -1)
         {
@@ -145,7 +151,9 @@ internal sealed class SerializableSound : ISerializableProjectAsset
             string extension = ((_dataAsset.Flags & wavFlags) == wavFlags) ? ".wav" : ".ogg";
 
             // Save data to disk
-            File.WriteAllBytes(Path.Combine(directory, $"{friendlyName}{extension}"), groupData.EmbeddedAudio[audioId].Data);
+            string destFilePath = Path.Join(directory, $"{friendlyName}{extension}");
+            Paths.VerifyWithinDirectory(directory, destFilePath);
+            File.WriteAllBytes(destFilePath, groupData.EmbeddedAudio[audioId].Data);
         }
     }
 
@@ -189,7 +197,7 @@ internal sealed class SerializableSound : ISerializableProjectAsset
         {
             throw new ProjectException("Failed to get sound asset path");
         }
-        string baseFilename = Path.Combine(Path.GetDirectoryName(jsonFilename), Path.GetFileNameWithoutExtension(jsonFilename));
+        string baseFilename = Path.Join(Path.GetDirectoryName(jsonFilename), Path.GetFileNameWithoutExtension(jsonFilename));
         string filename = null;
         foreach (string extension in _extensionSearchOrder)
         {

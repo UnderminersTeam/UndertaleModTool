@@ -61,7 +61,7 @@ internal sealed class SerializableCode : ISerializableProjectAsset
         // Write GML
         string filename = $"{Path.GetFileNameWithoutExtension(destinationFile)}.gml";
         string directory = Path.GetDirectoryName(destinationFile);
-        using (FileStream fs = new(Path.Combine(directory, filename), FileMode.Create))
+        using (FileStream fs = new(Path.Join(directory, filename), FileMode.Create))
         {
             projectContext.TryGetCodeSource(_dataAsset, out string source);
             if (source is null)
@@ -125,7 +125,7 @@ internal sealed class SerializableCode : ISerializableProjectAsset
         try
         {
             // Read text
-            string source = File.ReadAllText(Path.Combine(directory, filename));
+            string source = File.ReadAllText(Path.Join(directory, filename));
 
             // Queue for code replacement
             group.QueueReplace(_dataAsset, source);
