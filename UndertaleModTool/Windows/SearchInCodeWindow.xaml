@@ -44,7 +44,7 @@
                 </StackPanel>
             </Expander>
 
-            <UndertaleModTool:ButtonDark x:Name="SearchButton" Grid.Row="1" Content="Search" Width="68" Margin="0,5,0,0" FontSize="16px"
+            <UndertaleModTool:ButtonDark x:Name="SearchButton" Grid.Row="1" Content="Search" Width="68" Margin="0,5,0,0" FontSize="14"
                                          Click="SearchButton_Click" HorizontalAlignment="Right" IsDefault="True"/>
 
             <ListView ItemsSource="{Binding Results}" Name="ResultsListView" Grid.Row="3" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}">
