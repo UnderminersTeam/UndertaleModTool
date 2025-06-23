@@ -26,32 +26,27 @@ namespace UndertaleModTool.Windows
     {
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
 
-        bool isCaseSensitive;
-        bool isRegexSearch;
-        bool isInAssembly;
-        string text;
+        private static bool isSearchInProgress = false;
 
-        int progressCount = 0;
-        int resultCount = 0;
+        private bool isCaseSensitive, isRegexSearch, isInAssembly;
+        private string text;
+
+        private int progressCount = 0;
+        private int resultCount = 0;
+
+        private ConcurrentDictionary<string, List<(int, string)>> resultsDict;
+        private ConcurrentBag<string> failedList;
+        private IEnumerable<KeyValuePair<string, List<(int, string)>>> resultsDictSorted;
+        private IEnumerable<string> failedListSorted;
+
+        private Regex keywordRegex, nameRegex;
+        private GlobalDecompileContext decompileContext;
+        private LoaderDialog loaderDialog;
+        private UndertaleCodeEditor.CodeEditorTab editorTab;
 
         public readonly record struct Result(string Code, int LineNumber, string LineText);
 
         public ObservableCollection<Result> Results { get; set; } = new();
-
-        ConcurrentDictionary<string, List<(int, string)>> resultsDict;
-        ConcurrentBag<string> failedList;
-        IEnumerable<KeyValuePair<string, List<(int, string)>>> resultsDictSorted;
-        IEnumerable<string> failedListSorted;
-        
-        Regex keywordRegex;
-
-        GlobalDecompileContext decompileContext;
-
-        LoaderDialog loaderDialog;
-
-        private UndertaleCodeEditor.CodeEditorTab editorTab;
-
-        static bool isSearchInProgress = false;
 
         public SearchInCodeWindow(string query = null, bool inAssembly = false)
         {
@@ -105,6 +100,12 @@ namespace UndertaleModTool.Windows
             isRegexSearch = RegexSearchCheckBox.IsChecked ?? false;
             isInAssembly = InAssemblyCheckBox.IsChecked ?? false;
 
+            bool filterByName = FilterByNameExpander.IsExpanded;
+            bool nameIsCaseSensitive, nameIsRegex;
+            string name;
+
+            IList<UndertaleCode> codeEntriesToSearch = mainWindow.Data.Code;
+
             if (isRegexSearch)
             {
                 try
@@ -113,9 +114,48 @@ namespace UndertaleModTool.Windows
                 }
                 catch (ArgumentException e)
                 {
-                    this.ShowError($"Invalid regex: {e.Message}");
+                    this.ShowError($"Invalid Regex: {e.Message}");
                     return;
                 }
+            }
+
+            if (filterByName)
+            {
+                name = NameFilterTextBox.Text;
+                if (!String.IsNullOrEmpty(name))
+                {
+                    nameIsCaseSensitive = NameCaseSensitiveCheckBox.IsChecked ?? false;
+                    nameIsRegex = NameRegexSearchCheckBox.IsChecked ?? false;
+
+                    if (nameIsRegex)
+                    {
+                        try
+                        {
+                            nameRegex = new(name, nameIsCaseSensitive ? RegexOptions.Compiled : RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                            codeEntriesToSearch = mainWindow.Data.Code.Where(c => !String.IsNullOrEmpty(c.Name.Content)
+                                                                                  && nameRegex.IsMatch(c.Name.Content))
+                                                                      .ToList();
+                        }
+                        catch (ArgumentException e)
+                        {
+                            this.ShowError($"Invalid name Regex: {e.Message}");
+                            filterByName = false;
+                        }
+                    }
+                    else
+                    {
+                        var comparison = nameIsCaseSensitive ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase;
+                        codeEntriesToSearch = mainWindow.Data.Code.Where(c => !String.IsNullOrEmpty(c.Name.Content)
+                                                                              && c.Name.Content.Contains(name, comparison))
+                                                                  .ToList();
+                    }
+                }
+            }
+
+            if (codeEntriesToSearch.Count == 0)
+            {
+                this.ShowMessage("There are no code entries that match the name filter.");
+                return;
             }
 
             mainWindow.IsEnabled = false;
@@ -143,9 +183,9 @@ namespace UndertaleModTool.Windows
             }
 
             loaderDialog.SavedStatusText = "Code entries";
-            loaderDialog.Update(null, "Code entries", 0, mainWindow.Data.Code.Count);
+            loaderDialog.Update(null, "Code entries", 0, codeEntriesToSearch.Count);
 
-            await Task.Run(() => Parallel.ForEach(mainWindow.Data.Code, SearchInUndertaleCode));
+            await Task.Run(() => Parallel.ForEach(codeEntriesToSearch, SearchInUndertaleCode));
             await Task.Run(SortResults);
 
             loaderDialog.Maximum = null;
@@ -245,7 +285,18 @@ namespace UndertaleModTool.Windows
                 int lineEndIndex = codeText.IndexOf('\n', index);
                 lineEndIndex = lineEndIndex == -1 ? codeText.Length : lineEndIndex;
 
-                string lineText = codeText[lineStartIndex..lineEndIndex];
+                string lineText;
+
+                // Limit the displayed line length to 128
+                if (lineEndIndex - lineStartIndex > 128)
+                {
+                    lineEndIndex = lineStartIndex + 128;
+                    lineText = codeText[lineStartIndex..lineEndIndex] + "...";
+                }
+                else
+                {
+                    lineText = codeText[lineStartIndex..lineEndIndex];
+                }
 
                 if (nameWritten == false)
                 {
