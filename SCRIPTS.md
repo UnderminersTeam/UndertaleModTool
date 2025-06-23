@@ -105,7 +105,6 @@ These are scripts developed primarily for use in Undertale/Deltarune.
 - `GoToRoom_AutoLocatePersistentObj.csx`: Similar to `GoToRoom.csx` for Undertale/Deltarune, but instead attempts to locate a persistent object automatically, making it portable. Results will vary by game.
 - `MergeImages.csx`: Loads images from two directories, and exports side-by-side images of all corresponding images.
 - `ScaleAllTextures.csx`: Scales all texture pages in a game. Very likely to cause visual problems.
-- `SearchLimited.csx`: Performs a GML code search, in a limited subset of the game code.
 
 ## Technical Scripts
 
