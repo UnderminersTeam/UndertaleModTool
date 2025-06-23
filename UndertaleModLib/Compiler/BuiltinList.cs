@@ -3731,6 +3731,7 @@ public class BuiltinList : IBuiltins
         Constants["os_ps5"] = 22.0;
         Constants["os_gdk"] = 23.0;
         Constants["os_gxgames"] = 24.0;
+        Constants["os_switch2"] = 25.0;
         Constants["os_llvm_win32"] = 65536.0;
         Constants["os_llvm_macosx"] = 65537.0;
         Constants["os_llvm_psp"] = 65538.0;
