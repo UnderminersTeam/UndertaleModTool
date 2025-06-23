@@ -88,6 +88,7 @@ namespace UndertaleModTool
             DecompiledSearchPanel = SearchPanel.Install(DecompiledEditor.TextArea);
             DecompiledSearchPanel.LostFocus += SearchPanel_LostFocus;
             DecompiledSearchPanel.MarkerBrush = new SolidColorBrush(Color.FromRgb(90, 90, 90));
+            DecompiledSearchPanel.FontSize = 10;
 
             using (Stream stream = this.GetType().Assembly.GetManifestResourceStream("UndertaleModTool.Resources.GML.xshd"))
             {
@@ -169,6 +170,7 @@ namespace UndertaleModTool
             DisassemblySearchPanel = SearchPanel.Install(DisassemblyEditor.TextArea);
             DisassemblySearchPanel.LostFocus += SearchPanel_LostFocus;
             DisassemblySearchPanel.MarkerBrush = new SolidColorBrush(Color.FromRgb(90, 90, 90));
+            DisassemblySearchPanel.FontSize = 10;
 
             using (Stream stream = this.GetType().Assembly.GetManifestResourceStream("UndertaleModTool.Resources.VMASM.xshd"))
             {
