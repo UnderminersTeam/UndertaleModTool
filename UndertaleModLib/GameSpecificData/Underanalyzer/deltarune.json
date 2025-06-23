@@ -108,6 +108,47 @@
             "ConditionalValue": "0"
           }
         ]
+      },
+      "Deltarune.Asset.ZeroOneOrObject": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "Intersect",
+            "Macros": [
+              {
+                "MacroType": "Intersect",
+                "Macros": [
+                  {
+                    "MacroType": "MatchNot",
+                    "ConditionalType": "Integer",
+                    "ConditionalValue": "0"
+                  },
+                  {
+                    "MacroType": "MatchNot",
+                    "ConditionalType": "Integer",
+                    "ConditionalValue": "1"
+                  }
+                ]
+              },
+              "Asset.Object"
+            ]
+          },
+          {
+            "MacroType": "Union",
+            "Macros": [
+              {
+                "MacroType": "Match",
+                "ConditionalType": "Integer",
+                "ConditionalValue": "0"
+              },
+              {
+                "MacroType": "Match",
+                "ConditionalType": "Integer",
+                "ConditionalValue": "1"
+              }
+            ]
+          }
+        ]
       }
     }
   },
@@ -368,7 +409,7 @@
       "bossObject": "Asset.Object",
       "pushChar": "Asset.Object",
       "rotator_target": "Asset.Object",
-      "controlled": "Asset.Object",
+      "controlled": "Deltarune.Asset.ZeroOneOrObject",
       "tiletype": "Asset.Object",
       "simcity": "Asset.Object",
       "returnroom": "Asset.Room",
@@ -499,7 +540,10 @@
       },
       "room_id": "Asset.Room",
       "_border_image_layer": "Asset.Sprite",
-      "tile_sprite": "Asset.Sprite"
+      "tile_sprite": "Asset.Sprite",
+      "commenttriangle": "Asset.Sprite",
+      "target_room": "Asset.Room",
+      "base_sprite": "Asset.Sprite"
     },
     "FunctionArguments": {
       "snd_play": {
@@ -973,7 +1017,15 @@
         ]
       },
       "set_tile_sprite": [ null, "Asset.Sprite" ],
-      "set_tile_sprite_ext": [ null, "Asset.Sprite", null ]
+      "set_tile_sprite_ext": [ null, "Asset.Sprite", null ],
+      "gml_Script_ossafe_fill_rectangle_color": {
+        "MacroType": "Union",
+        "Macros": [
+          [ null, null, null, null, "Constant.Color", "Constant.Color", "Constant.Color", "Constant.Color" ],
+          [ null, null, null, null, "Constant.Color", "Constant.Color", "Constant.Color", "Constant.Color", null ]
+        ]
+      },
+      "gml_Script_scr_battle_sprite_set": [ null, "Asset.Sprite", null, null ]
     },
     "FunctionReturn": {
       "scr_getbuttonsprite": {
