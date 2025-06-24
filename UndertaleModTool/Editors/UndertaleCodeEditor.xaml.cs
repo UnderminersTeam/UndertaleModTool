@@ -88,6 +88,7 @@ namespace UndertaleModTool
             DecompiledSearchPanel = SearchPanel.Install(DecompiledEditor.TextArea);
             DecompiledSearchPanel.LostFocus += SearchPanel_LostFocus;
             DecompiledSearchPanel.MarkerBrush = new SolidColorBrush(Color.FromRgb(90, 90, 90));
+            DecompiledSearchPanel.FontSize = 10;
 
             using (Stream stream = this.GetType().Assembly.GetManifestResourceStream("UndertaleModTool.Resources.GML.xshd"))
             {
@@ -169,6 +170,7 @@ namespace UndertaleModTool
             DisassemblySearchPanel = SearchPanel.Install(DisassemblyEditor.TextArea);
             DisassemblySearchPanel.LostFocus += SearchPanel_LostFocus;
             DisassemblySearchPanel.MarkerBrush = new SolidColorBrush(Color.FromRgb(90, 90, 90));
+            DisassemblySearchPanel.FontSize = 10;
 
             using (Stream stream = this.GetType().Assembly.GetManifestResourceStream("UndertaleModTool.Resources.VMASM.xshd"))
             {
@@ -1626,6 +1628,62 @@ namespace UndertaleModTool
                 var res = new ClickVisualLineText(Text, ParentVisualLine, length);
                 res.Clicked += Clicked;
                 return res;
+            }
+        }
+
+        private void Command_Compile(object sender, ExecutedRoutedEventArgs e)
+        {
+
+        }
+
+        private void Grid_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                if (e.Delta > 0)
+                {
+                    if (DecompiledEditor.FontSize < 100)
+                    {
+                        DecompiledEditor.FontSize += 1;
+                        DisassemblyEditor.FontSize += 1;
+                    }
+                }
+                else
+                {
+                    if (DecompiledEditor.FontSize > 5)
+                    {
+                        DecompiledEditor.FontSize -= 1;
+                        DisassemblyEditor.FontSize -= 1;
+                    }
+                }
+            }
+        }
+
+        private void Grid_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.OemPlus || e.Key == Key.Add)
+            {
+                if (Keyboard.Modifiers == ModifierKeys.Control)
+                {
+                    if (DecompiledEditor.FontSize < 100)
+                    {
+                        DecompiledEditor.FontSize += 1;
+                        DisassemblyEditor.FontSize += 1;
+                    }
+                    e.Handled = true;
+                }
+            }
+            else if ((e.Key == Key.OemMinus || e.Key == Key.Subtract))
+            {
+                if (Keyboard.Modifiers == ModifierKeys.Control)
+                {
+                    if (DecompiledEditor.FontSize > 5)
+                    {
+                        DecompiledEditor.FontSize -= 1;
+                        DisassemblyEditor.FontSize -= 1;
+                    }
+                    e.Handled = true;
+                }
             }
         }
     }
