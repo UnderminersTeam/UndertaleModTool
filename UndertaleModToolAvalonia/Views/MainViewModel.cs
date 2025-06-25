@@ -250,6 +250,7 @@ public partial class MainViewModel
             UndertaleTimeline r => new UndertaleTimelineViewModel(r),
             UndertaleGameObject r => new UndertaleGameObjectViewModel(r),
             UndertaleRoom r => new UndertaleRoomViewModel(r),
+            UndertaleExtension r => r,
             UndertaleTexturePageItem r => new UndertaleTexturePageItemViewModel(r),
             UndertaleCode r => new UndertaleCodeViewModel(r),
             UndertaleVariable r => new UndertaleVariableViewModel(r),
@@ -260,8 +261,8 @@ public partial class MainViewModel
             UndertaleEmbeddedAudio r => new UndertaleEmbeddedAudioViewModel(r),
             UndertaleTextureGroupInfo r => new UndertaleTextureGroupInfoViewModel(r),
             UndertaleEmbeddedImage r => new UndertaleEmbeddedImageViewModel(r),
-            // temp
-            UndertaleResource i => i,
+            UndertaleParticleSystem r => new UndertaleParticleSystemViewModel(r),
+            UndertaleParticleSystemEmitter r => r,
             _ => null,
         };
 
