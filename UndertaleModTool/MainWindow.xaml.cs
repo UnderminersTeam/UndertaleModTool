@@ -276,7 +276,7 @@ namespace UndertaleModTool
             public bool Checked { get; set; }
         }
 
-        public void Dummy()
+        public UndertaleFont[] SelectFonts()
         {
             Window window = new()
             {
@@ -314,7 +314,7 @@ namespace UndertaleModTool
             Style itemContStyle = new(typeof(ListBoxItem));
             itemContStyle.Setters.Add(new Setter(ListBoxItem.IsSelectedProperty, new Binding("Checked") { Mode = BindingMode.TwoWay }));
             fontListBox.ItemContainerStyle = itemContStyle;
-            
+
             // Microsoft recommends to use `XAMLReader.Load()`,
             // but it sucks in two ways:
             // 1) It's difficult to modify, as there is no syntax highlighting, error checking, and auto-indentation.
@@ -322,6 +322,7 @@ namespace UndertaleModTool
             //
             // When `FrameworkElementFactory` will be removed from C#, then any AI assistant (e.g. ChatGPT, DeepSeek)
             // can generate XAML code from this C# code easily, with some minor tweaks (I've checked it).
+            // I mean even for the whole window.
             DataTemplate fontTemplate = new();
             FrameworkElementFactory templateFactory = new(typeof(CheckBox));
             templateFactory.SetValue(CheckBox.IsCheckedProperty, new Binding("Checked") { Mode = BindingMode.TwoWay });
@@ -389,10 +390,12 @@ namespace UndertaleModTool
             {
                 var selectedFonts = window.Tag as UndertaleFont[];
                 if (selectedFonts is null)
-                    return; // Shouldn't happen
+                    return null; // Shouldn't happen
 
-
+                return selectedFonts;
             }
+
+            return null;
         }
 
         /// <summary>
