@@ -315,6 +315,13 @@ namespace UndertaleModTool
             itemContStyle.Setters.Add(new Setter(ListBoxItem.IsSelectedProperty, new Binding("Checked") { Mode = BindingMode.TwoWay }));
             fontListBox.ItemContainerStyle = itemContStyle;
             
+            // Microsoft recommends to use `XAMLReader.Load()`,
+            // but it sucks in two ways:
+            // 1) It's difficult to modify, as there is no syntax highlighting, error checking, and auto-indentation.
+            // 2) In order to add the event listeners, you have to add them later, by accessing each element by name.
+            //
+            // When `FrameworkElementFactory` will be removed from C#, then any AI assistant (e.g. ChatGPT, DeepSeek)
+            // can generate XAML code from this C# code easily, with some minor tweaks (I've checked it).
             DataTemplate fontTemplate = new();
             FrameworkElementFactory templateFactory = new(typeof(CheckBox));
             templateFactory.SetValue(CheckBox.IsCheckedProperty, new Binding("Checked") { Mode = BindingMode.TwoWay });
