@@ -281,7 +281,7 @@ namespace UndertaleModTool
             Window window = new()
             {
                 MinWidth = 420,
-                MinHeight = 400,
+                MinHeight = 430,
                 Width = MinWidth,
                 Height = MinHeight,
                 Title = "Select fonts to export"
@@ -298,15 +298,15 @@ namespace UndertaleModTool
             FontEntry[] fonts = Data.Fonts?.Select(x => new FontEntry(x, true)).ToArray();
 
             Grid contentGrid = new();
-            contentGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Star) });
+            contentGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Star), MinHeight = 300 });
+            contentGrid.RowDefinitions.Add(new() { Height = GridLength.Auto });
             contentGrid.RowDefinitions.Add(new() { Height = GridLength.Auto });
 
             ListBox fontListBox = new()
             {
                 ItemsSource = fonts,
-                Margin = new(10),
+                Margin = new(10, 10, 10, 0),
                 MinWidth = 380,
-                MinHeight = 380,
                 SelectionMode = SelectionMode.Multiple,
                 Background = appDarkStyle[SystemColors.ControlBrushKey] as SolidColorBrush
             };
@@ -322,11 +322,34 @@ namespace UndertaleModTool
             fontTemplate.VisualTree = templateFactory;
             fontListBox.ItemTemplate = fontTemplate;
 
+            StackPanel selectStackPanel = new()
+            {
+                Orientation = Orientation.Horizontal,
+                Margin = new Thickness(10, 7, 0, 0)
+            };
+            ButtonDark selectAllButton = new()
+            {
+                Content = "Select all",
+                Height = 26,
+                Width = 63
+            };
+            selectAllButton.Click += (_, _) => fontListBox.SelectAll();
+            ButtonDark deselectAllButton = new()
+            {
+                Content = "Deselect all",
+                Margin = new Thickness(5, 0, 0, 0),
+                Height = 26,
+                Width = 71
+            };
+            deselectAllButton.Click += (_, _) => fontListBox.UnselectAll();
+            selectStackPanel.Children.Add(selectAllButton);
+            selectStackPanel.Children.Add(deselectAllButton);
+
             ButtonDark okButton = new()
             {
                 Content = "OK",
                 Margin = new Thickness(0, 16, 0, 16),
-                Width = 64,
+                Width = 80,
                 Height = 32,
                 FontSize = 16
             };
@@ -347,9 +370,11 @@ namespace UndertaleModTool
             };
 
             contentGrid.Children.Add(fontListBox);
+            contentGrid.Children.Add(selectStackPanel);
             contentGrid.Children.Add(okButton);
             Grid.SetRow(fontListBox, 0);
-            Grid.SetRow(okButton, 1);
+            Grid.SetRow(selectStackPanel, 1);
+            Grid.SetRow(okButton, 2);
 
             window.Content = contentGrid;
 
