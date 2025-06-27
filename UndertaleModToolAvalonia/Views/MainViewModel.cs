@@ -250,7 +250,7 @@ public partial class MainViewModel
             UndertaleTimeline r => new UndertaleTimelineViewModel(r),
             UndertaleGameObject r => new UndertaleGameObjectViewModel(r),
             UndertaleRoom r => new UndertaleRoomViewModel(r),
-            UndertaleExtension r => r,
+            UndertaleExtension r => new UndertaleExtensionViewModel(r),
             UndertaleTexturePageItem r => new UndertaleTexturePageItemViewModel(r),
             UndertaleCode r => new UndertaleCodeViewModel(r),
             UndertaleVariable r => new UndertaleVariableViewModel(r),
