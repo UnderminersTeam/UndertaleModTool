@@ -137,6 +137,9 @@
                                         <DataTemplate DataType="v:UndertaleParticleSystemViewModel">
                                             <TextBlock Text="{Binding ParticleSystem.Name.Content, StringFormat=Particle system - {0}}"/>
                                         </DataTemplate>
+                                        <DataTemplate DataType="v:UndertaleParticleSystemEmitterViewModel">
+                                            <TextBlock Text="{Binding ParticleSystemEmitter.Name.Content, StringFormat=Particle system emitter - {0}}"/>
+                                        </DataTemplate>
                                 </ContentControl.DataTemplates>
                             </ContentControl>
                             <Button Command="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).TabClose}"
@@ -240,6 +243,9 @@
                                     </DataTemplate>
                                         <DataTemplate DataType="v:UndertaleParticleSystemViewModel">
                                             <v:UndertaleParticleSystemView />
+                                        </DataTemplate>
+                                        <DataTemplate DataType="v:UndertaleParticleSystemEmitterViewModel">
+                                            <v:UndertaleParticleSystemEmitterView />
                                         </DataTemplate>
                                 </ContentControl.DataTemplates>
                             </ContentControl>

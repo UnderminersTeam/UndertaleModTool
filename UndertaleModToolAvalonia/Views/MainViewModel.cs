@@ -262,7 +262,7 @@ public partial class MainViewModel
             UndertaleTextureGroupInfo r => new UndertaleTextureGroupInfoViewModel(r),
             UndertaleEmbeddedImage r => new UndertaleEmbeddedImageViewModel(r),
             UndertaleParticleSystem r => new UndertaleParticleSystemViewModel(r),
-            UndertaleParticleSystemEmitter r => r,
+            UndertaleParticleSystemEmitter r => new UndertaleParticleSystemEmitterViewModel(r),
             _ => null,
         };
 
