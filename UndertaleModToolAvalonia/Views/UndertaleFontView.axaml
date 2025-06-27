@@ -82,7 +82,7 @@
         <!-- TODO: Show texture, click and edit glyphs -->
 
         <Label>Glyphs</Label>
-        <c:EditableDataGrid Name="GlyphsDataGrid" ItemsSource="{Binding Font.Glyphs}" ItemFactory="{Binding CreateGlyph}">
+        <c:EditableDataGrid ItemsSource="{Binding Font.Glyphs}" ItemFactory="{Binding CreateGlyph}" SelectionChanged="{Binding GlyphsSelectedChanged}">
             <c:EditableDataGrid.Columns>
                 <DataGridTemplateColumn Header="Character" Width="4*">
                     <DataGridTemplateColumn.CellTemplate>
@@ -144,7 +144,7 @@
         </c:EditableDataGrid>
 
         <Label>Kerning of selected glyph</Label>
-        <c:EditableDataGrid ItemsSource="{ReflectionBinding #GlyphsDataGrid.DataGridControl.SelectedItem.Kerning}" ItemFactory="{Binding CreateGlyphKerning}">
+        <c:EditableDataGrid ItemsSource="{Binding GlyphsSelected.Kerning}" ItemFactory="{Binding CreateGlyphKerning}">
             <c:EditableDataGrid.Columns>
                 <DataGridTemplateColumn Header="Preceding character" Width="1*">
                     <DataGridTemplateColumn.CellTemplate>

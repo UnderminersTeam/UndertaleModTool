@@ -54,7 +54,7 @@
         </Grid>
 
         <Label>Textures</Label>
-        <c:EditableDataGrid ItemsSource="{Binding Sprite.Textures}" ItemFactory="{Binding CreateTextureEntry}" Name="TexturesDataGrid">
+        <c:EditableDataGrid ItemsSource="{Binding Sprite.Textures}" ItemFactory="{Binding CreateTextureEntry}" SelectionChanged="{Binding TexturesSelectedChanged}">
             <c:EditableDataGrid.Columns>
                 <DataGridTemplateColumn Header="Texture" Width="1*">
                     <DataGridTemplateColumn.CellTemplate>
@@ -66,32 +66,31 @@
             </c:EditableDataGrid.Columns>
         </c:EditableDataGrid>
 
-        <!-- TODO: Show first image initially -->
         <Label>Image</Label>
         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
                       MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
             <c:SKImageViewer>
                 <c:SKImageViewer.SKImage>
                     <MultiBinding Converter="{StaticResource ToSKImageUpdaterConverter}">
-                        <ReflectionBinding Path="#TexturesDataGrid.DataGridControl.SelectedItem.Texture"/>
-                        <ReflectionBinding Path="#TexturesDataGrid.DataGridControl.SelectedItem.Texture.TexturePage.TextureData.Image"/>
-                        <ReflectionBinding Path="#TexturesDataGrid.DataGridControl.SelectedItem.Texture.SourceX"/>
-                        <ReflectionBinding Path="#TexturesDataGrid.DataGridControl.SelectedItem.Texture.SourceY"/>
-                        <ReflectionBinding Path="#TexturesDataGrid.DataGridControl.SelectedItem.Texture.SourceWidth"/>
-                        <ReflectionBinding Path="#TexturesDataGrid.DataGridControl.SelectedItem.Texture.SourceHeight"/>
-                        <ReflectionBinding Path="#TexturesDataGrid.DataGridControl.SelectedItem.Texture.TargetX"/>
-                        <ReflectionBinding Path="#TexturesDataGrid.DataGridControl.SelectedItem.Texture.TargetY"/>
-                        <ReflectionBinding Path="#TexturesDataGrid.DataGridControl.SelectedItem.Texture.TargetWidth"/>
-                        <ReflectionBinding Path="#TexturesDataGrid.DataGridControl.SelectedItem.Texture.TargetHeight"/>
-                        <ReflectionBinding Path="#TexturesDataGrid.DataGridControl.SelectedItem.Texture.BoundingWidth"/>
-                        <ReflectionBinding Path="#TexturesDataGrid.DataGridControl.SelectedItem.Texture.BoundingHeight"/>
+                        <Binding Path="TexturesSelected.Texture"/>
+                        <Binding Path="TexturesSelected.Texture.TexturePage.TextureData.Image"/>
+                        <Binding Path="TexturesSelected.Texture.SourceX"/>
+                        <Binding Path="TexturesSelected.Texture.SourceY"/>
+                        <Binding Path="TexturesSelected.Texture.SourceWidth"/>
+                        <Binding Path="TexturesSelected.Texture.SourceHeight"/>
+                        <Binding Path="TexturesSelected.Texture.TargetX"/>
+                        <Binding Path="TexturesSelected.Texture.TargetY"/>
+                        <Binding Path="TexturesSelected.Texture.TargetWidth"/>
+                        <Binding Path="TexturesSelected.Texture.TargetHeight"/>
+                        <Binding Path="TexturesSelected.Texture.BoundingWidth"/>
+                        <Binding Path="TexturesSelected.Texture.BoundingHeight"/>
                     </MultiBinding>
                 </c:SKImageViewer.SKImage>
             </c:SKImageViewer>
         </ScrollViewer>
 
         <Label>Collision masks</Label>
-        <c:EditableDataGrid ItemsSource="{Binding Sprite.CollisionMasks}" ItemFactory="{Binding CreateMaskEntry}" Name="CollisionMasksDataGrid">
+        <c:EditableDataGrid ItemsSource="{Binding Sprite.CollisionMasks}" ItemFactory="{Binding CreateMaskEntry}" SelectionChanged="{Binding CollisionMasksSelectedChanged}">
             <c:EditableDataGrid.Columns>
                 <DataGridTemplateColumn Header="Mask" Width="1*">
                     <DataGridTemplateColumn.CellTemplate>
@@ -109,7 +108,7 @@
             <c:SKImageViewer>
                 <c:SKImageViewer.SKImage>
                     <MultiBinding Converter="{StaticResource ToSKImageUpdaterConverter}">
-                        <ReflectionBinding Path="#CollisionMasksDataGrid.DataGridControl.SelectedItem"/>
+                        <Binding Path="CollisionMasksSelected"/>
                     </MultiBinding>
                 </c:SKImageViewer.SKImage>
             </c:SKImageViewer>

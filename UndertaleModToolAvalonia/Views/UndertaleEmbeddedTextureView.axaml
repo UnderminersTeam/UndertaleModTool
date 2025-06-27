@@ -45,7 +45,7 @@
             <c:SKImageViewer>
                 <c:SKImageViewer.SKImage>
                     <MultiBinding Converter="{StaticResource ToSKImageUpdaterConverter}">
-                        <ReflectionBinding Path="EmbeddedTexture.TextureData.Image"/>
+                        <Binding Path="EmbeddedTexture.TextureData.Image"/>
                     </MultiBinding>
                 </c:SKImageViewer.SKImage>
             </c:SKImageViewer>

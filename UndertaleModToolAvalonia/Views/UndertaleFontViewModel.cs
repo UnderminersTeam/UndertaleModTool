@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 
@@ -10,9 +11,17 @@ public partial class UndertaleFontViewModel : IUndertaleResourceViewModel
     public UndertaleResource Resource => Font;
     public UndertaleFont Font { get; set; }
 
+    [Notify]
+    private UndertaleFont.Glyph? _GlyphsSelected;
+
     public UndertaleFontViewModel(UndertaleFont font)
     {
         Font = font;
+    }
+
+    public void GlyphsSelectedChanged(object? item)
+    {
+        GlyphsSelected = (UndertaleFont.Glyph?)item!;
     }
 
     public void SortGlyphs()

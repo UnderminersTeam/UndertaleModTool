@@ -49,18 +49,18 @@
             <c:SKImageViewer>
                 <c:SKImageViewer.SKImage>
                     <MultiBinding Converter="{StaticResource ToSKImageUpdaterConverter}">
-                        <ReflectionBinding Path="TexturePageItem"/>
-                        <ReflectionBinding Path="TexturePageItem.TexturePage.TextureData.Image"/>
-                        <ReflectionBinding Path="TexturePageItem.SourceX"/>
-                        <ReflectionBinding Path="TexturePageItem.SourceY"/>
-                        <ReflectionBinding Path="TexturePageItem.SourceWidth"/>
-                        <ReflectionBinding Path="TexturePageItem.SourceHeight"/>
-                        <ReflectionBinding Path="TexturePageItem.TargetX"/>
-                        <ReflectionBinding Path="TexturePageItem.TargetY"/>
-                        <ReflectionBinding Path="TexturePageItem.TargetWidth"/>
-                        <ReflectionBinding Path="TexturePageItem.TargetHeight"/>
-                        <ReflectionBinding Path="TexturePageItem.BoundingWidth"/>
-                        <ReflectionBinding Path="TexturePageItem.BoundingHeight"/>
+                        <Binding Path="TexturePageItem"/>
+                        <Binding Path="TexturePageItem.TexturePage.TextureData.Image"/>
+                        <Binding Path="TexturePageItem.SourceX"/>
+                        <Binding Path="TexturePageItem.SourceY"/>
+                        <Binding Path="TexturePageItem.SourceWidth"/>
+                        <Binding Path="TexturePageItem.SourceHeight"/>
+                        <Binding Path="TexturePageItem.TargetX"/>
+                        <Binding Path="TexturePageItem.TargetY"/>
+                        <Binding Path="TexturePageItem.TargetWidth"/>
+                        <Binding Path="TexturePageItem.TargetHeight"/>
+                        <Binding Path="TexturePageItem.BoundingWidth"/>
+                        <Binding Path="TexturePageItem.BoundingHeight"/>
                     </MultiBinding>
                 </c:SKImageViewer.SKImage>
             </c:SKImageViewer>

@@ -67,17 +67,19 @@
             <TextBox Text="{Binding Background.GMS2FrameLength}" />
 
             <Label>Tile IDs</Label>
-            <c:EditableDataGrid ItemsSource="{Binding Background.GMS2TileIds}" ItemFactory="{Binding CreateTileID}">
-                <c:EditableDataGrid.Columns>
-                    <DataGridTemplateColumn Header="Tile ID" Width="1*">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate DataType="undertalem:UndertaleBackground+TileID">
-                                <TextBox Text="{Binding ID}" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </c:EditableDataGrid.Columns>
-            </c:EditableDataGrid>
+            <Expander Header="List">
+                <c:EditableDataGrid ItemsSource="{Binding Background.GMS2TileIds}" ItemFactory="{Binding CreateTileID}">
+                    <c:EditableDataGrid.Columns>
+                        <DataGridTemplateColumn Header="Tile ID" Width="1*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="undertalem:UndertaleBackground+TileID">
+                                    <TextBox Text="{Binding ID}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </c:EditableDataGrid.Columns>
+                </c:EditableDataGrid>
+            </Expander>
         </Grid>
         
         <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
@@ -87,18 +89,18 @@
                 <c:SKImageViewer>
                     <c:SKImageViewer.SKImage>
                         <MultiBinding Converter="{StaticResource ToSKImageUpdaterConverter}">
-                            <ReflectionBinding Path="Background.Texture"/>
-                            <ReflectionBinding Path="Background.Texture.TexturePage.TextureData.Image"/>
-                            <ReflectionBinding Path="Background.Texture.SourceX"/>
-                            <ReflectionBinding Path="Background.Texture.SourceY"/>
-                            <ReflectionBinding Path="Background.Texture.SourceWidth"/>
-                            <ReflectionBinding Path="Background.Texture.SourceHeight"/>
-                            <ReflectionBinding Path="Background.Texture.TargetX"/>
-                            <ReflectionBinding Path="Background.Texture.TargetY"/>
-                            <ReflectionBinding Path="Background.Texture.TargetWidth"/>
-                            <ReflectionBinding Path="Background.Texture.TargetHeight"/>
-                            <ReflectionBinding Path="Background.Texture.BoundingWidth"/>
-                            <ReflectionBinding Path="Background.Texture.BoundingHeight"/>
+                            <Binding Path="Background.Texture"/>
+                            <Binding Path="Background.Texture.TexturePage.TextureData.Image"/>
+                            <Binding Path="Background.Texture.SourceX"/>
+                            <Binding Path="Background.Texture.SourceY"/>
+                            <Binding Path="Background.Texture.SourceWidth"/>
+                            <Binding Path="Background.Texture.SourceHeight"/>
+                            <Binding Path="Background.Texture.TargetX"/>
+                            <Binding Path="Background.Texture.TargetY"/>
+                            <Binding Path="Background.Texture.TargetWidth"/>
+                            <Binding Path="Background.Texture.TargetHeight"/>
+                            <Binding Path="Background.Texture.BoundingWidth"/>
+                            <Binding Path="Background.Texture.BoundingHeight"/>
                         </MultiBinding>
                     </c:SKImageViewer.SKImage>
                 </c:SKImageViewer>

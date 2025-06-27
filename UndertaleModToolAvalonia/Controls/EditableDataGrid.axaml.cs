@@ -27,6 +27,14 @@ public partial class EditableDataGrid : UserControl
         set { SetValue(ItemFactoryProperty, value); }
     }
 
+    public static readonly StyledProperty<Action<object?>?> SelectionChangedProperty = AvaloniaProperty.Register<EditableDataGrid, Action<object?>?>(
+        nameof(SelectionChanged));
+    public Action<object?>? SelectionChanged
+    {
+        get { return GetValue(SelectionChangedProperty); }
+        set { SetValue(SelectionChangedProperty, value); }
+    }
+
     public ObservableCollection<DataGridColumn> Columns {
         get => DataGridControl.Columns;
         set
@@ -55,6 +63,8 @@ public partial class EditableDataGrid : UserControl
                 this.Find<InputElement>("MoveUpButton")!.IsEnabled = (DataGridControl.SelectedIndex > 0);
                 this.Find<InputElement>("MoveDownButton")!.IsEnabled = (DataGridControl.SelectedIndex < ItemsSource.Count - 1);
             });
+
+            SelectionChanged?.Invoke(DataGridControl.SelectedItem);
         };
         DataGridControl.GotFocus += (object? sender, GotFocusEventArgs e) =>
         {
@@ -64,6 +74,11 @@ public partial class EditableDataGrid : UserControl
                 if (row is not null)
                     row.IsSelected = true;
             }
+        };
+        DataGridControl.Initialized += (object? sender, EventArgs e) =>
+        {
+            if (ItemsSource.Count > 0)
+                DataGrid.SelectedIndex = 0;
         };
     }
 
