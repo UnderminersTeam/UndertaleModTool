@@ -12,7 +12,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using Microsoft.CodeAnalysis;
-using NAudio.MediaFoundation;
 using Microsoft.Win32;
 using UndertaleModLib;
 
