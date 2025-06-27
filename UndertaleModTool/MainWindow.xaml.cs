@@ -4077,10 +4077,12 @@ result in loss of work.");
                     }
                     catch (ProjectException ex)
                     {
+                        newProjectContext = null;
                         this.ShowError(ex.Message, "Failed to load project");
                     }
                     catch (Exception ex)
                     {
+                        newProjectContext = null;
                         this.ShowError($"Error occurred when loading project:\n{ex}");
                     }
                 });

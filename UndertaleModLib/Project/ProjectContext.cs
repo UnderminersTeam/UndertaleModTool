@@ -23,12 +23,12 @@ public sealed class ProjectContext
     /// <summary>
     /// Name of the project.
     /// </summary>
-    public string Name { get => _mainOptions.Name; }
+    public string Name { get => _mainOptions?.Name ?? "(unknown project name)"; }
 
     /// <summary>
     /// Project flags, denoting certain features that the project may use (including custom ones, which start with an underscore).
     /// </summary>
-    public List<string> Flags { get => _mainOptions.Flags; }
+    public List<string> Flags { get => _mainOptions?.Flags ?? []; }
 
     /// <summary>
     /// Current directory associated with loading data for this project. Must always be set.
@@ -279,6 +279,8 @@ public sealed class ProjectContext
             // Perform import
             RunPreImportScripts();
             ImportSubProjects();
+            ImportExternalFiles();
+            ApplyFileOperations();
             ApplyFilePatches();
             if (LoadDataPath is not null)
             {
@@ -407,6 +409,186 @@ public sealed class ProjectContext
     }
 
     /// <summary>
+    /// Helper method to copy a directory to another directory, ignoring hidden folders and files.
+    /// </summary>
+    private void CopyDirectory(DirectoryInfo sourceInfo, string destPath)
+    {
+        // Sanity check the source directory's existence
+        if (!sourceInfo.Exists)
+        {
+            throw new DirectoryNotFoundException(sourceInfo.FullName);
+        }
+
+        // Make sure destination directory is created
+        if (!Directory.Exists(destPath))
+        {
+            FileBackup.BackupDirectory(destPath, true);
+            Directory.CreateDirectory(destPath);
+        }
+
+        // Copy over files from this directory
+        foreach (FileInfo sourceFileInfo in sourceInfo.EnumerateFiles("*", SearchOption.TopDirectoryOnly))
+        {
+            if (sourceFileInfo.Attributes.HasFlag(FileAttributes.Hidden) || sourceFileInfo.Attributes.HasFlag(FileAttributes.System))
+            {
+                continue;
+            }
+            string destFilePath = Path.Join(destPath, sourceFileInfo.Name);
+            FileBackup.BackupFile(destFilePath);
+            sourceFileInfo.CopyTo(destFilePath, true);
+        }
+
+        // Recursively copy sub-directories
+        foreach (DirectoryInfo sourceDirInfo in sourceInfo.EnumerateDirectories("*", SearchOption.TopDirectoryOnly))
+        {
+            if (sourceDirInfo.Attributes.HasFlag(FileAttributes.Hidden) || sourceDirInfo.Attributes.HasFlag(FileAttributes.System))
+            {
+                continue;
+            }
+            string destDirPath = Path.Join(destPath, sourceDirInfo.Name);
+            CopyDirectory(sourceDirInfo, destDirPath);
+        }
+    }
+
+    /// <summary>
+    /// Imports all external files, as found in locations (file/directory paths) defined in the project options.
+    /// </summary>
+    private void ImportExternalFiles()
+    {
+        foreach (ProjectMainOptions.PathList.PathPair pair in _mainOptions.ExternalFiles)
+        {
+            // Make sure external file or directory exists
+            string sourcePath = Path.Join(_mainDirectory, pair.Source);
+            Paths.VerifyWithinDirectory(_mainDirectory, sourcePath);
+            bool isDirectory;
+            try
+            {
+                FileAttributes sourceAttributes = File.GetAttributes(sourcePath);
+                isDirectory = sourceAttributes.HasFlag(FileAttributes.Directory);
+            }
+            catch (Exception e)
+            {
+                throw new ProjectException($"Failed to find external file or directory: {e}", e);
+            }
+
+            // Get destination path
+            string destPath = Path.Join(SaveDirectory, pair.Destination);
+            Paths.VerifyWithinDirectory(SaveDirectory, destPath);
+
+            // Create directories if needed
+            string destFullPath = Path.GetFullPath(destPath);
+            string destDirectory = Path.GetDirectoryName(destFullPath);
+            if (!Directory.Exists(destDirectory))
+            {
+                FileBackup.BackupDirectory(destDirectory, true);
+                Directory.CreateDirectory(destDirectory);
+            }
+
+            if (isDirectory)
+            {
+                // If this is a directory, recursively copy its contents (and create directories).
+                CopyDirectory(new DirectoryInfo(sourcePath), destFullPath);
+            }
+            else
+            {
+                // If this is a file, copy single file
+                FileBackup.BackupFile(destFullPath);
+                File.Copy(sourcePath, destPath, true);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Attempts to find a valid file from the given path list, outputting the first valid path pair found, or <see langword="null"/> if none are valid.
+    /// </summary>
+    /// <remarks>
+    /// This method will search relative to <see cref="LoadDirectory"/>, and will also verify path destinations relative to <see cref="SaveDirectory"/>.
+    /// </remarks>
+    /// <returns><see langword="true"/> if a valid path pair was found; <see langword="false"/> otherwise.</returns>
+    private bool TryFindFileFromPathList(ProjectMainOptions.PathList list, out string sourcePath, out string destPath)
+    {
+        foreach (ProjectMainOptions.PathList.PathPair pair in list.Paths)
+        {
+            // Attempt next path
+            string attemptPath = Path.Join(LoadDirectory, pair.Source);
+            Paths.VerifyWithinDirectory(LoadDirectory, attemptPath);
+            if (!File.Exists(attemptPath))
+            {
+                continue;
+            }
+
+            // Successfully found a path!
+            sourcePath = attemptPath;
+            destPath = Path.Join(SaveDirectory, pair.Destination);
+            Paths.VerifyWithinDirectory(SaveDirectory, destPath);
+            return true;
+        }
+
+        // No valid path found
+        sourcePath = null;
+        destPath = null;
+        return false;
+    }
+
+    /// <summary>
+    /// Applies all file operations (copy/delete), as defined in the project options.
+    /// </summary>
+    private void ApplyFileOperations()
+    {
+        // Apply file copies first
+        foreach (ProjectMainOptions.FileOperation operation in _mainOptions.FileCopies)
+        {
+            // Try finding valid source/destination file paths
+            if (!TryFindFileFromPathList(operation.Paths, out string sourcePath, out string destPath))
+            {
+                // Throw exception only if required
+                if (operation.Required)
+                {
+                    throw new ProjectException("Failed to find required file to be copied");
+                }
+                continue;
+            }
+
+            // Back up destination file
+            string destFullPath = Path.GetFullPath(destPath);
+            FileBackup.BackupFile(destFullPath);
+
+            // Create directories if needed
+            string destDirectory = Path.GetDirectoryName(destFullPath);
+            if (!Directory.Exists(destDirectory))
+            {
+                FileBackup.BackupDirectory(destDirectory, true);
+                Directory.CreateDirectory(destDirectory);
+            }
+
+            // Perform copy
+            File.Copy(sourcePath, destPath, true);
+        }
+
+        // Apply file deletes last
+        foreach (ProjectMainOptions.FileOperation operation in _mainOptions.FileDeletes)
+        {
+            // Try finding valid destination file path
+            if (!TryFindFileFromPathList(operation.Paths, out _, out string destPath))
+            {
+                // Throw exception only if required
+                if (operation.Required)
+                {
+                    throw new ProjectException("Failed to find required file to be deleted");
+                }
+                continue;
+            }
+
+            // Back up destination file
+            FileBackup.BackupFile(Path.GetFullPath(destPath));
+
+            // Perform delete (only if file actually exists in destination - it may have been deleted already,
+            // but we already verified the file exists at the source path)
+            File.Delete(destPath);
+        }
+    }
+
+    /// <summary>
     /// Applies all file patches, located as defined in the project options.
     /// </summary>
     private void ApplyFilePatches()
@@ -417,46 +599,38 @@ public sealed class ProjectContext
             string fullPatchPath = Path.Join(_mainDirectory, patch.PatchPath);
             Paths.VerifyWithinDirectory(_mainDirectory, fullPatchPath);
 
-            // Try finding valid base file path
-            if (patch.DataFilePath.Paths.Count == 0)
+            // Try finding valid base/output file paths
+            if (!TryFindFileFromPathList(patch.DataFilePath, out string baseFilePath, out string outputFilePath))
             {
-                throw new ProjectException("Data file patch is missing any data file paths");
+                throw new ProjectException("Failed to find data file to be patched");
             }
-            string baseFilePath = null, baseFileRelativePath = null;
-            foreach (string path in patch.DataFilePath.Paths)
-            {
-                string attemptPath = Path.Join(LoadDirectory, path);
-                Paths.VerifyWithinDirectory(LoadDirectory, attemptPath);
-                if (!File.Exists(attemptPath))
-                {
-                    continue;
-                }
-                baseFilePath = attemptPath;
-                baseFileRelativePath = path;
-            }
-            if (baseFilePath is null)
-            {
-                throw new ProjectException($"Missing data file to be patched (first attempt was \"{patch.DataFilePath.Paths[0]}\")");
-            }
+            string baseFileFullPath = Path.GetFullPath(baseFilePath);
+            string outputFileFullPath = Path.GetFullPath(outputFilePath);
 
-            // Back up file
-            string outputFilePath = Path.Join(SaveDirectory, baseFileRelativePath);
-            Paths.VerifyWithinDirectory(SaveDirectory, outputFilePath);
-            FileBackup.BackupFile(outputFilePath);
+            // Back up destination file
+            FileBackup.BackupFile(outputFileFullPath);
+
+            // Create directories if needed
+            string outputDirectory = Path.GetDirectoryName(outputFileFullPath);
+            if (!Directory.Exists(outputDirectory))
+            {
+                FileBackup.BackupDirectory(outputDirectory, true);
+                Directory.CreateDirectory(outputDirectory);
+            }
 
             // Apply patch
             using FileStream patchStream = new(fullPatchPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            if (Path.GetFullPath(baseFilePath) == Path.GetFullPath(outputFilePath))
+            if (baseFileFullPath == outputFileFullPath)
             {
-                byte[] baseFileBytes = File.ReadAllBytes(baseFilePath);
+                byte[] baseFileBytes = File.ReadAllBytes(baseFileFullPath);
                 using MemoryStream baseStream = new(baseFileBytes);
-                using FileStream outputStream = new(outputFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
+                using FileStream outputStream = new(outputFileFullPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
                 BPS.ApplyPatch(baseStream, patchStream, outputStream);
             }
             else
             {
-                using FileStream baseStream = new(baseFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                using FileStream outputStream = new(outputFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
+                using FileStream baseStream = new(baseFileFullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                using FileStream outputStream = new(outputFileFullPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
                 BPS.ApplyPatch(baseStream, patchStream, outputStream);
             }
         }
@@ -1213,7 +1387,20 @@ public sealed class ProjectContext
         {
             string destPath = Path.Join(SaveDirectory, destinationFilename);
             Paths.VerifyWithinDirectory(SaveDirectory, destPath);
-            FileBackup.BackupFile(destPath);
+
+            // Backup original destination file status
+            string destFullPath = Path.GetFullPath(destPath);
+            FileBackup.BackupFile(destFullPath);
+
+            // Create directories if needed
+            string destDirectory = Path.GetDirectoryName(destFullPath);
+            if (!Directory.Exists(destDirectory))
+            {
+                FileBackup.BackupDirectory(destDirectory, true);
+                Directory.CreateDirectory(destDirectory);
+            }
+
+            // Actually copy the file
             File.Copy(sourcePath, destPath, true);
         }
         catch (Exception e)
