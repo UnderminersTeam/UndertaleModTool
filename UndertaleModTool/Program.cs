@@ -63,7 +63,7 @@ namespace UndertaleModTool
             File.WriteAllText(Path.Combine(GetExecutableDirectory(), "crash3.txt"), (ex.Message + "\n" + ex.StackTrace));
         }
 
-        private static async Task EmergencySaveFile()
+        private static void EmergencySaveFile()
         {
             var data = MainWindow.LastData;
             if (data is null || data.UnsupportedBytecodeVersion) return;
@@ -73,14 +73,12 @@ namespace UndertaleModTool
             dlg.Filter = "GameMaker data files (.win, .unx, .ios, .droid, audiogroup*.dat)|*.win;*.unx;*.ios;*.droid;audiogroup*.dat|All files|*";
             dlg.FileName = MainWindow.LastFilePath;
             dlg.Title = "Emergency-save the current file (separate file recommended):";
-
             if (dlg.ShowDialog() != true) return;
 
-            var filename = dlg.FileName;
-
             bool SaveSucceeded = false;
-            try {
-                using (var stream = new FileStream(filename + "temp", FileMode.Create, FileAccess.Write))
+            try
+            {
+                using (var stream = new FileStream(dlg.FileName + "temp", FileMode.Create, FileAccess.Write))
                 {
                     UndertaleIO.Write(stream, data, message => {});
                     SaveSucceeded = true;
@@ -98,7 +96,7 @@ namespace UndertaleModTool
                     // It saved successfully!
                     // If we're overwriting a previously existing data file, we're going to overwrite it now.
                     // Then, we're renaming it back to the proper (non-temp) file name.
-                    File.Move(filename + "temp", filename, true);
+                    File.Move(dlg.FileName + "temp", dlg.FileName, true);
                     MessageBox.Show("Emergency save successful.");
                 }
                 else

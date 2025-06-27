@@ -65,14 +65,24 @@ namespace UndertaleModTool
 
         private UndertaleData _data;
         private string _filePath;
-        public UndertaleData Data { get => _data; set {
+        public UndertaleData Data
+        {
+            get => _data;
+            set
+            {
                 _data = value;
                 LastData = value;
-            } }
-        public string FilePath { get => _filePath; set {
+            }
+        }
+        public string FilePath
+        {
+            get => _filePath;
+            set
+            {
                 _filePath = value;
                 LastFilePath = value;
-            } }
+            }
+        }
         public static UndertaleData LastData { get; set; }
         public static string LastFilePath { get; set; }
 
