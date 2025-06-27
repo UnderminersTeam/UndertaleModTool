@@ -73,7 +73,7 @@ namespace UndertaleModTool
             dlg.DefaultExt = "win";
             dlg.Filter = "GameMaker data files (.win, .unx, .ios, .droid, audiogroup*.dat)|*.win;*.unx;*.ios;*.droid;audiogroup*.dat|All files|*";
             dlg.FileName = MainWindow.LastFilePath;
-            dlg.Title = "Emergency-save the current file:";
+            dlg.Title = "Emergency-save the current file (separate file recommended):";
 
             if (dlg.ShowDialog() != true) return;
 
