@@ -193,6 +193,26 @@ public sealed class GameFileBackup(string gameDirectory) : IGameFileBackup
             }
         }
 
+        // Perform sanity checks before beginning full restoration
+        foreach (BackupFileEntry file in manifest.Files)
+        {
+            // Sanity check that the corresponding file can be written to or deleted (for basic cases - this is not secure and has race conditions)
+            string gameDataLocation = Path.Join(GameDirectory, file.Path);
+            Paths.VerifyWithinDirectory(GameDirectory, gameDataLocation);
+            if (!File.Exists(gameDataLocation))
+            {
+                continue;
+            }
+            try
+            {
+                using FileStream stream = new(gameDataLocation, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+            }
+            catch (Exception e)
+            {
+                throw new GameFileBackupException($"Backup restoration file failed to open at \"{file.Path}\": {e}", e);
+            }
+        }
+
         // Restore deleted directories
         foreach (BackupDirectoryEntry dir in manifest.Directories)
         {
