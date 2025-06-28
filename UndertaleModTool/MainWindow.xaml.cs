@@ -3962,7 +3962,7 @@ result in loss of work.");
 
         private void Command_NewProject(object sender, ExecutedRoutedEventArgs e)
         {
-            if (Data is null)
+            if (Data is null || FilePath is null)
             {
                 // No data set; this should be impossible, but abort if this does occur
                 return;
@@ -4029,7 +4029,7 @@ result in loss of work.");
 
         private async void Command_OpenProject(object sender, ExecutedRoutedEventArgs e)
         {
-            if (Data is null)
+            if (Data is null || FilePath is null)
             {
                 // No data set; this should be impossible, but abort if this does occur
                 return;
@@ -4102,7 +4102,7 @@ result in loss of work.");
         }
         private async void Command_SaveProject(object sender, ExecutedRoutedEventArgs e)
         {
-            if (Data is null)
+            if (Data is null || FilePath is null)
             {
                 // No data set; this should be impossible, but abort if this does occur
                 return;
@@ -4138,7 +4138,7 @@ result in loss of work.");
 
         private void Command_ViewProjectAssets(object sender, ExecutedRoutedEventArgs e)
         {
-            if (Data is null)
+            if (Data is null || FilePath is null)
             {
                 // No data set; this should be impossible, but abort if this does occur
                 return;
@@ -4170,7 +4170,7 @@ result in loss of work.");
 
         private void Command_CloseProject(object sender, ExecutedRoutedEventArgs e)
         {
-            if (Data is null)
+            if (Data is null || FilePath is null)
             {
                 // No data set; this should be impossible, but abort if this does occur
                 return;

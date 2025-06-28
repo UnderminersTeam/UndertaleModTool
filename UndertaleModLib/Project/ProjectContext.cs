@@ -619,18 +619,19 @@ public sealed class ProjectContext
             }
 
             // Apply patch
-            using FileStream patchStream = new(fullPatchPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            const int bufferSize = 131072;
+            using FileStream patchStream = new(fullPatchPath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize);
             if (baseFileFullPath == outputFileFullPath)
             {
                 byte[] baseFileBytes = File.ReadAllBytes(baseFileFullPath);
                 using MemoryStream baseStream = new(baseFileBytes);
-                using FileStream outputStream = new(outputFileFullPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
+                using FileStream outputStream = new(outputFileFullPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read, bufferSize);
                 BPS.ApplyPatch(baseStream, patchStream, outputStream);
             }
             else
             {
-                using FileStream baseStream = new(baseFileFullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                using FileStream outputStream = new(outputFileFullPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
+                using FileStream baseStream = new(baseFileFullPath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize);
+                using FileStream outputStream = new(outputFileFullPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read, bufferSize);
                 BPS.ApplyPatch(baseStream, patchStream, outputStream);
             }
         }

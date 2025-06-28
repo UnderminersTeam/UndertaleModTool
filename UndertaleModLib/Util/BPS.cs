@@ -122,6 +122,9 @@ public static class BPS
             patchFile.ReadExactly(readBuffer);
             uint expectedOutputCRC = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer);
 
+            // Initialize output file size
+            outputFile.SetLength(targetSize);
+
             // Skip metadata and apply patch
             patchFile.Seek(metadataPosition + metadataSize, SeekOrigin.Begin);
             long outputOffset = 0;
@@ -204,6 +207,7 @@ public static class BPS
 
                             // Copy bytes in chunks while possible
                             long possibleChunkedLength = Math.Min(length, outputOffset - targetRelativeOffset);
+                            long totalChunkedLength = possibleChunkedLength;
                             length -= possibleChunkedLength;
 
                             // Copy in chunks
@@ -221,27 +225,39 @@ public static class BPS
                             }
                             while (possibleChunkedLength > 0);
 
-                            // Copy the last byte while needed (in chunks)
+                            // Handle remaining data at the very end of the file
                             if (length > 0)
                             {
-                                // Fill shared buffer with the last byte
-                                byte lastByte = sharedBuffer[numBytesToCopy - 1];
-                                numBytesToCopy = (int)Math.Min(sharedBuffer.Length, length);
-                                for (int i = 0; i < numBytesToCopy; i++)
+                                // Copy section of last chunk if all data fully fits in shared buffer; otherwise, copy manually
+                                if (totalChunkedLength <= sharedBuffer.Length)
                                 {
-                                    sharedBuffer[i] = lastByte;
+                                    // Write the contents of the shared buffer as many times as needed
+                                    do
+                                    {
+                                        totalChunkedLength = Math.Min(length, totalChunkedLength);
+                                        targetRelativeOffset += totalChunkedLength;
+                                        outputOffset += totalChunkedLength;
+                                        outputFile.Write(sharedBuffer, 0, (int)totalChunkedLength);
+                                        length -= totalChunkedLength;
+                                    }
+                                    while (length > 0);
                                 }
-
-                                // Write the shared buffer as many times as needed
-                                targetRelativeOffset += length;
-                                outputOffset += length;
-                                do
+                                else
                                 {
-                                    numBytesToCopy = (int)Math.Min(sharedBuffer.Length, length);
-                                    outputFile.Write(sharedBuffer, 0, numBytesToCopy);
-                                    length -= numBytesToCopy;
+                                    // Copying large chunks of data that we just wrote, manually
+                                    do
+                                    {
+                                        numBytesToCopy = (int)Math.Min(sharedBuffer.Length, length);
+                                        outputFile.Seek(targetRelativeOffset, SeekOrigin.Begin);
+                                        outputFile.ReadExactly(sharedBuffer, 0, numBytesToCopy);
+                                        outputFile.Seek(outputOffset, SeekOrigin.Begin);
+                                        outputFile.Write(sharedBuffer, 0, numBytesToCopy);
+                                        length -= numBytesToCopy;
+                                        targetRelativeOffset += numBytesToCopy;
+                                        outputOffset += numBytesToCopy;
+                                    }
+                                    while (length > 0);
                                 }
-                                while (length > 0);
                             }
                             break;
                         }

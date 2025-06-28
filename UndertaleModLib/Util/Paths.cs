@@ -18,8 +18,12 @@ public static class Paths
     public static bool IsWithinDirectory(string directory, string pathToTest)
     {
         string fullDirectoryPath = Path.GetFullPath(directory);
+        if (!fullDirectoryPath.EndsWith(Path.DirectorySeparatorChar))
+        {
+            fullDirectoryPath += Path.DirectorySeparatorChar;
+        }
         string fullPathToTest = Path.GetFullPath(pathToTest);
-        return fullPathToTest.StartsWith(fullDirectoryPath);
+        return fullPathToTest.StartsWith(fullDirectoryPath, StringComparison.Ordinal);
     }
 
     /// <summary>
@@ -31,10 +35,14 @@ public static class Paths
     public static void VerifyWithinDirectory(string directory, string pathToTest)
     {
         string fullDirectoryPath = Path.GetFullPath(directory);
-        string fullPathToTest = Path.GetFullPath(pathToTest);
-        if (!fullPathToTest.StartsWith(fullDirectoryPath))
+        if (!fullDirectoryPath.EndsWith(Path.DirectorySeparatorChar))
         {
-            throw new Exception($"Path escapes its root directory ({fullPathToTest})");
+            fullDirectoryPath += Path.DirectorySeparatorChar;
+        }
+        string fullPathToTest = Path.GetFullPath(pathToTest);
+        if (!fullPathToTest.StartsWith(fullDirectoryPath, StringComparison.Ordinal))
+        {
+            throw new Exception($"Path escapes its root directory ({pathToTest})");
         }
     }
 }
