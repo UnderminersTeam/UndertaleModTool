@@ -31,6 +31,7 @@ using UndertaleModLib.ModelsDebug;
 using UndertaleModLib.Scripting;
 using UndertaleModLib.Util;
 using UndertaleModTool.Windows;
+using UndertaleModTool.Resources.Languages;
 using System.IO.Pipes;
 using Ookii.Dialogs.Wpf;
 
@@ -232,7 +233,7 @@ namespace UndertaleModTool
             InitializeComponent();
             this.DataContext = this;
 
-            Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open a data.win file to get started, then double click on the items on the left to view them.");
+            Highlighted = new DescriptionView(Resource.Msg_Welcome, Resource.Msg_GetStarted);
             OpenInTab(Highlighted);
 
             TitleMain = "UndertaleModTool by krzys_h v:" + Version;
@@ -680,7 +681,7 @@ namespace UndertaleModTool
         {
             if (Data != null)
             {
-                if (this.ShowQuestion("Warning: you currently have a project open.\nAre you sure you want to make a new project?") == MessageBoxResult.No)
+                if (this.ShowQuestion(Resource.Msg_AreYouSureYouWantToMakeANewProject) == MessageBoxResult.No)
                     return false;
             }
             this.Dispatcher.Invoke(() =>
@@ -700,10 +701,10 @@ namespace UndertaleModTool
             OnPropertyChanged("IsGMS2");
 
             BackgroundsItemsList.Header = IsGMS2 == Visibility.Visible
-                                          ? "Tile sets"
-                                          : "Backgrounds & Tile sets";
+                                          ? Resource.Tree_TileSets
+                                          : Resource.Tree_BackgroundsAndTileSets;
 
-            Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open a data.win, not create a new file! :P");
+            Highlighted = new DescriptionView(Resource.Msg_Welcome, Resource.Msg_GetStartedFromEmpty);
             OpenInTab(Highlighted);
 
             CanSave = true;
@@ -833,7 +834,7 @@ namespace UndertaleModTool
 
                 if (SettingsWindow.WarnOnClose)
                 {
-                    MessageBoxResult result = this.ShowQuestionWithCancel("Save changes before quitting?");
+                    MessageBoxResult result = this.ShowQuestionWithCancel(Resource.Msg_SaveChangesBeforeQuitting);
 
                     if (result == MessageBoxResult.Cancel)
                     {
@@ -908,8 +909,8 @@ namespace UndertaleModTool
             Tabs.Clear();
             CurrentTab = null;
 
-            OpenInTab(new DescriptionView("Welcome to UndertaleModTool!",
-                                          "Open data.win file to get started, then double click on the items on the left to view them"));
+            OpenInTab(new DescriptionView(Resource.Msg_Welcome,
+                                          Resource.Msg_GetStarted));
             CurrentTab = Tabs[CurrentTabIndex];
 
             UpdateObjectLabel(CurrentTab.CurrentObject);
@@ -1001,7 +1002,7 @@ namespace UndertaleModTool
         }
         private async Task LoadFile(string filename, bool preventClose = false, bool onlyGeneralInfo = false)
         {
-            LoaderDialog dialog = new LoaderDialog("Loading", "Loading, please wait...");
+            LoaderDialog dialog = new LoaderDialog(Resource.Msg_LoadingTitle, Resource.Msg_LoadingPleaseWait);
             dialog.PreventClose = preventClose;
             this.Dispatcher.Invoke(() =>
             {
@@ -1010,7 +1011,7 @@ namespace UndertaleModTool
             dialog.Owner = this;
 
             DisposeGameData();
-            Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!");
+            Highlighted = new DescriptionView(Resource.Msg_Welcome, Resource.Msg_DoubleClick);
             OpenInTab(Highlighted);
 
             GameSpecificResolver.BaseDirectory = ExePath;
@@ -1110,8 +1111,8 @@ namespace UndertaleModTool
                         OnPropertyChanged("IsGMS2");
 
                         BackgroundsItemsList.Header = IsGMS2 == Visibility.Visible
-                                                      ? "Tile sets"
-                                                      : "Backgrounds & Tile sets";
+                                                      ? Resource.Tree_TileSets
+                                                      : Resource.Tree_BackgroundsAndTileSets;
 
                         UndertaleCodeEditor.gettext = null;
                         UndertaleCodeEditor.gettextJSON = null;
@@ -1136,7 +1137,7 @@ namespace UndertaleModTool
 
             bool isDifferentPath = FilePath != filename;
 
-            LoaderDialog dialog = new LoaderDialog("Saving", "Saving, please wait...");
+            LoaderDialog dialog = new LoaderDialog(Resource.Msg_SavingTitle, Resource.Msg_SavingTitle);
             dialog.PreventClose = true;
             IProgress<Tuple<int, string>> progress = new Progress<Tuple<int, string>>(i => { dialog.ReportProgress(i.Item2, i.Item1); });
             IProgress<double?> setMax = new Progress<double?>(i => { dialog.Maximum = i; });
@@ -1322,13 +1323,13 @@ namespace UndertaleModTool
 
                 if (item == "Data")
                 {
-                    Highlighted = new DescriptionView("Welcome to UndertaleModTool!", Data != null ? "Double click on the items on the left to view them" : "Open data.win file to get started");
+                    Highlighted = new DescriptionView(Resource.Msg_Welcome, Data != null ? Resource.Msg_DoubleClick : Resource.Msg_OpenDataToStart);
                     return;
                 }
 
                 if (Data == null)
                 {
-                    Highlighted = new DescriptionView(item, "Load data.win file first");
+                    Highlighted = new DescriptionView(item, Resource.Msg_LoadDataWinFileFirst);
                     return;
                 }
 
@@ -1338,7 +1339,7 @@ namespace UndertaleModTool
                     "Global init" => new GlobalInitEditor(Data?.GlobalInitScripts),
                     "Game End scripts" => new GameEndEditor(Data?.GameEndScripts),
                     "Variables" => Data.FORM.Chunks["VARI"],
-                    _ => new DescriptionView(item, "Expand the list on the left to edit items"),
+                    _ => new DescriptionView(item, Resource.Msg_ExpandList),
                 };
             }
             else
@@ -1949,7 +1950,7 @@ namespace UndertaleModTool
             // If we're at the complete root, we need to add the "Run other script" button as well
             if (item.Name != "RootScriptItem") return;
 
-            var otherScripts = new MenuItem {Header = "Run _other script..."};
+            var otherScripts = new MenuItem {Header = Resource.Menu_Scripts_RunOtherScript};
             otherScripts.Click += MenuItem_RunOtherScript_Click;
             item.Items.Add(otherScripts);
         }
@@ -2497,8 +2498,10 @@ namespace UndertaleModTool
         {
             this.ShowWarning(message, "Script warning");
         }
-        public void ScriptError(string error, string title = "Error", bool SetConsoleText = true)
+        public void ScriptError(string error, string title = null, bool SetConsoleText = true)
         {
+            if (title is null)
+                title = Resource.Window_Error;
             this.ShowError(error, title);
             if (SetConsoleText)
             {
@@ -2605,7 +2608,7 @@ namespace UndertaleModTool
 
         private void MenuItem_About_Click(object sender, RoutedEventArgs e)
         {
-            this.ShowMessage("UndertaleModTool by krzys_h and the Underminers team\nVersion " + Version, "About");
+            this.ShowMessage(Resource.Msg_About + Version, Resource.Window_About);
         }
 
         /// From https://github.com/AvaloniaUI/Avalonia/blob/master/src/Avalonia.Dialogs/AboutAvaloniaDialog.xaml.cs
@@ -2951,17 +2954,12 @@ namespace UndertaleModTool
         {
             if (Data == null)
             {
-                ScriptError("Nothing to run!");
+                ScriptError(Resource.Msg_TempRunNothingToRun);
                 return;
             }
             if ((!WasWarnedAboutTempRun) && SettingsWindow.TempRunMessageShow)
             {
-                ScriptMessage(@"WARNING:
-Temp running the game does not permanently 
-save your changes. Please ""Save"" the game
-to save your changes. Closing UndertaleModTool
-without using the ""Save"" option can
-result in loss of work.");
+                ScriptMessage(Resource.Msg_TempRunWarn);
                 WasWarnedAboutTempRun = true;
             }
             bool saveOk = true;
@@ -2979,7 +2977,7 @@ result in loss of work.");
             Data.GeneralInfo.IsDebuggerDisabled = oldDisableDebuggerState;
             if (TempFilesFolder == null)
             {
-                this.ShowWarning("Temp folder is null.");
+                this.ShowWarning(Resource.Msg_TempFolderIsNull);
                 return;
             }
             else if (saveOk)
@@ -2987,18 +2985,18 @@ result in loss of work.");
                 string gameExeName = Data?.GeneralInfo?.FileName?.Content;
                 if (gameExeName == null || FilePath == null)
                 {
-                    ScriptError("Null game executable name or location");
+                    ScriptError(Resource.Msg_TempRunNull);
                     return;
                 }
                 string gameExePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(FilePath), gameExeName + ".exe");
                 if (!File.Exists(gameExePath))
                 {
-                    ScriptError("Cannot find game executable path, expected: " + gameExePath);
+                    ScriptError(Resource.Msg_TempRunCannotFindExecutable + gameExePath);
                     return;
                 }
                 if (!File.Exists(TempFilesFolder))
                 {
-                    ScriptError("Cannot find game path, expected: " + TempFilesFolder);
+                    ScriptError(Resource.Msg_TempRunCannotFindGamePath + TempFilesFolder);
                     return;
                 }
                 if (gameExeName != null)
@@ -3006,7 +3004,7 @@ result in loss of work.");
             }
             else if (!saveOk)
             {
-                this.ShowWarning("Temp save failed, cannot run.");
+                this.ShowWarning(Resource.Msg_TempRunSaveFailed);
                 return;
             }
             if (File.Exists(TempFilesFolder))
@@ -3409,8 +3407,8 @@ result in loss of work.");
 
                     if (addDefaultTab)
                     {
-                        OpenInTab(new DescriptionView("Welcome to UndertaleModTool!",
-                                                      "Open a data.win file to get started, then double click on the items on the left to view them"));
+                        OpenInTab(new DescriptionView(Resource.Msg_Welcome,
+                                                      Resource.Msg_GetStarted));
                         CurrentTab = Tabs[CurrentTabIndex];
 
                         UpdateObjectLabel(CurrentTab.CurrentObject);

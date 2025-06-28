@@ -1,0 +1,552 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="App_Title_Main" xml:space="preserve">
+    <value>UndertaleModTool krzys_h作 v:</value>
+  </data>
+  <data name="App_Title_NoGameLoaded" xml:space="preserve">
+    <value>ゲーム読み込み待ち</value>
+  </data>
+  <data name="Menu_File" xml:space="preserve">
+    <value>ファイル</value>
+  </data>
+  <data name="Menu_File_Close" xml:space="preserve">
+    <value>閉じる</value>
+  </data>
+  <data name="Menu_File_GenerateOffsetMap" xml:space="preserve">
+    <value>オフセットマップを生成</value>
+  </data>
+  <data name="Menu_File_New" xml:space="preserve">
+    <value>新規作成</value>
+  </data>
+  <data name="Menu_File_Open" xml:space="preserve">
+    <value>開く</value>
+  </data>
+  <data name="Menu_File_RunGameUnderGMSDebugger" xml:space="preserve">
+    <value>GMSデバッガーでゲームを実行</value>
+  </data>
+  <data name="Menu_File_RunGameWithOtherRunner" xml:space="preserve">
+    <value>別のランナーでゲームを実行</value>
+  </data>
+  <data name="Menu_File_Save" xml:space="preserve">
+    <value>名前を付けて保存</value>
+  </data>
+  <data name="Menu_File_Settings" xml:space="preserve">
+    <value>設定</value>
+  </data>
+  <data name="Menu_File_TempRunGame" xml:space="preserve">
+    <value>ゲームを一時実行</value>
+  </data>
+  <data name="Menu_Find" xml:space="preserve">
+    <value>検索</value>
+  </data>
+  <data name="Menu_Find_FindUnreferencedAssets" xml:space="preserve">
+    <value>未使用のアセットを検索</value>
+  </data>
+  <data name="Menu_Find_SearchInCode" xml:space="preserve">
+    <value>コード内を検索</value>
+  </data>
+  <data name="Menu_Help" xml:space="preserve">
+    <value>ヘルプ</value>
+  </data>
+  <data name="Menu_Help_About" xml:space="preserve">
+    <value>UndertaleModToolについて</value>
+  </data>
+  <data name="Menu_Help_GitHub" xml:space="preserve">
+    <value>GitHubで見る</value>
+  </data>
+  <data name="Menu_Scripts" xml:space="preserve">
+    <value>スクリプト</value>
+  </data>
+  <data name="Menu_Scripts_Loading" xml:space="preserve">
+    <value>(...読み込み中...)</value>
+  </data>
+  <data name="Tree_AudioGroups" xml:space="preserve">
+    <value>音声グループ</value>
+  </data>
+  <data name="Tree_BackgroundsAndTileSets" xml:space="preserve">
+    <value>背景とタイルセット</value>
+  </data>
+  <data name="Tree_Code" xml:space="preserve">
+    <value>コード</value>
+  </data>
+  <data name="Tree_CodeLocals" xml:space="preserve">
+    <value>ローカル変数</value>
+  </data>
+  <data name="Tree_Data" xml:space="preserve">
+    <value>データ</value>
+  </data>
+  <data name="Tree_EmbeddedAudio" xml:space="preserve">
+    <value>埋め込み音声</value>
+  </data>
+  <data name="Tree_EmbeddedImages" xml:space="preserve">
+    <value>埋め込み画像</value>
+  </data>
+  <data name="Tree_EmbeddedTextures" xml:space="preserve">
+    <value>埋め込みテクスチャ</value>
+  </data>
+  <data name="Tree_Extensions" xml:space="preserve">
+    <value>拡張機能</value>
+  </data>
+  <data name="Tree_FilterByName" xml:space="preserve">
+    <value>名前でフィルタ...</value>
+  </data>
+  <data name="Tree_Fonts" xml:space="preserve">
+    <value>フォント</value>
+  </data>
+  <data name="Tree_Functions" xml:space="preserve">
+    <value>関数</value>
+  </data>
+  <data name="Tree_GameEndScript" xml:space="preserve">
+    <value>ゲーム終了処理</value>
+  </data>
+  <data name="Tree_GameObjects" xml:space="preserve">
+    <value>ゲームオブジェクト</value>
+  </data>
+  <data name="Tree_GeneralInfo" xml:space="preserve">
+    <value>一般情報</value>
+  </data>
+  <data name="Tree_GlobalInit" xml:space="preserve">
+    <value>ゲーム起動処理</value>
+  </data>
+  <data name="Tree_ParticleSystemEmitters" xml:space="preserve">
+    <value>パーティクルシステムエミッター</value>
+  </data>
+  <data name="Tree_ParticleSystems" xml:space="preserve">
+    <value>パーティクルシステム</value>
+  </data>
+  <data name="Tree_Paths" xml:space="preserve">
+    <value>パス</value>
+  </data>
+  <data name="Tree_Rooms" xml:space="preserve">
+    <value>ルーム</value>
+  </data>
+  <data name="Tree_Scripts" xml:space="preserve">
+    <value>スクリプト</value>
+  </data>
+  <data name="Tree_Shaders" xml:space="preserve">
+    <value>シェーダー</value>
+  </data>
+  <data name="Tree_Sounds" xml:space="preserve">
+    <value>音声</value>
+  </data>
+  <data name="Tree_Sprites" xml:space="preserve">
+    <value>スプライト</value>
+  </data>
+  <data name="Tree_Strings" xml:space="preserve">
+    <value>文字列</value>
+  </data>
+  <data name="Tree_TextureGroupInfomation" xml:space="preserve">
+    <value>テクスチャグループ情報</value>
+  </data>
+  <data name="Tree_TexturePageItems" xml:space="preserve">
+    <value>テクスチャページアイテム</value>
+  </data>
+  <data name="Tree_Timelines" xml:space="preserve">
+    <value>タイムライン</value>
+  </data>
+  <data name="Tree_Variables" xml:space="preserve">
+    <value>変数</value>
+  </data>
+  <data name="Msg_GetStarted" xml:space="preserve">
+    <value>data.winファイルを開き、左側のリスト項目をダブルクリックしてください。</value>
+  </data>
+  <data name="Msg_LoadDataWinFileFirst" xml:space="preserve">
+    <value>初めにdata.winファイルを読み込んでください</value>
+  </data>
+  <data name="Msg_Welcome" xml:space="preserve">
+    <value>UndertaleModToolへようこそ！</value>
+  </data>
+  <data name="Window_About" xml:space="preserve">
+    <value>UndertaleModToolについて</value>
+  </data>
+  <data name="Menu_Scripts_RunOtherScript" xml:space="preserve">
+    <value>他のスクリプトを実行...</value>
+  </data>
+  <data name="Msg_GetStartedFromEmpty" xml:space="preserve">
+    <value>新しいファイルが作成されました。1からゲームを作るのを楽しんでください！
+新しくファイルを作るんじゃなくてdata.winファイルを作るように言ったのに！:P</value>
+  </data>
+  <data name="Tree_TileSets" xml:space="preserve">
+    <value>タイルセット</value>
+  </data>
+  <data name="Msg_DoubleClick" xml:space="preserve">
+    <value>左のリスト項目をダブルクリックしてください</value>
+  </data>
+  <data name="Msg_OpenDataToStart" xml:space="preserve">
+    <value>data.winファイルを開いて始める</value>
+  </data>
+  <data name="Msg_ExpandList" xml:space="preserve">
+    <value>左のリスト項目を展開してアイテムを編集</value>
+  </data>
+  <data name="Msg_About" xml:space="preserve">
+    <value>UndertaleModTool 作 krzys_h およびUnderminersチーム
+バージョン </value>
+  </data>
+  <data name="Msg_SaveChangesBeforeQuitting" xml:space="preserve">
+    <value>終了する前にファイルを保存しますか？</value>
+  </data>
+  <data name="Msg_LoadingTitle" xml:space="preserve">
+    <value>読み込み中</value>
+  </data>
+  <data name="Msg_LoadingPleaseWait" xml:space="preserve">
+    <value>読み込み中　お待ちください...</value>
+  </data>
+  <data name="Msg_PleaseWait" xml:space="preserve">
+    <value>お待ちください...</value>
+  </data>
+  <data name="RoomEditor_SaveAsPng" xml:space="preserve">
+    <value>PNG形式で保存</value>
+  </data>
+  <data name="Msg_TempRunWarn" xml:space="preserve">
+    <value>注意:
+ゲームを一時的に実行しても、変更内容は保存されません。
+変更内容を保存するには、ゲームを「保存」してください。
+「保存」をせずにUndertaleModToolを終了すると、
+作業内容が失われる可能性があります。</value>
+  </data>
+  <data name="Msg_TempRunNothingToRun" xml:space="preserve">
+    <value>実行するゲームがありません！</value>
+  </data>
+  <data name="Msg_TempFolderIsNull" xml:space="preserve">
+    <value>Tempフォルダがありません。</value>
+  </data>
+  <data name="Msg_TempRunNull" xml:space="preserve">
+    <value>ゲームの実行ファイル名か場所が空です</value>
+  </data>
+  <data name="Msg_TempRunCannotFindExecutable" xml:space="preserve">
+    <value>ゲームの実行可能ファイルが見つかりません。
+ファイルパス: </value>
+  </data>
+  <data name="Msg_TempRunCannotFindGamePath" xml:space="preserve">
+    <value>ゲームのパスが見つかりません。
+ファイルパス: </value>
+  </data>
+  <data name="Msg_TempRunSaveFailed" xml:space="preserve">
+    <value>一時的なセーブに失敗し、実行できませんでした。</value>
+  </data>
+  <data name="Window_Error" xml:space="preserve">
+    <value>エラー</value>
+  </data>
+  <data name="Msg_SavingTitle" xml:space="preserve">
+    <value>保存中</value>
+  </data>
+  <data name="Msg_SavingPleaseWait" xml:space="preserve">
+    <value>保存中　お待ちください...</value>
+  </data>
+  <data name="Msg_AreYouSureYouWantToMakeANewProject" xml:space="preserve">
+    <value>現在すでにプロジェクトを開いています。
+新しいプロジェクトを作成してもよろしいですか？</value>
+  </data>
+  <data name="AudioGroup_Name" xml:space="preserve">
+    <value>グループ名</value>
+  </data>
+  <data name="AudioGroup_Path" xml:space="preserve">
+    <value>パス (GM 2024.14以降)</value>
+  </data>
+  <data name="Tabs_AudioGroup" xml:space="preserve">
+    <value>音声グループ</value>
+  </data>
+  <data name="Tabs_Sound" xml:space="preserve">
+    <value>音声</value>
+  </data>
+  <data name="Sound_Name" xml:space="preserve">
+    <value>音声の名前</value>
+  </data>
+  <data name="Sound_Flags" xml:space="preserve">
+    <value>フラグ</value>
+  </data>
+  <data name="Sound_File" xml:space="preserve">
+    <value>ファイル</value>
+  </data>
+  <data name="Sound_Effects" xml:space="preserve">
+    <value>エフェクト</value>
+  </data>
+  <data name="Sound_Volume" xml:space="preserve">
+    <value>音量</value>
+  </data>
+  <data name="Sound_Pitch" xml:space="preserve">
+    <value>ピッチ</value>
+  </data>
+  <data name="Sound_AudioGroup" xml:space="preserve">
+    <value>音声グループ</value>
+  </data>
+  <data name="Sound_AudioFile" xml:space="preserve">
+    <value>音声ファイル</value>
+  </data>
+  <data name="Sound_Preload" xml:space="preserve">
+    <value>プレロード(古い音声システム)</value>
+  </data>
+  <data name="Sound_Play" xml:space="preserve">
+    <value>再生</value>
+  </data>
+  <data name="Sound_Stop" xml:space="preserve">
+    <value>停止</value>
+  </data>
+  <data name="Sound_Type" xml:space="preserve">
+    <value>タイプ</value>
+  </data>
+  <data name="Sprite_Name" xml:space="preserve">
+    <value>スプライト名</value>
+  </data>
+  <data name="Sprite_Size" xml:space="preserve">
+    <value>サイズ</value>
+  </data>
+  <data name="Sprite_Margin" xml:space="preserve">
+    <value>余白 左/右/下/上</value>
+  </data>
+  <data name="Sprite_Transparent" xml:space="preserve">
+    <value>透明</value>
+  </data>
+  <data name="Sprite_Smooth" xml:space="preserve">
+    <value>スムーズ</value>
+  </data>
+  <data name="Sprite_Preload" xml:space="preserve">
+    <value>プレロード</value>
+  </data>
+  <data name="Sprite_BoundingBoxMode" xml:space="preserve">
+    <value>バウンディングボックスモード</value>
+  </data>
+  <data name="Sprite_SepMasks" xml:space="preserve">
+    <value>分離マスク</value>
+  </data>
+  <data name="Sprite_Origin" xml:space="preserve">
+    <value>基点</value>
+  </data>
+  <data name="Sprite_Textures" xml:space="preserve">
+    <value>テクスチャ</value>
+  </data>
+  <data name="Sprite_CollisionMasks" xml:space="preserve">
+    <value>コリジョンマスク</value>
+  </data>
+  <data name="Tabs_Sprite" xml:space="preserve">
+    <value>スプライト</value>
+  </data>
+  <data name="Sprite_ExportAllFrames" xml:space="preserve">
+    <value>全フレームをエクスポート(Spineスプライトの場合はSpineデータ)</value>
+  </data>
+  <data name="Sprite_IsSpecialType" xml:space="preserve">
+    <value>特殊タイプ？</value>
+  </data>
+  <data name="Sprite_Version" xml:space="preserve">
+    <value>バージョン</value>
+  </data>
+  <data name="Sprite_Type" xml:space="preserve">
+    <value>タイプ</value>
+  </data>
+  <data name="Sprite_PlaybackSpeed" xml:space="preserve">
+    <value>プレイバックスピード</value>
+  </data>
+  <data name="Sprite_PlaybackSpeedType" xml:space="preserve">
+    <value>プレイバックスピードタイプ</value>
+  </data>
+  <data name="Sprite_DoubleClickToAdd" xml:space="preserve">
+    <value>ダブルクリックで追加</value>
+  </data>
+  <data name="EAudio_Import" xml:space="preserve">
+    <value>インポート</value>
+  </data>
+  <data name="EAudio_Export" xml:space="preserve">
+    <value>エクスポート</value>
+  </data>
+  <data name="EAudio_Play" xml:space="preserve">
+    <value>再生</value>
+  </data>
+  <data name="EAudio_Stop" xml:space="preserve">
+    <value>停止</value>
+  </data>
+  <data name="Tabs_EmbeddedAudio" xml:space="preserve">
+    <value>埋め込み音声</value>
+  </data>
+  <data name="EAudio_WAVDataLength" xml:space="preserve">
+    <value>WAVデータ 長さ:</value>
+  </data>
+  <data name="Tabs_EmbeddedImage" xml:space="preserve">
+    <value>埋め込み画像</value>
+  </data>
+  <data name="EImage_Name" xml:space="preserve">
+    <value>画像名</value>
+  </data>
+  <data name="EImage_Texture" xml:space="preserve">
+    <value>テクスチャ</value>
+  </data>
+  <data name="Tabs_EmbeddedTexture" xml:space="preserve">
+    <value>埋め込みテクスチャ</value>
+  </data>
+  <data name="ETexture_Export" xml:space="preserve">
+    <value>エクスポート</value>
+  </data>
+  <data name="ETexture_Import" xml:space="preserve">
+    <value>インポート</value>
+  </data>
+  <data name="ETexture_Size" xml:space="preserve">
+    <value>サイズ</value>
+  </data>
+  <data name="ETexture_Hint" xml:space="preserve">
+    <value>ヒント: この画像はマウス操作が可能です (マウスボタン3つとマウスホイール)。</value>
+  </data>
+  <data name="ETexture_Warning" xml:space="preserve">
+    <value>エラー: テクスチャの読み込みに失敗しました。</value>
+  </data>
+  <data name="ETexture_GeneratedMips" xml:space="preserve">
+    <value>生成済みミップマップ</value>
+  </data>
+  <data name="ETexture_Scaled" xml:space="preserve">
+    <value>スケーリング</value>
+  </data>
+  <data name="Tabs_String" xml:space="preserve">
+    <value>文字列</value>
+  </data>
+  <data name="String_Content" xml:space="preserve">
+    <value>内容</value>
+  </data>
+  <data name="Tabs_Script" xml:space="preserve">
+    <value>スクリプト</value>
+  </data>
+  <data name="Script_Code" xml:space="preserve">
+    <value>コード</value>
+  </data>
+  <data name="Script_Name" xml:space="preserve">
+    <value>スクリプト名</value>
+  </data>
+  <data name="Font_Name" xml:space="preserve">
+    <value>フォント名</value>
+  </data>
+  <data name="Font_DisplayName" xml:space="preserve">
+    <value>表示名</value>
+  </data>
+  <data name="Font_FontSize" xml:space="preserve">
+    <value>フォントサイズ</value>
+  </data>
+  <data name="Font_Bold" xml:space="preserve">
+    <value>太字</value>
+  </data>
+  <data name="Font_Italic" xml:space="preserve">
+    <value>斜字</value>
+  </data>
+  <data name="Font_Texture" xml:space="preserve">
+    <value>テクスチャ</value>
+  </data>
+  <data name="Font_Scale" xml:space="preserve">
+    <value>スケール</value>
+  </data>
+  <data name="Tabs_Font" xml:space="preserve">
+    <value>フォント</value>
+  </data>
+</root>
