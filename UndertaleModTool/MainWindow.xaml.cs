@@ -65,7 +65,6 @@ namespace UndertaleModTool
 
         public UndertaleData Data { get; set; }
         public string FilePath { get; set; }
-
         public string ScriptPath { get; set; } // For the scripting interface specifically
 
         public string TitleMain { get; set; }
