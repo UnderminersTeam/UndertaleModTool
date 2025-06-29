@@ -1,0 +1,109 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
+             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
+             xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
+             xmlns:undertale="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
+             xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.Views.UndertaleTextureGroupInfoView"
+             x:DataType="v:UndertaleTextureGroupInfoViewModel">
+    <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
+        <Label>Group name</Label>
+        <c:UndertaleStringReferenceView Reference="{Binding TextureGroupInfo.Name}" />
+
+        <Label>Embedded textures</Label>
+        <Expander Header="List">
+            <c:EditableDataGrid ItemsSource="{Binding TextureGroupInfo.TexturePages}" ItemFactory="{Binding CreateEmbeddedTextureItem}">
+                <c:EditableDataGrid.Columns>
+                    <DataGridTemplateColumn Header="Embedded texture" Width="1*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <DataTemplate.DataType>
+                                    <x:Type TypeName="undertale:UndertaleResourceById" x:TypeArguments="undertalem:UndertaleEmbeddedTexture,undertale:UndertaleChunkTXTR"/>
+                                </DataTemplate.DataType>
+                                <c:UndertaleResourceReferenceView Reference="{Binding Resource}" ReferenceType="undertalem:UndertaleEmbeddedTexture"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </c:EditableDataGrid.Columns>
+            </c:EditableDataGrid>
+        </Expander>
+
+        <Label>Sprites</Label>
+        <Expander Header="List">
+            <c:EditableDataGrid ItemsSource="{Binding TextureGroupInfo.Sprites}" ItemFactory="{Binding CreateSpriteItem}">
+                <c:EditableDataGrid.Columns>
+                    <DataGridTemplateColumn Header="Sprite" Width="1*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <DataTemplate.DataType>
+                                    <x:Type TypeName="undertale:UndertaleResourceById" x:TypeArguments="undertalem:UndertaleSprite,undertale:UndertaleChunkSPRT"/>
+                                </DataTemplate.DataType>
+                                <c:UndertaleResourceReferenceView Reference="{Binding Resource}" ReferenceType="undertalem:UndertaleSprite"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </c:EditableDataGrid.Columns>
+            </c:EditableDataGrid>
+        </Expander>
+
+        <Label>Spine sprites</Label>
+        <Expander Header="List">
+            <c:EditableDataGrid ItemsSource="{Binding TextureGroupInfo.SpineSprites}" ItemFactory="{Binding CreateSpriteItem}">
+                <c:EditableDataGrid.Columns>
+                    <DataGridTemplateColumn Header="Sprite" Width="1*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <DataTemplate.DataType>
+                                    <x:Type TypeName="undertale:UndertaleResourceById" x:TypeArguments="undertalem:UndertaleSprite,undertale:UndertaleChunkSPRT"/>
+                                </DataTemplate.DataType>
+                                <c:UndertaleResourceReferenceView Reference="{Binding Resource}" ReferenceType="undertalem:UndertaleSprite"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </c:EditableDataGrid.Columns>
+            </c:EditableDataGrid>
+        </Expander>
+
+        <Label>Fonts</Label>
+        <Expander Header="List">
+            <c:EditableDataGrid ItemsSource="{Binding TextureGroupInfo.Fonts}" ItemFactory="{Binding CreateFontItem}">
+                <c:EditableDataGrid.Columns>
+                    <DataGridTemplateColumn Header="Font" Width="1*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <DataTemplate.DataType>
+                                    <x:Type TypeName="undertale:UndertaleResourceById" x:TypeArguments="undertalem:UndertaleFont,undertale:UndertaleChunkFONT"/>
+                                </DataTemplate.DataType>
+                                <c:UndertaleResourceReferenceView Reference="{Binding Resource}" ReferenceType="undertalem:UndertaleFont"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </c:EditableDataGrid.Columns>
+            </c:EditableDataGrid>
+        </Expander>
+
+        <Label>Tilesets</Label>
+        <Expander Header="List">
+            <c:EditableDataGrid ItemsSource="{Binding TextureGroupInfo.Tilesets}" ItemFactory="{Binding CreateBackgroundItem}">
+                <c:EditableDataGrid.Columns>
+                    <DataGridTemplateColumn Header="Background" Width="1*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <DataTemplate.DataType>
+                                    <x:Type TypeName="undertale:UndertaleResourceById" x:TypeArguments="undertalem:UndertaleBackground,undertale:UndertaleChunkBGND"/>
+                                </DataTemplate.DataType>
+                                <c:UndertaleResourceReferenceView Reference="{Binding Resource}" ReferenceType="undertalem:UndertaleBackground"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </c:EditableDataGrid.Columns>
+            </c:EditableDataGrid>
+        </Expander>
+
+        <!-- TODO: Other properties? -->
+    </Grid>
+</UserControl>
