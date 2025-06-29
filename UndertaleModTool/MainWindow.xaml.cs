@@ -63,28 +63,8 @@ namespace UndertaleModTool
 
         private Tab _currentTab;
 
-        private UndertaleData _data;
-        private string _filePath;
-        public UndertaleData Data
-        {
-            get => _data;
-            set
-            {
-                _data = value;
-                LastData = value;
-            }
-        }
-        public string FilePath
-        {
-            get => _filePath;
-            set
-            {
-                _filePath = value;
-                LastFilePath = value;
-            }
-        }
-        public static UndertaleData LastData { get; set; }
-        public static string LastFilePath { get; set; }
+        public UndertaleData Data { get; set; }
+        public string FilePath { get; set; }
 
         public string ScriptPath { get; set; } // For the scripting interface specifically
 
@@ -773,17 +753,25 @@ namespace UndertaleModTool
             }
             return false;
         }
-        public async Task<bool> DoSaveDialog(bool suppressDebug = false)
+        public async Task<bool> DoSaveDialog(bool suppressDebug = false, bool isEmergency = false)
         {
+            if (isEmergency && (Data is null || FilePath is null || Data.UnsupportedBytecodeVersion))
+            {
+                return false;
+            }
             SaveFileDialog dlg = new SaveFileDialog();
 
             dlg.DefaultExt = "win";
             dlg.Filter = "GameMaker data files (.win, .unx, .ios, .droid, audiogroup*.dat)|*.win;*.unx;*.ios;*.droid;audiogroup*.dat|All files|*";
             dlg.FileName = FilePath;
+            if (isEmergency)
+            {
+                dlg.Title = "Emergency-save the current file (separate file recommended):";
+            }
 
             if (dlg.ShowDialog(this) == true)
             {
-                await SaveFile(dlg.FileName, suppressDebug);
+                await SaveFile(dlg.FileName, suppressDebug, isEmergency);
                 return true;
             }
             return false;
@@ -1150,7 +1138,7 @@ namespace UndertaleModTool
             GC.Collect();
         }
 
-        private async Task SaveFile(string filename, bool suppressDebug = false)
+        private async Task SaveFile(string filename, bool suppressDebug = false, bool isEmergency = false)
         {
             if (Data == null || Data.UnsupportedBytecodeVersion)
                 return;
@@ -1294,8 +1282,9 @@ namespace UndertaleModTool
                     else
                     {
                         // It failed, but since we made a temp file for saving, no data was overwritten or destroyed (hopefully)
-                        // We need to delete the temp file though (if it exists).
-                        if (File.Exists(filename + "temp"))
+                        // We need to delete the temp file though (if it exists),
+                        // except for emergency saves for possible data recovery.
+                        if (!isEmergency && File.Exists(filename + "temp"))
                             File.Delete(filename + "temp");
                         // No profile system changes, since the save failed, like a save was never attempted.
                     }
@@ -1315,6 +1304,8 @@ namespace UndertaleModTool
                 Dispatcher.Invoke(() =>
                 {
                     dialog.Hide();
+                    if (isEmergency && SaveSucceeded)
+                        this.ShowMessage("Emergency save successful.");
                 });
             });
             dialog.ShowDialog();
