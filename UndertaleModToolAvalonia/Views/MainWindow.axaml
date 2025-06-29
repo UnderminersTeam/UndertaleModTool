@@ -17,22 +17,29 @@
                     <NativeMenuItem Header="_Open" Command="{Binding FileOpen}" Gesture="Ctrl+O"/>
                     <NativeMenuItem Header="_Save" Command="{Binding FileSave}" Gesture="Ctrl+S"/>
                     <NativeMenuItemSeparator Header="-" />
-                    <NativeMenuItem Header="_Temp run game"/>
-                    <NativeMenuItem Header="Run game under GMS _debugger"/>
-                    <NativeMenuItem Header="Run game with other runner"/>
+                    <NativeMenuItem Header="_Temp run game" IsEnabled="False"/>
+                    <NativeMenuItem Header="Run game under GMS _debugger" IsEnabled="False"/>
+                    <NativeMenuItem Header="Run game with other runner" IsEnabled="False"/>
                     <NativeMenuItemSeparator Header="-" />
-                    <NativeMenuItem Header="Generate o_ffset map"/>
+                    <NativeMenuItem Header="Generate o_ffset map" IsEnabled="False"/>
                     <NativeMenuItemSeparator Header="-" />
                     <NativeMenuItem Header="S_ettings" Command="{Binding FileSettings}"/>
                     <NativeMenuItem Header="_Close" Command="{Binding FileClose}"/>
                 </NativeMenu>
             </NativeMenuItem>
-            <NativeMenuItem Header="_Script">
+            <NativeMenuItem Header="_Import" IsEnabled="False">
             </NativeMenuItem>
-            <NativeMenuItem Header="_Find">
+            <NativeMenuItem Header="_Export" IsEnabled="False">
+            </NativeMenuItem>
+            <NativeMenuItem Header="_Tools">
                 <NativeMenu>
-                    <NativeMenuItem Header="_Search in code"/>
-                    <NativeMenuItem Header="Find unreferenced _assets"/>
+                    <NativeMenuItem Header="_Search in code" Command="{Binding ToolsSearchInCode}" Gesture="Ctrl+Shift+F"/>
+                    <NativeMenuItem Header="Find unreferenced _assets" IsEnabled="False"/>
+                </NativeMenu>
+            </NativeMenuItem>
+            <NativeMenuItem Header="_Scripts">
+                <NativeMenu>
+                    <NativeMenuItem Header="Run _other script" IsEnabled="False" />
                 </NativeMenu>
             </NativeMenuItem>
             <NativeMenuItem Header="_Help">
@@ -48,6 +55,7 @@
         <KeyBinding Gesture="Ctrl+N" Command="{Binding FileNew}" />
         <KeyBinding Gesture="Ctrl+O" Command="{Binding FileOpen}" />
         <KeyBinding Gesture="Ctrl+S" Command="{Binding FileSave}" />
+        <KeyBinding Gesture="Ctrl+Shift+F" Command="{Binding ToolsSearchInCode}" />
         <KeyBinding Gesture="F1" Command="{Binding HelpAbout}" />
     </Window.KeyBindings>
     

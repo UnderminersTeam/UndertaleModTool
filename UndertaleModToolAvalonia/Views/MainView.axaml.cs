@@ -26,6 +26,7 @@ public partial class MainView : UserControl
                 vm.MessageDialog = MessageDialog;
                 vm.LaunchUriAsync = LaunchUriAsync;
                 vm.SettingsDialog = SettingsDialog;
+                vm.SearchInCodeOpen = SearchInCodeOpen;
             }
         };
     }
@@ -61,6 +62,14 @@ public partial class MainView : UserControl
         {
             DataContext = new SettingsViewModel(),
         }.ShowDialog(window);
+    }
+
+    public static void SearchInCodeOpen()
+    {
+        new SearchInCodeWindow()
+        {
+            DataContext = new SearchInCodeViewModel(),
+        }.Show();
     }
 
     private void FilterTextBox_TextChanged(object? sender, TextChangedEventArgs e)

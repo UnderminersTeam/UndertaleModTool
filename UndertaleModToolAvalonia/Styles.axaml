@@ -193,4 +193,28 @@
     <Style Selector="Window.SettingsWindow">
         <Setter Property="Padding" Value="12" />
     </Style>
+
+    <Style Selector="Window.SearchInCodeWindow">
+        <Style Selector="^ > Grid > StackPanel">
+            <Setter Property="Margin" Value="8" />
+        </Style>
+
+        <Style Selector="^ > Grid > StackPanel > TextBox">
+            <Setter Property="MinHeight" Value="48" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+
+        <Style Selector="^ > Grid > StackPanel > StackPanel">
+            <Setter Property="Spacing" Value="12" />
+        </Style>
+
+        <Style Selector="^ > Grid > DataGrid DataGridRow">
+            <Setter Property="FontFamily" Value="Consolas,Liberation Mono,Menlo" />
+        </Style>
+
+        <Style Selector="^ TextBlock.StatusBar">
+            <Setter Property="Padding" Value="4" />
+            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundListLowBrush}" />
+        </Style>
+    </Style>
 </Styles>
