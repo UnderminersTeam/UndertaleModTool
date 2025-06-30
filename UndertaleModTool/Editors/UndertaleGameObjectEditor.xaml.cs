@@ -16,6 +16,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using UndertaleModLib;
 using UndertaleModLib.Models;
+using UndertaleModTool.Windows;
 
 namespace UndertaleModTool
 {
@@ -24,6 +25,8 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertaleGameObjectEditor : DataUserControl
     {
+        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+        private static readonly HashSetTypesOverride gameObjType = new() { typeof(UndertaleGameObject) };
         private bool handleMouseScroll = true;
 
         public UndertaleGameObjectEditor()
@@ -97,6 +100,38 @@ namespace UndertaleModTool
             if (ev.Actions.Count <= 0)
             {
                 evList.Remove(ev);
+            }
+        }
+
+        private async void ShowChildrenButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not UndertaleGameObject gameObj)
+                return;
+
+            var button = sender as ButtonDark;
+
+            FindReferencesTypesDialog dialog = new(mainWindow.Data);
+            try
+            {
+                bool hasChildren = dialog.ShowReferencesFor(gameObj, gameObjType, showIfNoResults: false);
+                if (!hasChildren)
+                {
+                    var originalCont = button.Content;
+
+                    button.Content = "(no children were found)";
+                    await Task.Delay(2000);
+
+                    button.Content = originalCont;
+                }
+            }
+            catch (Exception ex)
+            {
+                mainWindow.ShowError("An error occurred in the object references related window.\n" +
+                                     $"Please report this on GitHub.\n\n{ex}");
+            }
+            finally
+            {
+                dialog?.Close();
             }
         }
     }
