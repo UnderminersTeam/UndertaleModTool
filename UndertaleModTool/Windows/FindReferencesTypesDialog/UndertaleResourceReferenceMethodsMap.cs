@@ -39,11 +39,15 @@ namespace UndertaleModTool.Windows
 
     public static class UndertaleResourceReferenceMethodsMap
     {
-        private static UndertaleData data;
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+        private static readonly Dictionary<string, object[]> emptyResultArr = new();
+        private static readonly Dictionary<string, List<object>> emptyResultList = new();
+
+        private static UndertaleData data;
         private static Dictionary<UndertaleCode, HashSet<UndertaleString>> stringReferences;
         private static Dictionary<UndertaleCode, HashSet<UndertaleFunction>> funcReferences;
         private static Dictionary<UndertaleCode, HashSet<UndertaleVariable>> variReferences;
+        private static bool ignoreArgumentsVar = false;
 
         private static IEnumerable<T> NotNullWhere<T>(this IList<T> list, Func<T, bool> predicate)
         {
@@ -1392,6 +1396,11 @@ namespace UndertaleModTool.Windows
                             if (objSrc is not UndertaleVariable obj)
                                 return null;
 
+                            // Exclude the internal "arguments" variable from unreferenced assets.
+                            if (ignoreArgumentsVar && obj.InstanceType == UndertaleInstruction.InstanceType.Local
+                                && obj.NameStringID == 0 && obj.Name?.Content == "arguments")
+                                return emptyResultArr;
+
                             IEnumerable<UndertaleCode> variRefs;
                             if (variReferences is not null)
                                 variRefs = variReferences.Where(x => x.Value.Contains(obj))
@@ -1545,6 +1554,8 @@ namespace UndertaleModTool.Windows
 
             UndertaleResourceReferenceMethodsMap.data = data;
 
+            bool onlyEmptyResult = true;
+
             var ver = (data.GeneralInfo.Major, data.GeneralInfo.Minor, data.GeneralInfo.Release);
             Dictionary<string, List<object>> outDict = new();
             foreach (var predicateForVer in predicatesForVer)
@@ -1569,13 +1580,22 @@ namespace UndertaleModTool.Windows
                 {
                     var result = predicateForVer.Predicate(obj, types, checkOne);
                     if (result is null)
+                    {
+                        onlyEmptyResult = false;
                         continue;
+                    }
+                    if (onlyEmptyResult && result == emptyResultArr)
+                        continue;
+
+                    onlyEmptyResult = false;
 
                     foreach (var entry in result)
                         outDict.Add(entry.Key, new(entry.Value));
                 }  
             }
 
+            if (onlyEmptyResult)
+                return emptyResultList;
             if (outDict.Count == 0)
                 return null;
 
@@ -1640,6 +1660,8 @@ namespace UndertaleModTool.Windows
 
                 if (assets.Count > 0) // A Partitioner can't be created on an empty list.
                 {
+                    ignoreArgumentsVar = true;
+
                     var assetsPart = Partitioner.Create(0, assets.Count);
 
                     await Task.Run(() =>
@@ -1671,6 +1693,8 @@ namespace UndertaleModTool.Windows
                             dicts.Add(resultDict);
                         });
                     });
+
+                    ignoreArgumentsVar = false;
                 }
 
                 Dictionary<string, int> outArrSizes = new();
