@@ -55,10 +55,12 @@ namespace UndertaleModTool
 
         private void ComboBox_Loaded(object sender, RoutedEventArgs e)
         {
-            (sender as ComboBox).DropDownOpened -= ComboBox_DropDownOpened;
-            (sender as ComboBox).DropDownOpened += ComboBox_DropDownOpened;
-            (sender as ComboBox).DropDownClosed -= ComboBox_DropDownClosed;
-            (sender as ComboBox).DropDownClosed += ComboBox_DropDownClosed;
+            var comboBox = sender as ComboBox;
+
+            comboBox.DropDownOpened -= ComboBox_DropDownOpened;
+            comboBox.DropDownOpened += ComboBox_DropDownOpened;
+            comboBox.DropDownClosed -= ComboBox_DropDownClosed;
+            comboBox.DropDownClosed += ComboBox_DropDownClosed;
         }
         private void ComboBox_DropDownOpened(object sender, EventArgs e)
         {
@@ -79,14 +81,15 @@ namespace UndertaleModTool
         }
         private void Remove_Click_Override(object sender, RoutedEventArgs e)
         {
-            var btn = (ButtonDark)sender;
-            var objRef = (UndertaleObjectReference)((Grid)btn.Parent).Parent;
+            var btn = sender as ButtonDark;
+            var objRef = (btn.Parent as Grid).Parent as UndertaleObjectReference;
 
-            var obj = (UndertaleGameObject)DataContext;
+            if (DataContext is not UndertaleGameObject obj)
+                return;
             var evType = objRef.ObjectEventType;
             var evSubtype = objRef.ObjectEventSubtype;
             var action = (UndertaleGameObject.EventAction)btn.DataContext;
-            var evList = ((UndertaleGameObject)DataContext).Events[(int)evType];
+            var evList = obj.Events[(int)evType];
 
             var ev = evList.FirstOrDefault(x => x.EventSubtype == evSubtype);
             if (ev is null) return;
