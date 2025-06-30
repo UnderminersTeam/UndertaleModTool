@@ -690,4 +690,17 @@ namespace UndertaleModLib
         /// </summary>
         public Func<string> InstanceIdPrefix = () => "inst_";
     }
+
+    public static class ListExtensions
+    {
+        /// <summary>
+        /// Returns an enumerable that filters <see langword="null"/> items.
+        /// </summary>
+        /// <typeparam name="T">The type of the elements of <paramref name="list" />.</typeparam>
+        /// <returns>An <see cref="IEnumerable{T}"/> without <see langword="null"/> items.</returns>
+        public static IEnumerable<T> SkipNullItems<T>(this IList<T> list)
+        {
+            return list.Where(x => x is not null);
+        }
+    }
 }

@@ -513,7 +513,7 @@ namespace UndertaleModTool.Windows
                             {
                                 IEnumerable<object[]> GetExtnOptions()
                                 {
-                                    foreach (var extn in data.Extensions)
+                                    foreach (var extn in data.Extensions.SkipNullItems())
                                     {
                                         foreach (var option in extn.Options)
                                             if (option.Name == obj || option.Value == obj)
@@ -529,7 +529,7 @@ namespace UndertaleModTool.Windows
                             {
                                 IEnumerable<object[]> GetExtnFiles()
                                 {
-                                    foreach (var extn in data.Extensions)
+                                    foreach (var extn in data.Extensions.SkipNullItems())
                                     {
                                         foreach (var file in extn.Files)
                                             if (file.Filename == obj || file.InitScript == obj || file.CleanupScript == obj)
@@ -545,7 +545,7 @@ namespace UndertaleModTool.Windows
                             {
                                 IEnumerable<object[]> GetExtnFunctions()
                                 {
-                                    foreach (var extn in data.Extensions)
+                                    foreach (var extn in data.Extensions.SkipNullItems())
                                     {
                                         foreach (var file in extn.Files)
                                         {
@@ -772,7 +772,7 @@ namespace UndertaleModTool.Windows
                             {
                                 IEnumerable<object[]> GetAnimCurveChannels()
                                 {
-                                    foreach (var curve in data.AnimationCurves)
+                                    foreach (var curve in data.AnimationCurves.SkipNullItems())
                                     {
                                         foreach (var ch in curve.Channels)
                                             if (ch.Name == obj)
@@ -833,9 +833,9 @@ namespace UndertaleModTool.Windows
                                 {
                                     if (track.Keyframes is StringKeyframes strKeyframes)
                                     {
-                                        foreach (var data in strKeyframes.List)
+                                        foreach (var keyframe in strKeyframes.List)
                                         {
-                                            foreach (var strPair in data.Channels)
+                                            foreach (var strPair in keyframe.Channels)
                                             {
                                                 if (strPair.Value.Value == obj)
                                                     seqStringKeyframes.Add(new object[] { strPair.Channel }.Concat(trackChain).Append(seq).ToArray());
@@ -847,7 +847,7 @@ namespace UndertaleModTool.Windows
                                 foreach (var subTrack in track.Tracks)
                                     ProcessTrack(seq, subTrack, trackChain);
                             };
-                            foreach (var seq in data.Sequences)
+                            foreach (var seq in data.Sequences.SkipNullItems())
                             {
                                 foreach (var track in seq.Tracks)
                                 {
@@ -864,7 +864,7 @@ namespace UndertaleModTool.Windows
                             {
                                 IEnumerable<object[]> GetSeqBroadMessages()
                                 {
-                                    foreach (var seq in data.Sequences)
+                                    foreach (var seq in data.Sequences.SkipNullItems())
                                     {
                                         foreach (var keyframe in seq.BroadcastMessages)
                                         {
@@ -883,7 +883,7 @@ namespace UndertaleModTool.Windows
                             {
                                 IEnumerable<object[]> GetSequenceMoments()
                                 {
-                                    foreach (var seq in data.Sequences)
+                                    foreach (var seq in data.Sequences.SkipNullItems())
                                     {
                                         foreach (var keyframe in seq.Moments)
                                         {
@@ -985,7 +985,7 @@ namespace UndertaleModTool.Windows
                                     ProcessTrack(seq, subTrack, trackChain);
                             };
 
-                            foreach (var seq in data.Sequences)
+                            foreach (var seq in data.Sequences.SkipNullItems())
                             {
                                 foreach (var track in seq.Tracks)
                                 {
@@ -1147,7 +1147,7 @@ namespace UndertaleModTool.Windows
                                     ProcessTrack(seq, subTrack, trackChain);
                             };
 
-                            foreach (var seq in data.Sequences)
+                            foreach (var seq in data.Sequences.SkipNullItems())
                             {
                                 foreach (var track in seq.Tracks)
                                 {
