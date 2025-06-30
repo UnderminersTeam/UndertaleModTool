@@ -307,8 +307,18 @@ namespace UndertaleModTool.Windows
                         {
                             (typeof(UndertaleGameObject), "Game objects"),
                             (typeof(UndertaleRoom), "Rooms"),
+                            (typeof(UndertaleRoom.GameObject), "Room object instances (creation code)"),
                             (typeof(UndertaleGlobalInit), "Global initialization and game end scripts"),
                             (typeof(UndertaleScript), "Scripts")
+                        }
+                    },
+                    new TypesForVersion()
+                    {
+                        // Bytecode version 16
+                        Version = (16, uint.MaxValue, uint.MaxValue),
+                        Types = new[]
+                        {
+                            (typeof(UndertaleRoom.GameObject), "Room object instances (pre create code)")
                         }
                     }
                 }

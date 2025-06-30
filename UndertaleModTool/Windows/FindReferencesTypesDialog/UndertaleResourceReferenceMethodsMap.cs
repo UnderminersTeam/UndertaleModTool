@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -1107,7 +1107,7 @@ namespace UndertaleModTool.Windows
 
                                 var objInstances = GetObjInstances();
                                 if (objInstances.Any())
-                                    outDict["Room object instance"] = checkOne ? objInstances.ToEmptyArray() : objInstances.ToArray();
+                                    outDict["Room object instances"] = checkOne ? objInstances.ToEmptyArray() : objInstances.ToArray();
                             }
 
                             if (outDict.Count == 0)
@@ -1193,6 +1193,41 @@ namespace UndertaleModTool.Windows
                                     outDict["Rooms"] = checkOne ? rooms.ToEmptyArray() : rooms.ToArray();
                             }
 
+                            if (types.Contains(typeof(UndertaleRoom.GameObject)))
+                            {
+                                IEnumerable<object[]> GetObjInstances()
+                                {
+                                    if (data.IsGameMaker2())
+                                    {
+                                        foreach (var room in data.Rooms)
+                                        {
+                                            foreach (var layer in room.Layers)
+                                            {
+                                                if (layer.InstancesData is not null)
+                                                {
+                                                    foreach (var inst in layer.InstancesData.Instances)
+                                                        if (inst.CreationCode == obj)
+                                                            yield return new object[] { inst, layer, room };
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        foreach (var room in data.Rooms)
+                                        {
+                                            foreach (var inst in room.GameObjects)
+                                                if (inst.CreationCode == obj)
+                                                    yield return new object[] { inst, room };
+                                        }
+                                    }
+                                }
+
+                                var objInstances = GetObjInstances();
+                                if (objInstances.Any())
+                                    outDict["Room object instances (creation code)"] = checkOne ? objInstances.ToEmptyArray() : objInstances.ToArray();
+                            }
+
                             if (types.Contains(typeof(UndertaleGlobalInit)))
                             {
                                 bool matches = data.GlobalInitScripts?.Any(x => x.Code == obj) == true;
@@ -1214,6 +1249,53 @@ namespace UndertaleModTool.Windows
                             if (outDict.Count == 0)
                                 return null;
                             return outDict;
+                        }
+                    },
+                    new PredicateForVersion()
+                    {
+                        // Bytecode version 16
+                        Version = (16, uint.MaxValue, uint.MaxValue),
+                        Predicate = (objSrc, types, checkOne) =>
+                        {
+                            if (!types.Contains(typeof(UndertaleRoom.GameObject)))
+                                return null;
+
+                            if (objSrc is not UndertaleCode obj)
+                                return null;
+
+                            IEnumerable<object[]> GetObjInstances()
+                            {
+                                if (data.IsGameMaker2())
+                                {
+                                    foreach (var room in data.Rooms)
+                                    {
+                                        foreach (var layer in room.Layers)
+                                        {
+                                            if (layer.InstancesData is not null)
+                                            {
+                                                foreach (var inst in layer.InstancesData.Instances)
+                                                    if (inst.PreCreateCode == obj)
+                                                        yield return new object[] { inst, layer, room };
+                                            }
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    foreach (var room in data.Rooms)
+                                    {
+                                        foreach (var inst in room.GameObjects)
+                                            if (inst.PreCreateCode == obj)
+                                                yield return new object[] { inst, room };
+                                    }
+                                }
+                            }
+
+                            var objInstances = GetObjInstances();
+                            if (objInstances.Any())
+                                return new() { { "Room object instances (pre create code)", checkOne ? objInstances.ToEmptyArray() : objInstances.ToArray() } };
+                            else
+                                return null;
                         }
                     }
                 }
