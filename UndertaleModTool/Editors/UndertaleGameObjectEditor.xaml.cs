@@ -24,11 +24,20 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertaleGameObjectEditor : DataUserControl
     {
+        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
         private bool handleMouseScroll = true;
 
         public UndertaleGameObjectEditor()
         {
             InitializeComponent();
+        }
+
+        private void DataUserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            ChildrenObjectsExpander.Content = null;
+
+            if (ChildrenObjectsExpander.IsExpanded)
+                ChildrenObjectsExpander_Expanded(null, null);
         }
 
         private void DataGrid_AddingNewItem(object sender, AddingNewItemEventArgs e)
@@ -98,6 +107,44 @@ namespace UndertaleModTool
             {
                 evList.Remove(ev);
             }
+        }
+
+        private void ChildrenObjectsExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            if (ChildrenObjectsExpander.Content is not null
+                || DataContext is not UndertaleGameObject obj
+                || mainWindow.Data is null)
+                return;
+
+            StackPanel childrenPanel = new();
+
+            var appResources = Application.Current.Resources;
+            var borderBrush = ((appResources?[SystemColors.MenuTextBrushKey]) as SolidColorBrush)
+                              ?? Brushes.Black;
+            Border childrenBorder = new()
+            {
+                BorderThickness = new(1),
+                BorderBrush = borderBrush,
+                Padding = new(2),
+                Child = childrenPanel
+            };
+
+            var children = obj.FindChildren(mainWindow.Data);
+            foreach (var childObj in children)
+            {
+                childrenPanel.Children.Add(new UndertaleObjectReference()
+                {
+                    ObjectReference = childObj,
+                    ObjectType = typeof(UndertaleGameObject),
+                    CanChange = false,
+                    CanRemove = false
+                });
+            }
+
+            if (childrenPanel.Children.Count == 0)
+                childrenPanel.Children.Add(new TextBlock() { Text = "(no children objects were found)" });
+
+            ChildrenObjectsExpander.Content = childrenBorder;
         }
     }
 }
