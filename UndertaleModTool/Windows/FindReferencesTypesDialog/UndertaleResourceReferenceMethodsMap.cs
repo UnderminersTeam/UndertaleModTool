@@ -1225,7 +1225,7 @@ namespace UndertaleModTool.Windows
 
                                 var objInstances = GetObjInstances();
                                 if (objInstances.Any())
-                                    outDict["Room object instances (creation code)"] = checkOne ? objInstances.ToEmptyArray() : objInstances.ToArray();
+                                    outDict["Room object instances"] = checkOne ? objInstances.ToEmptyArray() : objInstances.ToArray();
                             }
 
                             if (types.Contains(typeof(UndertaleGlobalInit)))
@@ -1293,7 +1293,7 @@ namespace UndertaleModTool.Windows
 
                             var objInstances = GetObjInstances();
                             if (objInstances.Any())
-                                return new() { { "Room object instances (pre create code)", checkOne ? objInstances.ToEmptyArray() : objInstances.ToArray() } };
+                                return new() { { "Room object instances", checkOne ? objInstances.ToEmptyArray() : objInstances.ToArray() } };
                             else
                                 return null;
                         }

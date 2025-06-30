@@ -318,7 +318,7 @@ namespace UndertaleModTool.Windows
                         Version = (16, uint.MaxValue, uint.MaxValue),
                         Types = new[]
                         {
-                            (typeof(UndertaleRoom.GameObject), "Room object instances (pre create code)")
+                            (typeof(UndertaleRoom.GameObject), "Room object instances (creation or pre create code)")
                         }
                     }
                 }
