@@ -149,6 +149,37 @@
             ]
           }
         ]
+      },
+      "Deltarune.Id.ZeroOrInstanceOrObject": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "Intersect",
+            "Macros": [
+              {
+                "MacroType": "Intersect",
+                "Macros": [
+                  {
+                    "MacroType": "MatchNot",
+                    "ConditionalType": "Integer",
+                    "ConditionalValue": "0"
+                  }
+                ]
+              },
+              "Id.InstanceOrObject"
+            ]
+          },
+          {
+            "MacroType": "Union",
+            "Macros": [
+              {
+                "MacroType": "Match",
+                "ConditionalType": "Integer",
+                "ConditionalValue": "0"
+              }
+            ]
+          }
+        ]
       }
     }
   },
@@ -415,13 +446,13 @@
       "returnroom": "Asset.Room",
       "target_char": "Id.InstanceOrObject",
       "writergod": "Asset.Object",
-      "source": "Id.InstanceOrObject",
+      "source": "Deltarune.Id.ZeroOrInstanceOrObject",
       "sneo": "Id.InstanceOrObject",
       "heartobj": "Asset.Object",
       "swatchbc": "Asset.Object",
       "swatch_bc": "Asset.Object",
       "master": "Id.InstanceOrObject",
-      "cutscene_master": "Id.InstanceOrObject",
+      "cutscene_master": "Deltarune.Id.ZeroOrInstanceOrObject",
       "teacupTarget": "Asset.Object",
       "_teacups": "Asset.Object",
       "custom_sprite": "Asset.Sprite",
@@ -1341,9 +1372,14 @@
         "face": "None"
       }
     },
-  "gml_Object_obj_rudebuster_anim_gerson_Step_0": {
+    "gml_Object_obj_rudebuster_anim_gerson_Step_0": {
       "Variables": {
         "sprite_index": "Deltarune.Asset.ZeroOrSprite"
+      }
+    },
+    "gml_Script_scr_actinfo": {
+      "Variables": {
+        "actor": "None"
       }
     }
   }
