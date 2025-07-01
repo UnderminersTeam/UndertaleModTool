@@ -205,7 +205,7 @@
       "victorysprite": "Asset.Sprite",
       "handSprite": "Asset.Sprite",
       "_headsprite": "Asset.Sprite",
-      "headsprite": "Asset.Sprite",
+      "headsprite": "Deltarune.Asset.ZeroOrSprite",
       "onionsprite": "Asset.Sprite",
       "leftTurnSprite": "Asset.Sprite",
       "rightTurnSprite": "Asset.Sprite",
@@ -309,8 +309,8 @@
       "item1pic": "Asset.Sprite",
       "item2pic": "Asset.Sprite",
       "item3pic": "Asset.Sprite",
-      "endanimation": "Asset.Sprite",
-      "sourceobject": "Asset.Object",
+      "endanimation": "Deltarune.Asset.ZeroOrSprite",
+      "sourceobject": "Deltarune.Asset.ZeroOrObject",
       "_instruments": "Asset.Sound",
       "_instrumentsB": "Asset.Sound",
       "_instrumentsAlt": "Asset.Sound",
@@ -373,7 +373,7 @@
       "colFar": "Constant.Color",
       "heroobj": "Asset.Object",
       "facetype": "Asset.Sprite",
-      "face": "Asset.Sprite",
+      "face": "Deltarune.Asset.ZeroOneOrSprite",
       "_character": "Asset.Object",
       "_charinstance": "Asset.Object",
       "charinstance": "Asset.Object",
@@ -1334,6 +1334,16 @@
     "gml_Script_scr_get_border": {
       "Variables": {
         "argument0": "Asset.Room"
+      }
+    },
+    "gml_Object_obj_dw_church_pianopiece_right_Step_0": {
+      "Variables": {
+        "face": "None"
+      }
+    },
+  "gml_Object_obj_rudebuster_anim_gerson_Step_0": {
+      "Variables": {
+        "sprite_index": "Deltarune.Asset.ZeroOrSprite"
       }
     }
   }
