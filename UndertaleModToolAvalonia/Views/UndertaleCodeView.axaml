@@ -19,7 +19,8 @@
             <c:UndertaleResourceReferenceView Reference="{Binding Code.ParentEntry}" ReferenceType="undertalem:UndertaleGameObject" />
         </Grid>
         
-        <TabControl Grid.Row="1" IsVisible="{Binding Code.ParentEntry, Converter={x:Static ObjectConverters.IsNull}}">
+        <TabControl Grid.Row="1" IsVisible="{Binding Code.ParentEntry, Converter={x:Static ObjectConverters.IsNull}}"
+                    SelectedIndex="{Binding SelectedTab}">
             <TabItem Header="GML">
                 <ThemeVariantScope RequestedThemeVariant="Dark">
                     <AvaloniaEdit:TextEditor x:Name="GMLTextEditor"

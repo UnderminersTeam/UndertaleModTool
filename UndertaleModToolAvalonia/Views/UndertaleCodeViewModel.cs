@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Avalonia.Threading;
 using AvaloniaEdit.Document;
 using Microsoft.Extensions.DependencyInjection;
+using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
@@ -13,10 +14,21 @@ namespace UndertaleModToolAvalonia.Views;
 
 public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
 {
+    public enum Tab
+    {
+        GML = 0,
+        ASM = 1,
+    }
+
     // TODO: A billion things. Syntax highlighting.
     public MainViewModel MainVM;
     public UndertaleResource Resource => Code;
     public UndertaleCode Code { get; set; }
+
+    [Notify]
+    private Tab _SelectedTab;
+    [Notify]
+    private (Tab, int)? _LastGoToLocation = null;
 
     public TextDocument GMLTextDocument { get; set; } = new TextDocument();
     public TextDocument ASMTextDocument { get; set; } = new TextDocument();

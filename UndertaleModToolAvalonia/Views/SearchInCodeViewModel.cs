@@ -199,19 +199,26 @@ public partial class SearchInCodeViewModel
 
     public void OpenSearchResult(SearchResult searchResult)
     {
-        MainVM.TabOpen(searchResult.Code);
-        // TODO: Open in line
+        var tab = MainVM.TabOpen(searchResult.Code);
+        if (tab is not null && tab.Content is UndertaleCodeViewModel vm)
+        {
+            vm.LastGoToLocation = (!IsInAssembly ? UndertaleCodeViewModel.Tab.GML : UndertaleCodeViewModel.Tab.ASM, searchResult.LineNumber);
+        }
     }
 
     public class SearchResult
     {
         public string Location { get; set; }
         public string Text { get; set; }
+
         public UndertaleCode Code;
+        public int LineNumber;
 
         public SearchResult(UndertaleCode code, int lineNumber, string text)
         {
             Code = code;
+            LineNumber = lineNumber;
+
             Location = code.Name.Content + ":" + lineNumber;
             Text = text.Trim();
         }

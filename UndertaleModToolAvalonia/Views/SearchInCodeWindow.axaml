@@ -8,11 +8,11 @@
         x:DataType="v:SearchInCodeViewModel"
         Title="Search in code"
         Width="800"
-        Height="500"
+        Height="400"
         Classes="SearchInCodeWindow">
     <Grid RowDefinitions="Auto,1*,Auto">
         <StackPanel Grid.Row="0">
-            <TextBox Text="{Binding SearchText}" AcceptsReturn="True"/>
+            <TextBox Name="SearchTextTextBox" Text="{Binding SearchText}" AcceptsReturn="True"/>
             <StackPanel Orientation="Horizontal">
                 <CheckBox IsChecked="{Binding IsCaseSensitive}" Content="Case sensitive" />
                 <CheckBox IsChecked="{Binding IsRegexSearch}" Content="Regex search" />
@@ -20,7 +20,7 @@
             </StackPanel>
             <Button Command="{Binding Search}" IsDefault="True" HorizontalAlignment="Right">Search</Button>
         </StackPanel>
-        <DataGrid Grid.Row="1" ItemsSource="{Binding Results}" IsReadOnly="True" CanUserResizeColumns="True"
+        <DataGrid Grid.Row="1" Name="ResultsDataGrid" ItemsSource="{Binding Results}" IsReadOnly="True" CanUserResizeColumns="True"
                   DoubleTapped="DataGrid_DoubleTapped">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Location" Binding="{Binding Location}" Width="Auto" />
