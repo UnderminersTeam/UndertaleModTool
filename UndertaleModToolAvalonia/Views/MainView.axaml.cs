@@ -29,6 +29,14 @@ public partial class MainView : UserControl
                 vm.SearchInCodeOpen = SearchInCodeOpen;
             }
         };
+
+        Loaded += (_, __) =>
+        {
+            if (DataContext is MainViewModel vm)
+            {
+                vm.OnLoaded();
+    }
+        };
     }
 
     public async Task<IReadOnlyList<IStorageFile>> OpenFileDialog(FilePickerOpenOptions options)

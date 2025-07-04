@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -82,6 +83,28 @@ public partial class MainViewModel
         ];
     }
 
+    public async void OnLoaded()
+    {
+        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            if (desktop.Args?.Length >= 1)
+            {
+                try
+                {
+                    using FileStream stream = File.OpenRead(desktop.Args[0]);
+                    if (await LoadData(stream))
+                    {
+                        DataPath = stream.Name;
+                    }
+                }
+                catch (SystemException e)
+                {
+                    await ShowMessageDialog($"Error opening data file from argument: {e.Message}");
+                }
+            }
+        }
+    }
+
     public async Task<MessageWindow.Result> ShowMessageDialog(string message, string? title = null, bool ok = false, bool yes = false, bool no = false, bool cancel = false)
     {
         if (MessageDialog is not null)
@@ -106,6 +129,51 @@ public partial class MainViewModel
         UpdateVersion();
     }
 
+    public async Task<bool> LoadData(Stream stream)
+    {
+        try
+        {
+            UndertaleData data = UndertaleIO.Read(stream,
+                (string warning, bool isImportant) =>
+                {
+                    Debug.WriteLine($"Data.Read warning: {(isImportant ? "(important) " : "")}{warning}");
+                },
+                (string message) =>
+                {
+                    Debug.WriteLine($"Data.Read message: {message}");
+                });
+
+            SetData(data);
+
+            return true;
+        }
+        catch (Exception e)
+        {
+            await ShowMessageDialog($"Error opening data file: {e.Message}");
+
+            return false;
+        }
+    }
+
+    public void CloseData()
+    {
+        SetData(null);
+        DataPath = null;
+
+        Tabs.Clear();
+
+        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            foreach (var window in desktop.Windows.ToList())
+            {
+                if (window is SearchInCodeWindow)
+                {
+                    window.Close();
+                }
+            }
+        }
+    }
+
     public void UpdateVersion()
     {
         Version = Data is not null && Data.GeneralInfo is not null ? (Data.GeneralInfo.Major, Data.GeneralInfo.Minor, Data.GeneralInfo.Release, Data.GeneralInfo.Build) : default;
@@ -124,7 +192,7 @@ public partial class MainViewModel
     // Menus
     public void FileNew()
     {
-        Tabs.Clear();
+        CloseData();
 
         SetData(UndertaleData.CreateNew());
         DataPath = null;
@@ -142,21 +210,14 @@ public partial class MainViewModel
         if (files.Count != 1)
             return;
 
-        Tabs.Clear();
+        CloseData();
 
         using Stream stream = await files[0].OpenReadAsync();
 
-        SetData(UndertaleIO.Read(stream,
-            (string warning, bool isImportant) =>
-            {
-                Debug.WriteLine($"Data.Read warning: {(isImportant ? "(important) " : "")}{warning}");
-            },
-            (string message) =>
-            {
-                Debug.WriteLine($"Data.Read message: {message}");
-            }));
-
-        DataPath = files[0].TryGetLocalPath();
+        if (await LoadData(stream))
+        {
+            DataPath = files[0].TryGetLocalPath();
+        }
     }
 
     public async void FileSave()
