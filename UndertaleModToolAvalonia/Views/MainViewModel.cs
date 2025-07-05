@@ -32,8 +32,14 @@ public partial class MainViewModel
     public Func<Task>? SettingsDialog;
     public Action? SearchInCodeOpen;
 
+    // Services
+    public readonly IServiceProvider ServiceProvider;
+
     // Settings
     public SettingsFile? Settings { get; set; }
+
+    // Scripting
+    public Scripting Scripting = null!;
 
     // Window
     public string Title => $"UndertaleModToolAvalonia - v" +
@@ -74,9 +80,6 @@ public partial class MainViewModel
     // Image cache
     public ImageCache ImageCache = new();
 
-    // Services
-    readonly IServiceProvider ServiceProvider;
-
     public MainViewModel(IServiceProvider? serviceProvider = null)
     {
         ServiceProvider = serviceProvider ?? App.Services;
@@ -92,6 +95,7 @@ public partial class MainViewModel
     public async void OnLoaded()
     {
         Settings = await SettingsFile.Load(ServiceProvider);
+        Scripting = new(ServiceProvider);
 
         if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
@@ -269,6 +273,37 @@ public partial class MainViewModel
         SearchInCodeOpen!();
     }
 
+    public async void ScriptsRunOtherScript()
+    {
+        var files = await OpenFileDialog!(new FilePickerOpenOptions()
+        {
+            Title = "Run script",
+            AllowMultiple = false,
+            FileTypeFilter = [
+                new FilePickerFileType("C# scripts (.csx)")
+                {
+                    Patterns = ["*.csx"],
+                },
+                new FilePickerFileType("All files")
+                {
+                    Patterns = ["*"],
+                },
+            ],
+        });
+
+        if (files.Count != 1)
+            return;
+
+        string text;
+        using (Stream stream = await files[0].OpenReadAsync())
+        {
+            using StreamReader streamReader = new(stream);
+            text = streamReader.ReadToEnd();
+        }
+
+        await Scripting.RunScript(text, files[0].TryGetLocalPath());
+    }
+
     public void HelpGitHub()
     {
         LaunchUriAsync?.Invoke(new Uri("https://github.com/UnderminersTeam/UndertaleModTool"));
@@ -297,7 +332,7 @@ public partial class MainViewModel
 
         list.Add(res);
     }
-    
+
     public TabItemViewModel? TabOpen(object? item)
     {
         if (Data is null)

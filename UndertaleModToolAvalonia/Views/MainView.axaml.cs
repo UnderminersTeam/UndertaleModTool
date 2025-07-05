@@ -35,7 +35,7 @@ public partial class MainView : UserControl
             if (DataContext is MainViewModel vm)
             {
                 vm.OnLoaded();
-    }
+            }
         };
     }
 
@@ -117,5 +117,15 @@ public partial class MainView : UserControl
                 }
             }
         }
+    }
+
+    private async void CommandTextBox_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (DataContext is MainViewModel vm)
+            if (e.Key == Key.Enter)
+            {
+                object? result = await vm.Scripting.RunScript(CommandTextBox.Text ?? "");
+                CommandTextBox.Text = result?.ToString() ?? "";
+            }
     }
 }

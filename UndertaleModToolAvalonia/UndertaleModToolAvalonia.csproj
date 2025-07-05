@@ -21,6 +21,7 @@
 
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
         <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.2" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.14.0" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.6" />
         <PackageReference Include="PropertyChanged.SourceGenerator" Version="1.1.1">
           <PrivateAssets>all</PrivateAssets>
