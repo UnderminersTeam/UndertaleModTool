@@ -26,7 +26,7 @@
             </Grid>
         
             <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties"
-                  IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).Version,
+                  IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).DataVersion,
                   Converter={StaticResource VersionCompareConverter},
                   ConverterParameter=GE2.0.6}">
                 <Label>Generated mips</Label>

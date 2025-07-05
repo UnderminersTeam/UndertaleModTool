@@ -22,7 +22,7 @@
         </Grid>
         
         <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
-              IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).Version,
+              IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).DataVersion,
               Converter={StaticResource VersionCompareConverter},
               ConverterParameter=GE2023.6}">
             <Label>Enabled</Label>
@@ -39,7 +39,7 @@
         </Grid>
 
         <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
-              IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).Version,
+              IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).DataVersion,
               Converter={StaticResource VersionCompareConverter},
               ConverterParameter=GE2023.8}">
             <Label>Emit relative</Label>
@@ -96,7 +96,7 @@
         </Grid>
 
         <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
-              IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).Version,
+              IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).DataVersion,
               Converter={StaticResource VersionCompareConverter},
               ConverterParameter=GE2023.4}">
             <Label>Animate sprite</Label>

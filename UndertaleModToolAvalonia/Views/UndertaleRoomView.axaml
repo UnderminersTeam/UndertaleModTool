@@ -283,12 +283,12 @@
                                     <Label>Definition</Label>
 
                                     <Panel>
-                                        <Panel IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).Version,
+                                        <Panel IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).DataVersion,
                                                Converter={StaticResource VersionCompareConverter},
                                                ConverterParameter=GE2}">
                                             <c:UndertaleResourceReferenceView Reference="{Binding ObjectDefinition}" ReferenceType="undertalem:UndertaleSprite"/>
                                         </Panel>
-                                        <Panel IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).Version,
+                                        <Panel IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).DataVersion,
                                                Converter={StaticResource VersionCompareConverter},
                                                ConverterParameter=L2}">
                                             <c:UndertaleResourceReferenceView Reference="{Binding ObjectDefinition}" ReferenceType="undertalem:UndertaleBackground"/>

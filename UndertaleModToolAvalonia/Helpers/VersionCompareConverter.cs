@@ -7,11 +7,11 @@ using Avalonia.Data.Converters;
 namespace UndertaleModToolAvalonia.Helpers;
 
 /// <summary>
-/// Checks if a version is greater then or equal, or less than, some value. Bind it to MainViewModel.Version.
+/// Checks if a version is greater then or equal, or less than, some value. Bind it to MainViewModel.DataVersion.
 /// Parameter follows this pattern: [operation][major[.minor[.release[.build]]]]
 /// Operation can be GE (greater or equal) or L (less than).
 /// Usage:
-/// {Binding $parent[v:MainView].((v:MainViewModel)DataContext).Version,
+/// {Binding $parent[v:MainView].((v:MainViewModel)DataContext).DataVersion,
 /// Converter={StaticResource VersionCompareConverter},
 /// ConverterParameter=2}
 /// </summary>

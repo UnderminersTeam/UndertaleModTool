@@ -44,9 +44,8 @@ public partial class MainViewModel
     private UndertaleData? _Data;
     [Notify]
     private string? _DataPath;
-
     [Notify]
-    private (uint Major, uint Minor, uint Release, uint Build) _Version;
+    private (uint Major, uint Minor, uint Release, uint Build) _DataVersion;
 
     IReadOnlyList<FilePickerFileType> dataFileTypes =
     [
@@ -176,7 +175,7 @@ public partial class MainViewModel
 
     public void UpdateVersion()
     {
-        Version = Data is not null && Data.GeneralInfo is not null ? (Data.GeneralInfo.Major, Data.GeneralInfo.Minor, Data.GeneralInfo.Release, Data.GeneralInfo.Build) : default;
+        DataVersion = Data is not null && Data.GeneralInfo is not null ? (Data.GeneralInfo.Major, Data.GeneralInfo.Minor, Data.GeneralInfo.Release, Data.GeneralInfo.Build) : default;
     }
 
     private void DataGeneralInfoChangedHandler(object? sender, PropertyChangedEventArgs e)
