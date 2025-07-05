@@ -4,8 +4,7 @@
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-        <!-- TODO: Delete this! -->
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <Version>0.8.2.0</Version>
     </PropertyGroup>
 
     <ItemGroup>

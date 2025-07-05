@@ -57,7 +57,7 @@ public partial class MainView : UserControl
         return await topLevel.Launcher.LaunchUriAsync(uri);
     }
 
-    public async Task<MessageWindow.Result> MessageDialog(string message, string? title = null, bool ok = false, bool yes = false, bool no = false, bool cancel = false)
+    public async Task<MessageWindow.Result> MessageDialog(string message, string? title = null, bool ok = true, bool yes = false, bool no = false, bool cancel = false)
     {
         Window window = this.FindLogicalAncestorOfType<Window>() ?? throw new InvalidOperationException();
         return await new MessageWindow(message, title, ok, yes, no, cancel).ShowDialog<MessageWindow.Result>(window);

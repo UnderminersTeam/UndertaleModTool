@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -25,17 +26,18 @@ public partial class MainViewModel
     public Func<FilePickerSaveOptions, Task<IStorageFile?>>? SaveFileDialog;
     public Func<Uri, Task<bool>>? LaunchUriAsync;
 
-    public delegate Task<MessageWindow.Result> MessageDialogDelegate(string message, string? title = null, bool ok = false, bool yes = false, bool no = false, bool cancel = false);
+    public delegate Task<MessageWindow.Result> MessageDialogDelegate(string message, string? title = null, bool ok = true, bool yes = false, bool no = false, bool cancel = false);
     public MessageDialogDelegate? MessageDialog;
 
     public Func<Task>? SettingsDialog;
     public Action? SearchInCodeOpen;
 
     // Settings
-    public SettingsFile Settings { get; } = new();
+    public SettingsFile? Settings { get; set; }
 
     // Window
-    public string Title => $"UndertaleModToolAvalonia - v0.0.0.0" +
+    public string Title => $"UndertaleModToolAvalonia - v" +
+        Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?.?.?.?" +
         $"{(Data?.GeneralInfo is not null ? " - " + Data.GeneralInfo.ToString() : "")}" +
         $"{(DataPath is not null ? " [" + DataPath + "]" : "")}";
 
@@ -72,8 +74,13 @@ public partial class MainViewModel
     // Image cache
     public ImageCache ImageCache = new();
 
-    public MainViewModel()
+    // Services
+    readonly IServiceProvider ServiceProvider;
+
+    public MainViewModel(IServiceProvider? serviceProvider = null)
     {
+        ServiceProvider = serviceProvider ?? App.Services;
+
         Tabs = [
             new TabItemViewModel(new DescriptionViewModel(
                 "Welcome to UndertaleModTool!",
@@ -84,6 +91,8 @@ public partial class MainViewModel
 
     public async void OnLoaded()
     {
+        Settings = await SettingsFile.Load(ServiceProvider);
+
         if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             if (desktop.Args?.Length >= 1)
@@ -104,7 +113,7 @@ public partial class MainViewModel
         }
     }
 
-    public async Task<MessageWindow.Result> ShowMessageDialog(string message, string? title = null, bool ok = false, bool yes = false, bool no = false, bool cancel = false)
+    public async Task<MessageWindow.Result> ShowMessageDialog(string message, string? title = null, bool ok = true, bool yes = false, bool no = false, bool cancel = false)
     {
         if (MessageDialog is not null)
             return await MessageDialog.Invoke(message, title, ok, yes, no, cancel);
@@ -267,8 +276,8 @@ public partial class MainViewModel
 
     public async void HelpAbout()
     {
-        await ShowMessageDialog("UndertaleModTool by the Underminers team\nLicensed under the GNU General Public License Version 3.",
-            title: "About", ok: true);
+        await ShowMessageDialog($"UndertaleModTool v{Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?.?.?.?"}" +
+            $"by the Underminers team\nLicensed under the GNU General Public License Version 3.", title: "About");
     }
 
     public void DataItemAdd(IList list)
