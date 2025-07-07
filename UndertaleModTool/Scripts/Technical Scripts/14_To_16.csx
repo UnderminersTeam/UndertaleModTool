@@ -35,8 +35,7 @@ If they do, you may file an issue on GitHub, but no warranty is given."); // War
     // Convert variables
     int id = 0;
     UndertaleVariable variable;
-    BuiltinList list = new BuiltinList();
-    list.Initialize(Data);
+    BuiltinList list = new BuiltinList(Data);
     foreach (var code in Data.Code)
     {
         for (int j = 0; j < code.Instructions.Count; j++)
@@ -200,7 +199,7 @@ Data.Variables.Insert(2, arguments);
 
 // Fix variables
 
-Data.GeneralInfo.DisableDebugger = true; 
+Data.GeneralInfo.IsDebuggerDisabled = true; 
 Data.MaxLocalVarCount = 1; 
 int globalNum = 0;
 int selfNum = 0;
@@ -244,7 +243,7 @@ foreach (UndertaleGameObject obj in Data.GameObjects)
 if (Data.Code.ByName("gml_Script_SCR_TEXTTYPE") != null)
 {
     Data.Strings.MakeString("script_execute").Content = "script_execute_wrapper";
-    string SCR_TEXTTYPE = GetDecompiledText("gml_Script_SCR_TEXTTYPE");
+    string SCR_TEXTTYPE = GetDecompiledText("gml_Script_SCR_TEXTTYPE", null, new Underanalyzer.Decompiler.DecompileSettings());
     SCR_TEXTTYPE = SCR_TEXTTYPE.Replace("if (", "else if (");
     SCR_TEXTTYPE = SCR_TEXTTYPE.Replace("else if (argument0 != 0)", "if (argument0 != 0)");
     SCR_TEXTTYPE = SCR_TEXTTYPE.Replace("else if (global.typer == 1)", "if (global.typer == 1)");

@@ -9,24 +9,24 @@ using UndertaleModLib.Util;
 EnsureDataLoaded();
 
 string exportFolder = PromptChooseDirectory();
-if (exportFolder == null)
+if (exportFolder is null)
     throw new ScriptException("The export folder was not set.");
 
+string stringsPath = Path.Combine(exportFolder, "strings.txt");
 //Overwrite Check One
-if (File.Exists(exportFolder + "\\strings.txt"))
+if (File.Exists(stringsPath))
 {
     bool overwriteCheckOne = ScriptQuestion(@"A 'strings.txt' file already exists.
 Would you like to overwrite it?");
-    if (overwriteCheckOne)
-        File.Delete(exportFolder + "\\strings.txt");
     if (!overwriteCheckOne)
     {
         ScriptError("A 'strings.txt' file already exists. Please remove it and try again.", "Error: Export already exists.");
         return;
     }
+    File.Delete(stringsPath);
 }
 
-using (StreamWriter writer = new StreamWriter(exportFolder + "\\strings.txt"))
+using (StreamWriter writer = new StreamWriter(stringsPath))
 {
     foreach (var str in Data.Strings)
     {

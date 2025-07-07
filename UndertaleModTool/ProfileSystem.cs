@@ -11,6 +11,7 @@ using UndertaleModLib.Models;
 using UndertaleModLib.Decompiler;
 using System.Threading.Tasks;
 using System.Text;
+using Underanalyzer.Decompiler;
 
 namespace UndertaleModTool
 {
@@ -18,19 +19,21 @@ namespace UndertaleModTool
 
     public partial class MainWindow : Window, INotifyPropertyChanged, IScriptInterface
     {
-        public string GetDecompiledText(string codeName, GlobalDecompileContext context = null)
+        public string GetDecompiledText(string codeName, GlobalDecompileContext context = null, IDecompileSettings settings = null)
         {
-            return GetDecompiledText(Data.Code.ByName(codeName), context);
+            return GetDecompiledText(Data.Code.ByName(codeName), context, settings);
         }
-        public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null)
+        public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null, IDecompileSettings settings = null)
         {
             if (code.ParentEntry is not null)
                 return $"// This code entry is a reference to an anonymous function within \"{code.ParentEntry.Name.Content}\", decompile that instead.";
 
-            GlobalDecompileContext DECOMPILE_CONTEXT = context is null ? new(Data, false) : context;
+            GlobalDecompileContext globalDecompileContext = context is null ? new(Data) : context;
             try
             {
-                return code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT) : "";
+                return code != null 
+                    ? new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, settings ?? Data.ToolInfo.DecompilerSettings).DecompileToString()
+                    : "";
             }
             catch (Exception e)
             {
@@ -59,7 +62,9 @@ namespace UndertaleModTool
 
         public void CrashCheck()
         {
-            try
+            string fileext = Path.GetExtension(FilePath);
+
+            if (fileext != ".dat") try
             {
                 string lastEditedLocation = Path.Combine(ProfilesFolder, "LastEdited.txt");
                 if (Data == null && File.Exists(lastEditedLocation))
@@ -137,7 +142,9 @@ namespace UndertaleModTool
 
         public void ApplyCorrections()
         {
-            try
+            string fileext = Path.GetExtension(FilePath);
+
+            if (fileext != ".dat") try
             {
                 DirectoryCopy(CorrectionsFolder, ProfilesFolder, true);
             }
@@ -175,7 +182,9 @@ namespace UndertaleModTool
 
         public void RevertProfile()
         {
-            try
+            string fileext = Path.GetExtension(FilePath);
+
+            if (fileext != ".dat") try
             {
                 // We need to do this regardless, as the "Temp" folder can still change in non-profile mode.
                 // If we don't, it could cause desynchronization between modes.
@@ -216,7 +225,11 @@ namespace UndertaleModTool
         {
             FileMessageEvent?.Invoke("Calculating MD5 hash...");
 
-            try
+            string fileext = Path.GetExtension(filename);
+
+            //this.ShowMessage(filename);
+
+            if (fileext != ".dat") try
             {
                 await Task.Run(() =>
                 {
@@ -227,6 +240,71 @@ namespace UndertaleModTool
                             MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
                             MD5PreviouslyLoaded = MD5CurrentlyLoaded;
                             remMD5 = MD5PreviouslyLoaded;
+
+                            String Input_text = "";
+                            if (SettingsWindow.ProfileModeEnabled && SettingsWindow.CustomProfileName == true)
+                            {
+                                if (SettingsWindow.RememberProfileName)
+                                {
+                                    var MD5DirName = CurProfileName;
+                                    var MD5DirPath = Path.Combine(ProfilesFolder, MD5DirName);
+                                    var FileDir = "";
+                                    string[] iwishiwasbetteratnames = filename.Split(new char[] { '\\' });
+                                    var directoriesamt = iwishiwasbetteratnames.Length;
+                                    for (var i = 0; i < directoriesamt - 1; i++)
+                                    {
+                                        FileDir += iwishiwasbetteratnames[i] + "\\";
+                                    }
+                                    if (File.Exists(FileDir + "Profiles\\directory.txt"))
+                                    { 
+                                        FileDir += "Profiles\\directory.txt";
+
+                                        var GetThisDir = File.ReadAllText(FileDir);
+
+                                        if (File.Exists(GetThisDir))
+                                            Input_text = File.ReadAllText(GetThisDir);
+                                        else
+                                            Input_text = SimpleTextInput("Loading Profile, please enter a Profile name.", "(Leaving this blank will name the profile with the data's MD5 hash.)", Input_text, true);
+                                        //this.ShowMessage(Input_text);
+                                    }
+                                    else
+                                        Input_text = SimpleTextInput("Loading Profile, please enter a Profile name.", "(Leaving this blank will name the profile with the data's MD5 hash.)", Input_text, true);
+                                }
+                                else
+                                    Input_text = SimpleTextInput("Loading Profile, please enter a Profile name.", "(Leaving this blank will name the profile with the data's MD5 hash.)", Input_text, true);
+                            }
+
+                            if (Input_text == "")
+                            {
+                                ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                                is_string = false;
+                            }
+                            else
+                            {
+                                byte[] idk = Encoding.ASCII.GetBytes(Input_text);
+                                MD5PreviouslyLoaded = idk;
+                                MD5CurrentlyLoaded = idk;
+
+                                ProfileHash = Input_text;
+                                is_string = true;
+                            }
+                            CurProfileName = ProfileHash;
+                            //this.ShowMessage(CurProfileName);
+                            CurrentProfileName = "- Current Profile: " + "\"" + CurProfileName + "\"";
+                        }
+                    }
+                });
+
+                /*await Task.Run(() =>
+                {
+                    using (var md5Instance = MD5.Create())
+                    {
+                        using (var stream = File.OpenRead(filename))
+                        {
+                            MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
+                            MD5PreviouslyLoaded = MD5CurrentlyLoaded;
+                            remMD5 = MD5PreviouslyLoaded;
+
                             String Input_text = "";
                             if (SettingsWindow.ProfileModeEnabled && SettingsWindow.CustomProfileName == true)
                                 Input_text = SimpleTextInput("Loading Profile, please enter a Profile name.", "(Leaving this blank will name the profile with the data's MD5 hash.)", Input_text, true);
@@ -247,9 +325,10 @@ namespace UndertaleModTool
                                 is_string = true;
                             }
                             CurrentProfileName = "- Current Profile: " + "\"" + CurProfileName + "\"";
+                            this.ShowMessage(ProfileHash);
                         }
                     }
-                });
+                });*/
 
                 string profDir = Path.Combine(ProfilesFolder, ProfileHash);
                 string profDirTemp = Path.Combine(profDir, "Temp");
@@ -346,7 +425,9 @@ an issue on GitHub.");
         {
             FileMessageEvent?.Invoke("Calculating MD5 hash...");
 
-            try
+            string fileext = Path.GetExtension(filename);
+
+            if (fileext != ".dat") try
             {
                 String Input_text = "";
                 if (SettingsWindow.ProfileModeEnabled == true && SettingsWindow.CustomProfileName == true)
@@ -391,6 +472,7 @@ an issue on GitHub.");
 
                 Directory.CreateDirectory(Path.Combine(ProfilesFolder, ProfileHash, "Main"));
                 Directory.CreateDirectory(Path.Combine(ProfilesFolder, ProfileHash, "Temp"));
+                var Oldname = "";
                 if (!SettingsWindow.ProfileModeEnabled || data.IsYYC())
                 {
                     MD5PreviouslyLoaded = MD5CurrentlyLoaded;
@@ -458,6 +540,7 @@ an issue on GitHub.");
                     }
                     MD5PreviouslyLoaded = MD5CurrentlyLoaded;
                     ProfileHash = Input_text;
+                    Oldname = CurProfileName;
                     CurProfileName = ProfileHash;
                     if (ProfileHash == "")
                     {
@@ -487,7 +570,8 @@ an issue on GitHub.");
                 }
                 if (SettingsWindow.DeleteOldProfileOnSave && copyProfile)
                 {
-                    Directory.Delete(Path.Combine(ProfilesFolder, deleteIfModeActive), true);
+                    //this.ShowMessage(Oldname);
+                    Directory.Delete(Path.Combine(ProfilesFolder, Oldname), true);
                 }
             }
             catch (Exception exc)

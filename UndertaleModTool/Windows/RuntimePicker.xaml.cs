@@ -102,6 +102,9 @@ namespace UndertaleModTool
                     continue;
 
                 string runtimeRunner = System.IO.Path.Combine(runtimePath, @"windows\Runner.exe");
+                string runtimeRunnerX64 = System.IO.Path.Combine(runtimePath, @"windows\x64\Runner.exe");
+                if (Environment.Is64BitOperatingSystem && File.Exists(runtimeRunnerX64))
+                    runtimeRunner = runtimeRunnerX64;
                 if (!File.Exists(runtimeRunner))
                     continue;
 

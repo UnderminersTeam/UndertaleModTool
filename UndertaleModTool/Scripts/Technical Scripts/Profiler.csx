@@ -483,10 +483,12 @@ void ProfileModeOperations()
 
     //TODO: reimplement ASM solution w/o hacky asm breaking
 
+    GlobalDecompileContext globalDecompileContext = new(Data);
+    Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = new Underanalyzer.Decompiler.DecompileSettings();
     foreach (UndertaleCode c in Data.Code)
     {
         UpdateProgressBar(null, "Code entries processed", progress++, Data.Code.Count);
-        string gmlCode = GetDecompiledText(c.Name.Content);
+        string gmlCode = GetDecompiledText(c.Name.Content, globalDecompileContext, decompilerSettings);
         gmlCode = gmlCode.Replace("\r\n", "\n");
         gmlCode = Regex.Replace(gmlCode, "global\\.interact = (\\d+)", "__scr_setinteract__\\(\\1\\)");
         gmlCode = gmlCode.Replace("global.interact", "__scr_getinteract__()");
@@ -647,7 +649,7 @@ void PersistentObjectSetup(string objectName)
     }
     if (Data.GeneralInfo.Name.Content.StartsWith("UNDERTALE"))
     {
-        Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, (uint)114, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML("", Data);
+        Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, (uint)114, Data).ReplaceGML("", Data);
     }
     bool gms2 = Data.IsVersionAtLeast(2, 0, 0, 0);
     var entry_room = Data.GeneralInfo.RoomOrder[0].Resource;

@@ -1,10 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading.Tasks;
 using UndertaleModLib.Models;
 using static UndertaleModLib.Compiler.Compiler.Lexer.Token;
 
@@ -17,6 +17,13 @@ namespace UndertaleModLib.Compiler
             private static Queue<Statement> remainingStageOne = new Queue<Statement>();
             public static List<string> ErrorMessages = new List<string>();
             private static bool hasError = false; // temporary variable that clears in several places
+
+            // Struct function names that haven't been used yet.
+            private static Queue<string> usableStructNames = new();
+
+            // Not really universally unique nor does it follow the UUID spec,
+            // it just needs to be unique in the same script.
+            private static int uuidCounter = 0;
 
             public class ExpressionConstant
             {
@@ -32,7 +39,8 @@ namespace UndertaleModLib.Compiler
                     Number,
                     String,
                     Constant,
-                    Int64
+                    Int64,
+                    Reference
                 }
 
                 public ExpressionConstant(double val)
@@ -59,6 +67,7 @@ namespace UndertaleModLib.Compiler
                     valueNumber = copyFrom.valueNumber;
                     valueString = copyFrom.valueString;
                     valueInt64 = copyFrom.valueInt64;
+                    isBool = copyFrom.isBool;
                 }
             }
 
@@ -95,6 +104,9 @@ namespace UndertaleModLib.Compiler
                     SwitchDefault,
                     FunctionCall,
                     FunctionDef,
+                    FunctionDefAssign,
+                    Throw,
+                    New,
                     Break,
                     Continue,
                     Exit,
@@ -110,12 +122,14 @@ namespace UndertaleModLib.Compiler
                     ExprConstant,
                     ExprBinaryOp,
                     ExprArray, // maybe?
+                    ExprStruct,
                     ExprFunctionCall,
                     ExprUnary,
                     ExprConditional,
                     ExprVariableRef,
                     ExprSingleVariable,
                     ExprFuncName,
+                    ExprNew,
 
                     Token,
                     Discard // optimization stage produces this
@@ -231,6 +245,11 @@ namespace UndertaleModLib.Compiler
                     this.Constant = constant;
                     Children = new List<Statement>();
                 }
+            }
+
+            public class FunctionParseInfo
+            {
+                public HashSet<string> LocalVars { get; } = new();
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -403,8 +422,7 @@ namespace UndertaleModLib.Compiler
                     if (context.Location != null)
                     {
                         msg += string.Format(" around line {0}, column {1}", context.Location.Line, context.Location.Column);
-                    }
-                    else if (context.Kind == TokenKind.EOF)
+                    } else if (context.Kind == TokenKind.EOF)
                     {
                         msg += " around EOF (end of file)";
                     }
@@ -429,7 +447,6 @@ namespace UndertaleModLib.Compiler
                     remainingStageOne.Dequeue();
                 }
             }
-
             public static Statement ParseTokens(CompileContext context, List<Lexer.Token> tokens)
             {
                 // Basic initialization
@@ -438,10 +455,21 @@ namespace UndertaleModLib.Compiler
                 context.LocalVars.Clear();
                 if ((context.Data?.GeneralInfo?.BytecodeVersion ?? 15) >= 15)
                     context.LocalVars["arguments"] = "arguments";
+                context.FunctionParseStack.Clear();
+                context.FunctionParseInfo.Clear();
                 context.GlobalVars.Clear();
+                context.EnumStatements.Clear();
                 context.Enums.Clear();
-                //context.LocalArgs.Clear();
+                context.FunctionsToObliterate.Clear();
+                uuidCounter = 0;
                 hasError = false;
+
+                usableStructNames.Clear();
+                foreach (UndertaleCode child in context.OriginalCode.ChildEntries)
+                {
+                    if (child.Name.Content.StartsWith("gml_Script____struct___"))
+                        usableStructNames.Enqueue(child.Name.Content["gml_Script_".Length..]);
+                }
 
                 // Ensuring an EOF exists
                 if (tokens.Count == 0 || tokens[tokens.Count - 1].Kind != TokenKind.EOF)
@@ -483,6 +511,7 @@ namespace UndertaleModLib.Compiler
                         ExpressionConstant constant = null;
                         if (t.Content[0] == '$' || t.Content.StartsWith("0x", StringComparison.InvariantCulture))
                         {
+                            // General hex number literal
                             long val;
                             try
                             {
@@ -504,11 +533,23 @@ namespace UndertaleModLib.Compiler
                                 constant = new ExpressionConstant((double)val);
                             }
                         }
+                        else if (t.Content[0] == '#')
+                        {
+                            // CSS color hex literal - needs to convert from RGB to BGR
+                            if (t.Content.Length != 7 ||
+                                !int.TryParse(t.Content[1..], NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int value))
+                            {
+                                ReportCodeError("Invalid CSS color hex literal. Must have exactly 6 hex characters.", t, false);
+                                constant = new ExpressionConstant(0);
+                                firstPass.Add(new Statement(TokenKind.ProcConstant, t, constant));
+                                continue;
+                            }
+                            constant = new ExpressionConstant((double)(((value & 0xff) << 16) | (value & 0xff00) | ((value & 0xff0000) >> 16)));
+                        }
                         else
                         {
-                            if (!double.TryParse(t.Content, System.Globalization.NumberStyles.Float,
-                                                 System.Globalization.CultureInfo.InvariantCulture,
-                                                 out double val))
+                            // Double-precision floating point literal
+                            if (!double.TryParse(t.Content, NumberStyles.Float, CultureInfo.InvariantCulture, out double val))
                             {
                                 ReportCodeError("Invalid double number format.", t, false);
                             }
@@ -537,6 +578,15 @@ namespace UndertaleModLib.Compiler
                 rootBlock = ParseBlock(context, true);
                 if (hasError)
                     return null;
+
+                // Remove any unused struct functions
+                // (so that struct definitions can just be added and removed at any time, like arrays)
+                // This should be safe since struct functions should only be used in one place each
+                while (usableStructNames.Count > 0)
+                    context.FunctionsToObliterate.Add(usableStructNames.Dequeue());
+                
+                // Resolve all enum values to their constants
+                ResolveEnumDeclarations(context);
 
                 return rootBlock;
             }
@@ -640,6 +690,12 @@ namespace UndertaleModLib.Compiler
                     case TokenKind.KeywordFunction:
                         s = ParseFunction(context);
                         break;
+                    case TokenKind.KeywordNew:
+                        s = ParseNew(context, false);
+                        break;
+                    case TokenKind.KeywordThrow:
+                        s = ParseThrow(context);
+                        break;
                     default:
                         // Assumes it's a variable assignment
                         if (remainingStageOne.Count > 0)
@@ -666,25 +722,44 @@ namespace UndertaleModLib.Compiler
                 Statement args = new Statement();
                 bool expressionMode = true;
                 Statement destination = null;
+                
+                FunctionParseInfo info = new();
+                context.FunctionParseStack.Push(info);
+                context.FunctionParseInfo[result] = info;
 
                 if (GetNextTokenKind() == TokenKind.ProcFunction)
                 {
                     expressionMode = false;
                     Statement s = remainingStageOne.Dequeue();
+                    // TODO: don't assume ___struct___ = a struct?
+                    // (GM does let you compile such functions, not sure if there
+                    // are any games out there that have such functions though)
+                    if (s.Text.StartsWith("___struct___"))
+                        ReportCodeError("Function names cannot start with ___struct___ (they are reserved for structs).", s.Token, false);
                     destination = new Statement(Statement.StatementKind.ExprFuncName, s.Token) { ID = s.ID };
                 }
 
                 EnsureTokenKind(TokenKind.OpenParen);
-                var i = 0;
-                //Dictionary<string, int> argsDict = new();
+
+                int numNamedArguments = 0;
                 while (remainingStageOne.Count > 0 && !hasError && !IsNextToken(TokenKind.EOF, TokenKind.CloseParen))
                 {
-                    var token = EnsureTokenKind(TokenKind.ProcVariable);
-                    if (token == null)
-                        return null;
-                    //argsDict.Add(token.Text, i);
-                    args.Children.Add(new Statement(Statement.StatementKind.Token, token.Text));
-                    i++;
+                    numNamedArguments++;
+                    Statement expr = EnsureTokenKind(TokenKind.ProcVariable);
+                    if (expr != null)
+                        args.Children.Add(expr);
+
+                    if (IsNextTokenDiscard(TokenKind.Assign))
+                    {
+                        Statement defaultValue = ParseExpression(context);
+                        args.Children.Add(defaultValue);
+                    }
+                    else
+                    {
+                        // No default value supplied
+                        args.Children.Add(null);
+                    }
+
                     if (!IsNextTokenDiscard(TokenKind.Comma))
                     {
                         if (!IsNextToken(TokenKind.CloseParen))
@@ -696,21 +771,50 @@ namespace UndertaleModLib.Compiler
                 }
                 result.Children.Add(args);
 
+                if (numNamedArguments > 16)
+                {
+                    ReportCodeError("Only 16 named arguments are allowed per function.", result.Token, false);
+                }
+
                 if (EnsureTokenKind(TokenKind.CloseParen) == null) return null;
+                if (IsNextTokenDiscard(TokenKind.Colon))
+                {
+                    result.Children.Insert(0, ParseFunctionCall(context)); // TODO: variable function calls
+                    result.Children.Insert(0, EnsureTokenKind(TokenKind.KeywordConstructor));
+                }
+                else if (IsNextToken(TokenKind.KeywordConstructor))
+                {
+                    result.Children.Insert(0, EnsureTokenKind(TokenKind.KeywordConstructor));
+                }
 
-                result.Children.Add(ParseStatement(context)); // most likely parses the body.
-                //context.LocalArgs.Add(result, argsDict);
+                result.Children.Add(ParseBlock(context));
 
+                context.FunctionParseStack.Pop();
                 if (expressionMode)
                     return result;
                 else // Whatever you call non-anonymous definitions
                 {
-                    Statement trueResult = new Statement(Statement.StatementKind.Assign, new Lexer.Token(TokenKind.Assign));
+                    Statement trueResult = new Statement(Statement.StatementKind.FunctionDefAssign);
                     trueResult.Children.Add(destination);
-                    trueResult.Children.Add(new Statement(Statement.StatementKind.Token, trueResult.Token));
                     trueResult.Children.Add(result);
                     return trueResult;
                 }
+            }
+
+            private static Statement ParseThrow(CompileContext context)
+            {
+                Statement result = new(Statement.StatementKind.Throw, EnsureTokenKind(TokenKind.KeywordThrow).Token);
+                result.Children.Add(ParseExpression(context));
+                return result;
+            }
+
+            private static Statement ParseNew(CompileContext context, bool expression)
+            {
+                Statement result = new(
+                    expression ? Statement.StatementKind.ExprNew : Statement.StatementKind.New,
+                    EnsureTokenKind(TokenKind.KeywordNew).Token);
+                result.Children.Add(ParseFunctionCall(context, true)); // TODO: variable function calls
+                return result;
             }
 
             private static Statement ParseFor(CompileContext context)
@@ -830,11 +934,8 @@ namespace UndertaleModLib.Compiler
 
             private static Statement ParseEnum(CompileContext context)
             {
-                ReportCodeError("Enums not currently supported.", true);
-                return null;
-                /*
                 Statement result = new Statement(Statement.StatementKind.Enum, EnsureTokenKind(TokenKind.Enum).Token);
-                Dictionary<string, int> values = new Dictionary<string, int>();
+                Dictionary<string, long?> values = new Dictionary<string, long?>();
 
                 Statement name = EnsureTokenKind(TokenKind.ProcVariable);
                 if (name == null)
@@ -844,43 +945,36 @@ namespace UndertaleModLib.Compiler
                 result.Text = name.Text;
                 result.ID = name.ID;
 
-                if (EnsureTokenKind(TokenKind.OpenBlock) == null) return null;
+                if (EnsureTokenKind(TokenKind.OpenBlock) == null)
+                    return null;
 
-                if (Enums.ContainsKey(name.Text))
+                if (context.Enums.ContainsKey(name.Text))
                 {
                     ReportCodeError("Enum \"" + name.Text + "\" is defined more than once.", name.Token, true);
-                } else
+                }
+                else
                 {
-                    Enums[name.Text] = values;
+                    context.Enums[name.Text] = values;
+                    context.EnumStatements.Add((name.Text, result));
                 }
 
-                int incrementingValue = 0;
                 while (!hasError && !IsNextToken(TokenKind.CloseBlock))
                 {
                     Statement val = new Statement(Statement.StatementKind.VariableName, remainingStageOne.Dequeue().Token);
                     result.Children.Add(val);
-                    
+
                     if (IsNextTokenDiscard(TokenKind.Assign))
                     {
-                        Statement expr = ParseExpression();
+                        Statement expr = ParseExpression(context);
                         val.Children.Add(expr);
-                        Statement optimized = Optimize(expr);
-                        if (expr.Token.Kind == TokenKind.Constant && (expr.Kind != Statement.StatementKind.ExprConstant ||
-                             expr.Constant.kind == ExpressionConstant.Kind.Constant || expr.Constant.kind == ExpressionConstant.Kind.Number))
-                        {
-                            incrementingValue = (int)optimized.Constant.valueNumber;
-                        } else
-                        {
-                            ReportCodeError("Enum value must be an integer constant value.", expr.Token, true);
-                        }
                     }
 
                     if (values.ContainsKey(val.Text))
                     {
-                        ReportCodeError("Duplicate enum value found.", val.Token, true);
+                        ReportCodeError("Duplicate enum entry found.", val.Token, true);
                     }
 
-                    values[val.Text] = incrementingValue++;
+                    values[val.Text] = null;
 
                     if (!IsNextTokenDiscard(TokenKind.Comma))
                     {
@@ -889,7 +983,131 @@ namespace UndertaleModLib.Compiler
                     }
                 }
 
-                return result;*/
+                return result;
+            }
+
+            private static void ResolveEnumDeclarations(CompileContext context)
+            {
+                // First pass on all enums
+                context.FirstPassResolvingEnums = true;
+                foreach ((string Name, Statement Statement) enumDecl in context.EnumStatements)
+                {
+                    Dictionary<string, long?> values = context.Enums[enumDecl.Name];
+
+                    // Populate values (with null, if unknown in this first pass)
+                    long? incrementingValue = 0;
+                    foreach (Statement entry in enumDecl.Statement.Children)
+                    {
+                        if (entry.Children.Count == 1)
+                        {
+                            // Read expression, and if it's constant, assign it
+                            Statement value = entry.Children[0] = Optimize(context, entry.Children[0]);
+                            if (value.Kind == Statement.StatementKind.ExprConstant)
+                            {
+                                ExpressionConstant constant = value.Constant;
+                                if (constant == null)
+                                {
+                                    ReportCodeError("Invalid constant in enum", value.Token, false);
+                                    incrementingValue = null;
+                                }
+                                else
+                                {
+                                    if (constant.kind == ExpressionConstant.Kind.Number)
+                                    {
+                                        incrementingValue = (long)constant.valueNumber;
+                                    }
+                                    else if (constant.kind == ExpressionConstant.Kind.Int64)
+                                    {
+                                        incrementingValue = constant.valueInt64;
+                                    }
+                                    else
+                                    {
+                                        incrementingValue = null;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                incrementingValue = null;
+                            }
+                        }
+
+                        // Assign value to this entry
+                        values[entry.Token.Content] = incrementingValue;
+
+                        // Increment to next value (if known)
+                        if (incrementingValue is not null)
+                        {
+                            incrementingValue++;
+                        }
+                    }
+                }
+                context.FirstPassResolvingEnums = false;
+
+                // Second pass on all enums
+                foreach ((string Name, Statement Statement) enumDecl in context.EnumStatements)
+                {
+                    Dictionary<string, long?> values = context.Enums[enumDecl.Name];
+
+                    // Populate remaining values not covered in first pass
+                    long? incrementingValue = 0;
+                    foreach (Statement entry in enumDecl.Statement.Children)
+                    {
+                        long? fromFirstPass = values[entry.Token.Content];
+                        if (fromFirstPass is not null)
+                        {
+                            incrementingValue = fromFirstPass + 1;
+                            continue;
+                        }
+
+                        if (entry.Children.Count == 1)
+                        {
+                            // Read expression, and make sure it's constant this time
+                            Statement value = entry.Children[0] = Optimize(context, entry.Children[0]);
+                            if (value.Kind != Statement.StatementKind.ExprConstant)
+                            {
+                                ReportCodeError($"Enum entry \"{enumDecl.Name}.{entry.Token.Content}\" failed to resolve to a constant", false);
+                                continue;
+                            }
+                            else
+                            {
+                                ExpressionConstant constant = value.Constant;
+                                if (constant == null)
+                                {
+                                    ReportCodeError("Invalid constant in enum", value.Token, false);
+                                    incrementingValue = null;
+                                }
+                                else
+                                {
+                                    if (constant.kind == ExpressionConstant.Kind.Number)
+                                    {
+                                        incrementingValue = (long)constant.valueNumber;
+                                    }
+                                    else if (constant.kind == ExpressionConstant.Kind.Int64)
+                                    {
+                                        incrementingValue = constant.valueInt64;
+                                    }
+                                    else
+                                    {
+                                        incrementingValue = null;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (incrementingValue is null)
+                        {
+                            ReportCodeError($"Failed to resolve enum entry value \"{enumDecl.Name}.{entry.Token.Content}\"", false);
+                            incrementingValue = 0;
+                        }
+
+                        // Assign value to this entry
+                        values[entry.Token.Content] = incrementingValue;
+
+                        // Increment to next value
+                        incrementingValue++;
+                    }
+                }
             }
 
             private static Statement ParseDoUntil(CompileContext context)
@@ -992,6 +1210,10 @@ namespace UndertaleModLib.Compiler
                     Statement variable = new Statement(var) { Kind = Statement.StatementKind.ExprSingleVariable };
                     result.Children.Add(variable);
                     context.LocalVars[var.Text] = var.Text;
+                    if (context.FunctionParseStack.Count > 0)
+                    {
+                        context.FunctionParseStack.Peek().LocalVars.Add(var.Text);
+                    }
 
                     // Read assignments if necessary
                     if (remainingStageOne.Count > 0 && IsNextToken(TokenKind.Assign))
@@ -1348,7 +1570,7 @@ namespace UndertaleModLib.Compiler
                     // Parse chain variable reference
                     Statement result = new Statement(Statement.StatementKind.ExprVariableRef, remainingStageOne.Peek().Token);
                     bool combine = false;
-                    if (left.Kind != Statement.StatementKind.ExprConstant)
+                    if (left.Kind != Statement.StatementKind.ExprConstant || left.Constant.kind == ExpressionConstant.Kind.Reference /* TODO: will this ever change? */)
                         result.Children.Add(left);
                     else
                         combine = true;
@@ -1488,6 +1710,8 @@ namespace UndertaleModLib.Compiler
                         return ParseFunctionCall(context, true);
                     case TokenKind.KeywordFunction:
                         return ParseFunction(context);
+                    case TokenKind.KeywordNew:
+                        return ParseNew(context, true);
                     case TokenKind.ProcVariable:
                         {
                             Statement variableRef = ParseSingleVar(context);
@@ -1503,8 +1727,9 @@ namespace UndertaleModLib.Compiler
                             }
                         }
                     case TokenKind.OpenBlock:
-                        // todo? maybe?
-                        ReportCodeError("Unsupported syntax.", remainingStageOne.Dequeue().Token, true);
+                        if (context.Data.IsVersionAtLeast(2, 3))
+                            return ParseStructLiteral(context);
+                        ReportCodeError("Cannot use struct literal prior to GMS2.3.", remainingStageOne.Dequeue().Token, true);
                         break;
                     case TokenKind.Increment:
                     case TokenKind.Decrement:
@@ -1562,6 +1787,140 @@ namespace UndertaleModLib.Compiler
                 return result;
             }
 
+            // Example: {key: 123, key2: "asd"}
+            private static Statement ParseStructLiteral(CompileContext context)
+            {
+                Statement result = new Statement(Statement.StatementKind.ExprStruct,
+                                                EnsureTokenKind(TokenKind.OpenBlock)?.Token);
+
+                Statement nextStatement = remainingStageOne.Peek();
+                Statement procVar;
+
+                // Non-constants are passed to the function through arguments
+                // I call this leaking the variable
+                // (because the values "leak" out of the struct function in the assembly)
+                Statement leakedVars = new Statement();
+                result.Children.Add(leakedVars);
+
+                string varName;
+                // Check if we can reuse any struct functions
+                if (usableStructNames.Count > 0)
+                    varName = usableStructNames.Dequeue();
+                else
+                {
+                    // Create a new function
+                    int i = context.Data.Code.Count;
+                    do
+                    {
+                        varName = "___struct___" + context.OriginalCode.Name.Content +
+                            "__" + uuidCounter++.ToString();
+                        i++;
+                    } while (context.Data.GlobalFunctions.NameToFunction.ContainsKey(varName));
+                }
+
+                int ID = GetVariableID(context, varName, out _);
+                if (ID >= 0 && ID < 100000)
+                    procVar = new Statement(TokenKind.ProcVariable, nextStatement.Token, -1); // becomes self anyway?
+                else
+                    procVar = new Statement(TokenKind.ProcVariable, nextStatement.Token, ID);
+
+                Statement function = new Statement(Statement.StatementKind.FunctionDef, procVar.Token);
+                function.Text = varName;
+                Statement args = new Statement();
+                Statement destination = new Statement(Statement.StatementKind.ExprFuncName, result.Token)
+                    { ID = procVar.ID, Text = varName };
+                Statement body = new Statement();
+
+                function.Children.Add(new Statement(Statement.StatementKind.Token, new Lexer.Token(TokenKind.KeywordConstructor))); // ensure it's a constructor function
+                function.Children.Add(args);
+                function.Children.Add(body);
+
+                context.FunctionParseInfo[function] = new();
+
+                Statement functionAssign = new Statement(Statement.StatementKind.FunctionDefAssign);
+                functionAssign.Children.Add(destination);
+                functionAssign.Children.Add(function);
+
+                result.Children.Add(functionAssign);
+
+                // this is a total mess
+                int argumentsID = context.GetAssetIndexByName("argument");
+                Lexer.Token varToken = new Lexer.Token(TokenKind.ProcVariable);
+                varToken.Content = "argument";
+                Statement argumentsVar = new Statement(TokenKind.ProcVariable, varToken);
+                argumentsVar.ID = argumentsID;
+
+                while (!hasError && remainingStageOne.Count > 0 && !IsNextToken(TokenKind.CloseBlock, TokenKind.EOF))
+                {
+                    if (!IsNextToken(TokenKind.ProcVariable))
+                    {
+                        if (remainingStageOne.Any())
+                            ReportCodeError("Expected variable name in inline struct.", remainingStageOne.Peek().Token, true);
+                        else
+                            ReportCodeError("Malformed struct literal.", false);
+                        break;
+                    }
+                    Statement variable = remainingStageOne.Dequeue();
+                    if (context.BuiltInList.Functions.ContainsKey(variable.Text) || context.scripts.Contains(variable.Text))
+                        ReportCodeError(string.Format("Struct variable name {0} cannot be used; a function or script already has the name.", variable.Text), variable.Token, false);
+                    if (context.assetIds.ContainsKey(variable.Text))
+                        ReportCodeError(string.Format("Struct variable name {0} cannot be used; a resource already has the name.", variable.Text), variable.Token, false);
+                    if (!IsNextTokenDiscard(TokenKind.Colon))
+                    {
+                        if (remainingStageOne.Any())
+                            ReportCodeError("Expected ':' after key in inline struct.", remainingStageOne.Peek().Token, true);
+                        else
+                            ReportCodeError("Malformed struct literal.", false);
+                        break;
+                    }
+
+                    Statement a = new Statement(Statement.StatementKind.Assign, variable.Token);
+                    body.Children.Add(a);
+
+                    Statement left = new Statement(variable) { Kind = Statement.StatementKind.ExprSingleVariable };
+                    left.ID = variable.ID;
+
+                    a.Children.Add(left);
+                    a.Children.Add(new Statement(TokenKind.Assign, a.Token));
+
+                    Statement expr = Optimize(context, ParseExpression(context));
+                    if (expr.Kind == Statement.StatementKind.ExprConstant)
+                    {
+                        // Constants can be inlined
+                        a.Children.Add(expr);
+                    }
+                    else
+                    {
+                        Statement argumentsAccess =
+                            new Statement(argumentsVar) { Kind = Statement.StatementKind.ExprSingleVariable };
+                        argumentsAccess.ID = argumentsVar.ID;
+                        Statement index = new Statement(Statement.StatementKind.ExprConstant, expr.Token);
+                        index.Constant = new ExpressionConstant((double)leakedVars.Children.Count);
+                        argumentsAccess.Children.Add(index);
+
+                        leakedVars.Children.Add(expr);
+                        a.Children.Add(argumentsAccess);
+                    }
+
+                    if (!IsNextTokenDiscard(TokenKind.Comma))
+                    {
+                        if (!IsNextToken(TokenKind.CloseBlock))
+                        {
+                            if (remainingStageOne.Any())
+                                ReportCodeError("Expected ',' or '}' after value in inline struct.", remainingStageOne.Peek().Token, true);
+                            else
+                                ReportCodeError("Malformed struct literal.", false);
+                            break;
+                        }
+                    }
+                }
+
+                if (EnsureTokenKind(TokenKind.CloseBlock) == null)
+                    return null;
+
+                return result;
+            }
+
             public static Statement Optimize(CompileContext context, Statement s)
             {
                 // Process children (if we can)
@@ -1572,6 +1931,18 @@ namespace UndertaleModLib.Compiler
                     {
                         // There's nothing to optimize here, don't waste time checking
                         return s;
+                    }
+                    else if (s.Kind == Statement.StatementKind.FunctionDef)
+                    {
+                        // Maintain a reference for function declarations
+                        result = s;
+                        for (int i = 0; i < result.Children.Count; i++)
+                        {
+                            if (result.Children[i] == null)
+                                result.Children[i] = new Statement(Statement.StatementKind.Discard);
+                            else
+                                result.Children[i] = Optimize(context, result.Children[i]);
+                        }
                     }
                     else
                     {
@@ -1584,7 +1955,7 @@ namespace UndertaleModLib.Compiler
                                 result.Children[i] = Optimize(context, result.Children[i]);
                         }
                     }
-                }
+                } 
                 else
                     result = new Statement(s);
                 Statement child0 = result.Children[0];
@@ -1910,6 +2281,15 @@ namespace UndertaleModLib.Compiler
                         }
                         break;
                     case Statement.StatementKind.ExprVariableRef:
+                        // Optimize enums, if detected
+                        if (result.Children.Count == 2 &&
+                            result.Children[0].Kind == Statement.StatementKind.ExprSingleVariable &&
+                            result.Children[1].Kind == Statement.StatementKind.ExprSingleVariable)
+                        {
+                            result = OptimizeEnumConstant(context, result, result.Children[0], result.Children[1]);
+                            break;
+                        }
+
                         for (int i = 0; i < result.Children.Count; i++)
                         {
                             if (result.Children[i].Children.Count != 2 || result.Children[i].Children[0].Kind != Statement.StatementKind.Token)
@@ -1947,7 +2327,38 @@ namespace UndertaleModLib.Compiler
                             ReportCodeError("Case argument must be constant.", result.Token, false);
                         }
                         break;
-                        // todo: parse enum references
+                    case Statement.StatementKind.FunctionDef:
+                        {
+                            // Produce default argument assignments, if they exist
+                            int childrenOffset = result.Children.Count - 2;
+                            Statement args = result.Children[childrenOffset], body = result.Children[childrenOffset + 1];
+                            for (int i = args.Children.Count - 2; i >= 0; i -= 2)
+                            {
+                                Statement defaultValue = args.Children[i + 1];
+                                if (defaultValue is not null && defaultValue.Kind != Statement.StatementKind.Discard)
+                                {
+                                    Statement ifStmt = new(Statement.StatementKind.If);
+                                    Statement compare = new(Statement.StatementKind.ExprBinaryOp, new Lexer.Token(TokenKind.CompareEqual));
+                                    Statement argVariable = new(Statement.StatementKind.ExprSingleVariable, new Lexer.Token(TokenKind.ProcVariable, $"argument{i / 2}"));
+                                    Statement undefinedVariable = new(Statement.StatementKind.ExprSingleVariable, new Lexer.Token(TokenKind.ProcVariable, "undefined"));
+                                    compare.Children.Add(argVariable);
+                                    compare.Children.Add(undefinedVariable);
+                                    ifStmt.Children.Add(compare);
+                                    Statement assign = new(Statement.StatementKind.Assign);
+                                    assign.Children.Add(argVariable);
+                                    assign.Children.Add(new Statement(Statement.StatementKind.Assign, new Lexer.Token(TokenKind.Assign)));
+                                    assign.Children.Add(defaultValue);
+                                    ifStmt.Children.Add(assign);
+                                    body.Children.Insert(0, ifStmt);
+                                    args.Children.RemoveAt(i + 1);
+                                }
+                                else
+                                {
+                                    args.Children.RemoveAt(i + 1);
+                                }
+                            }
+                        }
+                        break;
                 }
                 return result;
             }
@@ -1971,6 +2382,30 @@ namespace UndertaleModLib.Compiler
                         ReportCodeError("Accessor has incorrect number of arguments", s.Children[0].Token, false);
                 }
                 return ai;
+            }
+
+            private static Statement OptimizeEnumConstant(CompileContext context, Statement original, Statement enumName, Statement enumEntry)
+            {
+                if (context.Enums.TryGetValue(enumName.Token.Content, out Dictionary<string, long?> values))
+                {
+                    if (values.TryGetValue(enumEntry.Token.Content, out long? value) && value is not null)
+                    {
+                        Statement newConstant = new(Statement.StatementKind.ExprConstant)
+                        {
+                            Constant = new ExpressionConstant((long)value)
+                        };
+                        return newConstant;
+                    }
+                    else
+                    {
+                        if (!context.FirstPassResolvingEnums)
+                        {
+                            ReportCodeError($"Failed to resolve enum entry \"{enumName.Token.Content}.{enumEntry.Token.Content}\"", false);
+                        }
+                    }
+                }
+
+                return original;
             }
 
             // This is probably the messiest function. I can't think of any easy ways to clean it right now though.
@@ -2714,13 +3149,27 @@ namespace UndertaleModLib.Compiler
                 int index = context.GetAssetIndexByName(identifier);
                 if (index == -1)
                 {
-                    if (context.BuiltInList.Constants.TryGetValue(identifier, out double val))
+                    if (identifier == "true")
+                    {
+                        constant.isBool = context.BooleanTypeEnabled;
+                        constant.valueNumber = 1.0;
+                        return true;
+                    }
+                    else if (identifier == "false")
+                    {
+                        constant.isBool = context.BooleanTypeEnabled;
+                        constant.valueNumber = 0.0;
+                        return true;
+                    }
+                    else if (context.BuiltInList.Constants.TryGetValue(identifier, out double val))
                     {
                         constant.valueNumber = val;
                         return true;
                     }
                     return false;
                 }
+                if (context.TypedAssetRefs)
+                    constant.kind = ExpressionConstant.Kind.Reference;
                 constant.valueNumber = (double)index;
                 return true;
             }

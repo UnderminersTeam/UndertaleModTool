@@ -10,6 +10,7 @@
         xmlns:undertalelib="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
         xmlns:scol="clr-namespace:System.Collections;assembly=mscorlib"
         xmlns:cmod="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+        xmlns:gif ="http://wpfanimatedgif.codeplex.com"
         mc:Ignorable="d"
         Height="450" Width="800" Loaded="Window_Loaded"
         AllowDrop="True" Drop="Window_Drop">
@@ -26,10 +27,12 @@
         <local:FilteredViewConverter x:Key="FilteredViewConverter" Filter="{Binding Text, Source={x:Reference SearchBox}, UpdateSourceTrigger=PropertyChanged}"/>
         <local:NullToVisibilityConverter x:Key="VisibleIfNotNull"  nullValue="Collapsed" notNullValue="Visible"/>
         <local:CompareNumbersConverter x:Key="CompareNumbersConverter"/>
-        <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/> <!-- (built-in converter) -->
+        <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
+        <!-- (built-in converter) -->
         <local:TabTitleConverter x:Key="TabTitleConverter"/>
         <local:StringTitleConverter x:Key="StringTitleConverter"/>
         <local:ForwardButtonEnabledConverter x:Key="ForwardButtonEnabledConverter"/>
+        <local:UndertaleCachedImageLoader x:Key="UndertaleCachedImageLoader"/>
     </Window.Resources>
     <Window.CommandBindings>
         <CommandBinding Command="New" Executed="Command_New" />
@@ -49,6 +52,7 @@
         <CommandBinding Command="{x:Static local:MainWindow.SwitchToPrevTabCommand}" Executed="Command_SwitchToPrevTab" />
         <CommandBinding Command="NavigationCommands.BrowseBack" Executed="Command_GoBack" />
         <CommandBinding Command="NavigationCommands.BrowseForward" Executed="Command_GoForward" />
+        <CommandBinding Command="{x:Static local:MainWindow.SearchInCodeCommand}" Executed="Command_SearchInCode"/>
     </Window.CommandBindings>
     <Window.InputBindings>
         <KeyBinding Modifiers="Control" Key="N" Command="New"/>
@@ -65,11 +69,16 @@
         <KeyBinding Gesture="Ctrl+Shift+T" Command="{x:Static local:MainWindow.RestoreClosedTabCommand}"/>
         <KeyBinding Gesture="Ctrl+Tab" Command="{x:Static local:MainWindow.SwitchToNextTabCommand}"/>
         <KeyBinding Gesture="Ctrl+Shift+Tab" Command="{x:Static local:MainWindow.SwitchToPrevTabCommand}"/>
+        <KeyBinding Gesture="Ctrl+Shift+F" Command="{x:Static local:MainWindow.SearchInCodeCommand}" />
     </Window.InputBindings>
     <Grid>
+        <Image Margin="0,0,14,29" gif:ImageBehavior.AnimatedSource="/Resources/spr_flowey_riseanim.gif"  Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Bottom" Cursor="Hand" x:Name="Flowey"/>
+        <Image Margin="0,0,14,29" gif:ImageBehavior.AnimatedSource="/Resources/spr_flowey_unriseanim.gif"  Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Bottom" Cursor="Hand" x:Name="FloweyLeave" Opacity="0"/>
+        <Image Margin="0,0,0,70" Source="/Resources/spr_bubble_message.png" Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Bottom" Cursor="Hand" x:Name="FloweyBubble" Opacity="0"/>
         <DockPanel>
             <Menu DockPanel.Dock="Top"
                   Foreground="{DynamicResource {x:Static SystemColors.MenuTextBrushKey}}"
+                  FontFamily="Comic Sans MS"
                   Background="{DynamicResource {x:Static SystemColors.MenuBrushKey}}">
                 <local:MenuItemDark Header="_File">
                     <MenuItem Header="_New" Command="New" InputGestureText="Ctrl+N"/>
@@ -90,7 +99,7 @@
                             </Style>
                         </MenuItem.Style>
                     </MenuItem>
-                    <MenuItem Name="RunGMSDebuggerItem" Header="Run game under GMS _debugger" Command="PrintPreview" InputGestureText="Shift+F5">
+                    <MenuItem x:Name="RunGMSDebuggerItem" Header="Run game under GMS _debugger" Command="PrintPreview" InputGestureText="Shift+F5">
                         <MenuItem.Style>
                             <Style TargetType="{x:Type MenuItem}">
                                 <Setter Property="IsEnabled" Value="{Binding CanSave}"/>
@@ -115,25 +124,19 @@
                     <MenuItem Header="(...loading...)" IsEnabled="False"/>
                 </local:MenuItemDark>
                 <local:MenuItemDark Header="_Find">
-                    <MenuItem.Resources>
-                        <Style TargetType="MenuItem">
+                    <local:MenuItemDark.Resources>
+                        <Style TargetType="{x:Type MenuItem}">
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding Data, Mode=OneWay}" Value="{x:Null}">
                                     <Setter Property="IsEnabled" Value="False"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </MenuItem.Resources>
+                    </local:MenuItemDark.Resources>
+
+                    <MenuItem Header="_Search in code" Command="{x:Static local:MainWindow.SearchInCodeCommand}"  InputGestureText="Ctrl+Shift+F"></MenuItem>
 
                     <MenuItem Header="Find unreferenced _assets" Name="FindUnreferencedAssetsItem" Click="MenuItem_FindUnreferencedAssets_Click"/>
-                    <Separator/>
-                    <MenuItem Header="(script links)" FontStyle="Italic" IsEnabled="False"/>
-                    <MenuItem Header="Search in _code (&quot;Search.csx&quot;)"
-                              Click="MenuItem_RunBuiltinScript_Item_Click" CommandParameter="Scripts\Builtin Scripts\Search.csx"/>
-                    <MenuItem Header="Search in _assembly (&quot;SearchASM.csx&quot;)"
-                              Click="MenuItem_RunBuiltinScript_Item_Click" CommandParameter="Scripts\Builtin Scripts\SearchASM.csx"/>
-                    <MenuItem Header="Search in _specific code (&quot;SearchLimited.csx&quot;)"
-                              Click="MenuItem_RunBuiltinScript_Item_Click" CommandParameter="Scripts\Builtin Scripts\SearchLimited.csx"/>
                 </local:MenuItemDark>
                 <local:MenuItemDark Header="_Help">
                     <MenuItem Header="_GitHub" Click="MenuItem_GitHub_Click"/>
@@ -141,10 +144,7 @@
                 </local:MenuItemDark>
             </Menu>
             <Grid DockPanel.Dock="Bottom">
-                <local:TextBoxDark x:Name="CommandBox" AcceptsReturn="True" PreviewKeyDown="CommandBox_PreviewKeyDown" Margin="0,0,35,0"/>
-                <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" VerticalContentAlignment="Top" Name="ObjectLabel"
-                       ToolTip="This is an ID (index) of the currently open object. It starts from 0."
-                       ToolTipService.InitialShowDelay="200"/>
+                <local:TextBoxDark x:Name="CommandBox" AcceptsReturn="True" PreviewKeyDown="CommandBox_PreviewKeyDown" Margin="0,0,0,0"/>
             </Grid>
             <Grid>
                 <Grid.RowDefinitions>
@@ -163,18 +163,18 @@
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Margin="0,0,0,5" Orientation="Horizontal">
                         <local:ButtonDark ToolTip="Back" Margin="0,0,2,0" x:Name="BackButton" Click="BackButton_Click">
-                            <Button.Style>
-                                <Style TargetType="Button">
+                            <local:ButtonDark.Style>
+                                <Style TargetType="{x:Type Button}">
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding CurrentTab.HistoryPosition}" Value="0">
                                             <Setter Property="IsEnabled" Value="False" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </Button.Style>
-                            <Image Name="BackButtonImage">
+                            </local:ButtonDark.Style>
+                            <Image x:Name="BackButtonImage">
                                 <Image.Style>
-                                    <Style TargetType="Image">
+                                    <Style TargetType="{x:Type Image}">
                                         <Style.Triggers>
                                             <Trigger Property="IsEnabled" Value="False">
                                                 <Setter Property="Opacity" Value="0.2" />
@@ -191,18 +191,18 @@
                             </Image>
                         </local:ButtonDark>
                         <local:ButtonDark ToolTip="Forward" x:Name="ForwardButton" Click="ForwardButton_Click">
-                            <Button.IsEnabled>
+                            <local:ButtonDark.IsEnabled>
                                 <MultiBinding Converter="{StaticResource ForwardButtonEnabledConverter}" Mode="OneWay">
                                     <Binding Path="CurrentTab.HistoryPosition" Mode="OneWay"/>
                                     <Binding Path="CurrentTab.History.Count" Mode="OneWay"/>
                                 </MultiBinding>
-                            </Button.IsEnabled>
-                            <Image Name="ForwardButtonImage" RenderTransformOrigin="0.5,0.5">
+                            </local:ButtonDark.IsEnabled>
+                            <Image x:Name="ForwardButtonImage" RenderTransformOrigin="0.5,0.5">
                                 <Image.RenderTransform>
                                     <ScaleTransform ScaleX="-1" ScaleY="-1"/>
                                 </Image.RenderTransform>
                                 <Image.Style>
-                                    <Style TargetType="Image">
+                                    <Style TargetType="{x:Type Image}">
                                         <Style.Triggers>
                                             <Trigger Property="IsEnabled" Value="False">
                                                 <Setter Property="Opacity" Value="0.2" />
@@ -222,8 +222,8 @@
 
                     <local:TextBoxDark Grid.Row="1" x:Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged">
                         <!-- Source - https://stackoverflow.com/a/7433840/12136394 -->
-                        <TextBox.Style>
-                            <Style TargetType="TextBox">
+                        <local:TextBoxDark.Style>
+                            <Style TargetType="{x:Type TextBox}">
                                 <Style.Resources>
                                     <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
                                         <VisualBrush.Visual>
@@ -243,15 +243,15 @@
                                     </Trigger>
                                 </Style.Triggers>
                             </Style>
-                        </TextBox.Style>
+                        </local:TextBoxDark.Style>
                     </local:TextBoxDark>
                 </Grid>
-                <TreeView Grid.Column="0" Grid.Row="1" Name="MainTree" Margin="5" DataContext="{Binding Data}" AllowDrop="True"
+                <TreeView Grid.Column="0" Grid.Row="1" x:Name="MainTree" Margin="5" DataContext="{Binding Data}" AllowDrop="True"
                           SelectedItemChanged="TreeView_SelectedItemChanged"
                           MouseDoubleClick="MainTree_MouseDoubleClick" PreviewMouseRightButtonDown="MainTree_PreviewMouseRightButtonDown" MouseDown="MainTree_MouseDown"
                           KeyUp="MainTree_KeyUp" KeyDown="MainTree_KeyDown"
-                          VirtualizingStackPanel.IsVirtualizing="True"
-                          VirtualizingStackPanel.VirtualizationMode="Recycling">
+                          VirtualizingPanel.IsVirtualizing="True"
+                          VirtualizingPanel.VirtualizationMode="Recycling">
                     <TreeView.Resources>
                         <local:ContextMenuDark x:Key="AddMenu">
                             <MenuItem Header="Add" Click="MenuItem_Add_Click"/>
@@ -267,23 +267,23 @@
                         </local:ContextMenuDark>
 
                         <Style TargetType="{x:Type TreeViewItem}">
-                            <EventSetter Event="TreeViewItem.DragOver" Handler="TreeView_DragOver"/>
-                            <EventSetter Event="TreeViewItem.Drop" Handler="TreeView_Drop"/>
-                            <EventSetter Event="TreeViewItem.MouseMove" Handler="TreeView_MouseMove"/>
+                            <EventSetter Event="UIElement.DragOver" Handler="TreeView_DragOver"/>
+                            <EventSetter Event="UIElement.Drop" Handler="TreeView_Drop"/>
+                            <EventSetter Event="UIElement.MouseMove" Handler="TreeView_MouseMove"/>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding ., Converter={StaticResource ImplementsInterfaceConverter}, ConverterParameter={x:Type undertalelib:UndertaleResource}}" Value="True">
+                                <DataTrigger Binding="{Binding ., ConverterParameter={x:Type undertalelib:UndertaleResource}, Converter={StaticResource ImplementsInterfaceConverter}}" Value="True">
                                     <Setter Property="ContextMenu" Value="{StaticResource UndertaleResourceMenu}"/>
                                 </DataTrigger>
-                                <DataTrigger Binding="{Binding ItemsSource, RelativeSource={RelativeSource Self}, Converter={StaticResource ImplementsInterfaceConverter}, ConverterParameter={x:Type scol:IList}}" Value="True">
+                                <DataTrigger Binding="{Binding ItemsSource, ConverterParameter={x:Type scol:IList}, Converter={StaticResource ImplementsInterfaceConverter}, RelativeSource={RelativeSource Mode=Self}}" Value="True">
                                     <Setter Property="ContextMenu" Value="{StaticResource AddMenu}"/>
                                 </DataTrigger>
-                                <DataTrigger Binding="{Binding ItemsSource, RelativeSource={RelativeSource Self}, Converter={StaticResource ImplementsInterfaceConverter}, ConverterParameter={x:Type cmod:ICollectionView}}" Value="True">
+                                <DataTrigger Binding="{Binding ItemsSource, ConverterParameter={x:Type cmod:ICollectionView}, Converter={StaticResource ImplementsInterfaceConverter}, RelativeSource={RelativeSource Mode=Self}}" Value="True">
                                     <Setter Property="ContextMenu" Value="{StaticResource AddMenu}"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </TreeView.Resources>
-                    <TreeViewItem Header="Data" IsExpanded="True">
+                    <TreeViewItem Header="Data" IsExpanded="True" FontFamily="Comic Sans MS">
                         <TreeViewItem Header="General info" Visibility="{Binding GeneralInfo, Converter={StaticResource VisibleIfNotNull}}" Tag="StandaloneTab">
                             <TreeViewItem.Style>
                                 <Style TargetType="{x:Type TreeViewItem}">
@@ -316,11 +316,19 @@
                         <TreeViewItem Header="Sprites" ItemsSource="{Binding Sprites, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Sprites, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleSprite}">
-                                    <TextBlock Text="{Binding Name.Content}" />
+                                    <Grid>
+                                        <TextBlock Text="{Binding Name.Content}" Margin="22,0,0,0"/>
+                                        <Image
+                                            Width="20" 
+                                            Height="20"
+                                            HorizontalAlignment="Left"
+                                            Source="{Binding Textures[0].Texture, Converter={StaticResource UndertaleCachedImageLoader}, Mode=OneTime}">
+                                        </Image>
+                                    </Grid>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Name="BackgroundsItemsList" Header="Backgrounds &amp; Tile sets" ItemsSource="{Binding Backgrounds, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Backgrounds, Converter={StaticResource VisibleIfNotNull}}">
+                        <TreeViewItem x:Name="BackgroundsItemsList" Header="Backgrounds &amp; Tile sets" ItemsSource="{Binding Backgrounds, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Backgrounds, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleBackground}">
                                     <TextBlock Text="{Binding Name.Content}" />
@@ -365,7 +373,16 @@
                         <TreeViewItem Header="Game objects" ItemsSource="{Binding GameObjects, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding GameObjects, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleGameObject}">
-                                    <TextBlock Text="{Binding Name.Content}" />
+                                    <Grid>
+                                        <TextBlock Text="{Binding Name.Content}" Margin="22,0,0,0"/>
+                                        <Image
+                                            Width="20"
+                                            Height="20"
+                                            HorizontalAlignment="Left"
+                                            Source="{Binding Sprite.Textures[0].Texture, Converter={StaticResource UndertaleCachedImageLoader}, Mode=OneTime}"
+                                            >
+                                        </Image>
+                                    </Grid>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
@@ -386,22 +403,25 @@
                         <TreeViewItem Header="Texture page items" ItemsSource="{Binding TexturePageItems, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding TexturePageItems, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleTexturePageItem}">
-                                    <TextBlock Text="{Binding .}" />
+                                    <Grid>
+                                        <TextBlock Text="{Binding .}" Margin="22,0,0,0"/>
+                                        <Viewbox Stretch="Uniform" StretchDirection="DownOnly" Width="20" Height="20" HorizontalAlignment="Left">
+                                            <Border>
+                                                <local:UndertaleTexturePageItemDisplay x:Name="ItemDisplay" DisplayBorder="False"/>
+                                            </Border>
+                                        </Viewbox>
+                                    </Grid>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
-                        <TreeViewItem Name="CodeItemsList" Header="Code" ItemsSource="{Binding Code, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Code, Converter={StaticResource VisibleIfNotNull}}">
+                        <TreeViewItem x:Name="CodeItemsList" Header="Code" ItemsSource="{Binding Code, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Code, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemContainerStyle>
                                 <Style TargetType="{x:Type TreeViewItem}">
                                     <Setter Property="ContextMenu" Value="{StaticResource UndertaleResourceMenu}"/>
                                     <Setter Property="Foreground" Value="Gray"/>
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Path=ParentEntry}" Value="{x:Null}">
-                                            <Setter Property="Foreground">
-                                                <Setter.Value>
-                                                    <DynamicResource ResourceKey="{x:Static SystemColors.ControlTextBrushKey}"/>
-                                                </Setter.Value>
-                                            </Setter>
+                                        <DataTrigger Binding="{Binding ParentEntry}" Value="{x:Null}">
+                                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -436,7 +456,7 @@
                         <TreeViewItem Header="Strings" ItemsSource="{Binding Strings, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Strings, Converter={StaticResource VisibleIfNotNull}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleString}">
-                                    <TextBlock Text="{Binding Content, Mode=OneWay, Converter={StaticResource StringTitleConverter}}" />
+                                    <TextBlock Text="{Binding Content, Converter={StaticResource StringTitleConverter}, Mode=OneWay}" />
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
                         </TreeViewItem>
@@ -485,32 +505,32 @@
                     </TreeViewItem>
                 </TreeView>
 
-                <GridSplitter Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Stretch" ShowsPreview="True" Width="3"/>
+                <GridSplitter Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Stretch" ShowsPreview="True" Width="3" Background="#FFC7C7C7" Opacity="0.25"/>
 
                 <Grid Grid.Column="2" Grid.RowSpan="2">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    
-                    <Grid Grid.Row="0" Name="TabsGrid" UseLayoutRounding="True" Margin="0,0,0,3">
+
+                    <Grid Grid.Row="0" x:Name="TabsGrid" UseLayoutRounding="True" Margin="0,0,0,3">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <ScrollViewer Grid.Column="0" Name="TabScrollViewer" Height="26"
+                        <ScrollViewer Grid.Column="0" x:Name="TabScrollViewer" Height="26"
                                       HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"
                                       PreviewMouseWheel="TabScrollViewer_PreviewMouseWheel">
                             <local:TabControlDark x:Name="TabController" Height="22" TabStripPlacement="Top" ItemsSource="{Binding Tabs, Mode=OneWay}" SelectedIndex="{Binding CurrentTabIndex}"
                                                   SelectionChanged="TabController_SelectionChanged">
-                                <TabControl.Resources>
+                                <local:TabControlDark.Resources>
                                     <local:ContextMenuDark x:Key="TabMenu">
                                         <MenuItem Header="Close" Click="CloseTabMenuItem_Click" InputGestureText="Ctrl+W"/>
                                         <MenuItem Header="Close other tabs" Click="CloseOtherTabsMenuItem_Click">
                                             <MenuItem.Style>
-                                                <Style TargetType="MenuItem">
+                                                <Style TargetType="{x:Type MenuItem}">
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Tabs.Count, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:MainWindow}, Mode=OneWay}" Value="1">
+                                                        <DataTrigger Binding="{Binding Tabs.Count, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}, Mode=FindAncestor}}" Value="1">
                                                             <Setter Property="IsEnabled" Value="False"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
@@ -519,23 +539,23 @@
                                         </MenuItem>
                                         <MenuItem Header="Close all tabs" Command="{x:Static local:MainWindow.CloseAllTabsCommand}" InputGestureText="Ctrl+Shift+W"/>
                                     </local:ContextMenuDark>
-                                </TabControl.Resources>
-                                <TabControl.ItemContainerStyle>
-                                    <Style TargetType="TabItem">
+                                </local:TabControlDark.Resources>
+                                <local:TabControlDark.ItemContainerStyle>
+                                    <Style TargetType="{x:Type TabItem}">
                                         <Setter Property="TabIndex" Value="{Binding TabIndex, Mode=OneWay}"/>
                                         <Setter Property="ContextMenu" Value="{StaticResource TabMenu}"/>
                                         <Setter Property="AllowDrop" Value="True"/>
-                                        <EventSetter Event="MouseUp" Handler="TabItem_MouseUp"/>
-                                        <EventSetter Event="PreviewMouseMove" Handler="TabItem_PreviewMouseMove"/>
-                                        <EventSetter Event="Drop" Handler="TabItem_Drop"/>
+                                        <EventSetter Event="UIElement.MouseUp" Handler="TabItem_MouseUp"/>
+                                        <EventSetter Event="UIElement.PreviewMouseMove" Handler="TabItem_PreviewMouseMove"/>
+                                        <EventSetter Event="UIElement.Drop" Handler="TabItem_Drop"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding TabTitle, Mode=OneTime}" Value="Welcome!">
                                                 <Setter Property="ContextMenu" Value="{x:Null}"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
-                                </TabControl.ItemContainerStyle>
-                                <TabControl.ItemTemplate>
+                                </local:TabControlDark.ItemContainerStyle>
+                                <local:TabControlDark.ItemTemplate>
                                     <DataTemplate DataType="{x:Type local:Tab}">
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock Initialized="TabTitleText_Initialized">
@@ -543,28 +563,28 @@
                                             </TextBlock>
                                             <local:ButtonDark Background="Transparent" Width="16" Height="16" BorderThickness="0" Margin="12,0,0,0"
                                                               Click="TabCloseButton_OnClick" MouseEnter="TabCloseButton_MouseEnter" MouseLeave="TabCloseButton_MouseLeave">
-                                                <Button.Style>
-                                                    <Style TargetType="Button">
+                                                <local:ButtonDark.Style>
+                                                    <Style TargetType="{x:Type Button}">
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding TabTitle, Mode=OneTime}" Value="Welcome!">
                                                                 <Setter Property="Visibility" Value="Collapsed"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
-                                                </Button.Style>
+                                                </local:ButtonDark.Style>
                                                 <Image Source="/Resources/X.png"/>
                                             </local:ButtonDark>
                                         </StackPanel>
                                     </DataTemplate>
-                                </TabControl.ItemTemplate>
-                                <TabControl.ContentTemplate>
+                                </local:TabControlDark.ItemTemplate>
+                                <local:TabControlDark.ContentTemplate>
                                     <DataTemplate DataType="{x:Type local:Tab}"/>
-                                </TabControl.ContentTemplate>
+                                </local:TabControlDark.ContentTemplate>
                             </local:TabControlDark>
                         </ScrollViewer>
                         <StackPanel Grid.Column="1" Margin="5" Orientation="Horizontal" RenderOptions.BitmapScalingMode="NearestNeighbor">
                             <StackPanel.Visibility>
-                                <MultiBinding Converter="{StaticResource CompareNumbersConverter}" ConverterParameter=">" Mode="OneWay">
+                                <MultiBinding Converter="{StaticResource CompareNumbersConverter}" ConverterParameter="&gt;" Mode="OneWay">
                                     <Binding Path="ActualWidth" Mode="OneWay" ElementName="TabController"/>
                                     <Binding Path="ActualWidth" Mode="OneWay" ElementName="TabsGrid"/>
                                 </MultiBinding>
@@ -578,7 +598,7 @@
                         </StackPanel>
                     </Grid>
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
-                        <ContentControl Margin="10" Content="{Binding Selected, Mode=OneWay}" Name="DataEditor">
+                        <ContentControl Margin="10" Content="{Binding Selected, Mode=OneWay}" x:Name="DataEditor">
                             <ContentControl.Resources>
                                 <DataTemplate DataType="{x:Type local:DescriptionView}">
                                     <StackPanel>
@@ -712,10 +732,14 @@
                             </ContentControl.Resources>
                         </ContentControl>
                     </ScrollViewer>
+                    <Image Margin="0,0,14,11" Grid.Row="1" Source="/Resources/spr_flowey_wink.png"  Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Bottom" Cursor="Hand" x:Name="FloweyClickable" MouseDown="Flowey_MouseDown" MouseEnter="Flowey_MouseEnter" MouseLeave="Flowey_MouseLeave" Opacity="0"/>
+                    <Label Content="Howdy!" HorizontalAlignment="Right" VerticalAlignment="Bottom" VerticalContentAlignment="Bottom" x:Name="ObjectLabel" Opacity="0"
+                       Grid.Row="1"
+                       Margin="0,0,10,67" Foreground="Black"/>
                 </Grid>
             </Grid>
         </DockPanel>
-        <Border Background="Black" Name="room_dogcheck" Visibility="Collapsed">
+        <Border Background="Black" x:Name="room_dogcheck" Visibility="Collapsed">
             <Grid RenderOptions.BitmapScalingMode="NearestNeighbor">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="2*"/>
@@ -729,7 +753,7 @@
                 </Grid.RowDefinitions>
                 <Image Grid.Row="1" Grid.Column="1">
                     <Image.Triggers>
-                        <EventTrigger RoutedEvent="Loaded">
+                        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
                             <BeginStoryboard>
                                 <Storyboard RepeatBehavior="Forever">
                                     <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Source"

@@ -5,22 +5,40 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             xmlns:gif ="http://wpfanimatedgif.codeplex.com"
              mc:Ignorable="d" 
+             Unloaded="UndertaleFunctionsEditor_Unloaded"
+             DataContextChanged="UserControl_DataContextChanged"
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleFunction}">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="3*"/>
+            
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="0"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
-        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
+        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3,3,120,3" ObjectReference="{Binding Name}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Name string ID</TextBlock>
-        <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding NameStringID}"/>
+        <local:TextBoxDark Grid.Row="1" Grid.Column="1" Margin="3,3,120,3" Text="{Binding NameStringID}"/>
+
+        <Image Margin="0,32,30,0" Grid.Column="1" Grid.RowSpan="3" gif:ImageBehavior.AnimatedSource="/Resources/spr_flowey_riseanim.gif"  Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="Flowey"/>
+        <Image Margin="0,0,16,0" Grid.Column="1" Grid.RowSpan="3" Source="/Resources/spr_bubble_message.png" Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="FloweyBubble"/>
+        <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="FunctionsObjectLabel"
+                       ToolTip="This is an ID (index) of the currently open function. It starts from 0."
+                       ToolTipService.InitialShowDelay="200" Margin="0,0,17,0" Foreground="Black" Grid.Column="2"
+                       Width="Auto" Grid.RowSpan="3"
+               />
+        <Label Content="ID:" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="FunnyFunctions"
+                       ToolTip="This is an ID (index) of the currently open function. It starts from 0."
+                       ToolTipService.InitialShowDelay="200" Margin="0,0,58,0" Foreground="Black" Grid.Column="2"
+                       Width="Auto" Grid.RowSpan="3"
+               />
     </Grid>
 </local:DataUserControl>

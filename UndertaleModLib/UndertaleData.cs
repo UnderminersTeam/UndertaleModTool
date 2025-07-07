@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using Underanalyzer.Decompiler;
+using Underanalyzer.Decompiler.GameSpecific;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Models;
 
@@ -333,15 +335,20 @@ namespace UndertaleModLib
         public BuiltinList BuiltinList;
 
         /// <summary>
-        /// Cache for known 2.3-style function names for compiler speedups. Can be re-built by setting this to null.
+        /// Cache for 2.3-style functions defined in global scripts. Can be re-built by setting this to null.
         /// </summary>
-        public Dictionary<string, UndertaleFunction> KnownSubFunctions;
+        public IGlobalFunctions GlobalFunctions;
+
+        /// <summary>
+        /// Registry for macro types, their resolvers, and other data specific to this game.
+        /// </summary>
+        public GameSpecificRegistry GameSpecificRegistry;
 
         //Profile mode related properties
 
         //TODO: Why are the functions that deal with the cache in a completely different place than the cache parameters? These have *no* place of being here.
         /// <summary>
-        /// A <see cref="Dictionary{TKey,TValue}"/><typeparam name="TKey"></typeparam> of cached decompiled code,
+        /// A <see cref="Dictionary{TKey,TValue}"/> of cached decompiled code,
         /// with the code name as the Key and the decompiled code text as the value.
         /// </summary>
         public ConcurrentDictionary<string, string> GMLCache { get; set; }
@@ -467,15 +474,31 @@ namespace UndertaleModLib
         /// <param name="minor">The minor version.</param>
         /// <param name="release">The release version.</param>
         /// <param name="build">The build version.</param>
-        public void SetGMS2Version(uint major, uint minor = 0, uint release = 0, uint build = 0)
+        /// <param name="isLTS">If included, alter the data branch between LTS and non-LTS.</param>
+        public void SetGMS2Version(uint major, uint minor = 0, uint release = 0, uint build = 0, bool? isLTS = null)
         {
-            if (major != 2 && major != 2022 && major != 2023)
+            if (major != 2 && major != 2022 && major != 2023 && major != 2024)
                 throw new NotSupportedException("Attempted to set a version of GameMaker " + major + " using SetGMS2Version");
 
             GeneralInfo.Major = major;
             GeneralInfo.Minor = minor;
             GeneralInfo.Release = release;
             GeneralInfo.Build = build;
+
+            if (isLTS is not null)
+            {
+                SetLTS((bool)isLTS);
+            }
+        }
+
+        /// <summary>
+        /// Sets the branch type in GeneralInfo to the appropriate LTS or non-LTS version based on 
+        /// </summary>
+        /// <param name="isLTS">If included, alter the data branch between LTS and non-LTS.</param>
+        public void SetLTS(bool isLTS)
+        {
+            // Insert additional logic as needed for new branches using IsVersionAtLeast
+            GeneralInfo.Branch = isLTS ? UndertaleGeneralInfo.BranchType.LTS2022_0 : UndertaleGeneralInfo.BranchType.Post2022_0;
         }
 
         /// <summary>
@@ -510,6 +533,28 @@ namespace UndertaleModLib
         }
 
         /// <summary>
+        /// Reports whether the version of the data file is the same or higher than a specified version, and off the LTS branch that lacks some features.
+        /// </summary>
+        /// <param name="major">The major version.</param>
+        /// <param name="minor">The minor version.</param>
+        /// <param name="release">The release version.</param>
+        /// <param name="build">The build version.</param>
+        /// <returns>Whether the version of the data file is the same or higher than a specified version. Always false for LTS.</returns>
+        public bool IsNonLTSVersionAtLeast(uint major, uint minor = 0, uint release = 0, uint build = 0)
+        {
+            if (GeneralInfo is null)
+            {
+                Debug.WriteLine("\"UndertaleData.IsNonLTSVersionAtLeast()\" error - \"GeneralInfo\" is null.");
+                return false;
+            }
+
+            if (GeneralInfo.Branch < UndertaleGeneralInfo.BranchType.Post2022_0)
+                return false;
+
+            return IsVersionAtLeast(major, minor, release, build);
+        }
+
+        /// <summary>
         /// TODO: needs to be documented on what this does.
         /// </summary>
         /// <returns>TODO</returns>
@@ -517,7 +562,7 @@ namespace UndertaleModLib
         {
             // It is known it works this way in 1.0.1266. The exact version which changed this is unknown.
             // If we find a game which does not fit the version identified here, we should fix this check.
-            return TestGMS1Version(1354, 161, true) ? 0 : 1;
+            return TestGMS1Version(1250, 161, true) ? 0 : 1;
         }
 
         /// <summary>
@@ -606,7 +651,7 @@ namespace UndertaleModLib
             data.Options.Constants.Add(new UndertaleOptions.Constant() { Name = data.Strings.MakeString("@@DrawColour"), Value = data.Strings.MakeString(0xFFFFFFFF.ToString()) });
             data.Rooms.Add(new UndertaleRoom() { Name = data.Strings.MakeString("room0"), Caption = data.Strings.MakeString("") });
             data.BuiltinList = new BuiltinList(data);
-            Decompiler.AssetTypeResolver.InitializeTypes(data);
+            Decompiler.GameSpecificResolver.Initialize(data);
             return data;
         }
 
@@ -653,7 +698,8 @@ namespace UndertaleModLib
 
             // Clear other references
             FORM = null;
-            KnownSubFunctions = null;
+            GlobalFunctions = null;
+            GameSpecificRegistry = null;
             GMLCache = null;
             GMLCacheFailed = null;
             GMLCacheChanged = new();
@@ -680,5 +726,17 @@ namespace UndertaleModLib
         /// The MD5 hash of the current file.
         /// </summary>
         public string CurrentMD5 = "Unknown";
+
+        /// <summary>
+        /// Default settings to be used by the Underanalyzer decompiler,
+        /// for a tool and in any scripts that desire matching the same settings.
+        /// </summary>
+        public IDecompileSettings DecompilerSettings = new DecompileSettings();
+
+        /// <summary>
+        /// Function that returns the prefix to be used when 
+        /// resolving instance ID references in the compiler and decompiler.
+        /// </summary>
+        public Func<string> InstanceIdPrefix = () => "inst_";
     }
 }

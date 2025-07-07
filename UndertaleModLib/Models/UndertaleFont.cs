@@ -19,14 +19,14 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
     public UndertaleString DisplayName { get; set; }
 
     /// <summary>
-    /// Whether the Em size is a float.
+    /// A helper variable on whether the Em size is a float.
     /// </summary>
     public bool EmSizeIsFloat { get; set; }
 
     /// <summary>
-    /// The font size in Ems. In Game Maker: Studio 2.3 and above, this is a float instead.
+    /// The font size in Ems. In Game Maker: Studio 2.3 and above, this is a float instead. On versions below, it is an uint.
     /// </summary>
-    public uint EmSize { get; set; }
+    public float EmSize { get; set; }
 
     /// <summary>
     /// Whether to display the font in bold.
@@ -84,7 +84,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
     public uint Ascender { get; set; }
 
     /// <summary>
-    /// A spread value that's used for SDF rendering.
+    /// A spread value that's used for SDF rendering. TODO: what is spread, what is sdf?
     /// </summary>
     /// <remarks>
     /// Was introduced in GM 2023.2.
@@ -92,13 +92,18 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
     /// <value><c>0</c> if SDF is disabled for this font.</value>
     public uint SDFSpread { get; set; }
 
+    /// <remarks>
+    /// Was introduced in GM 2023.6. TODO: give an explanation of what this does
+    /// </remarks>
+    public uint LineHeight { get; set; }
+
     /// <summary>
     /// The glyphs that this font uses.
     /// </summary>
-    public UndertalePointerList<Glyph> Glyphs { get; private set; } = new UndertalePointerList<Glyph>();
+    public UndertalePointerList<Glyph> Glyphs { get; set; } = new UndertalePointerList<Glyph>();
 
     /// <summary>
-    /// The maximum offset from the baseline to the top of the font
+    /// The maximum offset from the baseline to the top of the font.
     /// </summary>
     /// <remarks>
     /// Exists since bytecode 17, but seems to be only get checked in GM 2022.2+.
@@ -175,7 +180,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             SourceWidth = reader.ReadUInt16();
             SourceHeight = reader.ReadUInt16();
             Shift = reader.ReadInt16();
-            Offset = reader.ReadInt16(); // potential assumption, see the conversation at https://github.com/krzys-h/UndertaleModTool/issues/40#issuecomment-440208912
+            Offset = reader.ReadInt16(); // Potential assumption, see the conversation at https://github.com/UnderminersTeam/UndertaleModTool/issues/40#issuecomment-440208912
             Kerning = reader.ReadUndertaleObject<UndertaleSimpleListShort<GlyphKerning>>();
         }
 
@@ -196,7 +201,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             public static readonly uint ChildObjectsSize = 4;
 
             /// <summary>
-            /// The code point of the preceeding character.
+            /// The code point of the preceding character.
             /// </summary>
             public short Character { get; set; }
 
@@ -274,7 +279,7 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
         else
         {
             // pre-GMS2.3
-            writer.Write(EmSize);
+            writer.Write((uint)EmSize);
         }
 
         writer.Write(Bold);
@@ -290,8 +295,10 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             writer.Write(AscenderOffset);
         if (writer.undertaleData.IsVersionAtLeast(2022, 2))
             writer.Write(Ascender);
-        if (writer.undertaleData.IsVersionAtLeast(2023, 2))
+        if (writer.undertaleData.IsNonLTSVersionAtLeast(2023, 2))
             writer.Write(SDFSpread);
+        if (writer.undertaleData.IsVersionAtLeast(2023, 6))
+            writer.Write(LineHeight);
         writer.WriteUndertaleObject(Glyphs);
     }
 
@@ -300,15 +307,19 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
     {
         Name = reader.ReadUndertaleString();
         DisplayName = reader.ReadUndertaleString();
-        EmSize = reader.ReadUInt32();
+        uint readEmSize = reader.ReadUInt32();
         EmSizeIsFloat = false;
 
         // since the float is always written negated, it has the first bit set.
-        if ((EmSize & (1 << 31)) != 0)
+        if ((readEmSize & (1 << 31)) != 0)
         {
             float fsize = -BitConverter.ToSingle(BitConverter.GetBytes(EmSize), 0);
-            EmSize = (uint)fsize;
+            EmSize = fsize;
             EmSizeIsFloat = true;
+        }
+        else
+        {
+            EmSize = readEmSize;
         }
 
         Bold = reader.ReadBoolean();
@@ -324,8 +335,10 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             AscenderOffset = reader.ReadInt32();
         if (reader.undertaleData.IsVersionAtLeast(2022, 2))
             Ascender = reader.ReadUInt32();
-        if (reader.undertaleData.IsVersionAtLeast(2023, 2))
+        if (reader.undertaleData.IsNonLTSVersionAtLeast(2023, 2))
             SDFSpread = reader.ReadUInt32();
+        if (reader.undertaleData.IsVersionAtLeast(2023, 6))
+            LineHeight = reader.ReadUInt32();
         Glyphs = reader.ReadUndertaleObject<UndertalePointerList<Glyph>>();
     }
 
@@ -337,8 +350,10 @@ public class UndertaleFont : UndertaleNamedResource, IDisposable
             skipSize += 4; // AscenderOffset
         if (reader.undertaleData.IsVersionAtLeast(2022, 2))
             skipSize += 4; // Ascender
-        if (reader.undertaleData.IsVersionAtLeast(2023, 2))
+        if (reader.undertaleData.IsNonLTSVersionAtLeast(2023, 2))
             skipSize += 4; // SDFSpread
+        if (reader.undertaleData.IsVersionAtLeast(2023, 6))
+            skipSize += 4; // LineHeight
 
         reader.Position += skipSize;
 

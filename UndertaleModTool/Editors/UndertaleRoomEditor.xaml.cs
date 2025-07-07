@@ -30,6 +30,7 @@ using System.Windows.Threading;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 using UndertaleModTool.Editors;
+using WpfAnimatedGif;
 using static UndertaleModLib.Models.UndertaleRoom;
 
 namespace UndertaleModTool
@@ -81,6 +82,12 @@ namespace UndertaleModTool
             Loaded += UndertaleRoomEditor_Loaded;
             Unloaded += UndertaleRoomEditor_Unloaded;
             DataContextChanged += UndertaleRoomEditor_DataContextChanged;
+
+            ((System.Windows.Controls.Image)mainWindow.FindName("Flowey")).Opacity = 0;
+            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
+
+            ((Label)this.FindName("RoomsObjectLabel")).Content = ((Label)mainWindow.FindName("ObjectLabel")).Content;
         }
 
         public void SaveImagePNG(Stream outfile)
@@ -140,6 +147,16 @@ namespace UndertaleModTool
         {
             ObjElemDict.Clear();
             ParticleSystemRectConverter.ClearDict();
+
+            var floweranim = ((System.Windows.Controls.Image)mainWindow.FindName("Flowey"));
+            //floweranim.Opacity = 1;
+
+            var controller = ImageBehavior.GetAnimationController(floweranim);
+            controller.Pause();
+            controller.GotoFrame(controller.FrameCount - 5);
+            controller.Play();
+
+            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
         }
 
         private void UndertaleRoomEditor_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -222,6 +239,22 @@ namespace UndertaleModTool
                     });
                 }
             }
+            UndertaleRoom code = this.DataContext as UndertaleRoom;
+
+            int foundIndex = code is UndertaleResource res ? mainWindow.Data.IndexOf(res, false) : -1;
+            string idString;
+
+            if (foundIndex == -1)
+                idString = "None";
+            else if (foundIndex == -2)
+                idString = "N/A";
+            else
+                idString = Convert.ToString(foundIndex);
+
+            ((Label)this.FindName("RoomsObjectLabel")).Content = idString;
+
+            //((Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
+            //((Image)mainWindow.FindName("Flowey")).Opacity = 0;
         }
 
         private void RoomCanvas_Loaded(object sender, RoutedEventArgs e)
@@ -815,12 +848,21 @@ namespace UndertaleModTool
                 {
                     if (roomcanvas.hDrag || roomcanvas.vDrag)
                     {
-                        var spriteWidth = gameObj.ObjectDefinition.Sprite.Width;
-                        var spriteHeight = gameObj.ObjectDefinition.Sprite.Height;
-                        var marginWidth = gameObj.ObjectDefinition.Sprite.MarginRight - gameObj.ObjectDefinition.Sprite.MarginLeft + 1;
-                        var marginHeight = gameObj.ObjectDefinition.Sprite.MarginBottom - gameObj.ObjectDefinition.Sprite.MarginTop;
-                        var scaledXOffset = (gameObj.SpriteXOffset - 1) * gameObj.ScaleX;
-                        var scaledYOffset = (gameObj.SpriteYOffset - 1) * gameObj.ScaleY;
+                        uint spriteWidth = 20;
+                        uint spriteHeight = 20;
+                        var marginWidth = 20;
+                        var marginHeight = 20;
+                        float scaledXOffset = 0;
+                        float scaledYOffset = 0;
+                        if (gameObj.ObjectDefinition.Sprite != null)
+                        {
+                            spriteWidth = gameObj.ObjectDefinition.Sprite.Width;
+                            spriteHeight = gameObj.ObjectDefinition.Sprite.Height;
+                            marginWidth = gameObj.ObjectDefinition.Sprite.MarginRight - gameObj.ObjectDefinition.Sprite.MarginLeft + 1;
+                            marginHeight = gameObj.ObjectDefinition.Sprite.MarginBottom - gameObj.ObjectDefinition.Sprite.MarginTop;
+                            scaledXOffset = (gameObj.SpriteXOffset - 1) * gameObj.ScaleX;
+                            scaledYOffset = (gameObj.SpriteYOffset - 1) * gameObj.ScaleY;
+                        }
                         if (roomcanvas.hDrag)
                         {
                             if (roomcanvas.dragOrigin.Value.X > marginWidth / 2)
@@ -1548,6 +1590,9 @@ namespace UndertaleModTool
                 // if it's needed to set "NineSlices"
                 if (!data.IsVersionAtLeast(2, 3, 2))
                     layer.AssetsData.NineSlices ??= new UndertalePointerList<SpriteInstance>();
+                // likewise
+                if (data.IsNonLTSVersionAtLeast(2023, 2))
+                    layer.AssetsData.ParticleSystems ??= new UndertalePointerList<ParticleSystemInstance>();
             }
             else if (layer.LayerType == LayerType.Tiles)
             {
@@ -3007,7 +3052,7 @@ namespace UndertaleModTool
             if (parameter is not string mode)
                 return 0;
 
-            if (!partSystemsDict.TryGetValue(partSys, out Rect sysRect))
+            if (partSystemsDict is not null && !partSystemsDict.TryGetValue(partSys, out Rect sysRect))
                 sysRect = AddNewSystem(partSys);
 
             return mode switch

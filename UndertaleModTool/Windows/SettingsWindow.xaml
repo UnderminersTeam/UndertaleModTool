@@ -37,6 +37,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="Game Maker: Studio 1.4 path" ToolTip="Required only if you want to use the Studio runner rather than the .exe or run the game under debugger."/>
@@ -56,7 +57,7 @@
             <TextBlock Grid.Row="4" Grid.Column="2" Margin="25 2 2 2" Text="Warn about temp running" ToolTip="Warn about temp running. Enabled by default."/>
 
             <CheckBox Grid.Row="5" Grid.Column="0" Margin="3" Content="" IsChecked="{Binding UseGMLCache}"/>
-            <TextBlock Grid.Row="5" Grid.Column="0" Margin="25 2 2 2" Text="Use decompiled code cache (experimental)" ToolTip="Used by some scripts (e.g. &quot;Search.csx&quot;) for acceleration. Disabled by default."/>
+            <TextBlock Grid.Row="5" Grid.Column="0" Margin="25 2 2 2" Text="Use decompiled code cache (experimental)" ToolTip="Used when searching for acceleration. Disabled by default."/>
             <CheckBox Grid.Row="5" Grid.Column="2" Margin="3" Content="" IsChecked="{Binding ShowDebuggerOption}"/>
             <TextBlock Grid.Row="5" Grid.Column="2" Margin="25 2 2 2" Text="Show &quot;Run game under GMS debugger&quot; file option" ToolTip="Whether to show the option in the &quot;File&quot; menu. Disabled by default."/>
 
@@ -64,6 +65,8 @@
 
             <CheckBox Grid.Row="7" Grid.Column="0" Margin="3" Content="" IsChecked="{Binding EnableDarkMode}"/>
             <TextBlock Grid.Row="7" Grid.Column="0" Margin="25 2 2 2" Text="Enable dark mode" ToolTip="Makes the program interface dark. Disabled by default."/>
+
+            <local:ButtonDark Grid.Row="7" Grid.Column="2" Margin="184,0,27,0" Click="GMLSettingsButton_Click" VerticalAlignment="Center" Grid.ColumnSpan="2">GML compiler/decompiler settings</local:ButtonDark>
 
             <Separator Grid.Row="8" Grid.ColumnSpan="4" Margin="10"/>
 
@@ -92,14 +95,17 @@
             <CheckBox Grid.Row="17" Grid.Column="0" Margin="3" VerticalAlignment="Center" Content="" IsChecked="{Binding DeleteOldProfileOnSave}"/>
             <TextBlock Grid.Row="17" Grid.Column="0" Margin="25 2 2 2" VerticalAlignment="Center" Text="Delete old profile on saving" ToolTip="Deletes the profile obsoleted on saving. Saves on file space at the expense of losing code information for variants. Enabled by default."/>
 
-            <Separator Grid.Row="18" Grid.ColumnSpan="4" Margin="10"/>
-            <local:ButtonDark Grid.Row="19" Grid.Column="0" Grid.ColumnSpan="1" Margin="5" Click="AppDataButton_Click">Open application data folder</local:ButtonDark>
-            <local:ButtonDark Grid.Row="19" Grid.Column="2" Grid.ColumnSpan="2" Margin="5" Click="UpdateAppButton_Click" x:Name="UpdateAppButton" HorizontalAlignment="Right" Width="223">Update app to latest commit</local:ButtonDark>
+            <Separator Grid.Row="19" Grid.ColumnSpan="4" Margin="10"/>
+            <local:ButtonDark Grid.Row="21" Grid.Column="0" Grid.ColumnSpan="1" Margin="5" Click="AppDataButton_Click">Open application data folder</local:ButtonDark>
+            <local:ButtonDark Grid.Row="21" Grid.Column="2" Grid.ColumnSpan="2" Margin="5" Click="UpdateAppButton_Click" x:Name="UpdateAppButton" HorizontalAlignment="Right" Width="223">Update app to latest commit</local:ButtonDark>
             <TextBlock Grid.Row="17" Grid.Column="2" Margin="25,0,2,0" VerticalAlignment="Center" Text="Ask Profile name on load" ToolTip="Lets you set a custom name for a Profile. Only useful if you have Profile mode on." Grid.ColumnSpan="2"/>
             <CheckBox Grid.Row="17" Grid.Column="2" Margin="3,2,3,0" VerticalAlignment="Top" Content="" IsChecked="{Binding CustomProfileName}"/>
-            <local:ButtonDark Grid.Row="19" Grid.ColumnSpan="2" Margin="9,5,267,5" Click="ProfileButtonImport_Click" Content="Import Current Profile" Grid.Column="1"/>
-            <local:ButtonDark Grid.Row="19" Grid.ColumnSpan="2" Margin="42,5,240,5" Click="ProfileButtonExport_Click" Content="Export Current Profile" Grid.Column="2"/>
-            <local:ButtonDark Grid.Row="7" Grid.Column="2" Margin="1,1,52,0" Click="ColorEditorButton_Click" Content="Change code editor colors"/>
+            <local:ButtonDark Grid.Row="21" Grid.ColumnSpan="2" Margin="9,5,267,5" Click="ProfileButtonImport_Click" Content="Import Current Profile" Grid.Column="1"/>
+            <local:ButtonDark Grid.Row="21" Grid.ColumnSpan="2" Margin="42,5,240,5" Click="ProfileButtonExport_Click" Content="Export Current Profile" Grid.Column="2"/>
+            <local:ButtonDark Grid.Row="7" Grid.Column="2" Margin="1,1,149,0" Click="ColorEditorButton_Click" Content="Change code editor colors"/>
+
+            <TextBlock Grid.Row="18" Grid.Column="0" Margin="25,0,2,0" VerticalAlignment="Center" Text="Remember profile name" ToolTip="The tool will remember the last profile name you input in each data.win." Grid.ColumnSpan="2"/>
+            <CheckBox Grid.Row="18" Grid.Column="0" Margin="3,2,3,0" VerticalAlignment="Top" Content="" IsChecked="{Binding RememberProfileName}"/>
         </Grid>
     </ScrollViewer>
 </Window>

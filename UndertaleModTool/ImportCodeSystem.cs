@@ -5,6 +5,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows;
+using Underanalyzer.Decompiler;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
@@ -97,15 +98,15 @@ namespace UndertaleModTool
             return passBack;
         }
 
-        public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
+        public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null, IDecompileSettings settings = null)
         {
             UndertaleCode code = Data.Code.ByName(codeName);
             if (code is null)
                 throw new ScriptException($"No code named \"{codeName}\" was found!");
 
-            ReplaceTextInGML(code, keyword, replacement, caseSensitive, isRegex, context);
+            ReplaceTextInGML(code, keyword, replacement, caseSensitive, isRegex, context, settings);
         }
-        public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
+        public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null, IDecompileSettings settings = null)
         {
             if (code.ParentEntry is not null)
                 return;
@@ -114,13 +115,21 @@ namespace UndertaleModTool
 
             string passBack = "";
             string codeName = code.Name.Content;
-            GlobalDecompileContext DECOMPILE_CONTEXT = context is null ? new(Data, false) : context;
+            GlobalDecompileContext globalDecompileContext = context is null ? new(Data) : context;
 
             if (!Data.ToolInfo.ProfileMode)
             {
                 try
                 {
-                    passBack = GetPassBack((code != null ? Decompiler.Decompile(code, DECOMPILE_CONTEXT ) : ""), keyword, replacement, caseSensitive, isRegex);
+                    // It would just be recompiling an empty string and messing with null entries seems bad
+                    if (code is null)
+                        return;
+                    string originalCode = new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, settings ?? Data.ToolInfo.DecompilerSettings)
+                        .DecompileToString();
+                    passBack = GetPassBack(originalCode, keyword, replacement, caseSensitive, isRegex);
+                    // No need to compile something unchanged
+                    if (passBack == originalCode)
+                        return;
                     code.ReplaceGML(passBack, Data);
                 }
                 catch (Exception exc)
@@ -135,7 +144,11 @@ namespace UndertaleModTool
                     string path = Path.Combine(ProfilesFolder, Data.ToolInfo.CurrentMD5, "Temp", codeName + ".gml");
                     if (File.Exists(path))
                     {
-                        passBack = GetPassBack(File.ReadAllText(path), keyword, replacement, caseSensitive, isRegex);
+                        string originalCode = File.ReadAllText(path);
+                        passBack = GetPassBack(originalCode, keyword, replacement, caseSensitive, isRegex);
+                        // No need to compile something unchanged
+                        if (passBack == originalCode)
+                            return;
                         File.WriteAllText(path, passBack);
                         code.ReplaceGML(passBack, Data);
                     }
@@ -143,10 +156,15 @@ namespace UndertaleModTool
                     {
                         try
                         {
-                            if (context is null)
-                                passBack = GetPassBack((code != null ? Decompiler.Decompile(code, new GlobalDecompileContext(Data, false)) : ""), keyword, replacement, caseSensitive, isRegex);
-                            else
-                                passBack = GetPassBack((code != null ? Decompiler.Decompile(code, context) : ""), keyword, replacement, caseSensitive, isRegex);
+                            // It would just be recompiling an empty string and messing with null entries seems bad
+                            if (code is null)
+                                return;
+                            string originalCode = new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, Data.ToolInfo.DecompilerSettings)
+                                .DecompileToString();
+                            passBack = GetPassBack(originalCode, keyword, replacement, caseSensitive, isRegex);
+                            // No need to compile something unchanged
+                            if (passBack == originalCode)
+                                return;
                             code.ReplaceGML(passBack, Data);
                         }
                         catch (Exception exc)
@@ -305,7 +323,7 @@ namespace UndertaleModTool
                                 // It *needs* to have a valid value, make the user specify one.
                                 List<uint> possible_values = new List<uint>();
                                 possible_values.Add(uint.MaxValue);
-                                methodNumber = (int)ReduceCollisionValue(possible_values);
+                                methodNumber = (int)ReduceCollisionValue(possible_values, codeName);
                             }
                         }
                     }
@@ -346,14 +364,28 @@ namespace UndertaleModTool
                                     // It *needs* to have a valid value, make the user specify one, silly.
                                     List<uint> possible_values = new List<uint>();
                                     possible_values.Add(uint.MaxValue);
-                                    ReassignGUIDs(methodNumberStr, ReduceCollisionValue(possible_values));
+                                    var object_found = false;
+                                    for (var i = 0; i < Data.GameObjects.Count; i++)
+                                    {
+                                        if (Data.GameObjects[i].Name.Content.ToLower() == methodNumberStr)
+                                        {
+                                            ReassignGUIDs(methodNumberStr, (uint)i);
+                                            object_found = true;
+                                            return;
+                                        }
+                                    }
+                                    if (!object_found)
+                                    {
+                                        ReassignGUIDs(methodNumberStr, ReduceCollisionValue(possible_values, codeName));
+                                    }
+
                                 }
                             }
                             else
                             {
                                 // Let's try to get this going
-                                methodNumber = (int)ReduceCollisionValue(GetCollisionValueFromCodeNameGUID(codeName));
-                                ReassignGUIDs(methodNumberStr, ReduceCollisionValue(GetCollisionValueFromCodeNameGUID(codeName)));
+                                methodNumber = (int)ReduceCollisionValue(GetCollisionValueFromCodeNameGUID(codeName), codeName);
+                                ReassignGUIDs(methodNumberStr, ReduceCollisionValue(GetCollisionValueFromCodeNameGUID(codeName), codeName));
                             }
                         }
                     }
@@ -427,7 +459,7 @@ namespace UndertaleModTool
                     // Write to profile if necessary.
                     string path = Path.Combine(ProfilesFolder, Data.ToolInfo.CurrentMD5, "Temp", codeName + ".gml");
                     if (File.Exists(path))
-                        File.WriteAllText(path, GetDecompiledText(code));
+                        File.WriteAllText(path, gmlCode);
                 }
                 else
                 {

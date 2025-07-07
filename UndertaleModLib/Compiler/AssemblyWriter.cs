@@ -22,8 +22,9 @@ namespace UndertaleModLib.Compiler
                 public List<UndertaleInstruction> instructions;
                 public uint offset = 0;
                 public Stack<DataType> typeStack = new Stack<DataType>();
-                public Stack<LoopContext> loopContexts = new Stack<LoopContext>();
-                public Stack<OtherContext> otherContexts = new Stack<OtherContext>();
+                public Stack<ControlFlowContext> controlFlowContexts = new Stack<ControlFlowContext>();
+                public Stack<ControlFlowContext> loopContexts = new Stack<ControlFlowContext>();
+                public Stack<FunctionContext> funcContexts = new Stack<FunctionContext>();
                 public List<string> ErrorMessages = new List<string>();
                 public List<VariablePatch> varPatches = new List<VariablePatch>();
                 public List<FunctionPatch> funcPatches = new List<FunctionPatch>();
@@ -200,42 +201,74 @@ namespace UndertaleModLib.Compiler
                                     }
                                 }
 
-                                foreach (var patch in varPatches)
+                                // Patch variables in the compiled code
+                                foreach (VariablePatch patch in varPatches)
                                 {
-                                    if (patch.InstType != InstanceType.Local)
+                                    // Only process non-local variables (extra check needed for room instance IDs, as InstType can overlap)
+                                    if (patch.InstType != InstanceType.Local || patch.VarType == VariableType.Instance)
                                     {
-                                        var realInstType = patch.InstType;
-                                        if (realInstType >= 0)
-                                            realInstType = InstanceType.Self;
-                                        else if (realInstType == InstanceType.Other)
-                                            realInstType = InstanceType.Self;
-                                        else if (realInstType == InstanceType.Arg)
-                                            realInstType = InstanceType.Builtin;
-                                        else if (realInstType == InstanceType.Builtin)
-                                            realInstType = InstanceType.Self; // used with @@This@@
-                                        else if (realInstType == InstanceType.Stacktop)
-                                            realInstType = InstanceType.Self; // used with @@GetInstance@@
+                                        // Change VARI instance type depending on context
+                                        InstanceType variInstanceType = patch.InstType switch
+                                        {
+                                            >= 0                    => InstanceType.Self,
+                                            InstanceType.Other      => InstanceType.Self,
+                                            InstanceType.Arg        => InstanceType.Builtin,
+                                            InstanceType.Builtin    => InstanceType.Self,       // used with @@This@@
+                                            InstanceType.Stacktop   => InstanceType.Self,       // used with @@GetInstance@@
+                                            _ => patch.InstType
+                                        };
+
+                                        // Room instance ID variables should always be type self (even if inst type is negative)
+                                        if (patch.VarType == VariableType.Instance)
+                                        {
+                                            variInstanceType = InstanceType.Self;
+                                        }
 
                                         // 2.3 variable fix
                                         // Definitely needs at least some change when ++/-- support is added,
                                         // since that does use instance type global
-                                        if (CompileContext.GMS2_3 &&
-                                            patch.VarType == VariableType.Array &&
-                                            realInstType == InstanceType.Global)
-                                            realInstType = InstanceType.Self;
+                                        if (CompileContext.GMS2_3 && patch.VarType == VariableType.Array && variInstanceType == InstanceType.Global)
+                                        {
+                                            variInstanceType = InstanceType.Self;
+                                        }
 
-                                        UndertaleVariable def = variables.EnsureDefined(patch.Name, realInstType,
-                                                                 compileContext.BuiltInList.GlobalArray.ContainsKey(patch.Name) ||
-                                                                 compileContext.BuiltInList.GlobalNotArray.ContainsKey(patch.Name) ||
-                                                                 compileContext.BuiltInList.Instance.ContainsKey(patch.Name) ||
-                                                                 compileContext.BuiltInList.InstanceLimitedEvent.ContainsKey(patch.Name),
-                                                                 compileContext.Data.Strings, compileContext.Data);
+                                        // Define (or locate) variable
+                                        UndertaleVariable def = variables.EnsureDefined(patch.Name, variInstanceType,
+                                            compileContext.BuiltInList.GlobalArray.ContainsKey(patch.Name) ||
+                                            compileContext.BuiltInList.GlobalNotArray.ContainsKey(patch.Name) ||
+                                            compileContext.BuiltInList.Instance.ContainsKey(patch.Name) ||
+                                            compileContext.BuiltInList.InstanceLimitedEvent.ContainsKey(patch.Name), 
+                                            compileContext.Data.Strings, compileContext.Data);
                                         if (patch.Target.Kind == Opcode.Pop)
+                                        {
+                                            // Pop instruction, set instruction's destination
                                             patch.Target.Destination = new Reference<UndertaleVariable>(def, patch.VarType);
+                                        }
                                         else
+                                        {
+                                            // All other instructions, just set instruction's value
                                             patch.Target.Value = new Reference<UndertaleVariable>(def, patch.VarType);
+                                        }
+
+                                        // Perform final adjustments to the instance type
                                         if (patch.VarType == VariableType.Normal)
+                                        {
+                                            if (patch.InstType == InstanceType.Self && compileContext.Data.IsVersionAtLeast(2024, 2))
+                                            {
+                                                // For some reason, 2024 versions seem to use builtin instead of self, for simple variables
+                                                patch.Target.TypeInst = InstanceType.Builtin;
+                                            }
+                                            else
+                                            {
+                                                // For all other normal variables, just use the existing instance type like usual
+                                                patch.Target.TypeInst = patch.InstType;
+                                            }
+                                        }
+                                        else if (patch.VarType == VariableType.Instance)
+                                        {
+                                            // In this case, the instance type is the room object instance ID
                                             patch.Target.TypeInst = patch.InstType;
+                                        }
                                     }
                                 }
                             }
@@ -245,7 +278,7 @@ namespace UndertaleModLib.Compiler
                         // The FUNC chunk contains references to builtin functions, and anonymous function definitions called gml_Script_...
                         // The anonymous functions are bound to names by code in Data.GlobalInit
                         // so to get an actual mapping from names to functions, you have to decompile all GlobalInit scripts...
-                        Decompiler.Decompiler.BuildSubFunctionCache(compileContext.Data);
+                        Decompiler.GlobalDecompileContext.BuildGlobalFunctionCache(compileContext.Data);
                         foreach (var patch in funcPatches)
                         {
                             if (patch.isNewFunc)
@@ -261,7 +294,7 @@ namespace UndertaleModLib.Compiler
                                     ParentEntry = compileContext.OriginalCode,
                                     Offset = patch.Offset,
                                     ArgumentsCount = (ushort)patch.ArgCount,
-                                    LocalsCount = compileContext.OriginalCode.LocalsCount // todo: use just the locals for the individual script
+                                    LocalsCount = (uint?)patch.FuncContext?.ParseInfo?.LocalVars?.Count ?? compileContext.OriginalCode.LocalsCount
                                 };
                                 compileContext.OriginalCode.ChildEntries.Add(childEntry);
                                 int childEntryIndex = compileContext.Data.Code.IndexOf(compileContext.OriginalCode) + compileContext.OriginalCode.ChildEntries.Count;
@@ -270,8 +303,11 @@ namespace UndertaleModLib.Compiler
                                 UndertaleScript childScript = new()
                                 {
                                     Name = childName,
-                                    Code = childEntry
+                                    Code = childEntry,
+                                    IsConstructor = patch.isNewConstructor
                                 };
+                                // If we don't set IsConstructor, the game will crash when creating the struct
+                                if (patch.Name.StartsWith("___struct___")) childScript.IsConstructor = true;
                                 compileContext.Data.Scripts.Add(childScript);
 
                                 UndertaleFunction childFunction = new()
@@ -282,7 +318,8 @@ namespace UndertaleModLib.Compiler
                                 };
                                 compileContext.Data.Functions.Add(childFunction);
 
-                                compileContext.Data.KnownSubFunctions.Add(patch.Name, childFunction);
+                                compileContext.Data.GlobalFunctions.NameToFunction.Add(patch.Name, childFunction);
+                                compileContext.Data.GlobalFunctions.FunctionToName.Add(childFunction, patch.Name);
 
                                 continue;
                             }
@@ -296,7 +333,7 @@ namespace UndertaleModLib.Compiler
                                 {
                                     if (def != null && def.Autogenerated)
                                         def = null;
-                                    def ??= compileContext.Data.KnownSubFunctions.GetValueOrDefault(patch.Name);
+                                    def ??= compileContext.Data.GlobalFunctions.NameToFunction.GetValueOrDefault(patch.Name) as UndertaleFunction;
                                 }
 
                                 if (compileContext.ensureFunctionsDefined)
@@ -315,7 +352,7 @@ namespace UndertaleModLib.Compiler
                             {
                                 def = compileContext.Data.Functions.ByName(patch.Name);
                                 // This code is only reachable using a 2.3 function definition. ("push.i gml_Script_scr_stuff")
-                                def ??= compileContext.Data.KnownSubFunctions.GetValueOrDefault(patch.Name);
+                                def ??= compileContext.Data.GlobalFunctions.NameToFunction.GetValueOrDefault(patch.Name) as UndertaleFunction;
                                 if (compileContext.ensureFunctionsDefined)
                                     def ??= compileContext.Data.Functions.EnsureDefined(patch.Name, compileContext.Data.Strings, true);
 
@@ -367,29 +404,6 @@ namespace UndertaleModLib.Compiler
 
                     return instructions;
                 }
-            }
-
-            public class VariablePatch
-            {
-                public UndertaleInstruction Target;
-                public string Name;
-                public VariableType VarType;
-                public InstanceType InstType;
-            }
-
-            public class FunctionPatch
-            {
-                public UndertaleInstruction Target;
-                public string Name;
-                public int ArgCount;
-                public uint Offset;
-                public bool isNewFunc = false;
-            }
-
-            public class StringPatch
-            {
-                public UndertaleInstruction Target;
-                public string Content;
             }
 
             public class Patch
@@ -455,57 +469,61 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
-            public class OtherContext
+            public class VariablePatch
             {
-                public enum ContextKind
-                {
-                    Switch,
-                    With
-                }
+                public UndertaleInstruction Target;
+                public string Name;
+                public VariableType VarType;
+                public InstanceType InstType;
+            }
 
-                public ContextKind Kind;
-                public Patch Break;
-                public Patch Continue;
-                public DataType TypeToPop; // switch statements
-                public bool BreakUsed = false;
-                public bool ContinueUsed = false;
+            public class FunctionPatch
+            {
+                public UndertaleInstruction Target;
+                public string Name;
+                public int ArgCount;
+                public uint Offset;
+                public bool isNewFunc = false; 
+                public bool isNewConstructor = false;
+                public FunctionContext FuncContext;
 
-                public OtherContext(Patch @break, Patch @continue, DataType typeToPop)
+                public FunctionPatch(CodeWriter cw)
                 {
-                    Kind = ContextKind.Switch;
-                    Break = @break;
-                    Continue = @continue;
-                    TypeToPop = typeToPop;
-                }
-
-                public OtherContext(Patch @break, Patch @continue)
-                {
-                    Kind = ContextKind.With;
-                    Break = @break;
-                    Continue = @continue;
-                }
-
-                public Patch UseBreak()
-                {
-                    BreakUsed = true;
-                    return Break;
-                }
-
-                public Patch UseContinue()
-                {
-                    ContinueUsed = true;
-                    return Continue;
+                    FuncContext = (cw.funcContexts.Count > 0) ? cw.funcContexts.Peek() : null;
                 }
             }
 
-            public struct LoopContext
+            public class StringPatch
+            {
+                public UndertaleInstruction Target;
+                public string Content;
+            }
+
+            public class FunctionContext
+            {
+                public Stack<ControlFlowContext> ControlFlowContexts { get; }
+                public Stack<ControlFlowContext> LoopContexts { get; }
+                public List<string> NamedArguments { get; }
+                public Parser.FunctionParseInfo ParseInfo { get; }
+
+                public FunctionContext(Stack<ControlFlowContext> controlFlowContexts, Stack<ControlFlowContext> loopContexts,
+                                       List<string> namedArguments, Parser.FunctionParseInfo parseInfo)
+                {
+                    ControlFlowContexts = controlFlowContexts;
+                    LoopContexts = loopContexts;
+                    NamedArguments = namedArguments;
+                    ParseInfo = parseInfo;
+                }
+            }
+
+            public class ControlFlowContext
             {
                 public Patch Break;
                 public Patch Continue;
                 public bool BreakUsed;
                 public bool ContinueUsed;
 
-                public LoopContext(Patch @break, Patch @continue)
+                public ControlFlowContext(Patch @break, Patch @continue)
                 {
                     Break = @break;
                     Continue = @continue;
@@ -526,30 +544,53 @@ namespace UndertaleModLib.Compiler
                 }
             }
 
-            private static Patch HelpUseBreak(ref Stack<LoopContext> s)
+            public class LoopContext : ControlFlowContext
             {
-                LoopContext c = s.Pop();
+                public LoopContext(Patch @break, Patch @continue) : base(@break, @continue)
+                {
+                }
+            }
+
+            public class RepeatLoopContext : LoopContext
+            {
+                public RepeatLoopContext(Patch @break, Patch @continue) : base(@break, @continue)
+                {
+                }
+            }
+
+            public class SwitchWithContext : ControlFlowContext
+            {
+                public enum ContextKind
+                {
+                    Switch,
+                    With
+                }
+
+                public ContextKind Kind;
+                public DataType TypeToPop; // switch statements
+
+                public SwitchWithContext(Patch @break, Patch @continue, DataType typeToPop) : base(@break, @continue)
+                {
+                    Kind = ContextKind.Switch;
+                    TypeToPop = typeToPop;
+                }
+
+                public SwitchWithContext(Patch @break, Patch @continue) : base(@break, @continue)
+                {
+                    Kind = ContextKind.With;
+                }
+            }
+
+            private static Patch HelpUseBreak(ref Stack<ControlFlowContext> s)
+            {
+                ControlFlowContext c = s.Pop();
                 Patch res = c.UseBreak();
                 s.Push(c);
                 return res;
             }
-            private static Patch HelpUseContinue(ref Stack<LoopContext> s)
+            private static Patch HelpUseContinue(ref Stack<ControlFlowContext> s)
             {
-                LoopContext c = s.Pop();
-                Patch res = c.UseContinue();
-                s.Push(c);
-                return res;
-            }
-            private static Patch HelpUseBreak(ref Stack<OtherContext> s)
-            {
-                OtherContext c = s.Pop();
-                Patch res = c.UseBreak();
-                s.Push(c);
-                return res;
-            }
-            private static Patch HelpUseContinue(ref Stack<OtherContext> s)
-            {
-                OtherContext c = s.Pop();
+                ControlFlowContext c = s.Pop();
                 Patch res = c.UseContinue();
                 s.Push(c);
                 return res;
@@ -562,7 +603,7 @@ namespace UndertaleModLib.Compiler
                 return cw;
             }
 
-            private static void AssembleStatement(CodeWriter cw, Parser.Statement s, int remaining = -1)
+            private static void AssembleStatement(CodeWriter cw, Parser.Statement s)
             {
                 switch (s.Kind)
                 {
@@ -572,7 +613,7 @@ namespace UndertaleModLib.Compiler
                         {
                             for (int i = 0; i < s.Children.Count; i++)
                             {
-                                AssembleStatement(cw, s.Children[i], s.Children.Count - i);
+                                AssembleStatement(cw, s.Children[i]);
                             }
                         }
                         break;
@@ -617,6 +658,25 @@ namespace UndertaleModLib.Compiler
                             }
                         }
                         break;
+                    case Parser.Statement.StatementKind.FunctionDefAssign:
+                        {
+                            AssembleExpression(cw, s.Children[1], s.Children[0]);
+
+                            bool isStructDef = s.Children[0].Text.StartsWith("___struct___");
+                            cw.varPatches.Add(new VariablePatch()
+                            {
+                                Target = cw.EmitRef(Opcode.Pop, DataType.Variable, DataType.Variable),
+                                Name = s.Children[0].Text,
+                                InstType = isStructDef ? InstanceType.Static : InstanceType.Self,
+                                VarType = VariableType.StackTop
+                            });
+                            if (!isStructDef)
+                            {
+                                cw.typeStack.Pop();
+                                cw.Emit(Opcode.Popz, DataType.Variable);
+                            }
+                            break;
+                        }
                     case Parser.Statement.StatementKind.Pre:
                         AssemblePostOrPre(cw, s, false, false);
                         break;
@@ -683,8 +743,11 @@ namespace UndertaleModLib.Compiler
                             endLoopPatch.Add(cw.Emit(Opcode.Bf));
 
                             var continuePatch = Patch.Start();
-                            cw.loopContexts.Push(new LoopContext(endLoopPatch, continuePatch));
+                            var context = new LoopContext(endLoopPatch, continuePatch);
+                            cw.controlFlowContexts.Push(context);
+                            cw.loopContexts.Push(context);
                             AssembleStatement(cw, s.Children[3]); // body
+                            cw.controlFlowContexts.Pop();
                             cw.loopContexts.Pop();
                             continuePatch.Finish(cw);
                             AssembleStatement(cw, s.Children[2]); // code that runs each iteration, usually "i++" or something
@@ -710,8 +773,11 @@ namespace UndertaleModLib.Compiler
                             }
                             Patch endLoopPatch = Patch.Start();
                             endLoopPatch.Add(cw.Emit(Opcode.Bf));
-                            cw.loopContexts.Push(new LoopContext(endLoopPatch, conditionPatch));
+                            var context = new LoopContext(endLoopPatch, conditionPatch);
+                            cw.controlFlowContexts.Push(context);
+                            cw.loopContexts.Push(context);
                             AssembleStatement(cw, s.Children[1]); // body
+                            cw.controlFlowContexts.Pop();
                             cw.loopContexts.Pop();
                             conditionPatch.Add(cw.Emit(Opcode.B));
                             conditionPatch.Finish(cw);
@@ -744,7 +810,9 @@ namespace UndertaleModLib.Compiler
                                         .ComparisonKind = ComparisonType.LTE;
                             endPatch.Add(cw.Emit(Opcode.Bt));
 
-                            cw.loopContexts.Push(new LoopContext(endPatch, repeatPatch));
+                            var context = new RepeatLoopContext(endPatch, repeatPatch);
+                            cw.controlFlowContexts.Push(context);
+                            cw.loopContexts.Push(context);
 
                             Patch startPatch = Patch.StartHere(cw);
                             AssembleStatement(cw, s.Children[1]); // body
@@ -753,13 +821,15 @@ namespace UndertaleModLib.Compiler
                             cw.Emit(Opcode.Push, DataType.Int32).Value = 1; // This is also weird- normally it's pushi.e
                             cw.Emit(Opcode.Sub, DataType.Int32, DataType.Int32);
                             cw.Emit(Opcode.Dup, DataType.Int32).Extra = 0;
-                            cw.Emit(Opcode.Conv, DataType.Int32, DataType.Boolean);
+                            if (!cw.compileContext.Data.IsVersionAtLeast(2022, 11))
+                                cw.Emit(Opcode.Conv, DataType.Int32, DataType.Boolean);
                             startPatch.Add(cw.Emit(Opcode.Bt));
                             startPatch.Finish(cw);
 
                             endPatch.Finish(cw);
                             cw.Emit(Opcode.Popz, DataType.Int32); // Cleans up the stack of the decrementing value, which at this point should be <= 0
 
+                            cw.controlFlowContexts.Pop();
                             cw.loopContexts.Pop();
                         }
                         break;
@@ -774,7 +844,9 @@ namespace UndertaleModLib.Compiler
                             Patch endPatch = Patch.Start();
                             Patch repeatPatch = Patch.Start();
 
-                            cw.loopContexts.Push(new LoopContext(endPatch, repeatPatch));
+                            var context = new LoopContext(endPatch, repeatPatch);
+                            cw.controlFlowContexts.Push(context);
+                            cw.loopContexts.Push(context);
 
                             Patch startPatch = Patch.StartHere(cw);
                             AssembleStatement(cw, s.Children[0]); // body
@@ -790,16 +862,16 @@ namespace UndertaleModLib.Compiler
                             startPatch.Finish(cw);
 
                             endPatch.Finish(cw);
+                            cw.controlFlowContexts.Pop();
                             cw.loopContexts.Pop();
                         }
                         break;
                     case Parser.Statement.StatementKind.Switch:
                         {
                             Patch endPatch = Patch.Start();
-                            bool isEnclosingLoop = (cw.loopContexts.Count > 0);
                             Patch continueEndPatch = null;
-                            LoopContext enclosingContext = default(LoopContext);
-                            if (isEnclosingLoop)
+                            ControlFlowContext enclosingContext = null;
+                            if (cw.loopContexts.Count > 0)
                             {
                                 continueEndPatch = Patch.Start();
                                 enclosingContext = cw.loopContexts.Peek();
@@ -809,7 +881,7 @@ namespace UndertaleModLib.Compiler
                             AssembleExpression(cw, s.Children[0]);
                             var compareType = cw.typeStack.Pop();
 
-                            cw.otherContexts.Push(new OtherContext(endPatch, continueEndPatch, compareType));
+                            cw.controlFlowContexts.Push(new SwitchWithContext(endPatch, continueEndPatch, compareType));
 
                             List<Tuple<Parser.Statement, Patch, int /* index in s.Children */>> cases = new List<Tuple<Parser.Statement, Patch, int>>();
                             Patch defaultPatch = null;
@@ -893,8 +965,8 @@ namespace UndertaleModLib.Compiler
                             }
 
                             // Write part at end in case a continue statement is used
-                            OtherContext context = cw.otherContexts.Pop();
-                            if (isEnclosingLoop && context.ContinueUsed)
+                            ControlFlowContext context = cw.controlFlowContexts.Pop();
+                            if (enclosingContext is not null && context.ContinueUsed)
                             {
                                 endPatch.Add(cw.Emit(Opcode.B));
 
@@ -916,7 +988,7 @@ namespace UndertaleModLib.Compiler
                                s.Children[0].Kind == Parser.Statement.StatementKind.ExprConstant &&
                                ((InstanceType)s.Children[0].Constant.valueNumber).In(InstanceType.Other, InstanceType.Self))
                             {
-                                cw.funcPatches.Add(new FunctionPatch()
+                                cw.funcPatches.Add(new FunctionPatch(cw)
                                 {
                                     Target = cw.EmitRef(Opcode.Call, DataType.Int32),
                                     Name = (InstanceType)s.Children[0].Constant.valueNumber == InstanceType.Other ? "@@Other@@" : "@@This@@",
@@ -935,7 +1007,9 @@ namespace UndertaleModLib.Compiler
                                     cw.Emit(Opcode.Conv, type, DataType.Int32);
                             }
 
-                            cw.otherContexts.Push(new OtherContext(endPatch, popEnvPatch));
+                            var context = new SwitchWithContext(endPatch, popEnvPatch);
+                            cw.controlFlowContexts.Push(context);
+                            cw.loopContexts.Push(context);
 
                             popEnvPatch.Add(cw.Emit(Opcode.PushEnv));
                             Patch startPatch = Patch.StartHere(cw);
@@ -946,7 +1020,9 @@ namespace UndertaleModLib.Compiler
                             startPatch.Add(cw.Emit(Opcode.PopEnv));
                             startPatch.Finish(cw);
 
-                            if (cw.otherContexts.Pop().BreakUsed)
+                            cw.controlFlowContexts.Pop();
+                            cw.loopContexts.Pop();
+                            if (context.BreakUsed)
                             {
                                 Patch cleanUpEndPatch = Patch.Start();
                                 cleanUpEndPatch.Add(cw.Emit(Opcode.B));
@@ -966,29 +1042,23 @@ namespace UndertaleModLib.Compiler
                         }
                         break;
                     case Parser.Statement.StatementKind.Continue:
-                        if (cw.loopContexts.Count == 0 && (cw.otherContexts.Count == 0 || cw.otherContexts.Peek().Continue == null))
+                        if (cw.loopContexts.Count == 0 && (cw.controlFlowContexts.Count == 0 || cw.controlFlowContexts.Peek().Continue == null))
                         {
                             AssemblyWriterError(cw, "Continue statement placed outside of any loops.", s.Token);
                         }
                         else
                         {
-                            if (cw.otherContexts.Count > 0 && cw.otherContexts.Peek().Continue != null)
-                                HelpUseContinue(ref cw.otherContexts).Add(cw.Emit(Opcode.B));
-                            else
-                                HelpUseContinue(ref cw.loopContexts).Add(cw.Emit(Opcode.B));
+                            HelpUseContinue(ref cw.controlFlowContexts).Add(cw.Emit(Opcode.B));
                         }
                         break;
                     case Parser.Statement.StatementKind.Break:
-                        if (cw.loopContexts.Count == 0 && cw.otherContexts.Count == 0)
+                        if (cw.loopContexts.Count == 0 && cw.controlFlowContexts.Count == 0)
                         {
                             AssemblyWriterError(cw, "Break statement placed outside of any loops.", s.Token);
                         }
                         else
                         {
-                            if (cw.otherContexts.Count > 0 && cw.otherContexts.Peek().Break != null)
-                                HelpUseBreak(ref cw.otherContexts).Add(cw.Emit(Opcode.B));
-                            else
-                                HelpUseBreak(ref cw.loopContexts).Add(cw.Emit(Opcode.B));
+                            HelpUseBreak(ref cw.controlFlowContexts).Add(cw.Emit(Opcode.B));
                         }
                         break;
                     case Parser.Statement.StatementKind.FunctionCall:
@@ -1013,12 +1083,16 @@ namespace UndertaleModLib.Compiler
                             }
 
                             // Clean up contexts if necessary
-                            bool useLocalVar = (cw.otherContexts.Count != 0);
+                            bool useLocalVar;
+                            if (CompileContext.GMS2_3)
+                                useLocalVar = cw.controlFlowContexts.Any(c => c is SwitchWithContext or RepeatLoopContext);
+                            else
+                                useLocalVar = cw.controlFlowContexts.Any(c => c is SwitchWithContext);
                             if (useLocalVar)
                             {
                                 // Put the return value into a local variable (GM does this as well)
                                 // so that it doesn't get cleared out of the stack??
-                                // See here: https://github.com/krzys-h/UndertaleModTool/issues/164
+                                // See here: https://github.com/UnderminersTeam/UndertaleModTool/issues/164
                                 cw.varPatches.Add(new VariablePatch()
                                 {
                                     Target = cw.EmitRef(Opcode.Pop, DataType.Variable, DataType.Variable),
@@ -1027,20 +1101,31 @@ namespace UndertaleModLib.Compiler
                                     VarType = VariableType.Normal
                                 });
                                 cw.compileContext.LocalVars["$$$$temp$$$$"] = "$$$$temp$$$$";
-                            }
-                            foreach (OtherContext oc in cw.otherContexts)
-                            {
-                                if (oc.Kind == OtherContext.ContextKind.Switch)
+                                if (cw.funcContexts.Count > 0)
                                 {
-                                    cw.Emit(Opcode.Popz, oc.TypeToPop);
+                                    cw.funcContexts.Peek().ParseInfo.LocalVars.Add("$$$$temp$$$$");
                                 }
-                                else
+                            }
+                            foreach (ControlFlowContext c in cw.controlFlowContexts)
+                            {
+                                if (c is SwitchWithContext sw)
                                 {
-                                    // With
-                                    var dropPopenv = cw.Emit(Opcode.PopEnv);
-                                    dropPopenv.JumpOffsetPopenvExitMagic = true;
-                                    if (cw.compileContext.Data?.GeneralInfo?.BytecodeVersion <= 14)
-                                        dropPopenv.JumpOffset = -1048576; // magic for older versions
+                                    if (sw.Kind == SwitchWithContext.ContextKind.Switch)
+                                    {
+                                        cw.Emit(Opcode.Popz, sw.TypeToPop);
+                                    }
+                                    else
+                                    {
+                                        // With
+                                        var dropPopenv = cw.Emit(Opcode.PopEnv);
+                                        dropPopenv.JumpOffsetPopenvExitMagic = true;
+                                        if (cw.compileContext.Data?.GeneralInfo?.BytecodeVersion <= 14)
+                                            dropPopenv.JumpOffset = -1048576; // magic for older versions
+                                    }
+                                }
+                                else if (CompileContext.GMS2_3 && c is RepeatLoopContext)
+                                {
+                                    cw.Emit(Opcode.Popz, DataType.Int32);
                                 }
                             }
                             if (useLocalVar)
@@ -1063,6 +1148,26 @@ namespace UndertaleModLib.Compiler
                         break;
                     case Parser.Statement.StatementKind.Exit:
                         AssembleExit(cw);
+                        break;
+                    case Parser.Statement.StatementKind.Enum:
+                        // No assembly logic for this
+                        break;
+                    case Parser.Statement.StatementKind.Throw:
+                        AssembleExpression(cw, s.Children[0]);
+                        if (cw.typeStack.Peek() != DataType.Variable)
+                        {
+                            cw.Emit(Opcode.Conv, cw.typeStack.Pop(), DataType.Variable);
+                            cw.typeStack.Push(DataType.Variable);
+                        }
+                        cw.funcPatches.Add(new FunctionPatch(cw)
+                        {
+                            Target = cw.EmitRef(Opcode.Call, DataType.Int32),
+                            Name = "@@throw@@",
+                            ArgCount = 1
+                        });
+                        break;
+                    case Parser.Statement.StatementKind.New:
+                        AssembleNew(cw, s, false);
                         break;
                     default:
                         AssemblyWriterError(cw, "Expected a statement, none found", s.Token);
@@ -1134,27 +1239,29 @@ namespace UndertaleModLib.Compiler
 
             private static void AssembleExit(CodeWriter cw)
             {
-                // First switch statements
-                foreach (OtherContext oc in cw.otherContexts)
+                foreach (ControlFlowContext c in cw.controlFlowContexts)
                 {
-                    if (oc.Kind == OtherContext.ContextKind.Switch)
+                    if (c is SwitchWithContext sw)
                     {
-                        cw.Emit(Opcode.Popz, oc.TypeToPop);
+                        if (sw.Kind == SwitchWithContext.ContextKind.Switch)
+                        {
+                            cw.Emit(Opcode.Popz, sw.TypeToPop);
+                        }
+                        else
+                        {
+                            // With
+                            var dropPopenv = cw.Emit(Opcode.PopEnv);
+                            dropPopenv.JumpOffsetPopenvExitMagic = true;
+                            if (cw.compileContext.Data?.GeneralInfo?.BytecodeVersion <= 14)
+                                dropPopenv.JumpOffset = -1048576; // magic for older versions
+                        }
+                    }
+                    else if (CompileContext.GMS2_3 && c is RepeatLoopContext)
+                    {
+                        cw.Emit(Opcode.Popz, DataType.Int32);
                     }
                 }
-
-                // Then with statements
-                foreach (OtherContext oc in cw.otherContexts)
-                {
-                    if (oc.Kind == OtherContext.ContextKind.With)
-                    {
-                        var dropPopenv = cw.Emit(Opcode.PopEnv);
-                        dropPopenv.JumpOffsetPopenvExitMagic = true;
-                        if (cw.compileContext.Data?.GeneralInfo?.BytecodeVersion <= 14)
-                            dropPopenv.JumpOffset = -1048576; // magic for older versions
-                    }
-                }
-
+                
                 cw.Emit(Opcode.Exit, DataType.Int32);
             }
 
@@ -1173,13 +1280,81 @@ namespace UndertaleModLib.Compiler
                     }
                 }
 
-                cw.funcPatches.Add(new FunctionPatch()
+                cw.funcPatches.Add(new FunctionPatch(cw)
                 {
                     Target = cw.EmitRef(Opcode.Call, DataType.Int32),
                     Name = fc.Text,
                     ArgCount = fc.Children.Count
                 });
                 cw.typeStack.Push(DataType.Variable);
+            }
+
+            private static void AssembleStructDef(CodeWriter cw, Parser.Statement str)
+            {
+                List<Parser.Statement> leaked = str.Children[0].Children;
+                // Just push these leaked variables onto the stack
+                // We need to do this in reverse since function arguments
+                // are parsed in reverse stack order
+                for (int i = leaked.Count - 1; i >= 0; i--)
+                {
+                    Parser.Statement statement = leaked[i];
+                    AssembleExpression(cw, statement);
+                }
+
+                AssembleStatement(cw, str.Children[1]);
+
+                cw.funcPatches.Add(new FunctionPatch(cw)
+                {
+                    Target = cw.EmitRef(Opcode.Call, DataType.Int32),
+                    Name = "@@NewGMLObject@@",
+                    Offset = cw.offset * 4,
+                    ArgCount = leaked.Count + 1
+                });
+                cw.typeStack.Push(DataType.Variable);
+            }
+
+            private static void AssembleNew(CodeWriter cw, Parser.Statement e, bool expression)
+            {
+                // Needs to push args onto stack backwards
+                Parser.Statement fc = e.Children[0];
+                for (int i = fc.Children.Count - 1; i >= 0; i--)
+                {
+                    AssembleExpression(cw, fc.Children[i]);
+
+                    // Convert to Variable data type
+                    var typeToConvertFrom = cw.typeStack.Pop();
+                    if (typeToConvertFrom != DataType.Variable)
+                    {
+                        cw.Emit(Opcode.Conv, typeToConvertFrom, DataType.Variable);
+                    }
+                }
+
+                // Push reference to constructor function
+                cw.funcPatches.Add(new FunctionPatch(cw)
+                {
+                    Target = cw.EmitRef(Opcode.Push, DataType.Int32),
+                    Name = fc.Text,
+                    ArgCount = -1
+                });
+                cw.Emit(Opcode.Conv, DataType.Int32, DataType.Variable);
+
+                // Create new object
+                cw.funcPatches.Add(new FunctionPatch(cw)
+                {
+                    Target = cw.EmitRef(Opcode.Call, DataType.Int32),
+                    Name = "@@NewGMLObject@@",
+                    ArgCount = fc.Children.Count + 1
+                });
+
+                // If in expression, a variable data type is on the stack; otherwise, pop the unused data
+                if (expression)
+                {
+                    cw.typeStack.Push(DataType.Variable);
+                }
+                else
+                {
+                    cw.Emit(Opcode.Popz, DataType.Variable);
+                }
             }
 
             private static void AssembleExpression(CodeWriter cw, Parser.Statement e, Parser.Statement funcDefName = null)
@@ -1249,7 +1424,15 @@ namespace UndertaleModLib.Compiler
                                     cw.Emit(Opcode.Push, DataType.Int64).Value = value.valueInt64;
                                     cw.typeStack.Push(DataType.Int64);
                                     break;
-                                default:
+                                case Parser.ExpressionConstant.Kind.Reference:
+                                    {
+                                        var instr = cw.Emit(Opcode.Break, DataType.Int32);
+                                        instr.Value = (short)-11; // pushref
+                                        instr.IntArgument = (int)value.valueNumber;
+                                        cw.typeStack.Push(DataType.Variable);
+                                        break;
+                                    }
+                                default:    
                                     cw.typeStack.Push(DataType.Variable);
                                     AssemblyWriterError(cw, "Invalid constant type.", e.Token);
                                     break;
@@ -1259,73 +1442,140 @@ namespace UndertaleModLib.Compiler
                     case Parser.Statement.StatementKind.ExprFunctionCall:
                         AssembleFunctionCall(cw, e); // the return value in this case must be used
                         break;
+                    case Parser.Statement.StatementKind.ExprStruct:
+                        AssembleStructDef(cw, e);
+                        break;
                     case Parser.Statement.StatementKind.ExprVariableRef:
                     case Parser.Statement.StatementKind.ExprSingleVariable:
                         AssembleVariablePush(cw, e);
                         break;
                     case Parser.Statement.StatementKind.FunctionDef:
                         {
-                            if (e.Children.Count != 2)
+                            if (e.Children.Count < 2 || e.Children.Count > 4)
                             {
                                 AssemblyWriterError(cw, "Malformed function assignment.", e.Token);
                                 break;
                             }
 
-                            Patch startPatch = Patch.StartHere(cw);
+                            bool isConstructor = e.Children.Count >= 3;
+                            Parser.Statement baseCall = null;
+                            if (isConstructor)
+                            {
+                                e.Children.RemoveAt(0);
+                                if (e.Children.Count >= 3)
+                                {
+                                    baseCall = e.Children[0];
+                                    e.Children.RemoveAt(0);
+                                }
+                            }
+
+                            // Construct new function context
+                            List<string> namedArgs = new();
+                            foreach (Parser.Statement argName in e.Children[0].Children)
+                                namedArgs.Add(argName.Text);
+                            FunctionContext newFuncContext = new(cw.controlFlowContexts, cw.loopContexts, namedArgs, cw.compileContext.FunctionParseInfo[e]);
+
+                            // Branch around function declaration
                             Patch endPatch = Patch.Start();
                             endPatch.Add(cw.Emit(Opcode.B));
+
                             // we're accessing a subfunction here, so build the cache if needed
-                            Decompiler.Decompiler.BuildSubFunctionCache(cw.compileContext.Data);
+                            Decompiler.GlobalDecompileContext.BuildGlobalFunctionCache(cw.compileContext.Data);
+
+                            if (funcDefName is null)
+                            {
+                                AssemblyWriterError(cw, "Anonymous function compilation support does not work yet.", e.Token);
+                                break;
+                            }
 
                             //Attempt to find the function before rushing to create a new one
                             var func = cw.compileContext.Data.Functions.FirstOrDefault(f => f.Name.Content == "gml_Script_" + funcDefName.Text);
                             if (func != null)
-                                cw.compileContext.Data.KnownSubFunctions.TryAdd(funcDefName.Text, func);
-
-                            if (cw.compileContext.Data.KnownSubFunctions.ContainsKey(funcDefName.Text))
                             {
-                                string subFunctionName = cw.compileContext.Data.KnownSubFunctions[funcDefName.Text].Name.Content;
+                                cw.compileContext.Data.GlobalFunctions.NameToFunction.TryAdd(funcDefName.Text, func);
+                                cw.compileContext.Data.GlobalFunctions.FunctionToName.TryAdd(func, funcDefName.Text);
+                            }
+
+                            if (cw.compileContext.Data.GlobalFunctions.NameToFunction.ContainsKey(funcDefName.Text))
+                            {
+                                string subFunctionName = cw.compileContext.Data.GlobalFunctions.NameToFunction[funcDefName.Text].Name.Content;
                                 UndertaleCode childEntry = cw.compileContext.OriginalCode.ChildEntries.ByName(subFunctionName);
                                 childEntry.Offset = cw.offset * 4;
                                 childEntry.ArgumentsCount = (ushort)e.Children[0].Children.Count;
-                                childEntry.LocalsCount = cw.compileContext.OriginalCode.LocalsCount; // todo: use just the locals for the individual script
+                                childEntry.LocalsCount = (uint?)newFuncContext.ParseInfo?.LocalVars?.Count ?? cw.compileContext.OriginalCode.LocalsCount;
+
+                                UndertaleScript script = cw.compileContext.Data.Scripts.ByName(childEntry.Name.Content);
+                                if (script is not null)
+                                {
+                                    script.IsConstructor = isConstructor;
+                                }
                             }
                             else // we're making a new function baby
                             {
-                                cw.funcPatches.Add(new FunctionPatch()
+                                cw.funcPatches.Add(new FunctionPatch(cw)
                                 {
                                     Name = funcDefName.Text,
                                     Offset = cw.offset * 4,
                                     ArgCount = (ushort)e.Children[0].Children.Count,
-                                    isNewFunc = true
+                                    isNewFunc = true,
+                                    isNewConstructor = isConstructor
                                 });
                             }
-                            cw.loopContexts.Push(new LoopContext(endPatch, startPatch));
 
-                            List<string> argsList = new();
-                            foreach (var arg in e.Children[0].Children)
+                            cw.funcContexts.Push(newFuncContext);
+                            cw.loopContexts = new();
+                            cw.controlFlowContexts = new();
+
+                            if (baseCall is not null)
                             {
-                                argsList.Add(arg.Text);
+                                AssembleFunctionCall(cw, baseCall);
+                                cw.funcPatches.Add(new FunctionPatch(cw)
+                                {
+                                    Target = cw.EmitRef(Opcode.Push, DataType.Int32),
+                                    Name = baseCall.Text,
+                                    ArgCount = -1
+                                });
+                                cw.Emit(Opcode.Conv, DataType.Int32, DataType.Variable);
+                                cw.funcPatches.Add(new FunctionPatch(cw)
+                                {
+                                    Target = cw.EmitRef(Opcode.Call, DataType.Int32),
+                                    Name = "@@CopyStatic@@",
+                                    ArgCount = 1
+                                });
                             }
-
-                            var oldArgsNames = cw.currentArgsNames;
-                            cw.currentArgsNames = argsList;
                             AssembleStatement(cw, e.Children[1]); // body
-                            cw.currentArgsNames = oldArgsNames;
+                            //cw.currentArgsNames = oldArgsNames;
                             AssembleExit(cw);
-                            cw.loopContexts.Pop();
                             endPatch.Finish(cw);
 
-                            cw.funcPatches.Add(new FunctionPatch()
+                            FunctionContext funcContext = cw.funcContexts.Pop();
+                            cw.loopContexts = funcContext.LoopContexts;
+                            cw.controlFlowContexts = funcContext.ControlFlowContexts;
+
+                            cw.funcPatches.Add(new FunctionPatch(cw)
                             {
                                 Target = cw.EmitRef(Opcode.Push, DataType.Int32),
                                 Name = funcDefName.Text,
                                 ArgCount = -1
                             });
                             cw.Emit(Opcode.Conv, DataType.Int32, DataType.Variable);
-                            cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-1;
-                            cw.Emit(Opcode.Conv, DataType.Int32, DataType.Variable);
-                            cw.funcPatches.Add(new FunctionPatch()
+
+                            if (isConstructor)
+                            {
+                                cw.funcPatches.Add(new FunctionPatch(cw)
+                                {
+                                    Target = cw.EmitRef(Opcode.Call, DataType.Int32),
+                                    Name = "@@NullObject@@",
+                                    ArgCount = 0
+                                });
+                            } 
+                            else
+                            {
+                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-1;
+                                cw.Emit(Opcode.Conv, DataType.Int32, DataType.Variable);
+                            }
+
+                            cw.funcPatches.Add(new FunctionPatch(cw)
                             {
                                 Target = cw.EmitRef(Opcode.Call, DataType.Int32),
                                 Name = "method",
@@ -1333,8 +1583,17 @@ namespace UndertaleModLib.Compiler
                             });
                             cw.typeStack.Push(DataType.Variable);
                             cw.Emit(Opcode.Dup, DataType.Variable).Extra = 0;
-                            cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-1; // todo: -6 sometimes?
+
+                            if (funcDefName.Text.StartsWith("___struct___"))
+                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-16;
+                            else if (cw.compileContext.Data.IsVersionAtLeast(2024) || cw.compileContext.OriginalCode.Name.Content == $"gml_GlobalScript_{funcDefName.Text}")
+                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-1;
+                            else
+                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)-6;
                         }
+                        break;
+                    case Parser.Statement.StatementKind.ExprNew:
+                        AssembleNew(cw, e, true);
                         break;
                     case Parser.Statement.StatementKind.ExprBinaryOp:
                         {
@@ -1592,7 +1851,7 @@ namespace UndertaleModLib.Compiler
                         break;
                     case Parser.Statement.StatementKind.ExprFuncName:
                         {
-                            cw.funcPatches.Add(new FunctionPatch()
+                            cw.funcPatches.Add(new FunctionPatch(cw)
                             {
                                 Target = cw.EmitRef(Opcode.Push, DataType.Int32),
                                 Name = e.Text,
@@ -1652,7 +1911,7 @@ namespace UndertaleModLib.Compiler
                         {
                             cw.typeStack.Pop();
                             cw.Emit(Opcode.Conv, type, DataType.Int32);
-                            cw.typeStack.Push(DataType.Double);
+                            cw.typeStack.Push(DataType.Int32);
                         }
                         break;
                     case Lexer.Token.TokenKind.LogicalAnd:
@@ -1722,6 +1981,9 @@ namespace UndertaleModLib.Compiler
                     {
                         if (e.Children[0].Children.Count != 0)
                         {
+                            // Final processing on variable
+                            var processedArray = CheckFor23BuiltinOrArg(cw, e.Children[0].Text, e.Children[0].ID);
+
                             if (e.Children[0].Kind == Parser.Statement.StatementKind.ExprFunctionCall)
                             {
                                 // Function call
@@ -1731,10 +1993,8 @@ namespace UndertaleModLib.Compiler
                             }
 
                             // Special array access- instance type needs to be pushed beforehand
-                            if (CompileContext.GMS2_3 && (cw.compileContext.BuiltInList.GlobalArray.ContainsKey(e.Children[0].Text) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(e.Children[0].Text)))
-                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)(e.Children[0].Text == "argument" ? InstanceType.Arg : InstanceType.Builtin); // hack x2
-                            else
-                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)e.Children[0].ID;
+                            cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)processedArray.NewID;
+
                             // Pushing array (incl. 2D) but not popping
                             AssembleArrayPush(cw, e.Children[0], !duplicate);
 
@@ -1770,8 +2030,8 @@ namespace UndertaleModLib.Compiler
                                 cw.varPatches.Add(new VariablePatch()
                                 {
                                     Target = cw.EmitRef(Opcode.Push, DataType.Variable),
-                                    Name = e.Children[0].Text,
-                                    InstType = GetIDPrefixSpecial(e.Children[0].ID),
+                                    Name = processedArray.NewVarName,
+                                    InstType = GetIDPrefixSpecial(processedArray.NewID),
                                     VarType = VariableType.Array
                                 });
                             }
@@ -1780,50 +2040,57 @@ namespace UndertaleModLib.Compiler
                             return;
                         }
                         isSingle = true;
+
+                        // Get variable type (if self) and instance ID
+                        VariableType varTypeIfSelf = VariableType.Normal;
                         int id = e.Children[0].ID;
                         if (id >= 100000)
+                        {
+                            // This is a room instance ID, encoded as a 16-bit integer apparently
+                            varTypeIfSelf = VariableType.Instance;
                             id -= 100000;
+                        }
+
                         string name = e.Children[0].Text;
                         switch (id)
                         {
                             case -1:
-                                if (cw.compileContext.BuiltInList.GlobalArray.ContainsKey(name)
-                                    || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(name)
-                                    || cw.currentArgsNames.Contains(name))
+                                var processedSelf = CheckFor23BuiltinOrArg(cw, name, id);
+                                if (processedSelf.NewID != id)
                                 {
-                                    if (name.In(cw.currentArgsNames.ToArray()))
-                                    {
-                                        int index = cw.currentArgsNames.IndexOf(name);
-                                        name = "argument" + index;
-                                    }
-
-                                    if (CompileContext.GMS2_3 &&
-                                        (name.In(
-                                            "argument0", "argument1", "argument2", "argument3",
-                                            "argument4", "argument5", "argument6", "argument7",
-                                            "argument8", "argument9", "argument10", "argument11",
-                                            "argument12", "argument13", "argument14", "argument15")))
-                                    {
-                                        // 2.3 argument (excuse the condition... the ID seems to be lost, so this is the easiest way to check)
-                                        cw.varPatches.Add(new VariablePatch()
-                                        {
-                                            Target = cw.EmitRef(Opcode.Push, DataType.Variable),
-                                            Name = name,
-                                            InstType = InstanceType.Arg,
-                                            VarType = VariableType.Normal
-                                        });
-                                    }
-                                    else
+                                    if (processedSelf.NewID == (int)InstanceType.Builtin)
                                     {
                                         // Builtin global
                                         cw.varPatches.Add(new VariablePatch()
                                         {
                                             Target = cw.EmitRef(useNoSpecificType ? Opcode.Push : Opcode.PushBltn, DataType.Variable),
-                                            Name = name,
+                                            Name = processedSelf.NewVarName,
                                             InstType = (CompileContext.GMS2_3 && !useNoSpecificType) ? InstanceType.Builtin : InstanceType.Self,
                                             VarType = VariableType.Normal
                                         });
                                     }
+                                    else
+                                    {
+                                        // Argument
+                                        cw.varPatches.Add(new VariablePatch()
+                                        {
+                                            Target = cw.EmitRef(Opcode.Push, DataType.Variable),
+                                            Name = processedSelf.NewVarName,
+                                            InstType = (InstanceType)processedSelf.NewID,
+                                            VarType = VariableType.Normal
+                                        });
+                                    }
+                                }
+                                else if (cw.compileContext.BuiltInList.GlobalArray.ContainsKey(name) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(name))
+                                {
+                                    // Builtin global
+                                    cw.varPatches.Add(new VariablePatch()
+                                    {
+                                        Target = cw.EmitRef(useNoSpecificType ? Opcode.Push : Opcode.PushBltn, DataType.Variable),
+                                        Name = name,
+                                        InstType = (CompileContext.GMS2_3 && !useNoSpecificType) ? InstanceType.Builtin : InstanceType.Self,
+                                        VarType = VariableType.Normal
+                                    });
                                 }
                                 else
                                 {
@@ -1832,7 +2099,7 @@ namespace UndertaleModLib.Compiler
                                         Target = cw.EmitRef(Opcode.Push, DataType.Variable),
                                         Name = name,
                                         InstType = InstanceType.Self,
-                                        VarType = VariableType.Normal
+                                        VarType = varTypeIfSelf
                                     });
                                 }
                                 break;
@@ -1937,13 +2204,17 @@ namespace UndertaleModLib.Compiler
                     string variableName = e.Text;
                     if (!fix2.WasIDSet || fix2.ID >= 100000)
                     {
-                        if (cw.compileContext.LocalVars.ContainsKey(variableName))
+                        if (cw.funcContexts.Count > 0 && cw.funcContexts.Peek().ParseInfo.LocalVars.Contains(variableName))
                         {
-                            fix2.ID = -7; // local
+                            fix2.ID = (int)InstanceType.Local;
+                        }
+                        else if (cw.funcContexts.Count == 0 && cw.compileContext.LocalVars.ContainsKey(variableName))
+                        {
+                            fix2.ID = (int)InstanceType.Local;
                         }
                         else
                         {
-                            fix2.ID = -1; // self
+                            fix2.ID = (int)InstanceType.Self;
                         }
                     }
                     fix.Children.Add(fix2);
@@ -1987,10 +2258,11 @@ namespace UndertaleModLib.Compiler
                     else
                     {
                         // Surprise! One small instruction.
+                        var processed = CheckFor23BuiltinOrArg(cw, a.Text, a.ID);
                         cw.varPatches.Add(new VariablePatch()
                         {
                             Target = cw.EmitRef(Opcode.Push, DataType.Variable),
-                            Name = a.Text,
+                            Name = processed.NewVarName,
                             InstType = InstanceType.Self,
                             VarType = arraypushaf ? VariableType.ArrayPushAF : VariableType.ArrayPopAF
                         });
@@ -2032,6 +2304,44 @@ namespace UndertaleModLib.Compiler
                 };
             }
 
+            private static (string NewVarName, int NewID) CheckFor23BuiltinOrArg(CodeWriter cw, string varName, int id)
+            {
+                if (CompileContext.GMS2_3)
+                {
+                    if (cw.funcContexts.Count > 0)
+                    {
+                        FunctionContext topFunctionCtx = cw.funcContexts.Peek();
+                        int argIndex = topFunctionCtx.NamedArguments.IndexOf(varName);
+                        if (argIndex != -1)
+                        {
+                            // Found a named argument; rename it to builtin variable
+                            return ($"argument{argIndex}", (int)InstanceType.Arg);
+                        }
+                    }
+
+                    if (cw.compileContext.BuiltInList.GlobalArray.ContainsKey(varName) || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(varName))
+                    {
+                        if (varName.In(
+                            "argument",
+                            "argument0", "argument1", "argument2", "argument3",
+                            "argument4", "argument5", "argument6", "argument7",
+                            "argument8", "argument9", "argument10", "argument11",
+                            "argument12", "argument13", "argument14", "argument15"))
+                        {
+                            // Found normal argument variable
+                            return (varName, (int)InstanceType.Arg);
+                        }
+                        else
+                        {
+                            // Found builtin variable
+                            return (varName, (int)InstanceType.Builtin);
+                        }
+                    }
+                }
+
+                return (varName, id);
+            }
+
             private static void AssembleStoreVariable(CodeWriter cw, Parser.Statement s, DataType typeToStore, bool skip = false, bool duplicate = false)
             {
                 if (s.Kind == Parser.Statement.StatementKind.ExprVariableRef)
@@ -2044,6 +2354,9 @@ namespace UndertaleModLib.Compiler
 
                         if (s.Children[0].Children.Count != 0)
                         {
+                            // Final processing on variable
+                            var processedArray = CheckFor23BuiltinOrArg(cw, s.Children[0].Text, s.Children[0].ID);
+
                             // Special array set- instance type needs to be pushed beforehand
                             if (!skip)
                             {
@@ -2053,7 +2366,7 @@ namespace UndertaleModLib.Compiler
                                     cw.Emit(Opcode.Conv, typeToStore, DataType.Variable);
                                     typeToStore = DataType.Variable;
                                 }
-                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)s.Children[0].ID;
+                                cw.Emit(Opcode.PushI, DataType.Int16).Value = (short)processedArray.NewID;
                                 AssembleArrayPush(cw, s.Children[0]);
                             }
 
@@ -2081,65 +2394,32 @@ namespace UndertaleModLib.Compiler
                                 cw.varPatches.Add(new VariablePatch()
                                 {
                                     Target = cw.EmitRef(Opcode.Pop, popLocation, typeToStore),
-                                    Name = s.Children[0].Text,
-                                    InstType = GetIDPrefixSpecial(s.Children[0].ID),
+                                    Name = processedArray.NewVarName,
+                                    InstType = GetIDPrefixSpecial(processedArray.NewID),
                                     VarType = VariableType.Array
                                 });
                             }
                             return;
                         }
 
-                        // Simple common assignment
+                        // Simple common assignment. Get variable type and instance ID
+                        VariableType varTypeIfSelf = VariableType.Normal;
                         int id = s.Children[0].ID;
                         if (id >= 100000)
+                        {
+                            // This is a room instance ID, encoded as a 16-bit integer apparently
+                            varTypeIfSelf = VariableType.Instance;
                             id -= 100000;
-                        if (CompileContext.GMS2_3
-                            && (cw.compileContext.BuiltInList.GlobalArray.ContainsKey(s.Children[0].Text)
-                                || cw.compileContext.BuiltInList.GlobalNotArray.ContainsKey(s.Children[0].Text)
-                                || cw.currentArgsNames.Contains(s.Children[0].Text))
-                            )
-                        {
-                            if (s.Children[0].Text.In(cw.currentArgsNames.ToArray()))
-                            {
-                                int index = cw.currentArgsNames.IndexOf(s.Children[0].Text);
-                                s.Children[0].Text = "argument" + index;
-                            }
+                        }
 
-                            if (s.Children[0].Text.In(
-                                "argument0", "argument1", "argument2", "argument3",
-                                "argument4", "argument5", "argument6", "argument7",
-                                "argument8", "argument9", "argument10", "argument11",
-                                "argument12", "argument13", "argument14", "argument15"))
-                            {
-                                cw.varPatches.Add(new VariablePatch()
-                                {
-                                    Target = cw.EmitRef(Opcode.Pop, popLocation, typeToStore),
-                                    Name = s.Children[0].Text,
-                                    InstType = InstanceType.Arg,
-                                    VarType = VariableType.Normal
-                                });
-                            }
-                            else
-                            {
-                                cw.varPatches.Add(new VariablePatch()
-                                {
-                                    Target = cw.EmitRef(Opcode.Pop, popLocation, typeToStore),
-                                    Name = s.Children[0].Text,
-                                    InstType = InstanceType.Builtin,
-                                    VarType = VariableType.Normal
-                                });
-                            }
-                        }
-                        else
+                        var processedCommon = CheckFor23BuiltinOrArg(cw, s.Children[0].Text, id);
+                        cw.varPatches.Add(new VariablePatch()
                         {
-                            cw.varPatches.Add(new VariablePatch()
-                            {
-                                Target = cw.EmitRef(Opcode.Pop, popLocation, typeToStore),
-                                Name = s.Children[0].Text,
-                                InstType = (InstanceType)id,
-                                VarType = VariableType.Normal
-                            });
-                        }
+                            Target = cw.EmitRef(Opcode.Pop, popLocation, typeToStore),
+                            Name = processedCommon.NewVarName,
+                            InstType = (InstanceType)processedCommon.NewID,
+                            VarType = varTypeIfSelf
+                        });
                     }
                     else
                     {
@@ -2198,17 +2478,21 @@ namespace UndertaleModLib.Compiler
                     string variableName = s.Text;
                     if (!fix2.WasIDSet || fix2.ID >= 100000)
                     {
-                        if (cw.compileContext.LocalVars.ContainsKey(variableName))
+                        if (cw.funcContexts.Count > 0 && cw.funcContexts.Peek().ParseInfo.LocalVars.Contains(variableName))
                         {
-                            fix2.ID = -7; // local
+                            fix2.ID = (int)InstanceType.Local;
+                        }
+                        else if (cw.funcContexts.Count == 0 && cw.compileContext.LocalVars.ContainsKey(variableName))
+                        {
+                            fix2.ID = (int)InstanceType.Local;
                         }
                         else if (cw.compileContext.GlobalVars.ContainsKey(variableName))
                         {
-                            fix2.ID = -5; // global
+                            fix2.ID = (int)InstanceType.Global;
                         }
                         else
                         {
-                            fix2.ID = -1; // self
+                            fix2.ID = (int)InstanceType.Self;
                         }
                     }
                     fix.Children.Add(fix2);
@@ -2216,15 +2500,10 @@ namespace UndertaleModLib.Compiler
                 }
                 else if (s.Kind == Parser.Statement.StatementKind.ExprFuncName)
                 {
-                    // Until further notice, I'm assuming this only comes up in 2.3 script definition.
-                    cw.varPatches.Add(new VariablePatch()
-                    {
-                        Target = cw.EmitRef(Opcode.Pop, DataType.Variable, DataType.Variable),
-                        Name = s.Text,
-                        InstType = InstanceType.Self,
-                        VarType = VariableType.StackTop
-                    });
-                    cw.Emit(Opcode.Popz, DataType.Variable);
+                    // Technically not fully valid syntax, but permit it as a simple variable
+                    Parser.Statement fix = new Parser.Statement(s);
+                    fix.Kind = Parser.Statement.StatementKind.ExprSingleVariable;
+                    AssembleStoreVariable(cw, fix, typeToStore, skip, duplicate);
                 }
                 else
                 {

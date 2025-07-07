@@ -139,17 +139,21 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// <summary>
     /// The vertices used for a <see cref="CollisionShape"/> of type <see cref="CollisionShapeFlags.Custom"/>.
     /// </summary>
-    public List<UndertalePhysicsVertex> PhysicsVertices { get; private set; } = new List<UndertalePhysicsVertex>();
+    public List<UndertalePhysicsVertex> PhysicsVertices { get; set; } = new List<UndertalePhysicsVertex>();
 
     #endregion
 
     /// <summary>
     /// All the events that this game object has.
     /// </summary>
-    public UndertalePointerList<UndertalePointerList<Event>> Events { get; private set; } = new();
+    public UndertalePointerList<UndertalePointerList<Event>> Events { get; set; } = new();
 
     /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
+
+    /// <summary>
+    /// Invoked whenever the effective value of any dependency property has been updated.
+    /// </summary>
     protected void OnPropertyChanged([CallerMemberName] string name = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
@@ -275,31 +279,31 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     // TODO: Add documentation for these methods.
     // These methods are used by scripts for getting a code entry for a certain event of the game object.
 
-    public UndertaleCode EventHandlerFor(EventType type, uint subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
+    public UndertaleCode EventHandlerFor(EventType type, uint subtype, UndertaleData data)
     {
-        Event subtypeObj = Events[(int)type].Where((x) => x.EventSubtype == subtype).FirstOrDefault();
+        Event subtypeObj = Events[(int)type].FirstOrDefault(x => x.EventSubtype == subtype);
         if (subtypeObj == null)
             Events[(int)type].Add(subtypeObj = new Event() { EventSubtype = subtype });
         EventAction action = subtypeObj.Actions.FirstOrDefault();
         if (action == null)
         {
             subtypeObj.Actions.Add(action = new EventAction());
-            action.ActionName = strg.MakeString("");
+            action.ActionName = data.Strings.MakeString("");
         }
         UndertaleCode code = action.CodeId;
         if (code == null)
         {
-            var name = strg.MakeString("gml_Object_" + Name.Content + "_" + type.ToString() + "_" + subtype);
+            var name = data.Strings.MakeString("gml_Object_" + Name.Content + "_" + type + "_" + subtype);
             code = new UndertaleCode()
             {
                 Name = name,
                 LocalsCount = 1
             };
             action.CodeId = code;
-            codelist.Add(code);
+            data.Code.Add(code);
 
             UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
-            argsLocal.Name = strg.MakeString("arguments");
+            argsLocal.Name = data.Strings.MakeString("arguments");
             argsLocal.Index = 0;
 
             var locals = new UndertaleCodeLocals()
@@ -307,84 +311,49 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
                 Name = name
             };
             locals.Locals.Add(argsLocal);
-            localslist.Add(locals);
+            data.CodeLocals.Add(locals);
         }
         return code;
     }
 
     public UndertaleCode EventHandlerFor(EventType type, UndertaleData data)
     {
-        return EventHandlerFor(type, data.Strings, data.Code, data.CodeLocals);
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, uint subtype, UndertaleData data)
-    {
-        return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
-    {
-        return EventHandlerFor(type, 0u, strg, codelist, localslist);
+        return EventHandlerFor(type, 0u, data);
     }
 
     public UndertaleCode EventHandlerFor(EventType type, EventSubtypeKey subtype, UndertaleData data)
     {
-        return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, EventSubtypeKey subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
-    {
         if (type != EventType.Keyboard && type != EventType.KeyPress && type != EventType.KeyRelease)
             throw new InvalidOperationException();
-        return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
+        return EventHandlerFor(type, (uint)subtype, data);
     }
 
     public UndertaleCode EventHandlerFor(EventType type, EventSubtypeStep subtype, UndertaleData data)
     {
-        return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, EventSubtypeStep subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
-    {
         if (type != EventType.Step)
             throw new InvalidOperationException();
-        return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
+        return EventHandlerFor(type, (uint)subtype, data);
     }
 
     public UndertaleCode EventHandlerFor(EventType type, EventSubtypeMouse subtype, UndertaleData data)
     {
-        return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, EventSubtypeMouse subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
-    {
         if (type != EventType.Mouse)
             throw new InvalidOperationException();
-        return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
+        return EventHandlerFor(type, (uint)subtype, data);
     }
 
     public UndertaleCode EventHandlerFor(EventType type, EventSubtypeOther subtype, UndertaleData data)
     {
-        return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, EventSubtypeOther subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
-    {
         if (type != EventType.Other)
             throw new InvalidOperationException();
-        return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
+        return EventHandlerFor(type, (uint)subtype, data);
     }
 
     public UndertaleCode EventHandlerFor(EventType type, EventSubtypeDraw subtype, UndertaleData data)
     {
-        return EventHandlerFor(type, subtype, data.Strings, data.Code, data.CodeLocals);
-    }
-
-    public UndertaleCode EventHandlerFor(EventType type, EventSubtypeDraw subtype, IList<UndertaleString> strg, IList<UndertaleCode> codelist, IList<UndertaleCodeLocals> localslist)
-    {
         if (type != EventType.Draw)
             throw new InvalidOperationException();
-        return EventHandlerFor(type, (uint)subtype, strg, codelist, localslist);
+        return EventHandlerFor(type, (uint)subtype, data);
     }
     #endregion
 
@@ -428,7 +397,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         /// The available actions that will be performed for this event.
         /// </summary>
         /// <remarks>This seems to always have 1 entry, it would need testing if maybe the games using drag-and-drop code are different</remarks>
-        public UndertalePointerList<EventAction> Actions { get; private set; } = new UndertalePointerList<EventAction>();
+        public UndertalePointerList<EventAction> Actions { get; set; } = new UndertalePointerList<EventAction>();
 
         //TODO: not used, condense. Also UMT specific.
         public EventSubtypeKey EventSubtypeKey
@@ -537,6 +506,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         public bool IsNot { get; set; } // always 0
         public uint UnknownAlwaysZero { get; set; } // always 0
 
+        /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <inheritdoc />

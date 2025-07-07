@@ -249,7 +249,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
 
     public class Track : UndertaleObject
     {
-        public enum TrackBuiltinName : int
+        public enum TrackBuiltinName
         {
             Gain = 5,
             Pitch = 6,
@@ -273,7 +273,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         }
 
         [Flags]
-        public enum TrackTraits : int
+        public enum TrackTraits
         {
             None,
             ChildrenIgnoreOrigin
@@ -455,8 +455,8 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
                 case "GMParticleTrack": // Introduced in GM 2023.2
                     Keyframes = reader.ReadUndertaleObject<ParticleKeyframes>();
                     break;
-                
-                // "GMGroupTrack" and "GMClipMaskTrack" have null keyframes
+
+                    // "GMGroupTrack" and "GMClipMaskTrack" have null keyframes
             }
         }
 
@@ -538,7 +538,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
                     count += 1 + ParticleKeyframes.UnserializeChildObjectCount(reader);
                     break;
 
-                // "GMGroupTrack" and "GMClipMaskTrack" have null keyframes
+                    // "GMGroupTrack" and "GMClipMaskTrack" have null keyframes
             }
 
             return count;
@@ -657,7 +657,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
             public override void Serialize(UndertaleWriter writer)
             {
                 base.Serialize(writer);
-                writer.Write((int)0);
+                writer.Write(0);
                 writer.Write(Mode);
             }
 
@@ -671,7 +671,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
             }
 
             /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
-            public static new uint UnserializeChildObjectCount(UndertaleReader reader)
+            public new static uint UnserializeChildObjectCount(UndertaleReader reader)
             {
                 uint count = ResourceData<UndertaleResourceById<UndertaleSound, UndertaleChunkSOND>>.UnserializeChildObjectCount(reader);
 
@@ -776,7 +776,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         public static uint UnserializeChildObjectCount(UndertaleReader reader)
         {
             uint count = 0;
-            
+
             // "IsCurveEmbedded"
             if (reader.ReadBoolean())
             {
@@ -810,7 +810,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         }
 
         /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
-        public static new uint UnserializeChildObjectCount(UndertaleReader reader)
+        public new static uint UnserializeChildObjectCount(UndertaleReader reader)
         {
             reader.Position += 4; // "Value"
 
@@ -847,7 +847,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         }
 
         /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
-        public static new uint UnserializeChildObjectCount(UndertaleReader reader)
+        public new static uint UnserializeChildObjectCount(UndertaleReader reader)
         {
             while (reader.AbsPosition % 4 != 0)
                 reader.Position++;
@@ -877,7 +877,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         }
 
         /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
-        public static new uint UnserializeChildObjectCount(UndertaleReader reader)
+        public new static uint UnserializeChildObjectCount(UndertaleReader reader)
         {
             reader.Position += 4; // "Value"
 
@@ -914,7 +914,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
         }
 
         /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
-        public static new uint UnserializeChildObjectCount(UndertaleReader reader)
+        public new static uint UnserializeChildObjectCount(UndertaleReader reader)
         {
             while (reader.AbsPosition % 4 != 0)
                 reader.Position++;
@@ -924,7 +924,7 @@ public class UndertaleSequence : UndertaleNamedResource, IDisposable
             return UndertaleSimpleList<Keyframe<RealData>>.UnserializeChildObjectCount(reader);
         }
     }
-    
+
     public class TextKeyframes : TrackKeyframes<TextKeyframes.Data>
     {
         // Source - https://github.com/YoYoGames/GameMaker-HTML5/blob/develop/scripts/yySequence.js#L2227

@@ -18,64 +18,99 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, ID
         /// <summary>
         /// Whether the sound is embedded into the data file.
         /// </summary>
+        /// <remarks>This should ideally be used for sound effects, but not for music.<br/>
+        /// The GameMaker documentation also calls this "not streamed" (or "from memory") for when the flag is present,
+        /// or "streamed" when it isn't.</remarks>
         IsEmbedded = 0x1,
         /// <summary>
         /// Whether the sound is compressed.
         /// </summary>
+        /// <remarks>When a sound is compressed it will take smaller memory/disk space.
+        /// However, this is at the cost of needing to decompress it when it needs to be played,
+        /// which means slightly higher CPU usage.</remarks>
+        // TODO: where exactly is this used? for non-embedded compressed files, this flag doesnt seem to be set.
         IsCompressed = 0x2,
         /// <summary>
-        /// Whether the sound is compressed on load.
+        /// Whether the sound is decompressed on game load.
         /// </summary>
+        /// <remarks>When a sound is played, it must be loaded into memory first, which would usually be done when the sound is first used.
+        /// If you preload it, the sound will be loaded into memory at the start of the game.</remarks>
+        // TODO: some predecessor/continuation of Preload? Also why is this flag the combination of both compressed and embedded?
         IsDecompressedOnLoad = 0x3,
         /// <summary>
         /// Whether this sound uses the "new audio system".
         /// </summary>
         /// <remarks>This is default for everything post Game Maker: Studio.
-        /// The legacy sound system was used in pre Game Maker 8</remarks>
-        Regular = 0x64, // also means "Use New Audio System?" Set by default on GMS 2.
+        /// The legacy sound system was used in pre Game Maker 8.</remarks>
+        Regular = 0x64,
     }
 
     /// <summary>
     /// The name of the sound entry.
     /// </summary>
+    /// <remarks>This name is used when referencing this entry from code.</remarks>
     public UndertaleString Name { get; set; }
 
     /// <summary>
     /// The flags the sound entry uses.
     /// </summary>
-    public AudioEntryFlags Flags { get; set; } = AudioEntryFlags.IsEmbedded;
+    /// <remarks>These effectively control different options of this sound.</remarks>
+    /// <seealso cref="AudioEntryFlags"/>
+    public AudioEntryFlags Flags { get; set; } = AudioEntryFlags.IsEmbedded & AudioEntryFlags.Regular;
 
     /// <summary>
     /// The file format of the audio entry.
     /// </summary>
+    /// <remarks>This includes the <c>.</c> from the file extension. Possible values are:
+    /// <list type="bullet">
+    /// <item><c>.wav</c>
+    /// </item>
+    /// <item><c>.mp3</c>
+    /// </item>
+    /// <item><c>.ogg</c>
+    /// </item>
+    /// </list>
+    /// </remarks>
+    // TODO: is .midi valid as well? it was used in legacy GM. Also I assume that this is the extension to
+    // know what the runner must do, and not just the extension of the filename.
     public UndertaleString Type { get; set; }
 
     /// <summary>
-    /// The file name of the audio entry.
+    /// The original file name of the audio entry.
     /// </summary>
+    /// <remarks>This is the full filename how it was loaded in the project.
+    /// This will be used if the sound effect is streamed from disk to find the sound file.
+    /// <seealso cref="AudioEntryFlags.IsEmbedded"/>
+    /// </remarks>
     public UndertaleString File { get; set; }
 
     /// <summary>
-    /// A pre- Game Maker: Studio way of having certain effects on a sound effect.
+    /// A pre-Game Maker: Studio way of having certain effects on a sound effect.
     /// </summary>
     /// <remarks>The exact way this works is unknown. But following values are possible:
     /// <c>Chorus</c>, <c>Echo</c>, <c>Flanger</c>, <c>Reverb</c>, <c>Gargle</c>, all possible to be combined with one another.</remarks>
+    // TODO: some research has been done, but not a lot. these don't *seem* to be bitflags, as both "nothing" and "flanger" have the same value of 1.
+    // https://discord.com/channels/566861759210586112/568950566122946580/957318910066196500
     public uint Effects { get; set; }
 
     /// <summary>
     /// The volume the audio entry is played at.
     /// </summary>
+    /// <remarks>The volume is a number between <c>0</c> and <c>1</c>,
+    /// which mean "completely silent" and "full volume" respectively.</remarks>
     public float Volume { get; set; } = 1;
 
     /// <summary>
-    /// Whether the audio entry should be preloaded.
+    /// Whether the sound is decompressed on game load.
     /// </summary>
+    /// <inheritdoc cref="AudioEntryFlags.IsDecompressedOnLoad"/>
     public bool Preload { get; set; } = true;
 
     /// <summary>
     /// The pitch change of the audio entry.
     /// </summary>
-    public float Pitch { get; set; } = 0;
+    // TODO: is this really pitch? I can't see pitch being referenced anywhere in any manual. This feels like it's panning from legacy GMS.
+    public float Pitch { get; set; }
 
     private UndertaleResourceById<UndertaleAudioGroup, UndertaleChunkAGRP> _audioGroup = new();
     private UndertaleResourceById<UndertaleEmbeddedAudio, UndertaleChunkAUDO> _audioFile = new();
@@ -83,15 +118,24 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, ID
     /// <summary>
     /// The audio group this audio entry belongs to.
     /// </summary>
+    /// <remarks>These can only be used with the regular audio system.</remarks>
+    /// <seealso cref="AudioEntryFlags.Regular"/>
+    /// <seealso cref="AudioGroup"/>
     public UndertaleAudioGroup AudioGroup { get => _audioGroup.Resource; set { _audioGroup.Resource = value; OnPropertyChanged(); } }
 
     /// <summary>
     /// The reference to the <see cref="UndertaleEmbeddedAudio"/> audio file.
     /// </summary>
+    /// <remarks>This is a UTMT-specific attribute. <br/>
+    /// All sound entries always have to have a reference to an <see cref="UndertaleEmbeddedAudio"/> entry.
+    /// Even if the sound entry is not embedded, it is still necessary. For that case, you can just link to any embedded sound.
+    /// </remarks>
+    /// <seealso cref="AudioEntryFlags.IsEmbedded"/>
+    /// <seealso cref="UndertaleEmbeddedAudio"/>
     public UndertaleEmbeddedAudio AudioFile { get => _audioFile.Resource; set { _audioFile.Resource = value; OnPropertyChanged(); } }
 
     /// <summary>
-    /// The id of <see cref="AudioFile"></see>.
+    /// The id of <see cref="AudioFile"/>.
     /// </summary>
     public int AudioID { get => _audioFile.CachedId; set { _audioFile.CachedId = value; OnPropertyChanged(); } }
 
@@ -100,8 +144,18 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, ID
     /// </summary>
     public int GroupID { get => _audioGroup.CachedId; set { _audioGroup.CachedId = value; OnPropertyChanged(); } }
 
+    /// <summary>
+    /// The precomputed length of the sound's audio data.
+    /// </summary>
+    /// <remarks>Introduced in GameMaker 2024.6.</remarks>
+    public float AudioLength { get; set; }
+
     /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
+
+    /// <summary>
+    /// Invoked whenever the effective value of any dependency property has been updated.
+    /// </summary>
     protected void OnPropertyChanged([CallerMemberName] string name = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
@@ -126,6 +180,9 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, ID
             writer.WriteUndertaleObject(_audioFile);
         else
             writer.Write(_audioFile.CachedId);
+
+        if (writer.undertaleData.IsVersionAtLeast(2024, 6))
+            writer.Write(AudioLength);
     }
 
     /// <inheritdoc />
@@ -159,6 +216,9 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, ID
         {
             _audioFile.CachedId = reader.ReadInt32();
         }
+
+        if (reader.undertaleData.IsVersionAtLeast(2024, 6))
+            AudioLength = reader.ReadSingle();
     }
 
     /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
@@ -197,7 +257,7 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, ID
     /// <inheritdoc />
     public override string ToString()
     {
-        return Name?.Content + " (" + GetType().Name + ")";
+        return $"{Name?.Content} ({GetType().Name})";
     }
 
     /// <inheritdoc/>
@@ -210,46 +270,5 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, ID
         Name = null;
         Type = null;
         File = null;
-    }
-}
-
-/// <summary>
-/// Audio group entry in a data file.
-/// </summary>
-[PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleAudioGroup : UndertaleNamedResource, IStaticChildObjectsSize, IDisposable
-{
-    /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
-    public static readonly uint ChildObjectsSize = 4;
-
-    /// <summary>
-    /// The name of the audio group.
-    /// </summary>
-    public UndertaleString Name { get; set; }
-
-    /// <inheritdoc />
-    public void Serialize(UndertaleWriter writer)
-    {
-        writer.WriteUndertaleString(Name);
-    }
-
-    /// <inheritdoc />
-    public void Unserialize(UndertaleReader reader)
-    {
-        Name = reader.ReadUndertaleString();
-    }
-
-    /// <inheritdoc />
-    public override string ToString()
-    {
-        return Name?.Content + " (" + GetType().Name + ")";
-    }
-
-    /// <inheritdoc/>
-    public void Dispose()
-    {
-        GC.SuppressFinalize(this);
-
-        Name = null;
     }
 }

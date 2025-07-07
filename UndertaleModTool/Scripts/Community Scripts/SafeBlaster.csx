@@ -18,7 +18,7 @@ if (obj_safeblaster == null)
     Data.GameObjects.Add(obj_safeblaster);
 }
 
-obj_safeblaster.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+obj_safeblaster.EventHandlerFor(EventType.Create, Data).ReplaceGML(@"
 con = 0
 idealx = 200
 idealy = 200
@@ -44,7 +44,7 @@ beam_up_sfx = caster_load(""music/sfx/sfx_segapower.ogg"")
 ", Data);
 
 
-obj_safeblaster.EventHandlerFor(EventType.Draw, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+obj_safeblaster.EventHandlerFor(EventType.Draw, Data).ReplaceGML(@"
 
 draw_sprite_ext(sprite_index, image_index, x, y, image_xscale, image_yscale, image_angle, image_blend, image_alpha)
 if(con == 0) {
@@ -199,10 +199,10 @@ if (con == 7)
 
 ", Data);
 
-obj_safeblaster.EventHandlerFor(EventType.Alarm, (uint)4, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML("con += 1", Data);
+obj_safeblaster.EventHandlerFor(EventType.Alarm, (uint)4, Data).ReplaceGML("con += 1", Data);
 
 // Removes unneeded caster_free calls from earlier versions
-obj_safeblaster.EventHandlerFor(EventType.Destroy, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML("", Data);
+obj_safeblaster.EventHandlerFor(EventType.Destroy, Data).ReplaceGML("", Data);
 
 
 // Generator
@@ -217,14 +217,15 @@ if (obj_safebl_gen == null)
     Data.GameObjects.Add(obj_safebl_gen);
 }
 
-obj_safebl_gen.EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(@"
+obj_safebl_gen.EventHandlerFor(EventType.Create, Data).ReplaceGML(@"
 type = 0
 num = 0
 ", Data);
 
 var obj_gasterbl_gen = Data.GameObjects.ByName("obj_gasterbl_gen");
-var decomp = Decompiler.Decompile(obj_gasterbl_gen.EventHandlerFor(EventType.Alarm, (uint)0, Data.Strings, Data.Code, Data.CodeLocals), new GlobalDecompileContext(Data, false));
-obj_safebl_gen.EventHandlerFor(EventType.Alarm, (uint)0, Data.Strings, Data.Code, Data.CodeLocals).ReplaceGML(decomp.Replace("obj_gasterblaster", "obj_safeblaster"), Data);
+UndertaleCode codeToDecompile = obj_gasterbl_gen.EventHandlerFor(EventType.Alarm, (uint)0, Data);
+string decomp = GetDecompiledText(codeToDecompile, null, new Underanalyzer.Decompiler.DecompileSettings());
+obj_safebl_gen.EventHandlerFor(EventType.Alarm, (uint)0, Data).ReplaceGML(decomp.Replace("obj_gasterblaster", "obj_safeblaster"), Data);
 
 
 ScriptMessage("Done! Use obj_safeblaster & obj_safebl_gen where you would normally use obj_gasterblaster & obj_safebl_gen.\nYou can set the amount of damage an individual blaster would do by setting the 'dmg' variable on the blaster instance (defaults to 9)");

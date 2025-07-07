@@ -24,12 +24,9 @@ bool debug_override = false;
 
 // Setup root export folder.
 string winFolder = GetFolder(FilePath); // The folder data.win is located in.
-string BackupFolder = winFolder + "/Backups/";
+string BackupFolder = Path.Combine(winFolder, "Backups");
 
-if (!(Directory.Exists(BackupFolder)))
-{
-    Directory.CreateDirectory(BackupFolder);
-}
+Directory.CreateDirectory(BackupFolder);
 
 System.Timers.Timer aTimer;
 // Create a timer with a minute interval defined by 'minutes_per_backup'.
@@ -39,17 +36,15 @@ while (true)
 {
     try
     {
-        //                               SimpleTextInput(string titleText,                                                                      string labelText, string defaultInputBoxText, bool isMultiline)
+        // SimpleTextInput(string titleText, string labelText, string defaultInputBoxText, bool isMultiline)
         double result = Convert.ToDouble(SimpleTextInput("Automatic backup script.", "Please enter the backup interval in minutes (minimum interval 5 minutes).", "30", false));
         if ((result < 5) && (!debug_override))
         {
             continue;
         }
-        else
-        {
-            minutes_per_backup = result;
-            break;
-        }
+
+        minutes_per_backup = result;
+        break;
     }
     catch (FormatException)
     {
@@ -62,17 +57,15 @@ while (true)
 {
     try
     {
-        //                            SimpleTextInput(string titleText,                                                                      string labelText, string defaultInputBoxText, bool isMultiline)
+        // SimpleTextInput(string titleText, string labelText, string defaultInputBoxText, bool isMultiline)
         int result2 = Convert.ToInt32(SimpleTextInput("Automatic backup script.", "Please enter the maximum number of unique backups this session (0 for unlimited).", "200", false));
         if (result2 < 0)
         {
             continue;
         }
-        else
-        {
-            maximum_number_of_runs = result2;
-            break;
-        }
+
+        maximum_number_of_runs = result2;
+        break;
     }
     catch (FormatException)
     {
@@ -83,7 +76,7 @@ while (true)
 double number_of_runs_per_continue_prompt = 5;
 double times_ran = 0;
 double backups_count = 0;
-double timer_delay = 1000*60*minutes_per_backup;
+double timer_delay = 1000 * 60 * minutes_per_backup;
 aTimer = new System.Timers.Timer(timer_delay);
 // Hook up the Elapsed event for the timer. 
 aTimer.Elapsed += OnTimedEvent;
@@ -127,7 +120,7 @@ void OnTimedEvent(Object source, ElapsedEventArgs e)
                 UndertaleIO.Write(stream, Data);
             }
         }
-        catch(Exception error)
+        catch (Exception error)
         {
             ScriptError("An error occured while trying to save:\n" + error.Message, "Save error");
             ScriptMessage("Automatic backups are off. Run the script again to turn back on automatic backups.");
@@ -138,6 +131,7 @@ void OnTimedEvent(Object source, ElapsedEventArgs e)
             return;
         }
         if (times_ran > 1)
+            // TODO: what's this about? 
             FileCompare();
         else
         {
@@ -146,7 +140,7 @@ void OnTimedEvent(Object source, ElapsedEventArgs e)
         }
         if (((times_ran % number_of_runs_per_continue_prompt) == 0) && (times_ran != 0))
         {
-            if (!(ScriptQuestion("The application has been running for about: " + (times_ran*minutes_per_backup).ToString() + " minutes with " + times_ran.ToString() + " runs this session. The current time is: " + DateTime.Now + ". Continue backing up?")))
+            if (!(ScriptQuestion("The application has been running for about: " + (times_ran * minutes_per_backup).ToString() + " minutes with " + times_ran.ToString() + " runs this session. The current time is: " + DateTime.Now + ". Continue backing up?")))
             {
                 aTimer.Stop();
                 aTimer.Dispose();
@@ -161,14 +155,14 @@ void OnTimedEvent(Object source, ElapsedEventArgs e)
     {
         aTimer.Stop();
         aTimer.Dispose();
-        ScriptMessage(backups_count.ToString() + " unique backups have been reached. (" + (backups_count*minutes_per_backup).ToString() + " minutes). Automatic backups are now off. Run the script again to turn back on automatic backups.");
-        SetUMTConsoleText(backups_count.ToString() + " unique backups have been reached. (" + (backups_count*minutes_per_backup).ToString() + " minutes). Automatic backups are now off. Run the script again to turn back on automatic backups.");
+        ScriptMessage(backups_count.ToString() + " unique backups have been reached. (" + (backups_count * minutes_per_backup).ToString() + " minutes). Automatic backups are now off. Run the script again to turn back on automatic backups.");
+        SetUMTConsoleText(backups_count.ToString() + " unique backups have been reached. (" + (backups_count * minutes_per_backup).ToString() + " minutes). Automatic backups are now off. Run the script again to turn back on automatic backups.");
         SetFinishedMessage(false);
         return;
     }
 }
 
-string GetFolder(string path) 
+string GetFolder(string path)
 {
     return Path.GetDirectoryName(path) + Path.DirectorySeparatorChar;
 }
@@ -201,7 +195,7 @@ void FileCompare()
         older_filename = filename;
         return;
     }
-    
+
     // Open the two files.
     fs1 = new FileStream(old_data_path, FileMode.Open);
     fs2 = new FileStream(new_data_path, FileMode.Open);

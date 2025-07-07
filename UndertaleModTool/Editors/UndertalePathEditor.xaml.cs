@@ -15,7 +15,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using UndertaleModLib;
 using UndertaleModLib.Models;
+using WpfAnimatedGif;
 
 namespace UndertaleModTool
 {
@@ -24,9 +26,47 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertalePathEditor : DataUserControl
     {
+        private static MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
         public UndertalePathEditor()
         {
             InitializeComponent();
+
+            ((Image)mainWindow.FindName("Flowey")).Opacity = 0;
+            ((Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+            ((Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
+
+            ((Label)this.FindName("PathsObjectLabel")).Content = ((Label)mainWindow.FindName("ObjectLabel")).Content;
+        }
+        private void UndertalePathsEditor_Unloaded(object sender, RoutedEventArgs e)
+        {
+            var floweranim = ((Image)mainWindow.FindName("Flowey"));
+            //floweranim.Opacity = 1;
+
+            var controller = ImageBehavior.GetAnimationController(floweranim);
+            controller.Pause();
+            controller.GotoFrame(controller.FrameCount - 5);
+            controller.Play();
+
+            ((Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+        }
+        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            UndertalePath code = this.DataContext as UndertalePath;
+
+            int foundIndex = code is UndertaleResource res ? mainWindow.Data.IndexOf(res, false) : -1;
+            string idString;
+
+            if (foundIndex == -1)
+                idString = "None";
+            else if (foundIndex == -2)
+                idString = "N/A";
+            else
+                idString = Convert.ToString(foundIndex);
+
+            ((Label)this.FindName("PathsObjectLabel")).Content = idString;
+
+            //((Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
+            //((Image)mainWindow.FindName("Flowey")).Opacity = 0;
         }
 
         public class LineData

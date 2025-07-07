@@ -15,8 +15,10 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
+using UndertaleModLib;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
+using WpfAnimatedGif;
 
 namespace UndertaleModTool
 {
@@ -30,6 +32,43 @@ namespace UndertaleModTool
         public UndertaleSpriteEditor()
         {
             InitializeComponent();
+
+            ((System.Windows.Controls.Image)mainWindow.FindName("Flowey")).Opacity = 0;
+            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
+
+            ((Label)this.FindName("SpritesObjectLabel")).Content = ((Label)mainWindow.FindName("ObjectLabel")).Content;
+        }
+        private void UndertaleSpritesEditor_Unloaded(object sender, RoutedEventArgs e)
+        {
+            var floweranim = ((System.Windows.Controls.Image)mainWindow.FindName("Flowey"));
+            //floweranim.Opacity = 1;
+
+            var controller = ImageBehavior.GetAnimationController(floweranim);
+            controller.Pause();
+            controller.GotoFrame(controller.FrameCount - 5);
+            controller.Play();
+
+            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+        }
+        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            UndertaleSprite code = this.DataContext as UndertaleSprite;
+
+            int foundIndex = code is UndertaleResource res ? mainWindow.Data.IndexOf(res, false) : -1;
+            string idString;
+
+            if (foundIndex == -1)
+                idString = "None";
+            else if (foundIndex == -2)
+                idString = "N/A";
+            else
+                idString = Convert.ToString(foundIndex);
+
+            ((Label)this.FindName("SpritesObjectLabel")).Content = idString;
+
+            //((Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
+            //((Image)mainWindow.FindName("Flowey")).Opacity = 0;
         }
 
         private void ExportAllSpine(SaveFileDialog dlg, UndertaleSprite sprite)
@@ -51,15 +90,18 @@ namespace UndertaleModTool
                         Directory.CreateDirectory(path);
 
                         // textures
-                        foreach (var tex in sprite.SpineTextures.Select((tex, id) => new { id,tex }))
+                        if (sprite.SpineHasTextureData)
                         {
-                            try
+                            foreach (var tex in sprite.SpineTextures.Select((tex, id) => new { id, tex }))
                             {
-                                File.WriteAllBytes(Path.Combine(path, tex.id + ext), tex.tex.TexBlob);
-                            }
-                            catch (Exception ex)
-                            {
-                                mainWindow.ShowError("Failed to export file: " + ex.Message, "Failed to export file");
+                                try
+                                {
+                                    File.WriteAllBytes(Path.Combine(path, tex.id + ext), tex.tex.TexBlob);
+                                } 
+                                catch (Exception ex) 
+                                {
+                                    mainWindow.ShowError("Failed to export file: " + ex.Message, "Failed to export file");
+                                }
                             }
                         }
 
@@ -88,7 +130,8 @@ namespace UndertaleModTool
             if (sprite.IsSpineSprite)
             {
                 ExportAllSpine(dlg, sprite);
-                return;
+                if (sprite.SpineHasTextureData)
+                    return;
             }
 
             TextureWorker worker = new TextureWorker();

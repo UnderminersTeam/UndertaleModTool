@@ -64,9 +64,9 @@ public class Split : Rect
     public bool overlapsRect(Rect rect)
     {
         return (((rect.X >= this.X) && (rect.X <= this.Right))
-            ||  ((this.X >= rect.X) && (this.X <= rect.Right)))
+            || ((this.X >= rect.X) && (this.X <= rect.Right)))
             && (((rect.Y >= this.Y) && (rect.Y <= this.Down))
-            ||  ((this.Y >= rect.Y) && (this.Y <= rect.Down)));
+            || ((this.Y >= rect.Y) && (this.Y <= rect.Down)));
     }
 
     public bool fits(int Width, int Height)
@@ -96,16 +96,18 @@ public class Split : Rect
 public class TextureAtlas
 {
 
-    public int Size;
+    public int Width;
+    public int Height;
     public int Padding;
     public List<Split> Splits;
     public List<Rect> Textures;
 
-    public TextureAtlas(int Size, int Padding)
+    public TextureAtlas(int Width, int Height, int Padding)
     {
-        this.Splits = new List<Split> { new Split(0, 0, Size, Size) };
+        this.Splits = new List<Split> { new Split(0, 0, Width, Height) };
         this.Textures = new List<Rect>();
-        this.Size = Size;
+        this.Width = Width;
+        this.Height = Height;
         this.Padding = Padding;
     }
 
@@ -131,7 +133,7 @@ public class TextureAtlas
 
         // Best Long Side fit.
         var bestFit = findBestFit(pWidth, pHeight,
-            split => Math.Min(pWidth - split.Width, pHeight - split.Height)
+            split => Math.Max(split.Width - pWidth, split.Height - pHeight)
         );
 
         // No space available, return null
@@ -289,12 +291,12 @@ int doItemGrouping(TPageItem item)
 //     return false;
 // }
 
-List<TextureAtlas> layoutPageItemList(List<TPageItem> items, int pageSize, int padding)
+List<TextureAtlas> layoutPageItemList(List<TPageItem> items, int pageSizeWidth, int pageSizeHeight, int padding)
 {
     var atlas_list = new List<TextureAtlas>();
     while (items.Count > 0)
     {
-        var atlas = new TextureAtlas(pageSize, padding);
+        var atlas = new TextureAtlas(pageSizeWidth, pageSizeHeight, padding);
         foreach (var page in items)
         {
             // If failed to allocate atlas space, then retry with a new one
@@ -320,11 +322,11 @@ List<TextureAtlas> layoutPageItemList(List<TPageItem> items, int pageSize, int p
     return atlas_list;
 }
 
-async Task<List<TextureAtlas>> layoutPageItemLists<K>(ILookup<K, TPageItem> lookup, int pageSize, int padding)
+async Task<List<TextureAtlas>> layoutPageItemLists<K>(ILookup<K, TPageItem> lookup, int pageSizeWidth, int pageSizeHeight, int padding)
 {
     return await Task.Run(() => lookup
         .AsParallel()
-        .Select(list => layoutPageItemList(list.ToList(), pageSize, padding))
+        .Select(list => layoutPageItemList(list.ToList(), pageSizeWidth, pageSizeHeight, padding))
         .SelectMany(item => item)
         .ToList());
 }
@@ -338,8 +340,10 @@ private static int NearestPowerOf2(uint x)
 EnsureDataLoaded();
 
 // User Configurable:: Atlas page size and item padding
-var pageSize = 512;
-var padding = 2;
+var pageSizeWidth = 1024;
+var pageSizeHeight = 1024;
+
+var padding = 1;
 
 // User Configurable:: Dimension cutoffs (gets thrown off the atlas pool)
 var maxDims = 256;
@@ -353,17 +357,9 @@ List<TPageItem> potBlacklist = new List<TPageItem>();
 // Ensure pageSize is POT
 if (forcePOT)
 {
-    pageSize = NearestPowerOf2((uint)pageSize);
+    pageSizeWidth = NearestPowerOf2((uint)pageSizeWidth);
+    pageSizeHeight = NearestPowerOf2((uint)pageSizeHeight);
 }
-
-// Sanity checks
-if (maxDims <= 0 || maxDims + padding * 2 >= pageSize)
-{
-    maxDims = pageSize - padding * 2;
-    maxArea = maxDims * maxDims;
-}
-if (maxArea <= 0)
-    maxArea = maxDims * maxDims;
 
 bool reuseTextures = false;
 
@@ -371,7 +367,7 @@ bool reuseTextures = false;
 string packagerDirectory = Path.Combine(ExePath, "Packager");
 if (Directory.Exists(packagerDirectory))
 {
-    DialogResult dr = MessageBox.Show("Do you want to reuse previously extracted page items?", 
+    DialogResult dr = MessageBox.Show("Do you want to reuse previously extracted page items?",
         "Texture Repacker", MessageBoxButtons.YesNo);
 
     reuseTextures = dr == DialogResult.Yes;
@@ -417,7 +413,7 @@ await Task.Run(() =>
 
 // Layout all the texture items (grouped by doItemGrouping) into atlases
 ResetProgress("Laying out texture items");
-var atlases = await layoutPageItemLists(texPageLookup, pageSize, padding);
+var atlases = await layoutPageItemLists(texPageLookup, pageSizeWidth, pageSizeHeight, padding);
 
 int lastTextPage = Data.EmbeddedTextures.Count - 1;
 
@@ -444,7 +440,7 @@ await Task.Run(() =>
             UndertaleEmbeddedTexture tex = new UndertaleEmbeddedTexture();
             tex.Name = new UndertaleString("Texture " + ++lastTextPage);
             Data.EmbeddedTextures.Add(tex);
-            Bitmap img = new Bitmap(atlas.Size, atlas.Size, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            Bitmap img = new Bitmap(atlas.Width, atlas.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
             // DPI fix
             img.SetResolution(96.0F, 96.0F);

@@ -5,6 +5,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Underanalyzer.Decompiler;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
@@ -33,13 +34,13 @@ namespace UndertaleModTests
         [TestMethod]
         public void DecompileAllScripts()
         {
-            GlobalDecompileContext context = new GlobalDecompileContext(data, true);
+            GlobalDecompileContext context = new GlobalDecompileContext(data);
             Parallel.ForEach(data.Code, (code) =>
             {
                 //Console.WriteLine(code.Name.Content);
                 try
                 {
-                    Decompiler.Decompile(code, context);
+                    new DecompileContext(context, code, data.ToolInfo.DecompilerSettings).DecompileToString();
                 }
                 catch (Exception e)
                 {
@@ -96,7 +97,7 @@ namespace UndertaleModTests
                     Assert.AreEqual(code.Instructions[i].ArgumentsCount, reasm[i].ArgumentsCount, errMsg);
                     Assert.AreEqual(code.Instructions[i].JumpOffsetPopenvExitMagic, reasm[i].JumpOffsetPopenvExitMagic, errMsg);
                     if (!code.Instructions[i].JumpOffsetPopenvExitMagic)
-                        Assert.AreEqual(code.Instructions[i].JumpOffset, reasm[i].JumpOffset, errMsg);
+                        Assert.AreEqual(code.Instructions[i].JumpOffset, reasm[i].JumpOffset, errMsg); // note: also handles IntArgument implicitly
                     Assert.AreSame(code.Instructions[i].Destination?.Target, reasm[i].Destination?.Target, errMsg);
                     Assert.AreEqual(code.Instructions[i].Destination?.Type, reasm[i].Destination?.Type, errMsg);
                     Assert.AreSame(code.Instructions[i].Function?.Target, reasm[i].Function?.Target, errMsg);

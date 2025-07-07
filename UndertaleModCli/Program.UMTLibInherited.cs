@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
+using Underanalyzer.Decompiler;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
@@ -292,7 +293,7 @@ public partial class Program : IScriptInterface
     }
 
     /// <inheritdoc/>
-    public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool isSaving = false)
+    public async Task<bool> GenerateGMLCache(GlobalDecompileContext decompileContext = null, object dialog = null, bool isSaving = false)
     {
         await Task.Delay(1); //dummy await
 
@@ -409,21 +410,23 @@ public partial class Program : IScriptInterface
     }
 
     /// <inheritdoc/>
-    public string GetDecompiledText(string codeName, GlobalDecompileContext context = null)
+    public string GetDecompiledText(string codeName, GlobalDecompileContext context = null, IDecompileSettings settings = null)
     {
-        return GetDecompiledText(Data.Code.ByName(codeName), context);
+        return GetDecompiledText(Data.Code.ByName(codeName), context, settings);
     }
 
     /// <inheritdoc/>
-    public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null)
+    public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null, IDecompileSettings settings = null)
     {
         if (code.ParentEntry is not null)
             return $"// This code entry is a reference to an anonymous function within \"{code.ParentEntry.Name.Content}\", decompile that instead.";
 
-        GlobalDecompileContext decompileContext = context is null ? new(Data, false) : context;
+        GlobalDecompileContext decompileContext = context is null ? new(Data) : context;
         try
         {
-            return code != null ? Decompiler.Decompile(code, decompileContext) : "";
+            return code != null 
+                ? new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, settings ?? Data.ToolInfo.DecompilerSettings).DecompileToString() 
+                : "";
         }
         catch (Exception e)
         {
@@ -521,13 +524,13 @@ public partial class Program : IScriptInterface
     }
 
     /// <inheritdoc/>
-    public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
+    public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int lineNum, string codeLine)>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
     {
         await ClickableSearchOutput(title, query, resultsCount, resultsDict.ToDictionary(pair => pair.Key, pair => pair.Value), editorDecompile, failedList);
     }
 
     /// <inheritdoc/>
-    public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
+    public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<(int lineNum, string codeLine)>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
     {
         await Task.Delay(1); //dummy await
 
@@ -555,17 +558,17 @@ public partial class Program : IScriptInterface
         Console.WriteLine();
 
         // Print in a pattern of:
-        // results in code_file
-        // line3: code
-        // line6: code
+        // Results in code_file
+        // Line 3: line of code
+        // Line 6: line of code
         //
-        // results in a codefile2
-        //etc.
+        // Results in code_file_1
+        // etc.
         foreach (var dictEntry in resultsDict)
         {
             Console.WriteLine($"Results in {dictEntry.Key}:");
             foreach (var resultEntry in dictEntry.Value)
-                Console.WriteLine(resultEntry);
+                Console.WriteLine($"Line {resultEntry.lineNum}: {resultEntry.codeLine}");
 
             Console.WriteLine();
         }
@@ -632,17 +635,17 @@ public partial class Program : IScriptInterface
     }
 
     /// <inheritdoc/>
-    public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
+    public void ReplaceTextInGML(string codeName, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null, IDecompileSettings settings = null)
     {
         UndertaleCode code = Data.Code.ByName(codeName);
         if (code is null)
             throw new ScriptException($"No code named \"{codeName}\" was found!");
 
-        ReplaceTextInGML(code, keyword, replacement, caseSensitive, isRegex, context);
+        ReplaceTextInGML(code, keyword, replacement, caseSensitive, isRegex, context, settings);
     }
 
     /// <inheritdoc/>
-    public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null)
+    public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null, IDecompileSettings settings = null)
     {
         if (code == null) throw new ArgumentNullException(nameof(code));
         if (code.ParentEntry is not null)
@@ -651,13 +654,20 @@ public partial class Program : IScriptInterface
         EnsureDataLoaded();
 
         string passBack = "";
-        GlobalDecompileContext decompileContext = context is null ? new(Data, false) : context;
+        GlobalDecompileContext decompileContext = context is null ? new(Data) : context;
 
         if (!Data.ToolInfo.ProfileMode)
         {
             try
             {
-                passBack = GetPassBack(Decompiler.Decompile(code, decompileContext), keyword, replacement, caseSensitive, isRegex);
+                // It would just be recompiling an empty string and messing with null entries seems bad
+                if (code is null)
+                    return;
+                string originalCode = new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, settings ?? Data.ToolInfo.DecompilerSettings).DecompileToString();
+                passBack = GetPassBack(originalCode, keyword, replacement, caseSensitive, isRegex);
+                // No need to compile something unchanged
+                if (passBack == originalCode)
+                    return;
                 code.ReplaceGML(passBack, Data);
             }
             catch (Exception exc)
@@ -665,27 +675,9 @@ public partial class Program : IScriptInterface
                 throw new Exception("Error during GML code replacement:\n" + exc);
             }
         }
-        else if (Data.ToolInfo.ProfileMode)
+        else
         {
-            try
-            {
-                try
-                {
-                    if (context is null)
-                        passBack = GetPassBack(Decompiler.Decompile(code, new GlobalDecompileContext(Data, false)), keyword, replacement, caseSensitive, isRegex);
-                    else
-                        passBack = GetPassBack(Decompiler.Decompile(code, context), keyword, replacement, caseSensitive, isRegex);
-                    code.ReplaceGML(passBack, Data);
-                }
-                catch (Exception exc)
-                {
-                    throw new Exception("Error during GML code replacement:\n" + exc);
-                }
-            }
-            catch (Exception exc)
-            {
-                throw new Exception("Error during writing of GML code to profile:\n" + exc + "\n\nCode:\n\n" + passBack);
-            }
+            throw new Exception("This UndertaleData is set to use profile mode, but UndertaleModCLI does not support profile mode.");
         }
     }
 
@@ -857,7 +849,7 @@ public partial class Program : IScriptInterface
                             // It *needs* to have a valid value, make the user specify one.
                             List<uint> possibleValues = new List<uint>();
                             possibleValues.Add(uint.MaxValue);
-                            methodNumber = (int)ReduceCollisionValue(possibleValues);
+                            methodNumber = (int)ReduceCollisionValue(possibleValues, codeName);
                         }
                     }
                 }
@@ -898,14 +890,14 @@ public partial class Program : IScriptInterface
                                 // It *needs* to have a valid value, make the user specify one, silly.
                                 List<uint> possibleValues = new List<uint>();
                                 possibleValues.Add(uint.MaxValue);
-                                ReassignGUIDs(methodNumberStr, ReduceCollisionValue(possibleValues));
+                                ReassignGUIDs(methodNumberStr, ReduceCollisionValue(possibleValues, codeName));
                             }
                         }
                         else
                         {
                             // Let's try to get this going
-                            methodNumber = (int)ReduceCollisionValue(GetCollisionValueFromCodeNameGUID(codeName));
-                            ReassignGUIDs(methodNumberStr, ReduceCollisionValue(GetCollisionValueFromCodeNameGUID(codeName)));
+                            methodNumber = (int)ReduceCollisionValue(GetCollisionValueFromCodeNameGUID(codeName),codeName);
+                            ReassignGUIDs(methodNumberStr, ReduceCollisionValue(GetCollisionValueFromCodeNameGUID(codeName), codeName));
                         }
                     }
                 }
@@ -1022,7 +1014,7 @@ public partial class Program : IScriptInterface
         }
     }
 
-    public uint ReduceCollisionValue(List<uint> possibleValues)
+    public uint ReduceCollisionValue(List<uint> possibleValues, string MyName)
     {
         this.ScriptMessage("haha dumbass");
         if (possibleValues.Count == 1)
@@ -1036,7 +1028,7 @@ public partial class Program : IScriptInterface
             while (!objFound)
             {
                 string objectIndex = SimpleTextInput("Object could not be found. Please enter it below:",
-                    "Object enter box.", "", false).ToLower();
+                    "Object enter box. ("+MyName+")", "", false).ToLower();
                 for (var i = 0; i < Data.GameObjects.Count; i++)
                 {
                     if (Data.GameObjects[i].Name.Content.ToLower() == objectIndex)

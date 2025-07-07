@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
-using Microsoft.CodeAnalysis.Scripting.Hosting;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using System;
@@ -34,11 +33,8 @@ using UndertaleModTool.Windows;
 using System.IO.Pipes;
 using Ookii.Dialogs.Wpf;
 
-using ColorConvert = System.Windows.Media.ColorConverter;
 using System.Text.RegularExpressions;
 using System.Windows.Data;
-using System.Reflection.Metadata.Ecma335;
-using System.Windows.Media.Imaging;
 using System.Security.Cryptography;
 using System.Collections.Concurrent;
 using System.Runtime;
@@ -50,8 +46,12 @@ using System.Net;
 using System.Globalization;
 using System.Windows.Controls.Primitives;
 using System.Runtime.CompilerServices;
-using System.Diagnostics.Metrics;
 using System.Windows.Interop;
+using Microsoft.VisualBasic;
+using NAudio.Wave;
+using WpfAnimatedGif;
+using System.Security.Policy;
+using XamlAnimatedGif;
 
 namespace UndertaleModTool
 {
@@ -77,6 +77,8 @@ namespace UndertaleModTool
         public static RoutedUICommand RestoreClosedTabCommand = new RoutedUICommand("Restore last closed tab", "RestoreClosedTab", typeof(MainWindow));
         public static RoutedUICommand SwitchToNextTabCommand = new RoutedUICommand("Switch to the next tab", "SwitchToNextTab", typeof(MainWindow));
         public static RoutedUICommand SwitchToPrevTabCommand = new RoutedUICommand("Switch to the previous tab", "SwitchToPrevTab", typeof(MainWindow));
+        public static RoutedUICommand SearchInCodeCommand = new("Search in code", "SearchInCode", typeof(MainWindow));
+
         public ObservableCollection<Tab> Tabs { get; set; } = new();
         public Tab CurrentTab
         {
@@ -117,12 +119,6 @@ namespace UndertaleModTool
         public string ExePath { get; private set; } = Program.GetExecutableDirectory();
         public string ScriptErrorType { get; set; } = "";
 
-        public enum CodeEditorMode
-        {
-            Unstated,
-            DontDecompile,
-            Decompile
-        }
         public enum SaveResult
         {
             NotSaved,
@@ -134,9 +130,6 @@ namespace UndertaleModTool
             Left,
             Right
         }
-
-        // TODO: move this to the code editor
-        public static CodeEditorMode CodeEditorDecompile { get; set; } = CodeEditorMode.Unstated;
 
         private int progressValue;
         private Task updater;
@@ -216,14 +209,14 @@ namespace UndertaleModTool
         public static string Edition = "(Git: " + GitVersion.GetGitVersion().Substring(0, 7) + ")";
 
         // On debug, build with git versions and provided release version. Otherwise, use the provided release version only.
-#if DEBUG
+#if DEBUG || SHOW_COMMIT_HASH
         public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString() + (Edition != "" ? " - " + Edition : "");
 #else
         public static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 #endif
 
-        private static readonly Color darkColor = Color.FromArgb(255, 32, 32, 32);
-        private static readonly Color darkLightColor = Color.FromArgb(255, 48, 48, 48);
+        private static readonly Color darkColor = Color.FromArgb(255, 0, 0, 0);
+        private static readonly Color darkLightColor = Color.FromArgb(255, 2, 2, 2);
         private static readonly Color whiteColor = Color.FromArgb(255, 222, 222, 222);
         private static readonly SolidColorBrush grayTextBrush = new(Color.FromArgb(255, 179, 179, 179));
         private static readonly SolidColorBrush inactiveSelectionBrush = new(Color.FromArgb(255, 212, 212, 212));
@@ -247,6 +240,12 @@ namespace UndertaleModTool
             else
                 _ProfileModeEnabled = false;
             InitializeComponent();
+
+            var floweranim = ((Image)this.FindName("Flowey"));
+
+            /*var animator = AnimationBehavior.GetAnimator(floweranim);
+            animator?.Play();*/
+
             this.DataContext = this;
 
             Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open a data.win file to get started, then double click on the items on the left to view them.");
@@ -270,7 +269,8 @@ namespace UndertaleModTool
                                 .AddReferences(typeof(UndertaleObject).GetTypeInfo().Assembly,
                                                 GetType().GetTypeInfo().Assembly,
                                                 typeof(JsonConvert).GetTypeInfo().Assembly,
-                                                typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly)
+                                                typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly,
+                                                typeof(Underanalyzer.Decompiler.DecompileContext).Assembly)
                                 .WithEmitDebugInformation(true); //when script throws an exception, add a exception location (line number)
             });
 
@@ -390,7 +390,8 @@ namespace UndertaleModTool
                     await LoadFile(arg, true, isLaunch || isSpecialLaunch);
                     if (SettingsWindow.ProfileModeEnabled)
                     {
-                        var MD5DirName = CurProfileName;
+                        /*var MD5DirName = CurProfileName; /////////////// this causes errors
+                        //this.ShowMessage("is this executing");
                         var FileDir = ProfilesFolder;
                         if (Directory.Exists(FileDir + "\\" + MD5DirName + "\\Main"))
                         {
@@ -402,7 +403,7 @@ namespace UndertaleModTool
                                     ImportCodeFromFile(Files[i], true, true, false, true);
                                 }
                             }
-                        }
+                        }*/
                     }
                 }
                 else if (arg == "deleteTempFolder") // if was launched from UndertaleModToolUpdater
@@ -676,6 +677,8 @@ namespace UndertaleModTool
             FilePath = null;
             Data = UndertaleData.CreateNew();
             Data.ToolInfo.AppDataProfiles = ProfilesFolder;
+            Data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
+            Data.ToolInfo.InstanceIdPrefix = () => SettingsWindow.InstanceIdPrefix;
             CloseChildFiles();
             OnPropertyChanged("Data");
             OnPropertyChanged("FilePath");
@@ -717,7 +720,8 @@ namespace UndertaleModTool
                             await LoadFile(filepath, true);
                             if (SettingsWindow.ProfileModeEnabled)
                             {
-                                var MD5DirName = CurProfileName;
+                                /*var MD5DirName = CurProfileName; ///// this causes errors
+                                //this.ShowMessage("is this executing2");
                                 var FileDir = ProfilesFolder;
                                 if (Directory.Exists(FileDir + "\\" + MD5DirName + "\\Main"))
                                 {
@@ -729,7 +733,7 @@ namespace UndertaleModTool
                                             ImportCodeFromFile(Files[i], true, true, false, true);
                                         }
                                     }
-                                }
+                                }*/
                             }
                         }
 
@@ -749,7 +753,7 @@ namespace UndertaleModTool
             if (dlg.ShowDialog(this) == true)
             {
                 await LoadFile(dlg.FileName, true);
-                if (SettingsWindow.ProfileModeEnabled)
+                /*if (SettingsWindow.ProfileModeEnabled) //// this is causing problems
                 { 
                     var MD5DirName = CurProfileName;
                     var FileDir = ProfilesFolder;
@@ -764,7 +768,7 @@ namespace UndertaleModTool
                             }
                         }
                     }
-                }
+                }*/
                 return true;
             }
             return false;
@@ -852,6 +856,19 @@ namespace UndertaleModTool
 
                 if (SettingsWindow.WarnOnClose)
                 {
+                    var floweranim = ((Image)this.FindName("FloweyLeave"));
+                    var flowery = ((Image)this.FindName("Flowey"));
+                    if (flowery.Opacity > 0)
+                    {
+                        flowery.Opacity = 0;
+                        floweranim.Opacity = 1;
+
+                        var controller = ImageBehavior.GetAnimationController(floweranim);
+                            controller.Pause();
+                            controller.GotoFrame(controller.FrameCount - 10);
+                            controller.Play();
+                    }
+
                     if (this.ShowQuestion("Are you sure you want to quit?") == MessageBoxResult.Yes)
                     {
                         if (this.ShowQuestion("Save changes first?") == MessageBoxResult.Yes)
@@ -883,7 +900,21 @@ namespace UndertaleModTool
                         DestroyUMTLastEdited();
                     }
                     else
+                    {
+                        if (floweranim.Opacity > 0)
+                        {
+                            floweranim.Opacity = 0;
+
+                            var floweranim2 = ((Image)this.FindName("Flowey"));
+                            floweranim2.Opacity = 1;
+
+                            var controller2 = ImageBehavior.GetAnimationController(floweranim2);
+                            controller2.Pause();
+                            controller2.GotoFrame(controller2.FrameCount - 9);
+                            controller2.Play();
+                        }
                         return;
+                    }
                 }
                 else
                 {
@@ -974,6 +1005,32 @@ namespace UndertaleModTool
         {
             GoForward();
         }
+        private async void Command_ExecuteSearch(object sender, ExecutedRoutedEventArgs e)
+        {
+            string path = "Scripts\\Builtin Scripts\\Search.csx";
+            if (!File.Exists(path))
+                path = Path.Combine(Program.GetExecutableDirectory(), path);
+
+            if (File.Exists(path))
+                await RunScript(path);
+            else
+                this.ShowError("The script file doesn't exist.");
+        }
+
+        private SearchInCodeWindow searchInCodeWindow;
+        private void Command_SearchInCode(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (searchInCodeWindow is null)
+            {
+                searchInCodeWindow = new();
+                searchInCodeWindow.Closed += (object sender, EventArgs e) =>
+                {
+                    searchInCodeWindow = null;
+                };
+                searchInCodeWindow.Show();
+            }
+            searchInCodeWindow.ActivateAndFocusOnTextBox();
+        }
 
         private void DisposeGameData()
         {
@@ -1020,7 +1077,6 @@ namespace UndertaleModTool
                         data = UndertaleIO.Read(stream, warning =>
                         {
                             this.ShowWarning(warning, "Loading warning");
-
                             if (warning.Contains("unserializeCountError.txt")
                                 || warning.Contains("object pool size"))
                                 return;
@@ -1036,6 +1092,9 @@ namespace UndertaleModTool
                 }
                 catch (Exception e)
                 {
+#if DEBUG
+                    Debug.WriteLine(e);
+#endif
                     this.ShowError("An error occured while trying to load:\n" + e.Message, "Load error");
                 }
 
@@ -1102,6 +1161,8 @@ namespace UndertaleModTool
                         CachedTileDataLoader.Reset();
 
                         Data.ToolInfo.AppDataProfiles = ProfilesFolder;
+                        Data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
+                        Data.ToolInfo.InstanceIdPrefix = () => SettingsWindow.InstanceIdPrefix;
                         FilePath = filename;
                         OnPropertyChanged("Data");
                         OnPropertyChanged("FilePath");
@@ -1177,7 +1238,7 @@ namespace UndertaleModTool
                         object countLock = new object();
                         string[] outputs = new string[Data.Code.Count];
                         UndertaleDebugInfo[] outputsOffsets = new UndertaleDebugInfo[Data.Code.Count];
-                        GlobalDecompileContext context = new GlobalDecompileContext(Data, false);
+                        GlobalDecompileContext context = new(Data);
                         Parallel.For(0, Data.Code.Count, (i) =>
                         {
                             var code = Data.Code[i];
@@ -1188,7 +1249,8 @@ namespace UndertaleModTool
                                 string output;
                                 try
                                 {
-                                    output = Decompiler.Decompile(code, context);
+                                    output = new Underanalyzer.Decompiler.DecompileContext(context, code, Data.ToolInfo.DecompilerSettings)
+                                        .DecompileToString();
                                 }
                                 catch (Exception e)
                                 {
@@ -1210,7 +1272,7 @@ namespace UndertaleModTool
                                 {
                                     if (debugMode == DebugDataDialog.DebugDataMode.FullAssembler || instr.Kind == UndertaleInstruction.Opcode.Pop || instr.Kind == UndertaleInstruction.Opcode.Popz || instr.Kind == UndertaleInstruction.Opcode.B || instr.Kind == UndertaleInstruction.Opcode.Bt || instr.Kind == UndertaleInstruction.Opcode.Bf || instr.Kind == UndertaleInstruction.Opcode.Ret || instr.Kind == UndertaleInstruction.Opcode.Exit)
                                         debugInfo.Add(new UndertaleDebugInfo.DebugInfoPair() { SourceCodeOffset = (uint)sb.Length, BytecodeOffset = instr.Address * 4 });
-                                    sb.Append(instr.ToString(code));
+                                    instr.ToString(sb, code);
                                     sb.Append('\n');
                                 }
                                 outputs[i] = sb.ToString();
@@ -1273,6 +1335,10 @@ namespace UndertaleModTool
                 {
                     if (SaveSucceeded)
                     {
+                        Stream str = Properties.Resources.snd_save;
+                        SoundPlayer player = new SoundPlayer(str);
+                        player.Play();
+
                         // It saved successfully!
                         // If we're overwriting a previously existing data file, we're going to delete it now.
                         // Then, we're renaming it back to the proper (non-temp) file name.
@@ -1285,6 +1351,29 @@ namespace UndertaleModTool
                         // Also make the changes to the profile system.
                         await ProfileSaveEvent(Data, filename);
                         SaveTempToMainProfile();
+
+                        if (SettingsWindow.ProfileModeEnabled && SettingsWindow.CustomProfileName && SettingsWindow.RememberProfileName)
+                        {
+                            var MD5DirName = CurProfileName;
+                            var MD5DirPath = Path.Combine(ProfilesFolder, MD5DirName);
+                            var FileDir = "";
+                            string[] iwishiwasbetteratnames = FilePath.Split(new char[] { '\\' });
+                            var directoriesamt = iwishiwasbetteratnames.Length;
+                            for (var i = 0; i < directoriesamt - 1; i++)
+                            {
+                                FileDir += iwishiwasbetteratnames[i] + "\\";
+                            }
+                            if (Directory.Exists(FileDir))
+                            {
+                                var rememberDir = FileDir + "Profiles\\" + MD5DirName + "\\name.txt";
+                                File.WriteAllText(rememberDir, MD5DirName);
+
+                                File.WriteAllText(FileDir + "Profiles\\" + "\\directory.txt", rememberDir);
+                            }
+                        }
+
+                        /*SoundPlayer player = new SoundPlayer(Application.GetResourceStream(new Uri(@"pack://application:,,,/Resources/snd_save.wav")).Stream);
+                        player.Play();*/
                     }
                     else
                     {
@@ -1495,7 +1584,7 @@ namespace UndertaleModTool
             });
         }
 
-        public async Task<bool> GenerateGMLCache(ThreadLocal<GlobalDecompileContext> decompileContext = null, object dialog = null, bool clearGMLEditedBefore = false)
+        public async Task<bool> GenerateGMLCache(GlobalDecompileContext decompileContext = null, object dialog = null, bool clearGMLEditedBefore = false)
         {
             if (!SettingsWindow.UseGMLCache)
                 return false;
@@ -1530,13 +1619,12 @@ namespace UndertaleModTool
             else
                 existedDialog = true;
 
-            if (decompileContext is null)
-                decompileContext = new(() => new GlobalDecompileContext(Data, false));
+            decompileContext ??= new(Data);
 
-            if (Data.KnownSubFunctions is null) //if we run script before opening any code
+            if (Data.GlobalFunctions is null) // If we run script before opening any code
             {
-                SetProgressBar(null, "Building the cache of all sub-functions...", 0, 0);
-                await Task.Run(() => Decompiler.BuildSubFunctionCache(Data));
+                SetProgressBar(null, "Building a cache of all global functions...", 0, 0);
+                await Task.Run(() => GlobalDecompileContext.BuildGlobalFunctionCache(Data));
             }
 
             if (Data.GMLCache.IsEmpty)
@@ -1550,7 +1638,9 @@ namespace UndertaleModTool
                     {
                         try
                         {
-                            Data.GMLCache[code.Name.Content] = Decompiler.Decompile(code, decompileContext.Value);
+                            Data.GMLCache[code.Name.Content] = 
+                                new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, Data.ToolInfo.DecompilerSettings)
+                                    .DecompileToString();
                         }
                         catch
                         {
@@ -1598,7 +1688,9 @@ namespace UndertaleModTool
                         {
                             try
                             {
-                                Data.GMLCache[code.Name.Content] = Decompiler.Decompile(code, decompileContext.Value);
+                                Data.GMLCache[code.Name.Content] = 
+                                    new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, Data.ToolInfo.DecompilerSettings)
+                                        .DecompileToString();
 
                                 Data.GMLCacheFailed.Remove(code.Name.Content); //that code compiles now
                             }
@@ -1668,6 +1760,54 @@ namespace UndertaleModTool
             else
             {
                 Highlighted = e.NewValue;
+            }
+        }
+
+        private void Flowey_MouseDown(object sender, MouseEventArgs e)
+        {
+
+        }
+        private void Flowey_MouseEnter(object sender, MouseEventArgs e)
+        {
+            var flowery = ((Image)this.FindName("Flowey"));
+            var flowery_wink = ((Image)this.FindName("FloweyClickable"));
+            var bubble = ((Image)this.FindName("FloweyBubble"));
+            var flowery_dialogue = (Label)this.FindName("ObjectLabel");
+            Thickness margin = flowery.Margin;
+
+            if (flowery.Opacity != 0)
+            {
+                flowery.Opacity = 0;
+                flowery_wink.Opacity = 1;
+                bubble.Opacity = 1;
+                flowery_dialogue.Opacity = 1;
+            }
+            else if (margin.Bottom < 999)
+            {
+                margin.Bottom += 999;
+                flowery.Margin = margin;
+
+                Thickness margin_clickable = flowery_wink.Margin;
+                if (margin_clickable.Bottom < 999)
+                {
+                    margin_clickable.Bottom += 999;
+                    flowery_wink.Margin = margin_clickable;
+                }
+            }
+        }
+        private void Flowey_MouseLeave(object sender, MouseEventArgs e)
+        {
+            var flowery = ((Image)this.FindName("Flowey"));
+            var flowery_wink = ((Image)this.FindName("FloweyClickable"));
+            var bubble = ((Image)this.FindName("FloweyBubble"));
+            var flowery_dialogue = (Label)this.FindName("ObjectLabel");
+
+            if (flowery_wink.Opacity != 0)
+            {
+                flowery.Opacity = 1;
+                flowery_wink.Opacity = 0;
+                bubble.Opacity = 0;
+                flowery_dialogue.Opacity = 0;
             }
         }
 
@@ -2076,7 +2216,7 @@ namespace UndertaleModTool
 
         private void MenuItem_Add_Click(object sender, RoutedEventArgs e)
         {
-            object source = null;
+            object source;
             try
             {
                 source = (MainTree.SelectedItem as TreeViewItem).ItemsSource;
@@ -2111,11 +2251,20 @@ namespace UndertaleModTool
                 {
                     notDataNewName = "Texture " + list.Count;
                 }
+                if (obj is UndertaleShader shader)
+                {
+                    shader.GLSL_ES_Vertex = Data.Strings.MakeString("", true);
+                    shader.GLSL_ES_Fragment = Data.Strings.MakeString("", true);
+                    shader.GLSL_Vertex = Data.Strings.MakeString("", true);
+                    shader.GLSL_Fragment = Data.Strings.MakeString("", true);
+                    shader.HLSL9_Vertex = Data.Strings.MakeString("", true);
+                    shader.HLSL9_Fragment = Data.Strings.MakeString("", true);
+                }
 
                 if (doMakeString)
                 {
-                    string newname = obj.GetType().Name.Replace("Undertale", "").Replace("GameObject", "Object").ToLower() + list.Count;
-                    (obj as UndertaleNamedResource).Name = Data.Strings.MakeString(newname);
+                    string newName = obj.GetType().Name.Replace("Undertale", "").Replace("GameObject", "Object").ToLower() + list.Count;
+                    (obj as UndertaleNamedResource).Name = Data.Strings.MakeString(newName);
                     if (obj is UndertaleRoom)
                     {
                         (obj as UndertaleRoom).Caption = Data.Strings.MakeString("");
@@ -2128,7 +2277,7 @@ namespace UndertaleModTool
                     {
                         UndertaleCode code = new UndertaleCode();
                         string prefix = Data.IsVersionAtLeast(2, 3) ? "gml_GlobalScript_" : "gml_Script_";
-                        code.Name = Data.Strings.MakeString(prefix + newname);
+                        code.Name = Data.Strings.MakeString(prefix + newName);
                         Data.Code.Add(code);
                         if (Data?.GeneralInfo.BytecodeVersion > 14)
                         {
@@ -2143,7 +2292,7 @@ namespace UndertaleModTool
                         }
                         (obj as UndertaleScript).Code = code;
                     }
-                    if ((obj is UndertaleCode) && (Data?.GeneralInfo.BytecodeVersion > 14))
+                    if ((obj is UndertaleCode) && (Data.GeneralInfo.BytecodeVersion > 14))
                     {
                         UndertaleCodeLocals locals = new UndertaleCodeLocals();
                         locals.Name = (obj as UndertaleCode).Name;
@@ -2487,7 +2636,11 @@ namespace UndertaleModTool
             updater.Dispose();
         }
 
-        public void OpenCodeFile(string name, CodeEditorMode editorDecompile, bool inNewTab = false)
+        public void OpenCodeEntry(string name, UndertaleCodeEditor.CodeEditorTab editorTab, bool inNewTab = false)
+        {
+            OpenCodeEntry(name, -1, editorTab, inNewTab);
+        }
+        public void OpenCodeEntry(string name, int lineNum, UndertaleCodeEditor.CodeEditorTab editorTab, bool inNewTab = false)
         {
             UndertaleCode code = Data.Code.ByName(name);
 
@@ -2495,38 +2648,49 @@ namespace UndertaleModTool
             {
                 Focus();
 
+                #pragma warning disable CA1416
                 if (Selected == code)
                 {
-                    #pragma warning disable CA1416
                     var codeEditor = FindVisualChild<UndertaleCodeEditor>(DataEditor);
                     if (codeEditor is null)
                     {
-                        Debug.WriteLine("Cannot select the code editor mode tab - its instance is not found.");
+                        Debug.WriteLine("Cannot select the code editor mode tab - the instance is not found.");
                     }
                     else
                     {
-                        if (editorDecompile == CodeEditorMode.Decompile
+                        if (editorTab == UndertaleCodeEditor.CodeEditorTab.Decompiled
                             && !codeEditor.DecompiledTab.IsSelected)
                         {
                             codeEditor.CodeModeTabs.SelectedItem = codeEditor.DecompiledTab;
                         }
-                        else if (editorDecompile == CodeEditorMode.DontDecompile
+                        else if (editorTab == UndertaleCodeEditor.CodeEditorTab.Disassembly
                             && !codeEditor.DisassemblyTab.IsSelected)
                         {
                             codeEditor.CodeModeTabs.SelectedItem = codeEditor.DisassemblyTab;
                         }
+
+                        var editor = editorTab == UndertaleCodeEditor.CodeEditorTab.Decompiled
+                                     ? codeEditor.DecompiledEditor : codeEditor.DisassemblyEditor;
+                        CurrentTab?.SaveTabContentState();
+                        UndertaleCodeEditor.ChangeLineNumber(lineNum, editor);
                     }
-                    #pragma warning restore CA1416
                 }
                 else
-                    CodeEditorDecompile = editorDecompile;
+                {
+                    if (CurrentTab?.CurrentObject is UndertaleCode)
+                        CurrentTab.SaveTabContentState();
+
+                    UndertaleCodeEditor.EditorTab = editorTab;
+                    UndertaleCodeEditor.ChangeLineNumber(lineNum, editorTab);
+                }
+                #pragma warning restore CA1416
 
                 HighlightObject(code);
                 ChangeSelection(code, inNewTab);
             }
             else
             {
-                this.ShowError($"Can't find code \"{name}\".\n(probably, different game data was loaded)");
+                this.ShowError($"Can't find code entry \"{name}\".\n(probably, different game data was loaded)");
             }
         }
 
@@ -2651,8 +2815,7 @@ namespace UndertaleModTool
 
                 ScriptPath = path;
 
-                string compatScriptText = Regex.Replace(scriptText, @"\bDecompileContext(?!\.)\b", "GlobalDecompileContext", RegexOptions.None);
-                object result = await CSharpScript.EvaluateAsync(compatScriptText, scriptOptions, this, typeof(IScriptInterface));
+                object result = await CSharpScript.EvaluateAsync(scriptText, scriptOptions, this, typeof(IScriptInterface));
 
                 if (FinishedMessageEnabled)
                 {
@@ -2784,7 +2947,7 @@ namespace UndertaleModTool
             TextInput textOutput = new TextInput(labelText, titleText, message, isMultiline, true); //read-only mode
             textOutput.Show();
         }
-        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<string>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null)
+        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int lineNum, string codeLine)>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null)
         {
             await Task.Delay(150); //wait until progress bar status is displayed
 
@@ -2797,7 +2960,7 @@ namespace UndertaleModTool
 
             PlayInformationSound();
         }
-        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<string>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null)
+        public async Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<(int lineNum, string codeLine)>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null)
         {
             await Task.Delay(150);
 
@@ -2833,12 +2996,12 @@ namespace UndertaleModTool
 
         private void MenuItem_GitHub_Click(object sender, RoutedEventArgs e)
         {
-            OpenBrowser("https://github.com/krzys-h/UndertaleModTool");
+            OpenBrowser("https://github.com/UnderminersTeam/UndertaleModTool");
         }
 
         private void MenuItem_About_Click(object sender, RoutedEventArgs e)
         {
-            this.ShowMessage("UndertaleModTool by krzys_h\nVersion " + Version, "About");
+            this.ShowMessage("UndertaleModTool by krzys_h and the Underminers team\nVersion " + Version, "About");
         }
 
         /// From https://github.com/AvaloniaUI/Avalonia/blob/master/src/Avalonia.Dialogs/AboutAvaloniaDialog.xaml.cs
@@ -2953,7 +3116,7 @@ namespace UndertaleModTool
             bool isBundled = !Regex.Match(assemblyLocation, @"C:\\Program Files( \(x86\))*\\dotnet\\shared\\").Success;
             string patchName = $"GUI-windows-latest-{configStr}-isBundled-{isBundled.ToString().ToLower()}-isSingleFile-{isSingleFile.ToString().ToLower()}";
 
-            string baseUrl = "https://api.github.com/repos/krzys-h/UndertaleModTool/actions/";
+            string baseUrl = "https://api.github.com/repos/UnderminersTeam/UndertaleModTool/actions/";
             string detectedActionName = "Publish continuous release of UndertaleModTool";
 
             // Fetch the latest workflow run
@@ -3117,7 +3280,7 @@ namespace UndertaleModTool
 
                     // Unzip double-zipped update
                     ZipFile.ExtractToDirectory(Path.Combine(tempFolder, "Update.zip.zip"), tempFolder, true);
-                    File.Move(Path.Combine(tempFolder, $"{patchName}.zip"), Path.Combine(tempFolder, "Update.zip"));
+                    File.Move(Path.Combine(tempFolder, $"{patchName}.zip"), Path.Combine(tempFolder, "Update.zip"), true);
                     File.Delete(Path.Combine(tempFolder, "Update.zip.zip"));
 
                     string updaterFolder = Path.Combine(ExePath, "Updater");
@@ -3374,7 +3537,25 @@ result in loss of work.");
             string idString;
 
             if (foundIndex == -1)
-                idString = "None";
+            {
+                idString = "Howdy!";
+                ((Image)this.FindName("Flowey")).Opacity = 1;
+                //((Image)this.FindName("FloweyBubble")).Opacity = 1;
+
+                var flowery = ((Image)this.FindName("Flowey"));
+                var flowery_wink = ((Image)this.FindName("FloweyClickable"));
+
+                Thickness margin = flowery.Margin;
+                if (margin.Bottom >= 999)
+                    margin.Bottom -= 999;
+                flowery.Margin = margin;
+
+                Thickness margin_clickable = flowery_wink.Margin;
+                if (margin_clickable.Bottom >= 999)
+                    margin_clickable.Bottom -= 999;
+                flowery_wink.Margin = margin_clickable;
+
+            }
             else if (foundIndex == -2)
                 idString = "N/A";
             else
@@ -4016,32 +4197,97 @@ result in loss of work.");
 
         public void ExportProfileFolder()
         {
-            if (CurProfileName != "null")
+            if (CanSave == true)
             {
-                var MD5DirName = CurProfileName;
-                var MD5DirPath = Path.Combine(ProfilesFolder, MD5DirName);
-                var FileDir = "";
-                string[] iwishiwasbetteratnames = FilePath.Split(new char[] { '\\' });
-                var directoriesamt = iwishiwasbetteratnames.Length;
-                for (var i = 0; i < directoriesamt - 1; i++)
+                if (CurProfileName != "null")
                 {
-                    FileDir += iwishiwasbetteratnames[i] + "\\";
+                    var MD5DirName = CurProfileName;
+                    var MD5DirPath = Path.Combine(ProfilesFolder, MD5DirName);
+                    var FileDir = "";
+                    string[] iwishiwasbetteratnames = FilePath.Split(new char[] { '\\' });
+                    var directoriesamt = iwishiwasbetteratnames.Length;
+                    for (var i = 0; i < directoriesamt - 1; i++)
+                    {
+                        FileDir += iwishiwasbetteratnames[i] + "\\";
+                    }
+                    FileDir += "Profiles\\" + MD5DirName;
+                    if (Directory.Exists(FileDir))
+                        Directory.Delete(FileDir, true);
+                    Directory.CreateDirectory(FileDir);
+                    DirectoryCopy(MD5DirPath, FileDir, true);
+                    this.ShowMessage("Done!");
                 }
-                FileDir += "Profiles\\" + MD5DirName;
-                if (Directory.Exists(FileDir))
-                    Directory.Delete(FileDir, true);
-                Directory.CreateDirectory(FileDir);
-                DirectoryCopy(MD5DirPath, FileDir, true);
-                this.ShowMessage("Done!");
+                else
+                {
+                    this.ShowMessage("You have to load a Profile beforehand!");
+                }
             }
             else
-            {
-                this.ShowMessage("You have to load a Profile beforehand!");
-            }
+                this.ShowMessage("You have to open a data.win beforehand!");
         }
         public void ImportProfileFolder()
         {
             if (CanSave == true)
+            {
+                if (CurProfileName != "null")
+                {
+                    var MD5DirName = CurProfileName;
+                    var MD5DirPath = Path.Combine(ProfilesFolder, MD5DirName);
+                    var FileDir = "";
+                    string[] iwishiwasbetteratnames = FilePath.Split(new char[] { '\\' });
+                    var directoriesamt = iwishiwasbetteratnames.Length;
+                    for (var i = 0; i < directoriesamt - 1; i++)
+                    {
+                        FileDir += iwishiwasbetteratnames[i] + "\\";
+                    }
+                    if (Directory.Exists(FileDir))
+                    {
+                        if (Directory.Exists(FileDir + "\\Profiles\\" + MD5DirName + "\\Main"))
+                        {
+                            FileDir += "\\Profiles\\" + MD5DirName;
+
+                            // replace the profile folder to avoid leftover code files (if code was deleted)
+
+                            if (Directory.Exists(MD5DirPath))
+                                Directory.Delete(MD5DirPath, true);
+                            Directory.CreateDirectory(MD5DirPath);
+                            DirectoryCopy(FileDir, MD5DirPath, true);
+
+                            if (Directory.Exists(MD5DirPath + "\\Temp"))
+                                Directory.Delete(MD5DirPath + "\\Temp", true);
+                            Directory.CreateDirectory(MD5DirPath + "\\Temp");
+
+
+                            // apply the code to UTMT
+
+                            string[] Files = Directory.GetFiles(FileDir + "\\Main");
+                            string[] TempFiles = Directory.GetFiles(FileDir + "\\Temp");
+                            for (var i = 0; i < Files.Length; i++)
+                            {
+                                if (Files[i].EndsWith(".gml"))
+                                {
+                                    ImportCodeFromFile(Files[i], true, true, false, true);
+                                    /*for (var j = 0; j < TempFiles.Length; j++)
+                                        File.Copy(Files[i], TempFiles[j], true);*/
+                                }
+                            }
+
+                            this.ShowMessage("Done!");
+                        }
+                        else
+                            this.ShowMessage("There's no code to import at all.");
+                    }
+                    else
+                        this.ShowMessage("You have to export a Profile folder to your current data.win's path beforehand!");
+                }
+                else
+                {
+                    this.ShowMessage("You have to load a Profile beforehand!");
+                }
+            }
+            else
+                this.ShowMessage("You have to open a data.win beforehand!");
+            /*if (CanSave == true)
             {
                 var MD5DirName = CurProfileName;
                 var FileDir = "";
@@ -4074,7 +4320,7 @@ result in loss of work.");
                     this.ShowMessage("You have to export a Profile folder to your current data.win's path beforehand!");
             }
             else
-                this.ShowMessage("You have to open a data.win beforehand!");
+                this.ShowMessage("You have to open a data.win beforehand!");*/
         }
     }
 

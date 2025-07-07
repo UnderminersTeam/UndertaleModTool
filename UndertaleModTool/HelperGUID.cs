@@ -36,7 +36,7 @@ namespace UndertaleModTool
             }
         }
 
-        public uint ReduceCollisionValue(List<uint> possible_values)
+        public uint ReduceCollisionValue(List<uint> possible_values, string MyName)
         {
             if (possible_values.Count == 1)
             {
@@ -49,7 +49,7 @@ namespace UndertaleModTool
                 while (!obj_found)
                 {
                     string object_index = SimpleTextInput("Object could not be found. Please enter it below:",
-                                                            "Object enter box.", "", false).ToLower();
+                                                            "Object enter box. (" + MyName + ")", "", false).ToLower();
                     for (var i = 0; i < Data.GameObjects.Count; i++)
                     {
                         if (Data.GameObjects[i].Name.Content.ToLower() == object_index)

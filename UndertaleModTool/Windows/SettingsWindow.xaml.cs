@@ -121,6 +121,15 @@ namespace UndertaleModTool
                 Settings.Save();
             }
         }
+        public static bool RememberProfileName
+        {
+            get => Settings.Instance.RememberProfileName;
+            set
+            {
+                Settings.Instance.RememberProfileName = value;
+                Settings.Save();
+            }
+        }
 
         public static bool WarnOnClose
         {
@@ -220,6 +229,18 @@ namespace UndertaleModTool
             }
         }
 
+        public static DecompilerSettings DecompilerSettings => Settings.Instance.DecompilerSettings;
+
+        public static string InstanceIdPrefix
+        {
+            get => Settings.Instance.InstanceIdPrefix;
+            set
+            {
+                Settings.Instance.InstanceIdPrefix = value;
+                Settings.Save();
+            }
+        }
+
         public bool UpdateButtonEnabled
         {
             get => UpdateAppButton.IsEnabled;
@@ -232,6 +253,7 @@ namespace UndertaleModTool
             this.DataContext = this;
             Settings.Load();
         }
+
         private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (!IsVisible || IsLoaded)
@@ -266,5 +288,13 @@ namespace UndertaleModTool
             codecolors.ShowDialog();
         }
 
+
+        private void GMLSettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            GMLSettingsWindow settings = new(Settings.Instance);
+            settings.Owner = this;
+            settings.ShowDialog();
+            Settings.Save();
+        }
     }
 }

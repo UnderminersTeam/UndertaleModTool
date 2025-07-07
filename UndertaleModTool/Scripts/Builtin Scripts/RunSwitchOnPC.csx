@@ -20,13 +20,16 @@ if (Data.GeneralInfo.Name.Content != "NXTALE")
     return;
 }
 
+GlobalDecompileContext globalDecompileContext = new(Data);
+Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = new Underanalyzer.Decompiler.DecompileSettings();
+
 // Enables borders and disables interpolation. It does this by making platform-specifc code run on desktop.
-ReplaceTextInGML("gml_Object_obj_time_Draw_77", "global.osflavor >= 3", "1");
+ReplaceTextInGML("gml_Object_obj_time_Draw_77", "global.osflavor >= 3", "1", false, false, globalDecompileContext, decompilerSettings);
 
 // This enables Mad Mew Mew's entrance.
-ReplaceTextInGML("gml_Object_obj_kitchenchecker_Create_0", "global.osflavor == 4 || global.osflavor == 5", "1");
-ReplaceTextInGML("gml_Object_obj_kitchenchecker_Alarm_2", "(global.osflavor == 4 || global.osflavor == 5) && ", "");
-ReplaceTextInGML("gml_Object_obj_npc_room_Create_0", "(global.osflavor != 4 && global.osflavor != 5) || ", "");
+ReplaceTextInGML("gml_Object_obj_kitchenchecker_Create_0", "global.osflavor == 4 || global.osflavor == 5", "1", false, false, globalDecompileContext, decompilerSettings);
+ReplaceTextInGML("gml_Object_obj_kitchenchecker_Alarm_2", "(global.osflavor == 4 || global.osflavor == 5) && ", "", false, false, globalDecompileContext, decompilerSettings);
+ReplaceTextInGML("gml_Object_obj_npc_room_Create_0", "(global.osflavor != 4 && global.osflavor != 5) || ", "", false, false, globalDecompileContext, decompilerSettings);
 
 // Done.
 ScriptMessage(@"NXTALE Enabler by Kneesnap

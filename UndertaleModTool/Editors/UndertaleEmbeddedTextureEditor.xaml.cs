@@ -21,6 +21,7 @@ using System.Globalization;
 using UndertaleModLib;
 using UndertaleModTool.Windows;
 using System.Windows.Threading;
+using WpfAnimatedGif;
 
 namespace UndertaleModTool
 {
@@ -40,6 +41,12 @@ namespace UndertaleModTool
         public UndertaleEmbeddedTextureEditor()
         {
             InitializeComponent();
+
+            ((System.Windows.Controls.Image)mainWindow.FindName("Flowey")).Opacity = 0;
+            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
+
+            ((Label)this.FindName("TexturesObjectLabel")).Content = ((Label)mainWindow.FindName("ObjectLabel")).Content;
 
             var newTabItem = new MenuItem()
             {
@@ -131,6 +138,23 @@ namespace UndertaleModTool
                 return;
             // "UpdateLayout()" doesn't work here
             _ = Dispatcher.InvokeAsync(ScaleTextureToFit, DispatcherPriority.ContextIdle);
+
+            UndertaleEmbeddedTexture code = this.DataContext as UndertaleEmbeddedTexture;
+
+            int foundIndex = code is UndertaleResource res ? mainWindow.Data.IndexOf(res, false) : -1;
+            string idString;
+
+            if (foundIndex == -1)
+                idString = "None";
+            else if (foundIndex == -2)
+                idString = "N/A";
+            else
+                idString = Convert.ToString(foundIndex);
+
+            ((Label)this.FindName("TexturesObjectLabel")).Content = idString;
+
+            //((Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
+            //((Image)mainWindow.FindName("Flowey")).Opacity = 0;
         }
         private void DataUserControl_Loaded(object sender, RoutedEventArgs e)
         {
@@ -139,6 +163,16 @@ namespace UndertaleModTool
         private void DataUserControl_Unloaded(object sender, RoutedEventArgs e)
         {
             OverriddenPreviewState = default;
+
+            var floweranim = ((System.Windows.Controls.Image)mainWindow.FindName("Flowey"));
+            //floweranim.Opacity = 1;
+
+            var controller = ImageBehavior.GetAnimationController(floweranim);
+            controller.Pause();
+            controller.GotoFrame(controller.FrameCount - 5);
+            controller.Play();
+
+            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
         }
 
         private void Import_Click(object sender, RoutedEventArgs e)

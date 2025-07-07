@@ -108,12 +108,20 @@ public class UndertaleExtensionFunction : UndertaleObject, IDisposable
     /// An identification number of the function.
     /// </summary>
     public uint ID { get; set; }
+
+    /// <summary>
+    /// TODO: is this kind the same as extension kind?
+    /// </summary>
     public uint Kind { get; set; }
 
     /// <summary>
     /// The return type of the function.
     /// </summary>
     public UndertaleExtensionVarType RetType { get; set; }
+
+    /// <summary>
+    /// TODO: The extension of the filename this function belongs to?
+    /// </summary>
     public UndertaleString ExtName { get; set; }
 
     /// <summary>
@@ -168,13 +176,35 @@ public class UndertaleExtensionFunction : UndertaleObject, IDisposable
     }
 }
 
+/// <summary>
+/// A file that's used in an <see cref="UndertaleExtension"/>.
+/// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleExtensionFile : UndertaleObject, IDisposable
 {
+    /// <summary>
+    /// The filename of this extension file.
+    /// </summary>
     public UndertaleString Filename { get; set; }
+
+    /// <summary>
+    /// The script name that gets called when the game ends.
+    /// </summary>
     public UndertaleString CleanupScript { get; set; }
+
+    /// <summary>
+    /// The script name that gets called when the game starts.
+    /// </summary>
     public UndertaleString InitScript { get; set; }
+
+    /// <summary>
+    /// The type of extension this belongs to.
+    /// </summary>
     public UndertaleExtensionKind Kind { get; set; }
+
+    /// <summary>
+    /// The functions this file has defined.
+    /// </summary>
     public UndertalePointerList<UndertaleExtensionFunction> Functions { get; set; } = new UndertalePointerList<UndertaleExtensionFunction>();
 
     /// <inheritdoc />
@@ -231,7 +261,7 @@ public class UndertaleExtensionFile : UndertaleObject, IDisposable
         {
             foreach (UndertaleExtensionFunction func in Functions)
                 func?.Dispose();
-         }
+        }
         Filename = null;
         CleanupScript = null;
         InitScript = null;
@@ -239,22 +269,45 @@ public class UndertaleExtensionFile : UndertaleObject, IDisposable
     }
 }
 
-
+/// <summary>
+/// An option that's used in an <see cref="UndertaleExtension"/>.
+/// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleExtensionOption : UndertaleObject, IStaticChildObjectsSize, IDisposable
+public class UndertaleExtensionOption : UndertaleNamedResource, IStaticChildObjectsSize, IDisposable
 {
     /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
     public static readonly uint ChildObjectsSize = 12;
 
+    /// <summary>
+    /// The type of what the option value is.
+    /// </summary>
     public enum OptionKind : uint
     {
+        /// <summary>
+        /// The option value is a boolean-
+        /// </summary>
         Boolean = 0,
+        /// <summary>
+        /// The option value is a number.
+        /// </summary>
         Number = 1,
+        /// <summary>
+        /// The option value is a string.
+        /// </summary>
         String = 2
     }
 
+    /// <inheritdoc />
     public UndertaleString Name { get; set; }
+
+    /// <summary>
+    /// The value of this option.
+    /// </summary>
     public UndertaleString Value { get; set; }
+
+    /// <summary>
+    /// The type of this option.
+    /// </summary>
     public OptionKind Kind { get; set; } = OptionKind.String;
 
     /// <inheritdoc />
@@ -306,10 +359,25 @@ public class UndertaleExtension : UndertaleNamedResource, IDisposable
     /// The name of the extension.
     /// </summary>
     public UndertaleString Name { get; set; }
+
+    /// <summary>
+    /// TODO: unknown? 
+    /// </summary>
     public UndertaleString ClassName { get; set; }
+
+    /// <summary>
+    /// The version of the extension.
+    /// </summary>
     public UndertaleString Version { get; set; }
 
+    /// <summary>
+    /// The files that this extension contains.
+    /// </summary>
     public UndertalePointerList<UndertaleExtensionFile> Files { get; set; } = new UndertalePointerList<UndertaleExtensionFile>();
+
+    /// <summary>
+    /// The options that this extension contains.
+    /// </summary>
     public UndertalePointerList<UndertaleExtensionOption> Options { get; set; } = new UndertalePointerList<UndertaleExtensionOption>();
 
     /// <inheritdoc />
@@ -386,7 +454,7 @@ public class UndertaleExtension : UndertaleNamedResource, IDisposable
             reader.Position += 12 + 4; // + "Version"
         else
             reader.Position += 12;
-        
+
         if (reader.undertaleData.IsVersionAtLeast(2022, 6))
         {
             uint filesPtr = reader.ReadUInt32();

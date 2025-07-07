@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using UndertaleModLib.Models;
 using static UndertaleModLib.Compiler.Compiler.AssemblyWriter;
+using static UndertaleModLib.Util.AssetReferenceTypes;
 
 namespace UndertaleModLib.Compiler
 {
@@ -17,11 +17,16 @@ namespace UndertaleModLib.Compiler
         public bool ensureFunctionsDefined = true;
         public bool ensureVariablesDefined = true;
         public static bool GMS2_3;
+        public bool BooleanTypeEnabled => Data.IsVersionAtLeast(2, 3, 7);
+        public bool TypedAssetRefs => Data.IsVersionAtLeast(2023, 8);
         public int LastCompiledArgumentCount = 0;
         public Dictionary<string, string> LocalVars = new Dictionary<string, string>();
-        public Dictionary<string, string> GlobalVars = new Dictionary<string, string>();
-        //public Dictionary<Compiler.Parser.Statement, Dictionary<string, int>> LocalArgs = new();
-        public Dictionary<string, Dictionary<string, int>> Enums = new Dictionary<string, Dictionary<string, int>>();
+        public Dictionary<string, string> GlobalVars = new Dictionary<string, string>(); 
+        public Stack<Compiler.Parser.FunctionParseInfo> FunctionParseStack = new();
+        public Dictionary<Compiler.Parser.Statement, Compiler.Parser.FunctionParseInfo> FunctionParseInfo = new();
+        public List<(string, Compiler.Parser.Statement)> EnumStatements = new List<(string, Compiler.Parser.Statement)>();
+        public Dictionary<string, Dictionary<string, long?>> Enums = new Dictionary<string, Dictionary<string, long?>>();
+        public bool FirstPassResolvingEnums = false;
         public UndertaleCode OriginalCode;
         public IList<UndertaleVariable> OriginalReferencedLocalVars;
         public BuiltinList BuiltInList => Data.BuiltinList;
@@ -30,6 +35,8 @@ namespace UndertaleModLib.Compiler
         public bool HasError = false;
         public string ResultError = null;
         public List<UndertaleInstruction> ResultAssembly = null;
+
+        public List<string> FunctionsToObliterate = new();
 
         public Compiler.MainThreadDelegate MainThreadDelegate = (f) => { f(); };
 
@@ -40,9 +47,35 @@ namespace UndertaleModLib.Compiler
             OriginalReferencedLocalVars = OriginalCode?.FindReferencedLocalVars();
         }
 
+        /// <summary>
+        /// Returns the asset index (including encoded reference type, if applicable) of a given identifier,
+        /// or -1 if no asset/reference is found.
+        /// </summary>
         public int GetAssetIndexByName(string name)
         {
-            return assetIds.TryGetValue(name, out int val) ? val : -1;
+            // Look up asset names
+            if (assetIds.TryGetValue(name, out int val))
+            {
+                return val;
+            }
+
+            // Handle named instance IDs
+            string instanceIdPrefix = Data.ToolInfo.InstanceIdPrefix();
+            if (name.StartsWith(instanceIdPrefix, StringComparison.InvariantCulture))
+            {
+                if (int.TryParse(name[instanceIdPrefix.Length..], out int id) && id >= 100000)
+                {
+                    if (TypedAssetRefs)
+                    {
+                        // Add type to ID
+                        id = (id & 0xffffff) | ((ConvertFromRefType(Data, RefType.RoomInstance) & 0x7f) << 24);
+                    }
+                    return id;
+                }
+            }
+
+            // Nothing found
+            return -1;
         }
 
         public void OnSuccessfulFinish()
@@ -53,6 +86,28 @@ namespace UndertaleModLib.Compiler
                 {
                     foreach (KeyValuePair<string, string> v in GlobalVars)
                         Data?.Variables?.EnsureDefined(v.Key, UndertaleInstruction.InstanceType.Global, false, Data.Strings, Data);
+                    if (Data is not null)
+                    {
+                        foreach (string name in FunctionsToObliterate)
+                        {
+                            string scriptName = "gml_Script_" + name;
+                            UndertaleScript scriptObj = Data.Scripts.ByName(scriptName);
+                            if (scriptObj is not null)
+                                Data.Scripts.Remove(scriptObj);
+                            UndertaleCode codeObj = Data.Code.ByName(scriptName);
+                            if (codeObj is not null)
+                            {
+                                Data.Code.Remove(codeObj);
+                                OriginalCode.ChildEntries.Remove(codeObj);
+                            }
+                            UndertaleFunction functionObj = Data.Functions.ByName(scriptName);
+                            if (functionObj is not null)
+                                Data.Functions.Remove(functionObj);
+                            Data.GlobalFunctions.NameToFunction.Remove(name);
+                            Data.GlobalFunctions.FunctionToName.Remove(functionObj);
+                        }
+                        FunctionsToObliterate.Clear();
+                    }
                 });
             }
 
@@ -74,35 +129,61 @@ namespace UndertaleModLib.Compiler
 
             LastCompiledArgumentCount = 0;
             userDefinedVariables.Clear();
+            FunctionsToObliterate.Clear();
             if (redoAssets || assetIds.Count == 0)
                 MakeAssetDictionary();
         }
 
         private void MakeAssetDictionary()
         {
+            // Clear the dictionary first and set the worst case max size so that we don't resize it over and over
             assetIds.Clear();
-            AddAssetsFromList(Data?.GameObjects);
-            AddAssetsFromList(Data?.Sprites);
-            AddAssetsFromList(Data?.Sounds);
-            AddAssetsFromList(Data?.Backgrounds);
-            AddAssetsFromList(Data?.Paths);
-            AddAssetsFromList(Data?.Fonts);
-            AddAssetsFromList(Data?.Timelines);
-            if (!GMS2_3)
-                AddAssetsFromList(Data?.Scripts);
-            AddAssetsFromList(Data?.Shaders);
-            AddAssetsFromList(Data?.Rooms);
-            AddAssetsFromList(Data?.AudioGroups);
-
             scripts.Clear();
-            if (Data?.Scripts != null)
+            if (Data is null) return;
+
+            int maxSize = 0;
+            maxSize += Data.GameObjects?.Count ?? 0;
+            maxSize += Data.Sprites?.Count ?? 0;
+            maxSize += Data.Sounds?.Count ?? 0;
+            maxSize += Data.Backgrounds?.Count ?? 0;
+            maxSize += Data.Paths?.Count ?? 0;
+            maxSize += Data.Fonts?.Count ?? 0;
+            maxSize += Data.Timelines?.Count ?? 0;
+            maxSize += Data.Scripts?.Count ?? 0;
+            maxSize += Data.Shaders?.Count ?? 0;
+            maxSize += Data.Rooms?.Count ?? 0;
+            maxSize += Data.AudioGroups?.Count ?? 0;
+            maxSize += Data.AnimationCurves?.Count ?? 0;
+            maxSize += Data.Sequences?.Count ?? 0;
+            maxSize += Data.ParticleSystems?.Count ?? 0;
+
+            assetIds.EnsureCapacity(maxSize);
+            scripts.EnsureCapacity(Data.Scripts?.Count ?? 0);
+
+            AddAssetsFromList(Data.GameObjects, RefType.Object);
+            AddAssetsFromList(Data.Sprites, RefType.Sprite);
+            AddAssetsFromList(Data.Sounds, RefType.Sound);
+            AddAssetsFromList(Data.Backgrounds, RefType.Background);
+            AddAssetsFromList(Data.Paths, RefType.Path);
+            AddAssetsFromList(Data.Fonts, RefType.Font);
+            AddAssetsFromList(Data.Timelines, RefType.Timeline);
+            if (!GMS2_3)
+                AddAssetsFromList(Data.Scripts, RefType.Script /* not actually used */);
+            AddAssetsFromList(Data.Shaders, RefType.Shader);
+            AddAssetsFromList(Data.Rooms, RefType.Room);
+            AddAssetsFromList(Data.AudioGroups, RefType.Sound /* apparently? */);
+            AddAssetsFromList(Data.AnimationCurves, RefType.AnimCurve);
+            AddAssetsFromList(Data.Sequences, RefType.Sequence);
+            AddAssetsFromList(Data.ParticleSystems, RefType.ParticleSystem);
+
+            if (Data.Scripts is not null)
             {
                 foreach (UndertaleScript s in Data.Scripts)
                 {
                     scripts.Add(s.Name.Content);
                 }
             }
-            if (Data?.Extensions != null)
+            if (Data.Extensions is not null)
             {
                 foreach (UndertaleExtension e in Data.Extensions)
                 {
@@ -117,15 +198,30 @@ namespace UndertaleModLib.Compiler
             }
         }
 
-        private void AddAssetsFromList<T>(IList<T> list) where T : UndertaleNamedResource
+        private void AddAssetsFromList<T>(IList<T> list, RefType type) where T : UndertaleNamedResource
         {
             if (list == null)
                 return;
-            for (int i = 0; i < list.Count; i++)
+            if (TypedAssetRefs)
             {
-                string name = list[i].Name?.Content;
-                if (name != null)
-                    assetIds[name] = i;
+                for (int i = 0; i < list.Count; i++)
+                {
+                    string name = list[i].Name?.Content;
+                    if (name != null)
+                    {
+                        // Typed asset refs pack their type into the ID
+                        assetIds[name] = (i & 0xffffff) | ((ConvertFromRefType(Data, type) & 0x7f) << 24);
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < list.Count; i++)
+                {
+                    string name = list[i].Name?.Content;
+                    if (name != null)
+                        assetIds[name] = i;
+                }
             }
         }
     }

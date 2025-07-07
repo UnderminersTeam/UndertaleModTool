@@ -6,7 +6,10 @@
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:gif ="http://wpfanimatedgif.codeplex.com"
              mc:Ignorable="d" 
+             Unloaded="UndertaleSpritesEditor_Unloaded"
+             DataContextChanged="UserControl_DataContextChanged"
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleSprite}">
     <UserControl.Resources>
         <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="SpriteType">
@@ -52,20 +55,22 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
-        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
+        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3,3,120,3" ObjectReference="{Binding Name}"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Size</TextBlock>
-        <Grid Grid.Row="2" Grid.Column="1">
+        <Grid Grid.Row="2" Grid.Column="1" Margin="0,0,117,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding Width}"/>
-            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding Height}"/>
+            <TextBlock Grid.Column="0" Margin="18,3,3,3">Width:</TextBlock>
+            <local:TextBoxDark Grid.Column="0" Margin="60,3,30,3" Text="{Binding Width}"/>
+            <TextBlock Grid.Column="1" Margin="-16,3,3,3">Height:</TextBlock>
+            <local:TextBoxDark Grid.Column="1" Margin="30,3,60,3" Text="{Binding Height}"/>
         </Grid>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Margin Left/Right/Bottom/Top</TextBlock>
-        <Grid Grid.Row="3" Grid.Column="1">
+        <Grid Grid.Row="3" Grid.Column="1" Margin="0,0,117,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -86,6 +91,19 @@
         
         <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Preload</TextBlock>
         <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding Preload}"/>
+
+        <Image Margin="0,32,30,0" Grid.Column="1" Grid.RowSpan="5" gif:ImageBehavior.AnimatedSource="/Resources/spr_flowey_riseanim.gif"  Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="Flowey"/>
+        <Image Margin="0,0,16,0" Grid.Column="1" Grid.RowSpan="5" Source="/Resources/spr_bubble_message.png" Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="FloweyBubble"/>
+        <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="SpritesObjectLabel"
+                       ToolTip="This is an ID (index) of the currently open sprite. It starts from 0."
+                       ToolTipService.InitialShowDelay="200" Margin="0,0,17,0" Foreground="Black" Grid.Column="2"
+                       Width="Auto" Grid.RowSpan="5"
+               />
+        <Label Content="ID:" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="FunnySprites"
+                       ToolTip="This is an ID (index) of the currently open sprite. It starts from 0."
+                       ToolTipService.InitialShowDelay="200" Margin="0,0,58,0" Foreground="Black" Grid.Column="2"
+                       Width="Auto" Grid.RowSpan="5"
+               />
 
         <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Bounding box mode</TextBlock>
         <local:TextBoxDark Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding BBoxMode}"/>
@@ -154,8 +172,8 @@
                     <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
                         <DrawingBrush.Drawing>
                             <DrawingGroup>
-                                <GeometryDrawing Geometry="M0,0 L20,0 20,20, 0,20Z" Brush="White"/>
-                                <GeometryDrawing Geometry="M0,10 L20,10 20,20, 10,20 10,0 0,0Z" Brush="LightGray"/>
+                                <GeometryDrawing Geometry="M0,0 L20,0 20,20, 0,20Z" Brush="Gray"/>
+                                <GeometryDrawing Geometry="M0,10 L20,10 20,20, 10,20 10,0 0,0Z" Brush="DimGray"/>
                             </DrawingGroup>
                         </DrawingBrush.Drawing>
                     </DrawingBrush>

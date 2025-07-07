@@ -4,15 +4,17 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Underanalyzer;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
+using UndertaleModLib.Util;
 
 namespace UndertaleModLib.Models;
 
 /// <summary>
 /// A bytecode instruction.
 /// </summary>
-public class UndertaleInstruction : UndertaleObject
+public class UndertaleInstruction : UndertaleObject, IGMInstruction
 {
     /// <summary>
     /// Possible opcodes an instruction can use.
@@ -141,7 +143,7 @@ public class UndertaleInstruction : UndertaleObject
             0xBC => 0xBB,
             _ => kind
         };
-        
+
         return kind;
     }
 
@@ -209,7 +211,9 @@ public class UndertaleInstruction : UndertaleObject
     public object Value { get; set; }
     public Reference<UndertaleVariable> Destination { get; set; }
     public Reference<UndertaleFunction> Function { get; set; }
-    public int JumpOffset { get; set; }
+    private int _IntegerArgument;
+    public int JumpOffset { get => _IntegerArgument; set => _IntegerArgument = value; }
+    public int IntArgument { get => _IntegerArgument; set => _IntegerArgument = value; }
     public bool JumpOffsetPopenvExitMagic { get; set; }
     public ushort ArgumentsCount { get; set; }
     public byte Extra { get; set; }
@@ -347,7 +351,7 @@ public class UndertaleInstruction : UndertaleObject
             uint addr = reader.GetAddressForUndertaleObject(obj.FirstAddress);
             for (int i = 0; i < obj.Occurrences; i++)
             {
-                reference = reader.GetUndertaleObjectAtAddress<UndertaleInstruction>(addr).GetReference<T>(obj is UndertaleFunction);
+                reference = reader.GetUndertaleObjectAtAddress<UndertaleInstruction>(addr).GetReference<T>(true);
                 if (reference == null)
                     throw new IOException("Failed to find reference at " + addr);
                 reference.Target = obj;
@@ -360,10 +364,18 @@ public class UndertaleInstruction : UndertaleObject
     public Reference<T> GetReference<T>(bool allowResolve = false) where T : class, UndertaleObject, ReferencedObject
     {
         Reference<T> res = (Destination as Reference<T>) ?? (Function as Reference<T>) ?? (Value as Reference<T>);
-        if (allowResolve && res == null && Value is int val)
+        if (allowResolve && res == null)
         {
-            Value = new Reference<T>(val);
-            return (Reference<T>)Value;
+            if (Kind == Opcode.Break && Value is short breakType && breakType == -11 /* pushref */)
+            {
+                Function = new Reference<UndertaleFunction>(IntArgument);
+                return Function as Reference<T>;
+            }
+            if (Value is int val)
+            {
+                Value = new Reference<T>(val);
+                return (Reference<T>)Value;
+            }
         }
         return res;
     }
@@ -376,191 +388,203 @@ public class UndertaleInstruction : UndertaleObject
             case InstructionType.SingleTypeInstruction:
             case InstructionType.DoubleTypeInstruction:
             case InstructionType.ComparisonInstruction:
-            {
-                writer.Write(Extra);
-                if (writer.Bytecode14OrLower && Kind == Opcode.Cmp)
-                    writer.Write((byte)0);
-                else
-                    writer.Write((byte)ComparisonKind);
-                byte TypePair = (byte)((byte)Type2 << 4 | (byte)Type1);
-                writer.Write(TypePair);
-
-                if (writer.Bytecode14OrLower)
                 {
-                    byte k = Kind switch
+                    writer.Write(Extra);
+                    if (writer.Bytecode14OrLower && Kind == Opcode.Cmp)
+                        writer.Write((byte)0);
+                    else
+                        writer.Write((byte)ComparisonKind);
+                    byte TypePair = (byte)((byte)Type2 << 4 | (byte)Type1);
+                    writer.Write(TypePair);
+
+                    if (writer.Bytecode14OrLower)
                     {
-                        Opcode.Conv => 0x03,
-                        Opcode.Mul => 0x04,
-                        Opcode.Div => 0x05,
-                        Opcode.Rem => 0x06,
-                        Opcode.Mod => 0x07,
-                        Opcode.Add => 0x08,
-                        Opcode.Sub => 0x09,
-                        Opcode.And => 0x0A,
-                        Opcode.Or => 0x0B,
-                        Opcode.Xor => 0x0C,
-                        Opcode.Neg => 0x0D,
-                        Opcode.Not => 0x0E,
-                        Opcode.Shl => 0x0F,
-                        Opcode.Shr => 0x10,
-                        Opcode.Dup => 0x82,
-                        Opcode.Cmp => (byte)(ComparisonKind + 0x10),
-                        Opcode.Ret => 0x9D,
-                        Opcode.Exit => 0x9E,
-                        Opcode.Popz => 0x9F,
-                        _ => (byte)Kind,
-                    };
-                    writer.Write(k);
+                        byte k = Kind switch
+                        {
+                            Opcode.Conv => 0x03,
+                            Opcode.Mul => 0x04,
+                            Opcode.Div => 0x05,
+                            Opcode.Rem => 0x06,
+                            Opcode.Mod => 0x07,
+                            Opcode.Add => 0x08,
+                            Opcode.Sub => 0x09,
+                            Opcode.And => 0x0A,
+                            Opcode.Or => 0x0B,
+                            Opcode.Xor => 0x0C,
+                            Opcode.Neg => 0x0D,
+                            Opcode.Not => 0x0E,
+                            Opcode.Shl => 0x0F,
+                            Opcode.Shr => 0x10,
+                            Opcode.Dup => 0x82,
+                            Opcode.Cmp => (byte)(ComparisonKind + 0x10),
+                            Opcode.Ret => 0x9D,
+                            Opcode.Exit => 0x9E,
+                            Opcode.Popz => 0x9F,
+                            _ => (byte)Kind,
+                        };
+                        writer.Write(k);
+                    }
+                    else
+                        writer.Write((byte)Kind);
                 }
-                else
-                    writer.Write((byte)Kind);
-            }
                 break;
 
             case InstructionType.GotoInstruction:
-            {
-                // See unserialize
-                if (writer.Bytecode14OrLower)
-                    writer.WriteInt24(JumpOffset);
-                else if (JumpOffsetPopenvExitMagic)
                 {
-                    writer.WriteInt24(0xF00000);
-                }
-                else
-                {
-                    uint JumpOffsetFixed = (uint)JumpOffset;
-                    JumpOffsetFixed &= ~0xFF800000;
-                    writer.WriteInt24((int)JumpOffsetFixed);
-                }
+                    // See unserialize
+                    if (writer.Bytecode14OrLower)
+                        writer.WriteInt24(JumpOffset);
+                    else if (JumpOffsetPopenvExitMagic)
+                    {
+                        writer.WriteInt24(0xF00000);
+                    }
+                    else
+                    {
+                        uint JumpOffsetFixed = (uint)JumpOffset;
+                        JumpOffsetFixed &= ~0xFF800000;
+                        writer.WriteInt24((int)JumpOffsetFixed);
+                    }
 
-                if (writer.Bytecode14OrLower)
-                {
-                    if (Kind == Opcode.B)
-                        writer.Write((byte)0xB7);
-                    else if (Kind == Opcode.Bt)
-                        writer.Write((byte)0xB8);
-                    else if (Kind == Opcode.Bf)
-                        writer.Write((byte)0xB9);
-                    else if (Kind == Opcode.PushEnv)
-                        writer.Write((byte)0xBB);
-                    else if (Kind == Opcode.PopEnv)
-                        writer.Write((byte)0xBC);
+                    if (writer.Bytecode14OrLower)
+                    {
+                        if (Kind == Opcode.B)
+                            writer.Write((byte)0xB7);
+                        else if (Kind == Opcode.Bt)
+                            writer.Write((byte)0xB8);
+                        else if (Kind == Opcode.Bf)
+                            writer.Write((byte)0xB9);
+                        else if (Kind == Opcode.PushEnv)
+                            writer.Write((byte)0xBB);
+                        else if (Kind == Opcode.PopEnv)
+                            writer.Write((byte)0xBC);
+                        else
+                            writer.Write((byte)Kind);
+                    }
                     else
                         writer.Write((byte)Kind);
                 }
-                else
-                    writer.Write((byte)Kind);
-            }
                 break;
 
             case InstructionType.PopInstruction:
-            {
-                if (Type1 == DataType.Int16)
                 {
-                    // Special scenario - the swap instruction
-                    // TODO: Figure out the proper syntax, see #129
-                    writer.Write(SwapExtra);
-                    byte TypePair = (byte)((byte)Type2 << 4 | (byte)Type1);
-                    writer.Write(TypePair);
-                    if (writer.Bytecode14OrLower && Kind == Opcode.Pop)
-                        writer.Write((byte)0x41);
+                    if (Type1 == DataType.Int16)
+                    {
+                        // Special scenario - the swap instruction
+                        // TODO: Figure out the proper syntax, see #129
+                        writer.Write(SwapExtra);
+                        byte TypePair = (byte)((byte)Type2 << 4 | (byte)Type1);
+                        writer.Write(TypePair);
+                        if (writer.Bytecode14OrLower && Kind == Opcode.Pop)
+                            writer.Write((byte)0x41);
+                        else
+                            writer.Write((byte)Kind);
+                    }
                     else
-                        writer.Write((byte)Kind);
+                    {
+                        writer.Write((short)TypeInst);
+                        byte TypePair = (byte)((byte)Type2 << 4 | (byte)Type1);
+                        writer.Write(TypePair);
+                        if (writer.Bytecode14OrLower && Kind == Opcode.Pop)
+                            writer.Write((byte)0x41);
+                        else
+                            writer.Write((byte)Kind);
+                        writer.WriteUndertaleObject(Destination);
+                    }
                 }
-                else
-                {
-                    writer.Write((short)TypeInst);
-                    byte TypePair = (byte)((byte)Type2 << 4 | (byte)Type1);
-                    writer.Write(TypePair);
-                    if (writer.Bytecode14OrLower && Kind == Opcode.Pop)
-                        writer.Write((byte)0x41);
-                    else
-                        writer.Write((byte)Kind);
-                    writer.WriteUndertaleObject(Destination);
-                }
-            }
                 break;
 
             case InstructionType.PushInstruction:
-            {
-                if (Type1 == DataType.Int16)
                 {
-                    //Debug.Assert(Value.GetType() == typeof(short));
-                    writer.Write((short)Value);
-                }
-                else if (Type1 == DataType.Variable)
-                {
-                    writer.Write((short)TypeInst);
-                }
-                else
-                {
-                    writer.Write((short)0);
-                }
-                writer.Write((byte)Type1);
-                if (writer.Bytecode14OrLower)
-                    writer.Write((byte)0xC0);
-                else
-                    writer.Write((byte)Kind);
-                switch (Type1)
-                {
-                    case DataType.Double:
-                        //Debug.Assert(Value.GetType() == typeof(double));
-                        writer.Write((double)Value);
-                        break;
-                    case DataType.Float:
-                        //Debug.Assert(Value.GetType() == typeof(float));
-                        writer.Write((float)Value);
-                        break;
-                    case DataType.Int32:
-                        if (Value.GetType() == typeof(Reference<UndertaleFunction>))
-                        {
-                            writer.WriteUndertaleObject((Reference<UndertaleFunction>)Value);
+                    if (Type1 == DataType.Int16)
+                    {
+                        //Debug.Assert(Value.GetType() == typeof(short));
+                        writer.Write((short)Value);
+                    }
+                    else if (Type1 == DataType.Variable)
+                    {
+                        writer.Write((short)TypeInst);
+                    }
+                    else
+                    {
+                        writer.Write((short)0);
+                    }
+                    writer.Write((byte)Type1);
+                    if (writer.Bytecode14OrLower)
+                        writer.Write((byte)0xC0);
+                    else
+                        writer.Write((byte)Kind);
+                    switch (Type1)
+                    {
+                        case DataType.Double:
+                            //Debug.Assert(Value.GetType() == typeof(double));
+                            writer.Write((double)Value);
                             break;
-                        }
-                        //Debug.Assert(Value.GetType() == typeof(int));
-                        writer.Write((int)Value);
-                        break;
-                    case DataType.Int64:
-                        //Debug.Assert(Value.GetType() == typeof(long));
-                        writer.Write((long)Value);
-                        break;
-                    case DataType.Boolean:
-                        //Debug.Assert(Value.GetType() == typeof(bool));
-                        writer.Write((bool)Value ? 1 : 0);
-                        break;
-                    case DataType.Variable:
-                        //Debug.Assert(Value.GetType() == typeof(Reference<UndertaleVariable>));
-                        writer.WriteUndertaleObject((Reference<UndertaleVariable>)Value);
-                        break;
-                    case DataType.String:
-                        //Debug.Assert(Value.GetType() == typeof(UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>));
-                        writer.WriteUndertaleObject((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Value);
-                        break;
-                    case DataType.Int16:
-                        break;
+                        case DataType.Float:
+                            //Debug.Assert(Value.GetType() == typeof(float));
+                            writer.Write((float)Value);
+                            break;
+                        case DataType.Int32:
+                            if (Value.GetType() == typeof(Reference<UndertaleFunction>))
+                            {
+                                writer.WriteUndertaleObject((Reference<UndertaleFunction>)Value);
+                                break;
+                            }
+                            if (Value.GetType() == typeof(Reference<UndertaleVariable>))
+                            {
+                                writer.WriteUndertaleObject((Reference<UndertaleVariable>)Value);
+                                break;
+                            }
+                            //Debug.Assert(Value.GetType() == typeof(int));
+                            writer.Write((int)Value);
+                            break;
+                        case DataType.Int64:
+                            //Debug.Assert(Value.GetType() == typeof(long));
+                            writer.Write((long)Value);
+                            break;
+                        case DataType.Boolean:
+                            //Debug.Assert(Value.GetType() == typeof(bool));
+                            writer.Write((bool)Value ? 1 : 0);
+                            break;
+                        case DataType.Variable:
+                            //Debug.Assert(Value.GetType() == typeof(Reference<UndertaleVariable>));
+                            writer.WriteUndertaleObject((Reference<UndertaleVariable>)Value);
+                            break;
+                        case DataType.String:
+                            //Debug.Assert(Value.GetType() == typeof(UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>));
+                            writer.WriteUndertaleObject((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Value);
+                            break;
+                        case DataType.Int16:
+                            break;
+                    }
                 }
-            }
                 break;
 
             case InstructionType.CallInstruction:
-            {
-                writer.Write(ArgumentsCount);
-                writer.Write((byte)Type1);
-                if (writer.Bytecode14OrLower && Kind == Opcode.Call)
-                    writer.Write((byte)0xDA);
-                else
-                    writer.Write((byte)Kind);
-                writer.WriteUndertaleObject(Function);
-            }
+                {
+                    writer.Write(ArgumentsCount);
+                    writer.Write((byte)Type1);
+                    if (writer.Bytecode14OrLower && Kind == Opcode.Call)
+                        writer.Write((byte)0xDA);
+                    else
+                        writer.Write((byte)Kind);
+                    writer.WriteUndertaleObject(Function);
+                }
                 break;
 
             case InstructionType.BreakInstruction:
-            {
-                //Debug.Assert(Value.GetType() == typeof(short));
-                writer.Write((short)Value);
-                writer.Write((byte)Type1);
-                writer.Write((byte)Kind);
-            }
+                {
+                    //Debug.Assert(Value.GetType() == typeof(short));
+                    writer.Write((short)Value);
+                    writer.Write((byte)Type1);
+                    writer.Write((byte)Kind);
+                    if (Type1 == DataType.Int32)
+                    {
+                        if (Function != null)
+                            writer.WriteUndertaleObject(Function);
+                        else
+                            writer.Write(IntArgument);
+                    }
+                }
                 break;
 
             default:
@@ -586,166 +610,185 @@ public class UndertaleInstruction : UndertaleObject
             case InstructionType.SingleTypeInstruction:
             case InstructionType.DoubleTypeInstruction:
             case InstructionType.ComparisonInstruction:
-            {
-                Extra = reader.ReadByte();
-#if DEBUG
-                if (Extra != 0 && Kind != Opcode.Dup && Kind != Opcode.CallV)
-                    throw new IOException("Invalid padding in " + Kind.ToString().ToUpper(CultureInfo.InvariantCulture));
-#endif
-                ComparisonKind = (ComparisonType)reader.ReadByte();
-                //if (!bytecode14 && (Kind == Opcode.Cmp) != ((byte)ComparisonKind != 0))
-                //    throw new IOException("Got unexpected comparison type in " + Kind.ToString().ToUpper(CultureInfo.InvariantCulture) + " (should be only in CMP)");
-                byte TypePair = reader.ReadByte();
-                Type1 = (DataType)(TypePair & 0xf);
-                Type2 = (DataType)(TypePair >> 4);
-#if DEBUG
-                if (GetInstructionType(Kind) == InstructionType.SingleTypeInstruction && Type2 != (byte)0)
-                    throw new IOException("Second type should be 0 in " + Kind.ToString().ToUpper(CultureInfo.InvariantCulture));
-#endif
-                //if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
-                if (reader.Bytecode14OrLower && Kind == Opcode.Cmp)
-                    ComparisonKind = (ComparisonType)(reader.ReadByte() - 0x10);
-                else
-                    reader.Position++;
-
-                if (Kind == Opcode.And || Kind == Opcode.Or)
                 {
-                    if (Type1 == DataType.Boolean && Type2 == DataType.Boolean)
-                        reader.undertaleData.ShortCircuit = false;
+                    Extra = reader.ReadByte();
+#if DEBUG
+                    if (Extra != 0 && Kind != Opcode.Dup && Kind != Opcode.CallV)
+                        throw new IOException("Invalid padding in " + Kind.ToString().ToUpper(CultureInfo.InvariantCulture));
+#endif
+                    ComparisonKind = (ComparisonType)reader.ReadByte();
+                    //if (!bytecode14 && (Kind == Opcode.Cmp) != ((byte)ComparisonKind != 0))
+                    //    throw new IOException("Got unexpected comparison type in " + Kind.ToString().ToUpper(CultureInfo.InvariantCulture) + " (should be only in CMP)");
+                    byte TypePair = reader.ReadByte();
+                    Type1 = (DataType)(TypePair & 0xf);
+                    Type2 = (DataType)(TypePair >> 4);
+#if DEBUG
+                    if (GetInstructionType(Kind) == InstructionType.SingleTypeInstruction && Type2 != (byte)0)
+                        throw new IOException("Second type should be 0 in " + Kind.ToString().ToUpper(CultureInfo.InvariantCulture));
+#endif
+                    //if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
+                    if (reader.Bytecode14OrLower && Kind == Opcode.Cmp)
+                        ComparisonKind = (ComparisonType)(reader.ReadByte() - 0x10);
+                    else
+                        reader.Position++;
+
+                    if (Kind == Opcode.And || Kind == Opcode.Or)
+                    {
+                        if (Type1 == DataType.Boolean && Type2 == DataType.Boolean)
+                            reader.undertaleData.ShortCircuit = false;
+                    }
                 }
-            }
                 break;
 
             case InstructionType.GotoInstruction:
-            {
-                if (reader.Bytecode14OrLower)
                 {
-                    JumpOffset = reader.ReadInt24();
-                    if (JumpOffset == -1048576) // magic? encoded in little endian as 00 00 F0, which is like below
-                        JumpOffsetPopenvExitMagic = true;
-                    reader.Position++;
-                    break;
-                }
+                    if (reader.Bytecode14OrLower)
+                    {
+                        JumpOffset = reader.ReadInt24();
+                        if (JumpOffset == -1048576) // magic? encoded in little endian as 00 00 F0, which is like below
+                            JumpOffsetPopenvExitMagic = true;
+                        reader.Position++;
+                        break;
+                    }
 
-                uint v = reader.ReadUInt24();
+                    uint v = reader.ReadUInt24();
 
-                JumpOffsetPopenvExitMagic = (v & 0x800000) != 0;
+                    JumpOffsetPopenvExitMagic = (v & 0x800000) != 0;
 
-                // The rest is int23 signed value, so make sure
-                uint r = v & 0x003FFFFF;
+                    // The rest is int23 signed value, so make sure
+                    uint r = v & 0x003FFFFF;
 #if DEBUG
-                if (JumpOffsetPopenvExitMagic && v != 0xF00000)
-                    throw new Exception("Popenv magic doesn't work, call issue #90 again");
-                else
+                    if (JumpOffsetPopenvExitMagic && v != 0xF00000)
+                        throw new Exception("Popenv magic doesn't work, call issue #90 again");
+                    else
 #endif
-                {
-                    if ((v & 0x00C00000) != 0)
-                        r |= 0xFFC00000;
-                    JumpOffset = (int)r;
-                }
+                    {
+                        if ((v & 0x00C00000) != 0)
+                            r |= 0xFFC00000;
+                        JumpOffset = (int)r;
+                    }
 
-                //if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
-                reader.Position++;
-            }
+                    //if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
+                    reader.Position++;
+                }
                 break;
 
             case InstructionType.PopInstruction:
-            {
-                TypeInst = (InstanceType)reader.ReadInt16();
-                byte TypePair = reader.ReadByte();
-                Type1 = (DataType)(TypePair & 0xf);
-                Type2 = (DataType)(TypePair >> 4);
-                //if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
-                reader.Position++;
-                if (Type1 == DataType.Int16)
                 {
-                    // Special scenario - the swap instruction
-                    // TODO: Figure out the proper syntax, see #129
-                    SwapExtra = (ushort)TypeInst;
-                    TypeInst = 0;
+                    TypeInst = (InstanceType)reader.ReadInt16();
+                    byte TypePair = reader.ReadByte();
+                    Type1 = (DataType)(TypePair & 0xf);
+                    Type2 = (DataType)(TypePair >> 4);
+                    //if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
+                    reader.Position++;
+                    if (Type1 == DataType.Int16)
+                    {
+                        // Special scenario - the swap instruction
+                        // TODO: Figure out the proper syntax, see #129
+                        SwapExtra = (ushort)TypeInst;
+                        TypeInst = 0;
+                    }
+                    else
+                    {
+                        Destination = reader.ReadUndertaleObject<Reference<UndertaleVariable>>();
+                    }
                 }
-                else
-                {
-                    Destination = reader.ReadUndertaleObject<Reference<UndertaleVariable>>();
-                }
-            }
                 break;
 
             case InstructionType.PushInstruction:
-            {
-                short val = reader.ReadInt16();
-                Type1 = (DataType)reader.ReadByte();
-                if (reader.Bytecode14OrLower)
                 {
-                    if (Type1 == DataType.Variable)
+                    short val = reader.ReadInt16();
+                    Type1 = (DataType)reader.ReadByte();
+                    if (reader.Bytecode14OrLower)
                     {
-                        switch (val)
+                        if (Type1 == DataType.Variable)
                         {
-                            case -5:
-                                Kind = Opcode.PushGlb;
-                                break;
-                            case -6: // builtin
-                                Kind = Opcode.PushBltn;
-                                break;
-                            case -7:
-                                Kind = Opcode.PushLoc;
-                                break;
+                            switch (val)
+                            {
+                                case -5:
+                                    Kind = Opcode.PushGlb;
+                                    break;
+                                case -6: // builtin
+                                    Kind = Opcode.PushBltn;
+                                    break;
+                                case -7:
+                                    Kind = Opcode.PushLoc;
+                                    break;
+                            }
+                        }
+                        else if (Type1 == DataType.Int16)
+                        {
+                            Kind = Opcode.PushI;
                         }
                     }
-                    else if (Type1 == DataType.Int16)
+                    //if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
+                    reader.Position++;
+                    switch (Type1)
                     {
-                        Kind = Opcode.PushI;
+                        case DataType.Double:
+                            Value = reader.ReadDouble();
+                            break;
+                        case DataType.Float:
+                            Value = reader.ReadSingle();
+                            break;
+                        case DataType.Int32:
+                            Value = reader.ReadInt32();
+                            break;
+                        case DataType.Int64:
+                            Value = reader.ReadInt64();
+                            break;
+                        case DataType.Boolean:
+                            Value = (reader.ReadUInt32() == 1); // TODO: double check
+                            break;
+                        case DataType.Variable:
+                            TypeInst = (InstanceType)val;
+                            Value = reader.ReadUndertaleObject<Reference<UndertaleVariable>>();
+                            break;
+                        case DataType.String:
+                            Value = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>>();
+                            break;
+                        case DataType.Int16:
+                            Value = val;
+                            break;
                     }
                 }
-                //if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
-                reader.Position++;
-                switch (Type1)
-                {
-                    case DataType.Double:
-                        Value = reader.ReadDouble();
-                        break;
-                    case DataType.Float:
-                        Value = reader.ReadSingle();
-                        break;
-                    case DataType.Int32:
-                        Value = reader.ReadInt32();
-                        break;
-                    case DataType.Int64:
-                        Value = reader.ReadInt64();
-                        break;
-                    case DataType.Boolean:
-                        Value = (reader.ReadUInt32() == 1); // TODO: double check
-                        break;
-                    case DataType.Variable:
-                        TypeInst = (InstanceType)val;
-                        Value = reader.ReadUndertaleObject<Reference<UndertaleVariable>>();
-                        break;
-                    case DataType.String:
-                        Value = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>>();
-                        break;
-                    case DataType.Int16:
-                        Value = val;
-                        break;
-                }
-            }
                 break;
 
             case InstructionType.CallInstruction:
-            {
-                ArgumentsCount = reader.ReadUInt16();
-                Type1 = (DataType)reader.ReadByte();
-                //if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
-                reader.Position++;
-                Function = reader.ReadUndertaleObject<Reference<UndertaleFunction>>();
-            }
+                {
+                    ArgumentsCount = reader.ReadUInt16();
+                    Type1 = (DataType)reader.ReadByte();
+                    //if(reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
+                    reader.Position++;
+                    Function = reader.ReadUndertaleObject<Reference<UndertaleFunction>>();
+                }
                 break;
 
             case InstructionType.BreakInstruction:
-            {
-                Value = reader.ReadInt16();
-                Type1 = (DataType)reader.ReadByte();
-                if (reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
-            }
+                {
+                    Value = reader.ReadInt16();
+                    Type1 = (DataType)reader.ReadByte();
+                    if (reader.ReadByte() != (byte)Kind) throw new Exception("really shouldn't happen");
+                    if (Type1 == DataType.Int32)
+                    {
+                        IntArgument = reader.ReadInt32();
+                        if (!reader.undertaleData.IsVersionAtLeast(2023, 8))
+                            reader.undertaleData.SetGMS2Version(2023, 8);
+                        if (!reader.undertaleData.IsVersionAtLeast(2024, 4))
+                        {
+                            if (CheckIfAssetTypeIs2024_4(reader.undertaleData, IntArgument & 0xffffff, IntArgument >> 24))
+                                reader.undertaleData.SetGMS2Version(2024, 4);
+                        }
+                    }
+                    if (reader.undertaleData.IsVersionAtLeast(2, 3))
+                    {
+                        if ((short)Value == -10) // chknullish instruction, added in 2.3.7
+                        {
+                            if (!reader.undertaleData.IsVersionAtLeast(2, 3, 7))
+                                reader.undertaleData.SetGMS2Version(2, 3, 7);
+                        }
+                    }
+                }
                 break;
 
             default:
@@ -771,7 +814,6 @@ public class UndertaleInstruction : UndertaleObject
             case InstructionType.DoubleTypeInstruction:
             case InstructionType.ComparisonInstruction:
             case InstructionType.GotoInstruction:
-            case InstructionType.BreakInstruction:
                 reader.Position += 4;
                 break;
 
@@ -817,6 +859,17 @@ public class UndertaleInstruction : UndertaleObject
                 reader.Position += 8;
                 return 1; // "Function"
 
+            case InstructionType.BreakInstruction:
+                {
+                    reader.Position += 2;
+                    DataType Type1 = (DataType)reader.ReadByte();
+                    if (Type1 == DataType.Int32)
+                        reader.Position += 5;
+                    else
+                        reader.Position += 1;
+                    break;
+                }
+
             default:
                 throw new IOException("Unknown opcode " + Kind.ToString().ToUpper(CultureInfo.InvariantCulture));
         }
@@ -830,9 +883,35 @@ public class UndertaleInstruction : UndertaleObject
         return ToString(null);
     }
 
+    /// <summary>
+    /// <inheritdoc cref="ToString()"/>
+    /// </summary>
+    /// <param name="code">The <see cref="UndertaleCode"/> code entry for which these instructions belong to.</param>
+    /// <param name="blocks">A list of block addresses for the code entry for which these instructions belong to.</param>
+    /// <returns></returns>
     public string ToString(UndertaleCode code, List<uint> blocks = null)
     {
         StringBuilder sb = new StringBuilder();
+        ToString(sb, code, blocks);
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Inserts a string representation of this object at a specified index in a <see cref="StringBuilder"/>.
+    /// </summary>
+    /// <param name="stringBuilder">The <see cref="StringBuilder"/> instance on where to insert the string representation.</param>
+    /// <param name="code"><inheritdoc cref="ToString(UndertaleCode, List{uint})"/></param>
+    /// <param name="blocks"><inheritdoc cref="ToString(UndertaleCode, List{uint})"/></param>
+    /// <param name="index">The index on where to insert the string representation. If this is <see langword="null"/>
+    /// it will use <paramref name="stringBuilder.Length"/> as the index instead.</param>
+    /// <remarks>Note that performance of this function can be drastically different, depending on <paramref name="index"/>.
+    /// For best results, it's recommended to leave it at <see langword="null"/>.</remarks>
+    public void ToString(StringBuilder stringBuilder, UndertaleCode code, List<uint> blocks = null, int? index = null)
+    {
+        if (index is null)
+            index = stringBuilder.Length;
+
+        StringBuilderHelper sbh = new StringBuilderHelper(index.Value);
 
         string kind = Kind.ToString();
         var type = GetInstructionType(Kind);
@@ -846,109 +925,148 @@ public class UndertaleInstruction : UndertaleObject
             }
         }
         else
+        {
             kind = kind.ToLower(CultureInfo.InvariantCulture);
-        sb.Append(kind);
+        }
+
+        sbh.Append(stringBuilder, kind);
 
         switch (GetInstructionType(Kind))
         {
             case InstructionType.SingleTypeInstruction:
-                sb.Append("." + Type1.ToOpcodeParam());
+                sbh.Append(stringBuilder, '.');
+                sbh.Append(stringBuilder, Type1.ToOpcodeParam());
 
                 if (Kind == Opcode.Dup || Kind == Opcode.CallV)
                 {
-                    sb.Append(' ');
-                    sb.Append(Extra.ToString());
+                    sbh.Append(stringBuilder, ' ');
+                    sbh.Append(stringBuilder, Extra);
                     if (Kind == Opcode.Dup)
                     {
                         if ((byte)ComparisonKind != 0)
                         {
                             // Special dup instruction with extra parameters
-                            sb.Append(' ');
-                            sb.Append((byte)ComparisonKind & 0x7F);
-                            sb.Append(" ;;; this is a weird GMS2.3+ swap instruction");
+                            sbh.Append(stringBuilder, ' ');
+                            sbh.Append(stringBuilder, (byte)ComparisonKind & 0x7F);
                         }
                     }
                 }
                 break;
 
             case InstructionType.DoubleTypeInstruction:
-                sb.Append("." + Type1.ToOpcodeParam());
-                sb.Append("." + Type2.ToOpcodeParam());
+                sbh.Append(stringBuilder, '.');
+                sbh.Append(stringBuilder, Type1.ToOpcodeParam());
+                sbh.Append(stringBuilder, '.');
+                sbh.Append(stringBuilder, Type2.ToOpcodeParam());
                 break;
 
             case InstructionType.ComparisonInstruction:
-                sb.Append("." + Type1.ToOpcodeParam());
-                sb.Append("." + Type2.ToOpcodeParam());
-                sb.Append(' ');
-                sb.Append(ComparisonKind.ToString());
+                sbh.Append(stringBuilder, '.');
+                sbh.Append(stringBuilder, Type1.ToOpcodeParam());
+                sbh.Append(stringBuilder, '.');
+                sbh.Append(stringBuilder, Type2.ToOpcodeParam());
+                sbh.Append(stringBuilder, ' ');
+                sbh.Append(stringBuilder, ComparisonKind.ToString());
                 break;
 
             case InstructionType.GotoInstruction:
-                sb.Append(' ');
-                string tgt;
-                if (code != null && Address + JumpOffset == code.Length / 4)
-                    tgt = "[end]";
+                sbh.Append(stringBuilder, ' ');
+                string targetGoto;
+                if (code is not null && Address + JumpOffset == code.Length / 4)
+                    targetGoto = "[end]";
                 else if (JumpOffsetPopenvExitMagic)
-                    tgt = "<drop>";
-                else if (blocks != null)
-                    tgt = "[" + blocks.IndexOf((uint)(Address + JumpOffset)) + "]";
+                    targetGoto = "<drop>";
+                else if (blocks is not null)
+                    targetGoto = $"[{blocks.IndexOf((uint)(Address + JumpOffset))}]";
                 else
-                    tgt = (Address + JumpOffset).ToString("D5");
-                sb.Append(tgt);
+                    targetGoto = (Address + JumpOffset).ToString("D5");
+                sbh.Append(stringBuilder, targetGoto);
                 break;
 
             case InstructionType.PopInstruction:
-                sb.Append("." + Type1.ToOpcodeParam());
-                sb.Append("." + Type2.ToOpcodeParam());
-                sb.Append(' ');
+                sbh.Append(stringBuilder, '.');
+                sbh.Append(stringBuilder, Type1.ToOpcodeParam());
+                sbh.Append(stringBuilder, '.');
+                sbh.Append(stringBuilder, Type2.ToOpcodeParam());
+                sbh.Append(stringBuilder, ' ');
                 if (Type1 == DataType.Int16)
                 {
                     // Special scenario - the swap instruction
-                    // TODO: Figure out the proper syntax, see #129
-                    sb.Append(SwapExtra.ToString());
-                    sb.Append(" ;;; this is a weird swap instruction, see #129");
+                    sbh.Append(stringBuilder, SwapExtra);
                 }
                 else
                 {
                     if (Type1 == DataType.Variable && TypeInst != InstanceType.Undefined)
                     {
-                        sb.Append(TypeInst.ToString().ToLower(CultureInfo.InvariantCulture));
-                        sb.Append('.');
+                        if (Destination.Type == VariableType.Instance)
+                        {
+                            // Syntax here is a bit ugly (but maintaining compatibility) - this is a room instance ID
+                            sbh.Append(stringBuilder, (short)TypeInst);
+                        }
+                        else
+                        {
+                            // Regular instance type
+                            sbh.Append(stringBuilder, TypeInst.ToString().ToLower(CultureInfo.InvariantCulture));
+                        }
+                        sbh.Append(stringBuilder, '.');
                     }
-                    sb.Append(Destination);
+                    sbh.Append(stringBuilder, Destination);
                 }
                 break;
 
             case InstructionType.PushInstruction:
-                sb.Append("." + Type1.ToOpcodeParam());
-                sb.Append(' ');
+                sbh.Append(stringBuilder, '.');
+                sbh.Append(stringBuilder, Type1.ToOpcodeParam());
+                sbh.Append(stringBuilder, ' ');
                 if (Type1 == DataType.Variable && TypeInst != InstanceType.Undefined)
                 {
-                    sb.Append(TypeInst.ToString().ToLower(CultureInfo.InvariantCulture));
-                    sb.Append('.');
+                    sbh.Append(stringBuilder, TypeInst.ToString().ToLower(CultureInfo.InvariantCulture));
+                    sbh.Append(stringBuilder, '.');
                 }
-                sb.Append((Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString());
+                if (Type1 == DataType.Int32)
+                {
+                    if (Value.GetType() == typeof(Reference<UndertaleFunction>))
+                    {
+                        sbh.Append(stringBuilder, "[function]");
+                    }
+                    else if (Value.GetType() == typeof(Reference<UndertaleVariable>))
+                    {
+                        sbh.Append(stringBuilder, "[variable]");
+                        sbh.Append(stringBuilder, (Value as Reference<UndertaleVariable>).Target.Name?.Content ?? "<null>");
+                        break;
+                    }
+                }
+                sbh.Append(stringBuilder, (Value as IFormattable)?.ToString(null, CultureInfo.InvariantCulture) ?? Value.ToString());
                 break;
 
             case InstructionType.CallInstruction:
-                sb.Append("." + Type1.ToOpcodeParam());
-                sb.Append(' ');
-                sb.Append(Function);
-                sb.Append("(argc=");
-                sb.Append(ArgumentsCount.ToString());
-                sb.Append(')');
+                sbh.Append(stringBuilder, '.');
+                sbh.Append(stringBuilder, Type1.ToOpcodeParam());
+                sbh.Append(stringBuilder, ' ');
+                sbh.Append(stringBuilder, Function);
+                sbh.Append(stringBuilder, "(argc=");
+                sbh.Append(stringBuilder, ArgumentsCount);
+                sbh.Append(stringBuilder, ')');
                 break;
 
             case InstructionType.BreakInstruction:
-                sb.Append("." + Type1.ToOpcodeParam());
+                sbh.Append(stringBuilder, '.');
+                sbh.Append(stringBuilder, Type1.ToOpcodeParam());
                 if (unknownBreak)
                 {
-                    sb.Append(" ");
-                    sb.Append(Value);
+                    sbh.Append(stringBuilder, ' ');
+                    sbh.Append(stringBuilder, Value);
+                }
+                if (Type1 == DataType.Int32)
+                {
+                    sbh.Append(stringBuilder, ' ');
+                    if (Function != null)
+                        sbh.Append(stringBuilder, Function);
+                    else
+                        sbh.Append(stringBuilder, IntArgument);
                 }
                 break;
         }
-        return sb.ToString();
     }
 
     public uint CalculateInstructionSize()
@@ -960,7 +1078,118 @@ public class UndertaleInstruction : UndertaleObject
                 return 3;
             else if (Type1 != DataType.Int16)
                 return 2;
+        if (Kind == Opcode.Break && Type1 == DataType.Int32)
+            return 2;
         return 1;
+    }
+
+    // Underanalyzer implementations
+    int IGMInstruction.Address => (int)Address * 4;
+    IGMInstruction.Opcode IGMInstruction.Kind => (IGMInstruction.Opcode)Kind;
+    IGMInstruction.ExtendedOpcode IGMInstruction.ExtKind => (IGMInstruction.ExtendedOpcode)Value;
+    IGMInstruction.ComparisonType IGMInstruction.ComparisonKind => (IGMInstruction.ComparisonType)ComparisonKind;
+    IGMInstruction.DataType IGMInstruction.Type1 => (IGMInstruction.DataType)Type1;
+    IGMInstruction.DataType IGMInstruction.Type2 => (IGMInstruction.DataType)Type2;
+    IGMInstruction.InstanceType IGMInstruction.InstType => (IGMInstruction.InstanceType)TypeInst;
+    IGMVariable IGMInstruction.Variable => Destination?.Target ?? (Value as Reference<UndertaleVariable>)?.Target;
+    IGMFunction IGMInstruction.Function => Function?.Target ?? (Value as Reference<UndertaleFunction>)?.Target;
+    IGMInstruction.VariableType IGMInstruction.ReferenceVarType => (IGMInstruction.VariableType)(Destination?.Type ?? (Value as Reference<UndertaleVariable>)?.Type);
+    double IGMInstruction.ValueDouble => (double)Value;
+    short IGMInstruction.ValueShort => (short)Value;
+    int IGMInstruction.ValueInt => (int)Value;
+    long IGMInstruction.ValueLong => (long)Value;
+    bool IGMInstruction.ValueBool => (bool)Value;
+    IGMString IGMInstruction.ValueString => ((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Value).Resource;
+    int IGMInstruction.BranchOffset => JumpOffset * 4;
+    bool IGMInstruction.PopWithContextExit => JumpOffsetPopenvExitMagic;
+    byte IGMInstruction.DuplicationSize => Extra;
+    byte IGMInstruction.DuplicationSize2 => (byte)(((byte)ComparisonKind & 0x7F) >> 3);
+    int IGMInstruction.ArgumentCount => (Kind == Opcode.Call) ? ArgumentsCount : Extra;
+    int IGMInstruction.PopSwapSize => SwapExtra;
+    int IGMInstruction.AssetReferenceId => IntArgument & 0xffffff;
+    AssetType IGMInstruction.GetAssetReferenceType(IGameContext context) => AdaptAssetType((context as GlobalDecompileContext).Data, IntArgument >> 24);
+
+    /// <summary>
+    /// Adapts asset type IDs to the <see cref="Underanalyzer.AssetType"/> enum, across versions.
+    /// </summary>
+    private static AssetType AdaptAssetType(UndertaleData data, int type)
+    {
+        if (data.IsVersionAtLeast(2024, 4))
+        {
+            return type switch
+            {
+                0 => AssetType.Object,
+                1 => AssetType.Sprite,
+                2 => AssetType.Sound,
+                3 => AssetType.Room,
+                4 => AssetType.Path,
+                5 => AssetType.Script,
+                6 => AssetType.Font,
+                7 => AssetType.Timeline,
+                8 => AssetType.Shader,
+                9 => AssetType.Sequence,
+                10 => AssetType.AnimCurve,
+                11 => AssetType.ParticleSystem,
+                13 => AssetType.Background,
+                14 => AssetType.RoomInstance,
+                _ => throw new Exception($"Unknown asset type {type}")
+            };
+        }
+
+        return type switch
+        {
+            0 => AssetType.Object,
+            1 => AssetType.Sprite,
+            2 => AssetType.Sound,
+            3 => AssetType.Room,
+            4 => AssetType.Background,
+            5 => AssetType.Path,
+            6 => AssetType.Script,
+            7 => AssetType.Font,
+            8 => AssetType.Timeline,
+            10 => AssetType.Shader,
+            11 => AssetType.Sequence,
+            12 => AssetType.AnimCurve,
+            13 => AssetType.ParticleSystem,
+            14 => AssetType.RoomInstance,
+            _ => throw new Exception($"Unknown asset type {type}")
+        };
+    }
+
+    /// <summary>
+    /// Checks whether the given pair of ID/type is guaranteed to be 2024.4+.
+    /// That is, it does not exist in the game data when using old IDs.
+    /// </summary>
+    private static bool CheckIfAssetTypeIs2024_4(UndertaleData data, int resourceId, int resourceType)
+    {
+        switch (resourceType)
+        {
+            // cases 0-3 are unnecessary
+
+            case 4:
+                return resourceId >= data.Backgrounds.Count;
+            case 5:
+                return resourceId >= data.Paths.Count;
+            case 6:
+                return resourceId >= data.Scripts.Count;
+            case 7:
+                return resourceId >= data.Fonts.Count;
+            case 8:
+                return resourceId >= data.Timelines.Count;
+            case 9:
+                return true; // used to be unused, now are sequences
+            case 10:
+                return resourceId >= data.Shaders.Count;
+            case 11:
+                return resourceId >= data.Sequences.Count;
+
+            // case 12 used to be animcurves, but now is unused (so would actually mean earlier than 2024.4)
+
+            case 13:
+                return resourceId >= data.ParticleSystems.Count;
+        }
+
+        return false;
     }
 }
 
@@ -1003,7 +1232,7 @@ public static class UndertaleInstructionUtil
 /// A code entry in a data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, IDisposable
+public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, IDisposable, IGMCode
 {
     /// <summary>
     /// The name of the code entry.
@@ -1027,8 +1256,6 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     /// </summary>
     public ushort ArgumentsCount { get; set; }
 
-
-    public bool WeirdLocalsFlag { get; set; }
     public uint Offset { get; set; }
 
 
@@ -1137,7 +1364,7 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
             }
             int BytecodeRelativeAddress = reader.ReadInt32();
             _bytecodeAbsoluteAddress = (uint)((int)reader.AbsPosition - 4 + BytecodeRelativeAddress);
-           
+
             if (Length > 0 && reader.undertaleData.IsVersionAtLeast(2, 3) && reader.GetOffsetMap().TryGetValue(_bytecodeAbsoluteAddress, out var i))
             {
                 ParentEntry = (i as UndertaleInstruction).Entry;
@@ -1407,4 +1634,16 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
         Name = null;
         _unsupportedBuffer = null;
     }
+
+    // Underanalyzer implementations
+    IGMString IGMCode.Name => Name;
+    int IGMCode.Length => (int)Length;
+    int IGMCode.InstructionCount => Instructions.Count;
+    int IGMCode.StartOffset => (int)Offset;
+    IGMCode IGMCode.Parent => ParentEntry;
+    int IGMCode.ChildCount => ChildEntries.Count;
+    int IGMCode.ArgumentCount => ArgumentsCount;
+    int IGMCode.LocalCount => (int)LocalsCount;
+    public IGMInstruction GetInstruction(int index) => Instructions[index];
+    public IGMCode GetChild(int index) => ChildEntries[index];
 }

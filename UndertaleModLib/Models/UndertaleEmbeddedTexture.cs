@@ -17,15 +17,8 @@ namespace UndertaleModLib.Models;
 /// An embedded texture entry in the data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
-                                        IStaticChildObjCount, IStaticChildObjectsSize
+public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
 {
-    /// <inheritdoc cref="IStaticChildObjCount.ChildObjectCount" />
-    public static readonly uint ChildObjectCount = 1;
-
-    /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
-    public static readonly uint ChildObjectsSize = 4; // minimal size
-
     /// <summary>
     /// The name of the embedded texture entry.
     /// </summary>
@@ -121,7 +114,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
             writer.Write(IndexInGroup);
         }
         if (TextureExternal)
-            writer.Write((int)0); // Ensure null pointer is written with external texture
+            writer.Write(0); // Ensure null pointer is written with external texture
         else
             writer.WriteUndertaleObjectPointer(_textureData);
     }
@@ -198,6 +191,29 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
         TextureLoaded = true;
     }
 
+    /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    {
+        uint count = 0;
+
+        reader.Position += 4; // "Scaled"
+        if (reader.undertaleData.IsVersionAtLeast(2, 0, 6))
+            reader.Position += 4; // "GeneratedMips"
+        if (reader.undertaleData.IsVersionAtLeast(2022, 3))
+            reader.Position += 4; // "_textureBlockSize"
+        if (reader.undertaleData.IsVersionAtLeast(2022, 9))
+            reader.Position += 12; // "TextureWidth", "TextureHeight", "IndexInGroup"
+
+        if (reader.ReadUInt32() != 0)
+        {
+            // If the texture data pointer isn't null, then this is an internal texture,
+            // which will create another object in the pool when reading the blob.
+            count++;
+        }
+
+        return count;
+    }
+
     /// <summary>
     /// Assigns texture group info to every embedded texture in the supplied data file.
     /// </summary>
@@ -231,7 +247,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
     /// <summary>
     /// Attempts to load the corresponding external texture. Should only happen in 2022.9 and above.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>The texture data of the external texture or a placeholder texture if it can't be loaded.</returns>
     public TexData LoadExternalTexture()
     {
         lock (_textureLoadLock)
@@ -246,7 +262,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
 
             // Try to find file on disk
             string path = Path.Combine(_2022_9_GameDirectory, TextureInfo.Directory.Content,
-                                       TextureInfo.Name.Content + "_" + IndexInGroup.ToString() + TextureInfo.Extension.Content);
+                                       TextureInfo.Name.Content + "_" + IndexInGroup + TextureInfo.Extension.Content);
             if (!File.Exists(path))
                 return _placeholderTexture;
 
@@ -342,17 +358,21 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable,
         }
 
         /// <summary>
-        /// Whether this texture uses QOI format.
+        /// Whether this texture uses the QOI format.
         /// </summary>
         public bool FormatQOI { get; set; } = false;
 
         /// <summary>
-        /// Whether this texture uses BZ2 format. (Always used in combination with QOI.)
+        /// Whether this texture uses the BZ2 format. (Always used in combination with QOI.)
         /// </summary>
         public bool FormatBZ2 { get; set; } = false;
 
         /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Invoked whenever the effective value of any dependency property has been updated.
+        /// </summary>
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

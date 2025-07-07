@@ -1,15 +1,18 @@
 EnsureDataLoaded();
 
-if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
+var displayName = Data.GeneralInfo?.DisplayName?.Content.ToLower();
+
+if (displayName == "deltarune chapter 1 & 2" || displayName == "deltarune chapter 1&2")
 {
     ScriptError("Error 0: Incompatible with the new Deltarune Chapter 1 & 2 demo");
     return;
 }
-else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1&2")
+
+if (!(displayName == "undertale" || displayName == "nxtale"))
 {
-    ScriptError("Error 1: Incompatible with the new Deltarune Chapter 1 & 2 demo");
-    return;
+    ScriptError("Error 1: This script only works with Undertale!");
 }
+
 
 
 // Remove all current fonts
@@ -19,7 +22,7 @@ Data.Fonts.Clear();
 
 Data.Functions.EnsureDefined("font_add", Data.Strings); // Allow font_add.
 
-var obj_time_Create_0 = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Create, Data.Strings, Data.Code, Data.CodeLocals);
+var obj_time_Create_0 = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Create, Data);
 obj_time_Create_0.AppendGML(@"
 // NOTE: According to GMS documentation the font ranges are ignored with ttf fonts, and that seems to be indeed the case
 font_add(""wingding.ttf"", 12, false, false, 32, 127);
@@ -33,4 +36,4 @@ font_add(""Mars Needs Cunnilingus.ttf"", 18, false, false, 32, 127);
 font_add(""comic.ttf"", 10, true, false, 32, 127);
 font_add(""PAPYRUS.TTF"", 8, true, false, 32, 127);
 ", Data);
-ChangeSelection(obj_time_Create_0);
+ScriptMessage("Successfully externalized fonts for Undertale!");

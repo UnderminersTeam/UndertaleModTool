@@ -16,7 +16,7 @@ EnsureDataLoaded();
 
 ScriptMessage(@"ImportGMS2FontData by Dobby233Liu
 This script can import GM font asset data to your mod
-(Designed for the data IDE v2022.6.0.23 generates)
+(Designed for the data IDE v2023.8.2.108 generates)
 Select the .yy file of the GM font asset you want to import"
 );
 
@@ -52,13 +52,18 @@ Try renaming the correct texture file to
 and putting it in the same directory as the .yy file."
     );
 
-/*
-  If true, the script will attempt to add the new font (if any) and the new font glyph texture that it created to a texture group
-  This was an attempt to get fonts that this script creates appear in a specific 2022.3 game, but was proved unnecessary, as the problem was caused by something else
-*/
-bool attemptToFixFontNotAppearing = false; // Data.GM2022_3;
+bool tginExists = Data.TextureGroupInfo is not null;
 // Default to putting the font into the default texgroup
-UndertaleTextureGroupInfo fontTexGroup = Data.TextureGroupInfo.ByName("Default");
+UndertaleTextureGroupInfo fontTexGroup;
+if (tginExists)
+    fontTexGroup = Data.TextureGroupInfo.ByName("Default");
+/*
+  If true, the script will attempt to add the new font (if any) and the new font glyph texture
+  that it created to a texture group
+  This was an attempt to get fonts that this script creates appear in a specific 2022.3 game,
+  but it was proved unnecessary as the problem was caused by something else
+*/
+bool attemptToFixFontNotAppearing = tginExists && false; // Data.GM2022_3;
 
 UndertaleFont font = Data.Fonts.ByName(fontName);
 if (font == null)
@@ -138,6 +143,10 @@ if (fontData.ContainsKey("ascender"))
     font.Ascender = (uint)fontData["ascender"];
 if (fontData.ContainsKey("ascenderOffset"))
     font.AscenderOffset = (int)fontData["ascenderOffset"];
+if (fontData.ContainsKey("usesSDF") && (bool)fontData["usesSDF"] && fontData.ContainsKey("sdfSpread"))
+    font.SDFSpread = (uint)fontData["sdfSpread"];
+if (fontData.ContainsKey("lineHeight"))
+    font.LineHeight = (uint)fontData["lineHeight"];
 
 // FIXME: Too complicated?
 List<int> charRangesUppersAndLowers = new();
@@ -152,7 +161,8 @@ font.RangeStart = (ushort)charRangesUppersAndLowers.DefaultIfEmpty(0).FirstOrDef
 font.RangeEnd = (uint)charRangesUppersAndLowers.DefaultIfEmpty(0xFFFF).LastOrDefault();
 
 List<UndertaleFont.Glyph> glyphs = new();
-// From what I've seen, the keys of the objects in glyphs is just the character property of the object itself but in string form 
+// From what I've seen, the keys of the objects in glyphs is just
+// the character property of the object itself but in string form 
 foreach (KeyValuePair<string, JToken> glyphKVEntry in (JObject)fontData["glyphs"])
 {
     var glyphData = (JObject)glyphKVEntry.Value;
@@ -173,8 +183,8 @@ font.Glyphs.Clear();
 foreach (var glyph in glyphs)
     font.Glyphs.Add(glyph);
 
-// TODO: Does this always exist?
 glyphs = font.Glyphs.ToList();
+// TODO: applyKerning??
 foreach (JObject kerningPair in fontData["kerningPairs"]?.Values<JObject>())
 {
     // Why do I need to do this. Thanks YoYo
@@ -182,8 +192,8 @@ foreach (JObject kerningPair in fontData["kerningPairs"]?.Values<JObject>())
     var glyph = glyphs.Find(x => x.Character == first);
     glyph.Kerning.Add(new UndertaleFont.Glyph.GlyphKerning()
     {
-        Other = (short)kerningPair["second"],
-        Amount = (short)kerningPair["amount"],
+        Character = (short)kerningPair["second"],
+        ShiftModifier = (short)kerningPair["amount"],
     });
 }
 

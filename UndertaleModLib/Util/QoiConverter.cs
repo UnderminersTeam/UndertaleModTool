@@ -43,7 +43,7 @@ namespace UndertaleModLib.Util
         {
             isBufferEmpty = true;
             sharedBuffer = new byte[size];
-        } 
+        }
 
         /// <summary>
         /// Creates a <see cref="Bitmap"/> from a <see cref="Stream"/>.
@@ -63,20 +63,18 @@ namespace UndertaleModLib.Util
         }
 
         /// <summary>
-        /// Creates a <see cref="Bitmap"/> from a <see cref="ReadOnlySpan"/>.
+        /// Creates a <see cref="Bitmap"/> from a <see cref="ReadOnlySpan{TKey}"/> of <see cref="byte"/>s.
         /// </summary>
-        /// <param name="bytes">The <see cref="Span"/> to create the PNG image from.</param>
+        /// <param name="bytes">The <see cref="Span{TKey}"/> of <see cref="byte"/>s to create the PNG image from.</param>
         /// <returns>The QOI image as a PNG.</returns>
         /// <exception cref="Exception">If there is an invalid QOIF magic header or there was an error with stride width.</exception>
         public static Bitmap GetImageFromSpan(ReadOnlySpan<byte> bytes) => GetImageFromSpan(bytes, out _);
 
-        /// <summary>
-        /// Creates a <see cref="Bitmap"/> from a <see cref="ReadOnlySpan"/>.
-        /// </summary>
-        /// <param name="bytes">The <see cref="Span"/> to create the PNG image from.</param>
-        /// <param name="length">The total amount of data read from the <see cref="Span"/>.</param>
-        /// <returns>The QOI image as a PNG.</returns>
-        /// <exception cref="Exception">If there is an invalid QOIF magic header or there was an error with stride width.</exception>
+        /// <summary><inheritdoc cref="GetImageFromSpan(System.ReadOnlySpan{byte})"/></summary>
+        /// <param name="bytes"><inheritdoc cref="GetImageFromSpan(System.ReadOnlySpan{byte})"/></param>
+        /// <param name="length">The total amount of data read from the <see cref="Span{TKey}"/>.</param>
+        /// <returns><inheritdoc cref="GetImageFromSpan(System.ReadOnlySpan{byte})"/></returns>
+        /// <exception cref="Exception"><inheritdoc cref="GetImageFromSpan(System.ReadOnlySpan{byte})"/></exception>
         public unsafe static Bitmap GetImageFromSpan(ReadOnlySpan<byte> bytes, out int length)
         {
             ReadOnlySpan<byte> header = bytes[..12];
@@ -195,13 +193,13 @@ namespace UndertaleModLib.Util
         public static byte[] GetArrayFromImage(Bitmap bmp, int padding = 4) => GetSpanFromImage(bmp, padding).ToArray();
 
         /// <summary>
-        /// Creates a QOI image as a <see cref="Span"/> from a <see cref="Bitmap"/>.
+        /// Creates a QOI image as a <see cref="Span{TKey}"/> from a <see cref="Bitmap"/>.
         /// </summary>
         /// <param name="bmp">The <see cref="Bitmap"/> to create the QOI image from.</param>
         /// <param name="padding">The amount of bytes of padding that should be used.</param>
         /// <returns>A QOI Image as a byte array.</returns>
         /// <exception cref="Exception">If there was an error with stride width.</exception>
-        public unsafe static Span<byte> GetSpanFromImage(Bitmap bmp, int padding = 4)
+        public static unsafe Span<byte> GetSpanFromImage(Bitmap bmp, int padding = 4)
         {
             if (!isBufferEmpty)
                 Array.Clear(sharedBuffer);

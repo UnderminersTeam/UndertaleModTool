@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using WpfAnimatedGif;
 
 namespace UndertaleModTool
 {
@@ -20,9 +21,26 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertaleGlobalInitEditor : DataUserControl
     {
+        private static MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
         public UndertaleGlobalInitEditor()
         {
             InitializeComponent();
+
+            ((Image)mainWindow.FindName("Flowey")).Opacity = 0;
+            ((Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+            ((Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
+        }
+        private void UndertaleGlobalInitEditor_Unloaded(object sender, RoutedEventArgs e)
+        {
+            var floweranim = ((Image)mainWindow.FindName("Flowey"));
+            //floweranim.Opacity = 1;
+
+            var controller = ImageBehavior.GetAnimationController(floweranim);
+            controller.Pause();
+            controller.GotoFrame(controller.FrameCount - 5);
+            controller.Play();
+
+            ((Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
         }
     }
 }
