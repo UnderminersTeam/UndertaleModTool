@@ -12,7 +12,7 @@ namespace Underanalyzer.Decompiler.ControlFlow;
 /// <summary>
 /// Represents a general binary branch operation. Specifically, only either an if statement or a ternary/conditional operator.
 /// </summary>
-internal class BinaryBranch : IControlFlowNode
+internal sealed class BinaryBranch : IControlFlowNode
 {
     public int StartAddress { get; private set; }
 

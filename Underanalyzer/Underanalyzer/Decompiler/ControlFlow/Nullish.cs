@@ -9,7 +9,7 @@ using Underanalyzer.Decompiler.AST;
 
 namespace Underanalyzer.Decompiler.ControlFlow;
 
-internal class Nullish : IControlFlowNode
+internal sealed class Nullish : IControlFlowNode
 {
     public enum NullishType
     {

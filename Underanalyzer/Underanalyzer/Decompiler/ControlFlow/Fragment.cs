@@ -13,7 +13,7 @@ namespace Underanalyzer.Decompiler.ControlFlow;
 /// <summary>
 /// Represents a single VM code fragment, used for single function contexts.
 /// </summary>
-internal class Fragment(int startAddr, int endAddr, IGMCode codeEntry, List<IControlFlowNode> blocks) : IControlFlowNode
+internal sealed class Fragment(int startAddr, int endAddr, IGMCode codeEntry, bool rootScope, List<IControlFlowNode> blocks) : IControlFlowNode
 {
     public int StartAddress { get; private set; } = startAddr;
 
@@ -33,6 +33,11 @@ internal class Fragment(int startAddr, int endAddr, IGMCode codeEntry, List<ICon
     /// Code entry that this fragment belongs to.
     /// </summary>
     public IGMCode CodeEntry { get; } = codeEntry;
+
+    /// <summary>
+    /// Whether this fragment is a root-scope fragment (that is, it may be a global function when inside of a global script).
+    /// </summary>
+    public bool RootScope { get; } = rootScope;
 
     /// <summary>
     /// The base blocks that this fragment is composed of.
@@ -70,7 +75,7 @@ internal class Fragment(int startAddr, int endAddr, IGMCode codeEntry, List<ICon
         // Build fragments, using a stack to track hierarchy
         List<Fragment> fragments = new(code.ChildCount);
         Stack<Fragment> stack = new();
-        Fragment current = new(code.StartOffset, code.Length, code, []);
+        Fragment current = new(code.StartOffset, code.Length, code, false, []);
         fragments.Add(current);
         for (int i = 0; i < blocks.Count; i++)
         {
@@ -133,7 +138,7 @@ internal class Fragment(int startAddr, int endAddr, IGMCode codeEntry, List<ICon
                 previous.Instructions.RemoveAt(previous.Instructions.Count - 1);
 
                 // Make our new "current" be this new fragment
-                current = new Fragment(block.StartAddress, endAddr, newCode, []);
+                current = new Fragment(block.StartAddress, endAddr, newCode, stack.Count == 1, []);
                 fragments.Add(current);
 
                 // Rewire previous block to jump to this fragment, and this fragment

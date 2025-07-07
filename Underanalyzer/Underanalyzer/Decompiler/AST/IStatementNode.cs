@@ -19,10 +19,10 @@ public interface IStatementNode : IASTNode<IStatementNode>
     /// <summary>
     /// If true, an empty line should be printed before this node, unless at the start of a block.
     /// </summary>
-    public bool EmptyLineBefore { get; }
+    public bool EmptyLineBefore { get; set; }
 
     /// <summary>
     /// If true, an empty line should be printed after this node, unless at the end of a block.
     /// </summary>
-    public bool EmptyLineAfter { get; }
+    public bool EmptyLineAfter { get; set; }
 }

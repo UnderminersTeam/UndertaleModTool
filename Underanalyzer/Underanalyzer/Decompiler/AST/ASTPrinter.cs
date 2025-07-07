@@ -14,7 +14,7 @@ namespace Underanalyzer.Decompiler.AST;
 /// <summary>
 /// Manages the printing of all AST nodes.
 /// </summary>
-public class ASTPrinter(DecompileContext context)
+public sealed class ASTPrinter(DecompileContext context)
 {
     /// <summary>
     /// The decompilation context this is printing for.
@@ -253,19 +253,34 @@ public class ASTPrinter(DecompileContext context)
     /// <summary>
     /// Looks up a function name, given a function reference.
     /// </summary>
-    public string LookupFunction(IGMFunction function)
+    public string LookupFunction(IGMFunction function, ASTFragmentContext? overrideContext = null)
     {
-        if (Context.GameContext.GlobalFunctions.FunctionToName.TryGetValue(function, out string? name))
+        if (Context.GameContext.GlobalFunctions.TryGetFunctionName(function, out string? name))
         {
             // We found a global function name!
             return name;
         }
 
         string funcName = function.Name.Content;
-        if (TopFragmentContext!.SubFunctionNames.TryGetValue(funcName, out string? realName))
+        ASTFragmentContext fragmentContext = overrideContext ?? TopFragmentContext!;
+        if (fragmentContext.SubFunctionNames.TryGetValue(funcName, out string? realName))
         {
             // We found a sub-function name within this fragment!
             return realName;
+        }
+
+        // If new function resolution is used, check parent fragment contexts for any sub-function names
+        if (Context.GameContext.UsingNewFunctionResolution)
+        {
+            while (fragmentContext.Parent is not null)
+            {
+                fragmentContext = fragmentContext.Parent;
+                if (fragmentContext.SubFunctionNames.TryGetValue(funcName, out realName))
+                {
+                    // We found a sub-function name in a parent fragment!
+                    return realName;
+                }
+            }
         }
 
         // Just a normal function name, otherwise

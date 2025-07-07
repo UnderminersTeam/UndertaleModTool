@@ -12,7 +12,7 @@ namespace Underanalyzer.Decompiler.ControlFlow;
 /// <summary>
 /// Represents a "repeat" loop in a control flow graph.
 /// </summary>
-internal class RepeatLoop : Loop
+internal sealed class RepeatLoop : Loop
 {
     public override List<IControlFlowNode?> Children { get; } = [null, null, null];
 

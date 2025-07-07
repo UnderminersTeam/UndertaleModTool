@@ -79,7 +79,7 @@ public static class VMAssembly
         HashSet<GMFunction> functions = new(new GMFunctionComparer());
         if (context is not null)
         {
-            foreach (GMFunction func in context.GlobalFunctions.FunctionToName.Keys.Cast<GMFunction>())
+            foreach (GMFunction func in ((Decompiler.GlobalFunctions)context.GlobalFunctions).GetFunctions().Cast<GMFunction>())
             {
                 functions.Add(func);
             }
@@ -264,7 +264,7 @@ public static class VMAssembly
                         {
                             throw new Exception($"Failed to parse variable {parts[1]}");
                         }
-                        instr.Variable = variable;
+                        instr.ResolvedVariable = variable;
                         instr.ReferenceVarType = varType;
                         instr.InstType = instType;
                     }
@@ -360,25 +360,25 @@ public static class VMAssembly
                             case IGMInstruction.DataType.Int32:
                                 if (!int.TryParse(data, out int dataInt32))
                                 {
-                                    if (data.StartsWith("[function]"))
+                                    if (data.StartsWith("[function]", StringComparison.Ordinal))
                                     {
                                         // We're pushing a function index instead
                                         GMFunction function = new(data["[function]".Length..]);
                                         if (functions.TryGetValue(function, out GMFunction? existingFunction))
                                         {
                                             // We found a function that was already created
-                                            instr.Function = existingFunction;
+                                            instr.ResolvedFunction = existingFunction;
                                         }
                                         else
                                         {
-                                            instr.Function = function;
+                                            instr.ResolvedFunction = function;
                                         }
                                         break;
                                     }
-                                    if (data.StartsWith("[variable]"))
+                                    if (data.StartsWith("[variable]", StringComparison.Ordinal))
                                     {
                                         // We're pushing a variable hash instead
-                                        instr.Variable = new GMVariable(new GMString(data["[variable]".Length..]));
+                                        instr.ResolvedVariable = new GMVariable(new GMString(data["[variable]".Length..]));
                                         break;
                                     }
                                     throw new Exception("Unknown push.i value");
@@ -404,7 +404,7 @@ public static class VMAssembly
                                 {
                                     throw new Exception($"Failed to parse variable {parts[1]}");
                                 }
-                                instr.Variable = variable;
+                                instr.ResolvedVariable = variable;
                                 instr.ReferenceVarType = varType;
                                 instr.InstType = instType;
                                 break;
@@ -433,12 +433,12 @@ public static class VMAssembly
                         if (functions.TryGetValue(function, out GMFunction? existingFunction))
                         {
                             // We found a function that was already created
-                            instr.Function = existingFunction;
+                            instr.ResolvedFunction = existingFunction;
                         }
                         else
                         {
                             // This is a brand new function
-                            instr.Function = function;
+                            instr.ResolvedFunction = function;
                             functions.Add(function);
                         }
 
@@ -468,7 +468,7 @@ public static class VMAssembly
                             if (!int.TryParse(parts[1], out int referenceID))
                             {
                                 // Not a reference ID. Instead, a function reference
-                                instr.Function = new GMFunction(parts[1]);
+                                instr.ResolvedFunction = new GMFunction(parts[1]);
                                 break;
                             }
                             if (parts.Length < 3)

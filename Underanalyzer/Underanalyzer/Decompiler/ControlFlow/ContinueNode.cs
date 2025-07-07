@@ -12,7 +12,7 @@ namespace Underanalyzer.Decompiler.ControlFlow;
 /// <summary>
 /// Represents a continue statement in the control flow graph.
 /// </summary>
-internal class ContinueNode(int address) : IControlFlowNode
+internal sealed class ContinueNode(int address) : IControlFlowNode
 {
     public int StartAddress { get; set; } = address;
 

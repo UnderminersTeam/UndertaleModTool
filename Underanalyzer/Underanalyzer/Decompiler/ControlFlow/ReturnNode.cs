@@ -12,7 +12,7 @@ namespace Underanalyzer.Decompiler.ControlFlow;
 /// <summary>
 /// Represents a return statement (with an expression) in the control flow graph.
 /// </summary>
-internal class ReturnNode(int address) : IControlFlowNode
+internal sealed class ReturnNode(int address) : IControlFlowNode
 {
     public int StartAddress { get; set; } = address;
 

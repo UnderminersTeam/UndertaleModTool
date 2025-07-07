@@ -4,6 +4,7 @@
   file, You can obtain one at https://mozilla.org/MPL/2.0/.
 */
 
+using System.Collections.Generic;
 using Underanalyzer.Decompiler.GameSpecific;
 
 namespace Underanalyzer.Decompiler.AST;
@@ -18,16 +19,22 @@ public class ReturnNode(IExpressionNode value) : IStatementNode, IBlockCleanupNo
     /// </summary>
     public IExpressionNode Value { get; private set; } = value;
 
+    /// <inheritdoc/>
     public bool SemicolonAfter => true;
-    public bool EmptyLineBefore => false;
-    public bool EmptyLineAfter => false;
 
+    /// <inheritdoc/>
+    public bool EmptyLineBefore { get => false; set => _ = value; }
+
+    /// <inheritdoc/>
+    public bool EmptyLineAfter { get => false; set => _ = value; }
+
+    /// <inheritdoc/>
     public IStatementNode Clean(ASTCleaner cleaner)
     {
         Value = Value.Clean(cleaner);
 
         // Handle macro type resolution
-        if (Value is IMacroResolvableNode valueResolvable && 
+        if (Value is IMacroResolvableNode valueResolvable &&
             cleaner.GlobalMacroResolver.ResolveReturnValueType(cleaner, cleaner.TopFragmentContext!.CodeEntryName) is IMacroType returnMacroType &&
             valueResolvable.ResolveMacroType(cleaner, returnMacroType) is IExpressionNode valueResolved)
         {
@@ -37,6 +44,14 @@ public class ReturnNode(IExpressionNode value) : IStatementNode, IBlockCleanupNo
         return this;
     }
 
+    /// <inheritdoc/>
+    public IStatementNode PostClean(ASTCleaner cleaner)
+    {
+        Value = Value.PostClean(cleaner);
+        return this;
+    }
+
+    /// <inheritdoc/>
     public void Print(ASTPrinter printer)
     {
         printer.Write("return ");
@@ -49,11 +64,13 @@ public class ReturnNode(IExpressionNode value) : IStatementNode, IBlockCleanupNo
         }
     }
 
+    /// <inheritdoc/>
     public bool RequiresMultipleLines(ASTPrinter printer)
     {
         return Value.RequiresMultipleLines(printer);
     }
 
+    /// <inheritdoc/>
     public int BlockClean(ASTCleaner cleaner, BlockNode block, int i)
     {
         // Check for return temp variable (done on first pass)
@@ -99,5 +116,11 @@ public class ReturnNode(IExpressionNode value) : IStatementNode, IBlockCleanupNo
         }
 
         return i;
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<IBaseASTNode> EnumerateChildren()
+    {
+        yield return Value;
     }
 }

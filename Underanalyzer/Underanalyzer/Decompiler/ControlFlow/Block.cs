@@ -12,7 +12,7 @@ namespace Underanalyzer.Decompiler.ControlFlow;
 /// <summary>
 /// Represents a basic block of VM instructions.
 /// </summary>
-internal class Block(int startAddr, int endAddr, int blockIndex, List<IGMInstruction> instructions) : IControlFlowNode
+internal sealed class Block(int startAddr, int endAddr, int blockIndex, List<IGMInstruction> instructions) : IControlFlowNode
 {
     public int StartAddress { get; private set; } = startAddr;
 
@@ -35,10 +35,11 @@ internal class Block(int startAddr, int endAddr, int blockIndex, List<IGMInstruc
     /// <summary>
     /// Calculates addresses of basic VM blocks; located at instructions that are jumped to.
     /// </summary>
-    private static HashSet<int> FindBlockAddresses(IGMCode code)
+    private static HashSet<int> FindBlockAddresses(IGameContext? gameContext, IGMCode code)
     {
         HashSet<int> addresses = [0, code.Length];
 
+        int address = 0;
         for (int i = 0; i < code.InstructionCount; i++)
         {
             IGMInstruction instr = code.GetInstruction(i);
@@ -48,23 +49,26 @@ internal class Block(int startAddr, int endAddr, int blockIndex, List<IGMInstruc
                 case IGMInstruction.Opcode.BranchTrue:
                 case IGMInstruction.Opcode.BranchFalse:
                 case IGMInstruction.Opcode.PushWithContext:
-                    addresses.Add(instr.Address + 4);
-                    addresses.Add(instr.Address + instr.BranchOffset);
+                    addresses.Add(address + 4);
+                    addresses.Add(address + instr.BranchOffset);
+                    address += 4;
                     break;
                 case IGMInstruction.Opcode.PopWithContext:
                     if (!instr.PopWithContextExit)
                     {
-                        addresses.Add(instr.Address + 4);
-                        addresses.Add(instr.Address + instr.BranchOffset);
+                        addresses.Add(address + 4);
+                        addresses.Add(address + instr.BranchOffset);
                     }
+                    address += 4;
                     break;
                 case IGMInstruction.Opcode.Exit:
                 case IGMInstruction.Opcode.Return:
-                    addresses.Add(instr.Address + 4);
+                    addresses.Add(address + 4);
+                    address += 4;
                     break;
                 case IGMInstruction.Opcode.Call:
                     // Handle try hook addresses
-                    if (i >= 4 && instr.Function?.Name?.Content == VMConstants.TryHookFunction)
+                    if (i >= 4 && instr.TryFindFunction(gameContext)?.Name?.Content == VMConstants.TryHookFunction)
                     {
                         // If too close to end, bail
                         if (i >= code.InstructionCount - 1)
@@ -94,9 +98,13 @@ internal class Block(int startAddr, int endAddr, int blockIndex, List<IGMInstruc
                         }
 
                         // Split this try hook into its own block - removes edge cases in later graph operations
-                        addresses.Add(finallyInstr.Address);
-                        addresses.Add(popInstr.Address + IGMInstruction.GetSize(popInstr));
+                        addresses.Add(address - 24 /* address of finallyInstr */);
+                        addresses.Add(address + 12 /* end address of popInstr */);
                     }
+                    address += 8;
+                    break;
+                default:
+                    address += IGMInstruction.GetSize(instr);
                     break;
             }
         }
@@ -109,7 +117,7 @@ internal class Block(int startAddr, int endAddr, int blockIndex, List<IGMInstruc
     /// </summary>
     public static List<Block> FindBlocks(DecompileContext ctx)
     {
-        List<Block> blocks = FindBlocks(ctx.Code, out Dictionary<int, Block> blocksByAddress);
+        List<Block> blocks = FindBlocks(ctx.Code, out Dictionary<int, Block> blocksByAddress, ctx.GameContext);
         ctx.Blocks = blocks;
         ctx.BlocksByAddress = blocksByAddress;
         return blocks;
@@ -119,33 +127,37 @@ internal class Block(int startAddr, int endAddr, int blockIndex, List<IGMInstruc
     /// <summary>
     /// Finds all blocks from a given code entry, generating a basic control flow graph.
     /// </summary>
-    public static List<Block> FindBlocks(IGMCode code, out Dictionary<int, Block> blocksByAddress)
+    public static List<Block> FindBlocks(IGMCode code, out Dictionary<int, Block> blocksByAddress, IGameContext? gameContext = null)
     {
-        HashSet<int> addresses = FindBlockAddresses(code);
+        HashSet<int> addresses = FindBlockAddresses(gameContext, code);
 
         blocksByAddress = [];
         List<Block> blocks = [];
         Block? current = null;
+        int address = 0;
         for (int i = 0; i < code.InstructionCount; i++)
         {
             // Check if we have a new block at the current instruction's address
             IGMInstruction instr = code.GetInstruction(i);
-            if (addresses.Contains(instr.Address))
+            if (addresses.Contains(address))
             {
                 // End previous block
                 if (current is not null)
                 {
-                    current.EndAddress = instr.Address;
+                    current.EndAddress = address;
                 }
 
                 // Make new block
-                current = new(instr.Address, -1, blocks.Count, []);
+                current = new(address, -1, blocks.Count, []);
                 blocks.Add(current);
                 blocksByAddress[current.StartAddress] = current;
             }
 
             // Add current instruction to our currently-building block
             current!.Instructions.Add(instr);
+
+            // Move to next instruction address
+            address += IGMInstruction.GetSize(instr);
         }
 
         // End current block, if applicable
@@ -173,7 +185,7 @@ internal class Block(int startAddr, int endAddr, int blockIndex, List<IGMInstruc
                 case IGMInstruction.Opcode.Branch:
                     {
                         // Connect to block at destination address
-                        Block dest = blocksByAddress[last.Address + last.BranchOffset];
+                        Block dest = blocksByAddress[(b.EndAddress - 4) + last.BranchOffset];
                         b.Successors.Add(dest);
                         dest.Predecessors.Add(b);
                     }
@@ -188,7 +200,7 @@ internal class Block(int startAddr, int endAddr, int blockIndex, List<IGMInstruc
                         next.Predecessors.Add(b);
 
                         // Connect to block at destination address, second
-                        Block dest = blocksByAddress[last.Address + last.BranchOffset];
+                        Block dest = blocksByAddress[(b.EndAddress - 4) + last.BranchOffset];
                         b.Successors.Add(dest);
                         dest.Predecessors.Add(b);
                     }
@@ -202,7 +214,7 @@ internal class Block(int startAddr, int endAddr, int blockIndex, List<IGMInstruc
                         next.Predecessors.Add(b);
 
                         // Connect to block at destination address, second
-                        Block dest = blocksByAddress[last.Address + last.BranchOffset];
+                        Block dest = blocksByAddress[(b.EndAddress - 4) + last.BranchOffset];
                         b.Successors.Add(dest);
                         dest.Predecessors.Add(b);
                     }
@@ -226,7 +238,7 @@ internal class Block(int startAddr, int endAddr, int blockIndex, List<IGMInstruc
                         {
                             IGMInstruction callInstr = b.Instructions[^2];
                             if (callInstr.Kind == IGMInstruction.Opcode.Call &&
-                                callInstr.Function?.Name?.Content == VMConstants.TryHookFunction)
+                                callInstr.TryFindFunction(gameContext)?.Name?.Content == VMConstants.TryHookFunction)
                             {
                                 // We've found a try hook - connect to targets
                                 int finallyAddr = b.Instructions[^6].ValueInt;

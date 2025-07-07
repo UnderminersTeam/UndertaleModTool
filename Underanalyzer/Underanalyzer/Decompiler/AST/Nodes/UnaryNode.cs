@@ -4,6 +4,7 @@
   file, You can obtain one at https://mozilla.org/MPL/2.0/.
 */
 
+using System.Collections.Generic;
 using Underanalyzer.Decompiler.GameSpecific;
 using static Underanalyzer.IGMInstruction;
 
@@ -24,13 +25,22 @@ public class UnaryNode(IExpressionNode value, IGMInstruction instruction) : IExp
     /// </summary>
     public IGMInstruction Instruction { get; } = instruction;
 
+    /// <inheritdoc/>
     public bool Duplicated { get; set; } = false;
+
+    /// <inheritdoc/>
     public bool Group { get; set; } = false;
+
+    /// <inheritdoc/>
     public DataType StackType { get; set; } = instruction.Type1;
 
+    /// <inheritdoc/>
     public string ConditionalTypeName => "Unary";
+
+    /// <inheritdoc/>
     public string ConditionalValue => ""; // TODO?
 
+    /// <inheritdoc/>
     public IExpressionNode Clean(ASTCleaner cleaner)
     {
         Value = Value.Clean(cleaner);
@@ -44,6 +54,14 @@ public class UnaryNode(IExpressionNode value, IGMInstruction instruction) : IExp
         return this;
     }
 
+    /// <inheritdoc/>
+    public IExpressionNode PostClean(ASTCleaner cleaner)
+    {
+        Value = Value.PostClean(cleaner);
+        return this;
+    }
+
+    /// <inheritdoc/>
     public void Print(ASTPrinter printer)
     {
         if (Group)
@@ -68,11 +86,13 @@ public class UnaryNode(IExpressionNode value, IGMInstruction instruction) : IExp
         }
     }
 
+    /// <inheritdoc/>
     public bool RequiresMultipleLines(ASTPrinter printer)
     {
         return Value.RequiresMultipleLines(printer);
     }
 
+    /// <inheritdoc/>
     public IExpressionNode? ResolveMacroType(ASTCleaner cleaner, IMacroType type)
     {
         if (type is IMacroTypeConditional conditional)
@@ -80,5 +100,11 @@ public class UnaryNode(IExpressionNode value, IGMInstruction instruction) : IExp
             return conditional.Resolve(cleaner, this);
         }
         return null;
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<IBaseASTNode> EnumerateChildren()
+    {
+        yield return Value;
     }
 }

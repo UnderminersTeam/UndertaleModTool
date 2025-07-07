@@ -4,6 +4,7 @@
   file, You can obtain one at https://mozilla.org/MPL/2.0/.
 */
 
+using System.Collections.Generic;
 using Underanalyzer.Decompiler.GameSpecific;
 
 namespace Underanalyzer.Decompiler.AST;
@@ -18,26 +19,55 @@ public class VariableHashNode(IGMVariable variable) : IExpressionNode, IStatemen
     /// </summary>
     public IGMVariable Variable = variable;
 
+    /// <inheritdoc/>
     public bool Duplicated { get; set; }
-    public bool Group { get; set; } = false;
-    public IGMInstruction.DataType StackType { get; set; } = IGMInstruction.DataType.Int32;
-    public bool SemicolonAfter => true;
-    public bool EmptyLineBefore => false;
-    public bool EmptyLineAfter => false;
 
+    /// <inheritdoc/>
+    public bool Group { get; set; } = false;
+
+    /// <inheritdoc/>
+    public IGMInstruction.DataType StackType { get; set; } = IGMInstruction.DataType.Int32;
+
+    /// <inheritdoc/>
+    public bool SemicolonAfter => true;
+
+    /// <inheritdoc/>
+    public bool EmptyLineBefore { get => false; set => _ = value; }
+
+    /// <inheritdoc/>
+    public bool EmptyLineAfter { get => false; set => _ = value; }
+
+    /// <inheritdoc/>
     public string ConditionalTypeName => "VariableHash";
+
+    /// <inheritdoc/>
     public string ConditionalValue => Variable.Name.Content; // TODO?
 
+    /// <inheritdoc/>
     IExpressionNode IASTNode<IExpressionNode>.Clean(ASTCleaner cleaner)
     {
         return this;
     }
 
+    /// <inheritdoc/>
     IStatementNode IASTNode<IStatementNode>.Clean(ASTCleaner cleaner)
     {
         return this;
     }
 
+    /// <inheritdoc/>
+    IExpressionNode IASTNode<IExpressionNode>.PostClean(ASTCleaner cleaner)
+    {
+        return this;
+    }
+
+    /// <inheritdoc/>
+    IStatementNode IASTNode<IStatementNode>.PostClean(ASTCleaner cleaner)
+    {
+        return this;
+    }
+
+    /// <inheritdoc/>
     public void Print(ASTPrinter printer)
     {
         if (Group)
@@ -55,11 +85,13 @@ public class VariableHashNode(IGMVariable variable) : IExpressionNode, IStatemen
         }
     }
 
+    /// <inheritdoc/>
     public bool RequiresMultipleLines(ASTPrinter printer)
     {
         return false;
     }
 
+    /// <inheritdoc/>
     public IExpressionNode? ResolveMacroType(ASTCleaner cleaner, IMacroType type)
     {
         if (type is IMacroTypeConditional conditional)
@@ -67,6 +99,12 @@ public class VariableHashNode(IGMVariable variable) : IExpressionNode, IStatemen
             return conditional.Resolve(cleaner, this);
         }
         return null;
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<IBaseASTNode> EnumerateChildren()
+    {
+        return [];
     }
 }
 

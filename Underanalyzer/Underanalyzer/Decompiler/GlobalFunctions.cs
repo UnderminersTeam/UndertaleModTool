@@ -13,20 +13,39 @@ using static Underanalyzer.IGMInstruction;
 namespace Underanalyzer.Decompiler;
 
 /// <summary>
-/// Interface that can be used to supply global function information to the decompiler,
-/// particularly for GMLv2 and above.
+/// Interface that can be used to supply global function information to the compiler/decompiler.
 /// </summary>
 public interface IGlobalFunctions
 {
     /// <summary>
-    /// Lookup of function reference to name. Should be the same references that are supplied to the decompiler.
+    /// Returns whether a global function name exists.
     /// </summary>
-    public Dictionary<IGMFunction, string> FunctionToName { get; }
+    /// <param name="name">Name to look up.</param>
+    /// <returns><see langword="true"/> if the global function name exists; <see langword="false"/> otherwise.</returns>
+    public bool FunctionNameExists(string name);
 
     /// <summary>
-    /// Lookup of function name to reference. Should be the same references that are supplied to the decompiler.
+    /// Returns whether a global function exists.
     /// </summary>
-    public Dictionary<string, IGMFunction> NameToFunction { get; }
+    /// <param name="function">Function to look up.</param>
+    /// <returns><see langword="true"/> if the global function exists; <see langword="false"/> otherwise.</returns>
+    public bool FunctionExists(IGMFunction function);
+
+    /// <summary>
+    /// Attempts to look up a global function by name.
+    /// </summary>
+    /// <param name="name">Name to look up.</param>
+    /// <param name="function">Output function, if found.</param>
+    /// <returns><see langword="true"/> if the global function was successfully looked up; <see langword="false"/> otherwise.</returns>
+    public bool TryGetFunction(string name, [NotNullWhen(true)] out IGMFunction? function);
+
+    /// <summary>
+    /// Attempts to look up a global function name by function.
+    /// </summary>
+    /// <param name="function">Function to look up.</param>
+    /// <param name="name">Output name, if found.</param>
+    /// <returns><see langword="true"/> if the name was successfully looked up; <see langword="false"/> otherwise.</returns>
+    public bool TryGetFunctionName(IGMFunction function, [NotNullWhen(true)] out string? name);
 }
 
 /// <summary>
@@ -34,9 +53,17 @@ public interface IGlobalFunctions
 /// </summary>
 public class GlobalFunctions : IGlobalFunctions
 {
-    public Dictionary<IGMFunction, string> FunctionToName { get; }
+    /// <summary>
+    /// Lookup of function reference to name. 
+    /// <see cref="IGMFunction"/> references should be the same as those input to the compiler/decompiler.
+    /// </summary>
+    protected Dictionary<IGMFunction, string> FunctionToName { get; }
 
-    public Dictionary<string, IGMFunction> NameToFunction { get; }
+    /// <summary>
+    /// Lookup of function name to reference. 
+    /// <see cref="IGMFunction"/> references should be the same as those input to the compiler/decompiler.
+    /// </summary>
+    protected Dictionary<string, IGMFunction> NameToFunction { get; }
 
     /// <summary>
     /// Initializes an empty instance of this class. Useful for pre-GMLv2.
@@ -68,6 +95,11 @@ public class GlobalFunctions : IGlobalFunctions
             for (int i = 1; i < fragments.Count; i++)
             {
                 Fragment fragment = fragments[i];
+                if (!fragment.RootScope)
+                {
+                    // If the fragment isn't at the root scope, it can't be a global function
+                    continue;
+                }
                 if (fragment.Successors.Count == 0)
                 {
                     // If no successors, assume code is corrupt and don't consider it
@@ -94,6 +126,70 @@ public class GlobalFunctions : IGlobalFunctions
         NameToFunction = nameToFunction;
     }
 
+    /// <inheritdoc/>
+    public bool FunctionNameExists(string name)
+    {
+        return NameToFunction.ContainsKey(name);
+    }
+
+    /// <inheritdoc/>
+    public bool FunctionExists(IGMFunction function)
+    {
+        return FunctionToName.ContainsKey(function);
+    }
+
+    /// <inheritdoc/>
+    public bool TryGetFunction(string name, [NotNullWhen(true)] out IGMFunction? function)
+    {
+        return NameToFunction.TryGetValue(name, out function);
+    }
+
+    /// <inheritdoc/>
+    public bool TryGetFunctionName(IGMFunction function, [NotNullWhen(true)] out string? name)
+    {
+        return FunctionToName.TryGetValue(function, out name);
+    }
+
+    /// <summary>
+    /// Adds an additional function to the lookup.
+    /// </summary>
+    /// <remarks>
+    /// This should not be used during Underanalyzer compilation/decompilation; this method is not thread-safe.
+    /// </remarks>
+    public void DefineFunction(string functionName, IGMFunction function)
+    {
+        FunctionToName[function] = functionName;
+        NameToFunction[functionName] = function;
+    }
+
+    /// <summary>
+    /// Removes a function from the lookup.
+    /// </summary>
+    /// <remarks>
+    /// This should not be used during Underanalyzer compilation/decompilation; this method is not thread-safe.
+    /// </remarks>
+    public void UndefineFunction(string functionName, IGMFunction function)
+    {
+        FunctionToName.Remove(function);
+        NameToFunction.Remove(functionName);
+    }
+
+    /// <summary>
+    /// Returns the full list of defined functions.
+    /// </summary>
+    public IEnumerable<IGMFunction> GetFunctions()
+    {
+        return FunctionToName.Keys;
+    }
+
+    /// <summary>
+    /// Returns the full list of defined function names.
+    /// </summary>
+    public IEnumerable<string> GetFunctionNames()
+    {
+        return NameToFunction.Keys;
+    }
+
     /// <summary>
     /// Gets the name of a global function based on the instructions after a code fragment.
     /// Returns true if one is found, or false if the code is corrupt or one could not be found.
@@ -110,7 +206,7 @@ public class GlobalFunctions : IGlobalFunctions
         }
 
         // Get function reference for fragment
-        if (block.Instructions[0] is not { Kind: Opcode.Push, Type1: DataType.Int32, Function: IGMFunction function } || function is null)
+        if (block.Instructions[0] is not { Kind: Opcode.Push, Type1: DataType.Int32, ResolvedFunction: IGMFunction function } || function is null)
         {
             return false;
         }
@@ -132,7 +228,7 @@ public class GlobalFunctions : IGlobalFunctions
                             _, _,
                         { ValueShort: -1 or -16 },
                         { Kind: Opcode.Convert, Type1: DataType.Int32, Type2: DataType.Variable },
-                        { Kind: Opcode.Call, Function.Name.Content: VMConstants.MethodFunction },
+                        { Kind: Opcode.Call, ResolvedFunction.Name.Content: VMConstants.MethodFunction },
                             ..
                         ])
                     {
@@ -146,7 +242,7 @@ public class GlobalFunctions : IGlobalFunctions
                             _, _, _, _, _,
                         { Kind: Opcode.Duplicate, DuplicationSize2: 0 },
                         { Kind: Opcode.PushImmediate },
-                        { Kind: Opcode.Pop, Variable.Name.Content: string funcName },
+                        { Kind: Opcode.Pop, ResolvedVariable.Name.Content: string funcName },
                             ..
                         ])
                     {
@@ -162,8 +258,8 @@ public class GlobalFunctions : IGlobalFunctions
                     if (block.Instructions is not
                         [
                             _, _,
-                        { Kind: Opcode.Call, Function.Name.Content: VMConstants.NullObjectFunction },
-                        { Kind: Opcode.Call, Function.Name.Content: VMConstants.MethodFunction },
+                        { Kind: Opcode.Call, ResolvedFunction.Name.Content: VMConstants.NullObjectFunction },
+                        { Kind: Opcode.Call, ResolvedFunction.Name.Content: VMConstants.MethodFunction },
                             ..
                         ])
                     {
@@ -177,7 +273,7 @@ public class GlobalFunctions : IGlobalFunctions
                             _, _, _, _,
                         { Kind: Opcode.Duplicate, DuplicationSize2: 0 },
                         { Kind: Opcode.PushImmediate, ValueShort: short pushVal },
-                        { Kind: Opcode.Pop, Variable.Name.Content: string funcName },
+                        { Kind: Opcode.Pop, ResolvedVariable.Name.Content: string funcName },
                             ..
                         ])
                     {

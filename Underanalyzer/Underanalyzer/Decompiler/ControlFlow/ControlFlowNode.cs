@@ -186,7 +186,7 @@ internal interface IControlFlowNode
     /// This assumes that there are no connections between any nodes contained in "newStructure" to any external nodes,
     /// except for "start" and "after" explicitly. If that is not the case, those will need to be manually cleaned up.
     /// </remarks>
-    public static void InsertStructure(IControlFlowNode start, IControlFlowNode after, IControlFlowNode newStructure)
+    public static void InsertStructure(IControlFlowNode start, IControlFlowNode after, IControlFlowNode newStructure, bool rerouteBackwardsBranches = true)
     {
         // If the start node is unreachable, then so is our new structure
         if (start.Unreachable)
@@ -198,15 +198,29 @@ internal interface IControlFlowNode
         // Reroute all nodes going into "start" to instead go into "newStructure"
         for (int i = 0; i < start.Predecessors.Count; i++)
         {
+            if (!rerouteBackwardsBranches && start.Predecessors[i].StartAddress >= start.StartAddress)
+            {
+                // If not rerouting backwards branches to "start", then ignore predecessors that come after, by address
+                continue;
+            }
             newStructure.Predecessors.Add(start.Predecessors[i]);
             ReplaceConnections(start.Predecessors[i].Successors, start, newStructure);
+            if (!rerouteBackwardsBranches)
+            {
+                // Clear out this predecessor if we potentially skip certain ones
+                start.Predecessors.RemoveAt(i);
+                i--;
+            }
         }
         if (start.Parent is not null)
         {
             ReplaceConnectionsNullable(start.Parent.Children, start, newStructure);
         }
-        // TODO: do we care about "start"'s Children?
-        start.Predecessors.Clear();
+        if (rerouteBackwardsBranches)
+        {
+            // Completely clear out predecessors if rerouting backwards branches
+            start.Predecessors.Clear();
+        }
 
         // Reroute predecessor at index 0 from "after" to instead come from "newStructure"
         if (after.Predecessors.Count > 0)

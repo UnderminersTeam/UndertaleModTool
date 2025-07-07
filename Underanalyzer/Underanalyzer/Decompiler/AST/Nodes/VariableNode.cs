@@ -4,6 +4,7 @@
   file, You can obtain one at https://mozilla.org/MPL/2.0/.
 */
 
+using System;
 using System.Collections.Generic;
 using Underanalyzer.Decompiler.GameSpecific;
 using static Underanalyzer.IGMInstruction;
@@ -42,11 +43,25 @@ public class VariableNode(IGMVariable variable, VariableType referenceType, IExp
     /// </summary>
     public bool RegularPush { get; } = regularPush;
 
+    /// <summary>
+    /// Whether this variable node should be forced to print "self." if it is able to.
+    /// Meant for tracking obscure compiler quirks.
+    /// </summary>
+    public bool ForceSelf { get; set; } = false;
+
+    /// <inheritdoc/>
     public bool Duplicated { get; set; } = false;
+
+    /// <inheritdoc/>
     public bool Group { get; set; } = false;
+
+    /// <inheritdoc/>
     public DataType StackType { get; set; } = DataType.Variable;
 
+    /// <inheritdoc/>
     public string ConditionalTypeName => "Variable";
+
+    /// <inheritdoc/>
     public string ConditionalValue => Variable.Name.Content;
 
     /// <summary>
@@ -193,6 +208,7 @@ public class VariableNode(IGMVariable variable, VariableType referenceType, IExp
         return true;
     }
 
+    /// <inheritdoc/>
     public IExpressionNode Clean(ASTCleaner cleaner)
     {
         // Clean up left side of variable, and get basic instance type, or 0 if none
@@ -233,7 +249,7 @@ public class VariableNode(IGMVariable variable, VariableType referenceType, IExp
         if (cleaner.StructArguments is not null)
         {
             // Verify this is an argument array access
-            if (instType == (int)InstanceType.Argument && 
+            if (instType is (int)InstanceType.Argument or (int)InstanceType.Self &&
                 Variable is { Name.Content: "argument" } &&
                 ArrayIndices is [Int16Node arrayIndex])
             {
@@ -252,7 +268,7 @@ public class VariableNode(IGMVariable variable, VariableType referenceType, IExp
         // Check if we're a regular argument, and set maximum referenced argument variable if so
         if (instType == (int)InstanceType.Argument)
         {
-            int num = GetArgumentIndex();
+            int num = GetArgumentIndex(cleaner.TopFragmentContext!.MaxReferencedArgument);
             if (num != -1)
             {
                 if (num > cleaner.TopFragmentContext!.MaxReferencedArgument)
@@ -261,14 +277,53 @@ public class VariableNode(IGMVariable variable, VariableType referenceType, IExp
                     cleaner.TopFragmentContext.MaxReferencedArgument = num;
                 }
 
-                // Generate named argument for later, in case it hasn't already been generated
-                cleaner.TopFragmentContext.GetNamedArgumentName(cleaner.Context, num);
+                if (!cleaner.TopFragmentContext.IsRootFragment)
+                {
+                    // Generate named argument for later, in case it hasn't already been generated
+                    cleaner.TopFragmentContext.GetNamedArgumentName(cleaner.Context, num);
+                }
             }
         }
 
         return this;
     }
 
+    /// <inheritdoc/>
+    public IExpressionNode PostClean(ASTCleaner cleaner)
+    {
+        Left = Left.PostClean(cleaner);
+        if (ArrayIndices is not null)
+        {
+            for (int i = 0; i < ArrayIndices.Count; i++)
+            {
+                ArrayIndices[i] = ArrayIndices[i].PostClean(cleaner);
+            }
+        }
+
+        if (cleaner.Context.Settings.CleanupLocalVarDeclarations &&
+            Left is Int16Node { Value: (int)InstanceType.Local } or InstanceTypeNode { InstanceType: InstanceType.Local })
+        {
+            // Check if not declared already. If not, check to see if we can hoist an existing declaration.
+            string localName = Variable.Name.Content;
+            LocalScope currentLocalScope = cleaner.TopFragmentContext!.CurrentLocalScope!;
+            if (!currentLocalScope.LocalDeclaredInAnyParentOrSelf(localName))
+            {
+                // Attempt hoist of declaration (if we can find an existing declaration to hoist)
+                if (currentLocalScope.FindBestHoistLocation(localName) is LocalScope hoistScope)
+                {
+                    // Found a suitable scope to hoist before - mark it as such.
+                    hoistScope.HoistedLocals.Add(localName);
+
+                    // Parent scope of the hoist is where the local is actually declared.
+                    hoistScope.Parent?.DeclaredLocals?.Add(localName);
+                }
+            }    
+        }
+
+        return this;
+    }
+
+    /// <inheritdoc/>
     public void Print(ASTPrinter printer)
     {
         // Print out left side, if necessary
@@ -297,10 +352,14 @@ public class VariableNode(IGMVariable variable, VariableType referenceType, IExp
                 {
                     case (int)InstanceType.Self:
                     case (int)InstanceType.Builtin:
-                        if (printer.LocalVariableNames.Contains(Variable.Name.Content) ||
+                        if (ForceSelf || 
+                            (value == (int)InstanceType.Self && ArrayIndices is null && printer.Context.GameContext.UsingSelfToBuiltin) ||
+                            leftInstType is { FromBuiltinFunction: true } ||
+                            printer.LocalVariableNames.Contains(Variable.Name.Content) ||
                             printer.TopFragmentContext!.NamedArguments.Contains(Variable.Name.Content))
                         {
-                            // Need an explicit self in order to not conflict with local
+                            // Need an explicit self in order to not conflict with local,
+                            // or a specific compiler quirk involving "self." was found.
                             printer.Write("self.");
                         }
                         break;
@@ -341,8 +400,9 @@ public class VariableNode(IGMVariable variable, VariableType referenceType, IExp
             printer.Write('.');
         }
 
-        int argIndex = GetArgumentIndex();
-        if (argIndex == -1)
+        int argIndex = GetArgumentIndex(printer.TopFragmentContext!.MaxReferencedArgument);
+        bool namedArgumentArray = false;
+        if (argIndex == -1 || printer.TopFragmentContext.IsRootFragment)
         {
             // Variable name
             printer.Write(Variable.Name.Content);
@@ -354,6 +414,9 @@ public class VariableNode(IGMVariable variable, VariableType referenceType, IExp
             if (namedArg is not null)
             {
                 printer.Write(namedArg);
+
+                // If the variable is a case like "argument[16]", track this so we omit the array index later
+                namedArgumentArray = Variable.Name.Content == "argument";
             }
             else
             {
@@ -366,17 +429,32 @@ public class VariableNode(IGMVariable variable, VariableType referenceType, IExp
             // Print array indices
             if (printer.Context.GMLv2)
             {
-                // For GMLv2
-                foreach (IExpressionNode index in ArrayIndices)
+                // For GMLv2, an arbitrary number of array indices are supported
+                if (namedArgumentArray)
                 {
-                    printer.Write('[');
-                    index.Print(printer);
-                    printer.Write(']');
+                    // Named argument array access; skip first index
+                    for (int i = 1; i < ArrayIndices.Count; i++)
+                    {
+                        IExpressionNode index = ArrayIndices[i];
+                        printer.Write('[');
+                        index.Print(printer);
+                        printer.Write(']');
+                    }
+                }
+                else
+                {
+                    // Normal variable; print all of its indices
+                    foreach (IExpressionNode index in ArrayIndices)
+                    {
+                        printer.Write('[');
+                        index.Print(printer);
+                        printer.Write(']');
+                    }
                 }
             }
             else
             {
-                // For GMLv1
+                // For GMLv1, only two array indices are supported
                 printer.Write('[');
                 ArrayIndices[0].Print(printer);
                 if (ArrayIndices.Count == 2)
@@ -389,6 +467,7 @@ public class VariableNode(IGMVariable variable, VariableType referenceType, IExp
         }
     }
 
+    /// <inheritdoc/>
     public bool RequiresMultipleLines(ASTPrinter printer)
     {
         if (Left.RequiresMultipleLines(printer))
@@ -408,11 +487,13 @@ public class VariableNode(IGMVariable variable, VariableType referenceType, IExp
         return false;
     }
 
+    /// <inheritdoc/>
     public IMacroType? GetExpressionMacroType(ASTCleaner cleaner)
     {
         return cleaner.GlobalMacroResolver.ResolveVariableType(cleaner, Variable.Name.Content);
     }
 
+    /// <inheritdoc/>
     public IExpressionNode? ResolveMacroType(ASTCleaner cleaner, IMacroType type)
     {
         if (type is IMacroTypeConditional conditional)
@@ -425,17 +506,38 @@ public class VariableNode(IGMVariable variable, VariableType referenceType, IExp
     /// <summary>
     /// Returns the argument index this variable represents, or -1 if this is not an argument variable.
     /// </summary>
-    public int GetArgumentIndex()
+    /// <remarks>
+    /// If <paramref name="onlyNamedArguments"/> is <see langword="true"/>, this returns -1 for cases such as a direct argument0 or argument[0].
+    /// </remarks>
+    public int GetArgumentIndex(int maxArgumentArrayIndex, bool onlyNamedArguments = true)
     {
-        string variableName = Variable.Name.Content;
-
-        if (variableName.StartsWith("argument") &&
-            variableName.Length >= "argument".Length + 1 &&
-            variableName.Length <= "argument".Length + 2)
+        // Check for argument instance type, if we only accept named arguments
+        if (onlyNamedArguments)
         {
-            if (int.TryParse(variableName["argument".Length..], out int num) && num >= 0 && num <= 15)
+            if (Left is not (InstanceTypeNode { InstanceType: InstanceType.Argument } or
+                             Int16Node { Value: (short)InstanceType.Argument }))
             {
-                return num;
+                return -1;
+            }
+        }
+
+        // Check variable name and array accessor
+        string variableName = Variable.Name.Content;
+        if (variableName.StartsWith("argument", StringComparison.Ordinal))
+        {
+            if (variableName.Length >= "argument".Length + 1 &&
+                variableName.Length <= "argument".Length + 2)
+            {
+                // Normal argument variable
+                if (int.TryParse(variableName["argument".Length..], out int num) && num >= 0 && num <= 15)
+                {
+                    return num;
+                }
+            }
+            else if (variableName == "argument" && ArrayIndices is [Int16Node { Value: >= 16 } index, ..] && index.Value <= maxArgumentArrayIndex)
+            {
+                // Argument, using array access (introduced in 2024.8)
+                return index.Value;
             }
         }
 
@@ -460,5 +562,18 @@ public class VariableNode(IGMVariable variable, VariableType referenceType, IExp
     public bool IsSimpleVariable()
     {
         return Left is InstanceTypeNode && ArrayIndices is null;
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<IBaseASTNode> EnumerateChildren()
+    {
+        yield return Left;
+        if (ArrayIndices is not null)
+        {
+            foreach (IExpressionNode node in ArrayIndices)
+            {
+                yield return node;
+            }
+        }
     }
 }

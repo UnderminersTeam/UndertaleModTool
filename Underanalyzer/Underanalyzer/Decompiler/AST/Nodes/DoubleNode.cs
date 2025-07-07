@@ -5,6 +5,7 @@
 */
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using Underanalyzer.Decompiler.GameSpecific;
 
@@ -15,15 +16,25 @@ namespace Underanalyzer.Decompiler.AST;
 /// </summary>
 public class DoubleNode(double value) : IConstantNode<double>, IConditionalValueNode
 {
+    /// <inheritdoc/>
     public double Value { get; } = value;
 
+    /// <inheritdoc/>
     public bool Duplicated { get; set; } = false;
+
+    /// <inheritdoc/>
     public bool Group { get; set; } = false;
+
+    /// <inheritdoc/>
     public IGMInstruction.DataType StackType { get; set; } = IGMInstruction.DataType.Double;
 
+    /// <inheritdoc/>
     public string ConditionalTypeName => "Double";
+
+    /// <inheritdoc/>
     public string ConditionalValue => Value.ToString("R", CultureInfo.InvariantCulture); // TODO: maybe do full conversion here
 
+    /// <inheritdoc/>
     public IExpressionNode Clean(ASTCleaner cleaner)
     {
         if (cleaner.Context.Settings.TryGetPredefinedDouble(Value, out string? predefined, out bool isMultiPart))
@@ -40,6 +51,13 @@ public class DoubleNode(double value) : IConstantNode<double>, IConditionalValue
         return this;
     }
 
+    /// <inheritdoc/>
+    public IExpressionNode PostClean(ASTCleaner cleaner)
+    {
+        return this;
+    }
+
+    /// <inheritdoc/>
     public void Print(ASTPrinter printer)
     {
         ReadOnlySpan<char> str = Value.ToString("R", CultureInfo.InvariantCulture);
@@ -116,11 +134,13 @@ public class DoubleNode(double value) : IConstantNode<double>, IConditionalValue
         printer.Write(resultStr);
     }
 
+    /// <inheritdoc/>
     public bool RequiresMultipleLines(ASTPrinter printer)
     {
         return false;
     }
 
+    /// <inheritdoc/>
     public IExpressionNode? ResolveMacroType(ASTCleaner cleaner, IMacroType type)
     {
         if (type is IMacroTypeConditional conditional)
@@ -128,5 +148,11 @@ public class DoubleNode(double value) : IConstantNode<double>, IConditionalValue
             return conditional.Resolve(cleaner, this);
         }
         return null;
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<IBaseASTNode> EnumerateChildren()
+    {
+        return [];
     }
 }

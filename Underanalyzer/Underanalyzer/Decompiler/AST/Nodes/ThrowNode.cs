@@ -4,6 +4,8 @@
   file, You can obtain one at https://mozilla.org/MPL/2.0/.
 */
 
+using System.Collections.Generic;
+
 namespace Underanalyzer.Decompiler.AST;
 
 /// <summary>
@@ -16,25 +18,53 @@ public class ThrowNode(IExpressionNode value) : IExpressionNode, IStatementNode,
     /// </summary>
     public IExpressionNode Value { get; private set; } = value;
 
+    /// <inheritdoc/>
     public bool Duplicated { get; set; }
-    public bool Group { get; set; } = false;
-    public IGMInstruction.DataType StackType { get; set; } = IGMInstruction.DataType.Variable;
-    public bool SemicolonAfter => true;
-    public bool EmptyLineBefore => false;
-    public bool EmptyLineAfter => false;
 
+    /// <inheritdoc/>
+    public bool Group { get; set; } = false;
+
+    /// <inheritdoc/>
+    public IGMInstruction.DataType StackType { get; set; } = IGMInstruction.DataType.Variable;
+
+    /// <inheritdoc/>
+    public bool SemicolonAfter => true;
+
+    /// <inheritdoc/>
+    public bool EmptyLineBefore { get => false; set => _ = value; }
+
+    /// <inheritdoc/>
+    public bool EmptyLineAfter { get => false; set => _ = value; }
+
+    /// <inheritdoc/>
     public IExpressionNode Clean(ASTCleaner cleaner)
     {
         Value = Value.Clean(cleaner);
         return this;
     }
 
+    /// <inheritdoc/>
     IStatementNode IASTNode<IStatementNode>.Clean(ASTCleaner cleaner)
     {
         Value = Value.Clean(cleaner);
         return this;
     }
 
+    /// <inheritdoc/>
+    public IExpressionNode PostClean(ASTCleaner cleaner)
+    {
+        Value = Value.PostClean(cleaner);
+        return this;
+    }
+
+    /// <inheritdoc/>
+    IStatementNode IASTNode<IStatementNode>.PostClean(ASTCleaner cleaner)
+    {
+        Value = Value.PostClean(cleaner);
+        return this;
+    }
+
+    /// <inheritdoc/>
     public int BlockClean(ASTCleaner cleaner, BlockNode block, int i)
     {
         // Remove duplicated finally statements
@@ -52,6 +82,7 @@ public class ThrowNode(IExpressionNode value) : IExpressionNode, IStatementNode,
         return i;
     }
 
+    /// <inheritdoc/>
     public void Print(ASTPrinter printer)
     {
         if (Group)
@@ -68,8 +99,15 @@ public class ThrowNode(IExpressionNode value) : IExpressionNode, IStatementNode,
         }
     }
 
+    /// <inheritdoc/>
     public bool RequiresMultipleLines(ASTPrinter printer)
     {
         return Value.RequiresMultipleLines(printer);
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<IBaseASTNode> EnumerateChildren()
+    {
+        yield return Value;
     }
 }

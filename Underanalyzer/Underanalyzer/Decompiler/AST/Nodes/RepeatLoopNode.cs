@@ -4,6 +4,8 @@
   file, You can obtain one at https://mozilla.org/MPL/2.0/.
 */
 
+using System.Collections.Generic;
+
 namespace Underanalyzer.Decompiler.AST;
 
 /// <summary>
@@ -21,10 +23,16 @@ public class RepeatLoopNode(IExpressionNode timesToRepeat, BlockNode body) : ISt
     /// </summary>
     public BlockNode Body { get; private set; } = body;
 
+    /// <inheritdoc/>
     public bool SemicolonAfter => false;
-    public bool EmptyLineBefore { get; private set; }
-    public bool EmptyLineAfter { get; private set; }
 
+    /// <inheritdoc/>
+    public bool EmptyLineBefore { get; set; }
+
+    /// <inheritdoc/>
+    public bool EmptyLineAfter { get; set; }
+
+    /// <inheritdoc/>
     public IStatementNode Clean(ASTCleaner cleaner)
     {
         TimesToRepeat = TimesToRepeat.Clean(cleaner);
@@ -36,6 +44,19 @@ public class RepeatLoopNode(IExpressionNode timesToRepeat, BlockNode body) : ISt
         return this;
     }
 
+    /// <inheritdoc/>
+    public IStatementNode PostClean(ASTCleaner cleaner)
+    {
+        TimesToRepeat = TimesToRepeat.PostClean(cleaner);
+
+        cleaner.TopFragmentContext!.PushLocalScope(cleaner.Context, cleaner.TopFragmentContext!.CurrentPostCleanupBlock!, this);
+        Body.PostClean(cleaner);
+        cleaner.TopFragmentContext!.PopLocalScope(cleaner.Context);
+
+        return this;
+    }
+
+    /// <inheritdoc/>
     public void Print(ASTPrinter printer)
     {
         printer.Write("repeat (");
@@ -55,8 +76,16 @@ public class RepeatLoopNode(IExpressionNode timesToRepeat, BlockNode body) : ISt
         }
     }
 
+    /// <inheritdoc/>
     public bool RequiresMultipleLines(ASTPrinter printer)
     {
         return true;
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<IBaseASTNode> EnumerateChildren()
+    {
+        yield return TimesToRepeat;
+        yield return Body;
     }
 }

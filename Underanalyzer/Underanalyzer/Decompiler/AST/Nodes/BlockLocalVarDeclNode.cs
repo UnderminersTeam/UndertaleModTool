@@ -13,15 +13,28 @@ namespace Underanalyzer.Decompiler.AST;
 /// </summary>
 public class BlockLocalVarDeclNode : IStatementNode
 {
+    /// <inheritdoc/>
     public bool SemicolonAfter => true;
-    public bool EmptyLineAfter { get; internal set; }
-    public bool EmptyLineBefore => false;
 
+    /// <inheritdoc/>
+    public bool EmptyLineAfter { get; set; }
+
+    /// <inheritdoc/>
+    public bool EmptyLineBefore { get => false; set => _ = value; }
+
+    /// <inheritdoc/>
     public IStatementNode Clean(ASTCleaner cleaner)
     {
         return this;
     }
 
+    /// <inheritdoc/>
+    public IStatementNode PostClean(ASTCleaner cleaner)
+    {
+        return this;
+    }
+
+    /// <inheritdoc/>
     public void Print(ASTPrinter printer)
     {
         List<string> localNames = printer.TopFragmentContext!.LocalVariableNamesList;
@@ -39,8 +52,15 @@ public class BlockLocalVarDeclNode : IStatementNode
         }
     }
 
+    /// <inheritdoc/>
     public bool RequiresMultipleLines(ASTPrinter printer)
     {
         return false;
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<IBaseASTNode> EnumerateChildren()
+    {
+        return [];
     }
 }

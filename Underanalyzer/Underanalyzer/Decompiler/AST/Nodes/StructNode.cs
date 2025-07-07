@@ -5,6 +5,7 @@
 */
 
 using System;
+using System.Collections.Generic;
 using Underanalyzer.Decompiler.GameSpecific;
 
 namespace Underanalyzer.Decompiler.AST;
@@ -19,28 +20,60 @@ public class StructNode(BlockNode body, ASTFragmentContext fragmentContext) : IF
     /// </summary>
     public BlockNode Body { get; private set; } = body;
 
+    /// <inheritdoc/>
     public bool Duplicated { get; set; } = false;
+
+    /// <inheritdoc/>
     public bool Group { get; set; } = false;
+
+    /// <inheritdoc/>
     public IGMInstruction.DataType StackType { get; set; } = IGMInstruction.DataType.Variable;
+
+    /// <inheritdoc/>
     public bool SemicolonAfter => false;
-    public bool EmptyLineBefore => false;
-    public bool EmptyLineAfter => false;
+
+    /// <inheritdoc/>
+    public bool EmptyLineBefore { get => false; set => _ = value; }
+
+    /// <inheritdoc/>
+    public bool EmptyLineAfter { get => false; set => _ = value; }
+
+    /// <inheritdoc/>
     public ASTFragmentContext FragmentContext { get; } = fragmentContext;
 
+    /// <inheritdoc/>
     public string ConditionalTypeName => "Struct";
+
+    /// <inheritdoc/>
     public string ConditionalValue => "";
 
+    /// <inheritdoc/>
     public IExpressionNode Clean(ASTCleaner cleaner)
     {
         Body.Clean(cleaner);
         return this;
     }
 
+    /// <inheritdoc/>
+    public IExpressionNode PostClean(ASTCleaner cleaner)
+    {
+        Body.PostCleanStruct(cleaner);
+        return this;
+    }
+
+    /// <inheritdoc/>
     IStatementNode IASTNode<IStatementNode>.Clean(ASTCleaner cleaner)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
+    IStatementNode IASTNode<IStatementNode>.PostClean(ASTCleaner cleaner)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc/>
     public void Print(ASTPrinter printer)
     {
         if (Body.Children.Count == 0)
@@ -54,11 +87,13 @@ public class StructNode(BlockNode body, ASTFragmentContext fragmentContext) : IF
         }
     }
 
+    /// <inheritdoc/>
     public bool RequiresMultipleLines(ASTPrinter printer)
     {
         return Body.Children.Count != 0;
     }
 
+    /// <inheritdoc/>
     public IExpressionNode? ResolveMacroType(ASTCleaner cleaner, IMacroType type)
     {
         if (type is IMacroTypeConditional conditional)
@@ -66,5 +101,11 @@ public class StructNode(BlockNode body, ASTFragmentContext fragmentContext) : IF
             return conditional.Resolve(cleaner, this);
         }
         return null;
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<IBaseASTNode> EnumerateChildren()
+    {
+        yield return Body;
     }
 }

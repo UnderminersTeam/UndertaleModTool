@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;net6.0;net7.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;net8.0</TargetFrameworks>
     <LangVersion>12</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Text.Json" Version="8.0.4" />
+    <PackageReference Include="System.Text.Json" Version="9.0.2" />
   </ItemGroup>
 
 </Project>

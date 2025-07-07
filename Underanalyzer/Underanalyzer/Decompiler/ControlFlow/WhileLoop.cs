@@ -4,8 +4,10 @@
   file, You can obtain one at https://mozilla.org/MPL/2.0/.
 */
 
+using System;
 using System.Collections.Generic;
 using Underanalyzer.Decompiler.AST;
+using static Underanalyzer.IGMInstruction;
 
 namespace Underanalyzer.Decompiler.ControlFlow;
 
@@ -13,7 +15,7 @@ namespace Underanalyzer.Decompiler.ControlFlow;
 /// Represents a "while" loop in a control flow graph.
 /// Can become a "for" loop as needed or desired, depending on the code.
 /// </summary>
-internal class WhileLoop : Loop
+internal sealed class WhileLoop : Loop
 {
     public override List<IControlFlowNode?> Children { get; } = [null, null, null, null, null];
 
@@ -132,6 +134,15 @@ internal class WhileLoop : Loop
     {
         // Build loop condition
         IExpressionNode condition = builder.BuildExpression(Head, output);
+
+        // If condition was an int16 that was directly used without conversion, that means it was a boolean
+        if (condition is Int16Node { Value: 0 or 1, StackType: not DataType.Boolean } i16)
+        {
+            condition = new BooleanNode(i16.Value == 1)
+            {
+                StackType = i16.StackType
+            };
+        }
 
         // Push this loop context
         Loop? prevLoop = builder.TopFragmentContext!.SurroundingLoop;

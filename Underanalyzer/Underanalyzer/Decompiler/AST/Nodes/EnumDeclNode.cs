@@ -6,7 +6,6 @@
 
 using System;
 using System.Collections.Generic;
-using Underanalyzer.Decompiler.GameSpecific;
 
 namespace Underanalyzer.Decompiler.AST;
 
@@ -20,20 +19,37 @@ public class EnumDeclNode(GMEnum gmEnum) : IStatementNode
     /// </summary>
     public GMEnum Enum { get; } = gmEnum;
 
+    /// <inheritdoc/>
     public bool SemicolonAfter => false;
-    public bool EmptyLineBefore { get; private set; }
-    public bool EmptyLineAfter { get; private set; }
 
+    /// <inheritdoc/>
+    public bool EmptyLineBefore { get; set; }
+
+    /// <inheritdoc/>
+    public bool EmptyLineAfter { get; set; }
+
+    /// <inheritdoc/>
     public IStatementNode Clean(ASTCleaner cleaner)
     {
         EmptyLineAfter = EmptyLineBefore = cleaner.Context.Settings.EmptyLineAroundEnums;
         return this;
     }
 
+    /// <inheritdoc/>
+    public IStatementNode PostClean(ASTCleaner cleaner)
+    {
+        return this;
+    }
+
+    /// <inheritdoc/>
     public void Print(ASTPrinter printer)
     {
         printer.Write("enum ");
         printer.Write(Enum.Name);
+        if (printer.Context.Settings.OpenBlockBraceOnSameLine)
+        {
+            printer.Write(' ');
+        }
         printer.OpenBlock();
 
         // Sort values of enum by value
@@ -90,6 +106,7 @@ public class EnumDeclNode(GMEnum gmEnum) : IStatementNode
         printer.CloseBlock();
     }
 
+    /// <inheritdoc/>
     public bool RequiresMultipleLines(ASTPrinter printer)
     {
         return true;
@@ -127,5 +144,11 @@ public class EnumDeclNode(GMEnum gmEnum) : IStatementNode
         {
             enumDecl.Clean(cleaner);
         }
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<IBaseASTNode> EnumerateChildren()
+    {
+        return [];
     }
 }

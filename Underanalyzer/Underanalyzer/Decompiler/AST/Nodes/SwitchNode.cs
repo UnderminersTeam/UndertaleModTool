@@ -4,6 +4,7 @@
   file, You can obtain one at https://mozilla.org/MPL/2.0/.
 */
 
+using System.Collections.Generic;
 using Underanalyzer.Decompiler.GameSpecific;
 
 namespace Underanalyzer.Decompiler.AST;
@@ -23,10 +24,16 @@ public class SwitchNode(IExpressionNode expression, BlockNode body) : IStatement
     /// </summary>
     public BlockNode Body { get; private set; } = body;
 
+    /// <inheritdoc/>
     public bool SemicolonAfter => false;
-    public bool EmptyLineBefore { get; private set; }
-    public bool EmptyLineAfter { get; private set; }
 
+    /// <inheritdoc/>
+    public bool EmptyLineBefore { get; set; }
+
+    /// <inheritdoc/>
+    public bool EmptyLineAfter { get; set; }
+
+    /// <inheritdoc/>
     public IStatementNode Clean(ASTCleaner cleaner)
     {
         Expression = Expression.Clean(cleaner);
@@ -50,6 +57,15 @@ public class SwitchNode(IExpressionNode expression, BlockNode body) : IStatement
         return this;
     }
 
+    /// <inheritdoc/>
+    public IStatementNode PostClean(ASTCleaner cleaner)
+    {
+        Expression = Expression.PostClean(cleaner);
+        Body.PostCleanSwitch(cleaner, this);
+        return this;
+    }
+
+    /// <inheritdoc/>
     public void Print(ASTPrinter printer)
     {
         printer.Write("switch (");
@@ -62,8 +78,16 @@ public class SwitchNode(IExpressionNode expression, BlockNode body) : IStatement
         Body.Print(printer);
     }
 
+    /// <inheritdoc/>
     public bool RequiresMultipleLines(ASTPrinter printer)
     {
         return true;
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<IBaseASTNode> EnumerateChildren()
+    {
+        yield return Expression;
+        yield return Body;
     }
 }

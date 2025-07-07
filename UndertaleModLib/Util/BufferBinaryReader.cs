@@ -211,9 +211,12 @@ namespace UndertaleModLib.Util
         public byte[] ReadBytes(int count)
         {
             if (count < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
             if (chunkBuffer.Position + count > _length)
             {
+                throw new IOException("Reading out of chunk bounds");
             }
 
             byte[] val = new byte[count];

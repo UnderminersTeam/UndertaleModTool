@@ -586,17 +586,6 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                     }
                     break;
                 case SpriteType.Spine:
-                {
-                    reader.Align(4);
-
-                    if (reader.undertaleData.IsVersionAtLeast(2023, 1))
-                    {
-                        Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
-                        SpineHasTextureData = false;
-                    }
-
-                    SpineVersion = reader.ReadInt32();
-                    if (SpineVersion >= 3)
                     {
                         reader.Align(4);
 
@@ -659,29 +648,29 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                     }
                     break;
                 case SpriteType.Vector:
-                {
-                    VectorVersion = reader.ReadInt32();
-                    Util.DebugUtil.Assert(VectorVersion == 3, "Invalid vector format version number, expected 3, got " + VectorVersion);
-
-                    Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
-
-                    reader.Align(4);
-                    int shapeVersion = reader.ReadInt32();
-                    Util.DebugUtil.Assert(shapeVersion == 3, "Invalid shape format version number, expected 3, got " + shapeVersion);
-                    VectorShape = reader.ReadUndertaleObjectNoPool<UndertaleShapeData<UndertaleVectorSubShapeData>>();
-
-                    bool collisionMaskExists = reader.ReadBoolean();
-                    VectorCollisionMaskWidth = reader.ReadInt32();
-                    VectorCollisionMaskHeight = reader.ReadInt32();
-                    if (collisionMaskExists)
                     {
-                        int dataLength = reader.ReadInt32();
-                        VectorCollisionMaskRLEData = reader.ReadBytes(dataLength);
-                        reader.Align(4);
-                    }
+                        VectorVersion = reader.ReadInt32();
+                        Util.DebugUtil.Assert(VectorVersion == 3, "Invalid vector format version number, expected 3, got " + VectorVersion);
 
-                    break;
-                }
+                        Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
+
+                        reader.Align(4);
+                        int shapeVersion = reader.ReadInt32();
+                        Util.DebugUtil.Assert(shapeVersion == 3, "Invalid shape format version number, expected 3, got " + shapeVersion);
+                        VectorShape = reader.ReadUndertaleObjectNoPool<UndertaleShapeData<UndertaleVectorSubShapeData>>();
+
+                        bool collisionMaskExists = reader.ReadBoolean();
+                        VectorCollisionMaskWidth = reader.ReadInt32();
+                        VectorCollisionMaskHeight = reader.ReadInt32();
+                        if (collisionMaskExists)
+                        {
+                            int dataLength = reader.ReadInt32();
+                            VectorCollisionMaskRLEData = reader.ReadBytes(dataLength);
+                            reader.Align(4);
+                        }
+
+                        break;
+                    }
             }
 
             if (sequenceOffset != 0)
@@ -760,27 +749,8 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                     return count;
 
                 case SpriteType.Spine:
-                {
-                    reader.Align(4);
-
-                    if (reader.undertaleData.IsVersionAtLeast(2023, 1))
-                        count += 1 + UndertaleSimpleList<TextureEntry>.UnserializeChildObjectCount(reader);
-
-                    int spineVersion = reader.ReadInt32();
-                    if (spineVersion >= 3)
-                        reader.Position += 4; // "SpineCacheVersion"
-                    Util.DebugUtil.Assert(spineVersion <= 3 && spineVersion >= 1,
-                                          "Invalid Spine format version number, expected 3, 2 or 1, got " + spineVersion);
-
-                    int jsonLength = reader.ReadInt32();
-                    int atlasLength = reader.ReadInt32();
-                    int textures = reader.ReadInt32();
-
-                    switch (spineVersion)
                     {
-                        case 1:
-                            reader.Position += 8 + (uint)jsonLength + (uint)atlasLength + (uint)textures;
-                            break;
+                        reader.Align(4);
 
                         if (reader.undertaleData.IsVersionAtLeast(2023, 1))
                             count += 1 + UndertaleSimpleList<TextureEntry>.UnserializeChildObjectCount(reader);
@@ -797,12 +767,14 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
 
                         switch (spineVersion)
                         {
-                            reader.Position += (uint)jsonLength + (uint)atlasLength;
+                            case 1:
+                                reader.Position += 8 + (uint)jsonLength + (uint)atlasLength + (uint)textures;
+                                break;
 
                             case 2:
                             case 3:
                                 {
-                                    reader.Position += jsonLength + atlasLength;
+                                    reader.Position += (uint)jsonLength + (uint)atlasLength;
 
                                     // TODO: make this return count instead if spine sprite
                                     // couldn't have sequence or nine slices data.
@@ -1443,28 +1415,28 @@ public class UndertaleVectorFillData : UndertaleObject
         switch (Type)
         {
             case UndertaleVectorFillType.FillBitmap:
-            {
-                writer.WriteUndertaleObject(BitmapFillData);
-                break;
-            }
+                {
+                    writer.WriteUndertaleObject(BitmapFillData);
+                    break;
+                }
 
             case UndertaleVectorFillType.FillGradient:
-            {
-                writer.WriteUndertaleObject(GradientFillData);
-                break;
-            }
+                {
+                    writer.WriteUndertaleObject(GradientFillData);
+                    break;
+                }
 
             case UndertaleVectorFillType.FillSolid:
-            {
-                writer.WriteUndertaleObject(SolidFillData);
-                break;
-            }
+                {
+                    writer.WriteUndertaleObject(SolidFillData);
+                    break;
+                }
 
             case UndertaleVectorFillType.FillInvalid:
-            {
-                // throw an exception maybe?
-                break;
-            }
+                {
+                    // throw an exception maybe?
+                    break;
+                }
         }
     }
 
@@ -1475,22 +1447,22 @@ public class UndertaleVectorFillData : UndertaleObject
         switch (Type)
         {
             case UndertaleVectorFillType.FillBitmap:
-            {
-                BitmapFillData = reader.ReadUndertaleObjectNoPool<UndertaleVectorBitmapFillData>();
-                break;
-            }
+                {
+                    BitmapFillData = reader.ReadUndertaleObjectNoPool<UndertaleVectorBitmapFillData>();
+                    break;
+                }
 
             case UndertaleVectorFillType.FillGradient:
-            {
-                GradientFillData = reader.ReadUndertaleObjectNoPool<UndertaleVectorGradientFillData>();
-                break;
-            }
+                {
+                    GradientFillData = reader.ReadUndertaleObjectNoPool<UndertaleVectorGradientFillData>();
+                    break;
+                }
 
             case UndertaleVectorFillType.FillSolid:
-            {
-                SolidFillData = reader.ReadUndertaleObjectNoPool<UndertaleVectorSolidFillData>();
-                break;
-            }
+                {
+                    SolidFillData = reader.ReadUndertaleObjectNoPool<UndertaleVectorSolidFillData>();
+                    break;
+                }
 
             case UndertaleVectorFillType.FillInvalid:
             default:
@@ -2080,10 +2052,10 @@ public class UndertaleYYSWFItem : UndertaleObject
         switch (ItemType)
         {
             case UndertaleYYSWFItemType.ItemShape:
-            {
-                ShapeData = reader.ReadUndertaleObjectNoPool<UndertaleShapeData<UndertaleYYSWFSubShapeData>>();
-                break;
-            }
+                {
+                    ShapeData = reader.ReadUndertaleObjectNoPool<UndertaleShapeData<UndertaleYYSWFSubShapeData>>();
+                    break;
+                }
 
             case UndertaleYYSWFItemType.ItemBitmap:
                 {

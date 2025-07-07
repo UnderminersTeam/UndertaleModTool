@@ -5,13 +5,14 @@
 */
 
 using System.Collections.Generic;
+using Underanalyzer.Decompiler.GameSpecific;
 
-namespace Underanalyzer.Decompiler.GameSpecific;
+namespace Underanalyzer;
 
 /// <summary>
 /// Represents an enum, composed of a varying number of defined values.
 /// </summary>
-public class GMEnum
+public sealed class GMEnum
 {
     /// <summary>
     /// Name of the enum. Should be a valid GML enum name.
@@ -49,7 +50,7 @@ public class GMEnum
     }
 
     /// <summary>
-    /// Makes a new enum, using an enum macro type.
+    /// Makes a new enum, using an enum macro type from the decompiler.
     /// </summary>
     public GMEnum(EnumMacroType enumMacroType)
     {
@@ -98,7 +99,30 @@ public class GMEnum
     }
 
     /// <summary>
-    /// Looks up the value entry for the given value, on this enum, or <see langword="null"/> if none exists.
+    /// Looks up the value entry for the given string name, on this enum.
+    /// </summary>
+    /// <returns><see langword="true"/> if contained in the enum; <see langword="false"/> otherwise.</returns>
+    public bool ContainsValue(string name)
+    {
+        return _valueLookupByName.ContainsKey(name);
+    }
+
+    /// <summary>
+    /// Looks up and returns the value for the given string name, on this enum.
+    /// </summary>
+    public bool TryGetValue(string name, out long value)
+    {
+        if (_valueLookupByName.TryGetValue(name, out GMEnumValue? enumValue))
+        {
+            value = enumValue.Value;
+            return true;
+        }
+        value = default;
+        return false;
+    }
+
+    /// <summary>
+    /// Looks up the value entry for the given integer value, on this enum, or <see langword="null"/> if none exists.
     /// </summary>
     public GMEnumValue? FindValue(long value)
     {
@@ -124,7 +148,7 @@ public class GMEnum
 /// <summary>
 /// Represents a single enum value.
 /// </summary>
-public class GMEnumValue(string name, long value)
+public sealed class GMEnumValue(string name, long value)
 {
     /// <summary>
     /// Name of the enum value. Should be a valid GML value name.

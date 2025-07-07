@@ -12,7 +12,7 @@ namespace Underanalyzer.Decompiler.ControlFlow;
 /// <summary>
 /// Represents an exit statement in the control flow graph.
 /// </summary>
-internal class ExitNode(int address) : IControlFlowNode
+internal sealed class ExitNode(int address) : IControlFlowNode
 {
     public int StartAddress { get; set; } = address;
 

@@ -1776,9 +1776,7 @@ public class DecompileContext_DecompileToString
             """
             function args_conflict(arg0_)
             {
-                var arg0;
-                
-                arg0 = 123;
+                var arg0 = 123;
             }
             """
         );
@@ -1822,9 +1820,7 @@ public class DecompileContext_DecompileToString
             """
             function default_args_locals(arg0 = 123)
             {
-                var local;
-                
-                local = 123;
+                var local = 123;
             }
             """
         );
@@ -1926,8 +1922,7 @@ public class DecompileContext_DecompileToString
     {
         var context = new Underanalyzer.Mock.GameContextMock();
         var func = new Underanalyzer.Mock.GMFunction("gml_Script_TestA");
-        context.GlobalFunctions.FunctionToName[func] = "TestA";
-        context.GlobalFunctions.NameToFunction["TestA"] = func;
+        ((GlobalFunctions)context.GlobalFunctions).DefineFunction("TestA", func);
 
         TestUtil.VerifyDecompileResult(
             """
@@ -2591,6 +2586,350 @@ public class DecompileContext_DecompileToString
             a().b++;
             a().b += 1;
             a().b = a().b + 1;
+            """
+        );
+    }
+
+    [Fact]
+    public void TestOver16NamedArguments()
+    {
+        TestUtil.VerifyDecompileResult(
+            """
+            :[0]
+            b [2]
+
+            > gml_Script_First (locals=0, args=17)
+            :[1]
+            push.v arg.argument15
+            pop.v.v builtin.a
+            pushi.e -15
+            pushi.e 16
+            push.v [array]self.argument
+            pop.v.v builtin.b
+            exit.i
+
+            :[2]
+            push.i [function]gml_Script_First
+            conv.i.v
+            pushi.e -1
+            conv.i.v
+            call.i method 2
+            dup.v 0
+            pushi.e -1
+            pop.v.v [stacktop]self.First
+            popz.v
+            b [4]
+
+            > gml_Script_Second (locals=0, args=18)
+            :[3]
+            push.v arg.argument15
+            pop.v.v builtin.a
+            pushi.e -15
+            pushi.e 16
+            push.v [array]self.argument
+            pop.v.v builtin.b
+            exit.i
+
+            :[4]
+            push.i [function]gml_Script_Second
+            conv.i.v
+            pushi.e -1
+            conv.i.v
+            call.i method 2
+            dup.v 0
+            pushi.e -1
+            pop.v.v [stacktop]self.Second
+            popz.v
+            b [6]
+
+            > gml_Script_Third (locals=0, args=16)
+            :[5]
+            push.v arg.argument15
+            pop.v.v builtin.a
+            pushi.e -15
+            pushi.e 16
+            push.v [array]self.argument
+            pop.v.v builtin.b
+            exit.i
+
+            :[6]
+            push.i [function]gml_Script_Third
+            conv.i.v
+            pushi.e -1
+            conv.i.v
+            call.i method 2
+            dup.v 0
+            pushi.e -1
+            pop.v.v [stacktop]self.Third
+            popz.v
+            b [8]
+
+            > gml_Script_Fourth (locals=0, args=17)
+            :[7]
+            pushi.e -15
+            pushi.e 16
+            push.v [multipush]self.argument
+            pushi.e 123
+            pushaf.e
+            pop.v.v builtin.a
+            exit.i
+
+            :[8]
+            push.i [function]gml_Script_Fourth
+            conv.i.v
+            pushi.e -1
+            conv.i.v
+            call.i method 2
+            dup.v 0
+            pushi.e -1
+            pop.v.v [stacktop]self.Fourth
+            popz.v
+            """,
+            """
+            function First(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16)
+            {
+                a = _15;
+                b = _16;
+            }
+
+            function Second(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17)
+            {
+                a = _15;
+                b = _16;
+            }
+
+            function Third(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15)
+            {
+                a = _15;
+                b = argument[16];
+            }
+
+            function Fourth(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16)
+            {
+                a = _16[123];
+            }
+            """,
+            null,
+            new DecompileSettings()
+            {
+                UnknownArgumentNamePattern = "_{0}"
+            }
+        );
+    }
+
+    [Fact]
+    public void TestStructNotCompound()
+    {
+        TestUtil.VerifyDecompileResult(
+            """
+            :[0]
+            push.v self.b
+            pushi.e 1
+            add.i.v
+            b [2]
+
+            > gml_Script____struct___test__0 (locals=1, args=0)
+            :[1]
+            pushi.e -15
+            pushi.e 0
+            push.v [array]self.argument
+            pop.v.v self.b
+            exit.i
+
+            :[2]
+            push.i [function]gml_Script____struct___test__0
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pushi.e -16
+            pop.v.v [stacktop]static.gml_Script____struct___test__0
+            call.i @@NewGMLObject@@ 2
+            pop.v.v self.a
+            """,
+            """
+            a = 
+            {
+                b: b + 1
+            };
+            """
+        );
+    }
+
+    [Fact]
+    public void TestCallVariable()
+    {
+        // TODO: make this test with asset references included
+        TestUtil.VerifyDecompileResult(
+            """
+            push.s "a"
+            conv.s.v
+            call.i show_debug_message 1
+            popz.v
+            push.s "a"
+            conv.s.v
+            call.i @@This@@ 0
+            push.v builtin.test
+            callv.v 1
+            popz.v
+            call.i @@This@@ 0
+            push.s "a"
+            conv.s.v
+            dup.v 1 1
+            dup.v 0
+            push.v stacktop.test
+            callv.v 1
+            popz.v
+            push.v self.a
+            push.s "a"
+            conv.s.v
+            dup.v 1 1
+            dup.v 0
+            push.v stacktop.b
+            callv.v 1
+            popz.v
+            """,
+            """
+            show_debug_message("a");
+            test("a");
+            self.test("a");
+            a.b("a");
+            """
+        );
+    }
+
+    [Fact]
+    public void TestNewConstructorSetStatic()
+    {
+        TestUtil.VerifyDecompileResult(
+            """
+            :[0]
+            b [2]
+
+            > gml_Script_Test (locals=0, args=1)
+            :[1]
+            call.i @@SetStatic@@ 0
+            push.v arg.argument0
+            pop.v.v builtin.test
+            exit.i
+
+            :[2]
+            push.i [function]gml_Script_Test
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pushi.e -1
+            pop.v.v [stacktop]self.Test
+            popz.v
+            """,
+            """
+            function Test(arg0) constructor
+            {
+                test = arg0;
+            }
+            """
+        );
+    }
+
+    [Fact]
+    public void TestStructSelfArgument()
+    {
+        // Note about this test case: -1 (self) values are generally -15 (arguments), but seems like either
+        // different GameMaker versions or mod tooling(?) generates code that uses self...
+        TestUtil.VerifyDecompileResult(
+            """
+            :[0]
+            call.i @@NewGMLArray@@ 0
+            call.i @@NewGMLArray@@ 0
+            b [2]
+
+            > test_struct (locals=0, args=0)
+            :[1]
+            pushi.e -1
+            pushi.e 0
+            push.v [array]self.argument
+            pop.v.v self.a
+            pushi.e -1
+            pushi.e 1
+            push.v [array]self.argument
+            pop.v.v self.b
+            exit.i
+
+            :[2]
+            push.i [function]test_struct
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pushi.e -16
+            pop.v.v [stacktop]static.test_struct
+            call.i @@NewGMLObject@@ 3
+            pop.v.v self.c
+            """,
+            """
+            c = 
+            {
+                a: [],
+                b: []
+            };
+            """
+        );
+    }
+
+    [Fact]
+    public void TestTryWithFinally()
+    {
+        TestUtil.VerifyDecompileResult(
+            """
+            :[0]
+            pushi.e 1
+            pop.v.i builtin.a
+
+            :[1]
+            push.i 80
+            conv.i.v
+            push.i -1
+            conv.i.v
+            call.i @@try_hook@@ 2
+            popz.v
+            
+            :[2]
+            push.v builtin.b
+            pushi.e -9
+            pushenv [4]
+
+            :[3]
+            pushi.e 3
+            pop.v.i builtin.c
+
+            :[4]
+            popenv [3]
+            
+            :[5]
+            call.i @@try_unhook@@ 0
+            popz.v
+            pushi.e 4
+            pop.v.i builtin.d
+            call.i @@finish_finally@@ 0
+            popz.v
+            b [6]
+
+            :[6]
+            """,
+            """
+            a = 1;
+            try
+            {
+                with (b)
+                {
+                    c = 3;
+                }
+            }
+            finally
+            {
+                d = 4;
+            }
             """
         );
     }

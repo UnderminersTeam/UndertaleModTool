@@ -4,6 +4,8 @@
   file, You can obtain one at https://mozilla.org/MPL/2.0/.
 */
 
+using System.Collections.Generic;
+
 namespace Underanalyzer.Decompiler.AST;
 
 /// <summary>
@@ -16,10 +18,16 @@ public class StaticInitNode(BlockNode body) : IStatementNode
     /// </summary>
     public BlockNode Body { get; private set; } = body;
 
+    /// <inheritdoc/>
     public bool SemicolonAfter => false;
-    public bool EmptyLineBefore { get; private set; }
-    public bool EmptyLineAfter { get; private set; }
 
+    /// <inheritdoc/>
+    public bool EmptyLineBefore { get; set; }
+
+    /// <inheritdoc/>
+    public bool EmptyLineAfter { get; set; }
+
+    /// <inheritdoc/>
     public IStatementNode Clean(ASTCleaner cleaner)
     {
         Body.Clean(cleaner);
@@ -30,6 +38,14 @@ public class StaticInitNode(BlockNode body) : IStatementNode
         return this;
     }
 
+    /// <inheritdoc/>
+    public IStatementNode PostClean(ASTCleaner cleaner)
+    {
+        Body.PostClean(cleaner);
+        return this;
+    }
+
+    /// <inheritdoc/>
     public void Print(ASTPrinter printer)
     {
         bool prevStaticInitState = printer.TopFragmentContext!.InStaticInitialization;
@@ -40,8 +56,15 @@ public class StaticInitNode(BlockNode body) : IStatementNode
         printer.TopFragmentContext.InStaticInitialization = prevStaticInitState;
     }
 
+    /// <inheritdoc/>
     public bool RequiresMultipleLines(ASTPrinter printer)
     {
         return Body.RequiresMultipleLines(printer);
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<IBaseASTNode> EnumerateChildren()
+    {
+        yield return Body;
     }
 }

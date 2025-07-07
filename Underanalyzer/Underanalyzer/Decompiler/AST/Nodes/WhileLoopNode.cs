@@ -4,6 +4,8 @@
   file, You can obtain one at https://mozilla.org/MPL/2.0/.
 */
 
+using System.Collections.Generic;
+
 namespace Underanalyzer.Decompiler.AST;
 
 /// <summary>
@@ -27,16 +29,18 @@ public class WhileLoopNode(IExpressionNode condition, BlockNode body, bool mustB
     /// </summary>
     public bool MustBeWhileLoop { get; } = mustBeWhileLoop;
 
+    /// <inheritdoc/>
     public bool SemicolonAfter { get => false; }
-    public bool EmptyLineBefore { get; internal set; }
-    public bool EmptyLineAfter { get; internal set; }
 
+    /// <inheritdoc/>
+    public bool EmptyLineBefore { get; set; }
+
+    /// <inheritdoc/>
+    public bool EmptyLineAfter { get; set; }
+
+    /// <inheritdoc/>
     public IStatementNode Clean(ASTCleaner cleaner)
     {
-        Condition = Condition.Clean(cleaner);
-        Condition.Group = false;
-        Body.Clean(cleaner);
-
         EmptyLineAfter = EmptyLineBefore = cleaner.Context.Settings.EmptyLineAroundBranchStatements;
 
         if (!MustBeWhileLoop)
@@ -44,7 +48,8 @@ public class WhileLoopNode(IExpressionNode condition, BlockNode body, bool mustB
             // Check if we can turn into a for (;;) loop
             if (Condition is Int64Node i64 && i64.Value == 1)
             {
-                return new ForLoopNode(null, null, null, Body)
+                ElseToContinueCleanup.Clean(cleaner, Body);
+                return new ForLoopNode(null, null, null, (BlockNode)Body.Clean(cleaner))
                 {
                     EmptyLineBefore = EmptyLineBefore,
                     EmptyLineAfter = EmptyLineAfter
@@ -52,33 +57,14 @@ public class WhileLoopNode(IExpressionNode condition, BlockNode body, bool mustB
             }
         }
 
+        Condition = Condition.Clean(cleaner);
+        Condition.Group = false;
+        Body.Clean(cleaner);
+
         return this;
     }
 
-    public void Print(ASTPrinter printer)
-    {
-        printer.Write("while (");
-        Condition.Print(printer);
-        printer.Write(')');
-        if (printer.Context.Settings.RemoveSingleLineBlockBraces && !Body.RequiresMultipleLines(printer))
-        {
-            Body.PrintSingleLine(printer);
-        }
-        else
-        {
-            if (printer.Context.Settings.OpenBlockBraceOnSameLine)
-            {
-                printer.Write(' ');
-            }
-            Body.Print(printer);
-        }
-    }
-
-    public bool RequiresMultipleLines(ASTPrinter printer)
-    {
-        return true;
-    }
-
+    /// <inheritdoc/>
     public int BlockClean(ASTCleaner cleaner, BlockNode block, int i)
     {
         // Check if we should convert this loop into a for loop
@@ -110,6 +96,12 @@ public class WhileLoopNode(IExpressionNode condition, BlockNode body, bool mustB
                 return i;
             }
 
+            // Finally, if the for loop body would be empty, there's no need to convert over
+            if (Body.Children.Count == 1)
+            {
+                return i;
+            }
+
             // Convert into for loop!
             Body.Children.RemoveAt(Body.Children.Count - 1);
             BlockNode incrementorBlock = new(Body.FragmentContext);
@@ -122,5 +114,51 @@ public class WhileLoopNode(IExpressionNode condition, BlockNode body, bool mustB
         }
 
         return i;
+    }
+
+    /// <inheritdoc/>
+    public IStatementNode PostClean(ASTCleaner cleaner)
+    {
+        Condition = Condition.PostClean(cleaner);
+        Condition.Group = false;
+
+        cleaner.TopFragmentContext!.PushLocalScope(cleaner.Context, cleaner.TopFragmentContext!.CurrentPostCleanupBlock!, this);
+        Body.PostClean(cleaner);
+        cleaner.TopFragmentContext!.PopLocalScope(cleaner.Context);
+
+        return this;
+    }
+
+    /// <inheritdoc/>
+    public void Print(ASTPrinter printer)
+    {
+        printer.Write("while (");
+        Condition.Print(printer);
+        printer.Write(')');
+        if (printer.Context.Settings.RemoveSingleLineBlockBraces && !Body.RequiresMultipleLines(printer))
+        {
+            Body.PrintSingleLine(printer);
+        }
+        else
+        {
+            if (printer.Context.Settings.OpenBlockBraceOnSameLine)
+            {
+                printer.Write(' ');
+            }
+            Body.Print(printer);
+        }
+    }
+
+    /// <inheritdoc/>
+    public bool RequiresMultipleLines(ASTPrinter printer)
+    {
+        return true;
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<IBaseASTNode> EnumerateChildren()
+    {
+        yield return Condition;
+        yield return Body;
     }
 }

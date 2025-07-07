@@ -40,17 +40,36 @@ public class FunctionDeclNode(string? name, bool isConstructor, BlockNode body, 
     /// </summary>
     internal Dictionary<int, IExpressionNode> ArgumentDefaultValues { get; set; } = [];
 
+    /// <inheritdoc/>
     public bool Duplicated { get; set; } = false;
-    public bool Group { get; set; } = false;
-    public IGMInstruction.DataType StackType { get; set; } = IGMInstruction.DataType.Variable;
-    public ASTFragmentContext FragmentContext { get; } = fragmentContext;
-    public bool SemicolonAfter => false;
-    public bool EmptyLineBefore { get; private set; }
-    public bool EmptyLineAfter { get; private set; }
 
+    /// <inheritdoc/>
+    public bool Group { get; set; } = false;
+
+    /// <inheritdoc/>
+    public IGMInstruction.DataType StackType { get; set; } = IGMInstruction.DataType.Variable;
+
+    /// <inheritdoc/>
+    public ASTFragmentContext FragmentContext { get; } = fragmentContext;
+
+    /// <inheritdoc/>
+    public bool SemicolonAfter => false;
+
+    /// <inheritdoc/>
+    public bool EmptyLineBefore { get; set; }
+
+    /// <inheritdoc/>
+    public bool EmptyLineAfter { get; set; }
+
+    /// <inheritdoc/>
     public string ConditionalTypeName => "FunctionDecl";
+
+    /// <inheritdoc/>
     public string ConditionalValue => Name ?? "";
 
+    /// <summary>
+    /// Cleans the body block of the function declaration node.
+    /// </summary>
     private void CleanBody(ASTCleaner cleaner)
     {
         Body.Clean(cleaner);
@@ -63,11 +82,31 @@ public class FunctionDeclNode(string? name, bool isConstructor, BlockNode body, 
         }
     }
 
+    /// <summary>
+    /// Post-cleans the body block of the function declaration node.
+    /// </summary>
+    private void PostCleanBody(ASTCleaner cleaner)
+    {
+        Body.PostClean(cleaner);
+        if (Body.FragmentContext.BaseParentCall is not null)
+        {
+            cleaner.PushFragmentContext(Body.FragmentContext);
+            Body.FragmentContext.BaseParentCall = Body.FragmentContext.BaseParentCall.PostClean(cleaner);
+            cleaner.PopFragmentContext();
+        }
+    }
+
+    /// <summary>
+    /// Determines whether empty lines should be used for this node, depending on settings.
+    /// </summary>
     private void CleanEmptyLines(ASTCleaner cleaner)
     {
         EmptyLineAfter = EmptyLineBefore = cleaner.Context.Settings.EmptyLineAroundFunctionDeclarations;
     }
 
+    /// <summary>
+    /// Cleans up the compiler-generated code that assigns default values to arguments, if enabled by settings.
+    /// </summary>
     private void CleanDefaultArgumentValues(ASTCleaner cleaner)
     {
         if (!cleaner.Context.Settings.CleanupDefaultArgumentValues)
@@ -81,7 +120,7 @@ public class FunctionDeclNode(string? name, bool isConstructor, BlockNode body, 
         while (childIndex < Body.Children.Count)
         {
             // Skip locals, if they exist
-            if (Body.Children[childIndex] is BlockLocalVarDeclNode)
+            if (Body.Children[childIndex] is BlockLocalVarDeclNode or LocalVarDeclNode)
             {
                 firstIfIndex++;
                 childIndex++;
@@ -104,7 +143,8 @@ public class FunctionDeclNode(string? name, bool isConstructor, BlockNode body, 
 
             // Verify the left variable is an argument we have not yet provided a default value for,
             // and is strictly greater than the previous argument index
-            int argIndex = argumentVariable.GetArgumentIndex();
+            bool onlyNamedArguments = !cleaner.Context.GameContext.UsingBuiltinDefaultArguments;
+            int argIndex = argumentVariable.GetArgumentIndex(Body.FragmentContext!.MaxReferencedArgument, onlyNamedArguments);
             if (argIndex == -1 || ArgumentDefaultValues.ContainsKey(argIndex) || argIndex <= lastArgumentIndex)
             {
                 break;
@@ -129,7 +169,7 @@ public class FunctionDeclNode(string? name, bool isConstructor, BlockNode body, 
             }
 
             // Assignment's destination should be the same argument variable
-            if (assign.Variable is not VariableNode assignDest || assignDest.GetArgumentIndex() != argIndex)
+            if (assign.Variable is not VariableNode assignDest || assignDest.GetArgumentIndex(Body.FragmentContext!.MaxReferencedArgument, onlyNamedArguments) != argIndex)
             {
                 break;
             }
@@ -138,19 +178,18 @@ public class FunctionDeclNode(string? name, bool isConstructor, BlockNode body, 
             // Also, process macro resolution for the default value expression, based on the argument name.
             IExpressionNode? expr = assign.Value;
             string? argName = Body.FragmentContext.GetNamedArgumentName(cleaner.Context, argIndex);
-            if (argName is null)
+            if (argName is not null)
             {
-                break;
+                cleaner.PushFragmentContext(Body.FragmentContext);
+                if (expr is IMacroResolvableNode valueResolvable &&
+                    cleaner.GlobalMacroResolver.ResolveVariableType(cleaner, argName) is IMacroType variableMacroType &&
+                    valueResolvable.ResolveMacroType(cleaner, variableMacroType) is IExpressionNode valueResolved)
+                {
+                    expr = valueResolved;
+                }
+                cleaner.PopFragmentContext();
             }
-            cleaner.PushFragmentContext(Body.FragmentContext);
-            if (expr is IMacroResolvableNode valueResolvable &&
-                cleaner.GlobalMacroResolver.ResolveVariableType(cleaner, argName) is IMacroType variableMacroType &&
-                valueResolvable.ResolveMacroType(cleaner, variableMacroType) is IExpressionNode valueResolved)
-            {
-                expr = valueResolved;
-            }
-            cleaner.PopFragmentContext();
-            
+
             if (expr is null)
             {
                 break;
@@ -165,6 +204,7 @@ public class FunctionDeclNode(string? name, bool isConstructor, BlockNode body, 
         Body.Children.RemoveRange(firstIfIndex, childIndex - firstIfIndex);
     }
 
+    /// <inheritdoc/>
     public IExpressionNode Clean(ASTCleaner cleaner)
     {
         CleanBody(cleaner);
@@ -173,6 +213,7 @@ public class FunctionDeclNode(string? name, bool isConstructor, BlockNode body, 
         return this;
     }
 
+    /// <inheritdoc/>
     IStatementNode IASTNode<IStatementNode>.Clean(ASTCleaner cleaner)
     {
         CleanBody(cleaner);
@@ -181,6 +222,21 @@ public class FunctionDeclNode(string? name, bool isConstructor, BlockNode body, 
         return this;
     }
 
+    /// <inheritdoc/>
+    public IExpressionNode PostClean(ASTCleaner cleaner)
+    {
+        PostCleanBody(cleaner);
+        return this;
+    }
+
+    /// <inheritdoc/>
+    IStatementNode IASTNode<IStatementNode>.PostClean(ASTCleaner cleaner)
+    {
+        PostCleanBody(cleaner);
+        return this;
+    }
+
+    /// <inheritdoc/>
     public void Print(ASTPrinter printer)
     {
         if (IsAnonymous)
@@ -215,8 +271,16 @@ public class FunctionDeclNode(string? name, bool isConstructor, BlockNode body, 
         if (Body.FragmentContext.BaseParentCall is not null)
         {
             printer.Write(" : ");
+            ASTFragmentContext outerFragmentContext = printer.TopFragmentContext!;
             printer.PushFragmentContext(Body.FragmentContext);
-            Body.FragmentContext.BaseParentCall.Print(printer);
+            if (Body.FragmentContext.BaseParentCall is FunctionCallNode functionCall)
+            {
+                functionCall.Print(printer, outerFragmentContext);
+            }
+            else
+            {
+                Body.FragmentContext.BaseParentCall.Print(printer);
+            }
             printer.PopFragmentContext();
         }
 
@@ -232,11 +296,13 @@ public class FunctionDeclNode(string? name, bool isConstructor, BlockNode body, 
         Body.Print(printer);
     }
 
+    /// <inheritdoc/>
     public bool RequiresMultipleLines(ASTPrinter printer)
     {
         return true;
     }
 
+    /// <inheritdoc/>
     public IExpressionNode? ResolveMacroType(ASTCleaner cleaner, IMacroType type)
     {
         if (type is IMacroTypeConditional conditional)
@@ -244,5 +310,15 @@ public class FunctionDeclNode(string? name, bool isConstructor, BlockNode body, 
             return conditional.Resolve(cleaner, this);
         }
         return null;
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<IBaseASTNode> EnumerateChildren()
+    {
+        foreach (IExpressionNode expr in ArgumentDefaultValues.Values)
+        {
+            yield return expr;
+        }
+        yield return Body;
     }
 }

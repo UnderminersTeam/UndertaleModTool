@@ -7,14 +7,13 @@
 using System;
 using System.Collections.Generic;
 using Underanalyzer.Decompiler.ControlFlow;
-using Underanalyzer.Decompiler.GameSpecific;
 
 namespace Underanalyzer.Decompiler;
 
 /// <summary>
 /// A decompilation context belonging to a single code entry in a game.
 /// </summary>
-public class DecompileContext
+public sealed class DecompileContext
 {
     /// <summary>
     /// The game context this decompile context belongs to.
@@ -106,7 +105,7 @@ public class DecompileContext
         }
     }
 
-    // Decompiles the AST from the code entry4
+    // Decompiles the AST from the code entry
     private AST.IStatementNode DecompileAST()
     {
         try
@@ -134,7 +133,8 @@ public class DecompileContext
             {
                 AST.EnumDeclNode.GenerateDeclarations(cleaner, cleaned);
             }
-            return cleaned;
+            AST.IStatementNode postCleaned = cleaned.PostClean(cleaner);
+            return postCleaned;
         }
         catch (DecompilerException ex)
         {

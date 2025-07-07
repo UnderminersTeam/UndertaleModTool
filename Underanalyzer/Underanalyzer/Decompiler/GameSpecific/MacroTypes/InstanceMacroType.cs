@@ -15,6 +15,19 @@ public class InstanceMacroType : IMacroTypeInt32
 {
     public IExpressionNode? Resolve(ASTCleaner cleaner, IMacroResolvableNode node, int data)
     {
+        // In GMLv2, don't resolve self, other, and global in versions where those no longer compile to numbers
+        if (cleaner.Context.GMLv2)
+        {
+            if (data is (int)IGMInstruction.InstanceType.Self or (int)IGMInstruction.InstanceType.Other)
+            {
+                return null;
+            }
+            if (data is (int)IGMInstruction.InstanceType.Global && cleaner.Context.GameContext.UsingGlobalConstantFunction)
+            {
+                return null;
+            }
+        }
+
         return data switch
         {
             (int)IGMInstruction.InstanceType.Self => new InstanceTypeNode(IGMInstruction.InstanceType.Self),

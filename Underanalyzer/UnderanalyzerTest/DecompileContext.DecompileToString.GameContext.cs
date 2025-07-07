@@ -70,4 +70,41 @@ public class DecompileContext_DecompileToString_GameContext
             }
         );
     }
+
+    [Fact]
+    public void TestBooleanLoop()
+    {
+        TestUtil.VerifyDecompileResult(
+            """
+            :[0]
+            pushi.e 1
+            conv.i.b
+            bf [2]
+
+            :[1]
+            b [0]
+
+            :[2]
+            pushi.e 1
+            bf [4]
+
+            :[3]
+            b [2]
+
+            :[4]
+            """,
+            """
+            while (1)
+            {
+            }
+            while (true)
+            {
+            }
+            """,
+            new GameContextMock()
+            {
+                UsingTypedBooleans = true
+            }
+        );
+    }
 }

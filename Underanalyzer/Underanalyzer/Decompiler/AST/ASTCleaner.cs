@@ -12,7 +12,7 @@ namespace Underanalyzer.Decompiler.AST;
 /// <summary>
 /// Manages cleaning/postprocessing of the AST.
 /// </summary>
-public class ASTCleaner(DecompileContext context)
+public sealed class ASTCleaner(DecompileContext context)
 {
     /// <summary>
     /// The decompilation context this is cleaning for.

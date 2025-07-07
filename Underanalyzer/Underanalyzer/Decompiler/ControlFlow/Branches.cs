@@ -363,7 +363,7 @@ internal static class Branches
     {
         foreach (Block block in ctx.Blocks!)
         {
-            if (block.Instructions is [.., { Kind: IGMInstruction.Opcode.Branch, Address: int address, BranchOffset: int branchOffset }])
+            if (block.Instructions is [.., { Kind: IGMInstruction.Opcode.Branch, BranchOffset: int branchOffset }])
             {
                 if (!ctx.BlockSurroundingLoops!.TryGetValue(block, out Loop? loop))
                 {
@@ -377,7 +377,7 @@ internal static class Branches
                     {
                         // This is probably a for loop now.
                         // We need to find the original successor, and set that as the incrementor.
-                        IControlFlowNode succ = ctx.BlocksByAddress![address + branchOffset];
+                        IControlFlowNode succ = ctx.BlocksByAddress![(block.EndAddress - 4) + branchOffset];
                         while (succ.Parent is not null)
                         {
                             succ = succ.Parent;

@@ -71,7 +71,7 @@ public interface IMacroTypeConditional : IMacroType
     public bool Required { get; }
 
     /// <summary>
-    /// Resolves the macro type with the given AST array initialization, or <see langword="null"/> if there is no resolution.
+    /// Resolves the macro type with the given AST conditional value node, or <see langword="null"/> if there is no resolution.
     /// </summary>
     public IExpressionNode? Resolve(ASTCleaner cleaner, IConditionalValueNode node);
 }

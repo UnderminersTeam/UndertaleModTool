@@ -50,7 +50,8 @@ public interface IFragmentNode : IStatementNode
         }
 
         // Get function reference for fragment
-        if (followingBlock.Instructions[0] is not { Kind: Opcode.Push, Type1: DataType.Int32, Function: IGMFunction function } || function is null)
+        if (followingBlock.Instructions[0] is not { Kind: Opcode.Push, Type1: DataType.Int32 } pushInstruction || 
+            pushInstruction.TryFindFunction(builder.Context.GameContext) is null)
         {
             throw new DecompilerException("Expected push.i with function reference after fragment");
         }
@@ -71,9 +72,10 @@ public interface IFragmentNode : IStatementNode
                             _, _, 
                             { ValueShort: -1 or -16 }, 
                             { Kind: Opcode.Convert, Type1: DataType.Int32, Type2: DataType.Variable },
-                            { Kind: Opcode.Call, Function.Name.Content: VMConstants.MethodFunction },
+                            { Kind: Opcode.Call } callInstr,
                             ..
-                        ])
+                        ] ||
+                        callInstr.TryFindFunction(builder.Context.GameContext)?.Name?.Content is not VMConstants.MethodFunction)
                     {
                         throw new DecompilerException("Fragment instruction match failure (normal function)");
                     }
@@ -85,9 +87,10 @@ public interface IFragmentNode : IStatementNode
                             _, _, _, _, _, 
                             { Kind: Opcode.Duplicate, DuplicationSize2: 0 },
                             { Kind: Opcode.PushImmediate },
-                            { Kind: Opcode.Pop, Variable.Name.Content: string varName },
+                            { Kind: Opcode.Pop } popInstr,
                             ..
-                        ])
+                        ] &&
+                        popInstr.TryFindVariable(builder.Context.GameContext) is IGMVariable { Name.Content: string varName })
                     {
                         funcName = varName;
                     }
@@ -117,10 +120,12 @@ public interface IFragmentNode : IStatementNode
                     if (followingBlock.Instructions is not
                         [
                             _, _,
-                            { Kind: Opcode.Call, Function.Name.Content: VMConstants.NullObjectFunction },
-                            { Kind: Opcode.Call, Function.Name.Content: VMConstants.MethodFunction },
+                            { Kind: Opcode.Call } callInstr1,
+                            { Kind: Opcode.Call } callInstr2,
                             ..
-                        ])
+                        ] ||
+                        callInstr1.TryFindFunction(builder.Context.GameContext)?.Name?.Content is not VMConstants.NullObjectFunction ||
+                        callInstr2.TryFindFunction(builder.Context.GameContext)?.Name?.Content is not VMConstants.MethodFunction)
                     {
                         throw new DecompilerException("Fragment instruction match failure (struct/constructor)");
                     }
@@ -131,9 +136,10 @@ public interface IFragmentNode : IStatementNode
                             _, _, _, _,
                             { Kind: Opcode.Duplicate, DuplicationSize2: 0 },
                             { Kind: Opcode.PushImmediate, ValueShort: short pushVal },
-                            { Kind: Opcode.Pop, Variable.Name.Content: string funcName },
+                            { Kind: Opcode.Pop } popInstr,
                             ..
-                        ])
+                        ] &&
+                        popInstr.TryFindVariable(builder.Context.GameContext) is IGMVariable { Name.Content: string funcName })
                     {
                         // Check if struct or constructor
                         if (pushVal == -16 || pushVal == -5)
@@ -143,9 +149,9 @@ public interface IFragmentNode : IStatementNode
                                 followingBlock.Instructions[7] is not 
                                 { 
                                     Kind: Opcode.Call, 
-                                    Function.Name.Content: VMConstants.NewObjectFunction,
                                     ArgumentCount: int argumentCount
-                                })
+                                } newObjectCallInstr ||
+                                newObjectCallInstr.TryFindFunction(builder.Context.GameContext)?.Name?.Content is not VMConstants.NewObjectFunction)
                             {
                                 throw new DecompilerException("Fragment instruction match failure (struct)");
                             }

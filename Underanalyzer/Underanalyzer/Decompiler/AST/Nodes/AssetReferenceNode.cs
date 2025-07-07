@@ -4,6 +4,7 @@
   file, You can obtain one at https://mozilla.org/MPL/2.0/.
 */
 
+using System.Collections.Generic;
 using Underanalyzer.Decompiler.GameSpecific;
 
 namespace Underanalyzer.Decompiler.AST;
@@ -23,23 +24,40 @@ public class AssetReferenceNode(int assetId, AssetType assetType) : IExpressionN
     /// </summary>
     public AssetType AssetType { get; } = assetType;
 
+    /// <inheritdoc/>
     public bool Duplicated { get; set; } = false;
+
+    /// <inheritdoc/>
     public bool Group { get; set; } = false;
+
+    /// <inheritdoc/>
     public IGMInstruction.DataType StackType { get; set; } = IGMInstruction.DataType.Variable;
 
+    /// <inheritdoc/>
     public string ConditionalTypeName => "AssetReference";
+
+    /// <inheritdoc/>
     public string ConditionalValue => $"{AssetType}:{AssetId}";
 
+    /// <inheritdoc/>
     public IExpressionNode Clean(ASTCleaner cleaner)
     {
         return this;
     }
 
+    /// <inheritdoc/>
+    public IExpressionNode PostClean(ASTCleaner cleaner)
+    {
+        return this;
+    }
+
+    /// <inheritdoc/>
     public bool RequiresMultipleLines(ASTPrinter printer)
     {
         return false;
     }
 
+    /// <inheritdoc/>
     public void Print(ASTPrinter printer)
     {
         string? assetName = printer.Context.GameContext.GetAssetName(AssetType, AssetId);
@@ -62,6 +80,7 @@ public class AssetReferenceNode(int assetId, AssetType assetType) : IExpressionN
         }
     }
 
+    /// <inheritdoc/>
     public IExpressionNode? ResolveMacroType(ASTCleaner cleaner, IMacroType type)
     {
         if (type is IMacroTypeConditional conditional)
@@ -69,5 +88,11 @@ public class AssetReferenceNode(int assetId, AssetType assetType) : IExpressionN
             return conditional.Resolve(cleaner, this);
         }
         return null;
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<IBaseASTNode> EnumerateChildren()
+    {
+        return [];
     }
 }

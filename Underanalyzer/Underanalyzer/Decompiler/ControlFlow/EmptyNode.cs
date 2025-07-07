@@ -13,7 +13,7 @@ namespace Underanalyzer.Decompiler.ControlFlow;
 /// Represents an empty node in the control flow graph.
 /// This is generally used for reshaping control flow to make later analysis easier.
 /// </summary>
-internal class EmptyNode(int address) : IControlFlowNode
+internal sealed class EmptyNode(int address) : IControlFlowNode
 {
     public int StartAddress { get; set; } = address;
 

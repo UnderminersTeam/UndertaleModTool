@@ -27,6 +27,9 @@ internal static class VMConstants
     // Function name used to copy static information from an inherited constructor function in GML
     public const string CopyStaticFunction = "@@CopyStatic@@";
 
+    // Function name used upon entering constructor functions (in newer versions)
+    public const string SetStaticFunction = "@@SetStatic@@";
+
     // Instance type helpers used in GMLv2
     public const string SelfFunction = "@@This@@";
     public const string OtherFunction = "@@Other@@";
@@ -56,6 +59,9 @@ internal static class VMConstants
     // Special-case GML functions used during macro resolution
     public const string ChooseFunction = "choose";
     public const string ScriptExecuteFunction = "script_execute";
+
+    // Function used to get static structs from functions
+    public const string StaticGetFunction = "static_get";
 
     // Builtin array variables (some of which don't exist past GMS2, but are still recognized by the compiler apparently)
     public static readonly HashSet<string> BuiltinArrayVariables = 

@@ -73,7 +73,7 @@ internal abstract class Loop(int startAddress, int endAddress, int index) : ICon
                     {
                         // While loop detected - only add if this is the first time we see it (in reverse)
                         // If not done only once, then this misfires on "continue" statements
-                        int conditionAddr = instr.Address + instr.BranchOffset;
+                        int conditionAddr = (block.EndAddress - 4) + instr.BranchOffset;
                         if (whileLoopsFound.Add(conditionAddr))
                         {
                             loops.Add(new WhileLoop(conditionAddr, block.EndAddress, loopIndex++,

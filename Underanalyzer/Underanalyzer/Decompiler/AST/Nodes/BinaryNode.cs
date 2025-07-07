@@ -4,7 +4,7 @@
   file, You can obtain one at https://mozilla.org/MPL/2.0/.
 */
 
-using System;
+using System.Collections.Generic;
 using Underanalyzer.Decompiler.GameSpecific;
 using static Underanalyzer.IGMInstruction;
 
@@ -30,11 +30,19 @@ public class BinaryNode : IMultiExpressionNode, IMacroResolvableNode, ICondition
     /// </summary>
     public IGMInstruction Instruction { get; }
 
+    /// <inheritdoc/>
     public bool Duplicated { get; set; } = false;
-    public bool Group { get; set; } = false;
-    public IGMInstruction.DataType StackType { get; set; }
 
+    /// <inheritdoc/>
+    public bool Group { get; set; } = false;
+
+    /// <inheritdoc/>
+    public DataType StackType { get; set; }
+
+    /// <inheritdoc/>
     public string ConditionalTypeName => "Binary";
+
+    /// <inheritdoc/>
     public string ConditionalValue => ""; // TODO?
 
     public BinaryNode(IExpressionNode left, IExpressionNode right, IGMInstruction instruction)
@@ -43,42 +51,16 @@ public class BinaryNode : IMultiExpressionNode, IMacroResolvableNode, ICondition
         Right = right;  
         Instruction = instruction;
 
-        if (Instruction.Kind == Opcode.Compare)
-        {
-            // For comparison operations, the result is always a boolean.
-            StackType = DataType.Boolean;
-        }
-        else
-        {
-            // Type1 and Type2 on the instruction represent the data types of Left and Right on the stack.
-            // Choose whichever type has a higher bias, or if equal, the smaller numerical data type value.
-            int bias1 = StackTypeBias(instruction.Type1);
-            int bias2 = StackTypeBias(instruction.Type2);
-            if (bias1 == bias2)
-            {
-                StackType = (DataType)Math.Min((byte)instruction.Type1, (byte)instruction.Type2);
-            }
-            else
-            {
-                StackType = (bias1 > bias2) ? instruction.Type1 : instruction.Type2;
-            }
-        }
+        // Get resulting stack type depending on instruction's opcode and types for Left and Right
+        StackType = instruction.Type1.BinaryResultWith(instruction.Kind, instruction.Type2);
     }
 
-    private static int StackTypeBias(DataType type)
-    {
-        return type switch
-        {
-            DataType.Int32 or DataType.Boolean or DataType.String => 0,
-            DataType.Double or DataType.Int64 => 1,
-            DataType.Variable => 2,
-            _ => throw new DecompilerException("Unknown stack type in binary operation")
-        };
-    }
-
+    /// <summary>
+    /// Checks whether the given expression node needs to be grouped, and 
+    /// sets <see cref="IExpressionNode.Group"/> accordingly if required.
+    /// </summary>
     private void CheckGroup(IExpressionNode node)
     {
-        // TODO: verify that this works for all cases
         if (node is BinaryNode binary)
         {
             if (binary.Instruction.Kind != Instruction.Kind)
@@ -96,6 +78,7 @@ public class BinaryNode : IMultiExpressionNode, IMacroResolvableNode, ICondition
         }
     }
 
+    /// <inheritdoc/>
     public IExpressionNode Clean(ASTCleaner cleaner)
     {
         Left = Left.Clean(cleaner);
@@ -115,6 +98,7 @@ public class BinaryNode : IMultiExpressionNode, IMacroResolvableNode, ICondition
             Left = leftResolved;
         }
 
+        // Check whether left/right sides need to have parentheses added (grouped)
         CheckGroup(Left);
         CheckGroup(Right);
 
@@ -128,6 +112,15 @@ public class BinaryNode : IMultiExpressionNode, IMacroResolvableNode, ICondition
         return this;
     }
 
+    /// <inheritdoc/>
+    public IExpressionNode PostClean(ASTCleaner cleaner)
+    {
+        Left = Left.PostClean(cleaner);
+        Right = Right.PostClean(cleaner);
+        return this;
+    }
+
+    /// <inheritdoc/>
     public void Print(ASTPrinter printer)
     {
         if (Group)
@@ -171,11 +164,13 @@ public class BinaryNode : IMultiExpressionNode, IMacroResolvableNode, ICondition
         }
     }
 
+    /// <inheritdoc/>
     public bool RequiresMultipleLines(ASTPrinter printer)
     {
         return Left.RequiresMultipleLines(printer) || Right.RequiresMultipleLines(printer);
     }
 
+    /// <inheritdoc/>
     public IExpressionNode? ResolveMacroType(ASTCleaner cleaner, IMacroType type)
     {
         bool didAnything = false;
@@ -194,5 +189,12 @@ public class BinaryNode : IMultiExpressionNode, IMacroResolvableNode, ICondition
         }
 
         return didAnything ? this : null;
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<IBaseASTNode> EnumerateChildren()
+    {
+        yield return Left;
+        yield return Right;
     }
 }

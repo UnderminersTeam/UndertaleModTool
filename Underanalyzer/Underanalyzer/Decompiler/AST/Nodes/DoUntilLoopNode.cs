@@ -4,6 +4,8 @@
   file, You can obtain one at https://mozilla.org/MPL/2.0/.
 */
 
+using System.Collections.Generic;
+
 namespace Underanalyzer.Decompiler.AST;
 
 /// <summary>
@@ -21,10 +23,16 @@ public class DoUntilLoopNode(BlockNode body, IExpressionNode condition) : IState
     /// </summary>
     public IExpressionNode Condition { get; private set; } = condition;
 
+    /// <inheritdoc/>
     public bool SemicolonAfter => true;
-    public bool EmptyLineBefore { get; private set; }
-    public bool EmptyLineAfter { get; private set; }
 
+    /// <inheritdoc/>
+    public bool EmptyLineBefore { get; set; }
+
+    /// <inheritdoc/>
+    public bool EmptyLineAfter { get; set; }
+
+    /// <inheritdoc/>
     public IStatementNode Clean(ASTCleaner cleaner)
     {
         ElseToContinueCleanup.Clean(cleaner, Body);
@@ -37,6 +45,18 @@ public class DoUntilLoopNode(BlockNode body, IExpressionNode condition) : IState
         return this;
     }
 
+    /// <inheritdoc/>
+    public IStatementNode PostClean(ASTCleaner cleaner)
+    {
+        cleaner.TopFragmentContext!.PushLocalScope(cleaner.Context, cleaner.TopFragmentContext!.CurrentPostCleanupBlock!, this);
+        Body.PostClean(cleaner);
+        cleaner.TopFragmentContext!.PopLocalScope(cleaner.Context);
+
+        Condition = Condition.PostClean(cleaner);
+        return this;
+    }
+
+    /// <inheritdoc/>
     public void Print(ASTPrinter printer)
     {
         printer.Write("do");
@@ -66,8 +86,16 @@ public class DoUntilLoopNode(BlockNode body, IExpressionNode condition) : IState
         printer.Write(')');
     }
 
+    /// <inheritdoc/>
     public bool RequiresMultipleLines(ASTPrinter printer)
     {
         return true;
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<IBaseASTNode> EnumerateChildren()
+    {
+        yield return Body;
+        yield return Condition;
     }
 }

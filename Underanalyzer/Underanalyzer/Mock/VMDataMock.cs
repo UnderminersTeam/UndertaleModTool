@@ -103,10 +103,10 @@ public class GMInstruction : IGMInstruction
     public IGMInstruction.InstanceType InstType { get; set; }
     
     /// <inheritdoc/>
-    public IGMVariable? Variable { get; set; }
+    public IGMVariable? ResolvedVariable { get; set; }
     
     /// <inheritdoc/>
-    public IGMFunction? Function { get; set; }
+    public IGMFunction? ResolvedFunction { get; set; }
     
     /// <inheritdoc/>
     public IGMInstruction.VariableType ReferenceVarType { get; set; }
@@ -155,6 +155,12 @@ public class GMInstruction : IGMInstruction
     
     /// <inheritdoc/>
     public AssetType GetAssetReferenceType(IGameContext context) => AssetReferenceType;
+
+    /// <inheritdoc/>
+    public IGMFunction? TryFindFunction(IGameContext? context) => ResolvedFunction;
+
+    /// <inheritdoc/>
+    public IGMVariable? TryFindVariable(IGameContext? context) => ResolvedVariable;
 
     /// <inheritdoc/>
     public override string ToString()

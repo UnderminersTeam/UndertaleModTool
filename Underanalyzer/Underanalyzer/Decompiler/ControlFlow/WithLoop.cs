@@ -9,7 +9,7 @@ using Underanalyzer.Decompiler.AST;
 
 namespace Underanalyzer.Decompiler.ControlFlow;
 
-internal class WithLoop : Loop
+internal sealed class WithLoop : Loop
 {
     public override List<IControlFlowNode?> Children { get; } = [null, null, null, null, null];
 
@@ -85,7 +85,7 @@ internal class WithLoop : Loop
         IControlFlowNode.DisconnectSuccessor(Tail, 0);
 
         IControlFlowNode nodeToEndAt = oldAfter;
-        if (BreakBlock != null)
+        if (BreakBlock is not null)
         {
             // Reroute everything going into BreakBlock to instead go into newAfter
             for (int i = 0; i < BreakBlock.Predecessors.Count; i++)
@@ -111,8 +111,26 @@ internal class WithLoop : Loop
             nodeToEndAt.Predecessors.Insert(0, After);
         }
 
-        // Insert structure into graph
-        IControlFlowNode.InsertStructure(Head, nodeToEndAt, this);
+        // Insert structure into graph. Don't reroute backwards branches to Head, though (as other loop headers could be there).
+        IControlFlowNode.InsertStructure(Head, nodeToEndAt, this, false);
+
+        // If Before still has more than one branch, just redirect it into this loop
+        if (Before.Successors.Count != 1)
+        {
+            if (Before.Successors.Count != 2)
+            {
+                throw new DecompilerException("Expected 2 branches on Before");
+            }
+            if ((Before.Successors[0] != this && Before.Successors[0] != Tail) || 
+                (Before.Successors[1] != this && Before.Successors[1] != Tail))
+            {
+                throw new DecompilerException("Expected 2 branches to this loop on Before");
+            }
+            IControlFlowNode.DisconnectSuccessor(Before, 1);
+            IControlFlowNode.DisconnectSuccessor(Before, 0);
+            Before.Successors.Add(this);
+            Predecessors.Add(Before);
+        }
 
         // Remove all predecessors of Tail that are before this loop
         for (int i = Tail.Predecessors.Count - 1; i >= 0; i--)
@@ -122,23 +140,6 @@ internal class WithLoop : Loop
             {
                 IControlFlowNode.DisconnectPredecessor(Tail, i);
             }
-        }
-
-        // If Before still has more than one branch, just redirect it into this loop
-        if (Before.Successors.Count != 1)
-        {
-            if (Before.Successors.Count != 2)
-            {
-                throw new DecompilerException("Expected 2 branches on Before");
-            }
-            if (Before.Successors[0] != this || Before.Successors[1] != this)
-            {
-                throw new DecompilerException("Expected 2 branches to this loop on Before");
-            }
-            IControlFlowNode.DisconnectSuccessor(Before, 1);
-            IControlFlowNode.DisconnectSuccessor(Before, 0);
-            Before.Successors.Add(this);
-            Predecessors.Add(Before);
         }
 
         // Update parent status of Head, as well as this loop, for later operation

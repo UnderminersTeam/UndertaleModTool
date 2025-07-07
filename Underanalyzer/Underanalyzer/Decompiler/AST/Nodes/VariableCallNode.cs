@@ -30,17 +30,34 @@ public class VariableCallNode(IExpressionNode function, IExpressionNode? instanc
     /// </summary>
     public List<IExpressionNode> Arguments { get; } = arguments;
 
+    /// <inheritdoc/>
     public bool Duplicated { get; set; }
+
+    /// <inheritdoc/>
     public bool Group { get; set; } = false;
+
+    /// <inheritdoc/>
     public IGMInstruction.DataType StackType { get; set; } = IGMInstruction.DataType.Variable;
+
+    /// <inheritdoc/>
     public bool SemicolonAfter => true;
-    public bool EmptyLineBefore => false;
-    public bool EmptyLineAfter => false;
+
+    /// <inheritdoc/>
+    public bool EmptyLineBefore { get => false; set => _ = value; }
+
+    /// <inheritdoc/>
+    public bool EmptyLineAfter { get => false; set => _ = value; }
+
+    /// <inheritdoc/>
     public string? FunctionName => null;
 
+    /// <inheritdoc/>
     public string ConditionalTypeName => "VariableCall";
+
+    /// <inheritdoc/>
     public string ConditionalValue => ""; // TODO?
 
+    /// <inheritdoc/>
     IExpressionNode IASTNode<IExpressionNode>.Clean(ASTCleaner cleaner)
     {
         Function = Function.Clean(cleaner);
@@ -50,9 +67,10 @@ public class VariableCallNode(IExpressionNode function, IExpressionNode? instanc
             Arguments[i] = Arguments[i].Clean(cleaner);
         }
 
-        return this;
+        return CleanupMacroTypes(cleaner);
     }
 
+    /// <inheritdoc/>
     IStatementNode IASTNode<IStatementNode>.Clean(ASTCleaner cleaner)
     {
         Function = Function.Clean(cleaner);
@@ -62,9 +80,36 @@ public class VariableCallNode(IExpressionNode function, IExpressionNode? instanc
             Arguments[i] = Arguments[i].Clean(cleaner);
         }
 
+        return CleanupMacroTypes(cleaner);
+    }
+
+    /// <inheritdoc/>
+    IExpressionNode IASTNode<IExpressionNode>.PostClean(ASTCleaner cleaner)
+    {
+        Function = Function.PostClean(cleaner);
+        Instance = Instance?.PostClean(cleaner);
+        for (int i = 0; i < Arguments.Count; i++)
+        {
+            Arguments[i] = Arguments[i].PostClean(cleaner);
+        }
+
         return this;
     }
 
+    /// <inheritdoc/>
+    IStatementNode IASTNode<IStatementNode>.PostClean(ASTCleaner cleaner)
+    {
+        Function = Function.PostClean(cleaner);
+        Instance = Instance?.PostClean(cleaner);
+        for (int i = 0; i < Arguments.Count; i++)
+        {
+            Arguments[i] = Arguments[i].PostClean(cleaner);
+        }
+
+        return this;
+    }
+
+    /// <inheritdoc/>
     public void Print(ASTPrinter printer)
     {
         bool canGenerateParentheses = true;
@@ -107,6 +152,7 @@ public class VariableCallNode(IExpressionNode function, IExpressionNode? instanc
         printer.Write(')');
     }
 
+    /// <inheritdoc/>
     public bool RequiresMultipleLines(ASTPrinter printer)
     {
         if (Instance is not null)
@@ -131,6 +177,7 @@ public class VariableCallNode(IExpressionNode function, IExpressionNode? instanc
         return false;
     }
 
+    /// <inheritdoc/>
     public IExpressionNode? ResolveMacroType(ASTCleaner cleaner, IMacroType type)
     {
         if (type is IMacroTypeConditional conditional)
@@ -138,5 +185,38 @@ public class VariableCallNode(IExpressionNode function, IExpressionNode? instanc
             return conditional.Resolve(cleaner, this);
         }
         return null;
+    }
+
+    /// <summary>
+    /// During cleanup, determines/resolves macro types for this node if possible.
+    /// </summary>
+    public IFunctionCallNode CleanupMacroTypes(ASTCleaner cleaner)
+    {
+        if (Function is VariableNode { Variable.Name.Content: string functionName })
+        {
+            if (cleaner.GlobalMacroResolver.ResolveFunctionArgumentTypes(cleaner, functionName) is IMacroTypeFunctionArgs argsMacroType)
+            {
+                if (argsMacroType.Resolve(cleaner, this) is IFunctionCallNode resolved)
+                {
+                    // We found a match!
+                    return resolved;
+                }
+            }
+        }
+        return this;
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<IBaseASTNode> EnumerateChildren()
+    {
+        if (Instance is not null)
+        {
+            yield return Instance;
+        }
+        yield return Function;
+        foreach (IExpressionNode node in Arguments)
+        {
+            yield return node;
+        }
     }
 }

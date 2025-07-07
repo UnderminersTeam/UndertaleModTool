@@ -12,7 +12,7 @@ namespace Underanalyzer.Decompiler.ControlFlow;
 /// <summary>
 /// Represents a break statement in the control flow graph.
 /// </summary>
-internal class BreakNode(int address, bool mayBeContinue = false) : IControlFlowNode
+internal sealed class BreakNode(int address, bool mayBeContinue = false) : IControlFlowNode
 {
     public int StartAddress { get; set; } = address;
 

@@ -24,10 +24,16 @@ public class ShortCircuitNode(List<IExpressionNode> conditions, ShortCircuitType
     /// </summary>
     public ShortCircuitType LogicType { get; } = logicType;
 
+    /// <inheritdoc/>
     public bool Duplicated { get; set; } = false;
+
+    /// <inheritdoc/>
     public bool Group { get; set; } = false;
+
+    /// <inheritdoc/>
     public IGMInstruction.DataType StackType { get; set; } = IGMInstruction.DataType.Boolean;
 
+    /// <inheritdoc/>
     public IExpressionNode Clean(ASTCleaner cleaner)
     {
         for (int i = 0; i < Conditions.Count; i++)
@@ -44,6 +50,17 @@ public class ShortCircuitNode(List<IExpressionNode> conditions, ShortCircuitType
         return this;
     }
 
+    /// <inheritdoc/>
+    public IExpressionNode PostClean(ASTCleaner cleaner)
+    {
+        for (int i = 0; i < Conditions.Count; i++)
+        {
+            Conditions[i] = Conditions[i].PostClean(cleaner);
+        }
+        return this;
+    }
+
+    /// <inheritdoc/>
     public void Print(ASTPrinter printer)
     {
         if (Group)
@@ -67,6 +84,7 @@ public class ShortCircuitNode(List<IExpressionNode> conditions, ShortCircuitType
         }
     }
 
+    /// <inheritdoc/>
     public bool RequiresMultipleLines(ASTPrinter printer)
     {
         foreach (IExpressionNode condition in Conditions)
@@ -77,5 +95,11 @@ public class ShortCircuitNode(List<IExpressionNode> conditions, ShortCircuitType
             }
         }
         return false;
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<IBaseASTNode> EnumerateChildren()
+    {
+        return Conditions;
     }
 }
