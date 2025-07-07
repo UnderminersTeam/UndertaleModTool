@@ -10,9 +10,14 @@
                        d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleEmbeddedTexture}"
                        DataContextChanged="DataUserControl_DataContextChanged" Loaded="DataUserControl_Loaded" Unloaded="DataUserControl_Unloaded">
     <UserControl.Resources>
-        <local:BooleanToVisibilityConverter x:Key="BoolFalseToVisConverter" local:trueValue="Collapsed" local:falseValue="Visible"/>
-        <local:TextureLoadedWrapper x:Key="TextureLoadedWrapper"/>
-        <local:IsVersionAtLeastConverter x:Key="IsVersionAtLeastConverter"/>
+        <ResourceDictionary>
+            <local:BooleanToVisibilityConverter x:Key="BoolFalseToVisConverter" local:trueValue="Collapsed" local:falseValue="Visible"/>
+            <local:TextureLoadedWrapper x:Key="TextureLoadedWrapper"/>
+            <local:IsVersionAtLeastConverter x:Key="IsVersionAtLeastConverter"/>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Controls/TransparencyGridBrush.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -79,20 +84,9 @@
                 </ScrollViewer.Background>
                 <Viewbox Name="TextureViewbox" Stretch="Uniform" StretchDirection="DownOnly"
                          SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor" MouseWheel="TextureViewbox_MouseWheel">
-                    <Border>
-                        <Border.Background>
-                            <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,20,20" ViewportUnits="Absolute">
-                                <DrawingBrush.Drawing>
-                                    <DrawingGroup>
-                                        <GeometryDrawing Geometry="M0,0 L20,0 20,20, 0,20Z" Brush="Gray"/>
-                                        <GeometryDrawing Geometry="M0,10 L20,10 20,20, 10,20 10,0 0,0Z" Brush="DimGray"/>
-                                    </DrawingGroup>
-                                </DrawingBrush.Drawing>
-                            </DrawingBrush>
-                        </Border.Background>
-
+                    <Border Background="{DynamicResource TransparencyGridBrushBrush}">
                         <Grid Cursor="Hand" MouseDown="Grid_MouseDown" MouseMove="Grid_MouseMove" MouseLeave="Grid_MouseLeave">
-                            <Image Source="{Binding TextureData.TextureBlob, Mode=OneWay}"/>
+                            <Image Name="TexturePageImage"/>
                             <Canvas>
                                 <Border Name="PageItemBorder" Background="LightBlue" BorderThickness="2" BorderBrush="Blue" Opacity="0.65"
                                         Width="0" Height="0"/>

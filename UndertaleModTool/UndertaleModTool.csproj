@@ -1,6 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net6.0-windows</TargetFramework>
+        <TargetFramework>net8.0-windows</TargetFramework>
         <RollForward>LatestMajor</RollForward>
         <OutputType>WinExe</OutputType>
         <!-- TODO: this should properly get migrated and get rid of -->
@@ -19,6 +19,7 @@
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
         <!-- Suppress all missing XML comment warnings -->
         <NoWarn>1591</NoWarn>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
     </PropertyGroup>
     <ItemGroup>
       <None Remove="Corrections\README.txt" />
@@ -81,23 +82,23 @@
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="AvalonEdit">
-            <Version>6.3.0.90</Version>
+            <Version>6.3.1.120</Version>
         </PackageReference>
-        <PackageReference Include="Fody" Version="6.8.1">
+        <PackageReference Include="Fody" Version="6.9.2">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="log4net" Version="2.0.17" />
+        <PackageReference Include="log4net" Version="3.0.4" />
         <PackageReference Include="Microsoft-WindowsAPICodePack-Shell">
             <Version>1.1.5</Version>
         </PackageReference>
         <PackageReference Include="Microsoft.CodeAnalysis.Analyzers">
-            <Version>3.3.4</Version>
+            <Version>3.11.0</Version>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting">
-            <Version>4.10.0</Version>
+            <Version>4.13.0</Version>
         </PackageReference>
         <PackageReference Include="NAudio">
             <Version>2.2.1</Version>
@@ -149,7 +150,7 @@
         <PackageReference Include="System.Xml.XPath.XDocument">
             <Version>4.3.0</Version>
         </PackageReference>
-        <PackageReference Include="Microsoft.Windows.Compatibility" Version="5.0.2" />
+        <PackageReference Include="Microsoft.Windows.Compatibility" Version="9.0.4" />
         <PackageReference Include="WpfAnimatedGif" Version="2.0.2" />
         <PackageReference Include="XamlAnimatedGif" Version="2.3.0" />
     </ItemGroup>

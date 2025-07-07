@@ -2,6 +2,7 @@
 // Reworked to be a profiler and stack tracer (to identify freeze locations) by Grossley
 // Removed built in ImportGML, that has been integrated into the tool itself now, replace with ImportGMLString - Grossley
 // Reworked for Profile Mode by Grossley - 04/29/2021
+// Rewritten a bunch to use new compiler, and profile mode operations removed
 
 using System;
 using System.IO;
@@ -11,15 +12,6 @@ using System.Linq;
 EnsureDataLoaded();
 
 int progress = 0;
-
-// This script profile mode compatible now. - Grossley
-// But it takes like 5 minutes to run instead of 5 seconds now. - colinator27
-ScriptMessage("This script is profile mode compatible. It may take a few minutes to complete.");
-bool profileChoice = ScriptQuestion(@"Would you like to run this under GML editing mode?
-The alternative is ASM mode.
-
-Warning: All comments, decompilation corrections, and other relevant changes will be deleted from your profile in ASM mode.
-ASM mode is recommended ONLY for games without code corrections or GMS 2.3 games.");
 
 if (!(ScriptQuestion(@"This script is irreversible
 and cannot be removed. 
@@ -64,11 +56,11 @@ NO to cancel script without changes")))
 // Helper function for defining functions
 UndertaleFunction DefineFunc(string name)
 {
-    var str = Data.Strings.MakeString(name);
-    var func = new UndertaleFunction()
+    UndertaleString str = Data.Strings.MakeString(name, out int id);
+    UndertaleFunction func = new()
     {
         Name = str,
-        UnknownChainEndingValue = Data.Strings.IndexOf(str)
+        NameStringID = id
     };
     Data.Functions.Add(func);
     return func;
@@ -101,20 +93,7 @@ If it is already invisible, select 'NO' to toggle the profiler back on."))
     }
 }
 
-if (profileChoice)
-{
-    if (ScriptQuestion(@"This will make changes across all of the code! Are you sure you'd like to continue?
-Note: this may break GML code if code corrections aren't present."))
-    {
-        ProfileModeOperations();
-    }
-    else
-        return;
-}
-else
-{
-    ProfileModeExempt();
-}
+ProfileModeExempt();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // GML implementations
@@ -122,28 +101,32 @@ else
 
 void ClearCustomGML()
 {
-    ImportGMLString("gml_Object___obj_executionorder___Destroy_0", @"");
-    ImportGMLString("gml_Object___obj_executionorder___Create_0", @"");
-    ImportGMLString("gml_Object___obj_executionorder___Draw_64", @"");
-    ImportGMLString("gml_Object_obj_grossley_persist_Create_0", @"");
-    ImportGMLString("gml_Object_obj_grossley_persist_Step_0", @"");
-    ImportGMLString("gml_Object_obj_grossley_persist_Draw_64", @"");
-    ImportGMLString("gml_Script___scr_eventrun__", @"");
-    ImportGMLString("gml_Script___scr_eventend__", @"");
-    ImportGMLString("gml_Script___scr_setinteract__", @"");
-    ImportGMLString("gml_Script___scr_getinteract__", @"");
+    UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+    importGroup.QueueReplace("gml_Object___obj_executionorder___Destroy_0", "");
+    importGroup.QueueReplace("gml_Object___obj_executionorder___Create_0", "");
+    importGroup.QueueReplace("gml_Object___obj_executionorder___Draw_64", "");
+    importGroup.QueueReplace("gml_Object_obj_grossley_persist_Create_0", "");
+    importGroup.QueueReplace("gml_Object_obj_grossley_persist_Step_0", "");
+    importGroup.QueueReplace("gml_Object_obj_grossley_persist_Draw_64", "");
+    importGroup.QueueReplace("gml_Script___scr_eventrun__", "");
+    importGroup.QueueReplace("gml_Script___scr_eventend__", "");
+    importGroup.QueueReplace("gml_Script___scr_setinteract__", "");
+    importGroup.QueueReplace("gml_Script___scr_getinteract__", "");
+    importGroup.Import();
 }
 
 SetUpCustomGML();
 
 void SetUpCustomGML()
 {
+    UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+
     // __obj_executionorder__
-    ImportGMLString("gml_Object___obj_executionorder___Destroy_0", @"
+    importGroup.QueueReplace("gml_Object___obj_executionorder___Destroy_0", @"
     ds_stack_destroy(stack);
     ");
 
-    ImportGMLString("gml_Object___obj_executionorder___Create_0", @"
+    importGroup.QueueReplace("gml_Object___obj_executionorder___Create_0", @"
     global.interact = 0; // prevents error on obj_time create from missing globals
     events[1024, 4] = 0;
     stack = ds_stack_create();
@@ -248,7 +231,8 @@ void SetUpCustomGML()
     i = 0;
     ds_stack_clear(stack);
     ";
-    ImportGMLString("gml_Object___obj_executionorder___Draw_64" /* draw gui */, str);
+    importGroup.QueueReplace("gml_Object___obj_executionorder___Draw_64" /* draw gui */, str);
+
     var objt = Data.GameObjects.ByName("__obj_executionorder__");
     objt.Persistent = true;
     Data.GeneralInfo.RoomOrder.First().Resource.GameObjects.Insert(0, new UndertaleRoom.GameObject()
@@ -259,12 +243,12 @@ void SetUpCustomGML()
 
     // Script implementations
     PersistentObjectSetup("obj_grossley_persist");
-    ImportGMLString("gml_Object_obj_grossley_persist_Create_0", @"
+    importGroup.QueueReplace("gml_Object_obj_grossley_persist_Create_0", @"
     ");
-    ImportGMLString("gml_Object_obj_grossley_persist_Step_0", @"
+    importGroup.QueueReplace("gml_Object_obj_grossley_persist_Step_0", @"
     global.grossley_timer = get_timer();
     ");
-    ImportGMLString("gml_Object_obj_grossley_persist_Draw_64", @"
+    importGroup.QueueReplace("gml_Object_obj_grossley_persist_Draw_64", @"
     var i, file;
     var time_spent_total = 0;
     var times_called_total = 0;
@@ -350,7 +334,7 @@ void SetUpCustomGML()
     }
     ");
 
-    ImportGMLString("gml_Script___scr_eventrun__", @"
+    importGroup.QueueReplace("gml_Script___scr_eventrun__", @"
     if (!instance_exists(__obj_executionorder__))
         instance_activate_object(__obj_executionorder__);
     if (!instance_exists(obj_grossley_persist))
@@ -423,7 +407,7 @@ void SetUpCustomGML()
     }
     ".Replace("instance_create(0, 0, obj_grossley_persist)", ((Data.GeneralInfo.Major < 2) ? "instance_create(0, 0, obj_grossley_persist)" : "instance_create_depth(0, 0, -99999999, obj_grossley_persist)")));
 
-    ImportGMLString("gml_Script___scr_eventend__", @"
+    importGroup.QueueReplace("gml_Script___scr_eventend__", @"
     global.grossley_obj_ind = object_index;
     with (__obj_executionorder__) 
     {
@@ -443,7 +427,7 @@ void SetUpCustomGML()
     }
     ");
 
-    ImportGMLString("gml_Script___scr_setinteract__", @"
+    importGroup.QueueReplace("gml_Script___scr_setinteract__", @"
     with (__obj_executionorder__)
     {
         if (ds_stack_size(stack) > 0)
@@ -455,7 +439,7 @@ void SetUpCustomGML()
     global.interact = argument0;
     ");
 
-    ImportGMLString("gml_Script___scr_getinteract__", @"
+    importGroup.QueueReplace("gml_Script___scr_getinteract__", @"
     with (__obj_executionorder__)
     {
         if (ds_stack_size(stack) > 0)
@@ -463,55 +447,26 @@ void SetUpCustomGML()
     }
     return global.interact;
     ");
+
+    importGroup.Import();
 }
 
 ///////////////////////////////////////////////////////////////////////////
 
-void ProfileModeOperations()
-{
-    // Process GML in the following fashion:
-    // Always put a call to scr_eventrun, with the name of the code from which it was called, at line 1.
-    // At end of file, also put scr_eventend.
-    // Replace all interacts with corresponding calls.
-    // Call scr_eventend immediately before a "return" or "exit" in order to make sure it is always called at end.
-    // This avoids the hacky ASM solution of forcing the code to jump to the end of the file.
-    // It also makes sense from a GML standpoint.
-    // This will only work for games with corrections, and UT/DR, for which GML can be guaranteed safe.
-    // Otherwise, the original (hacky) solution will need to be done.
-    // But this GML solution is so simple, inserting the call to scr_eventend similarly seems more than possible.
-    // Sadly, I don't know how to do such an equivalent action myself.
-
-    //TODO: reimplement ASM solution w/o hacky asm breaking
-
-    GlobalDecompileContext globalDecompileContext = new(Data);
-    Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = new Underanalyzer.Decompiler.DecompileSettings();
-    foreach (UndertaleCode c in Data.Code)
-    {
-        UpdateProgressBar(null, "Code entries processed", progress++, Data.Code.Count);
-        string gmlCode = GetDecompiledText(c.Name.Content, globalDecompileContext, decompilerSettings);
-        gmlCode = gmlCode.Replace("\r\n", "\n");
-        gmlCode = Regex.Replace(gmlCode, "global\\.interact = (\\d+)", "__scr_setinteract__\\(\\1\\)");
-        gmlCode = gmlCode.Replace("global.interact", "__scr_getinteract__()");
-        if (c.Name.Content.StartsWith("gml_Object"))
-        {
-            gmlCode = ("__scr_eventrun__(\"" + c.Name.Content.Substring(11) + "\")\n" + gmlCode + "\n__scr_eventend__()");
-            gmlCode = gmlCode.Replace("return;\n", "{__scr_eventend__();return;}\n");
-            gmlCode = gmlCode.Replace("exit\n", "{__scr_eventend__();exit;}\n");
-        }
-        c.ReplaceGML(gmlCode, Data);
-    }
-}
 void ProfileModeExempt()
 {
     // Process bytecode, patching in script calls where needed
     foreach (UndertaleCode c in Data.Code)
     {
+        if (c is null)
+            continue;
         // global.interact get/set patches
+        uint addr = 0;
         for (int i = 0; i < c.Instructions.Count; i++)
         {
             UndertaleInstruction inst = c.Instructions[i];
             if (inst.Kind == UndertaleInstruction.Opcode.PushGlb &&
-                ((UndertaleInstruction.Reference<UndertaleVariable>)inst.Value).Target.Name.Content == "interact")
+                inst.ValueVariable.Name.Content == "interact")
             {
                 // global.interact getter
                 c.Instructions[i] = new UndertaleInstruction()
@@ -519,12 +474,11 @@ void ProfileModeExempt()
                     Kind = UndertaleInstruction.Opcode.Call,
                     Type1 = UndertaleInstruction.DataType.Int32,
                     ArgumentsCount = 0,
-                    Function = new UndertaleInstruction.Reference<UndertaleFunction>() { Target = getInteractFunc }
+                    ValueFunction = getInteractFunc
                 };
-                NukeProfileGML(c.Name.Content);
             }
-            else if (inst.Kind == UndertaleInstruction.Opcode.Pop &&
-              ((UndertaleInstruction.Reference<UndertaleVariable>)inst.Destination).Target.Name.Content == "interact")
+            else if (inst.Kind == UndertaleInstruction.Opcode.Pop && 
+                     inst.ValueVariable.Name.Content == "interact")
             {
                 // global.interact setter
                 c.Instructions[i] = new UndertaleInstruction()
@@ -543,31 +497,39 @@ void ProfileModeExempt()
                     Kind = UndertaleInstruction.Opcode.Call,
                     Type1 = UndertaleInstruction.DataType.Int32,
                     ArgumentsCount = 1,
-                    Function = new UndertaleInstruction.Reference<UndertaleFunction>() { Target = setInteractFunc }
+                    ValueFunction = setInteractFunc
                 });
 
                 // Now that instructions were inserted, adjust jump offsets in
                 // surrounding goto instructions to properly reflect that
+                uint adjustAddr = 0;
                 for (int j = 0; j < i; j++)
                 {
                     var currPatch = c.Instructions[j];
                     if (UndertaleInstruction.GetInstructionType(currPatch.Kind) == UndertaleInstruction.InstructionType.GotoInstruction)
                     {
-                        if (currPatch.Address + currPatch.JumpOffset > inst.Address)
+                        if (adjustAddr + currPatch.JumpOffset > addr)
                             currPatch.JumpOffset += 2;
                     }
+                    adjustAddr += currPatch.CalculateInstructionSize();
+                }
+                for (int j = i; j < i + 3; j++)
+                {
+                    adjustAddr += c.Instructions[i].CalculateInstructionSize();
                 }
                 for (int j = i + 3; j < c.Instructions.Count; j++)
                 {
                     var currPatch = c.Instructions[j];
                     if (UndertaleInstruction.GetInstructionType(currPatch.Kind) == UndertaleInstruction.InstructionType.GotoInstruction)
                     {
-                        if (currPatch.Address + currPatch.JumpOffset <= inst.Address)
+                        if (adjustAddr + currPatch.JumpOffset <= addr)
                             currPatch.JumpOffset -= 2;
                     }
+                    adjustAddr += currPatch.CalculateInstructionSize();
                 }
-                NukeProfileGML(c.Name.Content);
             }
+
+            addr += inst.CalculateInstructionSize();
         }
 
         if (c.Name.Content.StartsWith("gml_Object"))
@@ -580,7 +542,7 @@ void ProfileModeExempt()
                 {
                     Kind = UndertaleInstruction.Opcode.Push,
                     Type1 = UndertaleInstruction.DataType.String,
-                    Value = new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>() { Resource = newString, CachedId = Data.Strings.IndexOf(newString) }
+                    ValueString = new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>() { Resource = newString, CachedId = Data.Strings.IndexOf(newString) }
                 },
                 new UndertaleInstruction()
                 {
@@ -593,7 +555,7 @@ void ProfileModeExempt()
                     Kind = UndertaleInstruction.Opcode.Call,
                     Type1 = UndertaleInstruction.DataType.Int32,
                     ArgumentsCount = 1,
-                    Function = new UndertaleInstruction.Reference<UndertaleFunction>() { Target = func }
+                    ValueFunction = func
                 },
                 new UndertaleInstruction()
                 {
@@ -603,9 +565,13 @@ void ProfileModeExempt()
             });
 
             // Patch every exit instruction to instead branch to the end of the code
-            c.UpdateAddresses();
-            var last = c.Instructions.Last();
-            uint endAddr = last.Address + last.CalculateInstructionSize();
+            c.UpdateLength();
+            uint endAddr = c.Length / 4;
+            uint exitPatchAddr = 0;
+            for (int i = 0; i < 4; i++)
+            {
+                exitPatchAddr += c.Instructions[i].CalculateInstructionSize();
+            }
             for (int i = 4; i < c.Instructions.Count; i++)
             {
                 if (c.Instructions[i].Kind == UndertaleInstruction.Opcode.Exit)
@@ -613,9 +579,10 @@ void ProfileModeExempt()
                     c.Instructions[i] = new UndertaleInstruction()
                     {
                         Kind = UndertaleInstruction.Opcode.B,
-                        JumpOffset = (int)(endAddr - c.Instructions[i].Address)
+                        JumpOffset = (int)(endAddr - exitPatchAddr)
                     };
                 }
+                exitPatchAddr += c.Instructions[i].CalculateInstructionSize();
             }
 
             // At the end of the code, insert function call to __scr_eventend__
@@ -626,7 +593,7 @@ void ProfileModeExempt()
                     Kind = UndertaleInstruction.Opcode.Call,
                     Type1 = UndertaleInstruction.DataType.Int32,
                     ArgumentsCount = 0,
-                    Function = new UndertaleInstruction.Reference<UndertaleFunction>() { Target = endFunc }
+                    ValueFunction = endFunc
                 },
                 new UndertaleInstruction()
                 {
@@ -634,7 +601,7 @@ void ProfileModeExempt()
                     Type1 = UndertaleInstruction.DataType.Variable
                 }
             });
-            NukeProfileGML(c.Name.Content);
+            c.UpdateLength();
         }
     }
 }
@@ -649,7 +616,9 @@ void PersistentObjectSetup(string objectName)
     }
     if (Data.GeneralInfo.Name.Content.StartsWith("UNDERTALE"))
     {
-        Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, (uint)114, Data).ReplaceGML("", Data);
+        UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+        importGroup.QueueReplace(Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, (uint)114, Data), "");
+        importGroup.Import();
     }
     bool gms2 = Data.IsVersionAtLeast(2, 0, 0, 0);
     var entry_room = Data.GeneralInfo.RoomOrder[0].Resource;
@@ -689,6 +658,8 @@ void PersistentObjectSetup(string objectName)
                 uint layer_id = 0;
                 foreach (var room in Data.Rooms)
                 {
+                    if (room is null)
+                        continue;
                     foreach (var layer in room.Layers)
                     {
                         if (layer.LayerId > layer_id)

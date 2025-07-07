@@ -12,7 +12,7 @@ public class UndertaleEmbeddedAudio : UndertaleNamedResource, PaddedObject, IDis
     /// <summary>
     /// The name of the embedded audio entry.
     /// </summary>
-    /// <remarks>This is an UTMT only attribute. GameMaker does not store names for them.</remarks>
+    /// <remarks>This is a UTMT only attribute. GameMaker does not store names for them.</remarks>
     public UndertaleString Name { get; set; }
 
     /// <summary>
@@ -56,13 +56,13 @@ public class UndertaleEmbeddedAudio : UndertaleNamedResource, PaddedObject, IDis
         try
         {
             // TODO: Does only the GUI set this?
-            return Name.Content + " (" + GetType().Name + ")";
+            return $"{Name.Content} ({GetType().Name})";
         }
         catch
         {
             Name = new UndertaleString("EmbeddedSound Unknown Index");
         }
-        return Name.Content + " (" + GetType().Name + ")";
+        return $"{Name.Content} ({GetType().Name})";
     }
 
     /// <inheritdoc/>

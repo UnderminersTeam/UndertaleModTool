@@ -70,7 +70,21 @@ public struct StringBuilderHelper
             sb.Insert(Position, value);
         Position += value.Length;
     }
-    
+
+    /// <summary>
+    /// Appends a copy of the specified string to a <see cref="StringBuilder"/> at <see cref="Position"/> and increases it afterwards.
+    /// </summary>
+    /// <param name="sb">An instance on where a string should be appended to.</param>
+    /// <param name="value"><inheritdoc cref="StringBuilder.Append(ReadOnlySpan{char})"/></param>
+    public void Append(StringBuilder sb, ReadOnlySpan<char> value)
+    {
+        if (Position == sb.Length)
+            sb.Append(value);
+        else
+            sb.Insert(Position, value);
+        Position += value.Length;
+    }
+
     /// <summary>
     /// Appends the specified char to a <see cref="StringBuilder"/> at <see cref="Position"/> and increases it afterwards.
     /// </summary>

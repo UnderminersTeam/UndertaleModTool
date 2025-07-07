@@ -1,0 +1,1338 @@
+{
+  "Types": {
+    "RegisterBasic": true,
+    "Enums": {
+      "Enum.e__VW": {
+        "Name": "e__VW",
+        "Values": {
+          "XView": 0,
+          "YView": 1,
+          "WView": 2,
+          "HView": 3,
+          "Angle": 4,
+          "HBorder": 5,
+          "VBorder": 6,
+          "HSpeed": 7,
+          "VSpeed": 8,
+          "Object": 9,
+          "Visible": 10,
+          "XPort": 11,
+          "YPort": 12,
+          "WPort": 13,
+          "HPort": 14,
+          "Camera": 15,
+          "SurfaceID": 16
+        }
+      },
+      "Enum.e__BG": {
+        "Name": "e__BG",
+        "Values": {
+          "Visible": 0,
+          "Foreground": 1,
+          "Index": 2,
+          "X": 3,
+          "Y": 4,
+          "Width": 5,
+          "Height": 6,
+          "HTiled": 7,
+          "VTiled": 8,
+          "XScale": 9,
+          "YScale": 10,
+          "HSpeed": 11,
+          "VSpeed": 12,
+          "Blend": 13,
+          "Alpha": 14
+        }
+      },
+      "Enum.AudioEffectType": {
+        "Name": "AudioEffectType",
+        "Values": {
+          "Bitcrusher": 0,
+          "Delay": 1,
+          "Gain": 2,
+          "HPF2": 3,
+          "LPF2": 4,
+          "Reverb1": 5,
+          "Tremolo": 6,
+          "PeakEQ": 7,
+          "HiShelf": 8,
+          "LoShelf": 9,
+          "EQ": 10,
+          "Compressor": 11
+        }
+      },
+      "Enum.AudioLFOType": {
+        "Name": "AudioLFOType",
+        "Values": {
+          "InvSawtooth": 0,
+          "Sawtooth": 1,
+          "Sine": 2,
+          "Square": 3,
+          "Triangle": 4
+        }
+      }
+    },
+    "Constants": {
+      "Constant.AudioFalloff": {
+        "audio_falloff_none": 0,
+        "audio_falloff_inverse_distance": 1,
+        "audio_falloff_inverse_distance_clamped": 2,
+        "audio_falloff_inverse_distance_scaled": 7,
+        "audio_falloff_linear_distance": 3,
+        "audio_falloff_linear_distance_clamped": 4,
+        "audio_falloff_exponent_distance": 5,
+        "audio_falloff_exponent_distance_clamped": 6,
+        "audio_falloff_exponent_distance_scaled": 8
+      },
+      "Constant.HAlign": {
+        "fa_left": 0,
+        "fa_center": 1,
+        "fa_right": 2
+      },
+      "Constant.VAlign": {
+        "fa_top": 0,
+        "fa_middle": 1,
+        "fa_bottom": 2
+      },
+      "Constant.PathAction": {
+        "path_action_stop": 0,
+        "path_action_restart": 1,
+        "path_action_continue": 2,
+        "path_action_reverse": 3
+      },
+      "Constant.GameSpeed": {
+        "gamespeed_fps": 0,
+        "gamespeed_microseconds": 1
+      },
+      "Constant.Cursor": {
+        "cr_size_all": -22,
+        "cr_handpoint": -21,
+        "cr_appstart": -19,
+        "cr_drag": -12,
+        "cr_hourglass": -11,
+        "cr_uparrow": -10,
+        "cr_size_we": -9,
+        "cr_size_nwse": -8,
+        "cr_size_ns": -7,
+        "cr_size_nesw": -6,
+        "cr_beam": -4,
+        "cr_cross": -3,
+        "cr_arrow": -2,
+        "cr_none": -1,
+        "cr_default": 0
+      },
+      "Constant.MouseButton": {
+        "mb_any": -1,
+        "mb_none": 0,
+        "mb_left": 1,
+        "mb_right": 2,
+        "mb_middle": 3
+      },
+      "Constant.GamepadButton": {
+        "gp_face1": 32769,
+        "gp_face2": 32770,
+        "gp_face3": 32771,
+        "gp_face4": 32772,
+        "gp_shoulderl": 32773,
+        "gp_shoulderlb": 32775,
+        "gp_shoulderr": 32774,
+        "gp_shoulderrb": 32776,
+        "gp_select": 32777,
+        "gp_start": 32778,
+        "gp_stickl": 32779,
+        "gp_stickr": 32780,
+        "gp_padu": 32781,
+        "gp_padd": 32782,
+        "gp_padl": 32783,
+        "gp_padr": 32784,
+        "gp_axislh": 32785,
+        "gp_axislv": 32786,
+        "gp_axisrh": 32787,
+        "gp_axisrv": 32788,
+        "gp_axis_acceleration_x": 32789,
+        "gp_axis_acceleration_y": 32790,
+        "gp_axis_acceleration_z": 32791,
+        "gp_axis_angular_velocity_x": 32792,
+        "gp_axis_angular_velocity_y": 32793,
+        "gp_axis_angular_velocity_z": 32794,
+        "gp_axis_orientation_x": 32795,
+        "gp_axis_orientation_y": 32796,
+        "gp_axis_orientation_z": 32797,
+        "gp_axis_orientation_w": 32798,
+        "gp_home": 32799,
+        "gp_extra1": 32800,
+        "gp_extra2": 32801,
+        "gp_extra3": 32802,
+        "gp_extra4": 32803,
+        "gp_paddler": 32804,
+        "gp_paddlel": 32805,
+        "gp_paddlerb": 32806,
+        "gp_paddlelb": 32807,
+        "gp_touchpadbutton": 32808,
+        "gp_extra5": 32809,
+        "gp_extra6": 32810
+      },
+      "Constant.BufferType": {
+        "buffer_fixed": 0,
+        "buffer_grow": 1,
+        "buffer_wrap": 2,
+        "buffer_fast": 3,
+        "buffer_vbuffer": 4,
+        "buffer_network": 5
+      },
+      "Constant.BufferDataType": {
+        "buffer_u8": 1,
+        "buffer_s8": 2,
+        "buffer_u16": 3,
+        "buffer_s16": 4,
+        "buffer_u32": 5,
+        "buffer_s32": 6,
+        "buffer_f16": 7,
+        "buffer_f32": 8,
+        "buffer_f64": 9,
+        "buffer_bool": 10,
+        "buffer_string": 11,
+        "buffer_u64": 12,
+        "buffer_text": 13
+      },
+      "Constant.SeekOffset": {
+        "buffer_seek_start": 0,
+        "buffer_seek_relative": 1,
+        "buffer_seek_end": 2
+      },
+      "Constant.SteamUGCFileType": {
+        "ugc_filetype_community": 0,
+        "ugc_filetype_microtrans": 1
+      },
+      "Constant.SteamUGCList": {
+        "ugc_list_Published": 0,
+        "ugc_list_VotedOn": 1,
+        "ugc_list_VotedUp": 2,
+        "ugc_list_VotedDown": 3,
+        "ugc_list_WillVoteLater": 4,
+        "ugc_list_Favorited": 5,
+        "ugc_list_Subscribed": 6,
+        "ugc_list_UsedOrPlayed": 7,
+        "ugc_list_Followed": 8
+      },
+      "Constant.SteamUGCMatchType": {
+        "ugc_match_Items": 0,
+        "ugc_match_Items_Mtx": 1,
+        "ugc_match_Items_ReadyToUse": 2,
+        "ugc_match_Collections": 3,
+        "ugc_match_Artwork": 4,
+        "ugc_match_Videos": 5,
+        "ugc_match_Screenshots": 6,
+        "ugc_match_AllGuides": 7,
+        "ugc_match_WebGuides": 8,
+        "ugc_match_IntegratedGuides": 9,
+        "ugc_match_UsableInGame": 10,
+        "ugc_match_ControllerBindings": 11
+      },
+      "Constant.SteamUGCSortOrder": {
+        "ugc_sortorder_CreationOrderDesc": 0,
+        "ugc_sortorder_CreationOrderAsc": 1,
+        "ugc_sortorder_TitleAsc": 2,
+        "ugc_sortorder_LastUpdatedDesc": 3,
+        "ugc_sortorder_SubscriptionDateDesc": 4,
+        "ugc_sortorder_VoteScoreDesc": 5,
+        "ugc_sortorder_ForModeration": 6
+      },
+      "Constant.SteamUGCQueryType": {
+        "ugc_query_RankedByVote": 0,
+        "ugc_query_RankedByPublicationDate": 1,
+        "ugc_query_AcceptedForGameRankedByAcceptanceDate": 2,
+        "ugc_query_RankedByTrend": 3,
+        "ugc_query_FavoritedByFriendsRankedByPublicationDate": 4,
+        "ugc_query_CreatedByFriendsRankedByPublicationDate": 5,
+        "ugc_query_RankedByNumTimesReported": 6,
+        "ugc_query_CreatedByFollowedUsersRankedByPublicationDate": 7,
+        "ugc_query_NotYetRated": 8,
+        "ugc_query_RankedByTotalVotesAsc": 9,
+        "ugc_query_RankedByVotesUp": 10,
+        "ugc_query_RankedByTextSearch": 11
+      },
+      "Constant.SteamLeaderboardSort": {
+        "lb_sort_none": 0,
+        "lb_sort_ascending": 1,
+        "lb_sort_descending": 2
+      },
+      "Constant.SteamLeaderboardDisplay": {
+        "lb_disp_none": 0,
+        "lb_disp_numeric": 1,
+        "lb_disp_time_sec": 2,
+        "lb_disp_time_ms": 3
+      },
+      "Constant.SteamOverlay": {
+        "ov_friends": 0,
+        "ov_community": 1,
+        "ov_players": 2,
+        "ov_settings": 3,
+        "ov_gamegroup": 4,
+        "ov_achievements": 5
+      },
+      "Constant.OperatingSystem": {
+        "os_unknown": -1,
+        "os_windows": 0,
+        "os_macosx": 1,
+        "os_psp": 2,
+        "os_ios": 3,
+        "os_android": 4,
+        "os_symbian": 5,
+        "os_linux": 6,
+        "os_winphone": 7,
+        "os_tizen": 8,
+        "os_win8native": 9,
+        "os_wiiu": 10,
+        "os_3ds": 11,
+        "os_psvita": 12,
+        "os_bb10": 13,
+        "os_ps4": 14,
+        "os_xboxone": 15,
+        "os_ps3": 16,
+        "os_xbox360": 17,
+        "os_uwp": 18,
+        "os_tvos": 20,
+        "os_switch": 21,
+        "os_ps5": 22,
+        "os_gdk": 23,
+        "os_gxgames": 24,
+        "os_switch2": 25
+      },
+      "Constant.BlendMode": {
+        "bm_complex": -1,
+        "bm_normal": 0,
+        "bm_add": 1,
+        "bm_max": 2,
+        "bm_subtract": 3,
+        "bm_min": 4,
+        "bm_reverse_subtract": 5
+      },
+      "Constant.BlendModeFactor": {
+        "bm_zero": 1,
+        "bm_one": 2,
+        "bm_src_color": 3,
+        "bm_inv_src_color": 4,
+        "bm_src_alpha": 5,
+        "bm_inv_src_alpha": 6,
+        "bm_dest_alpha": 7,
+        "bm_inv_dest_alpha": 8,
+        "bm_dest_color": 9,
+        "bm_inv_dest_color": 10,
+        "bm_src_alpha_sat": 11
+      },
+      "Constant.EventType": {
+        "ev_create": 0,
+        "ev_destroy": 1,
+        "ev_alarm": 2,
+        "ev_step": 3,
+        "ev_collision": 4,
+        "ev_keyboard": 5,
+        "ev_mouse": 6,
+        "ev_other": 7,
+        "ev_draw": 8,
+        "ev_keypress": 9,
+        "ev_keyrelease": 10,
+        "ev_trigger": 11,
+        "ev_cleanup": 12,
+        "ev_gesture": 13,
+        "ev_pre_create": 14
+      },
+      "Constant.EventSubtypeStep": {
+        "ev_step_normal": 0,
+        "ev_step_begin": 1,
+        "ev_step_end": 2
+      },
+      "Constant.EventSubtypeDraw": {
+        "ev_draw_normal": 0,
+        "ev_gui": 64,
+        "ev_draw_begin": 72,
+        "ev_draw_end": 73,
+        "ev_gui_begin": 74,
+        "ev_gui_end": 75,
+        "ev_draw_pre": 76,
+        "ev_draw_post": 77
+      },
+      "Constant.EventSubtypeMouse": {
+        "ev_left_button": 0,
+        "ev_right_button": 1,
+        "ev_middle_button": 2,
+        "ev_no_button": 3,
+        "ev_left_press": 4,
+        "ev_right_press": 5,
+        "ev_middle_press": 6,
+        "ev_left_release": 7,
+        "ev_right_release": 8,
+        "ev_middle_release": 9,
+        "ev_mouse_enter": 10,
+        "ev_mouse_leave": 11,
+        "ev_global_press": 12,
+        "ev_global_release": 13,
+        "ev_global_left_button": 50,
+        "ev_global_right_button": 51,
+        "ev_global_middle_button": 52,
+        "ev_global_left_press": 53,
+        "ev_global_right_press": 54,
+        "ev_global_middle_press": 55,
+        "ev_global_left_release": 56,
+        "ev_global_right_release": 57,
+        "ev_global_middle_release": 58,
+        "ev_mouse_wheel_up": 60,
+        "ev_mouse_wheel_down": 61
+      },
+      "Constant.EventSubtypeOther": {
+        "ev_outside": 0,
+        "ev_boundary": 1,
+        "ev_game_start": 2,
+        "ev_game_end": 3,
+        "ev_room_start": 4,
+        "ev_room_end": 5,
+        "ev_no_more_lives": 6,
+        "ev_animation_end": 7,
+        "ev_end_of_path": 8,
+        "ev_no_more_health": 9,
+        "ev_user0": 10,
+        "ev_user1": 11,
+        "ev_user2": 12,
+        "ev_user3": 13,
+        "ev_user4": 14,
+        "ev_user5": 15,
+        "ev_user6": 16,
+        "ev_user7": 17,
+        "ev_user8": 18,
+        "ev_user9": 19,
+        "ev_user10": 20,
+        "ev_user11": 21,
+        "ev_user12": 22,
+        "ev_user13": 23,
+        "ev_user14": 24,
+        "ev_user15": 25,
+        "ev_close_button": 30,
+        "ev_outside_view0": 40,
+        "ev_outside_view1": 41,
+        "ev_outside_view2": 42,
+        "ev_outside_view3": 43,
+        "ev_outside_view4": 44,
+        "ev_outside_view5": 45,
+        "ev_outside_view6": 46,
+        "ev_outside_view7": 47,
+        "ev_boundary_view0": 50,
+        "ev_boundary_view1": 51,
+        "ev_boundary_view2": 52,
+        "ev_boundary_view3": 53,
+        "ev_boundary_view4": 54,
+        "ev_boundary_view5": 55,
+        "ev_boundary_view6": 56,
+        "ev_boundary_view7": 57,
+        "ev_animation_update": 58,
+        "ev_animation_event": 59,
+        "ev_web_image_load": 60,
+        "ev_web_sound_load": 61,
+        "ev_web_async": 62,
+        "ev_dialog_async": 63,
+        "ev_web_iap": 66,
+        "ev_web_cloud": 67,
+        "ev_web_networking": 68,
+        "ev_web_steam": 69,
+        "ev_social": 70,
+        "ev_push_notification": 71,
+        "ev_audio_recording": 73,
+        "ev_audio_playback": 74,
+        "ev_system_event": 75,
+        "ev_broadcast_message": 76,
+        "ev_audio_playback_ended": 80
+      },
+      "Constant.EventSubtypeGesture": {
+        "ev_gesture_tap": 0,
+        "ev_gesture_double_tap": 1,
+        "ev_gesture_drag_start": 2,
+        "ev_gesture_dragging": 3,
+        "ev_gesture_drag_end": 4,
+        "ev_gesture_flick": 5,
+        "ev_gesture_pinch_start": 6,
+        "ev_gesture_pinch_in": 7,
+        "ev_gesture_pinch_out": 8,
+        "ev_gesture_pinch_end": 9,
+        "ev_gesture_rotate_start": 10,
+        "ev_gesture_rotating": 11,
+        "ev_gesture_rotate_end": 12,
+        "ev_global_gesture_tap": 64,
+        "ev_global_gesture_double_tap": 65,
+        "ev_global_gesture_drag_start": 66,
+        "ev_global_gesture_dragging": 67,
+        "ev_global_gesture_drag_end": 68,
+        "ev_global_gesture_flick": 69,
+        "ev_global_gesture_pinch_start": 70,
+        "ev_global_gesture_pinch_in": 71,
+        "ev_global_gesture_pinch_out": 72,
+        "ev_global_gesture_pinch_end": 73,
+        "ev_global_gesture_rotate_start": 74,
+        "ev_global_gesture_rotating": 75,
+        "ev_global_gesture_rotate_end": 76
+      },
+      "Constant.AsyncEventType": {
+        "ev_async_web_image_load": 60,
+        "ev_async_web": 62,
+        "ev_async_dialog": 63,
+        "ev_async_web_iap": 66,
+        "ev_async_web_cloud": 67,
+        "ev_async_web_networking": 68,
+        "ev_async_web_steam": 69,
+        "ev_async_social": 70,
+        "ev_async_push_notification": 71,
+        "ev_async_save_load": 72,
+        "ev_async_audio_recording": 73,
+        "ev_async_audio_playback": 74,
+        "ev_async_system_event": 75,
+        "ev_async_audio_playback_ended": 80
+      },
+      "Constant.PrimitiveType": {
+        "pr_pointlist": 1,
+        "pr_linelist": 2,
+        "pr_linestrip": 3,
+        "pr_trianglelist": 4,
+        "pr_trianglestrip": 5,
+        "pr_trianglefan": 6
+      },
+      "Constant.VertexType": {
+        "vertex_type_float1": 1,
+        "vertex_type_float2": 2,
+        "vertex_type_float3": 3,
+        "vertex_type_float4": 4,
+        "vertex_type_color": 5,
+        "vertex_type_ubyte4": 6
+      },
+      "Constant.VertexUsage": {
+        "vertex_usage_position": 1,
+        "vertex_usage_color": 2,
+        "vertex_usage_normal": 3,
+        "vertex_usage_texcoord": 4,
+        "vertex_usage_blendweight": 5,
+        "vertex_usage_blendindices": 6,
+        "vertex_usage_psize": 7,
+        "vertex_usage_tangent": 8,
+        "vertex_usage_binormal": 9,
+        "vertex_usage_fog": 12,
+        "vertex_usage_depth": 13,
+        "vertex_usage_sample": 14
+      },
+      "Constant.DsType": {
+        "ds_type_map": 1,
+        "ds_type_list": 2,
+        "ds_type_stack": 3,
+        "ds_type_queue": 4,
+        "ds_type_grid": 5,
+        "ds_type_priority": 6
+      },
+      "Constant.SocketType": {
+        "network_socket_tcp": 0,
+        "network_socket_udp": 1,
+        "network_socket_bluetooth": 2,
+        "network_socket_tcp_psn": 3,
+        "network_socket_udp_psn": 4,
+        "network_socket_udp_switch": 5,
+        "network_socket_ws": 6,
+        "network_socket_wss": 7
+      },
+      "Constant.NetworkConfig": {
+        "network_config_connect_timeout": 0,
+        "network_config_use_non_blocking_socket": 1,
+        "network_config_enable_reliable_udp": 2,
+        "network_config_disable_reliable_udp": 3,
+        "network_config_avoid_time_wait": 4,
+        "network_config_websocket_protocol": 5,
+        "network_config_enable_multicast": 6,
+        "network_config_disable_multicast": 7
+      }
+    },
+    "General": {
+      "Id.InstanceOrObject": {
+        "MacroType": "Union",
+        "Macros": [
+          "Asset.Object",
+          "Id.Instance",
+          "Asset.RoomInstance"
+        ]
+      },
+      "Array<Asset.Sprite>": {
+        "MacroType": "ArrayInit",
+        "Macro": "Asset.Sprite"
+      },
+      "Array<Asset.Background>": {
+        "MacroType": "ArrayInit",
+        "Macro": "Asset.Background"
+      },
+      "FunctionArguments.__view_get": [ "Enum.e__VW", null ],
+      "FunctionArguments.__view_set": {
+        "MacroType": "Union",
+        "Macros": [
+          [
+            {
+              "MacroType": "Intersect",
+              "Macros": [
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "9",
+                  "ConditionalType": "EnumValue"
+                },
+                "Enum.e__VW"
+              ]
+            },
+            null,
+            "Asset.Object"
+          ],
+          [
+            {
+              "MacroType": "Intersect",
+              "Macros": [
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "10",
+                  "ConditionalType": "EnumValue"
+                },
+                "Enum.e__VW"
+              ]
+            },
+            null,
+            "Bool"
+          ],
+          [ "Enum.e__VW", null, null ]
+        ]
+      }
+    }
+  },
+  "GlobalNames": {
+    "Variables": {
+      "sprite_index": "Asset.Sprite",
+      "mask_index": "Asset.Sprite",
+      "object_index": "Asset.Object",
+      "room": "Asset.Room",
+      "room_first": "Asset.Room",
+      "room_last": "Asset.Room",
+      "room_persistent": "Bool",
+      "image_blend": "Constant.Color",
+      "event_object": "Asset.Object",
+      "view_object": "Asset.Object",
+      "view_enabled": "Bool",
+      "view_visible": "Bool",
+      "visible": "Bool",
+      "background_index": "Asset.Background",
+      "background_color": "Constant.Color",
+      "background_colour": "Constant.Color",
+      "path_index": "Asset.Path",
+      "path_endaction": "Constant.PathAction",
+      "keyboard_key": "Constant.VirtualKey",
+      "keyboard_lastkey": "Constant.VirtualKey",
+      "timeline_index": "Asset.Timeline",
+      "mouse_button": "Constant.MouseButton",
+      "mouse_last_button": "Constant.MouseButton",
+      "os_type": "Constant.OperatingSystem",
+      "event_type": "Constant.EventType",
+      "instance_id": "Id.InstanceOrObject",
+      "persistent": "Bool",
+      "background_visible": "Bool"
+    },
+    "FunctionArguments": {
+      "action_create_object": [ "Asset.Object", null, null ],
+      "instance_activate_object": [ "Id.InstanceOrObject" ],
+      "script_exists": [ "Asset.Script" ],
+      "script_get_name": [ "Asset.Script" ],
+      "instance_change": [ "Asset.Object", "Bool" ],
+      "instance_copy": [ "Bool" ],
+      "instance_create": [ null, null, "Asset.Object" ],
+      "gml_Script_instance_create": [ null, null, "Asset.Object" ],
+      "instance_destroy": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Asset.Object" ],
+          [ "Asset.Object", "Bool" ]
+        ]
+      },
+      "instance_exists": [ "Asset.Object" ],
+      "instance_find": [ "Asset.Object", null ],
+      "instance_furthest": [ null, null, "Asset.Object" ],
+      "instance_nearest": [ null, null, "Asset.Object" ],
+      "instance_number": [ "Asset.Object" ],
+      "instance_place": [ null, null, "Id.InstanceOrObject" ],
+      "instance_position": [ null, null, "Id.InstanceOrObject" ],
+      "instance_deactivate_all": [ "Bool" ],
+      "application_surface_enable": [ "Bool" ],
+      "application_surface_draw_enable": [ "Bool" ],
+      "instance_deactivate_object": [ "Id.InstanceOrObject" ],
+      "instance_activate_region": [ null, null, null, null, "Bool" ],
+      "instance_deactivate_region": [ null, null, null, null, "Bool", "Bool" ],
+      "instance_create_depth": {
+        "MacroType": "Union",
+        "Macros": [
+          [ null, null, null, "Asset.Object" ],
+          [ null, null, null, "Asset.Object", null ]
+        ]
+      },
+      "instance_create_layer": {
+        "MacroType": "Union",
+        "Macros": [
+          [ null, null, null, "Asset.Object" ],
+          [ null, null, null, "Asset.Object", null ]
+        ]
+      },
+      "sprite_get_name": [ "Asset.Sprite" ],
+      "sprite_get_number": [ "Asset.Sprite" ],
+      "sprite_get_width": [ "Asset.Sprite" ],
+      "sprite_get_height": [ "Asset.Sprite" ],
+      "sprite_get_xoffset": [ "Asset.Sprite" ],
+      "sprite_get_yoffset": [ "Asset.Sprite" ],
+      "sprite_get_bbox_bottom": [ "Asset.Sprite" ],
+      "sprite_get_bbox_left": [ "Asset.Sprite" ],
+      "sprite_get_bbox_right": [ "Asset.Sprite" ],
+      "sprite_get_bbox_top": [ "Asset.Sprite" ],
+      "sprite_get_tpe": [ "Asset.Sprite", null ],
+      "sprite_get_texture": [ "Asset.Sprite", null ],
+      "sprite_get_uvs": [ "Asset.Sprite", null ],
+      "sprite_exists": [ "Asset.Sprite" ],
+      "sprite_add": [ null, null, "Bool", "Bool", null, null ],
+      "sprite_replace": [ "Asset.Sprite", null, null, "Bool", "Bool", null, null ],
+      "sprite_duplicate": [ "Asset.Sprite" ],
+      "sprite_assign": [ "Asset.Sprite", "Asset.Sprite" ],
+      "sprite_merge": [ "Asset.Sprite", "Asset.Sprite" ],
+      "sprite_create_from_surface": [ null, null, null, null, null, "Bool", "Bool", null, null ],
+      "sprite_add_from_surface": [ "Asset.Sprite", null, null, null, null, null, "Bool", "Bool" ],
+      "sprite_collision_mask": [ "Asset.Sprite", "Bool", null, null, null, null, null, null, null ],
+      "sprite_set_offset": [ "Asset.Sprite", null, null ],
+      "sprite_delete": [ "Asset.Sprite" ],
+      "sprite_set_alpha_from_sprite": [ "Asset.Sprite", "Asset.Sprite" ],
+      "sprite_set_cache_size": [ "Asset.Sprite", null ],
+      "sprite_set_cache_size_ext": [ "Asset.Sprite", null, null ],
+      "sprite_save": [ "Asset.Sprite", null, null ],
+      "sprite_save_strip": [ "Asset.Sprite", null ],
+      "sprite_flush": [ "Asset.Sprite" ],
+      "sprite_flush_multi": [ "Array<Asset.Sprite>" ],
+      "sprite_prefetch": [ "Asset.Sprite" ],
+      "sprite_prefetch_multi": [ "Array<Asset.Sprite>" ],
+      "background_get_name": [ "Asset.Background" ],
+      "background_get_width": [ "Asset.Background" ],
+      "background_get_height": [ "Asset.Background" ],
+      "background_get_texture": [ "Asset.Background" ],
+      "background_get_uvs": [ "Asset.Background" ],
+      "background_exists": [ "Asset.Background" ],
+      "background_add": [ null, null, null ],
+      "background_replace": [ "Asset.Background", null, null, null ],
+      "background_duplicate": [ "Asset.Background" ],
+      "background_assign": [ "Asset.Background", "Asset.Background" ],
+      "background_create_color": [ null, null, "Constant.Color" ],
+      "background_create_colour": [ null, null, "Constant.Color" ],
+      "background_create_gradient": [ null, null, "Constant.Color", "Constant.Color", null ],
+      "background_create_from_surface": [ null, null, null, null, null, null, null ],
+      "background_set_alpha_from_background": [ "Asset.Background", "Asset.Background" ],
+      "background_save": [ "Asset.Background", null ],
+      "background_delete": [ "Asset.Background" ],
+      "background_flush": [ "Asset.Background" ],
+      "background_flush_multi": [ "Array<Asset.Background>" ],
+      "background_prefetch": [ "Asset.Background" ],
+      "background_prefetch_multi": [ "Array<Asset.Background>" ],
+      "tile_add": [ "Asset.Background", null, null, null, null, null, null, null ],
+      "tile_set_background": [ null, "Asset.Background" ],
+      "tile_set_blend": [ null, "Constant.Color" ],
+      "audio_exists": [ "Asset.Sound" ],
+      "audio_get_name": [ "Asset.Sound" ],
+      "audio_get_type": [ "Asset.Sound" ],
+      "audio_play_sound": [ "Asset.Sound", null, "Bool" ],
+      "audio_play_sound_at": [ "Asset.Sound", null, null, null, null, null, null, "Bool", null ],
+      "audio_pause_sound": [ "Asset.Sound" ],
+      "audio_resume_sound": [ "Asset.Sound" ],
+      "audio_stop_sound": [ "Asset.Sound" ],
+      "audio_is_playing": [ "Asset.Sound" ],
+      "audio_is_paused": [ "Asset.Sound" ],
+      "audio_sound_set_track_position": [ "Asset.Sound", null ],
+      "audio_sound_get_track_position": [ "Asset.Sound" ],
+      "audio_sound_length": [ "Asset.Sound" ],
+      "audio_sound_pitch": [ "Asset.Sound", null ],
+      "audio_sound_get_pitch": [ "Asset.Sound" ],
+      "audio_falloff_set_model": [ "Constant.AudioFalloff" ],
+      "audio_sound_gain": [ "Asset.Sound", null, null ],
+      "audio_sound_get_gain": [ "Asset.Sound" ],
+      "audio_play_sound_on": [ null, "Asset.Sound", "Bool", null ],
+      "audio_play_in_sync_group": [ null, "Asset.Sound" ],
+      "sound_exists": [ "Asset.Sound" ],
+      "sound_get_name": [ "Asset.Sound" ],
+      "sound_play": [ "Asset.Sound" ],
+      "sound_loop": [ "Asset.Sound" ],
+      "sound_stop": [ "Asset.Sound" ],
+      "sound_isplaying": [ "Asset.Sound" ],
+      "sound_volume": [ "Asset.Sound", null ],
+      "sound_fade": [ "Asset.Sound", null, null ],
+      "sound_replace": [ "Asset.Sound", null, null, null ],
+      "sound_delete": [ "Asset.Sound" ],
+      "font_get_name": [ "Asset.Font" ],
+      "font_get_fontname": [ "Asset.Font" ],
+      "font_get_first": [ "Asset.Font" ],
+      "font_get_last": [ "Asset.Font" ],
+      "font_get_italic": [ "Asset.Font" ],
+      "font_get_bold": [ "Asset.Font" ],
+      "font_get_size": [ "Asset.Font" ],
+      "font_get_texture": [ "Asset.Font" ],
+      "font_get_uvs": [ "Asset.Font" ],
+      "font_set_cache_size": [ "Asset.Font", null ],
+      "font_exists": [ "Asset.Font" ],
+      "font_add_sprite": [ "Asset.Sprite", null, null, null ],
+      "font_add_sprite_ext": [ "Asset.Sprite", null, null, null ],
+      "font_replace": [ "Asset.Font", null, null, null, null, null, null ],
+      "font_replace_sprite": [ "Asset.Font", "Asset.Sprite", null, null, null ],
+      "font_replace_sprite_ext": [ "Asset.Font", "Asset.Sprite", null, null, null ],
+      "font_delete": [ "Asset.Font" ],
+      "path_start": [ "Asset.Path", null, "Constant.PathAction", null ],
+      "path_exists": [ "Asset.Path" ],
+      "path_get_closed": [ "Asset.Path" ],
+      "path_get_kind": [ "Asset.Path" ],
+      "path_get_length": [ "Asset.Path" ],
+      "path_get_name": [ "Asset.Path" ],
+      "path_get_number": [ "Asset.Path" ],
+      "path_get_point_speed": [ "Asset.Path", null ],
+      "path_get_point_x": [ "Asset.Path", null ],
+      "path_get_point_y": [ "Asset.Path", null ],
+      "path_get_precision": [ "Asset.Path", null ],
+      "path_get_speed": [ "Asset.Path", null ],
+      "path_get_x": [ "Asset.Path", null ],
+      "path_get_y": [ "Asset.Path", null ],
+      "path_add_point": [ "Asset.Path", null, null, null ],
+      "path_change_point": [ "Asset.Path", null, null, null, null ],
+      "path_insert_point": [ "Asset.Path", null, null, null, null ],
+      "path_delete_point": [ "Asset.Path", null ],
+      "path_clear_points": [ "Asset.Path" ],
+      "path_append": [ "Asset.Path", "Asset.Path" ],
+      "path_assign": [ "Asset.Path", "Asset.Path" ],
+      "path_delete": [ "Asset.Path" ],
+      "path_duplicate": [ "Asset.Path" ],
+      "path_flip": [ "Asset.Path" ],
+      "path_mirror": [ "Asset.Path" ],
+      "path_reverse": [ "Asset.Path" ],
+      "path_rotate": [ "Asset.Path", null ],
+      "path_scale": [ "Asset.Path", null, null ],
+      "path_set_closed": [ "Asset.Path", null ],
+      "path_set_kind": [ "Asset.Path", null ],
+      "path_set_precision": [ "Asset.Path", null ],
+      "path_shift": [ "Asset.Path", null, null ],
+      "timeline_exists": [ "Asset.Timeline" ],
+      "timeline_get_name": [ "Asset.Timeline" ],
+      "timeline_delete": [ "Asset.Timeline" ],
+      "timeline_moment_add_script": [ "Asset.Timeline", null, null ],
+      "timeline_moment_clear": [ "Asset.Timeline", null ],
+      "timeline_clear": [ "Asset.Timeline" ],
+      "timeline_size": [ "Asset.Timeline" ],
+      "timeline_max_moment": [ "Asset.Timeline" ],
+      "room_exists": [ "Asset.Room" ],
+      "room_next": [ "Asset.Room" ],
+      "room_previous": [ "Asset.Room" ],
+      "room_get_name": [ "Asset.Room" ],
+      "room_goto": [ "Asset.Room" ],
+      "room_duplicate": [ "Asset.Room" ],
+      "room_assign": [ "Asset.Room", "Asset.Room" ],
+      "room_instance_add": [ "Asset.Room", null, null, "Asset.Object" ],
+      "room_instance_clear": [ "Asset.Room" ],
+      "room_tile_add": [ "Asset.Room", "Asset.Background", null, null, null, null, null, null, null ],
+      "room_tile_add_ext": [ "Asset.Room", "Asset.Background", null, null, null, null, null, null, null, null, null, null ],
+      "room_tile_clear": [ "Asset.Room" ],
+      "room_set_background": [ "Asset.Room", null, null, null, "Asset.Background", null, null, null, null, null, null, null ],
+      "room_set_background_color": [ "Asset.Room", "Constant.Color", null ],
+      "room_set_background_colour": [ "Asset.Room", "Constant.Color", null ],
+      "room_set_height": [ "Asset.Room", null ],
+      "room_set_width": [ "Asset.Room", null ],
+      "room_set_persistent": [ "Asset.Room", null ],
+      "room_set_view_enabled": [ "Asset.Room", null ],
+      "room_set_viewport": [ "Asset.Room", null, "Bool", null, null, null, null ],
+      "room_get_viewport": [ "Asset.Room", null ],
+      "room_get_camera": [ "Asset.Room", null ],
+      "room_set_camera": [ "Asset.Room", null, null ],
+      "object_exists": [ "Asset.Object" ],
+      "object_get_depth": [ "Asset.Object" ],
+      "object_get_mask": [ "Asset.Object" ],
+      "object_get_name": [ "Asset.Object" ],
+      "object_get_parent": [ "Asset.Object" ],
+      "object_get_persistent": [ "Asset.Object" ],
+      "object_get_solid": [ "Asset.Object" ],
+      "object_get_sprite": [ "Asset.Object" ],
+      "object_get_visible": [ "Asset.Object" ],
+      "object_get_physics": [ "Asset.Object" ],
+      "object_is_ancestor": [ "Asset.Object", "Asset.Object" ],
+      "object_set_depth": [ "Asset.Object", null ],
+      "object_set_mask": [ "Asset.Object", null ],
+      "object_set_persistent": [ "Asset.Object", null ],
+      "object_set_solid": [ "Asset.Object", null ],
+      "object_set_sprite": [ "Asset.Object", null ],
+      "object_set_visible": [ "Asset.Object", null ],
+      "merge_color": [ "Constant.Color", "Constant.Color", null ],
+      "merge_colour": [ "Constant.Color", "Constant.Color", null ],
+      "draw_rectangle": [ null, null, null, null, "Bool" ],
+      "draw_clear": [ "Constant.Color" ],
+      "draw_clear_alpha": [ "Constant.Color", null ],
+      "draw_set_color": [ "Constant.Color" ],
+      "draw_circle_color": [ null, null, null, "Constant.Color", "Constant.Color", null ],
+      "draw_ellipse_color": [ null, null, null, null, "Constant.Color", "Constant.Color", null ],
+      "draw_line_color": [ null, null, null, null, "Constant.Color", "Constant.Color" ],
+      "draw_line_width_color": [ null, null, null, null, null, "Constant.Color", "Constant.Color" ],
+      "draw_point_color": [ null, null, "Constant.Color" ],
+      "draw_rectangle_color": [ null, null, null, null, "Constant.Color", "Constant.Color", "Constant.Color", "Constant.Color", null ],
+      "draw_triangle_color": [ null, null, null, null, null, null, "Constant.Color", null, null, null ],
+      "draw_roundrect_color": [ null, null, null, null, "Constant.Color", "Constant.Color", null ],
+      "draw_roundrect_color_ext": [ null, null, null, null, null, null, "Constant.Color", "Constant.Color", null ],
+      "draw_set_colour": [ "Constant.Color" ],
+      "draw_circle_colour": [ null, null, null, "Constant.Color", "Constant.Color", null ],
+      "draw_ellipse_colour": [ null, null, null, null, "Constant.Color", "Constant.Color", null ],
+      "draw_line_colour": [ null, null, null, null, "Constant.Color", "Constant.Color" ],
+      "draw_line_width_colour": [ null, null, null, null, null, "Constant.Color", "Constant.Color" ],
+      "draw_point_colour": [ null, null, "Constant.Color" ],
+      "draw_rectangle_colour": [ null, null, null, null, "Constant.Color", "Constant.Color", "Constant.Color", "Constant.Color", null ],
+      "draw_triangle_colour": [ null, null, null, null, null, null, "Constant.Color", null, null, null ],
+      "draw_roundrect_colour": [ null, null, null, null, "Constant.Color", "Constant.Color", null ],
+      "draw_roundrect_colour_ext": [ null, null, null, null, null, null, "Constant.Color", "Constant.Color", null ],
+      "draw_healthbar": [ null, null, null, null, null, "Constant.Color", "Constant.Color", "Constant.Color", null, null, null ],
+      "d3d_set_fog": [ "Bool", "Constant.Color", null, null ],
+      "gml_Script_d3d_set_fog": [ "Bool", "Constant.Color", null, null ],
+      "gpu_set_fog": [ "Bool", "Constant.Color", null, null ],
+      "layer_script_begin": [ null, "Asset.Script" ],
+      "layer_background_create": [ null, "Asset.Sprite" ],
+      "layer_background_blend": [ null, "Constant.Color" ],
+      "layer_background_visible": [ null, "Bool" ],
+      "layer_sprite_change": [ null, "Asset.Sprite" ],
+      "gpu_set_blendenable": [ "Bool" ],
+      "layer_script_end": [ null, "Asset.Script" ],
+      "draw_sprite": [ "Asset.Sprite", null, null, null ],
+      "draw_sprite_ext": [ "Asset.Sprite", null, null, null, null, null, null, "Constant.Color", null ],
+      "draw_sprite_general": [ "Asset.Sprite", null, null, null, null, null, null, null, null, null, null, "Constant.Color", "Constant.Color", "Constant.Color", "Constant.Color", null ],
+      "draw_sprite_part": [ "Asset.Sprite", null, null, null, null, null, null, null ],
+      "draw_sprite_part_ext": [ "Asset.Sprite", null, null, null, null, null, null, null, null, null, "Constant.Color", null ],
+      "draw_sprite_stretched": [ "Asset.Sprite", null, null, null, null, null ],
+      "draw_sprite_stretched_ext": [ "Asset.Sprite", null, null, null, null, null, "Constant.Color", null ],
+      "draw_sprite_pos": [ "Asset.Sprite", null, null, null, null, null, null, null, null, null, null ],
+      "draw_sprite_tiled": [ "Asset.Sprite", null, null, null ],
+      "draw_sprite_tiled_ext": [ "Asset.Sprite", null, null, null, null, null, "Constant.Color", null ],
+      "draw_background": [ "Asset.Background", null, null ],
+      "draw_background_ext": [ "Asset.Background", null, null, null, null, null, "Constant.Color", null ],
+      "draw_background_part": [ "Asset.Background", null, null, null, null, null, null ],
+      "draw_background_part_ext": [ "Asset.Background", null, null, null, null, null, null, null, null, "Constant.Color", null ],
+      "draw_background_stretched": [ "Asset.Background", null, null, null, null ],
+      "draw_background_stretched_ext": [ "Asset.Background", null, null, null, null, "Constant.Color", null ],
+      "draw_background_tiled": [ "Asset.Background", null, null ],
+      "draw_background_tiled_ext": [ "Asset.Background", null, null, null, null, "Constant.Color", null ],
+      "draw_background_general": [ "Asset.Background", null, null, null, null, null, null, null, null, null, "Constant.Color", "Constant.Color", "Constant.Color", "Constant.Color", null ],
+      "draw_set_font": [ "Asset.Font" ],
+      "draw_set_halign": [ "Constant.HAlign" ],
+      "draw_set_valign": [ "Constant.VAlign" ],
+      "draw_text_color": [ null, null, null, "Constant.Color", "Constant.Color", "Constant.Color", "Constant.Color", null ],
+      "draw_text_ext_color": [ null, null, null, null, null, "Constant.Color", "Constant.Color", "Constant.Color", "Constant.Color", null ],
+      "draw_text_transformed_color": [ null, null, null, null, null, null, "Constant.Color", "Constant.Color", "Constant.Color", "Constant.Color", null ],
+      "draw_text_transformed_ext_color": [ null, null, null, null, null, null, null, null, "Constant.Color", "Constant.Color", "Constant.Color", "Constant.Color", null ],
+      "draw_vertex_color": [ null, null, "Constant.Color", null ],
+      "draw_vertex_texture_color": [ null, null, null, null, "Constant.Color", null ],
+      "draw_text_colour": [ null, null, null, "Constant.Color", "Constant.Color", "Constant.Color", "Constant.Color", null ],
+      "draw_text_ext_colour": [ null, null, null, null, null, "Constant.Color", "Constant.Color", "Constant.Color", "Constant.Color", null ],
+      "draw_text_transformed_colour": [ null, null, null, null, null, null, "Constant.Color", "Constant.Color", "Constant.Color", "Constant.Color", null ],
+      "draw_text_transformed_ext_colour": [ null, null, null, null, null, null, null, null, "Constant.Color", "Constant.Color", "Constant.Color", "Constant.Color", null ],
+      "draw_vertex_colour": [ null, null, "Constant.Color", null ],
+      "draw_vertex_texture_colour": [ null, null, null, null, "Constant.Color", null ],
+      "distance_to_object": [ "Id.InstanceOrObject" ],
+      "place_meeting": [ null, null, "Id.InstanceOrObject" ],
+      "position_meeting": [ null, null, "Id.InstanceOrObject" ],
+      "position_change": [ null, null, "Asset.Object", null ],
+      "collision_circle": [ null, null, null, "Id.InstanceOrObject", null, null ],
+      "collision_circle_list": [ null, null, null, "Id.InstanceOrObject", null, null, null, null ],
+      "collision_ellipse": [ null, null, null, null, "Id.InstanceOrObject", null, null ],
+      "collision_line": [ null, null, null, null, "Id.InstanceOrObject", "Bool", "Bool" ],
+      "collision_line_list": [ null, null, null, null, "Id.InstanceOrObject", "Bool", "Bool", null, null ],
+      "collision_point": [ null, null, "Id.InstanceOrObject", null, null ],
+      "collision_point_list": [ null, null, "Id.InstanceOrObject", null, null, null, null ],
+      "collision_rectangle": [ null, null, null, null, "Id.InstanceOrObject", null, null ],
+      "collision_rectangle_list": [ null, null, null, null, "Id.InstanceOrObject", null, null, null, null ],
+      "mp_linear_step_object": [ null, null, null, "Id.InstanceOrObject" ],
+      "mp_linear_path": [ "Asset.Path", null, null, null, null ],
+      "mp_linear_path_object": [ "Asset.Path", null, null, null, "Id.InstanceOrObject" ],
+      "mp_potential_step_object": [ null, null, null, "Id.InstanceOrObject" ],
+      "mp_potential_path": [ "Asset.Path", null, null, null, null, null ],
+      "mp_potential_path_object": [ "Asset.Path", null, null, null, null, "Id.InstanceOrObject" ],
+      "mp_grid_path": [ null, "Asset.Path", null, null, null, null, "Bool" ],
+      "mp_grid_add_instances": [ null, "Id.InstanceOrObject", null ],
+      "draw_surface_ext": [ null, null, null, null, null, null, "Constant.Color", null ],
+      "shader_is_compiled": [ "Asset.Shader" ],
+      "shader_set": [ "Asset.Shader" ],
+      "shader_get_uniform": [ "Asset.Shader", null ],
+      "shader_get_sampler_index": [ "Asset.Shader", null ],
+      "shader_enable_corner_id": [ "Bool" ],
+      "texture_set_interpolation": [ "Bool" ],
+      "texture_set_tiled": [ "Bool" ],
+      "gpu_set_texfilter": [ "Bool" ],
+      "tileset_get_texture": [ "Asset.Tileset" ],
+      "tileset_get_uvs": [ "Asset.Tileset" ],
+      "game_get_speed": [ "Constant.GameSpeed" ],
+      "game_set_speed": [ null, "Constant.GameSpeed" ],
+      "window_set_cursor": [ "Constant.Cursor" ],
+      "window_set_fullscreen": [ "Bool" ],
+      "window_set_color": [ "Constant.Color" ],
+      "keyboard_check": [ "Constant.VirtualKey" ],
+      "keyboard_check_pressed": [ "Constant.VirtualKey" ],
+      "keyboard_check_released": [ "Constant.VirtualKey" ],
+      "keyboard_check_direct": [ "Constant.VirtualKey" ],
+      "keyboard_clear": [ "Constant.VirtualKey" ],
+      "keyboard_key_press": [ "Constant.VirtualKey" ],
+      "keyboard_key_release": [ "Constant.VirtualKey" ],
+      "keyboard_set_map": [ "Constant.VirtualKey", "Constant.VirtualKey" ],
+      "keyboard_get_map": [ "Constant.VirtualKey" ],
+      "keyboard_unset_map": [ "Constant.VirtualKey" ],
+      "keyboard_set_numlock": [ "Bool" ],
+      "mouse_check_button": [ "Constant.MouseButton" ],
+      "mouse_check_button_pressed": [ "Constant.MouseButton" ],
+      "mouse_check_button_released": [ "Constant.MouseButton" ],
+      "mouse_clear": [ "Constant.MouseButton" ],
+      "device_mouse_check_button": [ null, "Constant.MouseButton" ],
+      "device_mouse_check_button_pressed": [ null, "Constant.MouseButton" ],
+      "device_mouse_check_button_released": [ null, "Constant.MouseButton" ],
+      "device_mouse_dbclick_enable": [ "Bool" ],
+      "gamepad_button_value": [ null, "Constant.GamepadButton" ],
+      "gamepad_button_check": [ null, "Constant.GamepadButton" ],
+      "gamepad_button_check_pressed": [ null, "Constant.GamepadButton" ],
+      "gamepad_button_check_released": [ null, "Constant.GamepadButton" ],
+      "gamepad_axis_value": [ null, "Constant.GamepadButton" ],
+      "gamepad_set_color": [ null, "Constant.Color" ],
+      "buffer_create": [ null, "Constant.BufferType", null ],
+      "buffer_create_from_vertex_buffer": [ null, "Constant.BufferType", null ],
+      "buffer_create_from_vertex_buffer_ext": [ null, "Constant.BufferType", null, null, null ],
+      "buffer_read": [ null, "Constant.BufferDataType" ],
+      "buffer_write": [ null, "Constant.BufferDataType", null ],
+      "buffer_peek": [ null, null, "Constant.BufferDataType" ],
+      "buffer_poke": [ null, null, "Constant.BufferDataType", null ],
+      "buffer_fill": [ null, null, "Constant.BufferDataType", null, null ],
+      "buffer_sizeof": [ "Constant.BufferDataType" ],
+      "buffer_seek": [ null, "Constant.SeekOffset", null ],
+      "steam_ugc_create_item": [ null, "Constant.SteamUGCFileType" ],
+      "steam_ugc_create_query_user": [ "Constant.SteamUGCList", "Constant.SteamUGCMatchType", "Constant.SteamUGCSortOrder", null ],
+      "steam_ugc_create_query_user_ex": [ "Constant.SteamUGCList", "Constant.SteamUGCMatchType", "Constant.SteamUGCSortOrder", null, null, null, null ],
+      "steam_ugc_create_query_all": [ "Constant.SteamUGCQueryType", "Constant.SteamUGCMatchType", null ],
+      "steam_ugc_create_query_all_ex": [ "Constant.SteamUGCQueryType", "Constant.SteamUGCMatchType", null, null, null ],
+      "steam_ugc_query_set_cloud_filename_filter": [ null, "Bool" ],
+      "steam_ugc_query_set_match_any_tag": [ null, "Bool" ],
+      "steam_ugc_query_set_return_long_description": [ null, "Bool" ],
+      "steam_ugc_query_set_return_total_only": [ null, "Bool" ],
+      "steam_ugc_query_set_allow_cached_response": [ null, "Bool" ],
+      "steam_create_leaderboard": [ null, "Constant.SteamLeaderboardSort", "Constant.SteamLeaderboardDisplay" ],
+      "steam_activate_overlay": [ "Constant.SteamOverlay" ],
+      "network_create_socket": [ "Constant.SocketType" ],
+      "network_set_config": [ "Constant.NetworkConfig", null ],
+      "gpu_set_blendmode": [ "Constant.BlendMode" ],
+      "draw_set_blend_mode": [ "Constant.BlendMode" ],
+      "gml_Script_draw_set_blend_mode": [ "Constant.BlendMode" ],
+      "gpu_set_blendmode_ext": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Constant.BlendModeFactor", "Constant.BlendModeFactor" ],
+          [
+            {
+              "MacroType": "ArrayInit",
+              "Macro": "Constant.BlendModeFactor"
+            }
+          ]
+        ]
+      },
+      "draw_set_blend_mode_ext": [ "Constant.BlendModeFactor", "Constant.BlendModeFactor" ],
+      "gml_Script_draw_set_blend_mode_ext": [ "Constant.BlendModeFactor", "Constant.BlendModeFactor" ],
+      "gpu_set_blendmode_ext_sepalpha": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Constant.BlendModeFactor", "Constant.BlendModeFactor", "Constant.BlendModeFactor", "Constant.BlendModeFactor" ],
+          [
+            {
+              "MacroType": "ArrayInit",
+              "Macro": "Constant.BlendModeFactor"
+            }
+          ]
+        ]
+      },
+      "__view_get": "FunctionArguments.__view_get",
+      "__view_set": "FunctionArguments.__view_set",
+      "gml_Script___view_get": "FunctionArguments.__view_get",
+      "gml_Script___view_set": "FunctionArguments.__view_set",
+      "__background_set": [ "Enum.e__BG", null, null ],
+      "__background_get": [ "Enum.e__BG", null, null ],
+      "gml_Script___background_set": [ "Enum.e__BG", null, null ],
+      "gml_Script___background_get": [ "Enum.e__BG", null, null ],
+      "event_perform": {
+        "MacroType": "Union",
+        "Macros": [
+          [
+            {
+              "MacroType": "Intersect",
+              "Macros": [
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "3",
+                  "ConditionalType": "Integer"
+                },
+                "Constant.EventType"
+              ]
+            },
+            "Constant.EventSubtypeStep"
+          ],
+          [
+            {
+              "MacroType": "Intersect",
+              "Macros": [
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "8",
+                  "ConditionalType": "Integer"
+                },
+                "Constant.EventType"
+              ]
+            },
+            "Constant.EventSubtypeDraw"
+          ],
+          [
+            {
+              "MacroType": "Intersect",
+              "Macros": [
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "6",
+                  "ConditionalType": "Integer"
+                },
+                "Constant.EventType"
+              ]
+            },
+            "Constant.EventSubtypeMouse"
+          ],
+          [
+            {
+              "MacroType": "Intersect",
+              "Macros": [
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "7",
+                  "ConditionalType": "Integer"
+                },
+                "Constant.EventType"
+              ]
+            },
+            "Constant.EventSubtypeOther"
+          ],
+          [
+            {
+              "MacroType": "Intersect",
+              "Macros": [
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "13",
+                  "ConditionalType": "Integer"
+                },
+                "Constant.EventType"
+              ]
+            },
+            "Constant.EventSubtypeGesture"
+          ],
+          [
+            {
+              "MacroType": "Intersect",
+              "Macros": [
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "4",
+                  "ConditionalType": "Integer"
+                },
+                "Constant.EventType"
+              ]
+            },
+            "Asset.Object"
+          ],
+          [
+            {
+              "MacroType": "Intersect",
+              "Macros": [
+                {
+                  "MacroType": "Union",
+                  "Macros": [
+                    {
+                      "MacroType": "Match",
+                      "ConditionalValue": "5",
+                      "ConditionalType": "Integer"
+                    },
+                    {
+                      "MacroType": "Match",
+                      "ConditionalValue": "9",
+                      "ConditionalType": "Integer"
+                    },
+                    {
+                      "MacroType": "Match",
+                      "ConditionalValue": "10",
+                      "ConditionalType": "Integer"
+                    }
+                  ]
+                },
+                "Constant.EventType"
+              ]
+            },
+            "Constant.VirtualKey"
+          ],
+          [ "Constant.EventType", null ]
+        ]
+      },
+      "event_perform_object": {
+        "MacroType": "Union",
+        "Macros": [
+          [
+            "Asset.Object",
+            {
+              "MacroType": "Intersect",
+              "Macros": [
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "3",
+                  "ConditionalType": "Integer"
+                },
+                "Constant.EventType"
+              ]
+            },
+            "Constant.EventSubtypeStep"
+          ],
+          [
+            "Asset.Object",
+            {
+              "MacroType": "Intersect",
+              "Macros": [
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "8",
+                  "ConditionalType": "Integer"
+                },
+                "Constant.EventType"
+              ]
+            },
+            "Constant.EventSubtypeDraw"
+          ],
+          [
+            "Asset.Object",
+            {
+              "MacroType": "Intersect",
+              "Macros": [
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "6",
+                  "ConditionalType": "Integer"
+                },
+                "Constant.EventType"
+              ]
+            },
+            "Constant.EventSubtypeMouse"
+          ],
+          [
+            "Asset.Object",
+            {
+              "MacroType": "Intersect",
+              "Macros": [
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "7",
+                  "ConditionalType": "Integer"
+                },
+                "Constant.EventType"
+              ]
+            },
+            "Constant.EventSubtypeOther"
+          ],
+          [
+            "Asset.Object",
+            {
+              "MacroType": "Intersect",
+              "Macros": [
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "13",
+                  "ConditionalType": "Integer"
+                },
+                "Constant.EventType"
+              ]
+            },
+            "Constant.EventSubtypeGesture"
+          ],
+          [
+            "Asset.Object",
+            {
+              "MacroType": "Intersect",
+              "Macros": [
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "4",
+                  "ConditionalType": "Integer"
+                },
+                "Constant.EventType"
+              ]
+            },
+            "Asset.Object"
+          ],
+          [
+            "Asset.Object",
+            {
+              "MacroType": "Intersect",
+              "Macros": [
+                {
+                  "MacroType": "Union",
+                  "Macros": [
+                    {
+                      "MacroType": "Match",
+                      "ConditionalValue": "5",
+                      "ConditionalType": "Integer"
+                    },
+                    {
+                      "MacroType": "Match",
+                      "ConditionalValue": "9",
+                      "ConditionalType": "Integer"
+                    },
+                    {
+                      "MacroType": "Match",
+                      "ConditionalValue": "10",
+                      "ConditionalType": "Integer"
+                    }
+                  ]
+                },
+                "Constant.EventType"
+              ]
+            },
+            "Constant.VirtualKey"
+          ],
+          [ "Asset.Object", "Constant.EventType", null ]
+        ]
+      },
+      "event_perform_async": [ "Constant.AsyncEventType", null ],
+      "draw_primitive_begin": [ "Constant.PrimitiveType" ],
+      "draw_primitive_begin_texture": [ "Constant.PrimitiveType", null ],
+      "vertex_submit": [ null, "Constant.PrimitiveType", null ],
+      "vertex_submit_ext": [ null, "Constant.PrimitiveType", null, null, null ],
+      "vertex_color": [ null, "Constant.Color", null ],
+      "vertex_colour": [ null, "Constant.Color", null ],
+      "vertex_format_add_custom": [ "Constant.VertexType", "Constant.VertexUsage" ],
+      "ds_exists": [ null, "Constant.DsType" ],
+      "audio_effect_create": [ "Enum.AudioEffectType" ]
+    },
+    "FunctionReturn": {
+      "draw_getpixel": "Constant.Color",
+      "draw_getpixel_ext": "Constant.Color"
+    }
+  },
+  "CodeEntryNames": {
+    "gml_Script___view_get": {
+      "Variables": {
+        "__prop": "Enum.e__VW"
+      }
+    },
+    "gml_Script___view_set_internal": {
+      "Variables": {
+        "__prop": "Enum.e__VW"
+      }
+    },
+    "gml_Script___background_get_internal": {
+      "Variables": {
+        "__prop": "Enum.e__BG"
+      }
+    },
+    "gml_Script___background_set_internal": {
+      "Variables": {
+        "__prop": "Enum.e__BG"
+      }
+    }
+  }
+}

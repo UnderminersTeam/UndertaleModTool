@@ -13,7 +13,7 @@ using UndertaleModLib.Models;
 namespace UndertaleModLib
 {
     /// <summary>
-    /// An object representing a Game Maker: Studio data file.
+    /// An object representing a GameMaker Studio data file.
     /// </summary>
     /// <remarks>This is basically the heart of the data file, which is usually named <c>data.win</c>, <c>data.unx</c>,
     /// <c>data.ios</c> or <c>data.droid</c>, depending for which OS the game was compiled for.. <br/>
@@ -320,6 +320,11 @@ namespace UndertaleModLib
         public bool ShortCircuit = true;
 
         /// <summary>
+        /// Whether the data file has array copy-on-write enabled.
+        /// </summary>
+        public bool ArrayCopyOnWrite = false;
+
+        /// <summary>
         /// Some info for the editor to store data on.
         /// </summary>
         public readonly ToolInfo ToolInfo = new ToolInfo();
@@ -330,54 +335,19 @@ namespace UndertaleModLib
         public int PaddingAlignException = -1;
 
         /// <summary>
-        /// A list of known Game Maker: Studio constants and variables.
+        /// A list of known GameMaker Studio constants and variables.
         /// </summary>
         public BuiltinList BuiltinList;
 
         /// <summary>
         /// Cache for 2.3-style functions defined in global scripts. Can be re-built by setting this to null.
         /// </summary>
-        public IGlobalFunctions GlobalFunctions;
+        public GlobalFunctions GlobalFunctions;
 
         /// <summary>
         /// Registry for macro types, their resolvers, and other data specific to this game.
         /// </summary>
         public GameSpecificRegistry GameSpecificRegistry;
-
-        //Profile mode related properties
-
-        //TODO: Why are the functions that deal with the cache in a completely different place than the cache parameters? These have *no* place of being here.
-        /// <summary>
-        /// A <see cref="Dictionary{TKey,TValue}"/> of cached decompiled code,
-        /// with the code name as the Key and the decompiled code text as the value.
-        /// </summary>
-        public ConcurrentDictionary<string, string> GMLCache { get; set; }
-
-        /// <summary>
-        /// A list of names of code entries which failed to compile or decompile.
-        /// </summary>
-        public List<string> GMLCacheFailed { get; set; }
-
-        /// <summary>
-        /// A list of names of modified code entries.
-        /// </summary>
-        public ConcurrentBag<string> GMLCacheChanged { get; set; } = new();
-
-        /// <summary>
-        /// A list of names of code entries that were edited before the "Use decompiled code cache" setting was enabled.
-        /// </summary>
-        public List<string> GMLEditedBefore { get; set; }
-
-        /// <summary>
-        /// Whether the decompiled code cache has been saved to disk with no new cache changes happening since then.
-        /// </summary>
-        public bool GMLCacheWasSaved { get; set; }
-
-        /// <summary>
-        /// Whether the decompiled code cache is generated. This will be <see langword="false"/> if it's currently generating and
-        /// <see langword="true"/> otherwise.
-        /// </summary>
-        public bool GMLCacheIsReady { get; set; } = true;
 
         /// <summary>
         /// An array of a <see cref="UndertaleData"/> properties with <see cref="IList{T}"/> as their type.
@@ -422,7 +392,7 @@ namespace UndertaleModLib
         }
 
         /// <summary>
-        /// Reports the zero-based index of the first occurence of the specified <see cref="UndertaleResource"/>.
+        /// Reports the zero-based index of the first occurrence of the specified <see cref="UndertaleResource"/>.
         /// </summary>
         /// <param name="obj">The object to get the index of.</param>
         /// <param name="panicIfInvalid">Whether to throw if <paramref name="obj"/> is not a valid object.</param>
@@ -450,7 +420,7 @@ namespace UndertaleModLib
         }
 
         /// <summary>
-        /// Reports whether the data file was build by Game Maker Studio 2.
+        /// Reports whether the data file was built by GameMaker Studio 2.
         /// </summary>
         /// <returns><see langword="true"/> if yes, <see langword="false"/> if not.</returns>
         public bool IsGameMaker2()
@@ -555,9 +525,9 @@ namespace UndertaleModLib
         }
 
         /// <summary>
-        /// TODO: needs to be documented on what this does.
+        /// Returns the ID of the builtin (i.e., embedded in the main data file) audio group. Varies depending on version.
         /// </summary>
-        /// <returns>TODO</returns>
+        /// <returns>ID of the builtin audio group; 0 or 1.</returns>
         public int GetBuiltinSoundGroupID()
         {
             // It is known it works this way in 1.0.1266. The exact version which changed this is unknown.
@@ -690,7 +660,7 @@ namespace UndertaleModLib
                 if (disposableType.IsAssignableFrom(list.GetType().GetGenericArguments()[0]))
                 {
                     foreach (IDisposable disposable in list)
-                        disposable.Dispose();
+                        disposable?.Dispose();
                 }
 
                 list.Clear();
@@ -700,10 +670,6 @@ namespace UndertaleModLib
             FORM = null;
             GlobalFunctions = null;
             GameSpecificRegistry = null;
-            GMLCache = null;
-            GMLCacheFailed = null;
-            GMLCacheChanged = new();
-            GMLEditedBefore = null;
         }
     }
 
@@ -712,21 +678,6 @@ namespace UndertaleModLib
     /// </summary>
     public class ToolInfo
     {
-        /// <summary>
-        /// Whether profile mode is enabled.
-        /// </summary>
-        public bool ProfileMode = false;
-
-        /// <summary>
-        /// The location of the profiles folder.
-        /// </summary>
-        public string AppDataProfiles = "";
-
-        /// <summary>
-        /// The MD5 hash of the current file.
-        /// </summary>
-        public string CurrentMD5 = "Unknown";
-
         /// <summary>
         /// Default settings to be used by the Underanalyzer decompiler,
         /// for a tool and in any scripts that desire matching the same settings.

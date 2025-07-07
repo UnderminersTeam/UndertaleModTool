@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -54,22 +55,25 @@ namespace UndertaleModTool
             }
         }
 
+        public static bool ShowNullEntriesInResourceTree
+        {
+            get => Settings.Instance.ShowNullEntriesInResourceTree;
+            set
+            {
+                Settings.Instance.ShowNullEntriesInResourceTree = value;
+                Settings.Save();
+
+                // Refresh the tree for the change to take effect
+                mainWindow.UpdateTree();
+            }
+        }
+
         public static bool ProfileModeEnabled
         {
             get => Settings.Instance.ProfileModeEnabled;
             set
             {
                 Settings.Instance.ProfileModeEnabled = value;
-                Settings.Save();
-            }
-        }
-
-        public static bool UseGMLCache
-        {
-            get => Settings.Instance.UseGMLCache;
-            set
-            {
-                Settings.Instance.UseGMLCache = value;
                 Settings.Save();
             }
         }
@@ -100,6 +104,22 @@ namespace UndertaleModTool
             {
                 Settings.Instance.AutomaticFileAssociation = value;
                 Settings.Save();
+
+                if (!value && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    // Prompt user if they want to unassociate
+                    if (mainWindow.ShowQuestion("Remove current file associations, if they exist?", MessageBoxImage.Question, "File associations") == MessageBoxResult.Yes)
+                    {
+                        try
+                        {
+                            FileAssociations.RemoveAssociations();
+                        }
+                        catch (Exception ex)
+                        {
+                            mainWindow.ScriptError(ex.ToString(), "Unassociation failed", false);
+                        }
+                    }
+                }
             }
         }
 
@@ -201,6 +221,38 @@ namespace UndertaleModTool
             }
         }
 
+        public static string TransparencyGridColor1
+        {
+            get => Settings.Instance.TransparencyGridColor1;
+            set
+            {
+                try
+                {
+                    MainWindow.SetTransparencyGridColors(value, TransparencyGridColor2);
+
+                    Settings.Instance.TransparencyGridColor1 = value;
+                    Settings.Save();
+                }
+                catch (FormatException) { }
+            }
+        }
+
+        public static string TransparencyGridColor2
+        {
+            get => Settings.Instance.TransparencyGridColor2;
+            set
+            {
+                try
+                {
+                    MainWindow.SetTransparencyGridColors(TransparencyGridColor1, value);
+
+                    Settings.Instance.TransparencyGridColor2 = value;
+                    Settings.Save();
+                }
+                catch (FormatException) { }
+            }
+        }
+
         public static bool EnableDarkMode
         {
             get => Settings.Instance.EnableDarkMode;
@@ -229,6 +281,16 @@ namespace UndertaleModTool
             }
         }
 
+        public static bool RememberWindowPlacements
+        {
+            get => Settings.Instance.RememberWindowPlacements;
+            set
+            {
+                Settings.Instance.RememberWindowPlacements = value;
+                Settings.Save();
+            }
+        }
+
         public static DecompilerSettings DecompilerSettings => Settings.Instance.DecompilerSettings;
 
         public static string InstanceIdPrefix
@@ -246,6 +308,12 @@ namespace UndertaleModTool
             get => UpdateAppButton.IsEnabled;
             set => UpdateAppButton.IsEnabled = value;
         }
+
+#if DEBUG
+        public static Visibility UpdaterButtonVisibility => Visibility.Visible;
+#else
+        public static Visibility UpdaterButtonVisibility => Visibility.Hidden;
+#endif
 
         public SettingsWindow()
         {

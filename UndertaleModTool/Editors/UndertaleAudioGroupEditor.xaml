@@ -23,6 +23,10 @@
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3,3,120,3" ObjectReference="{Binding Name}"/>
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3,3,120,3">Path (GM 2024.14+)</TextBlock>
+        <local:UndertaleStringReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding Path}"/>
+
         <Image Margin="0,32,30,0" Grid.Column="1" Grid.RowSpan="3" gif:ImageBehavior.AnimatedSource="/Resources/spr_flowey_riseanim.gif"  Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="Flowey"/>
         <Image Margin="0,0,16,0" Grid.Column="1" Grid.RowSpan="3" Source="/Resources/spr_bubble_message.png" Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="FloweyBubble"/>
         <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="AudiogroupsObjectLabel"

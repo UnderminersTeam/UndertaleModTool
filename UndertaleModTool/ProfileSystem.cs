@@ -48,7 +48,7 @@ namespace UndertaleModTool
 
             try
             {
-                return code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : "";
+                return code != null ? code.Disassemble(Data.Variables, Data.CodeLocals?.For(code), Data.CodeLocals is null) : "";
             }
             catch (Exception e)
             {
@@ -62,9 +62,12 @@ namespace UndertaleModTool
 
         public void CrashCheck()
         {
-            string fileext = Path.GetExtension(FilePath);
+            if (!SettingsWindow.ProfileModeEnabled)
+            {
+                return;
+            }
 
-            if (fileext != ".dat") try
+            try
             {
                 string lastEditedLocation = Path.Combine(ProfilesFolder, "LastEdited.txt");
                 if (Data == null && File.Exists(lastEditedLocation))
@@ -88,30 +91,7 @@ namespace UndertaleModTool
                         if (Directory.Exists(Path.Combine(ProfilesFolder, reportedHashOfCrashedFile)) &&
                             profileHashOfCrashedFile == reportedHashOfCrashedFile)
                         {
-                            if (this.ShowQuestion("UndertaleModTool crashed during usage last time while editing " + pathOfCrashedFile + ", would you like to recover your code now?") == MessageBoxResult.Yes)
-                            {
-                                LoadFile(pathOfCrashedFile, true).ContinueWith((t) => { });
-                                if (Data == null)
-                                {
-                                    this.ShowError("Failed to load data when recovering.");
-                                    return;
-                                }
-                                string[] dirFiles = Directory.GetFiles(dataRecoverLocation);
-                                int progress = 0;
-                                LoaderDialog codeLoadDialog = new LoaderDialog("Script in progress...", "Please wait...");
-                                codeLoadDialog.PreventClose = true;
-                                codeLoadDialog.Update(null, "Code entries processed: ", progress++, dirFiles.Length);
-                                codeLoadDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
-                                foreach (string file in dirFiles)
-                                {
-                                    ImportGMLFile(file);
-                                    codeLoadDialog.Update(null, "Code entries processed: ", progress++, dirFiles.Length);
-                                    codeLoadDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
-                                }
-                                codeLoadDialog.TryClose();
-                                this.ShowMessage("Completed.");
-                            }
-                            else if (this.ShowQuestion("Would you like to move this code to the \"Recovered\" folder now? Any previous code there will be cleared!") == MessageBoxResult.Yes)
+                            if (this.ShowQuestion("UndertaleModTool crashed during usage last time while editing " + pathOfCrashedFile + ". Profile mode code from that session still exists. Would you like to move the code to the \"Recovered\" folder now? Any previous code there will be cleared!") == MessageBoxResult.Yes)
                             {
                                 this.ShowMessage("Your code can be recovered from the \"Recovered\" folder at any time.");
                                 string recoveredDir = Path.Combine(AppDataFolder, "Recovered", reportedHashOfCrashedFile);
@@ -136,38 +116,51 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                this.ShowError("CrashCheck error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
+                this.ShowError("CrashCheck error! (Note that profile mode is highly experimental.)\n" + exc);
             }
         }
 
         public void ApplyCorrections()
         {
-            string fileext = Path.GetExtension(FilePath);
+            if (!SettingsWindow.ProfileModeEnabled)
+            {
+                return;
+            }
 
-            if (fileext != ".dat") try
+            try
             {
                 DirectoryCopy(CorrectionsFolder, ProfilesFolder, true);
             }
             catch (Exception exc)
             {
-                this.ShowError("ApplyCorrections error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
+                this.ShowError("ApplyCorrections error! (Note that profile mode is highly experimental.)\n" + exc);
             }
         }
 
         public void CreateUMTLastEdited(string filename)
         {
+            if (!SettingsWindow.ProfileModeEnabled || ProfileHash is null)
+            {
+                return;
+            }
+
             try
             {
                 File.WriteAllText(Path.Combine(ProfilesFolder, "LastEdited.txt"), ProfileHash + "\n" + filename);
             }
             catch (Exception exc)
             {
-                this.ShowError("CreateUMTLastEdited error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
+                this.ShowError("CreateUMTLastEdited error! (Note that profile mode is highly experimental.)\n" + exc);
             }
         }
 
         public void DestroyUMTLastEdited()
         {
+            if (!SettingsWindow.ProfileModeEnabled)
+            {
+                return;
+            }
+
             try
             {
                 string path = Path.Combine(ProfilesFolder, "LastEdited.txt");
@@ -176,18 +169,19 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                this.ShowError("DestroyUMTLastEdited error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
+                this.ShowError("DestroyUMTLastEdited error! (Note that profile mode is highly experimental.)\n" + exc);
             }
         }
 
         public void RevertProfile()
         {
-            string fileext = Path.GetExtension(FilePath);
-
-            if (fileext != ".dat") try
+            if (!SettingsWindow.ProfileModeEnabled || ProfileHash is null)
             {
-                // We need to do this regardless, as the "Temp" folder can still change in non-profile mode.
-                // If we don't, it could cause desynchronization between modes.
+                return;
+            }
+
+            try
+            {
                 string mainFolder = Path.Combine(ProfilesFolder, ProfileHash, "Main");
                 Directory.CreateDirectory(mainFolder);
                 string tempFolder = Path.Combine(ProfilesFolder, ProfileHash, "Temp");
@@ -197,33 +191,15 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                this.ShowError("RevertProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
-            }
-        }
-        public void SaveTempToMainProfile()
-        {
-            try
-            {
-                // This extra step needs to happen for non-profile mode because the "Temp" folder can be modified in non-profile mode.
-                // If we don't, it could cause desynchronization between modes.
-                if (!SettingsWindow.ProfileModeEnabled)
-                {
-                    string mainFolder = Path.Combine(ProfilesFolder, ProfileHash, "Main");
-                    string tempFolder = Path.Combine(ProfilesFolder, ProfileHash, "Temp");
-                    Directory.CreateDirectory(tempFolder);
-                    if (Directory.Exists(mainFolder))
-                        Directory.Delete(mainFolder, true);
-                    DirectoryCopy(tempFolder, mainFolder, true);
-                }
-            }
-            catch (Exception exc)
-            {
-                this.ShowError("SaveTempToMainProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
+                this.ShowError("RevertProfile error! (Note that profile mode is highly experimental.)\n" + exc);
             }
         }
         public async Task UpdateProfile(UndertaleData data, string filename)
         {
-            FileMessageEvent?.Invoke("Calculating MD5 hash...");
+            if (!SettingsWindow.ProfileModeEnabled)
+            {
+                return;
+            }
 
             string fileext = Path.GetExtension(filename);
 
@@ -231,6 +207,8 @@ namespace UndertaleModTool
 
             if (fileext != ".dat") try
             {
+                FileMessageEvent?.Invoke("Calculating MD5 hash...");
+
                 await Task.Run(() =>
                 {
                     using (var md5Instance = MD5.Create())
@@ -333,23 +311,21 @@ namespace UndertaleModTool
                 string profDir = Path.Combine(ProfilesFolder, ProfileHash);
                 string profDirTemp = Path.Combine(profDir, "Temp");
                 string profDirMain = Path.Combine(profDir, "Main");
-                if (SettingsWindow.ProfileModeEnabled)
-                {
-                    if (Directory.Exists(profDir))
+                Directory.CreateDirectory(ProfilesFolder);
+                    if (SettingsWindow.ProfileModeEnabled)
                     {
-                        string[] Files = Directory.GetFiles(profDir + "\\Temp");
-                        if (!Directory.Exists(profDir + "\\Temp"))
-                            Directory.CreateDirectory(profDir + "\\Temp");
-                        for (var i = 0; i < Files.Length; i++)
+                        if (Directory.Exists(profDir))
                         {
-                            if (File.Exists(Files[i]))
-                                File.Delete(Files[i]);
+                            string[] Files = Directory.GetFiles(profDir + "\\Temp");
+                            if (!Directory.Exists(profDir + "\\Temp"))
+                                Directory.CreateDirectory(profDir + "\\Temp");
+                            for (var i = 0; i < Files.Length; i++)
+                            {
+                                if (File.Exists(Files[i]))
+                                    File.Delete(Files[i]);
+                            }
+                            DirectoryCopy(Path.Combine(profDir, "Main"), Path.Combine(profDir, "Temp"), true);
                         }
-                        DirectoryCopy(Path.Combine(profDir, "Main"), Path.Combine(profDir, "Temp"), true);
-                    }
-                    Directory.CreateDirectory(ProfilesFolder);
-                    if (Directory.Exists(profDir))
-                    {
                         if (!Directory.Exists(profDirTemp) && Directory.Exists(profDirMain))
                         {
                             // Get the subdirectories for the specified directory.
@@ -378,22 +354,21 @@ namespace UndertaleModTool
                         }
                     }
 
-                    // First generation no longer exists, it will be generated on demand while you edit.
-                    Directory.CreateDirectory(profDir);
-                    Directory.CreateDirectory(profDirMain);
-                    Directory.CreateDirectory(profDirTemp);
-                    if (!Directory.Exists(profDir) || !Directory.Exists(profDirMain) || !Directory.Exists(profDirTemp))
-                    {
-                        this.ShowWarning("Profile should exist, but does not. Insufficient permissions? Profile mode is disabled.");
-                        SettingsWindow.ProfileModeEnabled = false;
-                        return;
-                    }
+                // First generation no longer exists, it will be generated on demand while you edit.
+                Directory.CreateDirectory(profDir);
+                Directory.CreateDirectory(profDirMain);
+                Directory.CreateDirectory(profDirTemp);
+                if (!Directory.Exists(profDir) || !Directory.Exists(profDirMain) || !Directory.Exists(profDirTemp))
+                {
+                    this.ShowWarning("Profile should exist, but does not. Insufficient permissions? Profile mode is disabled.");
+                    SettingsWindow.ProfileModeEnabled = false;
+                    return;
+                }
 
-                    if (!SettingsWindow.ProfileMessageShown)
-                    {
-                        this.ShowMessage(@"The profile for your game loaded successfully!
+                if (!SettingsWindow.ProfileMessageShown)
+                {
+                    this.ShowMessage(@"The profile for your game loaded successfully!
 
-UndertaleModTool now uses the ""Profile"" system by default for code.
 Using the profile system, many new features are available to you!
 For example, the code is fully editable (you can even add comments)
 and it will be saved exactly as you wrote it. In addition, if the
@@ -406,24 +381,28 @@ to the ""File"" tab at the top and then opening the ""Settings""
 (the ""Enable profile mode"" option toggles it on or off).
 You may wish to disable it for purposes such as collaborative
 modding projects, or when performing technical operations.
-For more in depth information, please read ""About_Profile_Mode.txt"".
+Be warned that scripts are likely to mess with this system,
+and that enabling the profile mode setting won't have an immediate
+effect. (You must re-open a game first.)
 
 It should be noted that this system is somewhat experimental, so
 should you encounter any problems, please let us know or leave
 an issue on GitHub.");
-                        SettingsWindow.ProfileMessageShown = true;
-                    }
-                    CreateUMTLastEdited(filename);
+                    SettingsWindow.ProfileMessageShown = true;
                 }
+                CreateUMTLastEdited(filename);
             }
             catch (Exception exc)
             {
-                this.ShowError("UpdateProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
+                this.ShowError("UpdateProfile error! (Note that profile mode is highly experimental.)\n" + exc);
             }
         }
         public async Task ProfileSaveEvent(UndertaleData data, string filename)
         {
-            FileMessageEvent?.Invoke("Calculating MD5 hash...");
+            if (!SettingsWindow.ProfileModeEnabled || ProfileHash is null)
+            {
+                return;
+            }
 
             string fileext = Path.GetExtension(filename);
 
@@ -452,7 +431,10 @@ an issue on GitHub.");
                 bool copyProfile = false;
                 await Task.Run(() =>
                 {
-                    using (var md5Instance = MD5.Create())
+                    using var md5Instance = MD5.Create();
+                    using var stream = File.OpenRead(filename);
+                    MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
+                    if (!BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").Equals(BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", ""), StringComparison.InvariantCultureIgnoreCase))
                     {
                         using (var stream = File.OpenRead(filename))
                         {
@@ -568,6 +550,24 @@ an issue on GitHub.");
                     DirectoryCopy(Path.Combine(profDir, "Temp"), Path.Combine(profDir, "Main"), true);
                     this.ShowMessage("Profile saved successfully to " + "\"" + CurProfileName + "\"");
                 }
+                MD5PreviouslyLoaded = MD5CurrentlyLoaded;
+                // Get the subdirectories for the specified directory.
+                MD5DirNameOld = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
+                MD5DirPathOld = Path.Combine(ProfilesFolder, MD5DirNameOld);
+                MD5DirPathOldMain = Path.Combine(MD5DirPathOld, "Main");
+                MD5DirPathOldTemp = Path.Combine(MD5DirPathOld, "Temp");
+                if ((Directory.Exists(MD5DirPathOldMain)) && (Directory.Exists(MD5DirPathOldTemp)) && copyProfile)
+                {
+                    Directory.Delete(MD5DirPathOldMain, true);
+                }
+                DirectoryCopy(MD5DirPathOldTemp, MD5DirPathOldMain, true);
+
+                ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                profDir = Path.Combine(ProfilesFolder, ProfileHash);
+                Directory.CreateDirectory(profDir);
+                Directory.CreateDirectory(Path.Combine(profDir, "Main"));
+                Directory.CreateDirectory(Path.Combine(profDir, "Temp"));
+
                 if (SettingsWindow.DeleteOldProfileOnSave && copyProfile)
                 {
                     //this.ShowMessage(Oldname);
@@ -576,7 +576,7 @@ an issue on GitHub.");
             }
             catch (Exception exc)
             {
-                this.ShowError("ProfileSaveEvent error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
+                this.ShowError("ProfileSaveEvent error! (Note that profile mode is highly experimental.)\n" + exc);
             }
         }
         public void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
@@ -627,7 +627,7 @@ an issue on GitHub.");
             }
             catch (Exception exc)
             {
-                this.ShowError("DirectoryCopy error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
+                this.ShowError("DirectoryCopy error! (Note that profile mode is highly experimental.)\n" + exc);
             }
         }
     }

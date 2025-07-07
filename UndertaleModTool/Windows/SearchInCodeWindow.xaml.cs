@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable CA1416 // Validate platform compatibility
+
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -24,43 +26,42 @@ namespace UndertaleModTool.Windows
     {
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
 
-        bool isCaseSensitive;
-        bool isRegexSearch;
-        bool isInAssembly;
-        string text;
+        private static bool isSearchInProgress = false;
 
-        bool usingGMLCache;
+        private bool isCaseSensitive, isRegexSearch, isInAssembly;
+        private string text;
 
-        int progressCount = 0;
-        int resultCount = 0;
+        private int progressCount = 0;
+        private int resultCount = 0;
+
+        private ConcurrentDictionary<string, List<(int, string)>> resultsDict;
+        private ConcurrentBag<string> failedList;
+        private IEnumerable<KeyValuePair<string, List<(int, string)>>> resultsDictSorted;
+        private IEnumerable<string> failedListSorted;
+
+        private Regex keywordRegex, nameRegex;
+        private GlobalDecompileContext decompileContext;
+        private LoaderDialog loaderDialog;
+        private UndertaleCodeEditor.CodeEditorTab editorTab;
 
         public readonly record struct Result(string Code, int LineNumber, string LineText);
 
         public ObservableCollection<Result> Results { get; set; } = new();
 
-        ConcurrentDictionary<string, List<(int, string)>> resultsDict;
-        ConcurrentBag<string> failedList;
-        IEnumerable<KeyValuePair<string, List<(int, string)>>> resultsDictSorted;
-        IEnumerable<string> failedListSorted;
-        
-        Regex keywordRegex;
-
-        GlobalDecompileContext globalDecompileContext;
-        Underanalyzer.Decompiler.IDecompileSettings decompileSettings;
-
-        LoaderDialog loaderDialog;
-
-        private UndertaleCodeEditor.CodeEditorTab editorTab;
-
-        public SearchInCodeWindow()
+        public SearchInCodeWindow(string query = null, bool inAssembly = false)
         {
             InitializeComponent();
-        }
 
-        public void ActivateAndFocusOnTextBox()
-        {
-            Activate();
-            SearchTextBox.Focus();
+            if (query is not null)
+            {
+                if (query.Length > 256 || query.Count(x => x == '\n') > 16)
+                    return; // Ignore if the query is longer than 256 characters or 16 lines.
+
+                SearchTextBox.Text = query;
+                SearchTextBox.SelectAll();
+            }
+
+            InAssemblyCheckBox.IsChecked = inAssembly;
         }
 
         private async void SearchButton_Click(object sender, RoutedEventArgs e)
@@ -84,22 +85,83 @@ namespace UndertaleModTool.Windows
                 return;
             }
 
-            text = SearchTextBox.Text;
+            text = SearchTextBox.Text.Replace("\r\n", "\n");
 
             if (String.IsNullOrEmpty(text))
                 return;
+
+            if (isSearchInProgress)
+            {
+                this.ShowError("Can't search while another search is in progress.");
+                return;
+            }
 
             isCaseSensitive = CaseSensitiveCheckBox.IsChecked ?? false;
             isRegexSearch = RegexSearchCheckBox.IsChecked ?? false;
             isInAssembly = InAssemblyCheckBox.IsChecked ?? false;
 
+            bool filterByName = FilterByNameExpander.IsExpanded;
+            bool nameIsCaseSensitive, nameIsRegex;
+            string name;
+
+            IList<UndertaleCode> codeEntriesToSearch = mainWindow.Data.Code;
+
             if (isRegexSearch)
             {
-                keywordRegex = new(text, isCaseSensitive ? RegexOptions.Compiled : RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                try
+                {
+                    keywordRegex = new(text, isCaseSensitive ? RegexOptions.Compiled : RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                }
+                catch (ArgumentException e)
+                {
+                    this.ShowError($"Invalid Regex: {e.Message}");
+                    return;
+                }
+            }
+
+            if (filterByName)
+            {
+                name = NameFilterTextBox.Text;
+                if (!String.IsNullOrEmpty(name))
+                {
+                    nameIsCaseSensitive = NameCaseSensitiveCheckBox.IsChecked ?? false;
+                    nameIsRegex = NameRegexSearchCheckBox.IsChecked ?? false;
+
+                    if (nameIsRegex)
+                    {
+                        try
+                        {
+                            nameRegex = new(name, nameIsCaseSensitive ? RegexOptions.Compiled : RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                            codeEntriesToSearch = mainWindow.Data.Code.Where(c => !String.IsNullOrEmpty(c.Name.Content)
+                                                                                  && nameRegex.IsMatch(c.Name.Content))
+                                                                      .ToList();
+                        }
+                        catch (ArgumentException e)
+                        {
+                            this.ShowError($"Invalid name Regex: {e.Message}");
+                            filterByName = false;
+                        }
+                    }
+                    else
+                    {
+                        var comparison = nameIsCaseSensitive ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase;
+                        codeEntriesToSearch = mainWindow.Data.Code.Where(c => !String.IsNullOrEmpty(c.Name.Content)
+                                                                              && c.Name.Content.Contains(name, comparison))
+                                                                  .ToList();
+                    }
+                }
+            }
+
+            if (codeEntriesToSearch.Count == 0)
+            {
+                this.ShowMessage("There are no code entries that match the name filter.");
+                return;
             }
 
             mainWindow.IsEnabled = false;
             this.IsEnabled = false;
+
+            isSearchInProgress = true;
 
             loaderDialog = new("Searching...", null);
             loaderDialog.Owner = this;
@@ -117,34 +179,13 @@ namespace UndertaleModTool.Windows
 
             if (!isInAssembly)
             {
-                globalDecompileContext = new(mainWindow.Data);
-                decompileSettings = mainWindow.Data.ToolInfo.DecompilerSettings;
-
-                // HACK: This could be problematic
-                usingGMLCache = await mainWindow.GenerateGMLCache(globalDecompileContext, loaderDialog);
-
-                // If we run script before opening any code
-                if (!usingGMLCache && mainWindow.Data.GlobalFunctions is null)
-                {
-                    loaderDialog.Maximum = null;
-                    loaderDialog.Update("Building the cache of all global functions...");
-
-                    await Task.Run(() => GlobalDecompileContext.BuildGlobalFunctionCache(mainWindow.Data));
-                }
+                decompileContext = new GlobalDecompileContext(mainWindow.Data);
             }
 
             loaderDialog.SavedStatusText = "Code entries";
-            loaderDialog.Update(null, "Code entries", 0, mainWindow.Data.Code.Count);
+            loaderDialog.Update(null, "Code entries", 0, codeEntriesToSearch.Count);
 
-            if (!isInAssembly && usingGMLCache)
-            {
-                await Task.Run(() => Parallel.ForEach(mainWindow.Data.GMLCache, SearchInGMLCache));
-            }
-            else
-            {
-                await Task.Run(() => Parallel.ForEach(mainWindow.Data.Code, SearchInUndertaleCode));
-            }
-
+            await Task.Run(() => Parallel.ForEach(codeEntriesToSearch, SearchInUndertaleCode));
             await Task.Run(SortResults);
 
             loaderDialog.Maximum = null;
@@ -160,14 +201,8 @@ namespace UndertaleModTool.Windows
 
             mainWindow.IsEnabled = true;
             this.IsEnabled = true;
-        }
 
-        void SearchInGMLCache(KeyValuePair<string, string> code)
-        {
-            SearchInCodeText(code.Key, code.Value);
-
-            Interlocked.Increment(ref progressCount);
-            Dispatcher.Invoke(() => loaderDialog.ReportProgress(progressCount));
+            isSearchInProgress = false;
         }
 
         void SearchInUndertaleCode(UndertaleCode code)
@@ -177,14 +212,15 @@ namespace UndertaleModTool.Windows
                 if (code is not null && code.ParentEntry is null)
                 {
                     var codeText = isInAssembly
-                        ? code.Disassemble(mainWindow.Data.Variables, mainWindow.Data.CodeLocals.For(code))
-                        : new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, decompileSettings).DecompileToString();
+                        ? code.Disassemble(mainWindow.Data.Variables, mainWindow.Data.CodeLocals?.For(code), mainWindow.Data.CodeLocals is null)
+                        : TryGetProfileModeGML(code.Name.Content)
+                            ?? new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, mainWindow.Data.ToolInfo.DecompilerSettings).DecompileToString();
                     SearchInCodeText(code.Name.Content, codeText);
                 }
                 
             }
             // TODO: Look at specific exceptions
-            catch (Exception e)
+            catch (Exception)
             {
                 failedList.Add(code.Name.Content);
             }
@@ -193,28 +229,83 @@ namespace UndertaleModTool.Windows
             Dispatcher.Invoke(() => loaderDialog.ReportProgress(progressCount));
         }
 
+        static string TryGetProfileModeGML(string codeName)
+        {
+            if (SettingsWindow.ProfileModeEnabled && mainWindow.ProfileHash is not null)
+            {
+                string path = Path.Join(Settings.ProfilesFolder, mainWindow.ProfileHash, "Temp", codeName + ".gml");
+                if (File.Exists(path))
+                    return File.ReadAllText(path).Replace("\r\n", "\n");
+            }
+            return null;
+        }
+
         void SearchInCodeText(string codeName, string codeText)
         {
-            var lineNumber = 0;
-            StringReader codeTextReader = new(codeText);
-            bool nameWritten = false;
-            string lineText;
-            while ((lineText = codeTextReader.ReadLine()) is not null)
-            {
-                lineNumber += 1;
-                if (lineText == string.Empty)
-                    continue;
+            List<int> results = new();
 
-                if (((isRegexSearch && keywordRegex.Match(lineText).Success) || ((!isRegexSearch && isCaseSensitive) ? lineText.Contains(text) : lineText.Contains(text, StringComparison.CurrentCultureIgnoreCase))))
+            if (isRegexSearch)
+            {
+                MatchCollection matches = keywordRegex.Matches(codeText);
+                foreach (Match match in matches)
                 {
-                    if (nameWritten == false)
-                    {
-                        resultsDict[codeName] = new List<(int, string)>();
-                        nameWritten = true;
-                    }
-                    resultsDict[codeName].Add((lineNumber, lineText));
-                    Interlocked.Increment(ref resultCount);
+                    results.Add(match.Index);
                 }
+            }
+            else
+            {
+                StringComparison comparisonType = isCaseSensitive ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase;
+
+                int index = 0;
+                while ((index = codeText.IndexOf(text, index, comparisonType)) != -1)
+                {
+                    results.Add(index);
+                    index += text.Length;
+                }
+            }
+
+            bool nameWritten = false;
+
+            int lineNumber = 0;
+            int lineStartIndex = 0;
+
+            foreach (int index in results)
+            {
+                // Continue from previous line count since results are in order
+                for (int i = lineStartIndex; i < index; ++i)
+                {
+                    if (codeText[i] == '\n')
+                    {
+                        lineNumber++;
+                        lineStartIndex = i + 1;
+                    }
+                }
+
+                // Start at match.Index so it's only one line in case the search was multiline
+                int lineEndIndex = codeText.IndexOf('\n', index);
+                lineEndIndex = lineEndIndex == -1 ? codeText.Length : lineEndIndex;
+
+                string lineText;
+
+                // Limit the displayed line length to 128
+                if (lineEndIndex - lineStartIndex > 128)
+                {
+                    lineEndIndex = lineStartIndex + 128;
+                    lineText = codeText[lineStartIndex..lineEndIndex] + "...";
+                }
+                else
+                {
+                    lineText = codeText[lineStartIndex..lineEndIndex];
+                }
+
+                if (nameWritten == false)
+                {
+                    resultsDict[codeName] = new List<(int, string)>();
+                    nameWritten = true;
+                }
+                resultsDict[codeName].Add((lineNumber + 1, lineText));
+
+                Interlocked.Increment(ref resultCount);
             }
         }
 
@@ -223,12 +314,7 @@ namespace UndertaleModTool.Windows
             string[] codeNames = mainWindow.Data.Code.Select(x => x.Name.Content).ToArray();
 
             resultsDictSorted = resultsDict.OrderBy(c => Array.IndexOf(codeNames, c.Key));
-            failedListSorted = failedList;
-
-            if (!isInAssembly && mainWindow.Data.GMLCacheFailed?.Count > 0)
-                failedListSorted = failedListSorted.Concat(mainWindow.Data.GMLCacheFailed);
-
-            failedListSorted = failedListSorted.OrderBy(c => Array.IndexOf(codeNames, c));
+            failedListSorted = failedList.OrderBy(c => Array.IndexOf(codeNames, c));
         }
 
         public void ShowResults()
@@ -242,16 +328,22 @@ namespace UndertaleModTool.Windows
                 }
             }
 
-            string str = $"{resultCount} result{(resultCount > 1 ? "s" : "")} found in {resultsDictSorted.Count()} code entr{(resultsDictSorted.Count() > 1 ? "ies" : "y")}.";
+            string str = $"{resultCount} result{(resultCount != 1 ? "s" : "")} found in {resultsDictSorted.Count()} code entr{(resultsDictSorted.Count() != 1 ? "ies" : "y")}.";
             if (failedListSorted.Count() > 0)
             {
-                str += $" {failedListSorted.Count()} code entr{(failedListSorted.Count() > 1 ? "ies" : "y")} with an error.";
+                str += $" {failedListSorted.Count()} code entr{(failedListSorted.Count() != 1 ? "ies" : "y")} with an error.";
             }
             StatusBarTextBlock.Text = str;
         }
 
         void OpenSelectedListViewItem(bool inNewTab=false)
         {
+            if (isSearchInProgress)
+            {
+                this.ShowError("Can't open results while a search is in progress.");
+                return;
+            }
+
             foreach (Result result in ResultsListView.SelectedItems)
             {
                 mainWindow.OpenCodeEntry(result.Code, result.LineNumber, editorTab, inNewTab);
@@ -260,12 +352,29 @@ namespace UndertaleModTool.Windows
             }
         }
 
-        static void CopyListViewItems(IEnumerable items)
+        void CopyListViewItems(IEnumerable items)
         {
             string str = String.Join("\n", items
                 .Cast<Result>()
                 .Select(result => $"{result.Code}\t{result.LineNumber}\t{result.LineText}"));
-            Clipboard.SetText(str);
+            try
+            {
+                Clipboard.SetText(str);
+            }
+            catch (Exception ex)
+            {
+                this.ShowError("Can't copy the item name to clipboard due to this error:\n" +
+                               ex.Message + ".\nYou probably should try again.");
+            }
+        }
+
+        private async void SearchTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter && !Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+            {
+                e.Handled = true;
+                await Search();
+            }
         }
 
         private void ListViewItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -276,7 +385,10 @@ namespace UndertaleModTool.Windows
         private void ListViewItem_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Return)
+            {
                 OpenSelectedListViewItem();
+                e.Handled = true;
+            }   
         }
 
         private void MenuItemOpen_Click(object sender, RoutedEventArgs e)
@@ -299,9 +411,20 @@ namespace UndertaleModTool.Windows
             CopyListViewItems(ResultsListView.SelectedItems.Cast<Result>().OrderBy(item => ResultsListView.Items.IndexOf(item)));
         }
 
+        private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (!IsVisible || IsLoaded)
+                return;
+
+            if (Settings.Instance.EnableDarkMode)
+                MainWindow.SetDarkTitleBarForWindow(this, true, false);
+        }
+
         private void Window_Closing(object sender, CancelEventArgs e)
         {
             e.Cancel = (loaderDialog is not null);
         }
     }
 }
+
+#pragma warning restore CA1416 // Validate platform compatibility

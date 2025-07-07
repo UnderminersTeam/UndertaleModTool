@@ -50,7 +50,8 @@
                 Padding="4" Background="#222222" Foreground="#C0C0C0" MaxHeight="300"
                 BorderBrush="#FFABADB3" BorderThickness="1"
                 LineNumbersForeground="#DBDBDB" ShowLineNumbers="True"
-                Loaded="TextEditor_Loaded" LostFocus="TextEditor_LostFocus"/>
+                Loaded="TextEditor_Loaded" LostFocus="TextEditor_LostFocus"
+                DataContextChanged="TextEditor_DataContextChanged"/>
         </Expander>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">GLSL ES fragment source</TextBlock>
@@ -61,7 +62,8 @@
                 Padding="4" Background="#222222" Foreground="#C0C0C0" MaxHeight="300"
                 BorderBrush="#FFABADB3" BorderThickness="1"
                 LineNumbersForeground="#DBDBDB" ShowLineNumbers="True"
-                Loaded="TextEditor_Loaded" LostFocus="TextEditor_LostFocus"/>
+                Loaded="TextEditor_Loaded" LostFocus="TextEditor_LostFocus"
+                DataContextChanged="TextEditor_DataContextChanged"/>
         </Expander>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">GLSL vertex source</TextBlock>
@@ -72,7 +74,8 @@
                 Padding="4" Background="#222222" Foreground="#C0C0C0" MaxHeight="300"
                 BorderBrush="#FFABADB3" BorderThickness="1"
                 LineNumbersForeground="#DBDBDB" ShowLineNumbers="True"
-                Loaded="TextEditor_Loaded" LostFocus="TextEditor_LostFocus"/>
+                Loaded="TextEditor_Loaded" LostFocus="TextEditor_LostFocus"
+                DataContextChanged="TextEditor_DataContextChanged"/>
         </Expander>
 
         <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">GLSL fragment source</TextBlock>
@@ -83,7 +86,8 @@
                 Padding="4" Background="#222222" Foreground="#C0C0C0" MaxHeight="300"
                 BorderBrush="#FFABADB3" BorderThickness="1"
                 LineNumbersForeground="#DBDBDB" ShowLineNumbers="True"
-                Loaded="TextEditor_Loaded" LostFocus="TextEditor_LostFocus"/>
+                Loaded="TextEditor_Loaded" LostFocus="TextEditor_LostFocus"
+                DataContextChanged="TextEditor_DataContextChanged"/>
         </Expander>
 
         <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">HLSL9 vertex source</TextBlock>
@@ -94,7 +98,8 @@
                 Padding="4" Background="#222222" Foreground="#C0C0C0" MaxHeight="300"
                 BorderBrush="#FFABADB3" BorderThickness="1"
                 LineNumbersForeground="#DBDBDB" ShowLineNumbers="True"
-                Loaded="TextEditor_Loaded" LostFocus="TextEditor_LostFocus"/>
+                Loaded="TextEditor_Loaded" LostFocus="TextEditor_LostFocus"
+                DataContextChanged="TextEditor_DataContextChanged"/>
         </Expander>
 
         <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">HLSL9 fragment source</TextBlock>
@@ -105,7 +110,8 @@
                 Padding="4" Background="#222222" Foreground="#C0C0C0" MaxHeight="300"
                 BorderBrush="#FFABADB3" BorderThickness="1"
                 LineNumbersForeground="#DBDBDB" ShowLineNumbers="True"
-                Loaded="TextEditor_Loaded" LostFocus="TextEditor_LostFocus"/>
+                Loaded="TextEditor_Loaded" LostFocus="TextEditor_LostFocus"
+                DataContextChanged="TextEditor_DataContextChanged"/>
         </Expander>
 
         <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Vertex shader attributes</TextBlock>

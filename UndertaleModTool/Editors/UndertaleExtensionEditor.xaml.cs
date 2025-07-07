@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -23,7 +24,7 @@ namespace UndertaleModTool
     /// <summary>
     /// Interaction logic for UndertaleExtensionEditor.xaml
     /// </summary>
-    public partial class UndertaleExtensionEditor : DataUserControl
+    public partial class UndertaleExtensionEditor : DataUserControl, INotifyPropertyChanged
     {
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
 
@@ -37,8 +38,25 @@ namespace UndertaleModTool
                 return mainWindow.Data.Extensions.IndexOf(ext);
             }
         }
-        // God this is so ugly, if there's a better way, please, put in a pull request
-        public byte[] ProductIdData { get => ((((mainWindow.Data?.GeneralInfo?.Major ?? 0) >= 2) || (((mainWindow.Data?.GeneralInfo?.Major ?? 0) == 1) && (((mainWindow.Data?.GeneralInfo?.Build ?? 0) >= 1773) || ((mainWindow.Data?.GeneralInfo?.Build ?? 0) == 1539)))) ? mainWindow.Data.FORM.EXTN.productIdData[MyIndex] : null); set => mainWindow.Data.FORM.EXTN.productIdData[MyIndex] = value; }
+        public byte[] ProductIdData 
+        {
+            get
+            {
+                if (mainWindow.Data?.GeneralInfo is UndertaleGeneralInfo generalInfo &&
+                    (generalInfo.Major >= 2 || 
+                    (generalInfo.Major == 1 && (generalInfo.Build >= 1773 || generalInfo.Build == 1539))))
+                {
+                    return mainWindow.Data.FORM.EXTN.productIdData[MyIndex];
+                }
+                return null;
+            }
+            set
+            {
+                mainWindow.Data.FORM.EXTN.productIdData[MyIndex] = value;
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public UndertaleExtensionEditor()
         {
@@ -80,6 +98,11 @@ namespace UndertaleModTool
 
             //((Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
             //((Image)mainWindow.FindName("Flowey")).Opacity = 0;
+            DataContextChanged += (sender, args) =>
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MyIndex)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ProductIdData)));
+            };
         }
 
         private void NewFileButton_Click(object sender, RoutedEventArgs e)

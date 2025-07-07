@@ -88,24 +88,33 @@ namespace UndertaleModTool
 
             ((Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
         }
-        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private void UndertaleObjectReference_Loaded(object sender, RoutedEventArgs e)
         {
-            UndertaleGameObject code = this.DataContext as UndertaleGameObject;
+            var objRef = sender as UndertaleObjectReference;
 
-            int foundIndex = code is UndertaleResource res ? mainWindow.Data.IndexOf(res, false) : -1;
-            string idString;
+            objRef.ClearRemoveClickHandler();
+            objRef.RemoveButton.Click += Remove_Click_Override;
+            objRef.RemoveButton.ToolTip = "Remove action";
+            objRef.RemoveButton.IsEnabled = true;
+        }
+        private void Remove_Click_Override(object sender, RoutedEventArgs e)
+        {
+            var btn = (ButtonDark)sender;
+            var objRef = (UndertaleObjectReference)((Grid)btn.Parent).Parent;
 
-            if (foundIndex == -1)
-                idString = "None";
-            else if (foundIndex == -2)
-                idString = "N/A";
-            else
-                idString = Convert.ToString(foundIndex);
+            var obj = (UndertaleGameObject)DataContext;
+            var evType = objRef.ObjectEventType;
+            var evSubtype = objRef.ObjectEventSubtype;
+            var action = (UndertaleGameObject.EventAction)btn.DataContext;
+            var evList = ((UndertaleGameObject)DataContext).Events[(int)evType];
 
-            ((Label)this.FindName("ObjectsObjectLabel")).Content = idString;
-
-            //((Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
-            //((Image)mainWindow.FindName("Flowey")).Opacity = 0;
+            var ev = evList.FirstOrDefault(x => x.EventSubtype == evSubtype);
+            if (ev is null) return;
+            ev.Actions.Remove(action);
+            if (ev.Actions.Count <= 0)
+            {
+                evList.Remove(ev);
+            }
         }
     }
 }

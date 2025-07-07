@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using WpfAnimatedGif;
+using UndertaleModLib.Models;
 
 namespace UndertaleModTool
 {
@@ -41,6 +42,28 @@ namespace UndertaleModTool
             controller.Play();
 
             ((Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+        }
+        private void UndertaleObjectReference_Loaded(object sender, RoutedEventArgs e)
+        {
+            var objRef = sender as UndertaleObjectReference;
+
+            objRef.ClearRemoveClickHandler();
+            objRef.RemoveButton.Click += Remove_Click_Override;
+            objRef.RemoveButton.ToolTip = "Remove script";
+            objRef.RemoveButton.IsEnabled = true;
+        }
+        private void Remove_Click_Override(object sender, RoutedEventArgs e)
+        {
+            var btn = (ButtonDark)sender;
+            var objRef = (UndertaleObjectReference)((Grid)btn.Parent).Parent;
+
+            var data = (GlobalInitEditor)DataContext;
+            var globalInits = data.GlobalInits;
+            if (btn.DataContext is not UndertaleGlobalInit)
+            {
+                return;
+            }
+            globalInits.Remove((UndertaleGlobalInit)btn.DataContext);
         }
     }
 }
