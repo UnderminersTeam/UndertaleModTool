@@ -103,16 +103,23 @@
         </c:EditableDataGrid>
 
         <Label>Collision mask data</Label>
-        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
-                      MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
-            <c:SKImageViewer>
-                <c:SKImageViewer.SKImage>
-                    <MultiBinding Converter="{StaticResource ToSKImageUpdaterConverter}">
-                        <Binding Path="CollisionMasksSelected"/>
-                    </MultiBinding>
-                </c:SKImageViewer.SKImage>
-            </c:SKImageViewer>
-        </ScrollViewer>
+        <StackPanel IsVisible="{Binding CollisionMasksSelected, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
+                          MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
+                <c:SKImageViewer>
+                    <c:SKImageViewer.SKImage>
+                        <MultiBinding Converter="{StaticResource ToSKImageUpdaterConverter}">
+                            <Binding Path="CollisionMasksSelected"/>
+                        </MultiBinding>
+                    </c:SKImageViewer.SKImage>
+                </c:SKImageViewer>
+            </ScrollViewer>
+
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding ImportCollisionMaskData}">Import collision mask data</Button>
+                <Button Command="{Binding ExportCollisionMaskData}">Export collision mask data</Button>
+            </StackPanel>
+        </StackPanel>
 
         <Label>Is special type</Label>
         <CheckBox IsChecked="{Binding Sprite.IsSpecialType}" />
