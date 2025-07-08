@@ -380,7 +380,95 @@ public sealed class CompileGroup
         // Mark this group as compiling
         GlobalContext.CurrentCompileGroup = this;
 
-        // Work through replacement queue
+        // If queue hasn't been created yet, create an empty one
+        _queuedCodeReplacements ??= new();
+
+        // If global scripts are present in the replacement queue, parse their code in advance to collect global functions
+        List<CompileContext> globalScriptContexts = null;
+        foreach (QueuedOperation operation in _queuedCodeReplacements)
+        {
+            // Guess script kind and global script name, based on code entry name
+            (CompileScriptKind scriptKind, string globalScriptName) = GuessScriptKindFromName(operation.CodeEntry.Name?.Content);
+
+            // If not a global script, ignore
+            if (scriptKind is not CompileScriptKind.GlobalScript)
+            {
+                continue;
+            }
+
+            // Create a compile context early
+            CompileContext context = new(operation.Code, scriptKind, globalScriptName, GlobalContext);
+
+            // Perform parse
+            try
+            {
+                context.Parse();
+
+                // Check for compile errors
+                if (context.HasErrors)
+                {
+                    errors ??= new(context.Errors.Count);
+                    foreach (ICompileError error in context.Errors)
+                    {
+                        errors.Add(new CompileError(operation.CodeEntry, error));
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                // Exception thrown; make compile error for it
+                errors ??= new();
+                errors.Add(new CompileError(operation.CodeEntry, e));
+            }
+
+            // Add context to global script context list, for reuse
+            globalScriptContexts ??= new();
+            globalScriptContexts.Add(context);
+        }
+
+        // Define global functions, if applicable
+        List<(string Name, IGMFunction NewFunction, IGMFunction OldFunction)> newlyDefinedGlobalFunctions = null;
+        if (globalScriptContexts is not null)
+        {
+            // Perform linking on main thread
+            MainThreadAction(() =>
+            {
+                // Setup for linking
+                InitializeLinkingLookups();
+
+                // Iterate over all global script compile contexts, to find functions
+                foreach (CompileContext context in globalScriptContexts)
+                {
+                    if (context.OutputGlobalFunctionNames is null)
+                    {
+                        continue;
+                    }
+                    foreach (string functionName in context.OutputGlobalFunctionNames)
+                    {
+                        // Get old function entry, if one exists (in case this needs to be rolled back due to an error)
+                        Data.GlobalFunctions.TryGetFunction(functionName, out IGMFunction oldFunctionEntry);
+
+                        // Define function using standard naming convention
+                        string functionEntryName = $"gml_Script_{functionName}";
+                        if (!_linkingFunctionLookup.TryGetValue(functionEntryName, out UndertaleFunction newFunctionEntry))
+                        {
+                            // Create a new function entry; will be added to game data later
+                            newFunctionEntry = new()
+                            {
+                                Name = MakeString(functionEntryName, out int id),
+                                NameStringID = id
+                            };
+                        }
+                        Data.GlobalFunctions.DefineFunction(functionName, newFunctionEntry);
+                        newlyDefinedGlobalFunctions ??= new();
+                        newlyDefinedGlobalFunctions.Add((functionName, newFunctionEntry, oldFunctionEntry));
+                    }
+                }
+            });
+        }
+
+        // Work through replacement queue, for main compilation and linking
+        int globalScriptContextIndex = 0;
         foreach (QueuedOperation operation in _queuedCodeReplacements)
         {
             // Guess script kind and global script name, based on code entry name
@@ -400,7 +488,18 @@ public sealed class CompileGroup
             }
 
             // Perform initial compile step
-            CompileContext context = new(operation.Code, scriptKind, globalScriptName, GlobalContext);
+            CompileContext context;
+            if (scriptKind is not CompileScriptKind.GlobalScript)
+            {
+                // Create a brand new compile context
+                context = new(operation.Code, scriptKind, globalScriptName, GlobalContext);
+            }
+            else
+            {
+                // Reuse compile context from initial global script parse
+                context = globalScriptContexts[globalScriptContextIndex];
+                globalScriptContextIndex++;
+            }
             try
             {
                 context.Compile();
@@ -464,7 +563,6 @@ public sealed class CompileGroup
                 // Resolve function entries. Either pair up with existing child code entries, or make new ones.
                 List<ChildCodeEntryData> childDataList = new(context.OutputFunctionEntries.Count);
                 HashSet<string> usedChildEntryNames = new(operation.CodeEntry.ChildEntries.Count);
-                List<(string Name, IGMFunction NewFunction, IGMFunction OldFunction)> newlyDefinedGlobalFunctions = new();
                 string rootCodeEntryName = operation.CodeEntry.Name.Content;
                 int anonCounter = 0;
                 foreach (FunctionEntry functionEntry in context.OutputFunctionEntries)
@@ -584,7 +682,21 @@ public sealed class CompileGroup
                             }
 
                             // Try to take existing function, if available
-                            existingFunction = newFunction = _linkingFunctionLookup[originalEntryName];
+                            if (!_linkingFunctionLookup.TryGetValue(originalEntryName, out existingFunction))
+                            {
+                                // If this is a somehow a new global function (corrupt data?), take existing function from earlier
+                                if (scriptKind == CompileScriptKind.GlobalScript &&
+                                    functionEntry is { DeclaredInRootScope: true, FunctionName: not null } &&
+                                    Data.GlobalFunctions.TryGetFunction(functionEntry.FunctionName, out IGMFunction newGlobalFunction))
+                                {
+                                    // Don't set existing function, so that this new function will be added to the main data later
+                                    newFunction = (UndertaleFunction)newGlobalFunction;
+                                }
+                            }
+                            else
+                            {
+                                newFunction = existingFunction;
+                            }
 
                             // If all code entries from name group are taken, remove it from remaining lookup
                             if (originalCodeEntries.RemainingOriginalEntries.Count == 0)
@@ -629,8 +741,26 @@ public sealed class CompileGroup
                     }
                     if (existingFunction is null)
                     {
-                        // Need to make a new function entry
-                        newFunction = new()
+                        // If this is a new global function, take existing function from earlier, if available
+                        if (scriptKind == CompileScriptKind.GlobalScript &&
+                            functionEntry is { DeclaredInRootScope: true, FunctionName: not null })
+                        {
+                            if (!_linkingFunctionLookup.TryGetValue($"gml_Script_{functionEntry.FunctionName}", out existingFunction))
+                            {
+                                if (Data.GlobalFunctions.TryGetFunction(functionEntry.FunctionName, out IGMFunction newGlobalFunction))
+                                {
+                                    // Don't set existing function, so that this new function will be added to the main data later
+                                    newFunction = (UndertaleFunction)newGlobalFunction;
+                                }
+                            }
+                            else
+                            {
+                                newFunction = existingFunction;
+                            }
+                        }
+
+                        // If not assigned already, need to make a new function entry
+                        newFunction ??= new()
                         {
                             Name = MakeString(codeEntryName, out int id),
                             NameStringID = id
@@ -661,15 +791,6 @@ public sealed class CompileGroup
                         }
                     }
 
-                    // If this is a global function, define function name globally
-                    if (scriptKind == CompileScriptKind.GlobalScript &&
-                        functionEntry is { DeclaredInRootScope: true, FunctionName: not null })
-                    {
-                        Data.GlobalFunctions.TryGetFunction(shortName, out IGMFunction oldFunction);
-                        Data.GlobalFunctions.DefineFunction(shortName, newFunction);
-                        newlyDefinedGlobalFunctions.Add((shortName, newFunction, oldFunction));
-                    }
-
                     // Add data to list for later addition to main data
                     usedChildEntryNames.Add(codeEntryName);
                     childDataList.Add(
@@ -685,8 +806,6 @@ public sealed class CompileGroup
                         )
                     );
                 }
-
-                // TODO: maybe throw an error if there's any remaining child code entries that are also global functions
 
                 // Create structures for linking local variables
                 _linkingVariableOrderLookup ??= new(16);
@@ -766,17 +885,6 @@ public sealed class CompileGroup
                 // If any errors occurred, don't commit any further modifications to main data (avoid too much corruption)
                 if (errors is not null)
                 {
-                    // Undefine global functions that were newly-defined (so they don't cause consistency issues)
-                    foreach ((string functionName, IGMFunction newFunction, IGMFunction oldFunction) in newlyDefinedGlobalFunctions)
-                    {
-                        Data.GlobalFunctions.UndefineFunction(functionName, newFunction);
-
-                        // Also restore old function if possible
-                        if (oldFunction is not null)
-                        {
-                            Data.GlobalFunctions.DefineFunction(functionName, oldFunction);
-                        }
-                    }
                     return;
                 }
 
@@ -913,6 +1021,25 @@ public sealed class CompileGroup
         // Clear queues
         _queuedCodeReplacements?.Clear();
 
+        // If errors occurred, undefine global functions that were newly-defined (so they don't cause consistency issues)
+        if (errors is not null && newlyDefinedGlobalFunctions is not null)
+        {
+            // Iterate in reverse order, in case the same function name was defined twice in different scripts (to restore original function)
+            for (int i = newlyDefinedGlobalFunctions.Count - 1; i >= 0; i--)
+            {
+                (string functionName, IGMFunction newFunction, IGMFunction oldFunction) = newlyDefinedGlobalFunctions[i];
+
+                // Undefine function
+                Data.GlobalFunctions.UndefineFunction(functionName, newFunction);
+
+                // Restore old function if possible
+                if (oldFunction is not null)
+                {
+                    Data.GlobalFunctions.DefineFunction(functionName, oldFunction);
+                }
+            }
+        }
+
         // Unreference other structures
         UnreferenceLinkingLookups();
 
@@ -963,7 +1090,7 @@ public sealed class CompileGroup
             for (int i = 0; i < Data.Scripts.Count; i++)
             {
                 UndertaleScript script = Data.Scripts[i];
-                if (script.Name?.Content is string name)
+                if (script?.Name?.Content is string name)
                 {
                     if (_linkingScriptLookup.TryGetValue(name, out List<UndertaleScript> existing))
                     {

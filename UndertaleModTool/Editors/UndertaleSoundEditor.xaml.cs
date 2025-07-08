@@ -112,19 +112,27 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    string path = Path.Combine(Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath), "audiogroup" + sound.GroupID + ".dat");
+                    string relativePath;
+                    if (sound.AudioGroup is UndertaleAudioGroup { Path.Content: string customRelativePath })
+                    {
+                        relativePath = customRelativePath;
+                    }
+                    else
+                    {
+                        relativePath = $"audiogroup{sound.GroupID}.dat";
+                    }
+                    string path = Path.Combine(Path.GetDirectoryName(mainWindow.FilePath), relativePath);
                     if (File.Exists(path))
                     {
                         if (loadedPath != path)
                         {
                             loadedPath = path;
-                            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read))
+
+                            using FileStream stream = new(path, FileMode.Open, FileAccess.Read);
+                            audioGroupData = UndertaleIO.Read(stream, (warning, _) =>
                             {
-                                audioGroupData = UndertaleIO.Read(stream, warning =>
-                                {
-                                    throw new Exception(warning);
-                                });
-                            }
+                                throw new Exception(warning);
+                            });
                         }
 
                         target = audioGroupData.EmbeddedAudio[sound.AudioID];

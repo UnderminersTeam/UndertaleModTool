@@ -66,6 +66,11 @@ namespace UndertaleModTests
             Console.WriteLine(message);
         }
 
+        public void ScriptWarning(string message)
+        {
+            Console.WriteLine($"Warning: {message}");
+        }
+
         public bool ScriptQuestion(string message)
         {
             Console.WriteLine(message);
@@ -210,6 +215,11 @@ namespace UndertaleModTests
         }
 
         public string PromptChooseDirectory()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string PromptSaveFile(string defaultExt, string filter)
         {
             throw new NotImplementedException();
         }

@@ -196,7 +196,7 @@ namespace UndertaleModTool
 
             if (DataContext is UndertaleRoom room)
             {
-                GameObjItems.Header = room.Flags.HasFlag(RoomEntryFlags.IsGMS2)
+                GameObjItems.Header = (room.Flags.HasFlag(RoomEntryFlags.IsGMS2) || room.Flags.HasFlag(RoomEntryFlags.IsGM2024_13))
                                       ? "Game objects (from all layers)"
                                       : "Game objects";
                 SetupRoomWithGrids(room);
@@ -270,7 +270,7 @@ namespace UndertaleModTool
                 if (obj is GameObject)
                 {
                     var room = DataContext as UndertaleRoom;
-                    if (room?.Flags.HasFlag(RoomEntryFlags.IsGMS2) == true)
+                    if ((room?.Flags.HasFlag(RoomEntryFlags.IsGMS2) == true) || (room?.Flags.HasFlag(RoomEntryFlags.IsGM2024_13) == true))
                     {
                         // Check if the selected game object is in the "Game objects (from all layers)" list
                         var objectItem = GameObjItems.ItemContainerGenerator.ContainerFromItem(obj) as TreeViewItem;
@@ -1068,7 +1068,7 @@ namespace UndertaleModTool
                         break;
 
                     case GameObject gameObj:
-                        if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
+                        if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2) || room.Flags.HasFlag(RoomEntryFlags.IsGM2024_13))
                         {
                             resLayer = room.Layers.AsParallel()
                                                   .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
@@ -1086,7 +1086,7 @@ namespace UndertaleModTool
                         break;
 
                     case Tile tile:
-                        if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
+                        if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2) || room.Flags.HasFlag(RoomEntryFlags.IsGM2024_13))
                         {
                             resLayer = room.Layers.AsParallel()
                                                   .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
@@ -1511,6 +1511,8 @@ namespace UndertaleModTool
             // See #355
             foreach (UndertaleRoom Room in data.Rooms)
             {
+                if (Room is null)
+                    continue;
                 foreach (Layer Layer in Room.Layers)
                 {
                     if (Layer.LayerId > largest_layerid)
@@ -1601,6 +1603,9 @@ namespace UndertaleModTool
                 // likewise
                 if (data.IsNonLTSVersionAtLeast(2023, 2))
                     layer.AssetsData.ParticleSystems ??= new UndertalePointerList<ParticleSystemInstance>();
+                // and likewise again
+                if (data.IsVersionAtLeast(2024, 6))
+                    layer.AssetsData.TextItems ??= new UndertalePointerList<TextItemInstance>();
             }
             else if (layer.LayerType == LayerType.Tiles)
             {
@@ -1793,7 +1798,7 @@ namespace UndertaleModTool
 
             if (obj is GameObject)
             {
-                if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
+                if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2) || room.Flags.HasFlag(RoomEntryFlags.IsGM2024_13))
                 {
                     // Check if the selected game object is in the "Game objects (from all layers)" list
                     var objectItem = GameObjItems.ItemContainerGenerator.ContainerFromItem(obj) as TreeViewItem;
@@ -1931,7 +1936,7 @@ namespace UndertaleModTool
             List<Tile> tiles = null;
             List<Tuple<UndertaleTexturePageItem, List<Tuple<int, int, uint, uint>>>> tileTextures = null;
             List<object> allObjects = new();
-            if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2))
+            if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2) || room.Flags.HasFlag(RoomEntryFlags.IsGM2024_13))
             {
                 foreach (Layer layer in room.Layers)
                 {
@@ -2451,6 +2456,7 @@ namespace UndertaleModTool
                 switch ((item as Layer).LayerType)
                 {
                     case LayerType.Path:
+                    case LayerType.Path2:
                         return PathDataTemplate;
                     case LayerType.Instances:
                         return InstancesDataTemplate;
@@ -2478,7 +2484,8 @@ namespace UndertaleModTool
             if (values.Any(x => x is null || x == DependencyProperty.UnsetValue))
                 return null;
 
-            bool isGMS2 = ((RoomEntryFlags)values[1]).HasFlag(RoomEntryFlags.IsGMS2);
+            RoomEntryFlags flags = (RoomEntryFlags)values[1];
+            bool isGMS2 = flags.HasFlag(RoomEntryFlags.IsGMS2) || flags.HasFlag(RoomEntryFlags.IsGM2024_13);
 
             (values[0] as GeometryDrawing).Brush = new SolidColorBrush(Colors.Black);
             BindingOperations.SetBinding((values[0] as GeometryDrawing).Brush, SolidColorBrush.ColorProperty, new Binding(isGMS2 ? "BGColorLayer.BackgroundData.Color" : "BackgroundColor")
@@ -2627,28 +2634,48 @@ namespace UndertaleModTool
             {
                 if (par == "flags")
                 {
-                    if ((Application.Current.MainWindow as MainWindow).IsGMS2 == Visibility.Visible)
+                    MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+                    if (mainWindow?.Data is UndertaleData data && data.IsGameMaker2())
                     {
-                        if (!flags.HasFlag(RoomEntryFlags.IsGMS2))
+                        if (data.IsVersionAtLeast(2024, 13))
                         {
-                            try
+                            if (!flags.HasFlag(RoomEntryFlags.IsGM2024_13))
                             {
-                                Window mainWindow = Application.Current?.MainWindow;
-                                mainWindow.ShowError("Room flags of GMS 2+ games must contain the \"IsGMS2\" flag, otherwise the game will crash when loading that room.");
+                                try
+                                {
+                                    mainWindow.Dispatcher.BeginInvoke(() => mainWindow.ShowError("Room flags of GM 2024.13+ games must contain the \"IsGM2024_13\" flag, otherwise the game will crash when loading that room."));
+                                }
+                                catch { }
                             }
-                            catch { }
-                        }
 
-                        flags |= RoomEntryFlags.IsGMS2;
+                            flags |= RoomEntryFlags.IsGM2024_13;
+                        }
+                        else
+                        {
+                            if (!flags.HasFlag(RoomEntryFlags.IsGMS2))
+                            {
+                                try
+                                {
+                                    mainWindow.Dispatcher.BeginInvoke(() => mainWindow.ShowError("Room flags of GMS 2+ games must contain the \"IsGMS2\" flag, otherwise the game will crash when loading that room."));
+                                }
+                                catch { }
+                            }
+
+                            flags |= RoomEntryFlags.IsGMS2;
+                        }
                     }
 
                     return flags;
                 }
                 else
-                    isGMS2 = flags.HasFlag(RoomEntryFlags.IsGMS2) ^ invert;
+                {
+                    isGMS2 = (flags.HasFlag(RoomEntryFlags.IsGMS2) || flags.HasFlag(RoomEntryFlags.IsGM2024_13)) ^ invert;
+                }
             }
             else if (value is Visibility vis)
+            {
                 return vis == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+            }
 
             return targetType.Name switch
             {
@@ -2803,7 +2830,7 @@ namespace UndertaleModTool
 
             bool res = value switch
             {
-                RoomEntryFlags flags => !flags.HasFlag(RoomEntryFlags.IsGMS2),
+                RoomEntryFlags flags => !(flags.HasFlag(RoomEntryFlags.IsGMS2) || flags.HasFlag(RoomEntryFlags.IsGM2024_13)),
                 LayerType type => type is not LayerType.Instances,
                 _ => false
             };

@@ -68,6 +68,23 @@ namespace UndertaleModTool
 
             srcString.Content = editor.Text;
         }
+
+        private void TextEditor_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            var editor = sender as TextEditor;
+            if (editor is null)
+            {
+                return;
+            }
+
+            var srcString = e.NewValue as UndertaleString;
+            if (srcString is null)
+            {
+                return;
+            }
+
+            editor.Text = srcString.Content;
+        }
     }
 }
 

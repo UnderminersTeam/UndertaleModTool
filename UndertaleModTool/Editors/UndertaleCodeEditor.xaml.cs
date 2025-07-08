@@ -458,7 +458,7 @@ namespace UndertaleModTool
                 foreach (var obj in list)
                 {
                     if (obj is not UndertaleNamedResource namedObj)
-                        return;
+                        continue;
 
                     NamedObjDict[namedObj.Name.Content] = namedObj;
                 }
@@ -523,7 +523,7 @@ namespace UndertaleModTool
                 try
                 {
                     var data = mainWindow.Data;
-                    text = code.Disassemble(data.Variables, data.CodeLocals?.For(code));
+                    text = code.Disassemble(data.Variables, data.CodeLocals?.For(code), data.CodeLocals is null);
 
                     CurrentLocals.Clear();
                 }
@@ -1211,6 +1211,10 @@ namespace UndertaleModTool
                         ContextMenuDark contextMenu = new();
                         foreach (UndertaleObject obj in possibleObjects)
                         {
+                            if (obj is null)
+                            {
+                                continue;
+                            }
                             MenuItemDark item = new();
                             item.Header = obj.ToString().Replace("_", "__");
                             item.PreviewMouseDown += (sender2, ev2) =>

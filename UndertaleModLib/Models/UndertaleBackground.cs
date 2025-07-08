@@ -7,7 +7,7 @@ namespace UndertaleModLib.Models;
 /// <summary>
 /// A background or tileset entry in a data file.
 /// </summary>
-/// <remarks>For Game Maker Studio: 2, this will only ever be a tileset. For Game Maker Studio: 1, this is usually a background,
+/// <remarks>For GameMaker Studio 2, this will only ever be a tileset. For GameMaker: Studio 1, this is usually a background,
 /// but is sometimes repurposed as use for a tileset as well.</remarks>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleBackground : UndertaleNamedResource, IDisposable
