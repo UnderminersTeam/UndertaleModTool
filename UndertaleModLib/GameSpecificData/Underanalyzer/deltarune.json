@@ -761,6 +761,10 @@
                 {
                   "MacroType": "Match",
                   "ConditionalValue": "head_sprite"
+                },
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "current_sprite_index"
                 }
               ]
             },
