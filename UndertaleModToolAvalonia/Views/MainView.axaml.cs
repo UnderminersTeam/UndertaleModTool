@@ -23,6 +23,7 @@ public partial class MainView : UserControl
             {
                 vm.OpenFileDialog = OpenFileDialog;
                 vm.SaveFileDialog = SaveFileDialog;
+                vm.OpenFolderDialog = OpenFolderDialog;
                 vm.MessageDialog = MessageDialog;
                 vm.LaunchUriAsync = LaunchUriAsync;
                 vm.SettingsDialog = SettingsDialog;
@@ -49,6 +50,12 @@ public partial class MainView : UserControl
     {
         TopLevel topLevel = TopLevel.GetTopLevel(this)!;
         return await topLevel.StorageProvider.SaveFilePickerAsync(options);
+    }
+
+    public async Task<IReadOnlyList<IStorageFolder>> OpenFolderDialog(FolderPickerOpenOptions options)
+    {
+        TopLevel topLevel = TopLevel.GetTopLevel(this)!;
+        return await topLevel.StorageProvider.OpenFolderPickerAsync(options);
     }
 
     public async Task<bool> LaunchUriAsync(Uri uri)
@@ -124,8 +131,8 @@ public partial class MainView : UserControl
         if (DataContext is MainViewModel vm)
             if (e.Key == Key.Enter)
             {
-                object? result = await vm.Scripting.RunScript(CommandTextBox.Text ?? "");
-                CommandTextBox.Text = result?.ToString() ?? "";
+                object? result = await vm.Scripting.RunScript(vm.CommandTextBoxText);
+                vm.CommandTextBoxText = result?.ToString() ?? "";
             }
     }
 }

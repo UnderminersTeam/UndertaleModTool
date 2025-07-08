@@ -24,12 +24,12 @@
         <NativeMenuBar DockPanel.Dock="Top" />
         
         <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,auto">
-            <TextBox Name="CommandTextBox" Grid.Column="0" KeyDown="CommandTextBox_KeyDown" />
+            <TextBox Grid.Column="0" Text="{Binding CommandTextBoxText}" KeyDown="CommandTextBox_KeyDown" />
             <Label Grid.Column="1" Content="{Binding TabSelectedResourceIdString}"
                    ToolTip.Tip="This is an ID (index) of the currently open asset, item, or object. It starts from 0."/>
         </Grid>
         <Grid ColumnDefinitions="1*,Auto,3*">
-            <Grid x:Name="LeftPanel" Grid.Column="0" RowDefinitions="Auto,1*">
+            <Grid Grid.Column="0" x:Name="LeftPanel" RowDefinitions="Auto,1*">
                 <StackPanel Spacing="5">
                     <StackPanel Orientation="Horizontal">
                         <Button>←</Button>

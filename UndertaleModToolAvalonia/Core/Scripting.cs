@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Avalonia.Platform.Storage;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,24 +12,23 @@ using UndertaleModLib;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 using UndertaleModLib.Scripting;
+using UndertaleModToolAvalonia.Controls;
 using UndertaleModToolAvalonia.Views;
 
 namespace UndertaleModToolAvalonia.Core;
 
 public class Scripting
 {
-    private readonly IServiceProvider serviceProvider;
-    private readonly MainViewModel mainVM;
+    public readonly MainViewModel MainVM;
 
     public Scripting(IServiceProvider serviceProvider)
     {
-        this.serviceProvider = serviceProvider;
-        mainVM = serviceProvider.GetRequiredService<MainViewModel>();
+        MainVM = serviceProvider.GetRequiredService<MainViewModel>();
     }
 
     public async Task<object?> RunScript(string text, string? filePath = null)
     {
-        ScriptGlobals scripting = new(serviceProvider);
+        ScriptGlobals scripting = new(this, filePath);
 
         try
         {
@@ -58,15 +57,15 @@ public class Scripting
         }
         catch (CompilationErrorException e)
         {
-            await mainVM.ShowMessageDialog($"Error compiling script: {e.Message}");
+            await MainVM.ShowMessageDialog($"Error compiling script: {e.Message}");
         }
         catch (ScriptException e)
         {
-            await mainVM.ShowMessageDialog($"Error: {e.Message}");
+            await MainVM.ShowMessageDialog($"Error: {e.Message}");
         }
         catch (Exception e)
         {
-            await mainVM.ShowMessageDialog($"Error in script:\n{e}");
+            await MainVM.ShowMessageDialog($"Error in script:\n{e}");
         }
 
         return null;
@@ -76,17 +75,19 @@ public class Scripting
 public class ScriptGlobals : IScriptInterface
 {
     private readonly MainViewModel mainVM;
+    private readonly string? scriptPath;
 
-    public ScriptGlobals(IServiceProvider serviceProvider)
+    public ScriptGlobals(Scripting scripting, string? scriptPath)
     {
-        mainVM = serviceProvider.GetRequiredService<MainViewModel>();
+        mainVM = scripting.MainVM;
+        this.scriptPath = scriptPath;
     }
 
     public UndertaleData? Data => mainVM.Data;
 
     public string? FilePath => mainVM.DataPath;
 
-    public string ScriptPath => throw new NotImplementedException();
+    public string? ScriptPath => scriptPath;
 
     public object Highlighted => throw new NotImplementedException();
 
@@ -106,12 +107,12 @@ public class ScriptGlobals : IScriptInterface
 
     public void AddProgress(int amount)
     {
-        throw new NotImplementedException();
+        // TODO
     }
 
     public void AddProgressParallel(int amount)
     {
-        throw new NotImplementedException();
+        // TODO
     }
 
     public void ChangeSelection(object newSelection, bool inNewTab = false)
@@ -166,22 +167,22 @@ public class ScriptGlobals : IScriptInterface
 
     public void HideProgressBar()
     {
-        throw new NotImplementedException();
+        // TODO
     }
 
     public void IncrementProgress()
     {
-        throw new NotImplementedException();
+        // TODO
     }
 
     public void IncrementProgressParallel()
     {
-        throw new NotImplementedException();
+        // TODO
     }
 
     public void InitializeScriptDialog()
     {
-        throw new NotImplementedException();
+        // TODO
     }
 
     public bool LintUMTScript(string path)
@@ -194,9 +195,17 @@ public class ScriptGlobals : IScriptInterface
         throw new NotImplementedException();
     }
 
-    public string PromptChooseDirectory()
+    public string? PromptChooseDirectory()
     {
-        throw new NotImplementedException();
+        IReadOnlyList<IStorageFolder> folders = Task.Run(() => mainVM.OpenFolderDialog!(new()
+        {
+            Title = "Select directory",
+        })).Result;
+
+        if (folders.Count != 1)
+            return null;
+
+        return folders[0].TryGetLocalPath();
     }
 
     public string PromptLoadFile(string defaultExt, string filter)
@@ -216,7 +225,12 @@ public class ScriptGlobals : IScriptInterface
 
     public void ScriptError(string error, string title = "Error", bool SetConsoleText = true)
     {
-        throw new NotImplementedException();
+        mainVM.ShowMessageDialog(error, title).WaitOnDispatcherFrame();
+
+        if (SetConsoleText)
+        {
+            mainVM.CommandTextBoxText = error;
+        }
     }
 
     public string ScriptInputDialog(string title, string label, string defaultInput, string cancelText, string submitText, bool isMultiline, bool preventClose)
@@ -226,7 +240,7 @@ public class ScriptGlobals : IScriptInterface
 
     public void ScriptMessage(string message)
     {
-        throw new NotImplementedException();
+        mainVM.ShowMessageDialog(message, title: "Script message").WaitOnDispatcherFrame();
     }
 
     public void ScriptOpenURL(string url)
@@ -236,12 +250,12 @@ public class ScriptGlobals : IScriptInterface
 
     public bool ScriptQuestion(string message)
     {
-        throw new NotImplementedException();
+        return mainVM.ShowMessageDialog(message, "Script question", ok: false, yes: true, no: true).WaitOnDispatcherFrame() == MessageWindow.Result.Yes;
     }
 
     public void ScriptWarning(string message)
     {
-        throw new NotImplementedException();
+        mainVM.ShowMessageDialog(message, title: "Script warning").WaitOnDispatcherFrame();
     }
 
     public void SetFinishedMessage(bool isFinishedMessageEnabled)
@@ -251,17 +265,17 @@ public class ScriptGlobals : IScriptInterface
 
     public void SetProgress(int value)
     {
-        throw new NotImplementedException();
+        // TODO
     }
 
     public void SetProgressBar(string message, string status, double progressValue, double maxValue)
     {
-        throw new NotImplementedException();
+        // TODO
     }
 
     public void SetProgressBar()
     {
-        throw new NotImplementedException();
+        // TODO
     }
 
     public void SetUMTConsoleText(string message)
@@ -281,12 +295,13 @@ public class ScriptGlobals : IScriptInterface
 
     public void StartProgressBarUpdater()
     {
-        throw new NotImplementedException();
+        // TODO
     }
 
     public Task StopProgressBarUpdater()
     {
-        throw new NotImplementedException();
+        // TODO
+        return Task.CompletedTask;
     }
 
     public void SyncBinding(string resourceType, bool enable)
@@ -296,16 +311,16 @@ public class ScriptGlobals : IScriptInterface
 
     public void UpdateProgressBar(string message, string status, double progressValue, double maxValue)
     {
-        throw new NotImplementedException();
+        // TODO
     }
 
     public void UpdateProgressStatus(string status)
     {
-        throw new NotImplementedException();
+        // TODO
     }
 
     public void UpdateProgressValue(double progressValue)
     {
-        throw new NotImplementedException();
+        // TODO
     }
 }

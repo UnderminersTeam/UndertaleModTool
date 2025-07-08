@@ -24,6 +24,7 @@ public partial class MainViewModel
     // Set this when testing.
     public Func<FilePickerOpenOptions, Task<IReadOnlyList<IStorageFile>>>? OpenFileDialog;
     public Func<FilePickerSaveOptions, Task<IStorageFile?>>? SaveFileDialog;
+    public Func<FolderPickerOpenOptions, Task<IReadOnlyList<IStorageFolder>>> OpenFolderDialog;
     public Func<Uri, Task<bool>>? LaunchUriAsync;
 
     public delegate Task<MessageWindow.Result> MessageDialogDelegate(string message, string? title = null, bool ok = true, bool yes = false, bool no = false, bool cancel = false);
@@ -77,6 +78,10 @@ public partial class MainViewModel
     [Notify]
     private string _TabSelectedResourceIdString = "None";
 
+    // Command text box
+    [Notify]
+    private string _CommandTextBoxText = "";
+
     // Image cache
     public ImageCache ImageCache = new();
 
@@ -120,7 +125,7 @@ public partial class MainViewModel
     public async Task<MessageWindow.Result> ShowMessageDialog(string message, string? title = null, bool ok = true, bool yes = false, bool no = false, bool cancel = false)
     {
         if (MessageDialog is not null)
-            return await MessageDialog.Invoke(message, title, ok, yes, no, cancel);
+            return await MessageDialog(message, title, ok, yes, no, cancel);
         return MessageWindow.Result.None;
     }
 
@@ -215,7 +220,6 @@ public partial class MainViewModel
         var files = await OpenFileDialog!(new FilePickerOpenOptions()
         {
             Title = "Open data file",
-            AllowMultiple = false,
             FileTypeFilter = dataFileTypes,
         });
 
@@ -278,7 +282,6 @@ public partial class MainViewModel
         var files = await OpenFileDialog!(new FilePickerOpenOptions()
         {
             Title = "Run script",
-            AllowMultiple = false,
             FileTypeFilter = [
                 new FilePickerFileType("C# scripts (.csx)")
                 {
@@ -301,7 +304,10 @@ public partial class MainViewModel
             text = streamReader.ReadToEnd();
         }
 
-        await Scripting.RunScript(text, files[0].TryGetLocalPath());
+        string? filePath = files[0].TryGetLocalPath();
+        await Scripting.RunScript(text, filePath);
+
+        CommandTextBoxText = $"{Path.GetFileName(filePath) ?? "Script"} finished!";
     }
 
     public void HelpGitHub()
