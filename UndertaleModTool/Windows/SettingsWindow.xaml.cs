@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
@@ -150,7 +149,6 @@ namespace UndertaleModTool
                 Settings.Save();
             }
         }
-
         public static bool WarnOnClose
         {
             get => Settings.Instance.WarnOnClose;
@@ -340,7 +338,6 @@ namespace UndertaleModTool
         {
             ((MainWindow)Owner).UpdateApp(this);
         }
-        
         private void ProfileButtonExport_Click(object sender, RoutedEventArgs e)
         {
             ((MainWindow)Owner).ExportProfileFolder();
@@ -349,13 +346,6 @@ namespace UndertaleModTool
         {
             ((MainWindow)Owner).ImportProfileFolder();
         }
-        private void ColorEditorButton_Click(object sender, RoutedEventArgs e)
-        {
-            CodeColorsWindow codecolors = new CodeColorsWindow();
-            codecolors.Owner = this;
-            codecolors.ShowDialog();
-        }
-
 
         private void GMLSettingsButton_Click(object sender, RoutedEventArgs e)
         {

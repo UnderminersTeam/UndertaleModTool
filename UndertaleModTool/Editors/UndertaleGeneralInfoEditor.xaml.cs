@@ -28,10 +28,6 @@ namespace UndertaleModTool
         public UndertaleGeneralInfoEditor()
         {
             InitializeComponent();
-
-            ((Image)mainWindow.FindName("Flowey")).Opacity = 0;
-            ((Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
-            ((Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
         }
 
         private void SyncRoomList_Click(object sender, RoutedEventArgs e)

@@ -5,10 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
-             xmlns:gif ="http://wpfanimatedgif.codeplex.com"
              mc:Ignorable="d" 
-             Unloaded="UndertaleSoundsEditor_Unloaded"
-             DataContextChanged="UserControl_DataContextChanged"
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleSound}">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -31,36 +28,36 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
-        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3,3,120,3" ObjectReference="{Binding Name}"/>
+        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Flags</TextBlock>
-        <local:TextBoxDark Grid.Row="1" Grid.Column="1" Margin="3,3,120,3" Text="{Binding Flags}"/>
+        <local:FlagsBox Grid.Row="1" Grid.Column="1" Margin="3" Value="{Binding Flags}"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Type</TextBlock>
-        <local:UndertaleStringReference Grid.Row="2" Grid.Column="1" Margin="3,3,120,3" ObjectReference="{Binding Type}"/>
+        <local:UndertaleStringReference Grid.Row="2" Grid.Column="1" Margin="3" ObjectReference="{Binding Type}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">File</TextBlock>
-        <local:UndertaleStringReference Grid.Row="3" Grid.Column="1" Margin="3,3,120,3" ObjectReference="{Binding File}"/>
+        <local:UndertaleStringReference Grid.Row="3" Grid.Column="1" Margin="3" ObjectReference="{Binding File}"/>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Effects</TextBlock>
-        <local:TextBoxDark Grid.Row="4" Grid.Column="1" Margin="3,3,120,3" Text="{Binding Effects}"/>
+        <local:TextBoxDark Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding Effects}"/>
 
         <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Volume</TextBlock>
-        <local:TextBoxDark Grid.Row="5" Grid.Column="1" Margin="3,3,120,3" Text="{Binding Volume}"/>
+        <local:TextBoxDark Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding Volume}"/>
 
         <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Pitch</TextBlock>
-        <local:TextBoxDark Grid.Row="6" Grid.Column="1" Margin="3,3,120,3" Text="{Binding Pitch}"/>
+        <local:TextBoxDark Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding Pitch}"/>
 
         <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Audio group</TextBlock>
-        <local:UndertaleObjectReference Grid.Row="7" Grid.Column="1" Margin="3,3,120,3" ObjectReference="{Binding AudioGroup}" ObjectType="{x:Type undertale:UndertaleAudioGroup}"/>
+        <local:UndertaleObjectReference Grid.Row="7" Grid.Column="1" Margin="3" ObjectReference="{Binding AudioGroup}" ObjectType="{x:Type undertale:UndertaleAudioGroup}"/>
 
         <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Audio file</TextBlock>
-        <local:AudioFileReference Grid.Row="8" Grid.Column="1" Margin="3,3,120,3" AudioReference="{Binding AudioFile}" GroupReference="{Binding AudioGroup}" AudioID="{Binding AudioID}" GroupID="{Binding GroupID}"/>
+        <local:AudioFileReference Grid.Row="8" Grid.Column="1" Margin="3" AudioReference="{Binding AudioFile}" GroupReference="{Binding AudioGroup}" AudioID="{Binding AudioID}" GroupID="{Binding GroupID}"/>
 
         <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Preload (old audio system)</TextBlock>
         <CheckBox Grid.Row="9" Grid.Column="1" Margin="3" IsChecked="{Binding Preload}"/>
 
-        <Grid Grid.Row="11" Grid.Column="1" Name="AudioPlayer" Margin="0,0,117,0">
+        <Grid Grid.Row="11" Grid.Column="1" Name="AudioPlayer">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="1*"/>
@@ -71,17 +68,5 @@
             <local:ButtonDark Grid.Row="11" Grid.Column="0" x:Name="Play" Click="Play_Click" Margin="3,0">Play</local:ButtonDark>
             <local:ButtonDark Grid.Row="11" Grid.Column="1" x:Name="Stop" Click="Stop_Click" Margin="3,0">Stop</local:ButtonDark>
         </Grid>
-        <Image Margin="0,32,30,0" Grid.Column="1" Grid.RowSpan="4" gif:ImageBehavior.AnimatedSource="/Resources/spr_flowey_riseanim.gif"  Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="Flowey"/>
-        <Image Margin="0,0,16,0" Grid.Column="1" Grid.RowSpan="4" Source="/Resources/spr_bubble_message.png" Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="FloweyBubble"/>
-        <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="SoundsObjectLabel"
-                       ToolTip="This is an ID (index) of the currently open sound. It starts from 0."
-                       ToolTipService.InitialShowDelay="200" Margin="0,0,17,0" Foreground="Black" Grid.Column="2"
-                       Width="Auto" Grid.RowSpan="4"
-               />
-        <Label Content="ID:" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="FunnySounds"
-                       ToolTip="This is an ID (index) of the currently open sound. It starts from 0."
-                       ToolTipService.InitialShowDelay="200" Margin="0,0,58,0" Foreground="Black" Grid.Column="2"
-                       Width="Auto" Grid.RowSpan="4"
-               />
     </Grid>
 </local:DataUserControl>

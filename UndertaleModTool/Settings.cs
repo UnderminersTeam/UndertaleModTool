@@ -45,9 +45,9 @@ namespace UndertaleModTool
         //
         // This comment should be cleared in the event that the remedies described are implemented.
 
-        public bool DeleteOldProfileOnSave { get; set; } = false;
         public bool CustomProfileName { get; set; } = false;
         public bool RememberProfileName { get; set; } = false;
+        public bool DeleteOldProfileOnSave { get; set; } = false;
         public bool WarnOnClose { get; set; } = true;
 
         private double _globalGridWidth = 20;
@@ -67,21 +67,6 @@ namespace UndertaleModTool
         public bool ShowDebuggerOption { get; set; } = false;
         public DecompilerSettings DecompilerSettings { get; set; }
         public const string DefaultInstanceIdPrefix = "inst_";
-        public byte FunctionColor_0 { get; set; } = 255;
-        public byte FunctionColor_1 { get; set; } = 184;
-        public byte FunctionColor_2 { get; set; } = 113;
-        public byte GlobalColor_0 { get; set; } = 249;
-        public byte GlobalColor_1 { get; set; } = 123;
-        public byte GlobalColor_2 { get; set; } = 249;
-        public byte ConstantColor_0 { get; set; } = 255;
-        public byte ConstantColor_1 { get; set; } = 128;
-        public byte ConstantColor_2 { get; set; } = 128;
-        public byte InstanceColor_0 { get; set; } = 88;
-        public byte InstanceColor_1 { get; set; } = 227;
-        public byte InstanceColor_2 { get; set; } = 90;
-        public byte LocalColor_0 { get; set; } = 255;
-        public byte LocalColor_1 { get; set; } = 248;
-        public byte LocalColor_2 { get; set; } = 153;
         public string InstanceIdPrefix { get; set; } = DefaultInstanceIdPrefix;
 
         public bool ShowNullEntriesInResourceTree { get; set; } = false;
@@ -146,13 +131,6 @@ namespace UndertaleModTool
                 {
                     Instance.DecompilerSettings.UnknownArgumentNamePattern = "arg{0}";
                 }
-
-                // Use existing decompiler settings (from last settings instance)
-                if (existingDecompilerSettings is not null)
-                    Instance.DecompilerSettings = existingDecompilerSettings;
-
-                // If no settings were supplied at all, generate a new one (can be caused from downgrading)
-                Instance.DecompilerSettings ??= new();
 
                 // Update the version to this version
                 Instance.Version = MainWindow.Version;

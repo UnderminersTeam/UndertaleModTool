@@ -26,7 +26,7 @@ namespace UndertaleModLib
         /// <param name="reader">Where to deserialize from.</param>
         /// <returns>The object count.</returns>
         static uint UnserializeChildObjectCount(UndertaleReader reader) => 0;
-
+        
     }
 
     public interface UndertaleObjectWithBlobs

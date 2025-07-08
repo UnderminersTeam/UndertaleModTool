@@ -152,7 +152,7 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, ID
 
     /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
-
+    
     /// <summary>
     /// Invoked whenever the effective value of any dependency property has been updated.
     /// </summary>

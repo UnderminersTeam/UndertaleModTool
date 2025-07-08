@@ -7,8 +7,6 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Data;
 using UndertaleModTool.Windows;
-using UndertaleModLib;
-using WpfAnimatedGif;
 using ImageMagick;
 using System.Windows.Media.Imaging;
 using System.ComponentModel;
@@ -36,11 +34,6 @@ namespace UndertaleModTool
         {
             InitializeComponent();
 
-            ((System.Windows.Controls.Image)mainWindow.FindName("Flowey")).Opacity = 0;
-            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
-            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
-
-            ((Label)this.FindName("TexutrePagesObjectLabel")).Content = ((Label)mainWindow.FindName("ObjectLabel")).Content;
             DataContextChanged += SwitchDataContext;
             Unloaded += UnloadTexture;
         }
@@ -222,37 +215,6 @@ namespace UndertaleModTool
             {
                 dialog?.Close();
             }
-        }
-        private void UndertaleTexutrePagesEditor_Unloaded(object sender, RoutedEventArgs e)
-        {
-            var floweranim = ((System.Windows.Controls.Image)mainWindow.FindName("Flowey"));
-            //floweranim.Opacity = 1;
-
-            var controller = ImageBehavior.GetAnimationController(floweranim);
-            controller.Pause();
-            controller.GotoFrame(controller.FrameCount - 5);
-            controller.Play();
-
-            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
-        }
-        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            UndertaleTexturePageItem code = this.DataContext as UndertaleTexturePageItem;
-
-            int foundIndex = code is UndertaleResource res ? mainWindow.Data.IndexOf(res, false) : -1;
-            string idString;
-
-            if (foundIndex == -1)
-                idString = "None";
-            else if (foundIndex == -2)
-                idString = "N/A";
-            else
-                idString = Convert.ToString(foundIndex);
-
-            ((Label)this.FindName("TexutrePagesObjectLabel")).Content = idString;
-
-            //((Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
-            //((Image)mainWindow.FindName("Flowey")).Opacity = 0;
         }
     }
 }

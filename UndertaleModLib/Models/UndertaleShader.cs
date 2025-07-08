@@ -506,14 +506,7 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
         internal uint _Length; // note: this is not always an accurate value, use Data.Length if necessary
         public byte[] Data;
         public bool IsNull = true;
-
-        public UndertaleRawShaderData()
-        {
-            _Position = 0;
-            _PointerLocation = 0;
-            _Length = 0;
-            IsNull = true;
-        }
+        
         public void Serialize(UndertaleWriter writer, bool writeLength = true)
         {
             _PointerLocation = writer.Position;

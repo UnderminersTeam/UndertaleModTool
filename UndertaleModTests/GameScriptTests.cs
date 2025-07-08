@@ -272,21 +272,6 @@ namespace UndertaleModTests
         public void ChangeSelection(object newSelection, bool inNewTab = false)
         {
         }
-
-        public Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int lineNum, string codeLine)>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<(int lineNum, string codeLine)>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void ChangeSelection(object newSelection, bool inNewTab = false)
-        {
-            throw new NotImplementedException();
-        }
     }
 
     [TestClass]

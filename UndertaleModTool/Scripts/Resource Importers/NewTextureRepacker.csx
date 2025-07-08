@@ -63,9 +63,9 @@ public class Split : Rect
     public bool overlapsRect(Rect rect)
     {
         return (((rect.X >= this.X) && (rect.X <= this.Right))
-            || ((this.X >= rect.X) && (this.X <= rect.Right)))
+            ||  ((this.X >= rect.X) && (this.X <= rect.Right)))
             && (((rect.Y >= this.Y) && (rect.Y <= this.Down))
-            || ((this.Y >= rect.Y) && (this.Y <= rect.Down)));
+            ||  ((this.Y >= rect.Y) && (this.Y <= rect.Down)));
     }
 
     public bool fits(int Width, int Height)

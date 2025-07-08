@@ -1,9 +1,9 @@
 ﻿using System;
+
 namespace UndertaleModLib.Models;
 
 /// <summary>
 /// An animation curve entry in a data file. These were introduced in GameMaker 2.3.0
-/// An animation curve entry in a data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
@@ -32,7 +32,7 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
     /// The graph type of this animation curve.
     /// </summary>
     public GraphTypeEnum GraphType { get; set; }
-
+    
     /// <summary>
     /// The channels this animation curve has. 
     /// </summary>
@@ -110,11 +110,11 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
         {
             foreach (Channel channel in Channels)
                 channel?.Dispose();
-         }
+        }
         Name = null;
         Channels = null;
     }
-
+    
     /// <summary>
     /// A channel in an animation curve.
     /// </summary>
@@ -139,17 +139,17 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
 
         /// <inheritdoc />
         public UndertaleString Name { get; set; }
-
+        
         /// <summary>
         /// The curve type this channel uses. 
         /// </summary>
         public CurveType Curve { get; set; }
-
+        
         /// <summary>
         /// TODO: document this
         /// </summary>
         public uint Iterations { get; set; }
-
+        
         /// <summary>
         /// The points in the channel.
         /// </summary>
@@ -231,7 +231,7 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
             /// The X coordinate of this point. GameMaker abbreviates this to "h".
             /// </summary>
             public float X;
-
+            
             /// <summary>
             /// The Y coordinate of this point. GameMaker abbreviates this to "v".
             /// </summary>
@@ -241,17 +241,17 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
             /// The Y position for the first bezier handle. Only used if the Channel is set to Bezier.
             /// </summary>
             public float BezierX0;
-
+            
             /// <summary>
             /// The Y position for the first bezier handle. Only used if the Channel is set to Bezier.
             /// </summary>
             public float BezierY0;
-
+            
             /// <summary>
             /// The X position for the second bezier handle. Only used if the Channel is set to Bezier.
             /// </summary>
             public float BezierX1;
-
+            
             /// <summary>
             /// The Y position for the second bezier handle. Only used if the Channel is set to Bezier.
             /// </summary>

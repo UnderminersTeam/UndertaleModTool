@@ -20,6 +20,27 @@ if keyboard_check_pressed(92)
         black_fade = 0.4
         text_black_fade = 0.9
     }
+    else if (edit == 3)
+    {
+        ini_open("touchconfig.ini")
+        ini_write_real("CONFIG", "zx", zx)
+        ini_write_real("CONFIG", "zy", zy)
+        ini_write_real("CONFIG", "xx", xx)
+        ini_write_real("CONFIG", "xy", xy)
+        ini_write_real("CONFIG", "cx", cx)
+        ini_write_real("CONFIG", "cy", cy)
+        ini_write_real("CONFIG", "analog_posx", analog_posx)
+        ini_write_real("CONFIG", "analog_posy", analog_posy)
+        ini_write_real("CONFIG", "button_scale", button_scale)
+        ini_write_real("CONFIG", "analog_scale", analog_scale)
+        ini_write_real("CONFIG", "joystick_type", joystick_type)
+        ini_write_real("CONFIG", "controls_opacity", controls_opacity)
+        ini_close()
+        black_fade = 0
+        text_black_fade = 0
+        edit = 0
+        scr_add_keys()
+    }
 }
 if (edit == 0) return;
 scr_add_keys()

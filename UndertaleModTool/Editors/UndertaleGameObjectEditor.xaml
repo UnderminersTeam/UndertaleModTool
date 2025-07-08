@@ -6,10 +6,7 @@
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              xmlns:sys="clr-namespace:System;assembly=mscorlib" 
-             xmlns:gif ="http://wpfanimatedgif.codeplex.com"
              mc:Ignorable="d" 
-             Unloaded="UndertaleObjectsEditor_Unloaded"
-             DataContextChanged="UserControl_DataContextChanged"
              d:DesignHeight="800" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleGameObject}">
     <UserControl.Resources>
         <ResourceDictionary>
@@ -190,11 +187,12 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3"><Run Text="Name"/></TextBlock>
-            <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3,3,120,3" ObjectReference="{Binding Name}"/>
 
-            <TextBlock Grid.Row="1" Grid.Column="0" Margin="3"><Run Text="Sprite"/></TextBlock>
-            <local:UndertaleObjectReference Grid.Row="1" Grid.Column="1" Margin="3,3,120,3" ObjectReference="{Binding Sprite}" ObjectType="{x:Type undertale:UndertaleSprite}"/>
+            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
+            <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
+
+            <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Sprite</TextBlock>
+            <local:UndertaleObjectReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding Sprite}" ObjectType="{x:Type undertale:UndertaleSprite}"/>
 
             <ListView Grid.Row="2" Grid.Column="1" ItemsSource="{Binding Sprite.Textures, Mode=OneWay}" Background="Transparent" BorderThickness="0">
                 <ListView.ItemsPanel>
@@ -214,84 +212,71 @@
             </ListView>
 
 
-            <TextBlock Grid.Row="3" Grid.Column="0" Margin="3"><Run Text="Visible"/></TextBlock>
+            <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Visible</TextBlock>
             <CheckBox Grid.Row="3" Grid.Column="1" Margin="3" IsChecked="{Binding Visible}"/>
 
-            <TextBlock Grid.Row="4" Grid.Column="0" Margin="3"><Run Text="Solid"/></TextBlock>
+            <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Solid</TextBlock>
             <CheckBox Grid.Row="4" Grid.Column="1" Margin="3" IsChecked="{Binding Solid}"/>
 
-            <Image Margin="0,45,30,0" Grid.Column="1" Grid.RowSpan="5" gif:ImageBehavior.AnimatedSource="/Resources/spr_flowey_riseanim.gif"  Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="Flowey"/>
-            <Image Margin="0,13,16,0" Grid.Column="1" Grid.RowSpan="3" Source="/Resources/spr_bubble_message.png" Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="FloweyBubble"/>
-            <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="ObjectsObjectLabel"
-                       ToolTip="This is an ID (index) of the currently open object. It starts from 0."
-                       ToolTipService.InitialShowDelay="200" Margin="0,13,17,0" Foreground="Black" Grid.Column="2"
-                       Width="Auto" Grid.RowSpan="3"
-               />
-            <Label Content="ID:" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="FunnyObjects"
-                       ToolTip="This is an ID (index) of the currently open object. It starts from 0."
-                       ToolTipService.InitialShowDelay="200" Margin="0,13,58,0" Foreground="Black" Grid.Column="2"
-                       Width="Auto" Grid.RowSpan="3"
-               />
+            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}, Converter={StaticResource IsGMS2Converter}}">Depth</TextBlock>
+            <local:TextBoxDark Grid.Row="5" Grid.Column="1" Margin="3" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}, Converter={StaticResource IsGMS2Converter}}" Text="{Binding Depth}"/>
 
-            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Visibility="{Binding DataContext.IsGMS2, Converter={StaticResource IsGMS2Converter}, Mode=OneTime, RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}, Mode=FindAncestor}}"><Run Text="Depth"/></TextBlock>
-            <local:TextBoxDark Grid.Row="5" Grid.Column="1" Margin="3,3,120,3" Visibility="{Binding DataContext.IsGMS2, Converter={StaticResource IsGMS2Converter}, Mode=OneTime, RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}, Mode=FindAncestor}}" Text="{Binding Depth}"/>
-
-            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3"><Run Text="Persistent"/></TextBlock>
+            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Persistent</TextBlock>
             <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding Persistent}"/>
 
-            <TextBlock Grid.Row="7" Grid.Column="0" Margin="3"><Run Text="Parent"/></TextBlock>
-            <local:UndertaleObjectReference Grid.Row="7" Grid.Column="1" Margin="3,3,120,3" ObjectReference="{Binding ParentId}" ObjectType="{x:Type undertale:UndertaleGameObject}"/>
+            <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Parent</TextBlock>
+            <local:UndertaleObjectReference Grid.Row="7" Grid.Column="1" Margin="3" ObjectReference="{Binding ParentId}" ObjectType="{x:Type undertale:UndertaleGameObject}"/>
 
-            <TextBlock Grid.Row="8" Grid.Column="0" Margin="3"><Run Text="Texture mask id"/></TextBlock>
-            <local:UndertaleObjectReference Grid.Row="8" Grid.Column="1" Margin="3,3,120,3" ObjectReference="{Binding TextureMaskId}" ObjectType="{x:Type undertale:UndertaleSprite}"/>
+            <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Texture mask id</TextBlock>
+            <local:UndertaleObjectReference Grid.Row="8" Grid.Column="1" Margin="3" ObjectReference="{Binding TextureMaskId}" ObjectType="{x:Type undertale:UndertaleSprite}"/>
 
-            <TextBlock Grid.Row="9" Grid.Column="0" Margin="3"><Run Text="Uses physics"/></TextBlock>
+            <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Uses physics</TextBlock>
             <CheckBox Grid.Row="9" Grid.Column="1" Margin="3" IsChecked="{Binding UsesPhysics}"/>
 
-            <TextBlock Grid.Row="10" Grid.Column="0" Margin="3"><Run Text="Is sensor"/></TextBlock>
+            <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Is sensor</TextBlock>
             <CheckBox Grid.Row="10" Grid.Column="1" Margin="3" IsChecked="{Binding IsSensor}"/>
 
-            <TextBlock Grid.Row="11" Grid.Column="0" Margin="3"><Run Text="Collision shape"/></TextBlock>
-            <local:ComboBoxDark Grid.Row="11" Grid.Column="1" Margin="3" ItemsSource="{Binding Source={StaticResource CollisionShapeFlags}}" SelectedItem="{Binding CollisionShape}" />
+            <TextBlock Grid.Row="11" Grid.Column="0" Margin="3">Collision shape</TextBlock>
+            <local:ComboBoxDark Grid.Row="11" Grid.Column="1" Margin="3" ItemsSource="{Binding Source={StaticResource CollisionShapeFlags}}" SelectedItem="{Binding Path=CollisionShape}" />
 
             <Separator Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="2"/>
 
-            <TextBlock Grid.Row="13" Grid.Column="0" Margin="3" FontWeight="Bold"><Run Text="Physics"/></TextBlock>
+            <TextBlock Grid.Row="13" Grid.Column="0" Margin="3" FontWeight="Bold">Physics</TextBlock>
 
-            <TextBlock Grid.Row="14" Grid.Column="0" Margin="3"><Run Text="Density"/></TextBlock>
+            <TextBlock Grid.Row="14" Grid.Column="0" Margin="3">Density</TextBlock>
             <local:TextBoxDark Grid.Row="14" Grid.Column="1" Margin="3" Text="{Binding Density}"/>
 
-            <TextBlock Grid.Row="15" Grid.Column="0" Margin="3"><Run Text="Restitution"/></TextBlock>
+            <TextBlock Grid.Row="15" Grid.Column="0" Margin="3">Restitution</TextBlock>
             <local:TextBoxDark Grid.Row="15" Grid.Column="1" Margin="3" Text="{Binding Restitution}"/>
 
-            <TextBlock Grid.Row="16" Grid.Column="0" Margin="3"><Run Text="Group"/></TextBlock>
+            <TextBlock Grid.Row="16" Grid.Column="0" Margin="3">Group</TextBlock>
             <local:TextBoxDark Grid.Row="16" Grid.Column="1" Margin="3" Text="{Binding Group}"/>
 
-            <TextBlock Grid.Row="17" Grid.Column="0" Margin="3"><Run Text="Linear damping"/></TextBlock>
+            <TextBlock Grid.Row="17" Grid.Column="0" Margin="3">Linear damping</TextBlock>
             <local:TextBoxDark Grid.Row="17" Grid.Column="1" Margin="3" Text="{Binding LinearDamping}"/>
 
-            <TextBlock Grid.Row="18" Grid.Column="0" Margin="3"><Run Text="Angular damping"/></TextBlock>
+            <TextBlock Grid.Row="18" Grid.Column="0" Margin="3">Angular damping</TextBlock>
             <local:TextBoxDark Grid.Row="18" Grid.Column="1" Margin="3" Text="{Binding AngularDamping}"/>
 
             <!--TextBlock Grid.Row="19" Grid.Column="0" Margin="3">Physics shape vertex count</>
             <local:TextBoxDark Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding PhysicsShapeVertexCount}"/-->
 
-            <TextBlock Grid.Row="19" Grid.Column="0" Margin="3"><Run Text="Friction"/></TextBlock>
+            <TextBlock Grid.Row="19" Grid.Column="0" Margin="3">Friction</TextBlock>
             <local:TextBoxDark Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding Friction}"/>
 
-            <TextBlock Grid.Row="20" Grid.Column="0" Margin="3"><Run Text="Is awake"/></TextBlock>
+            <TextBlock Grid.Row="20" Grid.Column="0" Margin="3">Is awake</TextBlock>
             <CheckBox Grid.Row="20" Grid.Column="1" Margin="3" IsChecked="{Binding Awake}"/>
 
-            <TextBlock Grid.Row="21" Grid.Column="0" Margin="3"><Run Text="Is kinematic"/></TextBlock>
+            <TextBlock Grid.Row="21" Grid.Column="0" Margin="3">Is kinematic</TextBlock>
             <CheckBox Grid.Row="21" Grid.Column="1" Margin="3" IsChecked="{Binding Kinematic}"/>
 
-            <TextBlock Grid.Row="22" Grid.Column="0" Margin="3"><Run Text="Physics shape vertices"/></TextBlock>
+            <TextBlock Grid.Row="22" Grid.Column="0" Margin="3">Physics shape vertices</TextBlock>
             <local:DataGridDark Grid.Row="22" Grid.Column="1" Margin="3" ItemsSource="{Binding PhysicsVertices, Mode=OneWay}"
                                 AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True"
                                 HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray"
                                 HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
                                 ScrollViewer.CanContentScroll="False" PreviewMouseWheel="HandlePreviewMouseWheel">
-                <local:DataGridDark.Resources>
+                <DataGrid.Resources>
                     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                     <Style TargetType="{x:Type DataGridCell}">
                         <Setter Property="Template">
@@ -308,15 +293,15 @@
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate>
-                                            <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic"><Run Text="Double click to add"/></TextBlock>
+                                            <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
                                         </ControlTemplate>
                                     </Setter.Value>
                                 </Setter>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </local:DataGridDark.Resources>
-                <local:DataGridDark.Columns>
+                </DataGrid.Resources>
+                <DataGrid.Columns>
                     <DataGridTemplateColumn Header="X" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -331,26 +316,26 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                </local:DataGridDark.Columns>
+                </DataGrid.Columns>
             </local:DataGridDark>
 
             <Separator Grid.Row="23" Grid.Column="0" Grid.ColumnSpan="2"/>
         </Grid>
 
-        <TextBlock Margin="3" FontWeight="Bold"><Run Text="Events"/></TextBlock>
+        <TextBlock Margin="3" FontWeight="Bold">Events</TextBlock>
 
         <!-- hacks https://stackoverflow.com/questions/22378456/how-to-get-the-index-of-the-current-itemscontrol-item -->
         <ItemsControl ItemsSource="{Binding Events, Mode=OneWay}" AlternationCount="9999">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <StackPanel>
-                        <TextBlock Margin="3" Text="{Binding (ItemsControl.AlternationIndex), Converter={StaticResource EventNameConverter}, RelativeSource={RelativeSource Mode=TemplatedParent}}" x:Name="EventTypeName"/>
+                        <TextBlock Margin="3" Text="{Binding Path=(ItemsControl.AlternationIndex), RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource EventNameConverter}}" Name="EventTypeName"/>
                         <local:DataGridDark ItemsSource="{Binding .}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True"
                                             HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray"
                                             AddingNewItem="DataGrid_AddingNewItem" PreviewMouseWheel="HandlePreviewMouseWheel"
                                             HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
                                             ScrollViewer.CanContentScroll="False">
-                            <local:DataGridDark.Resources>
+                            <DataGrid.Resources>
                                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                                 <Style TargetType="{x:Type DataGridCell}">
                                     <Setter Property="Template">
@@ -367,7 +352,7 @@
                                             <Setter Property="Template">
                                                 <Setter.Value>
                                                     <ControlTemplate>
-                                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic"><Run Text="Double click to add"/></TextBlock>
+                                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
                                                     </ControlTemplate>
                                                 </Setter.Value>
                                             </Setter>
@@ -376,10 +361,10 @@
                                 </Style>
                                 <Style TargetType="{x:Type ComboBox}">
                                     <!-- DropDownX events are not routed events -->
-                                    <EventSetter Event="FrameworkElement.Loaded" Handler="ComboBox_Loaded"/>
+                                    <EventSetter Event="Loaded" Handler="ComboBox_Loaded"/>
                                 </Style>
-                            </local:DataGridDark.Resources>
-                            <local:DataGridDark.Columns>
+                            </DataGrid.Resources>
+                            <DataGrid.Columns>
                                 <DataGridTemplateColumn Header="Subtype ID" Width="1*">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
@@ -387,7 +372,7 @@
                                                 <ContentControl.Style>
                                                     <Style TargetType="{x:Type ContentControl}">
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Text, ElementName=EventTypeName, Mode=OneWay}" Value="KeyPress">
+                                                            <DataTrigger Binding="{Binding Text, Mode=OneWay, ElementName=EventTypeName}" Value="KeyPress">
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
@@ -399,7 +384,7 @@
                                                                     </Setter.Value>
                                                                 </Setter>
                                                             </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Text, ElementName=EventTypeName, Mode=OneWay}" Value="KeyRelease">
+                                                            <DataTrigger Binding="{Binding Text, Mode=OneWay, ElementName=EventTypeName}" Value="KeyRelease">
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
@@ -411,7 +396,7 @@
                                                                     </Setter.Value>
                                                                 </Setter>
                                                             </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Text, ElementName=EventTypeName, Mode=OneWay}" Value="Keyboard">
+                                                            <DataTrigger Binding="{Binding Text, Mode=OneWay, ElementName=EventTypeName}" Value="Keyboard">
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
@@ -423,25 +408,25 @@
                                                                     </Setter.Value>
                                                                 </Setter>
                                                             </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Text, ElementName=EventTypeName, Mode=OneWay}" Value="Create">
+                                                            <DataTrigger Binding="{Binding Text, Mode=OneWay, ElementName=EventTypeName}" Value="Create">
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
-                                                                            <TextBlock TextAlignment="Center"><Run Text="n/a"/></TextBlock>
+                                                                            <TextBlock TextAlignment="Center">n/a</TextBlock>
                                                                         </DataTemplate>
                                                                     </Setter.Value>
                                                                 </Setter>
                                                             </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Text, ElementName=EventTypeName, Mode=OneWay}" Value="Destroy">
+                                                            <DataTrigger Binding="{Binding Text, Mode=OneWay, ElementName=EventTypeName}" Value="Destroy">
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
-                                                                            <TextBlock TextAlignment="Center"><Run Text="n/a"/></TextBlock>
+                                                                            <TextBlock TextAlignment="Center">n/a</TextBlock>
                                                                         </DataTemplate>
                                                                     </Setter.Value>
                                                                 </Setter>
                                                             </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Text, ElementName=EventTypeName, Mode=OneWay}" Value="Step">
+                                                            <DataTrigger Binding="{Binding Text, Mode=OneWay, ElementName=EventTypeName}" Value="Step">
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
@@ -450,7 +435,7 @@
                                                                     </Setter.Value>
                                                                 </Setter>
                                                             </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Text, ElementName=EventTypeName, Mode=OneWay}" Value="Mouse">
+                                                            <DataTrigger Binding="{Binding Text, Mode=OneWay, ElementName=EventTypeName}" Value="Mouse">
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
@@ -459,7 +444,7 @@
                                                                     </Setter.Value>
                                                                 </Setter>
                                                             </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Text, ElementName=EventTypeName, Mode=OneWay}" Value="Other">
+                                                            <DataTrigger Binding="{Binding Text, Mode=OneWay, ElementName=EventTypeName}" Value="Other">
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
@@ -468,7 +453,7 @@
                                                                     </Setter.Value>
                                                                 </Setter>
                                                             </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Text, ElementName=EventTypeName, Mode=OneWay}" Value="Draw">
+                                                            <DataTrigger Binding="{Binding Text, Mode=OneWay, ElementName=EventTypeName}" Value="Draw">
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
@@ -477,7 +462,7 @@
                                                                     </Setter.Value>
                                                                 </Setter>
                                                             </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Text, ElementName=EventTypeName, Mode=OneWay}" Value="Collision">
+                                                            <DataTrigger Binding="{Binding Text, Mode=OneWay, ElementName=EventTypeName}" Value="Collision">
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
@@ -498,7 +483,7 @@
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <local:DataGridDark ItemsSource="{Binding Actions}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow">
-                                                <local:DataGridDark.Columns>
+                                                <DataGrid.Columns>
                                                     <DataGridTemplateColumn Header="Code" Width="*">
                                                         <DataGridTemplateColumn.CellTemplate>
                                                             <DataTemplate>
@@ -511,12 +496,12 @@
                                                             </DataTemplate>
                                                         </DataGridTemplateColumn.CellTemplate>
                                                     </DataGridTemplateColumn>
-                                                </local:DataGridDark.Columns>
+                                                </DataGrid.Columns>
                                             </local:DataGridDark>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                            </local:DataGridDark.Columns>
+                            </DataGrid.Columns>
                         </local:DataGridDark>
                         <Separator/>
                     </StackPanel>

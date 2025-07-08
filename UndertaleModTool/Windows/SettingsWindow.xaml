@@ -155,11 +155,23 @@
                     <StackPanel Grid.Column="0">
                         <CheckBox IsChecked="{Binding ProfileModeEnabled}" Content="Enable profile mode" ToolTip="Toggles the 'decompile once and compile many' profile mode. Enabled by default. May need to be disabled for certain operations."/>
                         <CheckBox IsChecked="{Binding DeleteOldProfileOnSave}" Content="Delete old profile on saving" ToolTip="Deletes the profile obsoleted on saving. Saves on file space at the expense of losing code information for variants. Enabled by default."/>
+                        <CheckBox IsChecked="{Binding RememberProfileName}" Content="Remember profile name" ToolTip="The last profile name you set in a folder will automatically load when opening a data file in there."/>
                     </StackPanel>
-                    
+
                     <StackPanel Grid.Column="1">
                         <CheckBox IsChecked="{Binding ProfileMessageShown}" Content="Profile mode message shown" ToolTip="On first load, this will show you the profile mode loaded message. If this somehow breaks, you can manually toggle it here."/>
+                        <CheckBox IsChecked="{Binding CustomProfileName}" Content="Ask Profile name on load" ToolTip="Lets you set a custom name for a Profile. Only useful if you have Profile mode on."/>
                     </StackPanel>
+                </Grid>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <local:ButtonDark Grid.Column="0" Click="ProfileButtonImport_Click" Content="Import Current Profile"/>
+                    <local:ButtonDark Grid.Column="1" Click="ProfileButtonExport_Click" Content="Export Current Profile"/>
                 </Grid>
 
                 <Separator/>
@@ -170,23 +182,10 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-            <CheckBox Grid.Row="15" Grid.Column="2" Margin="3" VerticalAlignment="Center" Content="" IsChecked="{Binding ProfileMessageShown}"/>
-            <TextBlock Grid.Row="15" Grid.Column="2" Margin="25 2 2 2" VerticalAlignment="Center" Text="Profile mode message shown" ToolTip="On first load, this will show you the profile mode loaded message. If this somehow breaks, you can manually toggle it here."/>
-
-            <CheckBox Grid.Row="17" Grid.Column="0" Margin="3" VerticalAlignment="Center" Content="" IsChecked="{Binding DeleteOldProfileOnSave}"/>
-            <TextBlock Grid.Row="17" Grid.Column="0" Margin="25 2 2 2" VerticalAlignment="Center" Text="Delete old profile on saving" ToolTip="Deletes the profile obsoleted on saving. Saves on file space at the expense of losing code information for variants. Enabled by default."/>
-
-            <Separator Grid.Row="19" Grid.ColumnSpan="4" Margin="10"/>
-            <local:ButtonDark Grid.Row="21" Grid.Column="0" Grid.ColumnSpan="1" Margin="5" Click="AppDataButton_Click">Open application data folder</local:ButtonDark>
-            <local:ButtonDark Grid.Row="21" Grid.Column="2" Grid.ColumnSpan="2" Margin="5" Click="UpdateAppButton_Click" x:Name="UpdateAppButton" HorizontalAlignment="Right" Width="223">Update app to latest commit</local:ButtonDark>
-            <TextBlock Grid.Row="17" Grid.Column="2" Margin="25,0,2,0" VerticalAlignment="Center" Text="Ask Profile name on load" ToolTip="Lets you set a custom name for a Profile. Only useful if you have Profile mode on." Grid.ColumnSpan="2"/>
-            <CheckBox Grid.Row="17" Grid.Column="2" Margin="3,2,3,0" VerticalAlignment="Top" Content="" IsChecked="{Binding CustomProfileName}"/>
-            <local:ButtonDark Grid.Row="21" Grid.ColumnSpan="2" Margin="9,5,267,5" Click="ProfileButtonImport_Click" Content="Import Current Profile" Grid.Column="1"/>
-            <local:ButtonDark Grid.Row="21" Grid.ColumnSpan="2" Margin="42,5,240,5" Click="ProfileButtonExport_Click" Content="Export Current Profile" Grid.Column="2"/>
-            <local:ButtonDark Grid.Row="7" Grid.Column="2" Margin="1,1,149,0" Click="ColorEditorButton_Click" Content="Change code editor colors"/>
-
-            <TextBlock Grid.Row="18" Grid.Column="0" Margin="25,0,2,0" VerticalAlignment="Center" Text="Remember profile name" ToolTip="The tool will remember the last profile name you input in each data.win." Grid.ColumnSpan="2"/>
-            <CheckBox Grid.Row="18" Grid.Column="0" Margin="3,2,3,0" VerticalAlignment="Top" Content="" IsChecked="{Binding RememberProfileName}"/>
+                    <local:ButtonDark Grid.Column="0" Click="AppDataButton_Click" Padding="8,2,8,2" HorizontalAlignment="Left">Open application data folder</local:ButtonDark>
+                    <local:ButtonDark Grid.Column="1" Click="UpdateAppButton_Click" Padding="8,2,8,2" HorizontalAlignment="Right" x:Name="UpdateAppButton" Visibility="{Binding UpdaterButtonVisibility}">Update app to latest commit</local:ButtonDark>
+                </Grid>
+            </StackPanel>
         </Grid>
     </ScrollViewer>
 </Window>

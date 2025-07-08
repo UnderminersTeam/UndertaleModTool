@@ -5,10 +5,7 @@
                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                        xmlns:local="clr-namespace:UndertaleModTool"
                        xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
-                       xmlns:gif ="http://wpfanimatedgif.codeplex.com"
                        mc:Ignorable="d" 
-                       Unloaded="UndertaleParticlesEditor_Unloaded"
-                       DataContextChanged="UserControl_DataContextChanged"
                        d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleParticleSystem}">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -23,7 +20,7 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
-        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3,3,120,3" ObjectReference="{Binding Name}"/>
+        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Origin</TextBlock>
         <Grid Grid.Row="1" Grid.Column="1">
@@ -32,11 +29,11 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding OriginX}"/>
-            <local:TextBoxDark Grid.Column="1" Margin="3,3,120,3" Text="{Binding OriginY}"/>
+            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding OriginY}"/>
         </Grid>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Draw order</TextBlock>
-        <local:TextBoxDark Grid.Row="2" Grid.Column="1" Margin="3,3,120,3" Text="{Binding DrawOrder}"/>
+        <local:TextBoxDark Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding DrawOrder}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Emitters</TextBlock>
         <Expander Grid.Row="3" Grid.Column="1" Margin="3" Header="List" Name="EmitterListExpander" IsExpanded="True">
@@ -81,17 +78,5 @@
                 </DataGrid.Columns>
             </local:DataGridDark>
         </Expander>
-        <Image Margin="0,32,30,0" Grid.Column="1" Grid.RowSpan="4" gif:ImageBehavior.AnimatedSource="/Resources/spr_flowey_riseanim.gif"  Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="Flowey"/>
-        <Image Margin="0,0,16,0" Grid.Column="1" Grid.RowSpan="4" Source="/Resources/spr_bubble_message.png" Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="FloweyBubble"/>
-        <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="ParticlesObjectLabel"
-                       ToolTip="This is an ID (index) of the currently open particle system. It starts from 0."
-                       ToolTipService.InitialShowDelay="200" Margin="0,0,17,0" Foreground="Black" Grid.Column="2"
-                       Width="Auto" Grid.RowSpan="4"
-               />
-        <Label Content="ID:" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="FunnyParticles"
-                       ToolTip="This is an ID (index) of the currently open particle system. It starts from 0."
-                       ToolTipService.InitialShowDelay="200" Margin="0,0,58,0" Foreground="Black" Grid.Column="2"
-                       Width="Auto" Grid.RowSpan="4"
-               />
     </Grid>
 </local:DataUserControl>

@@ -5,10 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
-             xmlns:gif ="http://wpfanimatedgif.codeplex.com"
              mc:Ignorable="d" 
-             Unloaded="UndertalePathsEditor_Unloaded"
-             DataContextChanged="UserControl_DataContextChanged"
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertalePath}">
     <UserControl.Resources>
         <local:PointsDisplayConverter x:Key="PointsDisplayConverter" />
@@ -31,32 +28,19 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
-        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3,3,120,3" ObjectReference="{Binding Name}"/>
+        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Smooth</TextBlock>
         <CheckBox Grid.Row="1" Grid.Column="1" Margin="3" IsChecked="{Binding IsSmooth}"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Closed</TextBlock>
         <CheckBox Grid.Row="2" Grid.Column="1" Margin="3" IsChecked="{Binding IsClosed}"/>
-
-        <Image Margin="0,32,30,0" Grid.Column="1" Grid.RowSpan="4" gif:ImageBehavior.AnimatedSource="/Resources/spr_flowey_riseanim.gif"  Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="Flowey"/>
-        <Image Margin="0,0,16,0" Grid.Column="1" Grid.RowSpan="4" Source="/Resources/spr_bubble_message.png" Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="FloweyBubble"/>
-        <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="PathsObjectLabel"
-                       ToolTip="This is an ID (index) of the currently open string. It starts from 0."
-                       ToolTipService.InitialShowDelay="200" Margin="0,0,17,0" Foreground="Black" Grid.Column="2"
-                       Width="Auto" Grid.RowSpan="4"
-               />
-        <Label Content="ID:" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="FunnyPaths"
-                       ToolTip="This is an ID (index) of the currently open path. It starts from 0."
-                       ToolTipService.InitialShowDelay="200" Margin="0,0,58,0" Foreground="Black" Grid.Column="2"
-                       Width="Auto" Grid.RowSpan="4"
-               />
-
+        
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Precision</TextBlock>
-        <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3,3,120,3" Text="{Binding Precision}"/>
+        <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Precision}"/>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Points</TextBlock>
-        <local:DataGridDark Grid.Row="4" Grid.Column="1" Margin="3,3,120,3" ItemsSource="{Binding Points}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
+        <local:DataGridDark Grid.Row="4" Grid.Column="1" Margin="3" ItemsSource="{Binding Points}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                 <Style TargetType="{x:Type DataGridCell}">

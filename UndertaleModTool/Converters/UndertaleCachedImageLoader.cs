@@ -8,20 +8,17 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
-using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 using static UndertaleModLib.Models.UndertaleRoom;
-using static UndertaleModLib.Models.UndertaleSprite;
 
 namespace UndertaleModTool
 {
@@ -337,36 +334,12 @@ namespace UndertaleModTool
         private static UndertaleCachedImageLoader loader = new();
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            //System.Diagnostics.Debug.WriteLine("amerika yaa");
-            //System.Diagnostics.Debug.WriteLine(values[0]);
-
-            /*if (values[0] == DependencyProperty.UnsetValue) // should NOT happen
-            {
-                System.Diagnostics.Debug.WriteLine("fuck");
-                // here
-                var bitmap = Properties.Resources.spr_unknown_sprite;
-                var bitmapSource = Imaging.CreateBitmapSourceFromHBitmap(bitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-                return bitmapSource;
-            }
-            /*else if (values[0] == UndertaleSprite)
-            {
-                return loader.Convert(textures[index].Texture, null, null, null);
-            }*/
-
             if (values.Any(x => x is null))
-            {
-                // here
-                var bitmap = Properties.Resources.spr_unknown_sprite;
-                var bitmapSource = Imaging.CreateBitmapSourceFromHBitmap(bitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-                return bitmapSource;
-            }
+                return null;
 
             IList<UndertaleSprite.TextureEntry> textures = values[0] as IList<UndertaleSprite.TextureEntry>;
             if (textures is null)
-            {
-                //System.Diagnostics.Debug.WriteLine("sad ending");
                 return null;
-            }
 
             int index = -1;
             if (values[1] is int indexInt)

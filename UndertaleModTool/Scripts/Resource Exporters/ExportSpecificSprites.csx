@@ -1,5 +1,3 @@
-// Basically a mashup of ExportAllSprites and DumpSpecificCode
-
 using System.Text;
 using System;
 using System.IO;

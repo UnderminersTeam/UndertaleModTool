@@ -18,9 +18,6 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
     return;
 }
 
-GlobalDecompileContext globalDecompileContext = new(Data);
-Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = new Underanalyzer.Decompiler.DecompileSettings();
-
 ScriptMessage("Add a run button to Undertale (Backspace)");
 
 UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)

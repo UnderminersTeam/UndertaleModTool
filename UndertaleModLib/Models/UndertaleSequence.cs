@@ -644,8 +644,8 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
                 case "GMParticleTrack": // Introduced in GM 2023.2
                     Keyframes = reader.ReadUndertaleObject<ParticleKeyframes>();
                     break;
-
-                    // "GMGroupTrack" and "GMClipMaskTrack" have null keyframes
+                
+                // "GMGroupTrack" and "GMClipMaskTrack" have null keyframes
             }
         }
 
@@ -726,7 +726,7 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
                     count += 1 + ParticleKeyframes.UnserializeChildObjectCount(reader);
                     break;
 
-                    // "GMGroupTrack" and "GMClipMaskTrack" have null keyframes
+                // "GMGroupTrack" and "GMClipMaskTrack" have null keyframes
             }
 
             return count;
@@ -1040,7 +1040,7 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
         public static uint UnserializeChildObjectCount(UndertaleReader reader)
         {
             uint count = 0;
-
+            
             // "IsCurveEmbedded"
             if (reader.ReadBoolean())
             {

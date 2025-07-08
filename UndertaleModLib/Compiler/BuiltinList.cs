@@ -62,7 +62,7 @@ public class BuiltinList : IBuiltins
     public Dictionary<string, VariableInfo> InstanceLimitedEvent { get; private set; } = null;
     public Dictionary<string, FunctionInfo> Functions { get; private set; } = null;
 
-    public BuiltinList()
+    public BuiltinList() 
     {
         InitializeMain(null);
     }
@@ -160,7 +160,7 @@ public class BuiltinList : IBuiltins
         Functions ??= new(data.Functions.Count);
         foreach (UndertaleFunction function in data.Functions)
         {
-            if (function?.Name?.Content is string name && !name.StartsWith("gml_Script_", StringComparison.Ordinal) &&
+            if (function?.Name?.Content is string name && !name.StartsWith("gml_Script_", StringComparison.Ordinal) && 
                 !scriptLookup.Contains(name) && !Functions.ContainsKey(name))
             {
                 DefineFunction(name);

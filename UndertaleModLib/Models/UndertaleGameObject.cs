@@ -150,7 +150,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
 
     /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
-
+    
     /// <summary>
     /// Invoked whenever the effective value of any dependency property has been updated.
     /// </summary>

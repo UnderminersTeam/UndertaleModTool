@@ -5,10 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
-             xmlns:gif ="http://wpfanimatedgif.codeplex.com"
              mc:Ignorable="d" 
-             Unloaded="UndertaleTexutrePagesEditor_Unloaded"
-             DataContextChanged="UserControl_DataContextChanged"
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleTexturePageItem}">
     <UserControl.Resources>
         <ResourceDictionary>
@@ -34,41 +31,31 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Source position/size</TextBlock>
-        <Grid Grid.Row="0" Grid.Column="1" Margin="0,0,-38,24" Grid.RowSpan="2">
+        <Grid Grid.Row="0" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" Margin="3" Text="X pos:"/>
-            <local:TextBoxDark Grid.Column="0" Margin="46,3,2,3" Text="{Binding SourceX}"/>
-            <TextBlock Grid.Column="1" Margin="3" Text="Y pos:"/>
-            <local:TextBoxDark Grid.Column="1" Margin="46,3,2,3" Text="{Binding SourceY}"/>
-            <TextBlock Grid.Column="2" Margin="3" Text="Width:"/>
-            <local:TextBoxDark Grid.Column="2" Margin="46,3,3,3" Text="{Binding SourceWidth}"/>
-            <TextBlock Grid.Column="3" Margin="3" Text="Height:"/>
-            <local:TextBoxDark Grid.Column="3" Margin="46,3,3,3" Text="{Binding SourceHeight}"/>
+            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding SourceX}"/>
+            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding SourceY}"/>
+            <local:TextBoxDark Grid.Column="2" Margin="3" Text="{Binding SourceWidth}"/>
+            <local:TextBoxDark Grid.Column="3" Margin="3" Text="{Binding SourceHeight}"/>
         </Grid>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Target position/size</TextBlock>
-        <Grid Grid.Row="1" Grid.Column="1" Margin="0,0,-38,24" Grid.RowSpan="2">
+        <Grid Grid.Row="1" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" Margin="3" Text="X pos:"/>
-            <local:TextBoxDark Grid.Column="0" Margin="46,3,2,3" Text="{Binding TargetX}"/>
-            <TextBlock Grid.Column="1" Margin="3" Text="Y pos:"/>
-            <local:TextBoxDark Grid.Column="1" Margin="46,3,2,3" Text="{Binding TargetY}"/>
-            <TextBlock Grid.Column="2" Margin="3" Text="Width:"/>
-            <local:TextBoxDark Grid.Column="2" Margin="46,3,3,3" Text="{Binding TargetWidth}"/>
-            <TextBlock Grid.Column="3" Margin="3" Text="Height:"/>
-            <local:TextBoxDark Grid.Column="3" Margin="46,3,3,3" Text="{Binding TargetHeight}"/>
+            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding TargetX}"/>
+            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding TargetY}"/>
+            <local:TextBoxDark Grid.Column="2" Margin="3" Text="{Binding TargetWidth}"/>
+            <local:TextBoxDark Grid.Column="3" Margin="3" Text="{Binding TargetHeight}"/>
         </Grid>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Bounding size</TextBlock>
@@ -77,14 +64,12 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" Margin="3,3,75,3" Text="Width:"/>
-            <TextBlock Grid.Column="1" Margin="-58,3,75,3" Text="Height:"/>
-            <local:TextBoxDark Grid.Column="0" Margin="46,3,61,3" Text="{Binding BoundingWidth}"/>
-            <local:TextBoxDark Grid.Column="1" Margin="-12,3,120,3" Text="{Binding BoundingHeight}"/>
+            <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding BoundingWidth}"/>
+            <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding BoundingHeight}"/>
         </Grid>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Texture</TextBlock>
-        <local:UndertaleObjectReference Grid.Row="3" Grid.Column="1" Margin="3,3,120,3" ObjectReference="{Binding TexturePage}" ObjectType="{x:Type undertale:UndertaleEmbeddedTexture}"/>
+        <local:UndertaleObjectReference Grid.Row="3" Grid.Column="1" Margin="3" ObjectReference="{Binding TexturePage}" ObjectType="{x:Type undertale:UndertaleEmbeddedTexture}"/>
 
         <local:ButtonDark Grid.Row="4" Grid.ColumnSpan="3" Width="230" Margin="3"
                           Click="FindReferencesButton_Click">Find all references to this page item</local:ButtonDark>
@@ -137,17 +122,5 @@
                 </Image>
             </Grid>
         </Viewbox>
-        <Image Margin="0,32,36,0" Grid.Column="1" Grid.RowSpan="4" gif:ImageBehavior.AnimatedSource="/Resources/spr_flowey_riseanim.gif"  Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="Flowey"/>
-        <Image Margin="0,0,22,0" Grid.Column="1" Grid.RowSpan="4" Source="/Resources/spr_bubble_message.png" Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="FloweyBubble"/>
-        <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="TexutrePagesObjectLabel"
-                       ToolTip="This is an ID (index) of the currently open texture page. It starts from 0."
-                       ToolTipService.InitialShowDelay="200" Margin="0,0,23,0" Foreground="Black" Grid.Column="2"
-                       Width="Auto" Grid.RowSpan="4"
-               />
-        <Label Content="ID:" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="FunnyTexturePages"
-                       ToolTip="This is an ID (index) of the currently open texture page. It starts from 0."
-                       ToolTipService.InitialShowDelay="200" Margin="0,0,64,0" Foreground="Black" Grid.Column="2"
-                       Width="Auto" Grid.RowSpan="4"
-               />
     </Grid>
 </local:DataUserControl>

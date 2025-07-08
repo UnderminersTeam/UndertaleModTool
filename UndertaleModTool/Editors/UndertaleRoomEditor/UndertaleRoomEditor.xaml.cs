@@ -32,7 +32,6 @@ using System.Windows.Threading;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 using UndertaleModTool.Editors;
-using WpfAnimatedGif;
 using static UndertaleModLib.Models.UndertaleRoom;
 
 namespace UndertaleModTool
@@ -85,12 +84,6 @@ namespace UndertaleModTool
             Loaded += UndertaleRoomEditor_Loaded;
             Unloaded += UndertaleRoomEditor_Unloaded;
             DataContextChanged += UndertaleRoomEditor_DataContextChanged;
-
-            ((System.Windows.Controls.Image)mainWindow.FindName("Flowey")).Opacity = 0;
-            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
-            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
-
-            ((Label)this.FindName("RoomsObjectLabel")).Content = ((Label)mainWindow.FindName("ObjectLabel")).Content;
         }
 
         public void SaveImagePNG(Stream outfile)
@@ -166,16 +159,6 @@ namespace UndertaleModTool
         {
             ObjElemDict.Clear();
             ParticleSystemRectConverter.ClearDict();
-
-            var floweranim = ((System.Windows.Controls.Image)mainWindow.FindName("Flowey"));
-            //floweranim.Opacity = 1;
-
-            var controller = ImageBehavior.GetAnimationController(floweranim);
-            controller.Pause();
-            controller.GotoFrame(controller.FrameCount - 5);
-            controller.Play();
-
-            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
         }
 
         private void UndertaleRoomEditor_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -261,22 +244,6 @@ namespace UndertaleModTool
                     });
                 }
             }
-            UndertaleRoom code = this.DataContext as UndertaleRoom;
-
-            int foundIndex = code is UndertaleResource res ? mainWindow.Data.IndexOf(res, false) : -1;
-            string idString;
-
-            if (foundIndex == -1)
-                idString = "None";
-            else if (foundIndex == -2)
-                idString = "N/A";
-            else
-                idString = Convert.ToString(foundIndex);
-
-            ((Label)this.FindName("RoomsObjectLabel")).Content = idString;
-
-            //((Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
-            //((Image)mainWindow.FindName("Flowey")).Opacity = 0;
         }
 
         private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -588,11 +555,6 @@ namespace UndertaleModTool
             
             movingObj = null;
         }
-        private bool fuckyou()
-        {
-            var fuck = (Mouse.LeftButton == MouseButtonState.Pressed);
-            return fuck;
-        }
 
         bool placingTiles = false;
         List<Point> placedTiles = new();
@@ -787,7 +749,7 @@ namespace UndertaleModTool
         {
             RoomCanvas roomCanvas = GetRoomCanvas();
             UndertaleRoom room = DataContext as UndertaleRoom;
-            if (Keyboard.IsKeyDown(Key.Space))
+            if (e.ChangedButton == MouseButton.Middle)
             {
                 var sv = RoomGraphicsScroll;
                 if (e.ButtonState == MouseButtonState.Pressed)
@@ -939,6 +901,7 @@ namespace UndertaleModTool
                         }
                         return;
                     }
+
                     gameObj.X = tgtX;
                     gameObj.Y = tgtY;
                 }
@@ -2233,107 +2196,6 @@ namespace UndertaleModTool
             ObjElemDict[layer] = canvas;
         }
 
-        public void CancelScrolling()
-        {
-            var roomcanvas = roomCanvas as RoomCanvas;
-            roomcanvas.isMoving = false;
-            roomcanvas.startPosition = null;
-        }
-
-        private void RoomGraphicsScroll_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            var roomcanvas = roomCanvas as RoomCanvas;
-            if (e.ChangedButton == MouseButton.Left && e.ButtonState == MouseButtonState.Released)
-            {
-                roomcanvas.dragOrigin = null;
-                roomcanvas.vDrag = false;
-                roomcanvas.hDrag = false;
-            }
-            if (Keyboard.IsKeyUp(Key.Space))
-                CancelScrolling();
-
-        }
-
-        private void RoomGraphicsScroll_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            var roomcanvas = roomCanvas as RoomCanvas;
-            var sv = roomGraphicsScroll as ScrollViewer;
-            if (Keyboard.IsKeyDown(Key.Space))
-            {
-                if (roomcanvas.isMoving == false) //Pressing mouse middle for the first time.
-                {
-                    roomcanvas.isMoving = true;
-                    roomcanvas.startPosition = e.GetPosition(sv);
-                }
-            }
-        }
-
-        private void RoomGraphicsScroll_MouseMove(object sender, MouseEventArgs e)
-        {
-            var roomcanvas = roomCanvas as RoomCanvas;
-            if (roomcanvas.isMoving == true)
-            {
-                roomcanvas.scrollHandled = false;
-                RoomViewDrag(e);
-            }
-            return;
-        }
-
-        public void RoomViewDrag(MouseEventArgs e)
-        {
-            if (Keyboard.IsKeyUp(Key.Space) || !fuckyou())
-            {
-                CancelScrolling();
-                return;
-            }
-            var sv = roomGraphicsScroll as ScrollViewer;
-            var roomcanvas = roomCanvas as RoomCanvas;
-            if (roomcanvas.isMoving && roomcanvas != null && sv != null && roomcanvas.scrollHandled == false)
-            {
-                //prevent buggy duplicate scrolling
-                roomcanvas.scrollHandled = true;
-                Thickness canvasOffset = roomcanvas.Margin;
-                var currentPosition = e.GetPosition(sv);
-                var offset = roomcanvas.startPosition.Value - currentPosition;
-
-                roomcanvas.startPosition = currentPosition;
-                //change margins if outside view
-                if (offset.X < 0 && sv.HorizontalOffset == 0)
-                {
-                    canvasOffset.Left -= offset.X;
-                }
-                else if (offset.X > 0 && sv.HorizontalOffset == sv.ScrollableWidth)
-                {
-                    canvasOffset.Right += offset.X;
-                }
-                if (offset.Y < 0 && sv.VerticalOffset == 0)
-                {
-                    canvasOffset.Top -= offset.Y;
-                }
-                else if (offset.Y > 0 && sv.VerticalOffset == sv.ScrollableHeight)
-                {
-                    canvasOffset.Bottom += offset.Y;
-                }
-                roomcanvas.Margin = canvasOffset;
-
-                sv.ScrollToVerticalOffset(sv.VerticalOffset + offset.Y);
-                sv.ScrollToHorizontalOffset(sv.HorizontalOffset + offset.X);
-
-            }
-        }
-        private void RoomGraphicsScroll_Loaded(object sender, RoutedEventArgs e)
-        {
-            roomGraphicsScroll = sender as ScrollViewer;
-
-            if (roomCanvas is null)
-            {
-                if (MainWindow.FindVisualChild<Canvas>(RoomGraphics) is Canvas canv && canv.Name == "RoomCanvas")
-                    roomCanvas = canv;
-                else
-                    throw new Exception("\"RoomCanvas\" not found.");
-            }
-        }
-
         private void LayerCanvas_Unloaded(object sender, RoutedEventArgs e)
         {
             LayerCanvas canvas = sender as LayerCanvas;
@@ -2358,6 +2220,7 @@ namespace UndertaleModTool
                 room.GridThicknessPx = 1;
             room.SetupRoom(!Settings.Instance.GridWidthEnabled, !Settings.Instance.GridHeightEnabled);
         }
+
         private void EditTiles_Click(object sender, RoutedEventArgs e)
         {
             if (ObjectEditor.Content is Layer lay)
@@ -2506,11 +2369,6 @@ namespace UndertaleModTool
         }
     }
 
-            }
-            MessageBox.Show("This feature is currently disabled");
-            return;
-        }
-    }
     public partial class RoomCanvas : Canvas
     {
         // True when middle click is held, scrolling the canvas

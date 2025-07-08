@@ -1,13 +1,11 @@
 ﻿using ICSharpCode.SharpZipLib.BZip2;
 using System;
 using System.Buffers.Binary;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using UndertaleModLib.Util;
 
 namespace UndertaleModLib.Models;
@@ -363,7 +361,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
 
         /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
-
+        
         /// <summary>
         /// Invoked whenever the effective value of any dependency property has been updated.
         /// </summary>

@@ -4,7 +4,7 @@ namespace UndertaleModLib.Util
 {
     public class DebugUtil
     {
-
+        
         /// <summary>
         /// Asserts that a specified condition is true.
         /// </summary>

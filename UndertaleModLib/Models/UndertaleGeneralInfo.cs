@@ -752,22 +752,22 @@ public class UndertaleOptions : UndertaleObject, IDisposable
     /// The priority of the game process. The higher the number, the more priority will be given to the game. Used only in Game Maker 8 and earlier.
     /// </summary>
     public uint Priority { get; set; } = 0;
-
+    
     /// <summary>
     /// The background of the loading bar when loading GameMaker 8 games.
     /// </summary>
     public UndertaleSprite.TextureEntry BackImage { get; set; } = new UndertaleSprite.TextureEntry();
-
+    
     /// <summary>
     /// The image of the loading bar when loading GameMaker 8 games.
     /// </summary>
     public UndertaleSprite.TextureEntry FrontImage { get; set; } = new UndertaleSprite.TextureEntry();
-
+    
     /// <summary>
     /// The image that gets shown when loading GameMaker 8 games.
     /// </summary>
     public UndertaleSprite.TextureEntry LoadImage { get; set; } = new UndertaleSprite.TextureEntry();
-
+    
     /// <summary>
     /// The transparency value of <see cref="LoadImage"/>. 255 indicates fully opaque, 0 means fully transparent. 
     /// </summary>

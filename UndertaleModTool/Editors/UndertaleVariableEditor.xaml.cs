@@ -12,9 +12,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using UndertaleModLib.Models;
-using UndertaleModLib;
-using WpfAnimatedGif;
 
 namespace UndertaleModTool
 {
@@ -23,47 +20,9 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertaleVariableEditor : DataUserControl
     {
-        private static MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
         public UndertaleVariableEditor()
         {
             InitializeComponent();
-
-            ((Image)mainWindow.FindName("Flowey")).Opacity = 0;
-            ((Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
-            ((Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
-
-            ((Label)this.FindName("VariablesObjectLabel")).Content = ((Label)mainWindow.FindName("ObjectLabel")).Content;
-        }
-        private void UndertaleVariablesEditor_Unloaded(object sender, RoutedEventArgs e)
-        {
-            var floweranim = ((Image)mainWindow.FindName("Flowey"));
-            //floweranim.Opacity = 1;
-
-            var controller = ImageBehavior.GetAnimationController(floweranim);
-            controller.Pause();
-            controller.GotoFrame(controller.FrameCount - 5);
-            controller.Play();
-
-            ((Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
-        }
-        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            UndertaleVariable code = this.DataContext as UndertaleVariable;
-
-            int foundIndex = code is UndertaleResource res ? mainWindow.Data.IndexOf(res, false) : -1;
-            string idString;
-
-            if (foundIndex == -1)
-                idString = "None";
-            else if (foundIndex == -2)
-                idString = "N/A";
-            else
-                idString = Convert.ToString(foundIndex);
-
-            ((Label)this.FindName("VariablesObjectLabel")).Content = idString;
-
-            //((Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
-            //((Image)mainWindow.FindName("Flowey")).Opacity = 0;
         }
     }
 }

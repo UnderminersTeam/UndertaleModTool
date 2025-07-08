@@ -6,7 +6,6 @@
                        xmlns:local="clr-namespace:UndertaleModTool"
                        xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
                        xmlns:sys="clr-namespace:System;assembly=mscorlib"
-                       xmlns:gif ="http://wpfanimatedgif.codeplex.com"
                        mc:Ignorable="d" 
                        d:DesignHeight="4500" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleParticleSystemEmitter}">
     <UserControl.Resources>
@@ -89,7 +88,7 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
-        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3,3,120,3" ObjectReference="{Binding Name}"/>
+        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3"
                    Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter},ConverterParameter=2023.6}"
@@ -98,11 +97,11 @@
                    Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter},ConverterParameter=2023.6}"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Emit mode</TextBlock>
-        <local:ComboBoxDark Grid.Row="2" Grid.Column="1" Margin="3,3,120,3"
+        <local:ComboBoxDark Grid.Row="2" Grid.Column="1" Margin="3"
                             ItemsSource="{Binding Source={StaticResource EmitMode}}" SelectedItem="{Binding Mode}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Emit count</TextBlock>
-        <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3,3,120,3" Text="{Binding EmitCount}"/>
+        <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding EmitCount}"/>
 
         <Grid Grid.Row="4" Grid.ColumnSpan="2" Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter},ConverterParameter=2023.8}">
             <Grid.ColumnDefinitions>
@@ -384,18 +383,5 @@
 
         <TextBlock Grid.Row="36" Grid.Column="0" Margin="3">Spawn on update count</TextBlock>
         <local:TextBoxDark Grid.Row="36" Grid.Column="1" Margin="3" Text="{Binding SpawnOnUpdateCount}"/>
-
-        <Image Margin="0,32,30,0" Grid.Column="1" Grid.RowSpan="4" gif:ImageBehavior.AnimatedSource="/Resources/spr_flowey_riseanim.gif"  Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="Flowey"/>
-        <Image Margin="0,0,16,0" Grid.Column="1" Grid.RowSpan="4" Source="/Resources/spr_bubble_message.png" Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="FloweyBubble"/>
-        <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="EmittersObjectLabel"
-                       ToolTip="This is an ID (index) of the currently open particle emitter. It starts from 0."
-                       ToolTipService.InitialShowDelay="200" Margin="0,0,17,0" Foreground="Black" Grid.Column="2"
-                       Width="Auto" Grid.RowSpan="4"
-               />
-        <Label Content="ID:" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="FunnyEmitters"
-                       ToolTip="This is an ID (index) of the currently open particle emitter. It starts from 0."
-                       ToolTipService.InitialShowDelay="200" Margin="0,0,58,0" Foreground="Black" Grid.Column="2"
-                       Width="Auto" Grid.RowSpan="4"
-               />
     </Grid>
 </local:DataUserControl>

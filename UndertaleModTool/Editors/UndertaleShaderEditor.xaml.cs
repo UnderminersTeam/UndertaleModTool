@@ -15,9 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using UndertaleModLib;
 using UndertaleModLib.Models;
-using WpfAnimatedGif;
 
 namespace UndertaleModTool
 {
@@ -31,43 +29,6 @@ namespace UndertaleModTool
         public UndertaleShaderEditor()
         {
             InitializeComponent();
-
-            ((Image)mainWindow.FindName("Flowey")).Opacity = 0;
-            ((Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
-            ((Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
-
-            ((Label)this.FindName("ShadersObjectLabel")).Content = ((Label)mainWindow.FindName("ObjectLabel")).Content;
-        }
-        private void UndertaleShadersEditor_Unloaded(object sender, RoutedEventArgs e)
-        {
-            var floweranim = ((Image)mainWindow.FindName("Flowey"));
-            //floweranim.Opacity = 1;
-
-            var controller = ImageBehavior.GetAnimationController(floweranim);
-            controller.Pause();
-            controller.GotoFrame(controller.FrameCount - 5);
-            controller.Play();
-
-            ((Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
-        }
-        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            UndertaleShader code = this.DataContext as UndertaleShader;
-
-            int foundIndex = code is UndertaleResource res ? mainWindow.Data.IndexOf(res, false) : -1;
-            string idString;
-
-            if (foundIndex == -1)
-                idString = "None";
-            else if (foundIndex == -2)
-                idString = "N/A";
-            else
-                idString = Convert.ToString(foundIndex);
-
-            ((Label)this.FindName("ShadersObjectLabel")).Content = idString;
-
-            //((Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
-            //((Image)mainWindow.FindName("Flowey")).Opacity = 0;
         }
 
         private void TextEditor_Loaded(object sender, RoutedEventArgs e)

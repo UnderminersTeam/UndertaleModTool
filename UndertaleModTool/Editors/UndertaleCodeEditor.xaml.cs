@@ -26,7 +26,6 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.TextFormatting;
 using System.Windows.Navigation;
@@ -36,7 +35,6 @@ using UndertaleModLib;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
-using WpfAnimatedGif;
 using Input = System.Windows.Input;
 
 namespace UndertaleModTool
@@ -52,9 +50,6 @@ namespace UndertaleModTool
         public UndertaleCode CurrentDisassembled = null;
         public UndertaleCode CurrentDecompiled = null;
         public List<string> CurrentLocals = new();
-        public string ProfileHash = mainWindow.ProfileHash;
-        public string MainPath = Path.Combine(Settings.ProfilesFolder, mainWindow.ProfileHash, "Main");
-        public string TempPath = Path.Combine(Settings.ProfilesFolder, mainWindow.ProfileHash, "Temp");
 
         public bool DecompiledFocused = false;
         public bool DecompiledChanged = false;
@@ -71,7 +66,6 @@ namespace UndertaleModTool
         public static (int Line, int Column, double ScrollPos) OverriddenDisasmPos { get; set; }
 
         public static RoutedUICommand Compile = new RoutedUICommand("Compile code", "Compile", typeof(UndertaleCodeEditor));
-        //public static RoutedUICommand Findcode = mainWindow.RunScript("Search.csx)");
 
         private static readonly Dictionary<string, UndertaleNamedResource> NamedObjDict = new();
         private static readonly Dictionary<string, UndertaleNamedResource> ScriptsDict = new();
@@ -88,22 +82,7 @@ namespace UndertaleModTool
 
         public UndertaleCodeEditor()
         {
-            /*var floweranim = ((Image)mainWindow.FindName("Flowey"));
-            floweranim.Opacity = 1;
-
-            var controller = ImageBehavior.GetAnimationController(floweranim);
-            controller.Pause();
-            controller.GotoFrame(controller.FrameCount - 5);
-            controller.Play();*/
-
-
             InitializeComponent();
-
-            ((Image)mainWindow.FindName("Flowey")).Opacity = 0;
-            ((Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
-            ((Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
-
-            ((Label)this.FindName("CodeObjectLabel")).Content = ((Label)mainWindow.FindName("ObjectLabel")).Content;
 
             // Decompiled editor styling and functionality
             DecompiledSearchPanel = SearchPanel.Install(DecompiledEditor.TextArea);
@@ -218,17 +197,6 @@ namespace UndertaleModTool
         {
             OverriddenDecompPos = default;
             OverriddenDisasmPos = default;
-
-            var floweranim = ((Image)mainWindow.FindName("Flowey"));
-            //floweranim.Opacity = 1;
-
-            var controller = ImageBehavior.GetAnimationController(floweranim);
-            controller.Pause();
-            controller.GotoFrame(controller.FrameCount - 5);
-            controller.Play();
-
-            ((Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
-            //((Image)mainWindow.FindName("FloweyBubble")).Opacity = 1;
         }
 
         private void SearchPanel_LostFocus(object sender, RoutedEventArgs e)
@@ -360,18 +328,6 @@ namespace UndertaleModTool
             }
             else
                 FillInCodeViewer(true);
-
-            int foundIndex = code is UndertaleResource res ? mainWindow.Data.IndexOf(res, false) : -1;
-            string idString;
-
-            if (foundIndex == -1)
-                idString = "None";
-            else if (foundIndex == -2)
-                idString = "N/A";
-            else
-                idString = Convert.ToString(foundIndex);
-
-            ((Label)this.FindName("CodeObjectLabel")).Content = idString;
         }
 
         public static readonly RoutedEvent CtrlKEvent = EventManager.RegisterRoutedEvent(
@@ -1164,7 +1120,7 @@ namespace UndertaleModTool
                 {
                     int line = docLine.LineNumber;
                     var highlighter = highlighterInst;
-
+                    
                     HighlightedLine highlighted;
                     try
                     {
@@ -1210,10 +1166,10 @@ namespace UndertaleModTool
                     return null;
 
                 var doc = CurrentContext.Document;
-                string numText = doc.GetText(offset, numLength);
+                string numText = doc.GetText(offset, numLength); 
 
                 var line = new ClickVisualLineText(numText, CurrentContext.VisualLine, numLength);
-
+                
                 line.Clicked += (text, inNewTab) =>
                 {
                     if (int.TryParse(text, out int id))
@@ -1271,7 +1227,7 @@ namespace UndertaleModTool
                                 {
                                     mainWindow.Focus();
                                     mainWindow.ChangeSelection(obj, true);
-
+                                    
                                 }
                                 else if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
                                     mainWindow.ChangeSelection(obj);
@@ -1332,11 +1288,11 @@ namespace UndertaleModTool
             private readonly TextEditor textEditorInst;
             private readonly UndertaleCodeEditor codeEditorInst;
 
-            private SolidColorBrush FunctionBrush = new(Color.FromRgb(CodeColorsWindow.FunctionColor_0, CodeColorsWindow.FunctionColor_1, CodeColorsWindow.FunctionColor_2));
-            private SolidColorBrush GlobalBrush = new(Color.FromRgb(CodeColorsWindow.GlobalColor_0, CodeColorsWindow.GlobalColor_1, CodeColorsWindow.GlobalColor_2));
-            private SolidColorBrush ConstantBrush = new(Color.FromRgb(CodeColorsWindow.ConstantColor_0, CodeColorsWindow.ConstantColor_1, CodeColorsWindow.ConstantColor_2));
-            private SolidColorBrush InstanceBrush = new(Color.FromRgb(CodeColorsWindow.InstanceColor_0, CodeColorsWindow.InstanceColor_1, CodeColorsWindow.InstanceColor_2));
-            private SolidColorBrush LocalBrush = new(Color.FromRgb(CodeColorsWindow.LocalColor_0, CodeColorsWindow.LocalColor_1, CodeColorsWindow.LocalColor_2)); // new(Color.FromRgb(0x58, 0xF8, 0x99)); -> this color is pretty cool
+            private static readonly SolidColorBrush FunctionBrush = new(Color.FromRgb(0xFF, 0xB8, 0x71));
+            private static readonly SolidColorBrush GlobalBrush = new(Color.FromRgb(0xF9, 0x7B, 0xF9));
+            private static readonly SolidColorBrush ConstantBrush = new(Color.FromRgb(0xFF, 0x80, 0x80));
+            private static readonly SolidColorBrush InstanceBrush = new(Color.FromRgb(0x58, 0xE3, 0x5A));
+            private static readonly SolidColorBrush LocalBrush = new(Color.FromRgb(0xFF, 0xF8, 0x99));
 
             private static ContextMenuDark contextMenu;
 
@@ -1364,6 +1320,7 @@ namespace UndertaleModTool
                     Placement = PlacementMode.MousePoint
                 };
             }
+
             public override void StartGeneration(ITextRunConstructionContext context)
             {
                 lineNameSections.Clear();

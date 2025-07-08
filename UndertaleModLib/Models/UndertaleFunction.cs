@@ -174,7 +174,7 @@ public class UndertaleCodeLocals : UndertaleNamedResource, IDisposable
     /// <returns><see langword="true"/> if a variable matching the provided name exists, otherwise <see langword="false"/>.</returns>
     public bool HasLocal(string varName)
     {
-        return Locals.Any(local => local.Name.Content == varName);
+        return Locals.Any(local=>local.Name.Content == varName);
     }
 
     // TODO: INotifyPropertyChanged

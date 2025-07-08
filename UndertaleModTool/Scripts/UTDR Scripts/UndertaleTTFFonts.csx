@@ -6,7 +6,6 @@ if (!(displayName == "undertale" || displayName == "nxtale"))
     ScriptError("Error 1: This script only works with Undertale!");
 }
 
-
 // Remove all current fonts
 // This is necessary because I need to add fonts under IDs that are normally used by these resources
 // TODO: Japanese fonts won't work at all because I didn't add support for that

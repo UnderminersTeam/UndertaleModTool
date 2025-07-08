@@ -352,7 +352,7 @@ public partial class Program : IScriptInterface
         }
 
         // If user provided code to dump, dump code
-        if ((options.Code?.Length > 0) && (program.Data.Code.Count > 0))
+        if ((options.Code?.Length > 0) && (program.Data.Code?.Count > 0))
         {
             // If user wanted to dump everything, do that, otherwise only dump what user provided
             string[] codeArray;

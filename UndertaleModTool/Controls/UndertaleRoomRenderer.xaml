@@ -82,7 +82,7 @@
                     <Canvas x:Name="RoomCanvas" Width="{Binding Width, Mode=OneTime}" Height="{Binding Height, Mode=OneTime}" IsItemsHost="True" AllowDrop="True" ClipToBounds="True"
                             SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor"
                             Loaded="RoomCanvas_Loaded">
-                        <Canvas.OpacityMask>
+                                                <Canvas.OpacityMask>
                             <DrawingBrush TileMode="Tile" ViewportUnits="Absolute">
                                 <DrawingBrush.Viewport>
                                     <MultiBinding Converter="{StaticResource GridConverter}">

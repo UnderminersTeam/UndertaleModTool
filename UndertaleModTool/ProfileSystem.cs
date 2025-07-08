@@ -436,9 +436,9 @@ an issue on GitHub.");
                     MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
                     if (!BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").Equals(BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", ""), StringComparison.InvariantCultureIgnoreCase))
                     {
-                        using (var stream = File.OpenRead(filename))
+                        using (var stream2 = File.OpenRead(filename))
                         {
-                            MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
+                            MD5CurrentlyLoaded = md5Instance.ComputeHash(stream2);
                             if (is_string == true)
                             {
                                 byte[] idk = Encoding.ASCII.GetBytes(Input_text);
@@ -455,6 +455,16 @@ an issue on GitHub.");
                 Directory.CreateDirectory(Path.Combine(ProfilesFolder, ProfileHash, "Main"));
                 Directory.CreateDirectory(Path.Combine(ProfilesFolder, ProfileHash, "Temp"));
                 var Oldname = "";
+
+                string profDir;
+                string MD5DirNameOld;
+                string MD5DirPathOld;
+                string MD5DirPathOldMain;
+                string MD5DirPathOldTemp;
+                string MD5DirNameNew;
+                string MD5DirPathNew;
+                string MD5DirPathNewTemp;
+
                 if (!SettingsWindow.ProfileModeEnabled || data.IsYYC())
                 {
                     MD5PreviouslyLoaded = MD5CurrentlyLoaded;
@@ -469,14 +479,6 @@ an issue on GitHub.");
                 else if (SettingsWindow.ProfileModeEnabled)
                 {
                     Directory.CreateDirectory(ProfilesFolder);
-                    string profDir;
-                    string MD5DirNameOld;
-                    string MD5DirPathOld;
-                    string MD5DirPathOldMain;
-                    string MD5DirPathOldTemp;
-                    string MD5DirNameNew;
-                    string MD5DirPathNew;
-                    string MD5DirPathNewTemp;
                     bool old_is_string = is_string;
                     // Get the subdirectories for the specified directory.
                     if (!is_string)
@@ -550,24 +552,6 @@ an issue on GitHub.");
                     DirectoryCopy(Path.Combine(profDir, "Temp"), Path.Combine(profDir, "Main"), true);
                     this.ShowMessage("Profile saved successfully to " + "\"" + CurProfileName + "\"");
                 }
-                MD5PreviouslyLoaded = MD5CurrentlyLoaded;
-                // Get the subdirectories for the specified directory.
-                MD5DirNameOld = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
-                MD5DirPathOld = Path.Combine(ProfilesFolder, MD5DirNameOld);
-                MD5DirPathOldMain = Path.Combine(MD5DirPathOld, "Main");
-                MD5DirPathOldTemp = Path.Combine(MD5DirPathOld, "Temp");
-                if ((Directory.Exists(MD5DirPathOldMain)) && (Directory.Exists(MD5DirPathOldTemp)) && copyProfile)
-                {
-                    Directory.Delete(MD5DirPathOldMain, true);
-                }
-                DirectoryCopy(MD5DirPathOldTemp, MD5DirPathOldMain, true);
-
-                ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
-                profDir = Path.Combine(ProfilesFolder, ProfileHash);
-                Directory.CreateDirectory(profDir);
-                Directory.CreateDirectory(Path.Combine(profDir, "Main"));
-                Directory.CreateDirectory(Path.Combine(profDir, "Temp"));
-
                 if (SettingsWindow.DeleteOldProfileOnSave && copyProfile)
                 {
                     //this.ShowMessage(Oldname);

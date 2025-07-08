@@ -650,9 +650,8 @@ public partial class Program : IScriptInterface
         }
     }
 
-    public uint ReduceCollisionValue(List<uint> possibleValues, string MyName)
+    public uint ReduceCollisionValue(List<uint> possibleValues)
     {
-        this.ScriptMessage("haha dumbass");
         if (possibleValues.Count == 1)
         {
             if (possibleValues[0] != uint.MaxValue)
@@ -664,7 +663,7 @@ public partial class Program : IScriptInterface
             while (!objFound)
             {
                 string objectIndex = SimpleTextInput("Object could not be found. Please enter it below:",
-                    "Object enter box. ("+MyName+")", "", false).ToLower();
+                    "Object enter box.", "", false).ToLower();
                 for (var i = 0; i < Data.GameObjects.Count; i++)
                 {
                     if (Data.GameObjects[i].Name.Content.ToLower() == objectIndex)

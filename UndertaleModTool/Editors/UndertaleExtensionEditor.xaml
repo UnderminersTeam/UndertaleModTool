@@ -6,10 +6,7 @@
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
-             xmlns:gif ="http://wpfanimatedgif.codeplex.com"
              mc:Ignorable="d" 
-             Unloaded="UndertaleExtensionsEditor_Unloaded"
-             DataContextChanged="UserControl_DataContextChanged"
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleExtension}">
     <UserControl.Resources>
         <local:ByteArrayConverter x:Key="byteArrayConverter"/>
@@ -38,7 +35,7 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Name</TextBlock>
-        <local:UndertaleStringReference Grid.Row="1" Grid.Column="1" Margin="3,3,120,3" ObjectReference="{Binding Name}"/>
+        <local:UndertaleStringReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="Version"
                    Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2023.4}"/>
@@ -46,10 +43,10 @@
                                         Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2023.4}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Class Name</TextBlock>
-        <local:UndertaleStringReference Grid.Row="3" Grid.Column="1" Margin="3,3,120,3" ObjectReference="{Binding ClassName}"/>
+        <local:UndertaleStringReference Grid.Row="3" Grid.Column="1" Margin="3" ObjectReference="{Binding ClassName}"/>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Files</TextBlock>
-        <local:DataGridDark Grid.Row="4" Grid.Column="1" Margin="3,3,120,3" ItemsSource="{Binding Files}"
+        <local:DataGridDark Grid.Row="4" Grid.Column="1" Margin="3" ItemsSource="{Binding Files}"
                             AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
             <DataGrid.Columns>
                 <DataGridTemplateColumn Header="Files" Width="*">
@@ -61,11 +58,11 @@
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </local:DataGridDark>
-        <local:ButtonDark Grid.Row="5" Grid.Column="1" Content="Add new extension file" Click="NewFileButton_Click" Margin="0,0,120,0"/>
+        <local:ButtonDark Grid.Row="5" Grid.Column="1" Content="Add new extension file" Click="NewFileButton_Click"/>
 
         <TextBlock Grid.Row="6" Grid.Column="0" Margin="3,13,3,3" Text="Options"
                    Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2022.6}"/>
-        <local:DataGridDark Grid.Row="6" Grid.Column="1" Margin="3,13,120,3" x:Name="OptionsGrid" ItemsSource="{Binding Options, Mode=OneWay}"
+        <local:DataGridDark Grid.Row="6" Grid.Column="1" Margin="3,13,3,3" x:Name="OptionsGrid" ItemsSource="{Binding Options, Mode=OneWay}"
                             AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
                             ScrollViewer.CanContentScroll="True"
                             VirtualizingPanel.IsVirtualizing="True"
@@ -129,7 +126,7 @@
                           Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2022.6}"/>
 
         <TextBlock Grid.Row="8" Grid.Column="0" Margin="3" Visibility="{Binding DataContext.IsExtProductIDEligible, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">Product ID</TextBlock>
-        <local:TextBoxDark Background="#FF333333" Foreground="#FFFFFFFF" Grid.Row="8" Grid.Column="1" Margin="3,3,120,3" Visibility="{Binding DataContext.IsExtProductIDEligible, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Text="{Binding ProductIdData, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UndertaleExtensionEditor}}, Mode = TwoWay, Converter={StaticResource byteArrayConverter}}"/>
+        <local:TextBoxDark Background="#FF333333" Foreground="#FFFFFFFF" Grid.Row="8" Grid.Column="1" Margin="3" Visibility="{Binding DataContext.IsExtProductIDEligible, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Text="{Binding ProductIdData, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UndertaleExtensionEditor}}, Mode = TwoWay, Converter={StaticResource byteArrayConverter}}"/>
 
         <StackPanel Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2">
             <TextBlock Foreground="Red" FontStyle="Italic">
@@ -141,17 +138,5 @@
             </TextBlock>
             <!-- Meaning, it is useless to add your own .gml files :p -->
         </StackPanel>
-        <Image Margin="0,32,30,0" Grid.Column="1" Grid.RowSpan="5" gif:ImageBehavior.AnimatedSource="/Resources/spr_flowey_riseanim.gif"  Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="Flowey"/>
-        <Image Margin="0,0,16,0" Grid.Column="1" Grid.RowSpan="5" Source="/Resources/spr_bubble_message.png" Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="FloweyBubble"/>
-        <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="ExtensionsObjectLabel"
-                       ToolTip="This is an ID (index) of the currently open string. It starts from 0."
-                       ToolTipService.InitialShowDelay="200" Margin="0,0,17,0" Foreground="Black" Grid.Column="2"
-                       Width="Auto" Grid.RowSpan="5"
-               />
-        <Label Content="ID:" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="FunnyExtensions"
-                       ToolTip="This is an ID (index) of the currently open string. It starts from 0."
-                       ToolTipService.InitialShowDelay="200" Margin="0,0,58,0" Foreground="Black" Grid.Column="2"
-                       Width="Auto" Grid.RowSpan="5"
-               />
     </Grid>
 </local:DataUserControl>

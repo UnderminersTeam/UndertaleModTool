@@ -868,16 +868,16 @@ namespace UndertaleModLib
         private bool checkedFor2024_14 = false;
         private void CheckForGM2022_2(UndertaleReader reader)
         {
-            /* This code performs four checks to identify GM2022.2.
-             * First, as you've seen, is the bytecode version.
-             * Second, we assume it is. If there are no Glyphs, we are vindicated by the impossibility of null values there.
-             * Third, we check that the Glyph Length is less than the chunk length. If it's going outside the chunk, that means
-             * that the length was misinterpreted.
-             * Fourth, in case of a terrible fluke causing this to appear valid erroneously, we verify that each pointer leads into the next.
-             * And if someone builds their game so the first pointer is absolutely valid length data and the next font is valid glyph data-
-             * screw it, call Jacky720 when someone constructs that and you want to mod it.
-             * Maybe try..catch on the whole shebang?
-             */
+           /* This code performs four checks to identify GM2022.2.
+            * First, as you've seen, is the bytecode version.
+            * Second, we assume it is. If there are no Glyphs, we are vindicated by the impossibility of null values there.
+            * Third, we check that the Glyph Length is less than the chunk length. If it's going outside the chunk, that means
+            * that the length was misinterpreted.
+            * Fourth, in case of a terrible fluke causing this to appear valid erroneously, we verify that each pointer leads into the next.
+            * And if someone builds their game so the first pointer is absolutely valid length data and the next font is valid glyph data-
+            * screw it, call Jacky720 when someone constructs that and you want to mod it.
+            * Maybe try..catch on the whole shebang?
+            */
             if (reader.undertaleData.GeneralInfo?.BytecodeVersion < 17 || reader.undertaleData.IsVersionAtLeast(2022, 2))
             {
                 checkedFor2022_2 = true;
@@ -1394,9 +1394,6 @@ namespace UndertaleModLib
             reader.Position = returnTo;
 
 
-            reader.Position = returnTo;
-
-
             checkedFor2022_1 = true;
         }
 
@@ -1866,7 +1863,7 @@ namespace UndertaleModLib
                 return 0;
 
             uint count = 0;
-
+            
             if (!reader.Bytecode14OrLower)
             {
                 count += 1 + UndertaleSimpleList<UndertaleFunction>.UnserializeChildObjectCount(reader);

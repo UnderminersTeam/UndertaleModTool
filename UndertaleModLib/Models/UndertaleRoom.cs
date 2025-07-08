@@ -231,7 +231,6 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
         for (int i = 0; i < orderedLayers.Length; i++)
         {
-            if (Layers[i] != orderedLayers[i])
                 Layers[i] = orderedLayers[i];
         }
     }
@@ -256,7 +255,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
     /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
-
+    
     /// <summary>
     /// Invoked whenever the effective value of any dependency property has been updated.
     /// </summary>
@@ -532,7 +531,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         // Loop through each tile and save how many times their sizes are used
         foreach (Tile tile in tileList)
         {
-            Point scale = new((int)tile.Width, (int)tile.Height);
+            Point scale = new((int) tile.Width, (int) tile.Height);
             if (tileSizes.ContainsKey(scale))
                 tileSizes[scale]++;
             else
@@ -1025,32 +1024,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 return ((ImageIndex % count) + count) % count;
             }
         }
-        public UndertaleModLib.UndertaleSimpleList<UndertaleModLib.Models.UndertaleSprite.TextureEntry> ObjectSpriteIndex
-        {
-            get
-            {
-                if (ObjectDefinition?.Sprite is null)
-                {
-                    /*var floweyr = Properties.Resources.spr_unknown_sprite;
-                    var ssass = ((ImageBrush)UndertaleRoomEditor.FindName("ImageBrushSprite")).ImageSource;
-                    mainWindow.ShowError(ssass.ToString(), "hi");*/
-                    //((ImageBrush)mainWindow.FindName("ImageBrushSprite")).ImageSource = floweyr;
-                    return null;
-                }
 
-                var sprite = ObjectDefinition.Sprite.Textures;
-
-                //var sprite = "Resources\\spr_unknown_sprite.png";
-
-                //var spritex = ObjectDefinition.Sprite.Textures[0].Texture;
-                /*Bitmap image = TextureWorker.ReadImageFromFile("Resources\\spr_unknown_sprite.png");
-                image.SetResolution(96.0F, 96.0F);
-                sprite[0].Texture.ReplaceTexture(image);
-
-                System.Diagnostics.Debug.WriteLine(ObjectDefinition.Sprite.Textures);*/
-                return sprite;
-            }
-        }
         /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)

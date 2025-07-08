@@ -5,10 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
-             xmlns:gif ="http://wpfanimatedgif.codeplex.com"
              mc:Ignorable="d" 
-             Unloaded="TextureGroupInfoEditor_Unloaded"
-             DataContextChanged="UserControl_DataContextChanged"
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleTextureGroupInfo}">
   
   <UserControl.Resources>
@@ -56,12 +53,12 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Group Name</TextBlock>
-                <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3,3,120,3" ObjectReference="{Binding Name}"/>
+                <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
 
               <!--Texture Page List-->
               <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Texture Pages</TextBlock>
-              <Expander Grid.Row="1" Grid.Column="1" Margin="3,3,120,3" Name="TextureListExpander" Header="List">
+              <Expander Grid.Row="1" Grid.Column="1" Margin="3" Name="TextureListExpander" Header="List">
                 <local:DataGridDark ItemsSource="{Binding TexturePages}" MaxHeight="370" x:Name="TextureListGrid"
                                     AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
                                     ScrollViewer.CanContentScroll="True"
@@ -106,7 +103,7 @@
 
               <!--Sprite List-->
               <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Sprites</TextBlock>
-              <Expander Grid.Row="2" Grid.Column="1" Margin="3,3,120,3" Name="SpriteListExpander" Header="List">
+              <Expander Grid.Row="2" Grid.Column="1" Margin="3" Name="SpriteListExpander" Header="List">
                 <local:DataGridDark ItemsSource="{Binding Sprites}" MaxHeight="370" x:Name="SpriteListGrid"
                                     AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
                                     ScrollViewer.CanContentScroll="True"
@@ -151,7 +148,7 @@
 
               <!--Spine Sprite List-->
               <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Spine Sprites</TextBlock>
-              <Expander Grid.Row="3" Grid.Column="1" Margin="3,3,120,3" Name="SpineSprListExpander" Header="List">
+              <Expander Grid.Row="3" Grid.Column="1" Margin="3" Name="SpineSprListExpander" Header="List">
                 <local:DataGridDark ItemsSource="{Binding SpineSprites}" MaxHeight="370" x:Name="SpineSprListGrid"
                                     AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
                                     ScrollViewer.CanContentScroll="True"
@@ -196,7 +193,7 @@
 
               <!--Font List-->
               <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Fonts</TextBlock>
-              <Expander Grid.Row="4" Grid.Column="1" Margin="3,3,120,3" Name="FontListExpander" Header="List">
+              <Expander Grid.Row="4" Grid.Column="1" Margin="3" Name="FontListExpander" Header="List">
                 <local:DataGridDark ItemsSource="{Binding Fonts}" MaxHeight="370" x:Name="FontListGrid"
                                     AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
                                     ScrollViewer.CanContentScroll="True"
@@ -241,7 +238,7 @@
 
               <!--Tileset List-->
               <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Tilesets</TextBlock>
-              <Expander Grid.Row="5" Grid.Column="1" Margin="3,3,120,3" Name="TilesetListExpander" Header="List">
+              <Expander Grid.Row="5" Grid.Column="1" Margin="3" Name="TilesetListExpander" Header="List">
                 <local:DataGridDark ItemsSource="{Binding Tilesets}" MaxHeight="370" x:Name="TilesetListGrid"
                                     AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
                                     ScrollViewer.CanContentScroll="True"
@@ -283,18 +280,6 @@
                   </DataGrid.Columns>
                 </local:DataGridDark>
               </Expander>
-                <Image Margin="0,32,30,0" Grid.Column="1" Grid.RowSpan="3" gif:ImageBehavior.AnimatedSource="/Resources/spr_flowey_riseanim.gif"  Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="Flowey"/>
-                <Image Margin="0,0,16,0" Grid.Column="1" Grid.RowSpan="3" Source="/Resources/spr_bubble_message.png" Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="FloweyBubble"/>
-                <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="TextureGroupInfoObjectLabel"
-                       ToolTip="This is an ID (index) of the currently open texture group information. It starts from 0."
-                       ToolTipService.InitialShowDelay="200" Margin="0,0,17,0" Foreground="Black" Grid.Column="2"
-                       Width="Auto" Grid.RowSpan="3"
-               />
-                <Label Content="ID:" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="FunnyTextureGroupInfo"
-                       ToolTip="This is an ID (index) of the currently open texture group information. It starts from 0."
-                       ToolTipService.InitialShowDelay="200" Margin="0,0,58,0" Foreground="Black" Grid.Column="2"
-                       Width="Auto" Grid.RowSpan="3"
-               />
             </Grid>
         </StackPanel>
     </StackPanel>

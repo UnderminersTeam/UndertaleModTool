@@ -390,38 +390,38 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                     switch (SpineVersion)
                     {
                         case 1:
-                            {
-                                UndertaleSpineTextureEntry atlas = SpineTextures.First(); // will throw an exception if the list is null, what I want!
-                                writer.Write(atlas.TexBlob.Length);
-                                writer.Write(atlas.PageWidth);
-                                writer.Write(atlas.PageHeight);
+                        {
+                            UndertaleSpineTextureEntry atlas = SpineTextures.First(); // will throw an exception if the list is null, what I want!
+                            writer.Write(atlas.TexBlob.Length);
+                            writer.Write(atlas.PageWidth);
+                            writer.Write(atlas.PageHeight);
 
-                                // the data.
-                                writer.Write(encodedJson);
-                                writer.Write(encodedAtlas);
+                            // the data.
+                            writer.Write(encodedJson);
+                            writer.Write(encodedAtlas);
 
-                                // the one and only atlas.
-                                writer.Write(atlas.TexBlob);
+                            // the one and only atlas.
+                            writer.Write(atlas.TexBlob);
 
-                                break;
-                            }
+                            break;
+                        }
                         case 2:
                         case 3:
+                        {
+                            writer.Write(SpineTextures.Count);
+
+                            // the data.
+                            writer.Write(encodedJson);
+                            writer.Write(encodedAtlas);
+
+                            // the length is stored in the header, so we can't use the list's method.
+                            foreach (var tex in SpineTextures)
                             {
-                                writer.Write(SpineTextures.Count);
-
-                                // the data.
-                                writer.Write(encodedJson);
-                                writer.Write(encodedAtlas);
-
-                                // the length is stored in the header, so we can't use the list's method.
-                                foreach (var tex in SpineTextures)
-                                {
-                                    writer.WriteUndertaleObject(tex);
-                                }
-
-                                break;
+                                writer.WriteUndertaleObject(tex);
                             }
+
+                            break;
+                        }
                     }
 
                     break;
@@ -571,106 +571,106 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                     ReadMaskData(reader);
                     break;
                 case SpriteType.SWF:
+                {
+                    //// TODO: This code does not work all the time for some reason. ////
+
+                    SWFVersion = reader.ReadInt32();
+                    Util.DebugUtil.Assert(SWFVersion == 8 || SWFVersion == 7, "Invalid SWF sprite format, expected 7 or 8, got " + SWFVersion);
+
+                    if (SWFVersion == 8)
                     {
-                        //// TODO: This code does not work all the time for some reason. ////
-
-                        SWFVersion = reader.ReadInt32();
-                        Util.DebugUtil.Assert(SWFVersion == 8 || SWFVersion == 7, "Invalid SWF sprite format, expected 7 or 8, got " + SWFVersion);
-
-                        if (SWFVersion == 8)
-                        {
-                            Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
-                        }
-
-                        YYSWF = reader.ReadUndertaleObjectNoPool<UndertaleYYSWF>();
+                        Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
                     }
+
+                    YYSWF = reader.ReadUndertaleObjectNoPool<UndertaleYYSWF>();
+                }
                     break;
                 case SpriteType.Spine:
+                {
+                    reader.Align(4);
+
+                    if (reader.undertaleData.IsVersionAtLeast(2023, 1))
                     {
-                        reader.Align(4);
+                        Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
+                        SpineHasTextureData = false;
+                    }
 
-                        if (reader.undertaleData.IsVersionAtLeast(2023, 1))
+                    SpineVersion = reader.ReadInt32();
+                    if (SpineVersion >= 3)
+                    {
+                        SpineCacheVersion = reader.ReadInt32();
+                        Util.DebugUtil.Assert(SpineCacheVersion == 1, "Invalid Spine cache format version number, expected 1, got " + SpineCacheVersion);
+                    }
+                    Util.DebugUtil.Assert(SpineVersion <= 3 && SpineVersion >= 1,
+                                          "Invalid Spine format version number, expected 3, 2 or 1, got " + SpineVersion);
+                    int jsonLength = reader.ReadInt32();
+                    int atlasLength = reader.ReadInt32();
+                    int textures = reader.ReadInt32(); // count in v2(and newer) and size in bytes in v1.
+                    SpineTextures = new UndertaleSimpleList<UndertaleSpineTextureEntry>();
+
+                    switch (SpineVersion)
+                    {
+                        // Version 1 - only one single PNG atlas.
+                        // Version 2 - can be multiple atlases.
+                        // Version 3 - an atlas can be a QOI blob.
+                        case 1:
                         {
-                            Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
-                            SpineHasTextureData = false;
+                            UndertaleSpineTextureEntry atlas = new UndertaleSpineTextureEntry();
+                            int atlasWidth = reader.ReadInt32();
+                            int atlasHeight = reader.ReadInt32();
+                            SpineJSON = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(jsonLength)));
+                            SpineAtlas = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(atlasLength)));
+
+                            atlas.PageWidth = atlasWidth;
+                            atlas.PageHeight = atlasHeight;
+                            atlas.TexBlob = reader.ReadBytes(textures);
+                            SpineTextures.InternalAdd(atlas);
+                            break;
                         }
-
-                        SpineVersion = reader.ReadInt32();
-                        if (SpineVersion >= 3)
+                        case 2:
+                        case 3:
                         {
-                            SpineCacheVersion = reader.ReadInt32();
-                            Util.DebugUtil.Assert(SpineCacheVersion == 1, "Invalid Spine cache format version number, expected 1, got " + SpineCacheVersion);
-                        }
-                        Util.DebugUtil.Assert(SpineVersion <= 3 && SpineVersion >= 1,
-                                              "Invalid Spine format version number, expected 3, 2 or 1, got " + SpineVersion);
-                        int jsonLength = reader.ReadInt32();
-                        int atlasLength = reader.ReadInt32();
-                        int textures = reader.ReadInt32(); // count in v2(and newer) and size in bytes in v1.
-                        SpineTextures = new UndertaleSimpleList<UndertaleSpineTextureEntry>();
+                            SpineJSON = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(jsonLength)));
+                            SpineAtlas = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(atlasLength)));
 
-                        switch (SpineVersion)
-                        {
-                            // Version 1 - only one single PNG atlas.
-                            // Version 2 - can be multiple atlases.
-                            // Version 3 - an atlas can be a QOI blob.
-                            case 1:
-                                {
-                                    UndertaleSpineTextureEntry atlas = new UndertaleSpineTextureEntry();
-                                    int atlasWidth = reader.ReadInt32();
-                                    int atlasHeight = reader.ReadInt32();
-                                    SpineJSON = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(jsonLength)));
-                                    SpineAtlas = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(atlasLength)));
+                            SpineTextures.SetCapacity(textures);
 
-                                    atlas.PageWidth = atlasWidth;
-                                    atlas.PageHeight = atlasHeight;
-                                    atlas.TexBlob = reader.ReadBytes(textures);
-                                    SpineTextures.InternalAdd(atlas);
-                                    break;
-                                }
-                            case 2:
-                            case 3:
-                                {
-                                    SpineJSON = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(jsonLength)));
-                                    SpineAtlas = Encoding.UTF8.GetString(DecodeSpineBlob(reader.ReadBytes(atlasLength)));
+                            // the length is stored before json and atlases so we can't use ReadUndertaleObjectList
+                            // same goes for serialization.
+                            for (int t = 0; t < textures; t++)
+                            {
+                                SpineTextures.InternalAdd(reader.ReadUndertaleObject<UndertaleSpineTextureEntry>());
+                            }
 
-                                    SpineTextures.SetCapacity(textures);
-
-                                    // the length is stored before json and atlases so we can't use ReadUndertaleObjectList
-                                    // same goes for serialization.
-                                    for (int t = 0; t < textures; t++)
-                                    {
-                                        SpineTextures.InternalAdd(reader.ReadUndertaleObject<UndertaleSpineTextureEntry>());
-                                    }
-
-                                    break;
-                                }
+                            break;
                         }
                     }
+                }
                     break;
                 case SpriteType.Vector:
+                {
+                    VectorVersion = reader.ReadInt32();
+                    Util.DebugUtil.Assert(VectorVersion == 3, "Invalid vector format version number, expected 3, got " + VectorVersion);
+
+                    Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
+
+                    reader.Align(4);
+                    int shapeVersion = reader.ReadInt32();
+                    Util.DebugUtil.Assert(shapeVersion == 3, "Invalid shape format version number, expected 3, got " + shapeVersion);
+                    VectorShape = reader.ReadUndertaleObjectNoPool<UndertaleShapeData<UndertaleVectorSubShapeData>>();
+
+                    bool collisionMaskExists = reader.ReadBoolean();
+                    VectorCollisionMaskWidth = reader.ReadInt32();
+                    VectorCollisionMaskHeight = reader.ReadInt32();
+                    if (collisionMaskExists)
                     {
-                        VectorVersion = reader.ReadInt32();
-                        Util.DebugUtil.Assert(VectorVersion == 3, "Invalid vector format version number, expected 3, got " + VectorVersion);
-
-                        Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
-
+                        int dataLength = reader.ReadInt32();
+                        VectorCollisionMaskRLEData = reader.ReadBytes(dataLength);
                         reader.Align(4);
-                        int shapeVersion = reader.ReadInt32();
-                        Util.DebugUtil.Assert(shapeVersion == 3, "Invalid shape format version number, expected 3, got " + shapeVersion);
-                        VectorShape = reader.ReadUndertaleObjectNoPool<UndertaleShapeData<UndertaleVectorSubShapeData>>();
-
-                        bool collisionMaskExists = reader.ReadBoolean();
-                        VectorCollisionMaskWidth = reader.ReadInt32();
-                        VectorCollisionMaskHeight = reader.ReadInt32();
-                        if (collisionMaskExists)
-                        {
-                            int dataLength = reader.ReadInt32();
-                            VectorCollisionMaskRLEData = reader.ReadBytes(dataLength);
-                            reader.Align(4);
-                        }
-
-                        break;
                     }
+
+                    break;
+                }
             }
 
             if (sequenceOffset != 0)
@@ -749,43 +749,43 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                     return count;
 
                 case SpriteType.Spine:
+                {
+                    reader.Align(4);
+
+                    if (reader.undertaleData.IsVersionAtLeast(2023, 1))
+                        count += 1 + UndertaleSimpleList<TextureEntry>.UnserializeChildObjectCount(reader);
+
+                    int spineVersion = reader.ReadInt32();
+                    if (spineVersion >= 3)
+                        reader.Position += 4; // "SpineCacheVersion"
+                    Util.DebugUtil.Assert(spineVersion <= 3 && spineVersion >= 1,
+                                          "Invalid Spine format version number, expected 3, 2 or 1, got " + spineVersion);
+
+                    int jsonLength = reader.ReadInt32();
+                    int atlasLength = reader.ReadInt32();
+                    int textures = reader.ReadInt32();
+
+                    switch (spineVersion)
                     {
-                        reader.Align(4);
+                        case 1:
+                            reader.Position += 8 + (uint)jsonLength + (uint)atlasLength + (uint)textures;
+                            break;
 
-                        if (reader.undertaleData.IsVersionAtLeast(2023, 1))
-                            count += 1 + UndertaleSimpleList<TextureEntry>.UnserializeChildObjectCount(reader);
-
-                        int spineVersion = reader.ReadInt32();
-                        if (spineVersion >= 3)
-                            reader.Position += 4; // "SpineCacheVersion"
-                        Util.DebugUtil.Assert(spineVersion <= 3 && spineVersion >= 1,
-                                              "Invalid Spine format version number, expected 3, 2 or 1, got " + spineVersion);
-
-                        int jsonLength = reader.ReadInt32();
-                        int atlasLength = reader.ReadInt32();
-                        int textures = reader.ReadInt32();
-
-                        switch (spineVersion)
+                        case 2:
+                        case 3:
                         {
-                            case 1:
-                                reader.Position += 8 + (uint)jsonLength + (uint)atlasLength + (uint)textures;
-                                break;
+                            reader.Position += (uint)jsonLength + (uint)atlasLength;
 
-                            case 2:
-                            case 3:
-                                {
-                                    reader.Position += (uint)jsonLength + (uint)atlasLength;
+                            // TODO: make this return count instead if spine sprite
+                            // couldn't have sequence or nine slices data.
+                            for (int i = 0; i < textures; i++)
+                                UndertaleSpineTextureEntry.UnserializeChildObjectCount(reader);
 
-                                    // TODO: make this return count instead if spine sprite
-                                    // couldn't have sequence or nine slices data.
-                                    for (int i = 0; i < textures; i++)
-                                        UndertaleSpineTextureEntry.UnserializeChildObjectCount(reader);
-
-                                    count += (uint)textures;
-                                }
-                                break;
+                            count += (uint)textures;
                         }
+                            break;
                     }
+                }
                     break;
 
                 case SpriteType.Vector:
@@ -1415,28 +1415,28 @@ public class UndertaleVectorFillData : UndertaleObject
         switch (Type)
         {
             case UndertaleVectorFillType.FillBitmap:
-                {
-                    writer.WriteUndertaleObject(BitmapFillData);
-                    break;
-                }
+            {
+                writer.WriteUndertaleObject(BitmapFillData);
+                break;
+            }
 
             case UndertaleVectorFillType.FillGradient:
-                {
-                    writer.WriteUndertaleObject(GradientFillData);
-                    break;
-                }
+            {
+                writer.WriteUndertaleObject(GradientFillData);
+                break;
+            }
 
             case UndertaleVectorFillType.FillSolid:
-                {
-                    writer.WriteUndertaleObject(SolidFillData);
-                    break;
-                }
+            {
+                writer.WriteUndertaleObject(SolidFillData);
+                break;
+            }
 
             case UndertaleVectorFillType.FillInvalid:
-                {
-                    // throw an exception maybe?
-                    break;
-                }
+            {
+                // throw an exception maybe?
+                break;
+            }
         }
     }
 
@@ -1447,29 +1447,29 @@ public class UndertaleVectorFillData : UndertaleObject
         switch (Type)
         {
             case UndertaleVectorFillType.FillBitmap:
-                {
-                    BitmapFillData = reader.ReadUndertaleObjectNoPool<UndertaleVectorBitmapFillData>();
-                    break;
-                }
+            {
+                BitmapFillData = reader.ReadUndertaleObjectNoPool<UndertaleVectorBitmapFillData>();
+                break;
+            }
 
             case UndertaleVectorFillType.FillGradient:
-                {
-                    GradientFillData = reader.ReadUndertaleObjectNoPool<UndertaleVectorGradientFillData>();
-                    break;
-                }
+            {
+                GradientFillData = reader.ReadUndertaleObjectNoPool<UndertaleVectorGradientFillData>();
+                break;
+            }
 
             case UndertaleVectorFillType.FillSolid:
-                {
-                    SolidFillData = reader.ReadUndertaleObjectNoPool<UndertaleVectorSolidFillData>();
-                    break;
-                }
+            {
+                SolidFillData = reader.ReadUndertaleObjectNoPool<UndertaleVectorSolidFillData>();
+                break;
+            }
 
             case UndertaleVectorFillType.FillInvalid:
             default:
-                {
-                    reader.SubmitWarning("Tried to read invalid fill data.");
-                    break;
-                }
+            {
+                reader.SubmitWarning("Tried to read invalid fill data.");
+                break;
+            }
         }
     }
 }
@@ -2029,16 +2029,16 @@ public class UndertaleYYSWFItem : UndertaleObject
         switch (ItemType)
         {
             case UndertaleYYSWFItemType.ItemShape:
-                {
-                    writer.WriteUndertaleObject(ShapeData);
-                    break;
-                }
+            {
+                writer.WriteUndertaleObject(ShapeData);
+                break;
+            }
 
             case UndertaleYYSWFItemType.ItemBitmap:
-                {
-                    writer.WriteUndertaleObject(BitmapData);
-                    break;
-                }
+            {
+                writer.WriteUndertaleObject(BitmapData);
+                break;
+            }
         }
     }
 
@@ -2052,26 +2052,26 @@ public class UndertaleYYSWFItem : UndertaleObject
         switch (ItemType)
         {
             case UndertaleYYSWFItemType.ItemShape:
-                {
-                    ShapeData = reader.ReadUndertaleObjectNoPool<UndertaleShapeData<UndertaleYYSWFSubShapeData>>();
-                    break;
-                }
+            {
+                ShapeData = reader.ReadUndertaleObjectNoPool<UndertaleShapeData<UndertaleYYSWFSubShapeData>>();
+                break;
+            }
 
             case UndertaleYYSWFItemType.ItemBitmap:
-                {
-                    BitmapData = reader.ReadUndertaleObjectNoPool<UndertaleYYSWFBitmapData>();
-                    break;
-                }
+            {
+                BitmapData = reader.ReadUndertaleObjectNoPool<UndertaleYYSWFBitmapData>();
+                break;
+            }
 
             case UndertaleYYSWFItemType.ItemFont:
             case UndertaleYYSWFItemType.ItemInvalid:
             case UndertaleYYSWFItemType.ItemTextField:
             case UndertaleYYSWFItemType.ItemSprite:
             default:
-                {
-                    reader.SubmitWarning("Tried to read unknown YYSWFItem, " + ItemType);
-                    break;
-                }
+            {
+                reader.SubmitWarning("Tried to read unknown YYSWFItem, " + ItemType);
+                break;
+            }
         }
     }
 
