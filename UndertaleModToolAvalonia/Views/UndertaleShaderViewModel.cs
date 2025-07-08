@@ -55,7 +55,6 @@ public partial class UndertaleShaderViewModel : IUndertaleResourceViewModel
         IReadOnlyList<IStorageFile> files = await MainVM.OpenFileDialog!(new FilePickerOpenOptions
         {
             Title = "Import shader",
-            AllowMultiple = false,
             FileTypeFilter = binFileTypes,
         });
 

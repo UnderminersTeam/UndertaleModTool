@@ -14,7 +14,7 @@ public partial class SettingsFile
 {
     public MainViewModel MainVM = null!;
 
-    public SettingsFile() {}
+    public SettingsFile() { }
     public SettingsFile(IServiceProvider serviceProvider)
     {
         MainVM = serviceProvider.GetRequiredService<MainViewModel>();

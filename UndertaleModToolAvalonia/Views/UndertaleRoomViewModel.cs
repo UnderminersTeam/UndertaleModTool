@@ -17,10 +17,11 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
     [Notify]
     private object? _PropertiesContent;
 
-    private void OnRoomItemsSelectedItemChanged() {
+    private void OnRoomItemsSelectedItemChanged()
+    {
         PropertiesContent = RoomItemsSelectedItem switch
         {
-            TreeViewItem { Name: "RoomTreeViewItem"} => Room,
+            TreeViewItem { Name: "RoomTreeViewItem" } => Room,
             TreeViewItem => null,
             UndertalePointerList<Tile> => null,
             UndertalePointerList<SpriteInstance> => null,

@@ -11,6 +11,7 @@
             <TextBox Grid.Column="0" Name="TextBox"
                      Text="{Binding Reference.Content, UpdateSourceTrigger=Explicit, TargetNullValue=''}"
                      IsReadOnly="{Binding Reference, Converter={x:Static ObjectConverters.IsNull}}"
+                     AcceptsReturn="True"
                      KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus">
                 <TextBox.Resources>
                     <c:UndertaleStringDropHandler x:Key="UndertaleStringDropHandler"/>

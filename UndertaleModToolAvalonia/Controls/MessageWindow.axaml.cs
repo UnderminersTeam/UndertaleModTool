@@ -27,7 +27,7 @@ public partial class MessageWindow : Window
         Initialize();
     }
 
-    public MessageWindow(string message, string? title=null, bool ok=false, bool yes=false, bool no=false, bool cancel=false)
+    public MessageWindow(string message, string? title = null, bool ok = false, bool yes = false, bool no = false, bool cancel = false)
     {
         Message = message;
 

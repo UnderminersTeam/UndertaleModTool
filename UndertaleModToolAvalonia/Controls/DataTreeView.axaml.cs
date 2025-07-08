@@ -24,11 +24,11 @@ public partial class DataTreeView : UserControl
         get => GetValue(DataProperty);
         set => SetValue(DataProperty, value);
     }
-    
+
     readonly MainViewModel mainVM = App.Services.GetRequiredService<MainViewModel>();
 
     public ObservableCollection<TreeItemViewModel> TreeSource { get; set; } = [];
-    
+
     public TreeItemViewModel DataTreeItem;
     public ObservableCollection<TreeItemViewModel> DataTreeItemSource;
 

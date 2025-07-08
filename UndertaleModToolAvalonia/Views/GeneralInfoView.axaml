@@ -15,7 +15,7 @@
         <h:UndertaleColorToColorConverter x:Key="UndertaleColorToColorConverter" />
     </UserControl.Resources>
     <StackPanel Classes="PaddedProperties">
-        <StackPanel IsVisible="{Binding GeneralInfo}">
+        <StackPanel IsVisible="{Binding GeneralInfo, Converter={x:Static ObjectConverters.IsNotNull}}">
             <TextBlock FontWeight="Bold" Text="General info"/>
             <Separator/>
 
@@ -98,20 +98,22 @@
                 <TextBox Text="{Binding GeneralInfo.DebuggerPort}" />
 
                 <Label>Room order</Label>
-                <c:EditableDataGrid ItemsSource="{Binding GeneralInfo.RoomOrder, Mode=TwoWay}" ItemFactory="{Binding CreateRoomOrderItem}">
-                    <c:EditableDataGrid.Columns>
-                        <DataGridTemplateColumn Header="Room" Width="1*">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <DataTemplate.DataType>
-                                        <x:Type TypeName="undertale:UndertaleResourceById" x:TypeArguments="undertalem:UndertaleRoom,undertale:UndertaleChunkROOM"/>
-                                    </DataTemplate.DataType>
-                                    <c:UndertaleResourceReferenceView Reference="{Binding Resource}" ReferenceType="undertalem:UndertaleRoom"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </c:EditableDataGrid.Columns>
-                </c:EditableDataGrid>
+                <Expander Header="Rooms">
+                    <c:EditableDataGrid ItemsSource="{Binding GeneralInfo.RoomOrder}" ItemFactory="{Binding CreateRoomOrderItem}">
+                        <c:EditableDataGrid.Columns>
+                            <DataGridTemplateColumn Header="Room" Width="1*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <DataTemplate.DataType>
+                                            <x:Type TypeName="undertale:UndertaleResourceById" x:TypeArguments="undertalem:UndertaleRoom,undertale:UndertaleChunkROOM"/>
+                                        </DataTemplate.DataType>
+                                        <c:UndertaleResourceReferenceView Reference="{Binding Resource}" ReferenceType="undertalem:UndertaleRoom"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </c:EditableDataGrid.Columns>
+                    </c:EditableDataGrid>
+                </Expander>
 
                 <!-- TODO: Make the following only visible if GMS2 -->
                 <Label>FPS</Label>
@@ -126,7 +128,7 @@
             </Grid>
         </StackPanel>
 
-        <StackPanel IsVisible="{Binding Options}">
+        <StackPanel IsVisible="{Binding Options, Converter={x:Static ObjectConverters.IsNotNull}}">
             <TextBlock FontWeight="Bold" Text="Options"/>
             <Separator/>
 
@@ -174,28 +176,30 @@
                 <TextBox Text="{Binding Options.LoadAlpha}" />
 
                 <Label>Constants</Label>
-                <c:EditableDataGrid ItemsSource="{Binding Options.Constants}" ItemFactory="{Binding CreateConstant}">
-                    <c:EditableDataGrid.Columns>
-                        <DataGridTemplateColumn Header="Name" Width="1*">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate DataType="{x:Type undertalem:UndertaleOptions+Constant}">
-                                    <c:UndertaleStringReferenceView Reference="{Binding Name}" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="Value" Width="1*">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate DataType="{x:Type undertalem:UndertaleOptions+Constant}">
-                                    <c:UndertaleStringReferenceView Reference="{Binding Value}" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </c:EditableDataGrid.Columns>
-                </c:EditableDataGrid>
+                <Expander Header="Constants">
+                    <c:EditableDataGrid ItemsSource="{Binding Options.Constants}" ItemFactory="{Binding CreateConstant}">
+                        <c:EditableDataGrid.Columns>
+                            <DataGridTemplateColumn Header="Name" Width="1*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="{x:Type undertalem:UndertaleOptions+Constant}">
+                                        <c:UndertaleStringReferenceView Reference="{Binding Name}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Value" Width="1*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="{x:Type undertalem:UndertaleOptions+Constant}">
+                                        <c:UndertaleStringReferenceView Reference="{Binding Value}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </c:EditableDataGrid.Columns>
+                    </c:EditableDataGrid>
+                </Expander>
             </Grid>
         </StackPanel>
 
-        <StackPanel IsVisible="{Binding Language}">
+        <StackPanel IsVisible="{Binding Language, Converter={x:Static ObjectConverters.IsNotNull}}">
             <TextBlock FontWeight="Bold" Text="Language"/>
             <Separator/>
 

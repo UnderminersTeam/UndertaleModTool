@@ -118,7 +118,7 @@ public class SKImageViewer : Control
                     for (int y = 0; y < Bounds.Height / gridSize; y++)
                     {
                         if ((x + y) % 2 != 0)
-                            canvas.DrawRect(SKRect.Create(x* gridSize, y* gridSize, gridSize, gridSize), gridColor2);
+                            canvas.DrawRect(SKRect.Create(x * gridSize, y * gridSize, gridSize, gridSize), gridColor2);
                     }
 
                 // Image

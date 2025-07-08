@@ -17,6 +17,7 @@
     <Style Selector="GridSplitter">
         <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundListLowBrush}" />
         <Setter Property="MinWidth" Value="3"/>
+        <Setter Property="MinHeight" Value="3"/>
     </Style>
 
     <Style Selector="TabControl,TabStrip">

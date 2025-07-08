@@ -1,11 +1,11 @@
-﻿using Avalonia.Platform.Storage;
-using SkiaSharp;
+﻿using System;
 using System.IO;
-using System;
+using Avalonia.Platform.Storage;
+using Microsoft.Extensions.DependencyInjection;
+using SkiaSharp;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 using UndertaleModToolAvalonia.Controls;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace UndertaleModToolAvalonia.Views;
 

@@ -54,7 +54,6 @@ public partial class UndertaleSpriteViewModel : IUndertaleResourceViewModel
         IReadOnlyList<IStorageFile> files = await MainVM.OpenFileDialog!(new FilePickerOpenOptions
         {
             Title = "Import collision mask data",
-            AllowMultiple = false,
             FileTypeFilter = binFileTypes,
         });
 

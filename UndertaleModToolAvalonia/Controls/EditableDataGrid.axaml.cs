@@ -35,7 +35,8 @@ public partial class EditableDataGrid : UserControl
         set { SetValue(SelectionChangedProperty, value); }
     }
 
-    public ObservableCollection<DataGridColumn> Columns {
+    public ObservableCollection<DataGridColumn> Columns
+    {
         get => DataGridControl.Columns;
         set
         {
@@ -77,7 +78,7 @@ public partial class EditableDataGrid : UserControl
         };
         DataGridControl.Initialized += (object? sender, EventArgs e) =>
         {
-            if (ItemsSource.Count > 0)
+            if (ItemsSource is not null && ItemsSource.Count > 0)
                 DataGrid.SelectedIndex = 0;
         };
     }
