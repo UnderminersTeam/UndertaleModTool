@@ -156,7 +156,46 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Margin="0,0,0,5" Orientation="Horizontal">
-                        <local:ButtonDark ToolTip="Back" Margin="0,0,2,0" x:Name="BackButton" Click="BackButton_Click">
+                        <Image Name="BackButtonImage" Margin="2,0,0,0">
+                            <Image.Style>
+                                <Style TargetType="Image">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsEnabled, ElementName=BackButton}" Value="False">
+                                            <Setter Property="Opacity" Value="0.2" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsMouseOver, ElementName=BackButton}" Value="True">
+                                            <Setter Property="Source" Value="/Resources/arrow_red.png" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsMouseOver, ElementName=BackButton}" Value="False">
+                                            <Setter Property="Source" Value="/Resources/arrow_blue.png" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+                        <Image Name="ForwardButtonImage" RenderTransformOrigin="0.61,0.5">
+                            <Image.RenderTransform>
+                                <ScaleTransform ScaleX="-1" ScaleY="-1"/>
+                            </Image.RenderTransform>
+                            <Image.Style>
+                                <Style TargetType="Image">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsEnabled, ElementName=ForwardButton}" Value="False">
+                                            <Setter Property="Opacity" Value="0.2" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsMouseOver, ElementName=ForwardButton}" Value="True">
+                                            <Setter Property="Source" Value="/Resources/arrow_red.png" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsMouseOver, ElementName=ForwardButton}" Value="False">
+                                            <Setter Property="Source" Value="/Resources/arrow_blue.png" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+                    </StackPanel>
+                    <StackPanel Grid.Row="0" Margin="0,0,0,5" Orientation="Horizontal">
+                        <local:ButtonDark ToolTip="Back" Margin="0,0,2,0" x:Name="BackButton" Click="BackButton_Click" Opacity="0">
                             <Button.Style>
                                 <Style TargetType="Button">
                                     <Style.Triggers>
@@ -166,50 +205,19 @@
                                     </Style.Triggers>
                                 </Style>
                             </Button.Style>
-                            <Image Name="BackButtonImage">
-                                <Image.Style>
-                                    <Style TargetType="Image">
-                                        <Style.Triggers>
-                                            <Trigger Property="IsEnabled" Value="False">
-                                                <Setter Property="Opacity" Value="0.2" />
-                                            </Trigger>
-                                            <Trigger Property="IsMouseOver" Value="False">
-                                                <Setter Property="Source" Value="/Resources/arrow_blue.png" />
-                                            </Trigger>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Source" Value="/Resources/arrow_red.png" />
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Image.Style>
-                            </Image>
+                            <Image Name="BackButtonImage2" Source="/Resources/arrow_red.png"></Image>
                         </local:ButtonDark>
-                        <local:ButtonDark ToolTip="Forward" x:Name="ForwardButton" Click="ForwardButton_Click">
+                        <local:ButtonDark ToolTip="Forward" x:Name="ForwardButton" Click="ForwardButton_Click" Opacity="0">
                             <Button.IsEnabled>
                                 <MultiBinding Converter="{StaticResource ForwardButtonEnabledConverter}" Mode="OneWay">
                                     <Binding Path="CurrentTab.HistoryPosition" Mode="OneWay"/>
                                     <Binding Path="CurrentTab.History.Count" Mode="OneWay"/>
                                 </MultiBinding>
                             </Button.IsEnabled>
-                            <Image Name="ForwardButtonImage" RenderTransformOrigin="0.5,0.5">
+                            <Image Name="ForwardButtonImage2" RenderTransformOrigin="0.5,0.5" Source="/Resources/arrow_red.png">
                                 <Image.RenderTransform>
                                     <ScaleTransform ScaleX="-1" ScaleY="-1"/>
                                 </Image.RenderTransform>
-                                <Image.Style>
-                                    <Style TargetType="Image">
-                                        <Style.Triggers>
-                                            <Trigger Property="IsEnabled" Value="False">
-                                                <Setter Property="Opacity" Value="0.2" />
-                                            </Trigger>
-                                            <Trigger Property="IsMouseOver" Value="False">
-                                                <Setter Property="Source" Value="/Resources/arrow_blue.png" />
-                                            </Trigger>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Source" Value="/Resources/arrow_red.png" />
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Image.Style>
                             </Image>
                         </local:ButtonDark>
                     </StackPanel>
