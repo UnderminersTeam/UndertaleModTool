@@ -30,6 +30,7 @@
         <local:TabTitleConverter x:Key="TabTitleConverter"/>
         <local:StringTitleConverter x:Key="StringTitleConverter"/>
         <local:ForwardButtonEnabledConverter x:Key="ForwardButtonEnabledConverter"/>
+        <local:UndertaleCachedImageLoader x:Key="UndertaleCachedImageLoader"/>
     </Window.Resources>
     <Window.CommandBindings>
         <CommandBinding Command="New" Executed="Command_New" />
@@ -307,13 +308,21 @@
                                 </HierarchicalDataTemplate>
                             </local:ResourceListTreeViewItem.DefaultItemTemplate>
                         </local:ResourceListTreeViewItem>
-                        <local:ResourceListTreeViewItem Header="Sprites" ItemsSource="{Binding Sprites, Converter={StaticResource FilteredViewConverter}}">
-                            <local:ResourceListTreeViewItem.DefaultItemTemplate>
+                        <TreeViewItem Header="Sprites" ItemsSource="{Binding Sprites, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Sprites, Converter={StaticResource VisibleIfNotNull}}">
+                            <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleSprite}">
-                                    <TextBlock Text="{Binding Name.Content}" />
+                                    <Grid>
+                                        <TextBlock Text="{Binding Name.Content}" Margin="22,0,0,0"/>
+                                        <Image
+                                            Width="20" 
+                                            Height="20"
+                                            HorizontalAlignment="Left"
+                                            Source="{Binding Textures[0].Texture, Converter={StaticResource UndertaleCachedImageLoader}, Mode=OneTime}">
+                                        </Image>
+                                    </Grid>
                                 </HierarchicalDataTemplate>
-                            </local:ResourceListTreeViewItem.DefaultItemTemplate>
-                        </local:ResourceListTreeViewItem>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
                         <local:ResourceListTreeViewItem x:Name="BackgroundsItemsList" Header="Backgrounds &amp; Tile sets" ItemsSource="{Binding Backgrounds, Converter={StaticResource FilteredViewConverter}}">
                             <local:ResourceListTreeViewItem.DefaultItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleBackground}">
@@ -356,13 +365,22 @@
                                 </HierarchicalDataTemplate>
                             </local:ResourceListTreeViewItem.DefaultItemTemplate>
                         </local:ResourceListTreeViewItem>
-                        <local:ResourceListTreeViewItem Header="Game objects" ItemsSource="{Binding GameObjects, Converter={StaticResource FilteredViewConverter}}">
-                            <local:ResourceListTreeViewItem.DefaultItemTemplate>
+                        <TreeViewItem Header="Game objects" ItemsSource="{Binding GameObjects, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding GameObjects, Converter={StaticResource VisibleIfNotNull}}">
+                            <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleGameObject}">
-                                    <TextBlock Text="{Binding Name.Content}" />
+                                    <Grid>
+                                        <TextBlock Text="{Binding Name.Content}" Margin="22,0,0,0"/>
+                                        <Image
+                                            Width="20"
+                                            Height="20"
+                                            HorizontalAlignment="Left"
+                                            Source="{Binding Sprite.Textures[0].Texture, Converter={StaticResource UndertaleCachedImageLoader}, Mode=OneTime}"
+                                            >
+                                        </Image>
+                                    </Grid>
                                 </HierarchicalDataTemplate>
-                            </local:ResourceListTreeViewItem.DefaultItemTemplate>
-                        </local:ResourceListTreeViewItem>
+                            </TreeViewItem.ItemTemplate>
+                        </TreeViewItem>
                         <local:ResourceListTreeViewItem Header="Rooms" ItemsSource="{Binding Rooms, Converter={StaticResource FilteredViewConverter}}">
                             <local:ResourceListTreeViewItem.DefaultItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleRoom}">
@@ -380,7 +398,14 @@
                         <local:ResourceListTreeViewItem Header="Texture page items" ItemsSource="{Binding TexturePageItems, Converter={StaticResource FilteredViewConverter}}">
                             <local:ResourceListTreeViewItem.DefaultItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleTexturePageItem}">
-                                    <TextBlock Text="{Binding .}" />
+                                    <Grid>
+                                        <TextBlock Text="{Binding .}" Margin="22,0,0,0"/>
+                                        <Viewbox Stretch="Uniform" StretchDirection="DownOnly" Width="20" Height="20" HorizontalAlignment="Left">
+                                            <Border>
+                                                <local:UndertaleTexturePageItemDisplay DisplayBorder="False"/>
+                                            </Border>
+                                        </Viewbox>
+                                    </Grid>
                                 </HierarchicalDataTemplate>
                             </local:ResourceListTreeViewItem.DefaultItemTemplate>
                         </local:ResourceListTreeViewItem>

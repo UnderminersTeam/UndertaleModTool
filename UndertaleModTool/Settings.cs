@@ -31,6 +31,7 @@ namespace UndertaleModTool
         public bool ProfileMessageShown { get; set; } = false;
         public bool AutomaticFileAssociation { get; set; } = true;
         public bool TempRunMessageShow { get; set; } = true;
+        public bool PlaySaveSound {  get; set; } = false;
 
         // The disk space impact will likely be small for the average user, it should be turned off by default for now.
         // "DeleteOldProfileOnSave" as it currently functions is dangerous to be on by default.
@@ -64,6 +65,7 @@ namespace UndertaleModTool
         public string TransparencyGridColor2 { get; set; } = "#FF999999";
 
         public bool EnableDarkMode { get; set; } = false;
+        public bool EnableDarkerMode { get; set; } = false;
         public bool ShowDebuggerOption { get; set; } = false;
         public DecompilerSettings DecompilerSettings { get; set; }
         public const string DefaultInstanceIdPrefix = "inst_";

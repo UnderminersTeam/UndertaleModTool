@@ -5,24 +5,41 @@ using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.Win32;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Ookii.Dialogs.Wpf;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
+using System.IO.Pipes;
 using System.Linq;
+using System.Media;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Reflection;
+using System.Runtime;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
@@ -31,24 +48,7 @@ using UndertaleModLib.ModelsDebug;
 using UndertaleModLib.Scripting;
 using UndertaleModLib.Util;
 using UndertaleModTool.Windows;
-using System.IO.Pipes;
-using Ookii.Dialogs.Wpf;
-
-using System.Text.RegularExpressions;
-using System.Windows.Data;
-using System.Security.Cryptography;
-using System.Collections.Concurrent;
-using System.Runtime;
 using SystemJson = System.Text.Json;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using Newtonsoft.Json.Linq;
-using System.Net;
-using System.Globalization;
-using System.Windows.Controls.Primitives;
-using System.Runtime.CompilerServices;
-using System.Windows.Interop;
-using System.Windows.Media.Imaging;
 
 namespace UndertaleModTool
 {
@@ -216,6 +216,9 @@ namespace UndertaleModTool
 
         private static readonly Color darkColor = Color.FromArgb(255, 32, 32, 32);
         private static readonly Color darkLightColor = Color.FromArgb(255, 48, 48, 48);
+        private static readonly Color darkerColor = Color.FromArgb(255, 0, 0, 0);
+        private static readonly Color darkerLightColor = Color.FromArgb(255, 16, 16, 16);
+
         private static readonly Color whiteColor = Color.FromArgb(255, 222, 222, 222);
         private static readonly SolidColorBrush grayTextBrush = new(Color.FromArgb(255, 179, 179, 179));
         private static readonly SolidColorBrush inactiveSelectionBrush = new(Color.FromArgb(255, 212, 212, 212));
@@ -230,6 +233,18 @@ namespace UndertaleModTool
             { SystemColors.MenuBrushKey, new SolidColorBrush(darkLightColor) },
             { SystemColors.GrayTextBrushKey, new SolidColorBrush(Color.FromArgb(255, 136, 136, 136)) },
             { SystemColors.InactiveSelectionHighlightBrushKey, new SolidColorBrush(Color.FromArgb(255, 112, 112, 112)) }
+        };
+        private static readonly Dictionary<ResourceKey, object> appDarkerStyle = new()
+        {
+            { SystemColors.WindowTextBrushKey, new SolidColorBrush(whiteColor) },
+            { SystemColors.ControlTextBrushKey, new SolidColorBrush(whiteColor) },
+            { SystemColors.WindowBrushKey, new SolidColorBrush(darkerColor) },
+            { SystemColors.ControlBrushKey, new SolidColorBrush(darkerLightColor) },
+            { SystemColors.ControlLightBrushKey, new SolidColorBrush(Color.FromArgb(255, 28, 28, 28)) },
+            { SystemColors.MenuTextBrushKey, new SolidColorBrush(whiteColor) },
+            { SystemColors.MenuBrushKey, new SolidColorBrush(darkerLightColor) },
+            { SystemColors.GrayTextBrushKey, new SolidColorBrush(Color.FromArgb(255, 104, 104, 104)) },
+            { SystemColors.InactiveSelectionHighlightBrushKey, new SolidColorBrush(Color.FromArgb(255, 80, 80, 80)) }
         };
 
         public MainWindow()
@@ -590,6 +605,7 @@ namespace UndertaleModTool
 
         public static void SetDarkMode(bool enable, bool isStartup = false)
         {
+            var darker = Settings.Instance.EnableDarkerMode;
             var resources = Application.Current.Resources;
 
             var mainWindow = Application.Current.MainWindow as MainWindow;
@@ -597,22 +613,40 @@ namespace UndertaleModTool
 
             if (enable)
             {
-                foreach (var pair in appDarkStyle)
-                    resources[pair.Key] = pair.Value;
+                if (!darker)
+                {
+                    foreach (var pair in appDarkStyle)
+                        resources[pair.Key] = pair.Value;
 
-                Windows.TextInput.BGColor = System.Drawing.Color.FromArgb(darkColor.R,
-                                                                          darkColor.G,
-                                                                          darkColor.B);
-                Windows.TextInput.TextBoxBGColor = System.Drawing.Color.FromArgb(darkLightColor.R,
-                                                                                 darkLightColor.G,
-                                                                                 darkLightColor.B);
+                    Windows.TextInput.BGColor = System.Drawing.Color.FromArgb(darkColor.R,
+                                                                              darkColor.G,
+                                                                              darkColor.B);
+                    Windows.TextInput.TextBoxBGColor = System.Drawing.Color.FromArgb(darkLightColor.R,
+                                                                                     darkLightColor.G,
+                                                                                     darkLightColor.B);
+                }
+                else
+                {
+                    foreach (var pair in appDarkerStyle)
+                        resources[pair.Key] = pair.Value;
+
+                    Windows.TextInput.BGColor = System.Drawing.Color.FromArgb(darkerColor.R,
+                                                                              darkerColor.G,
+                                                                              darkerColor.B);
+                    Windows.TextInput.TextBoxBGColor = System.Drawing.Color.FromArgb(darkerLightColor.R,
+                                                                                     darkerLightColor.G,
+                                                                                     darkerLightColor.B);
+                }
+
                 Windows.TextInput.TextColor = System.Drawing.Color.FromArgb(whiteColor.R,
-                                                                            whiteColor.G,
-                                                                            whiteColor.B);
+                                                                                whiteColor.G,
+                                                                                whiteColor.B);
             }
             else
             {
                 foreach (ResourceKey key in appDarkStyle.Keys)
+                    resources.Remove(key);
+                foreach (ResourceKey key in appDarkerStyle.Keys)
                     resources.Remove(key);
 
                 resources[SystemColors.GrayTextBrushKey] = grayTextBrush;
@@ -1282,6 +1316,13 @@ namespace UndertaleModTool
                 {
                     if (SaveSucceeded)
                     {
+                        if (Settings.Instance.PlaySaveSound)
+                        {
+                            Stream str = Properties.Resource1.snd_save;
+                            SoundPlayer player = new SoundPlayer(str);
+                            player.Play();
+                        }
+
                         // It saved successfully!
                         // If we're overwriting a previously existing data file, we're going to overwrite it now.
                         // Then, we're renaming it back to the proper (non-temp) file name.

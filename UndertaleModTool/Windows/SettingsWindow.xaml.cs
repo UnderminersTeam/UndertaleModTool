@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Media;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,6 +25,8 @@ namespace UndertaleModTool
     public partial class SettingsWindow : Window
     {
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+
+        private static float darkCount = 0;
 
         public static string GameMakerStudioPath
         {
@@ -64,6 +68,16 @@ namespace UndertaleModTool
 
                 // Refresh the tree for the change to take effect
                 mainWindow.UpdateTree();
+            }
+        }
+
+        public static bool PlaySaveSound
+        {
+            get => Settings.Instance.PlaySaveSound;
+            set
+            {
+                Settings.Instance.PlaySaveSound = value;
+                Settings.Save();
             }
         }
 
@@ -256,17 +270,65 @@ namespace UndertaleModTool
             get => Settings.Instance.EnableDarkMode;
             set
             {
+                if (value == true)
+                {
+                    darkCount += 1;
+
+                    if (darkCount == 2)
+                    {
+                        Stream str = Properties.Resource1.snd_wngdng2;
+                        SoundPlayer player = new SoundPlayer(str);
+                        player.Play();
+                    }
+                    if (darkCount == 3)
+                    {
+                        Stream str = Properties.Resource1.snd_wngdng3;
+                        SoundPlayer player = new SoundPlayer(str);
+                        player.Play();
+                    }
+                    if (darkCount == 4)
+                    {
+                        Stream str = Properties.Resource1.snd_wngdng4;
+                        SoundPlayer player = new SoundPlayer(str);
+                        player.Play();
+                    }
+                    if (darkCount == 5)
+                    {
+                        Stream str = Properties.Resource1.snd_wngdng5;
+                        SoundPlayer player = new SoundPlayer(str);
+                        player.Play();
+                    }
+                    if (darkCount == 6)
+                    {
+                        mainWindow.ShowMessage("As you click on the box one last time... you feel\nthe tool turn darker yet darker...", "???");
+                        Settings.Instance.EnableDarkerMode = true;
+                        Stream str = Properties.Resource1.snd_mysterygo;
+                        SoundPlayer player = new SoundPlayer(str);
+                        player.Play();
+                    }
+
+                    if (darkCount > 6)
+                        darkCount = 0;
+                }
+                else if (Settings.Instance.EnableDarkerMode)
+                {
+                    Settings.Instance.EnableDarkerMode = true;
+                    Stream str = Properties.Resource1.snd_him_quick;
+                    SoundPlayer player = new SoundPlayer(str);
+                    player.Play();
+                    Settings.Instance.EnableDarkerMode = false;
+                }
+
                 Settings.Instance.EnableDarkMode = value;
                 Settings.Save();
 
                 MainWindow.SetDarkMode(value);
 
-                if (value)
+                if (value && darkCount < 3)
                     mainWindow.ShowWarning("The message boxes (like this one) aren't compatible with the dark mode.\n" +
                                            "This will be fixed in future versions.");
             }
         }
-
         public static bool ShowDebuggerOption
         {
             get => Settings.Instance.ShowDebuggerOption;

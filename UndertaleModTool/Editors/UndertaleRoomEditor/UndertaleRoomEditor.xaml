@@ -1382,7 +1382,7 @@
                                     Stretch="UniformToFill">
                                     <ImageBrush.ImageSource>
                                         <MultiBinding Converter="{StaticResource CachedImageLoaderWithIndex}">
-                                            <Binding Path="ObjectDefinition.Sprite.Textures" Mode="OneWay"/>
+                                            <Binding Path="ObjectSpriteIndex" Mode="OneWay"/>
                                             <Binding Path="WrappedImageIndex" Mode="OneWay"/>
                                         </MultiBinding>
                                     </ImageBrush.ImageSource>

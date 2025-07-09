@@ -98,6 +98,7 @@
                     
                     <StackPanel Grid.Column="1">
                         <local:ButtonDark Click="GMLSettingsButton_Click" Padding="8,2,8,2" HorizontalAlignment="Left" VerticalAlignment="Top">GML compiler/decompiler settings</local:ButtonDark>
+                        <CheckBox IsChecked="{Binding PlaySaveSound}" Content="Enable save sound" ToolTip="Plays a sound when the program has successfully saved. Disabled by default."/>
                     </StackPanel>
                 </Grid>
 
