@@ -48,6 +48,7 @@ using UndertaleModLib.ModelsDebug;
 using UndertaleModLib.Scripting;
 using UndertaleModLib.Util;
 using UndertaleModTool.Windows;
+using WpfAnimatedGif;
 using SystemJson = System.Text.Json;
 
 namespace UndertaleModTool
@@ -254,7 +255,9 @@ namespace UndertaleModTool
             else
                 _ProfileModeEnabled = false;
             InitializeComponent();
-            
+
+            var floweranim = ((Image)this.FindName("Flowey"));
+
             this.DataContext = this;
 
             Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Open a data.win file to get started, then double click on the items on the left to view them.");
@@ -880,10 +883,35 @@ namespace UndertaleModTool
 
                 if (SettingsWindow.WarnOnClose)
                 {
+                    var floweranim = ((Image)this.FindName("FloweyLeave"));
+                    var flowery = ((Image)this.FindName("Flowey"));
+                    if (flowery.Opacity > 0)
+                    {
+                        flowery.Opacity = 0;
+                        floweranim.Opacity = 1;
+
+                        var controller = ImageBehavior.GetAnimationController(floweranim);
+                        controller.Pause();
+                        controller.GotoFrame(controller.FrameCount - 10);
+                        controller.Play();
+                    }
+
                     MessageBoxResult result = this.ShowQuestionWithCancel("Save changes before quitting?");
 
                     if (result == MessageBoxResult.Cancel)
                     {
+                        if (floweranim.Opacity > 0)
+                        {
+                            floweranim.Opacity = 0;
+
+                            var floweranim2 = ((Image)this.FindName("Flowey"));
+                            floweranim2.Opacity = 1;
+
+                            var controller2 = ImageBehavior.GetAnimationController(floweranim2);
+                            controller2.Pause();
+                            controller2.GotoFrame(controller2.FrameCount - 9);
+                            controller2.Play();
+                        }
                         return;
                     }
 
@@ -1405,6 +1433,53 @@ namespace UndertaleModTool
             else
             {
                 Highlighted = e.NewValue;
+            }
+        }
+        private void Flowey_MouseDown(object sender, MouseEventArgs e)
+        {
+
+        }
+        private void Flowey_MouseEnter(object sender, MouseEventArgs e)
+        {
+            var flowery = ((Image)this.FindName("Flowey"));
+            var flowery_wink = ((Image)this.FindName("FloweyClickable"));
+            var bubble = ((Image)this.FindName("FloweyBubble"));
+            var flowery_dialogue = (Label)this.FindName("ObjectLabel");
+            Thickness margin = flowery.Margin;
+
+            if (flowery.Opacity != 0)
+            {
+                flowery.Opacity = 0;
+                flowery_wink.Opacity = 1;
+                bubble.Opacity = 1;
+                flowery_dialogue.Opacity = 1;
+            }
+            else if (margin.Bottom < 999)
+            {
+                margin.Bottom += 999;
+                flowery.Margin = margin;
+
+                Thickness margin_clickable = flowery_wink.Margin;
+                if (margin_clickable.Bottom < 999)
+                {
+                    margin_clickable.Bottom += 999;
+                    flowery_wink.Margin = margin_clickable;
+                }
+            }
+        }
+        private void Flowey_MouseLeave(object sender, MouseEventArgs e)
+        {
+            var flowery = ((Image)this.FindName("Flowey"));
+            var flowery_wink = ((Image)this.FindName("FloweyClickable"));
+            var bubble = ((Image)this.FindName("FloweyBubble"));
+            var flowery_dialogue = (Label)this.FindName("ObjectLabel");
+
+            if (flowery_wink.Opacity != 0)
+            {
+                flowery.Opacity = 1;
+                flowery_wink.Opacity = 0;
+                bubble.Opacity = 0;
+                flowery_dialogue.Opacity = 0;
             }
         }
 
@@ -3202,7 +3277,25 @@ result in loss of work.");
             string idString;
 
             if (foundIndex == -1)
-                idString = "None";
+            {
+                idString = "Howdy!";
+                ((Image)this.FindName("Flowey")).Opacity = 1;
+                //((Image)this.FindName("FloweyBubble")).Opacity = 1;
+
+                var flowery = ((Image)this.FindName("Flowey"));
+                var flowery_wink = ((Image)this.FindName("FloweyClickable"));
+
+                Thickness margin = flowery.Margin;
+                if (margin.Bottom >= 999)
+                    margin.Bottom -= 999;
+                flowery.Margin = margin;
+
+                Thickness margin_clickable = flowery_wink.Margin;
+                if (margin_clickable.Bottom >= 999)
+                    margin_clickable.Bottom -= 999;
+                flowery_wink.Margin = margin_clickable;
+
+            }
             else if (foundIndex == -2)
                 idString = "N/A";
             else

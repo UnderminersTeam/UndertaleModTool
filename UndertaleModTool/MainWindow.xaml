@@ -10,6 +10,7 @@
         xmlns:undertalelib="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
         xmlns:scol="clr-namespace:System.Collections;assembly=mscorlib"
         xmlns:cmod="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+        xmlns:gif ="http://wpfanimatedgif.codeplex.com"
         mc:Ignorable="d"
         Height="450" Width="800" Loaded="Window_Loaded"
         AllowDrop="True" Drop="Window_Drop">
@@ -70,6 +71,9 @@
         <KeyBinding Gesture="Ctrl+Shift+F" Command="{x:Static local:MainWindow.SearchInCodeCommand}" />
     </Window.InputBindings>
     <Grid>
+        <Image Margin="0,0,14,29" gif:ImageBehavior.AnimatedSource="Resources/spr_flowey_riseanim.gif"  Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Bottom" Cursor="Hand" x:Name="Flowey"/>
+        <Image Margin="0,0,14,29" gif:ImageBehavior.AnimatedSource="Resources/spr_flowey_unriseanim.gif"  Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Bottom" Cursor="Hand" x:Name="FloweyLeave" Opacity="0"/>
+        <Image Margin="0,0,0,70" Source="Resources/spr_bubble_message.png" Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Bottom" Cursor="Hand" x:Name="FloweyBubble" Opacity="0"/>
         <DockPanel>
             <Menu DockPanel.Dock="Top"
                   Foreground="{DynamicResource {x:Static SystemColors.MenuTextBrushKey}}"
@@ -136,9 +140,6 @@
             </Menu>
             <Grid DockPanel.Dock="Bottom">
                 <local:TextBoxDark x:Name="CommandBox" AcceptsReturn="True" PreviewKeyDown="CommandBox_PreviewKeyDown" Margin="0,0,35,0"/>
-                <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" VerticalContentAlignment="Top" Name="ObjectLabel"
-                       ToolTip="This is an ID (index) of the currently open asset, item, or object. It starts from 0."
-                       ToolTipService.InitialShowDelay="200"/>
             </Grid>
             <Grid>
                 <Grid.RowDefinitions>
@@ -738,6 +739,10 @@
                             </ContentControl.Resources>
                         </ContentControl>
                     </ScrollViewer>
+                    <Image Margin="0,0,14,11" Grid.Row="1" Source="/Resources/spr_flowey_wink.png"  Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Bottom" Cursor="Hand" x:Name="FloweyClickable" MouseDown="Flowey_MouseDown" MouseEnter="Flowey_MouseEnter" MouseLeave="Flowey_MouseLeave" Opacity="0"/>
+                    <Label Content="Howdy!" HorizontalAlignment="Right" VerticalAlignment="Bottom" VerticalContentAlignment="Bottom" x:Name="ObjectLabel" Opacity="0"
+                       Grid.Row="1"
+                       Margin="0,0,10,67" Foreground="Black"/>
                 </Grid>
             </Grid>
         </DockPanel>

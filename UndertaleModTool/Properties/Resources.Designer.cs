@@ -90,15 +90,6 @@ namespace UndertaleModTool.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
-        /// </summary>
-        internal static System.IO.UnmanagedMemoryStream snd_save {
-            get {
-                return ResourceManager.GetStream("snd_save", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap spr_bubble_message {
@@ -164,16 +155,6 @@ namespace UndertaleModTool.Properties {
         internal static System.Drawing.Bitmap spr_flowey_wink {
             get {
                 object obj = ResourceManager.GetObject("spr_flowey_wink", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap spr_unknown_sprite {
-            get {
-                object obj = ResourceManager.GetObject("spr_unknown_sprite", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

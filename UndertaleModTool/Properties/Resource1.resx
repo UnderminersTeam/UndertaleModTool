@@ -118,15 +118,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\spr_tobdogl\0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\spr_tobdogl\1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="mus_dance_of_dog" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\mus_dance_of_dog.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="snd_him_quick" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\snd_him_quick.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
@@ -156,27 +147,6 @@
   </data>
   <data name="snd_wngdng7" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\snd_wngdng7.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="spr_bubble_message" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\spr_bubble_message.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="spr_bubble_message_left" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\spr_bubble_message_left.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="spr_flowey" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\spr_flowey.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="spr_flowey_big" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\spr_flowey_big.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="spr_flowey_riseanim" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\spr_flowey_riseanim.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="spr_flowey_unriseanim" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\spr_flowey_unriseanim.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="spr_flowey_wink" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\spr_flowey_wink.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="spr_mysteryman_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\spr_mysteryman\spr_mysteryman_0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>

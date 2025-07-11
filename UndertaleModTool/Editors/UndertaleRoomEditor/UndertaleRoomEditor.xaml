@@ -6,7 +6,10 @@
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
-             mc:Ignorable="d"
+             xmlns:gif ="http://wpfanimatedgif.codeplex.com"
+             mc:Ignorable="d" 
+             Unloaded="DataUserControl_Unloaded"
+             DataContextChanged="DataUserControl_DataContextChanged"
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleRoom}" x:Name="RoomEditor">
     <UserControl.Resources>
         <ResourceDictionary>
@@ -385,7 +388,7 @@
                 </StackPanel>
             </Border>
 
-            <ScrollViewer Grid.Column="2" Margin="3,0,0,0" Name="ObjectEditor" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible">
+            <ScrollViewer Grid.Column="2" Margin="3,0,0,50" Name="ObjectEditor" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible">
                 <ContentControl.Resources>
                     <DataTemplate DataType="{x:Type undertale:UndertaleRoom}">
                         <Grid IsSharedSizeScope="True">
@@ -1594,5 +1597,18 @@
             </ItemsControl>
         </ScrollViewer>
         <local:ButtonDark Grid.Column="0" Grid.Row="3" Content="Save as PNG" Click="ExportAsPNG_Click"/>
+
+        <Image Margin="0,291,175,0" Grid.Column="1" Grid.RowSpan="3" gif:ImageBehavior.AnimatedSource="/Resources/spr_flowey_riseanim.gif"  Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="Flowey"/>
+        <Image Margin="0,305,96,0" Grid.Column="1" Grid.RowSpan="3" Source="/Resources/spr_bubble_message_left.png" Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="FloweyBubble"/>
+        <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="RoomObjectLabel"
+                       ToolTip="This is an ID (index) of the currently open room. It starts from 0."
+                       ToolTipService.InitialShowDelay="200" Margin="0,305,102,0" Foreground="Black" Grid.Column="2"
+                       Width="Auto" Grid.RowSpan="3"
+               />
+        <Label Content="ID:" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="FunnyRoom"
+                       ToolTip="This is an ID (index) of the currently open room. It starts from 0."
+                       ToolTipService.InitialShowDelay="200" Margin="0,305,140,0" Foreground="Black" Grid.Column="2"
+                       Width="Auto" Grid.RowSpan="3"
+               />
     </Grid>
 </local:DataUserControl>
