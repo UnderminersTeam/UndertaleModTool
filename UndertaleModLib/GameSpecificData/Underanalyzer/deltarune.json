@@ -543,7 +543,8 @@
       "tile_sprite": "Asset.Sprite",
       "commenttriangle": "Asset.Sprite",
       "target_room": "Asset.Room",
-      "base_sprite": "Asset.Sprite"
+      "base_sprite": "Asset.Sprite",
+      "current_sprite_index": "Asset.Sprite"
     },
     "FunctionArguments": {
       "snd_play": {
@@ -760,6 +761,10 @@
                 {
                   "MacroType": "Match",
                   "ConditionalValue": "head_sprite"
+                },
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "current_sprite_index"
                 }
               ]
             },
