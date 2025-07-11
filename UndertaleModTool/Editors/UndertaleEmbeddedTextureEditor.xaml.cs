@@ -1,6 +1,10 @@
-﻿using Microsoft.Win32;
+﻿using ImageMagick;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,15 +18,12 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using System.Drawing;
+using System.Windows.Threading;
+using UndertaleModLib;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
-using System.Globalization;
-using UndertaleModLib;
 using UndertaleModTool.Windows;
-using System.Windows.Threading;
-using ImageMagick;
-using System.ComponentModel;
+using WpfAnimatedGif;
 
 namespace UndertaleModTool
 {
@@ -47,6 +48,12 @@ namespace UndertaleModTool
         public UndertaleEmbeddedTextureEditor()
         {
             InitializeComponent();
+
+            ((System.Windows.Controls.Image)mainWindow.FindName("Flowey")).Opacity = 0;
+            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
+
+            ((Label)this.FindName("EmbedTextureObjectLabel")).Content = ((Label)mainWindow.FindName("ObjectLabel")).Content;
 
             var newTabItem = new MenuItem()
             {
@@ -187,6 +194,20 @@ namespace UndertaleModTool
         }
         private void DataUserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
+            UndertaleEmbeddedTexture code = this.DataContext as UndertaleEmbeddedTexture;
+
+            int foundIndex = code is UndertaleResource res ? mainWindow.Data.IndexOf(res, false) : -1;
+            string idString;
+
+            if (foundIndex == -1)
+                idString = "None";
+            else if (foundIndex == -2)
+                idString = "N/A";
+            else
+                idString = Convert.ToString(foundIndex);
+
+            ((Label)this.FindName("EmbedTextureObjectLabel")).Content = idString;
+
             if (DataContext is UndertaleEmbeddedTexture texturePage)
                 items = mainWindow.Data.TexturePageItems.Where(x => x.TexturePage == texturePage).ToArray();
 
@@ -201,6 +222,16 @@ namespace UndertaleModTool
         }
         private void DataUserControl_Unloaded(object sender, RoutedEventArgs e)
         {
+            var floweranim = ((System.Windows.Controls.Image)mainWindow.FindName("Flowey"));
+            //floweranim.Opacity = 1;
+
+            var controller = ImageBehavior.GetAnimationController(floweranim);
+            controller.Pause();
+            controller.GotoFrame(controller.FrameCount - 5);
+            controller.Play();
+
+            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+
             OverriddenPreviewState = default;
         }
 

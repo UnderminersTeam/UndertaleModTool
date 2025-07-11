@@ -5,7 +5,8 @@
                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                        xmlns:local="clr-namespace:UndertaleModTool"
                        xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
-                       mc:Ignorable="d"
+                       xmlns:gif ="http://wpfanimatedgif.codeplex.com"
+                       mc:Ignorable="d" 
                        d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleCode}"
                        DataContextChanged="UserControl_DataContextChanged" Loaded="UndertaleCodeEditor_Loaded" Unloaded="UndertaleCodeEditor_Unloaded">
     <UserControl.CommandBindings>
@@ -32,19 +33,19 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
-        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
+        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3,3,85,3" ObjectReference="{Binding Name}"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Locals count</TextBlock>
-        <local:TextBoxDark Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding LocalsCount}"/>
+        <local:TextBoxDark Grid.Row="1" Grid.Column="1" Margin="3,3,85,3" Text="{Binding LocalsCount}"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Arguments count</TextBlock>
-        <local:TextBoxDark Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding ArgumentsCount}"/>
+        <local:TextBoxDark Grid.Row="2" Grid.Column="1" Margin="3,3,85,3" Text="{Binding ArgumentsCount}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Offset</TextBlock>
-        <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Offset}"/>
+        <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3,3,85,3" Text="{Binding Offset}"/>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Visibility="{Binding ParentEntry, Converter={StaticResource VisibleIfNotNull}}">Parent entry</TextBlock>
-        <local:UndertaleObjectReference Grid.Row="4" Grid.Column="1" Margin="3" Visibility="{Binding ParentEntry, Converter={StaticResource VisibleIfNotNull}}" ObjectReference="{Binding ParentEntry}" ObjectType="{x:Type undertale:UndertaleCode}" CanRemove="False" CanChange="False"/>
+        <local:UndertaleObjectReference Grid.Row="4" Grid.Column="1" Margin="3,3,85,3" Visibility="{Binding ParentEntry, Converter={StaticResource VisibleIfNotNull}}" ObjectReference="{Binding ParentEntry}" ObjectType="{x:Type undertale:UndertaleCode}" CanRemove="False" CanChange="False"/>
 
         <TabControl x:Name="CodeModeTabs" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" SelectionChanged="TabControl_SelectionChanged">
             <TabItem Header="Decompiled" Name="DecompiledTab">
@@ -82,5 +83,16 @@
                 </Grid>
             </TabItem>
         </TabControl>
-    </Grid>
+        <Image Margin="0,-52,20,0" Grid.Column="1" Grid.Row="4" gif:ImageBehavior.AnimatedSource="/Resources/spr_flowey_riseanim.gif"  Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="Flowey"/>
+        <Image Margin="0,-80,6,0" Grid.Column="1" Grid.Row="4" Source="/Resources/spr_bubble_message.png" Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="FloweyBubble"/>
+        <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="CodeObjectLabel"
+                       ToolTip="This is the ID (index) of this asset. It starts from 0."
+                       ToolTipService.InitialShowDelay="200" Margin="0,17,7,0" Foreground="Black" Grid.Column="1"
+                       Width="Auto" Grid.RowSpan="2"
+               />
+        <Label Content="ID:" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="FunnyCode"
+                       ToolTip="This is the ID (index) of this asset. It starts from 0."
+                       ToolTipService.InitialShowDelay="200" Margin="0,17,48,0" Foreground="Black" Grid.Column="1"
+                       Width="Auto" Grid.RowSpan="2"
+               />    </Grid>
 </local:DataUserControl>

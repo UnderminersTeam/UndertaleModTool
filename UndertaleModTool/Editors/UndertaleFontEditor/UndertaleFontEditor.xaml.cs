@@ -13,8 +13,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using UndertaleModLib;
 using UndertaleModLib.Models;
 using UndertaleModTool.Editors.UndertaleFontEditor;
+using WpfAnimatedGif;
 
 namespace UndertaleModTool
 {
@@ -28,6 +30,40 @@ namespace UndertaleModTool
         public UndertaleFontEditor()
         {
             InitializeComponent();
+
+            ((System.Windows.Controls.Image)mainWindow.FindName("Flowey")).Opacity = 0;
+            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
+
+            ((Label)this.FindName("FontObjectLabel")).Content = ((Label)mainWindow.FindName("ObjectLabel")).Content;
+        }
+        private void DataUserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            UndertaleFont code = this.DataContext as UndertaleFont;
+
+            int foundIndex = code is UndertaleResource res ? mainWindow.Data.IndexOf(res, false) : -1;
+            string idString;
+
+            if (foundIndex == -1)
+                idString = "None";
+            else if (foundIndex == -2)
+                idString = "N/A";
+            else
+                idString = Convert.ToString(foundIndex);
+
+            ((Label)this.FindName("FontObjectLabel")).Content = idString;
+        }
+        private void DataUserControl_Unloaded(object sender, RoutedEventArgs e)
+        {
+            var floweranim = ((System.Windows.Controls.Image)mainWindow.FindName("Flowey"));
+            //floweranim.Opacity = 1;
+
+            var controller = ImageBehavior.GetAnimationController(floweranim);
+            controller.Pause();
+            controller.GotoFrame(controller.FrameCount - 5);
+            controller.Play();
+
+            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
         }
 
         private void Button_Sort_Click(object sender, RoutedEventArgs e)
