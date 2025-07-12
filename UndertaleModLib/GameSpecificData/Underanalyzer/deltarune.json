@@ -108,6 +108,78 @@
             "ConditionalValue": "0"
           }
         ]
+      },
+      "Deltarune.Asset.ZeroOneOrObject": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "Intersect",
+            "Macros": [
+              {
+                "MacroType": "Intersect",
+                "Macros": [
+                  {
+                    "MacroType": "MatchNot",
+                    "ConditionalType": "Integer",
+                    "ConditionalValue": "0"
+                  },
+                  {
+                    "MacroType": "MatchNot",
+                    "ConditionalType": "Integer",
+                    "ConditionalValue": "1"
+                  }
+                ]
+              },
+              "Asset.Object"
+            ]
+          },
+          {
+            "MacroType": "Union",
+            "Macros": [
+              {
+                "MacroType": "Match",
+                "ConditionalType": "Integer",
+                "ConditionalValue": "0"
+              },
+              {
+                "MacroType": "Match",
+                "ConditionalType": "Integer",
+                "ConditionalValue": "1"
+              }
+            ]
+          }
+        ]
+      },
+      "Deltarune.Id.ZeroOrInstanceOrObject": {
+        "MacroType": "Union",
+        "Macros": [
+          {
+            "MacroType": "Intersect",
+            "Macros": [
+              {
+                "MacroType": "Intersect",
+                "Macros": [
+                  {
+                    "MacroType": "MatchNot",
+                    "ConditionalType": "Integer",
+                    "ConditionalValue": "0"
+                  }
+                ]
+              },
+              "Id.InstanceOrObject"
+            ]
+          },
+          {
+            "MacroType": "Union",
+            "Macros": [
+              {
+                "MacroType": "Match",
+                "ConditionalType": "Integer",
+                "ConditionalValue": "0"
+              }
+            ]
+          }
+        ]
       }
     }
   },
@@ -164,7 +236,7 @@
       "victorysprite": "Asset.Sprite",
       "handSprite": "Asset.Sprite",
       "_headsprite": "Asset.Sprite",
-      "headsprite": "Asset.Sprite",
+      "headsprite": "Deltarune.Asset.ZeroOrSprite",
       "onionsprite": "Asset.Sprite",
       "leftTurnSprite": "Asset.Sprite",
       "rightTurnSprite": "Asset.Sprite",
@@ -268,8 +340,8 @@
       "item1pic": "Asset.Sprite",
       "item2pic": "Asset.Sprite",
       "item3pic": "Asset.Sprite",
-      "endanimation": "Asset.Sprite",
-      "sourceobject": "Asset.Object",
+      "endanimation": "Deltarune.Asset.ZeroOrSprite",
+      "sourceobject": "Deltarune.Asset.ZeroOrObject",
       "_instruments": "Asset.Sound",
       "_instrumentsB": "Asset.Sound",
       "_instrumentsAlt": "Asset.Sound",
@@ -332,7 +404,7 @@
       "colFar": "Constant.Color",
       "heroobj": "Asset.Object",
       "facetype": "Asset.Sprite",
-      "face": "Asset.Sprite",
+      "face": "Deltarune.Asset.ZeroOneOrSprite",
       "_character": "Asset.Object",
       "_charinstance": "Asset.Object",
       "charinstance": "Asset.Object",
@@ -368,19 +440,19 @@
       "bossObject": "Asset.Object",
       "pushChar": "Asset.Object",
       "rotator_target": "Asset.Object",
-      "controlled": "Asset.Object",
+      "controlled": "Deltarune.Asset.ZeroOneOrObject",
       "tiletype": "Asset.Object",
       "simcity": "Asset.Object",
       "returnroom": "Asset.Room",
       "target_char": "Id.InstanceOrObject",
       "writergod": "Asset.Object",
-      "source": "Id.InstanceOrObject",
+      "source": "Deltarune.Id.ZeroOrInstanceOrObject",
       "sneo": "Id.InstanceOrObject",
       "heartobj": "Asset.Object",
       "swatchbc": "Asset.Object",
       "swatch_bc": "Asset.Object",
       "master": "Id.InstanceOrObject",
-      "cutscene_master": "Id.InstanceOrObject",
+      "cutscene_master": "Deltarune.Id.ZeroOrInstanceOrObject",
       "teacupTarget": "Asset.Object",
       "_teacups": "Asset.Object",
       "custom_sprite": "Asset.Sprite",
@@ -499,7 +571,11 @@
       },
       "room_id": "Asset.Room",
       "_border_image_layer": "Asset.Sprite",
-      "tile_sprite": "Asset.Sprite"
+      "tile_sprite": "Asset.Sprite",
+      "commenttriangle": "Asset.Sprite",
+      "target_room": "Asset.Room",
+      "base_sprite": "Asset.Sprite",
+      "current_sprite_index": "Asset.Sprite"
     },
     "FunctionArguments": {
       "snd_play": {
@@ -716,6 +792,10 @@
                 {
                   "MacroType": "Match",
                   "ConditionalValue": "head_sprite"
+                },
+                {
+                  "MacroType": "Match",
+                  "ConditionalValue": "current_sprite_index"
                 }
               ]
             },
@@ -973,7 +1053,15 @@
         ]
       },
       "set_tile_sprite": [ null, "Asset.Sprite" ],
-      "set_tile_sprite_ext": [ null, "Asset.Sprite", null ]
+      "set_tile_sprite_ext": [ null, "Asset.Sprite", null ],
+      "gml_Script_ossafe_fill_rectangle_color": {
+        "MacroType": "Union",
+        "Macros": [
+          [ null, null, null, null, "Constant.Color", "Constant.Color", "Constant.Color", "Constant.Color" ],
+          [ null, null, null, null, "Constant.Color", "Constant.Color", "Constant.Color", "Constant.Color", null ]
+        ]
+      },
+      "gml_Script_scr_battle_sprite_set": [ null, "Asset.Sprite", null, null ]
     },
     "FunctionReturn": {
       "scr_getbuttonsprite": {
@@ -1282,6 +1370,21 @@
     "gml_Script_scr_get_border": {
       "Variables": {
         "argument0": "Asset.Room"
+      }
+    },
+    "gml_Object_obj_dw_church_pianopiece_right_Step_0": {
+      "Variables": {
+        "face": "None"
+      }
+    },
+    "gml_Object_obj_rudebuster_anim_gerson_Step_0": {
+      "Variables": {
+        "sprite_index": "Deltarune.Asset.ZeroOrSprite"
+      }
+    },
+    "gml_Script_scr_actinfo": {
+      "Variables": {
+        "actor": "None"
       }
     }
   }

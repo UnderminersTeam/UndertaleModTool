@@ -17,7 +17,15 @@ namespace UndertaleModTool
             Loaded += DataGrid_Loaded;
             AddingNewItem += DataGrid_AddingNewItem;
         }
-        
+
+        protected override void OnSelectionChanged(SelectionChangedEventArgs e)
+        {
+            if (e.AddedItems.Count > 0 && e.AddedItems[0] != DependencyProperty.UnsetValue)
+                base.OnSelectionChanged(e);
+            else
+                System.Diagnostics.Debug.WriteLine("DataGridDark.OnSelectionChanged() - e.AddedItems[0] is \"UnsetValue\", skipping event handling.");
+        }
+
         private void DataGrid_AddingNewItem(object sender, AddingNewItemEventArgs e)
         {
             _ = Task.Run(() =>
