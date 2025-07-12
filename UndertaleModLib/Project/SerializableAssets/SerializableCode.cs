@@ -137,5 +137,35 @@ internal sealed class SerializableCode : ISerializableProjectAsset
         {
             throw new ProjectException($"Failed to import GML code file named \"{filename}\": {e.Message}", e);
         }
+
+        // If this is a global init script, add to global init list if not already present
+        const string globalScriptPrefix = "gml_GlobalScript_";
+        string codeAssetName = _dataAsset.Name.Content;
+        if (codeAssetName.StartsWith(globalScriptPrefix, StringComparison.Ordinal))
+        {
+            // Scan to see if there's a global init script already
+            UndertaleGlobalInit existingGlobalInit = null;
+            foreach (UndertaleGlobalInit globalInit in projectContext.Data.GlobalInitScripts)
+            {
+                if (globalInit.Code.Name.Content == codeAssetName)
+                {
+                    existingGlobalInit = globalInit;
+                    break;
+                }
+            }
+            if (existingGlobalInit is null)
+            {
+                // Create a new global init entry
+                projectContext.Data.GlobalInitScripts.Add(new()
+                {
+                    Code = _dataAsset
+                });
+            }
+            else
+            {
+                // Attach to existing global init entry
+                existingGlobalInit.Code = _dataAsset;
+            }
+        }
     }
 }
