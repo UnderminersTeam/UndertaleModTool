@@ -392,10 +392,11 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                         && layer.InstancesData.InstanceIds[0] > GameObjects[^1].InstanceID)
                     {
                         // Make sure it's not a false positive
-                        uint firstLayerInstID = layer.InstancesData.InstanceIds.MinBy(x => x);
-                        uint lastInstID = GameObjects.OrderBy(x => x.InstanceID).Last().InstanceID;
+                        uint firstLayerInstID = layer.InstancesData.InstanceIds.Min();
+                        uint lastInstID = GameObjects.MaxBy(x => x.InstanceID).InstanceID;
                         if (firstLayerInstID > lastInstID)
                         {
+                            // Should this throw a warning instead?
                             Debug.WriteLine($"The first instance ID ({firstLayerInstID}) " +
                                             $"of layer (ID {layer.LayerId}) is greater than the last game object ID ({lastInstID}) ?");
                             continue;
