@@ -15,6 +15,7 @@ using UndertaleModLib;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
+using UndertaleModTool.Resources.Languages;
 using static UndertaleModLib.Models.UndertaleRoom;
 
 namespace UndertaleModTool
@@ -122,14 +123,14 @@ namespace UndertaleModTool
 
                 string header = obj switch
                 {
-                    UndertaleAudioGroup => "Audio Group",
-                    UndertaleSound => "Sound",
-                    UndertaleSprite => "Sprite",
+                    UndertaleAudioGroup => Resource.Tabs_AudioGroup,
+                    UndertaleSound => Resource.Tabs_Sound,
+                    UndertaleSprite => Resource.Tabs_Sprite,
                     UndertaleBackground => "Background",
                     UndertalePath => "Path",
-                    UndertaleScript => "Script",
+                    UndertaleScript => Resource.Tabs_Script,
                     UndertaleShader => "Shader",
-                    UndertaleFont => "Font",
+                    UndertaleFont => Resource.Tabs_Font,
                     UndertaleTimeline => "Timeline",
                     UndertaleGameObject => "Game Object",
                     UndertaleRoom => "Room",
@@ -139,10 +140,10 @@ namespace UndertaleModTool
                     UndertaleVariable => "Variable",
                     UndertaleFunction => "Function",
                     UndertaleCodeLocals => "Code Locals",
-                    UndertaleEmbeddedTexture => "Embedded Texture",
-                    UndertaleEmbeddedAudio => "Embedded Audio",
+                    UndertaleEmbeddedTexture => Resource.Tabs_EmbeddedTexture,
+                    UndertaleEmbeddedAudio => Resource.Tabs_EmbeddedAudio,
                     UndertaleTextureGroupInfo => "Texture Group Info",
-                    UndertaleEmbeddedImage => "Embedded Image",
+                    UndertaleEmbeddedImage => Resource.Tabs_EmbeddedImage,
                     UndertaleSequence => "Sequence",
                     UndertaleAnimationCurve => "Animation Curve",
                     UndertaleParticleSystem => "Particle System",
@@ -170,7 +171,7 @@ namespace UndertaleModTool
                     }
                 }
 
-                title = "String - " + stringFirstLine;
+                title = $"{Resource.Tabs_String} - " + stringFirstLine;
             }
             else if (obj is UndertaleExtensionFile file)
             {

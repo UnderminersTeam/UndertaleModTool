@@ -1,0 +1,551 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="App_Title_Main" xml:space="preserve">
+    <value>UndertaleModTool by krzys_h v:</value>
+  </data>
+  <data name="App_Title_NoGameLoaded" xml:space="preserve">
+    <value>No game loaded</value>
+  </data>
+  <data name="Menu_File" xml:space="preserve">
+    <value>_File</value>
+  </data>
+  <data name="Menu_File_Close" xml:space="preserve">
+    <value>_Close</value>
+  </data>
+  <data name="Menu_File_GenerateOffsetMap" xml:space="preserve">
+    <value>Generate o_ffset map</value>
+  </data>
+  <data name="Menu_File_New" xml:space="preserve">
+    <value>_New</value>
+  </data>
+  <data name="Menu_File_Open" xml:space="preserve">
+    <value>_Open</value>
+  </data>
+  <data name="Menu_File_RunGameUnderGMSDebugger" xml:space="preserve">
+    <value>Run game under GMS _debugger</value>
+  </data>
+  <data name="Menu_File_RunGameWithOtherRunner" xml:space="preserve">
+    <value>Run game with other runner</value>
+  </data>
+  <data name="Menu_File_Save" xml:space="preserve">
+    <value>_Save</value>
+  </data>
+  <data name="Menu_File_Settings" xml:space="preserve">
+    <value>S_ettings</value>
+  </data>
+  <data name="Menu_File_TempRunGame" xml:space="preserve">
+    <value>_Temp run game</value>
+  </data>
+  <data name="Menu_Find" xml:space="preserve">
+    <value>_Find</value>
+  </data>
+  <data name="Menu_Find_FindUnreferencedAssets" xml:space="preserve">
+    <value>Find unreferenced _assets</value>
+  </data>
+  <data name="Menu_Find_SearchInCode" xml:space="preserve">
+    <value>_Search in code</value>
+  </data>
+  <data name="Menu_Help" xml:space="preserve">
+    <value>_Help</value>
+  </data>
+  <data name="Menu_Help_About" xml:space="preserve">
+    <value>_About</value>
+  </data>
+  <data name="Menu_Help_GitHub" xml:space="preserve">
+    <value>_GitHub</value>
+  </data>
+  <data name="Menu_Scripts" xml:space="preserve">
+    <value>_Scripts</value>
+  </data>
+  <data name="Menu_Scripts_Loading" xml:space="preserve">
+    <value>(...loading...)</value>
+  </data>
+  <data name="Tree_AudioGroups" xml:space="preserve">
+    <value>Audio groups</value>
+  </data>
+  <data name="Tree_BackgroundsAndTileSets" xml:space="preserve">
+    <value>Backgrounds &amp; Tile sets</value>
+  </data>
+  <data name="Tree_Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="Tree_CodeLocals" xml:space="preserve">
+    <value>Code locals</value>
+  </data>
+  <data name="Tree_Data" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="Tree_EmbeddedAudio" xml:space="preserve">
+    <value>Embedded audio</value>
+  </data>
+  <data name="Tree_EmbeddedImages" xml:space="preserve">
+    <value>Embedded images</value>
+  </data>
+  <data name="Tree_EmbeddedTextures" xml:space="preserve">
+    <value>Embedded textures</value>
+  </data>
+  <data name="Tree_Extensions" xml:space="preserve">
+    <value>Extensions</value>
+  </data>
+  <data name="Tree_FilterByName" xml:space="preserve">
+    <value>Filter by name...</value>
+  </data>
+  <data name="Tree_Fonts" xml:space="preserve">
+    <value>Fonts</value>
+  </data>
+  <data name="Tree_Functions" xml:space="preserve">
+    <value>Functions</value>
+  </data>
+  <data name="Tree_GameEndScript" xml:space="preserve">
+    <value>Game End scripts</value>
+  </data>
+  <data name="Tree_GameObjects" xml:space="preserve">
+    <value>Game objects</value>
+  </data>
+  <data name="Tree_GeneralInfo" xml:space="preserve">
+    <value>General info</value>
+  </data>
+  <data name="Tree_GlobalInit" xml:space="preserve">
+    <value>Global init</value>
+  </data>
+  <data name="Tree_ParticleSystemEmitters" xml:space="preserve">
+    <value>Particle system emitters</value>
+  </data>
+  <data name="Tree_ParticleSystems" xml:space="preserve">
+    <value>Particle systems</value>
+  </data>
+  <data name="Tree_Paths" xml:space="preserve">
+    <value>Paths</value>
+  </data>
+  <data name="Tree_Rooms" xml:space="preserve">
+    <value>Rooms</value>
+  </data>
+  <data name="Tree_Scripts" xml:space="preserve">
+    <value>Scripts</value>
+  </data>
+  <data name="Tree_Shaders" xml:space="preserve">
+    <value>Shaders</value>
+  </data>
+  <data name="Tree_Sounds" xml:space="preserve">
+    <value>Sounds</value>
+  </data>
+  <data name="Tree_Sprites" xml:space="preserve">
+    <value>Sprites</value>
+  </data>
+  <data name="Tree_Strings" xml:space="preserve">
+    <value>Strings</value>
+  </data>
+  <data name="Tree_TextureGroupInfomation" xml:space="preserve">
+    <value>Texture group infomation</value>
+  </data>
+  <data name="Tree_TexturePageItems" xml:space="preserve">
+    <value>Texture page items</value>
+  </data>
+  <data name="Tree_Timelines" xml:space="preserve">
+    <value>Timelines</value>
+  </data>
+  <data name="Tree_Variables" xml:space="preserve">
+    <value>Variables</value>
+  </data>
+  <data name="Msg_GetStarted" xml:space="preserve">
+    <value>Open a data.win file to get started, then double click on the items on the left to view them.</value>
+  </data>
+  <data name="Msg_LoadDataWinFileFirst" xml:space="preserve">
+    <value>Load data.win file first</value>
+  </data>
+  <data name="Msg_Welcome" xml:space="preserve">
+    <value>Welcome to UndertaleModTool!</value>
+  </data>
+  <data name="Window_About" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="Menu_Scripts_RunOtherScript" xml:space="preserve">
+    <value>Run _other script...</value>
+  </data>
+  <data name="Msg_GetStartedFromEmpty" xml:space="preserve">
+    <value>New file created, have fun making a game out of nothing
+I TOLD YOU to open a data.win, not create a new file! :P</value>
+  </data>
+  <data name="Tree_TileSets" xml:space="preserve">
+    <value>Tile sets</value>
+  </data>
+  <data name="Msg_DoubleClick" xml:space="preserve">
+    <value>Double click on the items on the left to view them</value>
+  </data>
+  <data name="Msg_OpenDataToStart" xml:space="preserve">
+    <value>Open data.win file to get started</value>
+  </data>
+  <data name="Msg_ExpandList" xml:space="preserve">
+    <value>Expand the list on the left to edit items</value>
+  </data>
+  <data name="Msg_About" xml:space="preserve">
+    <value>UndertaleModTool by krzys_h and the Underminers team
+Version </value>
+  </data>
+  <data name="Msg_SaveChangesBeforeQuitting" xml:space="preserve">
+    <value>Save changes before quitting?</value>
+  </data>
+  <data name="Msg_LoadingTitle" xml:space="preserve">
+    <value>Loading</value>
+  </data>
+  <data name="Msg_LoadingPleaseWait" xml:space="preserve">
+    <value>Loading, please wait...</value>
+  </data>
+  <data name="Msg_PleaseWait" xml:space="preserve">
+    <value>Please wait...</value>
+  </data>
+  <data name="RoomEditor_SaveAsPng" xml:space="preserve">
+    <value>Save as PNG</value>
+  </data>
+  <data name="Msg_TempRunWarn" xml:space="preserve">
+    <value>WARNING:
+Temp running the game does not permanently 
+save your changes. Please "Save" the game
+to save your changes. Closing UndertaleModTool
+without using the "Save" option can
+result in loss of work.</value>
+  </data>
+  <data name="Msg_TempRunNothingToRun" xml:space="preserve">
+    <value>Nothing to run!</value>
+  </data>
+  <data name="Msg_TempFolderIsNull" xml:space="preserve">
+    <value>Temp folder is null.</value>
+  </data>
+  <data name="Msg_TempRunNull" xml:space="preserve">
+    <value>Null game executable name or location</value>
+  </data>
+  <data name="Msg_TempRunCannotFindExecutable" xml:space="preserve">
+    <value>Cannot find game executable path, expected: </value>
+  </data>
+  <data name="Msg_TempRunCannotFindGamePath" xml:space="preserve">
+    <value>Cannot find game path, expected: </value>
+  </data>
+  <data name="Msg_TempRunSaveFailed" xml:space="preserve">
+    <value>Temp save failed, cannot run.</value>
+  </data>
+  <data name="Window_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Msg_SavingTitle" xml:space="preserve">
+    <value>Saving</value>
+  </data>
+  <data name="Msg_SavingPleaseWait" xml:space="preserve">
+    <value>Saving, please wait...</value>
+  </data>
+  <data name="Msg_AreYouSureYouWantToMakeANewProject" xml:space="preserve">
+    <value>Warning: you currently have a project open.
+Are you sure you want to make a new project?</value>
+  </data>
+  <data name="AudioGroup_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="AudioGroup_Path" xml:space="preserve">
+    <value>Path (GM 2024.14+)</value>
+  </data>
+  <data name="Tabs_AudioGroup" xml:space="preserve">
+    <value>Audio Group</value>
+  </data>
+  <data name="Tabs_Sound" xml:space="preserve">
+    <value>Sound</value>
+  </data>
+  <data name="Sound_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Sound_Flags" xml:space="preserve">
+    <value>Flags</value>
+  </data>
+  <data name="Sound_File" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="Sound_Effects" xml:space="preserve">
+    <value>Effects</value>
+  </data>
+  <data name="Sound_Volume" xml:space="preserve">
+    <value>Volume</value>
+  </data>
+  <data name="Sound_Pitch" xml:space="preserve">
+    <value>Pitch</value>
+  </data>
+  <data name="Sound_AudioGroup" xml:space="preserve">
+    <value>Audio group</value>
+  </data>
+  <data name="Sound_AudioFile" xml:space="preserve">
+    <value>Audio file</value>
+  </data>
+  <data name="Sound_Preload" xml:space="preserve">
+    <value>Preload (old audio system)</value>
+  </data>
+  <data name="Sound_Play" xml:space="preserve">
+    <value>Play</value>
+  </data>
+  <data name="Sound_Stop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="Sound_Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Sprite_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Sprite_Size" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="Sprite_Margin" xml:space="preserve">
+    <value>Margin Left/Right/Bottom/Top</value>
+  </data>
+  <data name="Sprite_Transparent" xml:space="preserve">
+    <value>Transparent</value>
+  </data>
+  <data name="Sprite_Smooth" xml:space="preserve">
+    <value>Smooth</value>
+  </data>
+  <data name="Sprite_Preload" xml:space="preserve">
+    <value>Preload</value>
+  </data>
+  <data name="Sprite_BoundingBoxMode" xml:space="preserve">
+    <value>Bounding box mode</value>
+  </data>
+  <data name="Sprite_SepMasks" xml:space="preserve">
+    <value>SepMasks</value>
+  </data>
+  <data name="Sprite_Origin" xml:space="preserve">
+    <value>Origin</value>
+  </data>
+  <data name="Sprite_Textures" xml:space="preserve">
+    <value>Textures</value>
+  </data>
+  <data name="Sprite_CollisionMasks" xml:space="preserve">
+    <value>Collision masks</value>
+  </data>
+  <data name="Tabs_Sprite" xml:space="preserve">
+    <value>Sprite</value>
+  </data>
+  <data name="Sprite_ExportAllFrames" xml:space="preserve">
+    <value>Export all frames (or Spine data if this is a Spine sprite)</value>
+  </data>
+  <data name="Sprite_IsSpecialType" xml:space="preserve">
+    <value>Is special type?</value>
+  </data>
+  <data name="Sprite_Version" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="Sprite_Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Sprite_PlaybackSpeed" xml:space="preserve">
+    <value>Playback speed</value>
+  </data>
+  <data name="Sprite_PlaybackSpeedType" xml:space="preserve">
+    <value>Playback speed type</value>
+  </data>
+  <data name="Sprite_DoubleClickToAdd" xml:space="preserve">
+    <value>Double click to add</value>
+  </data>
+  <data name="EAudio_Import" xml:space="preserve">
+    <value>Import</value>
+  </data>
+  <data name="EAudio_Export" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="EAudio_Play" xml:space="preserve">
+    <value>Play</value>
+  </data>
+  <data name="EAudio_Stop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="Tabs_EmbeddedAudio" xml:space="preserve">
+    <value>Embedded Audio</value>
+  </data>
+  <data name="EAudio_WAVDataLength" xml:space="preserve">
+    <value>WAV data, length:</value>
+  </data>
+  <data name="Tabs_EmbeddedImage" xml:space="preserve">
+    <value>Embedded Image</value>
+  </data>
+  <data name="EImage_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="EImage_Texture" xml:space="preserve">
+    <value>Texture</value>
+  </data>
+  <data name="Tabs_EmbeddedTexture" xml:space="preserve">
+    <value>Embedded Texture</value>
+  </data>
+  <data name="ETexture_Export" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="ETexture_Import" xml:space="preserve">
+    <value>Import</value>
+  </data>
+  <data name="ETexture_Size" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="ETexture_Hint" xml:space="preserve">
+    <value>Hint: This image is mouse interactable (3 mouse buttons and mouse wheel).</value>
+  </data>
+  <data name="ETexture_Warning" xml:space="preserve">
+    <value>Warning: Texture failed to load!</value>
+  </data>
+  <data name="ETexture_GeneratedMips" xml:space="preserve">
+    <value>Generated mips</value>
+  </data>
+  <data name="ETexture_Scaled" xml:space="preserve">
+    <value>Scaled</value>
+  </data>
+  <data name="Tabs_String" xml:space="preserve">
+    <value>String</value>
+  </data>
+  <data name="String_Content" xml:space="preserve">
+    <value>Content</value>
+  </data>
+  <data name="Tabs_Script" xml:space="preserve">
+    <value>Script</value>
+  </data>
+  <data name="Script_Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="Script_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Font_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Font_DisplayName" xml:space="preserve">
+    <value>Display name</value>
+  </data>
+  <data name="Font_FontSize" xml:space="preserve">
+    <value>Font size</value>
+  </data>
+  <data name="Font_Bold" xml:space="preserve">
+    <value>Bold</value>
+  </data>
+  <data name="Font_Italic" xml:space="preserve">
+    <value>Italic</value>
+  </data>
+  <data name="Font_Texture" xml:space="preserve">
+    <value>Texture</value>
+  </data>
+  <data name="Font_Scale" xml:space="preserve">
+    <value>Scale</value>
+  </data>
+  <data name="Tabs_Font" xml:space="preserve">
+    <value>Font</value>
+  </data>
+</root>
