@@ -625,6 +625,136 @@ namespace UndertaleModLib
             return data;
         }
 
+        /// <summary>
+        /// Creates a new resource based on type of the list.
+        /// </summary>
+        public static UndertaleResource CreateResource(IList list)
+        {
+            Type resourceType = list.GetType().GetGenericArguments()[0];
+            return (Activator.CreateInstance(resourceType) as UndertaleResource)!;
+        }
+
+        /// <summary>
+        /// Get the default name of a resource based on a list (e.g., sprite0)
+        /// </summary>
+        public static string GetDefaultResourceName(IList list)
+        {
+            Type resourceType = list.GetType().GetGenericArguments()[0];
+            if (resourceType == typeof(UndertaleTexturePageItem) ||
+                resourceType == typeof(UndertaleEmbeddedAudio) ||
+                resourceType == typeof(UndertaleEmbeddedTexture))
+            {
+                return null;
+            }
+
+            string typeName = resourceType.Name.Replace("Undertale", "").Replace("GameObject", "Object").ToLower();
+            string resourceName = typeName + list.Count;
+
+            return resourceName;
+        }
+
+        /// <summary>
+        /// Initialize newly created resource.
+        /// </summary>
+        /// <param name="resource">The resource to initialize.</param>
+        /// <param name="list">The list where the resource might reside.</param>
+        /// <param name="resourceName">Name to set to resource if supported.</param>
+        public void InitializeResource(UndertaleResource resource, IList list, string resourceName)
+        {
+            // Set up name
+            if (resource is UndertaleNamedResource namedResource)
+            {
+                UndertaleString name = resource switch
+                {
+                    // UTMT only names.
+                    UndertaleTexturePageItem => new UndertaleString("PageItem " + list.Count),
+                    UndertaleEmbeddedAudio => new UndertaleString("EmbeddedSound " + list.Count),
+                    UndertaleEmbeddedTexture => new UndertaleString("Texture " + list.Count),
+                    _ => Strings.MakeString(resourceName, createNew: true),
+                };
+
+                namedResource.Name = name;
+            }
+
+            if (resource is UndertaleString _string)
+            {
+                _string.Content = "string" + list.Count;
+            }
+            else if (resource is UndertaleRoom room)
+            {
+                if (IsVersionAtLeast(2))
+                {
+                    room.Caption = null;
+                    room.Backgrounds.Clear();
+                    if (IsVersionAtLeast(2024, 13))
+                    {
+                        room.Flags |= IsVersionAtLeast(2024, 13) ? UndertaleRoom.RoomEntryFlags.IsGM2024_13 : UndertaleRoom.RoomEntryFlags.IsGMS2;
+                    }
+                    else
+                    {
+                        room.Flags |= UndertaleRoom.RoomEntryFlags.IsGMS2;
+                        if (IsVersionAtLeast(2, 3))
+                        {
+                            room.Flags |= UndertaleRoom.RoomEntryFlags.IsGMS2_3;
+                        }
+                    }
+                }
+                else
+                {
+                    room.Caption = Strings.MakeString("", createNew: true);
+                }
+            }
+            else if (resource is UndertaleScript script)
+            {
+                if (IsVersionAtLeast(2, 3))
+                {
+                    script.Code = UndertaleCode.CreateEmptyEntry(this, Strings.MakeString($"gml_GlobalScript_{script.Name.Content}", createNew: true));
+                    if (GlobalInitScripts is IList<UndertaleGlobalInit> globalInitScripts)
+                    {
+                        globalInitScripts.Add(new UndertaleGlobalInit()
+                        {
+                            Code = script.Code,
+                        });
+                    }
+                }
+                else
+                {
+                    script.Code = UndertaleCode.CreateEmptyEntry(this, Strings.MakeString($"gml_Script_{script.Name.Content}", createNew: true));
+                }
+            }
+            else if (resource is UndertaleCode code)
+            {
+                if (CodeLocals is not null)
+                {
+                    code.LocalsCount = 1;
+                    UndertaleCodeLocals.CreateEmptyEntry(this, code.Name);
+                }
+                else
+                {
+                    code.WeirdLocalFlag = true;
+                }
+            }
+            else if (resource is UndertaleExtension)
+            {
+                if (GeneralInfo?.Major >= 2 ||
+                    (GeneralInfo?.Major == 1 && GeneralInfo?.Build >= 1773) ||
+                    (GeneralInfo?.Major == 1 && GeneralInfo?.Build == 1539))
+                {
+                    var newProductID = new byte[] { 0xBA, 0x5E, 0xBA, 0x11, 0xBA, 0xDD, 0x06, 0x60, 0xBE, 0xEF, 0xED, 0xBA, 0x0B, 0xAB, 0xBA, 0xBE };
+                    FORM.EXTN.productIdData.Add(newProductID);
+                }
+            }
+            else if (resource is UndertaleShader shader)
+            {
+                shader.GLSL_ES_Vertex = Strings.MakeString("", createNew: true);
+                shader.GLSL_ES_Fragment = Strings.MakeString("", createNew: true);
+                shader.GLSL_Vertex = Strings.MakeString("", createNew: true);
+                shader.GLSL_Fragment = Strings.MakeString("", createNew: true);
+                shader.HLSL9_Vertex = Strings.MakeString("", createNew: true);
+                shader.HLSL9_Fragment = Strings.MakeString("", createNew: true);
+            }
+        }
+
         /// <inheritdoc/>
         public void Dispose()
         {

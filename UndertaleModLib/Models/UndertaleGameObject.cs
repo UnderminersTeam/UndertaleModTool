@@ -139,7 +139,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// <summary>
     /// The vertices used for a <see cref="CollisionShape"/> of type <see cref="CollisionShapeFlags.Custom"/>.
     /// </summary>
-    public List<UndertalePhysicsVertex> PhysicsVertices { get; set; } = new List<UndertalePhysicsVertex>();
+    public UndertaleObservableList<UndertalePhysicsVertex> PhysicsVertices { get; set; } = new UndertaleObservableList<UndertalePhysicsVertex>();
 
     #endregion
 
@@ -247,7 +247,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         Awake = reader.ReadBoolean();
         Kinematic = reader.ReadBoolean();
         // Needs to be done manually because count is separated
-        PhysicsVertices.Capacity = physicsShapeVertexCount;
+        PhysicsVertices.SetCapacity(physicsShapeVertexCount);
         for (int i = 0; i < physicsShapeVertexCount; i++)
         {
             UndertalePhysicsVertex v = new UndertalePhysicsVertex();
