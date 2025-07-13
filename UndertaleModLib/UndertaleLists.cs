@@ -267,6 +267,27 @@ namespace UndertaleModLib
     /// </summary>
     public class UndertaleSimpleListShort<T> : UndertaleObservableList<T>, UndertaleObject where T : UndertaleObject, new()
     {
+        /// <summary>
+        /// Creates a new (short) simple list, which is empty and has default capacity.
+        /// </summary>
+        public UndertaleSimpleListShort()
+        {
+        }
+
+        /// <summary>
+        /// Creates a new (short) simple list, which is empty and has the specified initial capacity.
+        /// </summary>
+        public UndertaleSimpleListShort(int capacity) : base(capacity)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new (short) simple list from the contents of the provided enumerable.
+        /// </summary>
+        public UndertaleSimpleListShort(IEnumerable<T> enumerable) : base(enumerable)
+        {
+        }
+
         private void EnsureShortCount()
         {
             if (Count > Int16.MaxValue)
