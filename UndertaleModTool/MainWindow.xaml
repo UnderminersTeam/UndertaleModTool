@@ -317,7 +317,7 @@
                                 </HierarchicalDataTemplate>
                             </local:ResourceListTreeViewItem.DefaultItemTemplate>
                         </local:ResourceListTreeViewItem>
-                        <TreeViewItem Header="Sprites" ItemsSource="{Binding Sprites, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding Sprites, Converter={StaticResource VisibleIfNotNull}}">
+                        <local:ResourceListTreeViewItem Header="Sprites" ItemsSource="{Binding Sprites, Converter={StaticResource FilteredViewConverter}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleSprite}">
                                     <Grid>
@@ -331,7 +331,7 @@
                                     </Grid>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
-                        </TreeViewItem>
+                        </local:ResourceListTreeViewItem>
                         <local:ResourceListTreeViewItem x:Name="BackgroundsItemsList" Header="Backgrounds &amp; Tile sets" ItemsSource="{Binding Backgrounds, Converter={StaticResource FilteredViewConverter}}">
                             <local:ResourceListTreeViewItem.DefaultItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleBackground}">
@@ -374,7 +374,7 @@
                                 </HierarchicalDataTemplate>
                             </local:ResourceListTreeViewItem.DefaultItemTemplate>
                         </local:ResourceListTreeViewItem>
-                        <TreeViewItem Header="Game objects" ItemsSource="{Binding GameObjects, Converter={StaticResource FilteredViewConverter}}" Visibility="{Binding GameObjects, Converter={StaticResource VisibleIfNotNull}}">
+                        <local:ResourceListTreeViewItem Header="Game objects" ItemsSource="{Binding GameObjects, Converter={StaticResource FilteredViewConverter}}">
                             <TreeViewItem.ItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleGameObject}">
                                     <Grid>
@@ -389,7 +389,7 @@
                                     </Grid>
                                 </HierarchicalDataTemplate>
                             </TreeViewItem.ItemTemplate>
-                        </TreeViewItem>
+                        </local:ResourceListTreeViewItem>
                         <local:ResourceListTreeViewItem Header="Rooms" ItemsSource="{Binding Rooms, Converter={StaticResource FilteredViewConverter}}">
                             <local:ResourceListTreeViewItem.DefaultItemTemplate>
                                 <HierarchicalDataTemplate DataType="{x:Type undertale:UndertaleRoom}">
