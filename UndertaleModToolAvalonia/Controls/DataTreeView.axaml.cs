@@ -219,20 +219,4 @@ public partial class DataTreeView : UserControl
             }
         }
     }
-
-    private void ExpandCollapseButton_Click(object? sender, RoutedEventArgs e)
-    {
-        // BUG: This selects the item if you expand or collapse. It's to 'fix' a bug where if you click the button
-        // while something else below in the list is selected, not only will it select that item (no,
-        // AutoScrollToSelectedItem="False" doesn't seem to work), it'll also slowly scroll down to that item, while
-        // locking up the GUI. No idea why this happens.
-        if (e.Source is Control control)
-        {
-            ListBoxItem? listBoxItem = control.FindLogicalAncestorOfType<ListBoxItem>();
-            if (listBoxItem is not null)
-            {
-                listBoxItem.IsSelected = true;
-            }
-        }
-    }
 }
