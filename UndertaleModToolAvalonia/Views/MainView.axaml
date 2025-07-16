@@ -32,8 +32,8 @@
             <Grid Grid.Column="0" x:Name="LeftPanel" RowDefinitions="Auto,1*">
                 <StackPanel Spacing="5">
                     <StackPanel Orientation="Horizontal">
-                        <Button>←</Button>
-                        <Button>→</Button>
+                        <Button Command="{Binding TabGoBack}" IsEnabled="{Binding TabSelected.CanGoBack, FallbackValue=False}">←</Button>
+                        <Button Command="{Binding TabGoForward}" IsEnabled="{Binding TabSelected.CanGoForward, FallbackValue=False}">→</Button>
                     </StackPanel>
                     <TextBox Name="FilterTextBox" Watermark="Filter by name..." TextChanged="FilterTextBox_TextChanged"/>
                 </StackPanel>

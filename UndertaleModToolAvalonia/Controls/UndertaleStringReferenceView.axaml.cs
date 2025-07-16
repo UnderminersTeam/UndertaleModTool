@@ -58,6 +58,12 @@ public partial class UndertaleStringReferenceView : UserControl
         mainView.TabOpen(Reference);
     }
 
+    public void OpenInNewTab()
+    {
+        MainViewModel mainView = (this.FindLogicalAncestorOfType<MainView>()!.DataContext as MainViewModel)!;
+        mainView.TabOpen(Reference, inNewTab: true);
+    }
+
     void UpdateString(TextBox textBox)
     {
         if (Reference is not null)

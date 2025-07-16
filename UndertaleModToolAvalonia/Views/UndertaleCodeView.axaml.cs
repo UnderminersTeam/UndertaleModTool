@@ -3,6 +3,7 @@ using System.ComponentModel;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
+using Avalonia.VisualTree;
 
 namespace UndertaleModToolAvalonia.Views;
 
@@ -16,17 +17,24 @@ public partial class UndertaleCodeView : UserControl
         {
             if (DataContext is UndertaleCodeViewModel vm)
             {
-                AttachedToLogicalTree += (_, __) =>
+                if (this.IsAttachedToVisualTree())
                 {
                     ProcessLastGoToLocation();
-
-                    vm.PropertyChanged += (object? source, PropertyChangedEventArgs e) =>
+                }
+                else
+                {
+                    AttachedToLogicalTree += (_, __) =>
                     {
-                        if (e.PropertyName == nameof(UndertaleCodeViewModel.LastGoToLocation))
-                        {
-                            ProcessLastGoToLocation();
-                        }
+                        ProcessLastGoToLocation();
                     };
+                }
+
+                vm.PropertyChanged += (object? source, PropertyChangedEventArgs e) =>
+                {
+                    if (e.PropertyName == nameof(UndertaleCodeViewModel.LastGoToLocation) && vm.LastGoToLocation is not null)
+                    {
+                        ProcessLastGoToLocation();
+                    }
                 };
             }
         };
@@ -59,16 +67,20 @@ public partial class UndertaleCodeView : UserControl
             vm.SelectedTab = location.tab;
             AvaloniaEdit.TextEditor textEditor = (location.tab == UndertaleCodeViewModel.Tab.GML) ? GMLTextEditor : ASMTextEditor;
 
-            EventHandler<RoutedEventArgs>? func = null;
+            textEditor.TextArea.Caret.Column = 0;
+            textEditor.TextArea.Caret.Line = location.line;
+            textEditor.Focus();
+
+            EventHandler? func = null;
             func = (_, __) =>
             {
-                textEditor.TextArea.Caret.Column = 0;
-                textEditor.TextArea.Caret.Line = location.line;
                 textEditor.ScrollToLine(location.line);
-                textEditor.Focus();
-                textEditor.Loaded -= func;
+                textEditor.LayoutUpdated -= func;
             };
-            textEditor.Loaded += func;
+            textEditor.LayoutUpdated += func;
+
+            // HACK: I don't know how to check if the layout has updated already here or not, so I just invalidate it to call the above function.
+            textEditor.InvalidateMeasure();
         }
     }
 

@@ -48,6 +48,12 @@ public partial class UndertaleResourceReferenceView : UserControl
         mainView.TabOpen(Reference);
     }
 
+    public void OpenInNewTab()
+    {
+        MainViewModel mainView = (this.FindLogicalAncestorOfType<MainView>()!.DataContext as MainViewModel)!;
+        mainView.TabOpen(Reference, inNewTab: true);
+    }
+
     public void Remove()
     {
         Reference = null;

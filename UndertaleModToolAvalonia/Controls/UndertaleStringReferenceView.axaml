@@ -6,7 +6,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="UndertaleModToolAvalonia.Controls.UndertaleStringReferenceView">
     <ContentControl DataContext="{Binding $parent[c:UndertaleStringReferenceView]}">
-        <Grid ColumnDefinitions="*,Auto">
+        <Grid ColumnDefinitions="*,Auto,Auto">
             <!-- TODO: Make this look/work better -->
             <TextBox Grid.Column="0" Name="TextBox"
                      Text="{Binding Reference.Content, UpdateSourceTrigger=Explicit, TargetNullValue=''}"
@@ -20,7 +20,8 @@
                     <ContextDropBehavior Handler="{StaticResource UndertaleStringDropHandler}"/>
                 </Interaction.Behaviors>
             </TextBox>
-            <Button Grid.Column="1" Command="{Binding Open}">Open</Button>
+            <Button Grid.Column="1" Command="{Binding Open}">…</Button>
+            <Button Grid.Column="2" Command="{Binding OpenInNewTab}">⬈</Button>
         </Grid>
     </ContentControl>
 </UserControl>

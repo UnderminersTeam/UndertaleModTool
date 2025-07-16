@@ -24,7 +24,7 @@ public partial class MainViewModel
     // Set this when testing.
     public Func<FilePickerOpenOptions, Task<IReadOnlyList<IStorageFile>>>? OpenFileDialog;
     public Func<FilePickerSaveOptions, Task<IStorageFile?>>? SaveFileDialog;
-    public Func<FolderPickerOpenOptions, Task<IReadOnlyList<IStorageFolder>>> OpenFolderDialog;
+    public Func<FolderPickerOpenOptions, Task<IReadOnlyList<IStorageFolder>>>? OpenFolderDialog;
     public Func<Uri, Task<bool>>? LaunchUriAsync;
 
     public delegate Task<MessageWindow.Result> MessageDialogDelegate(string message, string? title = null, bool ok = true, bool yes = false, bool no = false, bool cancel = false);
@@ -339,7 +339,7 @@ public partial class MainViewModel
         list.Add(res);
     }
 
-    public TabItemViewModel? TabOpen(object? item)
+    public TabItemViewModel? TabOpen(object? item, bool inNewTab = false)
     {
         if (Data is null)
             return null;
@@ -384,10 +384,18 @@ public partial class MainViewModel
 
         if (content is not null)
         {
-            TabItemViewModel tab = new(content);
-            Tabs.Add(tab);
-            TabSelected = tab;
-            return tab;
+            if (!inNewTab && TabSelected is not null)
+            {
+                TabSelected.GoTo(content);
+                return TabSelected;
+            }
+            else
+            {
+                TabItemViewModel tab = new(content);
+                Tabs.Add(tab);
+                TabSelected = tab;
+                return tab;
+            }
         }
 
         return null;
@@ -407,6 +415,16 @@ public partial class MainViewModel
 
             TabSelectedIndex = index;
         }
+    }
+
+    public void TabGoBack()
+    {
+        TabSelected?.GoBack();
+    }
+
+    public void TabGoForward()
+    {
+        TabSelected?.GoForward();
     }
 
     private void OnTabSelectedChanged()

@@ -177,46 +177,58 @@ public partial class DataTreeView : UserControl
 
     public void ListMenu_Add_Click(object? sender, RoutedEventArgs e)
     {
-        if (mainVM.Data is not null)
+        TreeItemViewModel? treeItem = GetItem(e.Source);
+        if (treeItem is not null && mainVM.Data is not null)
         {
-            if (e.Source is Control control)
+            // This could probably be better
+            IList list = (treeItem.Value switch
             {
-                ListBoxItem? listBoxItem = control.FindLogicalAncestorOfType<ListBoxItem>();
-                if (listBoxItem is not null && listBoxItem.DataContext is TreeItemViewModel treeItem)
-                {
-                    // This could probably be better
-                    IList list = (treeItem.Value switch
-                    {
-                        "AudioGroups" => mainVM.Data.AudioGroups as IList,
-                        "Sounds" => mainVM.Data.Sounds as IList,
-                        "Sprites" => mainVM.Data.Sprites as IList,
-                        "Backgrounds" => mainVM.Data.Backgrounds as IList,
-                        "Paths" => mainVM.Data.Paths as IList,
-                        "Scripts" => mainVM.Data.Scripts as IList,
-                        "Shaders" => mainVM.Data.Shaders as IList,
-                        "Fonts" => mainVM.Data.Fonts as IList,
-                        "Timelines" => mainVM.Data.Timelines as IList,
-                        "GameObjects" => mainVM.Data.GameObjects as IList,
-                        "Rooms" => mainVM.Data.Rooms as IList,
-                        "Extensions" => mainVM.Data.Extensions as IList,
-                        "TexturePageItems" => mainVM.Data.TexturePageItems as IList,
-                        "Code" => mainVM.Data.Code as IList,
-                        "Variables" => mainVM.Data.Variables as IList,
-                        "Functions" => mainVM.Data.Functions as IList,
-                        "CodeLocals" => mainVM.Data.CodeLocals as IList,
-                        "Strings" => mainVM.Data.Strings as IList,
-                        "EmbeddedTextures" => mainVM.Data.EmbeddedTextures as IList,
-                        "EmbeddedAudio" => mainVM.Data.EmbeddedAudio as IList,
-                        "TextureGroupInformation" => mainVM.Data.TextureGroupInfo as IList,
-                        "EmbeddedImages" => mainVM.Data.EmbeddedImages as IList,
-                        "ParticleSystems" => mainVM.Data.ParticleSystems as IList,
-                        "ParticleSystemEmitters" => mainVM.Data.ParticleSystemEmitters as IList,
-                        _ => null,
-                    })!;
+                "AudioGroups" => mainVM.Data.AudioGroups as IList,
+                "Sounds" => mainVM.Data.Sounds as IList,
+                "Sprites" => mainVM.Data.Sprites as IList,
+                "Backgrounds" => mainVM.Data.Backgrounds as IList,
+                "Paths" => mainVM.Data.Paths as IList,
+                "Scripts" => mainVM.Data.Scripts as IList,
+                "Shaders" => mainVM.Data.Shaders as IList,
+                "Fonts" => mainVM.Data.Fonts as IList,
+                "Timelines" => mainVM.Data.Timelines as IList,
+                "GameObjects" => mainVM.Data.GameObjects as IList,
+                "Rooms" => mainVM.Data.Rooms as IList,
+                "Extensions" => mainVM.Data.Extensions as IList,
+                "TexturePageItems" => mainVM.Data.TexturePageItems as IList,
+                "Code" => mainVM.Data.Code as IList,
+                "Variables" => mainVM.Data.Variables as IList,
+                "Functions" => mainVM.Data.Functions as IList,
+                "CodeLocals" => mainVM.Data.CodeLocals as IList,
+                "Strings" => mainVM.Data.Strings as IList,
+                "EmbeddedTextures" => mainVM.Data.EmbeddedTextures as IList,
+                "EmbeddedAudio" => mainVM.Data.EmbeddedAudio as IList,
+                "TextureGroupInformation" => mainVM.Data.TextureGroupInfo as IList,
+                "EmbeddedImages" => mainVM.Data.EmbeddedImages as IList,
+                "ParticleSystems" => mainVM.Data.ParticleSystems as IList,
+                "ParticleSystemEmitters" => mainVM.Data.ParticleSystemEmitters as IList,
+                _ => null,
+            })!;
 
-                    mainVM.DataItemAdd(list);
-                }
-            }
+            mainVM.DataItemAdd(list);
+        }
+    }
+
+    public void ResourceMenu_Open_Click(object? sender, RoutedEventArgs e)
+    {
+        TreeItemViewModel? treeItem = GetItem(e.Source);
+        if (treeItem is not null && mainVM.Data is not null)
+        {
+            mainVM.TabOpen(treeItem);
+        }
+    }
+
+    public void ResourceMenu_OpenInNewTab_Click(object? sender, RoutedEventArgs e)
+    {
+        TreeItemViewModel? treeItem = GetItem(e.Source);
+        if (treeItem is not null && mainVM.Data is not null)
+        {
+            mainVM.TabOpen(treeItem, inNewTab: true);
         }
     }
 }

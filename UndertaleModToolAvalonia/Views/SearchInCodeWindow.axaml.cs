@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 
 namespace UndertaleModToolAvalonia.Views;
 
@@ -11,6 +12,11 @@ public partial class SearchInCodeWindow : Window
     public SearchInCodeWindow()
     {
         InitializeComponent();
+
+        AttachedToVisualTree += (_, __) =>
+        {
+            SearchTextTextBox.Focus();
+        };
 
         SearchTextTextBox.AddHandler(TextBox.KeyDownEvent, TextBox_KeyDown_Tunnel, Avalonia.Interactivity.RoutingStrategies.Tunnel);
         ResultsDataGrid.AddHandler(DataGrid.KeyDownEvent, DataGrid_KeyDown_Tunnel, Avalonia.Interactivity.RoutingStrategies.Tunnel);
@@ -43,5 +49,21 @@ public partial class SearchInCodeWindow : Window
                     e.Handled = true;
                     vm.OpenSearchResult(searchResult);
                 }
+    }
+
+    private void DataGridRow_Open_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is SearchInCodeViewModel vm)
+            if (e.Source is Control control)
+                if (control.DataContext is SearchInCodeViewModel.SearchResult searchResult)
+                    vm.OpenSearchResult(searchResult);
+    }
+
+    private void DataGridRow_OpenInNewTab_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is SearchInCodeViewModel vm)
+            if (e.Source is Control control)
+                if (control.DataContext is SearchInCodeViewModel.SearchResult searchResult)
+                    vm.OpenSearchResult(searchResult, inNewTab: true);
     }
 }

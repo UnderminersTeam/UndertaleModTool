@@ -22,6 +22,16 @@
         </StackPanel>
         <DataGrid Grid.Row="1" Name="ResultsDataGrid" ItemsSource="{Binding Results}" IsReadOnly="True" CanUserResizeColumns="True"
                   DoubleTapped="DataGrid_DoubleTapped">
+            <DataGrid.Styles>
+                <Style Selector="DataGridRow">
+                    <Setter Property="ContextMenu">
+                        <ContextMenu>
+                            <MenuItem Header="Open" Click="DataGridRow_Open_Click"/>
+                            <MenuItem Header="Open in new tab" Click="DataGridRow_OpenInNewTab_Click"/>
+                        </ContextMenu>
+                    </Setter>
+                </Style>
+            </DataGrid.Styles>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Location" Binding="{Binding Location}" Width="Auto" />
                 <DataGridTextColumn Header="Text" Binding="{Binding Text}" Width="Auto" />
