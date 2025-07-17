@@ -48,11 +48,29 @@
                           SelectedItem="{Binding TabSelected}"
                           SelectedIndex="{Binding TabSelectedIndex}"
                           PointerReleased="TabControl_PointerReleased"
-                          SelectionChanged="TabControl_SelectionChanged">
+                          SelectionChanged="TabControl_SelectionChanged"
+                          Background="Transparent">
+                    <TabStrip.Resources>
+                        <h:TabStripItemDropHandler x:Key="TabStripItemDropHandler" />
+                    </TabStrip.Resources>
+                    <Interaction.Behaviors>
+                        <ContextDropBehavior Handler="{StaticResource TabStripItemDropHandler}" />
+                    </Interaction.Behaviors>
+                    <TabStrip.Styles>
+                        <Style Selector="TabStripItem">
+                            <Setter Property="(Interaction.Behaviors)">
+                                <BehaviorCollectionTemplate>
+                                    <BehaviorCollection>
+                                        <ContextDragBehavior />
+                                    </BehaviorCollection>
+                                </BehaviorCollectionTemplate>
+                            </Setter>
+                        </Style>
+                    </TabStrip.Styles>
                     <TabStrip.ItemTemplate>
                         <DataTemplate DataType="v:TabItemViewModel">
                             <StackPanel Orientation="Horizontal">
-                                <ContentControl Content="{Binding Content}" Classes="TabItemContentControl">
+                                <ContentControl Content="{Binding Content}" Classes="TabItemContentControl" IsHitTestVisible="False">
                                     <ContentControl.DataTemplates>
                                         <DataTemplate DataType="v:DescriptionViewModel">
                                             <TextBlock Text="{Binding Heading}"/>
