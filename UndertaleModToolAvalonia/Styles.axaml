@@ -174,6 +174,11 @@
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="VerticalAlignment" Value="Stretch" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
+
+        <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
     </Style>
 
     <Style Selector="Window.MessageWindow">
@@ -189,6 +194,15 @@
         <Setter Property="Margin" Value="0,0,0,20" />
         <Setter Property="MinWidth" Value="75" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Window.LoaderWindow">
+        <Setter Property="Padding" Value="8" />
+
+        <Style Selector="^ ProgressBar#LoadingProgressBar">
+            <Setter Property="Margin" Value="0,8,0,0" />
+            <Setter Property="MinHeight" Value="16" />
+        </Style>
     </Style>
 
     <Style Selector="Window.SettingsWindow">

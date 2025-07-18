@@ -24,8 +24,9 @@ public partial class MainView : UserControl
                 vm.OpenFileDialog = OpenFileDialog;
                 vm.SaveFileDialog = SaveFileDialog;
                 vm.OpenFolderDialog = OpenFolderDialog;
-                vm.MessageDialog = MessageDialog;
                 vm.LaunchUriAsync = LaunchUriAsync;
+                vm.MessageDialog = MessageDialog;
+                vm.LoaderOpen = LoaderOpen;
                 vm.SettingsDialog = SettingsDialog;
                 vm.SearchInCodeOpen = SearchInCodeOpen;
             }
@@ -68,6 +69,15 @@ public partial class MainView : UserControl
     {
         Window window = this.FindLogicalAncestorOfType<Window>() ?? throw new InvalidOperationException();
         return await new MessageWindow(message, title, ok, yes, no, cancel).ShowDialog<MessageWindow.Result>(window);
+    }
+
+    public LoaderWindow LoaderOpen()
+    {
+        // TODO: Replace LoaderWindow with an interface
+        Window window = this.FindLogicalAncestorOfType<Window>() ?? throw new InvalidOperationException();
+        LoaderWindow loaderWindow = new();
+        loaderWindow.Show(window);
+        return loaderWindow;
     }
 
     public async Task SettingsDialog()

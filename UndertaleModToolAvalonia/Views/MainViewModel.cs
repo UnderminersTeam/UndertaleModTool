@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
 using UndertaleModLib.Models;
@@ -30,6 +31,7 @@ public partial class MainViewModel
     public delegate Task<MessageWindow.Result> MessageDialogDelegate(string message, string? title = null, bool ok = true, bool yes = false, bool no = false, bool cancel = false);
     public MessageDialogDelegate? MessageDialog;
 
+    public Func<LoaderWindow>? LoaderOpen;
     public Func<Task>? SettingsDialog;
     public Action? SearchInCodeOpen;
 
@@ -47,6 +49,9 @@ public partial class MainViewModel
         Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?.?.?.?" +
         $"{(Data?.GeneralInfo is not null ? " - " + Data.GeneralInfo.ToString() : "")}" +
         $"{(DataPath is not null ? " [" + DataPath + "]" : "")}";
+
+    [Notify]
+    private bool _IsEnabled = true;
 
     // Data
     [Notify]
@@ -148,17 +153,39 @@ public partial class MainViewModel
 
     public async Task<bool> LoadData(Stream stream)
     {
+        IsEnabled = false;
+
+        LoaderWindow w = LoaderOpen!();
+        w.SetMessage("Opening data file...");
+
         try
         {
-            UndertaleData data = UndertaleIO.Read(stream,
+            List<string> warnings = [];
+            bool hadImportantWarnings = false;
+
+            UndertaleData data = await Task.Run(() => UndertaleIO.Read(stream,
                 (string warning, bool isImportant) =>
                 {
-                    Debug.WriteLine($"Data.Read warning: {(isImportant ? "(important) " : "")}{warning}");
+                    warnings.Add(warning);
+                    if (isImportant)
+                    {
+                        hadImportantWarnings = true;
+                    }
                 },
                 (string message) =>
                 {
-                    Debug.WriteLine($"Data.Read message: {message}");
-                });
+                    Dispatcher.UIThread.Post(() => w.SetMessage($"Opening data file... {message}"));
+                })
+            );
+
+            if (warnings.Count > 0)
+            {
+                await ShowMessageDialog($"Warnings occurred when loading the data file:\n\n" +
+                    $"{(hadImportantWarnings ? "Data loss will likely occur when trying to save.\n" : "")}" +
+                    $"{String.Join("\n", warnings)}");
+            }
+
+            // TODO: Add other checks for possible stuff.
 
             SetData(data);
 
@@ -170,6 +197,40 @@ public partial class MainViewModel
 
             return false;
         }
+        finally
+        {
+            IsEnabled = true;
+            w.Close();
+        }
+    }
+
+    public async Task<bool> SaveData(Stream stream)
+    {
+        IsEnabled = false;
+
+        LoaderWindow w = LoaderOpen!();
+        w.SetMessage("Saving data file...");
+
+        try
+        {
+            await Task.Run(() => UndertaleIO.Write(stream, Data, message =>
+            {
+                Dispatcher.UIThread.Post(() => w.SetMessage($"Saving data file... {message}"));
+            }));
+
+            return true;
+        }
+        catch (Exception e)
+        {
+            await ShowMessageDialog($"Error saving data file: {e.Message}");
+        }
+        finally
+        {
+            IsEnabled = true;
+            w.Close();
+        }
+
+        return false;
     }
 
     public void CloseData()
@@ -253,10 +314,7 @@ public partial class MainViewModel
 
         using Stream stream = await file.OpenWriteAsync();
 
-        UndertaleIO.Write(stream, Data, message =>
-        {
-            Debug.WriteLine($"Data.Write message: {message}");
-        });
+        await SaveData(stream);
     }
 
     public async void FileSettings()

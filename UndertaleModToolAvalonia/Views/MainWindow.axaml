@@ -8,7 +8,8 @@
         x:Class="UndertaleModToolAvalonia.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         x:DataType="v:MainViewModel"
-        Title="{Binding Title}">
+        Title="{Binding Title}"
+        IsEnabled="{Binding IsEnabled}">
     <NativeMenu.Menu>
         <NativeMenu>
             <NativeMenuItem Header="_File">
