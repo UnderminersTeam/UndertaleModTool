@@ -151,12 +151,22 @@ public partial class MainViewModel
         UpdateVersion();
     }
 
+    public Task<bool> NewData()
+    {
+        CloseData();
+
+        SetData(UndertaleData.CreateNew());
+        DataPath = null;
+
+        return Task.FromResult(true);
+    }
+
     public async Task<bool> LoadData(Stream stream)
     {
         IsEnabled = false;
 
         LoaderWindow w = LoaderOpen!();
-        w.SetMessage("Opening data file...");
+        w.SetText("Opening data file...");
 
         try
         {
@@ -174,7 +184,7 @@ public partial class MainViewModel
                 },
                 (string message) =>
                 {
-                    Dispatcher.UIThread.Post(() => w.SetMessage($"Opening data file... {message}"));
+                    Dispatcher.UIThread.Post(() => w.SetText($"Opening data file... {message}"));
                 })
             );
 
@@ -209,13 +219,13 @@ public partial class MainViewModel
         IsEnabled = false;
 
         LoaderWindow w = LoaderOpen!();
-        w.SetMessage("Saving data file...");
+        w.SetText("Saving data file...");
 
         try
         {
             await Task.Run(() => UndertaleIO.Write(stream, Data, message =>
             {
-                Dispatcher.UIThread.Post(() => w.SetMessage($"Saving data file... {message}"));
+                Dispatcher.UIThread.Post(() => w.SetText($"Saving data file... {message}"));
             }));
 
             return true;
@@ -268,12 +278,9 @@ public partial class MainViewModel
     }
 
     // Menus
-    public void FileNew()
+    public async void FileNew()
     {
-        CloseData();
-
-        SetData(UndertaleData.CreateNew());
-        DataPath = null;
+        await NewData();
     }
 
     public async void FileOpen()

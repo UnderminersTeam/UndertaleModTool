@@ -1,9 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,11 +33,11 @@ public class Scripting
 
     public async Task<object?> RunScript(string text, string? filePath = null)
     {
-        ScriptGlobals scripting = new(this, filePath);
-
         try
         {
-            ScriptState<object> state = await CSharpScript.RunAsync(text, ScriptOptions.Default
+            MainVM.IsEnabled = false;
+
+            Script<object?> script = CSharpScript.Create(text, ScriptOptions.Default
                 .AddImports(
                     "System",
                     "System.Collections.Generic",
@@ -51,21 +56,39 @@ public class Scripting
                     "UndertaleModLib")
                 .WithFilePath(filePath)
                 .WithFileEncoding(Encoding.Default)
-                .WithEmitDebugInformation(true), scripting, typeof(IScriptInterface));
+                .WithEmitDebugInformation(true),
+                typeof(IScriptInterface));
 
-            return state.ReturnValue;
+            ImmutableArray<Diagnostic> diagnostics = await Task.Run(() => script.Compile());
+
+            IEnumerable<Diagnostic> errors = diagnostics.Where((Diagnostic diagnostic) => diagnostic.Severity == DiagnosticSeverity.Error);
+            if (errors.Any())
+            {
+                string message = String.Join("\n", errors);
+                await MainVM.ShowMessageDialog(message, title: "Script compilation error");
+
+                return null;
+            }
+
+            ScriptGlobals scripting = new(this, filePath);
+
+            try
+            {
+                ScriptState<object?> state = await script.RunAsync(scripting);
+                return state.ReturnValue;
+            }
+            catch (ScriptException e)
+            {
+                await MainVM.ShowMessageDialog(e.Message, title: "Error from script");
+            }
+            catch (Exception e)
+            {
+                await MainVM.ShowMessageDialog(e.ToString(), title: "Script execution error");
+            }
         }
-        catch (CompilationErrorException e)
+        finally
         {
-            await MainVM.ShowMessageDialog($"Error compiling script: {e.Message}");
-        }
-        catch (ScriptException e)
-        {
-            await MainVM.ShowMessageDialog($"Error: {e.Message}");
-        }
-        catch (Exception e)
-        {
-            await MainVM.ShowMessageDialog($"Error in script:\n{e}");
+            MainVM.IsEnabled = true;
         }
 
         return null;
@@ -76,6 +99,8 @@ public class ScriptGlobals : IScriptInterface
 {
     private readonly MainViewModel mainVM;
     private readonly string? scriptPath;
+
+    private LoaderWindow? loaderWindow;
 
     public ScriptGlobals(Scripting scripting, string? scriptPath)
     {
@@ -99,7 +124,7 @@ public class ScriptGlobals : IScriptInterface
 
     public string ScriptErrorMessage => throw new NotImplementedException();
 
-    public string ExePath => throw new NotImplementedException();
+    public string? ExePath => Path.GetDirectoryName(Environment.ProcessPath);
 
     public string ScriptErrorType => throw new NotImplementedException();
 
@@ -107,17 +132,22 @@ public class ScriptGlobals : IScriptInterface
 
     public void AddProgress(int amount)
     {
-        // TODO
+        loaderWindow!.SetValue(loaderWindow!.Value + amount);
     }
 
     public void AddProgressParallel(int amount)
     {
-        // TODO
+        Interlocked.Add(ref loaderWindow!.Value, amount);
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            loaderWindow!.SetValue(loaderWindow!.Value);
+        }, DispatcherPriority.Background);
     }
 
     public void ChangeSelection(object newSelection, bool inNewTab = false)
     {
-        throw new NotImplementedException();
+        // TODO: Implement
     }
 
     public Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int lineNum, string codeLine)>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string>? failedList = null)
@@ -132,57 +162,66 @@ public class ScriptGlobals : IScriptInterface
 
     public void DisableAllSyncBindings()
     {
-        throw new NotImplementedException();
+        // TODO: Implement
     }
 
     public void EnableUI()
     {
-        throw new NotImplementedException();
+        mainVM.IsEnabled = true;
     }
 
     public string GetDecompiledText(string codeName, GlobalDecompileContext? context = null, IDecompileSettings? settings = null)
     {
-        throw new NotImplementedException();
+        return GetDecompiledText(mainVM.Data!.Code.ByName(codeName), context, settings);
     }
 
     public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext? context = null, IDecompileSettings? settings = null)
     {
-        throw new NotImplementedException();
+        context ??= new(mainVM.Data);
+        // TODO: Decompiler settings
+
+        return new Underanalyzer.Decompiler.DecompileContext(context, code, settings).DecompileToString();
     }
 
     public string GetDisassemblyText(string codeName)
     {
-        throw new NotImplementedException();
+        return GetDisassemblyText(mainVM.Data!.Code.ByName(codeName));
     }
 
     public string GetDisassemblyText(UndertaleCode code)
     {
-        throw new NotImplementedException();
+        return code.Disassemble(mainVM.Data!.Variables, mainVM.Data!.CodeLocals?.For(code));
     }
 
     public int GetProgress()
     {
-        throw new NotImplementedException();
+        return loaderWindow!.Value;
     }
 
     public void HideProgressBar()
     {
-        // TODO
+        loaderWindow?.Close();
+        loaderWindow = null;
     }
 
     public void IncrementProgress()
     {
-        // TODO
+        loaderWindow!.SetValue(loaderWindow!.Value + 1);
     }
 
     public void IncrementProgressParallel()
     {
-        // TODO
+        Interlocked.Increment(ref loaderWindow!.Value);
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            loaderWindow!.SetValue(loaderWindow!.Value);
+        }, DispatcherPriority.Background);
     }
 
     public void InitializeScriptDialog()
     {
-        // TODO
+        // TODO: Implement
     }
 
     public bool LintUMTScript(string path)
@@ -192,7 +231,7 @@ public class ScriptGlobals : IScriptInterface
 
     public bool MakeNewDataFile()
     {
-        throw new NotImplementedException();
+        return mainVM.NewData().Result;
     }
 
     public string? PromptChooseDirectory()
@@ -208,14 +247,45 @@ public class ScriptGlobals : IScriptInterface
         return folders[0].TryGetLocalPath();
     }
 
-    public string PromptLoadFile(string defaultExt, string filter)
+    public string? PromptLoadFile(string? defaultExt, string? filter)
     {
-        throw new NotImplementedException();
+        // TODO: filter
+        var files = Task.Run(() => mainVM.OpenFileDialog!(new FilePickerOpenOptions()
+        {
+            Title = "Load file",
+            FileTypeFilter = [
+                new FilePickerFileType("All files")
+                {
+                    Patterns = ["*"],
+                },
+            ],
+        })).Result;
+
+        if (files.Count != 1)
+            return null;
+
+        return files[0].TryGetLocalPath();
     }
 
-    public string PromptSaveFile(string defaultExt, string filter)
+    public string? PromptSaveFile(string defaultExt, string filter)
     {
-        throw new NotImplementedException();
+        // TODO: filter
+        var file = Task.Run(() => mainVM.SaveFileDialog!(new FilePickerSaveOptions()
+        {
+            Title = "Save file",
+            FileTypeChoices = [
+                new FilePickerFileType("All files")
+                {
+                    Patterns = ["*"],
+                },
+            ],
+            DefaultExtension = defaultExt,
+        })).Result;
+
+        if (file is null)
+            return null;
+        
+        return file.TryGetLocalPath();
     }
 
     public bool RunUMTScript(string path)
@@ -245,7 +315,7 @@ public class ScriptGlobals : IScriptInterface
 
     public void ScriptOpenURL(string url)
     {
-        throw new NotImplementedException();
+        mainVM.LaunchUriAsync!(new(url)).Wait();
     }
 
     public bool ScriptQuestion(string message)
@@ -260,27 +330,31 @@ public class ScriptGlobals : IScriptInterface
 
     public void SetFinishedMessage(bool isFinishedMessageEnabled)
     {
-        throw new NotImplementedException();
+        // TODO: Implement
     }
 
     public void SetProgress(int value)
     {
-        // TODO
+        loaderWindow!.SetValue(value);
     }
 
     public void SetProgressBar(string message, string status, double progressValue, double maxValue)
     {
-        // TODO
+        loaderWindow ??= mainVM.LoaderOpen!();
+        loaderWindow.SetMessage(message);
+        loaderWindow.SetStatus(status);
+        loaderWindow.SetValue((int)progressValue);
+        loaderWindow.SetMaximum((int)maxValue);
     }
 
     public void SetProgressBar()
     {
-        // TODO
+        loaderWindow ??= mainVM.LoaderOpen!();
     }
 
     public void SetUMTConsoleText(string message)
     {
-        throw new NotImplementedException();
+        mainVM.CommandTextBoxText = message;
     }
 
     public string SimpleTextInput(string title, string label, string defaultValue, bool allowMultiline, bool showDialog = true)
@@ -295,32 +369,32 @@ public class ScriptGlobals : IScriptInterface
 
     public void StartProgressBarUpdater()
     {
-        // TODO
+        // TODO: Implement
     }
 
     public Task StopProgressBarUpdater()
     {
-        // TODO
+        // TODO: Implement
         return Task.CompletedTask;
     }
 
     public void SyncBinding(string resourceType, bool enable)
     {
-        throw new NotImplementedException();
+        // TODO: Implement
     }
 
     public void UpdateProgressBar(string message, string status, double progressValue, double maxValue)
     {
-        // TODO
+        SetProgressBar(message, status, progressValue, maxValue);
     }
 
     public void UpdateProgressStatus(string status)
     {
-        // TODO
+        loaderWindow!.SetTextToMessageAndStatus(status: status);
     }
 
     public void UpdateProgressValue(double progressValue)
     {
-        // TODO
+        loaderWindow!.SetValue((int)progressValue);
     }
 }
