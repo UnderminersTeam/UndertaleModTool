@@ -175,7 +175,7 @@ public partial class DataTreeView : UserControl
         }
     }
 
-    public void ListMenu_Add_Click(object? sender, RoutedEventArgs e)
+    public void ContextMenu_Add_Click(object? sender, RoutedEventArgs e)
     {
         TreeItemViewModel? treeItem = GetItem(e.Source);
         if (treeItem is not null && mainVM.Data is not null)
@@ -214,7 +214,7 @@ public partial class DataTreeView : UserControl
         }
     }
 
-    public void ResourceMenu_Open_Click(object? sender, RoutedEventArgs e)
+    public void ContextMenu_Open_Click(object? sender, RoutedEventArgs e)
     {
         TreeItemViewModel? treeItem = GetItem(e.Source);
         if (treeItem is not null && mainVM.Data is not null)
@@ -223,12 +223,51 @@ public partial class DataTreeView : UserControl
         }
     }
 
-    public void ResourceMenu_OpenInNewTab_Click(object? sender, RoutedEventArgs e)
+    public void ContextMenu_OpenInNewTab_Click(object? sender, RoutedEventArgs e)
     {
         TreeItemViewModel? treeItem = GetItem(e.Source);
         if (treeItem is not null && mainVM.Data is not null)
         {
             mainVM.TabOpen(treeItem, inNewTab: true);
+        }
+    }
+
+    public async void ContextMenu_CopyName_Click(object? sender, RoutedEventArgs e)
+    {
+        TreeItemViewModel? treeItem = GetItem(e.Source);
+        if (treeItem is not null && mainVM.Data is not null)
+        {
+            string? name = treeItem.Value switch
+            {
+                UndertaleNamedResource namedResource => namedResource.Name.Content,
+                UndertaleString _string => _string.Content,
+                _ => null,
+            };
+
+            if (name is not null)
+            {
+                TopLevel topLevel = TopLevel.GetTopLevel(this)!;
+                await topLevel.Clipboard!.SetTextAsync(name);
+            }
+        }
+    }
+
+    public async void ContextMenu_Remove_Click(object? sender, RoutedEventArgs e)
+    {
+        TreeItemViewModel? treeItem = GetItem(e.Source);
+        if (treeItem is not null && mainVM.Data is not null)
+        {
+            // TODO: Maybe do something about all references to this.
+            UndertaleResource resource = (treeItem.Value as UndertaleResource)!;
+
+            if (await mainVM.ShowMessageDialog($"Delete {resource}?\nNote that the code often references objects by ID, " +
+                $"so this operation is likely to break stuff because other items will shift up!",
+                ok: false, yes: true, no: true) == MessageWindow.Result.Yes)
+            {
+                mainVM.Data[resource.GetType()].Remove(resource);
+
+                // TODO: Close tabs, remove histories
+            }
         }
     }
 }

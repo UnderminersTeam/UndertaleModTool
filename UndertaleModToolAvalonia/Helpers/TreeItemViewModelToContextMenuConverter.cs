@@ -10,6 +10,7 @@ namespace UndertaleModToolAvalonia.Helpers;
 public class TreeItemViewModelToContextMenuConverter : IValueConverter
 {
     public ContextMenu? ListMenu { get; set; }
+    public ContextMenu? SingleMenu { get; set; }
     public ContextMenu? ResourceMenu { get; set; }
 
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
@@ -21,7 +22,7 @@ public class TreeItemViewModelToContextMenuConverter : IValueConverter
             if (treeItem.Value is UndertaleResource)
                 return ResourceMenu;
             if (treeItem.Value is "GeneralInfo" or "GlobalInitScripts" or "GameEndScripts")
-                return ResourceMenu; // TODO: Specific menu for those
+                return SingleMenu;
         }
         return null;
     }

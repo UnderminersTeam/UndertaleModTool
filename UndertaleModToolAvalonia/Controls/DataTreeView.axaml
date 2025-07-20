@@ -11,15 +11,22 @@
              x:Class="UndertaleModToolAvalonia.Controls.DataTreeView">
     <UserControl.Resources>
         <ContextMenu x:Key="ListMenu">
-            <MenuItem Header="_Add" Click="ListMenu_Add_Click"/>
+            <MenuItem Header="_Add" Click="ContextMenu_Add_Click"/>
+        </ContextMenu>
+        <ContextMenu x:Key="SingleMenu">
+            <MenuItem Header="_Open" Click="ContextMenu_Open_Click"/>
+            <MenuItem Header="Open in _new tab" Click="ContextMenu_OpenInNewTab_Click"/>
         </ContextMenu>
         <ContextMenu x:Key="ResourceMenu">
-            <MenuItem Header="_Open" Click="ResourceMenu_Open_Click"/>
-            <MenuItem Header="Open in _new tab" Click="ResourceMenu_OpenInNewTab_Click"/>
+            <MenuItem Header="_Open" Click="ContextMenu_Open_Click"/>
+            <MenuItem Header="Open in _new tab" Click="ContextMenu_OpenInNewTab_Click"/>
+            <MenuItem Header="_Copy name" Click="ContextMenu_CopyName_Click"/>
+            <MenuItem Header="_Remove" Click="ContextMenu_Remove_Click"/>
         </ContextMenu>
         <h:LevelToWidthConverter x:Key="LevelToWidthConverter" />
         <h:TreeItemViewModelToContextMenuConverter x:Key="TreeItemViewModelToContextMenuConverter"
                                                    ListMenu="{StaticResource ListMenu}"
+                                                   SingleMenu="{StaticResource SingleMenu}"
                                                    ResourceMenu="{StaticResource ResourceMenu}"/>
     </UserControl.Resources>
     <ContentControl DataContext="{Binding $parent[c:DataTreeView]}">
