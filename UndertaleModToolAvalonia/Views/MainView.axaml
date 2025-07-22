@@ -28,9 +28,10 @@
             <Label Grid.Column="1" Content="{Binding TabSelectedResourceIdString}"
                    ToolTip.Tip="This is an ID (index) of the currently open asset, item, or object. It starts from 0."/>
         </Grid>
+        
         <Grid ColumnDefinitions="1*,Auto,3*">
-            <Grid Grid.Column="0" x:Name="LeftPanel" RowDefinitions="Auto,1*">
-                <StackPanel Spacing="5">
+            <Grid Grid.Column="0" Name="LeftPanel" RowDefinitions="Auto,1*">
+                <StackPanel Grid.Row="0">
                     <StackPanel Orientation="Horizontal">
                         <Button Command="{Binding TabGoBack}" IsEnabled="{Binding TabSelected.CanGoBack, FallbackValue=False}">←</Button>
                         <Button Command="{Binding TabGoForward}" IsEnabled="{Binding TabSelected.CanGoForward, FallbackValue=False}">→</Button>
@@ -64,6 +65,11 @@
                                         <ContextDragBehavior />
                                     </BehaviorCollection>
                                 </BehaviorCollectionTemplate>
+                            </Setter>
+                            <Setter Property="ContextMenu">
+                                <ContextMenu>
+                                    <MenuItem Header="Close tab" Click="TabMenu_Close_Click"/>
+                                </ContextMenu>
                             </Setter>
                         </Style>
                     </TabStrip.Styles>

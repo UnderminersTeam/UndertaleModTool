@@ -9,6 +9,12 @@
     <Style Selector="Window">
         <Setter Property="FontSize" Value="12" />
     </Style>
+    <Style Selector="PopupRoot">
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+    <Style Selector="ContextMenu">
+        <Setter Property="FontSize" Value="12" />
+    </Style>
 
     <Style Selector="Menu">
         <Setter Property="Height" Value="24" />
@@ -30,6 +36,10 @@
 
     <Style Selector="Label">
         <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style Selector="TextBox">
+        <Setter Property="VerticalAlignment" Value="Top" />
     </Style>
 
     <Style Selector="ListBoxItem">
@@ -141,7 +151,15 @@
 
     <!-- Custom -->
     <Style Selector="Grid#LeftPanel">
-        <Setter Property="Margin" Value="5" />
+        <Setter Property="Margin" Value="4" />
+    </Style>
+
+    <Style Selector="TextBox#FilterTextBox">
+        <Setter Property="Margin" Value="0,4,0,0" />
+    </Style>
+
+    <Style Selector=":is(Control)#DataTreeView">
+        <Setter Property="Margin" Value="0,4,0,0" />
     </Style>
 
     <Style Selector="ContentControl.ListBoxContentControl">
@@ -182,16 +200,16 @@
     </Style>
 
     <Style Selector="Window.MessageWindow">
-        <Setter Property="Padding" Value="20,20,20,0" />
+        <Setter Property="Padding" Value="16,16,16,0" />
     </Style>
     <Style Selector="Window.MessageWindow TextBlock#MessageText">
-        <Setter Property="Margin" Value="0,0,0,20" />
+        <Setter Property="Margin" Value="0,0,0,16" />
     </Style>
     <Style Selector="Window.MessageWindow StackPanel#Buttons">
-        <Setter Property="Spacing" Value="20"/>
+        <Setter Property="Spacing" Value="16"/>
     </Style>
     <Style Selector="Window.MessageWindow StackPanel#Buttons > Button">
-        <Setter Property="Margin" Value="0,0,0,20" />
+        <Setter Property="Margin" Value="0,0,0,16" />
         <Setter Property="MinWidth" Value="75" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
     </Style>
@@ -206,7 +224,7 @@
     </Style>
 
     <Style Selector="Window.SettingsWindow">
-        <Setter Property="Padding" Value="12" />
+        <Setter Property="Padding" Value="8" />
     </Style>
 
     <Style Selector="Window.SearchInCodeWindow">

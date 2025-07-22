@@ -136,6 +136,21 @@ public partial class MainView : UserControl
         }
     }
 
+    private void TabMenu_Close_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainViewModel vm)
+        {
+            if (e.Source is Control control)
+            {
+                TabStripItem? tabItem = control.FindLogicalAncestorOfType<TabStripItem>();
+                if (tabItem is not null && tabItem.DataContext is TabItemViewModel vmTabItem)
+                {
+                    vm.TabClose(vmTabItem);
+                }
+            }
+        }
+    }
+
     private async void CommandTextBox_KeyDown(object? sender, KeyEventArgs e)
     {
         if (DataContext is MainViewModel vm)

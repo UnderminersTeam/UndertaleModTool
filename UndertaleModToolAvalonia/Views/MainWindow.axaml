@@ -17,6 +17,7 @@
                     <NativeMenuItem Header="_New" Command="{Binding FileNew}" Gesture="Ctrl+N"/>
                     <NativeMenuItem Header="_Open" Command="{Binding FileOpen}" Gesture="Ctrl+O"/>
                     <NativeMenuItem Header="_Save" Command="{Binding FileSave}" Gesture="Ctrl+S"/>
+                    <NativeMenuItem Header="_Close" Command="{Binding FileClose}"/>
                     <NativeMenuItemSeparator Header="-" />
                     <NativeMenuItem Header="_Temp run game" IsEnabled="False"/>
                     <NativeMenuItem Header="Run game under GMS _debugger" IsEnabled="False"/>
@@ -25,7 +26,7 @@
                     <NativeMenuItem Header="Generate o_ffset map" IsEnabled="False"/>
                     <NativeMenuItemSeparator Header="-" />
                     <NativeMenuItem Header="S_ettings" Command="{Binding FileSettings}"/>
-                    <NativeMenuItem Header="_Close" Command="{Binding FileClose}"/>
+                    <NativeMenuItem Header="_Exit" Command="{Binding FileExit}"/>
                 </NativeMenu>
             </NativeMenuItem>
             <NativeMenuItem Header="_Import" IsEnabled="False">

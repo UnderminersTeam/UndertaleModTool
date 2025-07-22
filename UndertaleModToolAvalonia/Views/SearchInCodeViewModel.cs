@@ -45,24 +45,27 @@ public partial class SearchInCodeViewModel
         MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
     }
 
-    public async void Search()
+    public void Search()
     {
         if (MainVM.Data is null)
         {
-            await MainVM.ShowMessageDialog("No data file loaded.");
+            StatusBarText = "Error: No data file loaded.";
             return;
         }
 
         if (MainVM.Data.IsYYC())
         {
-            await MainVM.ShowMessageDialog("Can't search code in YYC game, there's no code to search.");
+            StatusBarText = "Error: Can't search code in YYC game, there's no code to search.";
             return;
         }
 
         searchText = SearchText.Replace("\r\n", "\n");
 
         if (String.IsNullOrEmpty(searchText))
+        {
+            StatusBarText = "Error: No text to search.";
             return;
+        }
 
         if (IsRegexSearch)
         {
@@ -72,7 +75,7 @@ public partial class SearchInCodeViewModel
             }
             catch (ArgumentException e)
             {
-                await MainVM.ShowMessageDialog($"Invalid regex: {e.Message}");
+                StatusBarText = $"Error: Invalid regex ({e.Message})";
                 return;
             }
         }

@@ -59,9 +59,6 @@ public partial class UndertaleCodeView : UserControl
 
     public void GoToLocation((UndertaleCodeViewModel.Tab tab, int line) location)
     {
-        Window window = this.FindLogicalAncestorOfType<Window>() ?? throw new InvalidOperationException();
-        window.Activate();
-
         if (DataContext is UndertaleCodeViewModel vm)
         {
             vm.SelectedTab = location.tab;

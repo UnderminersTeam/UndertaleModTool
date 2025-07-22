@@ -3,7 +3,6 @@ using Avalonia.Controls;
 
 namespace UndertaleModToolAvalonia.Controls;
 
-// TODO: Add results
 public partial class MessageWindow : Window
 {
     public string Message { get; set; } = "Message.";
@@ -68,5 +67,11 @@ public partial class MessageWindow : Window
     public void CancelClick()
     {
         Close(Result.Cancel);
+    }
+
+    public async void Copy()
+    {
+        TopLevel topLevel = TopLevel.GetTopLevel(this)!;
+        await topLevel.Clipboard!.SetTextAsync(Message);
     }
 }

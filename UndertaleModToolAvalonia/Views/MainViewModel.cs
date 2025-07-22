@@ -324,12 +324,17 @@ public partial class MainViewModel
         await SaveData(stream);
     }
 
+    public void FileClose()
+    {
+        CloseData();
+    }
+
     public async void FileSettings()
     {
         await SettingsDialog!();
     }
 
-    public void FileClose()
+    public void FileExit()
     {
         if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
@@ -382,7 +387,7 @@ public partial class MainViewModel
 
     public async void HelpAbout()
     {
-        await ShowMessageDialog($"UndertaleModTool v{Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?.?.?.?"}" +
+        await ShowMessageDialog($"UndertaleModTool v{Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?.?.?.?"} " +
             $"by the Underminers team\nLicensed under the GNU General Public License Version 3.", title: "About");
     }
 

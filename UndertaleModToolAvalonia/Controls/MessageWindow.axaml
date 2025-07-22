@@ -14,6 +14,7 @@
         Classes="MessageWindow">
     <Window.KeyBindings>
         <KeyBinding Command="{Binding Close}" Gesture="Escape" />
+        <KeyBinding Command="{Binding Copy}" Gesture="Ctrl+C" />
     </Window.KeyBindings>
     <Grid RowDefinitions="1*,Auto">
         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
