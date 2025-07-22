@@ -2133,19 +2133,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                         reader.ReadUndertaleObject(TextItems);
                 }
 
-                AllAssets.Clear();
-                if (LegacyTiles != null)
-                    AllAssets.Add(LegacyTiles);
-                if (Sprites != null)
-                    AllAssets.Add(Sprites);
-                if (Sequences != null)
-                    AllAssets.Add(Sequences);
-                if (NineSlices != null)
-                    AllAssets.Add(NineSlices);
-                if (ParticleSystems != null)
-                    AllAssets.Add(ParticleSystems);
-                if (TextItems != null)
-                    AllAssets.Add(TextItems);
+                InitializeAllAssets();
             }
 
             /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
@@ -2198,6 +2186,23 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 }
 
                 return count;
+            }
+
+            public void InitializeAllAssets()
+            {
+                AllAssets.Clear();
+                if (LegacyTiles != null)
+                    AllAssets.Add(LegacyTiles);
+                if (Sprites != null)
+                    AllAssets.Add(Sprites);
+                if (Sequences != null)
+                    AllAssets.Add(Sequences);
+                if (NineSlices != null)
+                    AllAssets.Add(NineSlices);
+                if (ParticleSystems != null)
+                    AllAssets.Add(ParticleSystems);
+                if (TextItems != null)
+                    AllAssets.Add(TextItems);
             }
 
             /// <inheritdoc/>

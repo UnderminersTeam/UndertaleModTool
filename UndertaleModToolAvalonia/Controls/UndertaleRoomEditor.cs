@@ -324,7 +324,7 @@ public class UndertaleRoomEditor : Control
         {
             foreach (UndertaleRoom.Tile roomTile in roomTiles)
             {
-                if (roomTile.Tpag is null || roomTile.Tpag.TexturePage is null)
+                if (roomTile.Tpag is null || roomTile.Tpag.TexturePage is null || roomTile.Width == 0 || roomTile.Height == 0)
                     return;
                 //TODO: roomTile.TileDepth;
 
