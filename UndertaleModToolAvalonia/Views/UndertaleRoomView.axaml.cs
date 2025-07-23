@@ -202,8 +202,11 @@ public partial class UndertaleRoomView : UserControl
             && treeViewItem.DataContext is UndertaleRoom.Layer { LayerType: UndertaleRoom.LayerType.Assets } layer)
         {
             // TODO: Move to view model
-            // TODO: Create name
-            UndertaleRoom.SequenceInstance sequenceInstance = new();
+            UndertaleRoom.SequenceInstance sequenceInstance = new()
+            {
+                // Uses the same naming scheme as a sprite
+                Name = UndertaleRoom.SpriteInstance.GenerateRandomName(vm.MainVM.Data),
+            };
 
             if (layer.AssetsData.Sequences is not null)
                 layer.AssetsData.Sequences.Add(sequenceInstance);
