@@ -9,6 +9,7 @@
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <Version>0.8.2.0</Version>
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+        <ApplicationIcon>..\UndertaleModToolAvalonia\Assets\Icon.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
