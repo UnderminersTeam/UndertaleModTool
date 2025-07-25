@@ -143,7 +143,6 @@ public class UndertaleRoomEditor : Control
 
         public CustomDrawOperation(UndertaleRoomEditor editor)
         {
-
             this.editor = editor;
         }
 
@@ -189,13 +188,11 @@ public class UndertaleRoomEditor : Control
 
                 if (vm.Room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.IsGMS2))
                 {
-                    // TODO: Layer depth
-                    foreach (UndertaleRoom.Layer layer in vm.Room.Layers.Reverse())
+                    IOrderedEnumerable<UndertaleRoom.Layer> layers = vm.Room.Layers.OrderByDescending(x => x.LayerDepth);
+                    foreach (UndertaleRoom.Layer layer in layers)
                     {
                         if (!layer.IsVisible)
                             continue;
-
-                        // layer.LayerDepth
 
                         switch (layer.LayerType)
                         {
@@ -322,19 +319,22 @@ public class UndertaleRoomEditor : Control
 
         void RenderTiles(SKCanvas canvas, IList<UndertaleRoom.Tile> roomTiles)
         {
-            foreach (UndertaleRoom.Tile roomTile in roomTiles)
+            var orderedRoomTiles = roomTiles.OrderByDescending(x => x.TileDepth);
+            foreach (UndertaleRoom.Tile roomTile in orderedRoomTiles)
             {
-                if (roomTile.Tpag is null || roomTile.Tpag.TexturePage is null || roomTile.Width == 0 || roomTile.Height == 0)
-                    return;
-                //TODO: roomTile.TileDepth;
+                SKImage? image = mainVM.ImageCache.GetCachedImageFromTile(roomTile);
+                if (image is null)
+                    continue;
 
-                SKImage image = mainVM.ImageCache.GetCachedImageFromTile(roomTile);
                 currentUsedImages.Add(image);
 
                 canvas.Save();
-                canvas.Translate(roomTile.Tpag.TargetX, roomTile.Tpag.TargetY);
+                canvas.Translate(roomTile.X, roomTile.Y);
+                canvas.Translate(
+                    -Math.Min(roomTile.SourceX - roomTile.Tpag.TargetX, 0),
+                    -Math.Min(roomTile.SourceY - roomTile.Tpag.TargetY, 0));
                 canvas.Scale(roomTile.ScaleX, roomTile.ScaleY);
-                canvas.DrawImage(image, roomTile.X, roomTile.Y);
+                canvas.DrawImage(image, 0, 0);
                 canvas.Restore();
             }
         }
@@ -353,7 +353,10 @@ public class UndertaleRoomEditor : Control
 
                     if (tileId != 0)
                     {
-                        SKImage image = mainVM.ImageCache.GetCachedImageFromLayerTile(tilesData, tileId);
+                        SKImage? image = mainVM.ImageCache.GetCachedImageFromLayerTile(tilesData, tileId);
+                        if (image is null)
+                            continue;
+
                         currentUsedImages.Add(image);
 
                         canvas.Save();
@@ -409,11 +412,10 @@ public class UndertaleRoomEditor : Control
                 currentUsedImages.Add(image);
 
                 canvas.Save();
-                canvas.Translate(texture.TargetX, texture.TargetY);
                 canvas.Translate(roomGameObject.X, roomGameObject.Y);
                 canvas.RotateDegrees(roomGameObject.OppositeRotation);
                 canvas.Scale(roomGameObject.ScaleX, roomGameObject.ScaleY);
-                canvas.DrawImage(image, -gameObject.Sprite.OriginX, -gameObject.Sprite.OriginY);
+                canvas.DrawImage(image, -gameObject.Sprite.OriginX + texture.TargetX, -gameObject.Sprite.OriginY + texture.TargetY);
                 canvas.Restore();
 
                 // TODO: all other properties

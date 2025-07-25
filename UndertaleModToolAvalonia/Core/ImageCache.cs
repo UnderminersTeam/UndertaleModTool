@@ -92,8 +92,11 @@ public class ImageCache
         return image;
     }
 
-    public SKImage GetCachedImageFromTile(UndertaleRoom.Tile tile)
+    public SKImage? GetCachedImageFromTile(UndertaleRoom.Tile tile)
     {
+        if (tile.Tpag is null || tile.Tpag.TexturePage is null || tile.Width == 0 || tile.Height == 0)
+            return null;
+
         TileImageKey key = new(
             tile.Tpag.TexturePage.TextureData.Image,
             tile.Tpag.SourceX,
@@ -111,15 +114,21 @@ public class ImageCache
 
         if (image is null)
         {
+            // Don't allow tile to exceed texture page item's borders
+            int l = tile.Tpag.SourceX + Math.Max(0, tile.SourceX - tile.Tpag.TargetX);
+            int t = tile.Tpag.SourceY + Math.Max(0, tile.SourceY - tile.Tpag.TargetY);
+            int r = (int)Math.Min(l + tile.Width, tile.Tpag.SourceX + tile.Tpag.SourceWidth);
+            int b = (int)Math.Min(t + tile.Height, tile.Tpag.SourceY + tile.Tpag.SourceHeight);
+
+            if (l >= r || t >= b)
+                return null;
+
             // Assuming source and target are in the same scale.
             image = GetCachedImageFromGMImage(tile.Tpag.TexturePage.TextureData.Image)
-                .Subset(SKRectI.Create(
-                    tile.Tpag.SourceX + tile.SourceX - tile.Tpag.TargetX,
-                    tile.Tpag.SourceY + tile.SourceY - tile.Tpag.TargetY,
-                    (int)tile.Width,
-                    (int)tile.Height));
+                .Subset(new SKRectI(l, t, r, b));
 
-            imageCache[key] = new WeakReference<SKImage>(image);
+            if (image is not null)
+                imageCache[key] = new WeakReference<SKImage>(image);
         }
 
         return image;
@@ -167,5 +176,10 @@ public class ImageCache
         }
 
         return image;
+    }
+
+    public void Clear()
+    {
+        imageCache.Clear();
     }
 }
