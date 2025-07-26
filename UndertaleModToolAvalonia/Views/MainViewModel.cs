@@ -46,7 +46,7 @@ public partial class MainViewModel
 
     // Window
     public string Title => $"UndertaleModToolAvalonia - v" +
-        Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?.?.?.?" +
+        (Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?.?.?.?") +
         $"{(Data?.GeneralInfo is not null ? " - " + Data.GeneralInfo.ToString() : "")}" +
         $"{(DataPath is not null ? " [" + DataPath + "]" : "")}";
 
