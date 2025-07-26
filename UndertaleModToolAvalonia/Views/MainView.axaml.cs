@@ -76,7 +76,7 @@ public partial class MainView : UserControl
         // TODO: Replace LoaderWindow with an interface
         Window window = this.FindLogicalAncestorOfType<Window>() ?? throw new InvalidOperationException();
         LoaderWindow loaderWindow = new();
-        loaderWindow.Show(window);
+        loaderWindow.ShowDelayed(window);
         return loaderWindow;
     }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using AvaloniaEdit.Document;
@@ -38,14 +39,15 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
     public bool GMLOutdated = true;
     public bool ASMOutdated = true;
 
+    LoaderWindow? loaderWindow;
+
     public UndertaleCodeViewModel(UndertaleCode code, IServiceProvider? serviceProvider = null)
     {
         MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
 
         Code = code;
 
-        DecompileToGML().Wait();
-        DecompileToASM().Wait();
+        DecompileAll();
     }
 
     public async Task<bool> DecompileToGML()
@@ -53,12 +55,14 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
         if (Code.ParentEntry is not null)
             return false;
 
+        loaderWindow?.SetText("Decompiling to GML...");
+
         // TODO: Decompiler settings
         GlobalDecompileContext context = new(MainVM.Data);
 
         try
         {
-            GMLTextDocument.Text = new Underanalyzer.Decompiler.DecompileContext(context, Code).DecompileToString();
+            GMLTextDocument.Text = await Task.Run(() => new Underanalyzer.Decompiler.DecompileContext(context, Code).DecompileToString());
             GMLOutdated = false;
         }
         catch (Underanalyzer.Decompiler.DecompilerException e)
@@ -77,10 +81,12 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
         if (Code.ParentEntry is not null)
             return false;
 
+        loaderWindow?.SetText("Compiling from GML...");
+
         CompileGroup group = new(MainVM.Data);
         group.MainThreadAction = Dispatcher.UIThread.Invoke;
         group.QueueCodeReplace(Code, GMLTextDocument.Text);
-        CompileResult result = group.Compile();
+        CompileResult result = await Task.Run(() => group.Compile());
 
         if (!result.Successful)
         {
@@ -101,9 +107,11 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
         if (Code.ParentEntry is not null)
             return false;
 
+        loaderWindow?.SetText("Decompiling from ASM...");
+
         try
         {
-            ASMTextDocument.Text = Code.Disassemble(MainVM.Data!.Variables, MainVM.Data!.CodeLocals?.For(Code));
+            ASMTextDocument.Text = await Task.Run(() => Code.Disassemble(MainVM.Data!.Variables, MainVM.Data!.CodeLocals?.For(Code)));
             ASMOutdated = false;
         }
         catch (Exception e)
@@ -122,9 +130,13 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
         if (Code.ParentEntry is not null)
             return false;
 
+        loaderWindow?.SetText("Compiling from ASM...");
+
         try
         {
-            Code.Replace(Assembler.Assemble(ASMTextDocument.Text, MainVM.Data));
+            string text = ASMTextDocument.Text;
+            List<UndertaleInstruction> instructions = await Task.Run(() => Assembler.Assemble(text, MainVM.Data));
+            Code.Replace(instructions);
         }
         catch (Exception e)
         {
@@ -141,12 +153,32 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
         return true;
     }
 
-    public async void CompileAndDecompileGML()
+    public async void DecompileAll()
     {
-        if (IsCompilingOrDecompiling)
-            return;
+        loaderWindow = MainVM.LoaderOpen!();
 
         IsCompilingOrDecompiling = true;
+        MainVM.IsEnabled = false;
+
+        await DecompileToGML();
+        await DecompileToASM();
+
+        loaderWindow.Close();
+        loaderWindow = null;
+
+        IsCompilingOrDecompiling = false;
+        MainVM.IsEnabled = true;
+    }
+
+    public async void CompileAndDecompileGML()
+    {
+        if (IsCompilingOrDecompiling || !GMLOutdated)
+            return;
+
+        loaderWindow = MainVM.LoaderOpen!();
+
+        IsCompilingOrDecompiling = true;
+        MainVM.IsEnabled = false;
 
         if (await CompileFromGML())
         {
@@ -154,15 +186,22 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
             await DecompileToASM();
         }
 
+        loaderWindow.Close();
+        loaderWindow = null;
+
         IsCompilingOrDecompiling = false;
+        MainVM.IsEnabled = true;
     }
 
     public async void CompileAndDecompileASM()
     {
-        if (IsCompilingOrDecompiling)
+        if (IsCompilingOrDecompiling || !ASMOutdated)
             return;
 
+        loaderWindow = MainVM.LoaderOpen!();
+
         IsCompilingOrDecompiling = true;
+        MainVM.IsEnabled = false;
 
         if (await CompileFromASM())
         {
@@ -170,6 +209,10 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
             await DecompileToASM();
         }
 
+        loaderWindow.Close();
+        loaderWindow = null;
+
         IsCompilingOrDecompiling = false;
+        MainVM.IsEnabled = true;
     }
 }

@@ -15,7 +15,8 @@ public partial class LoaderWindow : Window
     private string? message;
     private string? status;
     private int maximum = -1;
-    
+    bool hasClosed = false;
+
     public LoaderWindow()
     {
         Initialize();
@@ -29,9 +30,22 @@ public partial class LoaderWindow : Window
         {
             if (!e.IsProgrammatic)
                 e.Cancel = true;
+            else
+                hasClosed = true;
         };
     }
 
+    public void ShowDelayed(Window owner)
+    {
+        Task.Delay(100).ContinueWith(_ =>
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                if (!hasClosed)
+                    Show(owner);
+            });
+        });
+    }
 
     public void UpdateText()
     {
