@@ -12,6 +12,36 @@ public partial class UndertaleRoomView : UserControl
     public UndertaleRoomView()
     {
         InitializeComponent();
+
+        DataContextChanged += (_, __) =>
+        {
+            if (DataContext is UndertaleRoomViewModel vm)
+            {
+                vm.PropertyChanged += (_, e) =>
+                {
+                    if (e.PropertyName == nameof(UndertaleRoomViewModel.RoomItemsSelectedItem))
+                    {
+                        var item = vm.RoomItemsSelectedItem;
+                        if (item is not null)
+                        {
+                            // TODO: This doesn't work if it has never been expanded before
+                            TreeViewItem? treeViewItem = (RoomItemsTreeView.TreeContainerFromItem(item) as TreeViewItem);
+                            if (treeViewItem is null)
+                                return;
+
+                            TreeViewItem currentViewItem = treeViewItem;
+                            while (currentViewItem.Parent is TreeViewItem parentTreeViewItem)
+                            {
+                                parentTreeViewItem.IsExpanded = true;
+                                currentViewItem = parentTreeViewItem;
+                            }
+
+                            treeViewItem.BringIntoView();
+                        }
+                    }
+                };
+            }
+        };
     }
 
     private void ContextMenu_AddGameObjectInstance_GameObjectList_Click(object? sender, RoutedEventArgs e)

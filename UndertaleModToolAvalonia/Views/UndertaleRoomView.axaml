@@ -79,7 +79,7 @@
         <Grid Grid.Row="0" RowDefinitions="1*" ColumnDefinitions="1*,Auto,1*">
             <Grid Grid.Column="0">
                 <!-- TreeView -->
-                <TreeView SelectedItem="{Binding RoomItemsSelectedItem}">
+                <TreeView Name="RoomItemsTreeView" SelectedItem="{Binding RoomItemsSelectedItem}">
                     <TreeView.Styles>
                         <Style Selector="TreeViewItem /template/ StackPanel > Border#PART_LayoutRoot.TreeViewItemLayoutRoot">
                             <Setter Property="ContextMenu" Value="{Binding ., Converter={StaticResource RoomItemToContextMenuConverter}}"/>
