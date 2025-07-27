@@ -2012,7 +2012,7 @@ public class UndertaleRoom : UndertaleNamedResource, IProjectAsset, INotifyPrope
 
             public bool Visible { get; set; } = true;
             public bool Foreground { get; set; }
-            public UndertaleSprite Sprite { get => _sprite.Resource; set { _sprite.Resource = value; OnPropertyChanged(); ParentLayer.ParentRoom.UpdateBGColorLayer(); } }
+            public UndertaleSprite Sprite { get => _sprite.Resource; set { _sprite.Resource = value; OnPropertyChanged(); ParentLayer?.ParentRoom?.UpdateBGColorLayer(); } }
             public bool TiledHorizontally { get => _tiledHorizontally; set { _tiledHorizontally = value; OnPropertyChanged(); } }
             public bool TiledVertically { get => _tiledVertically; set { _tiledVertically = value; OnPropertyChanged(); } }
             public bool Stretch { get => _stretch; set { _stretch = value; OnPropertyChanged(); } }
