@@ -287,15 +287,10 @@ internal sealed class SerializableSprite : ISerializableTextureProjectAsset
             };
             projectContext.Data.Sprites.Add(_dataAsset);
         }
-    }
 
-    /// <inheritdoc/>
-    public IProjectAsset Import(ProjectContext projectContext)
-    {
         UndertaleSprite spr = _dataAsset;
 
         // Update all main properties
-        DataName = spr.Name.Content;
         spr.Width = Width;
         spr.Height = Height;
         spr.MarginLeft = MarginLeft;
@@ -309,6 +304,12 @@ internal sealed class SerializableSprite : ISerializableTextureProjectAsset
         spr.SepMasks = (UndertaleSprite.SepMaskType)CollisionKind;
         spr.OriginX = OriginX;
         spr.OriginY = OriginY;
+    }
+
+    /// <inheritdoc/>
+    public IProjectAsset Import(ProjectContext projectContext)
+    {
+        UndertaleSprite spr = _dataAsset;
 
         // Update extra properties, if they exist
         if (!Extra.Equals(default(ExtraProperties)))
