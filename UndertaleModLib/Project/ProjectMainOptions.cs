@@ -30,6 +30,11 @@ internal sealed class ProjectMainOptions
     public PathList AssetsDataFilePath { get; set; } = new();
 
     /// <summary>
+    /// Whether loading/saving the project's data files should raise an error when any warnings occur.
+    /// </summary>
+    public bool ErrorOnWarnings { get; set; } = true;
+
+    /// <summary>
     /// List of root-level directory names to exclude from the project.
     /// </summary>
     public List<string> ExcludeDirectories { get; set; } = [];
@@ -124,6 +129,11 @@ internal sealed class ProjectMainOptions
         /// </summary>
         [JsonConverter(typeof(PathPairConverter))]
         public record struct PathPair(string Source, string Destination);
+
+        /// <summary>
+        /// Whether the path list is empty. 
+        /// </summary>
+        public readonly bool Empty => Paths.Count == 0;
     }
 
     /// <summary>

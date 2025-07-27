@@ -256,12 +256,20 @@ public sealed class ProjectContext
 
         if (currentData is not null)
         {
+            // Use already-loaded assets data file, if provided
             Data = currentData;
         }
-        else
+        else if (TryFindFileFromPathList(_mainOptions.AssetsDataFilePath, out string loadDataPath, out string saveDataPath))
         {
-            // TODO: check options for data file that needs to be loaded/saved, and if one is found,
-            // set LoadDataPath/SaveDataPath, as well as adjust LoadDirectory/SaveDirectory (e.g. for sub-projects)
+            // No data currently loaded - adjust load/save data file paths if a valid one is found.
+            // Note that the load/save *directories* are unchanged.
+            LoadDataPath = loadDataPath;
+            SaveDataPath = saveDataPath;
+        }
+        else if (!_mainOptions.AssetsDataFilePath.Empty)
+        {
+            // If no assets data file was found, and at least one valid path is specified, throw a useful error
+            throw new ProjectException("Failed to locate a valid assets data file path");
         }
 
         try
@@ -284,15 +292,25 @@ public sealed class ProjectContext
             ApplyFilePatches();
             if (LoadDataPath is not null)
             {
-                // TODO: load data here
+                if (Data is null)
+                {
+                    // Data should be ready for loading now
+                    LoadAssetsDataFile();
+                }
                 RunPreAssetImportScripts();
                 LoadProjectAssets();
             }
             RunPostImportScripts();
             if (SaveDataPath is not null)
             {
-                // TODO: save data here
                 FileBackup.BackupFile(SaveDataPath);
+                if (Data is not null && currentData is null)
+                {
+                    // Data was loaded as part of this import, so save it back now, and release it
+                    SaveAssetsDataFile();
+                    Data.Dispose();
+                    Data = null;
+                }
             }
         }
         finally
@@ -320,6 +338,52 @@ public sealed class ProjectContext
 
             // Currently, no non-custom flags are supported, so throw an exception.
             throw new ProjectException($"Unsupported project flag \"{flag}\"");
+        }
+    }
+
+    /// <summary>
+    /// Loads the main assets data file from <see cref="LoadDataPath"/>.
+    /// </summary>
+    private void LoadAssetsDataFile()
+    {
+        try
+        {
+            using FileStream fs = new(LoadDataPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            Data = UndertaleIO.Read(fs, (string warning, bool isImportant) =>
+            {
+                if (_mainOptions.ErrorOnWarnings)
+                {
+                    throw new ProjectException($"Warning occurred when loading data file: {warning}");
+                }
+            }, (_) => { });
+        }
+        catch (ProjectException)
+        {
+            throw;
+        }
+        catch (Exception e)
+        {
+            throw new ProjectException($"Error occurred when loading data file: {e}", e);
+        }
+    }
+
+    /// <summary>
+    /// Saves the main assets data file to <see cref="SaveDataPath"/>.
+    /// </summary>
+    private void SaveAssetsDataFile()
+    {
+        try
+        {
+            using FileStream fs = new(SaveDataPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
+            UndertaleIO.Write(fs, Data, (_) => { });
+        }
+        catch (ProjectException)
+        {
+            throw;
+        }
+        catch (Exception e)
+        {
+            throw new ProjectException($"Error occurred when saving data file: {e}", e);
         }
     }
 
@@ -661,8 +725,7 @@ public sealed class ProjectContext
         {
             // Skip directories that are irregular, start with ".", or are excluded based on main options
             DirectoryInfo info = new(directory);
-            if (info.Attributes.HasFlag(FileAttributes.Hidden) || info.Attributes.HasFlag(FileAttributes.ReadOnly) ||
-                info.Attributes.HasFlag(FileAttributes.System))
+            if (info.Attributes.HasFlag(FileAttributes.Hidden) || info.Attributes.HasFlag(FileAttributes.System))
             {
                 continue;
             }
