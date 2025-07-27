@@ -1,4 +1,4 @@
-﻿using ImageMagick;
+﻿﻿using ImageMagick;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -96,6 +96,8 @@ namespace UndertaleModLib.Util
                 returnImage.Composite(croppedImage, texPageItem.TargetX, texPageItem.TargetY, CompositeOperator.Copy);
                 croppedImage.Dispose();
             }
+
+            returnImage.Strip();
 
             return returnImage;
         }
@@ -226,6 +228,8 @@ namespace UndertaleModLib.Util
                     pixels.SetPixel(x, y, pixelBit ? white : black);
                 }
             }
+
+            image.Strip();
 
             return image;
         }
