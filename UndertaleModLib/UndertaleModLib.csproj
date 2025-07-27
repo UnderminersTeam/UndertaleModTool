@@ -23,6 +23,11 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
+  <PropertyGroup>
+    <!-- Allows disabling "GameSpecificData" folder copying to the output directory using "Directory.Build.props" outside of the project
+         (e.g. when using this project as a git submodule) -->
+    <CopyGameSpecificDataToOutDir Condition="$(CopyGameSpecificDataToOutDir) == ''">true</CopyGameSpecificDataToOutDir>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Fody" Version="6.9.2">
       <PrivateAssets>all</PrivateAssets>
@@ -34,42 +39,13 @@
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="GameSpecificData\Definitions\deltarune.json" />
-    <None Remove="GameSpecificData\Definitions\gamemaker.json" />
-    <None Remove="GameSpecificData\Definitions\undertale.json" />
-    <None Remove="GameSpecificData\deltarune.json" />
-    <None Remove="GameSpecificData\empty.json" />
-    <None Remove="GameSpecificData\gamemaker.json" />
-    <None Remove="GameSpecificData\README.txt" />
-    <None Remove="GameSpecificData\undertale.json" />
+    <None Remove="GameSpecificData\**" />
     <None Remove="version.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="gitversion.txt" />
-    <Content Include="GameSpecificData\README.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="GameSpecificData\Underanalyzer\deltarune.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="GameSpecificData\Underanalyzer\template.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="GameSpecificData\Underanalyzer\gamemaker.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="GameSpecificData\Underanalyzer\undertale.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="GameSpecificData\Definitions\deltarune.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="GameSpecificData\Definitions\gamemaker.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="GameSpecificData\Definitions\undertale.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="GameSpecificData\**" Condition="$(CopyGameSpecificDataToOutDir)"
+             CopyToOutputDirectory="PreserveNewest" />
     <EmbeddedResource Include="gitversion.txt" />
   </ItemGroup>
   <ItemGroup>
