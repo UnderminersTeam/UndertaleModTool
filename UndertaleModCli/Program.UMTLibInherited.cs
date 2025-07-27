@@ -400,7 +400,7 @@ public partial class Program : IScriptInterface
             }
             fileInfo = new FileInfo(path);
         }
-        while (fileInfo.Exists);
+        while (!fileInfo.Exists);
 
         return path;
     }
