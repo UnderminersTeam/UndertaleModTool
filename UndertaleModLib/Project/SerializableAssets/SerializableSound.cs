@@ -129,7 +129,9 @@ internal sealed class SerializableSound : ISerializableProjectAsset
         {
             // Determine file extension based on audio flags
             AudioEntryFlags wavFlags = AudioEntryFlags.IsEmbedded | AudioEntryFlags.Regular;
-            string extension = ((_dataAsset.Flags & wavFlags) == wavFlags) ? ".wav" : ".ogg";
+            string extension = 
+                ((_dataAsset.Flags & wavFlags) == wavFlags && (_dataAsset.Flags & AudioEntryFlags.IsCompressed) == 0) 
+                ? ".wav" : ".ogg";
 
             // Save data to disk
             string destFilePath = Path.Join(directory, $"{friendlyName}{extension}");
@@ -148,7 +150,9 @@ internal sealed class SerializableSound : ISerializableProjectAsset
 
             // Determine file extension based on audio flags
             AudioEntryFlags wavFlags = AudioEntryFlags.IsEmbedded | AudioEntryFlags.Regular;
-            string extension = ((_dataAsset.Flags & wavFlags) == wavFlags) ? ".wav" : ".ogg";
+            string extension =
+                ((_dataAsset.Flags & wavFlags) == wavFlags && (_dataAsset.Flags & AudioEntryFlags.IsCompressed) == 0)
+                ? ".wav" : ".ogg";
 
             // Save data to disk
             string destFilePath = Path.Join(directory, $"{friendlyName}{extension}");
