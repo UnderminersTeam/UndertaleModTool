@@ -4,7 +4,7 @@ Games are defined in the "Definitions" sub-folder, where they are given conditio
 
 GML decompiler configs are contained within the "Underanalyzer" sub-folder, referenced from the original definition files. (These are loaded on-demand.)
 
-If you want to load this data from other path (or you just don't need to work with GML code), then you can prevent automatic folder copying.
+If you want to load this data from another path (or you just don't need to work with GML code), then you can prevent automatic folder copying.
 For that, you can do one of the following:
 1) Edit the `CopyGameSpecificDataToOutDir` project property (change to "false").
 2) Override its value through "Directory.Build.props" file outside of the project (e.g. when you use "UndertaleModLib" as a git submodule).

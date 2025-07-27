@@ -24,7 +24,7 @@
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
-    <!-- Allows to disable "GameSpecificData" folder copying to the output directory using "Directory.Build.props" outside of the project
+    <!-- Allows disabling "GameSpecificData" folder copying to the output directory using "Directory.Build.props" outside of the project
          (e.g. when using this project as a git submodule) -->
     <CopyGameSpecificDataToOutDir Condition="$(CopyGameSpecificDataToOutDir) == ''">true</CopyGameSpecificDataToOutDir>
   </PropertyGroup>
