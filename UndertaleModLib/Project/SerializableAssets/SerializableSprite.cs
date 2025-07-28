@@ -320,6 +320,10 @@ internal sealed class SerializableSprite : ISerializableTextureProjectAsset
             spr.GMS2PlaybackSpeed = Extra.PlaybackSpeed;
             spr.GMS2PlaybackSpeedType = (AnimSpeedType)Extra.PlaybackSpeedType;
         }
+        else
+        {
+            spr.IsSpecialType = false;
+        }
 
         // Update sequence and nine slice properties, if they exist
         if (Extra.ExtraVersion >= 2)
