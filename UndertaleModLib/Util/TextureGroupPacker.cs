@@ -594,7 +594,7 @@ public sealed class TextureGroupPacker
 
             // Compare all of the image data
             ReadOnlySpan<byte> pixelsA = Image.GetPixels().GetReadOnlyArea(0, 0, widthA, heightA);
-            ReadOnlySpan<byte> pixelsB = Image.GetPixels().GetReadOnlyArea(0, 0, widthB, heightB);
+            ReadOnlySpan<byte> pixelsB = other.Image.GetPixels().GetReadOnlyArea(0, 0, widthB, heightB);
             return pixelsA.SequenceEqual(pixelsB);
         }
 
