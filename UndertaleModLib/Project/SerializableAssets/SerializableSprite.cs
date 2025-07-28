@@ -314,6 +314,7 @@ internal sealed class SerializableSprite : ISerializableTextureProjectAsset
         // Update extra properties, if they exist
         if (!Extra.Equals(default(ExtraProperties)))
         {
+            spr.IsSpecialType = true;
             spr.SVersion = Extra.ExtraVersion;
             spr.SSpriteType = (UndertaleSprite.SpriteType)Extra.SpriteType;
             spr.GMS2PlaybackSpeed = Extra.PlaybackSpeed;
