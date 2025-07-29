@@ -41,7 +41,10 @@ public partial class SettingsFile
 
                 if (settings is not null)
                 {
+                    // Check for upgrades here.
                     settings.MainVM = mainVM;
+                    settings.Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?.?.?.?";
+
                     return settings;
                 }
             }
@@ -99,6 +102,9 @@ public partial class SettingsFile
                 _ => throw new NotImplementedException(),
             };
         }
-        Save();
     }
+
+    public string InstanceIdPrefix { get; set; } = "inst_";
+
+    public Underanalyzer.Decompiler.DecompileSettings DecompileSettings { get; set; } = new();
 }

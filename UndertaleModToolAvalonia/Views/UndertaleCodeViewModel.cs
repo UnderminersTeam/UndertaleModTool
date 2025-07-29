@@ -57,12 +57,11 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
 
         loaderWindow?.SetText("Decompiling to GML...");
 
-        // TODO: Decompiler settings
         GlobalDecompileContext context = new(MainVM.Data);
 
         try
         {
-            GMLTextDocument.Text = await Task.Run(() => new Underanalyzer.Decompiler.DecompileContext(context, Code).DecompileToString());
+            GMLTextDocument.Text = await Task.Run(() => new Underanalyzer.Decompiler.DecompileContext(context, Code, MainVM.Data!.ToolInfo.DecompilerSettings).DecompileToString());
             GMLOutdated = false;
         }
         catch (Underanalyzer.Decompiler.DecompilerException e)
@@ -76,8 +75,6 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
 
     public async Task<bool> CompileFromGML()
     {
-        if (!GMLOutdated)
-            return false;
         if (Code.ParentEntry is not null)
             return false;
 
@@ -125,8 +122,6 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
 
     public async Task<bool> CompileFromASM()
     {
-        if (!ASMOutdated)
-            return false;
         if (Code.ParentEntry is not null)
             return false;
 
@@ -170,49 +165,53 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
         MainVM.IsEnabled = true;
     }
 
-    public async void CompileAndDecompileGML()
+    public void CompileAndDecompileGML() => CompileAndDecompileGML(false);
+
+    public async void CompileAndDecompileGML(bool onlyIfOutdated)
     {
-        if (IsCompilingOrDecompiling || !GMLOutdated)
-            return;
-
-        loaderWindow = MainVM.LoaderOpen!();
-
-        IsCompilingOrDecompiling = true;
-        MainVM.IsEnabled = false;
-
-        if (await CompileFromGML())
+        if (!IsCompilingOrDecompiling && (onlyIfOutdated ? GMLOutdated : true))
         {
-            await DecompileToGML();
-            await DecompileToASM();
+            loaderWindow = MainVM.LoaderOpen!();
+
+            IsCompilingOrDecompiling = true;
+            MainVM.IsEnabled = false;
+
+            if (await CompileFromGML())
+            {
+                await DecompileToGML();
+                await DecompileToASM();
+            }
+
+            loaderWindow.Close();
+            loaderWindow = null;
+
+            IsCompilingOrDecompiling = false;
+            MainVM.IsEnabled = true;
         }
-
-        loaderWindow.Close();
-        loaderWindow = null;
-
-        IsCompilingOrDecompiling = false;
-        MainVM.IsEnabled = true;
     }
 
-    public async void CompileAndDecompileASM()
+    public void CompileAndDecompileASM() => CompileAndDecompileASM(false);
+
+    public async void CompileAndDecompileASM(bool onlyIfOutdated)
     {
-        if (IsCompilingOrDecompiling || !ASMOutdated)
-            return;
-
-        loaderWindow = MainVM.LoaderOpen!();
-
-        IsCompilingOrDecompiling = true;
-        MainVM.IsEnabled = false;
-
-        if (await CompileFromASM())
+        if (!IsCompilingOrDecompiling && (onlyIfOutdated ? ASMOutdated : true))
         {
-            await DecompileToGML();
-            await DecompileToASM();
+            loaderWindow = MainVM.LoaderOpen!();
+
+            IsCompilingOrDecompiling = true;
+            MainVM.IsEnabled = false;
+
+            if (await CompileFromASM())
+            {
+                await DecompileToGML();
+                await DecompileToASM();
+            }
+
+            loaderWindow.Close();
+            loaderWindow = null;
+
+            IsCompilingOrDecompiling = false;
+            MainVM.IsEnabled = true;
         }
-
-        loaderWindow.Close();
-        loaderWindow = null;
-
-        IsCompilingOrDecompiling = false;
-        MainVM.IsEnabled = true;
     }
 }

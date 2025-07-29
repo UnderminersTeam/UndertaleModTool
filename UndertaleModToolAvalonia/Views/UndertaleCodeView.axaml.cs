@@ -85,7 +85,7 @@ public partial class UndertaleCodeView : UserControl
     {
         if (DataContext is UndertaleCodeViewModel vm)
         {
-            vm.CompileAndDecompileGML();
+            vm.CompileAndDecompileGML(onlyIfOutdated: true);
         }
     }
 
@@ -93,7 +93,7 @@ public partial class UndertaleCodeView : UserControl
     {
         if (DataContext is UndertaleCodeViewModel vm)
         {
-            vm.CompileAndDecompileASM();
+            vm.CompileAndDecompileASM(onlyIfOutdated: true);
         }
     }
 

@@ -123,8 +123,7 @@ public partial class SearchInCodeViewModel
             {
                 try
                 {
-                    // TODO: Decompiler settings
-                    codeText = new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext!, code).DecompileToString();
+                    codeText = new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext!, code, MainVM.Data!.ToolInfo.DecompilerSettings).DecompileToString();
                 }
                 catch (Underanalyzer.Decompiler.DecompilerException)
                 {

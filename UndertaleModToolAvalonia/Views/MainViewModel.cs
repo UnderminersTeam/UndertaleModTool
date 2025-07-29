@@ -146,6 +146,9 @@ public partial class MainViewModel
         if (Data is not null && Data.GeneralInfo is not null)
         {
             Data.GeneralInfo.PropertyChanged += DataGeneralInfoChangedHandler;
+
+            Data.ToolInfo.InstanceIdPrefix = () => Settings?.InstanceIdPrefix;
+            Data.ToolInfo.DecompilerSettings = Settings?.DecompileSettings;
         }
 
         UpdateVersion();
