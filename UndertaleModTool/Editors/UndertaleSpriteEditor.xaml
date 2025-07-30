@@ -113,7 +113,8 @@
         <local:DataGridDark Grid.Row="10" Grid.Column="1" Margin="3" ItemsSource="{Binding Textures, Mode=OneWay}" x:Name="TextureList"
                             AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True"
                             HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray"
-                            HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True">
+                            HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True"
+                            Loaded="TextureList_Loaded" Unloaded="TextureList_Unloaded">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                 <Style TargetType="{x:Type DataGridCell}">
@@ -145,7 +146,9 @@
                         <DataTemplate>
                             <local:UndertaleObjectReference Margin="20,0,0,0" CanRemove="True"
                                                             Loaded="UndertaleObjectReference_Loaded"
-                                                            ObjectReference="{Binding Texture, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                            ObjectReference="{Binding Texture, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, NotifyOnSourceUpdated=True}"
+                                                            SourceUpdated="UndertaleObjectReference_SourceUpdated"
+                                                            ObjectReferenceChanged="UndertaleObjectReference_ObjectReferenceChanged"
                                                             ObjectType="{x:Type undertale:UndertaleTexturePageItem}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
@@ -162,7 +165,11 @@
         <local:ButtonDark Grid.Row="12" Grid.Column="1" Content="Export all frames (or Spine data if this is a Spine sprite)" Click="ExportAll_Click"/>
 
         <TextBlock Grid.Row="13" Grid.Column="0" Margin="3">Collision masks</TextBlock>
-        <local:DataGridDark Grid.Row="13" Grid.Column="1" Margin="3" ItemsSource="{Binding CollisionMasks, Mode=OneWay}" x:Name="MaskList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True" AddingNewItem="MaskList_AddingNewItem">
+        <local:DataGridDark Grid.Row="13" Grid.Column="1" Margin="3" ItemsSource="{Binding CollisionMasks, Mode=OneWay}" x:Name="MaskList" 
+                            AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" 
+                            HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" 
+                            SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True" AddingNewItem="MaskList_AddingNewItem"
+                            Loaded="MaskList_Loaded" Unloaded="MaskList_Unloaded">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
                 <Style TargetType="{x:Type DataGridCell}">

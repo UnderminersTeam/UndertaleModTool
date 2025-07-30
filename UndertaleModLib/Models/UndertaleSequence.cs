@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using UndertaleModLib.Project;
+using UndertaleModLib.Project.SerializableAssets;
 
 namespace UndertaleModLib.Models;
 
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged, IDisposable
+public class UndertaleSequence : UndertaleNamedResource, IProjectAsset, INotifyPropertyChanged, IDisposable
 {
     /// <summary>
     /// Possible playback modes for sequences.
@@ -201,6 +203,31 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
         Tracks = null;
         FunctionIDs = null;
     }
+
+    /// <inheritdoc/>
+    internal ISerializableProjectAsset GenerateSerializableProjectAsset(ProjectContext projectContext)
+    {
+        SerializableSequence serializable = new();
+        serializable.PopulateFromData(projectContext, this);
+        return serializable;
+    }
+
+    /// <inheritdoc/>
+    ISerializableProjectAsset IProjectAsset.GenerateSerializableProjectAsset(ProjectContext projectContext)
+    {
+        SerializableSequence serializable = new();
+        serializable.PopulateFromData(projectContext, this);
+        return serializable;
+    }
+
+    /// <inheritdoc/>
+    public string ProjectName => Name?.Content ?? "<unknown name>";
+
+    /// <inheritdoc/>
+    public SerializableAssetType ProjectAssetType => SerializableAssetType.Sequence;
+
+    /// <inheritdoc/>
+    public bool ProjectExportable => Name?.Content is not null;
 
     /// <summary>
     /// A keyframe of data stored within a sequence track, at a given time/duration, and for some number of channels.

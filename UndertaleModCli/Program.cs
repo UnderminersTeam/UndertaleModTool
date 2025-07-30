@@ -186,21 +186,9 @@ public partial class Program : IScriptInterface
         this.Data = ReadDataFile(datafile, WarningHandler, this.Verbose ? MessageHandler : DummyHandler);
 
         FinishedMessageEnabled = true;
-        this.CliScriptOptions = ScriptOptions.Default
-            .AddImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler",
-                "UndertaleModLib.Scripting", "UndertaleModLib.Compiler",
-                "UndertaleModLib.Util", "System", "System.IO", "System.Collections.Generic",
-                "System.Text.RegularExpressions")
-            .AddReferences(typeof(UndertaleObject).GetTypeInfo().Assembly,
-                GetType().GetTypeInfo().Assembly,
-                typeof(JsonConvert).GetTypeInfo().Assembly,
-                typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly,
-                typeof(TextureWorker).GetTypeInfo().Assembly,
-                typeof(ImageMagick.MagickImage).GetTypeInfo().Assembly,
-                typeof(Underanalyzer.Decompiler.DecompileContext).Assembly)
-            // "WithEmitDebugInformation(true)" not only lets us to see a script line number which threw an exception,
-            // but also provides other useful debug info when we run UMT in "Debug".
-            .WithEmitDebugInformation(true);
+        this.CliScriptOptions = ScriptingUtil.CreateDefaultScriptOptions()
+                                             .AddReferences(GetType().GetTypeInfo().Assembly,
+                                                            typeof(JsonConvert).GetTypeInfo().Assembly);
     }
 
     public Program(FileInfo datafile, bool verbose, DirectoryInfo output = null)

@@ -1,4 +1,6 @@
 ﻿using System;
+using UndertaleModLib.Project.SerializableAssets;
+using UndertaleModLib.Project;
 
 namespace UndertaleModLib.Models;
 
@@ -6,7 +8,7 @@ namespace UndertaleModLib.Models;
 /// An animation curve entry in a data file. These were introduced in GameMaker 2.3.0
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
+public class UndertaleAnimationCurve : UndertaleNamedResource, IProjectAsset, IDisposable
 {
     /// <summary>
     /// TODO: unknown
@@ -292,4 +294,29 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
             }
         }
     }
+
+    /// <inheritdoc/>
+    internal ISerializableProjectAsset GenerateSerializableProjectAsset(ProjectContext projectContext)
+    {
+        SerializableAnimationCurve serializable = new();
+        serializable.PopulateFromData(projectContext, this);
+        return serializable;
+    }
+
+    /// <inheritdoc/>
+    ISerializableProjectAsset IProjectAsset.GenerateSerializableProjectAsset(ProjectContext projectContext)
+    {
+        SerializableAnimationCurve serializable = new();
+        serializable.PopulateFromData(projectContext, this);
+        return serializable;
+    }
+
+    /// <inheritdoc/>
+    public string ProjectName => Name?.Content ?? "<unknown name>";
+
+    /// <inheritdoc/>
+    public SerializableAssetType ProjectAssetType => SerializableAssetType.AnimationCurve;
+
+    /// <inheritdoc/>
+    public bool ProjectExportable => Name?.Content is not null;
 }
