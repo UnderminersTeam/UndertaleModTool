@@ -40,6 +40,9 @@ namespace UndertaleModTool
             {
                 File.WriteAllText(Path.Combine(GetExecutableDirectory(), "crash.txt"), e.ToString());
                 MessageBox.Show(e.ToString());
+                if (Application.Current.MainWindow is MainWindow mw) {
+                    mw.DoSaveDialog(false, true);
+                }
             }
         }
         private static void GlobalUnhandledExceptionHandler(object sender, UnhandledExceptionEventArgs e)
