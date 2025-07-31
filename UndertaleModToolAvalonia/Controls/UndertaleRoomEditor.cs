@@ -25,7 +25,7 @@ public class UndertaleRoomEditor : Control
     public UndertaleRoomViewModel? vm;
 
     public record RoomItemProperties(int X, int Y);
-    public record RoomItem(object Object, Rect Bounds, double Rotation, Point Pivot, Func<RoomItemProperties> GetProperties, Action<RoomItemProperties> SetProperties);
+    public record RoomItem(object Object, object Category, Rect Bounds, double Rotation, Point Pivot, Func<RoomItemProperties> GetProperties, Action<RoomItemProperties> SetProperties);
 
     public List<RoomItem> RoomItems = [];
     public RoomItem? HoveredRoomItem;
@@ -79,11 +79,11 @@ public class UndertaleRoomEditor : Control
                 switch (layer.LayerType)
                 {
                     case UndertaleRoom.LayerType.Instances:
-                        UpdateGameObjects(layer.InstancesData.Instances);
+                        UpdateGameObjects(layer.InstancesData.Instances, layer);
                         break;
                     case UndertaleRoom.LayerType.Assets:
-                        UpdateTiles(layer.AssetsData.LegacyTiles, layer.XOffset, layer.YOffset);
-                        UpdateSprites(layer.AssetsData.Sprites, layer.XOffset, layer.YOffset);
+                        UpdateTiles(layer.AssetsData.LegacyTiles, layer);
+                        UpdateSprites(layer.AssetsData.Sprites, layer);
                         break;
                     case UndertaleRoom.LayerType.Tiles:
                         //UpdateLayerTiles(layer.TilesData, layer.XOffset, layer.YOffset);
@@ -98,18 +98,19 @@ public class UndertaleRoomEditor : Control
         }
     }
 
-    void UpdateTiles(IList<UndertaleRoom.Tile> roomTiles, float xOffset = 0, float yOffset = 0)
+    void UpdateTiles(IList<UndertaleRoom.Tile> roomTiles, UndertaleRoom.Layer? layer = null)
     {
         IOrderedEnumerable<UndertaleRoom.Tile> orderedRoomTiles = roomTiles.OrderByDescending(x => x.TileDepth);
         foreach (UndertaleRoom.Tile roomTile in orderedRoomTiles)
         {
-            float x = xOffset + roomTile.X;
-            float y = yOffset + roomTile.Y;
+            float x = (layer?.XOffset ?? 0) + roomTile.X;
+            float y = (layer?.YOffset ?? 0) + roomTile.Y;
             float w = roomTile.Width * roomTile.ScaleX;
             float h = roomTile.Height * roomTile.ScaleY;
 
             RoomItems.Add(new RoomItem(
                 Object: roomTile,
+                Category: layer is not null ? layer : vm!.Room.Tiles,
                 Bounds: new Rect(x, y, w, h),
                 Rotation: 0,
                 Pivot: new Point(x, y),
@@ -126,7 +127,7 @@ public class UndertaleRoomEditor : Control
         }
     }
 
-    void UpdateSprites(IList<UndertaleRoom.SpriteInstance> roomSprites, float xOffset = 0, float yOffset = 0)
+    void UpdateSprites(IList<UndertaleRoom.SpriteInstance> roomSprites, UndertaleRoom.Layer layer)
     {
         foreach (UndertaleRoom.SpriteInstance roomSprite in roomSprites)
         {
@@ -139,14 +140,15 @@ public class UndertaleRoomEditor : Control
 
             RoomItems.Add(new RoomItem(
                 Object: roomSprite,
+                Category: layer,
                 Bounds: new Rect(
-                    xOffset + roomSprite.X - roomSprite.Sprite.OriginX * roomSprite.ScaleX,
-                    yOffset + roomSprite.Y - roomSprite.Sprite.OriginY * roomSprite.ScaleY,
+                    layer.XOffset + roomSprite.X - roomSprite.Sprite.OriginX * roomSprite.ScaleX,
+                    layer.YOffset + roomSprite.Y - roomSprite.Sprite.OriginY * roomSprite.ScaleY,
                     texture.BoundingWidth * roomSprite.ScaleX,
                     texture.BoundingHeight * roomSprite.ScaleY
                 ),
                 Rotation: roomSprite.OppositeRotation,
-                Pivot: new Point(xOffset + roomSprite.X, yOffset + roomSprite.Y),
+                Pivot: new Point(layer.XOffset + roomSprite.X, layer.YOffset + roomSprite.Y),
                 GetProperties: () =>
                 {
                     return new(roomSprite.X, roomSprite.Y);
@@ -160,7 +162,7 @@ public class UndertaleRoomEditor : Control
         }
     }
 
-    void UpdateGameObjects(IList<UndertaleRoom.GameObject> roomGameObjects)
+    void UpdateGameObjects(IList<UndertaleRoom.GameObject> roomGameObjects, UndertaleRoom.Layer? layer = null)
     {
         foreach (UndertaleRoom.GameObject roomGameObject in roomGameObjects)
         {
@@ -174,6 +176,7 @@ public class UndertaleRoomEditor : Control
 
             RoomItems.Add(new RoomItem(
                 Object: roomGameObject,
+                Category: layer is not null ? layer : vm!.Room.GameObjects,
                 Bounds: new Rect(
                     roomGameObject.X - gameObject.Sprite.OriginX * roomGameObject.ScaleX,
                     roomGameObject.Y - gameObject.Sprite.OriginY * roomGameObject.ScaleY,
@@ -232,6 +235,7 @@ public class UndertaleRoomEditor : Control
                 $"mouse: ({mousePosition.X}, {mousePosition.Y}), room: ({Math.Floor(roomMousePosition.X)}, {Math.Floor(roomMousePosition.Y)})\n" +
                 $"view: ({-Translation.X}, {-Translation.Y}, {-Translation.X + Bounds.Width}, {-Translation.Y + Bounds.Height}), zoom: {Scaling}x\n" +
                 $"{vm?.Room.Name.Content} ({vm?.Room.Width}, {vm?.Room.Height})\n" +
+                $"category: {vm?.CategorySelected}\n" +
                 $"custom render time: <{CustomDrawOperationTime} ms",
                 CultureInfo.CurrentCulture, FlowDirection.LeftToRight, Typeface.Default, 12, new SolidColorBrush(Colors.White)),
                 new Point(0, 0));
@@ -283,6 +287,7 @@ public class UndertaleRoomEditor : Control
 
         foreach (RoomItem roomItem in RoomItems.Reverse<RoomItem>())
         {
+            if (vm!.CategorySelected is null || roomItem.Category == vm!.CategorySelected)
             if (RectContainsPoint(roomItem.Bounds, roomItem.Rotation, roomItem.Pivot, roomMousePosition))
             {
                 HoveredRoomItem = roomItem;
@@ -311,6 +316,10 @@ public class UndertaleRoomEditor : Control
 
                 movingItemX = roomMousePosition.X - properties.X;
                 movingItemY = roomMousePosition.Y - properties.Y;
+            }
+            else
+            {
+                vm!.RoomItemsSelectedItem = null;
             }
         }
     }

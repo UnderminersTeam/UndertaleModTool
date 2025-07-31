@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Avalonia.Controls;
@@ -25,22 +26,8 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
     [Notify]
     private object? _PropertiesContent;
 
-    private void OnRoomItemsSelectedItemChanged()
-    {
-        PropertiesContent = RoomItemsSelectedItem switch
-        {
-            TreeViewItem { Name: "RoomTreeViewItem" } => Room,
-            TreeViewItem => null,
-            UndertalePointerList<Tile> => null,
-            UndertalePointerList<SpriteInstance> => null,
-            UndertalePointerList<SequenceInstance> => null,
-            UndertalePointerList<ParticleSystemInstance> => null,
-            UndertalePointerList<TextItemInstance> => null,
-            RoomItem => null,
-            object o => o,
-            _ => null,
-        };
-    }
+    [Notify]
+    private object? _CategorySelected;
 
     public UndertaleRoomViewModel(UndertaleRoom room, IServiceProvider? serviceProvider = null)
     {
@@ -64,13 +51,6 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
         if (isGMS2)
             RoomItems.Add(new("Layers", "Layers", Room.Layers));
         
-    }
-
-    public class RoomItem(string header, string tag, IEnumerable itemsSource)
-    {
-        public string Header { get; set; } = header;
-        public string Tag { get; set; } = tag;
-        public IEnumerable ItemsSource { get; set; } = itemsSource;
     }
 
     public void AddLayer(UndertaleRoom.LayerType type)
@@ -145,5 +125,83 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
         }
 
         Room.Layers.Add(layer);
+    }
+
+    object? FindItemCategory(object? item)
+    {
+        // NOTE: This sucks. Ideally we'd have this information from the DataContext of the item directly.
+        if (item is null)
+            return null;
+
+        bool isGMS2 = MainVM.Data!.IsVersionAtLeast(2);
+
+        object? category = item switch
+        {
+            RoomItem { Tag: "GameObjects" } => Room.GameObjects,
+            GameObject => !isGMS2 ? Room.GameObjects : null,
+            RoomItem { Tag: "Tiles" } => Room.Tiles,
+            Tile => !isGMS2 ? Room.Tiles : null,
+            RoomItem => null,
+            _ => null,
+        };
+
+        if (category is not null)
+            return category;
+
+        foreach (var layer in Room.Layers)
+        {
+            if (layer.LayerType == LayerType.Instances)
+            {
+                if (item == layer)
+                    return layer;
+
+                var instance = layer.InstancesData.Instances.FirstOrDefault(x => x == item);
+                if (instance is not null)
+                    return layer;
+            }
+            else if (layer.LayerType == LayerType.Assets)
+            {
+                if (item == layer)
+                    return layer;
+
+                foreach (IEnumerable<object> assetTypeList in layer.AssetsData.AllAssets.Cast<IEnumerable<object>>())
+                {
+                    if (item == assetTypeList)
+                        return layer;
+
+                    var instance = assetTypeList.FirstOrDefault(x => x == item);
+                    if (instance is not null)
+                        return layer;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private void OnRoomItemsSelectedItemChanged()
+    {
+        PropertiesContent = RoomItemsSelectedItem switch
+        {
+            TreeViewItem { Name: "RoomTreeViewItem" } => Room,
+            TreeViewItem => null,
+            UndertalePointerList<Tile> => null,
+            UndertalePointerList<SpriteInstance> => null,
+            UndertalePointerList<SequenceInstance> => null,
+            UndertalePointerList<ParticleSystemInstance> => null,
+            UndertalePointerList<TextItemInstance> => null,
+            RoomItem => null,
+            object o => o,
+            _ => null,
+        };
+
+        CategorySelected = FindItemCategory(RoomItemsSelectedItem);
+    }
+
+    public class RoomItem(string header, string tag, IEnumerable itemsSource)
+    {
+        public string Header { get; set; } = header;
+        public string Tag { get; set; } = tag;
+        public IEnumerable ItemsSource { get; set; } = itemsSource;
     }
 }
