@@ -1,0 +1,117 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
+             xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
+             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
+             xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.Views.UndertaleShaderView"
+             x:DataType="v:UndertaleShaderViewModel">
+    <UserControl.Resources>
+        <h:EnumTypeToValuesConverter x:Key="EnumTypeToValuesConverter" />
+    </UserControl.Resources>
+    <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
+        <Label>Name</Label>
+        <c:UndertaleStringReferenceView Reference="{Binding Shader.Name}" />
+
+        <Label>Type</Label>
+        <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleShader+ShaderType}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                  SelectedItem="{Binding Shader.Type}" />
+
+        <Label>Version</Label>
+        <TextBox Text="{Binding Shader.Version}" />
+
+        <Label>GLSL ES vertex source</Label>
+        <Expander Header="Code">
+            <c:UndertaleStringReferenceView Reference="{Binding Shader.GLSL_ES_Vertex}" />
+        </Expander>
+
+        <Label>GLSL ES fragment source</Label>
+        <Expander Header="Code">
+            <c:UndertaleStringReferenceView Reference="{Binding Shader.GLSL_ES_Fragment}" />
+        </Expander>
+
+        <Label>GLSL vertex source</Label>
+        <Expander Header="Code">
+            <c:UndertaleStringReferenceView Reference="{Binding Shader.GLSL_Vertex}" />
+        </Expander>
+
+        <Label>GLSL fragment source</Label>
+        <Expander Header="Code">
+            <c:UndertaleStringReferenceView Reference="{Binding Shader.GLSL_Fragment}" />
+        </Expander>
+
+        <Label>HLSL9 vertex source</Label>
+        <Expander Header="Code">
+            <c:UndertaleStringReferenceView Reference="{Binding Shader.HLSL9_Vertex}" />
+        </Expander>
+
+        <Label>HLSL9 fragment source</Label>
+        <Expander Header="Code">
+            <c:UndertaleStringReferenceView Reference="{Binding Shader.HLSL9_Fragment}" />
+        </Expander>
+
+        <Label>HLSL11 vertex data</Label>
+        <StackPanel Orientation="Horizontal">
+            <Button Command="{Binding ImportRawShaderData}" CommandParameter="HLSL11_VertexData">Import</Button>
+            <Button Command="{Binding ExportRawShaderData}" CommandParameter="HLSL11_VertexData">Export</Button>
+        </StackPanel>
+
+        <Label>HLSL11 pixel data</Label>
+        <StackPanel Orientation="Horizontal">
+            <Button Command="{Binding ImportRawShaderData}" CommandParameter="HLSL11_PixelData">Import</Button>
+            <Button Command="{Binding ExportRawShaderData}" CommandParameter="HLSL11_PixelData">Export</Button>
+        </StackPanel>
+
+        <Label>PSSL vertex data</Label>
+        <StackPanel Orientation="Horizontal">
+            <Button Command="{Binding ImportRawShaderData}" CommandParameter="PSSL_VertexData">Import</Button>
+            <Button Command="{Binding ExportRawShaderData}" CommandParameter="PSSL_VertexData">Export</Button>
+        </StackPanel>
+
+        <Label>PSSL pixel data</Label>
+        <StackPanel Orientation="Horizontal">
+            <Button Command="{Binding ImportRawShaderData}" CommandParameter="PSSL_PixelData">Import</Button>
+            <Button Command="{Binding ExportRawShaderData}" CommandParameter="PSSL_PixelData">Export</Button>
+        </StackPanel>
+
+        <Label>Cg_PSVita vertex data</Label>
+        <StackPanel Orientation="Horizontal">
+            <Button Command="{Binding ImportRawShaderData}" CommandParameter="Cg_PSVita_VertexData">Import</Button>
+            <Button Command="{Binding ExportRawShaderData}" CommandParameter="Cg_PSVita_VertexData">Export</Button>
+        </StackPanel>
+
+        <Label>Cg_PSVita pixel data</Label>
+        <StackPanel Orientation="Horizontal">
+            <Button Command="{Binding ImportRawShaderData}" CommandParameter="Cg_PSVita_PixelData">Import</Button>
+            <Button Command="{Binding ExportRawShaderData}" CommandParameter="Cg_PSVita_PixelData">Export</Button>
+        </StackPanel>
+
+        <Label>Cg_PS3 vertex data</Label>
+        <StackPanel Orientation="Horizontal">
+            <Button Command="{Binding ImportRawShaderData}" CommandParameter="Cg_PS3_VertexData">Import</Button>
+            <Button Command="{Binding ExportRawShaderData}" CommandParameter="Cg_PS3_VertexData">Export</Button>
+        </StackPanel>
+
+        <Label>Cg_PS3 pixel data</Label>
+        <StackPanel Orientation="Horizontal">
+            <Button Command="{Binding ImportRawShaderData}" CommandParameter="Cg_PS3_PixelData">Import</Button>
+            <Button Command="{Binding ExportRawShaderData}" CommandParameter="Cg_PS3_PixelData">Export</Button>
+        </StackPanel>
+
+        <Label>Vertex shader attributes</Label>
+        <c:EditableDataGrid ItemsSource="{Binding Shader.VertexShaderAttributes}" ItemFactory="{Binding CreateVertexShaderAttribute}">
+            <c:EditableDataGrid.Columns>
+                <DataGridTemplateColumn Header="Name" Width="1*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="undertalem:UndertaleShader+VertexShaderAttribute">
+                            <c:UndertaleStringReferenceView Reference="{Binding Name}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </c:EditableDataGrid.Columns>
+        </c:EditableDataGrid>
+    </Grid>
+</UserControl>
