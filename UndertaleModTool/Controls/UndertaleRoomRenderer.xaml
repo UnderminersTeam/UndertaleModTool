@@ -235,7 +235,11 @@
                     <Rectangle Width="{Binding Width, Mode=OneTime}" Height="{Binding Height, Mode=OneTime}"
                                Opacity="{Binding Color, Mode=OneTime, Converter={StaticResource ColorToOpacityConverter}}">
                         <Rectangle.RenderTransform>
-                            <TranslateTransform x:Name="transform2_0" X="{Binding X, Mode=OneTime}" Y="{Binding Y, Mode=OneTime}"/>
+                            <TransformGroup>
+                                <TranslateTransform x:Name="transform2_0" X="{Binding X, Mode=OneWay}" Y="{Binding Y, Mode=OneWay}"/>
+                                <ScaleTransform ScaleX="{Binding ScaleX, Mode=OneWay}" ScaleY="{Binding ScaleY, Mode=OneWay}"
+                                                CenterX="{Binding X, Mode=OneWay}" CenterY="{Binding Y, Mode=OneWay}"/>
+                            </TransformGroup>
                         </Rectangle.RenderTransform>
                         <Rectangle.Fill>
                             <ImageBrush
