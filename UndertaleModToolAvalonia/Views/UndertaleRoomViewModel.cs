@@ -127,7 +127,7 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
         Room.Layers.Add(layer);
     }
 
-    object? FindItemCategory(object? item)
+    public object? FindItemCategory(object? item)
     {
         // NOTE: This sucks. Ideally we'd have this information from the DataContext of the item directly.
         if (item is null)
@@ -137,10 +137,10 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
 
         object? category = item switch
         {
-            RoomItem { Tag: "GameObjects" } => Room.GameObjects,
-            GameObject => !isGMS2 ? Room.GameObjects : null,
-            RoomItem { Tag: "Tiles" } => Room.Tiles,
-            Tile => !isGMS2 ? Room.Tiles : null,
+            RoomItem { Tag: "GameObjects" } => RoomItems.First(x => x.Tag == "GameObjects"),
+            GameObject => !isGMS2 ? RoomItems.First(x => x.Tag == "GameObjects") : null,
+            RoomItem { Tag: "Tiles" } => RoomItems.First(x => x.Tag == "GameTiles"),
+            Tile => !isGMS2 ? RoomItems.First(x => x.Tag == "Tiles") : null,
             RoomItem => null,
             _ => null,
         };

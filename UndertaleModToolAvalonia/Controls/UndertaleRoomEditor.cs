@@ -110,7 +110,7 @@ public class UndertaleRoomEditor : Control
 
             RoomItems.Add(new RoomItem(
                 Object: roomTile,
-                Category: layer is not null ? layer : vm!.Room.Tiles,
+                Category: layer is not null ? layer : vm!.RoomItems.First(x => x.Tag == "Tiles"),
                 Bounds: new Rect(x, y, w, h),
                 Rotation: 0,
                 Pivot: new Point(x, y),
@@ -176,7 +176,7 @@ public class UndertaleRoomEditor : Control
 
             RoomItems.Add(new RoomItem(
                 Object: roomGameObject,
-                Category: layer is not null ? layer : vm!.Room.GameObjects,
+                Category: layer is not null ? layer : vm!.RoomItems.First(x => x.Tag == "GameObjects"),
                 Bounds: new Rect(
                     roomGameObject.X - gameObject.Sprite.OriginX * roomGameObject.ScaleX,
                     roomGameObject.Y - gameObject.Sprite.OriginY * roomGameObject.ScaleY,
@@ -319,7 +319,7 @@ public class UndertaleRoomEditor : Control
             }
             else
             {
-                vm!.RoomItemsSelectedItem = null;
+                vm!.RoomItemsSelectedItem = vm!.CategorySelected;
             }
         }
     }

@@ -1,7 +1,9 @@
 using System.Collections;
 using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
+using Avalonia.VisualTree;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 
@@ -24,11 +26,12 @@ public partial class UndertaleRoomView : UserControl
                         var item = vm.RoomItemsSelectedItem;
                         if (item is not null)
                         {
-                            // TODO: This doesn't work if it has never been expanded before
-                            TreeViewItem? treeViewItem = (RoomItemsTreeView.TreeContainerFromItem(item) as TreeViewItem);
+                            TreeViewItem? treeViewItem = GetTreeViewItem(RoomItemsTreeView, item);
+
                             if (treeViewItem is null)
                                 return;
 
+                            // Recursively expand parents of this item
                             TreeViewItem currentViewItem = treeViewItem;
                             while (currentViewItem.Parent is TreeViewItem parentTreeViewItem)
                             {
@@ -293,5 +296,44 @@ public partial class UndertaleRoomView : UserControl
                 list.Remove(treeViewItem.DataContext);
             }
         }
+    }
+
+    // Gets a TreeViewItem even if it's not "realized" yet.
+    // NOTE: Mostly taken from:
+    // https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/how-to-find-a-treeviewitem-in-a-treeview
+    // So I'm not sure exactly why and how this works.
+    private static TreeViewItem? GetTreeViewItem(ItemsControl container, object item)
+    {
+        if (container != null)
+        {
+            if (container.DataContext == item)
+            {
+                return container as TreeViewItem;
+            }
+
+            container.ApplyTemplate();
+
+            ItemsPresenter? itemsPresenter = container.FindDescendantOfType<ItemsPresenter>();
+
+            // This actually makes the child items.
+            itemsPresenter?.ApplyTemplate();
+
+            for (int i = 0, count = container.Items.Count; i < count; i++)
+            {
+                TreeViewItem? subContainer;
+                subContainer = (TreeViewItem?)container.ContainerFromIndex(i);
+
+                if (subContainer != null)
+                {
+                    TreeViewItem? resultContainer = GetTreeViewItem(subContainer, item);
+                    if (resultContainer != null)
+                    {
+                        return resultContainer;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 }
