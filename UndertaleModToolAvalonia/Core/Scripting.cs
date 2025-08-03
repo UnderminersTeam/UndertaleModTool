@@ -178,7 +178,7 @@ public class ScriptGlobals : IScriptInterface
     public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext? context = null, IDecompileSettings? settings = null)
     {
         context ??= new(mainVM.Data);
-        // TODO: Decompiler settings
+        settings ??= mainVM.Data!.ToolInfo.DecompilerSettings;
 
         return new Underanalyzer.Decompiler.DecompileContext(context, code, settings).DecompileToString();
     }
@@ -303,9 +303,10 @@ public class ScriptGlobals : IScriptInterface
         }
     }
 
-    public string ScriptInputDialog(string title, string label, string defaultInput, string cancelText, string submitText, bool isMultiline, bool preventClose)
+    public string? ScriptInputDialog(string title, string label, string defaultInput, string cancelText, string submitText, bool isMultiline, bool preventClose)
     {
-        throw new NotImplementedException();
+        // TODO: cancelText, submitText, preventClose
+        return mainVM.TextBoxDialog!(label, defaultInput, title: title, isMultiline: isMultiline).WaitOnDispatcherFrame();
     }
 
     public void ScriptMessage(string message)
@@ -357,14 +358,15 @@ public class ScriptGlobals : IScriptInterface
         mainVM.CommandTextBoxText = message;
     }
 
-    public string SimpleTextInput(string title, string label, string defaultValue, bool allowMultiline, bool showDialog = true)
+    public string? SimpleTextInput(string title, string label, string defaultValue, bool allowMultiline, bool showDialog = true)
     {
-        throw new NotImplementedException();
+        // TODO: showDialog
+        return mainVM.TextBoxDialog!(label, defaultValue, title: title, isMultiline: allowMultiline).WaitOnDispatcherFrame();
     }
 
     public void SimpleTextOutput(string title, string label, string message, bool allowMultiline)
     {
-        throw new NotImplementedException();
+        mainVM.TextBoxDialog!(label, message, title: title, isMultiline: allowMultiline, isReadOnly: true).WaitOnDispatcherFrame();
     }
 
     public void StartProgressBarUpdater()

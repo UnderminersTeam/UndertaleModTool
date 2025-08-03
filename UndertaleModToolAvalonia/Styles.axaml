@@ -207,6 +207,7 @@
         </Style>
         <Style Selector="^ TextBox#TextTextBox">
             <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
         </Style>
         <Style Selector="^ StackPanel#Buttons">
             <Setter Property="Spacing" Value="16"/>
