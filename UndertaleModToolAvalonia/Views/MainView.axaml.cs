@@ -26,6 +26,7 @@ public partial class MainView : UserControl
                 vm.OpenFolderDialog = OpenFolderDialog;
                 vm.LaunchUriAsync = LaunchUriAsync;
                 vm.MessageDialog = MessageDialog;
+                vm.TextBoxDialog = TextBoxDialog;
                 vm.LoaderOpen = LoaderOpen;
                 vm.SettingsDialog = SettingsDialog;
                 vm.SearchInCodeOpen = SearchInCodeOpen;
@@ -69,6 +70,12 @@ public partial class MainView : UserControl
     {
         Window window = this.FindLogicalAncestorOfType<Window>() ?? throw new InvalidOperationException();
         return await new MessageWindow(message, title, ok, yes, no, cancel).ShowDialog<MessageWindow.Result>(window);
+    }
+
+    public async Task<string?> TextBoxDialog(string message, string text = "", string? title = null, bool isMultiline = false, bool isReadOnly = false)
+    {
+        Window window = this.FindLogicalAncestorOfType<Window>() ?? throw new InvalidOperationException();
+        return await new TextBoxWindow(message, text, title, isMultiline, isReadOnly).ShowDialog<string?>(window);
     }
 
     public LoaderWindow LoaderOpen()

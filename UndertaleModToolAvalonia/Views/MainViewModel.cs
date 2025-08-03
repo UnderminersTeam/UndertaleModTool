@@ -31,6 +31,9 @@ public partial class MainViewModel
     public delegate Task<MessageWindow.Result> MessageDialogDelegate(string message, string? title = null, bool ok = true, bool yes = false, bool no = false, bool cancel = false);
     public MessageDialogDelegate? MessageDialog;
 
+    public delegate Task<string?> TextBoxDialogDelegate(string message, string text = "", string? title = null, bool isMultiline = false, bool isReadOnly = false);
+    public TextBoxDialogDelegate? TextBoxDialog;
+
     public Func<LoaderWindow>? LoaderOpen;
     public Func<Task>? SettingsDialog;
     public Action? SearchInCodeOpen;
@@ -394,7 +397,7 @@ public partial class MainViewModel
             $"by the Underminers team\nLicensed under the GNU General Public License Version 3.", title: "About");
     }
 
-    public void DataItemAdd(IList list)
+    public async void DataItemAdd(IList list)
     {
         // TODO: Ask user for name etc.
 
@@ -402,11 +405,43 @@ public partial class MainViewModel
             return;
 
         UndertaleResource res = UndertaleData.CreateResource(list);
-        Data.InitializeResource(res, list, UndertaleData.GetDefaultResourceName(list));
+
+        string? name = UndertaleData.GetDefaultResourceName(list);
+        if (name is not null)
+        {
+            name = await TextBoxDialog!("Name of new asset:", name);
+            if (name is null)
+                return;
+
+            static bool IsValidAssetIdentifier(string name)
+            {
+                if (string.IsNullOrEmpty(name))
+                    return false;
+
+                char firstChar = name[0];
+                if (!char.IsAsciiLetter(firstChar) && firstChar != '_')
+                    return false;
+
+                foreach (char c in name.Skip(1))
+                    if (!char.IsAsciiLetterOrDigit(c) && c != '_')
+                        return false;
+
+                return true;
+            }
+
+            if (!IsValidAssetIdentifier(name))
+            {
+                await ShowMessageDialog($"Asset name \"{name}\" is not a valid identifier. Only letters, digits and underscore allowed, and it must not start with a digit.");
+                return;
+            }
+        }
+
+        Data.InitializeResource(res, list, name);
 
         if (res is UndertaleRoom room)
         {
-            Data.GeneralInfo?.RoomOrder.Add(new(room));
+            if (await ShowMessageDialog("Add the new room to the end of the room order list?", ok: false, yes: true, no: true) == MessageWindow.Result.Yes)
+                Data.GeneralInfo?.RoomOrder.Add(new(room));
         }
 
         list.Add(res);

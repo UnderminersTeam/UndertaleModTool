@@ -199,19 +199,23 @@
         </Style>
     </Style>
 
-    <Style Selector="Window.MessageWindow">
+    <Style Selector="Window.MessageWindow, Window.TextBoxWindow">
         <Setter Property="Padding" Value="16,16,16,0" />
-    </Style>
-    <Style Selector="Window.MessageWindow TextBlock#MessageText">
-        <Setter Property="Margin" Value="0,0,0,16" />
-    </Style>
-    <Style Selector="Window.MessageWindow StackPanel#Buttons">
-        <Setter Property="Spacing" Value="16"/>
-    </Style>
-    <Style Selector="Window.MessageWindow StackPanel#Buttons > Button">
-        <Setter Property="Margin" Value="0,0,0,16" />
-        <Setter Property="MinWidth" Value="75" />
-        <Setter Property="HorizontalContentAlignment" Value="Center" />
+
+        <Style Selector="^ TextBlock#MessageText">
+            <Setter Property="Margin" Value="0,0,0,16" />
+        </Style>
+        <Style Selector="^ TextBox#TextTextBox">
+            <Setter Property="Margin" Value="0,0,0,16" />
+        </Style>
+        <Style Selector="^ StackPanel#Buttons">
+            <Setter Property="Spacing" Value="16"/>
+        </Style>
+        <Style Selector="^ StackPanel#Buttons > Button">
+            <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="MinWidth" Value="75" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
     </Style>
 
     <Style Selector="Window.LoaderWindow">

@@ -678,7 +678,7 @@ namespace UndertaleModLib
 
             if (resource is UndertaleString _string)
             {
-                _string.Content = "string" + list.Count;
+                _string.Content = resourceName;
             }
             else if (resource is UndertaleRoom room)
             {
