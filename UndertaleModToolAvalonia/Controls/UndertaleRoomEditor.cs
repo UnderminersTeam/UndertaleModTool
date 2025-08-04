@@ -68,7 +68,7 @@ public class UndertaleRoomEditor : Control
 
         RoomItems = [];
 
-        if (vm.Room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.IsGMS2))
+        if (vm.Room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.IsGMS2) || vm.Room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.IsGM2024_13))
         {
             IOrderedEnumerable<UndertaleRoom.Layer> layers = vm.Room.Layers.OrderByDescending(x => x.LayerDepth);
             foreach (UndertaleRoom.Layer layer in layers)
@@ -428,7 +428,7 @@ public class UndertaleRoomEditor : Control
                 canvas.Translate((float)editor.Translation.X, (float)editor.Translation.Y);
                 canvas.Scale((float)editor.Scaling);
 
-                if (vm.Room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.IsGMS2))
+                if (vm.Room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.IsGMS2) || vm.Room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.IsGM2024_13))
                 {
                     IOrderedEnumerable<UndertaleRoom.Layer> layers = vm.Room.Layers.OrderByDescending(x => x.LayerDepth);
                     foreach (UndertaleRoom.Layer layer in layers)
@@ -622,6 +622,15 @@ public class UndertaleRoomEditor : Control
                     uint tileId = tile & 0x0FFFFFFF;
                     uint tileOrientation = tile >> 28;
 
+                    float scaleX = (((tileOrientation >> 0) & 1) == 0) ? 1 : -1;
+                    float scaleY = (((tileOrientation >> 1) & 1) == 0) ? 1 : -1;
+                    float rotate = (((tileOrientation >> 2) & 1) == 0) ? 0 : 90;
+
+                    float posX = (x * tilesData.Background.GMS2TileWidth) + tilesData.Background.Texture.TargetX;
+                    float posY = (y * tilesData.Background.GMS2TileHeight) + tilesData.Background.Texture.TargetY;
+                    float centerX = posX + ((float)tilesData.Background.GMS2TileWidth / 2);
+                    float centerY = posY + ((float)tilesData.Background.GMS2TileHeight / 2);
+
                     if (tileId != 0)
                     {
                         SKImage? image = mainVM.ImageCache.GetCachedImageFromLayerTile(tilesData, tileId);
@@ -631,10 +640,9 @@ public class UndertaleRoomEditor : Control
                         currentUsedImages.Add(image);
 
                         canvas.Save();
-                        // TODO: tileOrientation
-                        canvas.DrawImage(image,
-                            (x * tilesData.Background.GMS2TileWidth) - tilesData.Background.Texture.TargetX,
-                            (y * tilesData.Background.GMS2TileHeight) - tilesData.Background.Texture.TargetY);
+                        canvas.RotateDegrees(rotate, centerX, centerY);
+                        canvas.Scale(scaleX, scaleY, centerX, centerY);
+                        canvas.DrawImage(image, posX, posY);
                         canvas.Restore();
                     }
                 }
@@ -642,7 +650,6 @@ public class UndertaleRoomEditor : Control
 
         void RenderSprites(SKCanvas canvas, IList<UndertaleRoom.SpriteInstance> roomSprites)
         {
-            // TODO: roomSprite.Color
             // TODO: roomSprite.AnimationSpeed
             // TODO: roomSprite.AnimationSpeedType
 
@@ -663,14 +670,18 @@ public class UndertaleRoomEditor : Control
                 canvas.Translate(roomSprite.X, roomSprite.Y);
                 canvas.RotateDegrees(roomSprite.OppositeRotation);
                 canvas.Scale(roomSprite.ScaleX, roomSprite.ScaleY);
-                canvas.DrawImage(image, -roomSprite.Sprite.OriginX, -roomSprite.Sprite.OriginY);
+
+                canvas.DrawImage(image, -roomSprite.Sprite.OriginX, -roomSprite.Sprite.OriginY, new SKPaint()
+                {
+                    ColorFilter = SKColorFilter.CreateBlendMode(UndertaleColor.ToColor(roomSprite.Color).ToSKColor(), SKBlendMode.Modulate),
+                });
+
                 canvas.Restore();
             }
         }
 
         void RenderGameObjects(SKCanvas canvas, IList<UndertaleRoom.GameObject> roomGameObjects)
         {
-            // TODO: roomGameObject.Color
             // TODO: roomGameObject.ImageSpeed
 
             foreach (UndertaleRoom.GameObject roomGameObject in roomGameObjects)
@@ -692,7 +703,12 @@ public class UndertaleRoomEditor : Control
                 canvas.Translate(roomGameObject.X, roomGameObject.Y);
                 canvas.RotateDegrees(roomGameObject.OppositeRotation);
                 canvas.Scale(roomGameObject.ScaleX, roomGameObject.ScaleY);
-                canvas.DrawImage(image, -gameObject.Sprite.OriginX + texture.TargetX, -gameObject.Sprite.OriginY + texture.TargetY);
+
+                canvas.DrawImage(image, -gameObject.Sprite.OriginX + texture.TargetX, -gameObject.Sprite.OriginY + texture.TargetY, new SKPaint()
+                {
+                    ColorFilter = SKColorFilter.CreateBlendMode(UndertaleColor.ToColor(roomGameObject.Color).ToSKColor(), SKBlendMode.Modulate),
+                });
+
                 canvas.Restore();
             }
         }
