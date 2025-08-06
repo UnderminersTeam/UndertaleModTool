@@ -57,10 +57,10 @@ public partial class EditableDataGrid : UserControl
         DataGridControl = this.Find<DataGrid>("DataGrid")!;
         DataGridControl.SelectionChanged += (object? sender, SelectionChangedEventArgs e) =>
         {
-            // Hack to make it so a temporary deselection when moving items doesn't stop the repeat button.
+            // HACK: Hack to make it so a temporary deselection when moving items doesn't stop the repeat button.
             Dispatcher.UIThread.Post(() =>
             {
-                this.Find<InputElement>("RemoveButton")!.IsEnabled = CanAdd && (DataGridControl.SelectedIndex != -1);
+                this.Find<InputElement>("RemoveButton")!.IsEnabled = ItemFactory is not null && (DataGridControl.SelectedIndex != -1);
                 this.Find<InputElement>("MoveUpButton")!.IsEnabled = (DataGridControl.SelectedIndex > 0);
                 this.Find<InputElement>("MoveDownButton")!.IsEnabled = (DataGridControl.SelectedIndex < ItemsSource.Count - 1);
             });
@@ -80,10 +80,10 @@ public partial class EditableDataGrid : UserControl
         {
             if (ItemsSource is not null && ItemsSource.Count > 0)
                 DataGrid.SelectedIndex = 0;
+
+            AddButton.IsEnabled = ItemFactory is not null;
         };
     }
-
-    public bool CanAdd => ItemFactory is not null;
 
     public void Add()
     {

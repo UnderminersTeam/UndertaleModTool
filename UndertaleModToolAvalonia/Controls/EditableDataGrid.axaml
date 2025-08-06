@@ -15,7 +15,7 @@
                         <Setter Property="HorizontalContentAlignment" Value="Center" />
                     </Style>
                 </StackPanel.Styles>
-                <Button x:Name="AddButton" Command="{Binding Add}" IsEnabled="{Binding CanAdd}">+</Button>
+                <Button x:Name="AddButton" Command="{Binding Add}">+</Button>
                 <Button x:Name="RemoveButton" Command="{Binding Remove}" IsEnabled="False">-</Button>
                 <RepeatButton x:Name="MoveUpButton" Command="{Binding MoveUp}" IsEnabled="False">↑</RepeatButton>
                 <RepeatButton x:Name="MoveDownButton" Command="{Binding MoveDown}" IsEnabled="False">↓</RepeatButton>
