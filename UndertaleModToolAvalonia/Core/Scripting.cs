@@ -342,6 +342,7 @@ public class ScriptGlobals : IScriptInterface
     public void SetProgressBar(string message, string status, double progressValue, double maxValue)
     {
         loaderWindow ??= mainVM.LoaderOpen!();
+        loaderWindow.EnsureShown();
         loaderWindow.SetMessage(message);
         loaderWindow.SetStatus(status);
         loaderWindow.SetValue((int)progressValue);
@@ -351,6 +352,7 @@ public class ScriptGlobals : IScriptInterface
     public void SetProgressBar()
     {
         loaderWindow ??= mainVM.LoaderOpen!();
+        loaderWindow.EnsureShown();
     }
 
     public void SetUMTConsoleText(string message)

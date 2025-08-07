@@ -66,6 +66,7 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
         }
         catch (Underanalyzer.Decompiler.DecompilerException e)
         {
+            loaderWindow?.EnsureShown();
             await MainVM.ShowMessageDialog(e.ToString(), title: "GML decompilation error");
             return false;
         }
@@ -87,6 +88,7 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
 
         if (!result.Successful)
         {
+            loaderWindow?.EnsureShown();
             MessageWindow.Result undoChanges = await MainVM.ShowMessageDialog(result.PrintAllErrors(codeEntryNames: false)
                 + "\n\nUndo changes?", title: "GML compilation error", ok: false, yes: true, no: true);
             if (undoChanges == MessageWindow.Result.Yes)
@@ -113,6 +115,7 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
         }
         catch (Exception e)
         {
+            loaderWindow?.EnsureShown();
             await MainVM.ShowMessageDialog(e.ToString(), title: "ASM decompilation error");
             return false;
         }
@@ -135,6 +138,7 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
         }
         catch (Exception e)
         {
+            loaderWindow?.EnsureShown();
             MessageWindow.Result undoChanges = await MainVM.ShowMessageDialog(e.ToString()
                 + "\n\nUndo changes?", title: "ASM compilation error", ok: false, yes: true, no: true);
             if (undoChanges == MessageWindow.Result.Yes)

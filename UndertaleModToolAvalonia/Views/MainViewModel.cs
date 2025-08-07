@@ -196,6 +196,7 @@ public partial class MainViewModel
 
             if (warnings.Count > 0)
             {
+                w.EnsureShown();
                 await ShowMessageDialog($"Warnings occurred when loading the data file:\n\n" +
                     $"{(hadImportantWarnings ? "Data loss will likely occur when trying to save.\n" : "")}" +
                     $"{String.Join("\n", warnings)}");
@@ -209,6 +210,7 @@ public partial class MainViewModel
         }
         catch (Exception e)
         {
+            w.EnsureShown();
             await ShowMessageDialog($"Error opening data file: {e.Message}");
 
             return false;
@@ -238,6 +240,7 @@ public partial class MainViewModel
         }
         catch (Exception e)
         {
+            w.EnsureShown();
             await ShowMessageDialog($"Error saving data file: {e.Message}");
         }
         finally

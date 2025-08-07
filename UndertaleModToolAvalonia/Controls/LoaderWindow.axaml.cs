@@ -12,10 +12,11 @@ public partial class LoaderWindow : Window
     public string TitleText { get; set; } = "UndertaleModToolAvalonia";
     public int Value;
 
-    private string? message;
-    private string? status;
-    private int maximum = -1;
+    string? message;
+    string? status;
+    int maximum = -1;
     bool hasClosed = false;
+    Window? showOwner;
 
     public LoaderWindow()
     {
@@ -37,6 +38,7 @@ public partial class LoaderWindow : Window
 
     public void ShowDelayed(Window owner)
     {
+        showOwner = owner;
         Task.Delay(100).ContinueWith(_ =>
         {
             Dispatcher.UIThread.Post(() =>
@@ -45,6 +47,12 @@ public partial class LoaderWindow : Window
                     Show(owner);
             });
         });
+    }
+
+    public void EnsureShown()
+    {
+        if (showOwner is not null)
+            Show(showOwner);
     }
 
     public void UpdateText()

@@ -13,13 +13,13 @@ public partial class SearchInCodeWindow : Window
     {
         InitializeComponent();
 
-        AttachedToVisualTree += (_, __) =>
+        Loaded += (_, __) =>
         {
             SearchTextTextBox.Focus();
         };
 
-        SearchTextTextBox.AddHandler(TextBox.KeyDownEvent, TextBox_KeyDown_Tunnel, Avalonia.Interactivity.RoutingStrategies.Tunnel);
-        ResultsDataGrid.AddHandler(DataGrid.KeyDownEvent, DataGrid_KeyDown_Tunnel, Avalonia.Interactivity.RoutingStrategies.Tunnel);
+        SearchTextTextBox.AddHandler(TextBox.KeyDownEvent, TextBox_KeyDown_Tunnel, RoutingStrategies.Tunnel);
+        ResultsDataGrid.AddHandler(DataGrid.KeyDownEvent, DataGrid_KeyDown_Tunnel, RoutingStrategies.Tunnel);
     }
 
     private void TextBox_KeyDown_Tunnel(object? sender, KeyEventArgs e)

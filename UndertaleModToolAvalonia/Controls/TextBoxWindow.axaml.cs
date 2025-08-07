@@ -19,6 +19,12 @@ public partial class TextBoxWindow : Window
         TextTextBox.Text = text;
         TextTextBox.IsReadOnly = isReadOnly;
         TextTextBox.AcceptsReturn = isMultiline;
+
+        Loaded += (_, __) =>
+        {
+            if (!isReadOnly)
+                TextTextBox.Focus();
+        };
     }
 
     public void OkClick()

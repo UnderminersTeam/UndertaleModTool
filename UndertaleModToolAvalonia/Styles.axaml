@@ -200,27 +200,27 @@
     </Style>
 
     <Style Selector="Window.MessageWindow, Window.TextBoxWindow">
-        <Setter Property="Padding" Value="16,16,16,0" />
+        <Setter Property="Padding" Value="16,0,16,16" />
 
         <Style Selector="^ TextBlock#MessageText">
-            <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="Margin" Value="0,16,0,0" />
         </Style>
         <Style Selector="^ TextBox#TextTextBox">
-            <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="Margin" Value="0,8,0,0" />
             <Setter Property="VerticalAlignment" Value="Stretch" />
         </Style>
         <Style Selector="^ StackPanel#Buttons">
-            <Setter Property="Spacing" Value="16"/>
+            <Setter Property="Margin" Value="0,16,0,0" />
+            <Setter Property="Spacing" Value="8"/>
         </Style>
         <Style Selector="^ StackPanel#Buttons > Button">
-            <Setter Property="Margin" Value="0,0,0,16" />
             <Setter Property="MinWidth" Value="75" />
             <Setter Property="HorizontalContentAlignment" Value="Center" />
         </Style>
     </Style>
 
     <Style Selector="Window.LoaderWindow">
-        <Setter Property="Padding" Value="8" />
+        <Setter Property="Padding" Value="16" />
 
         <Style Selector="^ ProgressBar#LoadingProgressBar">
             <Setter Property="Margin" Value="0,8,0,0" />
@@ -229,7 +229,7 @@
     </Style>
 
     <Style Selector="Window.SettingsWindow">
-        <Setter Property="Padding" Value="8" />
+        <Setter Property="Padding" Value="16" />
     </Style>
 
     <Style Selector="Window.SearchInCodeWindow">
