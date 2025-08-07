@@ -310,10 +310,10 @@ public partial class MainViewModel
         }
     }
 
-    public async void FileSave()
+    public async Task<bool> FileSave()
     {
         if (Data is null)
-            return;
+            return false;
 
         IStorageFile? file = await SaveFileDialog!(new FilePickerSaveOptions()
         {
@@ -323,11 +323,11 @@ public partial class MainViewModel
         });
 
         if (file is null)
-            return;
+            return false;
 
         using Stream stream = await file.OpenWriteAsync();
 
-        await SaveData(stream);
+        return await SaveData(stream);
     }
 
     public void FileClose()
