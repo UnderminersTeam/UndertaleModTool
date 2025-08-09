@@ -18,23 +18,13 @@ public partial class MainWindow : Window
             {
                 e.Cancel = true;
 
-                async void ShowSaveChangesBeforeQuittingDialog()
+                async void AskFileSaveBeforeClose()
                 {
-                    var result = await vm.ShowMessageDialog("Save changes before quitting?", ok: false, yes: true, no: true, cancel: true);
-                    if (result == MessageWindow.Result.Yes)
-                    {
-                        if (await vm.FileSave())
-                        {
-                            Close();
-                        }
-                    }
-                    else if (result == MessageWindow.Result.No)
-                    {
+                    if (await vm.AskFileSave("Save data file before quitting?"))
                         Close();
-                    }
                 }
 
-                ShowSaveChangesBeforeQuittingDialog();
+                AskFileSaveBeforeClose();
             }
         }
 

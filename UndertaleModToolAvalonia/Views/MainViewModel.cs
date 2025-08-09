@@ -157,6 +157,29 @@ public partial class MainViewModel
         UpdateVersion();
     }
 
+    /// <summary>Ask if user wants to save the current file before continuing.
+    /// Returns true if either it saved successfully, or if the user didn't want to save, or if there is no file loaded.</summary>
+    public async Task<bool> AskFileSave(string message)
+    {
+        if (Data is null)
+            return true;
+
+        var result = await ShowMessageDialog(message, ok: false, yes: true, no: true, cancel: true);
+        if (result == MessageWindow.Result.Yes)
+        {
+            if (await FileSave())
+            {
+                return true;
+            }
+        }
+        else if (result == MessageWindow.Result.No)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     public Task<bool> NewData()
     {
         CloseData();
@@ -289,11 +312,17 @@ public partial class MainViewModel
     // Menus
     public async void FileNew()
     {
-        await NewData();
+        if (await AskFileSave("Save data file before creating a new one?"))
+        {
+            await NewData();
+        }
     }
 
     public async void FileOpen()
     {
+        if (!await AskFileSave("Save data file before opening a new one?"))
+            return;
+
         var files = await OpenFileDialog!(new FilePickerOpenOptions()
         {
             Title = "Open data file",
@@ -333,8 +362,11 @@ public partial class MainViewModel
         return await SaveData(stream);
     }
 
-    public void FileClose()
+    public async void FileClose()
     {
+        if (!await AskFileSave("Save data file before closing?"))
+            return;
+
         CloseData();
     }
 
