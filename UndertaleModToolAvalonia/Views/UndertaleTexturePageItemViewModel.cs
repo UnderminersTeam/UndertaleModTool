@@ -24,7 +24,7 @@ public partial class UndertaleTexturePageItemViewModel : IUndertaleResourceViewM
 
     public async void SaveImage()
     {
-        IStorageFile? file = await MainVM.SaveFileDialog!(new FilePickerSaveOptions()
+        IStorageFile? file = await MainVM.View!.SaveFileDialog(new FilePickerSaveOptions()
         {
             Title = "Save image",
             FileTypeChoices = [

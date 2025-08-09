@@ -51,7 +51,7 @@ public partial class UndertaleSpriteViewModel : IUndertaleResourceViewModel
         if (CollisionMasksSelected is null)
             return;
 
-        IReadOnlyList<IStorageFile> files = await MainVM.OpenFileDialog!(new FilePickerOpenOptions
+        IReadOnlyList<IStorageFile> files = await MainVM.View!.OpenFileDialog(new FilePickerOpenOptions
         {
             Title = "Import collision mask data",
             FileTypeFilter = binFileTypes,
@@ -75,7 +75,7 @@ public partial class UndertaleSpriteViewModel : IUndertaleResourceViewModel
         if (CollisionMasksSelected is null)
             return;
 
-        IStorageFile? file = await MainVM.SaveFileDialog!(new FilePickerSaveOptions()
+        IStorageFile? file = await MainVM.View!.SaveFileDialog(new FilePickerSaveOptions()
         {
             Title = "Export collision mask data",
             FileTypeChoices = binFileTypes,

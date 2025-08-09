@@ -23,20 +23,7 @@ namespace UndertaleModToolAvalonia.Views;
 public partial class MainViewModel
 {
     // Set this when testing.
-    public Func<FilePickerOpenOptions, Task<IReadOnlyList<IStorageFile>>>? OpenFileDialog;
-    public Func<FilePickerSaveOptions, Task<IStorageFile?>>? SaveFileDialog;
-    public Func<FolderPickerOpenOptions, Task<IReadOnlyList<IStorageFolder>>>? OpenFolderDialog;
-    public Func<Uri, Task<bool>>? LaunchUriAsync;
-
-    public delegate Task<MessageWindow.Result> MessageDialogDelegate(string message, string? title = null, bool ok = true, bool yes = false, bool no = false, bool cancel = false);
-    public MessageDialogDelegate? MessageDialog;
-
-    public delegate Task<string?> TextBoxDialogDelegate(string message, string text = "", string? title = null, bool isMultiline = false, bool isReadOnly = false);
-    public TextBoxDialogDelegate? TextBoxDialog;
-
-    public Func<LoaderWindow>? LoaderOpen;
-    public Func<Task>? SettingsDialog;
-    public Action? SearchInCodeOpen;
+    public IView? View;
 
     // Services
     public readonly IServiceProvider ServiceProvider;
@@ -132,9 +119,7 @@ public partial class MainViewModel
 
     public async Task<MessageWindow.Result> ShowMessageDialog(string message, string? title = null, bool ok = true, bool yes = false, bool no = false, bool cancel = false)
     {
-        if (MessageDialog is not null)
-            return await MessageDialog(message, title, ok, yes, no, cancel);
-        return MessageWindow.Result.None;
+        return await View!.MessageDialog(message, title, ok, yes, no, cancel);
     }
 
     public void SetData(UndertaleData? data)
@@ -194,7 +179,7 @@ public partial class MainViewModel
     {
         IsEnabled = false;
 
-        LoaderWindow w = LoaderOpen!();
+        LoaderWindow w = View!.LoaderOpen();
         w.SetText("Opening data file...");
 
         try
@@ -249,7 +234,7 @@ public partial class MainViewModel
     {
         IsEnabled = false;
 
-        LoaderWindow w = LoaderOpen!();
+        LoaderWindow w = View!.LoaderOpen();
         w.SetText("Saving data file...");
 
         try
@@ -323,7 +308,7 @@ public partial class MainViewModel
         if (!await AskFileSave("Save data file before opening a new one?"))
             return;
 
-        var files = await OpenFileDialog!(new FilePickerOpenOptions()
+        var files = await View!.OpenFileDialog(new FilePickerOpenOptions()
         {
             Title = "Open data file",
             FileTypeFilter = dataFileTypes,
@@ -347,7 +332,7 @@ public partial class MainViewModel
         if (Data is null)
             return false;
 
-        IStorageFile? file = await SaveFileDialog!(new FilePickerSaveOptions()
+        IStorageFile? file = await View!.SaveFileDialog(new FilePickerSaveOptions()
         {
             Title = "Save data file",
             FileTypeChoices = dataFileTypes,
@@ -372,7 +357,7 @@ public partial class MainViewModel
 
     public async void FileSettings()
     {
-        await SettingsDialog!();
+        await View!.SettingsDialog();
     }
 
     public void FileExit()
@@ -385,12 +370,12 @@ public partial class MainViewModel
 
     public void ToolsSearchInCode()
     {
-        SearchInCodeOpen!();
+        View!.SearchInCodeOpen();
     }
 
     public async void ScriptsRunOtherScript()
     {
-        var files = await OpenFileDialog!(new FilePickerOpenOptions()
+        var files = await View!.OpenFileDialog(new FilePickerOpenOptions()
         {
             Title = "Run script",
             FileTypeFilter = [
@@ -421,9 +406,9 @@ public partial class MainViewModel
         CommandTextBoxText = $"{Path.GetFileName(filePath) ?? "Script"} finished!";
     }
 
-    public void HelpGitHub()
+    public async void HelpGitHub()
     {
-        LaunchUriAsync?.Invoke(new Uri("https://github.com/UnderminersTeam/UndertaleModTool"));
+        await View!.LaunchUriAsync(new Uri("https://github.com/UnderminersTeam/UndertaleModTool"));
     }
 
     public async void HelpAbout()
@@ -444,7 +429,7 @@ public partial class MainViewModel
         string? name = UndertaleData.GetDefaultResourceName(list);
         if (name is not null)
         {
-            name = await TextBoxDialog!("Name of new asset:", name);
+            name = await View!.TextBoxDialog("Name of new asset:", name);
             if (name is null)
                 return;
 

@@ -154,7 +154,7 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
 
     public async void DecompileAll()
     {
-        loaderWindow = MainVM.LoaderOpen!();
+        loaderWindow = MainVM.View!.LoaderOpen();
 
         IsCompilingOrDecompiling = true;
         MainVM.IsEnabled = false;
@@ -175,7 +175,7 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
     {
         if (!IsCompilingOrDecompiling && (onlyIfOutdated ? GMLOutdated : true))
         {
-            loaderWindow = MainVM.LoaderOpen!();
+            loaderWindow = MainVM.View!.LoaderOpen();
 
             IsCompilingOrDecompiling = true;
             MainVM.IsEnabled = false;
@@ -200,7 +200,7 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
     {
         if (!IsCompilingOrDecompiling && (onlyIfOutdated ? ASMOutdated : true))
         {
-            loaderWindow = MainVM.LoaderOpen!();
+            loaderWindow = MainVM.View!.LoaderOpen();
 
             IsCompilingOrDecompiling = true;
             MainVM.IsEnabled = false;

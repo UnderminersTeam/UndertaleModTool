@@ -139,7 +139,7 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
         {
             RoomItem { Tag: "GameObjects" } => RoomItems.First(x => x.Tag == "GameObjects"),
             GameObject => !isGMS2 ? RoomItems.First(x => x.Tag == "GameObjects") : null,
-            RoomItem { Tag: "Tiles" } => RoomItems.First(x => x.Tag == "GameTiles"),
+            RoomItem { Tag: "Tiles" } => RoomItems.First(x => x.Tag == "Tiles"),
             Tile => !isGMS2 ? RoomItems.First(x => x.Tag == "Tiles") : null,
             RoomItem => null,
             _ => null,

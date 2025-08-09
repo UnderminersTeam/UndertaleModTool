@@ -52,7 +52,7 @@ public partial class UndertaleShaderViewModel : IUndertaleResourceViewModel
 
     public async void ImportRawShaderData(string parameter)
     {
-        IReadOnlyList<IStorageFile> files = await MainVM.OpenFileDialog!(new FilePickerOpenOptions
+        IReadOnlyList<IStorageFile> files = await MainVM.View!.OpenFileDialog(new FilePickerOpenOptions
         {
             Title = "Import shader",
             FileTypeFilter = binFileTypes,
@@ -97,7 +97,7 @@ public partial class UndertaleShaderViewModel : IUndertaleResourceViewModel
         if (rawShaderData is null)
             return;
 
-        IStorageFile? file = await MainVM.SaveFileDialog!(new FilePickerSaveOptions()
+        IStorageFile? file = await MainVM.View!.SaveFileDialog(new FilePickerSaveOptions()
         {
             Title = "Export shader",
             FileTypeChoices = binFileTypes,

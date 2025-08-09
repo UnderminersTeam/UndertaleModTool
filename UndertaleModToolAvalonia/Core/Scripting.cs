@@ -236,7 +236,7 @@ public class ScriptGlobals : IScriptInterface
 
     public string? PromptChooseDirectory()
     {
-        IReadOnlyList<IStorageFolder> folders = Task.Run(() => mainVM.OpenFolderDialog!(new()
+        IReadOnlyList<IStorageFolder> folders = Task.Run(() => mainVM.View!.OpenFolderDialog(new()
         {
             Title = "Select directory",
         })).Result;
@@ -250,7 +250,7 @@ public class ScriptGlobals : IScriptInterface
     public string? PromptLoadFile(string? defaultExt, string? filter)
     {
         // TODO: filter
-        var files = Task.Run(() => mainVM.OpenFileDialog!(new FilePickerOpenOptions()
+        var files = Task.Run(() => mainVM.View!.OpenFileDialog(new FilePickerOpenOptions()
         {
             Title = "Load file",
             FileTypeFilter = [
@@ -270,7 +270,7 @@ public class ScriptGlobals : IScriptInterface
     public string? PromptSaveFile(string defaultExt, string filter)
     {
         // TODO: filter
-        var file = Task.Run(() => mainVM.SaveFileDialog!(new FilePickerSaveOptions()
+        var file = Task.Run(() => mainVM.View!.SaveFileDialog(new FilePickerSaveOptions()
         {
             Title = "Save file",
             FileTypeChoices = [
@@ -306,7 +306,7 @@ public class ScriptGlobals : IScriptInterface
     public string? ScriptInputDialog(string title, string label, string defaultInput, string cancelText, string submitText, bool isMultiline, bool preventClose)
     {
         // TODO: cancelText, submitText, preventClose
-        return mainVM.TextBoxDialog!(label, defaultInput, title: title, isMultiline: isMultiline).WaitOnDispatcherFrame();
+        return mainVM.View!.TextBoxDialog(label, defaultInput, title: title, isMultiline: isMultiline).WaitOnDispatcherFrame();
     }
 
     public void ScriptMessage(string message)
@@ -316,7 +316,7 @@ public class ScriptGlobals : IScriptInterface
 
     public void ScriptOpenURL(string url)
     {
-        mainVM.LaunchUriAsync!(new(url)).Wait();
+        mainVM.View!.LaunchUriAsync(new(url)).Wait();
     }
 
     public bool ScriptQuestion(string message)
@@ -341,7 +341,7 @@ public class ScriptGlobals : IScriptInterface
 
     public void SetProgressBar(string message, string status, double progressValue, double maxValue)
     {
-        loaderWindow ??= mainVM.LoaderOpen!();
+        loaderWindow ??= mainVM.View!.LoaderOpen();
         loaderWindow.EnsureShown();
         loaderWindow.SetMessage(message);
         loaderWindow.SetStatus(status);
@@ -351,7 +351,7 @@ public class ScriptGlobals : IScriptInterface
 
     public void SetProgressBar()
     {
-        loaderWindow ??= mainVM.LoaderOpen!();
+        loaderWindow ??= mainVM.View!.LoaderOpen();
         loaderWindow.EnsureShown();
     }
 
@@ -363,12 +363,12 @@ public class ScriptGlobals : IScriptInterface
     public string? SimpleTextInput(string title, string label, string defaultValue, bool allowMultiline, bool showDialog = true)
     {
         // TODO: showDialog
-        return mainVM.TextBoxDialog!(label, defaultValue, title: title, isMultiline: allowMultiline).WaitOnDispatcherFrame();
+        return mainVM.View!.TextBoxDialog(label, defaultValue, title: title, isMultiline: allowMultiline).WaitOnDispatcherFrame();
     }
 
     public void SimpleTextOutput(string title, string label, string message, bool allowMultiline)
     {
-        mainVM.TextBoxDialog!(label, message, title: title, isMultiline: allowMultiline, isReadOnly: true).WaitOnDispatcherFrame();
+        mainVM.View!.TextBoxDialog(label, message, title: title, isMultiline: allowMultiline, isReadOnly: true).WaitOnDispatcherFrame();
     }
 
     public void StartProgressBarUpdater()

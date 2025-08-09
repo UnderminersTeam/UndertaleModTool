@@ -22,7 +22,7 @@ public partial class UndertaleEmbeddedAudioViewModel : IUndertaleResourceViewMod
 
     public async void SaveAudio()
     {
-        IStorageFile? file = await MainVM.SaveFileDialog!(new FilePickerSaveOptions()
+        IStorageFile? file = await MainVM.View!.SaveFileDialog(new FilePickerSaveOptions()
         {
             Title = "Save audio",
             FileTypeChoices = [
