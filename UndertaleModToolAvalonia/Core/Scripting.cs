@@ -100,7 +100,8 @@ public class ScriptGlobals : IScriptInterface
     private readonly MainViewModel mainVM;
     private readonly string? scriptPath;
 
-    private LoaderWindow? loaderWindow;
+    private ILoaderWindow? loaderWindow;
+    private int loaderValue;
 
     public ScriptGlobals(Scripting scripting, string? scriptPath)
     {
@@ -132,16 +133,17 @@ public class ScriptGlobals : IScriptInterface
 
     public void AddProgress(int amount)
     {
-        loaderWindow!.SetValue(loaderWindow!.Value + amount);
+        loaderValue += amount;
+        loaderWindow!.SetValue(loaderValue);
     }
 
     public void AddProgressParallel(int amount)
     {
-        Interlocked.Add(ref loaderWindow!.Value, amount);
+        Interlocked.Add(ref loaderValue, amount);
 
         Dispatcher.UIThread.Post(() =>
         {
-            loaderWindow!.SetValue(loaderWindow!.Value);
+            loaderWindow!.SetValue(loaderValue);
         }, DispatcherPriority.Background);
     }
 
@@ -195,7 +197,7 @@ public class ScriptGlobals : IScriptInterface
 
     public int GetProgress()
     {
-        return loaderWindow!.Value;
+        return loaderValue;
     }
 
     public void HideProgressBar()
@@ -206,16 +208,17 @@ public class ScriptGlobals : IScriptInterface
 
     public void IncrementProgress()
     {
-        loaderWindow!.SetValue(loaderWindow!.Value + 1);
+        loaderValue++;
+        loaderWindow!.SetValue(loaderValue);
     }
 
     public void IncrementProgressParallel()
     {
-        Interlocked.Increment(ref loaderWindow!.Value);
+        Interlocked.Increment(ref loaderValue);
 
         Dispatcher.UIThread.Post(() =>
         {
-            loaderWindow!.SetValue(loaderWindow!.Value);
+            loaderWindow!.SetValue(loaderValue);
         }, DispatcherPriority.Background);
     }
 
@@ -336,7 +339,8 @@ public class ScriptGlobals : IScriptInterface
 
     public void SetProgress(int value)
     {
-        loaderWindow!.SetValue(value);
+        loaderValue = value;
+        loaderWindow!.SetValue(loaderValue);
     }
 
     public void SetProgressBar(string message, string status, double progressValue, double maxValue)
@@ -345,7 +349,10 @@ public class ScriptGlobals : IScriptInterface
         loaderWindow.EnsureShown();
         loaderWindow.SetMessage(message);
         loaderWindow.SetStatus(status);
-        loaderWindow.SetValue((int)progressValue);
+
+        loaderValue = (int)progressValue;
+        loaderWindow.SetValue(loaderValue);
+
         loaderWindow.SetMaximum((int)maxValue);
     }
 
@@ -399,6 +406,7 @@ public class ScriptGlobals : IScriptInterface
 
     public void UpdateProgressValue(double progressValue)
     {
-        loaderWindow!.SetValue((int)progressValue);
+        loaderValue = (int)progressValue;
+        loaderWindow!.SetValue(loaderValue);
     }
 }

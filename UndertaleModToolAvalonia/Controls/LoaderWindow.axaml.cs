@@ -7,11 +7,23 @@ using Avalonia.Threading;
 
 namespace UndertaleModToolAvalonia.Controls;
 
-public partial class LoaderWindow : Window
+public interface ILoaderWindow
+{
+    public void EnsureShown();
+    void SetMessage(string message);
+    void SetStatus(string status);
+    void SetValue(int value);
+    void SetMaximum(int maximum);
+    void SetText(string text);
+    void SetTextToMessageAndStatus(string status);
+    void Close();
+}
+
+public partial class LoaderWindow : Window, ILoaderWindow
 {
     public string TitleText { get; set; } = "UndertaleModToolAvalonia";
-    public int Value;
 
+    int value;
     string? message;
     string? status;
     int maximum = -1;
@@ -57,7 +69,7 @@ public partial class LoaderWindow : Window
 
     public void UpdateText()
     {
-        MessageTextBlock.Text = $"{(!String.IsNullOrEmpty(message) ? message + " " : "")} - {Value}/{maximum}{(!String.IsNullOrEmpty(status) ? ": " + status : "")}";
+        MessageTextBlock.Text = $"{(!String.IsNullOrEmpty(message) ? message + " - " : "")}{value}/{maximum}{(!String.IsNullOrEmpty(status) ? ": " + status : "")}";
     }
 
     public void SetMessage(string message)
@@ -74,7 +86,7 @@ public partial class LoaderWindow : Window
 
     public void SetValue(int value)
     {
-        this.Value = value;
+        this.value = value;
         LoadingProgressBar.Value = value;
         UpdateText();
     }

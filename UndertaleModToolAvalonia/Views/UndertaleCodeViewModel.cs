@@ -39,7 +39,7 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
     public bool GMLOutdated = true;
     public bool ASMOutdated = true;
 
-    LoaderWindow? loaderWindow;
+    ILoaderWindow? loaderWindow;
 
     public UndertaleCodeViewModel(UndertaleCode code, IServiceProvider? serviceProvider = null)
     {

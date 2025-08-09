@@ -179,7 +179,7 @@ public partial class MainViewModel
     {
         IsEnabled = false;
 
-        LoaderWindow w = View!.LoaderOpen();
+        ILoaderWindow w = View!.LoaderOpen();
         w.SetText("Opening data file...");
 
         try
@@ -234,7 +234,7 @@ public partial class MainViewModel
     {
         IsEnabled = false;
 
-        LoaderWindow w = View!.LoaderOpen();
+        ILoaderWindow w = View!.LoaderOpen();
         w.SetText("Saving data file...");
 
         try

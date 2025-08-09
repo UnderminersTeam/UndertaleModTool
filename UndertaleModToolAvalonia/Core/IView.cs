@@ -49,9 +49,8 @@ public interface IView
         return await new TextBoxWindow(message, text, title, isMultiline, isReadOnly).ShowDialog<string?>(window);
     }
 
-    public LoaderWindow LoaderOpen()
+    public ILoaderWindow LoaderOpen()
     {
-        // TODO: Replace LoaderWindow with an interface
         Window window = View.FindLogicalAncestorOfType<Window>() ?? throw new InvalidOperationException();
         LoaderWindow loaderWindow = new();
         loaderWindow.ShowDelayed(window);
