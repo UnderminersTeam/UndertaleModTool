@@ -289,7 +289,7 @@ public partial class UndertaleRoomView : UserControl
             && control.FindLogicalAncestorOfType<TreeViewItem>() is TreeViewItem treeViewItem)
         {
             TreeViewItem? parentTreeViewItem = treeViewItem.FindLogicalAncestorOfType<TreeViewItem>();
-            
+
             if (parentTreeViewItem?.DataContext is IList list)
             {
                 // TODO: Move to view model

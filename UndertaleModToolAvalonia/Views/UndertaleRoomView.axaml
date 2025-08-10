@@ -74,10 +74,11 @@
                                           SequenceInstanceMenu="{StaticResource SequenceInstanceMenu}"
                                           ParticleSystemInstanceMenu="{StaticResource ParticleSystemInstanceMenu}"
                                           TextItemInstanceMenu="{StaticResource TextItemInstanceMenu}" />
+        <h:ZoomConverter x:Key="ZoomConverter" />
     </UserControl.Resources>
-    <Grid RowDefinitions="250,Auto,1*" ColumnDefinitions="1*" Classes="PaddedProperties" MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
-        <Grid Grid.Row="0" RowDefinitions="1*" ColumnDefinitions="1*,Auto,1*">
-            <Grid Grid.Column="0">
+    <Grid ColumnDefinitions="2*,Auto,5*" RowDefinitions="1*" MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
+        <Grid Grid.Column="0" ColumnDefinitions="1*" RowDefinitions="1*,Auto,1*">
+            <Grid Grid.Row="0">
                 <!-- TreeView -->
                 <TreeView Name="RoomItemsTreeView" SelectedItem="{Binding RoomItemsSelectedItem}">
                     <TreeView.Styles>
@@ -171,8 +172,8 @@
                     <TreeViewItem x:Name="RoomTreeViewItem" Header="{Binding Room.Name.Content}" IsExpanded="True" ItemsSource="{Binding RoomItems}" />
                 </TreeView>
             </Grid>
-            <GridSplitter Grid.Column="1" />
-            <Grid Grid.Column="2">
+            <GridSplitter Grid.Row="1" />
+            <Grid Grid.Row="2">
                 <!-- Properties -->
                 <ScrollViewer>
                     <ContentControl Content="{Binding PropertiesContent}">
@@ -644,10 +645,16 @@
                 </ScrollViewer>
             </Grid>
         </Grid>
-        <GridSplitter Grid.Row="1" />
-        <Grid Grid.Row="2">
+        <GridSplitter Grid.Column="1" />
+        <Grid Grid.Column="2" RowDefinitions="Auto,1*">
+            <Grid Grid.Row="0" ColumnDefinitions="1*,Auto">
+                <StackPanel Grid.Column="0" Orientation="Horizontal"></StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <TextBox Text="{Binding Zoom, Converter={StaticResource ZoomConverter}}" Width="100"/>
+                </StackPanel>
+            </Grid>
             <!-- View -->
-            <c:UndertaleRoomEditor />
+            <c:UndertaleRoomEditor Grid.Row="1" />
         </Grid>
     </Grid>
 </UserControl>

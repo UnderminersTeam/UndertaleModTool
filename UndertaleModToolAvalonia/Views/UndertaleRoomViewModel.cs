@@ -29,6 +29,9 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
     [Notify]
     private object? _CategorySelected;
 
+    [Notify]
+    private double _Zoom = 1;
+
     public UndertaleRoomViewModel(UndertaleRoom room, IServiceProvider? serviceProvider = null)
     {
         MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
@@ -50,7 +53,7 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
 
         if (isGMS2)
             RoomItems.Add(new("Layers", "Layers", Room.Layers));
-        
+
     }
 
     public void AddLayer(UndertaleRoom.LayerType type)

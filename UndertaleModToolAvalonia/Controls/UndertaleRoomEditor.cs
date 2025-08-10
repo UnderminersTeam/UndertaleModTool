@@ -66,6 +66,8 @@ public class UndertaleRoomEditor : Control
         if (vm is null)
             return;
 
+        Scaling = vm.Zoom;
+
         RoomItems = [];
 
         if (vm.Room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.IsGMS2) || vm.Room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.IsGM2024_13))
@@ -288,11 +290,11 @@ public class UndertaleRoomEditor : Control
         foreach (RoomItem roomItem in RoomItems.Reverse<RoomItem>())
         {
             if (vm!.CategorySelected is null || roomItem.Category == vm!.CategorySelected)
-            if (RectContainsPoint(roomItem.Bounds, roomItem.Rotation, roomItem.Pivot, roomMousePosition))
-            {
-                HoveredRoomItem = roomItem;
-                break;
-            }
+                if (RectContainsPoint(roomItem.Bounds, roomItem.Rotation, roomItem.Pivot, roomMousePosition))
+                {
+                    HoveredRoomItem = roomItem;
+                    break;
+                }
         }
     }
 
@@ -345,6 +347,8 @@ public class UndertaleRoomEditor : Control
             Scaling /= 2;
         }
         Translation = new Vector(Math.Round(Translation.X), Math.Round(Translation.Y));
+
+        vm!.Zoom = Scaling;
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
