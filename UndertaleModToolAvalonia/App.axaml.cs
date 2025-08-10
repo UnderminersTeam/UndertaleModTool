@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
+using Avalonia.Styling;
 using Microsoft.Extensions.DependencyInjection;
 using UndertaleModToolAvalonia.Views;
 
@@ -12,6 +13,7 @@ namespace UndertaleModToolAvalonia;
 public partial class App : Application
 {
     public static IServiceProvider Services = null!;
+    public static IStyle? CurrentCustomStyles = null;
 
     public override void Initialize()
     {
@@ -31,6 +33,7 @@ public partial class App : Application
         Services = collection.BuildServiceProvider();
 
         MainViewModel vm = Services.GetRequiredService<MainViewModel>();
+        vm.Initialize();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {

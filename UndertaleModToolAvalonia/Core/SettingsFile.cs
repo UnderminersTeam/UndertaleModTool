@@ -2,7 +2,7 @@
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
-using System.Threading.Tasks;
+using Avalonia.Markup.Xaml;
 using Avalonia.Styling;
 using Microsoft.Extensions.DependencyInjection;
 using PropertyChanged.SourceGenerator;
@@ -20,22 +20,24 @@ public partial class SettingsFile
         MainVM = serviceProvider.GetRequiredService<MainViewModel>();
     }
 
-    public static async Task<SettingsFile> Load(IServiceProvider serviceProvider)
+    public static SettingsFile Load(IServiceProvider serviceProvider)
     {
         MainViewModel mainVM = serviceProvider.GetRequiredService<MainViewModel>();
 
+        SettingsFile? settings = null;
+
         string roamingAppData = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UndertaleModToolAvalonia");
+        
+        // Load Settings.json
+        string settingsPath = Path.Join(roamingAppData, "Settings.json");
 
-        try
+        if (File.Exists(settingsPath))
         {
-            string path = Path.Join(roamingAppData, "Settings.json");
-
-            if (File.Exists(path))
+            try
             {
-                string json = File.ReadAllText(path);
-                SettingsFile? settings = JsonSerializer.Deserialize<SettingsFile>(json, new JsonSerializerOptions()
+                string json = File.ReadAllText(settingsPath);
+                settings = JsonSerializer.Deserialize<SettingsFile>(json, new JsonSerializerOptions()
                 {
-                    ReadCommentHandling = JsonCommentHandling.Skip,
                     AllowTrailingCommas = true,
                 });
 
@@ -44,18 +46,39 @@ public partial class SettingsFile
                     // Check for upgrades here.
                     settings.MainVM = mainVM;
                     settings.Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?.?.?.?";
-
-                    return settings;
                 }
             }
-        }
-        catch (Exception e)
-        {
-            await mainVM.ShowMessageDialog($"Error when loading settings file: {e.Message}");
-            throw;
+            catch (Exception e)
+            {
+                mainVM.LazyErrorMessages.Add($"Error when loading settings file:\n{e.Message}\nDefault settings loaded.");
+            }
         }
 
-        return new SettingsFile(serviceProvider);
+        settings ??= new SettingsFile(serviceProvider);
+
+        // Load Styles.xaml
+        string stylesPath = Path.Join(roamingAppData, "Styles.xaml");
+
+        if (File.Exists(stylesPath))
+        {
+            try
+            {
+                string xaml = File.ReadAllText(stylesPath);
+                Styles styles = AvaloniaRuntimeXamlLoader.Parse<Styles>(xaml);
+
+                if (App.CurrentCustomStyles is not null)
+                    App.Current!.Styles.Remove(App.CurrentCustomStyles);
+
+                App.CurrentCustomStyles = styles;
+                App.Current!.Styles.Add(styles);
+            }
+            catch (Exception e)
+            {
+                mainVM.LazyErrorMessages.Add($"Error when loading styles file:\n{e.Message}");
+            }
+        }
+
+        return settings;
     }
 
     public async void Save()

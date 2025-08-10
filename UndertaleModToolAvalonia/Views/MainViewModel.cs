@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -27,6 +26,9 @@ public partial class MainViewModel
 
     // Services
     public readonly IServiceProvider ServiceProvider;
+
+    /// <summary>Error messages to be displayed after the view has been loaded.</summary>
+    public List<string> LazyErrorMessages = [];
 
     // Settings
     public SettingsFile? Settings { get; set; }
@@ -92,10 +94,19 @@ public partial class MainViewModel
         ];
     }
 
+    public void Initialize()
+    {
+        Settings = SettingsFile.Load(ServiceProvider);
+        Scripting = new(ServiceProvider);
+    }
+
     public async void OnLoaded()
     {
-        Settings = await SettingsFile.Load(ServiceProvider);
-        Scripting = new(ServiceProvider);
+        foreach (string message in LazyErrorMessages)
+        {
+            await ShowMessageDialog(message);
+        }
+        LazyErrorMessages.Clear();
 
         if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
