@@ -4,7 +4,7 @@
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-        <Version>0.8.2.0</Version>
+        <Version>0.8.3.0</Version>
     </PropertyGroup>
 
     <ItemGroup>
