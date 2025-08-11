@@ -12,17 +12,19 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="11.3.2" />
+        <PackageReference Include="Avalonia" Version="11.3.3" />
         <PackageReference Include="Avalonia.AvaloniaEdit" Version="11.3.0" />
-        <PackageReference Include="Avalonia.Controls.ColorPicker" Version="11.3.2" />
-        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.2" />
-        <PackageReference Include="Avalonia.Skia" Version="11.3.2" />
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.2" />
+        <PackageReference Include="Avalonia.Controls.ColorPicker" Version="11.3.3" />
+        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.3" />
+        <PackageReference Include="Avalonia.Markup.Xaml.Loader" Version="11.3.3" />
+        <PackageReference Include="Avalonia.Skia" Version="11.3.3" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.3" />
 
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.2" />
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.3" />
+        <PackageReference Include="AvaloniaEdit.TextMate" Version="11.3.0" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.14.0" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.6" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
         <PackageReference Include="PropertyChanged.SourceGenerator" Version="1.1.1">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
