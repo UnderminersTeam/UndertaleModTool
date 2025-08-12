@@ -391,8 +391,10 @@ namespace UndertaleModTool
 
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
             {
-                gridWidth /= 2;
-                gridHeight /= 2;
+                if (gridWidth > 1)
+                    gridWidth /= 2;
+                if (gridHeight > 1)
+                    gridHeight /= 2;
             }
             else if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
             {
@@ -887,8 +889,10 @@ namespace UndertaleModTool
                 }
 
                 // Snap to grid
-                tgtX = ((tgtX + gridWidth / 2) / gridWidth) * gridWidth;
-                tgtY = ((tgtY + gridHeight / 2) / gridHeight) * gridHeight;
+                if (gridWidth > 0)
+                    tgtX = ((tgtX + gridWidth / 2) / gridWidth) * gridWidth;
+                if (gridHeight > 0)
+                    tgtY = ((tgtY + gridHeight / 2) / gridHeight) * gridHeight;
 
                 if (movingObj is GameObject gameObj)
                 {
