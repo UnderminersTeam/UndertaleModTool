@@ -487,7 +487,7 @@ public sealed partial class ProjectContext
                 // Figure out a destination file path
                 string destinationFile;
                 if (_assetDataNamesToPaths.TryGetValue((serializableAsset.DataName, serializableAsset.AssetType), out string existingPath) &&
-                    File.Exists(existingPath))
+                    (File.Exists(existingPath) || (asset is UndertaleCode && File.Exists(Path.ChangeExtension(existingPath, "gml")))))
                 {
                     // Existing file path existed from project load, and the file still exists; use that again
                     destinationFile = existingPath;
