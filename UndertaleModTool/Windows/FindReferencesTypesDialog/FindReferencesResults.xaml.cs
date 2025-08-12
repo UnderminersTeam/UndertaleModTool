@@ -26,9 +26,13 @@ namespace UndertaleModTool.Windows
     public partial class FindReferencesResults : Window
     {
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+
         private object highlighted;
         private string sourceObjName;
         private readonly UndertaleData data;
+
+        internal object SourceObject { get; }
+        private readonly bool replaceExisting;
 
         private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
@@ -39,11 +43,13 @@ namespace UndertaleModTool.Windows
                 MainWindow.SetDarkTitleBarForWindow(this, true, false);
         }
 
-        public FindReferencesResults(object sourceObj, UndertaleData data, Dictionary<string, List<object>> results)
+        public FindReferencesResults(object sourceObj, UndertaleData data, Dictionary<string, List<object>> results,
+                                     bool replaceExisting = true)
         {
             InitializeComponent();
 
             this.data = data;
+            this.replaceExisting = replaceExisting;
 
             string sourceObjName;
             if (sourceObj is UndertaleNamedResource namedObj)
@@ -58,15 +64,20 @@ namespace UndertaleModTool.Windows
 
             Title = $"The references of game asset \"{sourceObjName}\"";
             label.Text = $"The search results for the game asset\n\"{sourceObjName}\".";
+            SourceObject = sourceObj;
 
             if (results is null)
+            {
                 ResultsTree.Background = new VisualBrush(new Label()
                 {
                     Content = "No references found.",
                     FontSize = 16
                 }) { Stretch = Stretch.None };
+            }
             else
+            {
                 ProcessResults(results);
+            }
         }
         public FindReferencesResults(UndertaleData data, Dictionary<string, List<object>> results)
         {
@@ -78,14 +89,40 @@ namespace UndertaleModTool.Windows
             label.Text = "The search results for the unreferenced game assets.";
 
             if (results is null)
+            {
                 ResultsTree.Background = new VisualBrush(new Label()
                 {
                     Content = "No unreferenced assets found.",
                     FontSize = 16
                 })
                 { Stretch = Stretch.None };
+            }
             else
+            {
                 ProcessResults(results);
+            }
+        }
+
+        /// <inheritdoc cref="Window.Show"/>
+        public new void Show()
+        {
+            if (replaceExisting)
+            {
+                var instances = Application.Current.Windows.OfType<FindReferencesResults>();
+                var lastExistingInst = instances.LastOrDefault(x =>
+                {
+                    return x.SourceObject == SourceObject && x != this;
+                });
+                if (lastExistingInst is not null)
+                {
+                    Left = lastExistingInst.Left;
+                    Top = lastExistingInst.Top;
+                    lastExistingInst.Close();
+                }
+                
+            }
+
+            base.Show();
         }
 
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
