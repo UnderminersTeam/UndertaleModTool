@@ -558,6 +558,7 @@ public class GMImage
                     var image = new MagickImage(_data);
                     image.Alpha(AlphaOption.Set);
                     image.Format = MagickFormat.Bgra;
+                    image.Depth = 8;
                     image.SetCompression(CompressionMethod.NoCompression);
                     return new GMImage(ImageFormat.RawBgra, Width, Height, image.ToByteArray());
                 }
@@ -822,6 +823,7 @@ public class GMImage
                     MagickImage image = new(_data, settings);
                     image.Alpha(AlphaOption.Set);
                     image.Format = MagickFormat.Bgra;
+                    image.Depth = 8;
                     image.SetCompression(CompressionMethod.NoCompression);
                     return image;
                 }
@@ -833,6 +835,7 @@ public class GMImage
                         Width = (uint)Width,
                         Height = (uint)Height,
                         Format = MagickFormat.Bgra,
+                        Depth = 8,
                         Compression = CompressionMethod.NoCompression
                     };
                     MagickImage image = new(_data, settings);
@@ -857,6 +860,7 @@ public class GMImage
     public static GMImage FromMagickImage(IMagickImage<byte> image)
     {
         image.Format = MagickFormat.Bgra;
+        image.Depth = 8;
         image.SetCompression(CompressionMethod.NoCompression);
         return new GMImage(ImageFormat.RawBgra, (int)image.Width, (int)image.Height, image.ToByteArray());
     }
