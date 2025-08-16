@@ -2,16 +2,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
-             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
-             xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
              xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="UndertaleModToolAvalonia.Views.UndertalePathView"
-             x:DataType="v:UndertalePathViewModel">
-    <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
+             x:Class="UndertaleModToolAvalonia.UndertalePathView"
+             x:DataType="l:UndertalePathViewModel">
+    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
         <Label>Name</Label>
-        <c:UndertaleStringReferenceView Reference="{Binding Path.Name}" />
+        <l:UndertaleStringReferenceView Reference="{Binding Path.Name}" />
 
         <Label>Smooth</Label>
         <CheckBox IsChecked="{Binding Path.IsSmooth}" />
@@ -23,8 +21,8 @@
         <TextBox Text="{Binding Path.Precision}" />
         
         <Label>Points</Label>
-        <c:EditableDataGrid ItemsSource="{Binding Path.Points}" ItemFactory="{Binding CreatePathPoint}">
-            <c:EditableDataGrid.Columns>
+        <l:EditableDataGrid ItemsSource="{Binding Path.Points}" ItemFactory="{Binding CreatePathPoint}">
+            <l:EditableDataGrid.Columns>
                 <DataGridTemplateColumn Header="X" Width="1*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate DataType="undertalem:UndertalePath+PathPoint">
@@ -46,8 +44,8 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-            </c:EditableDataGrid.Columns>
-        </c:EditableDataGrid>
+            </l:EditableDataGrid.Columns>
+        </l:EditableDataGrid>
     </Grid>
 
     <!-- TODO: Path renderer -->

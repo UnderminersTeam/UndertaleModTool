@@ -3,11 +3,11 @@
         xmlns:vm="using:UndertaleModToolAvalonia.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
+        xmlns:l="clr-namespace:UndertaleModToolAvalonia"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="UndertaleModToolAvalonia.Views.MainWindow"
+        x:Class="UndertaleModToolAvalonia.MainWindow"
         Icon="/Assets/Icon.ico"
-        x:DataType="v:MainViewModel"
+        x:DataType="l:MainViewModel"
         Title="{Binding Title}"
         IsEnabled="{Binding IsEnabled}">
     <NativeMenu.Menu>
@@ -61,5 +61,5 @@
         <KeyBinding Gesture="F1" Command="{Binding HelpAbout}" />
     </Window.KeyBindings>
     
-    <v:MainView />
+    <l:MainView />
 </Window>

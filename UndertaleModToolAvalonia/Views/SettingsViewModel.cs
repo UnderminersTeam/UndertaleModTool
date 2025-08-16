@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace UndertaleModToolAvalonia.Views;
+namespace UndertaleModToolAvalonia;
 
 public class SettingsViewModel
 {

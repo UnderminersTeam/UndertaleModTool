@@ -3,9 +3,8 @@ using System.Globalization;
 using Avalonia.Controls;
 using Avalonia.Data.Converters;
 using UndertaleModLib.Models;
-using UndertaleModToolAvalonia.Views;
 
-namespace UndertaleModToolAvalonia.Helpers;
+namespace UndertaleModToolAvalonia;
 
 public class RoomItemToContextMenuConverter : IValueConverter
 {

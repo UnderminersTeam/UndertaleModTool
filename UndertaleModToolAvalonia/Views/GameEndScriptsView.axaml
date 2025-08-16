@@ -2,21 +2,20 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
-             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
              xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="UndertaleModToolAvalonia.Views.GameEndScriptsView"
-             x:DataType="v:GameEndScriptsViewModel">
-    <c:EditableDataGrid ItemsSource="{Binding GameEndScripts}" ItemFactory="{Binding CreateGlobalInit}" Classes="LeftPaddedProperties">
-        <c:EditableDataGrid.Columns>
+             x:Class="UndertaleModToolAvalonia.GameEndScriptsView"
+             x:DataType="l:GameEndScriptsViewModel">
+    <l:EditableDataGrid ItemsSource="{Binding GameEndScripts}" ItemFactory="{Binding CreateGlobalInit}" Classes="LeftPaddedProperties">
+        <l:EditableDataGrid.Columns>
             <DataGridTemplateColumn Header="Script" Width="1*">
                 <DataGridTemplateColumn.CellTemplate>
                     <DataTemplate DataType="undertalem:UndertaleGlobalInit">
-                        <c:UndertaleResourceReferenceView Reference="{Binding Code}" ReferenceType="undertalem:UndertaleCode"/>
+                        <l:UndertaleResourceReferenceView Reference="{Binding Code}" ReferenceType="undertalem:UndertaleCode"/>
                     </DataTemplate>
                 </DataGridTemplateColumn.CellTemplate>
             </DataGridTemplateColumn>
-        </c:EditableDataGrid.Columns>
-    </c:EditableDataGrid>
+        </l:EditableDataGrid.Columns>
+    </l:EditableDataGrid>
 </UserControl>

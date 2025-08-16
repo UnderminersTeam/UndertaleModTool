@@ -10,9 +10,8 @@ using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using UndertaleModLib;
 using UndertaleModLib.Models;
-using UndertaleModToolAvalonia.Views;
 
-namespace UndertaleModToolAvalonia.Controls;
+namespace UndertaleModToolAvalonia;
 
 public partial class DataTreeView : UserControl
 {

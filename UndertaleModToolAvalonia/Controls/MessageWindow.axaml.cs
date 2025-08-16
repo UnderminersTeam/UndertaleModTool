@@ -1,7 +1,7 @@
 using System;
 using Avalonia.Controls;
 
-namespace UndertaleModToolAvalonia.Controls;
+namespace UndertaleModToolAvalonia;
 
 public partial class MessageWindow : Window
 {

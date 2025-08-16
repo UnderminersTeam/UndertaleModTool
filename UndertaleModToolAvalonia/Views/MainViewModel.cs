@@ -14,10 +14,8 @@ using Avalonia.Threading;
 using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
 using UndertaleModLib.Models;
-using UndertaleModToolAvalonia.Controls;
-using UndertaleModToolAvalonia.Core;
 
-namespace UndertaleModToolAvalonia.Views;
+namespace UndertaleModToolAvalonia;
 
 public partial class MainViewModel
 {

@@ -1,7 +1,7 @@
 ﻿using Avalonia.Controls.Templates;
 using Avalonia.Markup.Xaml.Templates;
 
-namespace UndertaleModToolAvalonia.Helpers;
+namespace UndertaleModToolAvalonia;
 
 public class ValueDataTemplate : DataTemplate, IDataTemplate
 {

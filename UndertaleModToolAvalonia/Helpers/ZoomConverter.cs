@@ -3,7 +3,7 @@ using System.Globalization;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
 
-namespace UndertaleModToolAvalonia.Helpers;
+namespace UndertaleModToolAvalonia;
 
 public class ZoomConverter : IValueConverter
 {

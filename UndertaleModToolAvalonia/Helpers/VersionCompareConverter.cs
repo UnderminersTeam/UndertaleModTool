@@ -4,14 +4,14 @@ using System.Linq;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
 
-namespace UndertaleModToolAvalonia.Helpers;
+namespace UndertaleModToolAvalonia;
 
 /// <summary>
 /// Checks if a version is greater then or equal, or less than, some value. Bind it to MainViewModel.DataVersion.
 /// Parameter follows this pattern: [operation][major[.minor[.release[.build]]]]
 /// Operation can be GE (greater or equal) or L (less than).
 /// Usage:
-/// {Binding $parent[v:MainView].((v:MainViewModel)DataContext).DataVersion,
+/// {Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
 /// Converter={StaticResource VersionCompareConverter},
 /// ConverterParameter=2}
 /// </summary>

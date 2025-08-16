@@ -3,10 +3,8 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
-using UndertaleModToolAvalonia.Controls;
-using UndertaleModToolAvalonia.Core;
 
-namespace UndertaleModToolAvalonia.Views;
+namespace UndertaleModToolAvalonia;
 
 public partial class MainView : UserControl, IView
 {
@@ -33,7 +31,7 @@ public partial class MainView : UserControl, IView
 
     private void FilterTextBox_TextChanged(object? sender, TextChangedEventArgs e)
     {
-        DataTreeView.SetFilter(FilterTextBox.Text ?? "");
+        MainDataTreeView.SetFilter(FilterTextBox.Text ?? "");
     }
 
     private void TabControl_SelectionChanged(object? sender, SelectionChangedEventArgs e)

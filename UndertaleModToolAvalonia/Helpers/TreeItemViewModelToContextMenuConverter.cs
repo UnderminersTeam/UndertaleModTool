@@ -3,9 +3,8 @@ using System.Globalization;
 using Avalonia.Controls;
 using Avalonia.Data.Converters;
 using UndertaleModLib;
-using UndertaleModToolAvalonia.Views;
 
-namespace UndertaleModToolAvalonia.Helpers;
+namespace UndertaleModToolAvalonia;
 
 public class TreeItemViewModelToContextMenuConverter : IValueConverter
 {

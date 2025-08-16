@@ -12,7 +12,7 @@ using UndertaleModLib;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 
-namespace UndertaleModToolAvalonia.Views;
+namespace UndertaleModToolAvalonia;
 
 public partial class SearchInCodeViewModel
 {

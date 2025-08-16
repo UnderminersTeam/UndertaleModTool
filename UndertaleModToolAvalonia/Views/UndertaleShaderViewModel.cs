@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 
-namespace UndertaleModToolAvalonia.Views;
+namespace UndertaleModToolAvalonia;
 
 public partial class UndertaleShaderViewModel : IUndertaleResourceViewModel
 {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using PropertyChanged.SourceGenerator;
 
-namespace UndertaleModToolAvalonia.Views;
+namespace UndertaleModToolAvalonia;
 
 public partial class TabItemViewModel
 {

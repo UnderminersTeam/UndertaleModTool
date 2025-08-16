@@ -2,34 +2,32 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
-             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
-             xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
              xmlns:undertale="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
              xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="UndertaleModToolAvalonia.Views.UndertaleParticleSystemEmitterView"
-             x:DataType="v:UndertaleParticleSystemEmitterViewModel">
+             x:Class="UndertaleModToolAvalonia.UndertaleParticleSystemEmitterView"
+             x:DataType="l:UndertaleParticleSystemEmitterViewModel">
     <UserControl.Resources>
-        <h:VersionCompareConverter x:Key="VersionCompareConverter" />
-        <h:EnumTypeToValuesConverter x:Key="EnumTypeToValuesConverter" />
-        <h:UndertaleColorToColorConverter x:Key="UndertaleColorToColorConverter" />
+        <l:VersionCompareConverter x:Key="VersionCompareConverter" />
+        <l:EnumTypeToValuesConverter x:Key="EnumTypeToValuesConverter" />
+        <l:UndertaleColorToColorConverter x:Key="UndertaleColorToColorConverter" />
     </UserControl.Resources>
     <StackPanel Classes="PaddedProperties">
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
             <Label>Name</Label>
-            <c:UndertaleStringReferenceView Reference="{Binding ParticleSystemEmitter.Name}" />
+            <l:UndertaleStringReferenceView Reference="{Binding ParticleSystemEmitter.Name}" />
         </Grid>
         
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
-              IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).DataVersion,
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
+              IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
               Converter={StaticResource VersionCompareConverter},
               ConverterParameter=GE2023.6}">
             <Label>Enabled</Label>
             <CheckBox IsChecked="{Binding ParticleSystemEmitter.Enabled}" />
         </Grid>
         
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
             <Label>Emit mode</Label>
             <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleParticleSystemEmitter+EmitMode}, Converter={StaticResource EnumTypeToValuesConverter}}"
                       SelectedItem="{Binding ParticleSystemEmitter.Mode}" />
@@ -38,8 +36,8 @@
             <TextBox Text="{Binding ParticleSystemEmitter.EmitCount}" />
         </Grid>
 
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
-              IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).DataVersion,
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
+              IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
               Converter={StaticResource VersionCompareConverter},
               ConverterParameter=GE2023.8}">
             <Label>Emit relative</Label>
@@ -66,7 +64,7 @@
                       SelectedItem="{Binding ParticleSystemEmitter.IntervalUnit}" />
         </Grid>
 
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
             <Label>Distribution</Label>
             <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleParticleSystemEmitter+DistributionEnum}, Converter={StaticResource EnumTypeToValuesConverter}}"
                       SelectedItem="{Binding ParticleSystemEmitter.Distribution}" />
@@ -87,7 +85,7 @@
             <TextBox Text="{Binding ParticleSystemEmitter.Rotation}" />
 
             <Label>Sprite</Label>
-            <c:UndertaleResourceReferenceView Reference="{Binding ParticleSystemEmitter.Sprite}" ReferenceType="undertalem:UndertaleSprite" />
+            <l:UndertaleResourceReferenceView Reference="{Binding ParticleSystemEmitter.Sprite}" ReferenceType="undertalem:UndertaleSprite" />
 
             <!-- TODO: View sprite -->
 
@@ -95,8 +93,8 @@
             <TextBox Text="{Binding ParticleSystemEmitter.FrameIndex}" />
         </Grid>
 
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
-              IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).DataVersion,
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
+              IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
               Converter={StaticResource VersionCompareConverter},
               ConverterParameter=GE2023.4}">
             <Label>Animate sprite</Label>
@@ -109,7 +107,7 @@
             <CheckBox IsChecked="{Binding ParticleSystemEmitter.IsRandom}" />
         </Grid>
 
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
             <Label>Texture</Label>
             <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleParticleSystemEmitter+TextureEnum}, Converter={StaticResource EnumTypeToValuesConverter}}"
                       SelectedItem="{Binding ParticleSystemEmitter.Texture}" />
@@ -210,13 +208,13 @@
             <CheckBox IsChecked="{Binding ParticleSystemEmitter.OrientationRelative}" />
 
             <Label>Spawn on death</Label>
-            <c:UndertaleResourceReferenceView Reference="{Binding ParticleSystemEmitter.SpawnOnDeath}" ReferenceType="undertalem:UndertaleParticleSystemEmitter" />
+            <l:UndertaleResourceReferenceView Reference="{Binding ParticleSystemEmitter.SpawnOnDeath}" ReferenceType="undertalem:UndertaleParticleSystemEmitter" />
 
             <Label>Spawn on death count</Label>
             <TextBox Text="{Binding ParticleSystemEmitter.SpawnOnDeathCount}" />
 
             <Label>Spawn on update</Label>
-            <c:UndertaleResourceReferenceView Reference="{Binding ParticleSystemEmitter.SpawnOnUpdate}" ReferenceType="undertalem:UndertaleParticleSystemEmitter" />
+            <l:UndertaleResourceReferenceView Reference="{Binding ParticleSystemEmitter.SpawnOnUpdate}" ReferenceType="undertalem:UndertaleParticleSystemEmitter" />
 
             <Label>Spawn on update count</Label>
             <TextBox Text="{Binding ParticleSystemEmitter.SpawnOnUpdateCount}" />

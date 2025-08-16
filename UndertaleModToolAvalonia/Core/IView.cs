@@ -4,10 +4,8 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.LogicalTree;
 using Avalonia.Platform.Storage;
-using UndertaleModToolAvalonia.Controls;
-using UndertaleModToolAvalonia.Views;
 
-namespace UndertaleModToolAvalonia.Core;
+namespace UndertaleModToolAvalonia;
 
 public interface IView
 {

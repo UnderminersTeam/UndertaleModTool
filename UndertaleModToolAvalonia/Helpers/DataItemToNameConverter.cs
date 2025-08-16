@@ -5,7 +5,7 @@ using Avalonia.Data.Converters;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 
-namespace UndertaleModToolAvalonia.Helpers;
+namespace UndertaleModToolAvalonia;
 
 public class DataItemToNameConverter : IValueConverter
 {

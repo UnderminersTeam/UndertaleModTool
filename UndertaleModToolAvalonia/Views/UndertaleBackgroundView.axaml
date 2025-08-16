@@ -2,21 +2,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
-             xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
-             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
              xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="UndertaleModToolAvalonia.Views.UndertaleBackgroundView"
-             x:DataType="v:UndertaleBackgroundViewModel">
+             x:Class="UndertaleModToolAvalonia.UndertaleBackgroundView"
+             x:DataType="l:UndertaleBackgroundViewModel">
     <UserControl.Resources>
-        <h:VersionCompareConverter x:Key="VersionCompareConverter" />
-        <c:ToSKImageUpdaterConverter x:Key="ToSKImageUpdaterConverter"/>
+        <l:VersionCompareConverter x:Key="VersionCompareConverter" />
+        <l:ToSKImageUpdaterConverter x:Key="ToSKImageUpdaterConverter"/>
     </UserControl.Resources>
     <StackPanel>
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
             <Label>Name</Label>
-            <c:UndertaleStringReferenceView Reference="{Binding Background.Name}" />
+            <l:UndertaleStringReferenceView Reference="{Binding Background.Name}" />
 
             <Label>Transparent</Label>
             <CheckBox IsChecked="{Binding Background.Transparent}" />
@@ -28,11 +26,11 @@
             <CheckBox IsChecked="{Binding Background.Preload}" />
 
             <Label>Texture</Label>
-            <c:UndertaleResourceReferenceView Reference="{Binding Background.Texture}" ReferenceType="undertalem:UndertaleTexturePageItem" />
+            <l:UndertaleResourceReferenceView Reference="{Binding Background.Texture}" ReferenceType="undertalem:UndertaleTexturePageItem" />
         </Grid>
         
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties"
-              IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).DataVersion,
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties"
+              IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
               Converter={StaticResource VersionCompareConverter},
               ConverterParameter=GE2}">
             
@@ -68,8 +66,8 @@
 
             <Label>Tile IDs</Label>
             <Expander Header="List">
-                <c:EditableDataGrid ItemsSource="{Binding Background.GMS2TileIds}" ItemFactory="{Binding CreateTileID}">
-                    <c:EditableDataGrid.Columns>
+                <l:EditableDataGrid ItemsSource="{Binding Background.GMS2TileIds}" ItemFactory="{Binding CreateTileID}">
+                    <l:EditableDataGrid.Columns>
                         <DataGridTemplateColumn Header="Tile ID" Width="1*">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate DataType="undertalem:UndertaleBackground+TileID">
@@ -77,17 +75,17 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                    </c:EditableDataGrid.Columns>
-                </c:EditableDataGrid>
+                    </l:EditableDataGrid.Columns>
+                </l:EditableDataGrid>
             </Expander>
         </Grid>
         
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
             <Label>Image</Label>
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
                           MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
-                <c:SKImageViewer>
-                    <c:SKImageViewer.SKImage>
+                <l:SKImageViewer>
+                    <l:SKImageViewer.SKImage>
                         <MultiBinding Converter="{StaticResource ToSKImageUpdaterConverter}">
                             <Binding Path="Background.Texture"/>
                             <Binding Path="Background.Texture.TexturePage.TextureData.Image"/>
@@ -102,8 +100,8 @@
                             <Binding Path="Background.Texture.BoundingWidth"/>
                             <Binding Path="Background.Texture.BoundingHeight"/>
                         </MultiBinding>
-                    </c:SKImageViewer.SKImage>
-                </c:SKImageViewer>
+                    </l:SKImageViewer.SKImage>
+                </l:SKImageViewer>
             </ScrollViewer>
         </Grid>
     </StackPanel>

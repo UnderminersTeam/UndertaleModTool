@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace UndertaleModToolAvalonia.Controls;
+namespace UndertaleModToolAvalonia;
 
 public partial class TextBoxWindow : Window
 {

@@ -9,9 +9,8 @@ using UndertaleModLib;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
-using UndertaleModToolAvalonia.Controls;
 
-namespace UndertaleModToolAvalonia.Views;
+namespace UndertaleModToolAvalonia;
 
 public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
 {

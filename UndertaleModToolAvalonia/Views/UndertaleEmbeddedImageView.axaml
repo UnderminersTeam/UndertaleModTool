@@ -2,18 +2,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
-             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
-             xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
              xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="UndertaleModToolAvalonia.Views.UndertaleEmbeddedImageView"
-             x:DataType="v:UndertaleEmbeddedImageViewModel">
-    <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
+             x:Class="UndertaleModToolAvalonia.UndertaleEmbeddedImageView"
+             x:DataType="l:UndertaleEmbeddedImageViewModel">
+    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
         <Label>Name</Label>
-        <c:UndertaleStringReferenceView Reference="{Binding EmbeddedImage.Name}" />
+        <l:UndertaleStringReferenceView Reference="{Binding EmbeddedImage.Name}" />
 
         <Label>Texture</Label>
-        <c:UndertaleResourceReferenceView Reference="{Binding EmbeddedImage.TextureEntry}" ReferenceType="undertalem:UndertaleTexturePageItem" />
+        <l:UndertaleResourceReferenceView Reference="{Binding EmbeddedImage.TextureEntry}" ReferenceType="undertalem:UndertaleTexturePageItem" />
     </Grid>
 </UserControl>

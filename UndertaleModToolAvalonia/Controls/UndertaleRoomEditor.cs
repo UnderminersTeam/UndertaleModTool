@@ -14,10 +14,8 @@ using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using SkiaSharp;
 using UndertaleModLib.Models;
-using UndertaleModToolAvalonia.Helpers;
-using UndertaleModToolAvalonia.Views;
 
-namespace UndertaleModToolAvalonia.Controls;
+namespace UndertaleModToolAvalonia;
 
 public class UndertaleRoomEditor : Control
 {

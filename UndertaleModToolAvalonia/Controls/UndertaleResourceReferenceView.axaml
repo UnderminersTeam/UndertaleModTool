@@ -2,17 +2,17 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="UndertaleModToolAvalonia.Controls.UndertaleResourceReferenceView">
-    <ContentControl DataContext="{Binding $parent[c:UndertaleResourceReferenceView]}">
+             x:Class="UndertaleModToolAvalonia.UndertaleResourceReferenceView">
+    <ContentControl DataContext="{Binding $parent[l:UndertaleResourceReferenceView]}">
         <Grid ColumnDefinitions="*,Auto,Auto,Auto">
             <!-- TODO: Can change, can remove -->
             <TextBox Grid.Column="0" Name="TextBox"
                      Text="{Binding Reference, Mode=OneWay}"
                      IsReadOnly="True">
                 <TextBox.Resources>
-                    <c:UndertaleReferenceDropHandler x:Key="UndertaleReferenceDropHandler"/>
+                    <l:UndertaleReferenceDropHandler x:Key="UndertaleReferenceDropHandler"/>
                 </TextBox.Resources>
                 <Interaction.Behaviors>
                     <ContextDropBehavior Handler="{StaticResource UndertaleReferenceDropHandler}"/>

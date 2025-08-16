@@ -6,7 +6,6 @@ using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avalonia.Styling;
 using Microsoft.Extensions.DependencyInjection;
-using UndertaleModToolAvalonia.Views;
 
 namespace UndertaleModToolAvalonia;
 

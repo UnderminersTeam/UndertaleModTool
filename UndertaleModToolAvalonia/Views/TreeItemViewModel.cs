@@ -3,9 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using PropertyChanged.SourceGenerator;
-using UndertaleModToolAvalonia.Controls;
 
-namespace UndertaleModToolAvalonia.Views;
+namespace UndertaleModToolAvalonia;
 
 public partial class TreeItemViewModel
 {

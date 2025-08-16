@@ -5,9 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using SkiaSharp;
 using UndertaleModLib;
 using UndertaleModLib.Models;
-using UndertaleModToolAvalonia.Controls;
 
-namespace UndertaleModToolAvalonia.Views;
+namespace UndertaleModToolAvalonia;
 
 public partial class UndertaleEmbeddedTextureViewModel : IUndertaleResourceViewModel
 {

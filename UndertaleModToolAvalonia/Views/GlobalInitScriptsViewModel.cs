@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using UndertaleModLib.Models;
 
-namespace UndertaleModToolAvalonia.Views;
+namespace UndertaleModToolAvalonia;
 
 public class GlobalInitScriptsViewModel
 {

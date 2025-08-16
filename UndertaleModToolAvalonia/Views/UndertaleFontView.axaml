@@ -2,23 +2,21 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
-             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
-             xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
              xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="UndertaleModToolAvalonia.Views.UndertaleFontView"
-             x:DataType="v:UndertaleFontViewModel">
+             x:Class="UndertaleModToolAvalonia.UndertaleFontView"
+             x:DataType="l:UndertaleFontViewModel">
     <UserControl.Resources>
-        <h:VersionCompareConverter x:Key="VersionCompareConverter" />
+        <l:VersionCompareConverter x:Key="VersionCompareConverter" />
     </UserControl.Resources>
     <StackPanel Classes="PaddedProperties">
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
             <Label>Name</Label>
-            <c:UndertaleStringReferenceView Reference="{Binding Font.Name}" />
+            <l:UndertaleStringReferenceView Reference="{Binding Font.Name}" />
 
             <Label>Display name</Label>
-            <c:UndertaleStringReferenceView Reference="{Binding Font.DisplayName}" />
+            <l:UndertaleStringReferenceView Reference="{Binding Font.DisplayName}" />
         
             <Label>Font size (em)</Label>
             <TextBox Text="{Binding Font.EmSize}" />
@@ -43,7 +41,7 @@
             <TextBox Text="{Binding Font.AntiAliasing}" />
 
             <Label>Texture</Label>
-            <c:UndertaleResourceReferenceView Reference="{Binding Font.Texture}" ReferenceType="undertalem:UndertaleTexturePageItem" />
+            <l:UndertaleResourceReferenceView Reference="{Binding Font.Texture}" ReferenceType="undertalem:UndertaleTexturePageItem" />
 
             <Label>Scale (X/Y)</Label>
             <Grid ColumnDefinitions="1*,1*">
@@ -52,8 +50,8 @@
             </Grid>
         </Grid>
 
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
-              IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).DataVersion,
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
+              IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
               Converter={StaticResource VersionCompareConverter},
               ConverterParameter=GE2022.2}">
             <Label>Ascender</Label>
@@ -63,16 +61,16 @@
             <TextBox Text="{Binding Font.AscenderOffset}" />
         </Grid>
 
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
-             IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).DataVersion,
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
+             IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
               Converter={StaticResource VersionCompareConverter},
               ConverterParameter=GE2023.2}">
             <Label>SDF spread value</Label>
             <TextBox Text="{Binding Font.SDFSpread}" />
         </Grid>
 
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
-             IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).DataVersion,
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
+             IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
               Converter={StaticResource VersionCompareConverter},
               ConverterParameter=GE2023.6}">
             <Label>Line height</Label>
@@ -82,8 +80,8 @@
         <!-- TODO: Show texture, click and edit glyphs -->
 
         <Label>Glyphs</Label>
-        <c:EditableDataGrid ItemsSource="{Binding Font.Glyphs}" ItemFactory="{Binding CreateGlyph}" SelectionChanged="{Binding GlyphsSelectedChanged}">
-            <c:EditableDataGrid.Columns>
+        <l:EditableDataGrid ItemsSource="{Binding Font.Glyphs}" ItemFactory="{Binding CreateGlyph}" SelectionChanged="{Binding GlyphsSelectedChanged}">
+            <l:EditableDataGrid.Columns>
                 <DataGridTemplateColumn Header="Character" Width="4*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate DataType="undertalem:UndertaleFont+Glyph">
@@ -140,12 +138,12 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-            </c:EditableDataGrid.Columns>
-        </c:EditableDataGrid>
+            </l:EditableDataGrid.Columns>
+        </l:EditableDataGrid>
 
         <Label>Kerning of selected glyph</Label>
-        <c:EditableDataGrid ItemsSource="{Binding GlyphsSelected.Kerning}" ItemFactory="{Binding CreateGlyphKerning}">
-            <c:EditableDataGrid.Columns>
+        <l:EditableDataGrid ItemsSource="{Binding GlyphsSelected.Kerning}" ItemFactory="{Binding CreateGlyphKerning}">
+            <l:EditableDataGrid.Columns>
                 <DataGridTemplateColumn Header="Preceding character" Width="1*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate DataType="undertalem:UndertaleFont+Glyph+GlyphKerning">
@@ -161,8 +159,8 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-            </c:EditableDataGrid.Columns>
-        </c:EditableDataGrid>
+            </l:EditableDataGrid.Columns>
+        </l:EditableDataGrid>
 
         <StackPanel Orientation="Horizontal">
             <Button Command="{Binding SortGlyphs}">Sort glyphs</Button>

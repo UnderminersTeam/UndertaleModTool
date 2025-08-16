@@ -2,13 +2,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
-             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
-             xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
              xmlns:undertale="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
              xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="UndertaleModToolAvalonia.Controls.DataTreeView">
+             x:Class="UndertaleModToolAvalonia.DataTreeView">
     <UserControl.Resources>
         <ContextMenu x:Key="ListMenu">
             <MenuItem Header="_Add" Click="ContextMenu_Add_Click"/>
@@ -23,16 +21,16 @@
             <MenuItem Header="_Copy name" Click="ContextMenu_CopyName_Click"/>
             <MenuItem Header="_Remove" Click="ContextMenu_Remove_Click"/>
         </ContextMenu>
-        <h:LevelToWidthConverter x:Key="LevelToWidthConverter" />
-        <h:TreeItemViewModelToContextMenuConverter x:Key="TreeItemViewModelToContextMenuConverter"
+        <l:LevelToWidthConverter x:Key="LevelToWidthConverter" />
+        <l:TreeItemViewModelToContextMenuConverter x:Key="TreeItemViewModelToContextMenuConverter"
                                                    ListMenu="{StaticResource ListMenu}"
                                                    SingleMenu="{StaticResource SingleMenu}"
                                                    ResourceMenu="{StaticResource ResourceMenu}"/>
     </UserControl.Resources>
-    <ContentControl DataContext="{Binding $parent[c:DataTreeView]}">
+    <ContentControl DataContext="{Binding $parent[l:DataTreeView]}">
         <ListBox Name="DataListBox" Grid.Row="1" ItemsSource="{Binding TreeSource}" DoubleTapped="ListBox_DoubleTapped" KeyDown="ListBox_KeyDown" AutoScrollToSelectedItem="False">
             <ListBox.Styles>
-                <Style Selector="ListBoxItem" x:DataType="v:TreeItemViewModel">
+                <Style Selector="ListBoxItem" x:DataType="l:TreeItemViewModel">
                     <Setter Property="(Interaction.Behaviors)">
                         <BehaviorCollectionTemplate>
                             <BehaviorCollection>
@@ -44,7 +42,7 @@
                 </Style>
             </ListBox.Styles>
             <ListBox.ItemTemplate>
-                <DataTemplate DataType="v:TreeItemViewModel">
+                <DataTemplate DataType="l:TreeItemViewModel">
                     <StackPanel Orientation="Horizontal" Background="Transparent">
                         <Panel Width="{Binding Level, Converter={StaticResource LevelToWidthConverter}}"></Panel>
                         <Panel Width="20">

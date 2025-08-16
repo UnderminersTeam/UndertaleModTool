@@ -5,9 +5,8 @@ using Avalonia.Input;
 using Avalonia.LogicalTree;
 using Avalonia.Xaml.Interactions.DragAndDrop;
 using UndertaleModLib;
-using UndertaleModToolAvalonia.Views;
 
-namespace UndertaleModToolAvalonia.Controls;
+namespace UndertaleModToolAvalonia;
 
 public partial class UndertaleResourceReferenceView : UserControl
 {

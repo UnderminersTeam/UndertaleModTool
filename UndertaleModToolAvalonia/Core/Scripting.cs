@@ -16,11 +16,8 @@ using Underanalyzer.Decompiler;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
-using UndertaleModLib.Scripting;
-using UndertaleModToolAvalonia.Controls;
-using UndertaleModToolAvalonia.Views;
-
-namespace UndertaleModToolAvalonia.Core;
+using UndertaleModLib.Scripting;
+namespace UndertaleModToolAvalonia;
 
 public class Scripting
 {
@@ -287,7 +284,7 @@ public class ScriptGlobals : IScriptInterface
 
         if (file is null)
             return null;
-        
+
         return file.TryGetLocalPath();
     }
 

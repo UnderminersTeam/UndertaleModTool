@@ -3,7 +3,7 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using UndertaleModLib.Models;
 
-namespace UndertaleModToolAvalonia.Helpers;
+namespace UndertaleModToolAvalonia;
 
 public class LayerTypeTemplateSelector : ITreeDataTemplate
 {

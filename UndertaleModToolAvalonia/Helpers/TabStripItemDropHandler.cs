@@ -3,9 +3,8 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.LogicalTree;
 using Avalonia.Xaml.Interactions.DragAndDrop;
-using UndertaleModToolAvalonia.Views;
 
-namespace UndertaleModToolAvalonia.Helpers;
+namespace UndertaleModToolAvalonia;
 
 public class TabStripItemDropHandler : DropHandlerBase
 {

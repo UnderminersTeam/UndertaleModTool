@@ -2,38 +2,36 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
-             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
-             xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
              xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="UndertaleModToolAvalonia.Views.UndertaleExtensionView"
-             x:DataType="v:UndertaleExtensionViewModel">
+             x:Class="UndertaleModToolAvalonia.UndertaleExtensionView"
+             x:DataType="l:UndertaleExtensionViewModel">
     <UserControl.Resources>
-        <h:VersionCompareConverter x:Key="VersionCompareConverter" />
-        <h:EnumTypeToValuesConverter x:Key="EnumTypeToValuesConverter" />
+        <l:VersionCompareConverter x:Key="VersionCompareConverter" />
+        <l:EnumTypeToValuesConverter x:Key="EnumTypeToValuesConverter" />
     </UserControl.Resources>
     <StackPanel Classes="PaddedProperties">
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
             <Label>Name</Label>
-            <c:UndertaleStringReferenceView Reference="{Binding Extension.Name}" />
+            <l:UndertaleStringReferenceView Reference="{Binding Extension.Name}" />
         </Grid>
 
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
-              IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).DataVersion,
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
+              IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
               Converter={StaticResource VersionCompareConverter},
               ConverterParameter=GE2023.4}">
             <Label>Version</Label>
-            <c:UndertaleStringReferenceView Reference="{Binding Extension.Version}" />
+            <l:UndertaleStringReferenceView Reference="{Binding Extension.Version}" />
         </Grid>
 
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
             <Label>Class name</Label>
-            <c:UndertaleStringReferenceView Reference="{Binding Extension.ClassName}" />
+            <l:UndertaleStringReferenceView Reference="{Binding Extension.ClassName}" />
 
             <Label>Files</Label>
-            <c:EditableDataGrid ItemsSource="{Binding Extension.Files}" ItemFactory="{Binding CreateExtensionFile}" SelectionChanged="{Binding FilesSelectedChanged}">
-                <c:EditableDataGrid.Columns>
+            <l:EditableDataGrid ItemsSource="{Binding Extension.Files}" ItemFactory="{Binding CreateExtensionFile}" SelectionChanged="{Binding FilesSelectedChanged}">
+                <l:EditableDataGrid.Columns>
                     <DataGridTemplateColumn Header="File name" Width="1*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate DataType="undertalem:UndertaleExtensionFile">
@@ -41,8 +39,8 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                </c:EditableDataGrid.Columns>
-            </c:EditableDataGrid>
+                </l:EditableDataGrid.Columns>
+            </l:EditableDataGrid>
         </Grid>
 
         <StackPanel IsVisible="{Binding FilesSelected, Converter={x:Static ObjectConverters.IsNotNull}}">
@@ -52,23 +50,23 @@
                 <TextBlock FontWeight="Bold">Selected file properties (<TextBlock Text="{Binding FilesSelected.Filename.Content}"/>)</TextBlock>
             </Label>
 
-            <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
                 <Label>Name</Label>
-                <c:UndertaleStringReferenceView Reference="{Binding FilesSelected.Filename}" />
+                <l:UndertaleStringReferenceView Reference="{Binding FilesSelected.Filename}" />
 
                 <Label>Kind</Label>
                 <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleExtensionKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
                           SelectedItem="{Binding FilesSelected.Kind}" />
 
                 <Label>Init function name</Label>
-                <c:UndertaleStringReferenceView Reference="{Binding FilesSelected.InitScript}" />
+                <l:UndertaleStringReferenceView Reference="{Binding FilesSelected.InitScript}" />
 
                 <Label>Cleanup function name</Label>
-                <c:UndertaleStringReferenceView Reference="{Binding FilesSelected.CleanupScript}" />
+                <l:UndertaleStringReferenceView Reference="{Binding FilesSelected.CleanupScript}" />
 
                 <Label>Functions</Label>
-                <c:EditableDataGrid ItemsSource="{Binding FilesSelected.Functions}" ItemFactory="{Binding CreateExtensionFunction}" SelectionChanged="{Binding FunctionsSelectedChanged}">
-                    <c:EditableDataGrid.Columns>
+                <l:EditableDataGrid ItemsSource="{Binding FilesSelected.Functions}" ItemFactory="{Binding CreateExtensionFunction}" SelectionChanged="{Binding FunctionsSelectedChanged}">
+                    <l:EditableDataGrid.Columns>
                         <DataGridTemplateColumn Header="Name" Width="1*">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate DataType="undertalem:UndertaleExtensionFunction">
@@ -76,8 +74,8 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                    </c:EditableDataGrid.Columns>
-                </c:EditableDataGrid>
+                    </l:EditableDataGrid.Columns>
+                </l:EditableDataGrid>
             </Grid>
         </StackPanel>
 
@@ -88,12 +86,12 @@
                 <TextBlock FontWeight="Bold">Selected function properties (<TextBlock Text="{Binding FunctionsSelected.Name.Content}"/>)</TextBlock>
             </Label>
 
-            <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
                 <Label>Name</Label>
-                <c:UndertaleStringReferenceView Reference="{Binding FunctionsSelected.Name}" />
+                <l:UndertaleStringReferenceView Reference="{Binding FunctionsSelected.Name}" />
                 
                 <Label>External name</Label>
-                <c:UndertaleStringReferenceView Reference="{Binding FunctionsSelected.ExtName}" />
+                <l:UndertaleStringReferenceView Reference="{Binding FunctionsSelected.ExtName}" />
 
                 <Label>ID</Label>
                 <TextBox Text="{Binding FunctionsSelected.ID}" />
@@ -106,8 +104,8 @@
                           SelectedItem="{Binding FunctionsSelected.RetType}" />
 
                 <Label>Argument types</Label>
-                <c:EditableDataGrid ItemsSource="{Binding FunctionsSelected.Arguments}" ItemFactory="{Binding CreateExtensionFunctionArg}">
-                    <c:EditableDataGrid.Columns>
+                <l:EditableDataGrid ItemsSource="{Binding FunctionsSelected.Arguments}" ItemFactory="{Binding CreateExtensionFunctionArg}">
+                    <l:EditableDataGrid.Columns>
                         <DataGridTemplateColumn Header="Type" Width="1*">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate DataType="undertalem:UndertaleExtensionFunctionArg">
@@ -116,24 +114,24 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                    </c:EditableDataGrid.Columns>
-                </c:EditableDataGrid>
+                    </l:EditableDataGrid.Columns>
+                </l:EditableDataGrid>
             </Grid>
         </StackPanel>
 
         <Separator />
 
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
-              IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).DataVersion,
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
+              IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
               Converter={StaticResource VersionCompareConverter},
               ConverterParameter=GE2022.6}">
             <Label>Options</Label>
-            <c:EditableDataGrid ItemsSource="{Binding Extension.Options}" ItemFactory="{Binding CreateExtensionOption}">
-                <c:EditableDataGrid.Columns>
+            <l:EditableDataGrid ItemsSource="{Binding Extension.Options}" ItemFactory="{Binding CreateExtensionOption}">
+                <l:EditableDataGrid.Columns>
                     <DataGridTemplateColumn Header="Name" Width="1*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate DataType="undertalem:UndertaleExtensionOption">
-                                <c:UndertaleStringReferenceView Reference="{Binding Name}" />
+                                <l:UndertaleStringReferenceView Reference="{Binding Name}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -149,12 +147,12 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate DataType="undertalem:UndertaleExtensionOption">
                                 <!-- TODO: Show checkbox and check if it's number depending on type -->
-                                <c:UndertaleStringReferenceView Reference="{Binding Value}" />
+                                <l:UndertaleStringReferenceView Reference="{Binding Value}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                </c:EditableDataGrid.Columns>
-            </c:EditableDataGrid>
+                </l:EditableDataGrid.Columns>
+            </l:EditableDataGrid>
         </Grid>
     </StackPanel>
 </UserControl>

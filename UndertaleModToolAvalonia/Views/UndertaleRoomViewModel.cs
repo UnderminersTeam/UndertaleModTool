@@ -10,7 +10,7 @@ using UndertaleModLib;
 using UndertaleModLib.Models;
 using static UndertaleModLib.Models.UndertaleRoom;
 
-namespace UndertaleModToolAvalonia.Views;
+namespace UndertaleModToolAvalonia;
 
 public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
 {

@@ -7,7 +7,7 @@ using Avalonia.VisualTree;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 
-namespace UndertaleModToolAvalonia.Views;
+namespace UndertaleModToolAvalonia;
 
 public partial class UndertaleRoomView : UserControl
 {

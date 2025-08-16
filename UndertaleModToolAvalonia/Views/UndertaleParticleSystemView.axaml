@@ -2,21 +2,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
-             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
-             xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
              xmlns:undertale="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
              xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="UndertaleModToolAvalonia.Views.UndertaleParticleSystemView"
-             x:DataType="v:UndertaleParticleSystemViewModel">
+             x:Class="UndertaleModToolAvalonia.UndertaleParticleSystemView"
+             x:DataType="l:UndertaleParticleSystemViewModel">
     <UserControl.Resources>
-        <h:VersionCompareConverter x:Key="VersionCompareConverter" />
+        <l:VersionCompareConverter x:Key="VersionCompareConverter" />
     </UserControl.Resources>
     <StackPanel Classes="PaddedProperties">
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
             <Label>Name</Label>
-            <c:UndertaleStringReferenceView Reference="{Binding ParticleSystem.Name}" />
+            <l:UndertaleStringReferenceView Reference="{Binding ParticleSystem.Name}" />
 
             <Label>Origin (X/Y)</Label>
             <Grid ColumnDefinitions="1*,1*">
@@ -28,30 +26,30 @@
             <TextBox Text="{Binding ParticleSystem.DrawOrder}" />
         </Grid>
         
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
-              IsVisible="{Binding $parent[v:MainView].((v:MainViewModel)DataContext).DataVersion,
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
+              IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
               Converter={StaticResource VersionCompareConverter},
               ConverterParameter=GE2023.8}">
             <Label>Global space particles</Label>
             <CheckBox IsChecked="{Binding ParticleSystem.GlobalSpaceParticles}" />
         </Grid>
         
-        <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
             <Label>Emitters</Label>
-            <c:EditableDataGrid ItemsSource="{Binding ParticleSystem.Emitters}" ItemFactory="{Binding CreateParticleSystemEmitterItem}">
-                <c:EditableDataGrid.Columns>
+            <l:EditableDataGrid ItemsSource="{Binding ParticleSystem.Emitters}" ItemFactory="{Binding CreateParticleSystemEmitterItem}">
+                <l:EditableDataGrid.Columns>
                     <DataGridTemplateColumn Header="Emitter" Width="1*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <DataTemplate.DataType>
                                     <x:Type TypeName="undertale:UndertaleResourceById" x:TypeArguments="undertalem:UndertaleParticleSystemEmitter,undertale:UndertaleChunkPSEM"/>
                                 </DataTemplate.DataType>
-                                <c:UndertaleResourceReferenceView Reference="{Binding Resource}" ReferenceType="undertalem:UndertaleParticleSystemEmitter"/>
+                                <l:UndertaleResourceReferenceView Reference="{Binding Resource}" ReferenceType="undertalem:UndertaleParticleSystemEmitter"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                </c:EditableDataGrid.Columns>
-            </c:EditableDataGrid>
+                </l:EditableDataGrid.Columns>
+            </l:EditableDataGrid>
         </Grid>
     </StackPanel>
 </UserControl>

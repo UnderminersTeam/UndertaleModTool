@@ -1,4 +1,4 @@
-﻿namespace UndertaleModToolAvalonia.Views;
+﻿namespace UndertaleModToolAvalonia;
 
 public class DescriptionViewModel
 {

@@ -4,7 +4,7 @@ using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 
-namespace UndertaleModToolAvalonia.Views;
+namespace UndertaleModToolAvalonia;
 
 public partial class UndertaleExtensionViewModel : IUndertaleResourceViewModel
 {

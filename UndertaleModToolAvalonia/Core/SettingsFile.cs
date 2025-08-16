@@ -6,9 +6,8 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Styling;
 using Microsoft.Extensions.DependencyInjection;
 using PropertyChanged.SourceGenerator;
-using UndertaleModToolAvalonia.Views;
 
-namespace UndertaleModToolAvalonia.Core;
+namespace UndertaleModToolAvalonia;
 
 public partial class SettingsFile
 {
@@ -27,7 +26,7 @@ public partial class SettingsFile
         SettingsFile? settings = null;
 
         string roamingAppData = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UndertaleModToolAvalonia");
-        
+
         // Load Settings.json
         string settingsPath = Path.Join(roamingAppData, "Settings.json");
 

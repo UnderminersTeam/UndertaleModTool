@@ -7,7 +7,7 @@ using Avalonia.Interactivity;
 using Avalonia.Reactive;
 using PropertyChanged.SourceGenerator;
 
-namespace UndertaleModToolAvalonia.Controls;
+namespace UndertaleModToolAvalonia;
 
 public partial class FlagsBoxView : UserControl
 {

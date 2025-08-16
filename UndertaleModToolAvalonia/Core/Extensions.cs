@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Avalonia.Threading;
 
-namespace UndertaleModToolAvalonia.Core;
+namespace UndertaleModToolAvalonia;
 
 public static class Extensions
 {

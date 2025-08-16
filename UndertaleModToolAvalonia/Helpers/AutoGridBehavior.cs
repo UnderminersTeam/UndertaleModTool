@@ -3,7 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 
-namespace UndertaleModToolAvalonia.Helpers;
+namespace UndertaleModToolAvalonia;
 
 /// <summary>
 /// Automatically sets Grid.Row and Grid.Column on every child of the attached Grid, in order, according to ColumnDefinitions.

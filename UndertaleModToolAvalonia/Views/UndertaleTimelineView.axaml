@@ -2,20 +2,18 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
-             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
-             xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
              xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="UndertaleModToolAvalonia.Views.UndertaleTimelineView"
-             x:DataType="v:UndertaleTimelineViewModel">
-    <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
+             x:Class="UndertaleModToolAvalonia.UndertaleTimelineView"
+             x:DataType="l:UndertaleTimelineViewModel">
+    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
         <Label>Name</Label>
-        <c:UndertaleStringReferenceView Reference="{Binding Timeline.Name}" />
+        <l:UndertaleStringReferenceView Reference="{Binding Timeline.Name}" />
 
         <Label>Moments</Label>
-        <c:EditableDataGrid ItemsSource="{Binding Timeline.Moments}" ItemFactory="{Binding CreateMoment}">
-            <c:EditableDataGrid.Columns>
+        <l:EditableDataGrid ItemsSource="{Binding Timeline.Moments}" ItemFactory="{Binding CreateMoment}">
+            <l:EditableDataGrid.Columns>
                 <DataGridTemplateColumn Header="Step" Width="1*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate DataType="undertalem:UndertaleTimeline+UndertaleTimelineMoment">
@@ -26,22 +24,22 @@
                 <DataGridTemplateColumn Header="Actions" Width="3*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate DataType="undertalem:UndertaleTimeline+UndertaleTimelineMoment">
-                            <c:EditableDataGrid ItemsSource="{Binding Event}"
-                                                ItemFactory="{Binding $parent[v:UndertaleTimelineView].((v:UndertaleTimelineViewModel)DataContext).CreateEventAction}">
-                                <c:EditableDataGrid.Columns>
+                            <l:EditableDataGrid ItemsSource="{Binding Event}"
+                                                ItemFactory="{Binding $parent[l:UndertaleTimelineView].((l:UndertaleTimelineViewModel)DataContext).CreateEventAction}">
+                                <l:EditableDataGrid.Columns>
                                     <DataGridTemplateColumn Header="Code" Width="1*">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate DataType="undertalem:UndertaleGameObject+EventAction">
-                                                <c:UndertaleResourceReferenceView Reference="{Binding CodeId}" ReferenceType="undertalem:UndertaleCode"/>
+                                                <l:UndertaleResourceReferenceView Reference="{Binding CodeId}" ReferenceType="undertalem:UndertaleCode"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                </c:EditableDataGrid.Columns>
-                            </c:EditableDataGrid>
+                                </l:EditableDataGrid.Columns>
+                            </l:EditableDataGrid>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-            </c:EditableDataGrid.Columns>
-        </c:EditableDataGrid>
+            </l:EditableDataGrid.Columns>
+        </l:EditableDataGrid>
     </Grid>
 </UserControl>

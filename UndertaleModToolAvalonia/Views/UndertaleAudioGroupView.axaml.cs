@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace UndertaleModToolAvalonia.Views;
+namespace UndertaleModToolAvalonia;
 
 public partial class UndertaleAudioGroupView : UserControl
 {

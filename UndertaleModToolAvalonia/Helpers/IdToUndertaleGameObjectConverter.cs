@@ -4,9 +4,8 @@ using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Microsoft.Extensions.DependencyInjection;
 using UndertaleModLib.Models;
-using UndertaleModToolAvalonia.Views;
 
-namespace UndertaleModToolAvalonia.Helpers;
+namespace UndertaleModToolAvalonia;
 
 // TODO: Don't use a static field for services. Also somehow make this update when the ids change.
 public class IdToUndertaleGameObjectConverter : IValueConverter

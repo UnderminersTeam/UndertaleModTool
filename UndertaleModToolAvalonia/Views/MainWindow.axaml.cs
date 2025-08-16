@@ -1,7 +1,6 @@
 ﻿using Avalonia.Controls;
-using UndertaleModToolAvalonia.Controls;
 
-namespace UndertaleModToolAvalonia.Views;
+namespace UndertaleModToolAvalonia;
 
 public partial class MainWindow : Window
 {

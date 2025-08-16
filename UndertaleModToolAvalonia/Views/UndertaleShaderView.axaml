@@ -2,19 +2,17 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:v="clr-namespace:UndertaleModToolAvalonia.Views"
-             xmlns:h="clr-namespace:UndertaleModToolAvalonia.Helpers"
-             xmlns:c="clr-namespace:UndertaleModToolAvalonia.Controls"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
              xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="UndertaleModToolAvalonia.Views.UndertaleShaderView"
-             x:DataType="v:UndertaleShaderViewModel">
+             x:Class="UndertaleModToolAvalonia.UndertaleShaderView"
+             x:DataType="l:UndertaleShaderViewModel">
     <UserControl.Resources>
-        <h:EnumTypeToValuesConverter x:Key="EnumTypeToValuesConverter" />
+        <l:EnumTypeToValuesConverter x:Key="EnumTypeToValuesConverter" />
     </UserControl.Resources>
-    <Grid h:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
+    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
         <Label>Name</Label>
-        <c:UndertaleStringReferenceView Reference="{Binding Shader.Name}" />
+        <l:UndertaleStringReferenceView Reference="{Binding Shader.Name}" />
 
         <Label>Type</Label>
         <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleShader+ShaderType}, Converter={StaticResource EnumTypeToValuesConverter}}"
@@ -25,32 +23,32 @@
 
         <Label>GLSL ES vertex source</Label>
         <Expander Header="Code">
-            <c:UndertaleStringReferenceView Reference="{Binding Shader.GLSL_ES_Vertex}" />
+            <l:UndertaleStringReferenceView Reference="{Binding Shader.GLSL_ES_Vertex}" />
         </Expander>
 
         <Label>GLSL ES fragment source</Label>
         <Expander Header="Code">
-            <c:UndertaleStringReferenceView Reference="{Binding Shader.GLSL_ES_Fragment}" />
+            <l:UndertaleStringReferenceView Reference="{Binding Shader.GLSL_ES_Fragment}" />
         </Expander>
 
         <Label>GLSL vertex source</Label>
         <Expander Header="Code">
-            <c:UndertaleStringReferenceView Reference="{Binding Shader.GLSL_Vertex}" />
+            <l:UndertaleStringReferenceView Reference="{Binding Shader.GLSL_Vertex}" />
         </Expander>
 
         <Label>GLSL fragment source</Label>
         <Expander Header="Code">
-            <c:UndertaleStringReferenceView Reference="{Binding Shader.GLSL_Fragment}" />
+            <l:UndertaleStringReferenceView Reference="{Binding Shader.GLSL_Fragment}" />
         </Expander>
 
         <Label>HLSL9 vertex source</Label>
         <Expander Header="Code">
-            <c:UndertaleStringReferenceView Reference="{Binding Shader.HLSL9_Vertex}" />
+            <l:UndertaleStringReferenceView Reference="{Binding Shader.HLSL9_Vertex}" />
         </Expander>
 
         <Label>HLSL9 fragment source</Label>
         <Expander Header="Code">
-            <c:UndertaleStringReferenceView Reference="{Binding Shader.HLSL9_Fragment}" />
+            <l:UndertaleStringReferenceView Reference="{Binding Shader.HLSL9_Fragment}" />
         </Expander>
 
         <Label>HLSL11 vertex data</Label>
@@ -102,16 +100,16 @@
         </StackPanel>
 
         <Label>Vertex shader attributes</Label>
-        <c:EditableDataGrid ItemsSource="{Binding Shader.VertexShaderAttributes}" ItemFactory="{Binding CreateVertexShaderAttribute}">
-            <c:EditableDataGrid.Columns>
+        <l:EditableDataGrid ItemsSource="{Binding Shader.VertexShaderAttributes}" ItemFactory="{Binding CreateVertexShaderAttribute}">
+            <l:EditableDataGrid.Columns>
                 <DataGridTemplateColumn Header="Name" Width="1*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate DataType="undertalem:UndertaleShader+VertexShaderAttribute">
-                            <c:UndertaleStringReferenceView Reference="{Binding Name}"/>
+                            <l:UndertaleStringReferenceView Reference="{Binding Name}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-            </c:EditableDataGrid.Columns>
-        </c:EditableDataGrid>
+            </l:EditableDataGrid.Columns>
+        </l:EditableDataGrid>
     </Grid>
 </UserControl>

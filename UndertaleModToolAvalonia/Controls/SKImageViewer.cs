@@ -13,9 +13,8 @@ using Microsoft.Extensions.DependencyInjection;
 using SkiaSharp;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
-using UndertaleModToolAvalonia.Views;
 
-namespace UndertaleModToolAvalonia.Controls;
+namespace UndertaleModToolAvalonia;
 
 public class SKImageViewer : Control
 {

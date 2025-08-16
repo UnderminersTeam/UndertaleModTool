@@ -1,6 +1,6 @@
 using UndertaleModLib;
 
-namespace UndertaleModToolAvalonia.Views;
+namespace UndertaleModToolAvalonia;
 
 interface IUndertaleResourceViewModel
 {
