@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.LogicalTree;
 using Avalonia.Platform.Storage;
 
@@ -70,5 +71,11 @@ public interface IView
         {
             DataContext = new SearchInCodeViewModel(),
         }.Show();
+    }
+
+    public IInputElement? GetFocusedElement()
+    {
+        TopLevel topLevel = TopLevel.GetTopLevel(View)!;
+        return topLevel.FocusManager?.GetFocusedElement();
     }
 }

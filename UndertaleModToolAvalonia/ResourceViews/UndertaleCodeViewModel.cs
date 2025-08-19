@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Avalonia.Input;
 using Avalonia.Threading;
 using AvaloniaEdit.Document;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +13,7 @@ using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia;
 
+// TODO: A billion things. Syntax highlighting.
 public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
 {
     public enum Tab
@@ -20,7 +22,8 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
         ASM = 1,
     }
 
-    // TODO: A billion things. Syntax highlighting.
+    public IUndertaleCodeView? View;
+
     public MainViewModel MainVM;
     public UndertaleResource Resource => Code;
     public UndertaleCode Code { get; set; }
@@ -33,12 +36,13 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
     public TextDocument GMLTextDocument { get; set; } = new TextDocument();
     public TextDocument ASMTextDocument { get; set; } = new TextDocument();
 
-    public bool IsCompilingOrDecompiling = false;
+    public bool IsCodeProcessing = false;
 
     public bool GMLOutdated = true;
     public bool ASMOutdated = true;
 
     ILoaderWindow? loaderWindow;
+    IInputElement? lastFocusedElement;
 
     public UndertaleCodeViewModel(UndertaleCode code, IServiceProvider? serviceProvider = null)
     {
@@ -151,33 +155,46 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
         return true;
     }
 
-    public async void DecompileAll()
+    void CodeProcessStart()
     {
         loaderWindow = MainVM.View!.LoaderOpen();
 
-        IsCompilingOrDecompiling = true;
+        IsCodeProcessing = true;
+
+        View?.SaveCaretOffsets();
+        lastFocusedElement = MainVM.View.GetFocusedElement();
         MainVM.IsEnabled = false;
+    }
+
+    void CodeProcessEnd()
+    {
+        loaderWindow!.Close();
+        loaderWindow = null;
+
+        IsCodeProcessing = false;
+
+        MainVM.IsEnabled = true;
+        lastFocusedElement?.Focus();
+        View?.RestoreCaretOffsets();
+    }
+
+    public async void DecompileAll()
+    {
+        CodeProcessStart();
 
         await DecompileToGML();
         await DecompileToASM();
 
-        loaderWindow.Close();
-        loaderWindow = null;
-
-        IsCompilingOrDecompiling = false;
-        MainVM.IsEnabled = true;
+        CodeProcessEnd();
     }
 
     public void CompileAndDecompileGML() => CompileAndDecompileGML(false);
 
     public async void CompileAndDecompileGML(bool onlyIfOutdated)
     {
-        if (!IsCompilingOrDecompiling && (onlyIfOutdated ? GMLOutdated : true))
+        if (!IsCodeProcessing && (onlyIfOutdated ? GMLOutdated : true))
         {
-            loaderWindow = MainVM.View!.LoaderOpen();
-
-            IsCompilingOrDecompiling = true;
-            MainVM.IsEnabled = false;
+            CodeProcessStart();
 
             if (await CompileFromGML())
             {
@@ -185,11 +202,7 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
                 await DecompileToASM();
             }
 
-            loaderWindow.Close();
-            loaderWindow = null;
-
-            IsCompilingOrDecompiling = false;
-            MainVM.IsEnabled = true;
+            CodeProcessEnd();
         }
     }
 
@@ -197,24 +210,17 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
 
     public async void CompileAndDecompileASM(bool onlyIfOutdated)
     {
-        if (!IsCompilingOrDecompiling && (onlyIfOutdated ? ASMOutdated : true))
+        if (!IsCodeProcessing && (onlyIfOutdated ? ASMOutdated : true))
         {
-            loaderWindow = MainVM.View!.LoaderOpen();
-
-            IsCompilingOrDecompiling = true;
-            MainVM.IsEnabled = false;
+            CodeProcessStart();
 
             if (await CompileFromASM())
             {
                 await DecompileToGML();
                 await DecompileToASM();
             }
-
-            loaderWindow.Close();
-            loaderWindow = null;
-
-            IsCompilingOrDecompiling = false;
-            MainVM.IsEnabled = true;
+            
+            CodeProcessEnd();
         }
     }
 }

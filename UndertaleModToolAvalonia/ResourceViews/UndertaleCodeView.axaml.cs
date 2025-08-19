@@ -2,13 +2,14 @@ using System;
 using System.ComponentModel;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.LogicalTree;
 using Avalonia.VisualTree;
 
 namespace UndertaleModToolAvalonia;
 
-public partial class UndertaleCodeView : UserControl
+public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
 {
+    public (int, int) LastCaretOffsets;
+
     public UndertaleCodeView()
     {
         InitializeComponent();
@@ -17,6 +18,8 @@ public partial class UndertaleCodeView : UserControl
         {
             if (DataContext is UndertaleCodeViewModel vm)
             {
+                vm.View = this;
+
                 if (this.IsAttachedToVisualTree())
                 {
                     ProcessLastGoToLocation();
@@ -39,10 +42,14 @@ public partial class UndertaleCodeView : UserControl
             }
         };
 
-        GMLTextEditor.Options.ConvertTabsToSpaces = true;
-        GMLTextEditor.Options.HighlightCurrentLine = true;
-        ASMTextEditor.Options.ConvertTabsToSpaces = true;
-        ASMTextEditor.Options.HighlightCurrentLine = true;
+        InitializeTextEditor(GMLTextEditor);
+        InitializeTextEditor(ASMTextEditor);
+    }
+
+    void InitializeTextEditor(AvaloniaEdit.TextEditor textEditor)
+    {
+        textEditor.Options.ConvertTabsToSpaces = true;
+        textEditor.Options.HighlightCurrentLine = true;
     }
 
     public void ProcessLastGoToLocation()
@@ -111,5 +118,27 @@ public partial class UndertaleCodeView : UserControl
         {
             vm.ASMOutdated = true;
         }
+    }
+}
+
+public interface IUndertaleCodeView
+{
+    private UndertaleCodeView View => (UndertaleCodeView)this;
+
+    public void SaveCaretOffsets()
+    {
+        View.LastCaretOffsets = (View.GMLTextEditor.CaretOffset, View.ASMTextEditor.CaretOffset);
+    }
+
+    public void RestoreCaretOffsets()
+    {
+        View.GMLTextEditor.CaretOffset = Math.Clamp(View.LastCaretOffsets.Item1, 0, View.GMLTextEditor.Text.Length);
+        View.ASMTextEditor.CaretOffset = Math.Clamp(View.LastCaretOffsets.Item2, 0, View.ASMTextEditor.Text.Length);
+    }
+
+    public int GMLCaretOffset
+    {
+        get { return View.GMLTextEditor.CaretOffset; }
+        set { View.GMLTextEditor.CaretOffset = value; }
     }
 }
