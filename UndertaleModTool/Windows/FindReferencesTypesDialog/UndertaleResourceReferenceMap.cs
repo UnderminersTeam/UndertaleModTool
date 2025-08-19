@@ -16,6 +16,7 @@ namespace UndertaleModTool.Windows
 
     public static class UndertaleResourceReferenceMap
     {
+        // Don't forget to update `referenceableTypes` as well
         private static readonly Dictionary<Type, TypesForVersion[]> typeMap = new()
         {
             {
@@ -111,6 +112,20 @@ namespace UndertaleModTool.Windows
                             (typeof(UndertaleTextureGroupInfo), "Texture groups")
                         }
                     },
+                }
+            },
+            {
+                typeof(UndertaleFont),
+                new[]
+                {
+                    new TypesForVersion
+                    {
+                        Version = (2, 2, 1),
+                        Types = new[]
+                        {
+                            (typeof(UndertaleTextureGroupInfo), "Texture groups")
+                        }
+                    }
                 }
             },
             {
@@ -267,6 +282,7 @@ namespace UndertaleModTool.Windows
                         Version = (1, 0, 0),
                         Types = new[]
                         {
+                            (typeof(UndertaleGameObject), "Game objects (children)"),
                             (typeof(UndertaleRoom.GameObject), "Room object instance")
                         }
                     },
@@ -291,8 +307,18 @@ namespace UndertaleModTool.Windows
                         {
                             (typeof(UndertaleGameObject), "Game objects"),
                             (typeof(UndertaleRoom), "Rooms"),
+                            (typeof(UndertaleRoom.GameObject), "Room object instances (creation code)"),
                             (typeof(UndertaleGlobalInit), "Global initialization and game end scripts"),
                             (typeof(UndertaleScript), "Scripts")
+                        }
+                    },
+                    new TypesForVersion()
+                    {
+                        // Bytecode version 16
+                        Version = (16, uint.MaxValue, uint.MaxValue),
+                        Types = new[]
+                        {
+                            (typeof(UndertaleRoom.GameObject), "Room object instances (creation or pre create code)")
                         }
                     }
                 }
@@ -398,11 +424,13 @@ namespace UndertaleModTool.Windows
             }
         };
 
+        // From `typeMap`
         private static readonly Dictionary<Type, string> referenceableTypes = new()
         {
             { typeof(UndertaleSprite), "Sprites" },
             { typeof(UndertaleBackground), "Backgrounds" },
             { typeof(UndertaleEmbeddedTexture), "Embedded textures" },
+            { typeof(UndertaleFont), "Fonts" },
             { typeof(UndertaleTexturePageItem), "Texture page items" },
             { typeof(UndertaleString), "Strings" },
             { typeof(UndertaleGameObject), "Game objects" },
