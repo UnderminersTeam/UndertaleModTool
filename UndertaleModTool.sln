@@ -17,6 +17,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModLibTests", "Und
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Underanalyzer", "Underanalyzer\Underanalyzer\Underanalyzer.csproj", "{A171D18F-274E-427A-AFB3-D7A161F5B9CF}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModToolAvalonia", "UndertaleModToolAvalonia\UndertaleModToolAvalonia.csproj", "{96FA167A-9D79-3328-BCB4-0564D2575718}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModToolAvalonia.Desktop", "UndertaleModToolAvalonia.Desktop\UndertaleModToolAvalonia.Desktop.csproj", "{314E047F-7297-F076-E9AC-8DEA76750E94}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +85,22 @@ Global
 		{A171D18F-274E-427A-AFB3-D7A161F5B9CF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A171D18F-274E-427A-AFB3-D7A161F5B9CF}.Release|x64.ActiveCfg = Release|Any CPU
 		{A171D18F-274E-427A-AFB3-D7A161F5B9CF}.Release|x64.Build.0 = Release|Any CPU
+		{96FA167A-9D79-3328-BCB4-0564D2575718}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96FA167A-9D79-3328-BCB4-0564D2575718}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96FA167A-9D79-3328-BCB4-0564D2575718}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{96FA167A-9D79-3328-BCB4-0564D2575718}.Debug|x64.Build.0 = Debug|Any CPU
+		{96FA167A-9D79-3328-BCB4-0564D2575718}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96FA167A-9D79-3328-BCB4-0564D2575718}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96FA167A-9D79-3328-BCB4-0564D2575718}.Release|x64.ActiveCfg = Release|Any CPU
+		{96FA167A-9D79-3328-BCB4-0564D2575718}.Release|x64.Build.0 = Release|Any CPU
+		{314E047F-7297-F076-E9AC-8DEA76750E94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{314E047F-7297-F076-E9AC-8DEA76750E94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{314E047F-7297-F076-E9AC-8DEA76750E94}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{314E047F-7297-F076-E9AC-8DEA76750E94}.Debug|x64.Build.0 = Debug|Any CPU
+		{314E047F-7297-F076-E9AC-8DEA76750E94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{314E047F-7297-F076-E9AC-8DEA76750E94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{314E047F-7297-F076-E9AC-8DEA76750E94}.Release|x64.ActiveCfg = Release|Any CPU
+		{314E047F-7297-F076-E9AC-8DEA76750E94}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
