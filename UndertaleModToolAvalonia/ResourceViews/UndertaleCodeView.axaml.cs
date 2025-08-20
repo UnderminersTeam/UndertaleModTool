@@ -1,13 +1,21 @@
 using System;
 using System.ComponentModel;
+using System.Reflection;
+using System.Xml;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Platform;
 using Avalonia.VisualTree;
+using AvaloniaEdit.Highlighting;
+using AvaloniaEdit.Highlighting.Xshd;
 
 namespace UndertaleModToolAvalonia;
 
 public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
 {
+    private static IHighlightingDefinition? GMLHighlightingDefinition = null;
+    private static IHighlightingDefinition? ASMHighlightingDefinition = null;
+
     public (int, int) LastCaretOffsets;
 
     public UndertaleCodeView()
@@ -50,6 +58,25 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
     {
         textEditor.Options.ConvertTabsToSpaces = true;
         textEditor.Options.HighlightCurrentLine = true;
+
+        static IHighlightingDefinition LoadHighlightingDefinition(string name)
+        {
+            using (XmlReader reader = XmlReader.Create(AssetLoader.Open(new Uri($"avares://{Assembly.GetExecutingAssembly().FullName}/Assets/Syntax{name}.xshd"))))
+            {
+                return HighlightingLoader.Load(reader, HighlightingManager.Instance);
+            }
+        }
+
+        if (textEditor == GMLTextEditor)
+        {
+            UndertaleCodeView.GMLHighlightingDefinition ??= LoadHighlightingDefinition("GML");
+            textEditor.SyntaxHighlighting = UndertaleCodeView.GMLHighlightingDefinition;
+        }
+        else if (textEditor == ASMTextEditor)
+        {
+            UndertaleCodeView.ASMHighlightingDefinition ??= LoadHighlightingDefinition("ASM");
+            textEditor.SyntaxHighlighting = UndertaleCodeView.ASMHighlightingDefinition;
+        }
     }
 
     public void ProcessLastGoToLocation()
