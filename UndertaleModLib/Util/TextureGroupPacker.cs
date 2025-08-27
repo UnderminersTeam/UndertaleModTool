@@ -80,7 +80,7 @@ public sealed class TextureGroupPacker
     /// <summary>
     /// Adds an image to be packed by the texture group packer, and returns a texture page item for it.
     /// </summary>
-    public UndertaleTexturePageItem AddImage(MagickImage image, BorderFlags borderFlags)
+    public UndertaleTexturePageItem AddImage(MagickImage image, BorderFlags borderFlags, bool allowCrop = true)
     {
         // Make sure this is used *before* packing only...
         if (_pages is not null)
@@ -97,7 +97,7 @@ public sealed class TextureGroupPacker
 
         // Crop the image, if allowed
         int minX = 0, minY = 0;
-        if (AllowCrop)
+        if (allowCrop && AllowCrop)
         {
             // Scan image for min/max X/Y pixels with nonzero alpha
             minX = uncroppedWidth;

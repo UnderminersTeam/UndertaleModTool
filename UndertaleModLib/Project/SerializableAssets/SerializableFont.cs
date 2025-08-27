@@ -289,7 +289,8 @@ internal sealed class SerializableFont : ISerializableTextureProjectAsset
         {
             // Add image to packer
             _textureImage = texturePacker.AddImage(TextureWorker.ReadBGRAImageFromFile(Path.Join(directory, filename)), 
-                                                   TextureGroupPacker.BorderFlags.Enabled | TextureGroupPacker.BorderFlags.ExtraBorder);
+                                                   TextureGroupPacker.BorderFlags.Enabled | TextureGroupPacker.BorderFlags.ExtraBorder,
+                                                   false);
         }
         catch (Exception e)
         {
