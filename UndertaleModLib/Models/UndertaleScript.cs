@@ -1,12 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
+using UndertaleModLib.Project;
+using UndertaleModLib.Project.SerializableAssets;
 
 namespace UndertaleModLib.Models;
 
 /// <summary>
 /// A script entry in a data file.
 /// </summary>
-public class UndertaleScript : UndertaleNamedResource, INotifyPropertyChanged, IStaticChildObjectsSize, IDisposable
+public class UndertaleScript : UndertaleNamedResource, IProjectAsset, INotifyPropertyChanged, IStaticChildObjectsSize, IDisposable
 {
     /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
     public static readonly uint ChildObjectsSize = 8;
@@ -66,4 +68,21 @@ public class UndertaleScript : UndertaleNamedResource, INotifyPropertyChanged, I
 
         _code.Dispose();
     }
+
+    /// <inheritdoc/>
+    ISerializableProjectAsset IProjectAsset.GenerateSerializableProjectAsset(ProjectContext projectContext)
+    {
+        SerializableScript serializable = new();
+        serializable.PopulateFromData(projectContext, this);
+        return serializable;
+    }
+
+    /// <inheritdoc/>
+    public string ProjectName => Name?.Content ?? "<unknown name>";
+
+    /// <inheritdoc/>
+    public SerializableAssetType ProjectAssetType => SerializableAssetType.Script;
+
+    /// <inheritdoc/>
+    public bool ProjectExportable => Name?.Content is not null && !IsConstructor && Code?.ParentEntry is null;
 }
