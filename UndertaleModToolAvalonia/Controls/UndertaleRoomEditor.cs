@@ -41,6 +41,9 @@ public class UndertaleRoomEditor : Control
     private double movingItemX;
     private double movingItemY;
 
+    private bool settingTiles = false;
+    private uint? hoveredTile = null;
+
     public UndertaleRoomEditor()
     {
         customDrawOperation = new CustomDrawOperation(this);
@@ -70,7 +73,7 @@ public class UndertaleRoomEditor : Control
 
         if (vm.Room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.IsGMS2) || vm.Room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.IsGM2024_13))
         {
-            IOrderedEnumerable<UndertaleRoom.Layer> layers = vm.Room.Layers.OrderByDescending(x => x.LayerDepth);
+            IOrderedEnumerable<UndertaleRoom.Layer> layers = vm.Room.Layers.Reverse().OrderByDescending(x => x.LayerDepth);
             foreach (UndertaleRoom.Layer layer in layers)
             {
                 if (!layer.IsVisible)
@@ -236,7 +239,8 @@ public class UndertaleRoomEditor : Control
                 $"view: ({-Translation.X}, {-Translation.Y}, {-Translation.X + Bounds.Width}, {-Translation.Y + Bounds.Height}), zoom: {Scaling}x\n" +
                 $"{vm?.Room.Name.Content} ({vm?.Room.Width}, {vm?.Room.Height})\n" +
                 $"category: {vm?.CategorySelected}\n" +
-                $"custom render time: <{CustomDrawOperationTime} ms",
+                $"custom render time: <{CustomDrawOperationTime} ms\n" +
+                $"hovered tile: {hoveredTile}",
                 CultureInfo.CurrentCulture, FlowDirection.LeftToRight, Typeface.Default, 12, new SolidColorBrush(Colors.White)),
                 new Point(0, 0));
         }
@@ -255,44 +259,85 @@ public class UndertaleRoomEditor : Control
             Translation = mousePosition - movingStartMousePosition;
         }
 
-        if (movingItem)
-        {
-            RoomItem? roomItem = GetSelectedRoomItem();
-            if (roomItem is null)
-            {
-                movingItem = false;
-            }
-            else
-            {
-                roomItem.SetProperties(new((int)(roomMousePosition.X - movingItemX), (int)(roomMousePosition.Y - movingItemY)));
-            }
-        }
-
-        // Find object below cursor
-        static bool RectContainsPoint(Rect rect, double rotation, Point pivot, Point point)
-        {
-            // TODO: Use matrices
-            double rotationRadians = rotation * (Math.PI / 180);
-            double sin = Math.Sin(-rotationRadians);
-            double cos = Math.Cos(-rotationRadians);
-
-            Point newPoint = point - pivot;
-            newPoint = new Point(newPoint.X * cos - newPoint.Y * sin, newPoint.X * sin + newPoint.Y * cos);
-            newPoint += pivot;
-
-            return newPoint.X >= rect.Left && newPoint.X <= rect.Right && newPoint.Y >= rect.Top && newPoint.Y <= rect.Bottom;
-        }
-
         HoveredRoomItem = null;
+        hoveredTile = null;
 
-        foreach (RoomItem roomItem in RoomItems.Reverse<RoomItem>())
+        if (vm!.RoomItemsSelectedItem is UndertaleRoom.Layer { LayerType: UndertaleRoom.LayerType.Tiles } tilesLayer)
         {
-            if (vm!.CategorySelected is null || roomItem.Category == vm!.CategorySelected)
-                if (RectContainsPoint(roomItem.Bounds, roomItem.Rotation, roomItem.Pivot, roomMousePosition))
+            hoveredTile = GetLayerTile(roomMousePosition, tilesLayer);
+            if (settingTiles)
+            {
+                SetLayerTile(roomMousePosition, tilesLayer, vm.SelectedTileData);
+            }
+        }
+        else
+        {
+            if (movingItem)
+            {
+                RoomItem? roomItem = GetSelectedRoomItem();
+                if (roomItem is null)
                 {
-                    HoveredRoomItem = roomItem;
-                    break;
+                    movingItem = false;
                 }
+                else
+                {
+                    roomItem.SetProperties(new((int)(roomMousePosition.X - movingItemX), (int)(roomMousePosition.Y - movingItemY)));
+                }
+            }
+
+            // Find object below cursor
+            static bool RectContainsPoint(Rect rect, double rotation, Point pivot, Point point)
+            {
+                // TODO: Use matrices
+                double rotationRadians = rotation * (Math.PI / 180);
+                double sin = Math.Sin(-rotationRadians);
+                double cos = Math.Cos(-rotationRadians);
+
+                Point newPoint = point - pivot;
+                newPoint = new Point(newPoint.X * cos - newPoint.Y * sin, newPoint.X * sin + newPoint.Y * cos);
+                newPoint += pivot;
+
+                return newPoint.X >= rect.Left && newPoint.X <= rect.Right && newPoint.Y >= rect.Top && newPoint.Y <= rect.Bottom;
+            }
+
+            foreach (RoomItem roomItem in RoomItems.Reverse<RoomItem>())
+            {
+                if (vm!.CategorySelected is null || roomItem.Category == vm!.CategorySelected)
+                    if (RectContainsPoint(roomItem.Bounds, roomItem.Rotation, roomItem.Pivot, roomMousePosition))
+                    {
+                        HoveredRoomItem = roomItem;
+                        break;
+                    }
+            }
+        }
+    }
+
+    uint? GetLayerTile(Point roomMousePosition, UndertaleRoom.Layer tilesLayer)
+    {
+        // Find x/y position
+        int x = (int)Math.Floor((roomMousePosition.X - tilesLayer.XOffset) / tilesLayer.TilesData.Background.GMS2TileWidth);
+        int y = (int)Math.Floor((roomMousePosition.Y - tilesLayer.YOffset) / tilesLayer.TilesData.Background.GMS2TileHeight);
+
+        if (y >= 0 && x >= 0
+            && y < tilesLayer.TilesData.TileData.Length
+            && x < tilesLayer.TilesData.TileData[y].Length)
+        {
+            return tilesLayer.TilesData.TileData[y][x];
+        }
+        return null;
+    }
+
+    void SetLayerTile(Point roomMousePosition, UndertaleRoom.Layer tilesLayer, uint tileData)
+    {
+        // Find x/y position
+        int x = (int)Math.Floor((roomMousePosition.X - tilesLayer.XOffset) / tilesLayer.TilesData.Background.GMS2TileWidth);
+        int y = (int)Math.Floor((roomMousePosition.Y - tilesLayer.YOffset) / tilesLayer.TilesData.Background.GMS2TileHeight);
+
+        if (y >= 0 && x >= 0
+            && y < tilesLayer.TilesData.TileData.Length
+            && x < tilesLayer.TilesData.TileData[y].Length)
+        {
+            tilesLayer.TilesData.TileData[y][x] = tileData;
         }
     }
 
@@ -306,20 +351,29 @@ public class UndertaleRoomEditor : Control
         }
         else if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
         {
-            if (HoveredRoomItem is not null)
+            Point roomMousePosition = (mousePosition - Translation) / Scaling;
+
+            if (vm!.RoomItemsSelectedItem is UndertaleRoom.Layer { LayerType: UndertaleRoom.LayerType.Tiles } tilesLayer)
             {
-                vm!.RoomItemsSelectedItem = HoveredRoomItem.Object;
-                movingItem = true;
-
-                Point roomMousePosition = (mousePosition - Translation) / Scaling;
-                RoomItemProperties properties = HoveredRoomItem.GetProperties();
-
-                movingItemX = roomMousePosition.X - properties.X;
-                movingItemY = roomMousePosition.Y - properties.Y;
+                settingTiles = true;
+                SetLayerTile(roomMousePosition, tilesLayer, vm.SelectedTileData);
             }
             else
             {
-                vm!.RoomItemsSelectedItem = vm!.CategorySelected;
+                if (HoveredRoomItem is not null)
+                {
+                    vm!.RoomItemsSelectedItem = HoveredRoomItem.Object;
+                    movingItem = true;
+
+                    RoomItemProperties properties = HoveredRoomItem.GetProperties();
+
+                    movingItemX = roomMousePosition.X - properties.X;
+                    movingItemY = roomMousePosition.Y - properties.Y;
+                }
+                else
+                {
+                    vm!.RoomItemsSelectedItem = vm!.CategorySelected;
+                }
             }
         }
     }
@@ -328,6 +382,7 @@ public class UndertaleRoomEditor : Control
     {
         moving = false;
         movingItem = false;
+        settingTiles = false;
     }
 
     protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
@@ -370,7 +425,7 @@ public class UndertaleRoomEditor : Control
         }
     }
 
-    class CustomDrawOperation : ICustomDrawOperation
+    public class CustomDrawOperation : ICustomDrawOperation
     {
         public Rect Bounds { get; set; }
 
@@ -432,7 +487,7 @@ public class UndertaleRoomEditor : Control
 
                 if (vm.Room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.IsGMS2) || vm.Room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.IsGM2024_13))
                 {
-                    IOrderedEnumerable<UndertaleRoom.Layer> layers = vm.Room.Layers.OrderByDescending(x => x.LayerDepth);
+                    IOrderedEnumerable<UndertaleRoom.Layer> layers = vm.Room.Layers.Reverse().OrderByDescending(x => x.LayerDepth);
                     foreach (UndertaleRoom.Layer layer in layers)
                     {
                         if (!layer.IsVisible)
@@ -684,35 +739,40 @@ public class UndertaleRoomEditor : Control
 
         void RenderGameObjects(SKCanvas canvas, IList<UndertaleRoom.GameObject> roomGameObjects)
         {
-            // TODO: roomGameObject.ImageSpeed
-
             foreach (UndertaleRoom.GameObject roomGameObject in roomGameObjects)
             {
-                UndertaleGameObject? gameObject = roomGameObject.ObjectDefinition;
-                if (gameObject is null)
-                    continue;
-                if (gameObject.Sprite is null)
-                    continue;
-                if (!(roomGameObject.ImageIndex >= 0 && roomGameObject.ImageIndex < gameObject.Sprite.Textures.Count))
-                    continue;
-
-                UndertaleTexturePageItem texture = gameObject.Sprite.Textures[roomGameObject.ImageIndex].Texture;
-
-                SKImage image = mainVM.ImageCache.GetCachedImageFromTexturePageItem(texture);
-                currentUsedImages.Add(image);
-
-                canvas.Save();
-                canvas.Translate(roomGameObject.X, roomGameObject.Y);
-                canvas.RotateDegrees(roomGameObject.OppositeRotation);
-                canvas.Scale(roomGameObject.ScaleX, roomGameObject.ScaleY);
-
-                canvas.DrawImage(image, -gameObject.Sprite.OriginX + texture.TargetX, -gameObject.Sprite.OriginY + texture.TargetY, new SKPaint()
-                {
-                    ColorFilter = SKColorFilter.CreateBlendMode(UndertaleColor.ToColor(roomGameObject.Color).ToSKColor(), SKBlendMode.Modulate),
-                });
-
-                canvas.Restore();
+                RenderGameObject(canvas, roomGameObject);
             }
+        }
+
+        void RenderGameObject(SKCanvas canvas, UndertaleRoom.GameObject roomGameObject)
+        {
+            // TODO: roomGameObject.ImageSpeed
+
+            UndertaleGameObject? gameObject = roomGameObject.ObjectDefinition;
+            if (gameObject is null)
+                return;
+            if (gameObject.Sprite is null)
+                return;
+            if (!(roomGameObject.ImageIndex >= 0 && roomGameObject.ImageIndex < gameObject.Sprite.Textures.Count))
+                return;
+
+            UndertaleTexturePageItem texture = gameObject.Sprite.Textures[roomGameObject.ImageIndex].Texture;
+
+            SKImage image = mainVM.ImageCache.GetCachedImageFromTexturePageItem(texture);
+            currentUsedImages.Add(image);
+
+            canvas.Save();
+            canvas.Translate(roomGameObject.X, roomGameObject.Y);
+            canvas.RotateDegrees(roomGameObject.OppositeRotation);
+            canvas.Scale(roomGameObject.ScaleX, roomGameObject.ScaleY);
+
+            canvas.DrawImage(image, -gameObject.Sprite.OriginX + texture.TargetX, -gameObject.Sprite.OriginY + texture.TargetY, new SKPaint()
+            {
+                ColorFilter = SKColorFilter.CreateBlendMode(UndertaleColor.ToColor(roomGameObject.Color).ToSKColor(), SKBlendMode.Modulate),
+            });
+
+            canvas.Restore();
         }
     }
 }

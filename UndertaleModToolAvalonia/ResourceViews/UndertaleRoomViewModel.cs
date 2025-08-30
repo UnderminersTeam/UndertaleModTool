@@ -32,6 +32,9 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
     [Notify]
     private double _Zoom = 1;
 
+    [Notify]
+    private uint _SelectedTileData = 0;
+
     public UndertaleRoomViewModel(UndertaleRoom room, IServiceProvider? serviceProvider = null)
     {
         MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
@@ -176,6 +179,11 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
                     if (instance is not null)
                         return layer;
                 }
+            }
+            else if (layer.LayerType == LayerType.Tiles)
+            {
+                if (item == layer)
+                    return layer;
             }
         }
 

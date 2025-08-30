@@ -521,6 +521,8 @@
                                                     <l:UndertaleResourceReferenceView Reference="{Binding Background}" ReferenceType="undertalem:UndertaleBackground" />
                                                     
                                                     <!-- TODO: Edit/export/import tile data -->
+                                                    <Label>Selected tile data</Label>
+                                                    <TextBox Text="{Binding $parent[UserControl].((l:UndertaleRoomViewModel)DataContext).SelectedTileData}" />
                                                 </Grid>
                                             </DataTemplate>
                                             <!--
