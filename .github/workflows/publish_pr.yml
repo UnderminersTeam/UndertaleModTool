@@ -25,7 +25,7 @@ jobs:
       with:
         submodules: true
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: 8.0.x
     - name: Restore dependencies
@@ -73,7 +73,7 @@ jobs:
       with:
         submodules: true
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: 8.0.x
     - name: Restore dependencies
