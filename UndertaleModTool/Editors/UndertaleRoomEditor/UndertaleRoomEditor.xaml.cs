@@ -254,36 +254,19 @@ namespace UndertaleModTool
                 currStoryboard.Remove(this);
             }
 
-            bool isMovable = false;
+            MoveButtonsPanel.IsEnabled = false;
 
             // I can't bind it directly because then clicking on the headers makes WPF explode because it tries to attach the header as child of ObjectEditor
             // TODO: find some better workaround
             if (e.NewValue == RoomRootItem)
             {
                 ObjectEditor.Content = DataContext;
-                MoveButtonsPanel.IsEnabled = false;
             }
             else if (e.NewValue is UndertaleObject obj)
             {
                 ObjectEditor.Content = obj;
 
-                if (obj is GameObject)
-                {
-                    var room = DataContext as UndertaleRoom;
-                    if ((room?.Flags.HasFlag(RoomEntryFlags.IsGMS2) == true) || (room?.Flags.HasFlag(RoomEntryFlags.IsGM2024_13) == true))
-                    {
-                        // Check if the selected game object is in the "Game objects (from all layers)" list
-                        var objectItem = GameObjItems.ItemContainerGenerator.ContainerFromItem(obj) as TreeViewItem;
-                        if (objectItem?.IsSelected != true)
-                            isMovable = true;
-                    }
-                    else
-                        isMovable = true;
-                }
-                else
-                    isMovable = movableTypes.Contains(obj.GetType());
-
-                MoveButtonsPanel.IsEnabled = isMovable;
+                MoveButtonsPanel.IsEnabled = movableTypes.Contains(e.NewValue.GetType());
 
                 try
                 {
@@ -1046,7 +1029,7 @@ namespace UndertaleModTool
         /// </summary>
         /// <param name="obj">the object to select.</param>
         /// <param name="focus">whether to focus on the object after selcting it.</param>
-        private void SelectObject(UndertaleObject obj, bool focus = true)
+        private void SelectObject(UndertaleObject obj, bool focus = true, bool isInAllGameObjectsList = false)
         {
             // TODO: enable virtualizing of RoomObjectsTree and make this method work with it
 
@@ -1072,12 +1055,12 @@ namespace UndertaleModTool
                         break;
 
                     case GameObject gameObj:
-                        if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2) || room.Flags.HasFlag(RoomEntryFlags.IsGM2024_13))
+                        if ((room.Flags.HasFlag(RoomEntryFlags.IsGMS2) || room.Flags.HasFlag(RoomEntryFlags.IsGM2024_13)) && !isInAllGameObjectsList)
                         {
                             resLayer = room.Layers.AsParallel()
-                                                  .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
-                                                  .FirstOrDefault(l => l.LayerType is LayerType.Instances
-                                                      && (l.InstancesData.Instances?.Any(x => x.InstanceID == gameObj.InstanceID) ?? false));
+                                                    .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
+                                                    .FirstOrDefault(l => l.LayerType is LayerType.Instances
+                                                        && (l.InstancesData.Instances?.Any(x => x.InstanceID == gameObj.InstanceID) ?? false));
                             resList = resLayer.InstancesData.Instances;
                             resListView = LayerItems.ItemContainerGenerator.ContainerFromItem(resLayer) as TreeViewItem;
                         }
@@ -1382,22 +1365,25 @@ namespace UndertaleModTool
 
         private void TreeViewMoveUpButton_Click(object sender, RoutedEventArgs e)
         {
-            UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
-            // If the button loses focus it cannot be held
-            MoveItem(selectedObj, -1, false);
+            if (RoomObjectsTree.SelectedItem is UndertaleObject selectedObj)
+            {
+                // If the button loses focus it cannot be held
+                MoveItem(selectedObj, -1, false);
+            }
         }
 
         private void TreeViewMoveDownButton_Click(object sender, RoutedEventArgs e)
         {
-            UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
-            // If the button loses focus it cannot be held
-            MoveItem(selectedObj, 1, false);
+            if (RoomObjectsTree.SelectedItem is UndertaleObject selectedObj)
+            {
+                // If the button loses focus it cannot be held
+                MoveItem(selectedObj, 1, false);
+            }
         }
 
         private void TreeViewMoveButton_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            UndertaleObject selectedObj = ObjectEditor.Content as UndertaleObject;
-            SelectObject(selectedObj);
+            //
         }
 
         private UndertaleObject copied;
@@ -1800,6 +1786,8 @@ namespace UndertaleModTool
             if (this.DataContext is not UndertaleRoom room)
                 return;
 
+            bool isInAllGameObjectsList = false;
+
             if (obj is GameObject)
             {
                 if (room.Flags.HasFlag(RoomEntryFlags.IsGMS2) || room.Flags.HasFlag(RoomEntryFlags.IsGM2024_13))
@@ -1808,8 +1796,7 @@ namespace UndertaleModTool
                     var objectItem = GameObjItems.ItemContainerGenerator.ContainerFromItem(obj) as TreeViewItem;
                     if (objectItem?.IsSelected == true)
                     {
-                        mainWindow.ShowError("You should select an object in an instances layer instead.");
-                        return;
+                        isInAllGameObjectsList = true;
                     }
                 }
             }
@@ -1827,7 +1814,7 @@ namespace UndertaleModTool
             IList list = obj switch
             {
                 Tile => layer is null ? room.Tiles : layer.AssetsData.LegacyTiles,
-                GameObject => layer is null ? room.GameObjects : layer.InstancesData.Instances,
+                GameObject => isInAllGameObjectsList ? room.GameObjects : (layer is null ? room.GameObjects : layer.InstancesData.Instances),
                 SpriteInstance => layer.AssetsData.Sprites,
                 ParticleSystemInstance => layer.AssetsData.ParticleSystems,
                 _ => null
@@ -1846,7 +1833,7 @@ namespace UndertaleModTool
                 list[newIndex] = obj;
                 list[index] = prevObj;
 
-                if (layer is not null)
+                if (layer is not null && !isInAllGameObjectsList)
                 {
                     // swap back objects in "ObjectDict"
                     var rect = ObjElemDict[obj];
@@ -1856,7 +1843,7 @@ namespace UndertaleModTool
                 }
             }
 
-            SelectObject(obj, focus);
+            SelectObject(obj, focus, isInAllGameObjectsList);
         }
 
         private void MenuItem_NewLayerInstances_Click(object sender, RoutedEventArgs e)
