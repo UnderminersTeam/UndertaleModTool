@@ -1105,7 +1105,7 @@ namespace UndertaleModTool
                         OnPropertyChanged("FilePath");
                         OnPropertyChanged("IsGMS2");
 
-                        BackgroundsItemsList.Header = ToVisibility(IsGMS2) ? "Tile sets" : "Backgrounds & Tile sets";
+                        BackgroundsItemsList.Header = IsVisible(IsGMS2) ? "Tile sets" : "Backgrounds & Tile sets";
 
                         UndertaleCodeEditor.gettext = null;
                         UndertaleCodeEditor.gettextJSON = null;
