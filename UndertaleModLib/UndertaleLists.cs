@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using UndertaleModLib.Models;
-using UndertaleModLib.Util;
 
 namespace UndertaleModLib
 {
@@ -353,9 +352,7 @@ namespace UndertaleModLib
 
             // Write all pointers
             foreach (T obj in this)
-            {
-                writer.WriteUndertaleObjectPointer<T>(obj);
-            }
+                writer.WriteUndertaleObjectPointer(obj);
 
             // Write blobs, if necessary for the given type
             Type t = typeof(T);
@@ -385,9 +382,7 @@ namespace UndertaleModLib
 
                     // Don't need to write anything if the object is null
                     if (obj is null)
-                    {
                         continue;
-                    }
 
                     // Serialize pre-padding, if this is a type that requires it
                     if (t.IsAssignableTo(typeof(PrePaddedObject)))
@@ -454,7 +449,7 @@ namespace UndertaleModLib
             // Advance to start of first object (particularly, if blobs exist)
             if (realCount > 0)
             {
-                T firstItem = this.First(i => i is not null);
+                T firstItem = this.First(j => j is not null);
                 uint pos = reader.GetAddressForUndertaleObject(firstItem);
                 if (reader.AbsPosition != pos)
                 {
@@ -510,11 +505,9 @@ namespace UndertaleModLib
         public static uint UnserializeChildObjectCount(UndertaleReader reader)
         {
             // Read base object count; short-circuit if there's no objects
-            uint count = reader.ReadUInt32(), pointerCount = count;
+            uint count = reader.ReadUInt32();
             if (count == 0)
-            {
                 return 0;
-            }
 
             // Read pointers of all objects
             uint[] pointers = reader.ListPtrsPool.Rent((int)count);
@@ -531,10 +524,10 @@ namespace UndertaleModLib
                             reader.undertaleData.SetGMS2Version(2024, 11);
                     }
                     else
-                    {
-                        reader.SubmitWarning("Null pointers found in pointer list on file built with GMS pre-2!");
-                    }
-                    i--; count--;
+                        reader.SubmitWarning("Null pointers found in pointer list on file built with GMS pre 2024.11!");
+
+                    i--;
+                    count--;
                     continue;
                 }
                 pointers[i] = pointer;

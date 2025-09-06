@@ -52,9 +52,6 @@ using System.Windows.Media.Imaging;
 
 namespace UndertaleModTool
 {
-    /// <summary>
-    /// Logika interakcji dla klasy MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged, IScriptInterface
     {
         /// Note for those who don't know what is "PropertyChanged.Fody" -
@@ -99,10 +96,12 @@ namespace UndertaleModTool
                 OpenInTab(value);
             } 
         }
+        
+        private static Visibility ToVisibility(bool visible) => visible ? Visibility.Visible : Visibility.Collapsed;
+        private static bool IsVisible(Visibility visibility) => visibility == Visibility.Visible;
 
-        public Visibility IsGMS2 => (Data?.GeneralInfo?.Major ?? 0) >= 2 ? Visibility.Visible : Visibility.Collapsed;
-        // God this is so ugly, if there's a better way, please, put in a pull request
-        public Visibility IsExtProductIDEligible => (((Data?.GeneralInfo?.Major ?? 0) >= 2) || (((Data?.GeneralInfo?.Major ?? 0) == 1) && (((Data?.GeneralInfo?.Build ?? 0) >= 1773) || ((Data?.GeneralInfo?.Build ?? 0) == 1539)))) ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility IsGMS2 => ToVisibility(Data?.GeneralInfo?.Major ?? 0 >= 2);
+        public Visibility IsExtProductIDEligible => ToVisibility(UndertaleExtension.ProductDataEligible(Data));
 
         public List<Tab> ClosedTabsHistory { get; } = new();
 
@@ -510,8 +509,7 @@ namespace UndertaleModTool
             ApplyCorrections();
             CrashCheck();
 
-            RunGMSDebuggerItem.Visibility = Settings.Instance.ShowDebuggerOption
-                                            ? Visibility.Visible : Visibility.Collapsed;
+            RunGMSDebuggerItem.Visibility = ToVisibility(Settings.Instance.ShowDebuggerOption);
         }
 
         public Dictionary<string, NamedPipeServerStream> childFiles = new Dictionary<string, NamedPipeServerStream>();
@@ -699,9 +697,7 @@ namespace UndertaleModTool
             OnPropertyChanged("FilePath");
             OnPropertyChanged("IsGMS2");
 
-            BackgroundsItemsList.Header = IsGMS2 == Visibility.Visible
-                                          ? "Tile sets"
-                                          : "Backgrounds & Tile sets";
+            BackgroundsItemsList.Header = IsVisible(IsGMS2) ? "Tile sets" : "Backgrounds & Tile sets";
 
             Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open a data.win, not create a new file! :P");
             OpenInTab(Highlighted);
@@ -1109,9 +1105,7 @@ namespace UndertaleModTool
                         OnPropertyChanged("FilePath");
                         OnPropertyChanged("IsGMS2");
 
-                        BackgroundsItemsList.Header = IsGMS2 == Visibility.Visible
-                                                      ? "Tile sets"
-                                                      : "Backgrounds & Tile sets";
+                        BackgroundsItemsList.Header = ToVisibility(IsGMS2) ? "Tile sets" : "Backgrounds & Tile sets";
 
                         UndertaleCodeEditor.gettext = null;
                         UndertaleCodeEditor.gettextJSON = null;
@@ -1841,7 +1835,7 @@ namespace UndertaleModTool
                             codeResource.WeirdLocalFlag = true;
                         }
                     }
-                    else if (obj is UndertaleExtension && IsExtProductIDEligible == Visibility.Visible)
+                    else if (obj is UndertaleExtension && IsVisible(IsExtProductIDEligible))
                     {
                         var newProductID = new byte[] { 0xBA, 0x5E, 0xBA, 0x11, 0xBA, 0xDD, 0x06, 0x60, 0xBE, 0xEF, 0xED, 0xBA, 0x0B, 0xAB, 0xBA, 0xBE };
                         Data.FORM.EXTN.productIdData.Add(newProductID);
@@ -3736,8 +3730,7 @@ result in loss of work.");
             ScrollViewer viewer = sender as ScrollViewer;
 
             // Prevent receiving the mouse wheel event if there is nowhere to scroll.
-            if (viewer.ComputedVerticalScrollBarVisibility != Visibility.Visible
-                && e.Source == viewer)
+            if (!IsVisible(viewer.ComputedVerticalScrollBarVisibility) && e.Source == viewer)
                 e.Handled = true;
         }
 

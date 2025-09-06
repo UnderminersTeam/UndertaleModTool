@@ -470,4 +470,19 @@ public class UndertaleExtension : UndertaleNamedResource, IDisposable
 
         return count;
     }
+
+    public static bool ProductDataEligible(UndertaleData data)
+    {
+        uint major = data?.GeneralInfo?.Major ?? 0;
+        if (major >= 2)
+        {
+            return true;
+        }
+        uint build = data?.GeneralInfo?.Build ?? 0;
+        if (build >= 1773 || build == 1559)
+        {
+            return true;
+        }
+        return false;
+    }
 }
