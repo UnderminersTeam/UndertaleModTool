@@ -346,7 +346,7 @@ namespace UndertaleModTool.Windows
             StatusBarTextBlock.Text = str;
         }
 
-        private void OpenSelectedListViewItem(bool inNewTab = false)
+        private void OpenSelectedListViewItem(bool inNewTab = false, Result resultToOpen = default)
         {
             if (isSearchInProgress)
             {
@@ -354,12 +354,26 @@ namespace UndertaleModTool.Windows
                 return;
             }
 
-            foreach (Result result in ResultsListView.SelectedItems)
+            if (resultToOpen != default)
             {
-                mainWindow.OpenCodeEntry(result.Code, result.LineNumber, editorTab, inNewTab);
-                // Only first one opens in current tab, the rest go into new tabs.
-                inNewTab = true;
+                mainWindow.OpenCodeEntry(resultToOpen.Code, resultToOpen.LineNumber, editorTab, inNewTab);
             }
+            else
+            {
+                foreach (Result result in ResultsListView.SelectedItems)
+                {
+                    mainWindow.OpenCodeEntry(result.Code, result.LineNumber, editorTab, inNewTab);
+                    // Only first one opens in current tab, the rest go into new tabs.
+                    inNewTab = true;
+                }
+            }
+
+            // So it activates the window after it finished processing
+            // (otherwise it doesn't work sometimes)
+            _ = Task.Run(() =>
+            {
+                Dispatcher.Invoke(mainWindow.Activate);
+            });
         }
 
         private void CopyListViewItems(IEnumerable items)
@@ -384,6 +398,19 @@ namespace UndertaleModTool.Windows
             {
                 e.Handled = true;
                 await Search();
+            }
+        }
+
+        private void ListViewItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ButtonState == MouseButtonState.Pressed
+                && e.ChangedButton == MouseButton.Middle)
+            {
+                if (e.Source is not FrameworkElement elem
+                    || elem.DataContext is not Result res)
+                    return;
+
+                OpenSelectedListViewItem(true, res);  
             }
         }
 

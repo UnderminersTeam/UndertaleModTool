@@ -62,6 +62,7 @@
                             </Trigger>
                         </Style.Triggers>
                         <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_MouseDoubleClick"/>
+                        <EventSetter Event="PreviewMouseDown" Handler="ListViewItem_PreviewMouseDown"/>
                         <EventSetter Event="KeyDown" Handler="ListViewItem_KeyDown"/>
                         <Setter Property="FontFamily" Value="Consolas"/>
                         <Setter Property="ContextMenu" Value="{StaticResource ListViewItemContextMenu}"/>
