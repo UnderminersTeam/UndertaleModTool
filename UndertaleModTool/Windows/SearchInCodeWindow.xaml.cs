@@ -69,7 +69,7 @@ namespace UndertaleModTool.Windows
             await Search();
         }
 
-        async Task Search()
+        private async Task Search()
         {
             // TODO: Allow this be cancelled, probably make loader inside this window itself.
 
@@ -205,7 +205,7 @@ namespace UndertaleModTool.Windows
             isSearchInProgress = false;
         }
 
-        void SearchInUndertaleCode(UndertaleCode code)
+        private void SearchInUndertaleCode(UndertaleCode code)
         {
             try
             {
@@ -240,7 +240,7 @@ namespace UndertaleModTool.Windows
             return null;
         }
 
-        void SearchInCodeText(string codeName, string codeText)
+        private void SearchInCodeText(string codeName, string codeText)
         {
             List<int> results = new();
 
@@ -309,7 +309,7 @@ namespace UndertaleModTool.Windows
             }
         }
 
-        void SortResults()
+        private void SortResults()
         {
             string[] codeNames = mainWindow.Data.Code.Select(x => x.Name.Content).ToArray();
 
@@ -336,7 +336,7 @@ namespace UndertaleModTool.Windows
             StatusBarTextBlock.Text = str;
         }
 
-        void OpenSelectedListViewItem(bool inNewTab=false)
+        private void OpenSelectedListViewItem(bool inNewTab = false)
         {
             if (isSearchInProgress)
             {
@@ -352,9 +352,9 @@ namespace UndertaleModTool.Windows
             }
         }
 
-        void CopyListViewItems(IEnumerable items)
+        private void CopyListViewItems(IEnumerable items)
         {
-            string str = String.Join("\n", items
+            string str = String.Join('\n', items
                 .Cast<Result>()
                 .Select(result => $"{result.Code}\t{result.LineNumber}\t{result.LineText}"));
             try
