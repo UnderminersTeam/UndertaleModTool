@@ -524,7 +524,7 @@ namespace UndertaleModLib
                             reader.undertaleData.SetGMS2Version(2024, 11);
                     }
                     else
-                        reader.SubmitWarning("Null pointers found in pointer list on file built with GMS pre 2024.11!");
+                        reader.SubmitWarning("Null pointers found in pointer list on file built with GMS pre-2!");
 
                     i--;
                     count--;
