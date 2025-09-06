@@ -319,7 +319,17 @@ namespace UndertaleModTool.Windows
 
         public void ShowResults()
         {
-            foreach (var result in resultsDictSorted)
+            static string GetWordEnding(int quantity, bool isResults)
+            {
+                if (isResults)
+                    return quantity != 1 ? "s" : "";
+                
+                return quantity != 1 ? "ies" : "y";
+            }
+
+            var resultsSorted = resultsDictSorted.ToArray();
+            var failedSorted = failedListSorted.ToArray();
+            foreach (var result in resultsSorted)
             {
                 var code = result.Key;
                 foreach (var (lineText, lineNumber) in result.Value)
@@ -328,10 +338,10 @@ namespace UndertaleModTool.Windows
                 }
             }
 
-            string str = $"{resultCount} result{(resultCount != 1 ? "s" : "")} found in {resultsDictSorted.Count()} code entr{(resultsDictSorted.Count() != 1 ? "ies" : "y")}.";
-            if (failedListSorted.Count() > 0)
+            string str = $"{resultCount} result{GetWordEnding(resultCount, true)} found in {resultsSorted.Length} code entr{GetWordEnding(resultsSorted.Length, false)}.";
+            if (failedSorted.Length > 0)
             {
-                str += $" {failedListSorted.Count()} code entr{(failedListSorted.Count() != 1 ? "ies" : "y")} with an error.";
+                str += $" {failedSorted.Length} code entr{GetWordEnding(failedSorted.Length, false)} with an error.";
             }
             StatusBarTextBlock.Text = str;
         }
