@@ -3,11 +3,8 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Ports;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
@@ -390,7 +387,7 @@ namespace UndertaleModLib
             = BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy;
         private readonly Type[] readerArgType = { typeof(UndertaleReader) };
         private readonly Type delegateType = typeof(Func<UndertaleReader, uint>);
-        private readonly Func<UndertaleReader, uint> blankCountFunc = new(_ => { return 0; });
+        private readonly Func<UndertaleReader, uint> blankCountFunc = _ => 0;
 
         private bool ProcessObjectCountingErrors(uint poolSize = 0)
         {
@@ -400,7 +397,7 @@ namespace UndertaleModLib
                 {
                     string fileDir = Path.GetDirectoryName(Environment.ProcessPath);
                     File.WriteAllText(Path.Combine(fileDir, "unserializeCountError.txt"),
-                                      countUnserializeExc.ToString() + "\n"
+                                      countUnserializeExc + "\n"
                                       + countUnserializeExc.Message + "\n"
                                       + countUnserializeExc.StackTrace);
 

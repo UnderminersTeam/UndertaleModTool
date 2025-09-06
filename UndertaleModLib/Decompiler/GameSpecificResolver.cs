@@ -25,7 +25,7 @@ public class GameSpecificResolver
 
     private static readonly Dictionary<string, Func<UndertaleData, string, ConditionResult>> _conditionEvaluators = new()
     {
-        ["Always"] = (UndertaleData data, string value) => 
+        ["Always"] = (UndertaleData _, string _) => 
         {
             return ConditionResult.Accept;
         },

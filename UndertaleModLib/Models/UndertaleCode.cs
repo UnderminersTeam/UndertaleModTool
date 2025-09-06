@@ -6,6 +6,7 @@ using System.Text;
 using Underanalyzer;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Util;
+// ReSharper disable All
 
 namespace UndertaleModLib.Models;
 
@@ -210,20 +211,20 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
 
     public enum InstanceType : short
     {
-        Undefined = 0, // actually, this is just object 0, but also occurs in places where no instance type was set
-
+        /// Actually, this is just object 0, but also occurs in places where no instance type was set
+        Undefined = 0,
         Self = -1,
         Other = -2,
         All = -3,
         Noone = -4,
         Global = -5,
-        Builtin = -6, // Note: Used only in UndertaleVariable.VarID (which is not really even InstanceType)
+        /// Note: Used only in UndertaleVariable.VarID (which is not really even InstanceType)
+        Builtin = -6,
         Local = -7,
         Stacktop = -9,
         Arg = -15,
         Static = -16
-
-        // anything > 0 => GameObjectIndex
+        // anything > 0 --> GameObjectIndex (or Instance ID if VariableType.Instance)
     }
 
     public enum VariableType : byte
@@ -231,9 +232,12 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
         Array = 0x00,
         StackTop = 0x80,
         Normal = 0xA0,
-        Instance = 0xE0, // the InstanceType is an instance ID inside the room -100000
-        ArrayPushAF = 0x10, // GMS2.3+, multidimensional array with pushaf
-        ArrayPopAF = 0x90, // GMS2.3+, multidimensional array with pushaf or popaf
+        /// The InstanceType is an Instance ID inside the room -100000
+        Instance = 0xE0,
+        /// GMS2.3+, multidimensional array with pushaf
+        ArrayPushAF = 0x10,
+        /// GMS2.3+, multidimensional array with pushaf or popaf
+        ArrayPopAF = 0x90,
     }
 
     public enum ComparisonType : byte
@@ -505,17 +509,15 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                     // Transform opcode as needed for bytecode 14
                     firstWord = (firstWord & 0xFFFFFF) | ((uint)ConvertNewKindToOldKind((byte)(firstWord >> 24)) << 24);
                 }
-                else
+                else if ((firstWord & 0xFFFFFF) != 0xF00000 && (firstWord & 0x800000) != 0)
                 {
                     // Additionally, after bytecode 14, transform 24-bit negative branch into a 23-bit negative branch
-                    if ((firstWord & 0xFFFFFF) != 0xF00000 && (firstWord & 0x800000) != 0)
-                    {
-                        // Unset 24-bit sign bit
-                        firstWord &= ~0x800000u;
+                    
+                    // Unset 24-bit sign bit
+                    firstWord &= ~0x800000u;
 
-                        // Set 23-bit sign bit
-                        firstWord |= 0x400000;
-                    }
+                    // Set 23-bit sign bit
+                    firstWord |= 0x400000;
                 }
                 writer.Write(firstWord);
                 break;
@@ -958,7 +960,7 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
         bool unknownBreak = false;
         if (type == InstructionType.BreakInstruction)
         {
-            if (!Assembler.BreakIDToName.TryGetValue(ExtendedKind, out kind))
+            if (!Assembler.ExtendedIDToName.TryGetValue(ExtendedKind, out kind))
             {
                 kind = kind.ToLower(CultureInfo.InvariantCulture);
                 unknownBreak = true;
@@ -1104,7 +1106,6 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                 if (type1 == DataType.Int64)
                 {
                     sbh.Append(stringBuilder, ValueLong.ToString(null, CultureInfo.InvariantCulture));
-                    break;
                 }
                 break;
 
