@@ -85,7 +85,9 @@ namespace UndertaleModTool
         private void Remove_Click_Override(object sender, RoutedEventArgs e)
         {
             var btn = sender as ButtonDark;
-            var objRef = (btn.Parent as Grid).Parent as UndertaleObjectReference;
+            var objRef = (btn?.Parent as Grid)?.Parent as UndertaleObjectReference;
+            if (objRef is null)
+                return;
 
             if (DataContext is not UndertaleGameObject obj)
                 return;
