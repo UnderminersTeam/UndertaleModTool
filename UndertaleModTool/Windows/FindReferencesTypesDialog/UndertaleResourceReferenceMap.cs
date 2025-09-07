@@ -480,7 +480,11 @@ namespace UndertaleModTool.Windows
             if (!typeMap.TryGetValue(type, out TypesForVersion[] typesForVer))
                 return null;
 
-            GameVersion version = (data.GeneralInfo.Major, data.GeneralInfo.Minor, data.GeneralInfo.Release);
+            GameVersion version;
+            if (data.GeneralInfo.Branch == UndertaleGeneralInfo.BranchType.LTS2022_0)
+                version = (2022, 0, 0);
+            else
+                version = (data.GeneralInfo.Major, data.GeneralInfo.Minor, data.GeneralInfo.Release);
             byte bytecodeVersion = data.GeneralInfo.BytecodeVersion;
 
             IEnumerable<(Type, string)> outTypes = Enumerable.Empty<(Type, string)>();
