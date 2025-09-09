@@ -50,6 +50,7 @@ public class GlobalDecompileContext : IGameContext
     public bool UsingBuiltinDefaultArguments => Data?.IsVersionAtLeast(2024, 11) ?? false;
     public bool UsingArrayCopyOnWrite => Data?.ArrayCopyOnWrite ?? false;
     public bool UsingNewArrayOwners => Data?.IsVersionAtLeast(2, 3, 2) ?? false;
+    public bool UsingOptimizedFunctionDeclarations => Data?.IsVersionAtLeast(2024, 14) ?? false;
     public GameSpecificRegistry GameSpecificRegistry => Data?.GameSpecificRegistry;
     public IBuiltins Builtins { get; private set; } = null;
     public ICodeBuilder CodeBuilder { get; private set; } = null;
