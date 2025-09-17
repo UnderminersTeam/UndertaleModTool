@@ -700,7 +700,8 @@ public class UndertaleOptions : UndertaleObject, IDisposable
         LegacyNumberConversion = 0x80000000,
         LegacyOtherBehavior = 0x100000000,
         AudioErrorBehavior = 0x200000000,
-        AllowInstanceChange = 0x400000000
+        AllowInstanceChange = 0x400000000,
+        LegacyPrimitiveDrawing = 0x800000000
     }
 
     /// <summary>
