@@ -78,7 +78,7 @@ partial class ProjectContext
                 asset.DataName ??= Path.GetFileNameWithoutExtension(assetPath);
 
                 // Associate the data name (and type) of this asset with its path
-                if (!_assetDataNamesToPaths.TryAdd((asset.DataName, asset.AssetType), assetPath))
+                if (!_assetDataNamesToPaths.TryAdd(new(asset.DataName, asset.AssetType), assetPath))
                 {
                     throw new ProjectException($"Found multiple {asset.AssetType.ToFilesystemNameSingular()} assets with name \"{asset.DataName}\"");
                 }
@@ -109,7 +109,7 @@ partial class ProjectContext
 
                 // Associate the data name (and type) of this asset with its path.
                 // Note that we store a theoretical JSON file path, which doesn't actually exist - just in case a JSON is required later.
-                if (!_assetDataNamesToPaths.TryAdd((asset.DataName, asset.AssetType), jsonPath))
+                if (!_assetDataNamesToPaths.TryAdd(new(asset.DataName, asset.AssetType), jsonPath))
                 {
                     throw new ProjectException($"Found multiple {asset.AssetType.ToFilesystemNameSingular()} assets with name \"{asset.DataName}\"");
                 }

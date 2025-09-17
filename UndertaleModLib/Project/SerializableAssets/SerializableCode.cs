@@ -114,7 +114,7 @@ internal sealed class SerializableCode : ISerializableProjectAsset
     public void ImportCode(ProjectContext projectContext, CodeImportGroup group)
     {
         // Get JSON filename (of main asset file)
-        if (!projectContext.AssetDataNamesToPaths.TryGetValue((DataName, AssetType), out string jsonFilename))
+        if (!projectContext.AssetDataNamesToPaths.TryGetValue(new(DataName, AssetType), out string jsonFilename))
         {
             throw new ProjectException("Failed to get code asset path");
         }

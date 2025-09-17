@@ -79,7 +79,7 @@ public sealed partial class ProjectContext
     /// <summary>
     /// Lookup of asset paths that existed when loading on disk, by data name and asset type.
     /// </summary>
-    internal IReadOnlyDictionary<(string DataName, SerializableAssetType AssetType), string> AssetDataNamesToPaths => _assetDataNamesToPaths;
+    internal IReadOnlyDictionary<AssetNameTypePair, string> AssetDataNamesToPaths => _assetDataNamesToPaths;
 
     /// <summary>
     /// Texture worker used during exporting.
@@ -103,6 +103,11 @@ public sealed partial class ProjectContext
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
+    /// <summary>
+    /// Tuple of an asset's data name and serializable asset type.
+    /// </summary>
+    internal record struct AssetNameTypePair(string DataName, SerializableAssetType AssetType);
+
     // Relevant project paths
     private readonly string _mainFilePath;
     private readonly string _mainDirectory;
@@ -115,7 +120,7 @@ public sealed partial class ProjectContext
     private HashSet<string> _projectJsonPaths = null;
 
     // Lookup of asset paths that existed when loading on disk, by data name and asset type
-    private readonly Dictionary<(string DataName, SerializableAssetType AssetType), string> _assetDataNamesToPaths = new(128);
+    private readonly Dictionary<AssetNameTypePair, string> _assetDataNamesToPaths = new(128);
 
     // Set of all assets in the current data that are marked for export
     private readonly HashSet<IProjectAsset> _assetsMarkedForExport = new(64);
@@ -486,7 +491,7 @@ public sealed partial class ProjectContext
 
                 // Figure out a destination file path
                 string destinationFile;
-                if (_assetDataNamesToPaths.TryGetValue((serializableAsset.DataName, serializableAsset.AssetType), out string existingPath) &&
+                if (_assetDataNamesToPaths.TryGetValue(new(serializableAsset.DataName, serializableAsset.AssetType), out string existingPath) &&
                     (File.Exists(existingPath) || (asset is UndertaleCode && File.Exists(Path.ChangeExtension(existingPath, "gml")))))
                 {
                     // Existing file path existed from project load, and the file still exists; use that again

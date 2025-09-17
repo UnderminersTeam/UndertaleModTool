@@ -371,7 +371,7 @@ internal sealed class SerializableSprite : ISerializableTextureProjectAsset
     public void ImportTextures(ProjectContext projectContext, TextureGroupPacker texturePacker)
     {
         // Get JSON filename (of main asset file)
-        if (!projectContext.AssetDataNamesToPaths.TryGetValue((DataName, AssetType), out string jsonFilename))
+        if (!projectContext.AssetDataNamesToPaths.TryGetValue(new(DataName, AssetType), out string jsonFilename))
         {
             throw new ProjectException("Failed to get background asset path");
         }

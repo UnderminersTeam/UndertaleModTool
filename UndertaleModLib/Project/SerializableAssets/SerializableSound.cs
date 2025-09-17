@@ -197,7 +197,7 @@ internal sealed class SerializableSound : ISerializableProjectAsset
         sound.AudioLength = AudioLength;
 
         // Find file for sound
-        if (!projectContext.AssetDataNamesToPaths.TryGetValue((DataName, AssetType), out string jsonFilename))
+        if (!projectContext.AssetDataNamesToPaths.TryGetValue(new(DataName, AssetType), out string jsonFilename))
         {
             throw new ProjectException("Failed to get sound asset path");
         }
