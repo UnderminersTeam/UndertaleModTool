@@ -122,7 +122,11 @@ public sealed class TextureGroupPacker
             {
                 // Image is literally just empty
                 image.Dispose();
-                image = new MagickImage(new byte[] { 0, 0, 0, 0 }, MagickFormat.Rgba);
+                image = new(MagickColors.Transparent, 1, 1);
+                image.Format = MagickFormat.Rgba;
+                image.SetBitDepth(8);
+                image.SetCompression(CompressionMethod.NoCompression);
+                image.Alpha(AlphaOption.Set);
             }
             else
             {
