@@ -524,6 +524,9 @@ public sealed partial class ProjectContext
                     {
                         throw new ProjectException($"Too many naming conflicts for \"{friendlyName}\"");
                     }
+
+                    // Register path for this asset (overriding any old one for this name & type)
+                    _assetDataNamesToPaths[new(serializableAsset.DataName, serializableAsset.AssetType)] = destinationFile;
                 }
 
                 // Ensure directories are created for this asset
