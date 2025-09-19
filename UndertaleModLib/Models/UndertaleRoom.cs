@@ -2065,6 +2065,12 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             public UndertalePointerList<ParticleSystemInstance> ParticleSystems { get; set; }
             public UndertalePointerList<TextItemInstance> TextItems { get; set; }
 
+            /// <summary>
+            /// List of the lists of types of assets.
+            /// UMT only.
+            /// </summary>
+            public List<object> AllAssets { get; set; } = new List<object>();
+
             /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
@@ -2127,6 +2133,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                     if (reader.undertaleData.IsVersionAtLeast(2024, 6))
                         reader.ReadUndertaleObject(TextItems);
                 }
+
+                InitializeAllAssets();
             }
 
             /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
@@ -2179,6 +2187,23 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 }
 
                 return count;
+            }
+
+            public void InitializeAllAssets()
+            {
+                AllAssets.Clear();
+                if (LegacyTiles != null)
+                    AllAssets.Add(LegacyTiles);
+                if (Sprites != null)
+                    AllAssets.Add(Sprites);
+                if (Sequences != null)
+                    AllAssets.Add(Sequences);
+                if (NineSlices != null)
+                    AllAssets.Add(NineSlices);
+                if (ParticleSystems != null)
+                    AllAssets.Add(ParticleSystems);
+                if (TextItems != null)
+                    AllAssets.Add(TextItems);
             }
 
             /// <inheritdoc/>
