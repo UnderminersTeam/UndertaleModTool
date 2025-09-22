@@ -153,11 +153,52 @@
             </DataGrid.Columns>
         </local:DataGridDark>
 
-        <Viewbox Grid.Row="11" Grid.Column="1" Stretch="Uniform" StretchDirection="DownOnly">
-            <Border Background="{StaticResource TransparencyGridBrushBrush}">
-                <local:UndertaleTexturePageItemDisplay DataContext="{Binding SelectedItem.Texture, Mode=OneWay, ElementName=TextureList}" x:Name="TextureDisplay"/>
-            </Border>
-        </Viewbox>
+        <Grid Grid.Row="11" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Zoom Controls -->
+            <Grid Grid.Row="0" Margin="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <local:ButtonDark Grid.Column="0" Content="Zoom In" Margin="2" Click="ZoomIn_Click" ToolTip="Zoom In (Ctrl++)"/>
+                <local:ButtonDark Grid.Column="1" Content="Zoom Out" Margin="2" Click="ZoomOut_Click" ToolTip="Zoom Out (Ctrl+-)"/>
+                <local:ButtonDark Grid.Column="2" Content="Fit" Margin="2" Click="FitToView_Click" ToolTip="Fit to View"/>
+                <local:ButtonDark Grid.Column="3" Content="1:1" Margin="2" Click="ActualSize_Click" ToolTip="Actual Size"/>
+                
+                <TextBlock Grid.Column="5" Text="Zoom:" VerticalAlignment="Center" Margin="5,0"/>
+                <local:TextBoxDark Grid.Column="6" Width="60" Margin="2" Text="{Binding ElementName=SpriteTextureContainer, Path=Tag, Mode=OneWay}" 
+                                   ToolTip="Current zoom percentage" IsReadOnly="True"/>
+            </Grid>
+            
+            <!-- Resizable Sprite Viewer -->
+            <ScrollViewer Grid.Row="1" Margin="3" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" 
+                          x:Name="SpriteTextureScrollViewer" PreviewMouseWheel="SpriteTextureScrollViewer_PreviewMouseWheel"
+                          VerticalAlignment="Top">
+                <Grid HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="SpriteTextureContainer" 
+                      RenderTransformOrigin="0.5,0.5" Cursor="Hand"
+                      MouseDown="SpriteTextureContainer_MouseDown" MouseMove="SpriteTextureContainer_MouseMove" 
+                      MouseUp="SpriteTextureContainer_MouseUp" MouseLeave="SpriteTextureContainer_MouseLeave">
+                    <Grid.RenderTransform>
+                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                    </Grid.RenderTransform>
+                    <Border Background="{StaticResource TransparencyGridBrushBrush}" x:Name="SpriteTextureBorder">
+                        <local:UndertaleTexturePageItemDisplay DataContext="{Binding SelectedItem.Texture, Mode=OneWay, ElementName=TextureList}" 
+                                                              x:Name="SpriteTextureDisplay"/>
+                    </Border>
+                </Grid>
+            </ScrollViewer>
+        </Grid>
 
         <local:ButtonDark Grid.Row="12" Grid.Column="1" Content="Export all frames (or Spine data if this is a Spine sprite)" Click="ExportAll_Click"/>
 
@@ -207,7 +248,7 @@
             </DataGrid.Columns>
         </local:DataGridDark>
 
-        <ContentControl Grid.Row="14" Grid.Column="1" Margin="3" DataContext="{Binding SelectedItem, Mode=OneWay, ElementName=MaskList}">
+        <ContentControl Grid.Row="15" Grid.Column="1" Margin="3" DataContext="{Binding SelectedItem, Mode=OneWay, ElementName=MaskList}">
             <ContentControl.Template>
                 <ControlTemplate>
                     <StackPanel Name="MaskEditor">
