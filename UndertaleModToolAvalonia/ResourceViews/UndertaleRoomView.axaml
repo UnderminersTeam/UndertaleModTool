@@ -11,8 +11,11 @@
     <UserControl.Resources>
         <ContextMenu x:Key="GameObjectListMenu">
             <MenuItem Header="_Add game object instance" Click="ContextMenu_AddGameObjectInstance_GameObjectList_Click"/>
+            <MenuItem Header="_Paste game object instance" Click="ContextMenu_Paste_Click"/>
         </ContextMenu>
         <ContextMenu x:Key="GameObjectMenu">
+            <MenuItem Header="_Copy game object instance" Click="ContextMenu_Copy_Click"/>
+            <MenuItem Header="_Paste game object instance" Click="ContextMenu_Paste_Click"/>
             <MenuItem Header="_Remove game object instance" Click="ContextMenu_RemoveGameObjectInstance_Click"/>
         </ContextMenu>
         <ContextMenu x:Key="TileListMenu">
@@ -34,6 +37,7 @@
         </ContextMenu>
         <ContextMenu x:Key="InstancesLayerMenu">
             <MenuItem Header="_Add game object instance" Click="ContextMenu_AddGameObjectInstance_InstancesLayer_Click"/>
+            <MenuItem Header="_Paste game object instance" Click="ContextMenu_Paste_Click"/>
             <MenuItem Header="_Remove layer" Click="ContextMenu_RemoveLayer_Click"/>
         </ContextMenu>
         <ContextMenu x:Key="AssetsLayerMenu">

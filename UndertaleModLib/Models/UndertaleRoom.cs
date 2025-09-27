@@ -1078,6 +1078,26 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         /// </remarks>
         public int YOffset => Y + SpriteYOffset;
 
+        public GameObject Clone()
+        {
+            return new()
+            {
+                X = this.X,
+                Y = this.Y,
+                ObjectDefinition = this.ObjectDefinition,
+                InstanceID = this.InstanceID,
+                CreationCode = this.CreationCode,
+                ScaleX = this.ScaleX,
+                ScaleY = this.ScaleY,
+                Color = this.Color,
+                Rotation = this.Rotation,
+                PreCreateCode = this.PreCreateCode,
+                ImageSpeed = this.ImageSpeed,
+                ImageIndex = this.ImageIndex,
+                Nonexistent = this.Nonexistent,
+            };
+        }
+
         /// <inheritdoc />
         public virtual void Serialize(UndertaleWriter writer)
         {

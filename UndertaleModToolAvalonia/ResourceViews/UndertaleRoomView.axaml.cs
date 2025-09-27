@@ -298,6 +298,62 @@ public partial class UndertaleRoomView : UserControl
         }
     }
 
+    private void ContextMenu_Copy_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is UndertaleRoomViewModel vm
+            && sender is Control control
+            && control.FindLogicalAncestorOfType<TreeViewItem>() is TreeViewItem treeViewItem)
+        {
+            vm.MainVM.InternalClipboard = treeViewItem.DataContext;
+        }
+    }
+
+    private void ContextMenu_Paste_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is UndertaleRoomViewModel vm
+            && sender is Control control
+            && control.FindLogicalAncestorOfType<TreeViewItem>() is TreeViewItem treeViewItem)
+        {
+            if (vm.MainVM.InternalClipboard is UndertaleRoom.GameObject instance)
+            {
+                // Find if called from "Game objects" list or from an instances layer or instance itself
+
+                object? where = treeViewItem?.DataContext;
+                UndertaleRoom.GameObject? selectedInstance = null;
+
+                if (where is UndertaleRoom.GameObject _selectedInstance)
+                {
+                    TreeViewItem? parentTreeViewItem = treeViewItem.FindLogicalAncestorOfType<TreeViewItem>();
+                    if (parentTreeViewItem is not null)
+                    {
+                        where = parentTreeViewItem.DataContext;
+                        selectedInstance = _selectedInstance;
+                    }
+                }
+
+                if (where is UndertaleRoomViewModel.RoomItem { Tag: "GameObjects" })
+                {
+                    int index = selectedInstance is not null ? vm.Room.GameObjects.IndexOf(selectedInstance) : vm.Room.GameObjects.Count;
+
+                    UndertaleRoom.GameObject newInstance = instance.Clone();
+                    newInstance.InstanceID = vm.MainVM.Data!.GeneralInfo.LastObj++;
+
+                    vm.Room.GameObjects.Insert(index, newInstance);
+                }
+                else if (where is UndertaleRoom.Layer { LayerType: UndertaleRoom.LayerType.Instances } layer)
+                {
+                    int index = selectedInstance is not null ? layer.InstancesData.Instances.IndexOf(selectedInstance) : layer.InstancesData.Instances.Count;
+
+                    UndertaleRoom.GameObject newInstance = instance.Clone();
+                    newInstance.InstanceID = vm.MainVM.Data!.GeneralInfo.LastObj++;
+
+                    vm.Room.GameObjects.Add(newInstance);
+                    layer.InstancesData.Instances.Insert(index, newInstance);
+                }
+            }
+        }
+    }
+
     // Gets a TreeViewItem even if it's not "realized" yet.
     // NOTE: Mostly taken from:
     // https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/how-to-find-a-treeviewitem-in-a-treeview

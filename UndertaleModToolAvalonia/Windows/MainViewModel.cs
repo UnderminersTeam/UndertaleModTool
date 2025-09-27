@@ -80,6 +80,9 @@ public partial class MainViewModel
     // Image cache
     public ImageCache ImageCache = new();
 
+    // Internal clipboard
+    public object? InternalClipboard = null;
+
     public MainViewModel(IServiceProvider? serviceProvider = null)
     {
         ServiceProvider = serviceProvider ?? App.Services;
