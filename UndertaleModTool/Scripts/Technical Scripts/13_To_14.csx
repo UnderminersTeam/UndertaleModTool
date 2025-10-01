@@ -61,8 +61,8 @@ if (!(Data.FORM.Chunks.ContainsKey("AGRP")))
     roomOrder.Clear();
     foreach(var room in rooms)
         roomOrder.Add(new UndertaleResourceById<UndertaleRoom, UndertaleChunkROOM>() { Resource = room });
-    Data.Options.ShaderExtensionFlag = 2147483648;
-    Data.Options.ShaderExtensionVersion = 2;
+    Data.Options.Unknown1 = 2147483648;
+    Data.Options.Unknown2 = 2;
     String[] order = {"GEN8", "OPTN", "EXTN", "SOND", "AGRP", "SPRT", "BGND", "PATH", "SCPT", "SHDR", "FONT", "TMLN", "OBJT", "ROOM", "DAFL", "TPAG", "CODE", "VARI", "FUNC", "STRG", "TXTR", "AUDO"};
     Dictionary<string, UndertaleChunk> newChunks = new Dictionary<string, UndertaleChunk>();
     foreach (String name in order)
