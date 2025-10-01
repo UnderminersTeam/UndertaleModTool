@@ -62,11 +62,14 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         /// </summary>
         StudioVersionMask = 0x0E00,
         /// <summary>
-        /// Whether Steam is enabled.
+        /// Whether Steam (or the YoYoPlayer) is enabled.
         /// </summary>
         SteamEnabled = 0x1000,
 
-        LocalDataEnabled = 0x2000,
+        /// <summary>
+        /// When enabled, the game will write save data to %appdata%\<Game Name>, otherwise it will write to %localappdata%\<Game Name>
+        /// </summary>
+        AppDataSaveLocation = 0x2000,
 
         /// <summary>
         /// Whether the game supports borderless window
@@ -78,6 +81,8 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         JavaScriptMode = 0x8000,
 
         LicenseExclusions = 0x10000,
+
+        EditorRunBuildType = 0x20000,
     }
 
     /// <summary>
