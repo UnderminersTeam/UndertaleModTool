@@ -27,9 +27,9 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         /// </summary>
         EnableViews = 1,
         /// <summary>
-        /// TODO not exactly sure, probably similar to <see cref="UndertaleRoom.DrawBackgroundColor"/>?
+        /// Clears the application surface with the window colour before drawing each frame.
         /// </summary>
-        ShowColor = 2,
+        ClearViewBackground = 2,
         /// <summary>
         /// Whether the room should not clear the display buffer.
         /// </summary>
