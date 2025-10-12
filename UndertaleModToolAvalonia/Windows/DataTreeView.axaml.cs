@@ -251,6 +251,33 @@ public partial class DataTreeView : UserControl
         }
     }
 
+    public async void ContextMenu_Move_Click(object? sender, RoutedEventArgs e)
+    {
+        TreeItemViewModel? treeItem = GetItem(e.Source);
+        if (treeItem is not null && mainVM.Data is not null && mainVM.View is not null)
+        {
+            UndertaleResource resource = (treeItem.Value as UndertaleResource)!;
+            IList list = mainVM.Data[resource.GetType()];
+            int oldIndex = list.IndexOf(resource);
+
+            string? input = await mainVM.View.TextBoxDialog("Swap to position:", oldIndex.ToString());
+            if (!int.TryParse(input, out int newIndex))
+            {
+                await mainVM.View.MessageDialog($"\"{input}\" is not a integer");
+                return;
+            }
+            if (newIndex < 0 || newIndex >= list.Count)
+            {
+                await mainVM.View.MessageDialog($"{newIndex} is out of range of the list");
+                return;
+            }
+
+            object? temp = list[newIndex];
+            list[newIndex] = resource;
+            list[oldIndex] = temp;
+        }
+    }
+
     public async void ContextMenu_Remove_Click(object? sender, RoutedEventArgs e)
     {
         TreeItemViewModel? treeItem = GetItem(e.Source);

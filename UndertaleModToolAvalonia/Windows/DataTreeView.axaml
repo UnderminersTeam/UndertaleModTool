@@ -19,6 +19,7 @@
             <MenuItem Header="_Open" Click="ContextMenu_Open_Click"/>
             <MenuItem Header="Open in _new tab" Click="ContextMenu_OpenInNewTab_Click"/>
             <MenuItem Header="_Copy name" Click="ContextMenu_CopyName_Click"/>
+            <MenuItem Header="_Swap to position" Click="ContextMenu_Move_Click"/>
             <MenuItem Header="_Remove" Click="ContextMenu_Remove_Click"/>
         </ContextMenu>
         <l:LevelToWidthConverter x:Key="LevelToWidthConverter" />
