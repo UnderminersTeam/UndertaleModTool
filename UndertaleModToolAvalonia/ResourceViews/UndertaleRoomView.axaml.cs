@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
@@ -45,6 +46,79 @@ public partial class UndertaleRoomView : UserControl
                 };
             }
         };
+    }
+
+    private void MoveUp_Click(object? sender, RoutedEventArgs e)
+    {
+        MoveSelectedRoomItem(-1);
+    }
+
+    private void MoveDown_Click(object? sender, RoutedEventArgs e)
+    {
+        MoveSelectedRoomItem(1);
+    }
+
+    private void MoveSelectedRoomItem(int distance)
+    {
+        if (DataContext is UndertaleRoomViewModel vm)
+        {
+            var treeViewItem = GetTreeViewItem(RoomItemsTreeView, RoomItemsTreeView.SelectedItem);
+            if (treeViewItem is null)
+                return;
+
+            IList? list = null;
+            Action<int, int>? moveAction = null;
+
+            TreeViewItem? parentTreeViewItem = treeViewItem.FindLogicalAncestorOfType<TreeViewItem>();
+
+            switch (parentTreeViewItem?.DataContext)
+            {
+                case UndertaleRoomViewModel.RoomItem { Tag: "GameObjects" }:
+                    list = vm.Room.GameObjects;
+                    moveAction = vm.Room.GameObjects.Move;
+                    break;
+                case UndertaleRoom.Layer { LayerType: UndertaleRoom.LayerType.Instances } layer:
+                    list = layer.InstancesData.Instances;
+                    moveAction = layer.InstancesData.Instances.Move;
+                    break;
+                case UndertaleRoomViewModel.RoomItem { Tag: "Tiles" }:
+                    list = vm.Room.Tiles;
+                    moveAction = vm.Room.Tiles.Move;
+                    break;
+                case UndertalePointerList<UndertaleRoom.Tile> legacyTiles:
+                    list = legacyTiles;
+                    moveAction = legacyTiles.Move;
+                    break;
+                case UndertalePointerList<UndertaleRoom.SpriteInstance> sprites:
+                    list = sprites;
+                    moveAction = sprites.Move;
+                    break;
+                case UndertalePointerList<UndertaleRoom.SequenceInstance> sequences:
+                    list = sequences;
+                    moveAction = sequences.Move;
+                    break;
+                case UndertalePointerList<UndertaleRoom.ParticleSystemInstance> particleSystems:
+                    list = particleSystems;
+                    moveAction = particleSystems.Move;
+                    break;
+                case UndertalePointerList<UndertaleRoom.TextItemInstance> textItems:
+                    list = textItems;
+                    moveAction = textItems.Move;
+                    break;
+            }
+
+            if (list is not null && moveAction is not null)
+            {
+                var item = treeViewItem.DataContext;
+                var oldIndex = list.IndexOf(item);
+                var newIndex = oldIndex + distance;
+
+                if (oldIndex != -1 && newIndex >= 0 && newIndex < list.Count)
+                {
+                    moveAction(oldIndex, newIndex);
+                }
+            }
+        }
     }
 
     private void ContextMenu_AddGameObjectInstance_GameObjectList_Click(object? sender, RoutedEventArgs e)
@@ -358,9 +432,9 @@ public partial class UndertaleRoomView : UserControl
     // NOTE: Mostly taken from:
     // https://learn.microsoft.com/en-us/dotnet/desktop/wpf/controls/how-to-find-a-treeviewitem-in-a-treeview
     // So I'm not sure exactly why and how this works.
-    private static TreeViewItem? GetTreeViewItem(ItemsControl container, object item)
+    private static TreeViewItem? GetTreeViewItem(ItemsControl? container, object? item)
     {
-        if (container != null)
+        if (container != null && item != null)
         {
             if (container.DataContext == item)
             {

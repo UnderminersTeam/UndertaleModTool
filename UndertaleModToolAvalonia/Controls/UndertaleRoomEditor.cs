@@ -315,6 +315,9 @@ public class UndertaleRoomEditor : Control
     uint? GetLayerTile(Point roomMousePosition, UndertaleRoom.Layer tilesLayer)
     {
         // Find x/y position
+        if (tilesLayer.TilesData.Background is null)
+            return null;
+
         int x = (int)Math.Floor((roomMousePosition.X - tilesLayer.XOffset) / tilesLayer.TilesData.Background.GMS2TileWidth);
         int y = (int)Math.Floor((roomMousePosition.Y - tilesLayer.YOffset) / tilesLayer.TilesData.Background.GMS2TileHeight);
 
@@ -739,9 +742,12 @@ public class UndertaleRoomEditor : Control
 
         void RenderGameObjects(SKCanvas canvas, IList<UndertaleRoom.GameObject> roomGameObjects)
         {
-            foreach (UndertaleRoom.GameObject roomGameObject in roomGameObjects)
+            lock (roomGameObjects)
             {
-                RenderGameObject(canvas, roomGameObject);
+                foreach (UndertaleRoom.GameObject roomGameObject in roomGameObjects)
+                {
+                    RenderGameObject(canvas, roomGameObject);
+                }
             }
         }
 

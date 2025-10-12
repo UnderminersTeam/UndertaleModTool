@@ -81,98 +81,104 @@
     <Grid ColumnDefinitions="2*,Auto,5*" RowDefinitions="1*" MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
         <Grid Grid.Column="0" ColumnDefinitions="1*" RowDefinitions="1*,Auto,1*">
             <Grid Grid.Row="0">
-                <!-- TreeView -->
-                <TreeView Name="RoomItemsTreeView" SelectedItem="{Binding RoomItemsSelectedItem}">
-                    <TreeView.Styles>
-                        <Style Selector="TreeViewItem /template/ StackPanel > Border#PART_LayoutRoot.TreeViewItemLayoutRoot">
-                            <Setter Property="ContextMenu" Value="{Binding ., Converter={StaticResource RoomItemToContextMenuConverter}}"/>
-                        </Style>
-                    </TreeView.Styles>
-                    <TreeView.DataTemplates>
-                        <TreeDataTemplate DataType="l:UndertaleRoomViewModel+RoomItem" ItemsSource="{Binding ItemsSource}">
-                            <TextBlock Text="{Binding Header}" />
-                        </TreeDataTemplate>
+                <Grid RowDefinitions="1*,Auto">
+                    <!-- TreeView -->
+                    <TreeView Grid.Row="0" Name="RoomItemsTreeView" SelectedItem="{Binding RoomItemsSelectedItem}">
+                        <TreeView.Styles>
+                            <Style Selector="TreeViewItem /template/ StackPanel > Border#PART_LayoutRoot.TreeViewItemLayoutRoot">
+                                <Setter Property="ContextMenu" Value="{Binding ., Converter={StaticResource RoomItemToContextMenuConverter}}"/>
+                            </Style>
+                        </TreeView.Styles>
+                        <TreeView.DataTemplates>
+                            <TreeDataTemplate DataType="l:UndertaleRoomViewModel+RoomItem" ItemsSource="{Binding ItemsSource}">
+                                <TextBlock Text="{Binding Header}" />
+                            </TreeDataTemplate>
                         
-                        <DataTemplate DataType="undertalem:UndertaleRoom+Background">
-                            <TextBlock Text="{Binding BackgroundDefinition, TargetNullValue=(Background not set)}" />
-                        </DataTemplate>
-                        <DataTemplate DataType="undertalem:UndertaleRoom+View">
-                            <TextBlock Text="View" />
-                        </DataTemplate>
-                        <DataTemplate DataType="undertalem:UndertaleRoom+GameObject">
-                            <TextBlock Text="{Binding .}" />
-                        </DataTemplate>
-                        <DataTemplate DataType="undertalem:UndertaleRoom+Tile">
-                            <TextBlock Text="{Binding .}" />
-                        </DataTemplate>
-                        <l:LayerTypeTemplateSelector>
-                            <l:LayerTypeTemplateSelector.PathTemplate>
-                                <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer">
-                                    <TextBlock Text="{Binding LayerName.Content}" />
-                                </TreeDataTemplate>
-                            </l:LayerTypeTemplateSelector.PathTemplate>
-                            <l:LayerTypeTemplateSelector.BackgroundTemplate>
-                                <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer">
-                                    <TextBlock Text="{Binding LayerName.Content}" />
-                                </TreeDataTemplate>
-                            </l:LayerTypeTemplateSelector.BackgroundTemplate>
-                            <l:LayerTypeTemplateSelector.InstancesTemplate>
-                                <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer" ItemsSource="{Binding InstancesData.Instances}">
-                                    <TextBlock Text="{Binding LayerName.Content}" />
-                                </TreeDataTemplate>
-                            </l:LayerTypeTemplateSelector.InstancesTemplate>
-                            <l:LayerTypeTemplateSelector.AssetsTemplate>
-                                <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer" ItemsSource="{Binding AssetsData.AllAssets}">
-                                    <TextBlock Text="{Binding LayerName.Content}" />
-                                </TreeDataTemplate>
-                            </l:LayerTypeTemplateSelector.AssetsTemplate>
-                            <l:LayerTypeTemplateSelector.TilesTemplate>
-                                <!-- TODO: Not gonna show the tiles? -->
-                                <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer">
-                                    <TextBlock Text="{Binding LayerName.Content}" />
-                                </TreeDataTemplate>
-                            </l:LayerTypeTemplateSelector.TilesTemplate>
-                            <l:LayerTypeTemplateSelector.EffectTemplate>
-                                <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer">
-                                    <TextBlock Text="{Binding LayerName.Content}" />
-                                </TreeDataTemplate>
-                            </l:LayerTypeTemplateSelector.EffectTemplate>
-                        </l:LayerTypeTemplateSelector>
+                            <DataTemplate DataType="undertalem:UndertaleRoom+Background">
+                                <TextBlock Text="{Binding BackgroundDefinition, TargetNullValue=(Background not set)}" />
+                            </DataTemplate>
+                            <DataTemplate DataType="undertalem:UndertaleRoom+View">
+                                <TextBlock Text="View" />
+                            </DataTemplate>
+                            <DataTemplate DataType="undertalem:UndertaleRoom+GameObject">
+                                <TextBlock Text="{Binding .}" />
+                            </DataTemplate>
+                            <DataTemplate DataType="undertalem:UndertaleRoom+Tile">
+                                <TextBlock Text="{Binding .}" />
+                            </DataTemplate>
+                            <l:LayerTypeTemplateSelector>
+                                <l:LayerTypeTemplateSelector.PathTemplate>
+                                    <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer">
+                                        <TextBlock Text="{Binding LayerName.Content}" />
+                                    </TreeDataTemplate>
+                                </l:LayerTypeTemplateSelector.PathTemplate>
+                                <l:LayerTypeTemplateSelector.BackgroundTemplate>
+                                    <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer">
+                                        <TextBlock Text="{Binding LayerName.Content}" />
+                                    </TreeDataTemplate>
+                                </l:LayerTypeTemplateSelector.BackgroundTemplate>
+                                <l:LayerTypeTemplateSelector.InstancesTemplate>
+                                    <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer" ItemsSource="{Binding InstancesData.Instances}">
+                                        <TextBlock Text="{Binding LayerName.Content}" />
+                                    </TreeDataTemplate>
+                                </l:LayerTypeTemplateSelector.InstancesTemplate>
+                                <l:LayerTypeTemplateSelector.AssetsTemplate>
+                                    <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer" ItemsSource="{Binding AssetsData.AllAssets}">
+                                        <TextBlock Text="{Binding LayerName.Content}" />
+                                    </TreeDataTemplate>
+                                </l:LayerTypeTemplateSelector.AssetsTemplate>
+                                <l:LayerTypeTemplateSelector.TilesTemplate>
+                                    <!-- TODO: Not gonna show the tiles? -->
+                                    <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer">
+                                        <TextBlock Text="{Binding LayerName.Content}" />
+                                    </TreeDataTemplate>
+                                </l:LayerTypeTemplateSelector.TilesTemplate>
+                                <l:LayerTypeTemplateSelector.EffectTemplate>
+                                    <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer">
+                                        <TextBlock Text="{Binding LayerName.Content}" />
+                                    </TreeDataTemplate>
+                                </l:LayerTypeTemplateSelector.EffectTemplate>
+                            </l:LayerTypeTemplateSelector>
                         
-                        <TreeDataTemplate ItemsSource="{Binding .}">
-                            <TreeDataTemplate.DataType>
-                                <x:Type TypeName="undertale:UndertalePointerList" x:TypeArguments="undertalem:UndertaleRoom+Tile"/>
-                            </TreeDataTemplate.DataType>
-                            <TextBlock Text="Legacy tiles"/>
-                        </TreeDataTemplate>
-                        <TreeDataTemplate ItemsSource="{Binding .}">
-                            <TreeDataTemplate.DataType>
-                                <x:Type TypeName="undertale:UndertalePointerList" x:TypeArguments="undertalem:UndertaleRoom+SpriteInstance"/>
-                            </TreeDataTemplate.DataType>
-                            <TextBlock Text="Sprites"/>
-                        </TreeDataTemplate>
-                        <TreeDataTemplate ItemsSource="{Binding .}">
-                            <TreeDataTemplate.DataType>
-                                <x:Type TypeName="undertale:UndertalePointerList" x:TypeArguments="undertalem:UndertaleRoom+SequenceInstance"/>
-                            </TreeDataTemplate.DataType>
-                            <TextBlock Text="Sequences"/>
-                        </TreeDataTemplate>
-                        <TreeDataTemplate ItemsSource="{Binding .}">
-                            <TreeDataTemplate.DataType>
-                                <x:Type TypeName="undertale:UndertalePointerList" x:TypeArguments="undertalem:UndertaleRoom+ParticleSystemInstance"/>
-                            </TreeDataTemplate.DataType>
-                            <TextBlock Text="Particle systems"/>
-                        </TreeDataTemplate>
-                        <TreeDataTemplate ItemsSource="{Binding .}">
-                            <TreeDataTemplate.DataType>
-                                <x:Type TypeName="undertale:UndertalePointerList" x:TypeArguments="undertalem:UndertaleRoom+TextItemInstance"/>
-                            </TreeDataTemplate.DataType>
-                            <TextBlock Text="Text items"/>
-                        </TreeDataTemplate>
-                    </TreeView.DataTemplates>
+                            <TreeDataTemplate ItemsSource="{Binding .}">
+                                <TreeDataTemplate.DataType>
+                                    <x:Type TypeName="undertale:UndertalePointerList" x:TypeArguments="undertalem:UndertaleRoom+Tile"/>
+                                </TreeDataTemplate.DataType>
+                                <TextBlock Text="Legacy tiles"/>
+                            </TreeDataTemplate>
+                            <TreeDataTemplate ItemsSource="{Binding .}">
+                                <TreeDataTemplate.DataType>
+                                    <x:Type TypeName="undertale:UndertalePointerList" x:TypeArguments="undertalem:UndertaleRoom+SpriteInstance"/>
+                                </TreeDataTemplate.DataType>
+                                <TextBlock Text="Sprites"/>
+                            </TreeDataTemplate>
+                            <TreeDataTemplate ItemsSource="{Binding .}">
+                                <TreeDataTemplate.DataType>
+                                    <x:Type TypeName="undertale:UndertalePointerList" x:TypeArguments="undertalem:UndertaleRoom+SequenceInstance"/>
+                                </TreeDataTemplate.DataType>
+                                <TextBlock Text="Sequences"/>
+                            </TreeDataTemplate>
+                            <TreeDataTemplate ItemsSource="{Binding .}">
+                                <TreeDataTemplate.DataType>
+                                    <x:Type TypeName="undertale:UndertalePointerList" x:TypeArguments="undertalem:UndertaleRoom+ParticleSystemInstance"/>
+                                </TreeDataTemplate.DataType>
+                                <TextBlock Text="Particle systems"/>
+                            </TreeDataTemplate>
+                            <TreeDataTemplate ItemsSource="{Binding .}">
+                                <TreeDataTemplate.DataType>
+                                    <x:Type TypeName="undertale:UndertalePointerList" x:TypeArguments="undertalem:UndertaleRoom+TextItemInstance"/>
+                                </TreeDataTemplate.DataType>
+                                <TextBlock Text="Text items"/>
+                            </TreeDataTemplate>
+                        </TreeView.DataTemplates>
                     
-                    <TreeViewItem x:Name="RoomTreeViewItem" Header="{Binding Room.Name.Content}" IsExpanded="True" ItemsSource="{Binding RoomItems}" />
-                </TreeView>
+                        <TreeViewItem x:Name="RoomTreeViewItem" Header="{Binding Room.Name.Content}" IsExpanded="True" ItemsSource="{Binding RoomItems}" />
+                    </TreeView>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal">
+                        <RepeatButton Click="MoveUp_Click">↑</RepeatButton>
+                        <RepeatButton Click="MoveDown_Click" >↓</RepeatButton>
+                    </StackPanel>
+                </Grid>
             </Grid>
             <GridSplitter Grid.Row="1" />
             <Grid Grid.Row="2">
