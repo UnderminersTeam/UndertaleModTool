@@ -62,11 +62,14 @@ public partial class UndertaleGeneralInfo : UndertaleObject, IDisposable
         /// </summary>
         StudioVersionMask = 0x0E00,
         /// <summary>
-        /// Whether Steam is enabled.
+        /// Whether Steam (or the YoYoPlayer) is enabled.
         /// </summary>
         SteamEnabled = 0x1000,
 
-        LocalDataEnabled = 0x2000,
+        /// <summary>
+        /// When enabled, the game will write save data to %appdata%\GameName, otherwise it will write to %localappdata%\GameName
+        /// </summary>
+        UseAppDataSaveLocation = 0x2000,
 
         /// <summary>
         /// Whether the game supports borderless window
@@ -78,6 +81,11 @@ public partial class UndertaleGeneralInfo : UndertaleObject, IDisposable
         JavaScriptMode = 0x8000,
 
         LicenseExclusions = 0x10000,
+
+        /// <summary>
+        /// This flag is set when a game is launched from the Gamemaker Studio 2 IDE using the 'Run' or 'Debug' options
+        /// </summary>
+        GameRunFromGMS2IDE = 0x20000,
     }
 
     /// <summary>
@@ -165,9 +173,9 @@ public partial class UndertaleGeneralInfo : UndertaleObject, IDisposable
     public byte BytecodeVersion { get; set; } = 0x10;
 
     /// <summary>
-    /// TODO: currently unknown value.
+    /// Likely padding, IsDebuggerDisabled and BytecodeVersion are written together as a 32-bit integer
     /// </summary>
-    public ushort Unknown { get; set; } = 0;
+    public ushort Padding { get; set; } = 0;
 
     /// <summary>
     /// The file name of the runner.
@@ -352,7 +360,7 @@ public partial class UndertaleGeneralInfo : UndertaleObject, IDisposable
     {
         writer.Write(IsDebuggerDisabled ? (byte)1 : (byte)0);
         writer.Write(BytecodeVersion);
-        writer.Write(Unknown);
+        writer.Write(Padding);
         writer.WriteUndertaleString(FileName);
         writer.WriteUndertaleString(Config);
         writer.Write(LastObj);
@@ -455,7 +463,7 @@ public partial class UndertaleGeneralInfo : UndertaleObject, IDisposable
 
         IsDebuggerDisabled = reader.ReadByte() != 0;
         BytecodeVersion = reader.ReadByte();
-        Unknown = reader.ReadUInt16();
+        Padding = reader.ReadUInt16();
         FileName = readFileNameDelegate();
         Config = reader.ReadUndertaleString();
         LastObj = reader.ReadUInt32();
@@ -700,18 +708,19 @@ public class UndertaleOptions : UndertaleObject, IDisposable
         LegacyNumberConversion = 0x80000000,
         LegacyOtherBehavior = 0x100000000,
         AudioErrorBehavior = 0x200000000,
-        AllowInstanceChange = 0x400000000
+        AllowInstanceChange = 0x400000000,
+        LegacyPrimitiveDrawing = 0x800000000
     }
 
     /// <summary>
-    /// TODO: unknown value, needs research. Tends to be 2^31?
+    /// Shader extension flag. Always set to int.MinValue
     /// </summary>
-    public uint Unknown1 { get; set; } = 0x80000000;
+    public int ShaderExtensionFlag { get; set; } = int.MinValue;
 
     /// <summary>
-    /// TODO: another unknown value, also needs research.
+    /// Shader extension version. Always set to 2
     /// </summary>
-    public uint Unknown2 { get; set; } = 0x00000002;
+    public int ShaderExtensionVersion { get; set; } = 2;
 
     /// <summary>
     /// Option flags the data file uses.
@@ -827,8 +836,8 @@ public class UndertaleOptions : UndertaleObject, IDisposable
     {
         if (NewFormat)
         {
-            writer.Write(Unknown1);
-            writer.Write(Unknown2);
+            writer.Write(ShaderExtensionFlag);
+            writer.Write(ShaderExtensionVersion);
             writer.Write((ulong)Info);
             writer.Write(Scale);
             writer.Write(WindowColor);
@@ -891,8 +900,8 @@ public class UndertaleOptions : UndertaleObject, IDisposable
         reader.Position -= 4;
         if (NewFormat)
         {
-            Unknown1 = reader.ReadUInt32();
-            Unknown2 = reader.ReadUInt32();
+            ShaderExtensionFlag = reader.ReadInt32();
+            ShaderExtensionVersion = reader.ReadInt32();
             Info = (OptionsFlags)reader.ReadUInt64();
             Scale = reader.ReadInt32();
             WindowColor = reader.ReadUInt32();
