@@ -1,24 +1,25 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using UndertaleModLib;
-using UndertaleModLib.Scripting;
-using UndertaleModLib.Util;
-using static UndertaleModLib.UndertaleReader;
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using System.CommandLine.Builder;
+using System.CommandLine.Invocation;
+using System.CommandLine.NamingConventionBinder;
 using System.CommandLine.Parsing;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using UndertaleModLib.Models;
-using Newtonsoft.Json;
+using UndertaleModLib;
 using UndertaleModLib.Compiler;
+using UndertaleModLib.Models;
+using UndertaleModLib.Scripting;
+using UndertaleModLib.Util;
+using static UndertaleModLib.UndertaleReader;
 
 namespace UndertaleModCli;
 
@@ -93,16 +94,16 @@ public partial class Program : IScriptInterface
     /// <returns>Result code of the program.</returns>
     public static int Main(string[] args)
     {
-        var verboseOption = new Option<bool>(new[] { "-v", "--verbose" }, "Detailed logs");
+        var verboseOption = new Option<bool>(new[] {"-v", "--verbose" }, description: "Detailed logs");
 
         var dataFileArgument = new Argument<FileInfo>("datafile", "Path to the data.win/.ios/.droid/.unx file");
 
         // Setup new command
-        Command newCommand = new Command("new", "Generates a blank data file")
+        Command newCommand = new("new", "Generates a blank data file")
         {
-            new Option<FileInfo>(new[] { "-o", "--output" }, () => new NewOptions().Output),
-            new Option<bool>(new[] { "-f", "--overwrite" }, "Overwrite destination file if it already exists"),
-            new Option<bool>(new[] { "-", "--stdout" }, "Write new data content to stdout"), // "-" is often used in *nix land as a replacement for stdout
+            new Option<FileInfo>(new[] {"-o","--output" } , () => new NewOptions().Output),
+            new Option<bool>(new[] {"-f","--overwrite" } , "Overwrite destination file if it already exists"),
+            new Option<bool>(new[] {"-","--stdout" } , "Write new data content to stdout"), // "-" is often used in *nix land as a replacement for stdout
             verboseOption
         };
         newCommand.Handler = CommandHandler.Create<NewOptions>(Program.New);

@@ -185,6 +185,7 @@ void DumpSound(UndertaleSound sound)
             else
             {
                 destPath = Path.Combine(exportedSoundsDir, "external", soundName + audioExt);
+                Directory.CreateDirectory(Path.Combine(exportedSoundsDir, "external"));
             }
             File.Copy(sourcePath, destPath, true);
         }
