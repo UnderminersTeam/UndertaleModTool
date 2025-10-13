@@ -13,7 +13,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia.Desktop" Version="11.3.3" />
+        <PackageReference Include="Avalonia.Desktop" Version="11.3.7" />
     </ItemGroup>
 
     <ItemGroup>
