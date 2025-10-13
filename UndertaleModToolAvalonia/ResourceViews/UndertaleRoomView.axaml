@@ -658,7 +658,9 @@
         <GridSplitter Grid.Column="1" />
         <Grid Grid.Column="2" RowDefinitions="Auto,1*">
             <Grid Grid.Row="0" ColumnDefinitions="1*,Auto">
-                <StackPanel Grid.Column="0" Orientation="Horizontal"></StackPanel>
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="{Binding StatusText}" />
+                </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal">
                     <TextBox Text="{Binding Zoom, Converter={StaticResource ZoomConverter}}" Width="100"/>
                 </StackPanel>

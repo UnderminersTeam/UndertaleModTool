@@ -231,9 +231,9 @@ public class UndertaleRoomEditor : Control
             Update();
             context.Custom(customDrawOperation);
 
+#if DEBUG
             // Debug text
             Point roomMousePosition = ((mousePosition - Translation) / Scaling);
-
             context.DrawText(new FormattedText(
                 $"mouse: ({mousePosition.X}, {mousePosition.Y}), room: ({Math.Floor(roomMousePosition.X)}, {Math.Floor(roomMousePosition.Y)})\n" +
                 $"view: ({-Translation.X}, {-Translation.Y}, {-Translation.X + Bounds.Width}, {-Translation.Y + Bounds.Height}), zoom: {Scaling}x\n" +
@@ -243,6 +243,7 @@ public class UndertaleRoomEditor : Control
                 $"hovered tile: {hoveredTile}",
                 CultureInfo.CurrentCulture, FlowDirection.LeftToRight, Typeface.Default, 12, new SolidColorBrush(Colors.White)),
                 new Point(0, 0));
+#endif
         }
 
         Dispatcher.UIThread.InvokeAsync(InvalidateVisual, DispatcherPriority.Background);
@@ -252,12 +253,13 @@ public class UndertaleRoomEditor : Control
     {
         mousePosition = e.GetPosition(this);
 
-        Point roomMousePosition = (mousePosition - Translation) / Scaling;
-
         if (moving)
         {
             Translation = mousePosition - movingStartMousePosition;
         }
+
+        Point roomMousePosition = (mousePosition - Translation) / Scaling;
+        vm!.StatusText = $"({Math.Floor(roomMousePosition.X)}, {Math.Floor(roomMousePosition.Y)})";
 
         HoveredRoomItem = null;
         hoveredTile = null;
@@ -488,6 +490,26 @@ public class UndertaleRoomEditor : Control
                 canvas.Translate((float)editor.Translation.X, (float)editor.Translation.Y);
                 canvas.Scale((float)editor.Scaling);
 
+                //foreach (RoomItem roomItem in editor.RoomItems)
+                //{
+                //    switch (roomItem.Object)
+                //    {
+                //        case UndertaleRoom.GameObject roomGameObject:
+                //            RenderGameObject(canvas, roomGameObject);
+                //            break;
+                //        case UndertaleRoom.Tile roomTile:
+                //            RenderTile(canvas, roomTile);
+                //            break;
+                //        case UndertaleRoom.SpriteInstance roomSprite:
+                //            RenderSprite(canvas, roomSprite);
+                //            break;
+                //        // layer.AssetsData.Sequences
+                //        // layer.AssetsData.NineSlices
+                //        // layer.AssetsData.ParticleSystems
+                //        // layer.AssetsData.TextItems
+                //    }
+                //}
+
                 if (vm.Room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.IsGMS2) || vm.Room.Flags.HasFlag(UndertaleRoom.RoomEntryFlags.IsGM2024_13))
                 {
                     IOrderedEnumerable<UndertaleRoom.Layer> layers = vm.Room.Layers.Reverse().OrderByDescending(x => x.LayerDepth);
@@ -585,6 +607,11 @@ public class UndertaleRoomEditor : Control
                 Debugger.Break();
                 throw;
             }
+        }
+
+        public void RenderRoom(SKCanvas canvas)
+        {
+
         }
 
         void RenderBackgrounds(SKCanvas canvas, IList<UndertaleRoom.Background> roomBackgrounds)

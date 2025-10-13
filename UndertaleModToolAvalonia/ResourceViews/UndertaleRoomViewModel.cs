@@ -30,6 +30,9 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
     private object? _CategorySelected;
 
     [Notify]
+    private string _StatusText = "";
+
+    [Notify]
     private double _Zoom = 1;
 
     [Notify]
@@ -189,6 +192,16 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
 
         return null;
     }
+
+    //public void SaveAsImage()
+    //{
+    //    var bitmap = new SKBitmap((int)Room.Width, (int)Room.Height, SKColorType.Bgra8888, SKAlphaType.Unpremul);
+    //    var canvas = new SKCanvas(bitmap);
+
+    //    //var op = new UndertaleRoomEditor.CustomDrawOperation();
+    //    //op.SKImage = EmbeddedTexture.TextureData.Image;
+    //    //op.RenderImage(canvas);
+    //}
 
     private void OnRoomItemsSelectedItemChanged()
     {
