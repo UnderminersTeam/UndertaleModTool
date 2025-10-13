@@ -24,6 +24,11 @@
                 </ComboBox>
             </Grid>
 
+            <StackPanel>
+                <CheckBox Content="Enable syntax highlighting"
+                          IsChecked="{Binding MainVM.Settings.EnableSyntaxHighlighting}"/>
+            </StackPanel>
+
             <!--
             TODO: Missing:
             bool EmptyLineAroundEnums { get; set; } = true;

@@ -27,6 +27,19 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
             if (DataContext is UndertaleCodeViewModel vm)
             {
                 vm.View = this;
+                if (vm.MainVM.Settings!.EnableSyntaxHighlighting)
+                {
+                    UndertaleCodeView.GMLHighlightingDefinition ??= LoadHighlightingDefinition("GML");
+                    GMLTextEditor.SyntaxHighlighting = UndertaleCodeView.GMLHighlightingDefinition;
+
+                    UndertaleCodeView.ASMHighlightingDefinition ??= LoadHighlightingDefinition("ASM");
+                    ASMTextEditor.SyntaxHighlighting = UndertaleCodeView.ASMHighlightingDefinition;
+                }
+                else
+                {
+                    GMLTextEditor.SyntaxHighlighting = null;
+                    ASMTextEditor.SyntaxHighlighting = null;
+                }
 
                 if (this.IsAttachedToVisualTree())
                 {
@@ -54,30 +67,20 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
         InitializeTextEditor(ASMTextEditor);
     }
 
+    static IHighlightingDefinition LoadHighlightingDefinition(string name)
+    {
+        using (XmlReader reader = XmlReader.Create(AssetLoader.Open(new Uri($"avares://{Assembly.GetExecutingAssembly().FullName}/Assets/Syntax{name}.xshd"))))
+        {
+            return HighlightingLoader.Load(reader, HighlightingManager.Instance);
+        }
+    }
+
     void InitializeTextEditor(AvaloniaEdit.TextEditor textEditor)
     {
         textEditor.Options.ConvertTabsToSpaces = true;
         textEditor.Options.HighlightCurrentLine = true;
-
-        static IHighlightingDefinition LoadHighlightingDefinition(string name)
-        {
-            using (XmlReader reader = XmlReader.Create(AssetLoader.Open(new Uri($"avares://{Assembly.GetExecutingAssembly().FullName}/Assets/Syntax{name}.xshd"))))
-            {
-                return HighlightingLoader.Load(reader, HighlightingManager.Instance);
-            }
-        }
-
-        if (textEditor == GMLTextEditor)
-        {
-            UndertaleCodeView.GMLHighlightingDefinition ??= LoadHighlightingDefinition("GML");
-            textEditor.SyntaxHighlighting = UndertaleCodeView.GMLHighlightingDefinition;
-        }
-        else if (textEditor == ASMTextEditor)
-        {
-            UndertaleCodeView.ASMHighlightingDefinition ??= LoadHighlightingDefinition("ASM");
-            textEditor.SyntaxHighlighting = UndertaleCodeView.ASMHighlightingDefinition;
-        }
     }
+
 
     public void ProcessLastGoToLocation()
     {
