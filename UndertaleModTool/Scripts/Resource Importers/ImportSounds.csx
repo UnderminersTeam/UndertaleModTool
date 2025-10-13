@@ -116,8 +116,8 @@ await Task.Run(() =>
             }
         }
 
-        // Try to find an audiogroup, when not updating an existing sound.
-        if (embedSound && usesAGRP && existingSound is null)
+        // Try to find an audiogroup always.
+        if (embedSound && usesAGRP)
         {
             if (manuallySpecifyEverySound)
             {
@@ -143,10 +143,13 @@ await Task.Run(() =>
                         break;
                     }
                 }
+                
+                // Still -1? Create a new one...
                 if (audioGroupID == -1)
                 {
-                    // Still -1? Create a new one...
-                    File.WriteAllBytes(Path.Combine(Path.GetDirectoryName(FilePath), $"audiogroup{Data.AudioGroups.Count}.dat"), Convert.FromBase64String("Rk9STQwAAABBVURPBAAAAAAAAAA="));
+                    // Missed assigning a number to a newly created audio group
+                    audioGroupID = Data.AudioGroups.Count;
+                    File.WriteAllBytes(Path.Combine(Path.GetDirectoryName(FilePath), $"audiogroup{audioGroupID}.dat"), Convert.FromBase64String("Rk9STQwAAABBVURPBAAAAAAAAAA="));
                     UndertaleAudioGroup newAudioGroup = new()
                     {
                         Name = Data.Strings.MakeString(audioGroupName),
@@ -154,12 +157,6 @@ await Task.Run(() =>
                     Data.AudioGroups.Add(newAudioGroup);
                 }
             }
-        }
-
-        // If this is an existing sound, use its audio group ID.
-        if (existingSound is not null)
-        {
-            audioGroupID = existingSound.GroupID;
         }
 
         // If the audiogroup ID is for the builtin audiogroup ID, it's embedded in the main data file and doesn't need to be loaded.
@@ -173,12 +170,17 @@ await Task.Run(() =>
         if ((embedSound && !needAGRP) || needAGRP)
         {
             soundData = new UndertaleEmbeddedAudio() { Data = File.ReadAllBytes(file) };
-            Data.EmbeddedAudio.Add(soundData);
-            if (existingSound is not null)
+            
+            // There is no need to add sound to data.win if we add it to audiogroup.dat
+            if (!needAGRP)
             {
-                Data.EmbeddedAudio.Remove(existingSound.AudioFile);
+                Data.EmbeddedAudio.Add(soundData);
+                if (existingSound is not null)
+                {
+                    Data.EmbeddedAudio.Remove(existingSound.AudioFile);
+                }
+                embAudioID = Data.EmbeddedAudio.Count - 1;
             }
-            embAudioID = Data.EmbeddedAudio.Count - 1;
         }
 
         // Update external audio group file if required.
