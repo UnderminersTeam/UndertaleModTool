@@ -9,12 +9,15 @@
              x:Class="UndertaleModToolAvalonia.UndertaleCodeView"
              x:DataType="l:UndertaleCodeViewModel">
     <Grid RowDefinitions="Auto,1*" ColumnDefinitions="1*" MaxHeight="{Binding $parent[ContentControl].Bounds.Height}">
-        <Grid Grid.Row="0" l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
-            <Label>Name</Label>
-            <l:UndertaleStringReferenceView Reference="{Binding Code.Name}" />
+        <Grid Grid.Row="0" ColumnDefinitions="1*,Auto" Classes="PaddedProperties">
+            <Grid Grid.Column="0" l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                <Label>Name</Label>
+                <l:UndertaleStringReferenceView Reference="{Binding Code.Name}" />
 
-            <Label>Parent</Label>
-            <l:UndertaleResourceReferenceView Reference="{Binding Code.ParentEntry}" ReferenceType="undertalem:UndertaleGameObject" />
+                <Label>Parent</Label>
+                <l:UndertaleResourceReferenceView Reference="{Binding Code.ParentEntry}" ReferenceType="undertalem:UndertaleGameObject" />
+            </Grid>
+            <Button Grid.Column="1" Command="{Binding CompileAndDecompileGML}">Compile and decompile</Button>
         </Grid>
         
         <TabControl Grid.Row="1" IsVisible="{Binding Code.ParentEntry, Converter={x:Static ObjectConverters.IsNull}}"

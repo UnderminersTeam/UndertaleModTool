@@ -27,6 +27,8 @@
             <StackPanel>
                 <CheckBox Content="Enable syntax highlighting"
                           IsChecked="{Binding MainVM.Settings.EnableSyntaxHighlighting}"/>
+                <CheckBox Content="Automatically compile and decompile code on lost focus"
+                          IsChecked="{Binding MainVM.Settings.AutomaticallyCompileAndDecompileCodeOnLostFocus}"/>
             </StackPanel>
 
             <!--

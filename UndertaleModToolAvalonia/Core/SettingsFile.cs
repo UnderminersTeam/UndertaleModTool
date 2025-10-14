@@ -127,6 +127,7 @@ public partial class SettingsFile
     }
 
     public bool EnableSyntaxHighlighting { get; set; } = true;
+    public bool AutomaticallyCompileAndDecompileCodeOnLostFocus { get; set; } = true;
 
     public string InstanceIdPrefix { get; set; } = "inst_";
 

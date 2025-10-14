@@ -120,7 +120,7 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
 
     private void GMLTextEditor_LostFocus(object? sender, RoutedEventArgs e)
     {
-        if (DataContext is UndertaleCodeViewModel vm)
+        if (DataContext is UndertaleCodeViewModel vm && vm.MainVM.Settings!.AutomaticallyCompileAndDecompileCodeOnLostFocus)
         {
             vm.CompileAndDecompileGML(onlyIfOutdated: true);
         }
@@ -128,7 +128,7 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
 
     private void ASMTextEditor_LostFocus(object? sender, RoutedEventArgs e)
     {
-        if (DataContext is UndertaleCodeViewModel vm)
+        if (DataContext is UndertaleCodeViewModel vm && vm.MainVM.Settings!.AutomaticallyCompileAndDecompileCodeOnLostFocus)
         {
             vm.CompileAndDecompileASM(onlyIfOutdated: true);
         }
