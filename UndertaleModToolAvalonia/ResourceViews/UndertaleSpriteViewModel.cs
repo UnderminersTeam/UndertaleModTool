@@ -35,14 +35,31 @@ public partial class UndertaleSpriteViewModel : IUndertaleResourceViewModel
     {
         MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
         Sprite = sprite;
+
+        if (Sprite.Textures.Count > 0)
+            TexturesSelected = Sprite.Textures[0];
+        if (Sprite.CollisionMasks.Count > 0)
+            CollisionMasksSelected = Sprite.CollisionMasks[0];
     }
 
     public void TexturesSelectedChanged(object? item)
     {
+        if (item is null)
+        {
+            if (Sprite.Textures.Count > 0)
+                TexturesSelected = Sprite.Textures[0];
+            return;
+        }
         TexturesSelected = (UndertaleSprite.TextureEntry?)item!;
     }
     public void CollisionMasksSelectedChanged(object? item)
     {
+        if (item is null)
+        {
+            if (Sprite.CollisionMasks.Count > 0)
+                CollisionMasksSelected = Sprite.CollisionMasks[0];
+            return;
+        }
         CollisionMasksSelected = (UndertaleSprite.MaskEntry?)item!;
     }
 

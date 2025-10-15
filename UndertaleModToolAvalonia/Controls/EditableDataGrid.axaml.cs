@@ -48,13 +48,10 @@ public partial class EditableDataGrid : UserControl
         }
     }
 
-    public DataGrid DataGridControl { get; set; }
-
     public EditableDataGrid()
     {
         InitializeComponent();
 
-        DataGridControl = this.Find<DataGrid>("DataGrid")!;
         DataGridControl.SelectionChanged += (object? sender, SelectionChangedEventArgs e) =>
         {
             // HACK: Hack to make it so a temporary deselection when moving items doesn't stop the repeat button.
@@ -75,13 +72,6 @@ public partial class EditableDataGrid : UserControl
                 if (row is not null)
                     row.IsSelected = true;
             }
-        };
-        DataGridControl.Initialized += (object? sender, EventArgs e) =>
-        {
-            if (ItemsSource is not null && ItemsSource.Count > 0)
-                DataGrid.SelectedIndex = 0;
-
-            AddButton.IsEnabled = ItemFactory is not null;
         };
     }
 
