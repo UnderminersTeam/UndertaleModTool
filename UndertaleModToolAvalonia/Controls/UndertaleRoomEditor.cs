@@ -114,7 +114,7 @@ public class UndertaleRoomEditor : Control
             RoomItems.Add(new RoomItem(
                 Object: roomTile,
                 Category: layer is not null ? layer : vm!.RoomItems.First(x => x.Tag == "Tiles"),
-                Bounds: new Rect(x, y, w, h),
+                Bounds: new Rect(x, y, w, h).Normalize(),
                 Rotation: 0,
                 Pivot: new Point(x, y),
                 GetProperties: () =>
@@ -149,7 +149,7 @@ public class UndertaleRoomEditor : Control
                     layer.YOffset + roomSprite.Y - roomSprite.Sprite.OriginY * roomSprite.ScaleY,
                     texture.BoundingWidth * roomSprite.ScaleX,
                     texture.BoundingHeight * roomSprite.ScaleY
-                ),
+                ).Normalize(),
                 Rotation: roomSprite.OppositeRotation,
                 Pivot: new Point(layer.XOffset + roomSprite.X, layer.YOffset + roomSprite.Y),
                 GetProperties: () =>
@@ -185,7 +185,7 @@ public class UndertaleRoomEditor : Control
                     roomGameObject.Y - gameObject.Sprite.OriginY * roomGameObject.ScaleY,
                     texture.BoundingWidth * roomGameObject.ScaleX,
                     texture.BoundingHeight * roomGameObject.ScaleY
-                ),
+                ).Normalize(),
                 Rotation: roomGameObject.OppositeRotation,
                 Pivot: new Point(
                     roomGameObject.X,
