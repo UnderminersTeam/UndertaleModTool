@@ -653,10 +653,12 @@ public class UndertaleRoomEditor : Control
             if (!backgroundData.Visible)
                 return;
 
-            canvas.DrawRect(0, 0, layer.ParentRoom.Width, layer.ParentRoom.Height, new SKPaint { Color = UndertaleColor.ToColor(backgroundData.Color).ToSKColor() });
-
             if (backgroundData.Sprite is null)
+            {
+                canvas.DrawRect(0, 0, layer.ParentRoom.Width, layer.ParentRoom.Height, new SKPaint { Color = UndertaleColor.ToColor(backgroundData.Color).ToSKColor() });
                 return;
+            }
+                
             if (!(backgroundData.FirstFrame >= 0 && backgroundData.FirstFrame < backgroundData.Sprite.Textures.Count))
                 return;
 
@@ -672,6 +674,10 @@ public class UndertaleRoomEditor : Control
             canvas.Translate(texture.TargetX, texture.TargetY);
             canvas.Scale(backgroundData.CalcScaleX, backgroundData.CalcScaleY);
             canvas.DrawImage(image, -backgroundData.Sprite.OriginX, -backgroundData.Sprite.OriginY);
+            canvas.DrawImage(image, -backgroundData.Sprite.OriginX, -backgroundData.Sprite.OriginY, new SKPaint()
+            {
+                ColorFilter = SKColorFilter.CreateBlendMode(UndertaleColor.ToColor(backgroundData.Color).ToSKColor(), SKBlendMode.Modulate),
+            });
             canvas.Restore();
         }
 
