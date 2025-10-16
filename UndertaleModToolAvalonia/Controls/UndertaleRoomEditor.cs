@@ -617,8 +617,6 @@ public class UndertaleRoomEditor : Control
         void RenderBackgrounds(SKCanvas canvas, IList<UndertaleRoom.Background> roomBackgrounds)
         {
             // TODO: roomBackground.Foreground;
-            // TODO: roomBackground.TiledHorizontally;
-            // TODO: roomBackground.TiledVertically;
             foreach (UndertaleRoom.Background roomBackground in roomBackgrounds)
             {
                 if (!roomBackground.Enabled)
@@ -634,12 +632,32 @@ public class UndertaleRoomEditor : Control
                 SKImage image = mainVM.ImageCache.GetCachedImageFromTexturePageItem(texture);
                 currentUsedImages.Add(image);
 
-                canvas.Save();
-                canvas.Translate(roomBackground.X, roomBackground.Y);
-                canvas.Translate(texture.TargetX, texture.TargetY);
-                canvas.Scale(roomBackground.CalcScaleX, roomBackground.CalcScaleY);
-                canvas.DrawImage(image, 0, 0);
-                canvas.Restore();
+                var w = texture.BoundingWidth * roomBackground.CalcScaleX;
+                var h = texture.BoundingHeight * roomBackground.CalcScaleY;
+
+                var startX = roomBackground.TiledHorizontally ? ((roomBackground.X % w) - w) : roomBackground.X;
+                var startY = roomBackground.TiledVertically ? ((roomBackground.Y % h) - h) : roomBackground.Y;
+
+                var endX = roomBackground.TiledHorizontally ? roomBackground.ParentRoom.Width : (startX + w);
+                var endY = roomBackground.TiledVertically ? roomBackground.ParentRoom.Height : (startY + h);
+
+                for (var x = startX; x < endX; x += w)
+                {
+                    for (var y = startY; y < endY; y += h)
+                    {
+                        canvas.Save();
+                        if (roomBackground.TiledHorizontally || roomBackground.TiledVertically)
+                        {
+                            // TODO: Only clip in direction of tiling
+                            canvas.ClipRect(new SKRect(0, 0, roomBackground.ParentRoom.Width, roomBackground.ParentRoom.Height));
+                        }
+                        canvas.Translate(x, y);
+                        canvas.Translate(texture.TargetX, texture.TargetY);
+                        canvas.Scale(roomBackground.CalcScaleX, roomBackground.CalcScaleY);
+                        canvas.DrawImage(image, 0, 0);
+                        canvas.Restore();
+                    }
+                }
             }
         }
 
@@ -647,9 +665,6 @@ public class UndertaleRoomEditor : Control
         {
             UndertaleRoom.Layer.LayerBackgroundData backgroundData = layer.BackgroundData;
 
-            // TODO: backgroundData.Foreground
-            // TODO: backgroundData.TiledHorizontally;
-            // TODO: backgroundData.TiledVertically;
             if (!backgroundData.Visible)
                 return;
 
@@ -669,16 +684,35 @@ public class UndertaleRoomEditor : Control
             SKImage image = mainVM.ImageCache.GetCachedImageFromTexturePageItem(texture);
             currentUsedImages.Add(image);
 
-            canvas.Save();
-            canvas.Translate(layer.XOffset, layer.YOffset);
-            canvas.Translate(texture.TargetX, texture.TargetY);
-            canvas.Scale(backgroundData.CalcScaleX, backgroundData.CalcScaleY);
-            canvas.DrawImage(image, -backgroundData.Sprite.OriginX, -backgroundData.Sprite.OriginY);
-            canvas.DrawImage(image, -backgroundData.Sprite.OriginX, -backgroundData.Sprite.OriginY, new SKPaint()
+            var w = backgroundData.Sprite.Width * backgroundData.CalcScaleX;
+            var h = backgroundData.Sprite.Height * backgroundData.CalcScaleY;
+
+            var startX = backgroundData.TiledHorizontally ? ((layer.XOffset % w) - w) : layer.XOffset;
+            var startY = backgroundData.TiledVertically ? ((layer.YOffset % h) - h) : layer.YOffset;
+
+            var endX = backgroundData.TiledHorizontally ? layer.ParentRoom.Width : (startX + w);
+            var endY = backgroundData.TiledVertically ? layer.ParentRoom.Height : (startY + h);
+
+            for (var x = startX; x < endX; x += w)
             {
-                ColorFilter = SKColorFilter.CreateBlendMode(UndertaleColor.ToColor(backgroundData.Color).ToSKColor(), SKBlendMode.Modulate),
-            });
-            canvas.Restore();
+                for (var y = startY; y < endY; y += h)
+                {
+                    canvas.Save();
+                    if (backgroundData.TiledHorizontally || backgroundData.TiledVertically)
+                    {
+                        // TODO: Only clip in direction of tiling
+                        canvas.ClipRect(new SKRect(0, 0, layer.ParentRoom.Width, layer.ParentRoom.Height));
+                    }
+                    canvas.Translate(x, y);
+                    canvas.Translate(texture.TargetX, texture.TargetY);
+                    canvas.Scale(backgroundData.CalcScaleX, backgroundData.CalcScaleY);
+                    canvas.DrawImage(image, 0, 0, new SKPaint()
+                    {
+                        ColorFilter = SKColorFilter.CreateBlendMode(UndertaleColor.ToColor(backgroundData.Color).ToSKColor(), SKBlendMode.Modulate),
+                    });
+                    canvas.Restore();
+                }
+            }
         }
 
         void RenderTiles(SKCanvas canvas, IList<UndertaleRoom.Tile> roomTiles)
