@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 
@@ -16,10 +17,22 @@ namespace UndertaleModTool
     public partial class UndertaleSpriteEditor : DataUserControl
     {
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+        private double currentZoom = 1.0;
+        private bool isDragging = false;
+        private Point lastMousePosition;
+        private double defaultScrollViewerHeight = 200;
+        private double userResizedHeight = 200;
 
         public UndertaleSpriteEditor()
         {
             InitializeComponent();
+            UpdateZoomDisplay();
+            
+            SpriteTextureScrollViewer.Height = defaultScrollViewerHeight;
+            SpriteTextureScrollViewer.MaxHeight = double.PositiveInfinity;
+            userResizedHeight = defaultScrollViewerHeight;
+
+            SpriteTextureDisplay.DataContextChanged += (s, e) => UpdateScrollViewerSize();
         }
 
         private void ExportAllSpine(SaveFileDialog dlg, UndertaleSprite sprite)
@@ -214,6 +227,167 @@ namespace UndertaleModTool
         {
             if (DataContext is UndertaleSprite sprite && (sender as FrameworkElement).DataContext is UndertaleSprite.MaskEntry entry)
                 sprite.CollisionMasks.Remove(entry);
+        }
+
+        private void ZoomIn_Click(object sender, RoutedEventArgs e)
+        {
+            currentZoom = Math.Min(currentZoom * 1.2, 10.0); // Max 10x zoom
+            ApplyZoom();
+        }
+
+        private void ZoomOut_Click(object sender, RoutedEventArgs e)
+        {
+            currentZoom = Math.Max(currentZoom / 1.2, 0.1); // Min 0.1x zoom
+            ApplyZoom();
+        }
+
+        private void FitToView_Click(object sender, RoutedEventArgs e)
+        {
+            if (SpriteTextureDisplay.DataContext == null) return;
+
+            var scrollViewer = SpriteTextureScrollViewer;
+            var display = SpriteTextureDisplay;
+            
+            display.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            var actualSize = display.DesiredSize;
+            
+            if (actualSize.Width > 0 && actualSize.Height > 0)
+            {
+                var availableSize = new Size(Math.Max(300, scrollViewer.ActualWidth - 20), Math.Max(200, scrollViewer.ActualHeight - 20));
+                var scaleX = availableSize.Width / actualSize.Width;
+                var scaleY = availableSize.Height / actualSize.Height;
+                currentZoom = Math.Min(scaleX, scaleY);
+                currentZoom = Math.Max(0.1, Math.Min(currentZoom, 10.0));
+                ApplyZoom();
+            }
+        }
+
+        private void ActualSize_Click(object sender, RoutedEventArgs e)
+        {
+            currentZoom = 1.0;
+            ApplyZoom();
+        }
+
+        private void ApplyZoom()
+        {
+            var scaleTransform = SpriteTextureContainer.RenderTransform as ScaleTransform;
+            if (scaleTransform != null)
+            {
+                scaleTransform.ScaleX = currentZoom;
+                scaleTransform.ScaleY = currentZoom;
+                
+                UpdateScrollViewerSize();
+            }
+            UpdateZoomDisplay();
+        }
+
+        private void UpdateScrollViewerSize()
+        {
+            if (SpriteTextureDisplay.DataContext != null)
+            {
+                SpriteTextureDisplay.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                var textureSize = SpriteTextureDisplay.DesiredSize;
+                
+                if (textureSize.Width > 0 && textureSize.Height > 0)
+                {
+                    var scaledHeight = textureSize.Height * currentZoom;
+                    var paddingBuffer = 40;
+                    
+                    var neededHeight = scaledHeight + paddingBuffer;
+                    
+                    var targetHeight = Math.Max(userResizedHeight, Math.Min(800, neededHeight));
+                    
+                    if (Math.Abs(SpriteTextureScrollViewer.Height - targetHeight) > 10 || double.IsNaN(SpriteTextureScrollViewer.Height))
+                    {
+                        SpriteTextureScrollViewer.Height = targetHeight;
+                        SpriteTextureScrollViewer.MaxHeight = double.PositiveInfinity;
+                    }
+                }
+            }
+            else
+            {
+                SpriteTextureScrollViewer.Height = userResizedHeight;
+                SpriteTextureScrollViewer.MaxHeight = double.PositiveInfinity;
+            }
+        }
+
+        private void UpdateZoomDisplay()
+        {
+            SpriteTextureContainer.Tag = $"{currentZoom:P0}";
+        }
+
+        private void SpriteTextureScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                if (e.Delta > 0)
+                {
+                    currentZoom = Math.Min(currentZoom * 1.1, 10.0);
+                }
+                else
+                {
+                    currentZoom = Math.Max(currentZoom / 1.1, 0.1);
+                }
+                ApplyZoom();
+                e.Handled = true;
+            }
+        }
+
+        private void SpriteTextureContainer_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                isDragging = true;
+                lastMousePosition = e.GetPosition(SpriteTextureScrollViewer);
+                SpriteTextureContainer.CaptureMouse();
+                SpriteTextureContainer.Cursor = Cursors.SizeAll;
+                e.Handled = true;
+            }
+        }
+
+        private void SpriteTextureContainer_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isDragging && e.LeftButton == MouseButtonState.Pressed)
+            {
+                var currentPosition = e.GetPosition(SpriteTextureScrollViewer);
+                var deltaY = currentPosition.Y - lastMousePosition.Y;
+                
+                var zoomChange = deltaY * 0.01;
+                var newZoom = Math.Max(0.1, Math.Min(currentZoom + zoomChange, 10.0));
+                
+                if (Math.Abs(newZoom - currentZoom) > 0.01)
+                {
+                    currentZoom = newZoom;
+                    ApplyZoom();
+                    lastMousePosition = currentPosition;
+                }
+                e.Handled = true;
+            }
+            else if (!isDragging)
+            {
+                SpriteTextureContainer.Cursor = Cursors.SizeNWSE;
+            }
+        }
+
+        private void SpriteTextureContainer_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (isDragging)
+            {
+                isDragging = false;
+                SpriteTextureContainer.ReleaseMouseCapture();
+                SpriteTextureContainer.Cursor = Cursors.SizeNWSE;
+                e.Handled = true;
+            }
+        }
+
+        private void SpriteTextureContainer_MouseLeave(object sender, MouseEventArgs e)
+        {
+            if (isDragging)
+            {
+                isDragging = false;
+                SpriteTextureContainer.ReleaseMouseCapture();
+            }
+            SpriteTextureContainer.Cursor = Cursors.Hand;
         }
     }
 }
