@@ -5,12 +5,18 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Reflection;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
+using DynamicData;
+using DynamicData.Alias;
+using DynamicData.Binding;
+using DynamicData.PLinq;
 using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
 using UndertaleModLib.Models;
@@ -62,6 +68,27 @@ public partial class MainViewModel
             Patterns = ["*"],
         },
     ];
+
+    // Tree data grid
+    public partial class TreeDataGridItem
+    {
+        [Notify]
+        private string _Text = "<unset text!>";
+        public object? Value { get; set; }
+        public object? Tag { get; set; }
+        [Notify]
+        private IList<TreeDataGridItem>? _Children;
+    }
+
+    [Notify]
+    private ObservableCollection<TreeDataGridItem> _TreeDataGridData = [];
+
+    public BehaviorSubject<string> filterTextSubject = new("");
+    public string FilterText
+    {
+        get { return filterTextSubject.Value; }
+        set { filterTextSubject.OnNext(value); }
+    }
 
     // Tabs
     public ObservableCollection<TabItemViewModel> Tabs { get; set; }
@@ -129,29 +156,116 @@ public partial class MainViewModel
         }
     }
 
-    public async Task<MessageWindow.Result> ShowMessageDialog(string message, string? title = null, bool ok = true, bool yes = false, bool no = false, bool cancel = false)
+    // Called by [Notify]
+    public void OnDataChanged()
     {
-        return await View!.MessageDialog(message, title, ok, yes, no, cancel);
-    }
-
-    public void SetData(UndertaleData? data)
-    {
-        if (Data is not null && Data.GeneralInfo is not null)
+        if (Data is not null)
         {
-            Data.GeneralInfo.PropertyChanged -= DataGeneralInfoChangedHandler;
-        }
-
-        Data = data;
-
-        if (Data is not null && Data.GeneralInfo is not null)
-        {
-            Data.GeneralInfo.PropertyChanged += DataGeneralInfoChangedHandler;
+            if (Data.GeneralInfo is not null)
+                Data.GeneralInfo.PropertyChanged += DataGeneralInfoChangedHandler;
 
             Data.ToolInfo.InstanceIdPrefix = () => Settings?.InstanceIdPrefix;
             Data.ToolInfo.DecompilerSettings = Settings?.DecompileSettings;
         }
 
         UpdateVersion();
+
+        TreeDataGridData.Clear();
+
+        if (Data is not null)
+        {
+            ReadOnlyObservableCollection<TreeDataGridItem>? MakeChildren<T>(IList<T> list) where T : notnull
+            {
+                if (list is ObservableCollection<T> collection)
+                {
+                    collection
+                        .ToObservableChangeSet(x => x)
+                        .Filter(filterTextSubject.Select<string, Func<T, bool>>(filterText => item =>
+                        {
+                            string? name = item switch
+                            {
+                                UndertaleNamedResource namedResource => namedResource.Name.Content,
+                                UndertaleString _string => _string.Content,
+                                _ => null,
+                            };
+
+                            if (name is null)
+                                return true;
+
+                            return name.Contains(filterText, System.StringComparison.CurrentCultureIgnoreCase);
+                        }))
+                        .Transform(x => new TreeDataGridItem() { Text = "", Value = x })
+                        .Bind(out ReadOnlyObservableCollection<TreeDataGridItem> readOnlyCollection)
+                        .Subscribe();
+                    return readOnlyCollection;
+                }
+                return null;
+            }
+
+            TreeDataGridData.Add(new()
+            {
+                Value = Data,
+                Text = "Data",
+                Children = [
+                    new() {Value = "GeneralInfo", Text = "General info"},
+                    new() {Value = "GlobalInitScripts", Text = "Global init scripts"},
+                    new() {Value = "GameEndScripts", Text = "Game End scripts"},
+                    new() {Tag = "list", Value = "AudioGroups", Text = "Audio groups",
+                        Children = MakeChildren(Data.AudioGroups)},
+                    new() {Tag = "list", Value = "Sounds", Text = "Sounds",
+                        Children = MakeChildren(Data.Sounds)},
+                    new() {Tag = "list", Value = "Sprites", Text = "Sprites",
+                        Children = MakeChildren(Data.Sprites)},
+                    new() {Tag = "list", Value = "Backgrounds", Text = "Backgrounds & Tile sets",
+                        Children = MakeChildren(Data.Backgrounds)},
+                    new() {Tag = "list", Value = "Paths", Text = "Paths",
+                        Children = MakeChildren(Data.Paths)},
+                    new() {Tag = "list", Value = "Scripts", Text = "Scripts",
+                        Children = MakeChildren(Data.Scripts)},
+                    new() {Tag = "list", Value = "Shaders", Text = "Shaders",
+                        Children = MakeChildren(Data.Shaders)},
+                    new() {Tag = "list", Value = "Fonts", Text = "Fonts",
+                        Children = MakeChildren(Data.Fonts)},
+                    new() {Tag = "list", Value = "Timelines", Text = "Timelines",
+                        Children = MakeChildren(Data.Timelines)},
+                    new() {Tag = "list", Value = "GameObjects", Text = "Game objects",
+                        Children = MakeChildren(Data.GameObjects)},
+                    new() {Tag = "list", Value = "Rooms", Text = "Rooms",
+                        Children = MakeChildren(Data.Rooms)},
+                    new() {Tag = "list", Value = "Extensions", Text = "Extensions",
+                        Children = MakeChildren(Data.Extensions)},
+                    new() {Tag = "list", Value = "TexturePageItems", Text = "Texture page items",
+                        Children = MakeChildren(Data.TexturePageItems)},
+                    new() {Tag = "list", Value = "Code", Text = "Code",
+                        Children = MakeChildren(Data.Code)},
+                    new() {Tag = "list", Value = "Variables", Text = "Variables",
+                        Children = MakeChildren(Data.Variables)},
+                    new() {Tag = "list", Value = "Functions", Text = "Functions",
+                        Children = MakeChildren(Data.Functions)},
+                    new() {Tag = "list", Value = "CodeLocals", Text = "Code locals",
+                        Children = MakeChildren(Data.CodeLocals)},
+                    new() {Tag = "list", Value = "Strings", Text = "Strings",
+                        Children = MakeChildren(Data.Strings)},
+                    new() {Tag = "list", Value = "EmbeddedTextures", Text = "Embedded textures",
+                        Children = MakeChildren(Data.EmbeddedTextures)},
+                    new() {Tag = "list", Value = "EmbeddedAudio", Text = "Embedded audio",
+                        Children = MakeChildren(Data.EmbeddedAudio)},
+                    new() {Tag = "list", Value = "TextureGroupInformation", Text = "Texture group information",
+                        Children = MakeChildren(Data.TextureGroupInfo)},
+                    new() {Tag = "list", Value = "EmbeddedImages", Text = "Embedded images",
+                        Children = MakeChildren(Data.EmbeddedImages)},
+                    new() {Tag = "list", Value = "ParticleSystems", Text = "Particle systems",
+                        Children = MakeChildren(Data.ParticleSystems)},
+                    new() {Tag = "list", Value = "ParticleSystemEmitters", Text = "Particle system emitters",
+                        Children = MakeChildren(Data.ParticleSystemEmitters)},
+                ]
+            });
+        }
+    }
+
+    public async Task<MessageWindow.Result> ShowMessageDialog(string message, string? title = null, bool ok = true, bool yes = false, bool no = false, bool cancel = false)
+    {
+        return await View!.MessageDialog(message, title, ok, yes, no, cancel);
     }
 
     /// <summary>Ask if user wants to save the current file before continuing.
@@ -181,7 +295,7 @@ public partial class MainViewModel
     {
         CloseData();
 
-        SetData(UndertaleData.CreateNew());
+        Data = UndertaleData.CreateNew();
         DataPath = null;
 
         return Task.FromResult(true);
@@ -224,7 +338,7 @@ public partial class MainViewModel
 
             // TODO: Add other checks for possible stuff.
 
-            SetData(data);
+            Data = data;
 
             return true;
         }
@@ -274,7 +388,7 @@ public partial class MainViewModel
 
     public void CloseData()
     {
-        SetData(null);
+        Data = null;
         DataPath = null;
 
         Tabs.Clear();
@@ -483,11 +597,6 @@ public partial class MainViewModel
     {
         if (Data is null)
             return null;
-
-        if (item is TreeItemViewModel treeItem)
-        {
-            item = treeItem.Value;
-        }
 
         object? content = item switch
         {

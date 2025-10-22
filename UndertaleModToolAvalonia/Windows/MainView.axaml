@@ -15,7 +15,25 @@
     </Design.DataContext>
 
     <UserControl.Resources>
+        <ContextMenu x:Key="ListMenu">
+            <MenuItem Header="_Add" Click="ContextMenu_Add_Click"/>
+        </ContextMenu>
+        <ContextMenu x:Key="SingleMenu">
+            <MenuItem Header="_Open" Click="ContextMenu_Open_Click"/>
+            <MenuItem Header="Open in _new tab" Click="ContextMenu_OpenInNewTab_Click"/>
+        </ContextMenu>
+        <ContextMenu x:Key="ResourceMenu">
+            <MenuItem Header="_Open" Click="ContextMenu_Open_Click"/>
+            <MenuItem Header="Open in _new tab" Click="ContextMenu_OpenInNewTab_Click"/>
+            <MenuItem Header="_Copy name" Click="ContextMenu_CopyName_Click"/>
+            <MenuItem Header="_Swap to position" Click="ContextMenu_Move_Click"/>
+            <MenuItem Header="_Remove" Click="ContextMenu_Remove_Click"/>
+        </ContextMenu>
         <l:DataItemToNameConverter x:Key="DataItemToNameConverter"/>
+        <l:TreeDataGridItemToContextMenuConverter x:Key="TreeDataGridItemToContextMenuConverter"
+                                                  ListMenu="{StaticResource ListMenu}"
+                                                  SingleMenu="{StaticResource SingleMenu}"
+                                                  ResourceMenu="{StaticResource ResourceMenu}"/>
     </UserControl.Resources>
 
     <DockPanel>
@@ -36,7 +54,21 @@
                     </StackPanel>
                     <TextBox Name="FilterTextBox" Watermark="Filter by name..." TextChanged="FilterTextBox_TextChanged"/>
                 </StackPanel>
-                <l:DataTreeView Grid.Row="1" Name="MainDataTreeView" Data="{Binding Data}" />
+
+                <TreeDataGrid Name="MainTreeDataGrid" Grid.Row="1" ShowColumnHeaders="False" DoubleTapped="TreeDataGrid_DoubleTapped" KeyDown="MainTreeDataGrid_KeyDown">
+                    <TreeDataGrid.Styles>
+						<Style Selector="TreeDataGridRow TreeDataGridExpanderCell" x:DataType="l:MainViewModel+TreeDataGridItem">
+                            <Setter Property="(Interaction.Behaviors)">
+                                <BehaviorCollectionTemplate>
+                                    <BehaviorCollection>
+                                        <ContextDragBehavior />
+                                    </BehaviorCollection>
+                                </BehaviorCollectionTemplate>
+                            </Setter>
+                            <Setter Property="ContextMenu" Value="{Binding ., Converter={StaticResource TreeDataGridItemToContextMenuConverter}}"/>
+                        </Style>
+                    </TreeDataGrid.Styles>
+                </TreeDataGrid>
             </Grid>
             
             <GridSplitter Grid.Column="1" ResizeDirection="Columns"/>

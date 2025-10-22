@@ -4,6 +4,7 @@
     <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
     <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
     <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
+    <StyleInclude Source="avares://Avalonia.Controls.TreeDataGrid/Themes/Fluent.axaml"/>
 
     <!-- Basic controls -->
     <Style Selector="Window">
@@ -53,6 +54,31 @@
     <Style Selector="DataGridCell">
         <Setter Property="FontSize" Value="12" />
         <Setter Property="MinHeight" Value="12" />
+    </Style>
+
+    <Style Selector="TreeDataGridRow">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <Style Selector="TreeDataGridCellsPresenter">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <Style Selector="TreeDataGridExpanderCell /template/ Border#CellBorder > DockPanel > Border">
+        <Style Selector="^:pointerover">
+            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundListLowBrush}" />
+        </Style>
+    </Style>
+
+    <Style Selector="TreeDataGridExpanderCell, TreeDataGridTemplateCell">
+        <Setter Property="MinHeight" Value="12" />
+    </Style>
+
+    <Style Selector="TreeDataGridTemplateCell > ContentPresenter > TextBlock">
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Padding" Value="4,1,4,1" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="MaxLines" Value="1" />
     </Style>
 
     <Style Selector="ColorPicker">
@@ -156,19 +182,6 @@
 
     <Style Selector="TextBox#FilterTextBox">
         <Setter Property="Margin" Value="0,4,0,0" />
-    </Style>
-
-    <Style Selector=":is(Control)#DataTreeView">
-        <Setter Property="Margin" Value="0,4,0,0" />
-    </Style>
-
-    <Style Selector="ContentControl.ListBoxContentControl">
-        <Setter Property="Padding" Value="0,1" />
-    </Style>
-
-    <Style Selector="ContentControl.ListBoxContentControl TextBlock">
-        <Setter Property="TextWrapping" Value="NoWrap" />
-        <Setter Property="MaxLines" Value="1" />
     </Style>
 
     <Style Selector=":is(Control).PaddedProperties">

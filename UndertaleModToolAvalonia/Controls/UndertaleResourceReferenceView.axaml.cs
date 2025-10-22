@@ -65,7 +65,7 @@ public class UndertaleReferenceDropHandler : DropHandlerBase
     {
         if (targetContext is UndertaleResourceReferenceView vm)
         {
-            if (sourceContext is TreeItemViewModel treeView && treeView.Value is UndertaleResource resource && vm.ReferenceType.IsInstanceOfType(resource))
+            if (sourceContext is MainViewModel.TreeDataGridItem item && item.Value is UndertaleResource resource && vm.ReferenceType.IsInstanceOfType(resource))
             {
                 return true;
             }
@@ -76,7 +76,7 @@ public class UndertaleReferenceDropHandler : DropHandlerBase
     {
         if (targetContext is UndertaleResourceReferenceView vm)
         {
-            if (sourceContext is TreeItemViewModel treeView && treeView.Value is UndertaleResource resource && vm.ReferenceType.IsInstanceOfType(resource))
+            if (sourceContext is MainViewModel.TreeDataGridItem item && item.Value is UndertaleResource resource && vm.ReferenceType.IsInstanceOfType(resource))
             {
                 vm.Reference = resource;
                 return true;
