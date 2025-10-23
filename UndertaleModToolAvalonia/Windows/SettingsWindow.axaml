@@ -25,6 +25,8 @@
             </Grid>
 
             <StackPanel>
+                <CheckBox Content="Open new resource after creating it"
+                          IsChecked="{Binding MainVM.Settings.OpenNewResourceAfterCreatingIt}" />
                 <CheckBox Content="Enable syntax highlighting"
                           IsChecked="{Binding MainVM.Settings.EnableSyntaxHighlighting}"/>
                 <CheckBox Content="Automatically compile and decompile code on lost focus"

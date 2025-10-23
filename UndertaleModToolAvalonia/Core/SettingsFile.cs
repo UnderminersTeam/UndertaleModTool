@@ -126,6 +126,7 @@ public partial class SettingsFile
         }
     }
 
+    public bool OpenNewResourceAfterCreatingIt { get; set; } = false;
     public bool EnableSyntaxHighlighting { get; set; } = true;
     public bool AutomaticallyCompileAndDecompileCodeOnLostFocus { get; set; } = true;
 

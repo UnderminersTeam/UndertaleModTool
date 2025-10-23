@@ -589,6 +589,11 @@ public partial class MainViewModel
         }
 
         list.Add(res);
+
+        if (Settings!.OpenNewResourceAfterCreatingIt)
+        {
+            TabOpen(res, inNewTab: true);
+        }
     }
 
     public TabItemViewModel? TabOpen(object? item, bool inNewTab = false)
