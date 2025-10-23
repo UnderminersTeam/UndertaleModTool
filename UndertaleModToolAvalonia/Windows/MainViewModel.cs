@@ -179,7 +179,7 @@ public partial class MainViewModel
                 if (list is ObservableCollection<T> collection)
                 {
                     collection
-                        .ToObservableChangeSet(x => x)
+                        .ToObservableChangeSet()
                         .Filter(filterTextSubject.Select<string, Func<T, bool>>(filterText => item =>
                         {
                             string? name = item switch
@@ -545,8 +545,6 @@ public partial class MainViewModel
 
     public async void DataItemAdd(IList list)
     {
-        // TODO: Ask user for name etc.
-
         if (Data is null || list is null)
             return;
 

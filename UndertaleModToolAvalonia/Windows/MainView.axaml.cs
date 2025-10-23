@@ -224,6 +224,9 @@ public partial class MainView : UserControl, IView
                 int oldIndex = list.IndexOf(resource);
 
                 string? input = await vm.View.TextBoxDialog("Swap to position:", oldIndex.ToString());
+                if (input is null)
+                    return;
+
                 if (!int.TryParse(input, out int newIndex))
                 {
                     await vm.View.MessageDialog($"\"{input}\" is not a integer");
@@ -235,8 +238,12 @@ public partial class MainView : UserControl, IView
                     return;
                 }
 
+                // HACK: I don't fully understand why it doesn't work if you don't do this
+                if (oldIndex > newIndex)
+                    (oldIndex, newIndex) = (newIndex, oldIndex);
+
                 object? temp = list[newIndex];
-                list[newIndex] = resource;
+                list[newIndex] = list[oldIndex];
                 list[oldIndex] = temp;
             }
         }
