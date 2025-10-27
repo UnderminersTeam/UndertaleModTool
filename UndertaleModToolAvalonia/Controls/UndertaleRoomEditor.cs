@@ -56,6 +56,9 @@ public class UndertaleRoomEditor : Control
     private bool settingTiles = false;
     private uint? hoveredTile = null;
 
+    // Used when updating RoomItems so it's not changed when rendering
+    private readonly object updateLock = new();
+
     public UndertaleRoomEditor()
     {
         customDrawOperation = new CustomDrawOperation(this);
@@ -80,7 +83,11 @@ public class UndertaleRoomEditor : Control
         {
             customDrawOperation.Bounds = Bounds;
 
-            Update();
+            lock (updateLock)
+            {
+                Update();
+            }
+
             context.Custom(customDrawOperation);
 
 #if DEBUG
@@ -98,7 +105,11 @@ public class UndertaleRoomEditor : Control
 #endif
         }
 
-        Dispatcher.UIThread.InvokeAsync(InvalidateVisual, DispatcherPriority.Background);
+        TopLevel topLevel = TopLevel.GetTopLevel(this)!;
+        topLevel.RequestAnimationFrame(_ =>
+        {
+            Dispatcher.UIThread.InvokeAsync(InvalidateVisual, DispatcherPriority.Background);
+        });
     }
 
     protected override void OnPointerMoved(PointerEventArgs e)
@@ -568,7 +579,10 @@ public class UndertaleRoomEditor : Control
                     canvas.DrawRect(0, 0, vm.Room.Width, vm.Room.Height, new SKPaint { Color = color.ToSKColor() });
                 }
 
-                RenderRoom(canvas);
+                lock (editor.updateLock)
+                {
+                    RenderRoom(canvas);
+                }
 
                 RoomItem? selectedRoomItem = editor.GetSelectedRoomItem();
                 if (selectedRoomItem is not null && selectedRoomItem.Selectable is not null)
