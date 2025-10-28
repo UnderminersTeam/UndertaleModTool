@@ -31,6 +31,15 @@
                           IsChecked="{Binding MainVM.Settings.EnableSyntaxHighlighting}"/>
                 <CheckBox Content="Automatically compile and decompile code on lost focus"
                           IsChecked="{Binding MainVM.Settings.AutomaticallyCompileAndDecompileCodeOnLostFocus}"/>
+
+                <CheckBox Content="Enable room grid by default"
+                          IsChecked="{Binding MainVM.Settings.EnableRoomGridByDefault}"/>
+
+                <StackPanel Orientation="Horizontal">
+                    <Label>Default room grid size:</Label>
+                    <TextBox Text="{Binding MainVM.Settings.DefaultRoomGridWidth}" />
+                    <TextBox Text="{Binding MainVM.Settings.DefaultRoomGridHeight}" />
+                </StackPanel>
             </StackPanel>
 
             <!--

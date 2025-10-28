@@ -33,6 +33,12 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
     private string _StatusText = "";
 
     [Notify]
+    private bool _IsGridEnabled = false;
+    [Notify]
+    private uint _GridWidth = 20;
+    [Notify]
+    private uint _GridHeight = 20;
+    [Notify]
     private double _Zoom = 1;
 
     [Notify]
@@ -43,6 +49,10 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
         MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
 
         Room = room;
+
+        IsGridEnabled = MainVM.Settings!.EnableRoomGridByDefault;
+        GridWidth = MainVM.Settings!.DefaultRoomGridWidth;
+        GridHeight = MainVM.Settings!.DefaultRoomGridHeight;
 
         bool isGMS2 = MainVM.Data!.IsVersionAtLeast(2);
 

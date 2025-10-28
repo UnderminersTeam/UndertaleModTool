@@ -130,6 +130,10 @@ public partial class SettingsFile
     public bool EnableSyntaxHighlighting { get; set; } = true;
     public bool AutomaticallyCompileAndDecompileCodeOnLostFocus { get; set; } = true;
 
+    public bool EnableRoomGridByDefault { get; set; } = false;
+    public uint DefaultRoomGridWidth { get; set; } = 20;
+    public uint DefaultRoomGridHeight { get; set; } = 20;
+
     public string InstanceIdPrefix { get; set; } = "inst_";
 
     public Underanalyzer.Decompiler.DecompileSettings DecompileSettings { get; set; } = new();

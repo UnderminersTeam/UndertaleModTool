@@ -142,10 +142,19 @@ public class UndertaleRoomEditor : Control
                 RoomItem? roomItem = GetSelectedRoomItem();
                 if (roomItem is not null && roomItem.Selectable is not null)
                 {
-                    roomItem.Selectable.SetProperties(new(
-                        (int)(roomMousePosition.X - movingItemX),
-                        (int)(roomMousePosition.Y - movingItemY)
-                    ));
+                    double x = (roomMousePosition.X - movingItemX);
+                    double y = (roomMousePosition.Y - movingItemY);
+
+                    if (vm.IsGridEnabled)
+                    {
+                        x = Math.Floor(roomMousePosition.X / vm.GridWidth) * vm.GridWidth;
+                        y = Math.Floor(roomMousePosition.Y / vm.GridHeight) * vm.GridHeight;
+
+                        x -= Math.Floor(movingItemX / vm.GridWidth) * vm.GridWidth;
+                        y -= Math.Floor(movingItemY / vm.GridHeight) * vm.GridHeight;
+                    }
+
+                    roomItem.Selectable.SetProperties(new((int)x, (int)y));
                 }
                 else
                 {
@@ -582,6 +591,21 @@ public class UndertaleRoomEditor : Control
                 lock (editor.updateLock)
                 {
                     RenderRoom(canvas);
+                }
+
+                if (vm.IsGridEnabled)
+                {
+                    if (vm.GridWidth > 0)
+                    for (uint x = 0; x < vm.Room.Width; x += vm.GridWidth)
+                    {
+                        canvas.DrawLine(x, 0, x, vm.Room.Height, new SKPaint { Color = SKColors.White.WithAlpha(64), BlendMode = SKBlendMode.Difference });
+                    }
+
+                    if (vm.GridHeight > 0)
+                    for (uint y = 0; y < vm.Room.Height; y += vm.GridHeight)
+                    {
+                        canvas.DrawLine(0, y, vm.Room.Width, y, new SKPaint { Color = SKColors.White.WithAlpha(64), BlendMode = SKBlendMode.Difference });
+                    }
                 }
 
                 RoomItem? selectedRoomItem = editor.GetSelectedRoomItem();
