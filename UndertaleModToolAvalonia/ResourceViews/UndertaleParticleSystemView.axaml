@@ -36,7 +36,7 @@
         
         <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
             <Label>Emitters</Label>
-            <l:EditableDataGrid ItemsSource="{Binding ParticleSystem.Emitters}" ItemFactory="{Binding CreateParticleSystemEmitterItem}">
+            <l:EditableDataGrid ItemsSource="{Binding ParticleSystem.Emitters}" ItemFactory="{Binding CreateParticleSystemEmitterItem}" HeadersVisibility="None">
                 <l:EditableDataGrid.Columns>
                     <DataGridTemplateColumn Header="Emitter" Width="1*">
                         <DataGridTemplateColumn.CellTemplate>

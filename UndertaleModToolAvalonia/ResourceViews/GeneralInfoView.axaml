@@ -94,7 +94,7 @@
 
                 <Label>Room order</Label>
                 <Expander Header="Rooms">
-                    <l:EditableDataGrid ItemsSource="{Binding GeneralInfo.RoomOrder}" ItemFactory="{Binding CreateRoomOrderItem}">
+                    <l:EditableDataGrid ItemsSource="{Binding GeneralInfo.RoomOrder}" ItemFactory="{Binding CreateRoomOrderItem}" HeadersVisibility="None">
                         <l:EditableDataGrid.Columns>
                             <DataGridTemplateColumn Header="Room" Width="1*">
                                 <DataGridTemplateColumn.CellTemplate>

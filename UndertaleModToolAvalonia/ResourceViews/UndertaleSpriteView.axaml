@@ -52,7 +52,8 @@
         </Grid>
 
         <Label>Textures</Label>
-        <l:EditableDataGrid Name="TexturesDataGrid" ItemsSource="{Binding Sprite.Textures}" ItemFactory="{Binding CreateTextureEntry}" SelectionChanged="{Binding TexturesSelectedChanged}">
+        <l:EditableDataGrid Name="TexturesDataGrid" ItemsSource="{Binding Sprite.Textures}" ItemFactory="{Binding CreateTextureEntry}" HeadersVisibility="None"
+                            SelectionChanged="{Binding TexturesSelectedChanged}">
             <l:EditableDataGrid.Columns>
                 <DataGridTemplateColumn Header="Texture" Width="1*">
                     <DataGridTemplateColumn.CellTemplate>
@@ -88,7 +89,8 @@
         </ScrollViewer>
 
         <Label>Collision masks</Label>
-        <l:EditableDataGrid Name="CollisionMasksDataGrid" ItemsSource="{Binding Sprite.CollisionMasks}" ItemFactory="{Binding CreateMaskEntry}" SelectionChanged="{Binding CollisionMasksSelectedChanged}">
+        <l:EditableDataGrid Name="CollisionMasksDataGrid" ItemsSource="{Binding Sprite.CollisionMasks}" ItemFactory="{Binding CreateMaskEntry}" HeadersVisibility="None"
+                            SelectionChanged="{Binding CollisionMasksSelectedChanged}">
             <l:EditableDataGrid.Columns>
                 <DataGridTemplateColumn Header="Mask" Width="1*">
                     <DataGridTemplateColumn.CellTemplate>

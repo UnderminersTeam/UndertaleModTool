@@ -195,7 +195,8 @@
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate DataType="undertalem:UndertaleGameObject+Event">
                                             <l:EditableDataGrid ItemsSource="{Binding Actions}"
-                                                                ItemFactory="{Binding $parent[l:UndertaleGameObjectView].((l:UndertaleGameObjectViewModel)DataContext).CreateEventAction}">
+                                                                ItemFactory="{Binding $parent[l:UndertaleGameObjectView].((l:UndertaleGameObjectViewModel)DataContext).CreateEventAction}"
+                                                                HeadersVisibility="None">
                                                 <l:EditableDataGrid.Columns>
                                                     <DataGridTemplateColumn Header="Code" Width="1*">
                                                         <DataGridTemplateColumn.CellTemplate>

@@ -25,7 +25,8 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate DataType="undertalem:UndertaleTimeline+UndertaleTimelineMoment">
                             <l:EditableDataGrid ItemsSource="{Binding Event}"
-                                                ItemFactory="{Binding $parent[l:UndertaleTimelineView].((l:UndertaleTimelineViewModel)DataContext).CreateEventAction}">
+                                                ItemFactory="{Binding $parent[l:UndertaleTimelineView].((l:UndertaleTimelineViewModel)DataContext).CreateEventAction}"
+                                                HeadersVisibility="None">
                                 <l:EditableDataGrid.Columns>
                                     <DataGridTemplateColumn Header="Code" Width="1*">
                                         <DataGridTemplateColumn.CellTemplate>

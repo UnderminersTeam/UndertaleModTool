@@ -100,7 +100,7 @@
         </StackPanel>
 
         <Label>Vertex shader attributes</Label>
-        <l:EditableDataGrid ItemsSource="{Binding Shader.VertexShaderAttributes}" ItemFactory="{Binding CreateVertexShaderAttribute}">
+        <l:EditableDataGrid ItemsSource="{Binding Shader.VertexShaderAttributes}" ItemFactory="{Binding CreateVertexShaderAttribute}" HeadersVisibility="None">
             <l:EditableDataGrid.Columns>
                 <DataGridTemplateColumn Header="Name" Width="1*">
                     <DataGridTemplateColumn.CellTemplate>

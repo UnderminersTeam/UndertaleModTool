@@ -14,7 +14,7 @@
 
         <Label>Embedded textures</Label>
         <Expander Header="List">
-            <l:EditableDataGrid ItemsSource="{Binding TextureGroupInfo.TexturePages}" ItemFactory="{Binding CreateEmbeddedTextureItem}">
+            <l:EditableDataGrid ItemsSource="{Binding TextureGroupInfo.TexturePages}" ItemFactory="{Binding CreateEmbeddedTextureItem}" HeadersVisibility="None">
                 <l:EditableDataGrid.Columns>
                     <DataGridTemplateColumn Header="Embedded texture" Width="1*">
                         <DataGridTemplateColumn.CellTemplate>
@@ -32,7 +32,7 @@
 
         <Label>Sprites</Label>
         <Expander Header="List">
-            <l:EditableDataGrid ItemsSource="{Binding TextureGroupInfo.Sprites}" ItemFactory="{Binding CreateSpriteItem}">
+            <l:EditableDataGrid ItemsSource="{Binding TextureGroupInfo.Sprites}" ItemFactory="{Binding CreateSpriteItem}" HeadersVisibility="None">
                 <l:EditableDataGrid.Columns>
                     <DataGridTemplateColumn Header="Sprite" Width="1*">
                         <DataGridTemplateColumn.CellTemplate>
@@ -50,7 +50,7 @@
 
         <Label>Spine sprites</Label>
         <Expander Header="List">
-            <l:EditableDataGrid ItemsSource="{Binding TextureGroupInfo.SpineSprites}" ItemFactory="{Binding CreateSpriteItem}">
+            <l:EditableDataGrid ItemsSource="{Binding TextureGroupInfo.SpineSprites}" ItemFactory="{Binding CreateSpriteItem}" HeadersVisibility="None">
                 <l:EditableDataGrid.Columns>
                     <DataGridTemplateColumn Header="Sprite" Width="1*">
                         <DataGridTemplateColumn.CellTemplate>
@@ -68,7 +68,7 @@
 
         <Label>Fonts</Label>
         <Expander Header="List">
-            <l:EditableDataGrid ItemsSource="{Binding TextureGroupInfo.Fonts}" ItemFactory="{Binding CreateFontItem}">
+            <l:EditableDataGrid ItemsSource="{Binding TextureGroupInfo.Fonts}" ItemFactory="{Binding CreateFontItem}" HeadersVisibility="None">
                 <l:EditableDataGrid.Columns>
                     <DataGridTemplateColumn Header="Font" Width="1*">
                         <DataGridTemplateColumn.CellTemplate>
@@ -86,7 +86,7 @@
 
         <Label>Tilesets</Label>
         <Expander Header="List">
-            <l:EditableDataGrid ItemsSource="{Binding TextureGroupInfo.Tilesets}" ItemFactory="{Binding CreateBackgroundItem}">
+            <l:EditableDataGrid ItemsSource="{Binding TextureGroupInfo.Tilesets}" ItemFactory="{Binding CreateBackgroundItem}" HeadersVisibility="None">
                 <l:EditableDataGrid.Columns>
                     <DataGridTemplateColumn Header="Background" Width="1*">
                         <DataGridTemplateColumn.CellTemplate>

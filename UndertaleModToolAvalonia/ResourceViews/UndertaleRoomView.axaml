@@ -242,7 +242,7 @@
                                           Converter={StaticResource VersionCompareConverter},
                                           ConverterParameter=GE2}">
                                         <Label>Game objects</Label>
-                                        <l:EditableDataGrid ItemsSource="{Binding GameObjects}" ItemFactory="{x:Null}">
+                                        <l:EditableDataGrid ItemsSource="{Binding GameObjects}" ItemFactory="{x:Null}" HeadersVisibility="None">
                                             <l:EditableDataGrid.Columns>
                                                 <DataGridTemplateColumn Header="Game object" Width="1*">
                                                     <DataGridTemplateColumn.CellTemplate>
@@ -260,7 +260,7 @@
                                           Converter={StaticResource VersionCompareConverter},
                                           ConverterParameter=GE2024.13}">
                                         <Label>Instance creation order IDs</Label>
-                                        <l:EditableDataGrid ItemsSource="{Binding InstanceCreationOrderIDs.InstanceIDs}" ItemFactory="{x:Null}">
+                                        <l:EditableDataGrid ItemsSource="{Binding InstanceCreationOrderIDs.InstanceIDs}" ItemFactory="{x:Null}" HeadersVisibility="None">
                                             <l:EditableDataGrid.Columns>
                                                 <DataGridTemplateColumn Header="IDs" Width="1*">
                                                     <DataGridTemplateColumn.CellTemplate>

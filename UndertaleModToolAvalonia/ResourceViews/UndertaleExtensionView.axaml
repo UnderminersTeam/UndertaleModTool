@@ -30,7 +30,8 @@
             <l:UndertaleStringReferenceView Reference="{Binding Extension.ClassName}" />
 
             <Label>Files</Label>
-            <l:EditableDataGrid ItemsSource="{Binding Extension.Files}" ItemFactory="{Binding CreateExtensionFile}" SelectionChanged="{Binding FilesSelectedChanged}">
+            <l:EditableDataGrid ItemsSource="{Binding Extension.Files}" ItemFactory="{Binding CreateExtensionFile}" HeadersVisibility="None"
+                                SelectionChanged="{Binding FilesSelectedChanged}">
                 <l:EditableDataGrid.Columns>
                     <DataGridTemplateColumn Header="File name" Width="1*">
                         <DataGridTemplateColumn.CellTemplate>
@@ -65,7 +66,8 @@
                 <l:UndertaleStringReferenceView Reference="{Binding FilesSelected.CleanupScript}" />
 
                 <Label>Functions</Label>
-                <l:EditableDataGrid ItemsSource="{Binding FilesSelected.Functions}" ItemFactory="{Binding CreateExtensionFunction}" SelectionChanged="{Binding FunctionsSelectedChanged}">
+                <l:EditableDataGrid ItemsSource="{Binding FilesSelected.Functions}" ItemFactory="{Binding CreateExtensionFunction}" HeadersVisibility="None"
+                                    SelectionChanged="{Binding FunctionsSelectedChanged}">
                     <l:EditableDataGrid.Columns>
                         <DataGridTemplateColumn Header="Name" Width="1*">
                             <DataGridTemplateColumn.CellTemplate>
@@ -104,7 +106,7 @@
                           SelectedItem="{Binding FunctionsSelected.RetType}" />
 
                 <Label>Argument types</Label>
-                <l:EditableDataGrid ItemsSource="{Binding FunctionsSelected.Arguments}" ItemFactory="{Binding CreateExtensionFunctionArg}">
+                <l:EditableDataGrid ItemsSource="{Binding FunctionsSelected.Arguments}" ItemFactory="{Binding CreateExtensionFunctionArg}" HeadersVisibility="None">
                     <l:EditableDataGrid.Columns>
                         <DataGridTemplateColumn Header="Type" Width="1*">
                             <DataGridTemplateColumn.CellTemplate>
