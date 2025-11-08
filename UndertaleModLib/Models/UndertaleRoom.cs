@@ -2536,6 +2536,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         private UndertaleResourceById<UndertaleParticleSystem, UndertaleChunkPSYS> _particleSys = new();
 
         public UndertaleString Name { get; set; }
+        public int InstanceID { get; set; }
         public UndertaleParticleSystem ParticleSystem
         {
             get => _particleSys.Resource;
@@ -2564,6 +2565,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         public void Serialize(UndertaleWriter writer)
         {
             writer.WriteUndertaleString(Name);
+            if (writer.undertaleData.IsVersionAtLeast(2024, 14))
+                writer.Write(InstanceID);
             _particleSys.Serialize(writer);
             writer.Write(X);
             writer.Write(Y);
@@ -2577,6 +2580,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         public void Unserialize(UndertaleReader reader)
         {
             Name = reader.ReadUndertaleString();
+            if (reader.undertaleData.IsVersionAtLeast(2024, 14))
+                InstanceID = reader.ReadInt32();
             _particleSys.Unserialize(reader);
             X = reader.ReadInt32();
             Y = reader.ReadInt32();
