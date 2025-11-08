@@ -2669,6 +2669,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         public float FrameWidth { get; set; }
         public float FrameHeight { get; set; }
         public bool Wrap { get; set; }
+        public float ParagraphSpacing { get; set; }
         public TextItemWrapMode WrapMode { get; set; }
         public TextItemOrigin Origin { get; set; }
 
@@ -2689,6 +2690,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             writer.Write(Alignment);
             writer.Write(CharSpacing);
             writer.Write(LineSpacing);
+            if (writer.undertaleData.IsVersionAtLeast(2024, 14))
+                writer.Write(ParagraphSpacing);
             writer.Write(FrameWidth);
             writer.Write(FrameHeight);
             writer.Write(Wrap);
@@ -2716,6 +2719,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             Alignment = reader.ReadInt32();
             CharSpacing = reader.ReadSingle();
             LineSpacing = reader.ReadSingle();
+            if (reader.undertaleData.IsVersionAtLeast(2024, 14))
+                ParagraphSpacing = reader.ReadSingle();
             FrameWidth = reader.ReadSingle();
             FrameHeight = reader.ReadSingle();
             Wrap = reader.ReadBoolean();
