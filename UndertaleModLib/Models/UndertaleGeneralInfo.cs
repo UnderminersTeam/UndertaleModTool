@@ -85,7 +85,11 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         /// <summary>
         /// This flag is set when a game is launched from the Gamemaker Studio 2 IDE using the 'Run' or 'Debug' options
         /// </summary>
-        GameRunFromGMS2IDE = 0x20000,
+        GameRunFromGMS2IDE = 0x20000, //0x10000
+
+        // TODO
+        //TransparentBackground = 0x20000,
+        WindowsD3DSwapEffectDiscard = 0x40000
     }
 
     /// <summary>
