@@ -165,7 +165,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
     public int VectorCollisionMaskWidth { get; set; }
     public int VectorCollisionMaskHeight { get; set; }
     public UndertaleObservableList<byte[]> VectorCollisionMaskRLEData { get; set; }
-    public UndertaleObservableList<int> VectorFrameToShape { get; set; }
+    public UndertaleObservableList<int> VectorFrameToShapeMap { get; set; }
 
     public UndertaleSequence V2Sequence;
 
@@ -434,8 +434,8 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
 
                     if (VectorVersion >= 4)
                     {
-                        writer.Write(VectorFrameToShape.Count);
-                        foreach (var n in VectorFrameToShape)
+                        writer.Write(VectorFrameToShapeMap.Count);
+                        foreach (var n in VectorFrameToShapeMap)
                         {
                             writer.Write(n);
                         }
@@ -678,17 +678,17 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
 
                     if (VectorVersion >= 4)
                     {
-                        VectorFrameToShape = new(reader.ReadInt32());
-                        for (var i = 0; i < VectorFrameToShape.Count; i++)
+                        VectorFrameToShapeMap = new(reader.ReadInt32());
+                        for (var i = 0; i < VectorFrameToShapeMap.Count; i++)
                         {
-                            VectorFrameToShape.InternalAdd(reader.ReadInt32());
+                            VectorFrameToShapeMap.InternalAdd(reader.ReadInt32());
                         }
 
                         VectorShapes = reader.ReadUndertaleObjectNoPool<UndertaleSimpleList<UndertaleVectorShapeData>>();
                     }
                     else
                     {
-                        VectorFrameToShape = new(){ 0 };
+                        VectorFrameToShapeMap = new(){ 0 };
                         VectorShapes = new() { reader.ReadUndertaleObjectNoPool<UndertaleVectorShapeData>() };
                     }
                          
