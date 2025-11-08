@@ -2610,6 +2610,26 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         }
     }
 
+    public enum TextItemWrapMode : int
+    {
+        Default,
+        SplitWords
+    }
+
+	public enum TextItemOrigin : int
+	{
+		TopLeft,
+		TopCenter,
+		TopRight,
+		MiddleLeft,
+		MiddleCenter,
+		MiddleRight,
+		BottomLeft,
+		BottomCenter,
+		BottomRight,
+		Custom
+	}
+
     public class TextItemInstance : UndertaleObject, INotifyPropertyChanged, IStaticChildObjCount, IStaticChildObjectsSize, IDisposable
     {
         /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
@@ -2649,6 +2669,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         public float FrameWidth { get; set; }
         public float FrameHeight { get; set; }
         public bool Wrap { get; set; }
+        public TextItemWrapMode WrapMode { get; set; }
+        public TextItemOrigin Origin { get; set; }
 
         /// <inheritdoc />
         public virtual void Serialize(UndertaleWriter writer)
@@ -2670,6 +2692,11 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             writer.Write(FrameWidth);
             writer.Write(FrameHeight);
             writer.Write(Wrap);
+            if (writer.undertaleData.IsVersionAtLeast(2024, 14))
+            {
+                writer.Write((int)WrapMode);
+                writer.Write((int)Origin);
+            }
         }
 
         /// <inheritdoc />
@@ -2692,6 +2719,11 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             FrameWidth = reader.ReadSingle();
             FrameHeight = reader.ReadSingle();
             Wrap = reader.ReadBoolean();
+            if (reader.undertaleData.IsVersionAtLeast(2024, 14))
+            {
+                WrapMode = (TextItemWrapMode)reader.ReadInt32();
+                Origin = (TextItemOrigin)reader.ReadInt32();
+            }
         }
 
         /// <summary>
