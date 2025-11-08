@@ -1256,6 +1256,10 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
             /// </summary>
             public int FontIndex { get; set; }
 
+            public int WrapMode { get; set; }
+
+            public int Origin { get; set; }
+
             /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
@@ -1263,6 +1267,11 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
                 writer.Write(Wrap);
                 writer.Write(_alignment);
                 writer.Write(FontIndex);
+                if (writer.undertaleData.IsVersionAtLeast(2024, 14))
+                {
+                    writer.Write(WrapMode);
+                    writer.Write(Origin);
+                }
             }
 
             /// <inheritdoc />
@@ -1272,6 +1281,11 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
                 Wrap = reader.ReadBoolean();
                 _alignment = reader.ReadInt32();
                 FontIndex = reader.ReadInt32();
+                if (reader.undertaleData.IsVersionAtLeast(2024, 14))
+                {
+                    WrapMode = reader.ReadInt32();
+                    Origin = reader.ReadInt32();
+                }
             }
         }
     }
