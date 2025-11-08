@@ -1256,9 +1256,9 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
             /// </summary>
             public int FontIndex { get; set; }
 
-            public int WrapMode { get; set; }
+            public UndertaleRoom.TextItemWrapMode WrapMode { get; set; }
 
-            public int Origin { get; set; }
+            public UndertaleRoom.TextItemOrigin Origin { get; set; }
 
             /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
@@ -1269,8 +1269,8 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
                 writer.Write(FontIndex);
                 if (writer.undertaleData.IsVersionAtLeast(2024, 14))
                 {
-                    writer.Write(WrapMode);
-                    writer.Write(Origin);
+                    writer.Write((int)WrapMode);
+                    writer.Write((int)Origin);
                 }
             }
 
@@ -1283,8 +1283,8 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
                 FontIndex = reader.ReadInt32();
                 if (reader.undertaleData.IsVersionAtLeast(2024, 14))
                 {
-                    WrapMode = reader.ReadInt32();
-                    Origin = reader.ReadInt32();
+                    WrapMode = (UndertaleRoom.TextItemWrapMode)reader.ReadInt32();
+                    Origin = (UndertaleRoom.TextItemOrigin)reader.ReadInt32();
                 }
             }
         }
