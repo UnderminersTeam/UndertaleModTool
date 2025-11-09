@@ -28,7 +28,7 @@ namespace UndertaleModTool.Windows
 
         private static bool isSearchInProgress = false;
 
-        private bool isCaseSensitive, isRegexSearch, isInAssembly;
+        private bool isCaseSensitive, isRegexSearch, isMultilineRegex, isInAssembly;
         private string text;
 
         private int progressCount = 0;
@@ -98,6 +98,7 @@ namespace UndertaleModTool.Windows
 
             isCaseSensitive = CaseSensitiveCheckBox.IsChecked ?? false;
             isRegexSearch = RegexSearchCheckBox.IsChecked ?? false;
+            isMultilineRegex = MultilineRegexCheckBox.IsChecked ?? false;
             isInAssembly = InAssemblyCheckBox.IsChecked ?? false;
 
             bool filterByName = FilterByNameExpander.IsExpanded;
@@ -110,7 +111,16 @@ namespace UndertaleModTool.Windows
             {
                 try
                 {
-                    keywordRegex = new(text, isCaseSensitive ? RegexOptions.Compiled : RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                    RegexOptions options = RegexOptions.Compiled;
+                    if (!isCaseSensitive)
+                    {
+                        options |= RegexOptions.IgnoreCase;
+                    }
+                    if (isMultilineRegex)
+                    {
+                        options |= RegexOptions.Multiline;
+                    }
+                    keywordRegex = new(text, options);
                 }
                 catch (ArgumentException e)
                 {
