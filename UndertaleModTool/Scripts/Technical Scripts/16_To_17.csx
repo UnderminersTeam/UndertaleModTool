@@ -12,7 +12,10 @@ if (Data?.GeneralInfo.BytecodeVersion == 16)
     String[] order = {"GEN8", "OPTN", "LANG", "EXTN", "SOND", "AGRP", "SPRT", "BGND", "PATH", "SCPT", "GLOB", "SHDR", "FONT", "TMLN", "OBJT", "ROOM", "DAFL", "EMBI", "TPAG", "TGIN", "CODE", "VARI", "FUNC", "STRG", "TXTR", "AUDO"};
     Dictionary<string, UndertaleChunk> newChunks = new Dictionary<string, UndertaleChunk>();
     foreach (String name in order)
-        newChunks[name] = Data.FORM.Chunks[name];
+    {
+        if (Data.FORM.Chunks.ContainsKey(name))
+            newChunks[name] = Data.FORM.Chunks[name];
+    }
     Data.FORM.Chunks = newChunks;
     UndertaleTextureGroupInfo tgin = new UndertaleTextureGroupInfo();
     tgin.Name = Data.Strings.MakeString("Default");
@@ -32,6 +35,26 @@ if (Data?.GeneralInfo.BytecodeVersion == 16)
     {
         tgin.Tilesets.Add(new UndertaleResourceById<UndertaleBackground, UndertaleChunkBGND>() { Resource = Data.Backgrounds[i] });
     }
-    Data.TextureGroupInfo.Add(tgin); 
+    Data.TextureGroupInfo.Add(tgin);
+    
+    // Fix background/tileset tile data if corrupted
+    foreach (var bg in Data.Backgrounds)
+    {
+        if (bg.GMS2TileWidth > 0 && bg.GMS2TileHeight > 0 && bg.GMS2TileCount > 0)
+        {
+            int expectedLength = (int)bg.GMS2TileCount * (int)bg.GMS2ItemsPerTileCount;
+            
+            // Resize the list to match expected length
+            while (bg.GMS2TileIds.Count < expectedLength)
+            {
+                bg.GMS2TileIds.Add(new UndertaleBackground.TileID() { ID = 0 });
+            }
+            while (bg.GMS2TileIds.Count > expectedLength)
+            {
+                bg.GMS2TileIds.RemoveAt(bg.GMS2TileIds.Count - 1);
+            }
+        }
+    }
+    
     ScriptMessage("Upgraded from 16 to 17 successfully. This game can be run on any runner newer than GMS 2.2.2.302 but older than GMS 2.3. Save the game to apply the changes.");
 }
