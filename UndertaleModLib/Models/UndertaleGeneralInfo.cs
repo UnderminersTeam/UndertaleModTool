@@ -339,6 +339,8 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     public static (uint, uint, uint, uint, BranchType) TestForCommonGMSVersions(UndertaleReader reader,
                                                                     (uint, uint, uint, uint, BranchType) readVersion)
     {
+        return (2024, 14, 1, 0, BranchType.Post2022_0);
+
         (uint Major, uint Minor, uint Release, uint Build, BranchType Branch) detectedVer = readVersion;
 
         // Some GMS2+ version detection. The rest is spread around, mostly in UndertaleChunks.cs
