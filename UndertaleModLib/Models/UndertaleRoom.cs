@@ -2615,26 +2615,6 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         }
     }
 
-    public enum TextItemWrapMode : int
-    {
-        Default,
-        SplitWords
-    }
-
-	public enum TextItemOrigin : int
-	{
-		TopLeft,
-		TopCenter,
-		TopRight,
-		MiddleLeft,
-		MiddleCenter,
-		MiddleRight,
-		BottomLeft,
-		BottomCenter,
-		BottomRight,
-		Custom
-	}
-
     public class TextItemInstance : UndertaleObject, INotifyPropertyChanged, IStaticChildObjCount, IStaticChildObjectsSize, IDisposable
     {
         /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
@@ -2675,8 +2655,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         public float FrameHeight { get; set; }
         public bool Wrap { get; set; }
         public float ParagraphSpacing { get; set; }
-        public TextItemWrapMode WrapMode { get; set; }
-        public TextItemOrigin Origin { get; set; }
+        public UndertaleSequence.TextKeyframes.WrapMode WrapMode { get; set; }
+        public UndertaleSequence.TextKeyframes.Origin Origin { get; set; }
 
         /// <inheritdoc />
         public virtual void Serialize(UndertaleWriter writer)

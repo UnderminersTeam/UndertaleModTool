@@ -1211,7 +1211,27 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
     /// Keyframe store for text keyframes.
     /// </summary>
     public sealed class TextKeyframes : TrackKeyframes<TextKeyframes.Data>
-    {
+    { 
+        public enum WrapMode : int
+        {
+            Default,
+            SplitWords
+        }
+
+        public enum Origin : int
+        {
+            TopLeft,
+            TopCenter,
+            TopRight,
+            MiddleLeft,
+            MiddleCenter,
+            MiddleRight,
+            BottomLeft,
+            BottomCenter,
+            BottomRight,
+            Custom
+        }
+        
         /// <summary>
         /// Text keyframe data, containing various text display properties.
         /// </summary>
@@ -1256,9 +1276,9 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
             /// </summary>
             public int FontIndex { get; set; }
 
-            public UndertaleRoom.TextItemWrapMode WrapMode { get; set; }
+            public WrapMode WrapMode { get; set; }
 
-            public UndertaleRoom.TextItemOrigin Origin { get; set; }
+            public Origin Origin { get; set; }
 
             /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
