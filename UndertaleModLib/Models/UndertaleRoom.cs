@@ -2711,8 +2711,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             Wrap = reader.ReadBoolean();
             if (reader.undertaleData.IsVersionAtLeast(2024, 14))
             {
-                WrapMode = (TextItemWrapMode)reader.ReadInt32();
-                Origin = (TextItemOrigin)reader.ReadInt32();
+                WrapMode = (UndertaleSequence.TextKeyframes.WrapMode)reader.ReadInt32();
+                Origin = (UndertaleSequence.TextKeyframes.Origin)reader.ReadInt32();
             }
         }
 

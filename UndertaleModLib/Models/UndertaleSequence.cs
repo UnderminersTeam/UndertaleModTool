@@ -1303,8 +1303,8 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
                 FontIndex = reader.ReadInt32();
                 if (reader.undertaleData.IsVersionAtLeast(2024, 14))
                 {
-                    WrapMode = (UndertaleRoom.TextItemWrapMode)reader.ReadInt32();
-                    Origin = (UndertaleRoom.TextItemOrigin)reader.ReadInt32();
+                    WrapMode = (WrapMode)reader.ReadInt32();
+                    Origin = (Origin)reader.ReadInt32();
                 }
             }
         }
