@@ -5,18 +5,12 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Reflection;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
-using DynamicData;
-using DynamicData.Alias;
-using DynamicData.Binding;
-using DynamicData.PLinq;
 using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
 using UndertaleModLib.Models;
@@ -83,12 +77,7 @@ public partial class MainViewModel
     [Notify]
     private ObservableCollection<TreeDataGridItem> _TreeDataGridData = [];
 
-    public BehaviorSubject<string> filterTextSubject = new("");
-    public string FilterText
-    {
-        get { return filterTextSubject.Value; }
-        set { filterTextSubject.OnNext(value); }
-    }
+    public event Action<string> FilterTextChanged;
 
     // Tabs
     public ObservableCollection<TabItemViewModel> Tabs { get; set; }
@@ -172,32 +161,27 @@ public partial class MainViewModel
 
         TreeDataGridData.Clear();
 
+        if (FilterTextChanged is not null)
+        foreach (Delegate item in FilterTextChanged.GetInvocationList())
+        {
+            FilterTextChanged -= (Action<string>)item;
+        }
+
         if (Data is not null)
         {
-            ReadOnlyObservableCollection<TreeDataGridItem>? MakeChildren<T>(IList<T> list) where T : notnull
+            ObservableCollection<TreeDataGridItem>? MakeChildren<T>(IList<T> list) where T : notnull
             {
                 if (list is ObservableCollection<T> collection)
                 {
-                    collection
-                        .ToObservableChangeSet()
-                        .Filter(filterTextSubject.Select<string, Func<T, bool>>(filterText => item =>
-                        {
-                            string? name = item switch
-                            {
-                                UndertaleNamedResource namedResource => namedResource.Name.Content,
-                                UndertaleString _string => _string.Content,
-                                _ => null,
-                            };
+                    ObservableCollectionView<T, TreeDataGridItem> view = new(collection,
+                        transform: x => new TreeDataGridItem() { Text = "", Value = x });
 
-                            if (name is null)
-                                return true;
+                    FilterTextChanged += filterText =>
+                    {
+                        view.SetFilter(item => AssetNameContainsText(item, filterText));
+                    };
 
-                            return name.Contains(filterText, System.StringComparison.CurrentCultureIgnoreCase);
-                        }))
-                        .Transform(x => new TreeDataGridItem() { Text = "", Value = x })
-                        .Bind(out ReadOnlyObservableCollection<TreeDataGridItem> readOnlyCollection)
-                        .Subscribe();
-                    return readOnlyCollection;
+                    return view.Output;
                 }
                 return null;
             }
@@ -261,6 +245,21 @@ public partial class MainViewModel
                 ]
             });
         }
+    }
+
+    private bool AssetNameContainsText<T>(T asset, string text)
+    {
+        string? name = asset switch
+        {
+            UndertaleNamedResource namedResource => namedResource.Name.Content,
+            UndertaleString _string => _string.Content,
+            _ => null,
+        };
+
+        if (name is null)
+            return true;
+
+        return name.Contains(text, System.StringComparison.CurrentCultureIgnoreCase);
     }
 
     public async Task<MessageWindow.Result> ShowMessageDialog(string message, string? title = null, bool ok = true, bool yes = false, bool no = false, bool cancel = false)
@@ -541,6 +540,11 @@ public partial class MainViewModel
     {
         await ShowMessageDialog($"UndertaleModTool v{Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?.?.?.?"} " +
             $"by the Underminers team\nLicensed under the GNU General Public License Version 3.", title: "About");
+    }
+
+    public void SetFilterText(string text)
+    {
+        FilterTextChanged.Invoke(text);
     }
 
     public async void DataItemAdd(IList list)

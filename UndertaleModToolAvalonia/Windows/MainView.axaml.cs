@@ -71,7 +71,7 @@ public partial class MainView : UserControl, IView
     {
         if (DataContext is MainViewModel vm)
         {
-            vm.FilterText = FilterTextBox.Text ?? "";
+            vm.SetFilterText(FilterTextBox.Text ?? "");
         }
     }
 
@@ -237,10 +237,6 @@ public partial class MainView : UserControl, IView
                     await vm.View.MessageDialog($"{newIndex} is out of range of the list");
                     return;
                 }
-
-                // HACK: I don't fully understand why it doesn't work if you don't do this
-                if (oldIndex > newIndex)
-                    (oldIndex, newIndex) = (newIndex, oldIndex);
 
                 object? temp = list[newIndex];
                 list[newIndex] = list[oldIndex];
