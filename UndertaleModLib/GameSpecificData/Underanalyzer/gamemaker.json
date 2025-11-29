@@ -543,6 +543,14 @@
         "network_config_websocket_protocol": 5,
         "network_config_enable_multicast": 6,
         "network_config_disable_multicast": 7
+      },
+      "Constant.ExtenalCallType": {
+        "dll_cdecl": 0,
+        "dll_stdcall": 1
+      },
+      "Constant.ExtenalArgumentType": {
+        "ty_real": 0,
+        "ty_string": 1
       }
     },
     "General": {
@@ -1306,7 +1314,23 @@
       "vertex_colour": [ null, "Constant.Color", null ],
       "vertex_format_add_custom": [ "Constant.VertexType", "Constant.VertexUsage" ],
       "ds_exists": [ null, "Constant.DsType" ],
-      "audio_effect_create": [ "Enum.AudioEffectType" ]
+      "audio_effect_create": [ "Enum.AudioEffectType" ],
+      "external_define": {
+        "MacroType": "Union",
+        "Macros": [
+          [ null, null, "Constant.ExtenalCallType", "Constant.ExtenalArgumentType", null ],
+          [ null, null, "Constant.ExtenalCallType", "Constant.ExtenalArgumentType", null, "Constant.ExtenalArgumentType" ],
+          [ null, null, "Constant.ExtenalCallType", "Constant.ExtenalArgumentType", null, "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType" ],
+          [ null, null, "Constant.ExtenalCallType", "Constant.ExtenalArgumentType", null, "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType" ],
+          [ null, null, "Constant.ExtenalCallType", "Constant.ExtenalArgumentType", null, "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType" ],
+          [ null, null, "Constant.ExtenalCallType", "Constant.ExtenalArgumentType", null, "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType" ],
+          [ null, null, "Constant.ExtenalCallType", "Constant.ExtenalArgumentType", null, "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType" ],
+          [ null, null, "Constant.ExtenalCallType", "Constant.ExtenalArgumentType", null, "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType" ],
+          [ null, null, "Constant.ExtenalCallType", "Constant.ExtenalArgumentType", null, "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType" ],
+          [ null, null, "Constant.ExtenalCallType", "Constant.ExtenalArgumentType", null, "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType" ],
+          [ null, null, "Constant.ExtenalCallType", "Constant.ExtenalArgumentType", null, "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType" ]
+        ]
+      }
     },
     "FunctionReturn": {
       "draw_getpixel": "Constant.Color",
