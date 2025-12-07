@@ -219,6 +219,11 @@ namespace UndertaleModTests
             throw new NotImplementedException();
         }
 
+        public string PromptSaveFile(string defaultExt, string filter)
+        {
+            throw new NotImplementedException();
+        }
+
         public string GetDecompiledText(string codeName, GlobalDecompileContext context = null, IDecompileSettings settings = null)
         {
             string output = "GetDecompiledText(): " + codeName;

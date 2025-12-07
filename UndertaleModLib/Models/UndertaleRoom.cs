@@ -392,10 +392,11 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                         && layer.InstancesData.InstanceIds[0] > GameObjects[^1].InstanceID)
                     {
                         // Make sure it's not a false positive
-                        uint firstLayerInstID = layer.InstancesData.InstanceIds.MinBy(x => x);
-                        uint lastInstID = GameObjects.OrderBy(x => x.InstanceID).Last().InstanceID;
+                        uint firstLayerInstID = layer.InstancesData.InstanceIds.Min();
+                        uint lastInstID = GameObjects.MaxBy(x => x.InstanceID).InstanceID;
                         if (firstLayerInstID > lastInstID)
                         {
+                            // Should this throw a warning instead?
                             Debug.WriteLine($"The first instance ID ({firstLayerInstID}) " +
                                             $"of layer (ID {layer.LayerId}) is greater than the last game object ID ({lastInstID}) ?");
                             continue;
@@ -511,11 +512,16 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             {
                 if (layer.LayerType == LayerType.Assets)
                     tileList = tileList.Concat(layer.AssetsData.LegacyTiles);
-                else if (layer.LayerType == LayerType.Tiles && layer.TilesData.TileData.Length != 0)
+                else if (layer.LayerType == LayerType.Tiles && layer.TilesData.TileData.Length != 0 && layer.TilesData.Background is not null)
                 {
-                    int w = (int) (Width / layer.TilesData.TilesX);
-                    int h = (int) (Height / layer.TilesData.TilesY);
-                    tileSizes[new(w, h)] = layer.TilesData.TilesX * layer.TilesData.TilesY;
+                    int w = (int)layer.TilesData.Background.GMS2TileWidth;
+                    int h = (int)layer.TilesData.Background.GMS2TileHeight;
+                    Point scale = new(w, h);
+                    uint numTiles = layer.TilesData.TilesX * layer.TilesData.TilesY;
+                    if (tileSizes.ContainsKey(scale))
+                        tileSizes[scale] += numTiles;
+                    else
+                        tileSizes[scale] = numTiles;
                 }
             }
 
