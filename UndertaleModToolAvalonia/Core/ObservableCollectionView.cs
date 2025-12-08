@@ -7,7 +7,95 @@ namespace UndertaleModToolAvalonia;
 
 public class ObservableCollectionView<TInput, TOutput>
 {
-    public ObservableCollection<TOutput> Output { get; } = [];
+    public class CustomObservableCollection<T> : Collection<T>, INotifyCollectionChanged
+    {
+        public event NotifyCollectionChangedEventHandler? CollectionChanged;
+
+        bool isDelayingEvents = false;
+        readonly List<NotifyCollectionChangedEventArgs> delayedEvents = [];
+
+        public void StartDelayingEvents()
+        {
+            isDelayingEvents = true;
+        }
+
+        public void FinishDelayingEvents()
+        {
+            isDelayingEvents = false;
+
+            // HACK: Don't you love magic numbers?
+            if (delayedEvents.Count > 100)
+            {
+                SendReset();
+            }
+            else
+            {
+                foreach (NotifyCollectionChangedEventArgs e in delayedEvents)
+                {
+                    if (CollectionChanged is not null)
+                        CollectionChanged(this, e);
+                }
+            }
+
+            delayedEvents.Clear();
+        }
+
+        public void SendReset()
+        {
+            if (CollectionChanged is not null)
+                CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
+        }
+
+        protected override void ClearItems()
+        {
+            base.ClearItems();
+
+            SendEvent(new(NotifyCollectionChangedAction.Reset));
+        }
+
+        protected override void InsertItem(int index, T item)
+        {
+            base.InsertItem(index, item);
+
+            SendEvent(new(NotifyCollectionChangedAction.Add, item, index));
+        }
+
+        protected override void RemoveItem(int index)
+        {
+            T removedItem = this[index];
+            base.RemoveItem(index);
+
+            SendEvent(new(NotifyCollectionChangedAction.Remove, removedItem, index));
+        }
+
+        protected override void SetItem(int index, T item)
+        {
+            T originalItem = this[index];
+            base.SetItem(index, item);
+
+            SendEvent(new(NotifyCollectionChangedAction.Replace, item, originalItem, index));
+        }
+
+        public void Move(int oldIndex, int newIndex)
+        {
+            T removedItem = this[oldIndex];
+
+            base.RemoveItem(oldIndex);
+            base.InsertItem(newIndex, removedItem);
+
+            SendEvent(new(NotifyCollectionChangedAction.Move, removedItem, newIndex, oldIndex));
+        }
+
+        void SendEvent(NotifyCollectionChangedEventArgs e)
+        {
+            if (isDelayingEvents)
+                delayedEvents.Add(e);
+            else if (CollectionChanged is not null)
+                CollectionChanged(this, e);
+        }
+    }
+
+    public CustomObservableCollection<TOutput> Output { get; } = [];
 
     private readonly ObservableCollection<TInput> input;
 
@@ -163,11 +251,15 @@ public class ObservableCollectionView<TInput, TOutput>
     {
         Output.Clear();
         outputIndexToInputIndexMap.Clear();
+
+        Filter();
     }
 
     private void Filter()
     {
         // TODO: This can obviously be improved by batch adding and removing everything instead of using the regular RemoveAt and Insert functions.
+
+        Output.StartDelayingEvents();
 
         // Remove all that don't pass from output.
         for (int i = Output.Count - 1; i >= 0; i--)
@@ -219,6 +311,8 @@ public class ObservableCollectionView<TInput, TOutput>
                 }
             }
         }
+
+        Output.FinishDelayingEvents();
     }
 
     private bool DoesPassFilter(TInput item) => filterPredicate is null || filterPredicate(item);

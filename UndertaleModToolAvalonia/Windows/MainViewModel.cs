@@ -169,7 +169,7 @@ public partial class MainViewModel
 
         if (Data is not null)
         {
-            ObservableCollection<TreeDataGridItem>? MakeChildren<T>(IList<T> list) where T : notnull
+            IList<TreeDataGridItem>? MakeChildren<T>(IList<T> list) where T : notnull
             {
                 if (list is ObservableCollection<T> collection)
                 {
@@ -259,7 +259,7 @@ public partial class MainViewModel
         if (name is null)
             return true;
 
-        return name.Contains(text, System.StringComparison.CurrentCultureIgnoreCase);
+        return name.Contains(text, StringComparison.OrdinalIgnoreCase);
     }
 
     public async Task<MessageWindow.Result> ShowMessageDialog(string message, string? title = null, bool ok = true, bool yes = false, bool no = false, bool cancel = false)
