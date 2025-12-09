@@ -7,6 +7,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
+using Avalonia.Markup.Xaml.MarkupExtensions;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 
@@ -39,10 +40,24 @@ public partial class MainView : UserControl, IView
                                     if (value.Value is UndertaleNamedResource namedResource)
                                     {
                                         textBlock[!TextBlock.TextProperty] = new Binding("Value.Name.Content");
+                                        
+                                        if (namedResource is UndertaleCode code)
+                                        {
+                                            // NOTE: Doesn't update, but whatever.
+                                            if (code.ParentEntry is not null)
+                                            {
+                                                textBlock[!TextBlock.ForegroundProperty] = new DynamicResourceExtension("SystemControlForegroundBaseMediumBrush");
+                                            }
+                                        }
                                     }
                                     else if (value.Value is UndertaleString _string)
                                     {
                                         textBlock[!TextBlock.TextProperty] = new Binding("Value.Content");
+                                    }
+                                    else if (value.Value is null)
+                                    {
+                                        textBlock.Text = "(null)";
+                                        textBlock[!TextBlock.ForegroundProperty] = new DynamicResourceExtension("SystemControlForegroundBaseMediumBrush");
                                     }
                                     //else if (value.Value is UndertaleData data)
                                     //{
