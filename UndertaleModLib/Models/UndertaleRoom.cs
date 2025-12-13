@@ -2615,11 +2615,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         }
     }
 
-    public class TextItemInstance : UndertaleObject, INotifyPropertyChanged, IStaticChildObjCount, IStaticChildObjectsSize, IDisposable
+    public class TextItemInstance : UndertaleObject, INotifyPropertyChanged, IStaticChildObjectsSize, IDisposable
     {
-        /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
-        public static readonly uint ChildObjectsSize = 68;
-
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {
@@ -2714,6 +2711,19 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 WrapMode = (UndertaleSequence.TextKeyframes.WrapMode)reader.ReadInt32();
                 Origin = (UndertaleSequence.TextKeyframes.Origin)reader.ReadInt32();
             }
+        }
+
+        /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+        public new static uint UnserializeChildObjectCount(UndertaleReader reader)
+        {
+            reader.Position += 68;
+                
+            if (reader.undertaleData.IsVersionAtLeast(2024, 14))
+            {
+                reader.Position += 12; // ParagraphSpacing, WrapMode, Origin
+            }
+
+            return 0;
         }
 
         /// <summary>

@@ -1235,11 +1235,8 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
         /// <summary>
         /// Text keyframe data, containing various text display properties.
         /// </summary>
-        public sealed class Data : UndertaleObject, IStaticChildObjectsSize
+        public sealed class Data : UndertaleObject
         {
-            /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
-            public static readonly uint ChildObjectsSize = 16;
-
             // Backing alignment field, containing vertical and horizontal components
             private int _alignment;
 
@@ -1306,6 +1303,19 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
                     WrapMode = (WrapMode)reader.ReadInt32();
                     Origin = (Origin)reader.ReadInt32();
                 }
+            }
+
+            /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+            public new static uint UnserializeChildObjectCount(UndertaleReader reader)
+            {
+                reader.Position += 16;
+                
+                if (reader.undertaleData.IsVersionAtLeast(2024, 14))
+                {
+                    reader.Position += 8; // WrapMode, Origin
+                }
+
+                return 0;
             }
         }
     }
