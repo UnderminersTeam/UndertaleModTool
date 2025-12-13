@@ -830,7 +830,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                 }
                     break;
 
-                case SpriteType.Vector:
+                case SpriteType.Vector: // FIXME: 2024.14 stuff
                     reader.Position += 4; // skip version
                     count += 1 + UndertaleSimpleList<TextureEntry>.UnserializeChildObjectCount(reader);
                     break;
