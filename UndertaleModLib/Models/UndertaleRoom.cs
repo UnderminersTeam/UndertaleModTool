@@ -2522,11 +2522,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         }
     }
 
-    public class ParticleSystemInstance : UndertaleObject, INotifyPropertyChanged, IStaticChildObjCount, IStaticChildObjectsSize, IDisposable
+    public class ParticleSystemInstance : UndertaleObject, INotifyPropertyChanged, IDisposable
     {
-        /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
-        public static readonly uint ChildObjectsSize = 32;
-
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {
@@ -2590,7 +2587,21 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
             Color = reader.ReadUInt32();
             Rotation = reader.ReadSingle();
         }
+        
+        
+        /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+        public new static uint UnserializeChildObjectCount(UndertaleReader reader)
+        {
+            reader.Position += 32;
+                
+            if (reader.undertaleData.IsVersionAtLeast(2024, 14))
+            {
+                reader.Position += 4; // InstanceID
+            }
 
+            return 0;
+        }
+        
         /// <summary>
         /// Generates a random name for this instance, as a utility for room editing.
         /// </summary>
