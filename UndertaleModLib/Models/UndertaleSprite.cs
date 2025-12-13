@@ -201,6 +201,10 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
         _YYSWF = null;
         V2Sequence = null;
         V3NineSlice = null;
+        // FIXME: verify correctness of this
+        VectorShapes = new();
+        VectorCollisionMaskRLEData = null;
+        VectorFrameToShapeMap = new();
     }
 
     /// <summary>
