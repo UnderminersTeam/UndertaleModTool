@@ -544,11 +544,11 @@
         "network_config_enable_multicast": 6,
         "network_config_disable_multicast": 7
       },
-      "Constant.ExtenalCallType": {
+      "Constant.ExternalCallType": {
         "dll_cdecl": 0,
         "dll_stdcall": 1
       },
-      "Constant.ExtenalArgumentType": {
+      "Constant.ExternalArgumentType": {
         "ty_real": 0,
         "ty_string": 1
       }
@@ -1318,17 +1318,17 @@
       "external_define": {
         "MacroType": "Union",
         "Macros": [
-          [ null, null, "Constant.ExtenalCallType", "Constant.ExtenalArgumentType", null ],
-          [ null, null, "Constant.ExtenalCallType", "Constant.ExtenalArgumentType", null, "Constant.ExtenalArgumentType" ],
-          [ null, null, "Constant.ExtenalCallType", "Constant.ExtenalArgumentType", null, "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType" ],
-          [ null, null, "Constant.ExtenalCallType", "Constant.ExtenalArgumentType", null, "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType" ],
-          [ null, null, "Constant.ExtenalCallType", "Constant.ExtenalArgumentType", null, "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType" ],
-          [ null, null, "Constant.ExtenalCallType", "Constant.ExtenalArgumentType", null, "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType" ],
-          [ null, null, "Constant.ExtenalCallType", "Constant.ExtenalArgumentType", null, "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType" ],
-          [ null, null, "Constant.ExtenalCallType", "Constant.ExtenalArgumentType", null, "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType" ],
-          [ null, null, "Constant.ExtenalCallType", "Constant.ExtenalArgumentType", null, "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType" ],
-          [ null, null, "Constant.ExtenalCallType", "Constant.ExtenalArgumentType", null, "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType" ],
-          [ null, null, "Constant.ExtenalCallType", "Constant.ExtenalArgumentType", null, "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType", "Constant.ExtenalArgumentType" ]
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ]
         ]
       }
     },
