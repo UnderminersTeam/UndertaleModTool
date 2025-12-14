@@ -1,5 +1,8 @@
 ﻿using Microsoft.Win32;
 using System;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -7,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
+using static UndertaleModLib.Models.UndertaleSprite;
 
 namespace UndertaleModTool
 {
@@ -20,6 +24,103 @@ namespace UndertaleModTool
         public UndertaleSpriteEditor()
         {
             InitializeComponent();
+            DataContextChanged += OnDataContextChanged;
+            Unloaded += OnUnloaded;
+        }
+
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is UndertaleSprite oldObj)
+            {
+                oldObj.PropertyChanged -= OnPropertyChanged;
+            }
+        }
+
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.OldValue is UndertaleSprite oldObj)
+            {
+                oldObj.PropertyChanged -= OnPropertyChanged;
+            }
+            if (e.NewValue is UndertaleSprite newObj)
+            {
+                newObj.PropertyChanged += OnPropertyChanged;
+            }
+        }
+
+        private void UndertaleObjectReference_SourceUpdated(object sender, System.Windows.Data.DataTransferEventArgs e)
+        {
+            OnAssetUpdated();
+        }
+
+        private void UndertaleObjectReference_ObjectReferenceChanged(object sender, UndertaleObjectReference.ObjectReferenceChangedEventArgs e)
+        {
+            OnAssetUpdated();
+        }
+
+        private void TextureList_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Attach to collection changed events
+            if (sender is not DataGrid dg || dg.ItemsSource is not ObservableCollection<TextureEntry> collection)
+            {
+                return;
+            }
+            collection.CollectionChanged += DataGrid_CollectionChanged;
+        }
+
+        private void TextureList_Unloaded(object sender, RoutedEventArgs e)
+        {
+            // Detach to collection changed events
+            if (sender is not DataGrid dg || dg.ItemsSource is not ObservableCollection<TextureEntry> collection)
+            {
+                return;
+            }
+            collection.CollectionChanged -= DataGrid_CollectionChanged;
+        }
+
+        private void MaskList_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Attach to collection changed events
+            if (sender is not DataGrid dg || dg.ItemsSource is not ObservableCollection<MaskEntry> collection)
+            {
+                return;
+            }
+            collection.CollectionChanged += DataGrid_CollectionChanged;
+        }
+
+        private void MaskList_Unloaded(object sender, RoutedEventArgs e)
+        {
+            // Detach to collection changed events
+            if (sender is not DataGrid dg || dg.ItemsSource is not ObservableCollection<MaskEntry> collection)
+            {
+                return;
+            }
+            collection.CollectionChanged -= DataGrid_CollectionChanged;
+        }
+
+        private void DataGrid_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            OnAssetUpdated();
+        }
+
+        private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            OnAssetUpdated();
+        }
+
+        private void OnAssetUpdated()
+        {
+            if (mainWindow.Project is null || !mainWindow.IsSelectedProjectExportable)
+            {
+                return;
+            }
+            Dispatcher.BeginInvoke(() =>
+            {
+                if (DataContext is UndertaleSprite obj)
+                {
+                    mainWindow.Project?.MarkAssetForExport(obj);
+                }
+            });
         }
 
         private void ExportAllSpine(SaveFileDialog dlg, UndertaleSprite sprite)
@@ -157,6 +258,8 @@ namespace UndertaleModTool
                     target.Data = TextureWorker.ReadMaskData(dlg.FileName, maskWidth, maskHeight);
                     target.Width = maskWidth;
                     target.Height = maskHeight;
+
+                    OnAssetUpdated();
                 }
                 catch (Exception ex)
                 {
