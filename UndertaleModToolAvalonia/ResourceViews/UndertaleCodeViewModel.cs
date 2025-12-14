@@ -13,7 +13,6 @@ using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia;
 
-// TODO: A billion things. Syntax highlighting.
 public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
 {
     public enum Tab

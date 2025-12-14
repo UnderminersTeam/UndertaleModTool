@@ -11,6 +11,7 @@
     <UserControl.Resources>
         <l:ByteArrayToStringConverter x:Key="ByteArrayToStringConverter" />
         <l:UndertaleColorToColorConverter x:Key="UndertaleColorToColorConverter" />
+        <l:VersionCompareConverter x:Key="VersionCompareConverter" />
     </UserControl.Resources>
     <StackPanel Classes="PaddedProperties">
         <StackPanel IsVisible="{Binding GeneralInfo, Converter={x:Static ObjectConverters.IsNotNull}}">
@@ -29,7 +30,7 @@
 
                 <Label>Config</Label>
                 <l:UndertaleStringReferenceView Reference="{Binding GeneralInfo.Config}"/>
-            
+
                 <Label>Last object ID</Label>
                 <TextBox Text="{Binding GeneralInfo.LastObj}"/>
 
@@ -109,8 +110,12 @@
                         </l:EditableDataGrid.Columns>
                     </l:EditableDataGrid>
                 </Expander>
+            </Grid>
 
-                <!-- TODO: Make the following only visible if GMS2 -->
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
+                  IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
+                  Converter={StaticResource VersionCompareConverter},
+                  ConverterParameter=GE2}">
                 <Label>FPS</Label>
                 <TextBox Text="{Binding GeneralInfo.GMS2FPS}" />
 

@@ -172,13 +172,25 @@ await Task.Run(() =>
         UndertaleEmbeddedAudio soundData = null;
         if ((embedSound && !needAGRP) || needAGRP)
         {
-            soundData = new UndertaleEmbeddedAudio() { Data = File.ReadAllBytes(file) };
-            Data.EmbeddedAudio.Add(soundData);
+            var bytes = File.ReadAllBytes(file);
+            
             if (existingSound is not null)
             {
-                Data.EmbeddedAudio.Remove(existingSound.AudioFile);
+                soundData = existingSound.AudioFile;
+                soundData.Data = bytes;
+                embAudioID = Data.EmbeddedAudio.IndexOf(soundData);
             }
-            embAudioID = Data.EmbeddedAudio.Count - 1;
+            else
+            {
+                soundData = new UndertaleEmbeddedAudio()
+                {
+                    Data = bytes,
+                    Name = new UndertaleString("EmbeddedSound " + Data.EmbeddedAudio.Count.ToString())
+                };
+                Data.EmbeddedAudio.Add(soundData);
+                embAudioID = Data.EmbeddedAudio.Count - 1;
+            }
+            
         }
 
         // Update external audio group file if required.

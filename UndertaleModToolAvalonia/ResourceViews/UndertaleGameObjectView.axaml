@@ -11,6 +11,7 @@
         <l:EnumTypeToValuesConverter x:Key="EnumTypeToValuesConverter" />
         <l:EventsToExtendedEventConverter x:Key="EventsToExtendedEventConverter" />
         <l:IdToUndertaleGameObjectConverter x:Key="IdToUndertaleGameObjectConverter" />
+        <l:VersionCompareConverter x:Key="VersionCompareConverter" />
     </UserControl.Resources>
     <StackPanel Classes="PaddedProperties">
         <TextBlock FontWeight="Bold" Text="Game object" />
@@ -23,18 +24,28 @@
             <Label>Sprite</Label>
             <l:UndertaleResourceReferenceView Reference="{Binding GameObject.Sprite}" ReferenceType="undertalem:UndertaleSprite"/>
 
-            <!-- TODO: Show sprite -->
+            <Label>Image</Label>
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
+                      MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
+                <l:SKImageViewer Image="{Binding GameObject.Sprite.Textures[0].Texture}" />
+            </ScrollViewer>
 
             <Label>Visible</Label>
             <CheckBox IsChecked="{Binding GameObject.Visible}"/>
 
             <Label>Solid</Label>
             <CheckBox IsChecked="{Binding GameObject.Solid}"/>
+        </Grid>
 
-            <!-- TODO: Visible only in GMS2 -->
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
+              IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
+              Converter={StaticResource VersionCompareConverter},
+              ConverterParameter=L2}">
             <Label>Depth</Label>
             <TextBox Text="{Binding GameObject.Depth}" />
-
+        </Grid>
+        
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
             <Label>Persitent</Label>
             <CheckBox IsChecked="{Binding GameObject.Persistent}"/>
 
