@@ -7,9 +7,6 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="UndertaleModToolAvalonia.UndertaleTexturePageItemView"
              x:DataType="l:UndertaleTexturePageItemViewModel">
-    <UserControl.Resources>
-        <l:ToSKImageUpdaterConverter x:Key="ToSKImageUpdaterConverter" />
-    </UserControl.Resources>
     <StackPanel>
         <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
             <Label>Source X/Y/W/H</Label>
@@ -44,24 +41,7 @@
 
         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
                       MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
-            <l:SKImageViewer>
-                <l:SKImageViewer.SKImage>
-                    <MultiBinding Converter="{StaticResource ToSKImageUpdaterConverter}">
-                        <Binding Path="TexturePageItem"/>
-                        <Binding Path="TexturePageItem.TexturePage.TextureData.Image"/>
-                        <Binding Path="TexturePageItem.SourceX"/>
-                        <Binding Path="TexturePageItem.SourceY"/>
-                        <Binding Path="TexturePageItem.SourceWidth"/>
-                        <Binding Path="TexturePageItem.SourceHeight"/>
-                        <Binding Path="TexturePageItem.TargetX"/>
-                        <Binding Path="TexturePageItem.TargetY"/>
-                        <Binding Path="TexturePageItem.TargetWidth"/>
-                        <Binding Path="TexturePageItem.TargetHeight"/>
-                        <Binding Path="TexturePageItem.BoundingWidth"/>
-                        <Binding Path="TexturePageItem.BoundingHeight"/>
-                    </MultiBinding>
-                </l:SKImageViewer.SKImage>
-            </l:SKImageViewer>
+            <l:SKImageViewer Image="{Binding TexturePageItem}" />
         </ScrollViewer>
 
         <!-- TODO: Import/Export -->

@@ -9,7 +9,6 @@
              x:DataType="l:UndertaleBackgroundViewModel">
     <UserControl.Resources>
         <l:VersionCompareConverter x:Key="VersionCompareConverter" />
-        <l:ToSKImageUpdaterConverter x:Key="ToSKImageUpdaterConverter"/>
     </UserControl.Resources>
     <StackPanel>
         <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
@@ -84,24 +83,7 @@
             <Label>Image</Label>
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
                           MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
-                <l:SKImageViewer>
-                    <l:SKImageViewer.SKImage>
-                        <MultiBinding Converter="{StaticResource ToSKImageUpdaterConverter}">
-                            <Binding Path="Background.Texture"/>
-                            <Binding Path="Background.Texture.TexturePage.TextureData.Image"/>
-                            <Binding Path="Background.Texture.SourceX"/>
-                            <Binding Path="Background.Texture.SourceY"/>
-                            <Binding Path="Background.Texture.SourceWidth"/>
-                            <Binding Path="Background.Texture.SourceHeight"/>
-                            <Binding Path="Background.Texture.TargetX"/>
-                            <Binding Path="Background.Texture.TargetY"/>
-                            <Binding Path="Background.Texture.TargetWidth"/>
-                            <Binding Path="Background.Texture.TargetHeight"/>
-                            <Binding Path="Background.Texture.BoundingWidth"/>
-                            <Binding Path="Background.Texture.BoundingHeight"/>
-                        </MultiBinding>
-                    </l:SKImageViewer.SKImage>
-                </l:SKImageViewer>
+                <l:SKImageViewer Image="{Binding Background.Texture}" />
             </ScrollViewer>
         </Grid>
     </StackPanel>

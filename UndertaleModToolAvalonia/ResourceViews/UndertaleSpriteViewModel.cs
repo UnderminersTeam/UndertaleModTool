@@ -48,9 +48,11 @@ public partial class UndertaleSpriteViewModel : IUndertaleResourceViewModel
         {
             if (Sprite.Textures.Count > 0)
                 TexturesSelected = Sprite.Textures[0];
-            return;
+            else
+                TexturesSelected = null;
         }
-        TexturesSelected = (UndertaleSprite.TextureEntry?)item!;
+        else
+            TexturesSelected = (UndertaleSprite.TextureEntry?)item!;
     }
     public void CollisionMasksSelectedChanged(object? item)
     {
@@ -58,9 +60,11 @@ public partial class UndertaleSpriteViewModel : IUndertaleResourceViewModel
         {
             if (Sprite.CollisionMasks.Count > 0)
                 CollisionMasksSelected = Sprite.CollisionMasks[0];
-            return;
+            else
+                CollisionMasksSelected = null;
         }
-        CollisionMasksSelected = (UndertaleSprite.MaskEntry?)item!;
+        else
+            CollisionMasksSelected = (UndertaleSprite.MaskEntry?)item!;
     }
 
     public async void ImportCollisionMaskData()

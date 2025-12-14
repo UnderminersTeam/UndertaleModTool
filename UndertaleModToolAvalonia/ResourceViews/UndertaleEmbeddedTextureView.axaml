@@ -7,7 +7,6 @@
              x:Class="UndertaleModToolAvalonia.UndertaleEmbeddedTextureView"
              x:DataType="l:UndertaleEmbeddedTextureViewModel">
     <UserControl.Resources>
-        <l:ToSKImageUpdaterConverter x:Key="ToSKImageUpdaterConverter" />
         <l:VersionCompareConverter x:Key="VersionCompareConverter" />
     </UserControl.Resources>
     <Grid RowDefinitions="Auto,1*" MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
@@ -40,13 +39,7 @@
         <!-- TODO: Failed to load message -->
         <!-- TODO: Import/export -->
         <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center">
-            <l:SKImageViewer>
-                <l:SKImageViewer.SKImage>
-                    <MultiBinding Converter="{StaticResource ToSKImageUpdaterConverter}">
-                        <Binding Path="EmbeddedTexture.TextureData.Image"/>
-                    </MultiBinding>
-                </l:SKImageViewer.SKImage>
-            </l:SKImageViewer>
+            <l:SKImageViewer Image="{Binding EmbeddedTexture.TextureData.Image}" />
         </ScrollViewer>
     </Grid>
 </UserControl>

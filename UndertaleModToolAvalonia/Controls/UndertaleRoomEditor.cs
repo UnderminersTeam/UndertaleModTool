@@ -693,7 +693,10 @@ public class UndertaleRoomEditor : Control
             roomBackground.UpdateStretch();
 
             UndertaleTexturePageItem texture = background.Texture;
-            SKImage image = mainVM.ImageCache.GetCachedImageFromTexturePageItem(texture);
+            SKImage? image = mainVM.ImageCache.GetCachedImageFromTexturePageItem(texture);
+            if (image is null)
+                return;
+
             currentUsedImages.Add(image);
 
             var w = texture.BoundingWidth * roomBackground.CalcScaleX;
@@ -744,7 +747,10 @@ public class UndertaleRoomEditor : Control
 
             UndertaleTexturePageItem texture = backgroundData.Sprite.Textures[(int)backgroundData.FirstFrame].Texture;
 
-            SKImage image = mainVM.ImageCache.GetCachedImageFromTexturePageItem(texture);
+            SKImage? image = mainVM.ImageCache.GetCachedImageFromTexturePageItem(texture);
+            if (image is null)
+                return;
+
             currentUsedImages.Add(image);
 
             var w = backgroundData.Sprite.Width * backgroundData.CalcScaleX;
@@ -852,7 +858,10 @@ public class UndertaleRoomEditor : Control
 
             UndertaleTexturePageItem texture = roomSprite.Sprite.Textures[(int)roomSprite.FrameIndex].Texture;
 
-            SKImage image = mainVM.ImageCache.GetCachedImageFromTexturePageItem(texture);
+            SKImage? image = mainVM.ImageCache.GetCachedImageFromTexturePageItem(texture);
+            if (image is null)
+                return;
+
             currentUsedImages.Add(image);
 
             canvas.Save();
@@ -883,7 +892,10 @@ public class UndertaleRoomEditor : Control
 
             UndertaleTexturePageItem texture = gameObject.Sprite.Textures[roomGameObject.ImageIndex].Texture;
 
-            SKImage image = mainVM.ImageCache.GetCachedImageFromTexturePageItem(texture);
+            SKImage? image = mainVM.ImageCache.GetCachedImageFromTexturePageItem(texture);
+            if (image is null)
+                return;
+
             currentUsedImages.Add(image);
 
             canvas.Save();

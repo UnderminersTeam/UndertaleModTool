@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
 using Avalonia.Platform;
@@ -18,27 +18,77 @@ namespace UndertaleModToolAvalonia;
 
 public class SKImageViewer : Control
 {
-    public static readonly StyledProperty<object?> SKImageProperty =
-        AvaloniaProperty.Register<SKImageViewer, object?>(nameof(SKImage));
+    public static readonly StyledProperty<object?> ImageProperty =
+        AvaloniaProperty.Register<SKImageViewer, object?>(nameof(Image));
 
-    public object? SKImage
+    public object? Image
     {
-        get => GetValue(SKImageProperty);
-        set => SetValue(SKImageProperty, value);
+        get => GetValue(ImageProperty);
+        set => SetValue(ImageProperty, value);
+    }
+
+    public static readonly StyledProperty<IList<object?>> BindingsProperty =
+        AvaloniaProperty.Register<SKImageViewer, IList<object?>>(nameof(Bindings));
+
+    public IList<object?> Bindings
+    {
+        get => GetValue(BindingsProperty);
+        set => SetValue(BindingsProperty, value);
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
 
-        if (change.Property == SKImageProperty)
+        if (change.Property == ImageProperty)
         {
-            Size size = GetSize();
-            Width = size.Width;
-            Height = size.Height;
+            if (Image is UndertaleTexturePageItem)
+            {
+                // Bind these values to a property so we can get updates when they change.
+                IList<IBinding> bindings =
+                [
+                    new Binding("Image.TexturePage.TextureData.Image")
+                        {Source = this},
+                    new Binding("Image.SourceX")
+                        {Source = this},
+                    new Binding("Image.SourceY")
+                        {Source = this},
+                    new Binding("Image.SourceWidth")
+                        {Source = this},
+                    new Binding("Image.SourceHeight")
+                        {Source = this},
+                    new Binding("Image.TargetX")
+                        {Source = this},
+                    new Binding("Image.TargetY")
+                        {Source = this},
+                    new Binding("Image.TargetWidth")
+                        {Source = this},
+                    new Binding("Image.TargetHeight")
+                        {Source = this},
+                    new Binding("Image.BoundingWidth")
+                        {Source = this},
+                    new Binding("Image.BoundingHeight")
+                        {Source = this},
+                ];
 
-            InvalidateMeasure();
-            InvalidateVisual();
+                MultiBinding multiBinding = new()
+                {
+                    Bindings = bindings,
+                    Converter = new FuncMultiValueConverter<object?, IList<object?>>(x => new List<object?>(x))
+                };
+
+                Bind(BindingsProperty, multiBinding);
+            }
+            else
+            {
+                // Unbind?
+            }
+
+            Invalidate();
+        }
+        else if (change.Property == BindingsProperty)
+        {
+            Invalidate();
         }
     }
 
@@ -50,13 +100,23 @@ public class SKImageViewer : Control
         customDrawOperation = new CustomDrawOperation();
     }
 
+    void Invalidate()
+    {
+        Size size = GetSize();
+        Width = size.Width;
+        Height = size.Height;
+
+        InvalidateMeasure();
+        InvalidateVisual();
+    }
+
     Size GetSize()
     {
-        if (SKImage is UndertaleTexturePageItem texturePageItem)
+        if (Image is UndertaleTexturePageItem texturePageItem)
             return new Size(texturePageItem.BoundingWidth, texturePageItem.BoundingHeight);
-        else if (SKImage is GMImage gmImage)
+        else if (Image is GMImage gmImage)
             return new Size(gmImage.Width, gmImage.Height);
-        else if (SKImage is UndertaleSprite.MaskEntry maskEntry)
+        else if (Image is UndertaleSprite.MaskEntry maskEntry)
             return new Size(maskEntry.Width, maskEntry.Height);
 
         return new Size(0, 0);
@@ -71,7 +131,7 @@ public class SKImageViewer : Control
     {
         Size size = GetSize();
         customDrawOperation.Bounds = new Rect(0, 0, size.Width, size.Height);
-        customDrawOperation.SKImage = SKImage;
+        customDrawOperation.Image = Image;
 
         context.Custom(customDrawOperation);
     }
@@ -80,7 +140,7 @@ public class SKImageViewer : Control
     {
         public Rect Bounds { get; set; }
 
-        public object? SKImage;
+        public object? Image;
 
         readonly MainViewModel mainVM = App.Services.GetRequiredService<MainViewModel>();
 
@@ -125,7 +185,7 @@ public class SKImageViewer : Control
 
                 canvas.Restore();
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 Debugger.Break();
                 throw;
@@ -134,19 +194,25 @@ public class SKImageViewer : Control
 
         public void RenderImage(SKCanvas canvas)
         {
-            if (SKImage is UndertaleTexturePageItem texturePageItem)
+            if (Image is UndertaleTexturePageItem texturePageItem)
             {
-                SKImage image = mainVM.ImageCache.GetCachedImageFromTexturePageItem(texturePageItem);
+                if (texturePageItem.TexturePage is not null)
+                {
+                    SKImage? image = mainVM.ImageCache.GetCachedImageFromTexturePageItem(texturePageItem);
 
-                // TODO: TargetWidth/TargetHeight
-                canvas.DrawImage(image, texturePageItem.TargetX, texturePageItem.TargetY);
+                    if (image is not null)
+                    {
+                        // TODO: TargetWidth/TargetHeight
+                        canvas.DrawImage(image, texturePageItem.TargetX, texturePageItem.TargetY);
+                    }
+                }
             }
-            else if (SKImage is GMImage gmImage)
+            else if (Image is GMImage gmImage)
             {
                 SKImage image = mainVM.ImageCache.GetCachedImageFromGMImage(gmImage);
                 canvas.DrawImage(image, 0, 0);
             }
-            else if (SKImage is UndertaleSprite.MaskEntry maskEntry)
+            else if (Image is UndertaleSprite.MaskEntry maskEntry)
             {
                 int size = maskEntry.Width * maskEntry.Height;
                 byte[] pixels = new byte[size];
@@ -170,19 +236,5 @@ public class SKImageViewer : Control
                 canvas.DrawImage(image, 0, 0);
             }
         }
-    }
-}
-
-public class ToSKImageUpdaterConverter : IMultiValueConverter
-{
-    public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
-    {
-        // Ignore other values, they're just for binding updates.
-        if (values[0] is UndertaleTexturePageItem or GMImage or UndertaleSprite.MaskEntry)
-        {
-            return values[0];
-        }
-
-        return null;
     }
 }

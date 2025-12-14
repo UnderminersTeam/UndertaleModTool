@@ -48,7 +48,7 @@ public partial class UndertaleEmbeddedTextureViewModel : IUndertaleResourceViewM
         var canvas = new SKCanvas(bitmap);
 
         var op = new SKImageViewer.CustomDrawOperation();
-        op.SKImage = EmbeddedTexture.TextureData.Image;
+        op.Image = EmbeddedTexture.TextureData.Image;
         op.RenderImage(canvas);
 
         var result = bitmap.Encode(stream, SKEncodedImageFormat.Png, 100);

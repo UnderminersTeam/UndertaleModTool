@@ -48,7 +48,7 @@ public partial class UndertaleTexturePageItemViewModel : IUndertaleResourceViewM
         var canvas = new SKCanvas(bitmap);
 
         var op = new SKImageViewer.CustomDrawOperation();
-        op.SKImage = TexturePageItem;
+        op.Image = TexturePageItem;
         op.RenderImage(canvas);
 
         var result = bitmap.Encode(stream, SKEncodedImageFormat.Png, 100);
