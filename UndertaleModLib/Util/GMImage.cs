@@ -230,7 +230,7 @@ public class GMImage
         {
             // Read chunk from stream
             reader.Position = chunkStartPosition;
-            reader.Stream.Read(chunkData[..chunkSize]);
+            reader.Stream.ReadExactly(chunkData[..chunkSize]);
 
             // Find first nonzero byte at end of stream
             int position = chunkSize - 1;
