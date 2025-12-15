@@ -46,7 +46,7 @@ jobs:
         cp -r ./UndertaleModLib/GameSpecificData/ ./CLI-${{ matrix.os }}/GameSpecificData/
         cp -r ./UndertaleModTool/Scripts/ ./CLI-${{ matrix.os }}/Scripts/
     - name: Upload ${{ matrix.os }} CLI
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: CLI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}
         path: CLI-${{ matrix.os }}
