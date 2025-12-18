@@ -16,6 +16,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using UndertaleModLib;
 using UndertaleModLib.Models;
+using UndertaleModTool.Windows;
 
 namespace UndertaleModTool
 {
@@ -24,6 +25,8 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertaleGameObjectEditor : DataUserControl
     {
+        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+        private static readonly HashSetTypesOverride gameObjType = new() { typeof(UndertaleGameObject) };
         private bool handleMouseScroll = true;
 
         public UndertaleGameObjectEditor()
@@ -55,10 +58,12 @@ namespace UndertaleModTool
 
         private void ComboBox_Loaded(object sender, RoutedEventArgs e)
         {
-            (sender as ComboBox).DropDownOpened -= ComboBox_DropDownOpened;
-            (sender as ComboBox).DropDownOpened += ComboBox_DropDownOpened;
-            (sender as ComboBox).DropDownClosed -= ComboBox_DropDownClosed;
-            (sender as ComboBox).DropDownClosed += ComboBox_DropDownClosed;
+            var comboBox = sender as ComboBox;
+
+            comboBox.DropDownOpened -= ComboBox_DropDownOpened;
+            comboBox.DropDownOpened += ComboBox_DropDownOpened;
+            comboBox.DropDownClosed -= ComboBox_DropDownClosed;
+            comboBox.DropDownClosed += ComboBox_DropDownClosed;
         }
         private void ComboBox_DropDownOpened(object sender, EventArgs e)
         {
@@ -79,14 +84,17 @@ namespace UndertaleModTool
         }
         private void Remove_Click_Override(object sender, RoutedEventArgs e)
         {
-            var btn = (ButtonDark)sender;
-            var objRef = (UndertaleObjectReference)((Grid)btn.Parent).Parent;
+            var btn = sender as ButtonDark;
+            var objRef = (btn?.Parent as Grid)?.Parent as UndertaleObjectReference;
+            if (objRef is null)
+                return;
 
-            var obj = (UndertaleGameObject)DataContext;
+            if (DataContext is not UndertaleGameObject obj)
+                return;
             var evType = objRef.ObjectEventType;
             var evSubtype = objRef.ObjectEventSubtype;
             var action = (UndertaleGameObject.EventAction)btn.DataContext;
-            var evList = ((UndertaleGameObject)DataContext).Events[(int)evType];
+            var evList = obj.Events[(int)evType];
 
             var ev = evList.FirstOrDefault(x => x.EventSubtype == evSubtype);
             if (ev is null) return;
@@ -94,6 +102,38 @@ namespace UndertaleModTool
             if (ev.Actions.Count <= 0)
             {
                 evList.Remove(ev);
+            }
+        }
+
+        private async void ShowChildrenButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not UndertaleGameObject gameObj)
+                return;
+
+            var button = sender as ButtonDark;
+
+            FindReferencesTypesDialog dialog = new(mainWindow.Data);
+            try
+            {
+                bool hasChildren = dialog.ShowReferencesFor(gameObj, gameObjType, showIfNoResults: false);
+                if (!hasChildren)
+                {
+                    var originalCont = button.Content;
+
+                    button.Content = "(no children were found)";
+                    await Task.Delay(2000);
+
+                    button.Content = originalCont;
+                }
+            }
+            catch (Exception ex)
+            {
+                mainWindow.ShowError("An error occurred in the object references related window.\n" +
+                                     $"Please report this on GitHub.\n\n{ex}");
+            }
+            finally
+            {
+                dialog?.Close();
             }
         }
     }
