@@ -69,7 +69,7 @@ namespace UndertaleModTool.Windows
             await Search();
         }
 
-        async Task Search()
+        private async Task Search()
         {
             // TODO: Allow this be cancelled, probably make loader inside this window itself.
 
@@ -215,7 +215,7 @@ namespace UndertaleModTool.Windows
             isSearchInProgress = false;
         }
 
-        void SearchInUndertaleCode(UndertaleCode code)
+        private void SearchInUndertaleCode(UndertaleCode code)
         {
             try
             {
@@ -250,7 +250,7 @@ namespace UndertaleModTool.Windows
             return null;
         }
 
-        void SearchInCodeText(string codeName, string codeText)
+        private void SearchInCodeText(string codeName, string codeText)
         {
             List<int> results = new();
 
@@ -319,7 +319,7 @@ namespace UndertaleModTool.Windows
             }
         }
 
-        void SortResults()
+        private void SortResults()
         {
             string[] codeNames = mainWindow.Data.Code.Select(x => x.Name.Content).ToArray();
 
@@ -329,7 +329,17 @@ namespace UndertaleModTool.Windows
 
         public void ShowResults()
         {
-            foreach (var result in resultsDictSorted)
+            static string GetWordEnding(int quantity, bool isResults)
+            {
+                if (isResults)
+                    return quantity != 1 ? "s" : "";
+                
+                return quantity != 1 ? "ies" : "y";
+            }
+
+            var resultsSorted = resultsDictSorted.ToArray();
+            var failedSorted = failedListSorted.ToArray();
+            foreach (var result in resultsSorted)
             {
                 var code = result.Key;
                 foreach (var (lineText, lineNumber) in result.Value)
@@ -338,15 +348,15 @@ namespace UndertaleModTool.Windows
                 }
             }
 
-            string str = $"{resultCount} result{(resultCount != 1 ? "s" : "")} found in {resultsDictSorted.Count()} code entr{(resultsDictSorted.Count() != 1 ? "ies" : "y")}.";
-            if (failedListSorted.Count() > 0)
+            string str = $"{resultCount} result{GetWordEnding(resultCount, true)} found in {resultsSorted.Length} code entr{GetWordEnding(resultsSorted.Length, false)}.";
+            if (failedSorted.Length > 0)
             {
-                str += $" {failedListSorted.Count()} code entr{(failedListSorted.Count() != 1 ? "ies" : "y")} with an error.";
+                str += $" {failedSorted.Length} code entr{GetWordEnding(failedSorted.Length, false)} with an error.";
             }
             StatusBarTextBlock.Text = str;
         }
 
-        void OpenSelectedListViewItem(bool inNewTab=false)
+        private void OpenSelectedListViewItem(bool inNewTab = false, Result resultToOpen = default)
         {
             if (isSearchInProgress)
             {
@@ -354,17 +364,31 @@ namespace UndertaleModTool.Windows
                 return;
             }
 
-            foreach (Result result in ResultsListView.SelectedItems)
+            if (resultToOpen != default)
             {
-                mainWindow.OpenCodeEntry(result.Code, result.LineNumber, editorTab, inNewTab);
-                // Only first one opens in current tab, the rest go into new tabs.
-                inNewTab = true;
+                mainWindow.OpenCodeEntry(resultToOpen.Code, resultToOpen.LineNumber, editorTab, inNewTab);
             }
+            else
+            {
+                foreach (Result result in ResultsListView.SelectedItems)
+                {
+                    mainWindow.OpenCodeEntry(result.Code, result.LineNumber, editorTab, inNewTab);
+                    // Only first one opens in current tab, the rest go into new tabs.
+                    inNewTab = true;
+                }
+            }
+
+            // So it activates the window after it finished processing
+            // (otherwise it doesn't work sometimes)
+            _ = Task.Run(() =>
+            {
+                Dispatcher.Invoke(mainWindow.Activate);
+            });
         }
 
-        void CopyListViewItems(IEnumerable items)
+        private void CopyListViewItems(IEnumerable items)
         {
-            string str = String.Join("\n", items
+            string str = String.Join('\n', items
                 .Cast<Result>()
                 .Select(result => $"{result.Code}\t{result.LineNumber}\t{result.LineText}"));
             try
@@ -384,6 +408,19 @@ namespace UndertaleModTool.Windows
             {
                 e.Handled = true;
                 await Search();
+            }
+        }
+
+        private void ListViewItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ButtonState == MouseButtonState.Pressed
+                && e.ChangedButton == MouseButton.Middle)
+            {
+                if (e.Source is not FrameworkElement elem
+                    || elem.DataContext is not Result res)
+                    return;
+
+                OpenSelectedListViewItem(true, res);  
             }
         }
 
