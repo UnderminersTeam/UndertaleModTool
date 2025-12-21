@@ -4267,6 +4267,19 @@ public class BuiltinList : IBuiltins
         // This one is a special case; it only exports to browser. I don't think this library supports
         // browser at all though, so we'll just assume it's -1. Wouldn't hurt anyway.
         Constants["os_browser"] = -1.0;
+        if (data?.GeneralInfo?.Major >= 2)
+        {
+            Constants["time_source_global"] = 0.0;
+            Constants["time_source_game"] = 1.0;
+            Constants["time_source_units_seconds"] = 0.0;
+            Constants["time_source_units_frames"] = 1.0;
+            Constants["time_source_expire_nearest"] = 0.0;
+            Constants["time_source_expire_after"] = 1.0;
+            Constants["time_source_state_initial"] = 0.0;
+            Constants["time_source_state_active"] = 1.0;
+            Constants["time_source_state_paused"] = 2.0;
+            Constants["time_source_state_stopped"] = 3.0;
+        }
 
         // Moving on to the variables
         GlobalNotArray = new(128);
