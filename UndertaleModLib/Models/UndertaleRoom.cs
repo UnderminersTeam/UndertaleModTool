@@ -2626,7 +2626,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         }
     }
 
-    public class TextItemInstance : UndertaleObject, INotifyPropertyChanged, IStaticChildObjectsSize, IDisposable
+    public class TextItemInstance : UndertaleObject, INotifyPropertyChanged, IDisposable
     {
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)
