@@ -15,7 +15,7 @@
                 <l:UndertaleStringReferenceView Reference="{Binding Code.Name}" />
 
                 <Label>Parent</Label>
-                <l:UndertaleResourceReferenceView Reference="{Binding Code.ParentEntry}" ReferenceType="undertalem:UndertaleGameObject" />
+                <l:UndertaleResourceReferenceView Reference="{Binding Code.ParentEntry}" ReferenceType="undertalem:UndertaleCode" />
             </Grid>
             <Button Grid.Column="1" Command="{Binding CompileAndDecompileGML}">Compile and decompile</Button>
         </Grid>
@@ -26,7 +26,6 @@
                 <ThemeVariantScope RequestedThemeVariant="Dark">
                     <AvaloniaEdit:TextEditor x:Name="GMLTextEditor"
                                              Document="{Binding GMLTextDocument}"
-                                             LostFocus="GMLTextEditor_LostFocus"
                                              TextChanged="GMLTextEditor_TextChanged"
                                              ShowLineNumbers="True"
                                              Background="#FF282828"
@@ -41,7 +40,6 @@
                 <ThemeVariantScope RequestedThemeVariant="Dark">
                     <AvaloniaEdit:TextEditor x:Name="ASMTextEditor"
                                              Document="{Binding ASMTextDocument}"
-                                             LostFocus="ASMTextEditor_LostFocus"
                                              TextChanged="ASMTextEditor_TextChanged"
                                              ShowLineNumbers="True"
                                              Background="#FF282828"

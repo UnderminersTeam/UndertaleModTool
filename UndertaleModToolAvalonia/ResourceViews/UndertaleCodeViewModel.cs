@@ -40,6 +40,9 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
     public bool GMLOutdated = true;
     public bool ASMOutdated = true;
 
+    public bool GMLFocused = false;
+    public bool ASMFocused = false;
+
     ILoaderWindow? loaderWindow;
     IInputElement? lastFocusedElement;
 
