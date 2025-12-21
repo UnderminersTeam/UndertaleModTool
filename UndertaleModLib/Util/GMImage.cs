@@ -391,7 +391,7 @@ public class GMImage
 
             // Check if rest of bytes are 0x00 padded
             byte[] paddingBytes = reader.ReadBytes((int)(maxEndOfStreamPosition - reader.Position));
-            for (int i=0; i<paddingBytes.Length; i++)
+            for (int i = 0; i < paddingBytes.Length; i++)
             {
                 if (paddingBytes[i] != 0)
                     throw new IOException("Non-zero bytes in padding");
@@ -850,7 +850,7 @@ public class GMImage
     /// <summary>
     /// Same as <see cref="ConvertToPng"/>.
     /// </summary>
-    /// <remarks>This is supposd to return the image converted to <see cref="ImageFormat.Dds"/> format, but that's not implemented yet.</remarks>
+    /// <remarks>This is supposed to return the image converted to <see cref="ImageFormat.Dds"/> format, but that's not implemented yet.</remarks>
     /// <returns></returns>
     public GMImage ConvertToDds()
     {
