@@ -28,6 +28,13 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
     private static IHighlightingDefinition? ASMHighlightingDefinition = null;
     private static uint HighlightingMajorVersion = 0;
 
+    private static readonly Dictionary<string, UndertaleNamedResource> ScriptsCache = new();
+    private static readonly Dictionary<string, UndertaleNamedResource> FunctionsCache = new();
+    private static readonly Dictionary<string, UndertaleNamedResource> CodeCache = new();
+    private static readonly Dictionary<string, UndertaleNamedResource> NamedResourcesCache = new();
+    
+    private readonly List<string> codeLocalsCache = new();
+
     public (int, int) LastCaretOffsets;
 
     public UndertaleCodeView()
@@ -88,6 +95,8 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
                         ProcessLastGoToLocation();
                     }
                 };
+
+                UpdateHighlightingCache();
             }
         };
 
@@ -120,6 +129,84 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
 
             return definition;
         }
+    }
+
+    void UpdateHighlightingCache()
+    {
+        if (DataContext is not UndertaleCodeViewModel vm)
+            return;
+
+        UndertaleData data = vm.MainVM.Data!;
+
+        ScriptsCache.Clear();
+
+        foreach (var script in data.Scripts)
+        {
+            if (script is null)
+                continue;
+            ScriptsCache[script.Name.Content] = script;
+        }
+
+        FunctionsCache.Clear();
+        foreach (var function in data.Functions)
+        {
+            if (function is null)
+                continue;
+            FunctionsCache[function.Name.Content] = function;
+        }
+
+        CodeCache.Clear();
+        foreach (var code in data.Code)
+        {
+            if (code is null)
+                continue;
+            CodeCache[code.Name.Content] = code;
+        }
+
+        NamedResourcesCache.Clear();
+
+        // NOTE: Remember to add new types
+        IEnumerable?[] objLists = [
+            data.Sounds,
+                data.Sprites,
+                data.Backgrounds,
+                data.Paths,
+                data.Scripts,
+                data.Fonts,
+                data.GameObjects,
+                data.Rooms,
+                data.Extensions,
+                data.Shaders,
+                data.Timelines,
+                data.AnimationCurves,
+                data.Sequences,
+                data.AudioGroups
+        ];
+
+        foreach (IEnumerable? list in objLists)
+        {
+            if (list is null)
+                continue;
+
+            foreach (var obj in list)
+            {
+                if (obj is UndertaleNamedResource namedObj)
+                    NamedResourcesCache[namedObj.Name.Content] = namedObj;
+            }
+        }
+
+        codeLocalsCache.Clear();
+
+        UndertaleCodeLocals? locals = data.CodeLocals?.ByName(vm.Code.Name.Content);
+        if (locals != null)
+        {
+            foreach (var local in locals.Locals)
+                codeLocalsCache.Add(local.Name.Content);
+            codeLocalsCache.Sort();
+        }
+
+        GMLTextEditor.TextArea.TextView.Redraw();
+        ASMTextEditor.TextArea.TextView.Redraw();
     }
 
     void InitializeTextEditor(TextEditor textEditor)
@@ -170,6 +257,8 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
             return;
 
         vm.GMLFocused = true;
+
+        UpdateHighlightingCache();
     }
 
     private void ASMTextEditor_GotFocus(object? sender, GotFocusEventArgs e)
@@ -178,6 +267,8 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
             return;
 
         vm.ASMFocused = true;
+
+        UpdateHighlightingCache();
     }
 
     private void GMLTextEditor_LostFocus(object? sender, RoutedEventArgs e)
@@ -459,87 +550,22 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
             UndertaleNamedResource? namedResource = null;
             bool nonResourceReference = false;
 
-            Dictionary<string, UndertaleNamedResource> scriptsDict = new();
-            Dictionary<string, UndertaleNamedResource> functionsDict = new();
-            Dictionary<string, UndertaleNamedResource> codeDict = new();
-            Dictionary<string, UndertaleNamedResource> namedObjDict = new();
-
-            foreach (var scr in data.Scripts)
-            {
-                if (scr is null)
-                    continue;
-                scriptsDict[scr.Name.Content] = scr;
-            }
-
-            foreach (var func2 in data.Functions)
-            {
-                if (func2 is null)
-                    continue;
-                functionsDict[func2.Name.Content] = func2;
-            }
-
-            foreach (var code in data.Code)
-            {
-                if (code is null)
-                    continue;
-                codeDict[code.Name.Content] = code;
-            }
-
-            // NOTE: Remember to add new types
-            IEnumerable[] objLists = [
-                data.Sounds,
-                data.Sprites,
-                data.Backgrounds,
-                data.Paths,
-                data.Scripts,
-                data.Fonts,
-                data.GameObjects,
-                data.Rooms,
-                data.Extensions,
-                data.Shaders,
-                data.Timelines,
-                data.AnimationCurves,
-                data.Sequences,
-                data.AudioGroups
-            ];
-
-            foreach (var list in objLists)
-            {
-                if (list is null)
-                    continue;
-
-                foreach (var obj in list)
-                {
-                    if (obj is not UndertaleNamedResource namedObj)
-                        continue;
-                    namedObjDict[namedObj.Name.Content] = namedObj;
-                }
-            }
-
-            List<string> CurrentLocals = [];
-            UndertaleCodeLocals? locals = data.CodeLocals?.ByName(codeViewModel.Code.Name.Content);
-            if (locals != null)
-            {
-                foreach (var local in locals.Locals)
-                    CurrentLocals.Add(local.Name.Content);
-            }
-
             // Process the content of this identifier/function
             if (isFunction)
             {
                 namedResource = null;
 
                 if (!data.IsVersionAtLeast(2, 3)) // in GMS2.3 every custom "function" is in fact a member variable and scripts are never referenced directly
-                    scriptsDict.TryGetValue(text, out namedResource);
+                    ScriptsCache.TryGetValue(text, out namedResource);
 
                 if (namedResource == null)
                 {
-                    functionsDict.TryGetValue(text, out namedResource);
+                    FunctionsCache.TryGetValue(text, out namedResource);
                     if (data.IsVersionAtLeast(2, 3))
                     {
                         if (namedResource != null)
                         {
-                            if (codeDict.TryGetValue(namedResource.Name.Content, out _))
+                            if (CodeCache.TryGetValue(namedResource.Name.Content, out _))
                                 namedResource = null; // in GMS2.3 every custom "function" is in fact a member variable, and the names in functions make no sense (they have the gml_Script_ prefix)
                         }
                         else
@@ -547,7 +573,7 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
                             // Resolve 2.3 sub-functions for their parent entry
                             if (data.GlobalFunctions?.TryGetFunction(text, out Underanalyzer.IGMFunction? f) == true)
                             {
-                                scriptsDict.TryGetValue(f.Name.Content, out namedResource);
+                                ScriptsCache.TryGetValue(f.Name.Content, out namedResource);
                                 namedResource = (namedResource as UndertaleScript)?.Code?.ParentEntry;
                             }
                         }
@@ -565,7 +591,7 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
             }
             else
             {
-                namedObjDict.TryGetValue(text, out namedResource);
+                NamedResourcesCache.TryGetValue(text, out namedResource);
                 if (data.IsVersionAtLeast(2, 3))
                 {
                     if (namedResource is UndertaleScript)
@@ -575,7 +601,7 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
                         globalFunc is UndertaleFunction utGlobalFunc)
                     {
                         // Try getting script that this function reference belongs to
-                        if (namedObjDict.TryGetValue("gml_Script_" + text, out namedResource) && namedResource is UndertaleScript script)
+                        if (NamedResourcesCache.TryGetValue("gml_Script_" + text, out namedResource) && namedResource is UndertaleScript script)
                         {
                             // Highlight like a function as well
                             namedResource = script.Code;
@@ -586,7 +612,7 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
                     if (namedResource == null)
                     {
                         // Try to get basic function
-                        if (functionsDict.TryGetValue(text, out namedResource))
+                        if (FunctionsCache.TryGetValue(text, out namedResource))
                         {
                             isFunction = true;
                         }
@@ -623,7 +649,7 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
                     data.BuiltinList.Instance.ContainsKey(text) ||
                     data.BuiltinList.GlobalArray.ContainsKey(text))
                     return new ColorVisualLineText(text, CurrentContext.VisualLine, length, InstanceBrush);
-                if (CurrentLocals?.Contains(text) == true)
+                if (codeView.codeLocalsCache.BinarySearch(text) >= 0)
                     return new ColorVisualLineText(text, CurrentContext.VisualLine, length, LocalBrush);
                 return null;
             }
