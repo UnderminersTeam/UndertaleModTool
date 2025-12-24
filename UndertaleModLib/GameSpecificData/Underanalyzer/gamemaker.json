@@ -1349,7 +1349,13 @@
           [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ]
         ]
       },
-      "call_later": [ null, "Constant.TimeSourceUnitType", null ],
+      "call_later": {
+        "MacroType": "Union",
+        "Macros": [
+          [ null, "Constant.TimeSourceUnitType", null ],
+          [ null, "Constant.TimeSourceUnitType", null, "Bool" ]
+        ]
+      },
       "time_source_create": {
         "MacroType": "Union",
         "Macros": [
@@ -1359,7 +1365,13 @@
           [ "Constant.BuiltInTimeSourceType", null, "Constant.TimeSourceUnitType", null, null, null, "Constant.TimeSourceExpiryType" ]
         ]
       },
-      "time_source_destroy": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_destroy": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Constant.BuiltInTimeSourceType" ],
+          [ "Constant.BuiltInTimeSourceType", "Bool" ]
+        ]
+      },
       "time_source_start": [ "Constant.BuiltInTimeSourceType" ],
       "time_source_stop": [ "Constant.BuiltInTimeSourceType" ],
       "time_source_pause": [ "Constant.BuiltInTimeSourceType" ],
