@@ -125,6 +125,22 @@ public partial class MainView : UserControl, IView
         }
     }
 
+    public void ExpandItemOnTree(MainViewModel.TreeDataGridItem item)
+    {
+        if (MainTreeDataGrid.Rows is null)
+            return;
+
+        // TODO: Work on non-visible rows
+        foreach (var r in MainTreeDataGrid.Rows)
+        {
+            if (r.Model == item && r is HierarchicalRow<MainViewModel.TreeDataGridItem> hierarchicalRow)
+            {
+                hierarchicalRow.IsExpanded = true;
+                break;
+            }
+        }
+    }
+
     private void TreeDataGrid_DoubleTapped(object? sender, TappedEventArgs e)
     {
         OpenItemFromTreeDataGridControl(e.Source);

@@ -186,7 +186,7 @@ public partial class MainViewModel
                 return null;
             }
 
-            TreeDataGridData.Add(new()
+            var dataItem = new TreeDataGridItem()
             {
                 Value = Data,
                 Text = "Data",
@@ -243,7 +243,13 @@ public partial class MainViewModel
                     new() {Tag = "list", Value = "ParticleSystemEmitters", Text = "Particle system emitters",
                         Children = MakeChildren(Data.ParticleSystemEmitters)},
                 ]
-            });
+            };
+
+            TreeDataGridData.Add(dataItem);
+
+            // HACK: Dirty! But I don't wanna make a wholte interface for that
+            if (View is MainView mainView)
+                mainView.ExpandItemOnTree(dataItem);
         }
     }
 
