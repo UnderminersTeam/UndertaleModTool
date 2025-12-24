@@ -4,7 +4,7 @@ using Avalonia.Interactivity;
 
 namespace UndertaleModToolAvalonia;
 
-public partial class SearchInCodeWindow : Window
+public partial class SearchInCodeWindow : Window, IView
 {
     // TODO: Open multiple results
     // TODO: Context menu
@@ -13,7 +13,15 @@ public partial class SearchInCodeWindow : Window
     {
         InitializeComponent();
 
-        Loaded += (_, __) =>
+        DataContextChanged += (_, _) =>
+        {
+            if (DataContext is SearchInCodeViewModel vm)
+            {
+                vm.View = this;
+            }
+        };
+
+        Loaded += (_, _) =>
         {
             SearchTextTextBox.Focus();
         };

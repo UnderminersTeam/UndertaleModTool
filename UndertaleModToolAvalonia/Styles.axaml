@@ -107,7 +107,7 @@
     <Style Selector="ScrollBar">
         <Setter Property="AllowAutoHide" Value="False"/>
     </Style>
-    <Style Selector=":is(ItemsControl)">
+    <Style Selector=":is(Control)">
         <Setter Property="ScrollViewer.AllowAutoHide" Value="False"/>
     </Style>
 

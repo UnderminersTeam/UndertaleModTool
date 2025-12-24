@@ -10,7 +10,7 @@ namespace UndertaleModToolAvalonia;
 
 public interface IView
 {
-    private UserControl View => (UserControl)this;
+    private Control View => (Control)this;
 
     public async Task<IReadOnlyList<IStorageFile>> OpenFileDialog(FilePickerOpenOptions options)
     {
@@ -50,7 +50,7 @@ public interface IView
 
     public ILoaderWindow LoaderOpen()
     {
-        Window window = View.FindLogicalAncestorOfType<Window>() ?? throw new InvalidOperationException();
+        Window window = View.FindLogicalAncestorOfType<Window>(true) ?? throw new InvalidOperationException();
         LoaderWindow loaderWindow = new();
         loaderWindow.ShowDelayed(window);
         return loaderWindow;

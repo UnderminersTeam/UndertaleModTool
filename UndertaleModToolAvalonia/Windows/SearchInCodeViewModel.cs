@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
@@ -16,7 +17,13 @@ namespace UndertaleModToolAvalonia;
 
 public partial class SearchInCodeViewModel
 {
+    // Set this when testing.
+    public IView? View;
+
     public MainViewModel MainVM { get; }
+
+    [Notify]
+    private bool _IsEnabled = true;
 
     [Notify]
     private string _SearchText = "";
@@ -37,15 +44,19 @@ public partial class SearchInCodeViewModel
     GlobalDecompileContext? globalDecompileContext;
 
     ConcurrentDictionary<UndertaleCode, List<(int, string)>> resultsByCodeDict = new();
-    int resultCount;
-    int failedCount;
+    int resultCount = 0;
+    int failedCount = 0;
+
+    ILoaderWindow? loaderWindow;
+    int currentCodeEntriesCount = 0;
+    bool postToLoader = true;
 
     public SearchInCodeViewModel(IServiceProvider? serviceProvider = null)
     {
         MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
     }
 
-    public void Search()
+    public async void Search()
     {
         if (MainVM.Data is null)
         {
@@ -80,27 +91,44 @@ public partial class SearchInCodeViewModel
             }
         }
 
+        // Set up loader window
+        loaderWindow = View!.LoaderOpen();
+        loaderWindow.SetMaximum(MainVM.Data.Code.Count);
+        loaderWindow.SetValue(0);
+        loaderWindow.SetMessage("Searching...");
+        loaderWindow.EnsureShown();
+
+        IsEnabled = false;
+        MainVM.IsEnabled = false;
+
+        // Search codes in parallel
         globalDecompileContext = new(MainVM.Data);
 
-        Parallel.ForEach(MainVM.Data.Code, SearchInUndertaleCode);
+        await Task.Run(() => Parallel.ForEach(MainVM.Data.Code, SearchInUndertaleCode));
 
         // Sort results
-        var sortedResultsByCodeDict = resultsByCodeDict.OrderBy(entry => MainVM.Data.Code.IndexOf(entry.Key));
+        loaderWindow.SetText("Sorting...");
 
-        List<SearchResult> sortedResultsList = [];
-        foreach (var result in sortedResultsByCodeDict)
+        List<SearchResult> sortedResultsList = new(resultCount);
+        
+        await Task.Run(() =>
         {
-            UndertaleCode code = result.Key;
-            foreach (var (lineNumber, lineText) in result.Value)
+            var sortedResultsByCodeDict = resultsByCodeDict.OrderBy(entry => MainVM.Data.Code.IndexOf(entry.Key));
+
+            foreach (var result in sortedResultsByCodeDict)
             {
-                sortedResultsList.Add(new(code, lineNumber, lineText));
+                UndertaleCode code = result.Key;
+                foreach (var (lineNumber, lineText) in result.Value)
+                {
+                    sortedResultsList.Add(new(code, lineNumber, lineText));
+                }
             }
-        }
+        });
 
         Results = [.. sortedResultsList];
 
         // Set status bar text
-        string str = $"{resultCount} result{(resultCount != 1 ? "s" : "")} found in {sortedResultsByCodeDict.Count()} code entr{(sortedResultsByCodeDict.Count() != 1 ? "ies" : "y")}.";
+        string str = $"{resultCount} result{(resultCount != 1 ? "s" : "")} found in {resultsByCodeDict.Count} code entr{(resultsByCodeDict.Count != 1 ? "ies" : "y")}.";
         if (failedCount > 0)
         {
             str += $" {failedCount} code entr{(failedCount != 1 ? "ies" : "y")} with an error.";
@@ -111,10 +139,28 @@ public partial class SearchInCodeViewModel
         resultsByCodeDict = new();
         resultCount = 0;
         failedCount = 0;
+        currentCodeEntriesCount = 0;
+        postToLoader = true;
+
+        // Close loader window
+        loaderWindow.Close();
+
+        IsEnabled = true;
+        MainVM.IsEnabled = true;
     }
 
     void SearchInUndertaleCode(UndertaleCode code)
     {
+        if (postToLoader)
+        {
+            postToLoader = false;
+            Dispatcher.UIThread.Post(() =>
+            {
+                loaderWindow!.SetValue(currentCodeEntriesCount);
+                postToLoader = true;
+            }, DispatcherPriority.SystemIdle);
+        }
+
         if (code is not null && code.ParentEntry is null)
         {
             string codeText = String.Empty;
@@ -128,6 +174,7 @@ public partial class SearchInCodeViewModel
                 catch (Underanalyzer.Decompiler.DecompilerException)
                 {
                     Interlocked.Increment(ref failedCount);
+                    return;
                 }
             }
             else
@@ -139,6 +186,7 @@ public partial class SearchInCodeViewModel
                 catch (Exception)
                 {
                     Interlocked.Increment(ref failedCount);
+                    return;
                 }
             }
 
@@ -197,6 +245,8 @@ public partial class SearchInCodeViewModel
                 Interlocked.Increment(ref resultCount);
             }
         }
+
+        Interlocked.Increment(ref currentCodeEntriesCount);
     }
 
     public void OpenSearchResult(SearchResult searchResult, bool inNewTab = false)
