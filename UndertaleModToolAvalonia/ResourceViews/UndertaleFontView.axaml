@@ -77,7 +77,12 @@
             <TextBox Text="{Binding Font.LineHeight}" />
         </Grid>
 
-        <!-- TODO: Show texture, click and edit glyphs -->
+		<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
+			  MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
+			<l:SKImageViewer Image="{Binding Font.Texture}" />
+		</ScrollViewer>
+
+        <!-- TODO: Click and edit glyphs -->
 
         <Label>Glyphs</Label>
         <l:EditableDataGrid ItemsSource="{Binding Font.Glyphs}" ItemFactory="{Binding CreateGlyph}" SelectionChanged="{Binding GlyphsSelectedChanged}">
