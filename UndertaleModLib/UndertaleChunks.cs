@@ -1090,7 +1090,7 @@ namespace UndertaleModLib
         {
             checkedFor2024_14 = true;
 
-            if (!reader.undertaleData.IsVersionAtLeast(2024, 13))// || reader.undertaleData.IsVersionAtLeast(2024, 14))
+            if (!reader.undertaleData.IsVersionAtLeast(2024, 13) || reader.undertaleData.IsVersionAtLeast(2024, 14))
             {
                 return;
             }

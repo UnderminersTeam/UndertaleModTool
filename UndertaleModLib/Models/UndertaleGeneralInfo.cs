@@ -85,7 +85,11 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         /// <summary>
         /// This flag is set when a game is launched from the Gamemaker Studio 2 IDE using the 'Run' or 'Debug' options
         /// </summary>
-        GameRunFromGMS2IDE = 0x20000,
+        GameRunFromGMS2IDE = 0x20000, //0x10000
+
+        // TODO
+        //TransparentBackground = 0x20000,
+        WindowsD3DSwapEffectDiscard = 0x40000
     }
 
     /// <summary>
@@ -335,6 +339,8 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     public static (uint, uint, uint, uint, BranchType) TestForCommonGMSVersions(UndertaleReader reader,
                                                                     (uint, uint, uint, uint, BranchType) readVersion)
     {
+        return (2024, 14, 1, 0, BranchType.Post2022_0);
+
         (uint Major, uint Minor, uint Release, uint Build, BranchType Branch) detectedVer = readVersion;
 
         // Some GMS2+ version detection. The rest is spread around, mostly in UndertaleChunks.cs

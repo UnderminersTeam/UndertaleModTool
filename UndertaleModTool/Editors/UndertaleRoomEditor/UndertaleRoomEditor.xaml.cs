@@ -528,7 +528,8 @@ namespace UndertaleModTool
                         ScaleX = other.ScaleX,
                         ScaleY = other.ScaleY,
                         Color = other.Color,
-                        Rotation = other.Rotation
+                        Rotation = other.Rotation,
+                        InstanceID = other.InstanceID
                     };
                     undoStack.Push(undoObj);
                     hotpointX = mousePos.X - other.X;
@@ -698,6 +699,7 @@ namespace UndertaleModTool
                     ScaleY = partSysInst.ScaleY,
                     Color = partSysInst.Color,
                     Rotation = partSysInst.Rotation
+                    // FIXME: InstanceID
                 };
 
                 newObj = newPartSysInst;
