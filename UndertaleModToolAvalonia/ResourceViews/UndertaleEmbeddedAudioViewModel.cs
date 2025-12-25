@@ -1,7 +1,8 @@
-﻿using System;
-using System.IO;
-using Avalonia.Platform.Storage;
+﻿using Avalonia.Platform.Storage;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 
@@ -13,6 +14,17 @@ public partial class UndertaleEmbeddedAudioViewModel : IUndertaleResourceViewMod
     public UndertaleResource Resource => EmbeddedAudio;
     public UndertaleEmbeddedAudio EmbeddedAudio { get; set; }
 
+    IReadOnlyList<FilePickerFileType> audioFileTypes = [
+        new FilePickerFileType("WAV files (.wav)")
+        {
+            Patterns = ["*.wav"],
+        },
+        new FilePickerFileType("All files")
+        {
+            Patterns = ["*"],
+        },
+    ];
+
     public UndertaleEmbeddedAudioViewModel(UndertaleEmbeddedAudio embeddedAudio, IServiceProvider? serviceProvider = null)
     {
         MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
@@ -20,21 +32,33 @@ public partial class UndertaleEmbeddedAudioViewModel : IUndertaleResourceViewMod
         EmbeddedAudio = embeddedAudio;
     }
 
-    public async void SaveAudio()
+    public async void ImportAudio()
+    {
+        IReadOnlyList<IStorageFile> files = await MainVM.View!.OpenFileDialog(new FilePickerOpenOptions
+        {
+            Title = "Import audio",
+            FileTypeFilter = audioFileTypes,
+        });
+
+        if (files.Count != 1)
+            return;
+
+        byte[] bytes;
+        using (Stream stream = await files[0].OpenReadAsync())
+        {
+            bytes = new byte[stream.Length];
+            await stream.ReadExactlyAsync(bytes);
+        }
+
+        EmbeddedAudio.Data = bytes;
+    }
+
+    public async void ExportAudio()
     {
         IStorageFile? file = await MainVM.View!.SaveFileDialog(new FilePickerSaveOptions()
         {
-            Title = "Save audio",
-            FileTypeChoices = [
-                new FilePickerFileType("WAV files (.wav)")
-                {
-                    Patterns = ["*.wav"],
-                },
-                new FilePickerFileType("All files")
-                {
-                    Patterns = ["*"],
-                },
-            ],
+            Title = "Export audio",
+            FileTypeChoices = audioFileTypes,
             DefaultExtension = ".wav",
         });
 
