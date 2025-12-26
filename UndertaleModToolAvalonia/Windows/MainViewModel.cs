@@ -145,6 +145,31 @@ public partial class MainViewModel
         }
     }
 
+    public async void OpenDroppedFiles(IEnumerable<IStorageItem>? files)
+    {
+        if (files is null)
+            return;
+
+        var list = files.ToList();
+        if (list.Count != 1)
+            return;
+
+        if (list[0] is not IStorageFile file)
+            return;
+
+        if (!await AskFileSave("Save data file before opening a new one?"))
+            return;
+
+        CloseData();
+
+        using Stream stream = await file.OpenReadAsync();
+
+        if (await LoadData(stream))
+        {
+            DataPath = file.TryGetLocalPath();
+        }
+    }
+
     // Called by [Notify]
     public void OnDataChanged()
     {

@@ -7,7 +7,8 @@
              xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="UndertaleModToolAvalonia.MainView"
-             x:DataType="l:MainViewModel">
+             x:DataType="l:MainViewModel"
+			 Background="Transparent">
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
@@ -35,6 +36,10 @@
                                                   SingleMenu="{StaticResource SingleMenu}"
                                                   ResourceMenu="{StaticResource ResourceMenu}"/>
     </UserControl.Resources>
+
+	<Interaction.Behaviors>
+		<FilesDropBehavior Command="{Binding OpenDroppedFiles}" />
+	</Interaction.Behaviors>
 
     <DockPanel>
         <NativeMenuBar DockPanel.Dock="Top" />
