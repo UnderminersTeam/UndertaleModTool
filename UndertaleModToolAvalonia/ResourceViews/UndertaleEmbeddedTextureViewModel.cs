@@ -1,10 +1,11 @@
-﻿using System;
-using System.IO;
-using Avalonia.Platform.Storage;
+﻿using Avalonia.Platform.Storage;
 using Microsoft.Extensions.DependencyInjection;
-using SkiaSharp;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using UndertaleModLib;
 using UndertaleModLib.Models;
+using UndertaleModLib.Util;
 
 namespace UndertaleModToolAvalonia;
 
@@ -14,6 +15,17 @@ public partial class UndertaleEmbeddedTextureViewModel : IUndertaleResourceViewM
     public UndertaleResource Resource => EmbeddedTexture;
     public UndertaleEmbeddedTexture EmbeddedTexture { get; set; }
 
+    IReadOnlyList<FilePickerFileType> imageFileTypes = [
+        new FilePickerFileType("PNG files (.png)")
+        {
+            Patterns = ["*.png"],
+        },
+        new FilePickerFileType("All files")
+        {
+            Patterns = ["*"],
+        },
+    ];
+
     public UndertaleEmbeddedTextureViewModel(UndertaleEmbeddedTexture embeddedTexture, IServiceProvider? serviceProvider = null)
     {
         MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
@@ -21,22 +33,58 @@ public partial class UndertaleEmbeddedTextureViewModel : IUndertaleResourceViewM
         EmbeddedTexture = embeddedTexture;
     }
 
-    public async void SaveImage()
+    public async void ImportImage()
     {
+        // TODO: Allow formats other than PNG, either directly or to convert it
+        IReadOnlyList<IStorageFile> files = await MainVM.View!.OpenFileDialog(new FilePickerOpenOptions
+        {
+            Title = "Import image",
+            FileTypeFilter = imageFileTypes,
+        });
+
+        if (files.Count != 1)
+            return;
+
+        byte[] bytes;
+        using (Stream stream = await files[0].OpenReadAsync())
+        {
+            bytes = new byte[stream.Length];
+            await stream.ReadExactlyAsync(bytes);
+        }
+
+        var gmImage = GMImage.FromPng(bytes, verifyHeader: true);
+        gmImage.ConvertToFormat(EmbeddedTexture.TextureData.Image.Format);
+
+        EmbeddedTexture.TextureData.Image = gmImage;
+        EmbeddedTexture.TextureWidth = gmImage.Width;
+        EmbeddedTexture.TextureHeight = gmImage.Height;
+    }
+
+    public async void ExportImage()
+    {
+        string extension = EmbeddedTexture.TextureData.Image.Format switch
+        {
+            GMImage.ImageFormat.Png => "png",
+            GMImage.ImageFormat.Qoi => "qoi",
+            GMImage.ImageFormat.Bz2Qoi => "bz2",
+            _ => "bin",
+        };
+
         IStorageFile? file = await MainVM.View!.SaveFileDialog(new FilePickerSaveOptions()
         {
-            Title = "Save image",
+            Title = "Export image",
             FileTypeChoices = [
-               new FilePickerFileType("PNG files (.png)")
+                new FilePickerFileType($"{extension.ToUpperInvariant()} files (.{extension})")
                 {
-                    Patterns = ["*.png"],
+                    Patterns = [$"*.{extension}"],
                 },
                 new FilePickerFileType("All files")
                 {
                     Patterns = ["*"],
                 },
             ],
-            DefaultExtension = ".png",
+            DefaultExtension = $"*.{extension}",
+            SuggestedFileName = $"{EmbeddedTexture.Name.Content}.{extension}",
         });
 
         if (file is null)
@@ -44,15 +92,25 @@ public partial class UndertaleEmbeddedTextureViewModel : IUndertaleResourceViewM
 
         using Stream stream = await file.OpenWriteAsync();
 
-        var bitmap = new SKBitmap(EmbeddedTexture.TextureData.Image.Width, EmbeddedTexture.TextureData.Image.Height, SKColorType.Bgra8888, SKAlphaType.Unpremul);
-        var canvas = new SKCanvas(bitmap);
+        byte[] data = EmbeddedTexture.TextureData.Image.GetData();
+        stream.Write(data);
+    }
 
-        var op = new SKImageViewer.CustomDrawOperation();
-        op.Image = EmbeddedTexture.TextureData.Image;
-        op.RenderImage(canvas);
+    public async void ExportImageAsPNG()
+    {
+        IStorageFile? file = await MainVM.View!.SaveFileDialog(new FilePickerSaveOptions()
+        {
+            Title = "Export image as PNG",
+            FileTypeChoices = imageFileTypes,
+            DefaultExtension = ".png",
+            SuggestedFileName = $"{EmbeddedTexture.Name.Content}.png",
+        });
 
-        var result = bitmap.Encode(stream, SKEncodedImageFormat.Png, 100);
-        if (!result)
-            throw new InvalidOperationException();
+        if (file is null)
+            return;
+
+        using Stream stream = await file.OpenWriteAsync();
+
+        EmbeddedTexture.TextureData.Image.SavePng(stream);
     }
 }
