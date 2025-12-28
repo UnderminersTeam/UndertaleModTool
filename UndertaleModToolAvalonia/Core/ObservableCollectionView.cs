@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using Avalonia.Threading;
 
 namespace UndertaleModToolAvalonia;
 
@@ -91,7 +92,9 @@ public class ObservableCollectionView<TInput, TOutput>
             if (isDelayingEvents)
                 delayedEvents.Add(e);
             else if (CollectionChanged is not null)
-                CollectionChanged(this, e);
+            {
+                Dispatcher.UIThread.Invoke(() => CollectionChanged(this, e));
+            }
         }
     }
 

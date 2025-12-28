@@ -16,7 +16,8 @@ using Underanalyzer.Decompiler;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
-using UndertaleModLib.Scripting;
+using UndertaleModLib.Scripting;
+
 namespace UndertaleModToolAvalonia;
 
 public class Scripting
@@ -342,21 +343,26 @@ public class ScriptGlobals : IScriptInterface
 
     public void SetProgressBar(string message, string status, double progressValue, double maxValue)
     {
-        loaderWindow ??= mainVM.View!.LoaderOpen();
-        loaderWindow.EnsureShown();
-        loaderWindow.SetMessage(message);
-        loaderWindow.SetStatus(status);
-
         loaderValue = (int)progressValue;
-        loaderWindow.SetValue(loaderValue);
 
-        loaderWindow.SetMaximum((int)maxValue);
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            loaderWindow ??= mainVM.View!.LoaderOpen();
+            loaderWindow.EnsureShown();
+            loaderWindow.SetMessage(message);
+            loaderWindow.SetStatus(status);
+            loaderWindow.SetValue(loaderValue);
+            loaderWindow.SetMaximum((int)maxValue);
+        });
     }
 
     public void SetProgressBar()
     {
-        loaderWindow ??= mainVM.View!.LoaderOpen();
-        loaderWindow.EnsureShown();
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            loaderWindow ??= mainVM.View!.LoaderOpen();
+            loaderWindow.EnsureShown();
+        });
     }
 
     public void SetUMTConsoleText(string message)
@@ -398,12 +404,19 @@ public class ScriptGlobals : IScriptInterface
 
     public void UpdateProgressStatus(string status)
     {
-        loaderWindow!.SetTextToMessageAndStatus(status: status);
+        Dispatcher.UIThread.Post(() =>
+        {
+            loaderWindow!.SetTextToMessageAndStatus(status: status);
+        });
     }
 
     public void UpdateProgressValue(double progressValue)
     {
         loaderValue = (int)progressValue;
-        loaderWindow!.SetValue(loaderValue);
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            loaderWindow!.SetValue(loaderValue);
+        });
     }
 }
