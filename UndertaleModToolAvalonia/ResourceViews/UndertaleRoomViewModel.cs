@@ -2,10 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Platform.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using PropertyChanged.SourceGenerator;
+using SkiaSharp;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 using static UndertaleModLib.Models.UndertaleRoom;
@@ -18,7 +21,7 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
     public UndertaleResource Resource => Room;
     public UndertaleRoom Room { get; set; }
 
-    public ObservableCollection<RoomItem> RoomItems { get; set; } = [];
+    public ObservableCollection<RoomTreeItem> RoomTreeItems { get; set; } = [];
 
     [Notify]
     private object? _RoomItemsSelectedItem;
@@ -57,18 +60,18 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
         bool isGMS2 = MainVM.Data!.IsVersionAtLeast(2);
 
         if (!isGMS2)
-            RoomItems.Add(new("Backgrounds", "Backgrounds", Room.Backgrounds));
+            RoomTreeItems.Add(new("Backgrounds", "Backgrounds", Room.Backgrounds));
 
-        RoomItems.Add(new("Views", "Views", Room.Views));
+        RoomTreeItems.Add(new("Views", "Views", Room.Views));
 
         if (!isGMS2)
         {
-            RoomItems.Add(new("Game objects", "GameObjects", Room.GameObjects));
-            RoomItems.Add(new("Tiles", "Tiles", Room.Tiles));
+            RoomTreeItems.Add(new("Game objects", "GameObjects", Room.GameObjects));
+            RoomTreeItems.Add(new("Tiles", "Tiles", Room.Tiles));
         }
 
         if (isGMS2)
-            RoomItems.Add(new("Layers", "Layers", Room.Layers));
+            RoomTreeItems.Add(new("Layers", "Layers", Room.Layers));
 
     }
 
@@ -146,7 +149,16 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
         Room.Layers.Add(layer);
     }
 
-    public object? FindItemCategory(object? item)
+    public object? FindItemFromCategory(object? category)
+    {
+        if ("GameObjects".Equals(category))
+            return RoomTreeItems.First(x => x.Tag == "GameObjects");
+        if ("Tiles".Equals(category))
+            return RoomTreeItems.First(x => x.Tag == "Tiles");
+        return category;
+    }
+
+    public object? FindCategoryOfItem(object? item)
     {
         // NOTE: This sucks. Ideally we'd have this information from the DataContext of the item directly.
         if (item is null)
@@ -156,11 +168,11 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
 
         object? category = item switch
         {
-            RoomItem { Tag: "GameObjects" } => RoomItems.First(x => x.Tag == "GameObjects"),
-            GameObject => !isGMS2 ? RoomItems.First(x => x.Tag == "GameObjects") : null,
-            RoomItem { Tag: "Tiles" } => RoomItems.First(x => x.Tag == "Tiles"),
-            Tile => !isGMS2 ? RoomItems.First(x => x.Tag == "Tiles") : null,
-            RoomItem => null,
+            RoomTreeItem { Tag: "GameObjects" } => "GameObjects",
+            GameObject => !isGMS2 ? "GameObjects" : null,
+            RoomTreeItem { Tag: "Tiles" } => "Tiles",
+            Tile => !isGMS2 ? "Tiles" : null,
+            RoomTreeItem => null,
             _ => null,
         };
 
@@ -203,15 +215,47 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
         return null;
     }
 
-    //public void SaveAsImage()
-    //{
-    //    var bitmap = new SKBitmap((int)Room.Width, (int)Room.Height, SKColorType.Bgra8888, SKAlphaType.Unpremul);
-    //    var canvas = new SKCanvas(bitmap);
+    public async void SaveAsImage()
+    {
+        IStorageFile? file = await MainVM.View!.SaveFileDialog(new FilePickerSaveOptions()
+        {
+            Title = "Save image",
+            FileTypeChoices = [
+                new FilePickerFileType("PNG files (.png)")
+                {
+                    Patterns = ["*.png"],
+                },
+                new FilePickerFileType("All files")
+                {
+                    Patterns = ["*"],
+                },
+            ],
+            DefaultExtension = ".png",
+            SuggestedFileName = $"{Room.Name?.Content ?? "Room"}.png",
+        });
 
-    //    //var op = new UndertaleRoomEditor.CustomDrawOperation();
-    //    //op.SKImage = EmbeddedTexture.TextureData.Image;
-    //    //op.RenderImage(canvas);
-    //}
+        if (file is null)
+            return;
+
+        using Stream stream = await file.OpenWriteAsync();
+
+        var bitmap = new SKBitmap((int)Room.Width, (int)Room.Height, SKColorType.Bgra8888, SKAlphaType.Unpremul);
+        var canvas = new SKCanvas(bitmap);
+
+        var updater = new UndertaleRoomEditor.Updater();
+        updater.Room = Room;
+        updater.Update();
+
+        var renderer = new UndertaleRoomEditor.Renderer();
+        renderer.Room = Room;
+        renderer.RoomItems = updater.RoomItems;
+        renderer.Canvas = canvas;
+        renderer.RenderRoom();
+
+        var result = bitmap.Encode(stream, SKEncodedImageFormat.Png, 100);
+        if (!result)
+            throw new InvalidOperationException();
+    }
 
     private void OnRoomItemsSelectedItemChanged()
     {
@@ -224,15 +268,15 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
             UndertalePointerList<SequenceInstance> => null,
             UndertalePointerList<ParticleSystemInstance> => null,
             UndertalePointerList<TextItemInstance> => null,
-            RoomItem => null,
+            RoomTreeItem => null,
             object o => o,
             _ => null,
         };
 
-        CategorySelected = FindItemCategory(RoomItemsSelectedItem);
+        CategorySelected = FindCategoryOfItem(RoomItemsSelectedItem);
     }
 
-    public class RoomItem(string header, string tag, IEnumerable itemsSource)
+    public class RoomTreeItem(string header, string tag, IEnumerable itemsSource)
     {
         public string Header { get; set; } = header;
         public string Tag { get; set; } = tag;

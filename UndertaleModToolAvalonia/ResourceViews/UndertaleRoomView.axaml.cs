@@ -73,7 +73,7 @@ public partial class UndertaleRoomView : UserControl
 
             switch (parentTreeViewItem?.DataContext)
             {
-                case UndertaleRoomViewModel.RoomItem { Tag: "GameObjects" }:
+                case UndertaleRoomViewModel.RoomTreeItem { Tag: "GameObjects" }:
                     list = vm.Room.GameObjects;
                     moveAction = vm.Room.GameObjects.Move;
                     break;
@@ -81,7 +81,7 @@ public partial class UndertaleRoomView : UserControl
                     list = layer.InstancesData.Instances;
                     moveAction = layer.InstancesData.Instances.Move;
                     break;
-                case UndertaleRoomViewModel.RoomItem { Tag: "Tiles" }:
+                case UndertaleRoomViewModel.RoomTreeItem { Tag: "Tiles" }:
                     list = vm.Room.Tiles;
                     moveAction = vm.Room.Tiles.Move;
                     break;
@@ -143,7 +143,7 @@ public partial class UndertaleRoomView : UserControl
         {
             // Find if called from "Game objects" list or from an instances layer
             TreeViewItem? parentTreeViewItem = treeViewItem.FindLogicalAncestorOfType<TreeViewItem>();
-            if (parentTreeViewItem?.DataContext is UndertaleRoomViewModel.RoomItem { Tag: "GameObjects" })
+            if (parentTreeViewItem?.DataContext is UndertaleRoomViewModel.RoomTreeItem { Tag: "GameObjects" })
             {
                 // TODO: Move to view model
                 vm.Room.GameObjects.Remove(instance);
@@ -180,7 +180,7 @@ public partial class UndertaleRoomView : UserControl
         {
             // Find if called from "Tiles" list or from an asset layer
             TreeViewItem? parentTreeViewItem = treeViewItem.FindLogicalAncestorOfType<TreeViewItem>();
-            if (parentTreeViewItem?.DataContext is UndertaleRoomViewModel.RoomItem { Tag: "Tiles" })
+            if (parentTreeViewItem?.DataContext is UndertaleRoomViewModel.RoomTreeItem { Tag: "Tiles" })
             {
                 // TODO: Move to view model
                 vm.Room.Tiles.Remove(tile);
@@ -405,7 +405,7 @@ public partial class UndertaleRoomView : UserControl
                     }
                 }
 
-                if (where is UndertaleRoomViewModel.RoomItem { Tag: "GameObjects" })
+                if (where is UndertaleRoomViewModel.RoomTreeItem { Tag: "GameObjects" })
                 {
                     int index = selectedInstance is not null ? vm.Room.GameObjects.IndexOf(selectedInstance) : vm.Room.GameObjects.Count;
 

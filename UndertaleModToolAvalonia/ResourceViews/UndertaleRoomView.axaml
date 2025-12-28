@@ -91,7 +91,7 @@
                             </Style>
                         </TreeView.Styles>
                         <TreeView.DataTemplates>
-                            <TreeDataTemplate DataType="l:UndertaleRoomViewModel+RoomItem" ItemsSource="{Binding ItemsSource}">
+                            <TreeDataTemplate DataType="l:UndertaleRoomViewModel+RoomTreeItem" ItemsSource="{Binding ItemsSource}">
                                 <TextBlock Text="{Binding Header}" />
                             </TreeDataTemplate>
                         
@@ -173,7 +173,7 @@
                             </TreeDataTemplate>
                         </TreeView.DataTemplates>
                     
-                        <TreeViewItem x:Name="RoomTreeViewItem" Header="{Binding Room.Name.Content}" IsExpanded="True" ItemsSource="{Binding RoomItems}" />
+                        <TreeViewItem x:Name="RoomTreeViewItem" Header="{Binding Room.Name.Content}" IsExpanded="True" ItemsSource="{Binding RoomTreeItems}" />
                     </TreeView>
                     <StackPanel Grid.Row="1" Orientation="Horizontal">
                         <RepeatButton Click="MoveUp_Click">↑</RepeatButton>
@@ -660,7 +660,8 @@
         <Grid Grid.Column="2" RowDefinitions="Auto,1*">
             <Grid Grid.Row="0" ColumnDefinitions="1*,Auto">
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
-                    <TextBlock Text="{Binding StatusText}" />
+					<Button Command="{Binding SaveAsImage}">Save as image</Button>
+                    <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal">
                     <ToggleButton IsChecked="{Binding IsGridEnabled}">Grid</ToggleButton>

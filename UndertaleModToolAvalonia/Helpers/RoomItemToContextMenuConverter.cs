@@ -25,15 +25,15 @@ public class RoomItemToContextMenuConverter : IValueConverter
     {
         switch (value)
         {
-            case UndertaleRoomViewModel.RoomItem { Tag: "GameObjects" }:
+            case UndertaleRoomViewModel.RoomTreeItem { Tag: "GameObjects" }:
                 return GameObjectListMenu;
             case UndertaleRoom.GameObject:
                 return GameObjectMenu;
-            case UndertaleRoomViewModel.RoomItem { Tag: "Tiles" }:
+            case UndertaleRoomViewModel.RoomTreeItem { Tag: "Tiles" }:
                 return TileListMenu;
             case UndertaleRoom.Tile:
                 return TileMenu;
-            case UndertaleRoomViewModel.RoomItem { Tag: "Layers" }:
+            case UndertaleRoomViewModel.RoomTreeItem { Tag: "Layers" }:
                 return LayersListMenu;
             case UndertaleRoom.Layer { LayerType: UndertaleRoom.LayerType.Instances }:
                 return InstancesLayerMenu;
