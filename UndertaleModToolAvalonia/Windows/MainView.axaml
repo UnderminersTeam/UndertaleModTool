@@ -103,7 +103,8 @@
                             </Setter>
                             <Setter Property="ContextMenu">
                                 <ContextMenu>
-                                    <MenuItem Header="Close tab" Click="TabMenu_Close_Click"/>
+                                    <MenuItem Header="Select on list" Click="TabMenu_Select_Click"/>
+									<MenuItem Header="Close tab" Click="TabMenu_Close_Click"/>
                                 </ContextMenu>
                             </Setter>
                         </Style>

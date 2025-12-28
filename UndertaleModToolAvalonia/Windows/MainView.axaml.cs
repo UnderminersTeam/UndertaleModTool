@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Primitives;
@@ -127,18 +128,56 @@ public partial class MainView : UserControl, IView
 
     public void ExpandItemOnTree(MainViewModel.TreeDataGridItem item)
     {
-        if (MainTreeDataGrid.Rows is null)
+        if (DataContext is not MainViewModel vm)
             return;
 
-        // TODO: Work on non-visible rows
-        foreach (var r in MainTreeDataGrid.Rows)
+        IndexPath? foundIndex = FindTreeIndexPathFromValue(item, vm.TreeDataGridData);
+
+        if (foundIndex is IndexPath index)
         {
-            if (r.Model == item && r is HierarchicalRow<MainViewModel.TreeDataGridItem> hierarchicalRow)
-            {
-                hierarchicalRow.IsExpanded = true;
-                break;
-            }
+            var source = (MainTreeDataGrid.Source as HierarchicalTreeDataGridSource<MainViewModel.TreeDataGridItem>)!;
+            source.Expand(index);
         }
+    }
+
+    public void SelectValueInTree(object value)
+    {
+        if (DataContext is not MainViewModel vm)
+            return;
+
+        IndexPath? foundIndex = FindTreeIndexPathFromValue(value, vm.TreeDataGridData);
+
+        if (foundIndex is IndexPath index)
+        {
+            var source = (MainTreeDataGrid.Source as HierarchicalTreeDataGridSource<MainViewModel.TreeDataGridItem>)!;
+            source.Expand(index);
+
+            MainTreeDataGrid.RowSelection!.SelectedIndex = index;
+
+            int rowIndex = MainTreeDataGrid.Rows!.ModelIndexToRowIndex(index);
+            MainTreeDataGrid.RowsPresenter!.BringIntoView(rowIndex);
+        }
+    }
+
+    public static IndexPath? FindTreeIndexPathFromValue(object value, IList<MainViewModel.TreeDataGridItem>? list, IndexPath indexPath = new())
+    {
+        if (list is null)
+            return null;
+
+        for (int i = 0; i < list.Count; i++)
+        {
+            MainViewModel.TreeDataGridItem? item = list[i];
+            if (item.Value == value || item == value)
+            {
+                return indexPath.Append(i);
+            }
+
+            IndexPath? result = FindTreeIndexPathFromValue(value, item.Children, indexPath.Append(i));
+            if (result is not null)
+                return result;
+        }
+
+        return null;
     }
 
     private void TreeDataGrid_DoubleTapped(object? sender, TappedEventArgs e)
@@ -327,6 +366,24 @@ public partial class MainView : UserControl, IView
                             vm.TabClose(vmTabItem);
                         }
                     }
+                }
+            }
+        }
+    }
+
+    private void TabMenu_Select_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not MainViewModel vm)
+            return;
+
+        if (e.Source is Control control)
+        {
+            TabStripItem? tabItem = control.FindLogicalAncestorOfType<TabStripItem>();
+            if (tabItem is not null && tabItem.DataContext is TabItemViewModel vmTabItem)
+            {
+                if (vmTabItem?.Content is IUndertaleResourceViewModel vmResourceView)
+                {
+                    SelectValueInTree(vmResourceView.Resource);
                 }
             }
         }
