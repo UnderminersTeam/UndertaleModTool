@@ -7,38 +7,40 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="UndertaleModToolAvalonia.UndertaleSoundView"
              x:DataType="l:UndertaleSoundViewModel">
-    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
-        <Label>Name</Label>
-        <l:UndertaleStringReferenceView Reference="{Binding Sound.Name}" />
+	<ScrollViewer>
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
+            <Label>Name</Label>
+            <l:UndertaleStringReferenceView Reference="{Binding Sound.Name}" />
 
-        <Label>Flags</Label>
-        <l:FlagsBoxView Value="{Binding Sound.Flags}" />
+            <Label>Flags</Label>
+            <l:FlagsBoxView Value="{Binding Sound.Flags}" />
 
-        <Label>Type</Label>
-        <l:UndertaleStringReferenceView Reference="{Binding Sound.Type}" />
+            <Label>Type</Label>
+            <l:UndertaleStringReferenceView Reference="{Binding Sound.Type}" />
 
-        <Label>File</Label>
-        <l:UndertaleStringReferenceView Reference="{Binding Sound.File}" />
+            <Label>File</Label>
+            <l:UndertaleStringReferenceView Reference="{Binding Sound.File}" />
 
-        <Label>Effects</Label>
-        <TextBox Text="{Binding Sound.Effects}" />
+            <Label>Effects</Label>
+            <TextBox Text="{Binding Sound.Effects}" />
 
-        <Label>Volume</Label>
-        <TextBox Text="{Binding Sound.Volume}" />
+            <Label>Volume</Label>
+            <TextBox Text="{Binding Sound.Volume}" />
 
-        <Label>Pitch</Label>
-        <TextBox Text="{Binding Sound.Pitch}" />
+            <Label>Pitch</Label>
+            <TextBox Text="{Binding Sound.Pitch}" />
 
-        <Label>Audio group</Label>
-        <l:UndertaleResourceReferenceView Reference="{Binding Sound.AudioGroup}" ReferenceType="undertalem:UndertaleAudioGroup" />
+            <Label>Audio group</Label>
+            <l:UndertaleResourceReferenceView Reference="{Binding Sound.AudioGroup}" ReferenceType="undertalem:UndertaleAudioGroup" />
 
-        <!-- TODO: Deal with audio groups. -->
-        <Label>Audio file</Label>
-        <TextBox Text="{Binding Sound.AudioID}" />
+            <!-- TODO: Deal with audio groups. -->
+            <Label>Audio file</Label>
+            <TextBox Text="{Binding Sound.AudioID}" />
 
-        <Label>Preload (old audio system)</Label>
-        <CheckBox IsChecked="{Binding Sound.Preload}" />
+            <Label>Preload (old audio system)</Label>
+            <CheckBox IsChecked="{Binding Sound.Preload}" />
 
-        <!-- TODO: Audio player -->
-    </Grid>
+            <!-- TODO: Audio player -->
+        </Grid>
+	</ScrollViewer>
 </UserControl>

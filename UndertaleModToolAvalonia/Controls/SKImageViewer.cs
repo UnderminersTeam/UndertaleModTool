@@ -81,7 +81,7 @@ public class SKImageViewer : Control
             }
             else
             {
-                // Unbind?
+                // NOTE: Unbind?
             }
 
             Invalidate();

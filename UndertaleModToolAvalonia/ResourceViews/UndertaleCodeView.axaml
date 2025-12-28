@@ -8,7 +8,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="UndertaleModToolAvalonia.UndertaleCodeView"
              x:DataType="l:UndertaleCodeViewModel">
-    <Grid RowDefinitions="Auto,1*" ColumnDefinitions="1*" MaxHeight="{Binding $parent[ContentControl].Bounds.Height}">
+    <Grid RowDefinitions="Auto,1*" ColumnDefinitions="1*">
         <Grid Grid.Row="0" ColumnDefinitions="1*,Auto" Classes="PaddedProperties">
             <Grid Grid.Column="0" l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
                 <Label>Name</Label>
@@ -28,6 +28,7 @@
                                              Document="{Binding GMLTextDocument}"
                                              TextChanged="GMLTextEditor_TextChanged"
                                              ShowLineNumbers="True"
+                                             WordWrap="True"
                                              Background="#FF282828"
                                              FontFamily="Consolas,Liberation Mono,Menlo">
                         <AvaloniaEdit:TextEditor.KeyBindings>
@@ -42,6 +43,7 @@
                                              Document="{Binding ASMTextDocument}"
                                              TextChanged="ASMTextEditor_TextChanged"
                                              ShowLineNumbers="True"
+                                             WordWrap="True"
                                              Background="#FF282828"
                                              FontFamily="Consolas,Liberation Mono,Menlo">
                         <AvaloniaEdit:TextEditor.KeyBindings>

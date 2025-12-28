@@ -158,7 +158,7 @@ public partial class SearchInCodeViewModel
             {
                 loaderWindow!.SetValue(currentCodeEntriesCount);
                 postToLoader = true;
-            }, DispatcherPriority.SystemIdle);
+            }, DispatcherPriority.Background);
         }
 
         if (code is not null && code.ParentEntry is null)

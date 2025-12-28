@@ -7,18 +7,20 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="UndertaleModToolAvalonia.UndertaleEmbeddedImageView"
              x:DataType="l:UndertaleEmbeddedImageViewModel">
-	<StackPanel Classes="PaddedProperties">
-		<Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
-			<Label>Name</Label>
-			<l:UndertaleStringReferenceView Reference="{Binding EmbeddedImage.Name}" />
+	<ScrollViewer>
+		<StackPanel Classes="PaddedProperties">
+			<Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+				<Label>Name</Label>
+				<l:UndertaleStringReferenceView Reference="{Binding EmbeddedImage.Name}" />
 
-			<Label>Texture</Label>
-			<l:UndertaleResourceReferenceView Reference="{Binding EmbeddedImage.TextureEntry}" ReferenceType="undertalem:UndertaleTexturePageItem" />
-		</Grid>
+				<Label>Texture</Label>
+				<l:UndertaleResourceReferenceView Reference="{Binding EmbeddedImage.TextureEntry}" ReferenceType="undertalem:UndertaleTexturePageItem" />
+			</Grid>
 
-		<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
-			      MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
-			<l:SKImageViewer Image="{Binding EmbeddedImage.TextureEntry}" />
-		</ScrollViewer>
-	</StackPanel>
+			<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
+						  MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
+				<l:SKImageViewer Image="{Binding EmbeddedImage.TextureEntry}" />
+			</ScrollViewer>
+		</StackPanel>
+	</ScrollViewer>
 </UserControl>

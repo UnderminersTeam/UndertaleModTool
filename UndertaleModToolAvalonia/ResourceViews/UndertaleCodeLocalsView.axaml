@@ -7,28 +7,30 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="UndertaleModToolAvalonia.UndertaleCodeLocalsView"
              x:DataType="l:UndertaleCodeLocalsViewModel">
-    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
-        <Label>Name</Label>
-        <l:UndertaleStringReferenceView Reference="{Binding CodeLocals.Name}" />
+	<ScrollViewer>
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
+            <Label>Name</Label>
+            <l:UndertaleStringReferenceView Reference="{Binding CodeLocals.Name}" />
 
-        <Label>Code locals</Label>
-        <l:EditableDataGrid ItemsSource="{Binding CodeLocals.Locals}" ItemFactory="{Binding CreateLocalVar}">
-            <l:EditableDataGrid.Columns>
-                <DataGridTemplateColumn Header="Index" Width="1*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="undertalem:UndertaleCodeLocals+LocalVar">
-                            <TextBox Text="{Binding Index}"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Name" Width="3*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="undertalem:UndertaleCodeLocals+LocalVar">
-                            <l:UndertaleStringReferenceView Reference="{Binding Name}"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </l:EditableDataGrid.Columns>
-        </l:EditableDataGrid>
-    </Grid>
+            <Label>Code locals</Label>
+            <l:EditableDataGrid ItemsSource="{Binding CodeLocals.Locals}" ItemFactory="{Binding CreateLocalVar}">
+                <l:EditableDataGrid.Columns>
+                    <DataGridTemplateColumn Header="Index" Width="1*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="undertalem:UndertaleCodeLocals+LocalVar">
+                                <TextBox Text="{Binding Index}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Name" Width="3*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="undertalem:UndertaleCodeLocals+LocalVar">
+                                <l:UndertaleStringReferenceView Reference="{Binding Name}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </l:EditableDataGrid.Columns>
+            </l:EditableDataGrid>
+        </Grid>
+	</ScrollViewer>
 </UserControl>

@@ -78,7 +78,8 @@
                                           TextItemInstanceMenu="{StaticResource TextItemInstanceMenu}" />
         <l:ZoomConverter x:Key="ZoomConverter" />
     </UserControl.Resources>
-    <Grid ColumnDefinitions="2*,Auto,5*" RowDefinitions="1*" MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
+	
+    <Grid ColumnDefinitions="2*,Auto,5*" RowDefinitions="1*">
         <Grid Grid.Column="0" ColumnDefinitions="1*" RowDefinitions="1*,Auto,1*">
             <Grid Grid.Row="0">
                 <Grid RowDefinitions="1*,Auto">

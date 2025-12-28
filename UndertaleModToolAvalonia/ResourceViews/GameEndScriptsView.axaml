@@ -7,7 +7,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="UndertaleModToolAvalonia.GameEndScriptsView"
              x:DataType="l:GameEndScriptsViewModel">
-    <l:EditableDataGrid ItemsSource="{Binding GameEndScripts}" ItemFactory="{Binding CreateGlobalInit}" Classes="LeftPaddedProperties">
+    <l:EditableDataGrid ItemsSource="{Binding GameEndScripts}" ItemFactory="{Binding CreateGlobalInit}" HeadersVisibility="None" Classes="LeftPaddedProperties">
         <l:EditableDataGrid.Columns>
             <DataGridTemplateColumn Header="Script" Width="1*">
                 <DataGridTemplateColumn.CellTemplate>

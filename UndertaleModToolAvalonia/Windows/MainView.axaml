@@ -217,101 +217,99 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="l:TabItemViewModel">
-                            <ScrollViewer IsVisible="{Binding IsSelected}">
-                                <ContentControl Content="{Binding Content}">
-                                    <ContentControl.DataTemplates>
-                                        <DataTemplate DataType="l:DescriptionViewModel">
-                                            <StackPanel Classes="PaddedProperties">
-                                                <TextBlock FontWeight="Bold" Text="{Binding Heading}"/>
-                                                <Separator/>
-                                                <TextBlock Text="{Binding Description}"/>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:GeneralInfoViewModel">
-                                            <l:GeneralInfoView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:GlobalInitScriptsViewModel">
-                                            <l:GlobalInitScriptsView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:GameEndScriptsViewModel">
-                                            <l:GameEndScriptsView />
-                                        </DataTemplate>
-                                        <!-- Resources -->
-                                        <DataTemplate DataType="l:UndertaleAudioGroupViewModel">
-                                            <l:UndertaleAudioGroupView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:UndertaleSoundViewModel">
-                                            <l:UndertaleSoundView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:UndertaleSpriteViewModel">
-                                            <l:UndertaleSpriteView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:UndertaleBackgroundViewModel">
-                                            <l:UndertaleBackgroundView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:UndertalePathViewModel">
-                                            <l:UndertalePathView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:UndertaleScriptViewModel">
-                                            <l:UndertaleScriptView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:UndertaleShaderViewModel">
-                                            <l:UndertaleShaderView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:UndertaleFontViewModel">
-                                            <l:UndertaleFontView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:UndertaleTimelineViewModel">
-                                            <l:UndertaleTimelineView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:UndertaleGameObjectViewModel">
-                                            <l:UndertaleGameObjectView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:UndertaleRoomViewModel">
-                                            <l:UndertaleRoomView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:UndertaleExtensionViewModel">
-                                            <l:UndertaleExtensionView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:UndertaleTexturePageItemViewModel">
-                                            <l:UndertaleTexturePageItemView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:UndertaleCodeViewModel">
-                                            <l:UndertaleCodeView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:UndertaleVariableViewModel">
-                                            <l:UndertaleVariableView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:UndertaleFunctionViewModel">
-                                            <l:UndertaleFunctionView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:UndertaleCodeLocalsViewModel">
-                                            <l:UndertaleCodeLocalsView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:UndertaleStringViewModel">
-                                            <l:UndertaleStringView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:UndertaleEmbeddedTextureViewModel">
-                                            <l:UndertaleEmbeddedTextureView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:UndertaleEmbeddedAudioViewModel">
-                                            <l:UndertaleEmbeddedAudioView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:UndertaleTextureGroupInfoViewModel">
-                                            <l:UndertaleTextureGroupInfoView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:UndertaleEmbeddedImageViewModel">
-                                            <l:UndertaleEmbeddedImageView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:UndertaleParticleSystemViewModel">
-                                            <l:UndertaleParticleSystemView />
-                                        </DataTemplate>
-                                        <DataTemplate DataType="l:UndertaleParticleSystemEmitterViewModel">
-                                            <l:UndertaleParticleSystemEmitterView />
-                                        </DataTemplate>
-                                    </ContentControl.DataTemplates>
-                                </ContentControl>
-                            </ScrollViewer>
+                            <ContentControl Content="{Binding Content}" IsVisible="{Binding IsSelected}">
+                                <ContentControl.DataTemplates>
+                                    <DataTemplate DataType="l:DescriptionViewModel">
+                                        <StackPanel Classes="PaddedProperties">
+                                            <TextBlock FontWeight="Bold" Text="{Binding Heading}"/>
+                                            <Separator/>
+                                            <TextBlock Text="{Binding Description}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:GeneralInfoViewModel">
+                                        <l:GeneralInfoView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:GlobalInitScriptsViewModel">
+                                        <l:GlobalInitScriptsView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:GameEndScriptsViewModel">
+                                        <l:GameEndScriptsView />
+                                    </DataTemplate>
+                                    <!-- Resources -->
+                                    <DataTemplate DataType="l:UndertaleAudioGroupViewModel">
+                                        <l:UndertaleAudioGroupView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleSoundViewModel">
+                                        <l:UndertaleSoundView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleSpriteViewModel">
+                                        <l:UndertaleSpriteView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleBackgroundViewModel">
+                                        <l:UndertaleBackgroundView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertalePathViewModel">
+                                        <l:UndertalePathView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleScriptViewModel">
+                                        <l:UndertaleScriptView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleShaderViewModel">
+                                        <l:UndertaleShaderView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleFontViewModel">
+                                        <l:UndertaleFontView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleTimelineViewModel">
+                                        <l:UndertaleTimelineView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleGameObjectViewModel">
+                                        <l:UndertaleGameObjectView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleRoomViewModel">
+                                        <l:UndertaleRoomView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleExtensionViewModel">
+                                        <l:UndertaleExtensionView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleTexturePageItemViewModel">
+                                        <l:UndertaleTexturePageItemView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleCodeViewModel">
+                                        <l:UndertaleCodeView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleVariableViewModel">
+                                        <l:UndertaleVariableView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleFunctionViewModel">
+                                        <l:UndertaleFunctionView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleCodeLocalsViewModel">
+                                        <l:UndertaleCodeLocalsView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleStringViewModel">
+                                        <l:UndertaleStringView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleEmbeddedTextureViewModel">
+                                        <l:UndertaleEmbeddedTextureView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleEmbeddedAudioViewModel">
+                                        <l:UndertaleEmbeddedAudioView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleTextureGroupInfoViewModel">
+                                        <l:UndertaleTextureGroupInfoView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleEmbeddedImageViewModel">
+                                        <l:UndertaleEmbeddedImageView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleParticleSystemViewModel">
+                                        <l:UndertaleParticleSystemView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleParticleSystemEmitterViewModel">
+                                        <l:UndertaleParticleSystemEmitterView />
+                                    </DataTemplate>
+                                </ContentControl.DataTemplates>
+                            </ContentControl>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

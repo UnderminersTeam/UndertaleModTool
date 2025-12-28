@@ -60,6 +60,7 @@ public partial class UndertaleEmbeddedAudioViewModel : IUndertaleResourceViewMod
             Title = "Export audio",
             FileTypeChoices = audioFileTypes,
             DefaultExtension = ".wav",
+            SuggestedFileName = $"{EmbeddedAudio.Name.Content}.wav",
         });
 
         if (file is null)

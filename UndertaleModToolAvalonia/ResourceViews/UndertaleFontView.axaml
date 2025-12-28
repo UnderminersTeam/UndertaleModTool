@@ -10,166 +10,169 @@
     <UserControl.Resources>
         <l:VersionCompareConverter x:Key="VersionCompareConverter" />
     </UserControl.Resources>
-    <StackPanel Classes="PaddedProperties">
-        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
-            <Label>Name</Label>
-            <l:UndertaleStringReferenceView Reference="{Binding Font.Name}" />
 
-            <Label>Display name</Label>
-            <l:UndertaleStringReferenceView Reference="{Binding Font.DisplayName}" />
+	<ScrollViewer>
+        <StackPanel Classes="PaddedProperties">
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                <Label>Name</Label>
+                <l:UndertaleStringReferenceView Reference="{Binding Font.Name}" />
+
+                <Label>Display name</Label>
+                <l:UndertaleStringReferenceView Reference="{Binding Font.DisplayName}" />
         
-            <Label>Font size (em)</Label>
-            <TextBox Text="{Binding Font.EmSize}" />
+                <Label>Font size (em)</Label>
+                <TextBox Text="{Binding Font.EmSize}" />
         
-            <Label>Bold</Label>
-            <CheckBox IsChecked="{Binding Font.Bold}" />
+                <Label>Bold</Label>
+                <CheckBox IsChecked="{Binding Font.Bold}" />
 
-            <Label>Italic</Label>
-            <CheckBox IsChecked="{Binding Font.Italic}" />
+                <Label>Italic</Label>
+                <CheckBox IsChecked="{Binding Font.Italic}" />
 
-            <Label>Range (start-end)</Label>
-            <Grid ColumnDefinitions="1*,Auto,1*">
-                <TextBox Grid.Column="0" Text="{Binding Font.RangeStart}" />
-                <TextBlock Grid.Column="1" Text=" - " />
-                <TextBox Grid.Column="2" Text="{Binding Font.RangeEnd}" />
+                <Label>Range (start-end)</Label>
+                <Grid ColumnDefinitions="1*,Auto,1*">
+                    <TextBox Grid.Column="0" Text="{Binding Font.RangeStart}" />
+                    <TextBlock Grid.Column="1" Text=" - " />
+                    <TextBox Grid.Column="2" Text="{Binding Font.RangeEnd}" />
+                </Grid>
+        
+                <Label>Charset</Label>
+                <TextBox Text="{Binding Font.Charset}" />
+
+                <Label>Anti Aliasing</Label>
+                <TextBox Text="{Binding Font.AntiAliasing}" />
+
+                <Label>Texture</Label>
+                <l:UndertaleResourceReferenceView Reference="{Binding Font.Texture}" ReferenceType="undertalem:UndertaleTexturePageItem" />
+
+                <Label>Scale (X/Y)</Label>
+                <Grid ColumnDefinitions="1*,1*">
+                    <TextBox Grid.Column="0" Text="{Binding Font.ScaleX}" />
+                    <TextBox Grid.Column="1" Text="{Binding Font.ScaleY}" />
+                </Grid>
             </Grid>
-        
-            <Label>Charset</Label>
-            <TextBox Text="{Binding Font.Charset}" />
 
-            <Label>Anti Aliasing</Label>
-            <TextBox Text="{Binding Font.AntiAliasing}" />
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
+				  IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
+                  Converter={StaticResource VersionCompareConverter},
+                  ConverterParameter=GE2022.2}">
+                <Label>Ascender</Label>
+                <TextBox Text="{Binding Font.Ascender}" />
 
-            <Label>Texture</Label>
-            <l:UndertaleResourceReferenceView Reference="{Binding Font.Texture}" ReferenceType="undertalem:UndertaleTexturePageItem" />
-
-            <Label>Scale (X/Y)</Label>
-            <Grid ColumnDefinitions="1*,1*">
-                <TextBox Grid.Column="0" Text="{Binding Font.ScaleX}" />
-                <TextBox Grid.Column="1" Text="{Binding Font.ScaleY}" />
+                <Label>Ascender offset</Label>
+                <TextBox Text="{Binding Font.AscenderOffset}" />
             </Grid>
-        </Grid>
 
-        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
-              IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
-              Converter={StaticResource VersionCompareConverter},
-              ConverterParameter=GE2022.2}">
-            <Label>Ascender</Label>
-            <TextBox Text="{Binding Font.Ascender}" />
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
+                  IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
+                  Converter={StaticResource VersionCompareConverter},
+                  ConverterParameter=GE2023.2}">
+                <Label>SDF spread value</Label>
+                <TextBox Text="{Binding Font.SDFSpread}" />
+            </Grid>
 
-            <Label>Ascender offset</Label>
-            <TextBox Text="{Binding Font.AscenderOffset}" />
-        </Grid>
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
+                  IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
+                  Converter={StaticResource VersionCompareConverter},
+                  ConverterParameter=GE2023.6}">
+                <Label>Line height</Label>
+                <TextBox Text="{Binding Font.LineHeight}" />
+            </Grid>
 
-        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
-             IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
-              Converter={StaticResource VersionCompareConverter},
-              ConverterParameter=GE2023.2}">
-            <Label>SDF spread value</Label>
-            <TextBox Text="{Binding Font.SDFSpread}" />
-        </Grid>
+		    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
+						  MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
+			    <l:SKImageViewer Image="{Binding Font.Texture}" />
+		    </ScrollViewer>
 
-        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
-             IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
-              Converter={StaticResource VersionCompareConverter},
-              ConverterParameter=GE2023.6}">
-            <Label>Line height</Label>
-            <TextBox Text="{Binding Font.LineHeight}" />
-        </Grid>
+            <!-- TODO: Click and edit glyphs -->
 
-		<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
-			  MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
-			<l:SKImageViewer Image="{Binding Font.Texture}" />
-		</ScrollViewer>
+            <Label>Glyphs</Label>
+            <l:EditableDataGrid ItemsSource="{Binding Font.Glyphs}" ItemFactory="{Binding CreateGlyph}" SelectionChanged="{Binding GlyphsSelectedChanged}">
+                <l:EditableDataGrid.Columns>
+                    <DataGridTemplateColumn Header="Character" Width="4*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="undertalem:UndertaleFont+Glyph">
+                                <TextBox Text="{Binding Character}" />
+                                <!-- TODO: Character convert -->
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="X" Width="1*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="undertalem:UndertaleFont+Glyph">
+                                <TextBox Text="{Binding SourceX}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Y" Width="1*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="undertalem:UndertaleFont+Glyph">
+                                <TextBox Text="{Binding SourceY}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="W" Width="1*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="undertalem:UndertaleFont+Glyph">
+                                <TextBox Text="{Binding SourceWidth}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="H" Width="1*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="undertalem:UndertaleFont+Glyph">
+                                <TextBox Text="{Binding SourceHeight}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Width="4*">
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="Shift" ToolTip.Tip="The number of pixels to shift right when advancing to the next character." />
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="undertalem:UndertaleFont+Glyph">
+                                <TextBox Text="{Binding Shift}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Width="4*">
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="Offset" ToolTip.Tip="The number of pixels to horizontally offset the rendering of the glyph." />
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="undertalem:UndertaleFont+Glyph">
+                                <TextBox Text="{Binding Offset}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </l:EditableDataGrid.Columns>
+            </l:EditableDataGrid>
 
-        <!-- TODO: Click and edit glyphs -->
+            <Label>Kerning of selected glyph</Label>
+            <l:EditableDataGrid ItemsSource="{Binding GlyphsSelected.Kerning}" ItemFactory="{Binding CreateGlyphKerning}">
+                <l:EditableDataGrid.Columns>
+                    <DataGridTemplateColumn Header="Preceding character" Width="1*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="undertalem:UndertaleFont+Glyph+GlyphKerning">
+                                <TextBox Text="{Binding Character}" />
+                                <!-- TODO: Character convert -->
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Shift modified" Width="1*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="undertalem:UndertaleFont+Glyph+GlyphKerning">
+                                <TextBox Text="{Binding ShiftModifier}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </l:EditableDataGrid.Columns>
+            </l:EditableDataGrid>
 
-        <Label>Glyphs</Label>
-        <l:EditableDataGrid ItemsSource="{Binding Font.Glyphs}" ItemFactory="{Binding CreateGlyph}" SelectionChanged="{Binding GlyphsSelectedChanged}">
-            <l:EditableDataGrid.Columns>
-                <DataGridTemplateColumn Header="Character" Width="4*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="undertalem:UndertaleFont+Glyph">
-                            <TextBox Text="{Binding Character}" />
-                            <!-- TODO: Character convert -->
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Source X" Width="1*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="undertalem:UndertaleFont+Glyph">
-                            <TextBox Text="{Binding SourceX}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Source Y" Width="1*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="undertalem:UndertaleFont+Glyph">
-                            <TextBox Text="{Binding SourceY}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Source W" Width="1*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="undertalem:UndertaleFont+Glyph">
-                            <TextBox Text="{Binding SourceWidth}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Source H" Width="1*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="undertalem:UndertaleFont+Glyph">
-                            <TextBox Text="{Binding SourceHeight}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn Width="4*">
-                    <DataGridTemplateColumn.Header>
-                        <TextBlock Text="Shift" ToolTip.Tip="The number of pixels to shift right when advancing to the next character." />
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="undertalem:UndertaleFont+Glyph">
-                            <TextBox Text="{Binding Shift}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn Width="4*">
-                    <DataGridTemplateColumn.Header>
-                        <TextBlock Text="Offset" ToolTip.Tip="The number of pixels to horizontally offset the rendering of the glyph." />
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="undertalem:UndertaleFont+Glyph">
-                            <TextBox Text="{Binding Offset}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </l:EditableDataGrid.Columns>
-        </l:EditableDataGrid>
-
-        <Label>Kerning of selected glyph</Label>
-        <l:EditableDataGrid ItemsSource="{Binding GlyphsSelected.Kerning}" ItemFactory="{Binding CreateGlyphKerning}">
-            <l:EditableDataGrid.Columns>
-                <DataGridTemplateColumn Header="Preceding character" Width="1*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="undertalem:UndertaleFont+Glyph+GlyphKerning">
-                            <TextBox Text="{Binding Character}" />
-                            <!-- TODO: Character convert -->
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Shift modified" Width="1*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="undertalem:UndertaleFont+Glyph+GlyphKerning">
-                            <TextBox Text="{Binding ShiftModifier}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </l:EditableDataGrid.Columns>
-        </l:EditableDataGrid>
-
-        <StackPanel Orientation="Horizontal">
-            <Button Command="{Binding SortGlyphs}">Sort glyphs</Button>
-            <Button Command="{Binding UpdateRange}">Update range</Button>
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding SortGlyphs}">Sort glyphs</Button>
+                <Button Command="{Binding UpdateRange}">Update range</Button>
+            </StackPanel>
         </StackPanel>
-    </StackPanel>
+	</ScrollViewer>
 </UserControl>

@@ -6,17 +6,19 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="UndertaleModToolAvalonia.UndertaleEmbeddedAudioView"
              x:DataType="l:UndertaleEmbeddedAudioViewModel">
-    <StackPanel Classes="PaddedProperties">
-        <StackPanel Orientation="Horizontal">
-            <TextBlock Text="WAV data, length: " />
-            <TextBlock Text="{Binding EmbeddedAudio.Data.Length}" />
-        </StackPanel>
+	<ScrollViewer>
+        <StackPanel Classes="PaddedProperties">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="WAV data, length: " />
+                <TextBlock Text="{Binding EmbeddedAudio.Data.Length}" />
+            </StackPanel>
 
-        <StackPanel Orientation="Horizontal">
-			<Button Command="{Binding ImportAudio}">Import audio</Button>
-            <Button Command="{Binding ExportAudio}">Export audio</Button>
-        </StackPanel>
+            <StackPanel Orientation="Horizontal">
+			    <Button Command="{Binding ImportAudio}">Import audio</Button>
+                <Button Command="{Binding ExportAudio}">Export audio</Button>
+            </StackPanel>
 
-        <!-- TODO: Play audio -->
-    </StackPanel>
+            <!-- TODO: Play audio -->
+        </StackPanel>
+	</ScrollViewer>
 </UserControl>

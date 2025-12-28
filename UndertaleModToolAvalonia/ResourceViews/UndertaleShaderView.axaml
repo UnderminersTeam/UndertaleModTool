@@ -10,106 +10,109 @@
     <UserControl.Resources>
         <l:EnumTypeToValuesConverter x:Key="EnumTypeToValuesConverter" />
     </UserControl.Resources>
-    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
-        <Label>Name</Label>
-        <l:UndertaleStringReferenceView Reference="{Binding Shader.Name}" />
 
-        <Label>Type</Label>
-        <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleShader+ShaderType}, Converter={StaticResource EnumTypeToValuesConverter}}"
-                  SelectedItem="{Binding Shader.Type}" />
+	<ScrollViewer>
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
+            <Label>Name</Label>
+            <l:UndertaleStringReferenceView Reference="{Binding Shader.Name}" />
 
-        <Label>Version</Label>
-        <TextBox Text="{Binding Shader.Version}" />
+            <Label>Type</Label>
+            <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleShader+ShaderType}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                      SelectedItem="{Binding Shader.Type}" />
 
-        <Label>GLSL ES vertex source</Label>
-        <Expander Header="Code">
-            <l:UndertaleStringReferenceView Reference="{Binding Shader.GLSL_ES_Vertex}" />
-        </Expander>
+            <Label>Version</Label>
+            <TextBox Text="{Binding Shader.Version}" />
 
-        <Label>GLSL ES fragment source</Label>
-        <Expander Header="Code">
-            <l:UndertaleStringReferenceView Reference="{Binding Shader.GLSL_ES_Fragment}" />
-        </Expander>
+            <Label>GLSL ES vertex source</Label>
+            <Expander Header="Code">
+                <l:UndertaleStringReferenceView Reference="{Binding Shader.GLSL_ES_Vertex}" />
+            </Expander>
 
-        <Label>GLSL vertex source</Label>
-        <Expander Header="Code">
-            <l:UndertaleStringReferenceView Reference="{Binding Shader.GLSL_Vertex}" />
-        </Expander>
+            <Label>GLSL ES fragment source</Label>
+            <Expander Header="Code">
+                <l:UndertaleStringReferenceView Reference="{Binding Shader.GLSL_ES_Fragment}" />
+            </Expander>
 
-        <Label>GLSL fragment source</Label>
-        <Expander Header="Code">
-            <l:UndertaleStringReferenceView Reference="{Binding Shader.GLSL_Fragment}" />
-        </Expander>
+            <Label>GLSL vertex source</Label>
+            <Expander Header="Code">
+                <l:UndertaleStringReferenceView Reference="{Binding Shader.GLSL_Vertex}" />
+            </Expander>
 
-        <Label>HLSL9 vertex source</Label>
-        <Expander Header="Code">
-            <l:UndertaleStringReferenceView Reference="{Binding Shader.HLSL9_Vertex}" />
-        </Expander>
+            <Label>GLSL fragment source</Label>
+            <Expander Header="Code">
+                <l:UndertaleStringReferenceView Reference="{Binding Shader.GLSL_Fragment}" />
+            </Expander>
 
-        <Label>HLSL9 fragment source</Label>
-        <Expander Header="Code">
-            <l:UndertaleStringReferenceView Reference="{Binding Shader.HLSL9_Fragment}" />
-        </Expander>
+            <Label>HLSL9 vertex source</Label>
+            <Expander Header="Code">
+                <l:UndertaleStringReferenceView Reference="{Binding Shader.HLSL9_Vertex}" />
+            </Expander>
 
-        <Label>HLSL11 vertex data</Label>
-        <StackPanel Orientation="Horizontal">
-            <Button Command="{Binding ImportRawShaderData}" CommandParameter="HLSL11_VertexData">Import</Button>
-            <Button Command="{Binding ExportRawShaderData}" CommandParameter="HLSL11_VertexData">Export</Button>
-        </StackPanel>
+            <Label>HLSL9 fragment source</Label>
+            <Expander Header="Code">
+                <l:UndertaleStringReferenceView Reference="{Binding Shader.HLSL9_Fragment}" />
+            </Expander>
 
-        <Label>HLSL11 pixel data</Label>
-        <StackPanel Orientation="Horizontal">
-            <Button Command="{Binding ImportRawShaderData}" CommandParameter="HLSL11_PixelData">Import</Button>
-            <Button Command="{Binding ExportRawShaderData}" CommandParameter="HLSL11_PixelData">Export</Button>
-        </StackPanel>
+            <Label>HLSL11 vertex data</Label>
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding ImportRawShaderData}" CommandParameter="HLSL11_VertexData">Import</Button>
+                <Button Command="{Binding ExportRawShaderData}" CommandParameter="HLSL11_VertexData">Export</Button>
+            </StackPanel>
 
-        <Label>PSSL vertex data</Label>
-        <StackPanel Orientation="Horizontal">
-            <Button Command="{Binding ImportRawShaderData}" CommandParameter="PSSL_VertexData">Import</Button>
-            <Button Command="{Binding ExportRawShaderData}" CommandParameter="PSSL_VertexData">Export</Button>
-        </StackPanel>
+            <Label>HLSL11 pixel data</Label>
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding ImportRawShaderData}" CommandParameter="HLSL11_PixelData">Import</Button>
+                <Button Command="{Binding ExportRawShaderData}" CommandParameter="HLSL11_PixelData">Export</Button>
+            </StackPanel>
 
-        <Label>PSSL pixel data</Label>
-        <StackPanel Orientation="Horizontal">
-            <Button Command="{Binding ImportRawShaderData}" CommandParameter="PSSL_PixelData">Import</Button>
-            <Button Command="{Binding ExportRawShaderData}" CommandParameter="PSSL_PixelData">Export</Button>
-        </StackPanel>
+            <Label>PSSL vertex data</Label>
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding ImportRawShaderData}" CommandParameter="PSSL_VertexData">Import</Button>
+                <Button Command="{Binding ExportRawShaderData}" CommandParameter="PSSL_VertexData">Export</Button>
+            </StackPanel>
 
-        <Label>Cg_PSVita vertex data</Label>
-        <StackPanel Orientation="Horizontal">
-            <Button Command="{Binding ImportRawShaderData}" CommandParameter="Cg_PSVita_VertexData">Import</Button>
-            <Button Command="{Binding ExportRawShaderData}" CommandParameter="Cg_PSVita_VertexData">Export</Button>
-        </StackPanel>
+            <Label>PSSL pixel data</Label>
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding ImportRawShaderData}" CommandParameter="PSSL_PixelData">Import</Button>
+                <Button Command="{Binding ExportRawShaderData}" CommandParameter="PSSL_PixelData">Export</Button>
+            </StackPanel>
 
-        <Label>Cg_PSVita pixel data</Label>
-        <StackPanel Orientation="Horizontal">
-            <Button Command="{Binding ImportRawShaderData}" CommandParameter="Cg_PSVita_PixelData">Import</Button>
-            <Button Command="{Binding ExportRawShaderData}" CommandParameter="Cg_PSVita_PixelData">Export</Button>
-        </StackPanel>
+            <Label>Cg_PSVita vertex data</Label>
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding ImportRawShaderData}" CommandParameter="Cg_PSVita_VertexData">Import</Button>
+                <Button Command="{Binding ExportRawShaderData}" CommandParameter="Cg_PSVita_VertexData">Export</Button>
+            </StackPanel>
 
-        <Label>Cg_PS3 vertex data</Label>
-        <StackPanel Orientation="Horizontal">
-            <Button Command="{Binding ImportRawShaderData}" CommandParameter="Cg_PS3_VertexData">Import</Button>
-            <Button Command="{Binding ExportRawShaderData}" CommandParameter="Cg_PS3_VertexData">Export</Button>
-        </StackPanel>
+            <Label>Cg_PSVita pixel data</Label>
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding ImportRawShaderData}" CommandParameter="Cg_PSVita_PixelData">Import</Button>
+                <Button Command="{Binding ExportRawShaderData}" CommandParameter="Cg_PSVita_PixelData">Export</Button>
+            </StackPanel>
 
-        <Label>Cg_PS3 pixel data</Label>
-        <StackPanel Orientation="Horizontal">
-            <Button Command="{Binding ImportRawShaderData}" CommandParameter="Cg_PS3_PixelData">Import</Button>
-            <Button Command="{Binding ExportRawShaderData}" CommandParameter="Cg_PS3_PixelData">Export</Button>
-        </StackPanel>
+            <Label>Cg_PS3 vertex data</Label>
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding ImportRawShaderData}" CommandParameter="Cg_PS3_VertexData">Import</Button>
+                <Button Command="{Binding ExportRawShaderData}" CommandParameter="Cg_PS3_VertexData">Export</Button>
+            </StackPanel>
 
-        <Label>Vertex shader attributes</Label>
-        <l:EditableDataGrid ItemsSource="{Binding Shader.VertexShaderAttributes}" ItemFactory="{Binding CreateVertexShaderAttribute}" HeadersVisibility="None">
-            <l:EditableDataGrid.Columns>
-                <DataGridTemplateColumn Header="Name" Width="1*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="undertalem:UndertaleShader+VertexShaderAttribute">
-                            <l:UndertaleStringReferenceView Reference="{Binding Name}"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </l:EditableDataGrid.Columns>
-        </l:EditableDataGrid>
-    </Grid>
+            <Label>Cg_PS3 pixel data</Label>
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding ImportRawShaderData}" CommandParameter="Cg_PS3_PixelData">Import</Button>
+                <Button Command="{Binding ExportRawShaderData}" CommandParameter="Cg_PS3_PixelData">Export</Button>
+            </StackPanel>
+
+            <Label>Vertex shader attributes</Label>
+            <l:EditableDataGrid ItemsSource="{Binding Shader.VertexShaderAttributes}" ItemFactory="{Binding CreateVertexShaderAttribute}" HeadersVisibility="None">
+                <l:EditableDataGrid.Columns>
+                    <DataGridTemplateColumn Header="Name" Width="1*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="undertalem:UndertaleShader+VertexShaderAttribute">
+                                <l:UndertaleStringReferenceView Reference="{Binding Name}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </l:EditableDataGrid.Columns>
+            </l:EditableDataGrid>
+        </Grid>
+	</ScrollViewer>
 </UserControl>
