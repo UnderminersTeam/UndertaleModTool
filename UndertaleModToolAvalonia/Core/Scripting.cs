@@ -63,7 +63,7 @@ public class Scripting
             if (errors.Any())
             {
                 string message = String.Join("\n", errors);
-                await MainVM.ShowMessageDialog(message, title: "Script compilation error");
+                await MainVM.View!.MessageDialog(message, title: "Script compilation error");
 
                 return null;
             }
@@ -77,11 +77,11 @@ public class Scripting
             }
             catch (ScriptException e)
             {
-                await MainVM.ShowMessageDialog(e.Message, title: "Error from script");
+                await MainVM.View!.MessageDialog(e.Message, title: "Error from script");
             }
             catch (Exception e)
             {
-                await MainVM.ShowMessageDialog(e.ToString(), title: "Script execution error");
+                await MainVM.View!.MessageDialog(e.ToString(), title: "Script execution error");
             }
         }
         finally
@@ -296,7 +296,7 @@ public class ScriptGlobals : IScriptInterface
 
     public void ScriptError(string error, string title = "Error", bool SetConsoleText = true)
     {
-        mainVM.ShowMessageDialog(error, title).WaitOnDispatcherFrame();
+        mainVM.View!.MessageDialog(error, title).WaitOnDispatcherFrame();
 
         if (SetConsoleText)
         {
@@ -312,7 +312,7 @@ public class ScriptGlobals : IScriptInterface
 
     public void ScriptMessage(string message)
     {
-        mainVM.ShowMessageDialog(message, title: "Script message").WaitOnDispatcherFrame();
+        mainVM.View!.MessageDialog(message, title: "Script message").WaitOnDispatcherFrame();
     }
 
     public void ScriptOpenURL(string url)
@@ -322,12 +322,12 @@ public class ScriptGlobals : IScriptInterface
 
     public bool ScriptQuestion(string message)
     {
-        return mainVM.ShowMessageDialog(message, "Script question", ok: false, yes: true, no: true).WaitOnDispatcherFrame() == MessageWindow.Result.Yes;
+        return mainVM.View!.MessageDialog(message, "Script question", ok: false, yes: true, no: true).WaitOnDispatcherFrame() == MessageWindow.Result.Yes;
     }
 
     public void ScriptWarning(string message)
     {
-        mainVM.ShowMessageDialog(message, title: "Script warning").WaitOnDispatcherFrame();
+        mainVM.View!.MessageDialog(message, title: "Script warning").WaitOnDispatcherFrame();
     }
 
     public void SetFinishedMessage(bool isFinishedMessageEnabled)

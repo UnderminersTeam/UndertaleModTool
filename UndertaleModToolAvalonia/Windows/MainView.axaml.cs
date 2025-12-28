@@ -286,7 +286,7 @@ public partial class MainView : UserControl, IView
                 // TODO: Maybe do something about all references to this.
                 UndertaleResource resource = (item.Value as UndertaleResource)!;
 
-                if (await vm.ShowMessageDialog($"Delete {resource}?\nNote that the code often references objects by ID, " +
+                if (await vm.View!.MessageDialog($"Delete {resource}?\nNote that the code often references objects by ID, " +
                     $"so this operation is likely to break stuff because other items will shift up!",
                     ok: false, yes: true, no: true) == MessageWindow.Result.Yes)
                 {

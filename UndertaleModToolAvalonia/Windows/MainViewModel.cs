@@ -77,7 +77,7 @@ public partial class MainViewModel
     [Notify]
     private ObservableCollection<TreeDataGridItem> _TreeDataGridData = [];
 
-    public event Action<string> FilterTextChanged;
+    public event Action<string>? FilterTextChanged;
 
     // Tabs
     public ObservableCollection<TabItemViewModel> Tabs { get; set; }
@@ -121,7 +121,7 @@ public partial class MainViewModel
     {
         foreach (string message in LazyErrorMessages)
         {
-            await ShowMessageDialog(message);
+            await View!.MessageDialog(message);
         }
         LazyErrorMessages.Clear();
 
@@ -139,7 +139,7 @@ public partial class MainViewModel
                 }
                 catch (SystemException e)
                 {
-                    await ShowMessageDialog($"Error opening data file from argument: {e.Message}");
+                    await View!.MessageDialog($"Error opening data file from argument: {e.Message}");
                 }
             }
         }
@@ -272,7 +272,7 @@ public partial class MainViewModel
 
             TreeDataGridData.Add(dataItem);
 
-            // HACK: Dirty! But I don't wanna make a wholte interface for that
+            // HACK: Dirty! But I don't wanna make a whole interface for that
             if (View is MainView mainView)
                 mainView.ExpandItemOnTree(dataItem);
         }
@@ -293,11 +293,6 @@ public partial class MainViewModel
         return name.Contains(text, StringComparison.OrdinalIgnoreCase);
     }
 
-    public async Task<MessageWindow.Result> ShowMessageDialog(string message, string? title = null, bool ok = true, bool yes = false, bool no = false, bool cancel = false)
-    {
-        return await View!.MessageDialog(message, title, ok, yes, no, cancel);
-    }
-
     /// <summary>Ask if user wants to save the current file before continuing.
     /// Returns true if either it saved successfully, or if the user didn't want to save, or if there is no file loaded.</summary>
     public async Task<bool> AskFileSave(string message)
@@ -305,7 +300,7 @@ public partial class MainViewModel
         if (Data is null)
             return true;
 
-        var result = await ShowMessageDialog(message, ok: false, yes: true, no: true, cancel: true);
+        var result = await View!.MessageDialog(message, ok: false, yes: true, no: true, cancel: true);
         if (result == MessageWindow.Result.Yes)
         {
             if (await FileSave())
@@ -361,7 +356,7 @@ public partial class MainViewModel
             if (warnings.Count > 0)
             {
                 w.EnsureShown();
-                await ShowMessageDialog($"Warnings occurred when loading the data file:\n\n" +
+                await View!.MessageDialog($"Warnings occurred when loading the data file:\n\n" +
                     $"{(hadImportantWarnings ? "Data loss will likely occur when trying to save.\n" : "")}" +
                     $"{String.Join("\n", warnings)}");
             }
@@ -375,7 +370,7 @@ public partial class MainViewModel
         catch (Exception e)
         {
             w.EnsureShown();
-            await ShowMessageDialog($"Error opening data file: {e.Message}");
+            await View!.MessageDialog($"Error opening data file: {e.Message}");
 
             return false;
         }
@@ -405,7 +400,7 @@ public partial class MainViewModel
         catch (Exception e)
         {
             w.EnsureShown();
-            await ShowMessageDialog($"Error saving data file: {e.Message}");
+            await View!.MessageDialog($"Error saving data file: {e.Message}");
         }
         finally
         {
@@ -569,13 +564,13 @@ public partial class MainViewModel
 
     public async void HelpAbout()
     {
-        await ShowMessageDialog($"UndertaleModTool v{Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?.?.?.?"} " +
+        await View!.MessageDialog($"UndertaleModTool v{Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?.?.?.?"} " +
             $"by the Underminers team\nLicensed under the GNU General Public License Version 3.", title: "About");
     }
 
     public void SetFilterText(string text)
     {
-        FilterTextChanged.Invoke(text);
+        FilterTextChanged?.Invoke(text);
     }
 
     public async void DataItemAdd(IList list)
@@ -610,7 +605,7 @@ public partial class MainViewModel
 
             if (!IsValidAssetIdentifier(name))
             {
-                await ShowMessageDialog($"Asset name \"{name}\" is not a valid identifier. Only letters, digits and underscore allowed, and it must not start with a digit.");
+                await View!.MessageDialog($"Asset name \"{name}\" is not a valid identifier. Only letters, digits and underscore allowed, and it must not start with a digit.");
                 return;
             }
         }
@@ -619,7 +614,7 @@ public partial class MainViewModel
 
         if (res is UndertaleRoom room)
         {
-            if (await ShowMessageDialog("Add the new room to the end of the room order list?", ok: false, yes: true, no: true) == MessageWindow.Result.Yes)
+            if (await View!.MessageDialog("Add the new room to the end of the room order list?", ok: false, yes: true, no: true) == MessageWindow.Result.Yes)
                 Data.GeneralInfo?.RoomOrder.Add(new(room));
         }
 

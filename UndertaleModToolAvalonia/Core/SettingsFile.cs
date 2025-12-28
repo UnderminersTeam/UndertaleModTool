@@ -96,7 +96,7 @@ public partial class SettingsFile
         }
         catch (Exception e)
         {
-            await MainVM.ShowMessageDialog($"Error when saving settings file: {e.Message}");
+            await MainVM.View!.MessageDialog($"Error when saving settings file: {e.Message}");
         }
     }
 
