@@ -19,14 +19,11 @@ jobs:
             const {owner, repo} = context.repo;
             const run_id = ${{ github.event.workflow_run.id }};
             const pull_head_sha = "${{ github.event.workflow_run.head_sha }}";
-            const test = "${{ github.event.workflow_run.pull_requests }}";
-            const test2 = "${{ github.event.workflow_run.pull_requests[0] }}";
-            const test3 = "${{ github.event.workflow_run.pull_requests[0].number }}";
 
             // hack to get PR number - iterate through all PRs
             const issue_number = await (async () =>
             {
-              const pulls = await github.rest.pulls.list({owner, repo});
+              const pulls = await github.rest.pulls.list.endpoint.merge({owner, repo});
               for await (const {data} of github.paginate.iterator(pulls))
               {
                 for (const pull of data)
