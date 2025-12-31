@@ -12,7 +12,7 @@
         <l:VersionCompareConverter x:Key="VersionCompareConverter" />
     </UserControl.Resources>
 
-	<ScrollViewer>
+    <ScrollViewer>
         <StackPanel Classes="PaddedProperties">
             <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
                 <Label>Name</Label>
@@ -54,5 +54,5 @@
                 </l:EditableDataGrid>
             </Grid>
         </StackPanel>
-	</ScrollViewer>
+    </ScrollViewer>
 </UserControl>

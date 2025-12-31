@@ -78,7 +78,7 @@
                                           TextItemInstanceMenu="{StaticResource TextItemInstanceMenu}" />
         <l:ZoomConverter x:Key="ZoomConverter" />
     </UserControl.Resources>
-	
+    
     <Grid ColumnDefinitions="2*,Auto,5*" RowDefinitions="1*">
         <Grid Grid.Column="0" ColumnDefinitions="1*" RowDefinitions="1*,Auto,1*">
             <Grid Grid.Row="0">
@@ -660,7 +660,7 @@
         <Grid Grid.Column="2" RowDefinitions="Auto,1*">
             <Grid Grid.Row="0" ColumnDefinitions="1*,Auto">
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
-					<Button Command="{Binding SaveAsImage}">Save as image</Button>
+                    <Button Command="{Binding SaveAsImage}">Save as image</Button>
                     <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal">

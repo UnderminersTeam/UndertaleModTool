@@ -11,7 +11,7 @@
         <l:EnumTypeToValuesConverter x:Key="EnumTypeToValuesConverter" />
     </UserControl.Resources>
 
-	<ScrollViewer>
+    <ScrollViewer>
         <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
             <Label>Name</Label>
             <l:UndertaleStringReferenceView Reference="{Binding Variable.Name}" />
@@ -26,5 +26,5 @@
             <Label>Name string ID</Label>
             <TextBox Text="{Binding Variable.NameStringID}" />
         </Grid>
-	</ScrollViewer>
+    </ScrollViewer>
 </UserControl>

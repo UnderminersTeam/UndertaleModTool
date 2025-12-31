@@ -14,7 +14,7 @@
         <l:VersionCompareConverter x:Key="VersionCompareConverter" />
     </UserControl.Resources>
 
-	<ScrollViewer>
+    <ScrollViewer>
         <StackPanel Classes="PaddedProperties">
             <StackPanel IsVisible="{Binding GeneralInfo, Converter={x:Static ObjectConverters.IsNotNull}}">
                 <TextBlock FontWeight="Bold" Text="General info"/>
@@ -219,5 +219,5 @@
                 </Grid>
             </StackPanel>
         </StackPanel>
-	</ScrollViewer>
+    </ScrollViewer>
 </UserControl>

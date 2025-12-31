@@ -11,7 +11,7 @@
         <l:VersionCompareConverter x:Key="VersionCompareConverter" />
     </UserControl.Resources>
 
-	<ScrollViewer>
+    <ScrollViewer>
         <StackPanel>
             <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
                 <Label>Name</Label>
@@ -86,5 +86,5 @@
                 <l:SKImageViewer Image="{Binding Background.Texture}" />
             </ScrollViewer>
         </StackPanel>
-	</ScrollViewer>
+    </ScrollViewer>
 </UserControl>

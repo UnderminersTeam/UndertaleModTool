@@ -10,12 +10,12 @@
         <l:VersionCompareConverter x:Key="VersionCompareConverter" />
     </UserControl.Resources>
 
-	<ScrollViewer>
+    <ScrollViewer>
         <StackPanel>
-			<Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
-				<Label>Scaled</Label>
-				<TextBox Text="{Binding EmbeddedTexture.Scaled}" />
-				
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
+                <Label>Scaled</Label>
+                <TextBox Text="{Binding EmbeddedTexture.Scaled}" />
+                
                 <Label>Size</Label>
                 <Grid ColumnDefinitions="1*,1*">
                     <TextBox Grid.Column="0" Text="{Binding EmbeddedTexture.TextureData.Width}" IsReadOnly="True" />
@@ -32,17 +32,17 @@
             </Grid>
 
             <StackPanel Orientation="Horizontal">
-				<Button Command="{Binding ImportImage}">Import image</Button>
+                <Button Command="{Binding ImportImage}">Import image</Button>
                 <Button Command="{Binding ExportImage}">Export image</Button>
-			    <Button Command="{Binding ExportImageAsPNG}">Export image as PNG</Button>
+                <Button Command="{Binding ExportImageAsPNG}">Export image as PNG</Button>
             </StackPanel>
             
             <!-- TODO: Click on item to open -->
             <!-- TODO: Failed to load message -->
             <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
-						  MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
+                          MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
                 <l:SKImageViewer Image="{Binding EmbeddedTexture.TextureData.Image}" />
             </ScrollViewer>
-		</StackPanel>
+        </StackPanel>
     </ScrollViewer>
 </UserControl>

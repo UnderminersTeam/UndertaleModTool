@@ -7,7 +7,7 @@
         x:Class="UndertaleModToolAvalonia.SearchInCodeWindow"
         x:DataType="l:SearchInCodeViewModel"
         Title="Search in code"
-		IsEnabled="{Binding IsEnabled}"
+        IsEnabled="{Binding IsEnabled}"
         Width="800"
         Height="400"
         Classes="SearchInCodeWindow">

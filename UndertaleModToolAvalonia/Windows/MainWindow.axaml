@@ -60,6 +60,6 @@
         <KeyBinding Gesture="Ctrl+Shift+F" Command="{Binding ToolsSearchInCode}" />
         <KeyBinding Gesture="F1" Command="{Binding HelpAbout}" />
     </Window.KeyBindings>
-    
+
     <l:MainView />
 </Window>

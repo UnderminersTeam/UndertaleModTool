@@ -14,7 +14,7 @@
         <l:VersionCompareConverter x:Key="VersionCompareConverter" />
     </UserControl.Resources>
 
-	<ScrollViewer>
+    <ScrollViewer>
         <StackPanel Classes="PaddedProperties">
             <TextBlock FontWeight="Bold" Text="Game object" />
             <Separator />
@@ -230,5 +230,5 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </StackPanel>
-	</ScrollViewer>
+    </ScrollViewer>
 </UserControl>

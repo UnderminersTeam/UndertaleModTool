@@ -11,7 +11,7 @@
         <l:EnumTypeToValuesConverter x:Key="EnumTypeToValuesConverter" />
     </UserControl.Resources>
 
-	<ScrollViewer>
+    <ScrollViewer>
         <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
             <Label>Name</Label>
             <l:UndertaleStringReferenceView Reference="{Binding Shader.Name}" />
@@ -114,5 +114,5 @@
                 </l:EditableDataGrid.Columns>
             </l:EditableDataGrid>
         </Grid>
-	</ScrollViewer>
+    </ScrollViewer>
 </UserControl>

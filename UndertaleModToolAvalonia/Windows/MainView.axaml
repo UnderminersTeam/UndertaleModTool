@@ -8,7 +8,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="UndertaleModToolAvalonia.MainView"
              x:DataType="l:MainViewModel"
-			 Background="Transparent">
+             Background="Transparent">
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
@@ -37,9 +37,9 @@
                                                   ResourceMenu="{StaticResource ResourceMenu}"/>
     </UserControl.Resources>
 
-	<Interaction.Behaviors>
-		<FilesDropBehavior Command="{Binding OpenDroppedFiles}" />
-	</Interaction.Behaviors>
+    <Interaction.Behaviors>
+        <FilesDropBehavior Command="{Binding OpenDroppedFiles}" />
+    </Interaction.Behaviors>
 
     <DockPanel>
         <NativeMenuBar DockPanel.Dock="Top" />
@@ -62,7 +62,7 @@
 
                 <TreeDataGrid Name="MainTreeDataGrid" Grid.Row="1" ShowColumnHeaders="False" DoubleTapped="TreeDataGrid_DoubleTapped" KeyDown="MainTreeDataGrid_KeyDown">
                     <TreeDataGrid.Styles>
-						<Style Selector="TreeDataGridRow TreeDataGridExpanderCell" x:DataType="l:MainViewModel+TreeDataGridItem">
+                        <Style Selector="TreeDataGridRow TreeDataGridExpanderCell" x:DataType="l:MainViewModel+TreeDataGridItem">
                             <Setter Property="(Interaction.Behaviors)">
                                 <BehaviorCollectionTemplate>
                                     <BehaviorCollection>
@@ -104,7 +104,7 @@
                             <Setter Property="ContextMenu">
                                 <ContextMenu>
                                     <MenuItem Header="Select on list" Click="TabMenu_Select_Click"/>
-									<MenuItem Header="Close tab" Click="TabMenu_Close_Click"/>
+                                    <MenuItem Header="Close tab" Click="TabMenu_Close_Click"/>
                                 </ContextMenu>
                             </Setter>
                         </Style>

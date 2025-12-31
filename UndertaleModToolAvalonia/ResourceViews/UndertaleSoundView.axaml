@@ -7,7 +7,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="UndertaleModToolAvalonia.UndertaleSoundView"
              x:DataType="l:UndertaleSoundViewModel">
-	<ScrollViewer>
+    <ScrollViewer>
         <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
             <Label>Name</Label>
             <l:UndertaleStringReferenceView Reference="{Binding Sound.Name}" />
@@ -42,5 +42,5 @@
 
             <!-- TODO: Audio player -->
         </Grid>
-	</ScrollViewer>
+    </ScrollViewer>
 </UserControl>

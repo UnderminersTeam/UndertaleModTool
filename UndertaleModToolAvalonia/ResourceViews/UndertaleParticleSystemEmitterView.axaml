@@ -14,7 +14,7 @@
         <l:UndertaleColorToColorConverter x:Key="UndertaleColorToColorConverter" />
     </UserControl.Resources>
 
-	<ScrollViewer>
+    <ScrollViewer>
         <StackPanel Classes="PaddedProperties">
             <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
                 <Label>Name</Label>
@@ -222,5 +222,5 @@
                 <TextBox Text="{Binding ParticleSystemEmitter.SpawnOnUpdateCount}" />
             </Grid>
         </StackPanel>
-	</ScrollViewer>
+    </ScrollViewer>
 </UserControl>
