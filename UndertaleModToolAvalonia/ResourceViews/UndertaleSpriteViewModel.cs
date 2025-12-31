@@ -4,6 +4,7 @@ using System.IO;
 using Avalonia.Platform.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using PropertyChanged.SourceGenerator;
+using SkiaSharp;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 
@@ -65,6 +66,67 @@ public partial class UndertaleSpriteViewModel : IUndertaleResourceViewModel
         }
         else
             CollisionMasksSelected = (UndertaleSprite.MaskEntry?)item!;
+    }
+
+    public async void ExportAllTexturesAsPNGs()
+    {
+        string GetFileNameOfTexture(int i) => $"{Sprite.Name.Content}_{i}.png";
+
+        IReadOnlyList<IStorageFolder> folders = await MainVM.View!.OpenFolderDialog(new FolderPickerOpenOptions()
+        {
+            Title = "Export all textures into folder",
+        });
+
+        if (folders.Count != 1)
+            return;
+
+        IStorageFolder folder = folders[0];
+
+        List<string> filesThatAlreadyExist = [];
+        for (int i = 0; i < Sprite.Textures.Count; i++)
+        {
+            var fileName = GetFileNameOfTexture(i);
+            if (await folder.GetFileAsync(fileName) is not null)
+            {
+                filesThatAlreadyExist.Add(fileName);
+            }
+        }
+
+        if (filesThatAlreadyExist.Count > 0)
+        {
+            MessageWindow.Result result = await MainVM.View!.MessageDialog($"The following files already exist. Do you want to replace them?"
+                + $"\n\n{string.Join("\n", filesThatAlreadyExist)}", ok: false, yes: true, cancel: true);
+
+            if (result != MessageWindow.Result.Yes)
+                return;
+        }
+
+        for (int i = 0; i < Sprite.Textures.Count; i++)
+        {
+            var fileName = GetFileNameOfTexture(i);
+            var texture = Sprite.Textures[i].Texture;
+
+            IStorageFile? file = await folder.CreateFileAsync(fileName);
+            if (file is null)
+            {
+                await MainVM.View!.MessageDialog($"Error: Could not create file \"{fileName}\"");
+                return;
+            }
+
+            // TODO: Reuse UndertaleTexturePageItemViewModel.cs code
+            using var stream = await file.OpenWriteAsync();
+
+            var bitmap = new SKBitmap(texture.BoundingWidth, texture.BoundingHeight, SKColorType.Bgra8888, SKAlphaType.Unpremul);
+            var canvas = new SKCanvas(bitmap);
+
+            var op = new SKImageViewer.CustomDrawOperation();
+            op.Image = texture;
+            op.RenderImage(canvas);
+
+            var result = bitmap.Encode(stream, SKEncodedImageFormat.Png, 100);
+            if (!result)
+                throw new InvalidOperationException();
+        }
     }
 
     public async void ImportCollisionMaskData()
