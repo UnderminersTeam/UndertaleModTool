@@ -97,6 +97,23 @@ public class UndertaleRoomEditor : Control
 #if DEBUG
             // Debug text
             Point roomMousePosition = ((mousePosition - Translation) / Scaling);
+
+            static string GetTileInfo(uint? tile)
+            {
+                if (tile is uint tileNN)
+                {
+                    uint tileId = tileNN & 0x0FFFFFFF;
+                    uint tileOrientation = tileNN >> 28;
+
+                    float scaleX = (((tileOrientation >> 0) & 1) == 0) ? 1 : -1;
+                    float scaleY = (((tileOrientation >> 1) & 1) == 0) ? 1 : -1;
+                    float rotate = (((tileOrientation >> 2) & 1) == 0) ? 0 : 90;
+                    return $"id: {tileId} xs: {scaleX} ys: {scaleY} r: {rotate}";
+                }
+
+                return "";
+            }
+
             context.DrawText(new FormattedText(
                 $"mouse: ({mousePosition.X}, {mousePosition.Y}), room: ({Math.Floor(roomMousePosition.X)}, {Math.Floor(roomMousePosition.Y)})\n" +
                 $"view: ({-Translation.X}, {-Translation.Y}, {-Translation.X + Bounds.Width}, {-Translation.Y + Bounds.Height}), zoom: {Scaling}x\n" +
@@ -104,7 +121,7 @@ public class UndertaleRoomEditor : Control
                 $"category: {vm?.CategorySelected}\n" +
                 $"custom render time: <{CustomDrawOperationTime} ms\n" +
                 $"hovered room item: {HoveredRoomItem?.Object}\n" +
-                $"hovered tile: {hoveredTile}",
+                $"hovered tile: {GetTileInfo(hoveredTile)}",
                 CultureInfo.CurrentCulture, FlowDirection.LeftToRight, Typeface.Default, 12, new SolidColorBrush(Colors.White)),
                 new Point(0, 0));
 #endif
@@ -655,6 +672,9 @@ public class UndertaleRoomEditor : Control
         List<SKImage> usedImages = [];
         List<SKImage> currentUsedImages = [];
 
+        readonly List<SKPoint> vertices = [];
+        readonly List<SKPoint> texs = [];
+
         readonly MainViewModel mainVM = App.Services.GetRequiredService<MainViewModel>();
 
         public void RenderRoom()
@@ -838,38 +858,101 @@ public class UndertaleRoomEditor : Control
             if (tilesData.Background is null)
                 return;
 
-            for (int y = 0; y < tilesData.TileData.Length; y++)
-                for (int x = 0; x < tilesData.TileData[y].Length; x++)
+            SKImage? image = mainVM.ImageCache.GetCachedImageFromGMImage(tilesData.Background.Texture.TexturePage.TextureData.Image);
+            if (image is null)
+                return;
+
+            currentUsedImages.Add(image);
+
+            UndertaleBackground background = tilesData.Background;
+            UndertaleTexturePageItem texture = background.Texture;
+
+            uint tileColumns = background.GMS2TileColumns;
+            uint tileW = background.GMS2TileWidth;
+            uint tileH = background.GMS2TileHeight;
+            uint borderX = background.GMS2OutputBorderX;
+            uint borderY = background.GMS2OutputBorderY;
+
+            ushort targetX = texture.TargetX;
+            ushort targetY = texture.TargetY;
+            ushort sourceX = texture.SourceX;
+            ushort sourceY = texture.SourceY;
+
+            uint[][] tileData = tilesData.TileData;
+
+            vertices.Clear();
+            texs.Clear();
+
+            static void AddQuad(List<SKPoint> list, float x1, float y1, float x2, float y2, uint transform)
+            {
+                // Flip X
+                if ((transform & 1) != 0)
+                    (x1, x2) = (x2, x1);
+
+                // Flip Y
+                if (((transform >> 1) & 1) != 0)
+                    (y1, y2) = (y2, y1);
+
+                SKPoint topLeft;
+                SKPoint bottomLeft;
+                SKPoint topRight;
+                SKPoint bottomRight;
+
+                // Rotate 90 degrees clockwise
+                if (((transform >> 2) & 1) == 0)
                 {
-                    uint tile = tilesData.TileData[y][x];
+                    topLeft = new SKPoint(x1, y1);
+                    bottomLeft = new SKPoint(x1, y2);
+                    topRight = new SKPoint(x2, y1);
+                    bottomRight = new SKPoint(x2, y2);
+                }
+                else
+                {
+                    topLeft = new SKPoint(x1, y2);
+                    bottomLeft = new SKPoint(x2, y2);
+                    topRight = new SKPoint(x1, y1);
+                    bottomRight = new SKPoint(x2, y1);
+                }
+
+                list.Add(topLeft);
+                list.Add(bottomLeft);
+                list.Add(topRight);
+
+                list.Add(topRight);
+                list.Add(bottomLeft);
+                list.Add(bottomRight);
+            }
+
+            for (int y = 0; y < tileData.Length; y++)
+                for (int x = 0; x < tileData[y].Length; x++)
+                {
+                    uint tile = tileData[y][x];
                     uint tileId = tile & 0x0FFFFFFF;
-                    uint tileOrientation = tile >> 28;
-
-                    float scaleX = (((tileOrientation >> 0) & 1) == 0) ? 1 : -1;
-                    float scaleY = (((tileOrientation >> 1) & 1) == 0) ? 1 : -1;
-                    float rotate = (((tileOrientation >> 2) & 1) == 0) ? 0 : 90;
-
-                    float posX = (x * tilesData.Background.GMS2TileWidth) + tilesData.Background.Texture.TargetX;
-                    float posY = (y * tilesData.Background.GMS2TileHeight) + tilesData.Background.Texture.TargetY;
-                    float centerX = posX + ((float)tilesData.Background.GMS2TileWidth / 2);
-                    float centerY = posY + ((float)tilesData.Background.GMS2TileHeight / 2);
 
                     if (tileId != 0)
                     {
-                        SKImage? image = mainVM.ImageCache.GetCachedImageFromLayerTile(tilesData, tileId);
-                        if (image is null)
-                            continue;
+                        uint tileOrientation = tile >> 28;
 
-                        currentUsedImages.Add(image);
+                        float posX = (x * tileW) + targetX;
+                        float posY = (y * tileH) + targetY;
 
-                        Canvas.Save();
-                        Canvas.Translate(layer.XOffset, layer.YOffset);
-                        Canvas.RotateDegrees(rotate, centerX, centerY);
-                        Canvas.Scale(scaleX, scaleY, centerX, centerY);
-                        Canvas.DrawImage(image, posX, posY);
-                        Canvas.Restore();
+                        uint tileX = tileId % tileColumns;
+                        uint tileY = tileId / tileColumns;
+
+                        float xx = sourceX + (tileX * (tileW + borderX * 2) + borderX);
+                        float yy = sourceY + (tileY * (tileH + borderY * 2) + borderY);
+
+                        AddQuad(texs, xx, yy, xx + tileW, yy + tileH, tileOrientation);
+                        AddQuad(vertices, posX, posY, posX + tileW, posY + tileH, 0);
                     }
                 }
+
+            SKShader shader = SKShader.CreateImage(image);
+
+            Canvas.Save();
+            Canvas.Translate(layer.XOffset, layer.YOffset);
+            Canvas.DrawVertices(SKVertexMode.Triangles, vertices.ToArray(), texs.ToArray(), null, new SKPaint() { Shader = shader });
+            Canvas.Restore();
         }
 
         void RenderSprite(UndertaleRoom.SpriteInstance roomSprite, UndertaleRoom.Layer layer)
