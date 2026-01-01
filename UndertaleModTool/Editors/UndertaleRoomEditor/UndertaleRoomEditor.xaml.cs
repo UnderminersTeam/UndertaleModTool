@@ -692,6 +692,7 @@ namespace UndertaleModTool
                 var newPartSysInst = new ParticleSystemInstance
                 {
                     Name = ParticleSystemInstance.GenerateRandomName(mainWindow.Data),
+                    InstanceID = ++mainWindow.Data.LastParticleSystemInstanceID,
                     ParticleSystem = partSysInst.ParticleSystem,
                     X = (int)pos.X,
                     Y = (int)pos.Y,
@@ -699,7 +700,6 @@ namespace UndertaleModTool
                     ScaleY = partSysInst.ScaleY,
                     Color = partSysInst.Color,
                     Rotation = partSysInst.Rotation
-                    // FIXME: InstanceID
                 };
 
                 newObj = newPartSysInst;

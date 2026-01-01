@@ -1306,7 +1306,7 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
             }
 
             /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
-            public new static uint UnserializeChildObjectCount(UndertaleReader reader)
+            public static uint UnserializeChildObjectCount(UndertaleReader reader)
             {
                 reader.Position += 16;
                 

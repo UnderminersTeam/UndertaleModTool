@@ -161,7 +161,7 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
     public UndertaleYYSWF YYSWF { get => _YYSWF; set { _YYSWF = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(YYSWF))); } }
 
     public int VectorVersion { get; set; }
-    public UndertaleSimpleList<UndertaleVectorShapeData> VectorShapes { get; set; }
+    public UndertaleObservableList<UndertaleVectorShapeData> VectorShapes { get; set; }
     public int VectorCollisionMaskWidth { get; set; }
     public int VectorCollisionMaskHeight { get; set; }
     public UndertaleObservableList<byte[]> VectorCollisionMaskRLEData { get; set; }
@@ -201,10 +201,9 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
         _YYSWF = null;
         V2Sequence = null;
         V3NineSlice = null;
-        // FIXME: verify correctness of this
-        VectorShapes = new();
+        VectorShapes = null;
         VectorCollisionMaskRLEData = null;
-        VectorFrameToShapeMap = new();
+        VectorFrameToShapeMap = null;
     }
 
     /// <summary>
@@ -443,7 +442,11 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                         {
                             writer.Write(n);
                         }
-                        writer.WriteUndertaleObject(VectorShapes);
+                        writer.Write(VectorShapes.Count);
+                        foreach (var s in VectorShapes)
+                        {
+                            writer.WriteUndertaleObject(s);
+                        }
                     }
                     else
                     {
@@ -452,10 +455,10 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                     }
 
                     writer.Write(VectorCollisionMaskRLEData.Count);
+                    writer.Write(VectorCollisionMaskWidth);
+                    writer.Write(VectorCollisionMaskHeight);
                     if (VectorCollisionMaskRLEData.Count > 0)
                     {
-                        writer.Write(VectorCollisionMaskWidth);
-                        writer.Write(VectorCollisionMaskHeight);
                         if (VectorVersion <= 3)
                         {
                             DebugUtil.Assert(VectorCollisionMaskRLEData.Count == 1, "There must be only 1 vector collision mask before vector version 4");
@@ -466,12 +469,6 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                             writer.Write(data);
                             writer.Align(4);
                         }
-                    }
-                    else
-                    {
-                        writer.Write(0);
-                        writer.Write(0);
-                        writer.Write(0);
                     }
 
                     break;
@@ -682,13 +679,19 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
 
                     if (VectorVersion >= 4)
                     {
-                        VectorFrameToShapeMap = new(reader.ReadInt32());
-                        for (var i = 0; i < VectorFrameToShapeMap.Count; i++)
+                        int mapCount = reader.ReadInt32();
+                        VectorFrameToShapeMap = new(mapCount);
+                        for (int i = 0; i < mapCount; i++)
                         {
                             VectorFrameToShapeMap.InternalAdd(reader.ReadInt32());
                         }
 
-                        VectorShapes = reader.ReadUndertaleObjectNoPool<UndertaleSimpleList<UndertaleVectorShapeData>>();
+                        int shapeCount = reader.ReadInt32();
+                        VectorShapes = new(shapeCount);
+                        for (int i = 0; i < shapeCount; i++)
+                        {
+                            VectorShapes.InternalAdd(reader.ReadUndertaleObjectNoPool<UndertaleVectorShapeData>());
+                        }
                     }
                     else
                     {
@@ -699,16 +702,12 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                     int collisionMaskCount = VectorVersion >= 4 ? reader.ReadInt32() : (reader.ReadBoolean() ? 1 : 0);
                     VectorCollisionMaskWidth = reader.ReadInt32();
                     VectorCollisionMaskHeight = reader.ReadInt32();
-                    VectorCollisionMaskRLEData = new();
-                    if (collisionMaskCount > 0)
+                    VectorCollisionMaskRLEData = new(collisionMaskCount);
+                    for (int i = 0; i < collisionMaskCount; i++)
                     {
-                        VectorCollisionMaskRLEData.SetCapacity(collisionMaskCount);
-                        for (var i = 0; i < VectorCollisionMaskRLEData.Count; i++)
-                        {
-                            int dataLength = reader.ReadInt32();
-                            VectorCollisionMaskRLEData.Add(reader.ReadBytes(dataLength));
-                            reader.Align(4);
-                        }
+                        int dataLength = reader.ReadInt32();
+                        VectorCollisionMaskRLEData.InternalAdd(reader.ReadBytes(dataLength));
+                        reader.Align(4);
                     }
 
                     break;
@@ -787,8 +786,12 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                     if (swfVersion == 8)
                         count += 1 + UndertaleSimpleList<TextureEntry>.UnserializeChildObjectCount(reader);
 
-                    // "YYSWF" classes are not in the pool
-                    return count;
+                    // If we have a sequence, jump directly to its offset (not worth parsing effort to count everything not included in the pool)
+                    if (sequenceOffset != 0)
+                    {
+                        reader.AbsPosition = sequenceOffset;
+                    }
+                    break;
 
                 case SpriteType.Spine:
                 {
@@ -830,9 +833,15 @@ public class UndertaleSprite : UndertaleNamedResource, PrePaddedObject, INotifyP
                 }
                     break;
 
-                case SpriteType.Vector: // FIXME: 2024.14 stuff
+                case SpriteType.Vector:
                     reader.Position += 4; // skip version
                     count += 1 + UndertaleSimpleList<TextureEntry>.UnserializeChildObjectCount(reader);
+
+                    // If we have a sequence, jump directly to its offset (not worth parsing effort to count everything not included in the pool)
+                    if (sequenceOffset != 0)
+                    {
+                        reader.AbsPosition = sequenceOffset;
+                    }
                     break;
             }
 

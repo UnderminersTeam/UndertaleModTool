@@ -23,30 +23,37 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         /// Start the game as fullscreen.
         /// </summary>
         Fullscreen = 0x0001,
+
         /// <summary>
         /// Use synchronization to avoid tearing.
         /// </summary>
         SyncVertex1 = 0x0002,
+
         /// <summary>
         /// Use synchronization to avoid tearing. TODO: difference?
         /// </summary>
         SyncVertex2 = 0x0004,
+
         /// <summary>
         /// Interpolate colours between pixels.
         /// </summary>
         Interpolate = 0x0008,
+
         /// <summary>
         /// Keep aspect ratio during scaling.
         /// </summary>
         Scale = 0x0010,
+
         /// <summary>
         /// Display mouse cursor.
         /// </summary>
         ShowCursor = 0x0020,
+
         /// <summary>
         /// Allows window to be resized.
         /// </summary>
         Sizeable = 0x0040,
+
         /// <summary>
         /// Allows fullscreen switching TODO: ???
         /// </summary>
@@ -61,6 +68,7 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         /// studioVersion = (infoFlags &amp; InfoFlags.StudioVersionMask) >> 9
         /// </summary>
         StudioVersionMask = 0x0E00,
+
         /// <summary>
         /// Whether Steam (or the YoYoPlayer) is enabled.
         /// </summary>
@@ -75,6 +83,7 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         /// Whether the game supports borderless window
         /// </summary>
         BorderlessWindow = 0x4000,
+
         /// <summary>
         /// Tells the runner to run Javascript code
         /// </summary>
@@ -85,10 +94,16 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         /// <summary>
         /// This flag is set when a game is launched from the Gamemaker Studio 2 IDE using the 'Run' or 'Debug' options
         /// </summary>
-        GameRunFromGMS2IDE = 0x20000, //0x10000
+        GameRunFromGMS2IDE = 0x20000,
 
-        // TODO
-        //TransparentBackground = 0x20000,
+        /// <summary>
+        /// For the GX.games runner, allows the browser canvas to be transparent where nothing is drawn.
+        /// </summary>
+        TransparentBackground = 0x20000,
+
+        /// <summary>
+        /// For the Windows runner, reverts the swapchain to an older/legacy swap effect.
+        /// </summary>
         WindowsD3DSwapEffectDiscard = 0x40000
     }
 
@@ -339,8 +354,6 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     public static (uint, uint, uint, uint, BranchType) TestForCommonGMSVersions(UndertaleReader reader,
                                                                     (uint, uint, uint, uint, BranchType) readVersion)
     {
-        return (2024, 14, 1, 0, BranchType.Post2022_0);
-
         (uint Major, uint Minor, uint Release, uint Build, BranchType Branch) detectedVer = readVersion;
 
         // Some GMS2+ version detection. The rest is spread around, mostly in UndertaleChunks.cs

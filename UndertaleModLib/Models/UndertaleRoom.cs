@@ -2578,7 +2578,15 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         {
             Name = reader.ReadUndertaleString();
             if (reader.undertaleData.IsVersionAtLeast(2024, 14))
+            {
                 InstanceID = reader.ReadInt32();
+
+                // Track the last ID (it's not stored elsewhere...)
+                if (InstanceID > reader.undertaleData.LastParticleSystemInstanceID)
+                {
+                    reader.undertaleData.LastParticleSystemInstanceID = InstanceID;
+                }
+            }
             _particleSys.Unserialize(reader);
             X = reader.ReadInt32();
             Y = reader.ReadInt32();
@@ -2590,7 +2598,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         
         
         /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
-        public new static uint UnserializeChildObjectCount(UndertaleReader reader)
+        public static uint UnserializeChildObjectCount(UndertaleReader reader)
         {
             reader.Position += 32;
                 
@@ -2725,7 +2733,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         }
 
         /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
-        public new static uint UnserializeChildObjectCount(UndertaleReader reader)
+        public static uint UnserializeChildObjectCount(UndertaleReader reader)
         {
             reader.Position += 68;
                 
