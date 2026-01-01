@@ -528,7 +528,8 @@ namespace UndertaleModTool
                         ScaleX = other.ScaleX,
                         ScaleY = other.ScaleY,
                         Color = other.Color,
-                        Rotation = other.Rotation
+                        Rotation = other.Rotation,
+                        InstanceID = other.InstanceID
                     };
                     undoStack.Push(undoObj);
                     hotpointX = mousePos.X - other.X;
@@ -691,6 +692,7 @@ namespace UndertaleModTool
                 var newPartSysInst = new ParticleSystemInstance
                 {
                     Name = ParticleSystemInstance.GenerateRandomName(mainWindow.Data),
+                    InstanceID = ++mainWindow.Data.LastParticleSystemInstanceID,
                     ParticleSystem = partSysInst.ParticleSystem,
                     X = (int)pos.X,
                     Y = (int)pos.Y,

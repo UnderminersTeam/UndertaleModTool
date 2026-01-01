@@ -1175,6 +1175,11 @@
 
                             <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Rotation</TextBlock>
                             <local:TextBoxDark Grid.Row="5" Grid.Column="2" Margin="3" Text="{Binding Rotation}"/>
+
+                            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3" Text="Instance ID"
+                                       Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter},ConverterParameter=2024.14}"/>
+                            <local:TextBoxDark Grid.Row="6" Grid.Column="2" Margin="3" Text="{Binding InstanceID}"
+                                               Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter},ConverterParameter=2024.14}"/>
                         </Grid>
                     </DataTemplate>
                 </ContentControl.Resources>
