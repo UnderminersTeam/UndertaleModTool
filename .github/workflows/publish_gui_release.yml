@@ -21,13 +21,13 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         submodules: true
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: 10.0.x
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
@@ -46,7 +46,7 @@ jobs:
       run: |
         7z a -tzip GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip ./${{ matrix.os }}/* -mx0 
     - name: Upload artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
           name: GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}
           path: GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip
@@ -70,13 +70,13 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         submodules: true
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: 10.0.x
     - name: Restore dependencies
       run: dotnet restore UndertaleModCli
     - name: Build
@@ -94,7 +94,7 @@ jobs:
       run: |
         7z a -tzip CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}.zip ./CLI-${{ matrix.os }}/* -mx0 
     - name: Upload artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
           name: CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}
           path: CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}.zip

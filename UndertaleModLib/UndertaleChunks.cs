@@ -1598,6 +1598,7 @@ namespace UndertaleModLib
                     {
                         reader.SubmitWarning("Missing expected TPAG padding");
                         reader.Position--;
+                        break;
                     }
                 }
             }

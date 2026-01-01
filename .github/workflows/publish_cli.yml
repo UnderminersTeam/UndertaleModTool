@@ -25,13 +25,13 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         submodules: true
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: 10.0.x
     - name: Restore dependencies
       run: dotnet restore UndertaleModCli
     - name: Build
@@ -46,7 +46,7 @@ jobs:
         cp -r ./UndertaleModLib/GameSpecificData/ ./CLI-${{ matrix.os }}/GameSpecificData/
         cp -r ./UndertaleModTool/Scripts/ ./CLI-${{ matrix.os }}/Scripts/
     - name: Upload ${{ matrix.os }} CLI
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: CLI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}
         path: CLI-${{ matrix.os }}

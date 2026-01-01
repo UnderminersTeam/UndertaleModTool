@@ -12,12 +12,12 @@ Heya. I heard you like digging deep into GameMaker games like Undertale/Deltarun
 # Downloads
 
 Both the latest stable release and the most cutting edge version can be downloaded from the table below!
-Note, that you can update to the bleeding edge releases at any time from within the settings menu of UndertaleModTool.  
+Note, that you can update to the nightly releases at any time from within the settings menu of UndertaleModTool.  
 
 | Releases 	| Status 	|
 |:---:	|----------	|
 | Stable 	| [![Latest Stable Release](https://img.shields.io/github/downloads/UnderminersTeam/UndertaleModTool/0.8.3.0/total)](https://github.com/UnderminersTeam/UndertaleModTool/releases/tag/0.8.3.0) |
-| Bleeding edge 	| [![Latest Bleeding Edge](https://img.shields.io/github/downloads/UnderminersTeam/UndertaleModTool/bleeding-edge/total)](https://github.com/UnderminersTeam/UndertaleModTool/releases/tag/bleeding-edge) |
+| Nightly 	| [![Latest Nightly](https://img.shields.io/github/downloads/UnderminersTeam/UndertaleModTool/nightly/total)](https://github.com/UnderminersTeam/UndertaleModTool/releases/tag/nightly) |
 
 It's worth noting that UndertaleModTool has different builds per release. The differences are as follows:
 

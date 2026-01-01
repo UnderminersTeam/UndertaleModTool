@@ -4413,6 +4413,10 @@ public class BuiltinList : IBuiltins
         {
             GlobalNotArray["font_texture_page_size"] = new VariableInfo("font_texture_page_size", true, true);
         }
+        if (data?.IsVersionAtLeast(2022, 11) == true)
+        {
+            GlobalNotArray["audio_bus_main"] = new VariableInfo("audio_bus_main", true, true);
+        }
         GlobalNotArray["os_type"] = new VariableInfo("os_type", true, false);
         GlobalNotArray["os_device"] = new VariableInfo("os_device", true, false);
         GlobalNotArray["os_version"] = new VariableInfo("os_version", true, false);
