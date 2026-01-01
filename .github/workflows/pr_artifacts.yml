@@ -13,17 +13,17 @@ jobs:
     if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v6
+      - uses: actions/github-script@v8
         with:
           script: |
             const {owner, repo} = context.repo;
-            const run_id = ${{github.event.workflow_run.id}};
-            const pull_head_sha = "${{github.event.workflow_run.head_sha}}";
+            const run_id = ${{ github.event.workflow_run.id }};
+            const pull_head_sha = "${{ github.event.workflow_run.head_sha }}";
 
             // hack to get PR number - iterate through all PRs
             const issue_number = await (async () =>
             {
-              const pulls = await github.rest.pulls.list({owner, repo});
+              const pulls = await github.rest.pulls.list.endpoint.merge({owner, repo});
               for await (const {data} of github.paginate.iterator(pulls))
               {
                 for (const pull of data)

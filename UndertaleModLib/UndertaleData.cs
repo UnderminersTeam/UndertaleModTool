@@ -325,6 +325,14 @@ namespace UndertaleModLib
         public bool ArrayCopyOnWrite = false;
 
         /// <summary>
+        /// The last room particle system instance ID of the data file (incrementing).
+        /// </summary>
+        /// <remarks>
+        /// The first actual usable ID is 8388608.
+        /// </remarks>
+        public int LastParticleSystemInstanceID { get; set; } = 8388607;
+
+        /// <summary>
         /// Some info for the editor to store data on.
         /// </summary>
         public readonly ToolInfo ToolInfo = new ToolInfo();
