@@ -40,8 +40,8 @@ bool GeneralSound_embedSound = false;
 bool GeneralSound_decodeLoad = false;
 bool GeneralSound_needAGRP = false;
 bool manuallySpecifyEverySound = !ScriptQuestion(
-    "Would you like to automatically specify the characteristics of each sound?\n" +
-    "If you select no, you will have to manually specify all sounds.");
+    "Would you like to automatically specify the characteristics of all sounds?\n" +
+    "If you select no, you will have to manually specify each sound.");
 if (!manuallySpecifyEverySound)
 {
     GeneralSound_embedSound = ScriptQuestion("Do you want to keep your OGG files external or internal?\nNo - keep it external\nYes - embed sound into the game (use responsibly!)");
@@ -116,7 +116,7 @@ await Task.Run(() =>
             }
         }
 
-        // Try to find an audiogroup always.
+        // Try to find an audiogroup, if needed.
         if (embedSound && usesAGRP)
         {
             if (manuallySpecifyEverySound)
@@ -127,34 +127,35 @@ await Task.Run(() =>
             {
                 needAGRP = GeneralSound_needAGRP;
             }
-        }
-        if (needAGRP && usesAGRP && embedSound)
-        {
-            audioGroupName = folderName;
-
-            if (audioGroupID == -1)
+            if (needAGRP)
             {
-                // Find the audio group we need.
-                for (int i = 0; i < Data.AudioGroups.Count; i++)
-                {
-                    if (Data.AudioGroups[i]?.Name?.Content == audioGroupName)
-                    {
-                        audioGroupID = i;
-                        break;
-                    }
-                }
-                
-                // Still -1? Create a new one...
+                audioGroupName = folderName;
+
                 if (audioGroupID == -1)
                 {
-                    // Missed assigning a number to a newly created audio group
-                    audioGroupID = Data.AudioGroups.Count;
-                    File.WriteAllBytes(Path.Combine(Path.GetDirectoryName(FilePath), $"audiogroup{audioGroupID}.dat"), Convert.FromBase64String("Rk9STQwAAABBVURPBAAAAAAAAAA="));
-                    UndertaleAudioGroup newAudioGroup = new()
+                    // Find the audio group we need.
+                    for (int i = 0; i < Data.AudioGroups.Count; i++)
                     {
-                        Name = Data.Strings.MakeString(audioGroupName),
-                    };
-                    Data.AudioGroups.Add(newAudioGroup);
+                        if (Data.AudioGroups[i]?.Name?.Content == audioGroupName)
+                        {
+                            audioGroupID = i;
+                            break;
+                        }
+                    }
+
+                    // Still -1? Create a new one...
+                    if (audioGroupID == -1)
+                    {
+                        // Create a new audio group file, with the next available index (ignoring custom paths).
+                        audioGroupID = Data.AudioGroups.Count;
+                        File.WriteAllBytes(Path.Combine(Path.GetDirectoryName(FilePath), $"audiogroup{audioGroupID}.dat"), Convert.FromBase64String("Rk9STQwAAABBVURPBAAAAAAAAAA="));
+
+                        // Add new entry to the data file.
+                        Data.AudioGroups.Add(new UndertaleAudioGroup()
+                        {
+                            Name = Data.Strings.MakeString(audioGroupName)
+                        });
+                    }
                 }
             }
         }
@@ -166,14 +167,45 @@ await Task.Run(() =>
         }
 
         // Create embedded audio entry if required.
-        UndertaleEmbeddedAudio soundData = null;
-        if ((embedSound && !needAGRP) || needAGRP)
+        if (embedSound)
         {
-            soundData = new UndertaleEmbeddedAudio() { Data = File.ReadAllBytes(file) };
-            
-            // There is no need to add sound to data.win if we add it to audiogroup.dat
-            if (!needAGRP)
+            UndertaleEmbeddedAudio soundData = new() { Data = File.ReadAllBytes(file) };
+
+            // Update data file with new embedded audio, or update the sound's external audio group file if needed.
+            if (needAGRP)
             {
+                // Load audiogroup into memory.
+                UndertaleData audioGroupDat;
+                string relativeAudioGroupPath;
+                if (audioGroupID < Data.AudioGroups.Count && Data.AudioGroups[audioGroupID] is UndertaleAudioGroup { Path.Content: string customRelativePath })
+                {
+                    relativeAudioGroupPath = customRelativePath;
+                }
+                else
+                {
+                    relativeAudioGroupPath = $"audiogroup{audioGroupID}.dat";
+                }
+                string audioGroupPath = Path.Combine(Path.GetDirectoryName(FilePath), relativeAudioGroupPath);
+                using (FileStream audioGroupReadStream = new(audioGroupPath, FileMode.Open, FileAccess.Read))
+                {
+                    audioGroupDat = UndertaleIO.Read(audioGroupReadStream);
+                }
+
+                // Add the EmbeddedAudio entry to the audiogroup data.
+                audioGroupDat.EmbeddedAudio.Add(soundData);
+                if (existingSound is not null)
+                {
+                    audioGroupDat.EmbeddedAudio.Remove(existingSound.AudioFile);
+                }
+                audioID = audioGroupDat.EmbeddedAudio.Count - 1;
+
+                // Write audio group back to disk.
+                using FileStream audioGroupWriteStream = new(audioGroupPath, FileMode.Create);
+                UndertaleIO.Write(audioGroupWriteStream, audioGroupDat);
+            }
+            else
+            {
+                // Update data file's embedded audio.
                 Data.EmbeddedAudio.Add(soundData);
                 if (existingSound is not null)
                 {
@@ -181,39 +213,6 @@ await Task.Run(() =>
                 }
                 embAudioID = Data.EmbeddedAudio.Count - 1;
             }
-        }
-
-        // Update external audio group file if required.
-        if (needAGRP)
-        {
-            // Load audiogroup into memory.
-            UndertaleData audioGroupDat;
-            string relativeAudioGroupPath;
-            if (audioGroupID < Data.AudioGroups.Count && Data.AudioGroups[audioGroupID] is UndertaleAudioGroup { Path.Content: string customRelativePath })
-            {
-                relativeAudioGroupPath = customRelativePath;
-            }
-            else
-            {
-                relativeAudioGroupPath = $"audiogroup{audioGroupID}.dat";
-            }
-            string audioGroupPath = Path.Combine(Path.GetDirectoryName(FilePath), relativeAudioGroupPath);
-            using (FileStream audioGroupReadStream = new(audioGroupPath, FileMode.Open, FileAccess.Read))
-            {
-                audioGroupDat = UndertaleIO.Read(audioGroupReadStream);
-            }
-
-            // Add the EmbeddedAudio entry to the audiogroup data.
-            audioGroupDat.EmbeddedAudio.Add(soundData);
-            if (existingSound is not null)
-            {
-                audioGroupDat.EmbeddedAudio.Remove(existingSound.AudioFile);
-            }
-            audioID = audioGroupDat.EmbeddedAudio.Count - 1;
-
-            // Write audio group back to disk.
-            using FileStream audioGroupWriteStream = new(audioGroupPath, FileMode.Create);
-            UndertaleIO.Write(audioGroupWriteStream, audioGroupDat);
         }
 
         // Determine sound flags.
