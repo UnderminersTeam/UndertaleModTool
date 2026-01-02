@@ -29,12 +29,12 @@
                 <Label>Texture</Label>
                 <l:UndertaleResourceReferenceView Reference="{Binding Background.Texture}" ReferenceType="undertalem:UndertaleTexturePageItem" />
             </Grid>
-        
+
             <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties"
                   IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
                   Converter={StaticResource VersionCompareConverter},
                   ConverterParameter=GE2}">
-            
+
                 <Label>Unknown Always 2</Label>
                 <TextBox Text="{Binding Background.GMS2UnknownAlways2}" />
 
@@ -43,7 +43,23 @@
 
                 <Label>Tile Height</Label>
                 <TextBox Text="{Binding Background.GMS2TileHeight}" />
+            </Grid>
 
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties"
+                  IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
+                  Converter={StaticResource VersionCompareConverter},
+                  ConverterParameter=GE2024.14.1}">
+                <Label>Tile Separation X</Label>
+                <TextBox Text="{Binding Background.GMS2TileSeparationX}" />
+
+                <Label>Tile Separation Y</Label>
+                <TextBox Text="{Binding Background.GMS2TileSeparationY}" />
+            </Grid>
+
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties"
+                  IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
+                  Converter={StaticResource VersionCompareConverter},
+                  ConverterParameter=GE2}">
                 <Label>Output Border X</Label>
                 <TextBox Text="{Binding Background.GMS2OutputBorderX}" />
 
@@ -59,8 +75,8 @@
                 <Label>Tile Count</Label>
                 <TextBox Text="{Binding Background.GMS2TileCount}" />
 
-                <Label>Unknown Always Zero</Label>
-                <TextBox Text="{Binding Background.GMS2UnknownAlwaysZero}" />
+                <Label>Exported Sprite Index</Label>
+                <TextBox Text="{Binding Background.GMS2ExportedSpriteIndex}" />
 
                 <Label>Frame Time (microseconds)</Label>
                 <TextBox Text="{Binding Background.GMS2FrameLength}" />

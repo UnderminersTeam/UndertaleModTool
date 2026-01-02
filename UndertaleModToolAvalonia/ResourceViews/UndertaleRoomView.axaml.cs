@@ -331,6 +331,7 @@ public partial class UndertaleRoomView : UserControl
             UndertaleRoom.ParticleSystemInstance particleSystemInstance = new()
             {
                 Name = UndertaleRoom.ParticleSystemInstance.GenerateRandomName(vm.MainVM.Data),
+                InstanceID = ++vm.MainVM.Data!.LastParticleSystemInstanceID,
             };
 
             if (layer.AssetsData.ParticleSystems is not null)
