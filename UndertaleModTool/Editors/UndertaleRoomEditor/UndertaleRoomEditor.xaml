@@ -1175,6 +1175,11 @@
 
                             <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Rotation</TextBlock>
                             <local:TextBoxDark Grid.Row="5" Grid.Column="2" Margin="3" Text="{Binding Rotation}"/>
+
+                            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3" Text="Instance ID"
+                                       Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter},ConverterParameter=2024.14}"/>
+                            <local:TextBoxDark Grid.Row="6" Grid.Column="2" Margin="3" Text="{Binding InstanceID}"
+                                               Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter},ConverterParameter=2024.14}"/>
                         </Grid>
                     </DataTemplate>
                 </ContentControl.Resources>
@@ -1395,7 +1400,11 @@
                                    MouseDown="Rectangle_MouseDown" MouseMove="Rectangle_MouseMove" MouseUp="Rectangle_MouseUp"
                                    Opacity="{Binding Color, Mode=OneWay, Converter={StaticResource ColorToOpacityConverter}}">
                             <Rectangle.RenderTransform>
-                                <TranslateTransform x:Name="transform2_0" X="{Binding X, Mode=OneWay}" Y="{Binding Y, Mode=OneWay}"/>
+                                <TransformGroup>
+                                    <TranslateTransform x:Name="transform2_0" X="{Binding X, Mode=OneWay}" Y="{Binding Y, Mode=OneWay}"/>
+                                    <ScaleTransform ScaleX="{Binding ScaleX, Mode=OneWay}" ScaleY="{Binding ScaleY, Mode=OneWay}"
+                                                    CenterX="{Binding X, Mode=OneWay}" CenterY="{Binding Y, Mode=OneWay}"/>
+                                </TransformGroup>
                             </Rectangle.RenderTransform>
                             <Rectangle.Style>
                                 <Style BasedOn="{StaticResource NearestNeighbor}"/>
