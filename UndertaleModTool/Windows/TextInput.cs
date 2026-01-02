@@ -18,6 +18,8 @@ namespace UndertaleModTool.Windows
         public string Title { get; }
         public bool AllowMultiline { get; }
         public string DefaultValue { get; }
+
+        [DefaultValue("")]
         public string ReturnString { get; set; }
 
         private static Color bgColor = SystemColors.Window;

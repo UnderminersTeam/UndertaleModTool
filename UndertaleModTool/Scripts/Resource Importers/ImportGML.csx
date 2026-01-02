@@ -14,15 +14,13 @@ string importFolder = PromptChooseDirectory();
 if (importFolder == null)
     throw new ScriptException("The import folder was not set.");
 
-string[] dirFiles = Directory.GetFiles(importFolder);
+string[] dirFiles = Directory.GetFiles(importFolder, "*.gml");
 if (dirFiles.Length == 0)
-    throw new ScriptException("The selected folder is empty.");
-else if (!dirFiles.Any(x => x.EndsWith(".gml")))
-    throw new ScriptException("The selected folder doesn't contain any GML file.");
+    throw new ScriptException("The selected folder doesn't contain any GML files.");
 
 // Ask whether they want to link code. If no, will only generate code entry.
 // If yes, will try to add code to objects and scripts depending upon its name
-bool doParse = ScriptQuestion("Do you want to automatically attempt to link imported code?");
+bool doLink = ScriptQuestion("Do you want to automatically attempt to link imported code?");
 
 SetProgressBar(null, "Files", 0, dirFiles.Length);
 StartProgressBarUpdater();
@@ -30,7 +28,10 @@ StartProgressBarUpdater();
 SyncBinding("Strings, Code, CodeLocals, Scripts, GlobalInitScripts, GameObjects, Functions, Variables", true);
 await Task.Run(() =>
 {
-    UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+    UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
+    {
+        AutoCreateAssets = doLink
+    };
     foreach (string file in dirFiles)
     {
         IncrementProgress();

@@ -9,18 +9,18 @@ namespace UndertaleModLib.Models;
 public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
 {
     /// <summary>
-    /// TODO: unknown
+    /// Unused enum: The curve type is set per channel unlike in GMS2 where it is set per animation curve
     /// </summary>
     public enum GraphTypeEnum : uint
     {
         /// <summary>
-        /// Unknown
+        /// Value is never set by the compiler
         /// </summary>
-        Unknown0 = 0,
+        Bezier = 0,
         /// <summary>
-        /// Unknown
+        /// Value is always set by the compiler
         /// </summary>
-        Unknown1 = 1
+        Graph = 1
     }
 
     /// <summary>
@@ -133,8 +133,11 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
             /// <summary>
             /// Creates a smooth progression between points using catmull-rom interpolation.
             /// </summary>
-            Smooth = 1
-            // TODO: What about bezier?
+            Smooth = 1,
+            /// <summary>
+            /// Creates a curved progression by using points as the control points of a 2D Bézier curve.
+            /// </summary>
+            Bezier = 2
         }
 
         /// <inheritdoc />
@@ -146,7 +149,7 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
         public CurveType Curve { get; set; }
         
         /// <summary>
-        /// TODO: document this
+        /// The amount of resolution generated between control points in both Catmull-Rom (smooth) and Bezier interpolation.
         /// </summary>
         public uint Iterations { get; set; }
         
