@@ -12,18 +12,18 @@ Heya. I heard you like digging deep into GameMaker games like Undertale/Deltarun
 # Downloads
 
 Both the latest stable release and the most cutting edge version can be downloaded from the table below!
-Note, that you can update to the nightly releases at any time from within the settings menu of UndertaleModTool.  
+The nightly releases are more likely to contain issues, but have the most recent features and fixes.
 
 | Releases 	| Status 	|
 |:---:	|----------	|
-| Stable 	| [![Latest Stable Release](https://img.shields.io/github/downloads/UnderminersTeam/UndertaleModTool/0.8.3.0/total)](https://github.com/UnderminersTeam/UndertaleModTool/releases/tag/0.8.3.0) |
+| Stable 	| [![Latest Stable Release](https://img.shields.io/github/downloads/UnderminersTeam/UndertaleModTool/latest/total)](https://github.com/UnderminersTeam/UndertaleModTool/releases/latest) |
 | Nightly 	| [![Latest Nightly](https://img.shields.io/github/downloads/UnderminersTeam/UndertaleModTool/nightly/total)](https://github.com/UnderminersTeam/UndertaleModTool/releases/tag/nightly) |
 
 It's worth noting that UndertaleModTool has different builds per release. The differences are as follows:
 
-* `.NET bundled` - bundles the required .NET runtime version needed to run the tool alongside it. All stable releases are .NET bundled, so you don't have to worry about installing the necessary runtime.
 * `Single file` - the tool is only one executable, with all dependencies embedded within it. This does make your folders cleaner, however it also causes some unexpected stability issues.
-* `Non-single File` - all dependencies are not embedded within the executable, but are now located right next to it. Choose this if you don't care about finding the right executable in-between of ~300 dll's, or if the stability issues from the `Single file` build affect you.
+* `Non-single file` - all dependencies are not embedded within the executable, but are now located right next to it. Choose this if you don't care about finding the right executable in-between of ~300 DLL files, or if the stability issues from the `Single file` build affect you.
+* `.NET bundled` - bundles the required .NET runtime version needed to run the tool alongside it. All stable releases are .NET bundled, so you don't have to worry about installing the necessary runtime.
 
 # Main Features
 
