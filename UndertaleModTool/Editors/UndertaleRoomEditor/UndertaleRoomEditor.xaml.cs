@@ -266,7 +266,7 @@ namespace UndertaleModTool
             {
                 ObjectEditor.Content = obj;
 
-                MoveButtonsPanel.IsEnabled = movableTypes.Contains(e.NewValue.GetType());
+                MoveButtonsPanel.IsEnabled = movableTypes.Contains(obj.GetType());
 
                 try
                 {
@@ -1029,8 +1029,9 @@ namespace UndertaleModTool
         /// <summary>
         /// Selects the given object inside the TreeView.
         /// </summary>
-        /// <param name="obj">the object to select.</param>
-        /// <param name="focus">whether to focus on the object after selcting it.</param>
+        /// <param name="obj">The object to select.</param>
+        /// <param name="focus">Whether to focus on the object after selcting it.</param>
+        /// <param name="isInAllGameObjectsList">Whether the object is in the "all game objects" list (room creation order).</param>
         private void SelectObject(UndertaleObject obj, bool focus = true, bool isInAllGameObjectsList = false)
         {
             // TODO: enable virtualizing of RoomObjectsTree and make this method work with it
@@ -1059,10 +1060,9 @@ namespace UndertaleModTool
                     case GameObject gameObj:
                         if ((room.Flags.HasFlag(RoomEntryFlags.IsGMS2) || room.Flags.HasFlag(RoomEntryFlags.IsGM2024_13)) && !isInAllGameObjectsList)
                         {
-                            resLayer = room.Layers.AsParallel()
-                                                    .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
-                                                    .FirstOrDefault(l => l.LayerType is LayerType.Instances
-                                                        && (l.InstancesData.Instances?.Any(x => x.InstanceID == gameObj.InstanceID) ?? false));
+                            resLayer = room.Layers.FirstOrDefault(l => 
+                                l.LayerType is LayerType.Instances && 
+                                (l.InstancesData.Instances?.Any(x => x.InstanceID == gameObj.InstanceID) ?? false));
                             resList = resLayer.InstancesData.Instances;
                             resListView = LayerItems.ItemContainerGenerator.ContainerFromItem(resLayer) as TreeViewItem;
                         }
@@ -1381,11 +1381,6 @@ namespace UndertaleModTool
                 // If the button loses focus it cannot be held
                 MoveItem(selectedObj, 1, false);
             }
-        }
-
-        private void TreeViewMoveButton_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            //
         }
 
         private UndertaleObject copied;
