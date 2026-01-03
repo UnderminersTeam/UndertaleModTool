@@ -125,4 +125,4 @@ jobs:
         files: |
           */*
         body: | 
-          This is an automatically updating **bleeding edge** build of UndertaleModTool. There *will* be bugs! If you encounter any, please make an issue on GitHub or join the Underminers Discord for more help!
+          This is the latest version of UndertaleModTool. Also listed on this page are stable releases, but this is an automatically updating **bleeding edge** build. If you encounter any bugs, please make an issue on GitHub or join the Underminers Discord for help.
