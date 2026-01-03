@@ -2,12 +2,11 @@
 
 [![Underminers Discord](https://img.shields.io/discord/566861759210586112?label=Discord&logo=discord&logoColor=white)](https://discord.gg/hnyMDypMbN) [![GitHub](https://img.shields.io/github/license/UnderminersTeam/UndertaleModTool?logo=github)](https://github.com/UnderminersTeam/UndertaleModTool/blob/master/LICENSE.txt)
 
-(seeing such an amazing tool fills you with DETERMINATION.)
+The most complete tool for modding, decompiling and unpacking Undertale (and other GameMaker games!)
 
-Heya. I heard you like digging deep into GameMaker games like Undertale/Deltarune, so here's a tool just for you!
+> *\* (Seeing such a specialized tool, the culmination of work from many amazing contributors...)*
 
-![Flowey: Now YOU are the GOD of this world.](images/flowey.gif)
-
+> *\* (It fills you with determination.)*
 
 # Downloads
 
@@ -102,3 +101,5 @@ as well as all the other contributors:
 </p>
 
 And of course, special thanks to Toby Fox and the whole Undertale team for making the game(s) ;)
+
+![Flowey: Now YOU are the GOD of this world.](images/flowey.gif)
