@@ -378,10 +378,10 @@
                 <StackPanel Name="MoveButtonsPanel" Margin="1,1,1,1">
                     <local:RepeatButtonDark FontFamily="Marlett" FontSize="14" Content="5" Margin="0,0,0,2"
                                             ToolTip="Move item up (-)" ToolTipService.InitialShowDelay="250"
-                                            Click="TreeViewMoveUpButton_Click" PreviewMouseLeftButtonUp="TreeViewMoveButton_MouseLeftButtonUp"/>
+                                            Click="TreeViewMoveUpButton_Click"/>
                     <local:RepeatButtonDark FontFamily="Marlett" FontSize="14" Content="6"
                                             ToolTip="Move item down (+)" ToolTipService.InitialShowDelay="250"
-                                            Click="TreeViewMoveDownButton_Click" PreviewMouseLeftButtonUp="TreeViewMoveButton_MouseLeftButtonUp"/>
+                                            Click="TreeViewMoveDownButton_Click"/>
                 </StackPanel>
             </Border>
 
