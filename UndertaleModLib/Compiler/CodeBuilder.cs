@@ -17,9 +17,8 @@ internal class CodeBuilder : ICodeBuilder
     // Data being used with this code builder.
     private readonly GlobalDecompileContext _globalContext;
 
-    // Lookups for variables and functions.
+    // Lookup for variables.
     private readonly Dictionary<(UndertaleString, UndertaleInstruction.InstanceType), UndertaleVariable> _variableLookup;
-    private readonly Dictionary<string, UndertaleFunction> _functionLookup;
 
     public CodeBuilder(GlobalDecompileContext globalContext)
     {
@@ -35,15 +34,6 @@ internal class CodeBuilder : ICodeBuilder
                 continue;
             }
             _variableLookup.TryAdd((v.Name, v.InstanceType), v);
-        }
-        IList<UndertaleFunction> functions = _globalContext.Data.Functions;
-        _functionLookup = new(functions.Count);
-        foreach (UndertaleFunction f in functions)
-        {
-            if (f?.Name?.Content is string name)
-            {
-                _functionLookup.TryAdd(name, f);
-            }
         }
     }
 
@@ -324,15 +314,7 @@ internal class CodeBuilder : ICodeBuilder
             }
             else if (_globalContext.Builtins.LookupBuiltinFunction(functionName) is not null)
             {
-                if (_functionLookup.TryGetValue(functionName, out UndertaleFunction existingFunction))
-                {
-                    reference = existingFunction;
-                }
-                else
-                {
-                    reference = _globalContext.Data.Functions.Define(functionName, _globalContext.Data.Strings);
-                    _functionLookup.Add(functionName, reference);
-                }
+                reference = _globalContext.Data.Functions.EnsureDefined(functionName, _globalContext.Data.Strings);
             }
             else if (_globalContext.GlobalFunctions.TryGetFunction(functionName, out IGMFunction function))
             {
@@ -340,15 +322,7 @@ internal class CodeBuilder : ICodeBuilder
             }
             else if (_globalContext.GetScriptId(functionName, out int _))
             {
-                if (_functionLookup.TryGetValue(functionName, out UndertaleFunction existingFunction))
-                {
-                    reference = existingFunction;
-                }
-                else
-                {
-                    reference = _globalContext.Data.Functions.Define(functionName, _globalContext.Data.Strings);
-                    _functionLookup.Add(functionName, reference);
-                }
+                reference = _globalContext.Data.Functions.EnsureDefined(functionName, _globalContext.Data.Strings);
             }
             else
             {
