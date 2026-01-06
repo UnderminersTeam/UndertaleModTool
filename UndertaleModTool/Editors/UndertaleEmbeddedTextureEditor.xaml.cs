@@ -237,7 +237,7 @@ namespace UndertaleModTool
                         mainWindow.ShowWarning("WARNING: Texture page dimensions are not powers of 2. Sprite blurring is very likely in-game.", "Unexpected texture dimensions");
                     }
 
-                    var previousFormat = target.TextureData.Image.Format;
+                    var previousFormat = target.TextureData.Image?.Format;
 
                     // Import image
                     target.TextureData.Image = image;
