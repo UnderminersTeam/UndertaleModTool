@@ -62,7 +62,9 @@ All contributions are welcome! If you find a bug, a data file that does not load
 
 # Compilation Instructions
 
-In order to compile the repo yourself, the `.NET Core 8 SDK` or later is required.
+In order to compile the repo yourself, the `.NET Core 10 SDK` or later is required.
+
+When cloning using Git, make sure to recursively clone submodules (e.g. with `--recurse-submodules`), as a submodule is used for the `Underanalyzer` dependency.
 
 The following projects can be compiled:  
 - `UndertaleModLib`: The core library used by all other projects.
