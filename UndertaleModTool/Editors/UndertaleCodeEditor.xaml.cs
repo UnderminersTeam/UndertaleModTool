@@ -1660,11 +1660,6 @@ namespace UndertaleModTool
             }
         }
 
-        private void Command_Compile(object sender, ExecutedRoutedEventArgs e)
-        {
-
-        }
-
         private void ZoomChange(bool zoomingIn)
         {
             bool fontSizeChanged = false;
