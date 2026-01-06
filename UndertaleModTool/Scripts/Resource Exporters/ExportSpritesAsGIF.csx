@@ -75,6 +75,7 @@ async Task ExtractSprites(string folder, string prefix)
 void ExtractSprite(UndertaleSprite sprite, string folder, TextureWorker worker)
 {
     using MagickImageCollection gif = new();
+    bool anyValidFrames = false;
     for (int picCount = 0; picCount < sprite.Textures.Count; picCount++)
     {
         if (sprite.Textures[picCount]?.Texture != null)
@@ -82,27 +83,32 @@ void ExtractSprite(UndertaleSprite sprite, string folder, TextureWorker worker)
             IMagickImage<byte> image = worker.GetTextureFor(sprite.Textures[picCount].Texture, sprite.Name.Content + " (frame " + picCount + ")", true);
             image.GifDisposeMethod = GifDisposeMethod.Previous;
             // the animation delay unit seems to be 100 per second, not milliseconds (1000 per second)
-            if (sprite.IsSpecialType && Data.IsGameMaker2()) 
+            if (sprite.IsSpecialType && Data.IsGameMaker2())
             {
-                if (sprite.GMS2PlaybackSpeed == 0f) 
+                if (sprite.GMS2PlaybackSpeed == 0f)
                 {
                     image.AnimationDelay = 10;
-                } 
-                else if (sprite.GMS2PlaybackSpeedType is AnimSpeedType.FramesPerGameFrame) 
+                }
+                else if (sprite.GMS2PlaybackSpeedType is AnimSpeedType.FramesPerGameFrame)
                 {
                     image.AnimationDelay = (uint)Math.Max((int)(Math.Round(100f / (sprite.GMS2PlaybackSpeed * Data.GeneralInfo.GMS2FPS))), 1);
-                } 
-                else 
+                }
+                else
                 {
                     image.AnimationDelay = (uint)Math.Max((int)(Math.Round(100 / sprite.GMS2PlaybackSpeed)), 1);
                 }
-            } 
-            else 
+            }
+            else
             {
                 image.AnimationDelay = 3; // 30fps
             }
             gif.Add(image);
+            anyValidFrames = true;
         }
+    }
+    if (!anyValidFrames)
+    {
+        return;
     }
     gif.Optimize();
     gif.Write(Path.Join(folder, sprite.Name.Content + ".gif"));

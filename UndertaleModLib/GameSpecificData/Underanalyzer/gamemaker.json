@@ -296,7 +296,8 @@
         "os_switch": 21,
         "os_ps5": 22,
         "os_gdk": 23,
-        "os_gxgames": 24
+        "os_gxgames": 24,
+        "os_switch2": 25
       },
       "Constant.BlendMode": {
         "bm_complex": -1,
@@ -542,6 +543,32 @@
         "network_config_websocket_protocol": 5,
         "network_config_enable_multicast": 6,
         "network_config_disable_multicast": 7
+      },
+      "Constant.ExternalCallType": {
+        "dll_cdecl": 0,
+        "dll_stdcall": 1
+      },
+      "Constant.ExternalArgumentType": {
+        "ty_real": 0,
+        "ty_string": 1
+      },
+      "Constant.BuiltInTimeSourceType": {
+        "time_source_global": 0,
+        "time_source_game": 1
+      },
+      "Constant.TimeSourceUnitType": {
+        "time_source_units_seconds": 0,
+        "time_source_units_frames": 1
+      },   
+      "Constant.TimeSourceExpiryType": {
+        "time_source_expire_nearest": 0,
+        "time_source_expire_after": 1
+      },
+      "Constant.TimeSourceStateType": {
+        "time_source_state_initial": 0,
+        "time_source_state_active": 1,
+        "time_source_state_paused": 2,
+        "time_source_state_stopped": 3
       }
     },
     "General": {
@@ -870,6 +897,7 @@
       "draw_line_width_color": [ null, null, null, null, null, "Constant.Color", "Constant.Color" ],
       "draw_point_color": [ null, null, "Constant.Color" ],
       "draw_rectangle_color": [ null, null, null, null, "Constant.Color", "Constant.Color", "Constant.Color", "Constant.Color", null ],
+      "draw_triangle_color": [ null, null, null, null, null, null, "Constant.Color", null, null, null ],
       "draw_roundrect_color": [ null, null, null, null, "Constant.Color", "Constant.Color", null ],
       "draw_roundrect_color_ext": [ null, null, null, null, null, null, "Constant.Color", "Constant.Color", null ],
       "draw_set_colour": [ "Constant.Color" ],
@@ -879,6 +907,7 @@
       "draw_line_width_colour": [ null, null, null, null, null, "Constant.Color", "Constant.Color" ],
       "draw_point_colour": [ null, null, "Constant.Color" ],
       "draw_rectangle_colour": [ null, null, null, null, "Constant.Color", "Constant.Color", "Constant.Color", "Constant.Color", null ],
+      "draw_triangle_colour": [ null, null, null, null, null, null, "Constant.Color", null, null, null ],
       "draw_roundrect_colour": [ null, null, null, null, "Constant.Color", "Constant.Color", null ],
       "draw_roundrect_colour_ext": [ null, null, null, null, null, null, "Constant.Color", "Constant.Color", null ],
       "draw_healthbar": [ null, null, null, null, null, "Constant.Color", "Constant.Color", "Constant.Color", null, null, null ],
@@ -931,10 +960,14 @@
       "position_meeting": [ null, null, "Id.InstanceOrObject" ],
       "position_change": [ null, null, "Asset.Object", null ],
       "collision_circle": [ null, null, null, "Id.InstanceOrObject", null, null ],
+      "collision_circle_list": [ null, null, null, "Id.InstanceOrObject", null, null, null, null ],
       "collision_ellipse": [ null, null, null, null, "Id.InstanceOrObject", null, null ],
       "collision_line": [ null, null, null, null, "Id.InstanceOrObject", "Bool", "Bool" ],
+      "collision_line_list": [ null, null, null, null, "Id.InstanceOrObject", "Bool", "Bool", null, null ],
       "collision_point": [ null, null, "Id.InstanceOrObject", null, null ],
+      "collision_point_list": [ null, null, "Id.InstanceOrObject", null, null, null, null ],
       "collision_rectangle": [ null, null, null, null, "Id.InstanceOrObject", null, null ],
+      "collision_rectangle_list": [ null, null, null, null, "Id.InstanceOrObject", null, null, null, null ],
       "mp_linear_step_object": [ null, null, null, "Id.InstanceOrObject" ],
       "mp_linear_path": [ "Asset.Path", null, null, null, null ],
       "mp_linear_path_object": [ "Asset.Path", null, null, null, "Id.InstanceOrObject" ],
@@ -1011,9 +1044,32 @@
       "gpu_set_blendmode": [ "Constant.BlendMode" ],
       "draw_set_blend_mode": [ "Constant.BlendMode" ],
       "gml_Script_draw_set_blend_mode": [ "Constant.BlendMode" ],
-      "gpu_set_blendmode_ext": [ "Constant.BlendMode", "Constant.BlendModeFactor" ],
-      "draw_set_blend_mode_ext": [ "Constant.BlendMode", "Constant.BlendModeFactor" ],
-      "gml_Script_draw_set_blend_mode_ext": [ "Constant.BlendMode", "Constant.BlendModeFactor" ],
+      "gpu_set_blendmode_ext": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Constant.BlendModeFactor", "Constant.BlendModeFactor" ],
+          [
+            {
+              "MacroType": "ArrayInit",
+              "Macro": "Constant.BlendModeFactor"
+            }
+          ]
+        ]
+      },
+      "draw_set_blend_mode_ext": [ "Constant.BlendModeFactor", "Constant.BlendModeFactor" ],
+      "gml_Script_draw_set_blend_mode_ext": [ "Constant.BlendModeFactor", "Constant.BlendModeFactor" ],
+      "gpu_set_blendmode_ext_sepalpha": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Constant.BlendModeFactor", "Constant.BlendModeFactor", "Constant.BlendModeFactor", "Constant.BlendModeFactor" ],
+          [
+            {
+              "MacroType": "ArrayInit",
+              "Macro": "Constant.BlendModeFactor"
+            }
+          ]
+        ]
+      },
       "__view_get": "FunctionArguments.__view_get",
       "__view_set": "FunctionArguments.__view_set",
       "gml_Script___view_get": "FunctionArguments.__view_get",
@@ -1276,11 +1332,75 @@
       "vertex_colour": [ null, "Constant.Color", null ],
       "vertex_format_add_custom": [ "Constant.VertexType", "Constant.VertexUsage" ],
       "ds_exists": [ null, "Constant.DsType" ],
-      "audio_effect_create": [ "Enum.AudioEffectType" ]
+      "audio_effect_create": [ "Enum.AudioEffectType" ],
+      "external_define": {
+        "MacroType": "Union",
+        "Macros": [
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ]
+        ]
+      },
+      "call_later": {
+        "MacroType": "Union",
+        "Macros": [
+          [ null, "Constant.TimeSourceUnitType", null ],
+          [ null, "Constant.TimeSourceUnitType", null, "Bool" ]
+        ]
+      },
+      "time_source_create": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Constant.BuiltInTimeSourceType", null, "Constant.TimeSourceUnitType", null ],
+          [ "Constant.BuiltInTimeSourceType", null, "Constant.TimeSourceUnitType", null, null ],
+          [ "Constant.BuiltInTimeSourceType", null, "Constant.TimeSourceUnitType", null, null, null ],
+          [ "Constant.BuiltInTimeSourceType", null, "Constant.TimeSourceUnitType", null, null, null, "Constant.TimeSourceExpiryType" ]
+        ]
+      },
+      "time_source_destroy": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Constant.BuiltInTimeSourceType" ],
+          [ "Constant.BuiltInTimeSourceType", "Bool" ]
+        ]
+      },
+      "time_source_start": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_stop": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_pause": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_resume": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_reconfigure": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Constant.BuiltInTimeSourceType", null, "Constant.TimeSourceUnitType", null ],
+          [ "Constant.BuiltInTimeSourceType", null, "Constant.TimeSourceUnitType", null, null ],
+          [ "Constant.BuiltInTimeSourceType", null, "Constant.TimeSourceUnitType", null, null, null ],
+          [ "Constant.BuiltInTimeSourceType", null, "Constant.TimeSourceUnitType", null, null, null, "Constant.TimeSourceExpiryType" ]
+        ]
+      },
+      "time_source_reset": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_get_children": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_get_parent": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_get_period": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_get_reps_completed": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_get_reps_remaining": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_get_state": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_get_time_remaining": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_get_units": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_exists": [ "Constant.BuiltInTimeSourceType" ]
     },
     "FunctionReturn": {
       "draw_getpixel": "Constant.Color",
-      "draw_getpixel_ext": "Constant.Color"
+      "draw_getpixel_ext": "Constant.Color",
+      "time_source_get_state": "Constant.TimeSourceStateType",
+      "time_source_get_units": "Constant.TimeSourceUnitType"
     }
   },
   "CodeEntryNames": {

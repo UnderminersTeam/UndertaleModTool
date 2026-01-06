@@ -1,4 +1,4 @@
-﻿using ImageMagick;
+﻿﻿using ImageMagick;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -97,6 +97,8 @@ namespace UndertaleModLib.Util
                 croppedImage.Dispose();
             }
 
+            returnImage.Strip();
+
             return returnImage;
         }
 
@@ -117,6 +119,7 @@ namespace UndertaleModLib.Util
             MagickImage image = new(filePath, settings);
             image.Alpha(AlphaOption.Set);
             image.Format = MagickFormat.Bgra;
+            image.Depth = 8;
             image.SetCompression(CompressionMethod.NoCompression);
             return image;
         }
@@ -226,6 +229,8 @@ namespace UndertaleModLib.Util
                     pixels.SetPixel(x, y, pixelBit ? white : black);
                 }
             }
+
+            image.Strip();
 
             return image;
         }

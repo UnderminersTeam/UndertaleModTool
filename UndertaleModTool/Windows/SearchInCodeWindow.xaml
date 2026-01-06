@@ -15,6 +15,7 @@
             <MenuItem Header="Copy" Command="Copy"/>
             <MenuItem Header="Copy all" Click="MenuItemCopyAll_Click"/>
         </local:ContextMenuDark>
+        <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
     </Window.Resources>
     <DockPanel>
         <StatusBar DockPanel.Dock="Bottom" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
@@ -22,13 +23,34 @@
                 <TextBlock Name="StatusBarTextBlock"></TextBlock>
             </StatusBarItem>
         </StatusBar>
-        <Grid>
-            <UndertaleModTool:TextBoxDark x:Name="SearchTextBox" Margin="10,10,10,0" TextWrapping="Wrap" AcceptsReturn="True" Height="36" VerticalAlignment="Top" VerticalScrollBarVisibility="Auto" PreviewKeyDown="SearchTextBox_PreviewKeyDown"/>
-            <UndertaleModTool:ButtonDark x:Name="SearchButton" Content="Search" Margin="0,51,10,0" VerticalAlignment="Top" Click="SearchButton_Click" HorizontalAlignment="Right" Width="39" IsDefault="True"/>
-            <CheckBox x:Name="CaseSensitiveCheckBox" Content="Case sensitive" HorizontalAlignment="Left" Margin="10,51,0,0" Height="15" VerticalAlignment="Top"/>
-            <CheckBox x:Name="RegexSearchCheckBox" Content="Regex search" HorizontalAlignment="Left" Margin="108,51,0,0" VerticalAlignment="Top"/>
-            <CheckBox x:Name="InAssemblyCheckBox" Content="In assembly" HorizontalAlignment="Left" Margin="204,51,0,0" VerticalAlignment="Top"/>
-            <ListView ItemsSource="{Binding Results}" x:Name="ResultsListView" Margin="10,76,10,10" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}">
+        <Grid Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <UndertaleModTool:TextBoxDark x:Name="SearchTextBox" Grid.Row="0" TextWrapping="Wrap" AcceptsReturn="True" Height="36" VerticalScrollBarVisibility="Auto" PreviewKeyDown="SearchTextBox_PreviewKeyDown"/>
+            <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,5,0,0">
+                <CheckBox Name="CaseSensitiveCheckBox" Content="Case sensitive" Height="15" Margin="0,0,5,0"/>
+                <CheckBox Name="RegexSearchCheckBox" Content="Regex search" Height="15" Margin="0,0,5,0"/>
+                <CheckBox Name="MultilineRegexCheckBox" Content="Multiline regex" Height="15" Margin="0,0,5,0"
+                          Visibility="{Binding IsChecked, ElementName=RegexSearchCheckBox, Converter={StaticResource BoolToVisConverter}}"/>
+                <CheckBox Name="InAssemblyCheckBox" Content="In assembly" Height="15" Margin="0,0,12,0"/>
+            </StackPanel>
+            <Expander Name="FilterByNameExpander" Grid.Row="2" Margin="0,0,0,6" Header="Filter by code name" IsExpanded="False">
+                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                    <UndertaleModTool:TextBoxDark x:Name="NameFilterTextBox" AcceptsReturn="False" Height="18" Width="280" HorizontalAlignment="Left" Margin="0,0,10,0"
+                                                  IsEnabled="{Binding IsExpanded, ElementName=FilterByNameExpander}"/>
+                    <CheckBox Name="NameCaseSensitiveCheckBox" Content="Case sensitive" Height="15" Margin="0,0,5,0" IsEnabled="{Binding IsExpanded, ElementName=FilterByNameExpander}"/>
+                    <CheckBox Name="NameRegexSearchCheckBox" Content="Regex search" Height="15" Margin="0,0,5,0" IsEnabled="{Binding IsExpanded, ElementName=FilterByNameExpander}"/>
+                </StackPanel>
+            </Expander>
+
+            <UndertaleModTool:ButtonDark x:Name="SearchButton" Grid.Row="1" Content="Search" Width="68" Margin="0,5,0,0" FontSize="14"
+                                         Click="SearchButton_Click" HorizontalAlignment="Right" IsDefault="True"/>
+
+            <ListView ItemsSource="{Binding Results}" Name="ResultsListView" Grid.Row="3" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}">
                 <ListView.CommandBindings>
                     <CommandBinding Command="Copy" Executed="CopyCommand_Executed"/>
                 </ListView.CommandBindings>
@@ -43,6 +65,7 @@
                             </Trigger>
                         </Style.Triggers>
                         <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_MouseDoubleClick"/>
+                        <EventSetter Event="PreviewMouseDown" Handler="ListViewItem_PreviewMouseDown"/>
                         <EventSetter Event="KeyDown" Handler="ListViewItem_KeyDown"/>
                         <Setter Property="FontFamily" Value="Consolas"/>
                         <Setter Property="ContextMenu" Value="{StaticResource ListViewItemContextMenu}"/>

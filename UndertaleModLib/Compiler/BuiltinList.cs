@@ -3731,6 +3731,7 @@ public class BuiltinList : IBuiltins
         Constants["os_ps5"] = 22.0;
         Constants["os_gdk"] = 23.0;
         Constants["os_gxgames"] = 24.0;
+        Constants["os_switch2"] = 25.0;
         Constants["os_llvm_win32"] = 65536.0;
         Constants["os_llvm_macosx"] = 65537.0;
         Constants["os_llvm_psp"] = 65538.0;
@@ -4266,6 +4267,19 @@ public class BuiltinList : IBuiltins
         // This one is a special case; it only exports to browser. I don't think this library supports
         // browser at all though, so we'll just assume it's -1. Wouldn't hurt anyway.
         Constants["os_browser"] = -1.0;
+        if (data?.GeneralInfo?.Major >= 2)
+        {
+            Constants["time_source_global"] = 0.0;
+            Constants["time_source_game"] = 1.0;
+            Constants["time_source_units_seconds"] = 0.0;
+            Constants["time_source_units_frames"] = 1.0;
+            Constants["time_source_expire_nearest"] = 0.0;
+            Constants["time_source_expire_after"] = 1.0;
+            Constants["time_source_state_initial"] = 0.0;
+            Constants["time_source_state_active"] = 1.0;
+            Constants["time_source_state_paused"] = 2.0;
+            Constants["time_source_state_stopped"] = 3.0;
+        }
 
         // Moving on to the variables
         GlobalNotArray = new(128);
@@ -4398,6 +4412,10 @@ public class BuiltinList : IBuiltins
         if (data?.GeneralInfo?.Major >= 2)
         {
             GlobalNotArray["font_texture_page_size"] = new VariableInfo("font_texture_page_size", true, true);
+        }
+        if (data?.IsVersionAtLeast(2022, 11) == true)
+        {
+            GlobalNotArray["audio_bus_main"] = new VariableInfo("audio_bus_main", true, true);
         }
         GlobalNotArray["os_type"] = new VariableInfo("os_type", true, false);
         GlobalNotArray["os_device"] = new VariableInfo("os_device", true, false);

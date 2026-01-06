@@ -26,36 +26,42 @@ namespace UndertaleModTool.Windows
     {
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
 
-        bool isCaseSensitive;
-        bool isRegexSearch;
-        bool isInAssembly;
-        string text;
+        private static bool isSearchInProgress = false;
 
-        int progressCount = 0;
-        int resultCount = 0;
+        private bool isCaseSensitive, isRegexSearch, isMultilineRegex, isInAssembly;
+        private string text;
+
+        private int progressCount = 0;
+        private int resultCount = 0;
+
+        private ConcurrentDictionary<string, List<(int, string)>> resultsDict;
+        private ConcurrentBag<string> failedList;
+        private IEnumerable<KeyValuePair<string, List<(int, string)>>> resultsDictSorted;
+        private IEnumerable<string> failedListSorted;
+
+        private Regex keywordRegex, nameRegex;
+        private GlobalDecompileContext decompileContext;
+        private LoaderDialog loaderDialog;
+        private UndertaleCodeEditor.CodeEditorTab editorTab;
 
         public readonly record struct Result(string Code, int LineNumber, string LineText);
 
         public ObservableCollection<Result> Results { get; set; } = new();
 
-        ConcurrentDictionary<string, List<(int, string)>> resultsDict;
-        ConcurrentBag<string> failedList;
-        IEnumerable<KeyValuePair<string, List<(int, string)>>> resultsDictSorted;
-        IEnumerable<string> failedListSorted;
-        
-        Regex keywordRegex;
-
-        GlobalDecompileContext decompileContext;
-
-        LoaderDialog loaderDialog;
-
-        private UndertaleCodeEditor.CodeEditorTab editorTab;
-
-        static bool isSearchInProgress = false;
-
-        public SearchInCodeWindow()
+        public SearchInCodeWindow(string query = null, bool inAssembly = false)
         {
             InitializeComponent();
+
+            if (query is not null)
+            {
+                if (query.Length > 256 || query.Count(x => x == '\n') > 16)
+                    return; // Ignore if the query is longer than 256 characters or 16 lines.
+
+                SearchTextBox.Text = query;
+                SearchTextBox.SelectAll();
+            }
+
+            InAssemblyCheckBox.IsChecked = inAssembly;
         }
 
         private async void SearchButton_Click(object sender, RoutedEventArgs e)
@@ -63,7 +69,7 @@ namespace UndertaleModTool.Windows
             await Search();
         }
 
-        async Task Search()
+        private async Task Search()
         {
             // TODO: Allow this be cancelled, probably make loader inside this window itself.
 
@@ -92,19 +98,74 @@ namespace UndertaleModTool.Windows
 
             isCaseSensitive = CaseSensitiveCheckBox.IsChecked ?? false;
             isRegexSearch = RegexSearchCheckBox.IsChecked ?? false;
+            isMultilineRegex = MultilineRegexCheckBox.IsChecked ?? false;
             isInAssembly = InAssemblyCheckBox.IsChecked ?? false;
+
+            bool filterByName = FilterByNameExpander.IsExpanded;
+            bool nameIsCaseSensitive, nameIsRegex;
+            string name;
+
+            IList<UndertaleCode> codeEntriesToSearch = mainWindow.Data.Code;
 
             if (isRegexSearch)
             {
                 try
                 {
-                    keywordRegex = new(text, isCaseSensitive ? RegexOptions.Compiled : RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                    RegexOptions options = RegexOptions.Compiled;
+                    if (!isCaseSensitive)
+                    {
+                        options |= RegexOptions.IgnoreCase;
+                    }
+                    if (isMultilineRegex)
+                    {
+                        options |= RegexOptions.Multiline;
+                    }
+                    keywordRegex = new(text, options);
                 }
                 catch (ArgumentException e)
                 {
-                    this.ShowError($"Invalid regex: {e.Message}");
+                    this.ShowError($"Invalid Regex: {e.Message}");
                     return;
                 }
+            }
+
+            if (filterByName)
+            {
+                name = NameFilterTextBox.Text;
+                if (!String.IsNullOrEmpty(name))
+                {
+                    nameIsCaseSensitive = NameCaseSensitiveCheckBox.IsChecked ?? false;
+                    nameIsRegex = NameRegexSearchCheckBox.IsChecked ?? false;
+
+                    if (nameIsRegex)
+                    {
+                        try
+                        {
+                            nameRegex = new(name, nameIsCaseSensitive ? RegexOptions.Compiled : RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                            codeEntriesToSearch = mainWindow.Data.Code.Where(c => !String.IsNullOrEmpty(c.Name.Content)
+                                                                                  && nameRegex.IsMatch(c.Name.Content))
+                                                                      .ToList();
+                        }
+                        catch (ArgumentException e)
+                        {
+                            this.ShowError($"Invalid name Regex: {e.Message}");
+                            filterByName = false;
+                        }
+                    }
+                    else
+                    {
+                        var comparison = nameIsCaseSensitive ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase;
+                        codeEntriesToSearch = mainWindow.Data.Code.Where(c => !String.IsNullOrEmpty(c.Name.Content)
+                                                                              && c.Name.Content.Contains(name, comparison))
+                                                                  .ToList();
+                    }
+                }
+            }
+
+            if (codeEntriesToSearch.Count == 0)
+            {
+                this.ShowMessage("There are no code entries that match the name filter.");
+                return;
             }
 
             mainWindow.IsEnabled = false;
@@ -132,9 +193,9 @@ namespace UndertaleModTool.Windows
             }
 
             loaderDialog.SavedStatusText = "Code entries";
-            loaderDialog.Update(null, "Code entries", 0, mainWindow.Data.Code.Count);
+            loaderDialog.Update(null, "Code entries", 0, codeEntriesToSearch.Count);
 
-            await Task.Run(() => Parallel.ForEach(mainWindow.Data.Code, SearchInUndertaleCode));
+            await Task.Run(() => Parallel.ForEach(codeEntriesToSearch, SearchInUndertaleCode));
             await Task.Run(SortResults);
 
             loaderDialog.Maximum = null;
@@ -154,7 +215,7 @@ namespace UndertaleModTool.Windows
             isSearchInProgress = false;
         }
 
-        void SearchInUndertaleCode(UndertaleCode code)
+        private void SearchInUndertaleCode(UndertaleCode code)
         {
             try
             {
@@ -189,7 +250,7 @@ namespace UndertaleModTool.Windows
             return null;
         }
 
-        void SearchInCodeText(string codeName, string codeText)
+        private void SearchInCodeText(string codeName, string codeText)
         {
             List<int> results = new();
 
@@ -234,7 +295,18 @@ namespace UndertaleModTool.Windows
                 int lineEndIndex = codeText.IndexOf('\n', index);
                 lineEndIndex = lineEndIndex == -1 ? codeText.Length : lineEndIndex;
 
-                string lineText = codeText[lineStartIndex..lineEndIndex];
+                string lineText;
+
+                // Limit the displayed line length to 128
+                if (lineEndIndex - lineStartIndex > 128)
+                {
+                    lineEndIndex = lineStartIndex + 128;
+                    lineText = codeText[lineStartIndex..lineEndIndex] + "...";
+                }
+                else
+                {
+                    lineText = codeText[lineStartIndex..lineEndIndex];
+                }
 
                 if (nameWritten == false)
                 {
@@ -247,7 +319,7 @@ namespace UndertaleModTool.Windows
             }
         }
 
-        void SortResults()
+        private void SortResults()
         {
             string[] codeNames = mainWindow.Data.Code.Select(x => x.Name.Content).ToArray();
 
@@ -257,7 +329,17 @@ namespace UndertaleModTool.Windows
 
         public void ShowResults()
         {
-            foreach (var result in resultsDictSorted)
+            static string GetWordEnding(int quantity, bool isResults)
+            {
+                if (isResults)
+                    return quantity != 1 ? "s" : "";
+                
+                return quantity != 1 ? "ies" : "y";
+            }
+
+            var resultsSorted = resultsDictSorted.ToArray();
+            var failedSorted = failedListSorted.ToArray();
+            foreach (var result in resultsSorted)
             {
                 var code = result.Key;
                 foreach (var (lineText, lineNumber) in result.Value)
@@ -266,15 +348,15 @@ namespace UndertaleModTool.Windows
                 }
             }
 
-            string str = $"{resultCount} result{(resultCount != 1 ? "s" : "")} found in {resultsDictSorted.Count()} code entr{(resultsDictSorted.Count() != 1 ? "ies" : "y")}.";
-            if (failedListSorted.Count() > 0)
+            string str = $"{resultCount} result{GetWordEnding(resultCount, true)} found in {resultsSorted.Length} code entr{GetWordEnding(resultsSorted.Length, false)}.";
+            if (failedSorted.Length > 0)
             {
-                str += $" {failedListSorted.Count()} code entr{(failedListSorted.Count() != 1 ? "ies" : "y")} with an error.";
+                str += $" {failedSorted.Length} code entr{GetWordEnding(failedSorted.Length, false)} with an error.";
             }
             StatusBarTextBlock.Text = str;
         }
 
-        void OpenSelectedListViewItem(bool inNewTab=false)
+        private void OpenSelectedListViewItem(bool inNewTab = false, Result resultToOpen = default)
         {
             if (isSearchInProgress)
             {
@@ -282,17 +364,31 @@ namespace UndertaleModTool.Windows
                 return;
             }
 
-            foreach (Result result in ResultsListView.SelectedItems)
+            if (resultToOpen != default)
             {
-                mainWindow.OpenCodeEntry(result.Code, result.LineNumber, editorTab, inNewTab);
-                // Only first one opens in current tab, the rest go into new tabs.
-                inNewTab = true;
+                mainWindow.OpenCodeEntry(resultToOpen.Code, resultToOpen.LineNumber, editorTab, inNewTab);
             }
+            else
+            {
+                foreach (Result result in ResultsListView.SelectedItems)
+                {
+                    mainWindow.OpenCodeEntry(result.Code, result.LineNumber, editorTab, inNewTab);
+                    // Only first one opens in current tab, the rest go into new tabs.
+                    inNewTab = true;
+                }
+            }
+
+            // So it activates the window after it finished processing
+            // (otherwise it doesn't work sometimes)
+            _ = Task.Run(() =>
+            {
+                Dispatcher.Invoke(mainWindow.Activate);
+            });
         }
 
-        void CopyListViewItems(IEnumerable items)
+        private void CopyListViewItems(IEnumerable items)
         {
-            string str = String.Join("\n", items
+            string str = String.Join('\n', items
                 .Cast<Result>()
                 .Select(result => $"{result.Code}\t{result.LineNumber}\t{result.LineText}"));
             try
@@ -312,6 +408,19 @@ namespace UndertaleModTool.Windows
             {
                 e.Handled = true;
                 await Search();
+            }
+        }
+
+        private void ListViewItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ButtonState == MouseButtonState.Pressed
+                && e.ChangedButton == MouseButton.Middle)
+            {
+                if (e.Source is not FrameworkElement elem
+                    || elem.DataContext is not Result res)
+                    return;
+
+                OpenSelectedListViewItem(true, res);  
             }
         }
 

@@ -1,24 +1,21 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using UndertaleModLib;
-using UndertaleModLib.Scripting;
-using UndertaleModLib.Util;
-using static UndertaleModLib.UndertaleReader;
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Builder;
-using System.CommandLine.Parsing;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using UndertaleModLib.Models;
-using Newtonsoft.Json;
+using UndertaleModLib;
 using UndertaleModLib.Compiler;
+using UndertaleModLib.Models;
+using UndertaleModLib.Scripting;
+using UndertaleModLib.Util;
+using static UndertaleModLib.UndertaleReader;
 
 namespace UndertaleModCli;
 
@@ -93,80 +90,147 @@ public partial class Program : IScriptInterface
     /// <returns>Result code of the program.</returns>
     public static int Main(string[] args)
     {
-        var verboseOption = new Option<bool>(new[] { "-v", "--verbose" }, "Detailed logs");
+        Option<bool> verboseOption = new("-v", "--verbose") { Description = "Detailed logs" };
 
-        var dataFileArgument = new Argument<FileInfo>("datafile", "Path to the data.win/.ios/.droid/.unx file");
+        Argument<FileInfo> dataFileArgument = new("datafile")
+        {
+            Description = "Path to the data.win/.ios/.droid/.unx file"
+        };
 
         // Setup new command
-        Command newCommand = new Command("new", "Generates a blank data file")
+        Option<FileInfo> newOutputOption = new("-o", "--output") { DefaultValueFactory = _ => new NewOptions().Output };
+        Option<bool> newOverwriteOption = new("-f", "--overwrite") { Description = "Overwrite destination file if it already exists" };
+        Option<bool> newStdoutOption = new("-", "--stdout") { Description = "Write new data content to stdout" };
+        Command newCommand = new("new", "Generates a blank data file")
         {
-            new Option<FileInfo>(new[] { "-o", "--output" }, () => new NewOptions().Output),
-            new Option<bool>(new[] { "-f", "--overwrite" }, "Overwrite destination file if it already exists"),
-            new Option<bool>(new[] { "-", "--stdout" }, "Write new data content to stdout"), // "-" is often used in *nix land as a replacement for stdout
+            newOutputOption,
+            newOverwriteOption,
+            newStdoutOption, // "-" is often used in *nix land as a replacement for stdout
             verboseOption
         };
-        newCommand.Handler = CommandHandler.Create<NewOptions>(Program.New);
+        newCommand.SetAction(parseResult =>
+        {
+            return New(new NewOptions()
+            {
+                Output = parseResult.GetValue(newOutputOption),
+                Overwrite = parseResult.GetValue(newOverwriteOption),
+                Stdout = parseResult.GetValue(newStdoutOption),
+                Verbose = parseResult.GetValue(verboseOption)
+            });
+        });
 
         // Setup load command
-        var scriptRunnerOption = new Option<FileInfo[]>(new[] { "-s", "--scripts" }, "Scripts to apply to the <datafile>. Ex. a.csx b.csx");
-        Command loadCommand = new Command("load", "Load a data file and perform actions on it")
+        Option<FileInfo[]> scriptRunnerOption = new("-s", "--scripts") { Description = "Scripts to apply to the <datafile>. Ex. a.csx b.csx" };
+        Option<FileInfo> loadOutputOption = new("-o", "--output") { Description = "Where to save the modified data file" };
+        Option<string> loadLineOption = new("-l", "--line") { Description = "Run C# string. Runs AFTER everything else" };
+        Option<bool> loadInteractiveOption = new("-i", "--interactive") { Description = "Interactive menu launch" };
+        Command loadCommand = new("load", "Load a data file and perform actions on it")
         {
             dataFileArgument,
             scriptRunnerOption,
             verboseOption,
-            //TODO: why no force overwrite here, but needed for new?
-            new Option<FileInfo>(new[] { "-o", "--output" }, "Where to save the modified data file"),
-            new Option<string>(new[] { "-l", "--line" }, "Run C# string. Runs AFTER everything else"),
-            //TODO: make interactive another Command
-            new Option<bool>(new[] { "-i", "--interactive" }, "Interactive menu launch")
+            // TODO: why no force overwrite here, but needed for new?
+            loadOutputOption,
+            loadLineOption,
+            // TODO: make interactive another Command
+            loadInteractiveOption
         };
-        loadCommand.Handler = CommandHandler.Create<LoadOptions>(Program.Load);
+        loadCommand.SetAction(parseResult =>
+        {
+            return Load(new LoadOptions()
+            {
+                Datafile = parseResult.GetValue(dataFileArgument),
+                Scripts = parseResult.GetValue(scriptRunnerOption),
+                Line = parseResult.GetValue(loadLineOption),
+                Output = parseResult.GetValue(loadOutputOption),
+                Interactive = parseResult.GetValue(loadInteractiveOption),
+                Verbose = parseResult.GetValue(verboseOption)
+            });
+        });
 
         // Setup info command
-        Command infoCommand = new Command("info", "Show basic info about the game data file") { dataFileArgument, verboseOption };
-        infoCommand.Handler = CommandHandler.Create<InfoOptions>(Program.Info);
+        Command infoCommand = new("info", "Show basic info about the game data file") { dataFileArgument, verboseOption };
+        infoCommand.SetAction(parseResult =>
+        {
+            return Info(new InfoOptions()
+            {
+                Datafile = parseResult.GetValue(dataFileArgument),
+                Verbose = parseResult.GetValue(verboseOption)
+            });
+        });
 
         // Setup dump command
-        Command dumpCommand = new Command("dump", "Dump certain properties about the game data file")
+        Option<DirectoryInfo> dumpOutputOption = new("-o", "--output") { Description = "Where to dump data file properties to. Will default to path of the data file" };
+        Option<string[]> dumpCodeOption = new("-c", "--code")
+        {
+            Description = $"The code files to dump. Ex. gml_Script_init_map gml_Script_reset_map. Specify '{UMT_DUMP_ALL}' to dump all code entries"
+        };
+        Option<bool> dumpStringsOption = new("-s", "--strings") { Description = "Whether to dump all strings" };
+        Option<bool> dumpTexturesOption = new("-t", "--textures") { Description = "Whether to dump all embedded textures" };
+        Command dumpCommand = new("dump", "Dump certain properties about the game data file")
         {
             dataFileArgument,
             verboseOption,
-            new Option<DirectoryInfo>(new[] { "-o", "--output" }, "Where to dump data file properties to. Will default to path of the data file"),
-            new Option<string[]>(new[] { "-c", "--code" },
-                $"The code files to dump. Ex. gml_Script_init_map gml_Script_reset_map. Specify '{UMT_DUMP_ALL}' to dump all code entries"),
-            new Option<bool>(new[] { "-s", "--strings" }, "Whether to dump all strings"),
-            new Option<bool>(new[] { "-t", "--textures" }, "Whether to dump all embedded textures")
+            dumpOutputOption,
+            dumpCodeOption,
+            dumpStringsOption,
+            dumpTexturesOption
         };
-        dumpCommand.Handler = CommandHandler.Create<DumpOptions>(Program.Dump);
+        dumpCommand.SetAction(parseResult =>
+        {
+            return Dump(new DumpOptions()
+            {
+                Datafile = parseResult.GetValue(dataFileArgument),
+                Verbose = parseResult.GetValue(verboseOption),
+                Output = parseResult.GetValue(dumpOutputOption),
+                Code = parseResult.GetValue(dumpCodeOption),
+                Strings = parseResult.GetValue(dumpStringsOption),
+                Textures = parseResult.GetValue(dumpTexturesOption)
+            });
+        });
 
         // Setup replace command
-        Command replaceCommand = new Command("replace", "Replace certain properties in the game data file")
+        Option<FileInfo> replaceOutputOption = new("-o", "--output") { Description = "Where to save the modified data file" };
+        Option<string[]> replaceCodeOption = new("-c", "--code")
+        {
+            Description = $"Which code files to replace with which file. Ex. 'gml_Script_init_map=./newCode.gml'. It is possible to replace everything by using '{UMT_REPLACE_ALL}'"
+        };
+        Option<string[]> replaceTexturesOption = new("-t", "--textures")
+        {
+            Description = $"Which embedded texture entry to replace with which file. Ex. 'Texture 0=./newTexture.png'. It is possible to replace everything by using '{UMT_REPLACE_ALL}'"
+        };
+        Command replaceCommand = new("replace", "Replace certain properties in the game data file")
         {
             dataFileArgument,
             verboseOption,
-            new Option<FileInfo>(new[] { "-o", "--output" }, "Where to save the modified data file"),
-            new Option<string[]>(new[] { "-c", "--code" },
-                $"Which code files to replace with which file. Ex. 'gml_Script_init_map=./newCode.gml'. It is possible to replace everything by using '{UMT_REPLACE_ALL}'"),
-            new Option<string[]>(new[] { "-t", "--textures" },
-                $"Which embedded texture entry to replace with which file. Ex. 'Texture 0=./newTexture.png'. It is possible to replace everything by using '{UMT_REPLACE_ALL}'")
+            replaceOutputOption,
+            replaceCodeOption,
+            replaceTexturesOption
         };
-        replaceCommand.Handler = CommandHandler.Create<ReplaceOptions>(Program.Replace);
+        replaceCommand.SetAction(parseResult =>
+        {
+            return Replace(new ReplaceOptions()
+            {
+                Datafile = parseResult.GetValue(dataFileArgument),
+                Verbose = parseResult.GetValue(verboseOption),
+                Output = parseResult.GetValue(replaceOutputOption),
+                Code = parseResult.GetValue(replaceCodeOption),
+                Textures = parseResult.GetValue(replaceTexturesOption)
+            });
+        });
 
         // Merge everything together
-        RootCommand rootCommand = new RootCommand
-        {
+        RootCommand rootCommand =
+        [
             newCommand,
             loadCommand,
             infoCommand,
             dumpCommand,
             replaceCommand
-        };
+        ];
         rootCommand.Description = "CLI tool for modding, decompiling and unpacking Undertale (and other GameMaker games)!";
-        Parser commandLine = new CommandLineBuilder(rootCommand)
-            .UseDefaults() // automatically configures dotnet-suggest
-            .Build();
-
-        return commandLine.Invoke(args);
+        ParseResult parseResult = rootCommand.Parse(args);
+        return parseResult.Invoke();
     }
 
     public Program(FileInfo datafile, FileInfo[] scripts, FileInfo output, bool verbose = false, bool interactive = false)
