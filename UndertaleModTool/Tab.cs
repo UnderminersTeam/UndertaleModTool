@@ -299,6 +299,13 @@ namespace UndertaleModTool
                 case UndertaleCodeEditor codeEditor:
                     #pragma warning disable CA1416
                     bool isDecompiledOpen = codeEditor.CodeModeTabs.SelectedIndex == 0;
+
+                    if (UndertaleCodeEditor.OverriddenZoomFontSize != 0)
+                    {
+                        codeEditor.DecompiledEditor.FontSize = UndertaleCodeEditor.OverriddenZoomFontSize;
+                        codeEditor.DisassemblyEditor.FontSize = UndertaleCodeEditor.OverriddenZoomFontSize;
+                        UndertaleCodeEditor.OverriddenZoomFontSize = 0;
+                    }
                     
                     var textEditor = codeEditor.DecompiledEditor;
                     (int, int, double) decompCodePos;
@@ -354,7 +361,8 @@ namespace UndertaleModTool
                         DisassemblyCodePosition = disasmCodePos,
                         DecompiledScrollPos = codeEditor.DecompiledEditor.VerticalOffset,
                         DisassemblyScrollPos = codeEditor.DisassemblyEditor.VerticalOffset,
-                        IsDecompiledOpen = isDecompiledOpen
+                        IsDecompiledOpen = isDecompiledOpen,
+                        ZoomFontSize = codeEditor.ZoomFontSize
                     };
                     #pragma warning restore CA1416
                     break;
@@ -916,6 +924,7 @@ namespace UndertaleModTool
 
                 UndertaleCodeEditor.OverriddenDecompPos = codeTabState.DecompiledCodePosition;
                 UndertaleCodeEditor.OverriddenDisasmPos = codeTabState.DisassemblyCodePosition;
+                UndertaleCodeEditor.OverriddenZoomFontSize = codeTabState.ZoomFontSize;
 
                 codeTabState.IsStateRestored = true;
                 #pragma warning restore CA1416
@@ -958,6 +967,9 @@ namespace UndertaleModTool
 
         /// <summary>Whether this state was already restored (applied to the code editor).</summary>
         public bool IsStateRestored;
+
+        /// <summary>The zoom font size of decompiled and disassembled code.</summary>
+        public double ZoomFontSize;
     }
 
     /// <summary>Stores the information about the tab with a room.</summary>

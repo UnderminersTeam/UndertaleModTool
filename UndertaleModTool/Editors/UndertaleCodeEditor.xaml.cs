@@ -72,6 +72,10 @@ namespace UndertaleModTool
         private static readonly Dictionary<string, UndertaleNamedResource> FunctionsDict = new();
         private static readonly Dictionary<string, UndertaleNamedResource> CodeDict = new();
 
+        private static double LastZoomFontSize = 14;
+        public double ZoomFontSize = LastZoomFontSize;
+        public static double OverriddenZoomFontSize = 0;
+
         public enum CodeEditorTab
         {
             Unknown,
@@ -88,6 +92,8 @@ namespace UndertaleModTool
             DecompiledSearchPanel = SearchPanel.Install(DecompiledEditor.TextArea);
             DecompiledSearchPanel.LostFocus += SearchPanel_LostFocus;
             DecompiledSearchPanel.MarkerBrush = new SolidColorBrush(Color.FromRgb(90, 90, 90));
+            DecompiledSearchPanel.FontSize = 14;
+            DecompiledEditor.FontSize = ZoomFontSize;
 
             using (Stream stream = this.GetType().Assembly.GetManifestResourceStream("UndertaleModTool.Resources.GML.xshd"))
             {
@@ -169,6 +175,8 @@ namespace UndertaleModTool
             DisassemblySearchPanel = SearchPanel.Install(DisassemblyEditor.TextArea);
             DisassemblySearchPanel.LostFocus += SearchPanel_LostFocus;
             DisassemblySearchPanel.MarkerBrush = new SolidColorBrush(Color.FromRgb(90, 90, 90));
+            DisassemblySearchPanel.FontSize = 14;
+            DisassemblyEditor.FontSize = ZoomFontSize;
 
             using (Stream stream = this.GetType().Assembly.GetManifestResourceStream("UndertaleModTool.Resources.VMASM.xshd"))
             {
@@ -197,6 +205,7 @@ namespace UndertaleModTool
         {
             OverriddenDecompPos = default;
             OverriddenDisasmPos = default;
+            OverriddenZoomFontSize = 0;
         }
 
         private void SearchPanel_LostFocus(object sender, RoutedEventArgs e)
@@ -363,11 +372,18 @@ namespace UndertaleModTool
             else
                 CodeModeTabs.SelectedItem = DisassemblyTab;
 
+            ZoomFontSize = tabState.ZoomFontSize;
+            LastZoomFontSize = ZoomFontSize;
+
             TextEditor textEditor = DecompiledEditor;
+            textEditor.FontSize = ZoomFontSize;
+            textEditor.UpdateLayout();
             (int linePos, int columnPos, double scrollPos) = tabState.DecompiledCodePosition;
             RestoreCaretPosition(textEditor, linePos, columnPos, scrollPos);
 
             textEditor = DisassemblyEditor;
+            textEditor.FontSize = ZoomFontSize;
+            textEditor.UpdateLayout();
             (linePos, columnPos, scrollPos) = tabState.DisassemblyCodePosition;
             RestoreCaretPosition(textEditor, linePos, columnPos, scrollPos);
         }
@@ -410,6 +426,7 @@ namespace UndertaleModTool
                 OverriddenDecompPos = (lineNum, -1, -1);
             else
                 OverriddenDisasmPos = (lineNum, -1, -1);
+            OverriddenZoomFontSize = LastZoomFontSize;
         }
         public static void ChangeLineNumber(int lineNum, TextEditor textEditor)
         {
@@ -508,6 +525,12 @@ namespace UndertaleModTool
 
                 OverriddenDisasmPos = default;
             }
+            if (OverriddenZoomFontSize != 0)
+            {
+                ZoomFontSize = OverriddenZoomFontSize;
+                LastZoomFontSize = ZoomFontSize;
+                OverriddenZoomFontSize = 0;
+            }
 
             DisassemblyEditor.TextArea.ClearSelection();
             if (code.ParentEntry != null)
@@ -540,6 +563,7 @@ namespace UndertaleModTool
             DisassemblyEditor.Document.BeginUpdate();
             DisassemblyEditor.Document.Text = text;
 
+            DisassemblyEditor.FontSize = ZoomFontSize;
             if (!DisassemblyEditor.IsReadOnly)
                 RestoreCaretPosition(DisassemblyEditor, currLine, currColumn, scrollPos);
 
@@ -678,6 +702,12 @@ namespace UndertaleModTool
                 scrollPos = OverriddenDecompPos.ScrollPos;
 
                 OverriddenDecompPos = default;
+            }
+            if (OverriddenZoomFontSize != 0)
+            {
+                ZoomFontSize = OverriddenZoomFontSize;
+                LastZoomFontSize = ZoomFontSize;
+                OverriddenZoomFontSize = 0;
             }
 
             DecompiledEditor.TextArea.ClearSelection();
@@ -842,6 +872,7 @@ namespace UndertaleModTool
                             DecompiledEditor.Document.Text = decompiled;
                             PopulateCurrentLocals(dataa, code);
 
+                            DecompiledEditor.FontSize = ZoomFontSize;
                             RestoreCaretPosition(DecompiledEditor, currLine, currColumn, scrollPos);
 
                             if (existingDialog is not null)                      //if code was edited (and compiles after it)
@@ -1626,6 +1657,76 @@ namespace UndertaleModTool
                 var res = new ClickVisualLineText(Text, ParentVisualLine, length);
                 res.Clicked += Clicked;
                 return res;
+            }
+        }
+
+        private void ZoomChange(bool zoomingIn)
+        {
+            bool fontSizeChanged = false;
+            TextView view1 = DecompiledEditor.TextArea.TextView;
+            TextViewPosition? position1 = view1.GetPosition(new Point(0.0, view1.ScrollOffset.Y + 0.5));
+            TextView view2 = DisassemblyEditor.TextArea.TextView;
+            TextViewPosition? position2 = view2.GetPosition(new Point(0.0, view2.ScrollOffset.Y + 0.5));
+            if (zoomingIn)
+            {
+                if (ZoomFontSize < 100)
+                {
+                    ZoomFontSize += 1;
+                    fontSizeChanged = true;
+                }
+            }
+            else
+            {
+                if (ZoomFontSize > 5)
+                {
+                    ZoomFontSize -= 1;
+                    fontSizeChanged = true;
+                }
+            }
+            if (fontSizeChanged)
+            {
+                DecompiledEditor.FontSize = ZoomFontSize;
+                DisassemblyEditor.FontSize = ZoomFontSize;
+                LastZoomFontSize = ZoomFontSize;
+                if (position1.HasValue)
+                {
+                    DecompiledEditor.UpdateLayout();
+                    DecompiledEditor.ScrollTo(position1.Value.Line, -1, VisualYPosition.LineTop, 0.0, 0.0);
+                }
+                if (position2.HasValue)
+                {
+                    DisassemblyEditor.UpdateLayout();
+                    DisassemblyEditor.ScrollTo(position2.Value.Line, -1, VisualYPosition.LineTop, 0.0, 0.0);
+                }
+            }
+        }
+
+        private void Grid_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                e.Handled = true;
+                ZoomChange(e.Delta > 0);
+            }
+        }
+
+        private void Grid_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.OemPlus || e.Key == Key.Add)
+            {
+                if (Keyboard.Modifiers == ModifierKeys.Control)
+                {
+                    e.Handled = true;
+                    ZoomChange(true);
+                }
+            }
+            else if ((e.Key == Key.OemMinus || e.Key == Key.Subtract))
+            {
+                if (Keyboard.Modifiers == ModifierKeys.Control)
+                {
+                    e.Handled = true;
+                    ZoomChange(false);
+                }
             }
         }
     }
