@@ -293,6 +293,12 @@ namespace UndertaleModTool
                     return foundSource;
                 }
 
+                // If the image is of unknown format, it cannot be displayed. Use a placeholder texture...
+                if (image.Format == GMImage.ImageFormat.Unknown)
+                {
+                    image = new GMImage(1, 1);
+                }
+
                 // If no source was found, then create a new one
                 byte[] pixelData = image.ConvertToRawBgra().ToSpan().ToArray();
                 BitmapSource bitmap = BitmapSource.Create(image.Width, image.Height, 96, 96, PixelFormats.Bgra32, null, pixelData, image.Width * 4);
@@ -1058,7 +1064,7 @@ namespace UndertaleModTool
 
                 Dispatcher.Invoke(async () =>
                 {
-                    if (data != null)
+                    if (data is not null)
                     {
                         if (data.UnsupportedBytecodeVersion)
                         {
@@ -1077,25 +1083,35 @@ namespace UndertaleModTool
                             CanSave = true;
                             CanSafelySave = true;
                             await UpdateProfile(data, filename);
-                            if (data != null)
-                            {
-                                data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
-                                data.ToolInfo.InstanceIdPrefix = () => SettingsWindow.InstanceIdPrefix;
-                            }
+                            data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
+                            data.ToolInfo.InstanceIdPrefix = () => SettingsWindow.InstanceIdPrefix;
                         }
                         if (data.IsYYC())
                         {
                             this.ShowWarning("This game uses YYC (YoYo Compiler), which means the code is embedded into the game executable. This configuration is currently not fully supported; continue at your own risk.", "YYC");
                         }
-                        if (data.GeneralInfo != null)
+                        if (data.GeneralInfo is not null)
                         {
                             if (!data.GeneralInfo.IsDebuggerDisabled)
                             {
                                 this.ShowWarning("This game is set to run with the GameMaker Studio debugger and the normal runtime will simply hang after loading if the debugger is not running. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger");
                             }
                         }
+                        if (data.EmbeddedTextures is not null)
+                        {
+                            foreach (UndertaleEmbeddedTexture tex in data.EmbeddedTextures)
+                            {
+                                if (tex?.TextureData?.Image?.Format == GMImage.ImageFormat.Unknown)
+                                {
+                                    this.ShowWarning("This game contains texture(s) with unknown or unsupported image formats. These will save/load, but will not display in editors, and many operations will fail regarding them. Proceed with caution.", "Unsupported textures");
+                                    break;
+                                }
+                            }
+                        }
                         if (Path.GetDirectoryName(FilePath) != Path.GetDirectoryName(filename))
+                        {
                             CloseChildFiles();
+                        }
 
                         Data = data;
 
