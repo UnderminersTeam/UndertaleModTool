@@ -409,7 +409,7 @@ public class GMImage
                 int h = (int)height;
 
                 // Starting at 1 because the mipmap count includes the main texture
-                for (var i = 1; i < mipMapCount; i++)
+                for (int i = 1; i < mipMapCount; i++)
                 {
                     w /= 2;
                     h /= 2;
@@ -419,19 +419,42 @@ public class GMImage
                 }
             }
 
+            // Before reading data, check if our padding is correct (since we don't support the full DDS format...)
+            long paddingStartAddress = startAddress + size;
+            long paddingSize = maxEndOfStreamPosition - paddingStartAddress;
+            bool paddingError = false;
+            const int maxPaddingSize = 127;
+            if (paddingSize > maxPaddingSize)
+            {
+                // Padding is over 127 bytes in length, which is impossible (it should align to 128-byte boundaries)
+                paddingError = true;
+            }
+            else if (paddingSize > 0)
+            {
+                // Ensure padding is all 0 bytes
+                Span<byte> paddingData = stackalloc byte[maxPaddingSize];
+                reader.Position = paddingStartAddress;
+                reader.Stream.ReadExactly(paddingData[..(int)paddingSize]);
+                for (int i = 0; i < paddingSize; i++)
+                {
+                    if (paddingData[i] != 0)
+                    {
+                        paddingError = true;
+                        break;
+                    }
+                }
+            }
+
+            // If a padding error was detected, just include it as part of the image data as a failsafe.
+            // This means that extra padding may be added if textures somehow misalign, but generally this shouldn't be a concern...
+            if (paddingError)
+            {
+                size += (int)paddingSize;
+            }
+
             // Read entire data
             reader.Position = startAddress;
             byte[] bytes = reader.ReadBytes(size);
-
-            int byteAmountLeft = (int)(maxEndOfStreamPosition - reader.Position);
-
-            // Check if rest of bytes are 0x00 padded
-            byte[] paddingBytes = reader.ReadBytes(byteAmountLeft);
-            for (int i = 0; i < paddingBytes.Length; i++)
-            {
-                if (paddingBytes[i] != 0)
-                    throw new IOException("Non-zero bytes in padding");
-            }
 
             return FromDds(bytes);
         }
