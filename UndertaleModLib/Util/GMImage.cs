@@ -351,22 +351,33 @@ public class GMImage
             // Size int skipped because 8 bytes were already read
             uint flags = reader.ReadUInt32();
             uint height = reader.ReadUInt32();
-
-            //uint width = reader.ReadUInt32();
-            reader.Position += 4;
+            uint width = reader.ReadUInt32();
 
             uint pitchOrLinearSize = reader.ReadUInt32();
 
             //uint depth = reader.ReadUInt32();
-            //uint mipMapCount = reader.ReadUInt32();
+            reader.Position += 4;
+
+            uint mipMapCount = reader.ReadUInt32();
+
             //byte[] reserved1 = reader.ReadBytes(4 * 11);
             //uint pixelFormatSize = reader.ReadUInt32();
-            reader.Position += 56;
+            reader.Position += 48;
 
             uint pixelFormatFlags = reader.ReadUInt32();
             uint pixelFormatFourCC = reader.ReadUInt32();
 
-            // TODO: Check caps for DDSCAPS_COMPLEX (when there's extra data afterwards)
+            //uint pixelFormatRGBBitCount = reader.ReadUInt32();
+            //uint pixelFormatRBitMask = reader.ReadUInt32();
+            //uint pixelFormatGBitMask = reader.ReadUInt32();
+            //uint pixelFormatBBitMask = reader.ReadUInt32();
+            //uint pixelFormatABitMask = reader.ReadUInt32();
+
+            //uint caps = reader.ReadUInt32();
+            //uint caps2 = reader.ReadUInt32();
+            //uint caps3 = reader.ReadUInt32();
+            //uint caps4 = reader.ReadUInt32();
+            //uint reserved2 = reader.ReadUInt32();
 
             // Skip to end of header
             reader.Position += 40;
@@ -385,12 +396,37 @@ public class GMImage
             else
                 size += (int)(pitchOrLinearSize * height);
 
+            // TODO: Check for cubemaps and volume textures.
+            // TODO: Check for DX10 arrays.
+
+            // Add mipmap data size
+            if (mipMapCount > 0)
+            {
+                // DXT1 == 0x31545844
+                int pixelSize = (pixelFormatFourCC == 0x31545844) ? 8 : 16;
+
+                int w = (int)width;
+                int h = (int)height;
+
+                // Starting at 1 because the mipmap count includes the main texture
+                for (var i = 1; i < mipMapCount; i++)
+                {
+                    w /= 2;
+                    h /= 2;
+                    if (w == 0) w = 1;
+                    if (h == 0) h = 1;
+                    size += ((w + 3) / 4) * ((h + 3) / 4) * pixelSize;
+                }
+            }
+
             // Read entire data
             reader.Position = startAddress;
             byte[] bytes = reader.ReadBytes(size);
 
+            int byteAmountLeft = (int)(maxEndOfStreamPosition - reader.Position);
+
             // Check if rest of bytes are 0x00 padded
-            byte[] paddingBytes = reader.ReadBytes((int)(maxEndOfStreamPosition - reader.Position));
+            byte[] paddingBytes = reader.ReadBytes(byteAmountLeft);
             for (int i = 0; i < paddingBytes.Length; i++)
             {
                 if (paddingBytes[i] != 0)
