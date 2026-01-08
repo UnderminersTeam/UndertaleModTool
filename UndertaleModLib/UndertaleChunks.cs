@@ -2156,34 +2156,45 @@ namespace UndertaleModLib
             for (int index = 0; index < List.Count; index++)
             {
                 UndertaleEmbeddedTexture obj = List[index];
-
+                
+                // Figure out max end of stream position for the texture, if it's embedded in the file
                 if (!obj.TextureExternal)
                 {
-                    // Calculate maximum end stream position for this blob
-                    int searchIndex = index + 1;
-                    int maxEndOfStreamPosition = -1;
-                    while (searchIndex < List.Count)
+                    uint recordedSize = obj.GetTextureBlockSize();
+                    if (recordedSize > 0)
                     {
-                        UndertaleEmbeddedTexture searchObj = List[searchIndex];
-
-                        if (searchObj.TextureExternal)
+                        // The size is stored in the file (in modern GM versions), so use it
+                        long startPositionOfTextureData = reader.GetOffsetMapRev()[obj.TextureData];
+                        obj.TextureData.SetMaxEndOfStreamPosition(startPositionOfTextureData + recordedSize);
+                    }
+                    else
+                    {
+                        // Calculate maximum end stream position for this blob
+                        int searchIndex = index + 1;
+                        long maxEndOfStreamPosition = -1;
+                        while (searchIndex < List.Count)
                         {
-                            // Skip this texture, as it's external
-                            searchIndex++;
-                            continue;
+                            UndertaleEmbeddedTexture searchObj = List[searchIndex];
+
+                            if (searchObj.TextureExternal)
+                            {
+                                // Skip this texture, as it's external
+                                searchIndex++;
+                                continue;
+                            }
+
+                            // Use start address of this blob
+                            maxEndOfStreamPosition = reader.GetOffsetMapRev()[searchObj.TextureData];
+                            break;
                         }
 
-                        // Use start address of this blob
-                        maxEndOfStreamPosition = (int)reader.GetOffsetMapRev()[searchObj.TextureData];
-                        break;
+                        if (maxEndOfStreamPosition == -1)
+                        {
+                            // At end of list, so just use the end of the chunk
+                            maxEndOfStreamPosition = startPosition + Length;
+                        }
+                        obj.TextureData.SetMaxEndOfStreamPosition(maxEndOfStreamPosition);
                     }
-
-                    if (maxEndOfStreamPosition == -1)
-                    {
-                        // At end of list, so just use the end of the chunk
-                        maxEndOfStreamPosition = (int)(startPosition + Length);
-                    }
-                    obj.TextureData.SetMaxEndOfStreamPosition(maxEndOfStreamPosition);
                 }
 
                 obj.UnserializeBlob(reader);
