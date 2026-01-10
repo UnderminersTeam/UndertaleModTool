@@ -773,6 +773,80 @@ namespace UndertaleModLib
     {
         public override string Name => "BGND";
 
+        private bool checkedFor2024_14_1 = false;
+        private void CheckForGM2024_14_1(UndertaleReader reader)
+        {
+            checkedFor2024_14_1 = true;
+
+            if (!reader.undertaleData.IsVersionAtLeast(2024, 13) || reader.undertaleData.IsVersionAtLeast(2024, 14, 1))
+            {
+                return;
+            }
+
+            long returnTo = reader.Position;
+            long chunkStartPos = reader.AbsPosition;
+
+            // Go through each background, and check to see if it ends at the expected position. If not, this is probably 2024.14.1.
+            uint bgCount = reader.ReadUInt32();
+            for (int i = 0; i < bgCount; i++)
+            {
+                // Find background's start position, and calculate next background position (if available).
+                reader.Position = returnTo + 4 + (4 * i);
+                uint bgPtr = reader.ReadUInt32();
+                if (bgPtr == 0)
+                {
+                    // Removed asset
+                    continue;
+                }
+                uint nextBgPtr = 0;
+                int j = i;
+                while (nextBgPtr == 0 && (++j) < bgCount)
+                {
+                    // Try next pointer in list
+                    nextBgPtr = reader.ReadUInt32();
+                }
+
+                // Skip all the way to "GMS2ItemsPerTileCount" (at its pre-2024.14.1 location), which is what we actually care about.
+                reader.AbsPosition = bgPtr + (11 * 4);
+                uint itemsPerTileCount = reader.ReadUInt32();
+                uint tileCount = reader.ReadUInt32();
+
+                // Calculate the theoretical end position given the above info, and compare to the actual end position (with padding).
+                uint theoreticalEndPos = bgPtr + (15 * 4) + (itemsPerTileCount * tileCount * 4);
+                if (nextBgPtr == 0)
+                {
+                    // Align to 16 bytes, and compare against chunk end position
+                    if ((theoreticalEndPos % 16) != 0)
+                    {
+                        theoreticalEndPos += 16 - (theoreticalEndPos % 16);
+                    }
+                    uint chunkEndPos = (uint)chunkStartPos + Length;
+                    if (theoreticalEndPos != chunkEndPos)
+                    {
+                        // Probably 2024.14.1!
+                        reader.undertaleData.SetGMS2Version(2024, 14, 1);
+                        break;
+                    }
+                }
+                else
+                {
+                    // Align to 8 bytes, and compare against next background start position
+                    if ((theoreticalEndPos % 8) != 0)
+                    {
+                        theoreticalEndPos += 8 - (theoreticalEndPos % 8);
+                    }
+                    if (theoreticalEndPos != nextBgPtr)
+                    {
+                        // Probably 2024.14.1!
+                        reader.undertaleData.SetGMS2Version(2024, 14, 1);
+                        break;
+                    }
+                }
+            }
+
+            reader.Position = returnTo;
+        }
+
         internal override void SerializeChunk(UndertaleWriter writer)
         {
             Alignment = 8;
@@ -782,7 +856,22 @@ namespace UndertaleModLib
         internal override void UnserializeChunk(UndertaleReader reader)
         {
             Alignment = 8;
+
+            if (!checkedFor2024_14_1)
+            {
+                CheckForGM2024_14_1(reader);
+            }
+
             base.UnserializeChunk(reader);
+        }
+
+        internal override uint UnserializeObjectCount(UndertaleReader reader)
+        {
+            checkedFor2024_14_1 = false;
+
+            CheckForGM2024_14_1(reader);
+
+            return base.UnserializeObjectCount(reader);
         }
     }
 
@@ -1081,7 +1170,7 @@ namespace UndertaleModLib
         {
             checkedFor2024_14 = true;
 
-            if (!reader.undertaleData.IsVersionAtLeast(2024, 13))// || reader.undertaleData.IsVersionAtLeast(2024, 14))
+            if (!reader.undertaleData.IsVersionAtLeast(2024, 13) || reader.undertaleData.IsVersionAtLeast(2024, 14))
             {
                 return;
             }
@@ -1589,6 +1678,7 @@ namespace UndertaleModLib
                     {
                         reader.SubmitWarning("Missing expected TPAG padding");
                         reader.Position--;
+                        break;
                     }
                 }
             }
@@ -2057,34 +2147,45 @@ namespace UndertaleModLib
             for (int index = 0; index < List.Count; index++)
             {
                 UndertaleEmbeddedTexture obj = List[index];
-
+                
+                // Figure out max end of stream position for the texture, if it's embedded in the file
                 if (!obj.TextureExternal)
                 {
-                    // Calculate maximum end stream position for this blob
-                    int searchIndex = index + 1;
-                    int maxEndOfStreamPosition = -1;
-                    while (searchIndex < List.Count)
+                    uint recordedSize = obj.GetTextureBlockSize();
+                    if (recordedSize > 0)
                     {
-                        UndertaleEmbeddedTexture searchObj = List[searchIndex];
-
-                        if (searchObj.TextureExternal)
+                        // The size is stored in the file (in modern GM versions), so use it
+                        long startPositionOfTextureData = reader.GetOffsetMapRev()[obj.TextureData];
+                        obj.TextureData.SetMaxEndOfStreamPosition(startPositionOfTextureData + recordedSize);
+                    }
+                    else
+                    {
+                        // Calculate maximum end stream position for this blob
+                        int searchIndex = index + 1;
+                        long maxEndOfStreamPosition = -1;
+                        while (searchIndex < List.Count)
                         {
-                            // Skip this texture, as it's external
-                            searchIndex++;
-                            continue;
+                            UndertaleEmbeddedTexture searchObj = List[searchIndex];
+
+                            if (searchObj.TextureExternal)
+                            {
+                                // Skip this texture, as it's external
+                                searchIndex++;
+                                continue;
+                            }
+
+                            // Use start address of this blob
+                            maxEndOfStreamPosition = reader.GetOffsetMapRev()[searchObj.TextureData];
+                            break;
                         }
 
-                        // Use start address of this blob
-                        maxEndOfStreamPosition = (int)reader.GetOffsetMapRev()[searchObj.TextureData];
-                        break;
+                        if (maxEndOfStreamPosition == -1)
+                        {
+                            // At end of list, so just use the end of the chunk
+                            maxEndOfStreamPosition = startPosition + Length;
+                        }
+                        obj.TextureData.SetMaxEndOfStreamPosition(maxEndOfStreamPosition);
                     }
-
-                    if (maxEndOfStreamPosition == -1)
-                    {
-                        // At end of list, so just use the end of the chunk
-                        maxEndOfStreamPosition = (int)(startPosition + Length);
-                    }
-                    obj.TextureData.SetMaxEndOfStreamPosition(maxEndOfStreamPosition);
                 }
 
                 obj.UnserializeBlob(reader);
