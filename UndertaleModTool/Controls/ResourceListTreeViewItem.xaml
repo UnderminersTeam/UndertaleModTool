@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertalelib="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
-             mc:Ignorable="d">
+             mc:Ignorable="d" xmlns:strings="clr-namespace:UndertaleModTool.Resources" >
 
     <TreeViewItem.Resources>
         <DataTemplate x:Key="DefaultNullItemTemplate">
@@ -15,17 +15,17 @@
         <local:ImplementsInterfaceConverter x:Key="ImplementsInterfaceConverter"/>
 
         <local:ContextMenuDark x:Key="UndertaleResourceMenu" Opened="MenuItem_ContextMenuOpened">
-            <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>
-            <MenuItem Header="Find all references" Click="MenuItem_FindAllReferences_Click" Name="FindAllReferences"/>
-            <MenuItem Header="Copy name to clipboard" Click="MenuItem_CopyName_Click"/>
-            <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
+            <MenuItem Header="{x:Static strings:Strings.Open_in_new_tab}" Click="MenuItem_OpenInNewTab_Click"/>
+            <MenuItem Header="{x:Static strings:Strings.Find_all_references}" Click="MenuItem_FindAllReferences_Click" Name="FindAllReferences"/>
+            <MenuItem Header="{x:Static strings:Strings.Copy_name_to_clipboard}" Click="MenuItem_CopyName_Click"/>
+            <MenuItem Header="{x:Static strings:Strings.Delete1}" Click="MenuItem_Delete_Click"/>
         </local:ContextMenuDark>
 
         <!-- TODO: Would need some way to know the ID, IndexOf won't be reliable -->
         <local:ContextMenuDark x:Key="NullItemReplaceMenu" Opened="MenuItem_NullDataContext_ContextMenuOpened">
             <!--<MenuItem IsEnabled="False" Header="ID: " Name="ObjectIdLabel" />
             <Separator />-->
-            <MenuItem IsEnabled="False" Header="Add in place (unimplemented)" />
+            <MenuItem IsEnabled="False" Header="{x:Static strings:Strings.Add_in_place__unimplemented}" />
         </local:ContextMenuDark>
 
         <Style x:Key="UndertaleModTool.ResourceListTreeViewItem.ItemContainerStyle" TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">

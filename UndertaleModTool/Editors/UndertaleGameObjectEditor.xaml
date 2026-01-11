@@ -7,7 +7,7 @@
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              xmlns:sys="clr-namespace:System;assembly=mscorlib" 
              mc:Ignorable="d" 
-             d:DesignHeight="800" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleGameObject}">
+             d:DesignHeight="800" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleGameObject}" xmlns:strings="clr-namespace:UndertaleModTool.Resources" >
     <UserControl.Resources>
         <ResourceDictionary>
             <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="CollisionShapeFlags">
@@ -188,10 +188,10 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
+            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Name}"></TextBlock>
             <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
-            <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Sprite</TextBlock>
+            <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Sprite}"></TextBlock>
             <local:UndertaleObjectReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding Sprite}" ObjectType="{x:Type undertale:UndertaleSprite}"/>
 
             <ListView Grid.Row="2" Grid.Column="1" ItemsSource="{Binding Sprite.Textures, Mode=OneWay}" Background="Transparent" BorderThickness="0">
@@ -212,65 +212,65 @@
             </ListView>
 
 
-            <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Visible</TextBlock>
+            <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Visible}"></TextBlock>
             <CheckBox Grid.Row="3" Grid.Column="1" Margin="3" IsChecked="{Binding Visible}"/>
 
-            <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Solid</TextBlock>
+            <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Solid}"></TextBlock>
             <CheckBox Grid.Row="4" Grid.Column="1" Margin="3" IsChecked="{Binding Solid}"/>
 
-            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}, Converter={StaticResource IsGMS2Converter}}">Depth</TextBlock>
+            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}, Converter={StaticResource IsGMS2Converter}}" Text="{x:Static strings:Strings.Depth}"></TextBlock>
             <local:TextBoxDark Grid.Row="5" Grid.Column="1" Margin="3" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}, Converter={StaticResource IsGMS2Converter}}" Text="{Binding Depth}"/>
 
-            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Persistent</TextBlock>
+            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Persistent}"></TextBlock>
             <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding Persistent}"/>
 
-            <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Parent</TextBlock>
+            <TextBlock Grid.Row="7" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Parent}"></TextBlock>
             <local:UndertaleObjectReference Grid.Row="7" Grid.Column="1" Margin="3" ObjectReference="{Binding ParentId}" ObjectType="{x:Type undertale:UndertaleGameObject}"/>
 
-            <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Texture mask id</TextBlock>
+            <TextBlock Grid.Row="8" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Texture_mask_id}"></TextBlock>
             <local:UndertaleObjectReference Grid.Row="8" Grid.Column="1" Margin="3" ObjectReference="{Binding TextureMaskId}" ObjectType="{x:Type undertale:UndertaleSprite}"/>
 
-            <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Uses physics</TextBlock>
+            <TextBlock Grid.Row="9" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Uses_physics}"></TextBlock>
             <CheckBox Grid.Row="9" Grid.Column="1" Margin="3" IsChecked="{Binding UsesPhysics}"/>
 
-            <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Is sensor</TextBlock>
+            <TextBlock Grid.Row="10" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Is_sensor}"></TextBlock>
             <CheckBox Grid.Row="10" Grid.Column="1" Margin="3" IsChecked="{Binding IsSensor}"/>
 
-            <TextBlock Grid.Row="11" Grid.Column="0" Margin="3">Collision shape</TextBlock>
+            <TextBlock Grid.Row="11" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Collision_shape}"></TextBlock>
             <local:ComboBoxDark Grid.Row="11" Grid.Column="1" Margin="3" ItemsSource="{Binding Source={StaticResource CollisionShapeFlags}}" SelectedItem="{Binding Path=CollisionShape}" />
 
             <Separator Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="2"/>
 
-            <TextBlock Grid.Row="13" Grid.Column="0" Margin="3" FontWeight="Bold">Physics</TextBlock>
+            <TextBlock Grid.Row="13" Grid.Column="0" Margin="3" FontWeight="Bold" Text="{x:Static strings:Strings.Physics}"></TextBlock>
 
-            <TextBlock Grid.Row="14" Grid.Column="0" Margin="3">Density</TextBlock>
+            <TextBlock Grid.Row="14" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Density}"></TextBlock>
             <local:TextBoxDark Grid.Row="14" Grid.Column="1" Margin="3" Text="{Binding Density}"/>
 
-            <TextBlock Grid.Row="15" Grid.Column="0" Margin="3">Restitution</TextBlock>
+            <TextBlock Grid.Row="15" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Restitution}"></TextBlock>
             <local:TextBoxDark Grid.Row="15" Grid.Column="1" Margin="3" Text="{Binding Restitution}"/>
 
-            <TextBlock Grid.Row="16" Grid.Column="0" Margin="3">Group</TextBlock>
+            <TextBlock Grid.Row="16" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Group}"></TextBlock>
             <local:TextBoxDark Grid.Row="16" Grid.Column="1" Margin="3" Text="{Binding Group}"/>
 
-            <TextBlock Grid.Row="17" Grid.Column="0" Margin="3">Linear damping</TextBlock>
+            <TextBlock Grid.Row="17" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Linear_damping}"></TextBlock>
             <local:TextBoxDark Grid.Row="17" Grid.Column="1" Margin="3" Text="{Binding LinearDamping}"/>
 
-            <TextBlock Grid.Row="18" Grid.Column="0" Margin="3">Angular damping</TextBlock>
+            <TextBlock Grid.Row="18" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Angular_damping}"></TextBlock>
             <local:TextBoxDark Grid.Row="18" Grid.Column="1" Margin="3" Text="{Binding AngularDamping}"/>
 
             <!--TextBlock Grid.Row="19" Grid.Column="0" Margin="3">Physics shape vertex count</>
             <local:TextBoxDark Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding PhysicsShapeVertexCount}"/-->
 
-            <TextBlock Grid.Row="19" Grid.Column="0" Margin="3">Friction</TextBlock>
+            <TextBlock Grid.Row="19" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Friction}"></TextBlock>
             <local:TextBoxDark Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding Friction}"/>
 
-            <TextBlock Grid.Row="20" Grid.Column="0" Margin="3">Is awake</TextBlock>
+            <TextBlock Grid.Row="20" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Is_awake}"></TextBlock>
             <CheckBox Grid.Row="20" Grid.Column="1" Margin="3" IsChecked="{Binding Awake}"/>
 
-            <TextBlock Grid.Row="21" Grid.Column="0" Margin="3">Is kinematic</TextBlock>
+            <TextBlock Grid.Row="21" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Is_kinematic}"></TextBlock>
             <CheckBox Grid.Row="21" Grid.Column="1" Margin="3" IsChecked="{Binding Kinematic}"/>
 
-            <TextBlock Grid.Row="22" Grid.Column="0" Margin="3">Physics shape vertices</TextBlock>
+            <TextBlock Grid.Row="22" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Physics_shape_vertices}"></TextBlock>
             <local:DataGridDark Grid.Row="22" Grid.Column="1" Margin="3" ItemsSource="{Binding PhysicsVertices, Mode=OneWay}"
                                 AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True"
                                 HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray"
@@ -322,7 +322,7 @@
             <Separator Grid.Row="23" Grid.Column="0" Grid.ColumnSpan="2"/>
         </Grid>
 
-        <TextBlock Margin="3" FontWeight="Bold">Events</TextBlock>
+        <TextBlock Margin="3" FontWeight="Bold" Text="{x:Static strings:Strings.Events}"></TextBlock>
 
         <!-- hacks https://stackoverflow.com/questions/22378456/how-to-get-the-index-of-the-current-itemscontrol-item -->
         <ItemsControl ItemsSource="{Binding Events, Mode=OneWay}" AlternationCount="9999">
@@ -352,7 +352,7 @@
                                             <Setter Property="Template">
                                                 <Setter.Value>
                                                     <ControlTemplate>
-                                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic" Text="{x:Static strings:Strings.Double_click_to_add}"></TextBlock>
                                                     </ControlTemplate>
                                                 </Setter.Value>
                                             </Setter>
@@ -365,7 +365,7 @@
                                 </Style>
                             </DataGrid.Resources>
                             <DataGrid.Columns>
-                                <DataGridTemplateColumn Header="Subtype ID" Width="1*">
+                                <DataGridTemplateColumn Header="{x:Static strings:Strings.Subtype_ID}" Width="1*">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <ContentControl Margin="3">
@@ -412,7 +412,7 @@
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
-                                                                            <TextBlock TextAlignment="Center">n/a</TextBlock>
+                                                                            <TextBlock TextAlignment="Center" Text="{x:Static strings:Strings.n_a}"></TextBlock>
                                                                         </DataTemplate>
                                                                     </Setter.Value>
                                                                 </Setter>
@@ -421,7 +421,7 @@
                                                                 <Setter Property="ContentTemplate">
                                                                     <Setter.Value>
                                                                         <DataTemplate>
-                                                                            <TextBlock TextAlignment="Center">n/a</TextBlock>
+                                                                            <TextBlock TextAlignment="Center" Text="{x:Static strings:Strings.n_a}"></TextBlock>
                                                                         </DataTemplate>
                                                                     </Setter.Value>
                                                                 </Setter>
@@ -479,12 +479,12 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="Actions" Width="5*">
+                                <DataGridTemplateColumn Header="{x:Static strings:Strings.Actions}" Width="5*">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <local:DataGridDark ItemsSource="{Binding Actions}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow">
                                                 <DataGrid.Columns>
-                                                    <DataGridTemplateColumn Header="Code" Width="*">
+                                                    <DataGridTemplateColumn Header="{x:Static strings:Strings.Code}" Width="*">
                                                         <DataGridTemplateColumn.CellTemplate>
                                                             <DataTemplate>
                                                                 <local:UndertaleObjectReference ObjectReference="{Binding CodeId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleCode}"

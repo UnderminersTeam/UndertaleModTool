@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UndertaleModTool"
              mc:Ignorable="d" 
-             d:DesignHeight="20" d:DesignWidth="300">
+             d:DesignHeight="20" d:DesignWidth="300" xmlns:strings="clr-namespace:UndertaleModTool.Resources" >
     <UserControl.Resources>
         <local:ContextMenuDark x:Key="contextMenu" Opened="MenuItem_ContextMenuOpened">
             <MenuItem Header="Open in new tab" Click="OpenInNewTabItem_Click"/>
@@ -18,7 +18,7 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <local:TextBoxDark Grid.Column="0" x:Name="ObjectText" AllowDrop="True"
-                           ToolTip="This is an string reference. Change the value here to edit this just this value of all referenced values, or drag and drop another string instance from the tree on the left to change the reference"
+                           ToolTip="{x:Static strings:Strings.This_is_an_string_reference__Change}"
                            Text="{Binding ObjectReference.Content, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=Explicit}"
                            PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" LostFocus="TextBox_LostFocus" PreviewMouseDown="Details_MouseDown">
             <TextBox.Style>

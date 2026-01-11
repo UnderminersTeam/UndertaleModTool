@@ -7,7 +7,7 @@
                        xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
                        mc:Ignorable="d" 
                        d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleEmbeddedTexture}"
-                       DataContextChanged="DataUserControl_DataContextChanged" Loaded="DataUserControl_Loaded" Unloaded="DataUserControl_Unloaded">
+                       DataContextChanged="DataUserControl_DataContextChanged" Loaded="DataUserControl_Loaded" Unloaded="DataUserControl_Unloaded" xmlns:strings="clr-namespace:UndertaleModTool.Resources" >
     <UserControl.Resources>
         <ResourceDictionary>
             <local:BooleanToVisibilityConverter x:Key="BoolFalseToVisConverter" local:trueValue="Collapsed" local:falseValue="Visible"/>
@@ -31,15 +31,15 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Scaled</TextBlock>
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Scaled}"></TextBlock>
         <local:TextBoxDark Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding Scaled}"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="Generated mips"
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Generated_mips}"
                    Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2.0.6}"/>
         <local:TextBoxDark Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GeneratedMips}"
                  Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2.0.6}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Size</TextBlock>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Size1}"></TextBlock>
         <Grid Grid.Row="2" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -49,7 +49,7 @@
             <local:TextBoxDark Grid.Column="1" x:Name="TexHeight" Margin="3" Text="{Binding TextureData.Height, Mode=OneWay}" IsReadOnly="True"/>
         </Grid>
 
-        <TextBlock Grid.Row="3" Grid.Column="4" Margin="3" Foreground="Red" Text="Warning: Texture failed to load!">
+        <TextBlock Grid.Row="3" Grid.Column="4" Margin="3" Foreground="Red" Text="{x:Static strings:Strings.Warning__Texture_failed_to_load}">
             <TextBlock.Visibility>
                 <MultiBinding Converter="{StaticResource TextureLoadedWrapper}" Mode="OneWay">
                     <Binding Path="TextureLoaded" Mode="OneWay"/>
@@ -71,9 +71,7 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.ColumnSpan="3" Margin="3" HorizontalAlignment="Center" Foreground="DarkGray" FontStyle="Italic" TextWrapping="Wrap" TextAlignment="Center">
-                Hint: This image is mouse interactable (3 mouse buttons and mouse wheel).
-            </TextBlock>
+            <TextBlock Grid.Row="0" Grid.ColumnSpan="3" Margin="3" HorizontalAlignment="Center" Foreground="DarkGray" FontStyle="Italic" TextWrapping="Wrap" TextAlignment="Center" Text="{x:Static strings:Strings.Hint__This_image_is_mouse_interactable}"></TextBlock>
             <ScrollViewer Name="TextureScroll" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" MaxHeight="450"
                           HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" ScrollChanged="TextureScroll_ScrollChanged">
                 <ScrollViewer.Background>

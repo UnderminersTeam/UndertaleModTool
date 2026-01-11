@@ -7,7 +7,7 @@
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleSprite}">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleSprite}" xmlns:strings="clr-namespace:UndertaleModTool.Resources" >
     <UserControl.Resources>
         <ResourceDictionary>
             <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="SpriteType">
@@ -56,10 +56,10 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Name}"></TextBlock>
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Size</TextBlock>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Size1}"></TextBlock>
         <Grid Grid.Row="2" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
@@ -67,13 +67,13 @@
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" Margin="3">Width:</TextBlock>
+            <TextBlock Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Width}"></TextBlock>
             <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding Width}"/>
-            <TextBlock Grid.Column="2" Margin="3">Height:</TextBlock>
+            <TextBlock Grid.Column="2" Margin="3" Text="{x:Static strings:Strings.Height}"></TextBlock>
             <local:TextBoxDark Grid.Column="3" Margin="3" Text="{Binding Height}"/>
         </Grid>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Margin</TextBlock>
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Margin}"></TextBlock>
         <Grid Grid.Row="3" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -85,33 +85,33 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" Margin="3">Left:</TextBlock>
+            <TextBlock Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Left}"></TextBlock>
             <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding MarginLeft}"/>
-            <TextBlock Grid.Column="2" Margin="3">Right:</TextBlock>
+            <TextBlock Grid.Column="2" Margin="3" Text="{x:Static strings:Strings.Right}"></TextBlock>
             <local:TextBoxDark Grid.Column="3" Margin="3" Text="{Binding MarginRight}"/>
-            <TextBlock Grid.Column="4" Margin="3">Bottom:</TextBlock>
+            <TextBlock Grid.Column="4" Margin="3" Text="{x:Static strings:Strings.Bottom}"></TextBlock>
             <local:TextBoxDark Grid.Column="5" Margin="3" Text="{Binding MarginBottom}"/>
-            <TextBlock Grid.Column="6" Margin="3">Top:</TextBlock>
+            <TextBlock Grid.Column="6" Margin="3" Text="{x:Static strings:Strings.Top}"></TextBlock>
             <local:TextBoxDark Grid.Column="7" Margin="3" Text="{Binding MarginTop}"/>
         </Grid>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Transparent</TextBlock>
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Transparent}"></TextBlock>
         <CheckBox Grid.Row="4" Grid.Column="1" Margin="3" IsChecked="{Binding Transparent}"/>
-        
-        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Smooth</TextBlock>
+
+        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Smooth}"></TextBlock>
         <CheckBox Grid.Row="5" Grid.Column="1" Margin="3" IsChecked="{Binding Smooth}"/>
-        
-        <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Preload</TextBlock>
+
+        <TextBlock Grid.Row="6" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Preload}"></TextBlock>
         <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding Preload}"/>
 
-        <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Bounding box mode</TextBlock>
+        <TextBlock Grid.Row="7" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Bounding_box_mode}"></TextBlock>
         <local:TextBoxDark Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding BBoxMode}"/>
 
-        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">SepMasks</TextBlock>
+        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.SepMasks}"></TextBlock>
         <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource SepMaskType}}" SelectedItem="{Binding Path=SepMasks}"
                             Grid.Row="8" Grid.Column="1" Margin="3"/>
 
-        <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Origin</TextBlock>
+        <TextBlock Grid.Row="9" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Origin1}"></TextBlock>
         <Grid Grid.Row="9" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
@@ -119,13 +119,13 @@
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" Margin="3">X:</TextBlock>
+            <TextBlock Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.X}"></TextBlock>
             <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding OriginXWrapper}"/>
-            <TextBlock Grid.Column="2" Margin="3">Y:</TextBlock>
+            <TextBlock Grid.Column="2" Margin="3" Text="{x:Static strings:Strings.Y}"></TextBlock>
             <local:TextBoxDark Grid.Column="3" Margin="3" Text="{Binding OriginYWrapper}"/>
         </Grid>
 
-        <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Textures</TextBlock>
+        <TextBlock Grid.Row="10" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Textures}"></TextBlock>
         <local:DataGridDark Grid.Row="10" Grid.Column="1" Margin="3" ItemsSource="{Binding Textures, Mode=OneWay}" x:Name="TextureList"
                             AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True"
                             HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray"
@@ -147,7 +147,7 @@
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate>
-                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic" Text="{x:Static strings:Strings.Double_click_to_add}"></TextBlock>
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>
@@ -175,9 +175,9 @@
             </Border>
         </Viewbox>
 
-        <local:ButtonDark Grid.Row="12" Grid.Column="1" Content="Export all frames (or Spine data if this is a Spine sprite)" Click="ExportAll_Click"/>
+        <local:ButtonDark Grid.Row="12" Grid.Column="1" Content="{x:Static strings:Strings.Export_all_frames__or_Spine_data}" Click="ExportAll_Click"/>
 
-        <TextBlock Grid.Row="13" Grid.Column="0" Margin="3">Collision masks</TextBlock>
+        <TextBlock Grid.Row="13" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Collision_masks}"></TextBlock>
         <local:DataGridDark Grid.Row="13" Grid.Column="1" Margin="3" ItemsSource="{Binding CollisionMasks, Mode=OneWay}" x:Name="MaskList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True" AddingNewItem="MaskList_AddingNewItem">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
@@ -196,7 +196,7 @@
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate>
-                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic" Text="{x:Static strings:Strings.Double_click_to_add}"></TextBlock>
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>
@@ -213,7 +213,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="(CollisionMask)"/>
+                                <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{x:Static strings:Strings.CollisionMask}"/>
                                 <local:ButtonDark Grid.Column="1" x:Name="RemoveButton" Content=" X " Click="RemoveMask_Clicked" ToolTip="Remove">
                                 </local:ButtonDark>
                             </Grid>
@@ -244,7 +244,7 @@
                                 </Image>
                             </Border>
                         </Viewbox>
-                        <TextBlock Text="Invalid mask data!" Foreground="Red" Name="MaskIsInvalid" Visibility="Hidden"/>
+                        <TextBlock Text="{x:Static strings:Strings.Invalid_mask_data}" Foreground="Red" Name="MaskIsInvalid" Visibility="Hidden"/>
 
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -257,8 +257,8 @@
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
-                            <local:ButtonDark Grid.Row="0" Grid.Column="0" Content="Import mask" Click="MaskImport_Click" x:Name="MaskImport"/>
-                            <local:ButtonDark Grid.Row="0" Grid.Column="3" Content="Export mask" Click="MaskExport_Click" x:Name="MaskExport"/>
+                            <local:ButtonDark Grid.Row="0" Grid.Column="0" Content="{x:Static strings:Strings.Import_mask}" Click="MaskImport_Click" x:Name="MaskImport"/>
+                            <local:ButtonDark Grid.Row="0" Grid.Column="3" Content="{x:Static strings:Strings.Export_mask}" Click="MaskExport_Click" x:Name="MaskExport"/>
                         </Grid>
                     </StackPanel>
                     <ControlTemplate.Triggers>
@@ -284,7 +284,7 @@
             </ContentControl.Template>
         </ContentControl>
 
-        <TextBlock Grid.Row="15" Grid.Column="0" Margin="3">Is special type?</TextBlock>
+        <TextBlock Grid.Row="15" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Is_special_type}"></TextBlock>
         <CheckBox Grid.Row="15" Grid.Column="1" Margin="3" IsChecked="{Binding IsSpecialType}"/>
 
         <Grid Grid.Row="16" Grid.ColumnSpan="2" Margin="0" Visibility="{Binding Path=IsSpecialType, Mode=OneWay, Converter={StaticResource BoolToVis}}">
@@ -297,11 +297,11 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            
-            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Version</TextBlock>
+
+            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Version}"></TextBlock>
             <local:TextBoxDark Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding SVersion}"/>
 
-            <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Type</TextBlock>
+            <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Type1}"></TextBlock>
             <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource SpriteType}}" SelectedItem="{Binding Path=SSpriteType}"
                                 Grid.Row="1" Grid.Column="1" Margin="3"/>
 
@@ -315,10 +315,10 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Playback speed</TextBlock>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Playback_speed}"></TextBlock>
                 <local:TextBoxDark Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GMS2PlaybackSpeed}"/>
 
-                <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Playback speed type</TextBlock>
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Playback_speed_type}"></TextBlock>
                 <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource AnimSpeedType}}" SelectedItem="{Binding Path=GMS2PlaybackSpeedType}"
                                     Grid.Row="1" Grid.Column="1" Margin="3"/>
             </Grid>
