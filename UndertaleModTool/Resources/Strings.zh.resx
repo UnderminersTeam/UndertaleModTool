@@ -953,7 +953,8 @@ UndertaleModTool通过平均值来表现这一点。
     <value>文件关联</value>
   </data>
   <data name="UndertaleModToolUpdater_app_didn" xml:space="preserve">
-    <value>UndertaleModToolUpdater 没有退出.\n无法从临时目录删除它</value>
+    <value>UndertaleModToolUpdater 没有退出.
+无法从临时目录删除它</value>
   </data>
   <data name="error_message_is_missing" xml:space="preserve">
     <value>(错误信息缺失)</value>
@@ -976,7 +977,8 @@ UndertaleModTool通过平均值来表现这一点。
     <value>要在退出前保存更改吗？</value>
   </data>
   <data name="Script_still_runs__Save_anyway__nIt" xml:space="preserve">
-    <value>脚本仍在运行。是否仍要保存？\n您要保存的数据文件可能会损坏。</value>
+    <value>脚本仍在运行。是否仍要保存？
+您要保存的数据文件可能会损坏。</value>
   </data>
   <data name="Loading1" xml:space="preserve">
     <value>加载中</value>
@@ -1089,7 +1091,10 @@ UndertaleModTool通过平均值来表现这一点。
     <value>错误</value>
   </data>
   <data name="UndertaleModTool_by_krzys_h_and_the" xml:space="preserve">
-    <value>UndertaleModTool 由 krzys_h 和 Underminers 团队创作\nVersion {0}\n\n简体中文本地化由Github: @Genouka 制作。</value>
+    <value>UndertaleModTool 由 krzys_h 和 Underminers 团队创作
+Version {0}
+
+简体中文本地化由Github: @Genouka 制作。</value>
   </data>
   <data name="Check_your_internet_connection" xml:space="preserve">
     <value>检查你的互联网连接。</value>

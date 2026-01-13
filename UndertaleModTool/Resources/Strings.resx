@@ -1223,7 +1223,8 @@ For best results, enter the same value in both fields.</value>
     <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
   </data>
   <data name="UndertaleModToolUpdater_app_didn" xml:space="preserve">
-    <value>UndertaleModToolUpdater app didn't exit.\nCan't delete its temp folder.</value>
+    <value>UndertaleModToolUpdater app didn't exit.
+Can't delete its temp folder.</value>
     <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
   </data>
   <data name="error_message_is_missing" xml:space="preserve">
@@ -1236,7 +1237,8 @@ Are you sure you want to make a new project?</value>
     <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
   </data>
   <data name="New_file_created__have_fun_making" xml:space="preserve">
-    <value>New file created, have fun making a game out of nothing\nI TOLD YOU to open a data.win, not create a new file! :P</value>
+    <value>New file created, have fun making a game out of nothing
+I TOLD YOU to open a data.win, not create a new file! :P</value>
     <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
   </data>
   <data name="Errors_occurred_during_loading__High" xml:space="preserve">
@@ -1252,7 +1254,8 @@ Are you sure you want to make a new project?</value>
     <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
   </data>
   <data name="Script_still_runs__Save_anyway__nIt" xml:space="preserve">
-    <value>Script still runs. Save anyway?\nIt can corrupt the data file that you'll save.</value>
+    <value>Script still runs. Save anyway?
+It can corrupt the data file that you'll save.</value>
     <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
   </data>
   <data name="Loading1" xml:space="preserve">
@@ -1370,7 +1373,8 @@ Restart the application to prevent some unexpected behavior.</value>
     <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
   </data>
   <data name="Stopping_the_progress_bar_updater" xml:space="preserve">
-    <value>Stopping the progress bar updater task is failed.\nIt's highly recommended to restart the application.</value>
+    <value>Stopping the progress bar updater task is failed.
+It's highly recommended to restart the application.</value>
     <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
   </data>
   <data name="Script_error" xml:space="preserve">
@@ -1398,7 +1402,8 @@ Restart the application to prevent some unexpected behavior.</value>
     <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
   </data>
   <data name="UndertaleModTool_by_krzys_h_and_the" xml:space="preserve">
-    <value>UndertaleModTool by krzys_h and the Underminers team\nVersion {0}</value>
+    <value>UndertaleModTool by krzys_h and the Underminers team
+Version {0}</value>
     <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
   </data>
   <data name="Check_your_internet_connection" xml:space="preserve">

@@ -2380,7 +2380,8 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
-        ///   查找类似 New file created, have fun making a game out of nothing\nI TOLD YOU to open a data.win, not create a new file! :P 的本地化字符串。
+        ///   查找类似 New file created, have fun making a game out of nothing
+        ///I TOLD YOU to open a data.win, not create a new file! :P 的本地化字符串。
         /// </summary>
         public static string New_file_created__have_fun_making {
             get {
@@ -3164,7 +3165,8 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Script still runs. Save anyway?\nIt can corrupt the data file that you&apos;ll save. 的本地化字符串。
+        ///   查找类似 Script still runs. Save anyway?
+        ///It can corrupt the data file that you&apos;ll save. 的本地化字符串。
         /// </summary>
         public static string Script_still_runs__Save_anyway__nIt {
             get {
@@ -3488,7 +3490,8 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Stopping the progress bar updater task is failed.\nIt&apos;s highly recommended to restart the application. 的本地化字符串。
+        ///   查找类似 Stopping the progress bar updater task is failed.
+        ///It&apos;s highly recommended to restart the application. 的本地化字符串。
         /// </summary>
         public static string Stopping_the_progress_bar_updater {
             get {
@@ -4022,7 +4025,8 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
-        ///   查找类似 UndertaleModTool by krzys_h and the Underminers team\nVersion {0} 的本地化字符串。
+        ///   查找类似 UndertaleModTool by krzys_h and the Underminers team
+        ///Version {0} 的本地化字符串。
         /// </summary>
         public static string UndertaleModTool_by_krzys_h_and_the {
             get {
@@ -4041,7 +4045,8 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
-        ///   查找类似 UndertaleModToolUpdater app didn&apos;t exit.\nCan&apos;t delete its temp folder. 的本地化字符串。
+        ///   查找类似 UndertaleModToolUpdater app didn&apos;t exit.
+        ///Can&apos;t delete its temp folder. 的本地化字符串。
         /// </summary>
         public static string UndertaleModToolUpdater_app_didn {
             get {
