@@ -9,7 +9,7 @@
 
     <TreeViewItem.Resources>
         <DataTemplate x:Key="DefaultNullItemTemplate">
-            <TextBlock Text="(null)"/>
+            <TextBlock Text="{x:Static strings:Strings.null1}"/>
         </DataTemplate>
 
         <local:ImplementsInterfaceConverter x:Key="ImplementsInterfaceConverter"/>

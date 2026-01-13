@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleFont}">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleFont}" xmlns:strings="clr-namespace:UndertaleModTool.Resources" >
     <Grid>
         <Grid.Resources>
             <local:CharConverter x:Key="CharConverter"/>
@@ -49,13 +49,13 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Name}"></TextBlock>
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Display name</TextBlock>
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Display_name}"></TextBlock>
         <local:UndertaleStringReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding DisplayName}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Font size</TextBlock>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Font_size}"></TextBlock>
         <Grid Grid.Row="2" Grid.Column="1" Margin="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -65,13 +65,13 @@
             <TextBlock Grid.Column="1" Text=" em"/>
         </Grid>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Bold</TextBlock>
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Bold}"></TextBlock>
         <CheckBox Grid.Row="3" Grid.Column="1" Margin="3" IsChecked="{Binding Bold}"/>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Italic</TextBlock>
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Italic}"></TextBlock>
         <CheckBox Grid.Row="4" Grid.Column="1" Margin="3" IsChecked="{Binding Italic}"/>
 
-        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Range</TextBlock>
+        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Range}"></TextBlock>
         <Grid Grid.Row="5" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -83,16 +83,16 @@
             <local:TextBoxDark Grid.Column="2" Margin="3" Text="{Binding RangeEnd}"/>
         </Grid>
 
-        <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Charset</TextBlock>
+        <TextBlock Grid.Row="6" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Charset}"></TextBlock>
         <local:TextBoxDark Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding Charset}"/>
 
-        <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Anti Aliasing</TextBlock>
+        <TextBlock Grid.Row="7" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Anti_Aliasing}"></TextBlock>
         <local:TextBoxDark Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding AntiAliasing}"/>
 
-        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Texture</TextBlock>
+        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Texture}"></TextBlock>
         <local:UndertaleObjectReference Grid.Row="8" Grid.Column="1" Margin="3" ObjectReference="{Binding Texture}" ObjectType="{x:Type undertale:UndertaleTexturePageItem}"/>
 
-        <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Scale</TextBlock>
+        <TextBlock Grid.Row="9" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Scale}"></TextBlock>
         <Grid Grid.Row="9" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -117,14 +117,13 @@
         <local:TextBoxDark Grid.Row="12" Grid.Column="1" Margin="3" Text="{Binding SDFSpread}"
                            Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2023.2}"/>
 
-        <TextBlock Grid.Row="13" Grid.Column="0" Margin="3" Text="Line height"
+        <TextBlock Grid.Row="13" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Line_height}"
                    Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2023.6}"/>
         <local:TextBoxDark Grid.Row="13" Grid.Column="1" Margin="3" Text="{Binding LineHeight}"
                            Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2023.6}"/>
 
-        <TextBlock Grid.Row="14" Grid.ColumnSpan="2" Margin="3,30,3,3" HorizontalAlignment="Center" Foreground="DarkGray" FontStyle="Italic" TextWrapping="Wrap" TextAlignment="Center">
-            Hint: You can click on any glyph here to highlight it in the "Glyphs".
-        </TextBlock>
+        <TextBlock Grid.Row="14" Grid.ColumnSpan="2" Margin="3,30,3,3" HorizontalAlignment="Center" Foreground="DarkGray" FontStyle="Italic" TextWrapping="Wrap" TextAlignment="Center"
+                    Text="{x:Static strings:Strings.Hint__You_can_click_on_any_glyph}"></TextBlock>
         <Viewbox Grid.Row="15" Grid.ColumnSpan="2" Margin="3" Stretch="Uniform" StretchDirection="DownOnly">
             <Grid MouseDown="Grid_MouseDown" Cursor="Hand">
                 <Grid.Background>

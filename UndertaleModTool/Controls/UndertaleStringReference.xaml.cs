@@ -85,7 +85,7 @@ namespace UndertaleModTool
             foreach (var item in menu.Items)
             {
                 var menuItem = item as MenuItem;
-                if ((menuItem.Header as string) == "Find all references")
+                if ((menuItem.Header as string) == UndertaleModTool.Resources.Strings.Find_all_references)
                 {
                     Type objType = menu.DataContext.GetType();
                     menuItem.Visibility = UndertaleResourceReferenceMap.IsTypeReferenceable(objType)
@@ -100,7 +100,7 @@ namespace UndertaleModTool
             var obj = (sender as FrameworkElement)?.DataContext;
             if (obj is not UndertaleResource res)
             {
-                mainWindow.ShowError("The selected object is not an \"UndertaleResource\".");
+                mainWindow.ShowError(UndertaleModTool.Resources.Strings.The_selected_object_is_not_an___UndertaleResource);
                 return;
             }
 

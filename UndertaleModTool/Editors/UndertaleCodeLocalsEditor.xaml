@@ -48,14 +48,14 @@
                 </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTemplateColumn Header="Index" Width="1*">
+                <DataGridTemplateColumn Header="{x:Static strings:Strings.Index}" Width="1*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <local:TextBoxDark Text="{Binding Index, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Name" Width="3*">
+                <DataGridTemplateColumn Header="{x:Static strings:Strings.Name}" Width="3*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <local:UndertaleStringReference ObjectReference="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>

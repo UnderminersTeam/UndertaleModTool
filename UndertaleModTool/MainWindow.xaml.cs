@@ -1366,7 +1366,7 @@ namespace UndertaleModTool
                 }
                 else
                 {
-                    Highlighted = new DescriptionView(item, "Expand the list on the left to edit items");
+                    Highlighted = new DescriptionView(item, UndertaleModTool.Resources.Strings.Expand_the_list_on_the_left_to_edit);
                 }
             }
             else
@@ -2984,12 +2984,7 @@ namespace UndertaleModTool
             }
             if ((!WasWarnedAboutTempRun) && SettingsWindow.TempRunMessageShow)
             {
-                ScriptMessage(@"WARNING:
-Temp running the game does not permanently 
-save your changes. Please ""Save"" the game
-to save your changes. Closing UndertaleModTool
-without using the ""Save"" option can
-result in loss of work.");
+                ScriptMessage(UndertaleModTool.Resources.Strings.WARNING__Temp_running_the_game_does);
                 WasWarnedAboutTempRun = true;
             }
             bool saveOk = true;
@@ -3007,7 +3002,7 @@ result in loss of work.");
             Data.GeneralInfo.IsDebuggerDisabled = oldDisableDebuggerState;
             if (TempFilesFolder == null)
             {
-                this.ShowWarning("Temp folder is null.");
+                this.ShowWarning(UndertaleModTool.Resources.Strings.Temp_folder_is_null);
                 return;
             }
             else if (saveOk)
@@ -3015,7 +3010,7 @@ result in loss of work.");
                 string gameExeName = Data?.GeneralInfo?.FileName?.Content;
                 if (gameExeName == null || FilePath == null)
                 {
-                    ScriptError("Null game executable name or location");
+                    ScriptError(UndertaleModTool.Resources.Strings.Null_game_executable_name_or_location);
                     return;
                 }
                 string gameExePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(FilePath), gameExeName + ".exe");
@@ -3034,7 +3029,7 @@ result in loss of work.");
             }
             else if (!saveOk)
             {
-                this.ShowWarning("Temp save failed, cannot run.");
+                this.ShowWarning(UndertaleModTool.Resources.Strings.Temp_save_failed__cannot_run);
                 return;
             }
             if (File.Exists(TempFilesFolder))
@@ -3051,32 +3046,32 @@ result in loss of work.");
             bool saveOk = true;
             if (!Data.GeneralInfo.IsDebuggerDisabled)
             {
-                if (this.ShowQuestion("The game has the debugger enabled. Would you like to disable it so the game will run?") == MessageBoxResult.Yes)
+                if (this.ShowQuestion(UndertaleModTool.Resources.Strings.The_game_has_the_debugger_enabled) == MessageBoxResult.Yes)
                 {
                     Data.GeneralInfo.IsDebuggerDisabled = true;
                     if (!await DoSaveDialog())
                     {
-                        this.ShowError("You must save your changes to run.");
+                        this.ShowError(UndertaleModTool.Resources.Strings.You_must_save_your_changes_to_run);
                         Data.GeneralInfo.IsDebuggerDisabled = false;
                         return;
                     }
                 }
                 else
                 {
-                    this.ShowError("Use the \"Run game using debugger\" option to run this game.");
+                    this.ShowError(UndertaleModTool.Resources.Strings.Use_the___Run_game_using_debugger);
                     return;
                 }
             }
             else
             {
                 Data.GeneralInfo.IsDebuggerDisabled = true;
-                if (this.ShowQuestion("Save changes first?") == MessageBoxResult.Yes)
+                if (this.ShowQuestion(UndertaleModTool.Resources.Strings.Save_changes_first) == MessageBoxResult.Yes)
                     saveOk = await DoSaveDialog();
             }
 
             if (FilePath == null)
             {
-                this.ShowWarning("The file must be saved in order to be run.");
+                this.ShowWarning(UndertaleModTool.Resources.Strings.The_file_must_be_saved_in_order_to);
             }
             else if (saveOk)
             {
@@ -3093,8 +3088,7 @@ result in loss of work.");
             if (Data == null)
                 return;
 
-            var result = this.ShowQuestion("Are you sure that you want to run the game with GMS debugger?\n" +
-                                           "If you want to enable a debug mode in some game, then you need to use one of the scripts.");
+            var result = this.ShowQuestion(UndertaleModTool.Resources.Strings.Are_you_sure_that_you_want_to_run);
             if (result != MessageBoxResult.Yes)
                 return;
 
@@ -3104,7 +3098,7 @@ result in loss of work.");
             bool saveOk = await DoSaveDialog(true);
             if (FilePath == null)
             {
-                this.ShowWarning("The file must be saved in order to be run.");
+                this.ShowWarning(UndertaleModTool.Resources.Strings.The_file_must_be_saved_in_order_to);
             }
             else if (saveOk)
             {
@@ -3115,7 +3109,7 @@ result in loss of work.");
                     return;
                 if (runtime.DebuggerPath == null)
                 {
-                    this.ShowError("The selected runtime does not support debugging.", "Run error");
+                    this.ShowError(UndertaleModTool.Resources.Strings.The_selected_runtime_does_not_support, UndertaleModTool.Resources.Strings.Run_error);
                     return;
                 }
 
@@ -3179,7 +3173,7 @@ result in loss of work.");
             UndertaleResource res = obj as UndertaleResource;
             if (res is null)
             {
-                string msg = $"Can't highlight the object - it's null or isn't an UndertaleResource.";
+                string msg = UndertaleModTool.Resources.Strings.Can_t_highlight_the_object___it_s;
                 if (silent)
                     Debug.WriteLine(msg);
                 else

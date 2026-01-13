@@ -61,6 +61,17 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 1) Double-click an inactive rectangle to select it.
+        ///2) You can move the selected rectangle with the arrow keys (held Shift - resize).
+        ///3) Drag mouse on desired region if it&apos;s an empty glyph. 的本地化字符串。
+        /// </summary>
+        public static string a_1__Double_click_an_inactive_rectangle {
+            get {
+                return ResourceManager.GetString("a_1__Double_click_an_inactive_rectangle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 _About 的本地化字符串。
         /// </summary>
         public static string About {
@@ -133,6 +144,15 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Adding not supported in this situation. 的本地化字符串。
+        /// </summary>
+        public static string Adding_not_supported_in_this_situation {
+            get {
+                return ResourceManager.GetString("Adding_not_supported_in_this_situation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Additive color blend 的本地化字符串。
         /// </summary>
         public static string Additive_color_blend {
@@ -175,6 +195,34 @@ namespace UndertaleModTool.Resources {
         public static string Animate_sprite {
             get {
                 return ResourceManager.GetString("Animate_sprite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Animation speed 的本地化字符串。
+        /// </summary>
+        public static string Animation_speed {
+            get {
+                return ResourceManager.GetString("Animation_speed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Anti Aliasing 的本地化字符串。
+        /// </summary>
+        public static string Anti_Aliasing {
+            get {
+                return ResourceManager.GetString("Anti_Aliasing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Are you sure that you want to run the game with GMS debugger?
+        ///If you want to enable a debug mode in some game, then you need to use one of the scripts. 的本地化字符串。
+        /// </summary>
+        public static string Are_you_sure_that_you_want_to_run {
+            get {
+                return ResourceManager.GetString("Are_you_sure_that_you_want_to_run", resourceCulture);
             }
         }
         
@@ -224,6 +272,51 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Auto 的本地化字符串。
+        /// </summary>
+        public static string Auto {
+            get {
+                return ResourceManager.GetString("Auto", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Automatically set size to match room size 的本地化字符串。
+        /// </summary>
+        public static string Automatically_set_size_to_match_room {
+            get {
+                return ResourceManager.GetString("Automatically_set_size_to_match_room", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Back image 的本地化字符串。
+        /// </summary>
+        public static string Back_image {
+            get {
+                return ResourceManager.GetString("Back_image", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Background color 的本地化字符串。
+        /// </summary>
+        public static string Background_color {
+            get {
+                return ResourceManager.GetString("Background_color", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Backgrounds 的本地化字符串。
+        /// </summary>
+        public static string Backgrounds {
+            get {
+                return ResourceManager.GetString("Backgrounds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Backgrounds &amp; Tile sets 的本地化字符串。
         /// </summary>
         public static string Backgrounds___Tile_sets {
@@ -238,6 +331,33 @@ namespace UndertaleModTool.Resources {
         public static string Backgrounds__amp__Tile_sets {
             get {
                 return ResourceManager.GetString("Backgrounds__amp__Tile_sets", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Backgrounds don&apos;t support this feature. 的本地化字符串。
+        /// </summary>
+        public static string Backgrounds_don_t_support_this_feature {
+            get {
+                return ResourceManager.GetString("Backgrounds_don_t_support_this_feature", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Bold 的本地化字符串。
+        /// </summary>
+        public static string Bold {
+            get {
+                return ResourceManager.GetString("Bold", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Border 的本地化字符串。
+        /// </summary>
+        public static string Border {
+            get {
+                return ResourceManager.GetString("Border", resourceCulture);
             }
         }
         
@@ -278,6 +398,24 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Can&apos;t change the object position - no list for the selected object was found. 的本地化字符串。
+        /// </summary>
+        public static string Can_t_change_the_object_position {
+            get {
+                return ResourceManager.GetString("Can_t_change_the_object_position", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Can&apos;t highlight the object - it&apos;s null or isn&apos;t an UndertaleResource. 的本地化字符串。
+        /// </summary>
+        public static string Can_t_highlight_the_object___it_s {
+            get {
+                return ResourceManager.GetString("Can_t_highlight_the_object___it_s", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Cancel 的本地化字符串。
         /// </summary>
         public static string Cancel {
@@ -287,11 +425,47 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Cannot find the glyphs table scroll viewer. 的本地化字符串。
+        /// </summary>
+        public static string Cannot_find_the_glyphs_table_scroll {
+            get {
+                return ResourceManager.GetString("Cannot_find_the_glyphs_table_scroll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Cannot find the selected glyph. 的本地化字符串。
+        /// </summary>
+        public static string Cannot_find_the_selected_glyph {
+            get {
+                return ResourceManager.GetString("Cannot_find_the_selected_glyph", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Cannot select the code editor mode tab - the instance is not found. 的本地化字符串。
         /// </summary>
         public static string Cannot_select_the_code_editor_mode {
             get {
                 return ResourceManager.GetString("Cannot_select_the_code_editor_mode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Caption 的本地化字符串。
+        /// </summary>
+        public static string Caption {
+            get {
+                return ResourceManager.GetString("Caption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Charset 的本地化字符串。
+        /// </summary>
+        public static string Charset {
+            get {
+                return ResourceManager.GetString("Charset", resourceCulture);
             }
         }
         
@@ -368,6 +542,15 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Code entry for room already exists; reusing it. 的本地化字符串。
+        /// </summary>
+        public static string Code_entry_for_room_already_exists {
+            get {
+                return ResourceManager.GetString("Code_entry_for_room_already_exists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Code locals 的本地化字符串。
         /// </summary>
         public static string Code_locals {
@@ -404,11 +587,56 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Color 的本地化字符串。
+        /// </summary>
+        public static string Color {
+            get {
+                return ResourceManager.GetString("Color", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Color depth 的本地化字符串。
+        /// </summary>
+        public static string Color_depth {
+            get {
+                return ResourceManager.GetString("Color_depth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Config 的本地化字符串。
         /// </summary>
         public static string Config {
             get {
                 return ResourceManager.GetString("Config", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Constants 的本地化字符串。
+        /// </summary>
+        public static string Constants {
+            get {
+                return ResourceManager.GetString("Constants", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Contains GameObject instances, listed in the tree on the left 的本地化字符串。
+        /// </summary>
+        public static string Contains_GameObject_instances__listed {
+            get {
+                return ResourceManager.GetString("Contains_GameObject_instances__listed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Contains legacy tiles and sprites, listed in the tree on the left 的本地化字符串。
+        /// </summary>
+        public static string Contains_legacy_tiles_and_sprites {
+            get {
+                return ResourceManager.GetString("Contains_legacy_tiles_and_sprites", resourceCulture);
             }
         }
         
@@ -431,6 +659,42 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Copy object 的本地化字符串。
+        /// </summary>
+        public static string Copy_object {
+            get {
+                return ResourceManager.GetString("Copy_object", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Copy particle system instance 的本地化字符串。
+        /// </summary>
+        public static string Copy_particle_system_instance {
+            get {
+                return ResourceManager.GetString("Copy_particle_system_instance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Copy sprite instance 的本地化字符串。
+        /// </summary>
+        public static string Copy_sprite_instance {
+            get {
+                return ResourceManager.GetString("Copy_sprite_instance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Copy tile 的本地化字符串。
+        /// </summary>
+        public static string Copy_tile {
+            get {
+                return ResourceManager.GetString("Copy_tile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Create 的本地化字符串。
         /// </summary>
         public static string Create {
@@ -445,6 +709,15 @@ namespace UndertaleModTool.Resources {
         public static string Create_new_code_entry {
             get {
                 return ResourceManager.GetString("Create_new_code_entry", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Creation code 的本地化字符串。
+        /// </summary>
+        public static string Creation_Code {
+            get {
+                return ResourceManager.GetString("Creation_Code", resourceCulture);
             }
         }
         
@@ -485,6 +758,15 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Definition 的本地化字符串。
+        /// </summary>
+        public static string Definition {
+            get {
+                return ResourceManager.GetString("Definition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Delay measured in: 的本地化字符串。
         /// </summary>
         public static string Delay_measured_in {
@@ -499,6 +781,60 @@ namespace UndertaleModTool.Resources {
         public static string Delay_min_max {
             get {
                 return ResourceManager.GetString("Delay_min_max", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Delete background 的本地化字符串。
+        /// </summary>
+        public static string Delete_background {
+            get {
+                return ResourceManager.GetString("Delete_background", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Delete layer 的本地化字符串。
+        /// </summary>
+        public static string Delete_layer {
+            get {
+                return ResourceManager.GetString("Delete_layer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Delete object 的本地化字符串。
+        /// </summary>
+        public static string Delete_object {
+            get {
+                return ResourceManager.GetString("Delete_object", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Delete particle system instance 的本地化字符串。
+        /// </summary>
+        public static string Delete_particle_system_instance {
+            get {
+                return ResourceManager.GetString("Delete_particle_system_instance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Delete sprite instance 的本地化字符串。
+        /// </summary>
+        public static string Delete_sprite_instance {
+            get {
+                return ResourceManager.GetString("Delete_sprite_instance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Delete tile 的本地化字符串。
+        /// </summary>
+        public static string Delete_tile {
+            get {
+                return ResourceManager.GetString("Delete_tile", resourceCulture);
             }
         }
         
@@ -566,6 +902,15 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Disable view 的本地化字符串。
+        /// </summary>
+        public static string Disable_view {
+            get {
+                return ResourceManager.GetString("Disable_view", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Disassembly 的本地化字符串。
         /// </summary>
         public static string Disassembly {
@@ -629,11 +974,47 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 (drag &amp; drop a {0}) 的本地化字符串。
+        /// </summary>
+        public static string drag___drop_a__0 {
+            get {
+                return ResourceManager.GetString("drag___drop_a__0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Draw background color 的本地化字符串。
+        /// </summary>
+        public static string Draw_background_color {
+            get {
+                return ResourceManager.GetString("Draw_background_color", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Draw order 的本地化字符串。
         /// </summary>
         public static string Draw_order {
             get {
                 return ResourceManager.GetString("Draw_order", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Edit 的本地化字符串。
+        /// </summary>
+        public static string Edit {
+            get {
+                return ResourceManager.GetString("Edit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Edit a font glyph rectangle 的本地化字符串。
+        /// </summary>
+        public static string Edit_a_font_glyph_rectangle {
+            get {
+                return ResourceManager.GetString("Edit_a_font_glyph_rectangle", resourceCulture);
             }
         }
         
@@ -710,6 +1091,15 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 (empty {0} reference) 的本地化字符串。
+        /// </summary>
+        public static string empty__0__reference {
+            get {
+                return ResourceManager.GetString("empty__0__reference", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Enabled 的本地化字符串。
         /// </summary>
         public static string Enabled {
@@ -728,6 +1118,15 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Entry count 的本地化字符串。
+        /// </summary>
+        public static string Entry_count {
+            get {
+                return ResourceManager.GetString("Entry_count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Error 的本地化字符串。
         /// </summary>
         public static string Error {
@@ -737,11 +1136,29 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Error - selected file line count doesn&apos;t match tile layer height. 的本地化字符串。
+        /// </summary>
+        public static string Error___selected_file_line_count {
+            get {
+                return ResourceManager.GetString("Error___selected_file_line_count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 (error message is missing) 的本地化字符串。
         /// </summary>
         public static string error_message_is_missing {
             get {
                 return ResourceManager.GetString("error_message_is_missing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 (error) 的本地化字符串。
+        /// </summary>
+        public static string error1 {
+            get {
+                return ResourceManager.GetString("error1", resourceCulture);
             }
         }
         
@@ -760,6 +1177,15 @@ namespace UndertaleModTool.Resources {
         public static string Events {
             get {
                 return ResourceManager.GetString("Events", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Expand the list on the left to edit items 的本地化字符串。
+        /// </summary>
+        public static string Expand_the_list_on_the_left_to_edit {
+            get {
+                return ResourceManager.GetString("Expand_the_list_on_the_left_to_edit", resourceCulture);
             }
         }
         
@@ -908,6 +1334,15 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 First frame 的本地化字符串。
+        /// </summary>
+        public static string First_frame {
+            get {
+                return ResourceManager.GetString("First_frame", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 First-time setup: Would you like to associate GameMaker data files (like .win) with UndertaleModTool? 的本地化字符串。
         /// </summary>
         public static string First_time_setup__Would_you_like {
@@ -926,11 +1361,38 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Follows object 的本地化字符串。
+        /// </summary>
+        public static string Follows_object {
+            get {
+                return ResourceManager.GetString("Follows_object", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Font size 的本地化字符串。
+        /// </summary>
+        public static string Font_size {
+            get {
+                return ResourceManager.GetString("Font_size", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Fonts 的本地化字符串。
         /// </summary>
         public static string Fonts {
             get {
                 return ResourceManager.GetString("Fonts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Foreground 的本地化字符串。
+        /// </summary>
+        public static string Foreground {
+            get {
+                return ResourceManager.GetString("Foreground", resourceCulture);
             }
         }
         
@@ -953,6 +1415,15 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Frame index 的本地化字符串。
+        /// </summary>
+        public static string Frame_index {
+            get {
+                return ResourceManager.GetString("Frame_index", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Frame Time (microseconds) 的本地化字符串。
         /// </summary>
         public static string Frame_Time__microseconds {
@@ -962,11 +1433,29 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Frequency 的本地化字符串。
+        /// </summary>
+        public static string Frequency {
+            get {
+                return ResourceManager.GetString("Frequency", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Friction 的本地化字符串。
         /// </summary>
         public static string Friction {
             get {
                 return ResourceManager.GetString("Friction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Front image 的本地化字符串。
+        /// </summary>
+        public static string Front_image {
+            get {
+                return ResourceManager.GetString("Front_image", resourceCulture);
             }
         }
         
@@ -1025,6 +1514,15 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Game objects (from all layers) 的本地化字符串。
+        /// </summary>
+        public static string Game_objects__from_all_layers {
+            get {
+                return ResourceManager.GetString("Game_objects__from_all_layers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 General info 的本地化字符串。
         /// </summary>
         public static string General_info {
@@ -1057,6 +1555,15 @@ namespace UndertaleModTool.Resources {
         public static string Generating_debugger_data {
             get {
                 return ResourceManager.GetString("Generating_debugger_data", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Get help 的本地化字符串。
+        /// </summary>
+        public static string Get_help {
+            get {
+                return ResourceManager.GetString("Get_help", resourceCulture);
             }
         }
         
@@ -1124,6 +1631,15 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Glyphs: 的本地化字符串。
+        /// </summary>
+        public static string Glyphs {
+            get {
+                return ResourceManager.GetString("Glyphs", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 GMS Debugger 的本地化字符串。
         /// </summary>
         public static string GMS_Debugger {
@@ -1133,11 +1649,47 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Gravity 的本地化字符串。
+        /// </summary>
+        public static string Gravity {
+            get {
+                return ResourceManager.GetString("Gravity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Gravity force|direction 的本地化字符串。
         /// </summary>
         public static string Gravity_force_direction {
             get {
                 return ResourceManager.GetString("Gravity_force_direction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Grid Height 的本地化字符串。
+        /// </summary>
+        public static string Grid_Height {
+            get {
+                return ResourceManager.GetString("Grid_Height", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Grid Thickness 的本地化字符串。
+        /// </summary>
+        public static string Grid_Thickness {
+            get {
+                return ResourceManager.GetString("Grid_Thickness", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Grid Width 的本地化字符串。
+        /// </summary>
+        public static string Grid_Width {
+            get {
+                return ResourceManager.GetString("Grid_Width", resourceCulture);
             }
         }
         
@@ -1178,6 +1730,15 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Help 的本地化字符串。
+        /// </summary>
+        public static string Help1 {
+            get {
+                return ResourceManager.GetString("Help1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Hint: Prior to GM 2023.8, these &quot;Size&quot; values were not split by x and y.
         ///UndertaleModTool represents this by averaging the values.
         ///For best results, enter the same value in both fields. 的本地化字符串。
@@ -1194,6 +1755,15 @@ namespace UndertaleModTool.Resources {
         public static string Hint__This_image_is_mouse_interactable {
             get {
                 return ResourceManager.GetString("Hint__This_image_is_mouse_interactable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Hint: You can click on any glyph here to highlight it in the &quot;Glyphs&quot;. 的本地化字符串。
+        /// </summary>
+        public static string Hint__You_can_click_on_any_glyph {
+            get {
+                return ResourceManager.GetString("Hint__You_can_click_on_any_glyph", resourceCulture);
             }
         }
         
@@ -1225,11 +1795,29 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Horizontal 的本地化字符串。
+        /// </summary>
+        public static string Horizontal {
+            get {
+                return ResourceManager.GetString("Horizontal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 ID 的本地化字符串。
         /// </summary>
         public static string ID1 {
             get {
                 return ResourceManager.GetString("ID1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Image speed 的本地化字符串。
+        /// </summary>
+        public static string Image_speed {
+            get {
+                return ResourceManager.GetString("Image_speed", resourceCulture);
             }
         }
         
@@ -1248,6 +1836,24 @@ namespace UndertaleModTool.Resources {
         public static string Import1 {
             get {
                 return ResourceManager.GetString("Import1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Imported successfully. 的本地化字符串。
+        /// </summary>
+        public static string Imported_successfully {
+            get {
+                return ResourceManager.GetString("Imported_successfully", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Index 的本地化字符串。
+        /// </summary>
+        public static string Index {
+            get {
+                return ResourceManager.GetString("Index", resourceCulture);
             }
         }
         
@@ -1279,11 +1885,29 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Instance ID 的本地化字符串。
+        /// </summary>
+        public static string Instance_ID {
+            get {
+                return ResourceManager.GetString("Instance_ID", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Instance type 的本地化字符串。
         /// </summary>
         public static string Instance_type {
             get {
                 return ResourceManager.GetString("Instance_type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Instances 的本地化字符串。
+        /// </summary>
+        public static string Instances {
+            get {
+                return ResourceManager.GetString("Instances", resourceCulture);
             }
         }
         
@@ -1302,6 +1926,15 @@ namespace UndertaleModTool.Resources {
         public static string Interval_min_max {
             get {
                 return ResourceManager.GetString("Interval_min_max", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Invalid color string 的本地化字符串。
+        /// </summary>
+        public static string Invalid_color_string {
+            get {
+                return ResourceManager.GetString("Invalid_color_string", resourceCulture);
             }
         }
         
@@ -1369,6 +2002,15 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Italic 的本地化字符串。
+        /// </summary>
+        public static string Italic {
+            get {
+                return ResourceManager.GetString("Italic", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Item name is null. 的本地化字符串。
         /// </summary>
         public static string Item_name_is_null {
@@ -1396,6 +2038,15 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Language count 的本地化字符串。
+        /// </summary>
+        public static string Language_count {
+            get {
+                return ResourceManager.GetString("Language_count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Last object ID 的本地化字符串。
         /// </summary>
         public static string Last_object_ID {
@@ -1410,6 +2061,51 @@ namespace UndertaleModTool.Resources {
         public static string Last_tile_ID {
             get {
                 return ResourceManager.GetString("Last_tile_ID", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Layer id 的本地化字符串。
+        /// </summary>
+        public static string Layer_id {
+            get {
+                return ResourceManager.GetString("Layer_id", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Layer name 的本地化字符串。
+        /// </summary>
+        public static string Layer_name {
+            get {
+                return ResourceManager.GetString("Layer_name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Layer type 的本地化字符串。
+        /// </summary>
+        public static string Layer_type {
+            get {
+                return ResourceManager.GetString("Layer_type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Layers 的本地化字符串。
+        /// </summary>
+        public static string Layers {
+            get {
+                return ResourceManager.GetString("Layers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Layers don&apos;t support this feature currently, change the layer depths instead. 的本地化字符串。
+        /// </summary>
+        public static string Layers_don_t_support_this_feature {
+            get {
+                return ResourceManager.GetString("Layers_don_t_support_this_feature", resourceCulture);
             }
         }
         
@@ -1450,6 +2146,15 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Line height 的本地化字符串。
+        /// </summary>
+        public static string Line_height {
+            get {
+                return ResourceManager.GetString("Line_height", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Linear damping 的本地化字符串。
         /// </summary>
         public static string Linear_damping {
@@ -1468,6 +2173,15 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Load alpha 的本地化字符串。
+        /// </summary>
+        public static string Load_alpha {
+            get {
+                return ResourceManager.GetString("Load_alpha", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Load data.win file first 的本地化字符串。
         /// </summary>
         public static string Load_data_win_file_first {
@@ -1482,6 +2196,15 @@ namespace UndertaleModTool.Resources {
         public static string Load_error {
             get {
                 return ResourceManager.GetString("Load_error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Load image 的本地化字符串。
+        /// </summary>
+        public static string Load_image {
+            get {
+                return ResourceManager.GetString("Load_image", resourceCulture);
             }
         }
         
@@ -1585,6 +2308,24 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Move item down (+) 的本地化字符串。
+        /// </summary>
+        public static string Move_item_down {
+            get {
+                return ResourceManager.GetString("Move_item_down", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Move item up (-) 的本地化字符串。
+        /// </summary>
+        public static string Move_item_up {
+            get {
+                return ResourceManager.GetString("Move_item_up", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 n/a 的本地化字符串。
         /// </summary>
         public static string n_a {
@@ -1621,6 +2362,24 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 New Assets layer 的本地化字符串。
+        /// </summary>
+        public static string New_Assets_layer {
+            get {
+                return ResourceManager.GetString("New_Assets_layer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 New Background layer 的本地化字符串。
+        /// </summary>
+        public static string New_Background_layer {
+            get {
+                return ResourceManager.GetString("New_Background_layer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 New file created, have fun making a game out of nothing\nI TOLD YOU to open a data.win, not create a new file! :P 的本地化字符串。
         /// </summary>
         public static string New_file_created__have_fun_making {
@@ -1630,11 +2389,92 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 New Instances layer 的本地化字符串。
+        /// </summary>
+        public static string New_Instances_layer {
+            get {
+                return ResourceManager.GetString("New_Instances_layer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 New legacy tile 的本地化字符串。
+        /// </summary>
+        public static string New_legacy_tile {
+            get {
+                return ResourceManager.GetString("New_legacy_tile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 New object instance 的本地化字符串。
+        /// </summary>
+        public static string New_object_instance {
+            get {
+                return ResourceManager.GetString("New_object_instance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 New sprite instance 的本地化字符串。
+        /// </summary>
+        public static string New_sprite_instance {
+            get {
+                return ResourceManager.GetString("New_sprite_instance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 New tile 的本地化字符串。
+        /// </summary>
+        public static string New_tile {
+            get {
+                return ResourceManager.GetString("New_tile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 New Tiles layer 的本地化字符串。
+        /// </summary>
+        public static string New_Tiles_layer {
+            get {
+                return ResourceManager.GetString("New_Tiles_layer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 No empty room backgrounds. 的本地化字符串。
+        /// </summary>
+        public static string No_empty_room_backgrounds {
+            get {
+                return ResourceManager.GetString("No_empty_room_backgrounds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 No game loaded 的本地化字符串。
         /// </summary>
         public static string No_game_loaded {
             get {
                 return ResourceManager.GetString("No_game_loaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 No glyph selected. 的本地化字符串。
+        /// </summary>
+        public static string No_glyph_selected {
+            get {
+                return ResourceManager.GetString("No_glyph_selected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 (no name) 的本地化字符串。
+        /// </summary>
+        public static string no_name {
+            get {
+                return ResourceManager.GetString("no_name", resourceCulture);
             }
         }
         
@@ -1653,6 +2493,24 @@ namespace UndertaleModTool.Resources {
         public static string None {
             get {
                 return ResourceManager.GetString("None", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Note: the languages currently don&apos;t seem used, and so the editor for them has not yet been made. 的本地化字符串。
+        /// </summary>
+        public static string Note__the_languages_currently_don {
+            get {
+                return ResourceManager.GetString("Note__the_languages_currently_don", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Null game executable name or location 的本地化字符串。
+        /// </summary>
+        public static string Null_game_executable_name_or_location {
+            get {
+                return ResourceManager.GetString("Null_game_executable_name_or_location", resourceCulture);
             }
         }
         
@@ -1707,6 +2565,15 @@ namespace UndertaleModTool.Resources {
         public static string Open_referenced_object {
             get {
                 return ResourceManager.GetString("Open_referenced_object", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Options 的本地化字符串。
+        /// </summary>
+        public static string Options {
+            get {
+                return ResourceManager.GetString("Options", resourceCulture);
             }
         }
         
@@ -1792,6 +2659,33 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Paste asset 的本地化字符串。
+        /// </summary>
+        public static string Paste_asset {
+            get {
+                return ResourceManager.GetString("Paste_asset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Paste object instance 的本地化字符串。
+        /// </summary>
+        public static string Paste_object_instance {
+            get {
+                return ResourceManager.GetString("Paste_object_instance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Paste tile 的本地化字符串。
+        /// </summary>
+        public static string Paste_tile {
+            get {
+                return ResourceManager.GetString("Paste_tile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Path (GM 2024.14+) 的本地化字符串。
         /// </summary>
         public static string Path__GM_2024_14 {
@@ -1873,11 +2767,74 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Please select a layer. 的本地化字符串。
+        /// </summary>
+        public static string Please_select_a_layer {
+            get {
+                return ResourceManager.GetString("Please_select_a_layer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Please select an assets layer. 的本地化字符串。
+        /// </summary>
+        public static string Please_select_an_assets_layer {
+            get {
+                return ResourceManager.GetString("Please_select_an_assets_layer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Please select an instance layer. 的本地化字符串。
+        /// </summary>
+        public static string Please_select_an_instance_layer {
+            get {
+                return ResourceManager.GetString("Please_select_an_instance_layer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Points 的本地化字符串。
         /// </summary>
         public static string Points {
             get {
                 return ResourceManager.GetString("Points", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Port pos/size 的本地化字符串。
+        /// </summary>
+        public static string Port_pos_size {
+            get {
+                return ResourceManager.GetString("Port_pos_size", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Pos/size 的本地化字符串。
+        /// </summary>
+        public static string Pos_size {
+            get {
+                return ResourceManager.GetString("Pos_size", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Position 的本地化字符串。
+        /// </summary>
+        public static string Position {
+            get {
+                return ResourceManager.GetString("Position", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Pre Create code 的本地化字符串。
+        /// </summary>
+        public static string Pre_Create_code {
+            get {
+                return ResourceManager.GetString("Pre_Create_code", resourceCulture);
             }
         }
         
@@ -1909,6 +2866,15 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Priority 的本地化字符串。
+        /// </summary>
+        public static string Priority {
+            get {
+                return ResourceManager.GetString("Priority", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Product ID 的本地化字符串。
         /// </summary>
         public static string Product_ID {
@@ -1927,6 +2893,15 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Range 的本地化字符串。
+        /// </summary>
+        public static string Range {
+            get {
+                return ResourceManager.GetString("Range", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Region X|Y|Width|Height 的本地化字符串。
         /// </summary>
         public static string Region_X_Y_Width_Height {
@@ -1941,6 +2916,15 @@ namespace UndertaleModTool.Resources {
         public static string Remove_reference {
             get {
                 return ResourceManager.GetString("Remove_reference", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Resolution 的本地化字符串。
+        /// </summary>
+        public static string Resolution {
+            get {
+                return ResourceManager.GetString("Resolution", resourceCulture);
             }
         }
         
@@ -1981,6 +2965,15 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Room is null. 的本地化字符串。
+        /// </summary>
+        public static string Room_is_null {
+            get {
+                return ResourceManager.GetString("Room_is_null", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Room order 的本地化字符串。
         /// </summary>
         public static string Room_order {
@@ -2013,6 +3006,15 @@ namespace UndertaleModTool.Resources {
         public static string Run__other_script {
             get {
                 return ResourceManager.GetString("Run__other_script", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Run error 的本地化字符串。
+        /// </summary>
+        public static string Run_error {
+            get {
+                return ResourceManager.GetString("Run_error", resourceCulture);
             }
         }
         
@@ -2063,11 +3065,29 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Save changes 的本地化字符串。
+        /// </summary>
+        public static string Save_changes {
+            get {
+                return ResourceManager.GetString("Save_changes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Save changes before quitting? 的本地化字符串。
         /// </summary>
         public static string Save_changes_before_quitting {
             get {
                 return ResourceManager.GetString("Save_changes_before_quitting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Save changes first? 的本地化字符串。
+        /// </summary>
+        public static string Save_changes_first {
+            get {
+                return ResourceManager.GetString("Save_changes_first", resourceCulture);
             }
         }
         
@@ -2324,6 +3344,15 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Source 的本地化字符串。
+        /// </summary>
+        public static string Source {
+            get {
+                return ResourceManager.GetString("Source", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Source position/size 的本地化字符串。
         /// </summary>
         public static string Source_position_size {
@@ -2396,6 +3425,15 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Spine Sprites 的本地化字符串。
+        /// </summary>
+        public static string Spine_Sprites {
+            get {
+                return ResourceManager.GetString("Spine_Sprites", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Sprite 的本地化字符串。
         /// </summary>
         public static string Sprite {
@@ -2459,6 +3497,15 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Stretch 的本地化字符串。
+        /// </summary>
+        public static string Stretch {
+            get {
+                return ResourceManager.GetString("Stretch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Stretch sprite 的本地化字符串。
         /// </summary>
         public static string Stretch_sprite {
@@ -2513,11 +3560,29 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Temp folder is null. 的本地化字符串。
+        /// </summary>
+        public static string Temp_folder_is_null {
+            get {
+                return ResourceManager.GetString("Temp_folder_is_null", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 _Temp run game 的本地化字符串。
         /// </summary>
         public static string Temp_run_game {
             get {
                 return ResourceManager.GetString("Temp_run_game", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Temp save failed, cannot run. 的本地化字符串。
+        /// </summary>
+        public static string Temp_save_failed__cannot_run {
+            get {
+                return ResourceManager.GetString("Temp_save_failed__cannot_run", resourceCulture);
             }
         }
         
@@ -2594,11 +3659,102 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 The character code is greater than the maximum (65535) 的本地化字符串。
+        /// </summary>
+        public static string The_character_code_is_greater_than {
+            get {
+                return ResourceManager.GetString("The_character_code_is_greater_than", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The file has invalid data. 的本地化字符串。
+        /// </summary>
+        public static string The_file_has_invalid_data {
+            get {
+                return ResourceManager.GetString("The_file_has_invalid_data", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The file must be saved in order to be run. 的本地化字符串。
+        /// </summary>
+        public static string The_file_must_be_saved_in_order_to {
+            get {
+                return ResourceManager.GetString("The_file_must_be_saved_in_order_to", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The font has no texture. 的本地化字符串。
+        /// </summary>
+        public static string The_font_has_no_texture {
+            get {
+                return ResourceManager.GetString("The_font_has_no_texture", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The game has the debugger enabled. Would you like to disable it so the game will run? 的本地化字符串。
+        /// </summary>
+        public static string The_game_has_the_debugger_enabled {
+            get {
+                return ResourceManager.GetString("The_game_has_the_debugger_enabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The glyphs were sorted successfully. 的本地化字符串。
+        /// </summary>
+        public static string The_glyphs_were_sorted_successfully {
+            get {
+                return ResourceManager.GetString("The_glyphs_were_sorted_successfully", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The last glyph has zero size.
+        ///You can use the button on the left to fix that. 的本地化字符串。
+        /// </summary>
+        public static string The_last_glyph_has_zero_size___You {
+            get {
+                return ResourceManager.GetString("The_last_glyph_has_zero_size___You", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The range was updated successfully. 的本地化字符串。
+        /// </summary>
+        public static string The_range_was_updated_successfully {
+            get {
+                return ResourceManager.GetString("The_range_was_updated_successfully", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 The script file doesn&apos;t exist. 的本地化字符串。
         /// </summary>
         public static string The_script_file_doesn_t_exist {
             get {
                 return ResourceManager.GetString("The_script_file_doesn_t_exist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The selected object is not an &quot;UndertaleResource&quot;. 的本地化字符串。
+        /// </summary>
+        public static string The_selected_object_is_not_an___UndertaleResource {
+            get {
+                return ResourceManager.GetString("The_selected_object_is_not_an___UndertaleResource", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The selected runtime does not support debugging. 的本地化字符串。
+        /// </summary>
+        public static string The_selected_runtime_does_not_support {
+            get {
+                return ResourceManager.GetString("The_selected_runtime_does_not_support", resourceCulture);
             }
         }
         
@@ -2686,6 +3842,33 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Tile data 的本地化字符串。
+        /// </summary>
+        public static string Tile_data {
+            get {
+                return ResourceManager.GetString("Tile_data", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Tile data is empty. 的本地化字符串。
+        /// </summary>
+        public static string Tile_data_is_empty {
+            get {
+                return ResourceManager.GetString("Tile_data_is_empty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Tile data size can&apos;t be zero. 的本地化字符串。
+        /// </summary>
+        public static string Tile_data_size_can_t_be_zero {
+            get {
+                return ResourceManager.GetString("Tile_data_size_can_t_be_zero", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Tile Height 的本地化字符串。
         /// </summary>
         public static string Tile_Height {
@@ -2722,6 +3905,15 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Tile set 的本地化字符串。
+        /// </summary>
+        public static string Tile_set {
+            get {
+                return ResourceManager.GetString("Tile_set", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Tile sets 的本地化字符串。
         /// </summary>
         public static string Tile_sets {
@@ -2740,11 +3932,29 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Tiles 的本地化字符串。
+        /// </summary>
+        public static string Tiles {
+            get {
+                return ResourceManager.GetString("Tiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Tilesets 的本地化字符串。
         /// </summary>
         public static string Tilesets {
             get {
                 return ResourceManager.GetString("Tilesets", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Tiling 的本地化字符串。
+        /// </summary>
+        public static string Tiling {
+            get {
+                return ResourceManager.GetString("Tiling", resourceCulture);
             }
         }
         
@@ -2785,6 +3995,15 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Top/Left/Right/Bottom 的本地化字符串。
+        /// </summary>
+        public static string Top_Left_Right_Bottom {
+            get {
+                return ResourceManager.GetString("Top_Left_Right_Bottom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Transparent 的本地化字符串。
         /// </summary>
         public static string Transparent {
@@ -2812,7 +4031,8 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
-        ///   查找类似 UndertaleModTool is already up to date.\nUpdate anyway? 的本地化字符串。
+        ///   查找类似 UndertaleModTool is already up to date.
+        ///Update anyway? 的本地化字符串。
         /// </summary>
         public static string UndertaleModTool_is_already_up_to {
             get {
@@ -2826,6 +4046,15 @@ namespace UndertaleModTool.Resources {
         public static string UndertaleModToolUpdater_app_didn {
             get {
                 return ResourceManager.GetString("UndertaleModToolUpdater_app_didn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Unknown 的本地化字符串。
+        /// </summary>
+        public static string Unknown {
+            get {
+                return ResourceManager.GetString("Unknown", resourceCulture);
             }
         }
         
@@ -2844,6 +4073,15 @@ namespace UndertaleModTool.Resources {
         public static string Unsupported_textures {
             get {
                 return ResourceManager.GetString("Unsupported_textures", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Use the &quot;Run game using debugger&quot; option to run this game. 的本地化字符串。
+        /// </summary>
+        public static string Use_the___Run_game_using_debugger {
+            get {
+                return ResourceManager.GetString("Use_the___Run_game_using_debugger", resourceCulture);
             }
         }
         
@@ -2893,6 +4131,51 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Vertex sync 的本地化字符串。
+        /// </summary>
+        public static string Vertex_sync {
+            get {
+                return ResourceManager.GetString("Vertex_sync", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Vertical 的本地化字符串。
+        /// </summary>
+        public static string Vertical {
+            get {
+                return ResourceManager.GetString("Vertical", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 View 的本地化字符串。
+        /// </summary>
+        public static string View {
+            get {
+                return ResourceManager.GetString("View", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Views 的本地化字符串。
+        /// </summary>
+        public static string Views {
+            get {
+                return ResourceManager.GetString("Views", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Views don&apos;t support this feature. 的本地化字符串。
+        /// </summary>
+        public static string Views_don_t_support_this_feature {
+            get {
+                return ResourceManager.GetString("Views_don_t_support_this_feature", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Visible 的本地化字符串。
         /// </summary>
         public static string Visible {
@@ -2911,11 +4194,36 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Warning - there is another progress bar updater task running (hangs) in the background.\nRestart the application to prevent some unexpected behavior. 的本地化字符串。
+        ///   查找类似 Warning - the maximum layer depth is reached.
+        ///You probably should change the depth of the new layer. 的本地化字符串。
+        /// </summary>
+        public static string Warning___the_maximum_layer_depth {
+            get {
+                return ResourceManager.GetString("Warning___the_maximum_layer_depth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Warning - there is another progress bar updater task running (hangs) in the background.
+        ///Restart the application to prevent some unexpected behavior. 的本地化字符串。
         /// </summary>
         public static string Warning___there_is_another_progress {
             get {
                 return ResourceManager.GetString("Warning___there_is_another_progress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 WARNING:
+        ///Temp running the game does not permanently 
+        ///save your changes. Please &quot;Save&quot; the game
+        ///to save your changes. Closing UndertaleModTool
+        ///without using the &quot;Save&quot; option can
+        ///result in loss of work. 的本地化字符串。
+        /// </summary>
+        public static string WARNING__Temp_running_the_game_does {
+            get {
+                return ResourceManager.GetString("WARNING__Temp_running_the_game_does", resourceCulture);
             }
         }
         
@@ -2929,7 +4237,8 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Warning: you currently have a project open.\nAre you sure you want to make a new project? 的本地化字符串。
+        ///   查找类似 Warning: you currently have a project open.
+        ///Are you sure you want to make a new project? 的本地化字符串。
         /// </summary>
         public static string Warning__you_currently_have_a_project {
             get {
@@ -2943,6 +4252,15 @@ namespace UndertaleModTool.Resources {
         public static string Warnings_occurred_during_loading {
             get {
                 return ResourceManager.GetString("Warnings_occurred_during_loading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Was the data exported from &quot;Tiled&quot;? 的本地化字符串。
+        /// </summary>
+        public static string Was_the_data_exported_from___Tiled {
+            get {
+                return ResourceManager.GetString("Was_the_data_exported_from___Tiled", resourceCulture);
             }
         }
         
@@ -2974,6 +4292,15 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
+        ///   查找类似 World 的本地化字符串。
+        /// </summary>
+        public static string World {
+            get {
+                return ResourceManager.GetString("World", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 X 的本地化字符串。
         /// </summary>
         public static string X {
@@ -2997,6 +4324,15 @@ namespace UndertaleModTool.Resources {
         public static string You_are_saving_the_game_in_GameMaker {
             get {
                 return ResourceManager.GetString("You_are_saving_the_game_in_GameMaker", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 You must save your changes to run. 的本地化字符串。
+        /// </summary>
+        public static string You_must_save_your_changes_to_run {
+            get {
+                return ResourceManager.GetString("You_must_save_your_changes_to_run", resourceCulture);
             }
         }
         

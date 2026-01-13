@@ -223,7 +223,7 @@
         </StackPanel>
 
         <StackPanel Visibility="{Binding Options, Converter={StaticResource NotNullToVisibilityConverter}}">
-            <TextBlock Text="Options" FontWeight="Bold"/>
+            <TextBlock Text="{x:Static strings:Strings.Options}" FontWeight="Bold"/>
             <Separator/>
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -258,40 +258,40 @@
                 <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Flags}"></TextBlock>
                 <local:FlagsBox Grid.Row="3" Grid.Column="1" Margin="3" Value="{Binding Options.Info}" />
 
-                <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="">Scale</TextBlock>
+                <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Scale}"></TextBlock>
                 <local:TextBoxDark Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding Options.Scale}"/>
 
-                <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Text="">Window color</TextBlock>
+                <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Window_color}"></TextBlock>
                 <local:ColorPicker Grid.Row="5" Grid.Column="1" Margin="3" Color="{Binding Options.WindowColor}"/>
 
-                <TextBlock Grid.Row="6" Grid.Column="0" Margin="3" Text="">Color depth</TextBlock>
+                <TextBlock Grid.Row="6" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Color_depth}"></TextBlock>
                 <local:TextBoxDark Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding Options.ColorDepth}"/>
 
-                <TextBlock Grid.Row="7" Grid.Column="0" Margin="3" Text="">Resolution</TextBlock>
+                <TextBlock Grid.Row="7" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Resolution}"></TextBlock>
                 <local:TextBoxDark Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding Options.Resolution}"/>
 
-                <TextBlock Grid.Row="8" Grid.Column="0" Margin="3" Text="">Frequency</TextBlock>
+                <TextBlock Grid.Row="8" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Frequency}"></TextBlock>
                 <local:TextBoxDark Grid.Row="8" Grid.Column="1" Margin="3" Text="{Binding Options.Frequency}"/>
 
-                <TextBlock Grid.Row="9" Grid.Column="0" Margin="3" Text="">Vertex sync</TextBlock>
+                <TextBlock Grid.Row="9" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Vertex_sync}"></TextBlock>
                 <local:TextBoxDark Grid.Row="9" Grid.Column="1" Margin="3" Text="{Binding Options.VertexSync}"/>
 
-                <TextBlock Grid.Row="10" Grid.Column="0" Margin="3" Text="">Priority</TextBlock>
+                <TextBlock Grid.Row="10" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Priority}"></TextBlock>
                 <local:TextBoxDark Grid.Row="10" Grid.Column="1" Margin="3" Text="{Binding Options.Priority}"/>
 
-                <TextBlock Grid.Row="11" Grid.Column="0" Margin="3" Text="">Back image</TextBlock>
+                <TextBlock Grid.Row="11" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Back_image}"></TextBlock>
                 <local:UndertaleObjectReference Grid.Row="11" Grid.Column="1" Margin="3" ObjectReference="{Binding Options.BackImage.Texture, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertaleModels:UndertaleTexturePageItem}"/>
 
-                <TextBlock Grid.Row="12" Grid.Column="0" Margin="3" Text="">Front image</TextBlock>
+                <TextBlock Grid.Row="12" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Front_image}"></TextBlock>
                 <local:UndertaleObjectReference Grid.Row="12" Grid.Column="1" Margin="3" ObjectReference="{Binding Options.FrontImage.Texture, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertaleModels:UndertaleTexturePageItem}"/>
 
-                <TextBlock Grid.Row="13" Grid.Column="0" Margin="3" Text="">Load image</TextBlock>
+                <TextBlock Grid.Row="13" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Load_image}"></TextBlock>
                 <local:UndertaleObjectReference Grid.Row="13" Grid.Column="1" Margin="3" ObjectReference="{Binding Options.LoadImage.Texture, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertaleModels:UndertaleTexturePageItem}"/>
 
-                <TextBlock Grid.Row="14" Grid.Column="0" Margin="3" Text="">Load alpha</TextBlock>
+                <TextBlock Grid.Row="14" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Load_alpha}"></TextBlock>
                 <local:TextBoxDark Grid.Row="14" Grid.Column="1" Margin="3" Text="{Binding Options.LoadAlpha}"/>
 
-                <TextBlock Grid.Row="15" Grid.Column="0" Margin="3" Text="">Constants</TextBlock>
+                <TextBlock Grid.Row="15" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Constants}"></TextBlock>
                 <local:DataGridDark Grid.Row="15" Grid.Column="1" Margin="3" ItemsSource="{Binding Options.Constants}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
                     <DataGrid.Resources>
                         <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
@@ -354,17 +354,17 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Unknown</TextBlock>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Unknown}"></TextBlock>
                 <local:TextBoxDark Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding Language.Unknown1}"/>
 
-                <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Language count</TextBlock>
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Language_count}"></TextBlock>
                 <local:TextBoxDark Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding Language.LanguageCount}"/>
 
-                <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Entry count</TextBlock>
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Entry_count}"></TextBlock>
                 <local:TextBoxDark Grid.Row="2" Grid.Column="2" Margin="3" Text="{Binding Language.EntryCount}"/>
 
                 <Border Grid.Row="3" Grid.Column="1" Margin="20" Background="LightPink" BorderBrush="Red" BorderThickness="3">
-                    <TextBlock TextWrapping="Wrap" Margin="3" Foreground="Red">Note: the languages currently don't seem used, and so the editor for them has not yet been made.</TextBlock>
+                    <TextBlock TextWrapping="Wrap" Margin="3" Foreground="Red" Text="{x:Static strings:Strings.Note__the_languages_currently_don}"></TextBlock>
                 </Border>
             </Grid>
         </StackPanel>
