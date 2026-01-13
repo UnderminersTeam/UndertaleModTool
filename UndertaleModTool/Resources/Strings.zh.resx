@@ -1567,4 +1567,412 @@ Version {0}
   <data name="Spine_Sprites" xml:space="preserve">
     <value>骨骼精灵</value>
   </data>
+  <data name="Ascender" xml:space="preserve">
+    <value>Ascender</value>
+  </data>
+  <data name="Ascender_offset" xml:space="preserve">
+    <value>Ascender offset</value>
+  </data>
+  <data name="SDF_spread_value" xml:space="preserve">
+    <value>SDF 扩散值</value>
+  </data>
+  <data name="The_references_of_game_object__quot" xml:space="preserve">
+    <value>游戏对象的引用 ""</value>
+  </data>
+  <data name="The_search_results_for_the_game_object" xml:space="preserve">
+    <value>游戏对象的搜索结果
+"".</value>
+  </data>
+  <data name="Search1" xml:space="preserve">
+    <value>搜索</value>
+  </data>
+  <data name="Export_results" xml:space="preserve">
+    <value>导出结果</value>
+  </data>
+  <data name="Note__the_results_may_be_not_100" xml:space="preserve">
+    <value>注意：结果可能不是100%完成。
+如有必要，请使用“查找”菜单中的搜索脚本之一。</value>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>完成</value>
+  </data>
+  <data name="The_references_of_game_asset____0" xml:space="preserve">
+    <value>游戏资产的引用 "{0}"</value>
+  </data>
+  <data name="The_search_results_for_the_game_asset" xml:space="preserve">
+    <value>游戏资产的搜索结果
+"{0}".</value>
+  </data>
+  <data name="No_references_found" xml:space="preserve">
+    <value>没有找到引用。</value>
+  </data>
+  <data name="The_unreferenced_game_assets" xml:space="preserve">
+    <value>未被引用的游戏资产</value>
+  </data>
+  <data name="The_search_results_for_the_unreferenced" xml:space="preserve">
+    <value>未引用游戏资产的搜索结果。</value>
+  </data>
+  <data name="No_unreferenced_assets_found" xml:space="preserve">
+    <value>找不到未引用的资产。</value>
+  </data>
+  <data name="The_object_references_are_stale" xml:space="preserve">
+    <value>对象引用已过时 - 加载了不同的游戏数据。</value>
+  </data>
+  <data name="No_results_to_export" xml:space="preserve">
+    <value>没有结果可被导出。</value>
+  </data>
+  <data name="The_object_reference_is_stale___a" xml:space="preserve">
+    <value>对象引用已过时 - 加载了不同的游戏数据。</value>
+  </data>
+  <data name="The_type_of_this_object_reference" xml:space="preserve">
+    <value>此对象引用的类型没有编辑器/查看器。</value>
+  </data>
+  <data name="The_types_of_references" xml:space="preserve">
+    <value>引用的类型</value>
+  </data>
+  <data name="Where_to_search_the_references" xml:space="preserve">
+    <value>在哪里搜索引用？</value>
+  </data>
+  <data name="Select_all" xml:space="preserve">
+    <value>选择全部</value>
+  </data>
+  <data name="Deselect_all" xml:space="preserve">
+    <value>取消选择全部</value>
+  </data>
+  <data name="Room_tiles" xml:space="preserve">
+    <value>房间图块</value>
+  </data>
+  <data name="Room_sprite_instances" xml:space="preserve">
+    <value>房间精灵实例</value>
+  </data>
+  <data name="Room_background_layers" xml:space="preserve">
+    <value>房间背景层</value>
+  </data>
+  <data name="Texture_groups" xml:space="preserve">
+    <value>纹理组</value>
+  </data>
+  <data name="oom_backgrounds" xml:space="preserve">
+    <value>房间背景</value>
+  </data>
+  <data name="Room_tile_layers" xml:space="preserve">
+    <value>房间图块层</value>
+  </data>
+  <data name="Code_entries__name_and_contents" xml:space="preserve">
+    <value>代码条目 (名称和内容)</value>
+  </data>
+  <data name="Settings___GML_compiler_decompiler" xml:space="preserve">
+    <value>设置 - GML编译器/反编译器</value>
+  </data>
+  <data name="General_settings__compiler__amp" xml:space="preserve">
+    <value>常规设置（编译器和反编译器）</value>
+  </data>
+  <data name="Settings_that_apply_to_both_the_compiler" xml:space="preserve">
+    <value>应用于编译器和反编译器的设置，使编辑GML代码更简单。</value>
+  </data>
+  <data name="Use_CSS_hex_color_literals" xml:space="preserve">
+    <value>使用CSS十六进制颜色文本</value>
+  </data>
+  <data name="If_enabled__color_constants_can_be" xml:space="preserve">
+    <value>如果启用，颜色常量可以格式化为#RRGGBB十六进制格式。</value>
+  </data>
+  <data name="Named_instance_ID_prefix" xml:space="preserve">
+    <value>命名实例ID前缀：</value>
+  </data>
+  <data name="Prefix_used_for_named_instance_IDs" xml:space="preserve">
+    <value>反编译器找到命名实例ID时用于命名实例ID的前缀，以及用于编译的前缀。如果该值与变量名冲突，请更改该值。</value>
+  </data>
+  <data name="Decompiler_settings" xml:space="preserve">
+    <value>反编译器设置</value>
+  </data>
+  <data name="Settings_that_solely_apply_to_the" xml:space="preserve">
+    <value>仅应用于GML反编译器且不会影响GML编译的设置。这些并不适用于所有脚本。</value>
+  </data>
+  <data name="Always_use_semicolons" xml:space="preserve">
+    <value>始终使用分号</value>
+  </data>
+  <data name="If_enabled__all_statements_that_can" xml:space="preserve">
+    <value>如果启用，则所有语句后面都可以有分号。</value>
+  </data>
+  <data name="Indentation_style" xml:space="preserve">
+    <value>缩进样式：</value>
+  </data>
+  <data name="Style_of_indentation_to_be_used_when" xml:space="preserve">
+    <value>打印反编译代码时使用的缩进样式。</value>
+  </data>
+  <data name="Open_block_braces_on_same_line" xml:space="preserve">
+    <value>在同一行上打开块大括号</value>
+  </data>
+  <data name="If_enabled__the_curly_braces_used" xml:space="preserve">
+    <value>如果启用，用于打开块的花括号将与它所属的语句放在同一行上，而不是放在自己的行上。</value>
+  </data>
+  <data name="Remove_block_braces_if_single_line" xml:space="preserve">
+    <value>如果是单线，则移除块括号</value>
+  </data>
+  <data name="If_enabled__blocks_that_contain_a" xml:space="preserve">
+    <value>如果启用，则包含单线的块将在可能的情况下删除其大括号。对于if/else链，所有块都必须是单线。</value>
+  </data>
+  <data name="Create_enum_declarations" xml:space="preserve">
+    <value>创建枚举声明</value>
+  </data>
+  <data name="If_enabled__enum_declarations_identified" xml:space="preserve">
+    <value>如果启用，在反编译期间标识的枚举声明将始终打印到反编译输出。</value>
+  </data>
+  <data name="Enum_macro_declarations_at_top_of" xml:space="preserve">
+    <value>代码顶部的枚举/宏声明</value>
+  </data>
+  <data name="If_enabled__enums_and_macros_will" xml:space="preserve">
+    <value>如果启用，枚举和宏将出现在反编译输出的顶部），而不是底部。</value>
+  </data>
+  <data name="Print_warnings" xml:space="preserve">
+    <value>打印警告</value>
+  </data>
+  <data name="If_enabled__warnings_generated_during" xml:space="preserve">
+    <value>如果启用，则在反编译期间生成的警告将打印为注释。</value>
+  </data>
+  <data name="Allow_leftover_data_on_VM_stack" xml:space="preserve">
+    <value>允许VM堆栈上的剩余数据</value>
+  </data>
+  <data name="If_enabled__data_left_over_on_the" xml:space="preserve">
+    <value>如果启用，VM堆栈上剩余的数据将被视为警告而不是错误。</value>
+  </data>
+  <data name="Add_empty_lines" xml:space="preserve">
+    <value>添加空行：</value>
+  </data>
+  <data name="Select_specific_syntax_to_add_empty" xml:space="preserve">
+    <value>选择特定语法以在前面、后面或周围添加空行。</value>
+  </data>
+  <data name="Around_branch_statements" xml:space="preserve">
+    <value>围绕分支语句</value>
+  </data>
+  <data name="If_enabled__adds_an_empty_line_before" xml:space="preserve">
+    <value>如果启用，则在分支语句之前和之后添加空行。</value>
+  </data>
+  <data name="After_local_variable_declarations" xml:space="preserve">
+    <value>在局部变量声明之后</value>
+  </data>
+  <data name="If_enabled__adds_an_empty_line_after" xml:space="preserve">
+    <value>如果启用，则在块范围的局部变量声明后添加空行。</value>
+  </data>
+  <data name="Before_switch_cases" xml:space="preserve">
+    <value>在 switch cases 之前</value>
+  </data>
+  <data name="If_enabled__adds_an_empty_line_before1" xml:space="preserve">
+    <value>如果启用，则在switch语句中的“case”条目之前添加空行。</value>
+  </data>
+  <data name="After_switch_cases" xml:space="preserve">
+    <value>在 switch cases 之后</value>
+  </data>
+  <data name="If_enabled__adds_an_empty_line_after1" xml:space="preserve">
+    <value>如果启用，则在switch语句中的“case”条目之后添加空行。</value>
+  </data>
+  <data name="Around_function_declarations" xml:space="preserve">
+    <value>围绕函数声明</value>
+  </data>
+  <data name="If_enabled__adds_an_empty_line_before2" xml:space="preserve">
+    <value>如果启用，则在函数声明之前和之后添加空行，即使它是匿名的。</value>
+  </data>
+  <data name="Around_static_initialization" xml:space="preserve">
+    <value>围绕静态初始化</value>
+  </data>
+  <data name="If_enabled__adds_an_empty_line_before3" xml:space="preserve">
+    <value>如果启用，则在静态初始化之前和之后添加空行，如果可能，将连续静态分组在一起。</value>
+  </data>
+  <data name="Select_specific_cleanup_operations" xml:space="preserve">
+    <value>为反编译器选择要执行的特定清理操作。禁用这些操作可能会使代码更难看或“不正确”，但可以显示底层逻辑。</value>
+  </data>
+  <data name="Perform_cleanups" xml:space="preserve">
+    <value>执行清理：</value>
+  </data>
+  <data name="Try_catch_finally_rewriting" xml:space="preserve">
+    <value>Try/catch/finally 重写</value>
+  </data>
+  <data name="If_enabled__compiler_generated_code" xml:space="preserve">
+    <value>如果启用，编译器生成的代码和try/catch/finally语句的逻辑将被重写为（试图）与原始代码相似。</value>
+  </data>
+  <data name="Transform_else_into_continue" xml:space="preserve">
+    <value>将else转换为continue</value>
+  </data>
+  <data name="If_enabled__certain_usages_of__quot" xml:space="preserve">
+    <value>如果启用，循环中“else”的某些用法可以转换为“continue”语句，这可以使代码更容易阅读。只有在能够保持准确性的情况下才会发生这种情况。</value>
+  </data>
+  <data name="Default_argument_values" xml:space="preserve">
+    <value>默认参数值</value>
+  </data>
+  <data name="If_enabled__syntax_for_default_named" xml:space="preserve">
+    <value>如果启用，将使用默认命名函数参数的语法。如果语句被转换为执行此操作，则生成编译器，从而保持准确性。</value>
+  </data>
+  <data name="Builtin_array_variable_syntax" xml:space="preserve">
+    <value>内置数组变量语法</value>
+  </data>
+  <data name="If_enabled__certain_builtin_globals" xml:space="preserve">
+    <value>如果启用，当检测到某些内置全局变量（如"view_xview"）在没有数组访问器的情况下使用时，将按原样打印，而不是使用编译器生成的语法。</value>
+  </data>
+  <data name="Scope_local_variable_declarations" xml:space="preserve">
+    <value>作用域局部变量声明</value>
+  </data>
+  <data name="If_enabled__local_variable_declarations" xml:space="preserve">
+    <value>如果启用，局部变量声明将根据其范围放置，这些范围是根据代码中的用法检测的。</value>
+  </data>
+  <data name="Restore_to_defaults" xml:space="preserve">
+    <value>恢复为默认值</value>
+  </data>
+  <data name="Please_wait" xml:space="preserve">
+    <value>请稍后...</value>
+  </data>
+  <data name="No_data_win_loaded" xml:space="preserve">
+    <value>没有加载 data.win。</value>
+  </data>
+  <data name="Can_t_search_code_in_YYC_game__there" xml:space="preserve">
+    <value>无法在YYC游戏中搜索代码，没有要搜索的代码。</value>
+  </data>
+  <data name="Can_t_search_while_another_search" xml:space="preserve">
+    <value>无法在另一个搜索正在进行时进行搜索。</value>
+  </data>
+  <data name="There_are_no_code_entries_that_match" xml:space="preserve">
+    <value>没有与名称筛选器匹配的代码条目。</value>
+  </data>
+  <data name="Searching" xml:space="preserve">
+    <value>搜索中...</value>
+  </data>
+  <data name="Code_entries" xml:space="preserve">
+    <value>代码条目</value>
+  </data>
+  <data name="Generating_result_list" xml:space="preserve">
+    <value>生成结果列表中...</value>
+  </data>
+  <data name="Can_t_open_results_while_a_search" xml:space="preserve">
+    <value>无法在搜索过程中打开结果。</value>
+  </data>
+  <data name="Open1" xml:space="preserve">
+    <value>打开</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>复制</value>
+  </data>
+  <data name="Copy_all" xml:space="preserve">
+    <value>复制全部</value>
+  </data>
+  <data name="Case_sensitive" xml:space="preserve">
+    <value>大小写敏感</value>
+  </data>
+  <data name="Regex_search" xml:space="preserve">
+    <value>正则搜索</value>
+  </data>
+  <data name="Multiline_regex" xml:space="preserve">
+    <value>多行正则表达式</value>
+  </data>
+  <data name="In_assembly" xml:space="preserve">
+    <value>在汇编中</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="Required_only_if_you_want_to_use" xml:space="preserve">
+    <value>仅当您希望使用Studio runner而不是.exe或在调试器下运行游戏时才需要。</value>
+  </data>
+  <data name="GameMaker__Studio_1_4_path" xml:space="preserve">
+    <value>GameMaker: Studio 1.4 路径:</value>
+  </data>
+  <data name="Required_only_if_you_want_to_run" xml:space="preserve">
+    <value>仅当您希望使用Studio runner而不是.exe运行GMS2游戏时才需要</value>
+  </data>
+  <data name="GameMaker_Studio_2_runtimes_path" xml:space="preserve">
+    <value>GameMaker Studio 2 runtimes 路径:</value>
+  </data>
+  <data name="Enable_asset_order_swapping" xml:space="preserve">
+    <value>启用资产次序交换</value>
+  </data>
+  <data name="Toggles_dragging__amp__dropping_assets" xml:space="preserve">
+    <value>将资源选项卡中的资源拖放到列表中的不同位置。默认情况下禁用。</value>
+  </data>
+  <data name="Automatically_associate_GameMaker" xml:space="preserve">
+    <value>自动关联GameMaker数据文件</value>
+  </data>
+  <data name="Automatic_file_association__Enabled" xml:space="preserve">
+    <value>自动建立文件关联。默认情况下启用。</value>
+  </data>
+  <data name="Show__quot_Run_game_under_GMS_debugger" xml:space="preserve">
+    <value>显示“在GMS调试器下运行游戏”文件选项</value>
+  </data>
+  <data name="Whether_to_show_the_option_in_the" xml:space="preserve">
+    <value>是否在“文件”菜单中显示选项。默认情况下禁用。</value>
+  </data>
+  <data name="Remember_last_window_position_and" xml:space="preserve">
+    <value>记住最后打开窗口的位置和大小</value>
+  </data>
+  <data name="Warn_about_saving_before_closing" xml:space="preserve">
+    <value>关闭前警告保存</value>
+  </data>
+  <data name="Warn_about_saving_before_closing1" xml:space="preserve">
+    <value>关闭前警告保存。默认情况下启用。</value>
+  </data>
+  <data name="Warn_about_temp_running" xml:space="preserve">
+    <value>关于临时运行的警告</value>
+  </data>
+  <data name="Warn_about_temp_running__Enabled" xml:space="preserve">
+    <value>警告临时运行。默认情况下启用。</value>
+  </data>
+  <data name="Show_null_entries_in_resource_tree" xml:space="preserve">
+    <value>在资源树中显示空条目</value>
+  </data>
+  <data name="Whether_to_show_null_entries_in_the" xml:space="preserve">
+    <value>是否在资源树中显示空条目，在GM 2024.11+游戏中，这些条目通常是编译器删除的未使用资产。由于GUI中的支持有限，默认情况下禁用。</value>
+  </data>
+  <data name="Enable_dark_mode" xml:space="preserve">
+    <value>启用暗塞模式</value>
+  </data>
+  <data name="Makes_the_program_interface_dark" xml:space="preserve">
+    <value>使程序界面变暗。默认情况下禁用。</value>
+  </data>
+  <data name="Transparency_grid_colors" xml:space="preserve">
+    <value>透明度网格颜色：</value>
+  </data>
+  <data name="GML_compiler_decompiler_settings" xml:space="preserve">
+    <value>GML编译器/反编译器设置</value>
+  </data>
+  <data name="This_option_globally_overrides_the" xml:space="preserve">
+    <value>该选项全局覆盖基于房间中最常用平铺的宽度自动指定房间的网格宽度。</value>
+  </data>
+  <data name="This_option_globally_overrides_the1" xml:space="preserve">
+    <value>该选项全局覆盖基于房间中最常用平铺的高度自动指定房间的格线高度。</value>
+  </data>
+  <data name="Global_grid_width" xml:space="preserve">
+    <value>全局网格宽度</value>
+  </data>
+  <data name="Global_grid_height" xml:space="preserve">
+    <value>全局网格高度</value>
+  </data>
+  <data name="This_option_globally_overrides_the2" xml:space="preserve">
+    <value>该选项全局替代自动指定的房间网格厚度。</value>
+  </data>
+  <data name="Global_grid_thickness" xml:space="preserve">
+    <value>全局网格厚度</value>
+  </data>
+  <data name="Warning__the_following_options_are" xml:space="preserve">
+    <value>警告：以下选项目前处于实验阶段。使用以下任何选项的风险由您自己承担，并且它们将来可能不兼容。</value>
+  </data>
+  <data name="Enable_profile_mode" xml:space="preserve">
+    <value>启用配置文件模式</value>
+  </data>
+  <data name="Toggles_the__decompile_once_and_compile" xml:space="preserve">
+    <value>切换“一次反编译，多次编译”配置文件模式。默认情况下启用。对于某些操作，可能需要禁用。</value>
+  </data>
+  <data name="Delete_old_profile_on_saving" xml:space="preserve">
+    <value>保存时删除旧配置文件</value>
+  </data>
+  <data name="Deletes_the_profile_obsoleted_on" xml:space="preserve">
+    <value>删除保存时过时的配置文件。以丢失变体的代码信息为代价节省文件空间。默认情况下启用。</value>
+  </data>
+  <data name="Profile_mode_message_shown" xml:space="preserve">
+    <value>显示配置文件模式消息</value>
+  </data>
+  <data name="On_first_load__this_will_show_you" xml:space="preserve">
+    <value>首次加载时，这将显示配置文件模式加载消息。如果这以某种方式中断，您可以在此处手动切换它。</value>
+  </data>
+  <data name="Open_application_data_folder" xml:space="preserve">
+    <value>打开应用程序数据文件夹</value>
+  </data>
+  <data name="Update_app_to_latest_commit" xml:space="preserve">
+    <value>将应用更新到最新commit版本</value>
+  </data>
 </root>

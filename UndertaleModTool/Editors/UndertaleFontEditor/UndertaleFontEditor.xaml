@@ -102,17 +102,17 @@
             <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding ScaleY}"/>
         </Grid>
 
-        <TextBlock Grid.Row="10" Grid.Column="0" Margin="3" Text="Ascender"
+        <TextBlock Grid.Row="10" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Ascender}"
                    Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2022.2}"/>
         <local:TextBoxDark Grid.Row="10" Grid.Column="1" Margin="3" Text="{Binding Ascender}"
                            Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2022.2}"/>
 
-        <TextBlock Grid.Row="11" Grid.Column="0" Margin="3" Text="Ascender offset"
+        <TextBlock Grid.Row="11" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Ascender_offset}"
                    Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2022.2}"/>
         <local:TextBoxDark Grid.Row="11" Grid.Column="1" Margin="3" Text="{Binding AscenderOffset}"
                            Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2022.2}"/>
 
-        <TextBlock Grid.Row="12" Grid.Column="0" Margin="3" Text="SDF spread value"
+        <TextBlock Grid.Row="12" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.SDF_spread_value}"
                    Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2023.2}"/>
         <local:TextBoxDark Grid.Row="12" Grid.Column="1" Margin="3" Text="{Binding SDFSpread}"
                            Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2023.2}"/>
