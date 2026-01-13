@@ -280,7 +280,7 @@
     <value>名称字符串的 ID</value>
   </data>
   <data name="Game_End_scripts" xml:space="preserve">
-    <value>游戏终止剧本</value>
+    <value>游戏终止脚本</value>
   </data>
   <data name="Sprite" xml:space="preserve">
     <value>精灵</value>
@@ -816,7 +816,7 @@ UndertaleModTool通过平均值来表现这一点。
     <value>字体</value>
   </data>
   <data name="Timelines" xml:space="preserve">
-    <value>图块行数</value>
+    <value>时间线</value>
   </data>
   <data name="Game_objects" xml:space="preserve">
     <value>游戏对象</value>
