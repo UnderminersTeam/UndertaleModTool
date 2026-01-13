@@ -151,7 +151,8 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
-        ///   查找类似 An error occurred while trying to load:\n{0} 的本地化字符串。
+        ///   查找类似 An error occurred while trying to load:
+        ///{0} 的本地化字符串。
         /// </summary>
         public static string An_error_occurred_while_trying_to {
             get {
@@ -1467,7 +1468,7 @@ namespace UndertaleModTool.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Load_data_win_file_first 的本地化字符串。
+        ///   查找类似 Load data.win file first 的本地化字符串。
         /// </summary>
         public static string Load_data_win_file_first {
             get {

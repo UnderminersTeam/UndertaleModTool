@@ -1271,7 +1271,8 @@ For best results, enter the same value in both fields.</value>
     <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
   </data>
   <data name="An_error_occurred_while_trying_to" xml:space="preserve">
-    <value>An error occurred while trying to load:\n{0}</value>
+    <value>An error occurred while trying to load:
+{0}</value>
     <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
   </data>
   <data name="Load_error" xml:space="preserve">
@@ -1415,7 +1416,7 @@ For best results, enter the same value in both fields.</value>
     <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
   </data>
   <data name="Load_data_win_file_first" xml:space="preserve">
-    <value>Load_data_win_file_first</value>
+    <value>Load data.win file first</value>
     <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
   </data>
   <data name="Create" xml:space="preserve">

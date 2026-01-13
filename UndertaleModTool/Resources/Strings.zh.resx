@@ -753,7 +753,7 @@ UndertaleModTool通过平均值来表现这一点。
     <value>脚本</value>
   </data>
   <data name="loading" xml:space="preserve">
-    <value>加载中</value>
+    <value>(...加载中...)</value>
   </data>
   <data name="Find" xml:space="preserve">
     <value>查找(_F)</value>
@@ -976,6 +976,9 @@ UndertaleModTool通过平均值来表现这一点。
   <data name="Script_still_runs__Save_anyway__nIt" xml:space="preserve">
     <value>脚本仍在运行。是否仍要保存？\n您要保存的数据文件可能会损坏。</value>
   </data>
+  <data name="Loading1" xml:space="preserve">
+    <value>加载中</value>
+  </data>
   <data name="Loading__please_wait" xml:space="preserve">
     <value>加载中，请稍后...</value>
   </data>
@@ -988,7 +991,8 @@ UndertaleModTool通过平均值来表现这一点。
     <value>加载警告</value>
   </data>
   <data name="An_error_occurred_while_trying_to" xml:space="preserve">
-    <value>加载时发生了一些错误:\n{0}</value>
+    <value>加载时发生了一些错误:
+{0}</value>
   </data>
   <data name="Load_error" xml:space="preserve">
     <value>加载错误</value>
@@ -1096,7 +1100,7 @@ UndertaleModTool通过平均值来表现这一点。
     <value>正在下载新版本...</value>
   </data>
   <data name="Load_data_win_file_first" xml:space="preserve">
-    <value>Load_data_win_file_first</value>
+    <value>请先加载 data.win 文件</value>
   </data>
   <data name="Create" xml:space="preserve">
     <value>Create</value>
