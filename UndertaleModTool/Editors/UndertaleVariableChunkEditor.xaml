@@ -7,7 +7,7 @@
              xmlns:undertale="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleChunkVARI}">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleChunkVARI}" xmlns:strings="clr-namespace:UndertaleModTool.Resources" >
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
@@ -21,16 +21,16 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Variables" FontWeight="Bold"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="{x:Static strings:Strings.Variables}" FontWeight="Bold"/>
         <Separator Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Instance/global variable count</TextBlock>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Instance_global_variable_count}"></TextBlock>
         <local:TextBoxDark Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding InstanceVarCount}"/>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Instance/global variable count (again)</TextBlock>
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Instance_global_variable_count__again}"></TextBlock>
         <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding InstanceVarCountAgain}"/>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Max local variable count</TextBlock>
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Max_local_variable_count}"></TextBlock>
         <local:TextBoxDark Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding MaxLocalVarCount}"/>
     </Grid>
 </local:DataUserControl>

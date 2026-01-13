@@ -1,0 +1,1978 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Name" xml:space="preserve">
+    <value>名称</value>
+  </data>
+  <data name="Path__GM_2024_14" xml:space="preserve">
+    <value>路径 (GM 2024.14+)</value>
+  </data>
+  <data name="Transparent" xml:space="preserve">
+    <value>透明</value>
+  </data>
+  <data name="Smooth" xml:space="preserve">
+    <value>平滑</value>
+  </data>
+  <data name="Preload" xml:space="preserve">
+    <value>预加载</value>
+  </data>
+  <data name="Texture" xml:space="preserve">
+    <value>纹理</value>
+  </data>
+  <data name="Unknown_Always_2" xml:space="preserve">
+    <value>未知值(始终为2)</value>
+  </data>
+  <data name="Tile_Width" xml:space="preserve">
+    <value>图块宽</value>
+  </data>
+  <data name="Tile_Height" xml:space="preserve">
+    <value>图块高</value>
+  </data>
+  <data name="Tile_Separation_X" xml:space="preserve">
+    <value>X 向间隙值</value>
+  </data>
+  <data name="Tile_Separation_Y" xml:space="preserve">
+    <value>Y 向间隙值</value>
+  </data>
+  <data name="Output_Border_X" xml:space="preserve">
+    <value>X 向间隙值</value>
+  </data>
+  <data name="Output_Border_Y" xml:space="preserve">
+    <value>Y 向间隙值</value>
+  </data>
+  <data name="Tile_Columns" xml:space="preserve">
+    <value>图块列数</value>
+  </data>
+  <data name="Items_frames_per_tile" xml:space="preserve">
+    <value>每图块的时间或帧数</value>
+  </data>
+  <data name="Tile_Count" xml:space="preserve">
+    <value>图块数</value>
+  </data>
+  <data name="Exported_Sprite_Index" xml:space="preserve">
+    <value>导出精灵索引</value>
+  </data>
+  <data name="Frame_Time__microseconds" xml:space="preserve">
+    <value>帧每毫秒</value>
+  </data>
+  <data name="Tile_IDs" xml:space="preserve">
+    <value>图块 ID</value>
+  </data>
+  <data name="Double_click_to_add" xml:space="preserve">
+    <value>双击以添加</value>
+  </data>
+  <data name="Hint__You_can_click_on_any_tile_region" xml:space="preserve">
+    <value>提示：您可以单击下面的任何图块区域，以在上面高亮显示其ID。</value>
+  </data>
+  <data name="Locals_count" xml:space="preserve">
+    <value>局部变量数目</value>
+  </data>
+  <data name="Arguments_count" xml:space="preserve">
+    <value>参数数量</value>
+  </data>
+  <data name="Offset" xml:space="preserve">
+    <value>偏移量</value>
+  </data>
+  <data name="Parent_entry" xml:space="preserve">
+    <value>父条目</value>
+  </data>
+  <data name="Decompiled" xml:space="preserve">
+    <value>反编译</value>
+  </data>
+  <data name="Local_variables" xml:space="preserve">
+    <value>局部变量</value>
+  </data>
+  <data name="Play" xml:space="preserve">
+    <value>播放</value>
+  </data>
+  <data name="Stop1" xml:space="preserve">
+    <value>停止</value>
+  </data>
+  <data name="Import1" xml:space="preserve">
+    <value>导入</value>
+  </data>
+  <data name="Export" xml:space="preserve">
+    <value>导出</value>
+  </data>
+  <data name="Scaled" xml:space="preserve">
+    <value>是否缩放</value>
+  </data>
+  <data name="Generated_mips" xml:space="preserve">
+    <value>生成位图</value>
+  </data>
+  <data name="Size1" xml:space="preserve">
+    <value>尺寸</value>
+  </data>
+  <data name="Warning__Texture_failed_to_load" xml:space="preserve">
+    <value>警告: 纹理加载失败!</value>
+  </data>
+  <data name="Hint__This_image_is_mouse_interactable" xml:space="preserve">
+    <value>提示：该图像是鼠标可交互的(3个鼠标按钮和鼠标滚轮)。</value>
+  </data>
+  <data name="Version" xml:space="preserve">
+    <value>版本</value>
+  </data>
+  <data name="Class_Name" xml:space="preserve">
+    <value>类名</value>
+  </data>
+  <data name="Files" xml:space="preserve">
+    <value>文件</value>
+  </data>
+  <data name="THINGS_TO_NOTE__n__Keep_in_mind_that" xml:space="preserve">
+    <value>注意事项：
+-请记住，.gml文件要么不存在，要么将为空。（例如，无功能）
+  因为它们是预先烘焙到GML脚本中的，所以这是正常的。</value>
+  </data>
+  <data name="Add_new_extension_option" xml:space="preserve">
+    <value>添加新的扩展选项</value>
+  </data>
+  <data name="Product_ID" xml:space="preserve">
+    <value>产品 ID</value>
+  </data>
+  <data name="FileName" xml:space="preserve">
+    <value>文件名</value>
+  </data>
+  <data name="Cleanup_function_name" xml:space="preserve">
+    <value>清理函数名</value>
+  </data>
+  <data name="Init_function_name" xml:space="preserve">
+    <value>初始化函数名</value>
+  </data>
+  <data name="Kind1" xml:space="preserve">
+    <value>种类</value>
+  </data>
+  <data name="Functions" xml:space="preserve">
+    <value>函数</value>
+  </data>
+  <data name="External_Name" xml:space="preserve">
+    <value>扩展名</value>
+  </data>
+  <data name="ID1" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="Return_Type" xml:space="preserve">
+    <value>返回类型</value>
+  </data>
+  <data name="Argument_Types" xml:space="preserve">
+    <value>参数类型</value>
+  </data>
+  <data name="Runner_literally_doesn_t_care_about" xml:space="preserve">
+    <value>运行时(Runner)实际上并不关心"Kind"值。
+"ID"确实很重要，因此请确保没有任何重复值。</value>
+  </data>
+  <data name="Name_string_ID" xml:space="preserve">
+    <value>名称字符串的 ID</value>
+  </data>
+  <data name="Game_End_scripts" xml:space="preserve">
+    <value>游戏终止脚本</value>
+  </data>
+  <data name="Sprite" xml:space="preserve">
+    <value>精灵</value>
+  </data>
+  <data name="Visible" xml:space="preserve">
+    <value>可见性</value>
+  </data>
+  <data name="Solid" xml:space="preserve">
+    <value>实体</value>
+  </data>
+  <data name="Depth" xml:space="preserve">
+    <value>深度</value>
+  </data>
+  <data name="Persistent" xml:space="preserve">
+    <value>持久化</value>
+  </data>
+  <data name="Parent" xml:space="preserve">
+    <value>父节点</value>
+  </data>
+  <data name="This_is_an_object_reference__Drag" xml:space="preserve">
+    <value>这是一个对象引用。从左侧的树中拖放匹配类型的对象以更改它！</value>
+  </data>
+  <data name="null1" xml:space="preserve">
+    <value>(null)</value>
+  </data>
+  <data name="Flags" xml:space="preserve">
+    <value>标志</value>
+  </data>
+  <data name="Open_in_new_tab" xml:space="preserve">
+    <value>在新标签页打开</value>
+  </data>
+  <data name="Open_referenced_object" xml:space="preserve">
+    <value>打开被引用的对象</value>
+  </data>
+  <data name="Remove_reference" xml:space="preserve">
+    <value>移除引用</value>
+  </data>
+  <data name="Find_all_references" xml:space="preserve">
+    <value>查找所有引用</value>
+  </data>
+  <data name="Copy_name_to_clipboard" xml:space="preserve">
+    <value>将名称复制到剪贴板</value>
+  </data>
+  <data name="Delete1" xml:space="preserve">
+    <value>删除</value>
+  </data>
+  <data name="Add_in_place__unimplemented" xml:space="preserve">
+    <value>在位置添加 (未实现)</value>
+  </data>
+  <data name="Create_new_code_entry" xml:space="preserve">
+    <value>创建新的代码条目</value>
+  </data>
+  <data name="This_is_an_string_reference__Change" xml:space="preserve">
+    <value>这是一个字符串引用。更改此处的值以仅编辑所有引用值的该值，或者从左侧的树中拖放另一个字符串实例以更改引用</value>
+  </data>
+  <data name="General_info" xml:space="preserve">
+    <value>常规信息</value>
+  </data>
+  <data name="Disable_GMS_debugger" xml:space="preserve">
+    <value>禁用GMS调试器</value>
+  </data>
+  <data name="Bytecode_version" xml:space="preserve">
+    <value>字节码版本</value>
+  </data>
+  <data name="Config" xml:space="preserve">
+    <value>配置</value>
+  </data>
+  <data name="Last_object_ID" xml:space="preserve">
+    <value>末位的对象 ID</value>
+  </data>
+  <data name="Last_tile_ID" xml:space="preserve">
+    <value>末位的图块 ID</value>
+  </data>
+  <data name="Game_ID" xml:space="preserve">
+    <value>游戏 ID</value>
+  </data>
+  <data name="DirectPlay_GUID" xml:space="preserve">
+    <value>DirectPlay GUID</value>
+  </data>
+  <data name="Default_window_size" xml:space="preserve">
+    <value>默认窗口尺寸</value>
+  </data>
+  <data name="License_MD5" xml:space="preserve">
+    <value>许可证的 MD5</value>
+  </data>
+  <data name="License_CRC32" xml:space="preserve">
+    <value>许可证的 CRC32</value>
+  </data>
+  <data name="Timestamp" xml:space="preserve">
+    <value>时间戳</value>
+  </data>
+  <data name="Display_name" xml:space="preserve">
+    <value>显示名称</value>
+  </data>
+  <data name="Active_targets" xml:space="preserve">
+    <value>活动目标</value>
+  </data>
+  <data name="Function_classifications" xml:space="preserve">
+    <value>函数类型</value>
+  </data>
+  <data name="Steam_AppID" xml:space="preserve">
+    <value>Steam AppID</value>
+  </data>
+  <data name="Debugger_port" xml:space="preserve">
+    <value>调试器端口</value>
+  </data>
+  <data name="Room_order" xml:space="preserve">
+    <value>房间次序</value>
+  </data>
+  <data name="FPS" xml:space="preserve">
+    <value>帧率</value>
+  </data>
+  <data name="Allow_statistics" xml:space="preserve">
+    <value>允许数据分析</value>
+  </data>
+  <data name="Game_GUID" xml:space="preserve">
+    <value>游戏 GUID</value>
+  </data>
+  <data name="Shader_Extension_Flag" xml:space="preserve">
+    <value>着色器扩展标志</value>
+  </data>
+  <data name="Shader_Extension_Version" xml:space="preserve">
+    <value>着色器扩展版本</value>
+  </data>
+  <data name="Scale" xml:space="preserve">
+    <value>缩放比例</value>
+  </data>
+  <data name="Window_color" xml:space="preserve">
+    <value>窗口颜色</value>
+  </data>
+  <data name="Disassembly" xml:space="preserve">
+    <value>反汇编</value>
+  </data>
+  <data name="Global_initialization_scripts" xml:space="preserve">
+    <value>全局初始化脚本</value>
+  </data>
+  <data name="Origin1" xml:space="preserve">
+    <value>原点</value>
+  </data>
+  <data name="Draw_order" xml:space="preserve">
+    <value>绘制次序</value>
+  </data>
+  <data name="Emitters" xml:space="preserve">
+    <value>发射器</value>
+  </data>
+  <data name="List" xml:space="preserve">
+    <value>列表</value>
+  </data>
+  <data name="Distribution" xml:space="preserve">
+    <value>粒子分布(创建位置)</value>
+  </data>
+  <data name="Interval_measured_in" xml:space="preserve">
+    <value>间隔 单位:</value>
+  </data>
+  <data name="Interval_min_max" xml:space="preserve">
+    <value>间隔 最小值|最大值</value>
+  </data>
+  <data name="Delay_measured_in" xml:space="preserve">
+    <value>延迟 单位:</value>
+  </data>
+  <data name="Emit_relative" xml:space="preserve">
+    <value>粒子发射 相对</value>
+  </data>
+  <data name="Delay_min_max" xml:space="preserve">
+    <value>延迟 最小值|最大值</value>
+  </data>
+  <data name="Emit_count" xml:space="preserve">
+    <value>粒子计数 数目</value>
+  </data>
+  <data name="Enabled" xml:space="preserve">
+    <value>启用</value>
+  </data>
+  <data name="Shape" xml:space="preserve">
+    <value>形状</value>
+  </data>
+  <data name="Region_X_Y_Width_Height" xml:space="preserve">
+    <value>区域 X|Y|宽|高</value>
+  </data>
+  <data name="Rotation" xml:space="preserve">
+    <value>旋转</value>
+  </data>
+  <data name="Sprite_frame_index" xml:space="preserve">
+    <value>精灵帧索引</value>
+  </data>
+  <data name="Animate_sprite" xml:space="preserve">
+    <value>动画精灵</value>
+  </data>
+  <data name="Stretch_sprite" xml:space="preserve">
+    <value>拉伸精灵</value>
+  </data>
+  <data name="Random" xml:space="preserve">
+    <value>随机数</value>
+  </data>
+  <data name="Start_color" xml:space="preserve">
+    <value>颜色 初始态</value>
+  </data>
+  <data name="Middle_color" xml:space="preserve">
+    <value>颜色 中间态</value>
+  </data>
+  <data name="Additive_color_blend" xml:space="preserve">
+    <value>加法混合绘制</value>
+  </data>
+  <data name="Lifetime_min_max" xml:space="preserve">
+    <value>寿命 最小值|最大值</value>
+  </data>
+  <data name="Scale_X_Y" xml:space="preserve">
+    <value>比例 X|Y</value>
+  </data>
+  <data name="Hint__Prior_to_GM_2023_8__these" xml:space="preserve">
+    <value>提示：在GM 2023.8之前，这些"尺寸"值不会被x和y分割。
+UndertaleModTool通过平均值来表现这一点。
+为了获得最佳结果，请在两个字段中输入相同的值。</value>
+  </data>
+  <data name="Size_min" xml:space="preserve">
+    <value>尺寸最小值</value>
+  </data>
+  <data name="Size_max" xml:space="preserve">
+    <value>尺寸最大值</value>
+  </data>
+  <data name="Size_increase" xml:space="preserve">
+    <value>尺寸增量</value>
+  </data>
+  <data name="Size_wiggle" xml:space="preserve">
+    <value>尺寸振动</value>
+  </data>
+  <data name="Speed_min_max" xml:space="preserve">
+    <value>速度 最小值|最大值</value>
+  </data>
+  <data name="Speed_increase_wiggle" xml:space="preserve">
+    <value>速度 增量|摆动值</value>
+  </data>
+  <data name="Gravity_force_direction" xml:space="preserve">
+    <value>重力矢量 大小|方向</value>
+  </data>
+  <data name="Direction_min_max" xml:space="preserve">
+    <value>方向 最小值|最大值</value>
+  </data>
+  <data name="Direction_increase_wiggle" xml:space="preserve">
+    <value>方向 增量|摆动值</value>
+  </data>
+  <data name="Orientation_min_max" xml:space="preserve">
+    <value>方向 最小值|最大值</value>
+  </data>
+  <data name="Orientation_increase_wiggle" xml:space="preserve">
+    <value>方向 增量|摆动值</value>
+  </data>
+  <data name="Is_orientation_relative" xml:space="preserve">
+    <value>相对于其方向</value>
+  </data>
+  <data name="Spawn_on_death" xml:space="preserve">
+    <value>消逝时再生</value>
+  </data>
+  <data name="Spawn_on_death_count" xml:space="preserve">
+    <value>消逝时再生的数目</value>
+  </data>
+  <data name="Spawn_on_update" xml:space="preserve">
+    <value>更新时再生</value>
+  </data>
+  <data name="Spawn_on_update_count" xml:space="preserve">
+    <value>更新时再生的数目</value>
+  </data>
+  <data name="Closed" xml:space="preserve">
+    <value>闭合</value>
+  </data>
+  <data name="Precision" xml:space="preserve">
+    <value>精度</value>
+  </data>
+  <data name="Points" xml:space="preserve">
+    <value>点</value>
+  </data>
+  <data name="Speed" xml:space="preserve">
+    <value>速度</value>
+  </data>
+  <data name="Y" xml:space="preserve">
+    <value>Y</value>
+  </data>
+  <data name="X" xml:space="preserve">
+    <value>X</value>
+  </data>
+  <data name="TODO__The_preview_doesn_t_update" xml:space="preserve">
+    <value>TODO: 目前预览没有实时更新，只是暂时关闭并重新打开对象</value>
+  </data>
+  <data name="Type1" xml:space="preserve">
+    <value>类型</value>
+  </data>
+  <data name="GLSL_ES_vertex_source" xml:space="preserve">
+    <value>GLSL ES 顶点着色器脚本</value>
+  </data>
+  <data name="GLSL_ES_fragment_source" xml:space="preserve">
+    <value>GLSL ES 片段着色器脚本</value>
+  </data>
+  <data name="GLSL_vertex_source" xml:space="preserve">
+    <value>GLSL 顶点着色器脚本</value>
+  </data>
+  <data name="GLSL_fragment_source" xml:space="preserve">
+    <value>GLSL 片段着色器脚本</value>
+  </data>
+  <data name="HLSL9_vertex_source" xml:space="preserve">
+    <value>HLSL9 顶点着色器脚本</value>
+  </data>
+  <data name="HLSL9_fragment_source" xml:space="preserve">
+    <value>HLSL9 片段着色器脚本</value>
+  </data>
+  <data name="Vertex_shader_attributes" xml:space="preserve">
+    <value>顶点着色器参数</value>
+  </data>
+  <data name="Preload__old_audio_system" xml:space="preserve">
+    <value>预加载 (旧音频系统)</value>
+  </data>
+  <data name="Audio_file" xml:space="preserve">
+    <value>音频文件</value>
+  </data>
+  <data name="Audio_group" xml:space="preserve">
+    <value>音频组</value>
+  </data>
+  <data name="Pitch" xml:space="preserve">
+    <value>音高</value>
+  </data>
+  <data name="Volume" xml:space="preserve">
+    <value>音量</value>
+  </data>
+  <data name="Effects" xml:space="preserve">
+    <value>效果</value>
+  </data>
+  <data name="File1" xml:space="preserve">
+    <value>文件</value>
+  </data>
+  <data name="Export_all_frames__or_Spine_data" xml:space="preserve">
+    <value>导出所有帧(如果这是骨骼类精灵则导出骨骼数据)</value>
+  </data>
+  <data name="Width" xml:space="preserve">
+    <value>宽度:</value>
+  </data>
+  <data name="Height" xml:space="preserve">
+    <value>高:</value>
+  </data>
+  <data name="Margin" xml:space="preserve">
+    <value>外边距</value>
+  </data>
+  <data name="Left" xml:space="preserve">
+    <value>左:</value>
+  </data>
+  <data name="Right" xml:space="preserve">
+    <value>右:</value>
+  </data>
+  <data name="Bottom" xml:space="preserve">
+    <value>下:</value>
+  </data>
+  <data name="Top" xml:space="preserve">
+    <value>上:</value>
+  </data>
+  <data name="Bounding_box_mode" xml:space="preserve">
+    <value>边界框模式</value>
+  </data>
+  <data name="SepMasks" xml:space="preserve">
+    <value>隔离遮罩</value>
+  </data>
+  <data name="Textures" xml:space="preserve">
+    <value>纹理</value>
+  </data>
+  <data name="Collision_masks" xml:space="preserve">
+    <value>碰撞遮罩</value>
+  </data>
+  <data name="CollisionMask" xml:space="preserve">
+    <value>(碰撞遮罩)</value>
+  </data>
+  <data name="Invalid_mask_data" xml:space="preserve">
+    <value>遮罩数据无效!</value>
+  </data>
+  <data name="Import_mask" xml:space="preserve">
+    <value>导入遮罩</value>
+  </data>
+  <data name="Export_mask" xml:space="preserve">
+    <value>导出遮罩</value>
+  </data>
+  <data name="Is_special_type" xml:space="preserve">
+    <value>是特殊类型?</value>
+  </data>
+  <data name="Playback_speed" xml:space="preserve">
+    <value>播放速度</value>
+  </data>
+  <data name="Playback_speed_type" xml:space="preserve">
+    <value>播放速度的单位</value>
+  </data>
+  <data name="Emit_mode" xml:space="preserve">
+    <value>粒子计数 模式</value>
+  </data>
+  <data name="Content" xml:space="preserve">
+    <value>内容</value>
+  </data>
+  <data name="Texture_Group" xml:space="preserve">
+    <value>纹理组</value>
+  </data>
+  <data name="Group_Name" xml:space="preserve">
+    <value>组名</value>
+  </data>
+  <data name="Texture_Pages" xml:space="preserve">
+    <value>纹理页</value>
+  </data>
+  <data name="Sprites" xml:space="preserve">
+    <value>精灵</value>
+  </data>
+  <data name="Tilesets" xml:space="preserve">
+    <value>图块集</value>
+  </data>
+  <data name="Source_position_size" xml:space="preserve">
+    <value>源 位置/尺寸</value>
+  </data>
+  <data name="Target_position_size" xml:space="preserve">
+    <value>目标 位置/尺寸</value>
+  </data>
+  <data name="Bounding_size" xml:space="preserve">
+    <value>边界框尺寸</value>
+  </data>
+  <data name="Find_all_references_to_this_page" xml:space="preserve">
+    <value>查找当前标签页条目的所有引用</value>
+  </data>
+  <data name="Moments" xml:space="preserve">
+    <value>时刻</value>
+  </data>
+  <data name="Variables" xml:space="preserve">
+    <value>变量</value>
+  </data>
+  <data name="Instance_global_variable_count" xml:space="preserve">
+    <value>实例/全局变量的数目</value>
+  </data>
+  <data name="Instance_global_variable_count__again" xml:space="preserve">
+    <value>实例/全局变量的数目(再次)</value>
+  </data>
+  <data name="Max_local_variable_count" xml:space="preserve">
+    <value>最大局部变量数目</value>
+  </data>
+  <data name="Instance_type" xml:space="preserve">
+    <value>实例类型</value>
+  </data>
+  <data name="VarID" xml:space="preserve">
+    <value>变量 ID</value>
+  </data>
+  <data name="File" xml:space="preserve">
+    <value>文件(_F)</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>新建(_N)</value>
+  </data>
+  <data name="Open" xml:space="preserve">
+    <value>打开(_O)</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>保存(_S)</value>
+  </data>
+  <data name="Temp_run_game" xml:space="preserve">
+    <value>临时运行游戏(_T)</value>
+  </data>
+  <data name="Run_game_under_GMS__debugger" xml:space="preserve">
+    <value>在GMS的调试器运行游戏(_D)</value>
+  </data>
+  <data name="Run_game_with_other_runner" xml:space="preserve">
+    <value>使用其他运行时(Runner)运行游戏</value>
+  </data>
+  <data name="Generate_o_ffset_map" xml:space="preserve">
+    <value>生成偏移表(_O)</value>
+  </data>
+  <data name="S_ettings" xml:space="preserve">
+    <value>设置(_S)</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>关闭(_C)</value>
+  </data>
+  <data name="Scripts" xml:space="preserve">
+    <value>脚本</value>
+  </data>
+  <data name="loading" xml:space="preserve">
+    <value>(...加载中...)</value>
+  </data>
+  <data name="Find" xml:space="preserve">
+    <value>查找(_F)</value>
+  </data>
+  <data name="Search_in_code" xml:space="preserve">
+    <value>在代码中搜索(_S)</value>
+  </data>
+  <data name="Find_unreferenced__assets" xml:space="preserve">
+    <value>查找未被引用的资产</value>
+  </data>
+  <data name="GitHub" xml:space="preserve">
+    <value>_Github</value>
+  </data>
+  <data name="Help" xml:space="preserve">
+    <value>帮助(_H)</value>
+  </data>
+  <data name="About" xml:space="preserve">
+    <value>关于(_A)</value>
+  </data>
+  <data name="This_is_an_ID__index__of_the_currently" xml:space="preserve">
+    <value>这是当前打开的资产、项目或对象的ID（索引）。它从0开始。</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>无</value>
+  </data>
+  <data name="Forward" xml:space="preserve">
+    <value>向前</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>搜索</value>
+  </data>
+  <data name="Filter_by_name" xml:space="preserve">
+    <value>按名称过滤...</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>添加</value>
+  </data>
+  <data name="Data" xml:space="preserve">
+    <value>数据</value>
+  </data>
+  <data name="Global_init" xml:space="preserve">
+    <value>全局初始化脚本</value>
+  </data>
+  <data name="Audio_groups" xml:space="preserve">
+    <value>音频组</value>
+  </data>
+  <data name="Sounds" xml:space="preserve">
+    <value>音频</value>
+  </data>
+  <data name="Backgrounds__amp__Tile_sets" xml:space="preserve">
+    <value>背景 &amp; 图块集</value>
+  </data>
+  <data name="Paths" xml:space="preserve">
+    <value>路径</value>
+  </data>
+  <data name="Shaders" xml:space="preserve">
+    <value>着色器</value>
+  </data>
+  <data name="Fonts" xml:space="preserve">
+    <value>字体</value>
+  </data>
+  <data name="Timelines" xml:space="preserve">
+    <value>时间线</value>
+  </data>
+  <data name="Game_objects" xml:space="preserve">
+    <value>游戏对象</value>
+  </data>
+  <data name="Rooms" xml:space="preserve">
+    <value>房间</value>
+  </data>
+  <data name="Extensions" xml:space="preserve">
+    <value>扩展</value>
+  </data>
+  <data name="Texture_page_items" xml:space="preserve">
+    <value>纹理页条目</value>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>代码</value>
+  </data>
+  <data name="Code_locals" xml:space="preserve">
+    <value>代码局部变量</value>
+  </data>
+  <data name="Strings1" xml:space="preserve">
+    <value>字符串</value>
+  </data>
+  <data name="Embedded_textures" xml:space="preserve">
+    <value>内嵌纹理</value>
+  </data>
+  <data name="Embedded_audio" xml:space="preserve">
+    <value>内嵌音频</value>
+  </data>
+  <data name="Texture_group_information" xml:space="preserve">
+    <value>纹理组信息</value>
+  </data>
+  <data name="Embedded_images" xml:space="preserve">
+    <value>内嵌图像</value>
+  </data>
+  <data name="Particle_systems" xml:space="preserve">
+    <value>粒子系统</value>
+  </data>
+  <data name="Particle_system_emitters" xml:space="preserve">
+    <value>粒子发射器</value>
+  </data>
+  <data name="End_color" xml:space="preserve">
+    <value>颜色 终末态</value>
+  </data>
+  <data name="Texture_mask_id" xml:space="preserve">
+    <value>纹理遮罩 ID</value>
+  </data>
+  <data name="Uses_physics" xml:space="preserve">
+    <value>使用物理</value>
+  </data>
+  <data name="Is_sensor" xml:space="preserve">
+    <value>是传感器的</value>
+  </data>
+  <data name="Collision_shape" xml:space="preserve">
+    <value>碰撞形状</value>
+  </data>
+  <data name="Physics" xml:space="preserve">
+    <value>物理</value>
+  </data>
+  <data name="Density" xml:space="preserve">
+    <value>密度</value>
+  </data>
+  <data name="Restitution" xml:space="preserve">
+    <value>力学恢复系数</value>
+  </data>
+  <data name="Group" xml:space="preserve">
+    <value>组</value>
+  </data>
+  <data name="Linear_damping" xml:space="preserve">
+    <value>线性阻尼</value>
+  </data>
+  <data name="Angular_damping" xml:space="preserve">
+    <value>角阻尼值</value>
+  </data>
+  <data name="Friction" xml:space="preserve">
+    <value>摩擦力</value>
+  </data>
+  <data name="Is_awake" xml:space="preserve">
+    <value>是唤醒状态的</value>
+  </data>
+  <data name="Is_kinematic" xml:space="preserve">
+    <value>是运动学的</value>
+  </data>
+  <data name="Physics_shape_vertices" xml:space="preserve">
+    <value>物理形状顶点</value>
+  </data>
+  <data name="Events" xml:space="preserve">
+    <value>事件</value>
+  </data>
+  <data name="Subtype_ID" xml:space="preserve">
+    <value>子类型 ID</value>
+  </data>
+  <data name="n_a" xml:space="preserve">
+    <value>(不适用)</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>行为</value>
+  </data>
+  <data name="No_game_loaded" xml:space="preserve">
+    <value>当前没有加载游戏</value>
+  </data>
+  <data name="ScriptsMenu" xml:space="preserve">
+    <value>脚本(_S)</value>
+  </data>
+  <data name="Close_current_tab" xml:space="preserve">
+    <value>关闭当前标签页</value>
+  </data>
+  <data name="Close_all_tabs" xml:space="preserve">
+    <value>关闭所有标签页</value>
+  </data>
+  <data name="Restore_last_closed_tab" xml:space="preserve">
+    <value>恢复最近关闭的标签页</value>
+  </data>
+  <data name="Switch_to_the_next_tab" xml:space="preserve">
+    <value>切换到下一个标签页</value>
+  </data>
+  <data name="Switch_to_the_previous_tab" xml:space="preserve">
+    <value>切换到上一个标签页</value>
+  </data>
+  <data name="Search_in_code_c1" xml:space="preserve">
+    <value>在代码中搜索</value>
+  </data>
+  <data name="Welcome_to_UndertaleModTool" xml:space="preserve">
+    <value>欢迎使用 UndertaleModTool!</value>
+  </data>
+  <data name="Open_a_data_win_file_to_get_started" xml:space="preserve">
+    <value>打开 data.win 文件以开始，然后双击左侧的任何条目来查看它们。
+
+简体中文的本地化翻译由 Github:@Genouka 制作。</value>
+  </data>
+  <data name="First_time_setup__Would_you_like" xml:space="preserve">
+    <value>首次安装: 你想将Gamemaker的数据文件(例如 .win)与UndertaleModTool建立文件关联吗？</value>
+  </data>
+  <data name="File_associations" xml:space="preserve">
+    <value>文件关联</value>
+  </data>
+  <data name="UndertaleModToolUpdater_app_didn" xml:space="preserve">
+    <value>UndertaleModToolUpdater 没有退出.
+无法从临时目录删除它</value>
+  </data>
+  <data name="error_message_is_missing" xml:space="preserve">
+    <value>(错误信息缺失)</value>
+  </data>
+  <data name="Warning__you_currently_have_a_project" xml:space="preserve">
+    <value>警告: 你当前已经打开了一个项目。
+你确定要创建一个新项目吗？</value>
+  </data>
+  <data name="New_file_created__have_fun_making" xml:space="preserve">
+    <value>新文件已创建，从头开始打造一个新游戏真有趣！
+我告诉你：要打开 data.win，不要创建新文件！:P</value>
+  </data>
+  <data name="Errors_occurred_during_loading__High" xml:space="preserve">
+    <value>加载期间出现错误。数据丢失的可能性很高！请你自行承担风险。</value>
+  </data>
+  <data name="The_changes_in_code_editor_weren" xml:space="preserve">
+    <value>由于"SaveCodeChanges()"中的某些错误，代码编辑器中的更改未保存。</value>
+  </data>
+  <data name="Save_changes_before_quitting" xml:space="preserve">
+    <value>要在退出前保存更改吗？</value>
+  </data>
+  <data name="Script_still_runs__Save_anyway__nIt" xml:space="preserve">
+    <value>脚本仍在运行。是否仍要保存？
+您要保存的数据文件可能会损坏。</value>
+  </data>
+  <data name="Loading1" xml:space="preserve">
+    <value>加载中</value>
+  </data>
+  <data name="Loading__please_wait" xml:space="preserve">
+    <value>加载中，请稍后...</value>
+  </data>
+  <data name="Double_click_on_the_items_on_the" xml:space="preserve">
+    <value>双击左边的条目来查看它们！
+
+简体中文的本地化翻译由 Github:@Genouka 制作。</value>
+  </data>
+  <data name="Loading_warning" xml:space="preserve">
+    <value>加载警告</value>
+  </data>
+  <data name="An_error_occurred_while_trying_to" xml:space="preserve">
+    <value>加载时发生了一些错误:
+{0}</value>
+  </data>
+  <data name="Load_error" xml:space="preserve">
+    <value>加载错误</value>
+  </data>
+  <data name="Warnings_occurred_during_loading" xml:space="preserve">
+    <value>加载过程中出现警告。尝试保存时可能会丢失数据！</value>
+  </data>
+  <data name="Loading_problems" xml:space="preserve">
+    <value>加载问题</value>
+  </data>
+  <data name="This_game_uses_YYC__YoYo_Compiler" xml:space="preserve">
+    <value>这个游戏使用YYC（YoYo编译器），这意味着代码嵌入到游戏可执行文件中。当前不完全支持此配置。继续使用风险自负。</value>
+  </data>
+  <data name="YYC" xml:space="preserve">
+    <value>YYC</value>
+  </data>
+  <data name="This_game_is_set_to_run_with_the" xml:space="preserve">
+    <value>此游戏设置为使用GameMaker Studio调试器运行，如果调试器未运行，则正常运行时将在加载后挂起。通过选中“禁用调试器”框并保存，可以在“常规信息”中禁用此功能。</value>
+  </data>
+  <data name="GMS_Debugger" xml:space="preserve">
+    <value>GMS 调试器</value>
+  </data>
+  <data name="This_game_contains_texture_s__with" xml:space="preserve">
+    <value>此游戏包含具有未知或不支持的图像格式的纹理。这些将保存/加载，但不会显示在编辑器中，并且与它们相关的许多操作将失败。小心操作。</value>
+  </data>
+  <data name="Unsupported_textures" xml:space="preserve">
+    <value>不支持的纹理</value>
+  </data>
+  <data name="Tile_sets" xml:space="preserve">
+    <value>图块集</value>
+  </data>
+  <data name="Backgrounds___Tile_sets" xml:space="preserve">
+    <value>背景 &amp; 图块集</value>
+  </data>
+  <data name="Saving" xml:space="preserve">
+    <value>保存中</value>
+  </data>
+  <data name="Saving__please_wait" xml:space="preserve">
+    <value>正在保存中，请稍后...</value>
+  </data>
+  <data name="You_are_saving_the_game_in_GameMaker" xml:space="preserve">
+    <value>您正在GameMaker Studio调试模式下保存游戏。除非调试器正在运行，否则正常运行时将在加载后挂起。通过选中“禁用调试器”框并保存，可以在“常规信息”中禁用此功能。</value>
+  </data>
+  <data name="Generating_debugger_data" xml:space="preserve">
+    <value>正在生成调试器数据...</value>
+  </data>
+  <data name="Item_name_is_null" xml:space="preserve">
+    <value>条目的名称为 null。</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="Add_the_new_room_to_the_end_of_the" xml:space="preserve">
+    <value>是否将新房间添加到房间次序列表的末尾？</value>
+  </data>
+  <data name="Add_to_room_order_list" xml:space="preserve">
+    <value>添加到房间次序列表</value>
+  </data>
+  <data name="Run__other_script" xml:space="preserve">
+    <value>运行其他脚本... (_O)</value>
+  </data>
+  <data name="No_scripts_found" xml:space="preserve">
+    <value>(没有找到脚本!)</value>
+  </data>
+  <data name="The_script_file_doesn_t_exist" xml:space="preserve">
+    <value>脚本文件不存在。</value>
+  </data>
+  <data name="Warning___there_is_another_progress" xml:space="preserve">
+    <value>警告 - 后台正在运行另一个进度条更新程序任务（挂起）。
+重新启动应用程序以防止某些意外行为。</value>
+  </data>
+  <data name="Stopping_the_progress_bar_updater" xml:space="preserve">
+    <value>停止进度条更新程序任务失败。
+强烈建议重新启动应用程序。</value>
+  </data>
+  <data name="Script_error" xml:space="preserve">
+    <value>脚本错误</value>
+  </data>
+  <data name="Cannot_select_the_code_editor_mode" xml:space="preserve">
+    <value>无法选择代码编辑器模式选项卡 - 找不到实例。</value>
+  </data>
+  <data name="Script_warning" xml:space="preserve">
+    <value>脚本警告</value>
+  </data>
+  <data name="Script_message" xml:space="preserve">
+    <value>脚本信息</value>
+  </data>
+  <data name="Script_Question" xml:space="preserve">
+    <value>脚本质询</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>错误</value>
+  </data>
+  <data name="UndertaleModTool_by_krzys_h_and_the" xml:space="preserve">
+    <value>UndertaleModTool 由 krzys_h 和 Underminers 团队创作
+Version {0}
+
+简体中文本地化由Github: @Genouka 制作。</value>
+  </data>
+  <data name="Check_your_internet_connection" xml:space="preserve">
+    <value>检查你的互联网连接。</value>
+  </data>
+  <data name="UndertaleModTool_is_already_up_to" xml:space="preserve">
+    <value>UndertaleModTool已经是最新的。
+是否仍要更新？</value>
+  </data>
+  <data name="Downloading" xml:space="preserve">
+    <value>下载中</value>
+  </data>
+  <data name="Downloading_new_version" xml:space="preserve">
+    <value>正在下载新版本...</value>
+  </data>
+  <data name="Load_data_win_file_first" xml:space="preserve">
+    <value>请先加载 data.win 文件</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="Invalid_name" xml:space="preserve">
+    <value>无效的名字</value>
+  </data>
+  <data name="Expand_the_list_on_the_left_to_edit" xml:space="preserve">
+    <value>展开左侧的列表以编辑条目</value>
+  </data>
+  <data name="WARNING__Temp_running_the_game_does" xml:space="preserve">
+    <value>警告：
+临时运行游戏不会永久保存您的更改。
+请“保存”游戏以保存更改。
+在不使用“保存”选项的情况下关闭UndertaleModTool可能会导致工作损失。</value>
+  </data>
+  <data name="Temp_folder_is_null" xml:space="preserve">
+    <value>临时目录是 null。</value>
+  </data>
+  <data name="Null_game_executable_name_or_location" xml:space="preserve">
+    <value>游戏可执行文件名称或位置为空</value>
+  </data>
+  <data name="Temp_save_failed__cannot_run" xml:space="preserve">
+    <value>临时保存失败，无法运行。</value>
+  </data>
+  <data name="The_game_has_the_debugger_enabled" xml:space="preserve">
+    <value>游戏已启用调试器。是否要禁用它以便游戏运行？</value>
+  </data>
+  <data name="You_must_save_your_changes_to_run" xml:space="preserve">
+    <value>必须保存更改才能运行。</value>
+  </data>
+  <data name="Use_the___Run_game_using_debugger" xml:space="preserve">
+    <value>使用“使用调试器运行游戏”选项来运行此游戏。</value>
+  </data>
+  <data name="Save_changes_first" xml:space="preserve">
+    <value>要先保存更改吗？</value>
+  </data>
+  <data name="The_file_must_be_saved_in_order_to" xml:space="preserve">
+    <value>必须保存文件才能运行。</value>
+  </data>
+  <data name="Are_you_sure_that_you_want_to_run" xml:space="preserve">
+    <value>是否确实要使用GMS调试器运行游戏？
+如果要在某些游戏中启用调试模式，则需要使用其中一个脚本。</value>
+  </data>
+  <data name="The_selected_runtime_does_not_support" xml:space="preserve">
+    <value>所选的运行时(Runtime)不支持调试。</value>
+  </data>
+  <data name="Run_error" xml:space="preserve">
+    <value>运行错误</value>
+  </data>
+  <data name="Can_t_highlight_the_object___it_s" xml:space="preserve">
+    <value>无法高亮显示对象 - 它为 null 或不是 UndertaleResource 。</value>
+  </data>
+  <data name="Edit_a_font_glyph_rectangle" xml:space="preserve">
+    <value>编辑一个字体的字形矩形</value>
+  </data>
+  <data name="Save_changes" xml:space="preserve">
+    <value>保存更改</value>
+  </data>
+  <data name="Get_help" xml:space="preserve">
+    <value>获取帮助</value>
+  </data>
+  <data name="Hint__You_can_click_on_any_glyph" xml:space="preserve">
+    <value>提示：您可以单击此处的任何字形以在“字形”中高亮显示它。</value>
+  </data>
+  <data name="Line_height" xml:space="preserve">
+    <value>线高</value>
+  </data>
+  <data name="Font_size" xml:space="preserve">
+    <value>字体大小</value>
+  </data>
+  <data name="Bold" xml:space="preserve">
+    <value>粗体</value>
+  </data>
+  <data name="Italic" xml:space="preserve">
+    <value>斜体</value>
+  </data>
+  <data name="Range" xml:space="preserve">
+    <value>范围</value>
+  </data>
+  <data name="Charset" xml:space="preserve">
+    <value>字符集</value>
+  </data>
+  <data name="Anti_Aliasing" xml:space="preserve">
+    <value>抗锯齿</value>
+  </data>
+  <data name="The_glyphs_were_sorted_successfully" xml:space="preserve">
+    <value>字形已成功排序。</value>
+  </data>
+  <data name="The_range_was_updated_successfully" xml:space="preserve">
+    <value>范围已成功更新。</value>
+  </data>
+  <data name="Cannot_find_the_glyphs_table_scroll" xml:space="preserve">
+    <value>找不到字形表的滚动查看器。</value>
+  </data>
+  <data name="No_glyph_selected" xml:space="preserve">
+    <value>没有选择字形。</value>
+  </data>
+  <data name="The_font_has_no_texture" xml:space="preserve">
+    <value>这个字体没有纹理。</value>
+  </data>
+  <data name="The_last_glyph_has_zero_size___You" xml:space="preserve">
+    <value>最后一个字形的大小为零。
+你可以用左边的按钮来解决这个问题。</value>
+  </data>
+  <data name="Glyphs" xml:space="preserve">
+    <value>字形：</value>
+  </data>
+  <data name="error1" xml:space="preserve">
+    <value>(错误)</value>
+  </data>
+  <data name="The_character_code_is_greater_than" xml:space="preserve">
+    <value>字符代码大于最大值（65535）</value>
+  </data>
+  <data name="drag___drop_a__0" xml:space="preserve">
+    <value>(拖放一个 {0})</value>
+  </data>
+  <data name="empty__0__reference" xml:space="preserve">
+    <value>(空的 {0} 引用)</value>
+  </data>
+  <data name="Code_entry_for_room_already_exists" xml:space="preserve">
+    <value>房间的代码条目已存在。它将被重用。</value>
+  </data>
+  <data name="Adding_not_supported_in_this_situation" xml:space="preserve">
+    <value>在此情况下不支持添加。</value>
+  </data>
+  <data name="The_selected_object_is_not_an___UndertaleResource" xml:space="preserve">
+    <value>选择的对象不是 "UndertaleResource".</value>
+  </data>
+  <data name="Invalid_color_string" xml:space="preserve">
+    <value>无效的颜色字符串</value>
+  </data>
+  <data name="Cannot_find_the_selected_glyph" xml:space="preserve">
+    <value>找不到选择的字形。</value>
+  </data>
+  <data name="a_1__Double_click_an_inactive_rectangle" xml:space="preserve">
+    <value>1) 双击非活动矩形以将其选中。
+2) 可以使用箭头键移动选定的矩形（按住Shift键调整大小）。
+3) 如果所需区域是空图示符，请在该区域上拖动鼠标。</value>
+  </data>
+  <data name="Help1" xml:space="preserve">
+    <value>帮助</value>
+  </data>
+  <data name="Copy_object" xml:space="preserve">
+    <value>复制对象</value>
+  </data>
+  <data name="Delete_object" xml:space="preserve">
+    <value>删除对象</value>
+  </data>
+  <data name="Copy_tile" xml:space="preserve">
+    <value>复制图块</value>
+  </data>
+  <data name="Delete_tile" xml:space="preserve">
+    <value>删除图块</value>
+  </data>
+  <data name="Copy_sprite_instance" xml:space="preserve">
+    <value>复制精灵实例</value>
+  </data>
+  <data name="Delete_sprite_instance" xml:space="preserve">
+    <value>删除精灵实例</value>
+  </data>
+  <data name="Copy_particle_system_instance" xml:space="preserve">
+    <value>复制粒子系统实例</value>
+  </data>
+  <data name="Delete_particle_system_instance" xml:space="preserve">
+    <value>删除粒子系统实例</value>
+  </data>
+  <data name="Backgrounds" xml:space="preserve">
+    <value>背景</value>
+  </data>
+  <data name="Delete_background" xml:space="preserve">
+    <value>删除背景</value>
+  </data>
+  <data name="no_name" xml:space="preserve">
+    <value>(没有名称)</value>
+  </data>
+  <data name="Disable_view" xml:space="preserve">
+    <value>禁用视口</value>
+  </data>
+  <data name="Views" xml:space="preserve">
+    <value>视口</value>
+  </data>
+  <data name="View" xml:space="preserve">
+    <value>视口</value>
+  </data>
+  <data name="New_object_instance" xml:space="preserve">
+    <value>新建对象实例</value>
+  </data>
+  <data name="Paste_object_instance" xml:space="preserve">
+    <value>粘贴对象实例</value>
+  </data>
+  <data name="Tiles" xml:space="preserve">
+    <value>图块</value>
+  </data>
+  <data name="New_tile" xml:space="preserve">
+    <value>新建图块</value>
+  </data>
+  <data name="Paste_tile" xml:space="preserve">
+    <value>粘贴图块</value>
+  </data>
+  <data name="Layers" xml:space="preserve">
+    <value>层</value>
+  </data>
+  <data name="New_Instances_layer" xml:space="preserve">
+    <value>新建实例层</value>
+  </data>
+  <data name="New_Tiles_layer" xml:space="preserve">
+    <value>新建图块层</value>
+  </data>
+  <data name="New_Background_layer" xml:space="preserve">
+    <value>新建背景层</value>
+  </data>
+  <data name="New_Assets_layer" xml:space="preserve">
+    <value>新建资产层</value>
+  </data>
+  <data name="Delete_layer" xml:space="preserve">
+    <value>删除层</value>
+  </data>
+  <data name="New_legacy_tile" xml:space="preserve">
+    <value>新建传统图块</value>
+  </data>
+  <data name="New_sprite_instance" xml:space="preserve">
+    <value>新建精灵实例</value>
+  </data>
+  <data name="Paste_asset" xml:space="preserve">
+    <value>粘贴资产</value>
+  </data>
+  <data name="Move_item_up" xml:space="preserve">
+    <value>上移条目 (-)</value>
+  </data>
+  <data name="Move_item_down" xml:space="preserve">
+    <value>下移条目 (+)</value>
+  </data>
+  <data name="Caption" xml:space="preserve">
+    <value>标题</value>
+  </data>
+  <data name="Background_color" xml:space="preserve">
+    <value>背景颜色</value>
+  </data>
+  <data name="Draw_background_color" xml:space="preserve">
+    <value>绘制背景颜色</value>
+  </data>
+  <data name="Creation_Code" xml:space="preserve">
+    <value>创建代码</value>
+  </data>
+  <data name="World" xml:space="preserve">
+    <value>世界</value>
+  </data>
+  <data name="Top_Left_Right_Bottom" xml:space="preserve">
+    <value>上/左/右/下</value>
+  </data>
+  <data name="Gravity" xml:space="preserve">
+    <value>重力</value>
+  </data>
+  <data name="Grid_Width" xml:space="preserve">
+    <value>网格宽</value>
+  </data>
+  <data name="Grid_Height" xml:space="preserve">
+    <value>网格高</value>
+  </data>
+  <data name="Grid_Thickness" xml:space="preserve">
+    <value>网格厚度</value>
+  </data>
+  <data name="Foreground" xml:space="preserve">
+    <value>前景</value>
+  </data>
+  <data name="Definition" xml:space="preserve">
+    <value>定义</value>
+  </data>
+  <data name="Position" xml:space="preserve">
+    <value>位置</value>
+  </data>
+  <data name="Tiling" xml:space="preserve">
+    <value>平铺</value>
+  </data>
+  <data name="Stretch" xml:space="preserve">
+    <value>拉伸</value>
+  </data>
+  <data name="Horizontal" xml:space="preserve">
+    <value>水平</value>
+  </data>
+  <data name="Vertical" xml:space="preserve">
+    <value>垂直</value>
+  </data>
+  <data name="Pos_size" xml:space="preserve">
+    <value>位置/尺寸</value>
+  </data>
+  <data name="Port_pos_size" xml:space="preserve">
+    <value>视口 位置/尺寸</value>
+  </data>
+  <data name="Border" xml:space="preserve">
+    <value>边距</value>
+  </data>
+  <data name="Follows_object" xml:space="preserve">
+    <value>跟随对象</value>
+  </data>
+  <data name="Instance_ID" xml:space="preserve">
+    <value>实例 ID</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>颜色</value>
+  </data>
+  <data name="Frame_index" xml:space="preserve">
+    <value>帧索引</value>
+  </data>
+  <data name="Image_speed" xml:space="preserve">
+    <value>图像速度</value>
+  </data>
+  <data name="Pre_Create_code" xml:space="preserve">
+    <value>预创建代码</value>
+  </data>
+  <data name="Source" xml:space="preserve">
+    <value>源</value>
+  </data>
+  <data name="Layer_name" xml:space="preserve">
+    <value>层的名称</value>
+  </data>
+  <data name="Layer_id" xml:space="preserve">
+    <value>层的 id</value>
+  </data>
+  <data name="Layer_type" xml:space="preserve">
+    <value>层的类型</value>
+  </data>
+  <data name="Automatically_set_size_to_match_room" xml:space="preserve">
+    <value>自动设置大小以匹配房间大小</value>
+  </data>
+  <data name="Auto" xml:space="preserve">
+    <value>自动</value>
+  </data>
+  <data name="Tile_set" xml:space="preserve">
+    <value>图块集</value>
+  </data>
+  <data name="Tile_data" xml:space="preserve">
+    <value>图块数据</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>编辑</value>
+  </data>
+  <data name="First_frame" xml:space="preserve">
+    <value>首帧</value>
+  </data>
+  <data name="Animation_speed" xml:space="preserve">
+    <value>动画速度</value>
+  </data>
+  <data name="Contains_legacy_tiles_and_sprites" xml:space="preserve">
+    <value>包含在左侧树中列出的传统图块和精灵</value>
+  </data>
+  <data name="Contains_GameObject_instances__listed" xml:space="preserve">
+    <value>包含游戏对象实例，列在左侧的树中</value>
+  </data>
+  <data name="Game_objects__from_all_layers" xml:space="preserve">
+    <value>游戏对象 (来自所有层)</value>
+  </data>
+  <data name="Please_select_an_assets_layer" xml:space="preserve">
+    <value>请选择一个资产层。</value>
+  </data>
+  <data name="Please_select_an_instance_layer" xml:space="preserve">
+    <value>请选择一个实例层。</value>
+  </data>
+  <data name="No_empty_room_backgrounds" xml:space="preserve">
+    <value>没有空房间背景。</value>
+  </data>
+  <data name="Please_select_a_layer" xml:space="preserve">
+    <value>请选择一个层。</value>
+  </data>
+  <data name="Room_is_null" xml:space="preserve">
+    <value>房间为 null。</value>
+  </data>
+  <data name="Warning___the_maximum_layer_depth" xml:space="preserve">
+    <value>警告 - 已达到最大层深度。
+您最好更改新层的深度。</value>
+  </data>
+  <data name="Layers_don_t_support_this_feature" xml:space="preserve">
+    <value>层当前不支持此功能，请改为更改层深度。</value>
+  </data>
+  <data name="Views_don_t_support_this_feature" xml:space="preserve">
+    <value>视口不支持此功能。</value>
+  </data>
+  <data name="Backgrounds_don_t_support_this_feature" xml:space="preserve">
+    <value>背景不支持此功能。</value>
+  </data>
+  <data name="Can_t_change_the_object_position" xml:space="preserve">
+    <value>无法更改对象位置 - 找不到所选对象的列表。</value>
+  </data>
+  <data name="Tile_data_is_empty" xml:space="preserve">
+    <value>图块数据为空。</value>
+  </data>
+  <data name="Tile_data_size_can_t_be_zero" xml:space="preserve">
+    <value>图块数据大小不能为零。</value>
+  </data>
+  <data name="Error___selected_file_line_count" xml:space="preserve">
+    <value>错误 - 选定的文件行计数与图块层高度不匹配。</value>
+  </data>
+  <data name="Was_the_data_exported_from___Tiled" xml:space="preserve">
+    <value>数据是从"Tiled"导出的吗？</value>
+  </data>
+  <data name="The_file_has_invalid_data" xml:space="preserve">
+    <value>文件的数据无效。</value>
+  </data>
+  <data name="Imported_successfully" xml:space="preserve">
+    <value>导入成功。</value>
+  </data>
+  <data name="Instances" xml:space="preserve">
+    <value>实例</value>
+  </data>
+  <data name="Index" xml:space="preserve">
+    <value>索引</value>
+  </data>
+  <data name="Color_depth" xml:space="preserve">
+    <value>颜色深度</value>
+  </data>
+  <data name="Resolution" xml:space="preserve">
+    <value>分辨率</value>
+  </data>
+  <data name="Frequency" xml:space="preserve">
+    <value>刷新率(遗留值)</value>
+  </data>
+  <data name="Vertex_sync" xml:space="preserve">
+    <value>顶点同步</value>
+  </data>
+  <data name="Priority" xml:space="preserve">
+    <value>优先级</value>
+  </data>
+  <data name="Back_image" xml:space="preserve">
+    <value>背景图</value>
+  </data>
+  <data name="Front_image" xml:space="preserve">
+    <value>前景图</value>
+  </data>
+  <data name="Load_image" xml:space="preserve">
+    <value>加载图像</value>
+  </data>
+  <data name="Load_alpha" xml:space="preserve">
+    <value>加载透明度</value>
+  </data>
+  <data name="Constants" xml:space="preserve">
+    <value>常量</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>未知</value>
+  </data>
+  <data name="Language_count" xml:space="preserve">
+    <value>语言数目</value>
+  </data>
+  <data name="Entry_count" xml:space="preserve">
+    <value>条目数目</value>
+  </data>
+  <data name="Note__the_languages_currently_don" xml:space="preserve">
+    <value>注意：这些语言目前似乎没有被使用，因此它们的编辑器尚未制作。</value>
+  </data>
+  <data name="Options" xml:space="preserve">
+    <value>选项</value>
+  </data>
+  <data name="Spine_Sprites" xml:space="preserve">
+    <value>骨骼精灵</value>
+  </data>
+  <data name="Ascender" xml:space="preserve">
+    <value>Ascender</value>
+  </data>
+  <data name="Ascender_offset" xml:space="preserve">
+    <value>Ascender offset</value>
+  </data>
+  <data name="SDF_spread_value" xml:space="preserve">
+    <value>SDF 扩散值</value>
+  </data>
+  <data name="The_references_of_game_object__quot" xml:space="preserve">
+    <value>游戏对象的引用 ""</value>
+  </data>
+  <data name="The_search_results_for_the_game_object" xml:space="preserve">
+    <value>游戏对象的搜索结果
+"".</value>
+  </data>
+  <data name="Search1" xml:space="preserve">
+    <value>搜索</value>
+  </data>
+  <data name="Export_results" xml:space="preserve">
+    <value>导出结果</value>
+  </data>
+  <data name="Note__the_results_may_be_not_100" xml:space="preserve">
+    <value>注意：结果可能不是100%完成。
+如有必要，请使用“查找”菜单中的搜索脚本之一。</value>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>完成</value>
+  </data>
+  <data name="The_references_of_game_asset____0" xml:space="preserve">
+    <value>游戏资产的引用 "{0}"</value>
+  </data>
+  <data name="The_search_results_for_the_game_asset" xml:space="preserve">
+    <value>游戏资产的搜索结果
+"{0}".</value>
+  </data>
+  <data name="No_references_found" xml:space="preserve">
+    <value>没有找到引用。</value>
+  </data>
+  <data name="The_unreferenced_game_assets" xml:space="preserve">
+    <value>未被引用的游戏资产</value>
+  </data>
+  <data name="The_search_results_for_the_unreferenced" xml:space="preserve">
+    <value>未引用游戏资产的搜索结果。</value>
+  </data>
+  <data name="No_unreferenced_assets_found" xml:space="preserve">
+    <value>找不到未引用的资产。</value>
+  </data>
+  <data name="The_object_references_are_stale" xml:space="preserve">
+    <value>对象引用已过时 - 加载了不同的游戏数据。</value>
+  </data>
+  <data name="No_results_to_export" xml:space="preserve">
+    <value>没有结果可被导出。</value>
+  </data>
+  <data name="The_object_reference_is_stale___a" xml:space="preserve">
+    <value>对象引用已过时 - 加载了不同的游戏数据。</value>
+  </data>
+  <data name="The_type_of_this_object_reference" xml:space="preserve">
+    <value>此对象引用的类型没有编辑器/查看器。</value>
+  </data>
+  <data name="The_types_of_references" xml:space="preserve">
+    <value>引用的类型</value>
+  </data>
+  <data name="Where_to_search_the_references" xml:space="preserve">
+    <value>在哪里搜索引用？</value>
+  </data>
+  <data name="Select_all" xml:space="preserve">
+    <value>选择全部</value>
+  </data>
+  <data name="Deselect_all" xml:space="preserve">
+    <value>取消选择全部</value>
+  </data>
+  <data name="Room_tiles" xml:space="preserve">
+    <value>房间图块</value>
+  </data>
+  <data name="Room_sprite_instances" xml:space="preserve">
+    <value>房间精灵实例</value>
+  </data>
+  <data name="Room_background_layers" xml:space="preserve">
+    <value>房间背景层</value>
+  </data>
+  <data name="Texture_groups" xml:space="preserve">
+    <value>纹理组</value>
+  </data>
+  <data name="oom_backgrounds" xml:space="preserve">
+    <value>房间背景</value>
+  </data>
+  <data name="Room_tile_layers" xml:space="preserve">
+    <value>房间图块层</value>
+  </data>
+  <data name="Code_entries__name_and_contents" xml:space="preserve">
+    <value>代码条目 (名称和内容)</value>
+  </data>
+  <data name="Settings___GML_compiler_decompiler" xml:space="preserve">
+    <value>设置 - GML编译器/反编译器</value>
+  </data>
+  <data name="General_settings__compiler__amp" xml:space="preserve">
+    <value>常规设置（编译器和反编译器）</value>
+  </data>
+  <data name="Settings_that_apply_to_both_the_compiler" xml:space="preserve">
+    <value>应用于编译器和反编译器的设置，使编辑GML代码更简单。</value>
+  </data>
+  <data name="Use_CSS_hex_color_literals" xml:space="preserve">
+    <value>使用CSS十六进制颜色文本</value>
+  </data>
+  <data name="If_enabled__color_constants_can_be" xml:space="preserve">
+    <value>如果启用，颜色常量可以格式化为#RRGGBB十六进制格式。</value>
+  </data>
+  <data name="Named_instance_ID_prefix" xml:space="preserve">
+    <value>命名实例ID前缀：</value>
+  </data>
+  <data name="Prefix_used_for_named_instance_IDs" xml:space="preserve">
+    <value>反编译器找到命名实例ID时用于命名实例ID的前缀，以及用于编译的前缀。如果该值与变量名冲突，请更改该值。</value>
+  </data>
+  <data name="Decompiler_settings" xml:space="preserve">
+    <value>反编译器设置</value>
+  </data>
+  <data name="Settings_that_solely_apply_to_the" xml:space="preserve">
+    <value>仅应用于GML反编译器且不会影响GML编译的设置。这些并不适用于所有脚本。</value>
+  </data>
+  <data name="Always_use_semicolons" xml:space="preserve">
+    <value>始终使用分号</value>
+  </data>
+  <data name="If_enabled__all_statements_that_can" xml:space="preserve">
+    <value>如果启用，则所有语句后面都可以有分号。</value>
+  </data>
+  <data name="Indentation_style" xml:space="preserve">
+    <value>缩进样式：</value>
+  </data>
+  <data name="Style_of_indentation_to_be_used_when" xml:space="preserve">
+    <value>打印反编译代码时使用的缩进样式。</value>
+  </data>
+  <data name="Open_block_braces_on_same_line" xml:space="preserve">
+    <value>在同一行上打开块大括号</value>
+  </data>
+  <data name="If_enabled__the_curly_braces_used" xml:space="preserve">
+    <value>如果启用，用于打开块的花括号将与它所属的语句放在同一行上，而不是放在自己的行上。</value>
+  </data>
+  <data name="Remove_block_braces_if_single_line" xml:space="preserve">
+    <value>如果是单线，则移除块括号</value>
+  </data>
+  <data name="If_enabled__blocks_that_contain_a" xml:space="preserve">
+    <value>如果启用，则包含单线的块将在可能的情况下删除其大括号。对于if/else链，所有块都必须是单线。</value>
+  </data>
+  <data name="Create_enum_declarations" xml:space="preserve">
+    <value>创建枚举声明</value>
+  </data>
+  <data name="If_enabled__enum_declarations_identified" xml:space="preserve">
+    <value>如果启用，在反编译期间标识的枚举声明将始终打印到反编译输出。</value>
+  </data>
+  <data name="Enum_macro_declarations_at_top_of" xml:space="preserve">
+    <value>代码顶部的枚举/宏声明</value>
+  </data>
+  <data name="If_enabled__enums_and_macros_will" xml:space="preserve">
+    <value>如果启用，枚举和宏将出现在反编译输出的顶部），而不是底部。</value>
+  </data>
+  <data name="Print_warnings" xml:space="preserve">
+    <value>打印警告</value>
+  </data>
+  <data name="If_enabled__warnings_generated_during" xml:space="preserve">
+    <value>如果启用，则在反编译期间生成的警告将打印为注释。</value>
+  </data>
+  <data name="Allow_leftover_data_on_VM_stack" xml:space="preserve">
+    <value>允许VM堆栈上的剩余数据</value>
+  </data>
+  <data name="If_enabled__data_left_over_on_the" xml:space="preserve">
+    <value>如果启用，VM堆栈上剩余的数据将被视为警告而不是错误。</value>
+  </data>
+  <data name="Add_empty_lines" xml:space="preserve">
+    <value>添加空行：</value>
+  </data>
+  <data name="Select_specific_syntax_to_add_empty" xml:space="preserve">
+    <value>选择特定语法以在前面、后面或周围添加空行。</value>
+  </data>
+  <data name="Around_branch_statements" xml:space="preserve">
+    <value>围绕分支语句</value>
+  </data>
+  <data name="If_enabled__adds_an_empty_line_before" xml:space="preserve">
+    <value>如果启用，则在分支语句之前和之后添加空行。</value>
+  </data>
+  <data name="After_local_variable_declarations" xml:space="preserve">
+    <value>在局部变量声明之后</value>
+  </data>
+  <data name="If_enabled__adds_an_empty_line_after" xml:space="preserve">
+    <value>如果启用，则在块范围的局部变量声明后添加空行。</value>
+  </data>
+  <data name="Before_switch_cases" xml:space="preserve">
+    <value>在 switch cases 之前</value>
+  </data>
+  <data name="If_enabled__adds_an_empty_line_before1" xml:space="preserve">
+    <value>如果启用，则在switch语句中的“case”条目之前添加空行。</value>
+  </data>
+  <data name="After_switch_cases" xml:space="preserve">
+    <value>在 switch cases 之后</value>
+  </data>
+  <data name="If_enabled__adds_an_empty_line_after1" xml:space="preserve">
+    <value>如果启用，则在switch语句中的“case”条目之后添加空行。</value>
+  </data>
+  <data name="Around_function_declarations" xml:space="preserve">
+    <value>围绕函数声明</value>
+  </data>
+  <data name="If_enabled__adds_an_empty_line_before2" xml:space="preserve">
+    <value>如果启用，则在函数声明之前和之后添加空行，即使它是匿名的。</value>
+  </data>
+  <data name="Around_static_initialization" xml:space="preserve">
+    <value>围绕静态初始化</value>
+  </data>
+  <data name="If_enabled__adds_an_empty_line_before3" xml:space="preserve">
+    <value>如果启用，则在静态初始化之前和之后添加空行，如果可能，将连续静态分组在一起。</value>
+  </data>
+  <data name="Select_specific_cleanup_operations" xml:space="preserve">
+    <value>为反编译器选择要执行的特定清理操作。禁用这些操作可能会使代码更难看或“不正确”，但可以显示底层逻辑。</value>
+  </data>
+  <data name="Perform_cleanups" xml:space="preserve">
+    <value>执行清理：</value>
+  </data>
+  <data name="Try_catch_finally_rewriting" xml:space="preserve">
+    <value>Try/catch/finally 重写</value>
+  </data>
+  <data name="If_enabled__compiler_generated_code" xml:space="preserve">
+    <value>如果启用，编译器生成的代码和try/catch/finally语句的逻辑将被重写为（试图）与原始代码相似。</value>
+  </data>
+  <data name="Transform_else_into_continue" xml:space="preserve">
+    <value>将else转换为continue</value>
+  </data>
+  <data name="If_enabled__certain_usages_of__quot" xml:space="preserve">
+    <value>如果启用，循环中“else”的某些用法可以转换为“continue”语句，这可以使代码更容易阅读。只有在能够保持准确性的情况下才会发生这种情况。</value>
+  </data>
+  <data name="Default_argument_values" xml:space="preserve">
+    <value>默认参数值</value>
+  </data>
+  <data name="If_enabled__syntax_for_default_named" xml:space="preserve">
+    <value>如果启用，将使用默认命名函数参数的语法。如果语句被转换为执行此操作，则生成编译器，从而保持准确性。</value>
+  </data>
+  <data name="Builtin_array_variable_syntax" xml:space="preserve">
+    <value>内置数组变量语法</value>
+  </data>
+  <data name="If_enabled__certain_builtin_globals" xml:space="preserve">
+    <value>如果启用，当检测到某些内置全局变量（如"view_xview"）在没有数组访问器的情况下使用时，将按原样打印，而不是使用编译器生成的语法。</value>
+  </data>
+  <data name="Scope_local_variable_declarations" xml:space="preserve">
+    <value>作用域局部变量声明</value>
+  </data>
+  <data name="If_enabled__local_variable_declarations" xml:space="preserve">
+    <value>如果启用，局部变量声明将根据其范围放置，这些范围是根据代码中的用法检测的。</value>
+  </data>
+  <data name="Restore_to_defaults" xml:space="preserve">
+    <value>恢复为默认值</value>
+  </data>
+  <data name="Please_wait" xml:space="preserve">
+    <value>请稍后...</value>
+  </data>
+  <data name="No_data_win_loaded" xml:space="preserve">
+    <value>没有加载 data.win。</value>
+  </data>
+  <data name="Can_t_search_code_in_YYC_game__there" xml:space="preserve">
+    <value>无法在YYC游戏中搜索代码，没有要搜索的代码。</value>
+  </data>
+  <data name="Can_t_search_while_another_search" xml:space="preserve">
+    <value>无法在另一个搜索正在进行时进行搜索。</value>
+  </data>
+  <data name="There_are_no_code_entries_that_match" xml:space="preserve">
+    <value>没有与名称筛选器匹配的代码条目。</value>
+  </data>
+  <data name="Searching" xml:space="preserve">
+    <value>搜索中...</value>
+  </data>
+  <data name="Code_entries" xml:space="preserve">
+    <value>代码条目</value>
+  </data>
+  <data name="Generating_result_list" xml:space="preserve">
+    <value>生成结果列表中...</value>
+  </data>
+  <data name="Can_t_open_results_while_a_search" xml:space="preserve">
+    <value>无法在搜索过程中打开结果。</value>
+  </data>
+  <data name="Open1" xml:space="preserve">
+    <value>打开</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>复制</value>
+  </data>
+  <data name="Copy_all" xml:space="preserve">
+    <value>复制全部</value>
+  </data>
+  <data name="Case_sensitive" xml:space="preserve">
+    <value>大小写敏感</value>
+  </data>
+  <data name="Regex_search" xml:space="preserve">
+    <value>正则搜索</value>
+  </data>
+  <data name="Multiline_regex" xml:space="preserve">
+    <value>多行正则表达式</value>
+  </data>
+  <data name="In_assembly" xml:space="preserve">
+    <value>在汇编中</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="Required_only_if_you_want_to_use" xml:space="preserve">
+    <value>仅当您希望使用Studio runner而不是.exe或在调试器下运行游戏时才需要。</value>
+  </data>
+  <data name="GameMaker__Studio_1_4_path" xml:space="preserve">
+    <value>GameMaker: Studio 1.4 路径:</value>
+  </data>
+  <data name="Required_only_if_you_want_to_run" xml:space="preserve">
+    <value>仅当您希望使用Studio runner而不是.exe运行GMS2游戏时才需要</value>
+  </data>
+  <data name="GameMaker_Studio_2_runtimes_path" xml:space="preserve">
+    <value>GameMaker Studio 2 runtimes 路径:</value>
+  </data>
+  <data name="Enable_asset_order_swapping" xml:space="preserve">
+    <value>启用资产次序交换</value>
+  </data>
+  <data name="Toggles_dragging__amp__dropping_assets" xml:space="preserve">
+    <value>将资源选项卡中的资源拖放到列表中的不同位置。默认情况下禁用。</value>
+  </data>
+  <data name="Automatically_associate_GameMaker" xml:space="preserve">
+    <value>自动关联GameMaker数据文件</value>
+  </data>
+  <data name="Automatic_file_association__Enabled" xml:space="preserve">
+    <value>自动建立文件关联。默认情况下启用。</value>
+  </data>
+  <data name="Show__quot_Run_game_under_GMS_debugger" xml:space="preserve">
+    <value>显示“在GMS调试器下运行游戏”文件选项</value>
+  </data>
+  <data name="Whether_to_show_the_option_in_the" xml:space="preserve">
+    <value>是否在“文件”菜单中显示选项。默认情况下禁用。</value>
+  </data>
+  <data name="Remember_last_window_position_and" xml:space="preserve">
+    <value>记住最后打开窗口的位置和大小</value>
+  </data>
+  <data name="Warn_about_saving_before_closing" xml:space="preserve">
+    <value>关闭前警告保存</value>
+  </data>
+  <data name="Warn_about_saving_before_closing1" xml:space="preserve">
+    <value>关闭前警告保存。默认情况下启用。</value>
+  </data>
+  <data name="Warn_about_temp_running" xml:space="preserve">
+    <value>关于临时运行的警告</value>
+  </data>
+  <data name="Warn_about_temp_running__Enabled" xml:space="preserve">
+    <value>警告临时运行。默认情况下启用。</value>
+  </data>
+  <data name="Show_null_entries_in_resource_tree" xml:space="preserve">
+    <value>在资源树中显示空条目</value>
+  </data>
+  <data name="Whether_to_show_null_entries_in_the" xml:space="preserve">
+    <value>是否在资源树中显示空条目，在GM 2024.11+游戏中，这些条目通常是编译器删除的未使用资产。由于GUI中的支持有限，默认情况下禁用。</value>
+  </data>
+  <data name="Enable_dark_mode" xml:space="preserve">
+    <value>启用暗塞模式</value>
+  </data>
+  <data name="Makes_the_program_interface_dark" xml:space="preserve">
+    <value>使程序界面变暗。默认情况下禁用。</value>
+  </data>
+  <data name="Transparency_grid_colors" xml:space="preserve">
+    <value>透明度网格颜色：</value>
+  </data>
+  <data name="GML_compiler_decompiler_settings" xml:space="preserve">
+    <value>GML编译器/反编译器设置</value>
+  </data>
+  <data name="This_option_globally_overrides_the" xml:space="preserve">
+    <value>该选项全局覆盖基于房间中最常用平铺的宽度自动指定房间的网格宽度。</value>
+  </data>
+  <data name="This_option_globally_overrides_the1" xml:space="preserve">
+    <value>该选项全局覆盖基于房间中最常用平铺的高度自动指定房间的格线高度。</value>
+  </data>
+  <data name="Global_grid_width" xml:space="preserve">
+    <value>全局网格宽度</value>
+  </data>
+  <data name="Global_grid_height" xml:space="preserve">
+    <value>全局网格高度</value>
+  </data>
+  <data name="This_option_globally_overrides_the2" xml:space="preserve">
+    <value>该选项全局替代自动指定的房间网格厚度。</value>
+  </data>
+  <data name="Global_grid_thickness" xml:space="preserve">
+    <value>全局网格厚度</value>
+  </data>
+  <data name="Warning__the_following_options_are" xml:space="preserve">
+    <value>警告：以下选项目前处于实验阶段。使用以下任何选项的风险由您自己承担，并且它们将来可能不兼容。</value>
+  </data>
+  <data name="Enable_profile_mode" xml:space="preserve">
+    <value>启用配置文件模式</value>
+  </data>
+  <data name="Toggles_the__decompile_once_and_compile" xml:space="preserve">
+    <value>切换“一次反编译，多次编译”配置文件模式。默认情况下启用。对于某些操作，可能需要禁用。</value>
+  </data>
+  <data name="Delete_old_profile_on_saving" xml:space="preserve">
+    <value>保存时删除旧配置文件</value>
+  </data>
+  <data name="Deletes_the_profile_obsoleted_on" xml:space="preserve">
+    <value>删除保存时过时的配置文件。以丢失变体的代码信息为代价节省文件空间。默认情况下启用。</value>
+  </data>
+  <data name="Profile_mode_message_shown" xml:space="preserve">
+    <value>显示配置文件模式消息</value>
+  </data>
+  <data name="On_first_load__this_will_show_you" xml:space="preserve">
+    <value>首次加载时，这将显示配置文件模式加载消息。如果这以某种方式中断，您可以在此处手动切换它。</value>
+  </data>
+  <data name="Open_application_data_folder" xml:space="preserve">
+    <value>打开应用程序数据文件夹</value>
+  </data>
+  <data name="Update_app_to_latest_commit" xml:space="preserve">
+    <value>将应用更新到最新commit版本</value>
+  </data>
+</root>

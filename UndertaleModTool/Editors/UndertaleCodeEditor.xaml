@@ -7,7 +7,7 @@
                        xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
                        mc:Ignorable="d"
                        d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleCode}"
-                       DataContextChanged="UserControl_DataContextChanged" Loaded="UndertaleCodeEditor_Loaded" Unloaded="UndertaleCodeEditor_Unloaded">
+                       DataContextChanged="UserControl_DataContextChanged" Loaded="UndertaleCodeEditor_Loaded" Unloaded="UndertaleCodeEditor_Unloaded" xmlns:strings="clr-namespace:UndertaleModTool.Resources" >
     <UserControl.CommandBindings>
         <CommandBinding Command="{x:Static local:UndertaleCodeEditor.Compile}" Executed="Command_Compile" />
     </UserControl.CommandBindings>
@@ -31,23 +31,23 @@
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Name}"></TextBlock>
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Locals count</TextBlock>
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Locals_count}"></TextBlock>
         <local:TextBoxDark Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding LocalsCount}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Arguments count</TextBlock>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Arguments_count}"></TextBlock>
         <local:TextBoxDark Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding ArgumentsCount}"/>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Offset</TextBlock>
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Offset}"></TextBlock>
         <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Offset}"/>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Visibility="{Binding ParentEntry, Converter={StaticResource VisibleIfNotNull}}">Parent entry</TextBlock>
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Visibility="{Binding ParentEntry, Converter={StaticResource VisibleIfNotNull}}" Text="{x:Static strings:Strings.Parent_entry}"></TextBlock>
         <local:UndertaleObjectReference Grid.Row="4" Grid.Column="1" Margin="3" Visibility="{Binding ParentEntry, Converter={StaticResource VisibleIfNotNull}}" ObjectReference="{Binding ParentEntry}" ObjectType="{x:Type undertale:UndertaleCode}" CanRemove="False" CanChange="False"/>
 
         <TabControl x:Name="CodeModeTabs" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" SelectionChanged="TabControl_SelectionChanged">
-            <TabItem Header="Decompiled" Name="DecompiledTab">
+            <TabItem Header="{x:Static strings:Strings.Decompiled}" Name="DecompiledTab">
                 <Grid PreviewMouseWheel="Grid_PreviewMouseWheel" PreviewKeyDown="Grid_PreviewKeyDown">
                     <avalonEdit:TextEditor
                         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
@@ -65,7 +65,7 @@
                         Padding="4"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Disassembly" Name="DisassemblyTab">
+            <TabItem Header="{x:Static strings:Strings.Disassembly}" Name="DisassemblyTab">
                 <Grid PreviewMouseWheel="Grid_PreviewMouseWheel" PreviewKeyDown="Grid_PreviewKeyDown">
                     <avalonEdit:TextEditor
                         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"

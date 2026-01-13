@@ -8,7 +8,7 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:Settings}"
-        Title="Settings - GML compiler/decompiler" Height="Auto" Width="700" SizeToContent="Height" WindowStartupLocation="CenterOwner">
+        Title="{x:Static strings:Strings.Settings___GML_compiler_decompiler}" Height="Auto" Width="700" SizeToContent="Height" WindowStartupLocation="CenterOwner" xmlns:strings="clr-namespace:UndertaleModTool.Resources" >
     <Window.Resources>
         <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="IndentStyleKind">
             <ObjectDataProvider.MethodParameters>
@@ -19,8 +19,8 @@
     </Window.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel>
-            <TextBlock Text="General settings (compiler &amp; decompiler)" Margin="10,10,10,4" FontWeight="Bold"
-                       ToolTip="Settings that apply to both the compiler and decompiler, to make editing GML code simpler."/>
+            <TextBlock Text="{x:Static strings:Strings.General_settings__compiler__amp}" Margin="10,10,10,4" FontWeight="Bold"
+                       ToolTip="{x:Static strings:Strings.Settings_that_apply_to_both_the_compiler}"/>
             <Grid Margin="10,0,10,10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -33,16 +33,16 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <CheckBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" Content="Use CSS hex color literals" ToolTip="If enabled, color constants can be formatted in the #RRGGBB hex format."
+                <CheckBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" Content="{x:Static strings:Strings.Use_CSS_hex_color_literals}" ToolTip="{x:Static strings:Strings.If_enabled__color_constants_can_be}"
                     IsChecked="{Binding DecompilerSettings.UseCSSColors}"/>
 
-                <TextBlock Grid.Row="1" Grid.Column="2" Margin="3" Text="Named instance ID prefix:" ToolTip="Prefix used for named instance IDs when found by decompiler, and for compilation. Change this value if it conflicts with variable names."/>
+                <TextBlock Grid.Row="1" Grid.Column="2" Margin="3" Text="{x:Static strings:Strings.Named_instance_ID_prefix}" ToolTip="{x:Static strings:Strings.Prefix_used_for_named_instance_IDs}"/>
                 <local:TextBoxDark Grid.Row="1" Grid.Column="3" Margin="3" Grid.ColumnSpan="1" 
                     Text="{Binding InstanceIdPrefix}"/>
             </Grid>
             <Separator Margin="10,0,10,0"/>
-            <TextBlock Text="Decompiler settings" Margin="10,10,10,4" FontWeight="Bold"
-                       ToolTip="Settings that solely apply to the GML decompiler, and will not affect GML compilation. These do not apply to all scripts."/>
+            <TextBlock Text="{x:Static strings:Strings.Decompiler_settings}" Margin="10,10,10,4" FontWeight="Bold"
+                       ToolTip="{x:Static strings:Strings.Settings_that_solely_apply_to_the}"/>
             <Grid Margin="10,0,10,3">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -57,10 +57,10 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <CheckBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" Content="Always use semicolons" ToolTip="If enabled, all statements that can have a semicolon after them will."
+                <CheckBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" Content="{x:Static strings:Strings.Always_use_semicolons}" ToolTip="{x:Static strings:Strings.If_enabled__all_statements_that_can}"
                     IsChecked="{Binding DecompilerSettings.UseSemicolon}"/>
 
-                <TextBlock Grid.Row="0" Grid.Column="2" Margin="3,3,6,3" Text="Indentation style:" ToolTip="Style of indentation to be used when printing decompiled code."/>
+                <TextBlock Grid.Row="0" Grid.Column="2" Margin="3,3,6,3" Text="{x:Static strings:Strings.Indentation_style}" ToolTip="{x:Static strings:Strings.Style_of_indentation_to_be_used_when}"/>
                 <local:ComboBoxDark Grid.Column="3" 
                     ItemsSource="{Binding Source={StaticResource IndentStyleKind}}" SelectedItem="{Binding DecompilerSettings.IndentStyle}">
                     <ComboBox.ItemTemplate>
@@ -70,22 +70,22 @@
                     </ComboBox.ItemTemplate>
                 </local:ComboBoxDark>
 
-                <CheckBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" Content="Open block braces on same line" ToolTip="If enabled, the curly braces used to open a block will be placed on the same line as the statement it belongs to, rather than placing the brace on its own line."
+                <CheckBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" Content="{x:Static strings:Strings.Open_block_braces_on_same_line}" ToolTip="{x:Static strings:Strings.If_enabled__the_curly_braces_used}"
                     IsChecked="{Binding DecompilerSettings.OpenBlockBraceOnSameLine}"/>
 
-                <CheckBox Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Margin="3" Content="Remove block braces if single line" ToolTip="If enabled, blocks that contain a single line will have its braces removed, where possible. For if/else chains, all blocks must be single lines."
+                <CheckBox Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Margin="3" Content="{x:Static strings:Strings.Remove_block_braces_if_single_line}" ToolTip="{x:Static strings:Strings.If_enabled__blocks_that_contain_a}"
                     IsChecked="{Binding DecompilerSettings.RemoveSingleLineBlockBraces}"/>
 
-                <CheckBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" Content="Create enum declarations" ToolTip="If enabled, enum declarations identified during decompilation will always be printed to decompiled output."
+                <CheckBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" Content="{x:Static strings:Strings.Create_enum_declarations}" ToolTip="{x:Static strings:Strings.If_enabled__enum_declarations_identified}"
                     IsChecked="{Binding DecompilerSettings.CreateEnumDeclarations}"/>
 
-                <CheckBox Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Margin="3" Content="Enum/macro declarations at top of code" ToolTip="If enabled, enums and macros will appear at the start (top) of decompiled output, rather than at the end (bottom)."
+                <CheckBox Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Margin="3" Content="{x:Static strings:Strings.Enum_macro_declarations_at_top_of}" ToolTip="{x:Static strings:Strings.If_enabled__enums_and_macros_will}"
                     IsChecked="{Binding DecompilerSettings.MacroDeclarationsAtTop}"/>
 
-                <CheckBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" Content="Print warnings" ToolTip="If enabled, warnings generated during decompilation will be printed as comments."
+                <CheckBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="3" Content="{x:Static strings:Strings.Print_warnings}" ToolTip="{x:Static strings:Strings.If_enabled__warnings_generated_during}"
                     IsChecked="{Binding DecompilerSettings.PrintWarnings}"/>
 
-                <CheckBox Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" Margin="3" Content="Allow leftover data on VM stack" ToolTip="If enabled, data left over on the VM stack will be treated as a warning rather than an error."
+                <CheckBox Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" Margin="3" Content="{x:Static strings:Strings.Allow_leftover_data_on_VM_stack}" ToolTip="{x:Static strings:Strings.If_enabled__data_left_over_on_the}"
                     IsChecked="{Binding DecompilerSettings.AllowLeftoverDataOnStack}"/>
             </Grid>
             <Grid Margin="10,3,10,3">
@@ -99,7 +99,7 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="Add empty lines:" ToolTip="Select specific syntax to add empty lines before, after, or around."/>
+                <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Add_empty_lines}" ToolTip="{x:Static strings:Strings.Select_specific_syntax_to_add_empty}"/>
                 <Grid Grid.Row="3" Grid.Column="2" Margin="3,3,3,3">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" MinWidth="220"/>
@@ -110,23 +110,23 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <CheckBox Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="3" Content="Around branch statements"
-                              ToolTip="If enabled, adds an empty line before and after branch statements." 
+                    <CheckBox Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="3" Content="{x:Static strings:Strings.Around_branch_statements}"
+                              ToolTip="{x:Static strings:Strings.If_enabled__adds_an_empty_line_before}" 
                               IsChecked="{Binding DecompilerSettings.EmptyLineAroundBranchStatements}"/>
-                    <CheckBox Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Margin="3" Content="After local variable declarations" 
-                              ToolTip="If enabled, adds an empty line after block-scoped local variable declarations." 
+                    <CheckBox Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Margin="3" Content="{x:Static strings:Strings.After_local_variable_declarations}" 
+                              ToolTip="{x:Static strings:Strings.If_enabled__adds_an_empty_line_after}" 
                               IsChecked="{Binding DecompilerSettings.EmptyLineAfterBlockLocals}"/>
-                    <CheckBox Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Margin="3" Content="Before switch cases" 
-                              ToolTip="If enabled, adds an empty line before (a chain) of &quot;case&quot; entries in a switch statement." 
+                    <CheckBox Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Margin="3" Content="{x:Static strings:Strings.Before_switch_cases}" 
+                              ToolTip="{x:Static strings:Strings.If_enabled__adds_an_empty_line_before1}" 
                               IsChecked="{Binding DecompilerSettings.EmptyLineBeforeSwitchCases}"/>
-                    <CheckBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Margin="3" Content="After switch cases" 
-                              ToolTip="If enabled, adds an empty line after (a chain) of &quot;case&quot; entries in a switch statement." 
+                    <CheckBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Margin="3" Content="{x:Static strings:Strings.After_switch_cases}" 
+                              ToolTip="{x:Static strings:Strings.If_enabled__adds_an_empty_line_after1}" 
                               IsChecked="{Binding DecompilerSettings.EmptyLineAfterSwitchCases}"/>
-                    <CheckBox Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Margin="3" Content="Around function declarations" 
-                              ToolTip="If enabled, adds an empty line before and after a function declaration, even if it is anonymous." 
+                    <CheckBox Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Margin="3" Content="{x:Static strings:Strings.Around_function_declarations}" 
+                              ToolTip="{x:Static strings:Strings.If_enabled__adds_an_empty_line_before2}" 
                               IsChecked="{Binding DecompilerSettings.EmptyLineAroundFunctionDeclarations}"/>
-                    <CheckBox Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Margin="3" Content="Around static initialization" 
-                              ToolTip="If enabled, adds an empty line before and after static initialization, grouping together consecutive statics if possible." 
+                    <CheckBox Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Margin="3" Content="{x:Static strings:Strings.Around_static_initialization}" 
+                              ToolTip="{x:Static strings:Strings.If_enabled__adds_an_empty_line_before3}" 
                               IsChecked="{Binding DecompilerSettings.EmptyLineAroundStaticInitialization}"/>
                 </Grid>
             </Grid>
@@ -141,8 +141,8 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="Perform cleanups:" 
-                           ToolTip="Select specific cleanup operations for the decompiler to perform. Disabling these may make code more ugly or &quot;incorrect,&quot; but can show underlying logic."/>
+                <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Perform_cleanups}" 
+                           ToolTip="{x:Static strings:Strings.Select_specific_cleanup_operations}"/>
                 <Grid Grid.Row="3" Grid.Column="2" Margin="3,3,3,3">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" MinWidth="220"/>
@@ -153,20 +153,20 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <CheckBox Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="3" Content="Try/catch/finally rewriting"
-                              ToolTip="If enabled, compiler-generated code and logic for try/catch/finally statements is rewritten to (attempt to) look like the original code." 
+                    <CheckBox Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="3" Content="{x:Static strings:Strings.Try_catch_finally_rewriting}"
+                              ToolTip="{x:Static strings:Strings.If_enabled__compiler_generated_code}" 
                               IsChecked="{Binding DecompilerSettings.CleanupTry}"/>
-                    <CheckBox Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Margin="3" Content="Transform else into continue" 
-                              ToolTip="If enabled, certain usages of &quot;else&quot; inside of a loop can be transformed into &quot;continue&quot; statements, which can make code easier to read. This only happens if accuracy can be maintained." 
+                    <CheckBox Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Margin="3" Content="{x:Static strings:Strings.Transform_else_into_continue}" 
+                              ToolTip="{x:Static strings:Strings.If_enabled__certain_usages_of__quot}" 
                               IsChecked="{Binding DecompilerSettings.CleanupElseToContinue}"/>
-                    <CheckBox Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Margin="3" Content="Default argument values" 
-                              ToolTip="If enabled, syntax for default named function arguments will be used. Compiler-generated if statements are transformed to do this, maintaining accuracy." 
+                    <CheckBox Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Margin="3" Content="{x:Static strings:Strings.Default_argument_values}" 
+                              ToolTip="{x:Static strings:Strings.If_enabled__syntax_for_default_named}" 
                               IsChecked="{Binding DecompilerSettings.CleanupDefaultArgumentValues}"/>
-                    <CheckBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Margin="3" Content="Builtin array variable syntax" 
-                              ToolTip="If enabled, certain builtin globals (such as &quot;view_xview&quot;), when detected to be used without an array accessor, will be printed as such, rather than using compiler-generated syntax." 
+                    <CheckBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Margin="3" Content="{x:Static strings:Strings.Builtin_array_variable_syntax}" 
+                              ToolTip="{x:Static strings:Strings.If_enabled__certain_builtin_globals}" 
                               IsChecked="{Binding DecompilerSettings.CleanupBuiltinArrayVariables}"/>
-                    <CheckBox Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Margin="3" Content="Scope local variable declarations" 
-                              ToolTip="If enabled, local variable declarations will be placed according to their scopes, which are detected based on usage in the code." 
+                    <CheckBox Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Margin="3" Content="{x:Static strings:Strings.Scope_local_variable_declarations}" 
+                              ToolTip="{x:Static strings:Strings.If_enabled__local_variable_declarations}" 
                               IsChecked="{Binding DecompilerSettings.CleanupLocalVarDeclarations}"/>
                 </Grid>
             </Grid>
@@ -179,7 +179,7 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <local:ButtonDark Grid.Column="0" Click="RestoreButton_Click" Padding="8,2,8,2" HorizontalAlignment="Right" x:Name="RestoreButton">Restore to defaults</local:ButtonDark>
+                <local:ButtonDark Grid.Column="0" Click="RestoreButton_Click" Padding="8,2,8,2" HorizontalAlignment="Right" x:Name="RestoreButton" Content="{x:Static strings:Strings.Restore_to_defaults}"></local:ButtonDark>
             </Grid>
         </StackPanel>
     </ScrollViewer>

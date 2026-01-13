@@ -7,7 +7,7 @@
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib" 
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleShader}">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleShader}" xmlns:strings="clr-namespace:UndertaleModTool.Resources" >
     <UserControl.Resources>
         <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="ShaderType">
             <ObjectDataProvider.MethodParameters>
@@ -32,14 +32,14 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Name}"></TextBlock>
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Type</TextBlock>
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Type1}"></TextBlock>
         <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource ShaderType}}" SelectedItem="{Binding Path=Type}"
                             Grid.Row="1" Grid.Column="1" Margin="3"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">GLSL ES vertex source</TextBlock>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.GLSL_ES_vertex_source}"></TextBlock>
         <Expander Grid.Row="2" Grid.Column="1" Margin="3" Header="Code">
             <avalonEdit:TextEditor xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
                 DataContext="{Binding GLSL_ES_Vertex}"
@@ -51,7 +51,7 @@
                 DataContextChanged="TextEditor_DataContextChanged"/>
         </Expander>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">GLSL ES fragment source</TextBlock>
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.GLSL_ES_fragment_source}"></TextBlock>
         <Expander Grid.Row="3" Grid.Column="1" Margin="3" Header="Code">
             <avalonEdit:TextEditor xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
                 DataContext="{Binding GLSL_ES_Fragment}"
@@ -63,7 +63,7 @@
                 DataContextChanged="TextEditor_DataContextChanged"/>
         </Expander>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">GLSL vertex source</TextBlock>
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.GLSL_vertex_source}"></TextBlock>
         <Expander Grid.Row="4" Grid.Column="1" Margin="3" Header="Code">
             <avalonEdit:TextEditor xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
                 DataContext="{Binding GLSL_Vertex}"
@@ -75,7 +75,7 @@
                 DataContextChanged="TextEditor_DataContextChanged"/>
         </Expander>
 
-        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">GLSL fragment source</TextBlock>
+        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.GLSL_fragment_source}"></TextBlock>
         <Expander Grid.Row="5" Grid.Column="1" Margin="3" Header="Code">
             <avalonEdit:TextEditor xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
                 DataContext="{Binding GLSL_Fragment}"
@@ -87,7 +87,7 @@
                 DataContextChanged="TextEditor_DataContextChanged"/>
         </Expander>
 
-        <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">HLSL9 vertex source</TextBlock>
+        <TextBlock Grid.Row="6" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.HLSL9_vertex_source}"></TextBlock>
         <Expander Grid.Row="6" Grid.Column="1" Margin="3" Header="Code">
             <avalonEdit:TextEditor xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
                 DataContext="{Binding HLSL9_Vertex}"
@@ -99,7 +99,7 @@
                 DataContextChanged="TextEditor_DataContextChanged"/>
         </Expander>
 
-        <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">HLSL9 fragment source</TextBlock>
+        <TextBlock Grid.Row="7" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.HLSL9_fragment_source}"></TextBlock>
         <Expander Grid.Row="7" Grid.Column="1" Margin="3" Header="Code">
             <avalonEdit:TextEditor xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
                 DataContext="{Binding HLSL9_Fragment}"
@@ -111,7 +111,7 @@
                 DataContextChanged="TextEditor_DataContextChanged"/>
         </Expander>
 
-        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Vertex shader attributes</TextBlock>
+        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Vertex_shader_attributes}"></TextBlock>
         <local:DataGridDark Grid.Row="8" Grid.Column="1" Margin="3" ItemsSource="{Binding VertexShaderAttributes}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
@@ -130,7 +130,7 @@
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate>
-                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic" Text="{x:Static strings:Strings.Double_click_to_add}"></TextBlock>
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>

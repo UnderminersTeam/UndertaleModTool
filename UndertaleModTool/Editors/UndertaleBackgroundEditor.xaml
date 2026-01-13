@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleBackground}" DataContextChanged="DataUserControl_DataContextChanged">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleBackground}" DataContextChanged="DataUserControl_DataContextChanged" xmlns:strings="clr-namespace:UndertaleModTool.Resources" >
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -32,17 +32,17 @@
             <local:IsVersionAtLeastConverter x:Key="IsVersionAtLeastConverter"/>
         </Grid.Resources>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Name}"></TextBlock>
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
-      <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Transparent</TextBlock>
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Transparent}"></TextBlock>
       <CheckBox Grid.Row="1" Grid.Column="1" Margin="3" IsChecked="{Binding Transparent}"/>
-      <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Smooth</TextBlock>
+      <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Smooth}"></TextBlock>
       <CheckBox Grid.Row="2" Grid.Column="1" Margin="3" IsChecked="{Binding Smooth}"/>
-      <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Preload</TextBlock>
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Preload}"></TextBlock>
       <CheckBox Grid.Row="3" Grid.Column="1" Margin="3" IsChecked="{Binding Preload}"/>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Texture</TextBlock>
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Texture}"></TextBlock>
         <local:UndertaleObjectReference Grid.Row="4" Grid.Column="1" Margin="3" ObjectReference="{Binding Texture}" ObjectType="{x:Type undertale:UndertaleTexturePageItem}"/>
 
         <Grid Grid.Row="5" Grid.ColumnSpan="2" Margin="0" Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2.0}">
@@ -67,47 +67,47 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Unknown Always 2</TextBlock>
+            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Unknown_Always_2}"></TextBlock>
             <local:TextBoxDark Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GMS2UnknownAlways2}"/>
 
-            <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Tile Width</TextBlock>
+            <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Tile_Width}"></TextBlock>
             <local:TextBoxDark Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GMS2TileWidth}"/>
 
-            <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Tile Height</TextBlock>
+            <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Tile_Height}"></TextBlock>
             <local:TextBoxDark Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding GMS2TileHeight}"/>
 
-            <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="Tile Separation X"
+            <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Tile_Separation_X}"
                        Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2024.14.1}"/>
             <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding GMS2TileSeparationX}"
                        Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2024.14.1}"/>
 
-            <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="Tile Separation Y"
+            <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Tile_Separation_Y}"
                        Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2024.14.1}"/>
             <local:TextBoxDark Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding GMS2TileSeparationY}"
                        Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2024.14.1}"/>
 
-            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Output Border X</TextBlock>
+            <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Output_Border_X}"></TextBlock>
             <local:TextBoxDark Grid.Row="5" Grid.Column="1" Margin="3" Text="{Binding GMS2OutputBorderX}"/>
 
-            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Output Border Y</TextBlock>
+            <TextBlock Grid.Row="6" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Output_Border_Y}"></TextBlock>
             <local:TextBoxDark Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding GMS2OutputBorderY}"/>
 
-            <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Tile Columns</TextBlock>
+            <TextBlock Grid.Row="7" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Tile_Columns}"></TextBlock>
             <local:TextBoxDark Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding GMS2TileColumns}"/>
 
-            <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Items/frames per tile</TextBlock>
+            <TextBlock Grid.Row="8" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Items_frames_per_tile}"></TextBlock>
             <local:TextBoxDark Grid.Row="8" Grid.Column="1" Margin="3" Text="{Binding GMS2ItemsPerTileCount}"/>
 
-            <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Tile Count</TextBlock>
+            <TextBlock Grid.Row="9" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Tile_Count}"></TextBlock>
             <local:TextBoxDark Grid.Row="9" Grid.Column="1" Margin="3" Text="{Binding GMS2TileCount}"/>
 
-            <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Exported Sprite Index</TextBlock>
+            <TextBlock Grid.Row="10" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Exported_Sprite_Index}"></TextBlock>
             <local:TextBoxDark Grid.Row="10" Grid.Column="1" Margin="3" Text="{Binding GMS2ExportedSpriteIndex}"/>
 
-            <TextBlock Grid.Row="11" Grid.Column="0" Margin="3">Frame Time (microseconds)</TextBlock>
+            <TextBlock Grid.Row="11" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Frame_Time__microseconds}"></TextBlock>
             <local:TextBoxDark Grid.Row="11" Grid.Column="1" Margin="3" Text="{Binding GMS2FrameLength}"/>
 
-            <TextBlock Grid.Row="12" Grid.Column="0" Margin="3">Tile IDs</TextBlock>
+            <TextBlock Grid.Row="12" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Tile_IDs}"></TextBlock>
             <local:DataGridDark Grid.Row="12" Grid.Column="1" x:Name="TileIdList" ItemsSource="{Binding GMS2TileIds}" MaxHeight="279" Margin="0,0,0,3" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True"
                                 SelectionChanged="DataGrid_SelectionChanged">
                 <DataGrid.Resources>
@@ -127,7 +127,7 @@
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate>
-                                            <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                            <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic" Text="{x:Static strings:Strings.Double_click_to_add}"></TextBlock>
                                         </ControlTemplate>
                                     </Setter.Value>
                                 </Setter>
@@ -146,9 +146,7 @@
                 </DataGrid.Columns>
             </local:DataGridDark>
 
-            <TextBlock Grid.Row="13" Grid.ColumnSpan="2" Margin="3" HorizontalAlignment="Center" Foreground="DarkGray" FontStyle="Italic" TextWrapping="Wrap" TextAlignment="Center">
-                Hint: You can click on any tile region below to highlight its ID above.
-            </TextBlock>
+            <TextBlock Grid.Row="13" Grid.ColumnSpan="2" Margin="3" HorizontalAlignment="Center" Foreground="DarkGray" FontStyle="Italic" TextWrapping="Wrap" TextAlignment="Center" Text="{x:Static strings:Strings.Hint__You_can_click_on_any_tile_region}"></TextBlock>
         </Grid>
 
         <Viewbox Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Stretch="Uniform" StretchDirection="DownOnly">

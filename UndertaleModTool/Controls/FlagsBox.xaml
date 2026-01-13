@@ -6,13 +6,13 @@
              xmlns:local="clr-namespace:UndertaleModTool"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800"
-             x:Name="flagsBox">
+             x:Name="flagsBox" xmlns:strings="clr-namespace:UndertaleModTool.Resources" >
     <UserControl.Resources>
         <local:EnumToValuesConverter x:Key="enumToValuesConverter" />
     </UserControl.Resources>
     <StackPanel>
         <TextBox Text="{Binding Value, ElementName=flagsBox}" />
-        <Expander Header="Flags">
+        <Expander Header="{x:Static strings:Strings.Flags}">
             <ItemsControl ItemsSource="{Binding Value, ElementName=flagsBox, Converter={StaticResource enumToValuesConverter}}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>

@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -180,13 +182,25 @@ namespace UndertaleModTool
                 typeName = camelCaseRegex.Replace(typeName, " $1").ToLowerInvariant();
             }
             // If the first letter is a vowel
-            if (Array.IndexOf(vowels, typeName[0]) != -1)
-                n = "n";
+            
+            if ((UndertaleModTool.Resources.Strings.Culture ?? Thread.CurrentThread.CurrentCulture)
+                .Name.ToLower().StartsWith("en"))
+            {
+                if (Array.IndexOf(vowels, typeName[0]) != -1)
+                    n = "n";
 
-            if (CanChange)
-                label.Content = $"(drag & drop a{n} {typeName})";
+                if (CanChange)
+                    label.Content = $"(drag & drop a{n} {typeName})";
+                else
+                    label.Content = $"(empty {typeName} reference)";
+            }
             else
-                label.Content = $"(empty {typeName} reference)";
+            {
+                if (CanChange)
+                    label.Content = String.Format(UndertaleModTool.Resources.Strings.drag___drop_a__0,typeName);
+                else
+                    label.Content = String.Format(UndertaleModTool.Resources.Strings.empty__0__reference,typeName);
+            }
         }
 
         public void ClearRemoveClickHandler()
@@ -212,7 +226,7 @@ namespace UndertaleModTool
                         // If code already exists, use it (otherwise create new code)
                         if (mainWindow.Data.Code.ByName(name) is UndertaleCode existing)
                         {
-                            mainWindow.ShowWarning("Code entry for room already exists; reusing it.");
+                            mainWindow.ShowWarning(UndertaleModTool.Resources.Strings.Code_entry_for_room_already_exists);
                             ObjectReference = existing;
                         }
                         else
@@ -239,7 +253,7 @@ namespace UndertaleModTool
                 }
                 else
                 {
-                    mainWindow.ShowError("Adding not supported in this situation.");
+                    mainWindow.ShowError(UndertaleModTool.Resources.Strings.Adding_not_supported_in_this_situation);
                 }
             }
             else
@@ -266,7 +280,7 @@ namespace UndertaleModTool
             foreach (var item in menu.Items)
             {
                 var menuItem = item as MenuItem;
-                if ((menuItem.Header as string) == "Find all references")
+                if ((menuItem.Header as string) == UndertaleModTool.Resources.Strings.Find_all_references)
                 {
                     Type objType = menu.DataContext.GetType();
                     menuItem.Visibility = UndertaleResourceReferenceMap.IsTypeReferenceable(objType)
@@ -281,7 +295,7 @@ namespace UndertaleModTool
             var obj = (sender as FrameworkElement)?.DataContext;
             if (obj is not UndertaleResource res)
             {
-                mainWindow.ShowError("The selected object is not an \"UndertaleResource\".");
+                mainWindow.ShowError(UndertaleModTool.Resources.Strings.The_selected_object_is_not_an___UndertaleResource);
                 return;
             }
 

@@ -75,13 +75,13 @@ namespace UndertaleModTool.Windows
 
             if (mainWindow.Data == null)
             {
-                this.ShowError("No data.win loaded.");
+                this.ShowError(UndertaleModTool.Resources.Strings.No_data_win_loaded);
                 return;
             }
 
             if (mainWindow.Data.IsYYC())
             {
-                this.ShowError("Can't search code in YYC game, there's no code to search.");
+                this.ShowError(UndertaleModTool.Resources.Strings.Can_t_search_code_in_YYC_game__there);
                 return;
             }
 
@@ -92,7 +92,7 @@ namespace UndertaleModTool.Windows
 
             if (isSearchInProgress)
             {
-                this.ShowError("Can't search while another search is in progress.");
+                this.ShowError(UndertaleModTool.Resources.Strings.Can_t_search_while_another_search);
                 return;
             }
 
@@ -164,7 +164,7 @@ namespace UndertaleModTool.Windows
 
             if (codeEntriesToSearch.Count == 0)
             {
-                this.ShowMessage("There are no code entries that match the name filter.");
+                this.ShowMessage(UndertaleModTool.Resources.Strings.There_are_no_code_entries_that_match);
                 return;
             }
 
@@ -173,7 +173,7 @@ namespace UndertaleModTool.Windows
 
             isSearchInProgress = true;
 
-            loaderDialog = new("Searching...", null);
+            loaderDialog = new(UndertaleModTool.Resources.Strings.Searching, null);
             loaderDialog.Owner = this;
             loaderDialog.PreventClose = true;
             loaderDialog.Show();
@@ -192,14 +192,14 @@ namespace UndertaleModTool.Windows
                 decompileContext = new GlobalDecompileContext(mainWindow.Data);
             }
 
-            loaderDialog.SavedStatusText = "Code entries";
-            loaderDialog.Update(null, "Code entries", 0, codeEntriesToSearch.Count);
+            loaderDialog.SavedStatusText = UndertaleModTool.Resources.Strings.Code_entries;
+            loaderDialog.Update(null, UndertaleModTool.Resources.Strings.Code_entries, 0, codeEntriesToSearch.Count);
 
             await Task.Run(() => Parallel.ForEach(codeEntriesToSearch, SearchInUndertaleCode));
             await Task.Run(SortResults);
 
             loaderDialog.Maximum = null;
-            loaderDialog.Update("Generating result list...");
+            loaderDialog.Update(UndertaleModTool.Resources.Strings.Generating_result_list);
 
             editorTab = isInAssembly ? UndertaleCodeEditor.CodeEditorTab.Disassembly : UndertaleCodeEditor.CodeEditorTab.Decompiled;
 
@@ -360,7 +360,7 @@ namespace UndertaleModTool.Windows
         {
             if (isSearchInProgress)
             {
-                this.ShowError("Can't open results while a search is in progress.");
+                this.ShowError(UndertaleModTool.Resources.Strings.Can_t_open_results_while_a_search);
                 return;
             }
 
