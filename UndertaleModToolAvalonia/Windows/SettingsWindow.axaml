@@ -40,6 +40,9 @@
                     <TextBox Text="{Binding MainVM.Settings.DefaultRoomGridWidth}" />
                     <TextBox Text="{Binding MainVM.Settings.DefaultRoomGridHeight}" />
                 </StackPanel>
+
+                <CheckBox Content="Enable selection of any layer by default"
+                          IsChecked="{Binding MainVM.Settings.EnableSelectAnyLayerByDefault}"/>
             </StackPanel>
 
             <!--

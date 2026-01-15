@@ -134,6 +134,8 @@ public partial class SettingsFile
     public uint DefaultRoomGridWidth { get; set; } = 20;
     public uint DefaultRoomGridHeight { get; set; } = 20;
 
+    public bool EnableSelectAnyLayerByDefault { get; set; } = true;
+
     public string InstanceIdPrefix { get; set; } = "inst_";
 
     public Underanalyzer.Decompiler.DecompileSettings DecompileSettings { get; set; } = new();

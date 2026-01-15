@@ -169,7 +169,7 @@ public class UndertaleRoomEditor : Control
                 if (roomItem.Selectable is null)
                     continue;
 
-                if (vm!.CategorySelected is null || roomItem.Selectable.Category == vm!.CategorySelected)
+                if (vm.IsSelectAnyLayerEnabled || vm!.CategorySelected is null || roomItem.Selectable.Category == vm!.CategorySelected)
                     if (RectContainsPoint(roomItem.Selectable.Bounds, roomItem.Selectable.Rotation, roomItem.Selectable.Pivot, roomMousePosition))
                     {
                         hoveredRoomItem = roomItem;
@@ -209,7 +209,10 @@ public class UndertaleRoomEditor : Control
                 }
                 else
                 {
-                    vm!.RoomItemsSelectedItem = vm.FindItemFromCategory(vm!.CategorySelected);
+                    if (!vm.IsSelectAnyLayerEnabled)
+                        vm!.RoomItemsSelectedItem = vm.FindItemFromCategory(vm!.CategorySelected);
+                    else
+                        vm!.RoomItemsSelectedItem = null;
                 }
             }
         }

@@ -674,6 +674,7 @@
                     <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <ToggleButton IsChecked="{Binding IsSelectAnyLayerEnabled}">Select any layer</ToggleButton>
                     <ToggleButton IsChecked="{Binding IsGridEnabled}">Grid</ToggleButton>
                     <TextBox Text="{Binding GridWidth}" Width="32" />
                     <TextBox Text="{Binding GridHeight}" Width="32" />

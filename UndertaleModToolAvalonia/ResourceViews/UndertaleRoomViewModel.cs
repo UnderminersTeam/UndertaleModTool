@@ -36,6 +36,9 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
     private string _StatusText = "";
 
     [Notify]
+    private bool _IsSelectAnyLayerEnabled = false;
+
+    [Notify]
     private bool _IsGridEnabled = false;
     [Notify]
     private uint _GridWidth = 20;
@@ -53,6 +56,7 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
 
         Room = room;
 
+        IsSelectAnyLayerEnabled = MainVM.Settings!.EnableSelectAnyLayerByDefault;
         IsGridEnabled = MainVM.Settings!.EnableRoomGridByDefault;
         GridWidth = MainVM.Settings!.DefaultRoomGridWidth;
         GridHeight = MainVM.Settings!.DefaultRoomGridHeight;
