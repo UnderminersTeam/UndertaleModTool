@@ -375,13 +375,16 @@ namespace UndertaleModLib
         /// <summary>
         /// Get a resource from the data file by name.
         /// </summary>
+        /// <remarks>
+        /// This does a linear search, and will thus be slow if used many times. It's recommended to build lookup maps if many searches are required.
+        /// </remarks>
         /// <param name="name">The name of the desired resource.</param>
         /// <param name="ignoreCase">Whether to ignore casing while searching.</param>
-        /// <returns>The <see cref="UndertaleResource"/>.</returns>
+        /// <returns>The <see cref="UndertaleNamedResource"/>.</returns>
         public UndertaleNamedResource ByName(string name, bool ignoreCase = false)
         {
-            // TODO: Check if those are all possible types
-            return Sounds.ByName(name, ignoreCase) ??
+            return 
+                Sounds.ByName(name, ignoreCase) ??
                 Sprites.ByName(name, ignoreCase) ??
                 Backgrounds.ByName(name, ignoreCase) ??
                 Paths.ByName(name, ignoreCase) ??
@@ -399,11 +402,14 @@ namespace UndertaleModLib
         }
 
         /// <summary>
-        /// Reports the zero-based index of the first occurrence of the specified <see cref="UndertaleResource"/>.
+        /// Returns the zero-based index of the first occurrence of the specified <see cref="UndertaleResource"/>.
         /// </summary>
+        /// <remarks>
+        /// This does a linear search, and will thus be slow if used many times. It's recommended to build lookup maps if many searches are required.
+        /// </remarks>
         /// <param name="obj">The object to get the index of.</param>
         /// <param name="panicIfInvalid">Whether to throw if <paramref name="obj"/> is not a valid object.</param>
-        /// <returns>The zero-based index position of the <paramref name="obj"/> parameter if it is found or -2 if it is not.</returns>
+        /// <returns>The zero-based index position of the <paramref name="obj"/> parameter if it is found, or -1 if it is not found.</returns>
         /// <exception cref="InvalidOperationException"><paramref name="panicIfInvalid"/> is <see langword="true"/>
         /// and <paramref name="obj"/> could not be found.</exception>
         public int IndexOf(UndertaleResource obj, bool panicIfInvalid = true)
@@ -418,12 +424,61 @@ namespace UndertaleModLib
 
             if (panicIfInvalid)
                 throw new InvalidOperationException();
-            return -2;
+            return -1;
         }
 
-        internal int IndexOfByName(string line)
+
+        /// <summary>
+        /// Returns the zero-based index of the first occurrence of the specified <see cref="UndertaleNamedResource"/>.
+        /// </summary>
+        /// <remarks>
+        /// This does a linear search, and will thus be slow if used many times. It's recommended to build lookup maps if many searches are required.
+        /// </remarks>
+        /// <param name="name">The name of the desired resource.</param>
+        /// <param name="ignoreCase">Whether to ignore casing while searching.</param>
+        /// <returns>The zero-based index position of the <see cref="UndertaleNamedResource"/> if it is found, or -1 if it is not found.</returns>
+        public int IndexOfByName(string name, bool ignoreCase = false)
         {
-            throw new NotImplementedException();
+            int res = Sounds.IndexOfName(name, ignoreCase);
+            if (res >= 0) return res;
+            res = Sprites.IndexOfName(name, ignoreCase);
+            if (res >= 0) return res;
+            res = Backgrounds.IndexOfName(name, ignoreCase);
+            if (res >= 0) return res;
+            res = Paths.IndexOfName(name, ignoreCase);
+            if (res >= 0) return res;
+            res = Scripts.IndexOfName(name, ignoreCase);
+            if (res >= 0) return res;
+            res = Fonts.IndexOfName(name, ignoreCase);
+            if (res >= 0) return res;
+            res = GameObjects.IndexOfName(name, ignoreCase);
+            if (res >= 0) return res;
+            res = Rooms.IndexOfName(name, ignoreCase);
+            if (res >= 0) return res;
+            res = Extensions.IndexOfName(name, ignoreCase);
+            if (res >= 0) return res;
+            res = Shaders.IndexOfName(name, ignoreCase);
+            if (res >= 0) return res;
+            res = Timelines.IndexOfName(name, ignoreCase);
+            if (res >= 0) return res;
+
+            if (AnimationCurves is not null)
+            {
+                res = AnimationCurves.IndexOfName(name, ignoreCase);
+                if (res >= 0) return res;
+            }
+            if (Sequences is not null)
+            {
+                res = Sequences.IndexOfName(name, ignoreCase);
+                if (res >= 0) return res;
+            }
+            if (AudioGroups is not null)
+            {
+                res = AudioGroups.IndexOfName(name, ignoreCase);
+                if (res >= 0) return res;
+            }
+
+            return -1;
         }
 
         /// <summary>

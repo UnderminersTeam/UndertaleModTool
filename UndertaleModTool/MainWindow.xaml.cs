@@ -3143,12 +3143,12 @@ result in loss of work.");
 
         public void UpdateObjectLabel(object obj)
         {
-            int foundIndex = obj is UndertaleResource res ? Data.IndexOf(res, false) : -1;
+            int foundIndex = obj is UndertaleResource res ? Data.IndexOf(res, false) : -2;
             string idString;
 
-            if (foundIndex == -1)
+            if (foundIndex == -2)
                 idString = "None";
-            else if (foundIndex == -2)
+            else if (foundIndex == -1)
                 idString = "N/A";
             else
                 idString = Convert.ToString(foundIndex);
