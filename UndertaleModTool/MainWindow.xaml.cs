@@ -98,9 +98,8 @@ namespace UndertaleModTool
         }
         
         private static Visibility ToVisibility(bool visible) => visible ? Visibility.Visible : Visibility.Collapsed;
-        private static bool IsVisible(Visibility visibility) => visibility == Visibility.Visible;
 
-        public Visibility IsGMS2 => ToVisibility(Data?.GeneralInfo?.Major ?? 0 >= 2);
+        public Visibility IsGMS2 => ToVisibility((Data?.GeneralInfo?.Major ?? 0) >= 2);
         public Visibility IsExtProductIDEligible => ToVisibility(UndertaleExtension.ProductDataEligible(Data));
 
         public List<Tab> ClosedTabsHistory { get; } = new();
@@ -703,7 +702,7 @@ namespace UndertaleModTool
             OnPropertyChanged("FilePath");
             OnPropertyChanged("IsGMS2");
 
-            BackgroundsItemsList.Header = IsVisible(IsGMS2) ? "Tile sets" : "Backgrounds & Tile sets";
+            BackgroundsItemsList.Header = IsGMS2 == Visibility.Visible ? "Tile sets" : "Backgrounds & Tile sets";
 
             Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open a data.win, not create a new file! :P");
             OpenInTab(Highlighted);
@@ -968,7 +967,7 @@ namespace UndertaleModTool
                 if (isDisassembly)
                 {
                     selectedCode = codeEditor.DisassemblyEditor?.SelectedText;
-                    if (String.IsNullOrEmpty(selectedCode))
+                    if (string.IsNullOrEmpty(selectedCode))
                         isDisassembly = false; // Don't check "In assembly" if there is nothing selected in there.
                 }
                 else
@@ -1121,7 +1120,7 @@ namespace UndertaleModTool
                         OnPropertyChanged("FilePath");
                         OnPropertyChanged("IsGMS2");
 
-                        BackgroundsItemsList.Header = IsVisible(IsGMS2) ? "Tile sets" : "Backgrounds & Tile sets";
+                        BackgroundsItemsList.Header = IsGMS2 == Visibility.Visible ? "Tile sets" : "Backgrounds & Tile sets";
 
                         UndertaleCodeEditor.gettext = null;
                         UndertaleCodeEditor.gettextJSON = null;
@@ -1851,7 +1850,7 @@ namespace UndertaleModTool
                             codeResource.WeirdLocalFlag = true;
                         }
                     }
-                    else if (obj is UndertaleExtension && IsVisible(IsExtProductIDEligible))
+                    else if (obj is UndertaleExtension && IsExtProductIDEligible == Visibility.Visible)
                     {
                         var newProductID = new byte[] { 0xBA, 0x5E, 0xBA, 0x11, 0xBA, 0xDD, 0x06, 0x60, 0xBE, 0xEF, 0xED, 0xBA, 0x0B, 0xAB, 0xBA, 0xBE };
                         Data.FORM.EXTN.productIdData.Add(newProductID);
@@ -3746,7 +3745,7 @@ result in loss of work.");
             ScrollViewer viewer = sender as ScrollViewer;
 
             // Prevent receiving the mouse wheel event if there is nowhere to scroll.
-            if (!IsVisible(viewer.ComputedVerticalScrollBarVisibility) && e.Source == viewer)
+            if (viewer.ComputedVerticalScrollBarVisibility != Visibility.Visible && e.Source == viewer)
                 e.Handled = true;
         }
 

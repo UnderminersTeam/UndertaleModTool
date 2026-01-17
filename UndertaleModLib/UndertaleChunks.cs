@@ -369,10 +369,7 @@ namespace UndertaleModLib
             // Strange data for each extension, some kind of unique identifier based on
             // the product ID for each of them
             productIdData = new List<byte[]>();
-            // NOTE: I do not know if 1773 is the earliest version which contains product IDs.
-            if (reader.undertaleData.GeneralInfo?.Major >= 2 
-                || reader.undertaleData.GeneralInfo is { Major: 1, Build: >= 1773 } 
-                || reader.undertaleData.GeneralInfo is { Major: 1, Build: 1539 })
+            if (UndertaleExtension.ProductDataEligible(reader.undertaleData))
             {
                 for (int i = 0; i < List.Count; i++)
                 {

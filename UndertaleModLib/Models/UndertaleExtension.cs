@@ -479,7 +479,7 @@ public class UndertaleExtension : UndertaleNamedResource, IDisposable
             return true;
         }
         uint build = data?.GeneralInfo?.Build ?? 0;
-        if (build >= 1773 || build == 1559)
+        if (build >= 1773 || build == 1559) // NOTE: unknown if 1773 is the earliest version which contains product IDs/data
         {
             return true;
         }

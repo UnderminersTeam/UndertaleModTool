@@ -211,7 +211,7 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
 
     public enum InstanceType : short
     {
-        /// Actually, this is just object 0, but also occurs in places where no instance type was set
+        /// Note: This is just object 0, but also occurs in places where no instance type was set
         Undefined = 0,
         Self = -1,
         Other = -2,
@@ -224,6 +224,7 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
         Stacktop = -9,
         Arg = -15,
         Static = -16
+
         // anything > 0 --> GameObjectIndex (or Instance ID if VariableType.Instance)
     }
 
@@ -232,7 +233,7 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
         Array = 0x00,
         StackTop = 0x80,
         Normal = 0xA0,
-        /// The InstanceType is an Instance ID inside the room -100000
+        /// The InstanceType is an Instance ID inside a room, minus 100000
         Instance = 0xE0,
         /// GMS2.3+, multidimensional array with pushaf
         ArrayPushAF = 0x10,
