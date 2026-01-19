@@ -33,7 +33,8 @@
 
             <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3">
                 <TextBlock.Text>
-                    <MultiBinding StringFormat="{}WAV data, length: {0}">
+                    <MultiBinding StringFormat="{}{0} data, {1} bytes">
+                        <Binding Path="FileType" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type local:UndertaleEmbeddedAudioEditor}}" Mode="OneWay" />
                         <Binding Path="Data.Length"/>
                     </MultiBinding>
                 </TextBlock.Text>

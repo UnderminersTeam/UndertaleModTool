@@ -191,23 +191,29 @@ public static class UndertaleDataExtensionMethods
         return newString;
     }
 
+    public static UndertaleFunction Define(this IList<UndertaleFunction> list, string name, IList<UndertaleString> strg)
+    {
+        UndertaleString str = strg.MakeString(name, out int id);
+        UndertaleFunction func = new()
+        {
+            Name = str,
+            NameStringID = id
+        };
+        list.Add(func);
+        return func;
+    }
+
     public static UndertaleFunction EnsureDefined(this IList<UndertaleFunction> list, string name, IList<UndertaleString> strg)
     {
         UndertaleFunction func = list.ByName(name);
         if (func is null)
         {
-            var str = strg.MakeString(name, out int id);
-            func = new UndertaleFunction()
-            {
-                Name = str,
-                NameStringID = id
-            };
-            list.Add(func);
+            return list.Define(name, strg);
         }
         return func;
     }
 
-    public static UndertaleVariable EnsureDefined(this IList<UndertaleVariable> list, UndertaleString nameString, int nameStringId, UndertaleInstruction.InstanceType inst, bool isBuiltin, UndertaleData data)
+    public static UndertaleInstruction.InstanceType CalculateInstType(this IList<UndertaleVariable> list, UndertaleInstruction.InstanceType inst, bool isBuiltin, UndertaleData data)
     {
         // Local variables are defined distinctly
         if (inst == UndertaleInstruction.InstanceType.Local)
@@ -229,17 +235,14 @@ public static class UndertaleDataExtensionMethods
             inst = UndertaleInstruction.InstanceType.Undefined;
         }
 
-        // Search for existing variable that can be used
-        foreach (UndertaleVariable variable in list)
-        {
-            if (variable.Name == nameString && variable.InstanceType == inst)
-            {
-                return variable;
-            }
-        }
+        return inst;
+    }
 
-        // Otherwise, make a new variable. Update variables counts first.
+    public static UndertaleVariable Define(this IList<UndertaleVariable> list, UndertaleString nameString, int nameStringId, UndertaleInstruction.InstanceType inst, bool isBuiltin, UndertaleData data)
+    {
+        // Update variables counts first
         uint oldId = data.VarCount1;
+        bool bytecode14 = data.GeneralInfo.BytecodeVersion <= 14;
         if (!bytecode14)
         {
             if (data.IsVersionAtLeast(2, 3))
@@ -284,6 +287,24 @@ public static class UndertaleDataExtensionMethods
         list.Add(newVariable);
 
         return newVariable;
+    }
+
+    public static UndertaleVariable EnsureDefined(this IList<UndertaleVariable> list, UndertaleString nameString, int nameStringId, UndertaleInstruction.InstanceType inst, bool isBuiltin, UndertaleData data)
+    {
+        // Calculate correct instance type
+        inst = list.CalculateInstType(inst, isBuiltin, data);
+
+        // Search for existing variable that can be used
+        foreach (UndertaleVariable variable in list)
+        {
+            if (variable.Name == nameString && variable.InstanceType == inst)
+            {
+                return variable;
+            }
+        }
+
+        // Otherwise, make a new variable
+        return list.Define(nameString, nameStringId, inst, isBuiltin, data);
     }
 
     public static UndertaleVariable DefineLocal(this IList<UndertaleVariable> list, UndertaleData data, int varId, UndertaleString nameString, int nameStringId)
