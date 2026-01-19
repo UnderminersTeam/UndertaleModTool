@@ -7,7 +7,7 @@
         <Nullable>enable</Nullable>
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
-        <Version>0.8.3.0</Version>
+        <Version>0.8.4.1</Version>
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
         <ApplicationIcon>..\UndertaleModToolAvalonia\Assets\Icon.ico</ApplicationIcon>
     </PropertyGroup>
