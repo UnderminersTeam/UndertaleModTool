@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -110,7 +110,7 @@ public partial class SearchInCodeViewModel
         loaderWindow.SetText("Sorting...");
 
         List<SearchResult> sortedResultsList = new(resultCount);
-        
+
         await Task.Run(() =>
         {
             var sortedResultsByCodeDict = resultsByCodeDict.OrderBy(entry => MainVM.Data.Code.IndexOf(entry.Key));

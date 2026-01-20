@@ -1,8 +1,8 @@
-﻿using Avalonia.Platform.Storage;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Avalonia.Platform.Storage;
+using Microsoft.Extensions.DependencyInjection;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 

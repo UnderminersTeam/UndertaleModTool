@@ -32,7 +32,7 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
     private static readonly Dictionary<string, UndertaleNamedResource> FunctionsCache = new();
     private static readonly Dictionary<string, UndertaleNamedResource> CodeCache = new();
     private static readonly Dictionary<string, UndertaleNamedResource> NamedResourcesCache = new();
-    
+
     private readonly List<string> codeLocalsCache = new();
 
     public (int, int) LastCaretOffsets;

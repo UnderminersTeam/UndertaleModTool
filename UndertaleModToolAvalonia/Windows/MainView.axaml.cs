@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
@@ -41,7 +41,7 @@ public partial class MainView : UserControl, IView
                                     if (value.Value is UndertaleNamedResource namedResource)
                                     {
                                         textBlock[!TextBlock.TextProperty] = new Binding("Value.Name.Content");
-                                        
+
                                         if (namedResource is UndertaleCode code)
                                         {
                                             // NOTE: Doesn't update, but whatever.

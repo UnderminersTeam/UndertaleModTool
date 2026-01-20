@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using SkiaSharp;
@@ -95,7 +95,7 @@ public class ImageCache
 
             if (image is null)
                 return null;
-            
+
             imageCache[key] = new WeakReference<SKImage>(image);
         }
 

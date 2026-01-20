@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using UndertaleModLib.Models;
@@ -33,7 +33,7 @@ public class UndertalePathEditor : Control
 
         Pen axisPen = new(axisBrush);
         context.DrawLine(axisPen, new(bounds.Left + padding + 0.5, 0 + 0.5), new(bounds.Right - padding + 0.5, 0 + 0.5));
-        context.DrawLine(axisPen, new(0 + 0.5, bounds.Top + padding + 0.5), new(0 + 0.5, bounds.Bottom -padding + 0.5));
+        context.DrawLine(axisPen, new(0 + 0.5, bounds.Top + padding + 0.5), new(0 + 0.5, bounds.Bottom - padding + 0.5));
 
         PathGeometry geometry = new();
         PathFigure pathFigure = new() { StartPoint = new(vm.Path.Points[0].X, vm.Path.Points[0].Y), IsClosed = vm.Path.IsClosed, IsFilled = false };

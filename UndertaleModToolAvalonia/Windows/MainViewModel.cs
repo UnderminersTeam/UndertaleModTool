@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -187,10 +187,10 @@ public partial class MainViewModel
         TreeDataGridData.Clear();
 
         if (FilterTextChanged is not null)
-        foreach (Delegate item in FilterTextChanged.GetInvocationList())
-        {
-            FilterTextChanged -= (Action<string>)item;
-        }
+            foreach (Delegate item in FilterTextChanged.GetInvocationList())
+            {
+                FilterTextChanged -= (Action<string>)item;
+            }
 
         if (Data is not null)
         {

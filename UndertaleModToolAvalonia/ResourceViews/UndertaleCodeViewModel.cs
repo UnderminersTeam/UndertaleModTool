@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Avalonia.Input;
@@ -221,7 +221,7 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
                 await DecompileToGML();
                 await DecompileToASM();
             }
-            
+
             CodeProcessEnd();
         }
     }
