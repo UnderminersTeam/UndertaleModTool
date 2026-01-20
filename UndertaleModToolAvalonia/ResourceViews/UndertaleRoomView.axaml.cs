@@ -125,12 +125,7 @@ public partial class UndertaleRoomView : UserControl
     {
         if (DataContext is UndertaleRoomViewModel vm)
         {
-            // TODO: Move to view model
-            UndertaleRoom.GameObject instance = new()
-            {
-                InstanceID = vm.MainVM.Data!.GeneralInfo.LastObj++,
-            };
-            vm.Room.GameObjects.Add(instance);
+            vm.AddGameObjectInstance();
         }
     }
 
@@ -145,15 +140,11 @@ public partial class UndertaleRoomView : UserControl
             TreeViewItem? parentTreeViewItem = treeViewItem.FindLogicalAncestorOfType<TreeViewItem>();
             if (parentTreeViewItem?.DataContext is UndertaleRoomViewModel.RoomTreeItem { Tag: "GameObjects" })
             {
-                // TODO: Move to view model
-                vm.Room.GameObjects.Remove(instance);
+                vm.RemoveGameObjectInstance(instance);
             }
             else if (parentTreeViewItem?.DataContext is UndertaleRoom.Layer { LayerType: UndertaleRoom.LayerType.Instances } layer)
             {
-                // TODO: Move to view model
-                // TODO: Remove from InstanceCreationOrderIDs
-                layer.InstancesData.Instances.Remove(instance);
-                vm.Room.GameObjects.Remove(instance);
+                vm.RemoveGameObjectInstance(instance, layer);
             }
         }
     }
@@ -162,12 +153,7 @@ public partial class UndertaleRoomView : UserControl
     {
         if (DataContext is UndertaleRoomViewModel vm)
         {
-            // TODO: Move to view model
-            UndertaleRoom.Tile tile = new()
-            {
-                InstanceID = vm.MainVM.Data!.GeneralInfo.LastTile++,
-            };
-            vm.Room.Tiles.Add(tile);
+            vm.AddTile();
         }
     }
 
@@ -182,13 +168,11 @@ public partial class UndertaleRoomView : UserControl
             TreeViewItem? parentTreeViewItem = treeViewItem.FindLogicalAncestorOfType<TreeViewItem>();
             if (parentTreeViewItem?.DataContext is UndertaleRoomViewModel.RoomTreeItem { Tag: "Tiles" })
             {
-                // TODO: Move to view model
-                vm.Room.Tiles.Remove(tile);
+                vm.RemoveTile(tile);
             }
             else if (parentTreeViewItem?.DataContext is UndertalePointerList<UndertaleRoom.Tile> legacyTiles)
             {
-                // TODO: Move to view model
-                legacyTiles.Remove(tile);
+                vm.RemoveTile(tile, legacyTiles);
             }
         }
     }
@@ -236,15 +220,7 @@ public partial class UndertaleRoomView : UserControl
             && control.FindLogicalAncestorOfType<TreeViewItem>() is TreeViewItem treeViewItem
             && treeViewItem.DataContext is UndertaleRoom.Layer layer)
         {
-            // TODO: Move to view model
-            if (layer.LayerType == UndertaleRoom.LayerType.Instances)
-            {
-                // TODO: Remove from InstanceCreationOrderIDs
-                foreach (UndertaleRoom.GameObject? instance in layer.InstancesData.Instances)
-                    vm.Room.GameObjects.Remove(instance);
-            }
-
-            vm.Room.Layers.Remove(layer);
+            vm.RemoveLayer(layer);
         }
     }
 
@@ -255,14 +231,7 @@ public partial class UndertaleRoomView : UserControl
             && control.FindLogicalAncestorOfType<TreeViewItem>() is TreeViewItem treeViewItem
             && treeViewItem.DataContext is UndertaleRoom.Layer { LayerType: UndertaleRoom.LayerType.Instances } layer)
         {
-            // TODO: Move to view model
-            UndertaleRoom.GameObject instance = new()
-            {
-                InstanceID = vm.MainVM.Data!.GeneralInfo.LastObj++,
-            };
-            vm.Room.GameObjects.Add(instance);
-
-            layer.InstancesData.Instances.Add(instance);
+            vm.AddGameObjectInstance(layer);
         }
     }
 
@@ -273,14 +242,7 @@ public partial class UndertaleRoomView : UserControl
             && control.FindLogicalAncestorOfType<TreeViewItem>() is TreeViewItem treeViewItem
             && treeViewItem.DataContext is UndertaleRoom.Layer { LayerType: UndertaleRoom.LayerType.Assets } layer)
         {
-            // TODO: Move to view model
-            UndertaleRoom.Tile tile = new()
-            {
-                InstanceID = vm.MainVM.Data!.GeneralInfo.LastTile++,
-                spriteMode = true,
-            };
-
-            layer.AssetsData.LegacyTiles.Add(tile);
+            vm.AddLegacyTileInstance(layer);
         }
     }
 
@@ -291,13 +253,7 @@ public partial class UndertaleRoomView : UserControl
             && control.FindLogicalAncestorOfType<TreeViewItem>() is TreeViewItem treeViewItem
             && treeViewItem.DataContext is UndertaleRoom.Layer { LayerType: UndertaleRoom.LayerType.Assets } layer)
         {
-            // TODO: Move to view model
-            UndertaleRoom.SpriteInstance spriteInstance = new()
-            {
-                Name = UndertaleRoom.SpriteInstance.GenerateRandomName(vm.MainVM.Data),
-            };
-
-            layer.AssetsData.Sprites.Add(spriteInstance);
+            vm.AddSpriteInstance(layer);
         }
     }
 
@@ -308,15 +264,7 @@ public partial class UndertaleRoomView : UserControl
             && control.FindLogicalAncestorOfType<TreeViewItem>() is TreeViewItem treeViewItem
             && treeViewItem.DataContext is UndertaleRoom.Layer { LayerType: UndertaleRoom.LayerType.Assets } layer)
         {
-            // TODO: Move to view model
-            UndertaleRoom.SequenceInstance sequenceInstance = new()
-            {
-                // Uses the same naming scheme as a sprite
-                Name = UndertaleRoom.SpriteInstance.GenerateRandomName(vm.MainVM.Data),
-            };
-
-            if (layer.AssetsData.Sequences is not null)
-                layer.AssetsData.Sequences.Add(sequenceInstance);
+            vm.AddSequenceInstance(layer);
         }
     }
 
@@ -327,15 +275,7 @@ public partial class UndertaleRoomView : UserControl
             && control.FindLogicalAncestorOfType<TreeViewItem>() is TreeViewItem treeViewItem
             && treeViewItem.DataContext is UndertaleRoom.Layer { LayerType: UndertaleRoom.LayerType.Assets } layer)
         {
-            // TODO: Move to view model
-            UndertaleRoom.ParticleSystemInstance particleSystemInstance = new()
-            {
-                Name = UndertaleRoom.ParticleSystemInstance.GenerateRandomName(vm.MainVM.Data),
-                InstanceID = ++vm.MainVM.Data!.LastParticleSystemInstanceID,
-            };
-
-            if (layer.AssetsData.ParticleSystems is not null)
-                layer.AssetsData.ParticleSystems.Add(particleSystemInstance);
+            vm.AddParticleSystemInstance(layer);
         }
     }
 
@@ -347,13 +287,7 @@ public partial class UndertaleRoomView : UserControl
             && treeViewItem.DataContext is UndertaleRoom.Layer { LayerType: UndertaleRoom.LayerType.Assets } layer)
         {
             // TODO: Move to view model
-            UndertaleRoom.TextItemInstance textItemInstance = new()
-            {
-                Name = UndertaleRoom.TextItemInstance.GenerateRandomName(vm.MainVM.Data),
-            };
-
-            if (layer.AssetsData.TextItems is not null)
-                layer.AssetsData.TextItems.Add(textItemInstance);
+            vm.AddTextItemInstance(layer);
         }
     }
 
@@ -365,10 +299,9 @@ public partial class UndertaleRoomView : UserControl
         {
             TreeViewItem? parentTreeViewItem = treeViewItem.FindLogicalAncestorOfType<TreeViewItem>();
 
-            if (parentTreeViewItem?.DataContext is IList list)
+            if (parentTreeViewItem?.DataContext is IList list && treeViewItem.DataContext is not null)
             {
-                // TODO: Move to view model
-                list.Remove(treeViewItem.DataContext);
+                vm.RemoveAsset(list, treeViewItem.DataContext);
             }
         }
     }

@@ -81,7 +81,7 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
 
     }
 
-    public void AddLayer(UndertaleRoom.LayerType type)
+    public void AddLayer(LayerType type)
     {
         // TODO: Move this to library
         string name = $"New {type switch
@@ -153,6 +153,117 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
         }
 
         Room.Layers.Add(layer);
+    }
+
+    public void RemoveLayer(Layer layer)
+    {
+        if (layer.LayerType == LayerType.Instances)
+        {
+            // TODO: Remove from InstanceCreationOrderIDs
+            foreach (UndertaleRoom.GameObject? instance in layer.InstancesData.Instances)
+            {
+                Room.GameObjects.Remove(instance);
+            }
+        }
+
+        Room.Layers.Remove(layer);
+    }
+
+    public void AddGameObjectInstance(Layer? layer = null)
+    {
+        GameObject instance = new()
+        {
+            InstanceID = MainVM.Data!.GeneralInfo.LastObj++,
+        };
+        Room.GameObjects.Add(instance);
+
+        layer?.InstancesData.Instances.Add(instance);
+    }
+
+    public void RemoveGameObjectInstance(GameObject instance, Layer? layer = null)
+    {
+        // TODO: Remove from InstanceCreationOrderIDs
+        layer?.InstancesData.Instances.Remove(instance);
+        Room.GameObjects.Remove(instance);
+    }
+
+    public void AddTile()
+    {
+        Tile tile = new()
+        {
+            InstanceID = MainVM.Data!.GeneralInfo.LastTile++,
+        };
+        Room.Tiles.Add(tile);
+    }
+
+    public void RemoveTile(Tile tile, UndertalePointerList<Tile>? legacyTilesList = null)
+    {
+        if (legacyTilesList is not null)
+        {
+            legacyTilesList.Remove(tile);
+        }
+        else
+        {
+            Room.Tiles.Remove(tile);
+        }
+    }
+
+    public void AddLegacyTileInstance(Layer layer)
+    {
+        Tile tile = new()
+        {
+            InstanceID = MainVM.Data!.GeneralInfo.LastTile++,
+            spriteMode = true,
+        };
+
+        layer.AssetsData.LegacyTiles.Add(tile);
+    }
+
+    public void AddSpriteInstance(Layer layer)
+    {
+        SpriteInstance spriteInstance = new()
+        {
+            Name = SpriteInstance.GenerateRandomName(MainVM.Data),
+        };
+
+        layer.AssetsData.Sprites.Add(spriteInstance);
+    }
+
+    public void AddSequenceInstance(Layer layer)
+    {
+        SequenceInstance sequenceInstance = new()
+        {
+            // Uses the same naming scheme as a sprite
+            Name = SpriteInstance.GenerateRandomName(MainVM.Data),
+        };
+
+        layer.AssetsData.Sequences?.Add(sequenceInstance);
+    }
+
+    public void AddParticleSystemInstance(Layer layer)
+    {
+        ParticleSystemInstance particleSystemInstance = new()
+        {
+            Name = ParticleSystemInstance.GenerateRandomName(MainVM.Data),
+            InstanceID = ++MainVM.Data!.LastParticleSystemInstanceID,
+        };
+
+        layer.AssetsData.ParticleSystems?.Add(particleSystemInstance);
+    }
+
+    public void AddTextItemInstance(Layer layer)
+    {
+        TextItemInstance textItemInstance = new()
+        {
+            Name = TextItemInstance.GenerateRandomName(MainVM.Data),
+        };
+
+        layer.AssetsData.TextItems?.Add(textItemInstance);
+    }
+
+    public void RemoveAsset(IList list, object asset)
+    {
+        list.Remove(asset);
     }
 
     public object? FindItemFromCategory(object? category)
