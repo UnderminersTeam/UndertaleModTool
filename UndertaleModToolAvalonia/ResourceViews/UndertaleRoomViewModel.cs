@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -49,6 +49,8 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
 
     [Notify]
     private uint _SelectedTileData = 0;
+    [Notify]
+    private uint _TileSetColumns = 0;
 
     public UndertaleRoomViewModel(UndertaleRoom room, IServiceProvider? serviceProvider = null)
     {

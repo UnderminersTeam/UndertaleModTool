@@ -436,14 +436,14 @@
                             <DataTemplate DataType="undertalem:UndertaleRoom+Layer">
                                 <StackPanel Name="Layer">
                                     <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                                        <Label>Layer type</Label>
+                                        <TextBlock Text="{Binding LayerType}" FontWeight="Bold" />
+                                        
                                         <Label>Layer name</Label>
                                         <l:UndertaleStringReferenceView Reference="{Binding LayerName}" />
 
                                         <Label>Layer id</Label>
                                         <TextBox Text="{Binding LayerId}" />
-
-                                        <Label>Layer type</Label>
-                                        <TextBlock Text="{Binding LayerType}" FontWeight="Bold" />
 
                                         <Label>Depth</Label>
                                         <TextBox Text="{Binding LayerDepth}" />
@@ -507,34 +507,44 @@
                                                 <TextBlock Text="Contains GameObject instances, listed in the tree on the left" />
                                             </DataTemplate>
                                             <DataTemplate DataType="undertalem:UndertaleRoom+Layer+LayerTilesData">
-                                                <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
-                                                    <Label>Offset X/Y</Label>
-                                                    <Grid ColumnDefinitions="1*,1*">
-                                                        <TextBox Grid.Column="0" Text="{ReflectionBinding #Layer.DataContext.XOffset}" />
-                                                        <TextBox Grid.Column="1" Text="{ReflectionBinding #Layer.DataContext.YOffset}" />
-                                                    </Grid>
+                                                <StackPanel>
+                                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                                                        <Label>Offset X/Y</Label>
+                                                        <Grid ColumnDefinitions="1*,1*">
+                                                            <TextBox Grid.Column="0" Text="{ReflectionBinding #Layer.DataContext.XOffset}" />
+                                                            <TextBox Grid.Column="1" Text="{ReflectionBinding #Layer.DataContext.YOffset}" />
+                                                        </Grid>
 
-                                                    <Label>Speed H/V</Label>
-                                                    <Grid ColumnDefinitions="1*,1*">
-                                                        <TextBox Grid.Column="0" Text="{ReflectionBinding #Layer.DataContext.HSpeed}" />
-                                                        <TextBox Grid.Column="1" Text="{ReflectionBinding #Layer.DataContext.VSpeed}" />
-                                                    </Grid>
+                                                        <Label>Speed H/V</Label>
+                                                        <Grid ColumnDefinitions="1*,1*">
+                                                            <TextBox Grid.Column="0" Text="{ReflectionBinding #Layer.DataContext.HSpeed}" />
+                                                            <TextBox Grid.Column="1" Text="{ReflectionBinding #Layer.DataContext.VSpeed}" />
+                                                        </Grid>
 
-                                                    <Label>Size</Label>
-                                                    <Grid ColumnDefinitions="1*,1*,1*">
-                                                        <TextBox Grid.Column="0" Text="{Binding TilesX, UpdateSourceTrigger=LostFocus}" />
-                                                        <TextBox Grid.Column="1" Text="{Binding TilesY, UpdateSourceTrigger=LostFocus}" />
-                                                        <!-- TODO: Auto button -->
-                                                        <Button Grid.Column="2">Auto</Button>
-                                                    </Grid>
+                                                        <Label>Size</Label>
+                                                        <Grid ColumnDefinitions="1*,1*,1*">
+                                                            <TextBox Grid.Column="0" Text="{Binding TilesX, UpdateSourceTrigger=LostFocus}" />
+                                                            <TextBox Grid.Column="1" Text="{Binding TilesY, UpdateSourceTrigger=LostFocus}" />
+                                                            <!-- TODO: Auto button -->
+                                                            <Button Grid.Column="2">Auto</Button>
+                                                        </Grid>
 
-                                                    <Label>Tile set</Label>
-                                                    <l:UndertaleResourceReferenceView Reference="{Binding Background}" ReferenceType="undertalem:UndertaleBackground" />
+                                                        <Label>Tile set</Label>
+                                                        <l:UndertaleResourceReferenceView Reference="{Binding Background}" ReferenceType="undertalem:UndertaleBackground" />
                                                     
-                                                    <!-- TODO: Edit/export/import tile data -->
-                                                    <Label>Selected tile data</Label>
-                                                    <TextBox Text="{Binding $parent[UserControl].((l:UndertaleRoomViewModel)DataContext).SelectedTileData}" />
-                                                </Grid>
+                                                        <!-- TODO: Edit/export/import tile data -->
+                                                        <Label>Selected tile data</Label>
+                                                        <TextBox Text="{Binding $parent[UserControl].((l:UndertaleRoomViewModel)DataContext).SelectedTileData}" />
+
+                                                        <Label>Tile set columns</Label>
+                                                        <TextBox Text="{Binding $parent[UserControl].((l:UndertaleRoomViewModel)DataContext).TileSetColumns}" />
+                                                    </Grid>
+
+                                                    <l:UndertaleRoomTilePicker
+                                                        SelectedTileData="{Binding $parent[UserControl].((l:UndertaleRoomViewModel)DataContext).SelectedTileData}"
+                                                        TileSetColumns="{Binding $parent[UserControl].((l:UndertaleRoomViewModel)DataContext).TileSetColumns}"
+                                                        MinHeight="{Binding $parent[ScrollViewer].Viewport.Height}" />
+                                                </StackPanel>
                                             </DataTemplate>
                                             <!--
                                             <DataTemplate DataType="undertalem:UndertaleRoom+Layer+LayerPathData">

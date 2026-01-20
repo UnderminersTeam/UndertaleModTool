@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -102,8 +102,9 @@ public class UndertaleRoomEditor : Control
     {
         mousePosition = e.GetPosition(this);
 
-        if (movingTranslation)
+        if (e.GetCurrentPoint(this).Properties.IsMiddleButtonPressed)
         {
+            movingTranslation = true;
             translation = mousePosition - movingTranslationOffset;
         }
 
@@ -184,7 +185,6 @@ public class UndertaleRoomEditor : Control
         if (e.GetCurrentPoint(this).Properties.IsMiddleButtonPressed)
         {
             this.Focus();
-            movingTranslation = true;
             movingTranslationOffset = mousePosition - translation;
         }
         else if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
@@ -220,6 +220,20 @@ public class UndertaleRoomEditor : Control
 
     protected override void OnPointerReleased(PointerReleasedEventArgs e)
     {
+        if (!movingTranslation)
+        {
+            if (e.InitialPressMouseButton == MouseButton.Middle)
+            {
+                if (vm!.RoomItemsSelectedItem is UndertaleRoom.Layer { LayerType: UndertaleRoom.LayerType.Tiles } tilesLayer)
+                {
+                    Point roomMousePosition = (mousePosition - translation) / scaling;
+                    uint? tile = GetLayerTile(roomMousePosition, tilesLayer);
+                    if (tile is not null)
+                        vm.SelectedTileData = (uint)tile;
+                }
+            }
+        }
+
         movingTranslation = false;
         movingItem = false;
         settingTiles = false;
@@ -345,7 +359,8 @@ public class UndertaleRoomEditor : Control
             && y < tilesLayer.TilesData.TileData.Length
             && x < tilesLayer.TilesData.TileData[y].Length)
         {
-            tilesLayer.TilesData.TileData[y][x] = tileData;
+            if ((tileData & 0x0FFFFFFF) < tilesLayer.TilesData.Background.GMS2TileCount)
+                tilesLayer.TilesData.TileData[y][x] = tileData;
         }
     }
 
@@ -366,7 +381,7 @@ public class UndertaleRoomEditor : Control
         public CustomDrawOperation(UndertaleRoomEditor editor)
         {
             this.editor = editor;
-            Bounds = editor.Bounds;
+            Bounds = new(0, 0, editor.Bounds.Width, editor.Bounds.Height);
 
             vm = editor.vm!;
             translation = editor.translation;
@@ -449,7 +464,7 @@ public class UndertaleRoomEditor : Control
                     canvas.DrawRect(rect, new SKPaint { Color = SKColors.Blue.WithAlpha(128), StrokeWidth = 2, Style = SKPaintStyle.Stroke });
                     canvas.Restore();
                 }
-                
+
                 if (hoveredRoomItem is not null && hoveredRoomItem.Selectable is not null)
                 {
                     SKRect rect = hoveredRoomItem.Selectable.Bounds.ToSKRect();
