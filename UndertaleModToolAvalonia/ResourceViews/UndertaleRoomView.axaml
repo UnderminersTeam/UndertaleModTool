@@ -437,7 +437,7 @@
                                 <StackPanel Name="Layer">
                                     <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
                                         <Label>Layer type</Label>
-                                        <TextBlock Text="{Binding LayerType}" FontWeight="Bold" />
+                                        <TextBlock Text="{Binding LayerType}" FontWeight="Bold" VerticalAlignment="Center" />
                                         
                                         <Label>Layer name</Label>
                                         <l:UndertaleStringReferenceView Reference="{Binding LayerName}" />
@@ -536,7 +536,9 @@
                                                         <TextBox Text="{Binding $parent[UserControl].((l:UndertaleRoomViewModel)DataContext).SelectedTileData}" />
 
                                                         <Label>Tile set columns</Label>
-                                                        <TextBox Text="{Binding $parent[UserControl].((l:UndertaleRoomViewModel)DataContext).TileSetColumns}" />
+                                                        <NumericUpDown
+                                                            Value="{Binding $parent[UserControl].((l:UndertaleRoomViewModel)DataContext).TileSetColumns}"
+                                                            Minimum="0" FormatString="0" />
                                                     </Grid>
 
                                                     <l:UndertaleRoomTilePicker
