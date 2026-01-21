@@ -525,8 +525,7 @@
                                                         <Grid ColumnDefinitions="1*,1*,1*">
                                                             <TextBox Grid.Column="0" Text="{Binding TilesX, UpdateSourceTrigger=LostFocus}" />
                                                             <TextBox Grid.Column="1" Text="{Binding TilesY, UpdateSourceTrigger=LostFocus}" />
-                                                            <!-- TODO: Auto button -->
-                                                            <Button Grid.Column="2">Auto</Button>
+                                                            <Button Grid.Column="2" Command="{Binding $parent[UserControl].((l:UndertaleRoomViewModel)DataContext).AutoSizeTileLayer}">Auto</Button>
                                                         </Grid>
 
                                                         <Label>Tile set</Label>

@@ -332,6 +332,21 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
         return null;
     }
 
+    public async void AutoSizeTileLayer()
+    {
+        if (PropertiesContent is Layer layer)
+        {
+            if (layer.TilesData is null
+                || layer.TilesData.Background is null
+                || layer.TilesData.Background.GMS2TileWidth == 0
+                || layer.TilesData.Background.GMS2TileHeight == 0)
+                return;
+
+            layer.TilesData.TilesX = (uint)Math.Ceiling((double)Room.Width / layer.TilesData.Background.GMS2TileWidth);
+            layer.TilesData.TilesY = (uint)Math.Ceiling((double)Room.Height / layer.TilesData.Background.GMS2TileHeight);
+        }
+    }
+
     public async void SaveAsImage()
     {
         IStorageFile? file = await MainVM.View!.SaveFileDialog(new FilePickerSaveOptions()
