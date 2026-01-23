@@ -59,6 +59,10 @@
         <KeyBinding Gesture="Ctrl+S" Command="{Binding FileSave}" />
         <KeyBinding Gesture="Ctrl+Shift+F" Command="{Binding ToolsSearchInCode}" />
         <KeyBinding Gesture="F1" Command="{Binding HelpAbout}" />
+        <KeyBinding Gesture="Ctrl+W" Command="{Binding TabCloseSelected}" />
+        <KeyBinding Gesture="Ctrl+Shift+W" Command="{Binding TabCloseAll}" />
+        <KeyBinding Gesture="Ctrl+Shift+Tab" Command="{Binding TabSetToPrevious}" />
+        <KeyBinding Gesture="Ctrl+Tab" Command="{Binding TabSetToNext}" />
     </Window.KeyBindings>
 
     <l:MainView />

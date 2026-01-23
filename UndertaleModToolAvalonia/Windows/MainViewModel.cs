@@ -699,6 +699,36 @@ public partial class MainViewModel
         }
     }
 
+    public void TabCloseSelected()
+    {
+        if (TabSelected is not null)
+            TabClose(TabSelected);
+    }
+
+    public void TabCloseAll()
+    {
+        foreach (TabItemViewModel tab in Tabs.ToList())
+        {
+            TabClose(tab);
+        }
+    }
+
+    public void TabSetToPrevious()
+    {
+        if (TabSelectedIndex > 0)
+            TabSelectedIndex--;
+        else
+            TabSelectedIndex = Tabs.Count - 1;
+    }
+
+    public void TabSetToNext()
+    {
+        if (TabSelectedIndex < Tabs.Count - 1)
+            TabSelectedIndex++;
+        else
+            TabSelectedIndex = 0;
+    }
+
     public void TabGoBack()
     {
         TabSelected?.GoBack();

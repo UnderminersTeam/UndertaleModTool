@@ -17,7 +17,7 @@
                 <Label>Parent</Label>
                 <l:UndertaleResourceReferenceView Reference="{Binding Code.ParentEntry}" ReferenceType="undertalem:UndertaleCode" />
             </Grid>
-            <Button Grid.Column="1" Command="{Binding CompileAndDecompileGML}">Compile and decompile</Button>
+            <Button Grid.Column="1" Command="{Binding CompileAndDecompileGML}" ToolTip.Tip="Ctrl+K">Compile and decompile</Button>
         </Grid>
         
         <TabControl Grid.Row="1" IsVisible="{Binding Code.ParentEntry, Converter={x:Static ObjectConverters.IsNull}}"

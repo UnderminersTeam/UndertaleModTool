@@ -404,6 +404,14 @@ public partial class MainView : UserControl, IView
         }
     }
 
+    private void TabMenu_CloseAll_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainViewModel vm)
+        {
+            vm.TabCloseAll();
+        }
+    }
+
     private async void CommandTextBox_KeyDown(object? sender, KeyEventArgs e)
     {
         if (DataContext is MainViewModel vm)
