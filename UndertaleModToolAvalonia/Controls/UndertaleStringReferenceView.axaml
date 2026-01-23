@@ -13,7 +13,9 @@
                      IsReadOnly="{Binding Reference, Converter={x:Static ObjectConverters.IsNull}}"
                      AcceptsReturn="True"
                      TextWrapping="Wrap"
-                     KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus">
+                     KeyDown="TextBox_KeyDown"
+                     PointerReleased="TextBox_PointerReleased"
+                     LostFocus="TextBox_LostFocus">
                 <TextBox.Resources>
                     <l:UndertaleStringDropHandler x:Key="UndertaleStringDropHandler"/>
                 </TextBox.Resources>

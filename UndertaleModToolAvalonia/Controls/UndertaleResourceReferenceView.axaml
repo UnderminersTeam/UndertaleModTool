@@ -10,7 +10,8 @@
             <!-- TODO: Can change, can remove -->
             <TextBox Grid.Column="0" Name="TextBox"
                      Text="{Binding Reference, Mode=OneWay}"
-                     IsReadOnly="True">
+                     IsReadOnly="True"
+                     PointerReleased="TextBox_PointerReleased">
                 <TextBox.Resources>
                     <l:UndertaleReferenceDropHandler x:Key="UndertaleReferenceDropHandler"/>
                 </TextBox.Resources>

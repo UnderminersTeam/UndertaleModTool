@@ -351,6 +351,9 @@ public class UndertaleRoomEditor : Control
 
     void SetLayerTile(Point roomMousePosition, UndertaleRoom.Layer tilesLayer, uint tileData)
     {
+        if (tilesLayer.TilesData.Background is null)
+            return;
+
         // Find x/y position
         int x = (int)Math.Floor((roomMousePosition.X - tilesLayer.XOffset) / tilesLayer.TilesData.Background.GMS2TileWidth);
         int y = (int)Math.Floor((roomMousePosition.Y - tilesLayer.YOffset) / tilesLayer.TilesData.Background.GMS2TileHeight);

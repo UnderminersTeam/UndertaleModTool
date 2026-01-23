@@ -665,7 +665,6 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
                 // Add click operation when we have a resource
                 line.Clicked += (text, button) =>
                 {
-                    // TODO: Middle click?
                     if (button == MouseButton.Right)
                     {
                         contextMenu.Items.Clear();
@@ -692,6 +691,10 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
                         codeViewModel.ASMFocused = false;
 
                         contextMenu.Open(textEditor);
+                    }
+                    else if (button == MouseButton.Middle)
+                    {
+                        codeViewModel.MainVM.TabOpen(namedResource, true);
                     }
                 };
             }

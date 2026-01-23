@@ -1,13 +1,14 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 
 namespace UndertaleModToolAvalonia;
 
 public partial class SearchInCodeWindow : Window, IView
 {
     // TODO: Open multiple results
-    // TODO: Context menu
 
     public SearchInCodeWindow()
     {
@@ -46,6 +47,16 @@ public partial class SearchInCodeWindow : Window, IView
             if (e.Source is Control control)
                 if (control.DataContext is SearchInCodeViewModel.SearchResult searchResult)
                     vm.OpenSearchResult(searchResult);
+    }
+
+    private void DataGrid_PointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        if (e.InitialPressMouseButton == MouseButton.Middle
+            && ((e.Source as Visual)?.GetTransformedBounds()?.Contains(e.GetPosition(null)) ?? false))
+            if (DataContext is SearchInCodeViewModel vm)
+                if (e.Source is Control control)
+                    if (control.DataContext is SearchInCodeViewModel.SearchResult searchResult)
+                        vm.OpenSearchResult(searchResult, inNewTab: true);
     }
 
     private void DataGrid_KeyDown_Tunnel(object? sender, KeyEventArgs e)

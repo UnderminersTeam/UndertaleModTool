@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
@@ -159,8 +158,6 @@ public class UndertaleRoomTilePicker : Control
 
         public void Render(ImmediateDrawingContext context)
         {
-            Debug.WriteLine(Bounds);
-
             var leaseFeature = context.TryGetFeature<ISkiaSharpApiLeaseFeature>();
             if (leaseFeature is null)
                 return;

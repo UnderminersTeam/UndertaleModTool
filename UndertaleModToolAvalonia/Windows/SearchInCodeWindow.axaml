@@ -22,7 +22,8 @@
             <Button Command="{Binding Search}" IsDefault="True" HorizontalAlignment="Right">Search</Button>
         </StackPanel>
         <DataGrid Grid.Row="1" Name="ResultsDataGrid" ItemsSource="{Binding Results}" IsReadOnly="True" CanUserResizeColumns="True"
-                  DoubleTapped="DataGrid_DoubleTapped">
+                  DoubleTapped="DataGrid_DoubleTapped"
+                  PointerReleased="DataGrid_PointerReleased">
             <DataGrid.Styles>
                 <Style Selector="DataGridRow">
                     <Setter Property="ContextMenu">

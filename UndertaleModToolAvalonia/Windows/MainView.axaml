@@ -60,7 +60,9 @@
                     <TextBox Name="FilterTextBox" Watermark="Filter by name..." TextChanged="FilterTextBox_TextChanged"/>
                 </StackPanel>
 
-                <TreeDataGrid Name="MainTreeDataGrid" Grid.Row="1" ShowColumnHeaders="False" DoubleTapped="TreeDataGrid_DoubleTapped" KeyDown="MainTreeDataGrid_KeyDown">
+                <TreeDataGrid Name="MainTreeDataGrid" Grid.Row="1" ShowColumnHeaders="False"
+                              DoubleTapped="MainTreeDataGrid_DoubleTapped"
+                              KeyDown="MainTreeDataGrid_KeyDown" >
                     <TreeDataGrid.Styles>
                         <Style Selector="TreeDataGridRow TreeDataGridExpanderCell" x:DataType="l:MainViewModel+TreeDataGridItem">
                             <Setter Property="(Interaction.Behaviors)">

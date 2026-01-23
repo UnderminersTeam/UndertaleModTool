@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Primitives;
@@ -9,6 +10,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml.MarkupExtensions;
+using Avalonia.VisualTree;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 
@@ -81,6 +83,8 @@ public partial class MainView : UserControl, IView
                 vm.OnLoaded();
             }
         };
+
+        MainTreeDataGrid.AddHandler(TreeDataGrid.PointerReleasedEvent, MainTreeDataGrid_PointerReleased_HandledEventsToo, handledEventsToo: true);
     }
 
     private void FilterTextBox_TextChanged(object? sender, TextChangedEventArgs e)
@@ -107,7 +111,7 @@ public partial class MainView : UserControl, IView
         return null;
     }
 
-    private void OpenItemFromTreeDataGridControl(object? source)
+    private void OpenItemFromTreeDataGridControl(object? source, bool inNewTab = false)
     {
         if (DataContext is MainViewModel vm)
         {
@@ -120,7 +124,7 @@ public partial class MainView : UserControl, IView
                     {
                         hierarchicalRow.IsExpanded = !hierarchicalRow.IsExpanded;
                     }
-                    vm.TabOpen(item.Value);
+                    vm.TabOpen(item.Value, inNewTab);
                 }
             }
         }
@@ -180,7 +184,7 @@ public partial class MainView : UserControl, IView
         return null;
     }
 
-    private void TreeDataGrid_DoubleTapped(object? sender, TappedEventArgs e)
+    private void MainTreeDataGrid_DoubleTapped(object? sender, TappedEventArgs e)
     {
         OpenItemFromTreeDataGridControl(e.Source);
     }
@@ -190,6 +194,15 @@ public partial class MainView : UserControl, IView
         if (e.PhysicalKey == PhysicalKey.Enter)
         {
             OpenItemFromTreeDataGridControl(e.Source);
+        }
+    }
+
+    private void MainTreeDataGrid_PointerReleased_HandledEventsToo(object? sender, PointerReleasedEventArgs e)
+    {
+        if (e.InitialPressMouseButton == MouseButton.Middle
+            && ((e.Source as Visual)?.GetTransformedBounds()?.Contains(e.GetPosition(null)) ?? false))
+        {
+            OpenItemFromTreeDataGridControl(e.Source, inNewTab: true);
         }
     }
 

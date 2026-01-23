@@ -4,6 +4,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
+using Avalonia.VisualTree;
 using Avalonia.Xaml.Interactions.DragAndDrop;
 using UndertaleModLib.Models;
 
@@ -40,6 +41,15 @@ public partial class UndertaleStringReferenceView : UserControl
         if (sender is TextBox textBox && e.Key == Key.Enter)
         {
             UpdateString(textBox);
+        }
+    }
+
+    private void TextBox_PointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        if (e.InitialPressMouseButton == MouseButton.Middle
+            && ((e.Source as Visual)?.GetTransformedBounds()?.Contains(e.GetPosition(null)) ?? false))
+        {
+            OpenInNewTab();
         }
     }
 

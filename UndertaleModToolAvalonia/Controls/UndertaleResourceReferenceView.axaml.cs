@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.LogicalTree;
+using Avalonia.VisualTree;
 using Avalonia.Xaml.Interactions.DragAndDrop;
 using UndertaleModLib;
 
@@ -38,6 +39,15 @@ public partial class UndertaleResourceReferenceView : UserControl
         if (change.Property == ReferenceTypeProperty)
         {
             this.Find<TextBox>("TextBox")!.Watermark = "(" + ReferenceType.Name + " reference)";
+        }
+    }
+
+    private void TextBox_PointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        if (e.InitialPressMouseButton == MouseButton.Middle
+            && ((e.Source as Visual)?.GetTransformedBounds()?.Contains(e.GetPosition(null)) ?? false))
+        {
+            OpenInNewTab();
         }
     }
 
