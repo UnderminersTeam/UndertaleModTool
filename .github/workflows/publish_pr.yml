@@ -87,6 +87,7 @@ jobs:
         cp ./SCRIPTS.md ./${{ matrix.os }}
         cp ./LICENSE.txt ./CLI-${{ matrix.os }}/
         cp -r ./UndertaleModTool/Scripts/ ./CLI-${{ matrix.os }}/Scripts/
+        rm ./CLI-${{ matrix.os }}/Underanalyzer.pdb
     - name: Upload ${{ matrix.os }} CLI
       uses: actions/upload-artifact@v6
       with:
