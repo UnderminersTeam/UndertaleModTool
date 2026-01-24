@@ -378,7 +378,16 @@ public partial class Program : IScriptInterface
         if (options.Scripts != null)
         {
             foreach (FileInfo script in options.Scripts)
+            {
                 program.RunCSharpFile(script.FullName);
+
+                // If script execution failed, stop and return failure
+                if (!program.ScriptExecutionSuccess)
+                {
+                    Console.Error.WriteLine($"Script execution failed: {script.FullName}");
+                    return EXIT_FAILURE;
+                }
+            }
         }
 
         // if line to execute was given, execute it
@@ -386,6 +395,13 @@ public partial class Program : IScriptInterface
         {
             program.ScriptPath = null;
             program.RunCSharpCode(options.Line);
+
+            // If script execution failed, stop and return failure
+            if (!program.ScriptExecutionSuccess)
+            {
+                Console.Error.WriteLine("Script execution failed");
+                return EXIT_FAILURE;
+            }
         }
 
         // if parameter to save file was given, save the data file
@@ -963,6 +979,16 @@ public partial class Program : IScriptInterface
             CSharpScript.EvaluateAsync(code, CliScriptOptions.WithFilePath(scriptFile ?? "").WithFileEncoding(Encoding.UTF8), this, typeof(IScriptInterface)).GetAwaiter().GetResult();
             ScriptExecutionSuccess = true;
             ScriptErrorMessage = "";
+        }
+        catch (ScriptException exc) // Treat this as a successful exit, not an error
+        {
+            ScriptExecutionSuccess = true;
+            ScriptErrorMessage = "";
+
+            if (FinishedMessageEnabled)
+                Console.WriteLine(exc.Message);
+
+            return;
         }
         catch (Exception exc)
         {
