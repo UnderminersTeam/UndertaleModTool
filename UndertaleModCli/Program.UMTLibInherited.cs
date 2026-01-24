@@ -371,68 +371,103 @@ public partial class Program : IScriptInterface
         Selected = newSelection;
     }
 
+    /// <summary>
+    /// Prompts the user for a path with validation.
+    /// </summary>
+    /// <param name="promptMessage">Message to display when asking for input</param>
+    /// <param name="emptyErrorMessage">Error message when path is empty</param>
+    /// <param name="validate">Validation function that returns an error message, or null if valid</param>
+    /// <returns>The validated path, or null if console is unavailable</returns>
+    private static string PromptPath(string promptMessage, string emptyErrorMessage, Func<string, string> validate)
+    {
+        string path;
+        string validationError;
+        do
+        {
+            Console.WriteLine(promptMessage);
+            Console.Write("Path: ");
+
+            var input = ReadLineWithFallback();
+            if (input is null)
+                return null;
+
+            path = RemoveQuotes(input);
+
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                Console.WriteLine(emptyErrorMessage);
+                validationError = string.Empty;
+                continue;
+            }
+
+            validationError = validate(path);
+
+            if (validationError != null)
+                Console.WriteLine(validationError);
+        }
+        while (validationError != null);
+
+        return path;
+    }
+
     /// <inheritdoc/>
     public string PromptChooseDirectory()
     {
-        string path;
-        DirectoryInfo directoryInfo;
-        do
-        {
-            Console.WriteLine("Please enter a path (or drag and drop) to a valid directory:");
-            Console.Write("Path: ");
-            path = RemoveQuotes(Console.ReadLine());
-            if (string.IsNullOrEmpty(path))
+        return PromptPath(
+            "Please enter a path (or drag and drop) to a valid directory:",
+            "Error: Path cannot be empty. Please enter a valid directory path.",
+            path =>
             {
-                return null;
-            }
-            directoryInfo = new DirectoryInfo(path);
-        }
-        while (!directoryInfo.Exists);
-
-        return path;
+                try
+                {
+                    var directoryInfo = new DirectoryInfo(path);
+                    return directoryInfo.Exists ? null : $"Error: Directory '{path}' does not exist. Please try again.";
+                }
+                catch (Exception ex) when (ex is ArgumentException or PathTooLongException or System.Security.SecurityException)
+                {
+                    return $"Error: Invalid path '{path}'. {ex.Message}";
+                }
+            });
     }
 
     /// <inheritdoc/>
     public string PromptLoadFile(string defaultExt, string filter)
     {
-        string path;
-        FileInfo fileInfo;
-        do
-        {
-            Console.WriteLine("Please enter a path (or drag and drop) to a valid file:");
-            Console.Write("Path: ");
-            path = RemoveQuotes(Console.ReadLine());
-            if (string.IsNullOrEmpty(path))
+        return PromptPath(
+            "Please enter a path (or drag and drop) to a valid file:",
+            "Error: Path cannot be empty. Please enter a valid file path.",
+            path =>
             {
-                return null;
-            }
-            fileInfo = new FileInfo(path);
-        }
-        while (!fileInfo.Exists);
-
-        return path;
+                try
+                {
+                    var fileInfo = new FileInfo(path);
+                    return fileInfo.Exists ? null : $"Error: File '{path}' does not exist. Please try again.";
+                }
+                catch (Exception ex) when (ex is ArgumentException or PathTooLongException or System.Security.SecurityException or NotSupportedException)
+                {
+                    return $"Error: Invalid path '{path}'. {ex.Message}";
+                }
+            });
     }
 
     /// <inheritdoc/>
     public string PromptSaveFile(string defaultExt, string filter)
     {
-        string path;
-        do
-        {
-            Console.WriteLine("Please enter a path (or drag and drop) to save the file:");
-            Console.Write("Path: ");
-            path = RemoveQuotes(Console.ReadLine());
-
-            if (Directory.Exists(path))
+        return PromptPath(
+            "Please enter a path (or drag and drop) to save the file:",
+            "Error: Path cannot be empty. Please enter a valid file path.",
+            path =>
             {
-                Console.WriteLine("Error: Directory exists at that path.");
-                path = null; // Ensuring that the loop will work correctly
-                continue;
-            }
-        } 
-        while (string.IsNullOrWhiteSpace(path));
-
-        return path;
+                try
+                {
+                    string fullPath = Path.GetFullPath(path);
+                    return Directory.Exists(fullPath) ? "Error: Directory exists at that path." : null;
+                }
+                catch (Exception ex) when (ex is ArgumentException or PathTooLongException or System.Security.SecurityException or NotSupportedException)
+                {
+                    return $"Error: Invalid path '{path}'. {ex.Message}";
+                }
+            });
     }
 
     /// <inheritdoc/>
