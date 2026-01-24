@@ -82,6 +82,11 @@ public partial class Program : IScriptInterface
     private bool FinishedMessageEnabled { get; set; }
 
     /// <summary>
+    /// Indicates if the script was cancelled by user action (via ScriptException).
+    /// </summary>
+    private bool ScriptCancelled { get; set; }
+
+    /// <summary>
     /// Buffer for piped input, allowing seamless transition to interactive input when exhausted.
     /// </summary>
     private static Queue<string> _pipedInputBuffer;
@@ -367,14 +372,14 @@ public partial class Program : IScriptInterface
             return EXIT_FAILURE;
         }
 
-        // if interactive is enabled, launch the menu instead
+        // If interactive is enabled, launch the menu instead
         if (options.Interactive)
         {
             program.RunInteractiveMenu();
             return EXIT_SUCCESS;
         }
 
-        // if we have any scripts to run, run every one of them
+        // If we have any scripts to run, run every one of them
         if (options.Scripts != null)
         {
             foreach (FileInfo script in options.Scripts)
@@ -390,7 +395,7 @@ public partial class Program : IScriptInterface
             }
         }
 
-        // if line to execute was given, execute it
+        // If line to execute was given, execute it
         if (options.Line != null)
         {
             program.ScriptPath = null;
@@ -404,7 +409,11 @@ public partial class Program : IScriptInterface
             }
         }
 
-        // if parameter to save file was given, save the data file
+        // If script was cancelled by user, exit successfully without saving
+        if (program.ScriptCancelled)
+            return EXIT_SUCCESS;
+
+        // If parameter to save file was given, save the data file
         if (options.Output != null)
             program.SaveDataFile(options.Output.FullName);
 
@@ -567,7 +576,7 @@ public partial class Program : IScriptInterface
             }
         }
 
-        // if parameter to save file was given, save the data file
+        // If parameter to save file was given, save the data file
         if (options.Output != null)
             program.SaveDataFile(options.Output.FullName);
 
@@ -599,18 +608,18 @@ public partial class Program : IScriptInterface
                 // 1 - run script
                 case ConsoleKey.NumPad1:
                 case ConsoleKey.D1:
-                {
-                    Console.Write("File path (you can drag and drop)? ");
-                    string path = RemoveQuotes(Console.ReadLine());
-                    Console.WriteLine("Trying to run script {0}", path);
-                    try
                     {
-                        RunCSharpFile(path);
-                    }
-                    catch (Exception)
-                    {
-                        // ignored
-                    }
+                        Console.Write("File path (you can drag and drop)? ");
+                        string path = RemoveQuotes(Console.ReadLine());
+                        Console.WriteLine("Trying to run script {0}", path);
+                        try
+                        {
+                            RunCSharpFile(path);
+                        }
+                        catch (Exception)
+                        {
+                            // ignored
+                        }
 
                         break;
                     }
@@ -618,13 +627,13 @@ public partial class Program : IScriptInterface
                 // 2 - run c# string
                 case ConsoleKey.NumPad2:
                 case ConsoleKey.D2:
-                {
-                    Console.Write("C# code line? ");
-                    string line = Console.ReadLine();
-                    ScriptPath = null;
-                    RunCSharpCode(line);
-                    break;
-                }
+                    {
+                        Console.Write("C# code line? ");
+                        string line = Console.ReadLine();
+                        ScriptPath = null;
+                        RunCSharpCode(line);
+                        break;
+                    }
 
                 // Save and overwrite data file
                 case ConsoleKey.NumPad3:
@@ -637,12 +646,12 @@ public partial class Program : IScriptInterface
                 // Save data file to different path
                 case ConsoleKey.NumPad4:
                 case ConsoleKey.D4:
-                {
-                    Console.Write("Where to save? ");
-                    string path = RemoveQuotes(Console.ReadLine());
-                    SaveDataFile(path);
-                    break;
-                }
+                    {
+                        Console.Write("Where to save? ");
+                        string path = RemoveQuotes(Console.ReadLine());
+                        SaveDataFile(path);
+                        break;
+                    }
 
                 // Print out Quick Info
                 case ConsoleKey.NumPad5:
@@ -655,21 +664,21 @@ public partial class Program : IScriptInterface
                 // Quit
                 case ConsoleKey.NumPad6:
                 case ConsoleKey.D6:
-                {
-                    Console.WriteLine("Are you SURE? You can press 'n' and save before the changes are gone forever!!!");
-                    Console.WriteLine("(Y/N)? ");
-                    bool isInputYes = Console.ReadKey(false).Key == ConsoleKey.Y;
-                    Console.WriteLine();
-                    if (isInputYes) return;
+                    {
+                        Console.WriteLine("Are you SURE? You can press 'n' and save before the changes are gone forever!!!");
+                        Console.WriteLine("(Y/N)? ");
+                        bool isInputYes = Console.ReadKey(false).Key == ConsoleKey.Y;
+                        Console.WriteLine();
+                        if (isInputYes) return;
 
-                    break;
-                }
+                        break;
+                    }
 
                 default:
-                {
-                    Console.WriteLine("Unknown input. Try using the upper line of digits on your keyboard.");
-                    break;
-                }
+                    {
+                        Console.WriteLine("Unknown input. Try using the upper line of digits on your keyboard.");
+                        break;
+                    }
             }
         }
     }
@@ -980,9 +989,10 @@ public partial class Program : IScriptInterface
             ScriptExecutionSuccess = true;
             ScriptErrorMessage = "";
         }
-        catch (ScriptException exc) // Treat this as a successful exit, not an error
+        catch (ScriptException exc) // Script was cancelled by user
         {
             ScriptExecutionSuccess = true;
+            ScriptCancelled = true;
             ScriptErrorMessage = "";
 
             if (FinishedMessageEnabled)
