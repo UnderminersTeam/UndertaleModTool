@@ -102,10 +102,22 @@ public partial class Program : IScriptInterface
     /// <inheritdoc/>
     public bool ScriptQuestion(string message)
     {
-        Console.Write($"{message} (Y/N) ");
-        bool isInputYes = Console.ReadKey(false).Key == ConsoleKey.Y;
-        Console.WriteLine();
-        return isInputYes;
+        while (true)
+        {
+            Console.Write($"{message} (Y/N): ");
+            var input = ReadLineWithFallback()?.Trim().ToLower();
+
+            if (string.IsNullOrEmpty(input))
+                Console.WriteLine("Please enter Y or N.");
+
+            if (input == "y" || input == "yes")
+                return true;
+
+            if (input == "n" || input == "no")
+                return false;
+
+            Console.WriteLine("Invalid input. Please enter Y or N.");
+        }
     }
 
     /// <inheritdoc/>

@@ -81,6 +81,21 @@ public partial class Program : IScriptInterface
     /// </summary>
     private bool FinishedMessageEnabled { get; set; }
 
+    /// <summary>
+    /// Buffer for piped input, allowing seamless transition to interactive input when exhausted.
+    /// </summary>
+    private static Queue<string> _pipedInputBuffer;
+
+    /// <summary>
+    /// Reader for direct console input when piped input is exhausted.
+    /// </summary>
+    private static StreamReader _consoleReader;
+
+    /// <summary>
+    /// Paths to try for direct console input (Windows and Unix).
+    /// </summary>
+    private static readonly string[] ConsoleInputPaths = { "CONIN$", "/dev/tty" };
+
     #endregion
 
     /// <summary>
@@ -90,6 +105,18 @@ public partial class Program : IScriptInterface
     /// <returns>Result code of the program.</returns>
     public static int Main(string[] args)
     {
+        // Pre-buffer any piped input so we can track when to switch to interactive mode
+        if (Console.IsInputRedirected)
+        {
+            _pipedInputBuffer = new Queue<string>();
+            string line;
+            while ((line = Console.ReadLine()) != null)
+            {
+                _pipedInputBuffer.Enqueue(line);
+            }
+        }
+
+
         Option<bool> verboseOption = new("-v", "--verbose") { Description = "Detailed logs" };
 
         Argument<FileInfo> dataFileArgument = new("datafile")
@@ -1023,6 +1050,35 @@ public partial class Program : IScriptInterface
 
     {
         return s.Trim('"', '\'');
+    /// <summary>
+    /// Reads a line from console, with fallback to interactive input when piped input is exhausted.
+    /// </summary>
+    /// <returns>The line read from console, or null if no input is available</returns>
+    private static string ReadLineWithFallback()
+    {
+        if (_pipedInputBuffer != null && _pipedInputBuffer.Count > 0)
+        {
+            string input = _pipedInputBuffer.Dequeue();
+            Console.WriteLine(input); // echo piped input to console
+            return input;
+        }
+
+        if (_consoleReader == null)
+        {
+            foreach (var path in ConsoleInputPaths)
+            {
+                try
+                {
+                    var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                    _consoleReader = new StreamReader(fileStream, Console.InputEncoding);
+                    break;
+                }
+                catch
+                { }
+            }
+        }
+
+        return _consoleReader?.ReadLine() ?? Console.ReadLine();
     }
 
     /// <summary>
