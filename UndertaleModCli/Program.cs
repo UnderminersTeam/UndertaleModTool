@@ -596,8 +596,8 @@ public partial class Program : IScriptInterface
                         // ignored
                     }
 
-                    break;
-                }
+                        break;
+                    }
 
                 // 2 - run c# string
                 case ConsoleKey.NumPad2:
@@ -613,10 +613,10 @@ public partial class Program : IScriptInterface
                 // Save and overwrite data file
                 case ConsoleKey.NumPad3:
                 case ConsoleKey.D3:
-                {
-                    SaveDataFile(FilePath);
-                    break;
-                }
+                    {
+                        SaveDataFile(FilePath);
+                        break;
+                    }
 
                 // Save data file to different path
                 case ConsoleKey.NumPad4:
@@ -631,10 +631,10 @@ public partial class Program : IScriptInterface
                 // Print out Quick Info
                 case ConsoleKey.NumPad5:
                 case ConsoleKey.D5:
-                {
-                    CliQuickInfo();
-                    break;
-                }
+                    {
+                        CliQuickInfo();
+                        break;
+                    }
 
                 // Quit
                 case ConsoleKey.NumPad6:
@@ -993,7 +993,7 @@ public partial class Program : IScriptInterface
     {
         if (Verbose)
             Console.WriteLine($"Saving new data file to '{outputPath}'");
-        try 
+        try
         {
             // Save data.win to temp file
             using (FileStream fs = new(outputPath + "temp", FileMode.Create, FileAccess.Write))
@@ -1008,7 +1008,7 @@ public partial class Program : IScriptInterface
             if (Verbose)
                 Console.WriteLine($"Saved data file to '{outputPath}'");
         }
-        catch (Exception e) 
+        catch (Exception e)
         {
             // Delete the temporary file in case we partially wrote it
             if (File.Exists(outputPath + "temp"))
@@ -1049,7 +1049,9 @@ public partial class Program : IScriptInterface
     private static string RemoveQuotes(string s)
 
     {
-        return s.Trim('"', '\'');
+        return s?.Trim('"', '\'');
+    }
+
     /// <summary>
     /// Reads a line from console, with fallback to interactive input when piped input is exhausted.
     /// </summary>
@@ -1110,7 +1112,7 @@ public partial class Program : IScriptInterface
     /// </summary>
     /// <param name="message">Not used.</param>
     private static void DummyHandler(string message)
-    {  }
+    { }
 
     //TODO: document these as well
     private void ProgressUpdater()

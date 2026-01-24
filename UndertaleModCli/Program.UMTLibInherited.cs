@@ -175,7 +175,7 @@ public partial class Program : IScriptInterface
         }
         else
         {
-            throw new InvalidOperationException("Unable to open the browser on this OS: " +  RuntimeInformation.OSDescription);
+            throw new InvalidOperationException("Unable to open the browser on this OS: " + RuntimeInformation.OSDescription);
         }
 
         p?.Dispose();
@@ -450,8 +450,8 @@ public partial class Program : IScriptInterface
         GlobalDecompileContext decompileContext = context is null ? new(Data) : context;
         try
         {
-            return code != null 
-                ? new DecompileContext(decompileContext, code, settings ?? Data.ToolInfo.DecompilerSettings).DecompileToString() 
+            return code != null
+                ? new DecompileContext(decompileContext, code, settings ?? Data.ToolInfo.DecompilerSettings).DecompileToString()
                 : "";
         }
         catch (Exception e)
@@ -532,7 +532,7 @@ public partial class Program : IScriptInterface
                     else if ((keyInfo.Key == ConsoleKey.Backspace) && (result.Length > 0))
                     {
                         Console.Write(' ');
-                        Console.SetCursorPosition(Console.CursorLeft-1, Console.CursorTop);
+                        Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
                         result = result.Remove(result.Length - 1);
                     }
                     else
