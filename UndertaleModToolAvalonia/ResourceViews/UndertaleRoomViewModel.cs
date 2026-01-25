@@ -17,6 +17,11 @@ namespace UndertaleModToolAvalonia;
 
 public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
 {
+    public const uint TILE_ID =     0b00000000000001111111111111111111;
+    public const uint TILE_FLIP_H = 0b00010000000000000000000000000000;
+    public const uint TILE_FLIP_V = 0b00100000000000000000000000000000;
+    public const uint TILE_ROTATE = 0b01000000000000000000000000000000;
+
     public MainViewModel MainVM;
     public UndertaleResource Resource => Room;
     public UndertaleRoom Room { get; set; }
@@ -344,6 +349,28 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
 
             layer.TilesData.TilesX = (uint)Math.Ceiling((double)Room.Width / layer.TilesData.Background.GMS2TileWidth);
             layer.TilesData.TilesY = (uint)Math.Ceiling((double)Room.Height / layer.TilesData.Background.GMS2TileHeight);
+        }
+    }
+
+    public void SelectedTileDataFlipX()
+    {
+        SelectedTileData ^= ((SelectedTileData & TILE_ROTATE) == 0) ? TILE_FLIP_H : TILE_FLIP_V;
+    }
+
+    public void SelectedTileDataFlipY()
+    {
+        SelectedTileData ^= ((SelectedTileData & TILE_ROTATE) == 0) ? TILE_FLIP_V : TILE_FLIP_H;
+    }
+
+    public void SelectedTileDataRotateClockwise()
+    {
+        if ((SelectedTileData & TILE_ROTATE) != 0)
+        {
+            SelectedTileData ^= TILE_ROTATE | TILE_FLIP_H | TILE_FLIP_V;
+        }
+        else
+        {
+            SelectedTileData ^= TILE_ROTATE;
         }
     }
 

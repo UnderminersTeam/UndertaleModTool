@@ -229,7 +229,7 @@ public class UndertaleRoomTilePicker : Control
                 }
             }
 
-            uint selectedTileId = SelectedTileData & 0x0FFFFFFF;
+            uint selectedTileId = SelectedTileData & UndertaleRoomViewModel.TILE_ID;
             uint selectedTileX = (selectedTileId % VisualColumns) * tileW;
             uint selectedTileY = (selectedTileId / VisualColumns) * tileH;
 

@@ -7,7 +7,8 @@
              xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="UndertaleModToolAvalonia.UndertaleRoomView"
-             x:DataType="l:UndertaleRoomViewModel">
+             x:DataType="l:UndertaleRoomViewModel"
+             x:Name="Root">
     <UserControl.Resources>
         <ContextMenu x:Key="GameObjectListMenu">
             <MenuItem Header="_Add game object instance" Click="ContextMenu_AddGameObjectInstance_GameObjectList_Click"/>
@@ -525,25 +526,31 @@
                                                         <Grid ColumnDefinitions="1*,1*,1*">
                                                             <TextBox Grid.Column="0" Text="{Binding TilesX, UpdateSourceTrigger=LostFocus}" />
                                                             <TextBox Grid.Column="1" Text="{Binding TilesY, UpdateSourceTrigger=LostFocus}" />
-                                                            <Button Grid.Column="2" Command="{Binding $parent[UserControl].((l:UndertaleRoomViewModel)DataContext).AutoSizeTileLayer}">Auto</Button>
+                                                            <Button Grid.Column="2" Command="{Binding #Root.DataContext.AutoSizeTileLayer}">Auto</Button>
                                                         </Grid>
 
                                                         <Label>Tile set</Label>
                                                         <l:UndertaleResourceReferenceView Reference="{Binding Background}" ReferenceType="undertalem:UndertaleBackground" />
                                                     
-                                                        <!-- TODO: Edit/export/import tile data -->
+                                                        <!-- TODO: Export/import tile data -->
                                                         <Label>Selected tile data</Label>
-                                                        <TextBox Text="{Binding $parent[UserControl].((l:UndertaleRoomViewModel)DataContext).SelectedTileData}" />
+                                                        <TextBox Text="{Binding #Root.DataContext.SelectedTileData}" />
 
                                                         <Label>Tile set columns</Label>
                                                         <NumericUpDown
-                                                            Value="{Binding $parent[UserControl].((l:UndertaleRoomViewModel)DataContext).TileSetColumns}"
+                                                            Value="{Binding #Root.DataContext.TileSetColumns}"
                                                             Minimum="0" FormatString="0" />
                                                     </Grid>
 
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Button Command="{Binding #Root.DataContext.SelectedTileDataFlipX}">Flip X</Button>
+                                                        <Button Command="{Binding #Root.DataContext.SelectedTileDataFlipY}">Flip Y</Button>
+                                                        <Button Command="{Binding #Root.DataContext.SelectedTileDataRotateClockwise}">Rotate clockwise</Button>
+                                                    </StackPanel>
+
                                                     <l:UndertaleRoomTilePicker
-                                                        SelectedTileData="{Binding $parent[UserControl].((l:UndertaleRoomViewModel)DataContext).SelectedTileData}"
-                                                        TileSetColumns="{Binding $parent[UserControl].((l:UndertaleRoomViewModel)DataContext).TileSetColumns}"
+                                                        SelectedTileData="{Binding #Root.DataContext.SelectedTileData}"
+                                                        TileSetColumns="{Binding #Root.DataContext.TileSetColumns}"
                                                         MinHeight="{Binding $parent[ScrollViewer].Viewport.Height}" />
                                                 </StackPanel>
                                             </DataTemplate>

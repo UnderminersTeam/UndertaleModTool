@@ -119,7 +119,14 @@ public class UndertaleRoomEditor : Control
             hoveredTile = GetLayerTile(roomMousePosition, tilesLayer);
             if (settingTiles)
             {
-                SetLayerTile(roomMousePosition, tilesLayer, vm.SelectedTileData);
+                if (e.GetCurrentPoint(this).Properties.IsRightButtonPressed)
+                {
+                    SetLayerTile(roomMousePosition, tilesLayer, 0);
+                }
+                else
+                {
+                    SetLayerTile(roomMousePosition, tilesLayer, vm.SelectedTileData);
+                }
             }
         }
         else
@@ -182,6 +189,8 @@ public class UndertaleRoomEditor : Control
 
     protected override void OnPointerPressed(PointerPressedEventArgs e)
     {
+        Point roomMousePosition = (mousePosition - translation) / scaling;
+
         if (e.GetCurrentPoint(this).Properties.IsMiddleButtonPressed)
         {
             this.Focus();
@@ -189,8 +198,6 @@ public class UndertaleRoomEditor : Control
         }
         else if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
         {
-            Point roomMousePosition = (mousePosition - translation) / scaling;
-
             if (vm!.RoomItemsSelectedItem is UndertaleRoom.Layer { LayerType: UndertaleRoom.LayerType.Tiles } tilesLayer)
             {
                 settingTiles = true;
@@ -214,6 +221,14 @@ public class UndertaleRoomEditor : Control
                     else
                         vm!.RoomItemsSelectedItem = null;
                 }
+            }
+        }
+        else if (e.GetCurrentPoint(this).Properties.IsRightButtonPressed)
+        {
+            if (vm!.RoomItemsSelectedItem is UndertaleRoom.Layer { LayerType: UndertaleRoom.LayerType.Tiles } tilesLayer)
+            {
+                settingTiles = true;
+                SetLayerTile(roomMousePosition, tilesLayer, 0);
             }
         }
     }
@@ -288,7 +303,7 @@ public class UndertaleRoomEditor : Control
         {
             if (tile is uint tileNN)
             {
-                uint tileId = tileNN & 0x0FFFFFFF;
+                uint tileId = tileNN & UndertaleRoomViewModel.TILE_ID;
                 uint tileOrientation = tileNN >> 28;
 
                 float scaleX = (((tileOrientation >> 0) & 1) == 0) ? 1 : -1;
@@ -301,13 +316,13 @@ public class UndertaleRoomEditor : Control
         }
 
         context.DrawText(new FormattedText(
-            $"mouse: ({mousePosition.X}, {mousePosition.Y}), room: ({Math.Floor(roomMousePosition.X)}, {Math.Floor(roomMousePosition.Y)})\n" +
-            $"view: ({-translation.X}, {-translation.Y}, {-translation.X + Bounds.Width}, {-translation.Y + Bounds.Height}), zoom: {scaling}x\n" +
-            $"{vm?.Room.Name.Content} ({vm?.Room.Width}, {vm?.Room.Height})\n" +
+            $"mouse: ({mousePosition.X}, {mousePosition.Y})\n" +
+            $"view: ({-translation.X}, {-translation.Y}, {-translation.X + Bounds.Width}, {-translation.Y + Bounds.Height})\n" +
             $"category: {vm?.CategorySelected}\n" +
             $"custom render time: <{customDrawOperationTime} ms\n" +
             $"hovered room item: {hoveredRoomItem?.Object}\n" +
-            $"hovered tile: {GetTileInfo(hoveredTile)}",
+            $"hovered tile: {GetTileInfo(hoveredTile)}\n" +
+            $"selected tile: {GetTileInfo(vm?.SelectedTileData)}",
             CultureInfo.CurrentCulture, FlowDirection.LeftToRight, Typeface.Default, 12, new SolidColorBrush(Colors.White)),
             new Point(0, 0));
     }
@@ -953,7 +968,7 @@ public class UndertaleRoomEditor : Control
                 for (int x = 0; x < tileData[y].Length; x++)
                 {
                     uint tile = tileData[y][x];
-                    uint tileId = tile & 0x0FFFFFFF;
+                    uint tileId = tile & UndertaleRoomViewModel.TILE_ID;
 
                     if (tileId != 0)
                     {
