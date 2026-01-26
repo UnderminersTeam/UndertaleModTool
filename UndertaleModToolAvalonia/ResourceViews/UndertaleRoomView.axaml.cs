@@ -22,9 +22,9 @@ public partial class UndertaleRoomView : UserControl
             {
                 vm.PropertyChanged += (_, e) =>
                 {
-                    if (e.PropertyName == nameof(UndertaleRoomViewModel.RoomItemsSelectedItem))
+                    if (e.PropertyName == nameof(UndertaleRoomViewModel.RoomTreeItemsSelectedItem))
                     {
-                        var item = vm.RoomItemsSelectedItem;
+                        var item = vm.RoomTreeItemsSelectedItem;
                         if (item is not null)
                         {
                             TreeViewItem? treeViewItem = GetTreeViewItem(RoomItemsTreeView, item);

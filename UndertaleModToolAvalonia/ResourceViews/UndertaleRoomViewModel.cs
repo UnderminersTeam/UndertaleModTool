@@ -29,7 +29,7 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
     public ObservableCollection<RoomTreeItem> RoomTreeItems { get; set; } = [];
 
     [Notify]
-    private object? _RoomItemsSelectedItem;
+    private object? _RoomTreeItemsSelectedItem;
 
     [Notify]
     private object? _PropertiesContent;
@@ -416,9 +416,9 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
             throw new InvalidOperationException();
     }
 
-    private void OnRoomItemsSelectedItemChanged()
+    private void OnRoomTreeItemsSelectedItemChanged()
     {
-        PropertiesContent = RoomItemsSelectedItem switch
+        PropertiesContent = RoomTreeItemsSelectedItem switch
         {
             TreeViewItem { Name: "RoomTreeViewItem" } => Room,
             TreeViewItem => null,
@@ -432,7 +432,7 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
             _ => null,
         };
 
-        CategorySelected = FindCategoryOfItem(RoomItemsSelectedItem);
+        CategorySelected = FindCategoryOfItem(RoomTreeItemsSelectedItem);
     }
 
     public class RoomTreeItem(string header, string tag, IEnumerable itemsSource)

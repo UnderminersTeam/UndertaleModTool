@@ -85,7 +85,7 @@
             <Grid Grid.Row="0">
                 <Grid RowDefinitions="1*,Auto">
                     <!-- TreeView -->
-                    <TreeView Grid.Row="0" Name="RoomItemsTreeView" SelectedItem="{Binding RoomItemsSelectedItem}">
+                    <TreeView Grid.Row="0" Name="RoomItemsTreeView" SelectedItem="{Binding RoomTreeItemsSelectedItem}">
                         <TreeView.Styles>
                             <Style Selector="TreeViewItem /template/ StackPanel > Border#PART_LayoutRoot.TreeViewItemLayoutRoot">
                                 <Setter Property="ContextMenu" Value="{Binding ., Converter={StaticResource RoomItemToContextMenuConverter}}"/>
@@ -533,8 +533,6 @@
                                                         <l:UndertaleResourceReferenceView Reference="{Binding Background}" ReferenceType="undertalem:UndertaleBackground" />
                                                     
                                                         <!-- TODO: Export/import tile data -->
-                                                        <Label>Selected tile data</Label>
-                                                        <TextBox Text="{Binding #Root.DataContext.SelectedTileData}" />
 
                                                         <Label>Tile set columns</Label>
                                                         <NumericUpDown
