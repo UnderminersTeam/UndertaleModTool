@@ -35,11 +35,19 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
 
     private readonly List<string> codeLocalsCache = new();
 
+    private readonly NumberGenerator gmlNumberGenerator;
+    private readonly NameGenerator gmlNameGenerator;
+    private readonly NameGenerator asmNameGenerator;
+
     public (int, int) LastCaretOffsets;
 
     public UndertaleCodeView()
     {
         InitializeComponent();
+
+        gmlNumberGenerator = new(this);
+        gmlNameGenerator = new(this);
+        asmNameGenerator = new(this);
 
         DataContextChanged += (_, __) =>
         {
@@ -63,10 +71,14 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
                     UndertaleCodeView.ASMHighlightingDefinition ??= LoadHighlightingDefinition("ASM");
                     ASMTextEditor.SyntaxHighlighting = UndertaleCodeView.ASMHighlightingDefinition;
 
-                    GMLTextEditor.TextArea.TextView.ElementGenerators.Add(new NumberGenerator(this));
-                    GMLTextEditor.TextArea.TextView.ElementGenerators.Add(new NameGenerator(this));
+                    if (!GMLTextEditor.TextArea.TextView.ElementGenerators.Contains(gmlNumberGenerator))
+                        GMLTextEditor.TextArea.TextView.ElementGenerators.Add(gmlNumberGenerator);
 
-                    ASMTextEditor.TextArea.TextView.ElementGenerators.Add(new NameGenerator(this));
+                    if (!GMLTextEditor.TextArea.TextView.ElementGenerators.Contains(gmlNameGenerator))
+                        GMLTextEditor.TextArea.TextView.ElementGenerators.Add(gmlNameGenerator);
+
+                    if (!ASMTextEditor.TextArea.TextView.ElementGenerators.Contains(asmNameGenerator))
+                        ASMTextEditor.TextArea.TextView.ElementGenerators.Add(asmNameGenerator);
                 }
                 else
                 {
@@ -74,6 +86,10 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
                     ASMTextEditor.SyntaxHighlighting = null;
                     UndertaleCodeView.GMLHighlightingDefinition = null;
                     UndertaleCodeView.ASMHighlightingDefinition = null;
+
+                    GMLTextEditor.TextArea.TextView.ElementGenerators.Remove(gmlNumberGenerator);
+                    GMLTextEditor.TextArea.TextView.ElementGenerators.Remove(gmlNameGenerator);
+                    ASMTextEditor.TextArea.TextView.ElementGenerators.Remove(asmNameGenerator);
                 }
 
                 if (this.IsAttachedToVisualTree())
@@ -136,9 +152,16 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
         if (DataContext is not UndertaleCodeViewModel vm)
             return;
 
-        UndertaleData data = vm.MainVM.Data!;
-
         ScriptsCache.Clear();
+        FunctionsCache.Clear();
+        CodeCache.Clear();
+        NamedResourcesCache.Clear();
+        codeLocalsCache.Clear();
+
+        if (!vm.MainVM.Settings!.EnableSyntaxHighlighting)
+            return;
+
+        UndertaleData data = vm.MainVM.Data!;
 
         foreach (var script in data.Scripts)
         {
@@ -147,7 +170,6 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
             ScriptsCache[script.Name.Content] = script;
         }
 
-        FunctionsCache.Clear();
         foreach (var function in data.Functions)
         {
             if (function is null)
@@ -155,15 +177,12 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
             FunctionsCache[function.Name.Content] = function;
         }
 
-        CodeCache.Clear();
         foreach (var code in data.Code)
         {
             if (code is null)
                 continue;
             CodeCache[code.Name.Content] = code;
         }
-
-        NamedResourcesCache.Clear();
 
         // NOTE: Remember to add new types
         IEnumerable?[] objLists = [
@@ -194,8 +213,6 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
                     NamedResourcesCache[namedObj.Name.Content] = namedObj;
             }
         }
-
-        codeLocalsCache.Clear();
 
         UndertaleCodeLocals? locals = data.CodeLocals?.ByName(vm.Code.Name.Content);
         if (locals != null)
@@ -323,7 +340,6 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
         public NumberGenerator(UndertaleCodeView codeView)
         {
             this.codeView = codeView;
-
             contextMenu.Placement = PlacementMode.Pointer;
         }
 
