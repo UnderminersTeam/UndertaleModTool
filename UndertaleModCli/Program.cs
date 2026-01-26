@@ -7,6 +7,7 @@ using System.CommandLine;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -81,6 +82,21 @@ public partial class Program : IScriptInterface
     /// </summary>
     private bool FinishedMessageEnabled { get; set; }
 
+    /// <summary>
+    /// Indicates if the script was cancelled by user action (via ScriptException).
+    /// </summary>
+    private bool ScriptCancelled { get; set; }
+
+    /// <summary>
+    /// Buffer for piped input, allowing seamless transition to interactive input when exhausted.
+    /// </summary>
+    private static Queue<string> _pipedInputBuffer;
+
+    /// <summary>
+    /// Reader for direct console input when piped input is exhausted.
+    /// </summary>
+    private static StreamReader _consoleReader;
+
     #endregion
 
     /// <summary>
@@ -90,6 +106,18 @@ public partial class Program : IScriptInterface
     /// <returns>Result code of the program.</returns>
     public static int Main(string[] args)
     {
+        // Pre-buffer any piped input so we can track when to switch to interactive mode
+        if (Console.IsInputRedirected)
+        {
+            _pipedInputBuffer = new Queue<string>();
+            string line;
+            while ((line = Console.ReadLine()) != null)
+            {
+                _pipedInputBuffer.Enqueue(line);
+            }
+        }
+
+
         Option<bool> verboseOption = new("-v", "--verbose") { Description = "Detailed logs" };
 
         Argument<FileInfo> dataFileArgument = new("datafile")
@@ -340,28 +368,48 @@ public partial class Program : IScriptInterface
             return EXIT_FAILURE;
         }
 
-        // if interactive is enabled, launch the menu instead
+        // If interactive is enabled, launch the menu instead
         if (options.Interactive)
         {
             program.RunInteractiveMenu();
             return EXIT_SUCCESS;
         }
 
-        // if we have any scripts to run, run every one of them
+        // If we have any scripts to run, run every one of them
         if (options.Scripts != null)
         {
             foreach (FileInfo script in options.Scripts)
+            {
                 program.RunCSharpFile(script.FullName);
+
+                // If script execution failed, stop and return failure
+                if (!program.ScriptExecutionSuccess)
+                {
+                    Console.Error.WriteLine($"Script execution failed: {script.FullName}");
+                    return EXIT_FAILURE;
+                }
+            }
         }
 
-        // if line to execute was given, execute it
+        // If line to execute was given, execute it
         if (options.Line != null)
         {
             program.ScriptPath = null;
             program.RunCSharpCode(options.Line);
+
+            // If script execution failed, stop and return failure
+            if (!program.ScriptExecutionSuccess)
+            {
+                Console.Error.WriteLine("Script execution failed");
+                return EXIT_FAILURE;
+            }
         }
 
-        // if parameter to save file was given, save the data file
+        // If script was cancelled by user, exit successfully without saving
+        if (program.ScriptCancelled)
+            return EXIT_SUCCESS;
+
+        // If parameter to save file was given, save the data file
         if (options.Output != null)
             program.SaveDataFile(options.Output.FullName);
 
@@ -524,7 +572,7 @@ public partial class Program : IScriptInterface
             }
         }
 
-        // if parameter to save file was given, save the data file
+        // If parameter to save file was given, save the data file
         if (options.Output != null)
             program.SaveDataFile(options.Output.FullName);
 
@@ -556,77 +604,77 @@ public partial class Program : IScriptInterface
                 // 1 - run script
                 case ConsoleKey.NumPad1:
                 case ConsoleKey.D1:
-                {
-                    Console.Write("File path (you can drag and drop)? ");
-                    string path = RemoveQuotes(Console.ReadLine());
-                    Console.WriteLine("Trying to run script {0}", path);
-                    try
                     {
-                        RunCSharpFile(path);
-                    }
-                    catch (Exception)
-                    {
-                        // ignored
-                    }
+                        Console.Write("File path (you can drag and drop)? ");
+                        string path = RemoveQuotes(Console.ReadLine());
+                        Console.WriteLine("Trying to run script {0}", path);
+                        try
+                        {
+                            RunCSharpFile(path);
+                        }
+                        catch (Exception)
+                        {
+                            // ignored
+                        }
 
-                    break;
-                }
+                        break;
+                    }
 
                 // 2 - run c# string
                 case ConsoleKey.NumPad2:
                 case ConsoleKey.D2:
-                {
-                    Console.Write("C# code line? ");
-                    string line = Console.ReadLine();
-                    ScriptPath = null;
-                    RunCSharpCode(line);
-                    break;
-                }
+                    {
+                        Console.Write("C# code line? ");
+                        string line = Console.ReadLine();
+                        ScriptPath = null;
+                        RunCSharpCode(line);
+                        break;
+                    }
 
                 // Save and overwrite data file
                 case ConsoleKey.NumPad3:
                 case ConsoleKey.D3:
-                {
-                    SaveDataFile(FilePath);
-                    break;
-                }
+                    {
+                        SaveDataFile(FilePath);
+                        break;
+                    }
 
                 // Save data file to different path
                 case ConsoleKey.NumPad4:
                 case ConsoleKey.D4:
-                {
-                    Console.Write("Where to save? ");
-                    string path = RemoveQuotes(Console.ReadLine());
-                    SaveDataFile(path);
-                    break;
-                }
+                    {
+                        Console.Write("Where to save? ");
+                        string path = RemoveQuotes(Console.ReadLine());
+                        SaveDataFile(path);
+                        break;
+                    }
 
                 // Print out Quick Info
                 case ConsoleKey.NumPad5:
                 case ConsoleKey.D5:
-                {
-                    CliQuickInfo();
-                    break;
-                }
+                    {
+                        CliQuickInfo();
+                        break;
+                    }
 
                 // Quit
                 case ConsoleKey.NumPad6:
                 case ConsoleKey.D6:
-                {
-                    Console.WriteLine("Are you SURE? You can press 'n' and save before the changes are gone forever!!!");
-                    Console.WriteLine("(Y/N)? ");
-                    bool isInputYes = Console.ReadKey(false).Key == ConsoleKey.Y;
-                    Console.WriteLine();
-                    if (isInputYes) return;
+                    {
+                        Console.WriteLine("Are you SURE? You can press 'n' and save before the changes are gone forever!!!");
+                        Console.WriteLine("(Y/N)? ");
+                        bool isInputYes = Console.ReadKey(false).Key == ConsoleKey.Y;
+                        Console.WriteLine();
+                        if (isInputYes) return;
 
-                    break;
-                }
+                        break;
+                    }
 
                 default:
-                {
-                    Console.WriteLine("Unknown input. Try using the upper line of digits on your keyboard.");
-                    break;
-                }
+                    {
+                        Console.WriteLine("Unknown input. Try using the upper line of digits on your keyboard.");
+                        break;
+                    }
             }
         }
     }
@@ -937,6 +985,17 @@ public partial class Program : IScriptInterface
             ScriptExecutionSuccess = true;
             ScriptErrorMessage = "";
         }
+        catch (ScriptException exc) // Script was cancelled by user
+        {
+            ScriptExecutionSuccess = true;
+            ScriptCancelled = true;
+            ScriptErrorMessage = "";
+
+            if (FinishedMessageEnabled)
+                Console.WriteLine(exc.Message);
+
+            return;
+        }
         catch (Exception exc)
         {
             ScriptExecutionSuccess = false;
@@ -966,7 +1025,7 @@ public partial class Program : IScriptInterface
     {
         if (Verbose)
             Console.WriteLine($"Saving new data file to '{outputPath}'");
-        try 
+        try
         {
             // Save data.win to temp file
             using (FileStream fs = new(outputPath + "temp", FileMode.Create, FileAccess.Write))
@@ -981,7 +1040,7 @@ public partial class Program : IScriptInterface
             if (Verbose)
                 Console.WriteLine($"Saved data file to '{outputPath}'");
         }
-        catch (Exception e) 
+        catch (Exception e)
         {
             // Delete the temporary file in case we partially wrote it
             if (File.Exists(outputPath + "temp"))
@@ -1022,7 +1081,41 @@ public partial class Program : IScriptInterface
     private static string RemoveQuotes(string s)
 
     {
-        return s.Trim('"', '\'');
+        return s?.Trim('"', '\'');
+    }
+
+    /// <summary>
+    /// Reads a line from console, with fallback to interactive input when piped input is exhausted.
+    /// </summary>
+    /// <returns>The line read from console, or null if no input is available</returns>
+    private static string ReadLineWithFallback()
+    {
+        if (_pipedInputBuffer != null && _pipedInputBuffer.Count > 0)
+        {
+            string input = _pipedInputBuffer.Dequeue();
+            Console.WriteLine(input); // echo piped input to console
+            return input;
+        }
+
+        if (_consoleReader == null)
+        {
+            try
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    var fileStream = new FileStream("/dev/tty", FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                    _consoleReader = new StreamReader(fileStream, Console.InputEncoding);
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    var fileStream = new FileStream("CONIN$", FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                    _consoleReader = new StreamReader(fileStream, Console.InputEncoding);
+                }
+            }
+            catch { }
+        }
+
+        return _consoleReader?.ReadLine() ?? Console.ReadLine();
     }
 
     /// <summary>
@@ -1054,7 +1147,7 @@ public partial class Program : IScriptInterface
     /// </summary>
     /// <param name="message">Not used.</param>
     private static void DummyHandler(string message)
-    {  }
+    { }
 
     //TODO: document these as well
     private void ProgressUpdater()
