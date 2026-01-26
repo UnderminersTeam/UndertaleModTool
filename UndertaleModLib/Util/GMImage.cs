@@ -969,6 +969,14 @@ public class GMImage
     }
 
     /// <summary>
+    /// Returns the image data in the current format.
+    /// </summary>
+    public byte[] GetData()
+    {
+        return _data;
+    }
+
+    /// <summary>
     /// Writes this image, in its current format (as seen on disk), to the current position of the specified <see cref="BinaryWriter"/>.
     /// </summary>
     /// <remarks>The gm2022_5 parameter is only relevant for images of BZ2 + QOI format.</remarks>

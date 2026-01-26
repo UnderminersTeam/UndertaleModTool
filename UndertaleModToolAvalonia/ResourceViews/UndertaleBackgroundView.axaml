@@ -1,0 +1,106 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
+             xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.UndertaleBackgroundView"
+             x:DataType="l:UndertaleBackgroundViewModel">
+    <UserControl.Resources>
+        <l:VersionCompareConverter x:Key="VersionCompareConverter" />
+    </UserControl.Resources>
+
+    <ScrollViewer>
+        <StackPanel>
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
+                <Label>Name</Label>
+                <l:UndertaleStringReferenceView Reference="{Binding Background.Name}" />
+
+                <Label>Transparent</Label>
+                <CheckBox IsChecked="{Binding Background.Transparent}" />
+
+                <Label>Smooth</Label>
+                <CheckBox IsChecked="{Binding Background.Smooth}" />
+        
+                <Label>Preload</Label>
+                <CheckBox IsChecked="{Binding Background.Preload}" />
+
+                <Label>Texture</Label>
+                <l:UndertaleResourceReferenceView Reference="{Binding Background.Texture}" ReferenceType="undertalem:UndertaleTexturePageItem" />
+            </Grid>
+
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties"
+                  IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
+                  Converter={StaticResource VersionCompareConverter},
+                  ConverterParameter=GE2}">
+
+                <Label>Unknown Always 2</Label>
+                <TextBox Text="{Binding Background.GMS2UnknownAlways2}" />
+
+                <Label>Tile Width</Label>
+                <TextBox Text="{Binding Background.GMS2TileWidth}" />
+
+                <Label>Tile Height</Label>
+                <TextBox Text="{Binding Background.GMS2TileHeight}" />
+            </Grid>
+
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties"
+                  IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
+                  Converter={StaticResource VersionCompareConverter},
+                  ConverterParameter=GE2024.14.1}">
+                <Label>Tile Separation X</Label>
+                <TextBox Text="{Binding Background.GMS2TileSeparationX}" />
+
+                <Label>Tile Separation Y</Label>
+                <TextBox Text="{Binding Background.GMS2TileSeparationY}" />
+            </Grid>
+
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties"
+                  IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
+                  Converter={StaticResource VersionCompareConverter},
+                  ConverterParameter=GE2}">
+                <Label>Output Border X</Label>
+                <TextBox Text="{Binding Background.GMS2OutputBorderX}" />
+
+                <Label>Output Border Y</Label>
+                <TextBox Text="{Binding Background.GMS2OutputBorderY}" />
+
+                <Label>Tile Columns</Label>
+                <TextBox Text="{Binding Background.GMS2TileColumns}" />
+
+                <Label>Items/frames per tile</Label>
+                <TextBox Text="{Binding Background.GMS2ItemsPerTileCount}" />
+
+                <Label>Tile Count</Label>
+                <TextBox Text="{Binding Background.GMS2TileCount}" />
+
+                <Label>Exported Sprite Index</Label>
+                <TextBox Text="{Binding Background.GMS2ExportedSpriteIndex}" />
+
+                <Label>Frame Time (microseconds)</Label>
+                <TextBox Text="{Binding Background.GMS2FrameLength}" />
+
+                <Label>Tile IDs</Label>
+                <Expander Header="List">
+                    <l:EditableDataGrid ItemsSource="{Binding Background.GMS2TileIds}" ItemFactory="{Binding CreateTileID}" HeadersVisibility="None">
+                        <l:EditableDataGrid.Columns>
+                            <DataGridTemplateColumn Header="Tile ID" Width="1*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="undertalem:UndertaleBackground+TileID">
+                                        <TextBox Text="{Binding ID}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </l:EditableDataGrid.Columns>
+                    </l:EditableDataGrid>
+                </Expander>
+            </Grid>
+        
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
+                            MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
+                <l:SKImageViewer Image="{Binding Background.Texture}" />
+            </ScrollViewer>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
