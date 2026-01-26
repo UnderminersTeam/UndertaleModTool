@@ -7,6 +7,7 @@ using System.CommandLine;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -95,11 +96,6 @@ public partial class Program : IScriptInterface
     /// Reader for direct console input when piped input is exhausted.
     /// </summary>
     private static StreamReader _consoleReader;
-
-    /// <summary>
-    /// Paths to try for direct console input (Windows and Unix).
-    /// </summary>
-    private static readonly string[] ConsoleInputPaths = { "CONIN$", "/dev/tty" };
 
     #endregion
 
@@ -1103,17 +1099,20 @@ public partial class Program : IScriptInterface
 
         if (_consoleReader == null)
         {
-            foreach (var path in ConsoleInputPaths)
+            try
             {
-                try
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                    var fileStream = new FileStream("/dev/tty", FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                     _consoleReader = new StreamReader(fileStream, Console.InputEncoding);
-                    break;
                 }
-                catch
-                { }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    var fileStream = new FileStream("CONIN$", FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                    _consoleReader = new StreamReader(fileStream, Console.InputEncoding);
+                }
             }
+            catch { }
         }
 
         return _consoleReader?.ReadLine() ?? Console.ReadLine();
