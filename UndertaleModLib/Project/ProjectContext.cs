@@ -111,6 +111,8 @@ public sealed partial class ProjectContext
     // Relevant project paths
     private readonly string _mainFilePath;
     private readonly string _mainDirectory;
+    public string MainFilePath { get => _mainFilePath; }
+    public string MainDirectory { get => _mainDirectory; }
 
     // Main options of the project
     private ProjectMainOptions _mainOptions = null;
