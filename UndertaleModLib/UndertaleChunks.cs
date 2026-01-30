@@ -182,14 +182,27 @@ namespace UndertaleModLib
             // Read object counts for all chunks
             while (reader.Position < startPos + Length)
             {
-                (uint count, UndertaleChunk chunk) = reader.CountChunkChildObjects();
-                totalCount += count;
-
-                // Don't register a new chunk for GEN8 specifically
-                if (chunk.Name != "GEN8")
+                long prevPosition = reader.Position;
+                try
                 {
-                    Chunks.Add(chunk.Name, chunk);
-                    ChunksTypeDict.Add(chunk.GetType(), chunk);
+                    (uint count, UndertaleChunk chunk) = reader.CountChunkChildObjects();
+                    totalCount += count;
+
+                    // Don't register a new chunk for GEN8 specifically
+                    if (chunk.Name != "GEN8")
+                    {
+                        Chunks.Add(chunk.Name, chunk);
+                        ChunksTypeDict.Add(chunk.GetType(), chunk);
+                    }
+                }
+                catch (Exception e)
+                {
+                    reader.SubmitObjectCountingError(e);
+                    reader.SwitchReaderType(false);
+                    // Safely jump to next chunk
+                    reader.Position = prevPosition + 4;
+                    uint length = reader.ReadUInt32();
+                    reader.Position += length;
                 }
             }
 
