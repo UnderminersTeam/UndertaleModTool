@@ -49,7 +49,7 @@
 
         <TabControl x:Name="CodeModeTabs" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" SelectionChanged="TabControl_SelectionChanged">
             <TabItem Header="Decompiled" Name="DecompiledTab">
-                <Grid>
+                <Grid PreviewMouseWheel="Grid_PreviewMouseWheel" PreviewKeyDown="Grid_PreviewKeyDown">
                     <avalonEdit:TextEditor
                         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
                         FontFamily="Consolas"
@@ -67,7 +67,7 @@
                 </Grid>
             </TabItem>
             <TabItem Header="Disassembly" Name="DisassemblyTab">
-                <Grid>
+                <Grid PreviewMouseWheel="Grid_PreviewMouseWheel" PreviewKeyDown="Grid_PreviewKeyDown">
                     <avalonEdit:TextEditor
                         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
                         FontFamily="Consolas"

@@ -485,8 +485,9 @@ namespace UndertaleModTool
 
                 if (outOfBounds)
                 {
-                    mainWindow.ShowError($"Tileset of \"{tilesData.ParentLayer.LayerName.Content}\" tile layer has wrong parameters (tile size, output border, etc.).\n" +
-                                          "It can't be displayed.");
+                    mainWindow.Dispatcher.BeginInvoke(() => 
+                        mainWindow.ShowError($"Tileset of \"{tilesData.ParentLayer.LayerName.Content}\" tile layer has wrong parameters (tile size, output border, etc.).\n" +
+                                             "It can't be displayed."));
                     return "Error";
                 }
 
@@ -494,7 +495,8 @@ namespace UndertaleModTool
             }
             catch (Exception ex)
             {
-                mainWindow.ShowError($"An error occurred while rendering tile layer \"{tilesData.ParentLayer.LayerName.Content}\".\n\n{ex}");
+                mainWindow.Dispatcher.BeginInvoke(() =>
+                    mainWindow.ShowError($"An error occurred while rendering tile layer \"{tilesData.ParentLayer.LayerName.Content}\".\n\n{ex}"));
                 return "Error";
             }
         }

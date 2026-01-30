@@ -50,6 +50,7 @@ public class GlobalDecompileContext : IGameContext
     public bool UsingBuiltinDefaultArguments => Data?.IsVersionAtLeast(2024, 11) ?? false;
     public bool UsingArrayCopyOnWrite => Data?.ArrayCopyOnWrite ?? false;
     public bool UsingNewArrayOwners => Data?.IsVersionAtLeast(2, 3, 2) ?? false;
+    public bool UsingOptimizedFunctionDeclarations => Data?.IsVersionAtLeast(2024, 14) ?? false;
     public GameSpecificRegistry GameSpecificRegistry => Data?.GameSpecificRegistry;
     public IBuiltins Builtins { get; private set; } = null;
     public ICodeBuilder CodeBuilder { get; private set; } = null;
@@ -193,13 +194,16 @@ public class GlobalDecompileContext : IGameContext
     /// Prepares a global decompile context for compilation.
     /// </summary>
     /// <param name="forceReloadAssets">Whether asset lookups should be forced to be re-created.</param>
-    internal void PrepareForCompilation(bool forceReloadAssets = true)
+    public void PrepareForCompilation(bool forceReloadAssets = true)
     {
         // Initialize builtin list if not already done (and create it for the game data if not already created)
         Builtins ??= (Data.BuiltinList ??= new BuiltinList(Data));
 
         // Initialize code builder if not already done
-        CodeBuilder = new CodeBuilder(this);
+        if (CodeBuilder is null || forceReloadAssets)
+        {
+            CodeBuilder = new CodeBuilder(this);
+        }
 
         // Reload asset lists if necessary
         if (forceReloadAssets || _assetIdLookup is null || _scriptIdLookup is null)

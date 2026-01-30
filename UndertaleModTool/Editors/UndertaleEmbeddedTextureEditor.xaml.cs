@@ -1,4 +1,3 @@
-﻿using ImageMagick;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -7,12 +6,9 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -24,6 +20,7 @@ using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 using UndertaleModTool.Windows;
 using WpfAnimatedGif;
+using ImageMagick;
 
 namespace UndertaleModTool
 {
@@ -200,9 +197,27 @@ namespace UndertaleModTool
             string idString;
 
             if (foundIndex == -1)
-                idString = "None";
+            {
+                idString = "Howdy!";
+                ((System.Windows.Controls.Image)this.FindName("Flowey")).Opacity = 1;
+                //((Image)this.FindName("FloweyBubble")).Opacity = 1;
+
+                var flowery = ((System.Windows.Controls.Image)this.FindName("Flowey"));
+                var flowery_wink = ((System.Windows.Controls.Image)this.FindName("FloweyClickable"));
+
+                Thickness margin = flowery.Margin;
+                if (margin.Bottom >= 999)
+                    margin.Bottom -= 999;
+                flowery.Margin = margin;
+
+                Thickness margin_clickable = flowery_wink.Margin;
+                if (margin_clickable.Bottom >= 999)
+                    margin_clickable.Bottom -= 999;
+                flowery_wink.Margin = margin_clickable;
+
+            }
             else if (foundIndex == -2)
-                idString = "N/A";
+                idString = "None";
             else
                 idString = Convert.ToString(foundIndex);
 
@@ -260,6 +275,7 @@ namespace UndertaleModTool
                         // Import any file type
                         using var magickImage = new MagickImage(dlg.FileName);
                         magickImage.Format = MagickFormat.Bgra;
+                        magickImage.Depth = 8;
                         magickImage.Alpha(AlphaOption.Set);
                         magickImage.SetCompression(CompressionMethod.NoCompression);
 
@@ -275,8 +291,18 @@ namespace UndertaleModTool
                         mainWindow.ShowWarning("WARNING: Texture page dimensions are not powers of 2. Sprite blurring is very likely in-game.", "Unexpected texture dimensions");
                     }
 
+                    var previousFormat = target.TextureData.Image?.Format;
+
                     // Import image
                     target.TextureData.Image = image;
+
+                    var currentFormat = target.TextureData.Image.Format;
+
+                    // If texture was DDS, warn user that texture has been converted to PNG
+                    if (previousFormat == GMImage.ImageFormat.Dds && currentFormat == GMImage.ImageFormat.Png)
+                    {
+                        mainWindow.ShowMessage($"{target} was converted into PNG format since we don't support converting images into DDS format. This might have performance issues in the game.");
+                    }
 
                     // Update width/height properties in the UI
                     TexWidth.GetBindingExpression(TextBox.TextProperty)?.UpdateTarget();

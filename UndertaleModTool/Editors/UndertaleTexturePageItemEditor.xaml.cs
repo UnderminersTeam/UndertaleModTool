@@ -1,4 +1,3 @@
-﻿using ImageMagick;
 using Microsoft.Win32;
 using System;
 using System.ComponentModel;
@@ -8,10 +7,11 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using UndertaleModLib;
+using WpfAnimatedGif;
+using ImageMagick;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 using UndertaleModTool.Windows;
-using WpfAnimatedGif;
 
 namespace UndertaleModTool
 {
@@ -194,7 +194,18 @@ namespace UndertaleModTool
             {
                 using MagickImage image = TextureWorker.ReadBGRAImageFromFile(dlg.FileName);
                 UndertaleTexturePageItem item = DataContext as UndertaleTexturePageItem;
+
+                var previousFormat = item.TexturePage.TextureData.Image.Format;
+
                 item.ReplaceTexture(image);
+
+                var currentFormat = item.TexturePage.TextureData.Image.Format;
+
+                // If texture was DDS, warn user that texture has been converted to PNG
+                if (previousFormat == GMImage.ImageFormat.Dds && currentFormat == GMImage.ImageFormat.Png)
+                {
+                    mainWindow.ShowMessage($"{item.TexturePage} was converted into PNG format since we don't support converting images into DDS format. This might have performance issues in the game.");
+                }
 
                 // Refresh the image of "ItemDisplay"
                 if (ItemDisplay.FindName("RenderAreaBorder") is not Border border)
