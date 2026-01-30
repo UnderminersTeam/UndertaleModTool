@@ -162,6 +162,7 @@
                     <StackPanel Grid.Column="1">
                         <CheckBox IsChecked="{Binding ProfileMessageShown}" Content="Profile mode message shown" ToolTip="On first load, this will show you the profile mode loaded message. If this somehow breaks, you can manually toggle it here."/>
                         <CheckBox IsChecked="{Binding CustomProfileName}" Content="Ask Profile name on load" ToolTip="Lets you set a custom name for a Profile. Only useful if you have Profile mode on."/>
+                        <CheckBox IsChecked="{Binding MakeBackup}" Content="Make data backup when loading and saving" ToolTip="Whenever you successfully load a data.win file, data.bck will be created with the exact same state when you opened it. MyMod.temp will be created when you save."/>
                     </StackPanel>
                 </Grid>
 

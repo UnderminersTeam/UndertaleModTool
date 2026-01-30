@@ -81,6 +81,16 @@ namespace UndertaleModTool
             }
         }
 
+        public static bool MakeBackup
+        {
+            get => Settings.Instance.MakeBackup;
+            set
+            {
+                Settings.Instance.MakeBackup = value;
+                Settings.Save();
+            }
+        }
+
         public static bool ProfileModeEnabled
         {
             get => Settings.Instance.ProfileModeEnabled;

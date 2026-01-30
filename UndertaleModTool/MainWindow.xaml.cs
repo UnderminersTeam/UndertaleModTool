@@ -1204,6 +1204,9 @@ namespace UndertaleModTool
 
                         UndertaleCodeEditor.gettext = null;
                         UndertaleCodeEditor.gettextJSON = null;
+
+                        if (Settings.Instance.MakeBackup)
+                            File.Copy(filename, filename.Replace(".win", ".bck"), true); // successfully loaded. safe to make the backup
                     }
 
                     dialog.Hide();
@@ -1223,6 +1226,18 @@ namespace UndertaleModTool
             if (Data == null || Data.UnsupportedBytecodeVersion)
                 return;
 
+            if (Settings.Instance.MakeBackup)
+            {
+                var FileDir = "";
+                string[] iwishiwasbetteratnames = FilePath.Split(new char[] { '\\' });
+                var directoriesamt = iwishiwasbetteratnames.Length;
+                for (var i = 0; i < directoriesamt - 1; i++)
+                {
+                    FileDir += iwishiwasbetteratnames[i] + "\\";
+                }
+                File.Copy(FilePath, FileDir + "MyMod.temp", true);
+            }
+
             bool isDifferentPath = FilePath != filename;
 
             LoaderDialog dialog = new LoaderDialog("Saving", "Saving, please wait...");
@@ -1238,6 +1253,7 @@ namespace UndertaleModTool
             DebugDataDialog.DebugDataMode debugMode = DebugDataDialog.DebugDataMode.NoDebug;
             if (!suppressDebug && Data.GeneralInfo != null && !Data.GeneralInfo.IsDebuggerDisabled)
                 this.ShowWarning("You are saving the game in GameMaker Studio debug mode. Unless the debugger is running, the normal runtime will simply hang after loading. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger");
+
             Task t = Task.Run(async () =>
             {
                 bool SaveSucceeded = true;
