@@ -17,7 +17,7 @@ namespace UndertaleModToolAvalonia;
 
 public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
 {
-    public const uint TILE_ID =     0b00000000000001111111111111111111;
+    public const uint TILE_ID = 0b00000000000001111111111111111111;
     public const uint TILE_FLIP_H = 0b00010000000000000000000000000000;
     public const uint TILE_FLIP_V = 0b00100000000000000000000000000000;
     public const uint TILE_ROTATE = 0b01000000000000000000000000000000;
@@ -405,7 +405,7 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
         updater.Room = Room;
         updater.Update();
 
-        var renderer = new UndertaleRoomEditor.Renderer();
+        var renderer = new RoomRenderer();
         renderer.Room = Room;
         renderer.RoomItems = updater.RoomItems;
         renderer.Canvas = canvas;
