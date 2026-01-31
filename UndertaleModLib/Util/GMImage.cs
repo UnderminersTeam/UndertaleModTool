@@ -40,6 +40,14 @@ public class GMImage
         /// DDS file format.
         /// </summary>
         Dds,
+
+        /// <summary>
+        /// Unknown or unsupported file format. Will be represented by raw bytes, including any padding.
+        /// </summary>
+        /// <remarks>
+        /// This format cannot be converted to any other format (nor displayed), but can be saved/loaded.
+        /// </remarks>
+        Unknown
     }
 
     /// <summary>
@@ -280,7 +288,8 @@ public class GMImage
 
         // Determine type of image by reading the first 8 bytes
         long startAddress = reader.Position;
-        ReadOnlySpan<byte> header = reader.ReadBytes(8);
+        Span<byte> header = stackalloc byte[8];
+        reader.Stream.ReadExactly(header);
 
         // PNG
         if (header.SequenceEqual(MagicPng))
@@ -351,22 +360,33 @@ public class GMImage
             // Size int skipped because 8 bytes were already read
             uint flags = reader.ReadUInt32();
             uint height = reader.ReadUInt32();
-
-            //uint width = reader.ReadUInt32();
-            reader.Position += 4;
+            uint width = reader.ReadUInt32();
 
             uint pitchOrLinearSize = reader.ReadUInt32();
 
             //uint depth = reader.ReadUInt32();
-            //uint mipMapCount = reader.ReadUInt32();
+            reader.Position += 4;
+
+            uint mipMapCount = reader.ReadUInt32();
+
             //byte[] reserved1 = reader.ReadBytes(4 * 11);
             //uint pixelFormatSize = reader.ReadUInt32();
-            reader.Position += 56;
+            reader.Position += 48;
 
             uint pixelFormatFlags = reader.ReadUInt32();
             uint pixelFormatFourCC = reader.ReadUInt32();
 
-            // TODO: Check caps for DDSCAPS_COMPLEX (when there's extra data afterwards)
+            //uint pixelFormatRGBBitCount = reader.ReadUInt32();
+            //uint pixelFormatRBitMask = reader.ReadUInt32();
+            //uint pixelFormatGBitMask = reader.ReadUInt32();
+            //uint pixelFormatBBitMask = reader.ReadUInt32();
+            //uint pixelFormatABitMask = reader.ReadUInt32();
+
+            //uint caps = reader.ReadUInt32();
+            //uint caps2 = reader.ReadUInt32();
+            //uint caps3 = reader.ReadUInt32();
+            //uint caps4 = reader.ReadUInt32();
+            //uint reserved2 = reader.ReadUInt32();
 
             // Skip to end of header
             reader.Position += 40;
@@ -385,22 +405,72 @@ public class GMImage
             else
                 size += (int)(pitchOrLinearSize * height);
 
+            // TODO: Check for cubemaps and volume textures.
+            // TODO: Check for DX10 arrays.
+
+            // Add mipmap data size
+            if (mipMapCount > 0)
+            {
+                // DXT1 == 0x31545844
+                int pixelSize = (pixelFormatFourCC == 0x31545844) ? 8 : 16;
+
+                int w = (int)width;
+                int h = (int)height;
+
+                // Starting at 1 because the mipmap count includes the main texture
+                for (int i = 1; i < mipMapCount; i++)
+                {
+                    w /= 2;
+                    h /= 2;
+                    if (w == 0) w = 1;
+                    if (h == 0) h = 1;
+                    size += ((w + 3) / 4) * ((h + 3) / 4) * pixelSize;
+                }
+            }
+
+            // Before reading data, check if our padding is correct (since we don't support the full DDS format...)
+            long paddingStartAddress = startAddress + size;
+            long paddingSize = maxEndOfStreamPosition - paddingStartAddress;
+            bool paddingError = false;
+            const int maxPaddingSize = 127;
+            if (paddingSize > maxPaddingSize)
+            {
+                // Padding is over 127 bytes in length, which is impossible (it should align to 128-byte boundaries)
+                paddingError = true;
+            }
+            else if (paddingSize > 0)
+            {
+                // Ensure padding is all 0 bytes
+                Span<byte> paddingData = stackalloc byte[maxPaddingSize];
+                reader.Position = paddingStartAddress;
+                reader.Stream.ReadExactly(paddingData[..(int)paddingSize]);
+                for (int i = 0; i < paddingSize; i++)
+                {
+                    if (paddingData[i] != 0)
+                    {
+                        paddingError = true;
+                        break;
+                    }
+                }
+            }
+
+            // If a padding error was detected, just include it as part of the image data as a failsafe.
+            // This means that extra padding may be added if textures somehow misalign, but generally this shouldn't be a concern...
+            if (paddingError)
+            {
+                size += (int)paddingSize;
+            }
+
             // Read entire data
             reader.Position = startAddress;
             byte[] bytes = reader.ReadBytes(size);
 
-            // Check if rest of bytes are 0x00 padded
-            byte[] paddingBytes = reader.ReadBytes((int)(maxEndOfStreamPosition - reader.Position));
-            for (int i = 0; i < paddingBytes.Length; i++)
-            {
-                if (paddingBytes[i] != 0)
-                    throw new IOException("Non-zero bytes in padding");
-            }
-
             return FromDds(bytes);
         }
 
-        throw new IOException("Failed to recognize any known image header");
+        // Unknown or unsupported file format...
+        reader.Position = startAddress;
+        return FromUnknown(reader.ReadBytes((int)(maxEndOfStreamPosition - startAddress)));
     }
 
     // Either retrieves the known uncompressed data size, or makes a lowball guess as to what it could be
@@ -535,6 +605,18 @@ public class GMImage
         return new GMImage(ImageFormat.Dds, width, height, data);
     }
 
+    /// <summary>
+    /// Creates a <see cref="GMImage"/> of unknown format, wrapping around the provided byte array containing unknown format data.
+    /// </summary>
+    /// <param name="data">Byte array of unknown format data.</param>
+    public static GMImage FromUnknown(byte[] data)
+    {
+        ArgumentNullException.ThrowIfNull(data);
+
+        // Create wrapper image
+        return new GMImage(ImageFormat.Unknown, 0, 0, data);
+    }
+
     private static void AddMagickToPngSettings(MagickReadSettings settings)
     {
         settings.SetDefine(MagickFormat.Png32, "compression-level", 4);
@@ -626,6 +708,8 @@ public class GMImage
                     image.Write(stream);
                     break;
                 }
+            case ImageFormat.Unknown:
+                throw new InvalidOperationException("Cannot convert unknown format to PNG");
             default:
                 throw new InvalidOperationException($"Unknown format {Format}");
         }
@@ -645,6 +729,7 @@ public class GMImage
             ImageFormat.Qoi => ConvertToQoi(),
             ImageFormat.Bz2Qoi => ConvertToBz2Qoi(sharedStream),
             ImageFormat.Dds => ConvertToDds(),
+            ImageFormat.Unknown => throw new InvalidOperationException("Cannot convert to unknown format"),
             _ => throw new ArgumentOutOfRangeException(nameof(format)),
         };
     }
@@ -692,6 +777,8 @@ public class GMImage
                         return QoiConverter.GetImageFromStream(uncompressedData);
                     }
                 }
+            case ImageFormat.Unknown:
+                throw new InvalidOperationException("Cannot convert unknown image format to raw BGRA");
         }
 
         throw new InvalidOperationException($"Unknown source format {Format}");
@@ -751,6 +838,8 @@ public class GMImage
                     image.Format = MagickFormat.Png32;
                     return new GMImage(ImageFormat.Png, Width, Height, image.ToByteArray());
                 }
+            case ImageFormat.Unknown:
+                throw new InvalidOperationException("Cannot convert unknown image format to PNG");
         }
 
         throw new InvalidOperationException($"Unknown source format {Format}");
@@ -776,6 +865,8 @@ public class GMImage
                     // Already in correct format; no conversion to be done
                     return this;
                 }
+            case ImageFormat.Unknown:
+                throw new InvalidOperationException("Cannot convert unknown image format to QOI");
         }
 
         throw new InvalidOperationException($"Unknown source format {Format}");
@@ -842,6 +933,8 @@ public class GMImage
                     // Already in correct format; no conversion to be done
                     return this;
                 }
+            case ImageFormat.Unknown:
+                throw new InvalidOperationException("Cannot convert unknown image format to BZ2+QOI");
         }
 
         throw new InvalidOperationException($"Unknown source format {Format}");
@@ -889,6 +982,7 @@ public class GMImage
             case ImageFormat.Png:
             case ImageFormat.Qoi:
             case ImageFormat.Dds:
+            case ImageFormat.Unknown:
                 // Data is stored identically to file format, so write it verbatim
                 writer.Write(_data);
                 break;
@@ -938,7 +1032,7 @@ public class GMImage
     }
 
     /// <summary>
-    /// Returns a new <see cref="MagickImage"/> with the contents of this image.
+    /// Returns a new <see cref="MagickImage"/> with the contents of this image, if not <see cref="ImageFormat.Unknown"/> format.
     /// </summary>
     public MagickImage GetMagickImage()
     {
@@ -988,6 +1082,8 @@ public class GMImage
                     MagickImage image = new(_data, settings);
                     return image;
                 }
+            case ImageFormat.Unknown:
+                throw new InvalidOperationException("Cannot get MagickImage from unknown image format");
         }
 
         throw new InvalidOperationException($"Unknown format {Format}");

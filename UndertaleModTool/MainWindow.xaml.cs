@@ -52,9 +52,6 @@ using System.Windows.Media.Imaging;
 
 namespace UndertaleModTool
 {
-    /// <summary>
-    /// Logika interakcji dla klasy MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged, IScriptInterface
     {
         /// Note for those who don't know what is "PropertyChanged.Fody" -
@@ -99,10 +96,11 @@ namespace UndertaleModTool
                 OpenInTab(value);
             } 
         }
+        
+        private static Visibility ToVisibility(bool visible) => visible ? Visibility.Visible : Visibility.Collapsed;
 
-        public Visibility IsGMS2 => (Data?.GeneralInfo?.Major ?? 0) >= 2 ? Visibility.Visible : Visibility.Collapsed;
-        // God this is so ugly, if there's a better way, please, put in a pull request
-        public Visibility IsExtProductIDEligible => (((Data?.GeneralInfo?.Major ?? 0) >= 2) || (((Data?.GeneralInfo?.Major ?? 0) == 1) && (((Data?.GeneralInfo?.Build ?? 0) >= 1773) || ((Data?.GeneralInfo?.Build ?? 0) == 1539)))) ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility IsGMS2 => ToVisibility((Data?.GeneralInfo?.Major ?? 0) >= 2);
+        public Visibility IsExtProductIDEligible => ToVisibility(UndertaleExtension.ProductDataEligible(Data));
 
         public List<Tab> ClosedTabsHistory { get; } = new();
 
@@ -291,6 +289,12 @@ namespace UndertaleModTool
                 if (foundSource is not null)
                 {
                     return foundSource;
+                }
+
+                // If the image is of unknown format, it cannot be displayed. Use a placeholder texture...
+                if (image.Format == GMImage.ImageFormat.Unknown)
+                {
+                    image = new GMImage(1, 1);
                 }
 
                 // If no source was found, then create a new one
@@ -510,8 +514,7 @@ namespace UndertaleModTool
             ApplyCorrections();
             CrashCheck();
 
-            RunGMSDebuggerItem.Visibility = Settings.Instance.ShowDebuggerOption
-                                            ? Visibility.Visible : Visibility.Collapsed;
+            RunGMSDebuggerItem.Visibility = ToVisibility(Settings.Instance.ShowDebuggerOption);
         }
 
         public Dictionary<string, NamedPipeServerStream> childFiles = new Dictionary<string, NamedPipeServerStream>();
@@ -699,9 +702,7 @@ namespace UndertaleModTool
             OnPropertyChanged("FilePath");
             OnPropertyChanged("IsGMS2");
 
-            BackgroundsItemsList.Header = IsGMS2 == Visibility.Visible
-                                          ? "Tile sets"
-                                          : "Backgrounds & Tile sets";
+            BackgroundsItemsList.Header = IsGMS2 == Visibility.Visible ? "Tile sets" : "Backgrounds & Tile sets";
 
             Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "New file created, have fun making a game out of nothing\nI TOLD YOU to open a data.win, not create a new file! :P");
             OpenInTab(Highlighted);
@@ -966,7 +967,7 @@ namespace UndertaleModTool
                 if (isDisassembly)
                 {
                     selectedCode = codeEditor.DisassemblyEditor?.SelectedText;
-                    if (String.IsNullOrEmpty(selectedCode))
+                    if (string.IsNullOrEmpty(selectedCode))
                         isDisassembly = false; // Don't check "In assembly" if there is nothing selected in there.
                 }
                 else
@@ -1058,7 +1059,7 @@ namespace UndertaleModTool
 
                 Dispatcher.Invoke(async () =>
                 {
-                    if (data != null)
+                    if (data is not null)
                     {
                         if (data.UnsupportedBytecodeVersion)
                         {
@@ -1077,25 +1078,35 @@ namespace UndertaleModTool
                             CanSave = true;
                             CanSafelySave = true;
                             await UpdateProfile(data, filename);
-                            if (data != null)
-                            {
-                                data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
-                                data.ToolInfo.InstanceIdPrefix = () => SettingsWindow.InstanceIdPrefix;
-                            }
+                            data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
+                            data.ToolInfo.InstanceIdPrefix = () => SettingsWindow.InstanceIdPrefix;
                         }
                         if (data.IsYYC())
                         {
                             this.ShowWarning("This game uses YYC (YoYo Compiler), which means the code is embedded into the game executable. This configuration is currently not fully supported; continue at your own risk.", "YYC");
                         }
-                        if (data.GeneralInfo != null)
+                        if (data.GeneralInfo is not null)
                         {
                             if (!data.GeneralInfo.IsDebuggerDisabled)
                             {
                                 this.ShowWarning("This game is set to run with the GameMaker Studio debugger and the normal runtime will simply hang after loading if the debugger is not running. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger");
                             }
                         }
+                        if (data.EmbeddedTextures is not null)
+                        {
+                            foreach (UndertaleEmbeddedTexture tex in data.EmbeddedTextures)
+                            {
+                                if (tex?.TextureData?.Image?.Format == GMImage.ImageFormat.Unknown)
+                                {
+                                    this.ShowWarning("This game contains texture(s) with unknown or unsupported image formats. These will save/load, but will not display in editors, and many operations will fail regarding them. Proceed with caution.", "Unsupported textures");
+                                    break;
+                                }
+                            }
+                        }
                         if (Path.GetDirectoryName(FilePath) != Path.GetDirectoryName(filename))
+                        {
                             CloseChildFiles();
+                        }
 
                         Data = data;
 
@@ -1109,9 +1120,7 @@ namespace UndertaleModTool
                         OnPropertyChanged("FilePath");
                         OnPropertyChanged("IsGMS2");
 
-                        BackgroundsItemsList.Header = IsGMS2 == Visibility.Visible
-                                                      ? "Tile sets"
-                                                      : "Backgrounds & Tile sets";
+                        BackgroundsItemsList.Header = IsGMS2 == Visibility.Visible ? "Tile sets" : "Backgrounds & Tile sets";
 
                         UndertaleCodeEditor.gettext = null;
                         UndertaleCodeEditor.gettextJSON = null;
@@ -3133,12 +3142,12 @@ result in loss of work.");
 
         public void UpdateObjectLabel(object obj)
         {
-            int foundIndex = obj is UndertaleResource res ? Data.IndexOf(res, false) : -1;
+            int foundIndex = obj is UndertaleResource res ? Data.IndexOf(res, false) : -2;
             string idString;
 
-            if (foundIndex == -1)
+            if (foundIndex == -2)
                 idString = "None";
-            else if (foundIndex == -2)
+            else if (foundIndex == -1)
                 idString = "N/A";
             else
                 idString = Convert.ToString(foundIndex);
@@ -3736,8 +3745,7 @@ result in loss of work.");
             ScrollViewer viewer = sender as ScrollViewer;
 
             // Prevent receiving the mouse wheel event if there is nowhere to scroll.
-            if (viewer.ComputedVerticalScrollBarVisibility != Visibility.Visible
-                && e.Source == viewer)
+            if (viewer.ComputedVerticalScrollBarVisibility != Visibility.Visible && e.Source == viewer)
                 e.Handled = true;
         }
 
