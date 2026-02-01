@@ -49,11 +49,12 @@ using UndertaleModLib.Scripting;
 using UndertaleModLib.Util;
 using UndertaleModTool.Windows;
 using WpfAnimatedGif;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using SystemJson = System.Text.Json;
 
 namespace UndertaleModTool
 {
-    public partial class MainWindow : Window, INotifyPropertyChanged, IScriptInterface
+    public partial class MainWindow : System.Windows.Window, INotifyPropertyChanged, IScriptInterface
     {
         /// Note for those who don't know what is "PropertyChanged.Fody" -
         /// it automatically adds "OnPropertyChanged()" to every property (or modify existing) of the class that implements INotifyPropertyChanged.
@@ -668,8 +669,8 @@ namespace UndertaleModTool
         }
         private static void SetDarkTitleBarForWindows(bool enable)
         {
-            Window activeWindow = null;
-            foreach (Window w in Application.Current.Windows)
+            System.Windows.Window activeWindow = null;
+            foreach (System.Windows.Window w in Application.Current.Windows)
             {
                 if (w.IsActive)
                 {
@@ -678,12 +679,12 @@ namespace UndertaleModTool
                 }
             }
 
-            foreach (Window w in Application.Current.Windows)
+            foreach (System.Windows.Window w in Application.Current.Windows)
                 SetDarkTitleBarForWindow(w, enable);
 
             activeWindow?.Activate();
         }
-        public static void SetDarkTitleBarForWindow(Window w, bool enable, bool isNotLoaded = true)
+        public static void SetDarkTitleBarForWindow(System.Windows.Window w, bool enable, bool isNotLoaded = true)
         {
             try
             {
@@ -964,7 +965,7 @@ namespace UndertaleModTool
         }
         private void CloseOtherWindows() //close "standalone" windows (e.g. "ClickableTextOutput")
         {
-            foreach (Window w in Application.Current.Windows)
+            foreach (System.Windows.Window w in Application.Current.Windows)
             {
                 if (w is not MainWindow && w.Owner is null) //&& is not a modal window
                     w.Close();
@@ -1192,6 +1193,42 @@ namespace UndertaleModTool
 
                         UndertaleCachedImageLoader.Reset();
                         CachedTileDataLoader.Reset();
+
+                        UndertaleCachedImageLoader loader = new();
+
+                        var test = 0;
+                        var dobreak = false;
+
+                        async Task LoadSpriteTextures()
+                        {
+                            await Task.Run(() => Parallel.ForEach(Data.Sprites, LoadSpriteTexture));
+                        }
+
+                        async void LoadSpriteTexture(UndertaleSprite sprite)
+                        {
+                            if (sprite is not null)
+                            {
+                                var name = sprite.Name.ToString();
+                                if (sprite.Textures.Count > 0 && sprite.Textures[0]?.Texture is not null)
+                                {
+                                    dialog?.Dispatcher.Invoke(DispatcherPriority.Normal, () =>
+                                    {
+                                        dialog?.Update("Generating sprite cache...", "Loading " + sprite.Name.ToString() + "...", test, Data.Sprites.Count);
+                                    });
+                                    /*if (name.Contains("spr_quitmessage"))
+                                    {
+                                        this.ShowError("hello");
+                                        dobreak = true;
+                                    }
+                                    else*/
+                                    loader.Convert(sprite.Textures[0].Texture, null, null, null);
+                                    test++;
+                                    //this.ShowError("hello");
+                                }
+                            }
+                        }
+
+                        await LoadSpriteTextures();
 
                         Data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
                         Data.ToolInfo.InstanceIdPrefix = () => SettingsWindow.InstanceIdPrefix;
@@ -3805,18 +3842,18 @@ result in loss of work.");
 
         private void TabCloseButton_OnClick(object sender, RoutedEventArgs e)
         {
-            Button button = (Button)sender;
+            System.Windows.Controls.Button button = (System.Windows.Controls.Button)sender;
             int tabIndex = (button.DataContext as Tab).TabIndex;
 
             CloseTab(tabIndex);
         }
         private void TabCloseButton_MouseEnter(object sender, MouseEventArgs e)
         {
-            (sender as Button).Content = new Image() { Source = Tab.ClosedHoverIcon };
+            (sender as System.Windows.Controls.Button).Content = new Image() { Source = Tab.ClosedHoverIcon };
         }
         private void TabCloseButton_MouseLeave(object sender, MouseEventArgs e)
         {
-            (sender as Button).Content = new Image() { Source = Tab.ClosedIcon };
+            (sender as System.Windows.Controls.Button).Content = new Image() { Source = Tab.ClosedIcon };
         }
 
         private void TabItem_MouseUp(object sender, MouseButtonEventArgs e)
@@ -3837,7 +3874,7 @@ result in loss of work.");
         // source - https://stackoverflow.com/a/10738247/12136394
         private void TabItem_PreviewMouseMove(object sender, MouseEventArgs e)
         {
-            if (e.Source is not TabItemDark tabItem || e.OriginalSource is Button)
+            if (e.Source is not TabItemDark tabItem || e.OriginalSource is System.Windows.Controls.Button)
                 return;
 
             if (Mouse.PrimaryDevice.LeftButton == MouseButtonState.Pressed)
