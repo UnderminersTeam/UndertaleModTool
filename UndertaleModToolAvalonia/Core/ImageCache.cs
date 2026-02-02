@@ -66,6 +66,11 @@ public class ImageCache
 
     public SKImage? GetCachedImageFromTexturePageItem(UndertaleTexturePageItem texturePageItem)
     {
+        if (texturePageItem.TexturePage is null
+            || texturePageItem.TexturePage.TextureData is null
+            || texturePageItem.TexturePage.TextureData.Image is null)
+            return null;
+
         TexturePageItemImageKey key = new(
             texturePageItem.TexturePage.TextureData.Image,
             texturePageItem.SourceX,
@@ -139,50 +144,6 @@ public class ImageCache
 
             if (image is not null)
                 imageCache[key] = new WeakReference<SKImage>(image);
-        }
-
-        return image;
-    }
-
-    public SKImage GetCachedImageFromLayerTile(UndertaleRoom.Layer.LayerTilesData tilesData, uint tileId)
-    {
-        LayerTileImageKey key = new(
-            tilesData.Background.Texture.TexturePage.TextureData.Image,
-            tilesData.Background.Texture.SourceX,
-            tilesData.Background.Texture.SourceY,
-            //texturePageItem.SourceWidth,
-            //texturePageItem.SourceHeight,
-            tileId,
-            tilesData.Background.GMS2TileColumns,
-            tilesData.Background.GMS2TileWidth,
-            tilesData.Background.GMS2TileHeight,
-            tilesData.Background.GMS2OutputBorderX,
-            tilesData.Background.GMS2OutputBorderY
-        );
-
-        SKImage? image = null;
-        if (imageCache.TryGetValue(key, out var reference))
-            reference.TryGetTarget(out image);
-
-        if (image is null)
-        {
-            uint tileX = tileId % tilesData.Background.GMS2TileColumns;
-            uint tileY = tileId / tilesData.Background.GMS2TileColumns;
-
-            uint x = tilesData.Background.Texture.SourceX;
-            uint y = tilesData.Background.Texture.SourceY;
-
-            x += tileX * (tilesData.Background.GMS2TileWidth + tilesData.Background.GMS2OutputBorderX * 2) + tilesData.Background.GMS2OutputBorderX;
-            y += tileY * (tilesData.Background.GMS2TileHeight + tilesData.Background.GMS2OutputBorderY * 2) + tilesData.Background.GMS2OutputBorderY;
-
-            image = GetCachedImageFromGMImage(tilesData.Background.Texture.TexturePage.TextureData.Image)
-                .Subset(SKRectI.Create(
-                    (int)x,
-                    (int)y,
-                    (int)tilesData.Background.GMS2TileWidth,
-                    (int)tilesData.Background.GMS2TileHeight));
-
-            imageCache[key] = new WeakReference<SKImage>(image);
         }
 
         return image;

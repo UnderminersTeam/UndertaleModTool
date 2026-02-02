@@ -5,6 +5,7 @@ using Avalonia.Skia;
 using Microsoft.Extensions.DependencyInjection;
 using SkiaSharp;
 using UndertaleModLib.Models;
+using UndertaleModLib.Util;
 
 namespace UndertaleModToolAvalonia;
 
@@ -201,10 +202,14 @@ public class RoomRenderer
     {
         UndertaleRoom.Layer.LayerTilesData tilesData = layer.TilesData;
 
-        if (tilesData.Background is null)
+        if (tilesData.Background is null || tilesData.Background.Texture is null)
             return;
 
-        SKImage? image = mainVM.ImageCache.GetCachedImageFromGMImage(tilesData.Background.Texture.TexturePage.TextureData.Image);
+        GMImage? gmImage = tilesData.Background.Texture.TexturePage?.TextureData?.Image;
+        if (gmImage is null)
+            return;
+
+        SKImage? image = mainVM.ImageCache.GetCachedImageFromGMImage(gmImage);
         if (image is null)
             return;
 
@@ -279,8 +284,8 @@ public class RoomRenderer
                 {
                     uint tileOrientation = tile >> 28;
 
-                    float posX = (x * tileW) + targetX;
-                    float posY = (y * tileH) + targetY;
+                    float posX = x * tileW;
+                    float posY = y * tileH;
 
                     uint tileX = tileId % tileColumns;
                     uint tileY = tileId / tileColumns;

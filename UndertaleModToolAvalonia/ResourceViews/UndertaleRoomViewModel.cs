@@ -401,14 +401,12 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
         var bitmap = new SKBitmap((int)Room.Width, (int)Room.Height, SKColorType.Bgra8888, SKAlphaType.Unpremul);
         var canvas = new SKCanvas(bitmap);
 
-        var updater = new UndertaleRoomEditor.Updater();
-        updater.Room = Room;
-        updater.Update();
-
-        var renderer = new RoomRenderer();
-        renderer.Room = Room;
-        renderer.RoomItems = updater.RoomItems;
-        renderer.Canvas = canvas;
+        var renderer = new RoomRenderer
+        {
+            Room = Room,
+            RoomItems = UndertaleRoomEditor.Updater.MakeRoomItems(Room),
+            Canvas = canvas
+        };
         renderer.RenderRoom();
 
         var result = bitmap.Encode(stream, SKEncodedImageFormat.Png, 100);
