@@ -739,12 +739,21 @@ namespace UndertaleModLib
                 uint length = (uint)(endPos - startPos);
                 if (length != expectedLength)
                 {
-                    int diff = (int)expectedLength - (int)length;
-                    reader.SubmitWarning("WARNING: File specified length " + expectedLength + ", but read only " + length + " (" + diff + " padding?)");
-                    if (diff > 0)
-                        reader.Position += (uint)diff;
+                    if (expectedLength > length)
+                    {
+                        uint diff = expectedLength - length;
+                        reader.SubmitWarning($"WARNING: File specified length {expectedLength}, but read only {length} ({diff} padding?)");
+                        if (reader.Position + diff >= reader.Length)
+                            reader.Position = reader.Length;
+                        else
+                            reader.Position += diff;
+                    }
                     else
-                        throw new IOException("Read underflow");
+                    {
+                        uint diff = length - expectedLength;
+                        throw new IOException($"Read underflow: File specified length {expectedLength}, but read {length} ({diff} too great)");
+                        //reader.Position -= diff;
+                    }
                 }
             }
         }
