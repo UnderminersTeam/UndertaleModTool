@@ -104,7 +104,12 @@ namespace UndertaleModTool
                 OpenInTab(value);
             } 
         }
-        
+
+        /// <summary>
+        /// Whether the currently-selected object is exportable to a project.
+        /// </summary>
+        public bool IsSelectedProjectExportable { get; private set; }
+
         private static Visibility ToVisibility(bool visible) => visible ? Visibility.Visible : Visibility.Collapsed;
 
         public Visibility IsGMS2 => (Data?.GeneralInfo?.Major ?? 0) >= 2 ? Visibility.Visible : Visibility.Collapsed;
