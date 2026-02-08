@@ -42,7 +42,7 @@ public class RoomRenderer
         public readonly record struct LayerTilesRenderCommand(SKImage Image,
             ushort SourceX, ushort SourceY, ushort SourceWidth, ushort SourceHeight,
             ushort TargetX, ushort TargetY, ushort TargetWidth, ushort TargetHeight,
-            float X, float Y, uint[][] TileData, uint TileColumns, uint TileW, uint TileH, uint OutputBorderX, uint OutputBorderY)
+            float X, float Y, uint[][] TileData, uint TileDataW, uint TileDataH, uint TileColumns, uint TileW, uint TileH, uint OutputBorderX, uint OutputBorderY)
             : IRenderCommand;
 
         public readonly UndertaleRoom Room;
@@ -331,6 +331,8 @@ public class RoomRenderer
                 X: layer.XOffset,
                 Y: layer.YOffset,
                 TileData: layer.TilesData.TileData.Select(x => x.ToArray()).ToArray(),
+                TileDataW: layer.TilesData.TilesX,
+                TileDataH: layer.TilesData.TilesY,
                 TileColumns: layer.TilesData.Background!.GMS2TileColumns,
                 TileW: layer.TilesData.Background!.GMS2TileWidth,
                 TileH: layer.TilesData.Background!.GMS2TileHeight,
@@ -522,8 +524,15 @@ public class RoomRenderer
             list.Add(bottomRight);
         }
 
-        for (int y = 0; y < c.TileData.Length; y++)
-            for (int x = 0; x < c.TileData[y].Length; x++)
+        SKRect bounds = Canvas.LocalClipBounds;
+
+        uint startX = Math.Max(0, (uint)(bounds.Left - c.X) / c.TileW);
+        uint startY = Math.Max(0, (uint)(bounds.Top - c.Y) / c.TileH);
+        uint endX = Math.Min((uint)Math.Ceiling((bounds.Right - c.X) / c.TileW), c.TileDataW);
+        uint endY = Math.Min((uint)Math.Ceiling((bounds.Bottom - c.Y) / c.TileH), c.TileDataH);
+
+        for (uint y = startY; y < endY; y++)
+            for (uint x = startX; x < endX; x++)
             {
                 uint tile = c.TileData[y][x];
                 uint tileId = tile & UndertaleRoomViewModel.TILE_ID;
