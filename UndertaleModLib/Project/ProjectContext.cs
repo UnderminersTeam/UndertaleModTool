@@ -57,6 +57,17 @@ public sealed partial class ProjectContext
     public string SaveDataPath { get; private set; } = null;
 
     /// <summary>
+    /// Path to the main data file for the game. Will be (or is at least intended to be) saved to.
+    /// </summary>
+    public string MainFilePath { get; init; }
+
+    /// <summary>
+    /// Path to the main directory containing the game data. Should contain <see cref="MainFilePath"/>,
+    /// and similar to it, is intended to be saved to.
+    /// </summary>
+    public string MainDirectory { get; init; }
+
+    /// <summary>
     /// Whether this context has any unexported assets.
     /// </summary>
     public bool HasUnexportedAssets { get => _assetsMarkedForExport.Count > 0; }
@@ -108,12 +119,6 @@ public sealed partial class ProjectContext
     /// </summary>
     internal record struct AssetNameTypePair(string DataName, SerializableAssetType AssetType);
 
-    // Relevant project paths
-    private readonly string _mainFilePath;
-    private readonly string _mainDirectory;
-    public string MainFilePath { get => _mainFilePath; }
-    public string MainDirectory { get => _mainDirectory; }
-
     // Main options of the project
     private ProjectMainOptions _mainOptions = null;
 
@@ -148,8 +153,8 @@ public sealed partial class ProjectContext
         Data = null;
         LoadDirectory = Path.GetFullPath(loadDirectory);
         SaveDirectory = Path.GetFullPath(saveDirectory);
-        _mainFilePath = mainFilePath;
-        _mainDirectory = Path.GetFullPath(Path.GetDirectoryName(_mainFilePath));
+        MainFilePath = mainFilePath;
+        MainDirectory = Path.GetFullPath(Path.GetDirectoryName(MainFilePath));
     }
 
     /// <summary>
@@ -200,12 +205,12 @@ public sealed partial class ProjectContext
         SaveDataPath = savingDataPath;
         LoadDirectory = Path.GetFullPath(Path.GetDirectoryName(loadedDataPath));
         SaveDirectory = Path.GetFullPath(Path.GetDirectoryName(savingDataPath));
-        _mainFilePath = mainFilePath;
+        MainFilePath = mainFilePath;
         if (mainThreadAction is not null)
         {
             MainThreadAction = mainThreadAction;
         }
-        _mainDirectory = Path.GetFullPath(Path.GetDirectoryName(mainFilePath));
+        MainDirectory = Path.GetFullPath(Path.GetDirectoryName(mainFilePath));
 
         // If the file already exists, we cannot overwrite it (give a friendly message)
         if (File.Exists(mainFilePath))
@@ -214,8 +219,8 @@ public sealed partial class ProjectContext
         }
 
         // If the directory isn't empty, we don't want to overwrite anything else accidentally
-        Directory.CreateDirectory(_mainDirectory);
-        if (Directory.EnumerateFileSystemEntries(_mainDirectory).Any())
+        Directory.CreateDirectory(MainDirectory);
+        if (Directory.EnumerateFileSystemEntries(MainDirectory).Any())
         {
             throw new ProjectException("Project directory is not empty");
         }
@@ -259,7 +264,7 @@ public sealed partial class ProjectContext
         }
 
         // Load options
-        using (FileStream fs = new(_mainFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+        using (FileStream fs = new(MainFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
         {
             _mainOptions = JsonSerializer.Deserialize<ProjectMainOptions>(fs, JsonOptions);
         }
@@ -437,9 +442,9 @@ public sealed partial class ProjectContext
         }
 
         // Ensure project file still exists, just in case the user did something strange...
-        if (!File.Exists(_mainFilePath))
+        if (!File.Exists(MainFilePath))
         {
-            throw new ProjectException($"Main project file no longer exists at \"{_mainFilePath}\"");
+            throw new ProjectException($"Main project file no longer exists at \"{MainFilePath}\"");
         }
 
         // Initialize saving structures
@@ -506,12 +511,12 @@ public sealed partial class ProjectContext
                     if (serializableAsset.IndividualDirectory)
                     {
                         // Asset needs its own directory
-                        destinationFile = Path.Join(_mainDirectory, serializableAsset.AssetType.ToFilesystemNamePlural(), friendlyName, $"{friendlyName}.json");
+                        destinationFile = Path.Join(MainDirectory, serializableAsset.AssetType.ToFilesystemNamePlural(), friendlyName, $"{friendlyName}.json");
                     }
                     else
                     {
                         // Asset doesn't need its own directory
-                        destinationFile = Path.Join(_mainDirectory, serializableAsset.AssetType.ToFilesystemNamePlural(), $"{friendlyName}.json");
+                        destinationFile = Path.Join(MainDirectory, serializableAsset.AssetType.ToFilesystemNamePlural(), $"{friendlyName}.json");
                     }
 
                     // If file already exists, add a suffix until there is no conflict

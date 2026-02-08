@@ -34,11 +34,11 @@ partial class ProjectContext
         {
             return;
         }
-        _projectJsonPaths ??= [Path.GetFullPath(_mainFilePath)];
+        _projectJsonPaths ??= [Path.GetFullPath(MainFilePath)];
         foreach (string subProjectRelativePath in _mainOptions.SubProjects)
         {
-            string subProjectPath = Path.Join(_mainDirectory, subProjectRelativePath);
-            Paths.VerifyWithinDirectory(_mainDirectory, subProjectPath);
+            string subProjectPath = Path.Join(MainDirectory, subProjectRelativePath);
+            Paths.VerifyWithinDirectory(MainDirectory, subProjectPath);
             if (!_projectJsonPaths.Add(Path.GetFullPath(subProjectPath)))
             {
                 throw new ProjectException("Infinite sub-project recursion detected");
@@ -59,8 +59,8 @@ partial class ProjectContext
         foreach (ProjectMainOptions.PathList.PathPair pair in _mainOptions.ExternalFiles)
         {
             // Make sure external file or directory exists
-            string sourcePath = Path.Join(_mainDirectory, pair.Source);
-            Paths.VerifyWithinDirectory(_mainDirectory, sourcePath);
+            string sourcePath = Path.Join(MainDirectory, pair.Source);
+            Paths.VerifyWithinDirectory(MainDirectory, sourcePath);
             bool isDirectory;
             try
             {
@@ -165,8 +165,8 @@ partial class ProjectContext
         foreach (ProjectMainOptions.Patch patch in _mainOptions.Patches)
         {
             // Get path to patch file
-            string fullPatchPath = Path.Join(_mainDirectory, patch.PatchPath);
-            Paths.VerifyWithinDirectory(_mainDirectory, fullPatchPath);
+            string fullPatchPath = Path.Join(MainDirectory, patch.PatchPath);
+            Paths.VerifyWithinDirectory(MainDirectory, fullPatchPath);
 
             // Try finding valid base/output file paths
             if (!TryFindFileFromPathList(patch.DataFilePath, out string baseFilePath, out string outputFilePath))
