@@ -398,16 +398,12 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
 
         using Stream stream = await file.OpenWriteAsync();
 
+        // NOTE: This is a CPU bitmap, unlike the GPU surface used when rendering in the UI.
         var bitmap = new SKBitmap((int)Room.Width, (int)Room.Height, SKColorType.Bgra8888, SKAlphaType.Unpremul);
         var canvas = new SKCanvas(bitmap);
 
-        var renderer = new RoomRenderer
-        {
-            Room = Room,
-            RoomItems = UndertaleRoomEditor.Updater.MakeRoomItems(Room),
-            Canvas = canvas
-        };
-        renderer.RenderRoom();
+        var renderer = new RoomRenderer();
+        renderer.RenderCommands(new RoomRenderer.RenderCommandsBuilder(Room).RenderCommands, canvas);
 
         var result = bitmap.Encode(stream, SKEncodedImageFormat.Png, 100);
         if (!result)

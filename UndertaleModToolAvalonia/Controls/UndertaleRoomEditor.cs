@@ -472,6 +472,8 @@ public class UndertaleRoomEditor : Control
         readonly UndertaleRoom room;
         readonly List<RoomItem> roomItems;
 
+        readonly List<RoomRenderer.RenderCommandsBuilder.IRenderCommand> renderCommands;
+
         readonly uint roomWidth;
         readonly uint roomHeight;
 
@@ -492,7 +494,11 @@ public class UndertaleRoomEditor : Control
             scaling = editor.scaling;
 
             room = vm.Room;
+
+            // TODO: Remove this
             roomItems = Updater.MakeRoomItems(room);
+
+            renderCommands = new RoomRenderer.RenderCommandsBuilder(room).RenderCommands;
 
             roomWidth = room.Width;
             roomHeight = room.Height;
@@ -544,10 +550,7 @@ public class UndertaleRoomEditor : Control
                 canvas.Translate((float)translation.X, (float)translation.Y);
                 canvas.Scale((float)scaling);
 
-                editor.rendererInstance.Room = room;
-                editor.rendererInstance.RoomItems = roomItems;
-                editor.rendererInstance.Canvas = canvas;
-                editor.rendererInstance.RenderRoom();
+                editor.rendererInstance.RenderCommands(renderCommands, canvas);
 
                 if (isGridEnabled)
                 {
