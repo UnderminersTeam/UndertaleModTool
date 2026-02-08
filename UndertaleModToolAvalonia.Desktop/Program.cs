@@ -31,6 +31,7 @@ class Program
     public static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
+            // NOTE: Software rendering on Linux to avoid crashes, I don't know why that's happening.
+            .With(new X11PlatformOptions() { RenderingMode = [X11RenderingMode.Software] })
             .LogToTrace();
-
 }
