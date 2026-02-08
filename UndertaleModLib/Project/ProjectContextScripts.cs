@@ -59,8 +59,8 @@ partial class ProjectContext
         foreach (string relativePath in relativePathList)
         {
             // Get path to script file
-            string path = Path.GetFullPath(Path.Join(_mainDirectory, relativePath));
-            Paths.VerifyWithinDirectory(_mainDirectory, path);
+            string path = Path.GetFullPath(Path.Join(MainDirectory, relativePath));
+            Paths.VerifyWithinDirectory(MainDirectory, path);
 
             // Load script contents
             string scriptText;

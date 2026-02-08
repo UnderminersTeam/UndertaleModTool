@@ -31,7 +31,7 @@ partial class ProjectContext
         List<SerializableCode> loadedCodeAssets = new(64);
         List<ISerializableTextureProjectAsset> loadedTextureAssets = new(64);
         HashSet<string> excludeDirectorySet = [.. _mainOptions.ExcludeDirectories];
-        foreach (string directory in Directory.EnumerateDirectories(_mainDirectory))
+        foreach (string directory in Directory.EnumerateDirectories(MainDirectory))
         {
             // Skip directories that are irregular, start with ".", or are excluded based on main options
             DirectoryInfo info = new(directory);
