@@ -127,6 +127,16 @@ public class UndertaleBackground : UndertaleNamedResource, IProjectAsset, INotif
     /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
 
+    /// <remarks>
+    /// GM 2024.14.1+ only.
+    /// </remarks>
+    public uint GMS2TileSeparationX { get; set; } = 0;
+
+    /// <remarks>
+    /// GM 2024.14.1+ only.
+    /// </remarks>
+    public uint GMS2TileSeparationY { get; set; } = 0;
+
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
     {
@@ -140,6 +150,11 @@ public class UndertaleBackground : UndertaleNamedResource, IProjectAsset, INotif
             writer.Write(GMS2VersionNumber);
             writer.Write(GMS2TileWidth);
             writer.Write(GMS2TileHeight);
+            if (writer.undertaleData.IsVersionAtLeast(2024, 14, 1))
+            {
+                writer.Write(GMS2TileSeparationX);
+                writer.Write(GMS2TileSeparationY);
+            }
             writer.Write(GMS2OutputBorderX);
             writer.Write(GMS2OutputBorderY);
             writer.Write(GMS2TileColumns);
@@ -174,6 +189,11 @@ public class UndertaleBackground : UndertaleNamedResource, IProjectAsset, INotif
             GMS2VersionNumber = reader.ReadUInt32();
             GMS2TileWidth = reader.ReadUInt32();
             GMS2TileHeight = reader.ReadUInt32();
+            if (reader.undertaleData.IsVersionAtLeast(2024, 14, 1))
+            {
+                GMS2TileSeparationX = reader.ReadUInt32();
+                GMS2TileSeparationY = reader.ReadUInt32();
+            }
             GMS2OutputBorderX = reader.ReadUInt32();
             GMS2OutputBorderY = reader.ReadUInt32();
             GMS2TileColumns = reader.ReadUInt32();

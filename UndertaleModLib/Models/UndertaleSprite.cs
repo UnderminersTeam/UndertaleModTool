@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using UndertaleModLib.Util;
 using UndertaleModLib.Project;
 using UndertaleModLib.Project.SerializableAssets;
 
@@ -162,10 +163,11 @@ public class UndertaleSprite : UndertaleNamedResource, IProjectAsset, PrePaddedO
     public UndertaleYYSWF YYSWF { get => _YYSWF; set { _YYSWF = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(YYSWF))); } }
 
     public int VectorVersion { get; set; }
-    public UndertaleShapeData<UndertaleVectorSubShapeData> VectorShape { get; set; }
+    public UndertaleObservableList<UndertaleVectorShapeData> VectorShapes { get; set; }
     public int VectorCollisionMaskWidth { get; set; }
     public int VectorCollisionMaskHeight { get; set; }
-    public byte[] VectorCollisionMaskRLEData { get; set; }
+    public UndertaleObservableList<byte[]> VectorCollisionMaskRLEData { get; set; }
+    public UndertaleObservableList<int> VectorFrameToShapeMap { get; set; }
 
     public UndertaleSequence V2Sequence;
 
@@ -201,6 +203,9 @@ public class UndertaleSprite : UndertaleNamedResource, IProjectAsset, PrePaddedO
         _YYSWF = null;
         V2Sequence = null;
         V3NineSlice = null;
+        VectorShapes = null;
+        VectorCollisionMaskRLEData = null;
+        VectorFrameToShapeMap = null;
     }
 
     /// <inheritdoc/>
@@ -475,24 +480,40 @@ public class UndertaleSprite : UndertaleNamedResource, IProjectAsset, PrePaddedO
 
                     writer.WriteUndertaleObject(Textures);
 
-                    writer.Align(4);
-                    writer.Write(3); // shape version
-                    writer.WriteUndertaleObject(VectorShape);
-
-                    if (VectorCollisionMaskRLEData is not null)
+                    if (VectorVersion >= 4)
                     {
-                        writer.Write(1);
-                        writer.Write(VectorCollisionMaskWidth);
-                        writer.Write(VectorCollisionMaskHeight);
-                        writer.Write(VectorCollisionMaskRLEData.Length);
-                        writer.Write(VectorCollisionMaskRLEData);
-                        writer.Align(4);
+                        writer.Write(VectorFrameToShapeMap.Count);
+                        foreach (var n in VectorFrameToShapeMap)
+                        {
+                            writer.Write(n);
+                        }
+                        writer.Write(VectorShapes.Count);
+                        foreach (var s in VectorShapes)
+                        {
+                            writer.WriteUndertaleObject(s);
+                        }
                     }
                     else
                     {
-                        writer.Write(0);
-                        writer.Write(0);
-                        writer.Write(0);
+                        DebugUtil.Assert(VectorShapes.Count == 1, "There must be only 1 vector collision mask before vector version 4");
+                        writer.WriteUndertaleObject(VectorShapes[0]);
+                    }
+
+                    writer.Write(VectorCollisionMaskRLEData.Count);
+                    writer.Write(VectorCollisionMaskWidth);
+                    writer.Write(VectorCollisionMaskHeight);
+                    if (VectorCollisionMaskRLEData.Count > 0)
+                    {
+                        if (VectorVersion <= 3)
+                        {
+                            DebugUtil.Assert(VectorCollisionMaskRLEData.Count == 1, "There must be only 1 vector collision mask before vector version 4");
+                        }
+                        foreach (var data in VectorCollisionMaskRLEData)
+                        {
+                            writer.Write(data.Length);
+                            writer.Write(data);
+                            writer.Align(4);
+                        }
                     }
 
                     break;
@@ -695,22 +716,42 @@ public class UndertaleSprite : UndertaleNamedResource, IProjectAsset, PrePaddedO
                 case SpriteType.Vector:
                 {
                     VectorVersion = reader.ReadInt32();
-                    Util.DebugUtil.Assert(VectorVersion == 3, "Invalid vector format version number, expected 3, got " + VectorVersion);
+                    DebugUtil.Assert(VectorVersion == 3 || VectorVersion == 4, "Invalid vector format version number, expected 3 or 4, got " + VectorVersion);
+                    if (VectorVersion >= 4 && !reader.undertaleData.IsVersionAtLeast(2024, 14))
+                        reader.undertaleData.SetGMS2Version(2024, 14);
 
                     Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
 
-                    reader.Align(4);
-                    int shapeVersion = reader.ReadInt32();
-                    Util.DebugUtil.Assert(shapeVersion == 3, "Invalid shape format version number, expected 3, got " + shapeVersion);
-                    VectorShape = reader.ReadUndertaleObjectNoPool<UndertaleShapeData<UndertaleVectorSubShapeData>>();
+                    if (VectorVersion >= 4)
+                    {
+                        int mapCount = reader.ReadInt32();
+                        VectorFrameToShapeMap = new(mapCount);
+                        for (int i = 0; i < mapCount; i++)
+                        {
+                            VectorFrameToShapeMap.InternalAdd(reader.ReadInt32());
+                        }
 
-                    bool collisionMaskExists = reader.ReadBoolean();
+                        int shapeCount = reader.ReadInt32();
+                        VectorShapes = new(shapeCount);
+                        for (int i = 0; i < shapeCount; i++)
+                        {
+                            VectorShapes.InternalAdd(reader.ReadUndertaleObjectNoPool<UndertaleVectorShapeData>());
+                        }
+                    }
+                    else
+                    {
+                        VectorFrameToShapeMap = new(){ 0 };
+                        VectorShapes = new() { reader.ReadUndertaleObjectNoPool<UndertaleVectorShapeData>() };
+                    }
+                         
+                    int collisionMaskCount = VectorVersion >= 4 ? reader.ReadInt32() : (reader.ReadBoolean() ? 1 : 0);
                     VectorCollisionMaskWidth = reader.ReadInt32();
                     VectorCollisionMaskHeight = reader.ReadInt32();
-                    if (collisionMaskExists)
+                    VectorCollisionMaskRLEData = new(collisionMaskCount);
+                    for (int i = 0; i < collisionMaskCount; i++)
                     {
                         int dataLength = reader.ReadInt32();
-                        VectorCollisionMaskRLEData = reader.ReadBytes(dataLength);
+                        VectorCollisionMaskRLEData.InternalAdd(reader.ReadBytes(dataLength));
                         reader.Align(4);
                     }
 
@@ -790,8 +831,12 @@ public class UndertaleSprite : UndertaleNamedResource, IProjectAsset, PrePaddedO
                     if (swfVersion == 8)
                         count += 1 + UndertaleSimpleList<TextureEntry>.UnserializeChildObjectCount(reader);
 
-                    // "YYSWF" classes are not in the pool
-                    return count;
+                    // If we have a sequence, jump directly to its offset (not worth parsing effort to count everything not included in the pool)
+                    if (sequenceOffset != 0)
+                    {
+                        reader.AbsPosition = sequenceOffset;
+                    }
+                    break;
 
                 case SpriteType.Spine:
                 {
@@ -836,6 +881,12 @@ public class UndertaleSprite : UndertaleNamedResource, IProjectAsset, PrePaddedO
                 case SpriteType.Vector:
                     reader.Position += 4; // skip version
                     count += 1 + UndertaleSimpleList<TextureEntry>.UnserializeChildObjectCount(reader);
+
+                    // If we have a sequence, jump directly to its offset (not worth parsing effort to count everything not included in the pool)
+                    if (sequenceOffset != 0)
+                    {
+                        reader.AbsPosition = sequenceOffset;
+                    }
                     break;
             }
 
@@ -1879,7 +1930,7 @@ public class UndertaleShapeData<T> : UndertaleObject where T : UndertaleObject, 
 
 
     /// <inheritdoc />
-    public void Serialize(UndertaleWriter writer)
+    public virtual void Serialize(UndertaleWriter writer)
     {
         writer.Write(MinX);
         writer.Write(MaxX);
@@ -1889,7 +1940,7 @@ public class UndertaleShapeData<T> : UndertaleObject where T : UndertaleObject, 
     }
 
     /// <inheritdoc />
-    public void Unserialize(UndertaleReader reader)
+    public virtual void Unserialize(UndertaleReader reader)
     {
         MinX = reader.ReadSingle();
         MaxX = reader.ReadSingle();
@@ -1901,6 +1952,27 @@ public class UndertaleShapeData<T> : UndertaleObject where T : UndertaleObject, 
         {
             StyleGroups.InternalAdd(reader.ReadUndertaleObjectNoPool<UndertaleStyleGroup<T>>());
         }
+    }
+}
+
+[PropertyChanged.AddINotifyPropertyChangedInterface]
+public class UndertaleVectorShapeData : UndertaleShapeData<UndertaleVectorSubShapeData>
+{
+    public int Version { get; set; }
+
+    public override void Serialize(UndertaleWriter writer)
+    {
+        writer.Align(4);
+        writer.Write(Version);
+        base.Serialize(writer);
+    }
+
+    public override void Unserialize(UndertaleReader reader)
+    {
+        reader.Align(4);
+        Version = reader.ReadInt32();
+        Util.DebugUtil.Assert(Version == 3 || Version == 4, "Invalid shape format version number, expected 3 or 4, got " + Version);
+        base.Unserialize(reader);
     }
 }
 

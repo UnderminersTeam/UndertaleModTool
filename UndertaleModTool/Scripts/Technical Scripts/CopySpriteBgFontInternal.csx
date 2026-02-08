@@ -84,7 +84,8 @@ await Task.Run(() =>
                 nativeBG.GMS2TileColumns = donorBG.GMS2TileColumns;
                 nativeBG.GMS2ItemsPerTileCount = donorBG.GMS2ItemsPerTileCount;
                 nativeBG.GMS2TileCount = donorBG.GMS2TileCount;
-                nativeBG.GMS2ExportedSprite = donorBG.GMS2ExportedSprite;
+                // FIXME: this doesn't properly work due to the cross-asset references required, but usually this doesn't matter...
+                nativeBG.GMS2ExportedSprite = null;
                 nativeBG.GMS2FrameLength = donorBG.GMS2FrameLength;
                 nativeBG.GMS2TileIds = donorBG.GMS2TileIds;
                 DumpBackground(donorBG);

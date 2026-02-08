@@ -38,7 +38,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
     /// <summary>
     /// Size of the texture attached to this texture page in bytes. Only appears in GM 2022.3+.
     /// </summary>
-    private uint _textureBlockSize { get; set; }
+    private uint _textureBlockSize { get; set; } = 0;
 
     /// <summary>
     /// The position of the placeholder <see cref="_textureBlockSize">TextureBlockSize</see> value
@@ -278,6 +278,14 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         }
     }
 
+    /// <summary>
+    /// Returns the parsed texture block size, or 0 if none is available, e.g. on older GM versions.
+    /// </summary>
+    internal uint GetTextureBlockSize()
+    {
+        return _textureBlockSize;
+    }
+
     /// <inheritdoc />
     public override string ToString()
     {
@@ -357,7 +365,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         /// <remarks>
         /// All data between the actual end position and this maximum end position should be 0x00 byte padding.
         /// </remarks>
-        private int _maxEndOfStreamPosition { get; set; } = -1;
+        private long _maxEndOfStreamPosition { get; set; } = -1;
 
         /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
@@ -421,7 +429,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         /// <remarks>
         /// All data between the actual end position and this maximum end position should be padding (zero bytes).
         /// </remarks>
-        public void SetMaxEndOfStreamPosition(int position)
+        public void SetMaxEndOfStreamPosition(long position)
         {
             _maxEndOfStreamPosition = position;
         }

@@ -11,18 +11,18 @@ namespace UndertaleModLib.Models;
 public class UndertaleAnimationCurve : UndertaleNamedResource, IProjectAsset, IDisposable
 {
     /// <summary>
-    /// TODO: unknown
+    /// Unused enum: The curve type is set per channel unlike in GMS2 where it is set per animation curve
     /// </summary>
     public enum GraphTypeEnum : uint
     {
         /// <summary>
-        /// Unknown
+        /// Value is never set by the compiler
         /// </summary>
-        Unknown0 = 0,
+        Bezier = 0,
         /// <summary>
-        /// Unknown
+        /// Value is always set by the compiler
         /// </summary>
-        Unknown1 = 1
+        Graph = 1
     }
 
     /// <summary>

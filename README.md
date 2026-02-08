@@ -2,28 +2,27 @@
 
 [![Underminers Discord](https://img.shields.io/discord/566861759210586112?label=Discord&logo=discord&logoColor=white)](https://discord.gg/hnyMDypMbN) [![GitHub](https://img.shields.io/github/license/UnderminersTeam/UndertaleModTool?logo=github)](https://github.com/UnderminersTeam/UndertaleModTool/blob/master/LICENSE.txt)
 
-(seeing such an amazing tool fills you with DETERMINATION.)
+The most complete tool for modding, decompiling and unpacking Undertale (and other GameMaker games!)
 
-Heya. I heard you like digging deep into GameMaker games like Undertale/Deltarune, so here's a tool just for you!
+> *\* (Seeing such a specialized tool, the culmination of work from many amazing contributors...)*
 
-![Flowey: Now YOU are the GOD of this world.](images/flowey.gif)
-
+> *\* (It fills you with determination.)*
 
 # Downloads
 
 Both the latest stable release and the most cutting edge version can be downloaded from the table below!
-Note, that you can update to the bleeding edge releases at any time from within the settings menu of UndertaleModTool.  
+The nightly releases are more likely to contain issues, but have the most recent features and fixes.
 
 | Releases 	| Status 	|
 |:---:	|----------	|
-| Stable 	| [![Latest Stable Release](https://img.shields.io/github/downloads/UnderminersTeam/UndertaleModTool/0.8.3.0/total)](https://github.com/UnderminersTeam/UndertaleModTool/releases/tag/0.8.3.0) |
-| Bleeding edge 	| [![Latest Bleeding Edge](https://img.shields.io/github/downloads/UnderminersTeam/UndertaleModTool/bleeding-edge/total)](https://github.com/UnderminersTeam/UndertaleModTool/releases/tag/bleeding-edge) |
+| Stable 	| [![Latest Stable Release](https://img.shields.io/github/downloads/UnderminersTeam/UndertaleModTool/latest/total)](https://github.com/UnderminersTeam/UndertaleModTool/releases/latest) |
+| Nightly 	| [![Latest Nightly](https://img.shields.io/github/downloads/UnderminersTeam/UndertaleModTool/nightly/total)](https://github.com/UnderminersTeam/UndertaleModTool/releases/tag/nightly) |
 
 It's worth noting that UndertaleModTool has different builds per release. The differences are as follows:
 
-* `.NET bundled` - bundles the required .NET runtime version needed to run the tool alongside it. All stable releases are .NET bundled, so you don't have to worry about installing the necessary runtime.
 * `Single file` - the tool is only one executable, with all dependencies embedded within it. This does make your folders cleaner, however it also causes some unexpected stability issues.
-* `Non-single File` - all dependencies are not embedded within the executable, but are now located right next to it. Choose this if you don't care about finding the right executable in-between of ~300 dll's, or if the stability issues from the `Single file` build affect you.
+* `Non-single file` - all dependencies are not embedded within the executable, but are now located right next to it. Choose this if you don't care about finding the right executable in-between of ~300 DLL files, or if the stability issues from the `Single file` build affect you.
+* `.NET bundled` - bundles the required .NET runtime version needed to run the tool alongside it. All stable releases are .NET bundled, so you don't have to worry about installing the necessary runtime.
 
 # Main Features
 
@@ -63,7 +62,9 @@ All contributions are welcome! If you find a bug, a data file that does not load
 
 # Compilation Instructions
 
-In order to compile the repo yourself, the `.NET Core 8 SDK` or later is required.
+In order to compile the repo yourself, the `.NET Core 10 SDK` or later is required.
+
+When cloning using Git, make sure to recursively clone submodules (e.g. with `--recurse-submodules`), as a submodule is used for the `Underanalyzer` dependency.
 
 The following projects can be compiled:  
 - `UndertaleModLib`: The core library used by all other projects.
@@ -102,3 +103,5 @@ as well as all the other contributors:
 </p>
 
 And of course, special thanks to Toby Fox and the whole Undertale team for making the game(s) ;)
+
+![Flowey: Now YOU are the GOD of this world.](images/flowey.gif)

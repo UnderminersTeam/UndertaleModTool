@@ -1238,15 +1238,32 @@ public class UndertaleSequence : UndertaleNamedResource, IProjectAsset, INotifyP
     /// Keyframe store for text keyframes.
     /// </summary>
     public sealed class TextKeyframes : TrackKeyframes<TextKeyframes.Data>
-    {
+    { 
+        public enum WrapMode : int
+        {
+            Default,
+            SplitWords
+        }
+
+        public enum Origin : int
+        {
+            TopLeft,
+            TopCenter,
+            TopRight,
+            MiddleLeft,
+            MiddleCenter,
+            MiddleRight,
+            BottomLeft,
+            BottomCenter,
+            BottomRight,
+            Custom
+        }
+        
         /// <summary>
         /// Text keyframe data, containing various text display properties.
         /// </summary>
-        public sealed class Data : UndertaleObject, IStaticChildObjectsSize
+        public sealed class Data : UndertaleObject
         {
-            /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
-            public static readonly uint ChildObjectsSize = 16;
-
             // Backing alignment field, containing vertical and horizontal components
             private int _alignment;
 
@@ -1283,6 +1300,10 @@ public class UndertaleSequence : UndertaleNamedResource, IProjectAsset, INotifyP
             /// </summary>
             public int FontIndex { get; set; }
 
+            public WrapMode WrapMode { get; set; }
+
+            public Origin Origin { get; set; }
+
             /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
@@ -1290,6 +1311,11 @@ public class UndertaleSequence : UndertaleNamedResource, IProjectAsset, INotifyP
                 writer.Write(Wrap);
                 writer.Write(_alignment);
                 writer.Write(FontIndex);
+                if (writer.undertaleData.IsVersionAtLeast(2024, 14))
+                {
+                    writer.Write((int)WrapMode);
+                    writer.Write((int)Origin);
+                }
             }
 
             /// <inheritdoc />
@@ -1299,6 +1325,24 @@ public class UndertaleSequence : UndertaleNamedResource, IProjectAsset, INotifyP
                 Wrap = reader.ReadBoolean();
                 _alignment = reader.ReadInt32();
                 FontIndex = reader.ReadInt32();
+                if (reader.undertaleData.IsVersionAtLeast(2024, 14))
+                {
+                    WrapMode = (WrapMode)reader.ReadInt32();
+                    Origin = (Origin)reader.ReadInt32();
+                }
+            }
+
+            /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+            public static uint UnserializeChildObjectCount(UndertaleReader reader)
+            {
+                reader.Position += 16;
+                
+                if (reader.undertaleData.IsVersionAtLeast(2024, 14))
+                {
+                    reader.Position += 8; // WrapMode, Origin
+                }
+
+                return 0;
             }
         }
     }
