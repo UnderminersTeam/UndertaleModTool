@@ -9,7 +9,37 @@ namespace UndertaleModLib.Compiler;
 /// <summary>
 /// Record of builtin variable information.
 /// </summary>
-public record VariableInfo(string Name, bool IsGlobal, bool CanSet, bool IsAutomaticArray = false) : IBuiltinVariable;
+public record VariableInfo : IBuiltinVariable
+{
+    /// <summary>
+    /// Name of the builtin variable.
+    /// </summary>
+    public string Name { get; }
+
+    /// <summary>
+    /// Whether or not the builtin variable is a global variable.
+    /// </summary>
+    public bool IsGlobal { get; }
+
+    /// <summary>
+    /// Whether or not the builtin variable will automatically
+    /// add an array index when compiled, if one is not already present.
+    /// </summary>
+    public bool IsAutomaticArray { get; }
+
+    /// <summary>
+    /// Whether or not the builtin variable can be set.
+    /// </summary>
+    public bool CanSet { get; }
+
+    public VariableInfo(string name, bool canSet, bool isGlobal = true, bool isAutoArray = false)
+    {
+        Name = name;
+        CanSet = canSet;
+        IsGlobal = IsGlobal;
+        IsAutomaticArray = isAutoArray;
+    }
+}
 
 /// <summary>
 /// Record of builtin function information.
@@ -30,21 +60,22 @@ public record FunctionInfo : IBuiltinFunction
     /// </summary>
     public FunctionClassification Classification { get; } = FunctionClassification.None;
 
-    public FunctionInfo(string name, int numArguments)
+    public FunctionInfo(string name, int numArgs)
     {
         Name = name;
-        MinArguments = numArguments;
-        MaxArguments = numArguments;
+        MinArguments = numArgs;
+        MaxArguments = numArgs;
     }
 
-    public FunctionInfo(string name, int minNumArguments, int maxNumArguments)
+    public FunctionInfo(string name, int minNumArgs, int maxNumArgs)
     {
         Name = name;
-        MinArguments = minNumArguments;
-        MaxArguments = maxNumArguments;
+        MinArguments = minNumArgs;
+        MaxArguments = maxNumArgs;
     }
 
-    public FunctionInfo(string name, int numArguments, FunctionClassification classification) : this(name, numArguments)
+    public FunctionInfo(string name, int numArgs, FunctionClassification classification)
+        : this(name, numArgs)
     {
         Classification = classification;
     }
@@ -55,14 +86,14 @@ public record FunctionInfo : IBuiltinFunction
 /// </summary>
 public class BuiltinList : IBuiltins
 {
-    public Dictionary<string, double> Constants { get; private set; } = null;
-    public Dictionary<string, VariableInfo> GlobalNotArray { get; private set; } = null;
-    public Dictionary<string, VariableInfo> GlobalArray { get; private set; } = null;
-    public Dictionary<string, VariableInfo> Instance { get; private set; } = null;
-    public Dictionary<string, VariableInfo> InstanceLimitedEvent { get; private set; } = null;
     public Dictionary<string, FunctionInfo> Functions { get; private set; } = null;
+    public Dictionary<string, double> Constants { get; private set; } = null;
+    public Dictionary<string, VariableInfo> Globals { get; private set; } = null;
+    public Dictionary<string, VariableInfo> GlobalArrays { get; private set; } = null;
+    public Dictionary<string, VariableInfo> InstanceVars { get; private set; } = null;
+    public Dictionary<string, VariableInfo> InstanceLimitedEvent { get; private set; } = null;
 
-    public BuiltinList() 
+    public BuiltinList()
     {
         InitializeMain(null);
     }
@@ -71,6 +102,49 @@ public class BuiltinList : IBuiltins
     {
         InitializeMain(data);
         LoadFunctionsFromData(data);
+    }
+
+    /// <summary>
+    /// Loads builtin functions purely based on functions used by game data already.
+    /// </summary>
+    private void LoadFunctionsFromData(UndertaleData data)
+    {
+        if (data.Functions is null)
+        {
+            // No functions (probably YYC), so don't do this
+            return;
+        }
+
+        // First, make script lookup to avoid script names being marked as builtin
+        HashSet<string> scriptLookup = new(data.Scripts.Count);
+        foreach (UndertaleScript script in data.Scripts)
+        {
+            string name = script?.Name?.Content;
+            if (name is null)
+                continue;
+            if (name.StartsWith("gml_Script_", StringComparison.Ordinal))
+                continue;
+
+            scriptLookup.Add(name);
+        }
+
+        // Load in all functions that aren't detected as scripts, and which aren't already builtin functions
+        Functions ??= new(data.Functions.Count);
+        foreach (UndertaleFunction function in data.Functions)
+        {
+            string name = function?.Name?.Content;
+            if (name is null)
+                continue;
+            if (name.StartsWith("gml_Script_", StringComparison.Ordinal))
+                continue;
+            if (scriptLookup.Contains(name))
+                continue;
+            if (Functions.ContainsKey(name))
+            {
+                continue;
+            }
+            DefineFunction(name);
+        }
     }
 
     /// <inheritdoc/>
@@ -86,15 +160,15 @@ public class BuiltinList : IBuiltins
     /// <inheritdoc/>
     public IBuiltinVariable LookupBuiltinVariable(string name)
     {
-        if (Instance.TryGetValue(name, out VariableInfo instanceVar))
+        if (InstanceVars.TryGetValue(name, out VariableInfo instanceVar))
         {
             return instanceVar;
         }
-        if (GlobalNotArray.TryGetValue(name, out VariableInfo globalNotArrayVar))
+        if (Globals.TryGetValue(name, out VariableInfo globalNotArrayVar))
         {
             return globalNotArrayVar;
         }
-        if (GlobalArray.TryGetValue(name, out VariableInfo globalArrayVar))
+        if (GlobalArrays.TryGetValue(name, out VariableInfo globalArrayVar))
         {
             return globalArrayVar;
         }
@@ -122,50 +196,49 @@ public class BuiltinList : IBuiltins
     /// <summary>
     /// Helper function to define a builtin function with a specific number of arguments.
     /// </summary>
-    private void DefineFunction(string name, int numArguments)
+    private void DefineFunction(string name, int numArgs)
     {
-        Functions[name] = new FunctionInfo(name, numArguments);
+        Functions[name] = new FunctionInfo(name, numArgs);
     }
 
     /// <summary>
     /// Helper function to define a builtin function with a specific number of arguments, and a function classification.
     /// </summary>
-    private void DefineFunction(string name, int numArguments, FunctionClassification classification)
+    private void DefineFunction(string name, int numArgs, FunctionClassification classification)
     {
-        Functions[name] = new FunctionInfo(name, numArguments, classification);
+        Functions[name] = new FunctionInfo(name, numArgs, classification);
     }
 
     /// <summary>
-    /// Loads builtin functions purely based on functions used by game data already.
+    /// Helper function to define a global variable with the given name and assignability.
     /// </summary>
-    private void LoadFunctionsFromData(UndertaleData data)
+    private void DefineGlobal(string name, bool canSet)
     {
-        if (data.Functions is null)
-        {
-            // No functions (probably YYC), so don't do this
-            return;
-        }
+        Globals[name] = new VariableInfo(name, canSet);
+    }
 
-        // First, make script lookup to avoid script names being marked as builtin
-        HashSet<string> scriptLookup = new(data.Scripts.Count);
-        foreach (UndertaleScript script in data.Scripts)
-        {
-            if (script?.Name?.Content is string name && !name.StartsWith("gml_Script_", StringComparison.Ordinal))
-            {
-                scriptLookup.Add(name);
-            }
-        }
+    /// <summary>
+    /// Helper function to define a global array variable with the given name and assignability.
+    /// </summary>
+    private void DefineGlobalArray(string name, bool canSet)
+    {
+        GlobalArrays[name] = new VariableInfo(name, canSet);
+    }
 
-        // Load in all functions that aren't detected as scripts, and which aren't already builtin functions
-        Functions ??= new(data.Functions.Count);
-        foreach (UndertaleFunction function in data.Functions)
-        {
-            if (function?.Name?.Content is string name && !name.StartsWith("gml_Script_", StringComparison.Ordinal) && 
-                !scriptLookup.Contains(name) && !Functions.ContainsKey(name))
-            {
-                DefineFunction(name);
-            }
-        }
+    /// <summary>
+    /// Helper function to define a global automatic array variable with the given name and assignability.
+    /// </summary>
+    private void DefineGlobalAutoArray(string name, bool canSet)
+    {
+        GlobalArrays[name] = new VariableInfo(name, canSet, true, true);
+    }
+
+    /// <summary>
+    /// Helper function to define an instance (self) variable with the given name and assignability.
+    /// </summary>
+    private void DefineInstanceVar(string name, bool canSet)
+    {
+        InstanceVars[name] = new VariableInfo(name, canSet, false);
     }
 
     /// <summary>
@@ -173,6 +246,15 @@ public class BuiltinList : IBuiltins
     /// </summary>
     private void InitializeMain(UndertaleData data)
     {
+        var gen8 = data?.GeneralInfo;
+        uint major = gen8?.Major ?? 0;
+        uint minor = gen8?.Minor ?? 0;
+        uint release = gen8?.Release ?? 0;
+        uint build = gen8?.Build ?? 0;
+
+        bool gms2 = major >= 2;
+        bool gms2_3 = major > 2 || (major == 2 && minor >= 3);
+
         // Functions
         Functions = new(4096);
         DefineFunction("@@This@@", 0);
@@ -206,7 +288,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("matrix_stack_clear", 0);
         DefineFunction("matrix_stack_top", 0);
         DefineFunction("matrix_stack_is_empty", 0);
-        if (data?.GeneralInfo?.Major < 2)
+        if (gms2)
         {
             DefineFunction("d3d_start", 0);
             DefineFunction("d3d_end", 0);
@@ -296,7 +378,7 @@ public class BuiltinList : IBuiltins
             DefineFunction("d3d_light_enable", 2);
             DefineFunction("d3d_set_lighting", 1);
         }
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2)
         {
             DefineFunction("action_path_old", 3);
             DefineFunction("action_set_sprite", 2);
@@ -706,7 +788,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("instance_furthest", 3);
         DefineFunction("instance_place", 3);
         DefineFunction("instance_place_list", 5);
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2)
         {
             DefineFunction("instance_create", 3);
         }
@@ -823,7 +905,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("colour_get_hue", 1);
         DefineFunction("colour_get_saturation", 1);
         DefineFunction("colour_get_value", 1);
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2)
         {
             DefineFunction("draw_set_blend_mode", 1);
             DefineFunction("draw_set_blend_mode_ext", 2);
@@ -878,7 +960,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("draw_vertex_texture_color", 6);
         DefineFunction("draw_vertex_texture_colour", 6);
         DefineFunction("sprite_get_uvs", 2);
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2)
         {
             DefineFunction("background_get_uvs", 1);
             DefineFunction("background_get_texture", 1);
@@ -896,7 +978,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("texture_get_height", 1);
         DefineFunction("texture_global_scale", 1);
         DefineFunction("texture_get_uvs", 1);
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             DefineFunction("texture_prefetch", 1);
             DefineFunction("texture_flush", 1);
@@ -907,7 +989,7 @@ public class BuiltinList : IBuiltins
             DefineFunction("texturegroup_get_fonts", 1);
             DefineFunction("texturegroup_get_tilesets", 1);
         }
-        if (data?.GeneralInfo?.Major >= 2 || data?.GeneralInfo?.Minor >= 3) // Since 1.3?
+        if (gms2_3)
         {
             DefineFunction("draw_enable_swf_aa", 1);
             DefineFunction("draw_set_swf_aa_level", 1);
@@ -946,7 +1028,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("draw_sprite_general", 16);
         DefineFunction("draw_sprite_tiled", 4);
         DefineFunction("draw_sprite_tiled_ext", 8);
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2)
         {
             DefineFunction("draw_background", 3);
             DefineFunction("draw_background_ext", 8);
@@ -958,7 +1040,7 @@ public class BuiltinList : IBuiltins
             DefineFunction("draw_background_tiled", 3);
             DefineFunction("draw_background_tiled_ext", 7);
         }
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2)
         {
             DefineFunction("tile_get_x", 1);
             DefineFunction("tile_get_y", 1);
@@ -1074,14 +1156,14 @@ public class BuiltinList : IBuiltins
         DefineFunction("mouse_check_button_released", 1);
         DefineFunction("mouse_wheel_up", 0);
         DefineFunction("mouse_wheel_down", 0);
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             DefineFunction("keyboard_virtual_show", 4);
             DefineFunction("keyboard_virtual_hide", 0);
             DefineFunction("keyboard_virtual_status", 0);
             DefineFunction("keyboard_virtual_height", 0);
         }
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2)
         {
             DefineFunction("joystick_exists", 1, FunctionClassification.Joystick);
             DefineFunction("joystick_direction", 1, FunctionClassification.Joystick);
@@ -1106,7 +1188,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("gpio_clear", 1);
         DefineFunction("gpio_get", 1);
         DefineFunction("gpio_set_mode", 2);
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             DefineFunction("gesture_drag_time", 1);
             DefineFunction("gesture_drag_distance", 1);
@@ -1142,7 +1224,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("is_vec3", 1);
         DefineFunction("is_vec4", 1);
         DefineFunction("is_matrix", 1);
-        if (data?.IsVersionAtLeast(2, 3) == true)
+        if (gms2_3)
         {
             DefineFunction("is_numeric", 1);
             DefineFunction("is_nan", 1);
@@ -1167,7 +1249,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("array_equals", 2);
         DefineFunction("array_create");
         DefineFunction("array_copy", 5);
-        if (data?.IsVersionAtLeast(2, 3) == true)
+        if (gms2_3)
         {
             DefineFunction("array_length", 1);
             DefineFunction("array_resize", 2);
@@ -1217,7 +1299,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("variable_instance_get", 2);
         DefineFunction("variable_instance_set", 3);
         DefineFunction("variable_instance_get_names", 1);
-        if (data?.IsVersionAtLeast(2, 3) == true)
+        if (gms2_3)
         {
             DefineFunction("variable_instance_names_count", 1);
             DefineFunction("variable_struct_exists", 2);
@@ -1317,7 +1399,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("string_replace_all", 3);
         DefineFunction("string_count", 2);
         DefineFunction("string_hash_to_newline", 1);
-        if (data?.IsVersionAtLeast(2, 3) == true)
+        if (gms2_3)
         {
             DefineFunction("string_pos_ext", 3);
             DefineFunction("string_last_pos", 2);
@@ -1335,7 +1417,6 @@ public class BuiltinList : IBuiltins
             DefineFunction("string_concat");
             DefineFunction("string_concat_ext", 1);
             DefineFunction("string_foreach", 2);
-
         }
         DefineFunction("point_distance", 4);
         DefineFunction("point_distance_3d", 6);
@@ -1469,7 +1550,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("part_system_automatic_draw", 2);
         DefineFunction("part_system_update", 1);
         DefineFunction("part_system_drawit", 1);
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             DefineFunction("part_system_create_layer", 2);
             DefineFunction("part_system_get_layer", 1);
@@ -1534,13 +1615,13 @@ public class BuiltinList : IBuiltins
         DefineFunction("sprite_prefetch_multi", 1);
         DefineFunction("sprite_flush", 1);
         DefineFunction("sprite_flush_multi", 1);
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             DefineFunction("sprite_set_speed", 3);
             DefineFunction("sprite_get_speed_type", 1);
             DefineFunction("sprite_get_speed", 1);
         }
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2)
         {
             DefineFunction("background_name", 1);
             DefineFunction("background_exists", 1);
@@ -1568,7 +1649,7 @@ public class BuiltinList : IBuiltins
             DefineFunction("background_flush", 1);
             DefineFunction("background_flush_multi", 1);
         }
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2)
         {
             DefineFunction("sound_name", 1);
             DefineFunction("sound_exists", 1);
@@ -1745,7 +1826,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("object_get_sprite", 1);
         DefineFunction("object_get_solid", 1);
         DefineFunction("object_get_visible", 1);
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2)
         {
             DefineFunction("object_set_depth", 2);
             DefineFunction("object_get_depth", 1);
@@ -1769,12 +1850,12 @@ public class BuiltinList : IBuiltins
         DefineFunction("room_set_persistent", 2);
         DefineFunction("room_set_background_color", 3);
         DefineFunction("room_set_background_colour", 3);
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2)
         {
             DefineFunction("room_set_background", 12);
             DefineFunction("room_set_view", 16);
         }
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             DefineFunction("room_set_viewport", 7);
             DefineFunction("room_get_viewport", 2);
@@ -1787,18 +1868,18 @@ public class BuiltinList : IBuiltins
         DefineFunction("room_instance_clear", 1);
         DefineFunction("asset_get_index", 1);
         DefineFunction("asset_get_type", 1);
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2)
         {
             DefineFunction("room_tile_add", 9);
             DefineFunction("room_tile_add_ext", 12);
             DefineFunction("room_tile_clear", 1);
         }
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             DefineFunction("room_get_camera", 2);
             DefineFunction("room_set_camera", 3);
         }
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2)
         {
             DefineFunction("sound_play", 1);
             DefineFunction("sound_loop", 1);
@@ -1857,13 +1938,13 @@ public class BuiltinList : IBuiltins
         DefineFunction("analytics_event", 1);
         DefineFunction("analytics_event_ext");
         DefineFunction("ads_set_reward_callback", 1);
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2)
         {
             DefineFunction("draw_enable_alphablend", 1);
         }
         DefineFunction("draw_texture_flush", 0);
         DefineFunction("draw_flush", 0);
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             DefineFunction("gpu_set_blendenable", 1);
             DefineFunction("gpu_set_ztestenable", 1);
@@ -2223,7 +2304,10 @@ public class BuiltinList : IBuiltins
         DefineFunction("buffer_async_group_begin", 1);
         DefineFunction("buffer_async_group_end", 0);
         DefineFunction("buffer_async_group_option", 2);
-        DefineFunction("buffer_get_surface", ((data?.IsVersionAtLeast(2, 3, 1) ?? false) ? 3 : 5)); // be more robust here
+        if (gms2_3 && release >= 1)
+            DefineFunction("buffer_get_surface", 3);
+        else
+            DefineFunction("buffer_get_surface", 5);
         DefineFunction("buffer_set_surface", 5);
         DefineFunction("buffer_set_network_safe", 2);
         DefineFunction("buffer_create_from_vertex_buffer", 3);
@@ -2629,7 +2713,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("xboxlive_set_service_configuration_id", 1);
         DefineFunction("xboxlive_generate_player_session_id", 0);
         DefineFunction("browser_input_capture", 1);
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             DefineFunction("layer_get_id", 1);
             DefineFunction("layer_get_id_at_depth", 1);
@@ -2922,7 +3006,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("switch_bnvib_get_loop_start_position", 1);
         DefineFunction("switch_bnvib_get_length", 1);
         DefineFunction("switch_bnvib_get_sampling_rate", 1);
-        if (data?.GeneralInfo?.Major == 1 && data?.GeneralInfo?.Build <= 1763)
+        if (major == 1 && build <= 1763)
         {
             DefineFunction("immersion_play_effect", 1, FunctionClassification.Immersion);
             DefineFunction("immersion_stop", 0, FunctionClassification.Immersion);
@@ -2930,7 +3014,7 @@ public class BuiltinList : IBuiltins
 
         // TODO: narrow down the versions and move to the correct places?
         // (these are from 2023.11 fnames)
-        if (data?.IsVersionAtLeast(2023) == true)
+        if (major >= 2023)
         {
             DefineFunction("move_and_collide", 3);
             DefineFunction("game_change", 2);
@@ -2954,7 +3038,7 @@ public class BuiltinList : IBuiltins
             DefineFunction("dbg_same_line", 0);
             DefineFunction("dbg_add_font_glyphs");
         }
-        if (data?.IsVersionAtLeast(2, 3) == true)
+        if (gms2_3)
         {
             DefineFunction("scheduler_resolution_set", 1);
             DefineFunction("scheduler_resolution_get", 0);
@@ -3293,10 +3377,9 @@ public class BuiltinList : IBuiltins
         Constants["c_white"] = 16777215.0;
         Constants["c_yellow"] = 65535.0;
         Constants["c_orange"] = 4235519.0;
-        if (data?.GeneralInfo?.Major < 2)
-        {
+        if (!gms2)
             Constants["bm_complex"] = -1.0;
-        }
+
         Constants["bm_normal"] = 0.0;
         Constants["bm_add"] = 1.0;
         Constants["bm_max"] = 2.0;
@@ -3318,7 +3401,7 @@ public class BuiltinList : IBuiltins
         Constants["bm_dest_colour"] = 9.0;
         Constants["bm_inv_dest_colour"] = 10.0;
         Constants["bm_src_alpha_sat"] = 11.0;
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             Constants["tf_point"] = 0.0;
             Constants["tf_linear"] = 1.0;
@@ -3462,7 +3545,7 @@ public class BuiltinList : IBuiltins
         Constants["ev_keypress"] = 9.0;
         Constants["ev_keyrelease"] = 10.0;
         Constants["ev_trigger"] = 11.0;
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             Constants["ev_cleanup"] = 11.0;
             Constants["ev_gesture"] = 13.0;
@@ -3588,7 +3671,7 @@ public class BuiltinList : IBuiltins
         Constants["ev_system_event"] = 75.0;
         Constants["ev_broadcast_message"] = 76.0;
         Constants["ev_audio_playback_ended"] = 80.0;
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             Constants["ev_gesture_tap"] = 0.0;
             Constants["ev_gesture_double_tap"] = 1.0;
@@ -3705,10 +3788,9 @@ public class BuiltinList : IBuiltins
         Constants["os_win32"] = 0.0;
         Constants["os_windows"] = 0.0;
         Constants["os_macosx"] = 1.0;
-        if (data?.GeneralInfo?.Major < 2)
-        {
+        if (!gms2)
             Constants["os_psp"] = 2.0;
-        }
+
         Constants["os_ios"] = 3.0;
         Constants["os_android"] = 4.0;
         Constants["os_symbian"] = 5.0;
@@ -3725,7 +3807,10 @@ public class BuiltinList : IBuiltins
         Constants["os_ps3"] = 16.0;
         Constants["os_xbox360"] = 17.0;
         Constants["os_uwp"] = 18.0;
-        Constants["os_switch_beta"] = 20.0; // This is what NXTALE identifies itself as. It likely was an old version name(?) Unfortunately, it shares an id with tvos. However, since this tool is written for Undertale, we give it priority over tvos.
+        // This is what NXTALE identifies itself as. It likely was an old version name (?).
+        // Unfortunately, it shares an id with tvos.
+        // However, since this tool is written for Undertale, we give it priority over tvos.
+        Constants["os_switch_beta"] = 20.0;
         Constants["os_tvos"] = 20.0;
         Constants["os_switch"] = 21.0;
         Constants["os_ps5"] = 22.0;
@@ -3758,12 +3843,9 @@ public class BuiltinList : IBuiltins
         Constants["asset_sprite"] = 1.0;
         Constants["asset_sound"] = 2.0;
         Constants["asset_room"] = 3.0;
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2)
         {
             Constants["asset_background"] = 4.0;
-        }
-        else
-        {
             Constants["asset_tiles"] = 9.0;
         }
         Constants["asset_path"] = 5.0;
@@ -4020,7 +4102,7 @@ public class BuiltinList : IBuiltins
         Constants["timezone_utc"] = 1.0;
         Constants["gamespeed_fps"] = 0.0;
         Constants["gamespeed_microseconds"] = 1.0;
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             Constants["spritespeed_framespersecond"] = 0.0;
             Constants["spritespeed_framespergameframe"] = 1.0;
@@ -4210,7 +4292,7 @@ public class BuiltinList : IBuiltins
         Constants["vbm_most_compatible"] = 2.0;
         Constants["tm_sleep"] = 0.0;
         Constants["tm_countvsyncs"] = 1.0;
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             Constants["layerelementtype_undefined"] = 0.0;
             Constants["layerelementtype_background"] = 1.0;
@@ -4238,7 +4320,7 @@ public class BuiltinList : IBuiltins
         Constants["cull_counterclockwise"] = 2.0;
         Constants["lighttype_dir"] = 0.0;
         Constants["lighttype_point"] = 1.0;
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             Constants["kbv_type_default"] = 0.0;
             Constants["kbv_type_ascii"] = 1.0;
@@ -4267,7 +4349,7 @@ public class BuiltinList : IBuiltins
         // This one is a special case; it only exports to browser. I don't think this library supports
         // browser at all though, so we'll just assume it's -1. Wouldn't hurt anyway.
         Constants["os_browser"] = -1.0;
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             Constants["time_source_global"] = 0.0;
             Constants["time_source_game"] = 1.0;
@@ -4282,233 +4364,227 @@ public class BuiltinList : IBuiltins
         }
 
         // Moving on to the variables
-        GlobalNotArray = new(128);
-        GlobalArray = new(128);
+        Globals = new(128);
+        GlobalArrays = new(128);
 
-        GlobalNotArray["argument_relative"] = new VariableInfo("argument_relative", true, false);
-        GlobalNotArray["argument_count"] = new VariableInfo("argument_count", true, false);
-        GlobalNotArray["argument"] = new VariableInfo("argument", true, true);
-        GlobalNotArray["argument0"] = new VariableInfo("argument0", true, true);
-        GlobalNotArray["argument1"] = new VariableInfo("argument1", true, true);
-        GlobalNotArray["argument2"] = new VariableInfo("argument2", true, true);
-        GlobalNotArray["argument3"] = new VariableInfo("argument3", true, true);
-        GlobalNotArray["argument4"] = new VariableInfo("argument4", true, true);
-        GlobalNotArray["argument5"] = new VariableInfo("argument5", true, true);
-        GlobalNotArray["argument6"] = new VariableInfo("argument6", true, true);
-        GlobalNotArray["argument7"] = new VariableInfo("argument7", true, true);
-        GlobalNotArray["argument8"] = new VariableInfo("argument8", true, true);
-        GlobalNotArray["argument9"] = new VariableInfo("argument9", true, true);
-        GlobalNotArray["argument10"] = new VariableInfo("argument10", true, true);
-        GlobalNotArray["argument11"] = new VariableInfo("argument11", true, true);
-        GlobalNotArray["argument12"] = new VariableInfo("argument12", true, true);
-        GlobalNotArray["argument13"] = new VariableInfo("argument13", true, true);
-        GlobalNotArray["argument14"] = new VariableInfo("argument14", true, true);
-        GlobalNotArray["argument15"] = new VariableInfo("argument15", true, true);
-        GlobalNotArray["debug_mode"] = new VariableInfo("debug_mode", true, false);
-        GlobalNotArray["pointer_invalid"] = new VariableInfo("pointer_invalid", true, false);
-        GlobalNotArray["pointer_null"] = new VariableInfo("pointer_null", true, false);
-        GlobalNotArray["undefined"] = new VariableInfo("undefined", true, false);
-        if (data?.GeneralInfo?.Major >= 2)
+        DefineGlobal("argument_relative", false);
+        DefineGlobal("argument_count", false);
+        DefineGlobal("argument", true);
+        DefineGlobal("argument0", true);
+        DefineGlobal("argument1", true);
+        DefineGlobal("argument2", true);
+        DefineGlobal("argument3", true);
+        DefineGlobal("argument4", true);
+        DefineGlobal("argument5", true);
+        DefineGlobal("argument6", true);
+        DefineGlobal("argument7", true);
+        DefineGlobal("argument8", true);
+        DefineGlobal("argument9", true);
+        DefineGlobal("argument10", true);
+        DefineGlobal("argument11", true);
+        DefineGlobal("argument12", true);
+        DefineGlobal("argument13", true);
+        DefineGlobal("argument14", true);
+        DefineGlobal("argument15", true);
+        DefineGlobal("debug_mode", false);
+        DefineGlobal("pointer_invalid", false);
+        DefineGlobal("pointer_null", false);
+        DefineGlobal("undefined", false);
+        if (gms2)
         {
-            GlobalNotArray["infinity"] = new VariableInfo("infinity", true, false);
-            GlobalNotArray["NaN"] = new VariableInfo("NaN", true, false);
+            DefineGlobal("infinity", false);
+            DefineGlobal("NaN", false);
         }
-        GlobalNotArray["room"] = new VariableInfo("room", true, true);
-        GlobalNotArray["room_first"] = new VariableInfo("room_first", true, false);
-        GlobalNotArray["room_last"] = new VariableInfo("room_last", true, false);
-        GlobalNotArray["transition_kind"] = new VariableInfo("transition_kind", true, true);
-        GlobalNotArray["transition_steps"] = new VariableInfo("transition_steps", true, true);
-        GlobalNotArray["score"] = new VariableInfo("score", true, true);
-        GlobalNotArray["lives"] = new VariableInfo("lives", true, true);
-        GlobalNotArray["health"] = new VariableInfo("health", true, true);
-        GlobalNotArray["game_id"] = new VariableInfo("game_id", true, false);
-        GlobalNotArray["game_display_name"] = new VariableInfo("game_display_name", true, false);
-        GlobalNotArray["game_project_name"] = new VariableInfo("game_project_name", true, false);
-        GlobalNotArray["game_save_id"] = new VariableInfo("game_save_id", true, false);
-        GlobalNotArray["working_directory"] = new VariableInfo("working_directory", true, false);
-        GlobalNotArray["temp_directory"] = new VariableInfo("temp_directory", true, false);
-        GlobalNotArray["program_directory"] = new VariableInfo("program_directory", true, false);
-        GlobalNotArray["instance_count"] = new VariableInfo("instance_count", true, false);
-        GlobalNotArray["instance_id"] = new VariableInfo("instance_id", true, false);
-        GlobalNotArray["room_width"] = new VariableInfo("room_width", true, true);
-        GlobalNotArray["room_height"] = new VariableInfo("room_height", true, true);
-        GlobalNotArray["room_caption"] = new VariableInfo("room_caption", true, true);
-        GlobalNotArray["room_speed"] = new VariableInfo("room_speed", true, true);
-        GlobalNotArray["room_persistent"] = new VariableInfo("room_persistent", true, true);
-        GlobalNotArray["background_color"] = new VariableInfo("background_color", true, true);
-        GlobalNotArray["background_showcolor"] = new VariableInfo("background_showcolor", true, true);
-        GlobalNotArray["background_colour"] = new VariableInfo("background_colour", true, true);
-        GlobalNotArray["background_showcolour"] = new VariableInfo("background_showcolour", true, true);
-        if (data?.GeneralInfo?.Major < 2)
+        DefineGlobal("room", true);
+        DefineGlobal("room_first", false);
+        DefineGlobal("room_last", false);
+        DefineGlobal("transition_kind", true);
+        DefineGlobal("transition_steps", true);
+        DefineGlobal("score", true);
+        DefineGlobal("lives", true);
+        DefineGlobal("health", true);
+        DefineGlobal("game_id", false);
+        DefineGlobal("game_display_name", false);
+        DefineGlobal("game_project_name", false);
+        DefineGlobal("game_save_id", false);
+        DefineGlobal("working_directory", false);
+        DefineGlobal("temp_directory", false);
+        DefineGlobal("program_directory", false);
+        DefineGlobal("instance_count", false);
+        DefineGlobal("instance_id", false);
+        DefineGlobal("room_width", true);
+        DefineGlobal("room_height", true);
+        DefineGlobal("room_caption", true);
+        DefineGlobal("room_speed", true);
+        DefineGlobal("room_persistent", true);
+        DefineGlobal("background_color", true);
+        DefineGlobal("background_showcolor", true);
+        DefineGlobal("background_colour", true);
+        DefineGlobal("background_showcolour", true);
+        if (!gms2)
         {
-            GlobalArray["background_visible"] = new VariableInfo("background_visible", true, true, true);
-            GlobalArray["background_foreground"] = new VariableInfo("background_foreground", true, true, true);
-            GlobalArray["background_index"] = new VariableInfo("background_index", true, true, true);
-            GlobalArray["background_x"] = new VariableInfo("background_x", true, true, true);
-            GlobalArray["background_y"] = new VariableInfo("background_y", true, true, true);
-            GlobalArray["background_width"] = new VariableInfo("background_width", true, false, true);
-            GlobalArray["background_height"] = new VariableInfo("background_height", true, false, true);
-            GlobalArray["background_htiled"] = new VariableInfo("background_htiled", true, true, true);
-            GlobalArray["background_vtiled"] = new VariableInfo("background_vtiled", true, true, true);
-            GlobalArray["background_xscale"] = new VariableInfo("background_xscale", true, true, true);
-            GlobalArray["background_yscale"] = new VariableInfo("background_yscale", true, true, true);
-            GlobalArray["background_hspeed"] = new VariableInfo("background_hspeed", true, true, true);
-            GlobalArray["background_vspeed"] = new VariableInfo("background_vspeed", true, true, true);
-            GlobalArray["background_blend"] = new VariableInfo("background_blend", true, true, true);
-            GlobalArray["background_alpha"] = new VariableInfo("background_alpha", true, true, true);
+            DefineGlobalAutoArray("background_visible", true);
+            DefineGlobalAutoArray("background_foreground", true);
+            DefineGlobalAutoArray("background_index", true);
+            DefineGlobalAutoArray("background_x", true);
+            DefineGlobalAutoArray("background_y", true);
+            DefineGlobalAutoArray("background_width", true);
+            DefineGlobalAutoArray("background_height", true);
+            DefineGlobalAutoArray("background_htiled", true);
+            DefineGlobalAutoArray("background_vtiled", true);
+            DefineGlobalAutoArray("background_xscale", true);
+            DefineGlobalAutoArray("background_yscale", true);
+            DefineGlobalAutoArray("background_hspeed", true);
+            DefineGlobalAutoArray("background_vspeed", true);
+            DefineGlobalAutoArray("background_blend", true);
+            DefineGlobalAutoArray("background_alpha", true);
         }
-        GlobalNotArray["view_enabled"] = new VariableInfo("view_enabled", true, true);
-        GlobalNotArray["view_current"] = new VariableInfo("view_current", true, false);
-        GlobalNotArray["view_visible"] = new VariableInfo("view_visible", true, true);
-        GlobalArray["view_xview"] = new VariableInfo("view_xview", true, true, true);
-        GlobalArray["view_yview"] = new VariableInfo("view_yview", true, true, true);
-        GlobalArray["view_wview"] = new VariableInfo("view_wview", true, true, true);
-        GlobalArray["view_hview"] = new VariableInfo("view_hview", true, true, true);
-        GlobalArray["view_angle"] = new VariableInfo("view_angle", true, true, true);
-        GlobalArray["view_hborder"] = new VariableInfo("view_hborder", true, true, true);
-        GlobalArray["view_vborder"] = new VariableInfo("view_vborder", true, true, true);
-        GlobalArray["view_hspeed"] = new VariableInfo("view_hspeed", true, true, true);
-        GlobalArray["view_vspeed"] = new VariableInfo("view_vspeed", true, true, true);
-        GlobalArray["view_object"] = new VariableInfo("view_object", true, true, true);
-        GlobalArray["view_xport"] = new VariableInfo("view_xport", true, true, true);
-        GlobalArray["view_yport"] = new VariableInfo("view_yport", true, true, true);
-        GlobalArray["view_wport"] = new VariableInfo("view_wport", true, true, true);
-        GlobalArray["view_hport"] = new VariableInfo("view_hport", true, true, true);
-        GlobalArray["view_surface_id"] = new VariableInfo("view_surface_id", true, true, true);
-        GlobalArray["view_camera"] = new VariableInfo("view_camera", true, true, true);
-        GlobalNotArray["mouse_x"] = new VariableInfo("mouse_x", true, false);
-        GlobalNotArray["mouse_y"] = new VariableInfo("mouse_y", true, false);
-        GlobalNotArray["mouse_button"] = new VariableInfo("mouse_button", true, true);
-        GlobalNotArray["mouse_lastbutton"] = new VariableInfo("mouse_lastbutton", true, true);
-        GlobalNotArray["keyboard_key"] = new VariableInfo("keyboard_key", true, true);
-        GlobalNotArray["keyboard_lastkey"] = new VariableInfo("keyboard_lastkey", true, true);
-        GlobalNotArray["keyboard_lastchar"] = new VariableInfo("keyboard_lastchar", true, true);
-        GlobalNotArray["keyboard_string"] = new VariableInfo("keyboard_string", true, true);
-        GlobalNotArray["show_score"] = new VariableInfo("show_score", true, true);
-        GlobalNotArray["show_lives"] = new VariableInfo("show_lives", true, true);
-        GlobalNotArray["show_health"] = new VariableInfo("show_health", true, true);
-        GlobalNotArray["caption_score"] = new VariableInfo("caption_score", true, true);
-        GlobalNotArray["caption_lives"] = new VariableInfo("caption_lives", true, true);
-        GlobalNotArray["caption_health"] = new VariableInfo("caption_health", true, true);
-        GlobalNotArray["fps"] = new VariableInfo("fps", true, false);
-        GlobalNotArray["fps_real"] = new VariableInfo("fps_real", true, false);
-        GlobalNotArray["current_time"] = new VariableInfo("current_time", true, false);
-        GlobalNotArray["current_year"] = new VariableInfo("current_year", true, false);
-        GlobalNotArray["current_month"] = new VariableInfo("current_month", true, false);
-        GlobalNotArray["current_day"] = new VariableInfo("current_day", true, false);
-        GlobalNotArray["current_weekday"] = new VariableInfo("current_weekday", true, false);
-        GlobalNotArray["current_hour"] = new VariableInfo("current_hour", true, false);
-        GlobalNotArray["current_minute"] = new VariableInfo("current_minute", true, false);
-        GlobalNotArray["current_second"] = new VariableInfo("current_second", true, false);
-        GlobalNotArray["event_type"] = new VariableInfo("event_type", true, false);
-        GlobalNotArray["event_number"] = new VariableInfo("event_number", true, false);
-        GlobalNotArray["event_object"] = new VariableInfo("event_object", true, false);
-        GlobalNotArray["event_action"] = new VariableInfo("event_action", true, false);
-        GlobalNotArray["error_occurred"] = new VariableInfo("error_occurred", true, true);
-        GlobalNotArray["error_last"] = new VariableInfo("error_last", true, true);
-        GlobalNotArray["gamemaker_registered"] = new VariableInfo("gamemaker_registered", true, false);
-        GlobalNotArray["gamemaker_pro"] = new VariableInfo("gamemaker_pro", true, false);
-        GlobalNotArray["application_surface"] = new VariableInfo("application_surface", true, false);
-        if (data?.GeneralInfo?.Major >= 2)
-        {
-            GlobalNotArray["font_texture_page_size"] = new VariableInfo("font_texture_page_size", true, true);
-        }
-        if (data?.IsVersionAtLeast(2022, 11) == true)
-        {
-            GlobalNotArray["audio_bus_main"] = new VariableInfo("audio_bus_main", true, true);
-        }
-        GlobalNotArray["os_type"] = new VariableInfo("os_type", true, false);
-        GlobalNotArray["os_device"] = new VariableInfo("os_device", true, false);
-        GlobalNotArray["os_version"] = new VariableInfo("os_version", true, false);
-        GlobalNotArray["browser_width"] = new VariableInfo("browser_width", true, false);
-        GlobalNotArray["browser_height"] = new VariableInfo("browser_height", true, false);
-        GlobalNotArray["async_load"] = new VariableInfo("async_load", true, false);
-        GlobalNotArray["event_data"] = new VariableInfo("event_data", true, false);
-        GlobalNotArray["display_aa"] = new VariableInfo("display_aa", true, false);
-        GlobalNotArray["iap_data"] = new VariableInfo("iap_data", true, false);
-        GlobalNotArray["cursor_sprite"] = new VariableInfo("cursor_sprite", true, true);
-        GlobalNotArray["delta_time"] = new VariableInfo("delta_time", true, true);
-        GlobalNotArray["webgl_enabled"] = new VariableInfo("webgl_enabled", true, false);
+        DefineGlobal("view_enabled", true);
+        DefineGlobal("view_current", false);
+        DefineGlobal("view_visible", true);
+        DefineGlobalAutoArray("view_xview", true);
+        DefineGlobalAutoArray("view_yview", true);
+        DefineGlobalAutoArray("view_wview", true);
+        DefineGlobalAutoArray("view_hview", true);
+        DefineGlobalAutoArray("view_angle", true);
+        DefineGlobalAutoArray("view_hborder", true);
+        DefineGlobalAutoArray("view_vborder", true);
+        DefineGlobalAutoArray("view_hspeed", true);
+        DefineGlobalAutoArray("view_vspeed", true);
+        DefineGlobalAutoArray("view_object", true);
+        DefineGlobalAutoArray("view_xport", true);
+        DefineGlobalAutoArray("view_yport", true);
+        DefineGlobalAutoArray("view_wport", true);
+        DefineGlobalAutoArray("view_hport", true);
+        DefineGlobalAutoArray("view_surface_id", true);
+        DefineGlobalAutoArray("view_camera", true);
+        DefineGlobal("mouse_x", false);
+        DefineGlobal("mouse_y", false);
+        DefineGlobal("mouse_button", true);
+        DefineGlobal("mouse_lastbutton", true);
+        DefineGlobal("keyboard_key", true);
+        DefineGlobal("keyboard_lastkey", true);
+        DefineGlobal("keyboard_lastchar", true);
+        DefineGlobal("keyboard_string", true);
+        DefineGlobal("show_score", true);
+        DefineGlobal("show_lives", true);
+        DefineGlobal("show_health", true);
+        DefineGlobal("caption_score", true);
+        DefineGlobal("caption_lives", true);
+        DefineGlobal("caption_health", true);
+        DefineGlobal("fps", false);
+        DefineGlobal("fps_real", false);
+        DefineGlobal("current_time", false);
+        DefineGlobal("current_year", false);
+        DefineGlobal("current_month", false);
+        DefineGlobal("current_day", false);
+        DefineGlobal("current_weekday", false);
+        DefineGlobal("current_hour", false);
+        DefineGlobal("current_minute", false);
+        DefineGlobal("current_second", false);
+        DefineGlobal("event_type", false);
+        DefineGlobal("event_number", false);
+        DefineGlobal("event_object", false);
+        DefineGlobal("event_action", false);
+        DefineGlobal("error_occurred", true);
+        DefineGlobal("error_last", true);
+        DefineGlobal("gamemaker_registered", false);
+        DefineGlobal("gamemaker_pro", false);
+        DefineGlobal("application_surface", false);
+        if (gms2)
+            DefineGlobal("font_texture_page_size", true);
+
+        if (major > 2022 || (major == 2022 && minor >= 11))
+            DefineGlobal("audio_bus_main", true);
+        DefineGlobal("os_type", false);
+        DefineGlobal("os_device", false);
+        DefineGlobal("os_version", false);
+        DefineGlobal("browser_width", false);
+        DefineGlobal("browser_height", false);
+        DefineGlobal("async_load", false);
+        DefineGlobal("event_data", false);
+        DefineGlobal("display_aa", false);
+        DefineGlobal("iap_data", false);
+        DefineGlobal("cursor_sprite", true);
+        DefineGlobal("delta_time", true);
+        DefineGlobal("webgl_enabled", false);
 
         // Now onto instance variables
-        Instance = new Dictionary<string, VariableInfo>
-        {
-            ["x"] = new VariableInfo("x", false, true),
-            ["y"] = new VariableInfo("y", false, true),
-            ["xprevious"] = new VariableInfo("xprevious", false, true),
-            ["yprevious"] = new VariableInfo("yprevious", false, true),
-            ["xstart"] = new VariableInfo("xstart", false, true),
-            ["ystart"] = new VariableInfo("ystart", false, true),
-            ["hspeed"] = new VariableInfo("hspeed", false, true),
-            ["vspeed"] = new VariableInfo("vspeed", false, true),
-            ["direction"] = new VariableInfo("direction", false, true),
-            ["speed"] = new VariableInfo("speed", false, true),
-            ["friction"] = new VariableInfo("friction", false, true),
-            ["gravity"] = new VariableInfo("gravity", false, true),
-            ["gravity_direction"] = new VariableInfo("gravity_direction", false, true),
-            ["object_index"] = new VariableInfo("object_index", false, false),
-            ["id"] = new VariableInfo("id", false, false),
-            ["alarm"] = new VariableInfo("alarm", false, true),
-            ["solid"] = new VariableInfo("solid", false, true),
-            ["visible"] = new VariableInfo("visible", false, true),
-            ["persistent"] = new VariableInfo("persistent", false, true),
-            ["depth"] = new VariableInfo("depth", false, true),
-            ["bbox_left"] = new VariableInfo("bbox_left", false, false),
-            ["bbox_right"] = new VariableInfo("bbox_right", false, false),
-            ["bbox_top"] = new VariableInfo("bbox_top", false, false),
-            ["bbox_bottom"] = new VariableInfo("bbox_bottom", false, false),
-            ["sprite_index"] = new VariableInfo("sprite_index", false, true),
-            ["image_index"] = new VariableInfo("image_index", false, true),
-            ["image_single"] = new VariableInfo("image_single", false, true),
-            ["image_number"] = new VariableInfo("image_number", false, false),
-            ["sprite_width"] = new VariableInfo("sprite_width", false, false),
-            ["sprite_height"] = new VariableInfo("sprite_height", false, false),
-            ["sprite_xoffset"] = new VariableInfo("sprite_xoffset", false, false),
-            ["sprite_yoffset"] = new VariableInfo("sprite_yoffset", false, false),
-            ["image_xscale"] = new VariableInfo("image_xscale", false, true),
-            ["image_yscale"] = new VariableInfo("image_yscale", false, true),
-            ["image_angle"] = new VariableInfo("image_angle", false, true),
-            ["image_alpha"] = new VariableInfo("image_alpha", false, true),
-            ["image_blend"] = new VariableInfo("image_blend", false, true),
-            ["image_speed"] = new VariableInfo("image_speed", false, true),
-            ["mask_index"] = new VariableInfo("mask_index", false, true),
-            ["path_index"] = new VariableInfo("path_index", false, false),
-            ["path_position"] = new VariableInfo("path_position", false, true),
-            ["path_positionprevious"] = new VariableInfo("path_positionprevious", false, true),
-            ["path_speed"] = new VariableInfo("path_speed", false, true),
-            ["path_scale"] = new VariableInfo("path_scale", false, true),
-            ["path_orientation"] = new VariableInfo("path_orientation", false, true),
-            ["path_endaction"] = new VariableInfo("path_endaction", false, true),
-            ["timeline_index"] = new VariableInfo("timeline_index", false, true),
-            ["timeline_position"] = new VariableInfo("timeline_position", false, true),
-            ["timeline_speed"] = new VariableInfo("timeline_speed", false, true),
-            ["timeline_running"] = new VariableInfo("timeline_running", false, true),
-            ["timeline_loop"] = new VariableInfo("timeline_loop", false, true),
-            ["phy_rotation"] = new VariableInfo("phy_rotation", false, true),
-            ["phy_position_x"] = new VariableInfo("phy_position_x", false, true),
-            ["phy_position_y"] = new VariableInfo("phy_position_y", false, true),
-            ["phy_angular_velocity"] = new VariableInfo("phy_angular_velocity", false, true),
-            ["phy_linear_velocity_x"] = new VariableInfo("phy_linear_velocity_x", false, true),
-            ["phy_linear_velocity_y"] = new VariableInfo("phy_linear_velocity_y", false, true),
-            ["phy_speed_x"] = new VariableInfo("phy_speed_x", false, true),
-            ["phy_speed_y"] = new VariableInfo("phy_speed_y", false, true),
-            ["phy_speed"] = new VariableInfo("phy_speed", false, false),
-            ["phy_angular_damping"] = new VariableInfo("phy_angular_damping", false, true),
-            ["phy_linear_damping"] = new VariableInfo("phy_linear_damping", false, true),
-            ["phy_bullet"] = new VariableInfo("phy_bullet", false, true),
-            ["phy_fixed_rotation"] = new VariableInfo("phy_fixed_rotation", false, true),
-            ["phy_active"] = new VariableInfo("phy_active", false, true),
-            ["phy_mass"] = new VariableInfo("phy_mass", false, false),
-            ["phy_inertia"] = new VariableInfo("phy_inertia", false, false),
-            ["phy_com_x"] = new VariableInfo("phy_com_x", false, false),
-            ["phy_com_y"] = new VariableInfo("phy_com_y", false, false),
-            ["phy_dynamic"] = new VariableInfo("phy_dynamic", false, false),
-            ["phy_kinematic"] = new VariableInfo("phy_kinematic", false, false),
-            ["phy_sleeping"] = new VariableInfo("phy_sleeping", false, false),
-            ["phy_position_xprevious"] = new VariableInfo("phy_position_xprevious", false, true),
-            ["phy_position_yprevious"] = new VariableInfo("phy_position_yprevious", false, true),
-            ["phy_collision_points"] = new VariableInfo("phy_collision_points", false, false)
-        };
+        DefineInstanceVar("x", true);
+        DefineInstanceVar("y", true);
+        DefineInstanceVar("xprevious", true);
+        DefineInstanceVar("yprevious", true);
+        DefineInstanceVar("xstart", true);
+        DefineInstanceVar("ystart", true);
+        DefineInstanceVar("hspeed", true);
+        DefineInstanceVar("vspeed", true);
+        DefineInstanceVar("direction", true);
+        DefineInstanceVar("speed", true);
+        DefineInstanceVar("friction", true);
+        DefineInstanceVar("gravity", true);
+        DefineInstanceVar("gravity_direction", true);
+        DefineInstanceVar("object_index", false);
+        DefineInstanceVar("id", false);
+        DefineInstanceVar("alarm", true);
+        DefineInstanceVar("solid", true);
+        DefineInstanceVar("visible", true);
+        DefineInstanceVar("persistent", true);
+        DefineInstanceVar("depth", true);
+        DefineInstanceVar("bbox_left", false);
+        DefineInstanceVar("bbox_right", false);
+        DefineInstanceVar("bbox_top", false);
+        DefineInstanceVar("bbox_bottom", false);
+        DefineInstanceVar("sprite_index", true);
+        DefineInstanceVar("image_index", true);
+        DefineInstanceVar("image_single", true);
+        DefineInstanceVar("image_number", false);
+        DefineInstanceVar("sprite_width", false);
+        DefineInstanceVar("sprite_height", false);
+        DefineInstanceVar("sprite_xoffset", false);
+        DefineInstanceVar("sprite_yoffset", false);
+        DefineInstanceVar("image_xscale", true);
+        DefineInstanceVar("image_yscale", true);
+        DefineInstanceVar("image_angle", true);
+        DefineInstanceVar("image_alpha", true);
+        DefineInstanceVar("image_blend", true);
+        DefineInstanceVar("image_speed", true);
+        DefineInstanceVar("mask_index", true);
+        DefineInstanceVar("path_index", false);
+        DefineInstanceVar("path_position", true);
+        DefineInstanceVar("path_positionprevious", true);
+        DefineInstanceVar("path_speed", true);
+        DefineInstanceVar("path_scale", true);
+        DefineInstanceVar("path_orientation", true);
+        DefineInstanceVar("path_endaction", true);
+        DefineInstanceVar("timeline_index", true);
+        DefineInstanceVar("timeline_position", true);
+        DefineInstanceVar("timeline_speed", true);
+        DefineInstanceVar("timeline_running", true);
+        DefineInstanceVar("timeline_loop", true);
+        DefineInstanceVar("phy_rotation", true);
+        DefineInstanceVar("phy_position_x", true);
+        DefineInstanceVar("phy_position_y", true);
+        DefineInstanceVar("phy_angular_velocity", true);
+        DefineInstanceVar("phy_linear_velocity_x", true);
+        DefineInstanceVar("phy_linear_velocity_y", true);
+        DefineInstanceVar("phy_speed_x", true);
+        DefineInstanceVar("phy_speed_y", true);
+        DefineInstanceVar("phy_speed", false);
+        DefineInstanceVar("phy_angular_damping", true);
+        DefineInstanceVar("phy_linear_damping", true);
+        DefineInstanceVar("phy_bullet", true);
+        DefineInstanceVar("phy_fixed_rotation", true);
+        DefineInstanceVar("phy_active", true);
+        DefineInstanceVar("phy_mass", false);
+        DefineInstanceVar("phy_inertia", false);
+        DefineInstanceVar("phy_com_x", false);
+        DefineInstanceVar("phy_com_y", false);
+        DefineInstanceVar("phy_dynamic", false);
+        DefineInstanceVar("phy_kinematic", false);
+        DefineInstanceVar("phy_sleeping", false);
+        DefineInstanceVar("phy_position_xprevious", true);
+        DefineInstanceVar("phy_position_yprevious", true);
+        DefineInstanceVar("phy_collision_points", false);
 
         // There are some of them that are only available in certain physics events
         InstanceLimitedEvent = new Dictionary<string, VariableInfo>
@@ -4516,7 +4592,7 @@ public class BuiltinList : IBuiltins
             ["phy_collision_x"] = new VariableInfo("phy_collision_x", false, false, true),
             ["phy_collision_y"] = new VariableInfo("phy_collision_y", false, false, true),
             ["phy_col_normal_x"] = new VariableInfo("phy_col_normal_x", false, false, true),
-            ["phy_col_normal_y"] = new VariableInfo("phy_col_normal_y", false, false, true)
+            ["phy_col_normal_y"] = new VariableInfo("phy_col_normal_y", false, false, true),
         };
     }
 }
