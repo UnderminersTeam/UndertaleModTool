@@ -4510,6 +4510,7 @@ public class BuiltinList : IBuiltins
         DefineGlobal("webgl_enabled", false);
 
         // Now onto instance variables
+        InstanceVars = new(128);
         DefineInstanceVar("x", true);
         DefineInstanceVar("y", true);
         DefineInstanceVar("xprevious", true);
