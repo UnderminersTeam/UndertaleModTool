@@ -1228,7 +1228,8 @@ namespace UndertaleModTool
                             }
                         }
 
-                        await LoadSpriteTextures();
+                        if (this.ShowQuestion("Do you want to save to load Sprite Cache?") == MessageBoxResult.Yes)
+                            await LoadSpriteTextures();
 
                         Data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
                         Data.ToolInfo.InstanceIdPrefix = () => SettingsWindow.InstanceIdPrefix;
