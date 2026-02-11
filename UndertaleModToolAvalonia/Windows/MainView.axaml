@@ -30,7 +30,6 @@
             <MenuItem Header="_Swap to position" Click="ContextMenu_Move_Click"/>
             <MenuItem Header="_Remove" Click="ContextMenu_Remove_Click"/>
         </ContextMenu>
-        <l:DataItemToNameConverter x:Key="DataItemToNameConverter"/>
         <l:TreeDataGridItemToContextMenuConverter x:Key="TreeDataGridItemToContextMenuConverter"
                                                   ListMenu="{StaticResource ListMenu}"
                                                   SingleMenu="{StaticResource SingleMenu}"
@@ -196,6 +195,9 @@
                                         <DataTemplate DataType="l:UndertaleEmbeddedImageViewModel">
                                             <TextBlock Text="{Binding EmbeddedImage.Name.Content, StringFormat=Embedded image - {0}}"/>
                                         </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleAnimationCurveViewModel">
+                                            <TextBlock Text="{Binding AnimationCurve.Name.Content, StringFormat=Animation curve - {0}}"/>
+                                        </DataTemplate>
                                         <DataTemplate DataType="l:UndertaleParticleSystemViewModel">
                                             <TextBlock Text="{Binding ParticleSystem.Name.Content, StringFormat=Particle system - {0}}"/>
                                         </DataTemplate>
@@ -304,6 +306,9 @@
                                     </DataTemplate>
                                     <DataTemplate DataType="l:UndertaleEmbeddedImageViewModel">
                                         <l:UndertaleEmbeddedImageView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleAnimationCurveViewModel">
+                                        <l:UndertaleAnimationCurveView />
                                     </DataTemplate>
                                     <DataTemplate DataType="l:UndertaleParticleSystemViewModel">
                                         <l:UndertaleParticleSystemView />

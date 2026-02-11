@@ -238,6 +238,7 @@ public partial class MainView : UserControl, IView
                     "EmbeddedAudio" => vm.Data.EmbeddedAudio as IList,
                     "TextureGroupInformation" => vm.Data.TextureGroupInfo as IList,
                     "EmbeddedImages" => vm.Data.EmbeddedImages as IList,
+                    "AnimationCurves" => vm.Data.AnimationCurves as IList,
                     "ParticleSystems" => vm.Data.ParticleSystems as IList,
                     "ParticleSystemEmitters" => vm.Data.ParticleSystemEmitters as IList,
                     _ => null,
