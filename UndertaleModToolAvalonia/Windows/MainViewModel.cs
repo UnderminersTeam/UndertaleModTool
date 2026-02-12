@@ -194,11 +194,11 @@ public partial class MainViewModel
 
         if (Data is not null)
         {
-            IList<TreeDataGridItem>? MakeChildren<T>(IList<T> list) where T : notnull
+            IList<TreeDataGridItem>? MakeChildren<T>(IList<T>? list) where T : notnull
             {
-                if (list is ObservableCollection<T> collection)
+                if (list is not null)
                 {
-                    ObservableCollectionView<T, TreeDataGridItem> view = new(collection,
+                    ObservableCollectionView<T, TreeDataGridItem> view = new(list,
                         transform: x => new TreeDataGridItem() { Text = "", Value = x });
 
                     FilterTextChanged += filterText =>
@@ -215,62 +215,91 @@ public partial class MainViewModel
             {
                 Value = Data,
                 Text = "Data",
-                Children = [
-                    new() {Value = "GeneralInfo", Text = "General info"},
-                    new() {Value = "GlobalInitScripts", Text = "Global init scripts"},
-                    new() {Value = "GameEndScripts", Text = "Game End scripts"},
-                    new() {Tag = "list", Value = "AudioGroups", Text = "Audio groups",
-                        Children = MakeChildren(Data.AudioGroups)},
-                    new() {Tag = "list", Value = "Sounds", Text = "Sounds",
-                        Children = MakeChildren(Data.Sounds)},
-                    new() {Tag = "list", Value = "Sprites", Text = "Sprites",
-                        Children = MakeChildren(Data.Sprites)},
-                    new() {Tag = "list", Value = "Backgrounds", Text = "Backgrounds & Tile sets",
-                        Children = MakeChildren(Data.Backgrounds)},
-                    new() {Tag = "list", Value = "Paths", Text = "Paths",
-                        Children = MakeChildren(Data.Paths)},
-                    new() {Tag = "list", Value = "Scripts", Text = "Scripts",
-                        Children = MakeChildren(Data.Scripts)},
-                    new() {Tag = "list", Value = "Shaders", Text = "Shaders",
-                        Children = MakeChildren(Data.Shaders)},
-                    new() {Tag = "list", Value = "Fonts", Text = "Fonts",
-                        Children = MakeChildren(Data.Fonts)},
-                    new() {Tag = "list", Value = "Timelines", Text = "Timelines",
-                        Children = MakeChildren(Data.Timelines)},
-                    new() {Tag = "list", Value = "GameObjects", Text = "Game objects",
-                        Children = MakeChildren(Data.GameObjects)},
-                    new() {Tag = "list", Value = "Rooms", Text = "Rooms",
-                        Children = MakeChildren(Data.Rooms)},
-                    new() {Tag = "list", Value = "Extensions", Text = "Extensions",
-                        Children = MakeChildren(Data.Extensions)},
-                    new() {Tag = "list", Value = "TexturePageItems", Text = "Texture page items",
-                        Children = MakeChildren(Data.TexturePageItems)},
-                    new() {Tag = "list", Value = "Code", Text = "Code",
-                        Children = MakeChildren(Data.Code)},
-                    new() {Tag = "list", Value = "Variables", Text = "Variables",
-                        Children = MakeChildren(Data.Variables)},
-                    new() {Tag = "list", Value = "Functions", Text = "Functions",
-                        Children = MakeChildren(Data.Functions)},
-                    new() {Tag = "list", Value = "CodeLocals", Text = "Code locals",
-                        Children = MakeChildren(Data.CodeLocals)},
-                    new() {Tag = "list", Value = "Strings", Text = "Strings",
-                        Children = MakeChildren(Data.Strings)},
-                    new() {Tag = "list", Value = "EmbeddedTextures", Text = "Embedded textures",
-                        Children = MakeChildren(Data.EmbeddedTextures)},
-                    new() {Tag = "list", Value = "EmbeddedAudio", Text = "Embedded audio",
-                        Children = MakeChildren(Data.EmbeddedAudio)},
-                    new() {Tag = "list", Value = "TextureGroupInformation", Text = "Texture group information",
-                        Children = MakeChildren(Data.TextureGroupInfo)},
-                    new() {Tag = "list", Value = "EmbeddedImages", Text = "Embedded images",
-                        Children = MakeChildren(Data.EmbeddedImages)},
-                    new() {Tag = "list", Value = "AnimationCurves", Text = "Animation curves",
-                        Children = MakeChildren(Data.AnimationCurves)},
-                    new() {Tag = "list", Value = "ParticleSystems", Text = "Particle systems",
-                        Children = MakeChildren(Data.ParticleSystems)},
-                    new() {Tag = "list", Value = "ParticleSystemEmitters", Text = "Particle system emitters",
-                        Children = MakeChildren(Data.ParticleSystemEmitters)},
-                ]
+                Children = [],
             };
+
+            if (Data.GeneralInfo is not null)
+                dataItem.Children.Add(new() { Value = "GeneralInfo", Text = "General info" });
+            if (Data.GlobalInitScripts is not null)
+                dataItem.Children.Add(new() { Value = "GlobalInitScripts", Text = "Global init scripts" });
+            if (Data.GameEndScripts is not null)
+                dataItem.Children.Add(new() { Value = "GameEndScripts", Text = "Game End scripts" });
+
+            if (Data.AudioGroups is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "AudioGroups", Text = "Audio groups",
+                Children = MakeChildren(Data.AudioGroups)});
+            if (Data.Sounds is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "Sounds", Text = "Sounds",
+                Children = MakeChildren(Data.Sounds)});
+            if (Data.Sprites is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "Sprites", Text = "Sprites",
+                Children = MakeChildren(Data.Sprites)});
+            if (Data.Backgrounds is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "Backgrounds", Text = "Backgrounds & Tile sets",
+                Children = MakeChildren(Data.Backgrounds)});
+            if (Data.Paths is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "Paths", Text = "Paths",
+                Children = MakeChildren(Data.Paths)});
+            if (Data.Scripts is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "Scripts", Text = "Scripts",
+                Children = MakeChildren(Data.Scripts)});
+            if (Data.Shaders is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "Shaders", Text = "Shaders",
+                Children = MakeChildren(Data.Shaders)});
+            if (Data.Fonts is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "Fonts", Text = "Fonts",
+                Children = MakeChildren(Data.Fonts)});
+            if (Data.Timelines is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "Timelines", Text = "Timelines",
+                Children = MakeChildren(Data.Timelines)});
+            if (Data.GameObjects is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "GameObjects", Text = "Game objects",
+                Children = MakeChildren(Data.GameObjects)});
+            if (Data.Rooms is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "Rooms", Text = "Rooms",
+                Children = MakeChildren(Data.Rooms)});
+            if (Data.Extensions is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "Extensions", Text = "Extensions",
+                Children = MakeChildren(Data.Extensions)});
+            if (Data.TexturePageItems is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "TexturePageItems", Text = "Texture page items",
+                Children = MakeChildren(Data.TexturePageItems)});
+            if (Data.Code is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "Code", Text = "Code",
+                Children = MakeChildren(Data.Code)});
+            if (Data.Variables is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "Variables", Text = "Variables",
+                Children = MakeChildren(Data.Variables)});
+            if (Data.Functions is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "Functions", Text = "Functions",
+                Children = MakeChildren(Data.Functions)});
+            if (Data.CodeLocals is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "CodeLocals", Text = "Code locals",
+                Children = MakeChildren(Data.CodeLocals)});
+            if (Data.Strings is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "Strings", Text = "Strings",
+                Children = MakeChildren(Data.Strings)});
+            if (Data.EmbeddedTextures is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "EmbeddedTextures", Text = "Embedded textures",
+                Children = MakeChildren(Data.EmbeddedTextures)});
+            if (Data.EmbeddedAudio is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "EmbeddedAudio", Text = "Embedded audio",
+                Children = MakeChildren(Data.EmbeddedAudio)});
+            if (Data.TextureGroupInfo is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "TextureGroupInformation", Text = "Texture group information",
+                Children = MakeChildren(Data.TextureGroupInfo)});
+            if (Data.EmbeddedImages is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "EmbeddedImages", Text = "Embedded images",
+                Children = MakeChildren(Data.EmbeddedImages)});
+            if (Data.AnimationCurves is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "AnimationCurves", Text = "Animation curves",
+                Children = MakeChildren(Data.AnimationCurves)});
+            if (Data.ParticleSystems is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "ParticleSystems", Text = "Particle systems",
+                Children = MakeChildren(Data.ParticleSystems)});
+            if (Data.ParticleSystemEmitters is not null)
+                dataItem.Children.Add(new() {Tag = "list", Value = "ParticleSystemEmitters", Text = "Particle system emitters",
+                Children = MakeChildren(Data.ParticleSystemEmitters)});
 
             TreeDataGridData.Add(dataItem);
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -100,7 +100,7 @@ public class ObservableCollectionView<TInput, TOutput>
 
     public CustomObservableCollection<TOutput> Output { get; } = [];
 
-    private readonly ObservableCollection<TInput> input;
+    private readonly IList<TInput> input;
 
     private readonly List<int> outputIndexToInputIndexMap = [];
 
@@ -108,13 +108,16 @@ public class ObservableCollectionView<TInput, TOutput>
 
     private readonly Func<TInput, TOutput>? transformFunc;
 
-    public ObservableCollectionView(ObservableCollection<TInput> input, Predicate<TInput>? filter = null, Func<TInput, TOutput>? transform = null)
+    public ObservableCollectionView(IList<TInput> input, Predicate<TInput>? filter = null, Func<TInput, TOutput>? transform = null)
     {
         this.input = input;
         this.filterPredicate = filter;
         this.transformFunc = transform;
 
-        this.input.CollectionChanged += OnInputCollectionChanged;
+        if (this.input is INotifyCollectionChanged inputNotifyCollectionChanged)
+            inputNotifyCollectionChanged.CollectionChanged += OnInputCollectionChanged;
+        else
+            throw new InvalidOperationException($"ObservableCollectionView input ({input}) does not implement INotifyCollectionChanged");
 
         Filter();
     }
@@ -278,7 +281,7 @@ public class ObservableCollectionView<TInput, TOutput>
         int outputIndex = 0;
         for (int inputIndex = 0; inputIndex < input.Count; inputIndex++)
         {
-            var inputItem = input[inputIndex];
+            TInput inputItem = input[inputIndex];
 
             // Find next output item that matches or passes after the current input index.
             while (outputIndex < outputIndexToInputIndexMap.Count && outputIndexToInputIndexMap[outputIndex] < inputIndex)
