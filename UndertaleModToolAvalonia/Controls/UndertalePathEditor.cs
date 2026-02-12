@@ -22,10 +22,8 @@ public class UndertalePathEditor : Control
         if (vm.Path.Points.Count == 0)
             return;
 
-        if (!(this.TryFindResource("SystemControlBackgroundBaseLowBrush", ActualThemeVariant, out var axisRes) && axisRes is SolidColorBrush axisBrush))
-            return;
-        if (!(this.TryFindResource("SystemControlForegroundAccentBrush", ActualThemeVariant, out var pathRes) && pathRes is SolidColorBrush pathBrush))
-            return;
+        SolidColorBrush axisBrush = this.GetSolidColorBrushResource("SystemControlBackgroundBaseLowBrush");
+        SolidColorBrush pathBrush = this.GetSolidColorBrushResource("SystemControlForegroundAccentBrush");
 
         Rect bounds = GetBounds();
 

@@ -484,6 +484,8 @@ public class UndertaleRoomEditor : Control
         readonly uint gridWidth;
         readonly uint gridHeight;
 
+        readonly SKColor selectedColor;
+
         public CustomDrawOperation(UndertaleRoomEditor editor)
         {
             this.editor = editor;
@@ -509,6 +511,8 @@ public class UndertaleRoomEditor : Control
             isGridEnabled = vm.IsGridEnabled;
             gridWidth = vm.GridWidth;
             gridHeight = vm.GridHeight;
+
+            selectedColor = editor.GetSolidColorBrushResource("SystemControlHighlightAccentBrush").Color.ToSKColor().WithAlpha(128);
         }
 
         public void Dispose() { }
@@ -575,7 +579,7 @@ public class UndertaleRoomEditor : Control
                     canvas.RotateDegrees((float)selectedRoomItem.Selectable.Rotation,
                         (float)(selectedRoomItem.Selectable.Pivot.X),
                         (float)(selectedRoomItem.Selectable.Pivot.Y));
-                    canvas.DrawRect(rect, new SKPaint { Color = SKColors.Blue.WithAlpha(128), StrokeWidth = 2, Style = SKPaintStyle.Stroke });
+                    canvas.DrawRect(rect, new SKPaint { Color = selectedColor, StrokeWidth = 2, Style = SKPaintStyle.Stroke });
                     canvas.Restore();
                 }
 
@@ -587,7 +591,7 @@ public class UndertaleRoomEditor : Control
                     canvas.RotateDegrees((float)hoveredRoomItem.Selectable.Rotation,
                             (float)(hoveredRoomItem.Selectable.Pivot.X),
                             (float)(hoveredRoomItem.Selectable.Pivot.Y));
-                    canvas.DrawRect(rect, new SKPaint { Color = SKColors.Blue.WithAlpha(128), Style = SKPaintStyle.Stroke });
+                    canvas.DrawRect(rect, new SKPaint { Color = selectedColor, Style = SKPaintStyle.Stroke });
                     canvas.Restore();
                 }
 

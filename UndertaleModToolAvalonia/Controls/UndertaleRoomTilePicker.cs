@@ -94,6 +94,7 @@ public class UndertaleRoomTilePicker : Control
                 Background = layerTilesData.Background,
                 SelectedTileData = SelectedTileData,
                 VisualColumns = TileSetColumns,
+                SelectedColor = this.GetSolidColorBrushResource("SystemControlHighlightAccentBrush").Color.ToSKColor(),
             });
         }
 
@@ -147,6 +148,8 @@ public class UndertaleRoomTilePicker : Control
         public required UndertaleBackground Background;
         public required uint SelectedTileData;
         public required uint VisualColumns = 0;
+
+        public required SKColor SelectedColor;
 
         public Rect Bounds { get; set; }
 
@@ -230,12 +233,12 @@ public class UndertaleRoomTilePicker : Control
             }
 
             uint selectedTileId = SelectedTileData & UndertaleRoomViewModel.TILE_ID;
-            uint selectedTileX = (selectedTileId % VisualColumns) * tileW;
-            uint selectedTileY = (selectedTileId / VisualColumns) * tileH;
+            float selectedTileX = (selectedTileId % VisualColumns) * tileW;
+            float selectedTileY = (selectedTileId / VisualColumns) * tileH;
 
             if (selectedTileId < tileCount)
             {
-                canvas.DrawRect(selectedTileX, selectedTileY, tileW, tileH, new SKPaint() { Style = SKPaintStyle.Stroke, Color = SKColors.Red });
+                canvas.DrawRect(selectedTileX - 1, selectedTileY - 1, tileW + 1, tileH + 1, new SKPaint() { Style = SKPaintStyle.Stroke, Color = SelectedColor });
             }
         }
     }
