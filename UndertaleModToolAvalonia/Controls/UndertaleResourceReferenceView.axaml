@@ -10,6 +10,7 @@
             <!-- TODO: Can change, can remove -->
             <TextBox Grid.Column="0" Name="TextBox"
                      Text="{Binding Reference, Mode=OneWay}"
+                     ToolTip.Tip="{Binding Reference, Mode=OneWay}"
                      IsReadOnly="True"
                      PointerReleased="TextBox_PointerReleased">
                 <TextBox.Resources>

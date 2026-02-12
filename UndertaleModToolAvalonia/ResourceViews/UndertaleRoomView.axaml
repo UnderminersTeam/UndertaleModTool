@@ -608,6 +608,12 @@
 
                                     <Label>Color</Label>
                                     <ColorPicker Color="{Binding Color, Converter={StaticResource UndertaleColorToColorConverter}}" />
+
+                                    <Label>Rotation</Label>
+                                    <TextBox Text="{Binding Rotation}" />
+
+                                    <Label>Frame index</Label>
+                                    <TextBox Text="{Binding FrameIndex}" />
                                     
                                     <Label>Animation speed</Label>
                                     <Grid ColumnDefinitions="1*,1*">
@@ -616,12 +622,6 @@
                                                   ItemsSource="{Binding Source={x:Type undertalem:AnimationSpeedType}, Converter={StaticResource EnumTypeToValuesConverter}}"
                                                   SelectedItem="{Binding AnimationSpeedType}" />
                                     </Grid>
-
-                                    <Label>Frame index</Label>
-                                    <TextBox Text="{Binding FrameIndex}" />
-
-                                    <Label>Rotation</Label>
-                                    <TextBox Text="{Binding Rotation}" />
                                 </Grid>
                             </DataTemplate>
                             <DataTemplate DataType="undertalem:UndertaleRoom+SequenceInstance">
