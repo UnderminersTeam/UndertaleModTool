@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using static UndertaleModLib.Models.UndertaleParticleSystemEmitter;
 
 namespace UndertaleModLib.Models;
 
@@ -84,6 +83,11 @@ public class UndertaleParticleSystem : UndertaleNamedResource, IDisposable
 
         Name = null;
         Emitters = null;
+    }
+    public enum DrawOrderEnum
+    {
+        NewOnTop,
+        OldOnTop,
     }
 }
 
@@ -514,10 +518,5 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
     {
         Seconds,
         Frames
-    }
-    public enum DrawOrderEnum
-    {
-        NewOnTop,
-        OldOnTop,
     }
 }
