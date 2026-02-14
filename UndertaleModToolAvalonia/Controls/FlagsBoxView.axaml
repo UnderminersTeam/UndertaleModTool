@@ -5,11 +5,12 @@
              xmlns:l="clr-namespace:UndertaleModToolAvalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="UndertaleModToolAvalonia.FlagsBoxView">
+    <UserControl.Resources>
+        <l:FlagEnumToStringConverter x:Key="FlagEnumToStringConverter" />
+    </UserControl.Resources>
     <ContentControl DataContext="{Binding $parent[l:FlagsBoxView]}">
         <StackPanel>
-            <Label Content="{Binding Value}" />
-            <!-- TODO: Add the textbox back in. -->
-            <!-- <TextBox Text="{Binding Value}" /> -->
+            <TextBox Name="ValueTextBox" Text="{Binding Value, Converter={StaticResource FlagEnumToStringConverter}}" />
             <Expander Header="Flags">
                 <ItemsControl ItemsSource="{Binding Flags}">
                     <ItemsControl.ItemTemplate>
