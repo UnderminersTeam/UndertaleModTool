@@ -19,11 +19,7 @@
                     <NativeMenuItem Header="_Save" Command="{Binding FileSave}" Gesture="Ctrl+S"/>
                     <NativeMenuItem Header="_Close" Command="{Binding FileClose}"/>
                     <NativeMenuItemSeparator Header="-" />
-                    <NativeMenuItem Header="_Temp run game" IsEnabled="False"/>
-                    <NativeMenuItem Header="Run game under GMS _debugger" IsEnabled="False"/>
-                    <NativeMenuItem Header="Run game with other runner" IsEnabled="False"/>
-                    <NativeMenuItemSeparator Header="-" />
-                    <NativeMenuItem Header="Generate o_ffset map" IsEnabled="False"/>
+                    <NativeMenuItem Header="_Run with runner" Command="{Binding FileRun}"/>
                     <NativeMenuItemSeparator Header="-" />
                     <NativeMenuItem Header="S_ettings" Command="{Binding FileSettings}"/>
                     <NativeMenuItem Header="_Exit" Command="{Binding FileExit}"/>

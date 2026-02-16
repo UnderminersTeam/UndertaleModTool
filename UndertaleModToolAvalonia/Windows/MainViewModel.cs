@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -526,7 +527,13 @@ public partial class MainViewModel
 
         using Stream stream = await file.OpenWriteAsync();
 
-        return await SaveData(stream);
+        if (await SaveData(stream))
+        {
+            DataPath = file.TryGetLocalPath();
+            return true;
+        }
+
+        return false;
     }
 
     public async void FileClose()
@@ -535,6 +542,51 @@ public partial class MainViewModel
             return;
 
         CloseData();
+    }
+
+    public async void FileRun()
+    {
+        // NOTE: The project system would make this a lot simpler!
+        if (Data is null)
+            return;
+
+        string question = $"Save data file before running? {(DataPath is null
+            ? " It must be saved before running."
+            : $"If it's not saved, the data file at the last location will be used (\"{DataPath}\").")}";
+
+        if (!await AskFileSave(question))
+            return;
+
+        if (DataPath is null)
+            return;
+
+        var files = await View!.OpenFileDialog(new FilePickerOpenOptions()
+        {
+            Title = "Open runner",
+            FileTypeFilter = [
+                new FilePickerFileType("Executable files (.exe)")
+                {
+                    Patterns = ["*.exe"],
+                },
+                new FilePickerFileType("All files")
+                {
+                    Patterns = ["*"],
+                },
+            ],
+        });
+
+        if (files.Count != 1)
+            return;
+
+        string runnerPath = files[0].TryGetLocalPath() ?? string.Empty;
+        if (runnerPath == string.Empty)
+            return;
+
+        if (!File.Exists(DataPath))
+            return;
+
+        // "launcher" allows game_change data files to still access files above the data path.
+        Process.Start(new ProcessStartInfo(runnerPath, $"-game \"{DataPath}\" launcher") { WorkingDirectory = Path.GetDirectoryName(DataPath) });
     }
 
     public async void FileSettings()
