@@ -116,6 +116,11 @@ namespace UndertaleModLib
         /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
         public static uint UnserializeChildObjectCount(UndertaleReader reader)
         {
+            if (reader.AbsPosition == 0)
+            {
+                reader.SubmitWarning($"Attempted to count child objects of {typeof(T).FullName} given a null pointer. Defaulting to 0.");
+                return 0;
+            }
             // Read base object count; short-circuit if there's no objects
             uint count = reader.ReadUInt32();
             if (count == 0)
@@ -294,6 +299,11 @@ namespace UndertaleModLib
         /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
         public static uint UnserializeChildObjectCount(UndertaleReader reader)
         {
+            if (reader.AbsPosition == 0)
+            {
+                reader.SubmitWarning($"Attempted to count child objects of {typeof(T).FullName} given a null pointer. Defaulting to 0.");
+                return 0;
+            }
             // Read base object count; short-circuit if there's no objects
             ushort count = reader.ReadUInt16();
             if (count == 0)
@@ -512,6 +522,11 @@ namespace UndertaleModLib
         /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
         public static uint UnserializeChildObjectCount(UndertaleReader reader)
         {
+            if (reader.AbsPosition == 0)
+            {
+                reader.SubmitWarning($"Attempted to count child objects of {typeof(T).FullName} given a null pointer. Defaulting to 0.");
+                return 0;
+            }
             // Read base object count; short-circuit if there's no objects
             uint count = reader.ReadUInt32();
             if (count == 0)

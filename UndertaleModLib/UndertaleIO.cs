@@ -278,21 +278,12 @@ namespace UndertaleModLib
             uint poolSize = 0;
             if (!ProcessObjectCountingErrors()) // process an exception from "FillUnserializeCountDictionaries()"
             {
-                try
+                if (!ReadOnlyGEN8)
                 {
-                    if (!ReadOnlyGEN8)
-                    {
-                        poolSize = data.FORM.UnserializeObjectCount(this);
-                    }
-                }
-                catch (Exception e)
-                {
-                    countUnserializeExc = e;
-                    Debug.WriteLine(e);
-
-                    SwitchReaderType(false);
+                    poolSize = data.FORM.UnserializeObjectCount(this);
                 }
             }
+            ProcessObjectCountingErrors();
             ListPtrsPool = null;
 
             // Initialize object pools
@@ -378,7 +369,7 @@ namespace UndertaleModLib
         private Dictionary<UndertaleObject, uint> objectPoolRev;
         private HashSet<uint> unreadObjects = new HashSet<uint>();
 
-        private Exception countUnserializeExc = null;
+        private List<Exception> countUnserializeExcs = new List<Exception>();
         private readonly Dictionary<Type, Func<UndertaleReader, uint>> unserializeFuncDict = new();
         private readonly Dictionary<Type, uint> staticObjCountDict = new();
         private readonly Dictionary<Type, uint> staticObjSizeDict = new();
@@ -389,25 +380,41 @@ namespace UndertaleModLib
         private readonly Type delegateType = typeof(Func<UndertaleReader, uint>);
         private readonly Func<UndertaleReader, uint> blankCountFunc = _ => 0;
 
+        /// <summary>
+        /// Submit an error for external logging, intended for object count unserialization.
+        /// </summary>
+        /// <param name="e">The exception caught.</param>
+        public void SubmitObjectCountingError(Exception e)
+        {
+            countUnserializeExcs.Add(e);
+        }
+
         private bool ProcessObjectCountingErrors(uint poolSize = 0)
         {
-            if (countUnserializeExc is not null)
+            if (countUnserializeExcs.Count > 0)
             {
                 try
                 {
                     string fileDir = Path.GetDirectoryName(Environment.ProcessPath);
-                    File.WriteAllText(Path.Combine(fileDir, "unserializeCountError.txt"),
-                                      countUnserializeExc + "\n"
+                    string unserializeErrorLog = "";
+                    foreach (Exception countUnserializeExc in countUnserializeExcs)
+                    {
+                        unserializeErrorLog += countUnserializeExc + "\n"
                                       + countUnserializeExc.Message + "\n"
-                                      + countUnserializeExc.StackTrace);
+                                      + countUnserializeExc.StackTrace + "\n\n";
+                    }
+                    File.WriteAllText(Path.Combine(fileDir, "unserializeCountError.txt"),
+                                      unserializeErrorLog);
 
-                    SubmitWarning("Warning - there was an error while trying to unserialize total object count.\n" +
-                                  "The error log is saved to \"unserializeCountError.txt\"." +
+                    SubmitWarning($"Warning - there {
+                        (countUnserializeExcs.Count == 1 ? "was an error" : $"were {countUnserializeExcs.Count} errors")
+                                  } while trying to unserialize total object count.\n" +
+                                  "The error log is saved to \"unserializeCountError.txt\". " +
                                   "Please report that error to UndertaleModTool GitHub.");
                 }
                 catch { }
 
-                countUnserializeExc = null;
+                countUnserializeExcs.Clear();
 
                 return true;
             }
@@ -505,7 +512,7 @@ namespace UndertaleModLib
             catch (Exception e)
             {
                 Debug.WriteLine(e);
-                countUnserializeExc = e;
+                countUnserializeExcs.Add(e);
             }
         }
         public Func<UndertaleReader, uint> GetUnserializeCountFunc(Type objType)
