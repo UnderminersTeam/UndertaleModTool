@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -322,7 +322,7 @@ public class ScriptGlobals : IScriptInterface
 
     public bool ScriptQuestion(string message)
     {
-        return mainVM.View!.MessageDialog(message, "Script question", ok: false, yes: true, no: true).WaitOnDispatcherFrame() == MessageWindow.Result.Yes;
+        return mainVM.View!.MessageDialog(message, "Script question", MessageWindow.Buttons.YesNo).WaitOnDispatcherFrame() == MessageWindow.Result.Yes;
     }
 
     public void ScriptWarning(string message)

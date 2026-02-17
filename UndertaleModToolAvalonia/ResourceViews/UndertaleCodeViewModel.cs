@@ -95,7 +95,7 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
         {
             loaderWindow?.EnsureShown();
             MessageWindow.Result undoChanges = await MainVM.View!.MessageDialog(result.PrintAllErrors(codeEntryNames: false)
-                + "\n\nUndo changes?", title: "GML compilation error", ok: false, yes: true, no: true);
+                + "\n\nUndo changes?", title: "GML compilation error", MessageWindow.Buttons.YesNo);
             if (undoChanges == MessageWindow.Result.Yes)
             {
                 await DecompileToGML();
@@ -145,7 +145,7 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
         {
             loaderWindow?.EnsureShown();
             MessageWindow.Result undoChanges = await MainVM.View!.MessageDialog(e.ToString()
-                + "\n\nUndo changes?", title: "ASM compilation error", ok: false, yes: true, no: true);
+                + "\n\nUndo changes?", title: "ASM compilation error", MessageWindow.Buttons.YesNo);
             if (undoChanges == MessageWindow.Result.Yes)
             {
                 await DecompileToASM();

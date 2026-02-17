@@ -12,6 +12,15 @@ public partial class MessageWindow : Window
     public bool HasNoButton { get; set; } = false;
     public bool HasCancelButton { get; set; } = false;
 
+    public enum Buttons
+    {
+        None = 0,
+        OK,
+        YesNo,
+        YesNoCancel,
+        YesCancel,
+    }
+
     public enum Result
     {
         None = 0,
@@ -26,17 +35,17 @@ public partial class MessageWindow : Window
         Initialize();
     }
 
-    public MessageWindow(string message, string? title = null, bool ok = false, bool yes = false, bool no = false, bool cancel = false)
+    public MessageWindow(string message, string? title = null, Buttons buttons = Buttons.OK)
     {
         Message = message;
 
         if (title is not null)
             TitleText = title;
 
-        HasOKButton = ok;
-        HasYesButton = yes;
-        HasNoButton = no;
-        HasCancelButton = cancel;
+        HasOKButton = buttons is Buttons.OK;
+        HasYesButton = buttons is Buttons.YesNo or Buttons.YesNoCancel or Buttons.YesCancel;
+        HasNoButton = buttons is Buttons.YesNo or Buttons.YesNoCancel;
+        HasCancelButton = buttons is Buttons.YesCancel or Buttons.YesNoCancel;
 
         Initialize();
     }

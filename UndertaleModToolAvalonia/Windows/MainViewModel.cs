@@ -332,7 +332,7 @@ public partial class MainViewModel
         if (Data is null)
             return true;
 
-        var result = await View!.MessageDialog(message, ok: false, yes: true, no: true, cancel: true);
+        var result = await View!.MessageDialog(message, buttons: MessageWindow.Buttons.YesNoCancel);
         if (result == MessageWindow.Result.Yes)
         {
             if (await FileSave())
@@ -697,7 +697,7 @@ public partial class MainViewModel
 
         if (res is UndertaleRoom room)
         {
-            if (await View!.MessageDialog("Add the new room to the end of the room order list?", ok: false, yes: true, no: true) == MessageWindow.Result.Yes)
+            if (await View!.MessageDialog("Add the new room to the end of the room order list?", buttons: MessageWindow.Buttons.YesNo) == MessageWindow.Result.Yes)
                 Data.GeneralInfo?.RoomOrder.Add(new(room));
         }
 

@@ -198,18 +198,18 @@
     <Style Selector="Window.MessageWindow, Window.TextBoxWindow">
         <Setter Property="Padding" Value="16,0,16,16" />
 
-        <Style Selector="^ TextBlock#MessageText">
+        <Style Selector="^ TextBlock#MessageTextBlock">
             <Setter Property="Margin" Value="0,16,0,0" />
         </Style>
         <Style Selector="^ TextBox#TextTextBox">
             <Setter Property="Margin" Value="0,8,0,0" />
             <Setter Property="VerticalAlignment" Value="Stretch" />
         </Style>
-        <Style Selector="^ StackPanel#Buttons">
+        <Style Selector="^ StackPanel#ButtonsStackPanel">
             <Setter Property="Margin" Value="0,16,0,0" />
             <Setter Property="Spacing" Value="8"/>
         </Style>
-        <Style Selector="^ StackPanel#Buttons > Button">
+        <Style Selector="^ StackPanel#ButtonsStackPanel > Button">
             <Setter Property="MinWidth" Value="75" />
             <Setter Property="HorizontalContentAlignment" Value="Center" />
         </Style>

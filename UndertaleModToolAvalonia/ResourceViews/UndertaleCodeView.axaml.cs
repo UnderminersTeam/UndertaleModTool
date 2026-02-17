@@ -161,7 +161,9 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
         if (!vm.MainVM.Settings!.EnableSyntaxHighlighting)
             return;
 
-        UndertaleData data = vm.MainVM.Data!;
+        UndertaleData? data = vm.MainVM.Data;
+        if (data is null)
+            return;
 
         foreach (var script in data.Scripts)
         {

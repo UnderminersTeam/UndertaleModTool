@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Avalonia.Platform.Storage;
@@ -95,7 +95,7 @@ public partial class UndertaleSpriteViewModel : IUndertaleResourceViewModel
         if (filesThatAlreadyExist.Count > 0)
         {
             MessageWindow.Result result = await MainVM.View!.MessageDialog($"The following files already exist. Do you want to replace them?"
-                + $"\n\n{string.Join("\n", filesThatAlreadyExist)}", ok: false, yes: true, cancel: true);
+                + $"\n\n{string.Join("\n", filesThatAlreadyExist)}", buttons: MessageWindow.Buttons.YesCancel);
 
             if (result != MessageWindow.Result.Yes)
                 return;

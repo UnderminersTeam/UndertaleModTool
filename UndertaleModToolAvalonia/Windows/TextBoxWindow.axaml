@@ -13,9 +13,9 @@
         WindowStartupLocation="CenterOwner"
         Classes="TextBoxWindow">
     <Grid RowDefinitions="Auto,1*,Auto">
-        <TextBlock Grid.Row="0" Name="MessageText" Text="{Binding Message}" TextWrapping="Wrap" />
+        <TextBlock Grid.Row="0" Name="MessageTextBlock" Text="{Binding Message}" TextWrapping="Wrap" />
         <TextBox Grid.Row="1" Name="TextTextBox" />
-        <StackPanel Grid.Row="2" Name="Buttons" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="2" Name="ButtonsStackPanel" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Command="{Binding OkClick}" IsDefault="True">OK</Button>
             <Button Command="{Binding CancelClick}">Cancel</Button>
         </StackPanel>

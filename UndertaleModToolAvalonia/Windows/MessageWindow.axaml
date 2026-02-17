@@ -18,9 +18,9 @@
     </Window.KeyBindings>
     <Grid RowDefinitions="1*,Auto">
         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
-            <TextBlock Name="MessageText" Text="{Binding Message}" TextWrapping="Wrap" />
+            <TextBlock Name="MessageTextBlock" Text="{Binding Message}" TextWrapping="Wrap" />
         </ScrollViewer>
-        <StackPanel Grid.Row="1" Name="Buttons" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="1" Name="ButtonsStackPanel" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Command="{Binding OkClick}" IsVisible="{Binding HasOKButton}" IsDefault="True">OK</Button>
             <Button Command="{Binding YesClick}" IsVisible="{Binding HasYesButton}" IsDefault="True">Yes</Button>
             <Button Command="{Binding NoClick}" IsVisible="{Binding HasNoButton}">No</Button>

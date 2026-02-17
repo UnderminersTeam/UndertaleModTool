@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -36,10 +36,10 @@ public interface IView
         return await topLevel.Launcher.LaunchUriAsync(uri);
     }
 
-    public async Task<MessageWindow.Result> MessageDialog(string message, string? title = null, bool ok = true, bool yes = false, bool no = false, bool cancel = false)
+    public async Task<MessageWindow.Result> MessageDialog(string message, string? title = null, MessageWindow.Buttons buttons = MessageWindow.Buttons.OK)
     {
         Window window = View.FindLogicalAncestorOfType<Window>() ?? throw new InvalidOperationException();
-        return await new MessageWindow(message, title, ok, yes, no, cancel).ShowDialog<MessageWindow.Result>(window);
+        return await new MessageWindow(message, title, buttons).ShowDialog<MessageWindow.Result>(window);
     }
 
     public async Task<string?> TextBoxDialog(string message, string text = "", string? title = null, bool isMultiline = false, bool isReadOnly = false)
