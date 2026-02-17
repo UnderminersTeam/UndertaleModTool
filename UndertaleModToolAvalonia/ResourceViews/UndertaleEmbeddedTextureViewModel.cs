@@ -15,17 +15,6 @@ public partial class UndertaleEmbeddedTextureViewModel : IUndertaleResourceViewM
     public UndertaleResource Resource => EmbeddedTexture;
     public UndertaleEmbeddedTexture EmbeddedTexture { get; set; }
 
-    IReadOnlyList<FilePickerFileType> imageFileTypes = [
-        new FilePickerFileType("PNG files (.png)")
-        {
-            Patterns = ["*.png"],
-        },
-        new FilePickerFileType("All files")
-        {
-            Patterns = ["*"],
-        },
-    ];
-
     public UndertaleEmbeddedTextureViewModel(UndertaleEmbeddedTexture embeddedTexture, IServiceProvider? serviceProvider = null)
     {
         MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
@@ -39,7 +28,7 @@ public partial class UndertaleEmbeddedTextureViewModel : IUndertaleResourceViewM
         IReadOnlyList<IStorageFile> files = await MainVM.View!.OpenFileDialog(new FilePickerOpenOptions
         {
             Title = "Import image",
-            FileTypeFilter = imageFileTypes,
+            FileTypeFilter = FilePickerFileTypes.Image,
         });
 
         if (files.Count != 1)
@@ -62,29 +51,20 @@ public partial class UndertaleEmbeddedTextureViewModel : IUndertaleResourceViewM
 
     public async void ExportImage()
     {
-        string extension = EmbeddedTexture.TextureData.Image.Format switch
+        (IReadOnlyList<FilePickerFileType> filePickerFileTypeList, string extension) type = EmbeddedTexture.TextureData.Image.Format switch
         {
-            GMImage.ImageFormat.Png => "png",
-            GMImage.ImageFormat.Qoi => "qoi",
-            GMImage.ImageFormat.Bz2Qoi => "bz2",
-            _ => "bin",
+            GMImage.ImageFormat.Png => (FilePickerFileTypes.PNG, "png"),
+            GMImage.ImageFormat.Qoi => (FilePickerFileTypes.QOI, "qoi"),
+            GMImage.ImageFormat.Bz2Qoi => (FilePickerFileTypes.BZ2, "bz2"),
+            _ => (FilePickerFileTypes.BIN, "bin"),
         };
 
         IStorageFile? file = await MainVM.View!.SaveFileDialog(new FilePickerSaveOptions()
         {
             Title = "Export image",
-            FileTypeChoices = [
-                new FilePickerFileType($"{extension.ToUpperInvariant()} files (.{extension})")
-                {
-                    Patterns = [$"*.{extension}"],
-                },
-                new FilePickerFileType("All files")
-                {
-                    Patterns = ["*"],
-                },
-            ],
-            DefaultExtension = $"*.{extension}",
-            SuggestedFileName = $"{EmbeddedTexture.Name.Content}.{extension}",
+            FileTypeChoices = type.filePickerFileTypeList,
+            DefaultExtension = $"*.{type.extension}",
+            SuggestedFileName = $"{EmbeddedTexture.Name.Content}.{type.extension}",
         });
 
         if (file is null)
@@ -101,7 +81,7 @@ public partial class UndertaleEmbeddedTextureViewModel : IUndertaleResourceViewM
         IStorageFile? file = await MainVM.View!.SaveFileDialog(new FilePickerSaveOptions()
         {
             Title = "Export image as PNG",
-            FileTypeChoices = imageFileTypes,
+            FileTypeChoices = FilePickerFileTypes.PNG,
             DefaultExtension = ".png",
             SuggestedFileName = $"{EmbeddedTexture.Name.Content}.png",
         });

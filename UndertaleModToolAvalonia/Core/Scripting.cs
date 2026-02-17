@@ -254,12 +254,7 @@ public class ScriptGlobals : IScriptInterface
         var files = Task.Run(() => mainVM.View!.OpenFileDialog(new FilePickerOpenOptions()
         {
             Title = "Load file",
-            FileTypeFilter = [
-                new FilePickerFileType("All files")
-                {
-                    Patterns = ["*"],
-                },
-            ],
+            FileTypeFilter = FilePickerFileTypes.All,
         })).Result;
 
         if (files.Count != 1)
@@ -274,12 +269,7 @@ public class ScriptGlobals : IScriptInterface
         var file = Task.Run(() => mainVM.View!.SaveFileDialog(new FilePickerSaveOptions()
         {
             Title = "Save file",
-            FileTypeChoices = [
-                new FilePickerFileType("All files")
-                {
-                    Patterns = ["*"],
-                },
-            ],
+            FileTypeChoices = FilePickerFileTypes.All,
             DefaultExtension = defaultExt,
         })).Result;
 

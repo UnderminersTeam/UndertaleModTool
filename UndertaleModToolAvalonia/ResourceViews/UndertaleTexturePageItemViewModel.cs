@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using Avalonia.Platform.Storage;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,16 +26,7 @@ public partial class UndertaleTexturePageItemViewModel : IUndertaleResourceViewM
         IStorageFile? file = await MainVM.View!.SaveFileDialog(new FilePickerSaveOptions()
         {
             Title = "Save image",
-            FileTypeChoices = [
-                new FilePickerFileType("PNG files (.png)")
-                {
-                    Patterns = ["*.png"],
-                },
-                new FilePickerFileType("All files")
-                {
-                    Patterns = ["*"],
-                },
-            ],
+            FileTypeChoices = FilePickerFileTypes.PNG,
             DefaultExtension = ".png",
         });
 

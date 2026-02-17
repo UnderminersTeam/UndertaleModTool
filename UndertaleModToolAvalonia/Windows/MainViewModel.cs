@@ -52,18 +52,6 @@ public partial class MainViewModel
     [Notify]
     private (uint Major, uint Minor, uint Release, uint Build) _DataVersion;
 
-    IReadOnlyList<FilePickerFileType> dataFileTypes =
-    [
-        new FilePickerFileType("GameMaker data files (.win, .unx, .ios, .droid, audiogroup*.dat)")
-        {
-            Patterns = ["*.win", "*.unx", "*.ios", "*.droid", "audiogroup*.dat"],
-        },
-        new FilePickerFileType("All files")
-        {
-            Patterns = ["*"],
-        },
-    ];
-
     // Tree data grid
     public partial class TreeDataGridItem
     {
@@ -494,7 +482,7 @@ public partial class MainViewModel
         var files = await View!.OpenFileDialog(new FilePickerOpenOptions()
         {
             Title = "Open data file",
-            FileTypeFilter = dataFileTypes,
+            FileTypeFilter = FilePickerFileTypes.Data,
         });
 
         if (files.Count != 1)
@@ -518,7 +506,7 @@ public partial class MainViewModel
         IStorageFile? file = await View!.SaveFileDialog(new FilePickerSaveOptions()
         {
             Title = "Save data file",
-            FileTypeChoices = dataFileTypes,
+            FileTypeChoices = FilePickerFileTypes.Data,
             DefaultExtension = ".win",
         });
 
@@ -563,16 +551,7 @@ public partial class MainViewModel
         var files = await View!.OpenFileDialog(new FilePickerOpenOptions()
         {
             Title = "Open runner",
-            FileTypeFilter = [
-                new FilePickerFileType("Executable files (.exe)")
-                {
-                    Patterns = ["*.exe"],
-                },
-                new FilePickerFileType("All files")
-                {
-                    Patterns = ["*"],
-                },
-            ],
+            FileTypeFilter = FilePickerFileTypes.EXE,
         });
 
         if (files.Count != 1)
@@ -612,16 +591,7 @@ public partial class MainViewModel
         var files = await View!.OpenFileDialog(new FilePickerOpenOptions()
         {
             Title = "Run script",
-            FileTypeFilter = [
-                new FilePickerFileType("C# scripts (.csx)")
-                {
-                    Patterns = ["*.csx"],
-                },
-                new FilePickerFileType("All files")
-                {
-                    Patterns = ["*"],
-                },
-            ],
+            FileTypeFilter = FilePickerFileTypes.CS,
         });
 
         if (files.Count != 1)

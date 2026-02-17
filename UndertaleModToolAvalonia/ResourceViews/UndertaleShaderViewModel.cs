@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Avalonia.Platform.Storage;
@@ -13,17 +13,6 @@ public partial class UndertaleShaderViewModel : IUndertaleResourceViewModel
     public MainViewModel MainVM;
     public UndertaleResource Resource => Shader;
     public UndertaleShader Shader { get; set; }
-
-    IReadOnlyList<FilePickerFileType> binFileTypes = [
-        new FilePickerFileType("BIN files (.bin)")
-        {
-            Patterns = ["*.bin"],
-        },
-        new FilePickerFileType("All files")
-        {
-            Patterns = ["*"],
-        },
-    ];
 
     public UndertaleShaderViewModel(UndertaleShader shader, IServiceProvider? serviceProvider = null)
     {
@@ -55,7 +44,7 @@ public partial class UndertaleShaderViewModel : IUndertaleResourceViewModel
         IReadOnlyList<IStorageFile> files = await MainVM.View!.OpenFileDialog(new FilePickerOpenOptions
         {
             Title = "Import shader",
-            FileTypeFilter = binFileTypes,
+            FileTypeFilter = FilePickerFileTypes.BIN,
         });
 
         if (files.Count != 1)
@@ -100,7 +89,7 @@ public partial class UndertaleShaderViewModel : IUndertaleResourceViewModel
         IStorageFile? file = await MainVM.View!.SaveFileDialog(new FilePickerSaveOptions()
         {
             Title = "Export shader",
-            FileTypeChoices = binFileTypes,
+            FileTypeChoices = FilePickerFileTypes.BIN,
             DefaultExtension = ".bin",
             SuggestedFileName = Shader.Name?.Content + "_" + parameter + ".bin",
         });

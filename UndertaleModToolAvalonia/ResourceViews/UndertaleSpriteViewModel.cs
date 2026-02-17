@@ -21,17 +21,6 @@ public partial class UndertaleSpriteViewModel : IUndertaleResourceViewModel
     [Notify]
     private UndertaleSprite.MaskEntry? _CollisionMasksSelected;
 
-    IReadOnlyList<FilePickerFileType> binFileTypes = [
-        new FilePickerFileType("BIN files (.bin)")
-        {
-            Patterns = ["*.bin"],
-        },
-        new FilePickerFileType("All files")
-        {
-            Patterns = ["*"],
-        },
-    ];
-
     public UndertaleSpriteViewModel(UndertaleSprite sprite, IServiceProvider? serviceProvider = null)
     {
         MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
@@ -137,7 +126,7 @@ public partial class UndertaleSpriteViewModel : IUndertaleResourceViewModel
         IReadOnlyList<IStorageFile> files = await MainVM.View!.OpenFileDialog(new FilePickerOpenOptions
         {
             Title = "Import collision mask data",
-            FileTypeFilter = binFileTypes,
+            FileTypeFilter = FilePickerFileTypes.BIN,
         });
 
         if (files.Count != 1)
@@ -161,7 +150,7 @@ public partial class UndertaleSpriteViewModel : IUndertaleResourceViewModel
         IStorageFile? file = await MainVM.View!.SaveFileDialog(new FilePickerSaveOptions()
         {
             Title = "Export collision mask data",
-            FileTypeChoices = binFileTypes,
+            FileTypeChoices = FilePickerFileTypes.BIN,
             DefaultExtension = ".bin",
         });
 

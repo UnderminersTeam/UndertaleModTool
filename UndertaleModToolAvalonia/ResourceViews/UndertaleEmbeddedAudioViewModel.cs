@@ -14,17 +14,6 @@ public partial class UndertaleEmbeddedAudioViewModel : IUndertaleResourceViewMod
     public UndertaleResource Resource => EmbeddedAudio;
     public UndertaleEmbeddedAudio EmbeddedAudio { get; set; }
 
-    IReadOnlyList<FilePickerFileType> audioFileTypes = [
-        new FilePickerFileType("WAV files (.wav)")
-        {
-            Patterns = ["*.wav"],
-        },
-        new FilePickerFileType("All files")
-        {
-            Patterns = ["*"],
-        },
-    ];
-
     public UndertaleEmbeddedAudioViewModel(UndertaleEmbeddedAudio embeddedAudio, IServiceProvider? serviceProvider = null)
     {
         MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
@@ -37,7 +26,7 @@ public partial class UndertaleEmbeddedAudioViewModel : IUndertaleResourceViewMod
         IReadOnlyList<IStorageFile> files = await MainVM.View!.OpenFileDialog(new FilePickerOpenOptions
         {
             Title = "Import audio",
-            FileTypeFilter = audioFileTypes,
+            FileTypeFilter = FilePickerFileTypes.WAV,
         });
 
         if (files.Count != 1)
@@ -58,7 +47,7 @@ public partial class UndertaleEmbeddedAudioViewModel : IUndertaleResourceViewMod
         IStorageFile? file = await MainVM.View!.SaveFileDialog(new FilePickerSaveOptions()
         {
             Title = "Export audio",
-            FileTypeChoices = audioFileTypes,
+            FileTypeChoices = FilePickerFileTypes.WAV,
             DefaultExtension = ".wav",
             SuggestedFileName = $"{EmbeddedAudio.Name.Content}.wav",
         });

@@ -379,16 +379,7 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
         IStorageFile? file = await MainVM.View!.SaveFileDialog(new FilePickerSaveOptions()
         {
             Title = "Save image",
-            FileTypeChoices = [
-                new FilePickerFileType("PNG files (.png)")
-                {
-                    Patterns = ["*.png"],
-                },
-                new FilePickerFileType("All files")
-                {
-                    Patterns = ["*"],
-                },
-            ],
+            FileTypeChoices = FilePickerFileTypes.PNG,
             DefaultExtension = ".png",
             SuggestedFileName = $"{Room.Name?.Content ?? "Room"}.png",
         });
