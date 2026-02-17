@@ -15,6 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using UndertaleModLib;
 using UndertaleModLib.Models;
+using WpfAnimatedGif;
 
 namespace UndertaleModTool
 {
@@ -28,6 +29,22 @@ namespace UndertaleModTool
         public UndertaleGeneralInfoEditor()
         {
             InitializeComponent();
+
+            ((System.Windows.Controls.Image)mainWindow.FindName("Flowey")).Opacity = 0;
+            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
+        }
+        private void DataUserControl_Unloaded(object sender, RoutedEventArgs e)
+        {
+            var floweranim = ((System.Windows.Controls.Image)mainWindow.FindName("Flowey"));
+            //floweranim.Opacity = 1;
+
+            var controller = ImageBehavior.GetAnimationController(floweranim);
+            controller.Pause();
+            controller.GotoFrame(controller.FrameCount - 5);
+            controller.Play();
+
+            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
         }
 
         private void SyncRoomList_Click(object sender, RoutedEventArgs e)

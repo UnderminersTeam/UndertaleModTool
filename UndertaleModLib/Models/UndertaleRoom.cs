@@ -1025,6 +1025,17 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                 return ((ImageIndex % count) + count) % count;
             }
         }
+        public UndertaleModLib.UndertaleSimpleList<UndertaleModLib.Models.UndertaleSprite.TextureEntry> ObjectSpriteIndex
+        {
+            get
+            {
+                if (ObjectDefinition?.Sprite is null)
+                    return null;
+
+                var sprite = ObjectDefinition.Sprite.Textures;
+                return sprite;
+            }
+        }
 
         /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;

@@ -98,6 +98,7 @@
                     
                     <StackPanel Grid.Column="1">
                         <local:ButtonDark Click="GMLSettingsButton_Click" Padding="8,2,8,2" HorizontalAlignment="Left" VerticalAlignment="Top">GML compiler/decompiler settings</local:ButtonDark>
+                        <CheckBox IsChecked="{Binding PlaySaveSound}" Content="Enable save sound" ToolTip="Plays a sound when the program has successfully saved. Disabled by default."/>
                     </StackPanel>
                 </Grid>
 
@@ -155,11 +156,24 @@
                     <StackPanel Grid.Column="0">
                         <CheckBox IsChecked="{Binding ProfileModeEnabled}" Content="Enable profile mode" ToolTip="Toggles the 'decompile once and compile many' profile mode. Enabled by default. May need to be disabled for certain operations."/>
                         <CheckBox IsChecked="{Binding DeleteOldProfileOnSave}" Content="Delete old profile on saving" ToolTip="Deletes the profile obsoleted on saving. Saves on file space at the expense of losing code information for variants. Enabled by default."/>
+                        <CheckBox IsChecked="{Binding RememberProfileName}" Content="Remember profile name" ToolTip="The last profile name you set in a folder will automatically load when opening a data file in there."/>
                     </StackPanel>
-                    
+
                     <StackPanel Grid.Column="1">
                         <CheckBox IsChecked="{Binding ProfileMessageShown}" Content="Profile mode message shown" ToolTip="On first load, this will show you the profile mode loaded message. If this somehow breaks, you can manually toggle it here."/>
+                        <CheckBox IsChecked="{Binding CustomProfileName}" Content="Ask Profile name on load" ToolTip="Lets you set a custom name for a Profile. Only useful if you have Profile mode on."/>
+                        <CheckBox IsChecked="{Binding MakeBackup}" Content="Make data backup when loading and saving" ToolTip="Whenever you successfully load a data.win file, data.bck will be created with the exact same state when you opened it. MyMod.temp will be created when you save."/>
                     </StackPanel>
+                </Grid>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <local:ButtonDark Grid.Column="0" Click="ProfileButtonImport_Click" Content="Import Current Profile"/>
+                    <local:ButtonDark Grid.Column="1" Click="ProfileButtonExport_Click" Content="Export Current Profile"/>
                 </Grid>
 
                 <Separator/>
