@@ -45,11 +45,6 @@ public static class FilePickerFileTypes
         Patterns = ["*.csx"],
     };
 
-    static readonly FilePickerFileType EXESingle = new("Executable files (.exe)")
-    {
-        Patterns = ["*.exe"],
-    };
-
     public static readonly IReadOnlyList<FilePickerFileType> All = [AllSingle];
     public static readonly IReadOnlyList<FilePickerFileType> BIN = [BINSingle, AllSingle];
     public static readonly IReadOnlyList<FilePickerFileType> Data = [DataSingle, AllSingle];
@@ -59,5 +54,4 @@ public static class FilePickerFileTypes
     public static readonly IReadOnlyList<FilePickerFileType> BZ2 = [BZ2Single, AllSingle];
     public static readonly IReadOnlyList<FilePickerFileType> WAV = [WAVSingle, AllSingle];
     public static readonly IReadOnlyList<FilePickerFileType> CS = [CSSingle, AllSingle];
-    public static readonly IReadOnlyList<FilePickerFileType> EXE = [EXESingle, AllSingle];
 }

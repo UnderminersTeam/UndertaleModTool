@@ -551,7 +551,7 @@ public partial class MainViewModel
         var files = await View!.OpenFileDialog(new FilePickerOpenOptions()
         {
             Title = "Open runner",
-            FileTypeFilter = FilePickerFileTypes.EXE,
+            FileTypeFilter = FilePickerFileTypes.All,
         });
 
         if (files.Count != 1)
