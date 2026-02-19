@@ -1,0 +1,28 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.UndertaleResourceReferenceView">
+    <ContentControl DataContext="{Binding $parent[l:UndertaleResourceReferenceView]}">
+        <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+            <!-- TODO: Can change, can remove -->
+            <TextBox Grid.Column="0" Name="TextBox"
+                     Text="{Binding Reference, Mode=OneWay}"
+                     ToolTip.Tip="{Binding Reference, Mode=OneWay}"
+                     IsReadOnly="True"
+                     PointerReleased="TextBox_PointerReleased">
+                <TextBox.Resources>
+                    <l:UndertaleReferenceDropHandler x:Key="UndertaleReferenceDropHandler"/>
+                </TextBox.Resources>
+                <Interaction.Behaviors>
+                    <ContextDropBehavior Handler="{StaticResource UndertaleReferenceDropHandler}"/>
+                </Interaction.Behaviors>
+            </TextBox>
+            <Button Grid.Column="1" Command="{Binding Open}" IsEnabled="{Binding Reference, Converter={x:Static ObjectConverters.IsNotNull}}">…</Button>
+            <Button Grid.Column="2" Command="{Binding OpenInNewTab}" IsEnabled="{Binding Reference, Converter={x:Static ObjectConverters.IsNotNull}}">⬈</Button>
+            <Button Grid.Column="3" Command="{Binding Remove}" IsEnabled="{Binding Reference, Converter={x:Static ObjectConverters.IsNotNull}}">🗙</Button>
+        </Grid>
+    </ContentControl>
+</UserControl>

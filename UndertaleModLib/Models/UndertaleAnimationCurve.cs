@@ -36,7 +36,7 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
     /// <summary>
     /// The channels this animation curve has. 
     /// </summary>
-    public UndertaleSimpleList<Channel> Channels { get; set; }
+    public UndertaleSimpleList<Channel> Channels { get; set; } = new UndertaleSimpleList<Channel>();
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
@@ -156,7 +156,7 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
         /// <summary>
         /// The points in the channel.
         /// </summary>
-        public UndertaleSimpleList<Point> Points { get; set; }
+        public UndertaleSimpleList<Point> Points { get; set; } = new UndertaleSimpleList<Point>();
 
         /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
@@ -228,37 +228,38 @@ public class UndertaleAnimationCurve : UndertaleNamedResource, IDisposable
         /// <summary>
         /// A point which can exist on a <see cref="Channel"/>.
         /// </summary>
+        [PropertyChanged.AddINotifyPropertyChangedInterface]
         public class Point : UndertaleObject
         {
             /// <summary>
             /// The X coordinate of this point. GameMaker abbreviates this to "h".
             /// </summary>
-            public float X;
+            public float X { get; set; }
             
             /// <summary>
             /// The Y coordinate of this point. GameMaker abbreviates this to "v".
             /// </summary>
-            public float Value;
+            public float Value { get; set; }
 
             /// <summary>
             /// The Y position for the first bezier handle. Only used if the Channel is set to Bezier.
             /// </summary>
-            public float BezierX0;
-            
+            public float BezierX0 { get; set; }
+
             /// <summary>
             /// The Y position for the first bezier handle. Only used if the Channel is set to Bezier.
             /// </summary>
-            public float BezierY0;
-            
+            public float BezierY0 { get; set; }
+
             /// <summary>
             /// The X position for the second bezier handle. Only used if the Channel is set to Bezier.
             /// </summary>
-            public float BezierX1;
-            
+            public float BezierX1 { get; set; }
+
             /// <summary>
             /// The Y position for the second bezier handle. Only used if the Channel is set to Bezier.
             /// </summary>
-            public float BezierY1;
+            public float BezierY1 { get; set; }
 
             /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)

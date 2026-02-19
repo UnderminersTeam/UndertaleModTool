@@ -1,0 +1,21 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
+             xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.GlobalInitScriptsView"
+             x:DataType="l:GlobalInitScriptsViewModel">
+    <l:EditableDataGrid ItemsSource="{Binding GlobalInitScripts}" ItemFactory="{Binding CreateGlobalInit}" HeadersVisibility="None" Classes="LeftPaddedProperties">
+        <l:EditableDataGrid.Columns>
+            <DataGridTemplateColumn Header="Script" Width="1*">
+                <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate DataType="undertalem:UndertaleGlobalInit">
+                        <l:UndertaleResourceReferenceView Reference="{Binding Code}" ReferenceType="undertalem:UndertaleCode"/>
+                    </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+        </l:EditableDataGrid.Columns>
+    </l:EditableDataGrid>
+</UserControl>

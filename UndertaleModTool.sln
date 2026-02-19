@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.32014.148
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11505.172 d18.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModTool", "UndertaleModTool\UndertaleModTool.csproj", "{C703A485-DBFB-4601-8A26-42E64CCF812F}"
 EndProject
@@ -16,6 +16,12 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModLibTests", "UndertaleModLibTests\UndertaleModLibTests.csproj", "{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Underanalyzer", "Underanalyzer\Underanalyzer\Underanalyzer.csproj", "{A171D18F-274E-427A-AFB3-D7A161F5B9CF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModToolAvalonia", "UndertaleModToolAvalonia\UndertaleModToolAvalonia.csproj", "{96FA167A-9D79-3328-BCB4-0564D2575718}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModToolAvalonia.Desktop", "UndertaleModToolAvalonia.Desktop\UndertaleModToolAvalonia.Desktop.csproj", "{314E047F-7297-F076-E9AC-8DEA76750E94}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UndertaleModToolAvalonia.Tests", "UndertaleModToolAvalonia.Tests\UndertaleModToolAvalonia.Tests.csproj", "{A7270EE0-D1D9-44EC-8E2E-15495FCD8772}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +87,30 @@ Global
 		{A171D18F-274E-427A-AFB3-D7A161F5B9CF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A171D18F-274E-427A-AFB3-D7A161F5B9CF}.Release|x64.ActiveCfg = Release|Any CPU
 		{A171D18F-274E-427A-AFB3-D7A161F5B9CF}.Release|x64.Build.0 = Release|Any CPU
+		{96FA167A-9D79-3328-BCB4-0564D2575718}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96FA167A-9D79-3328-BCB4-0564D2575718}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96FA167A-9D79-3328-BCB4-0564D2575718}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{96FA167A-9D79-3328-BCB4-0564D2575718}.Debug|x64.Build.0 = Debug|Any CPU
+		{96FA167A-9D79-3328-BCB4-0564D2575718}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96FA167A-9D79-3328-BCB4-0564D2575718}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96FA167A-9D79-3328-BCB4-0564D2575718}.Release|x64.ActiveCfg = Release|Any CPU
+		{96FA167A-9D79-3328-BCB4-0564D2575718}.Release|x64.Build.0 = Release|Any CPU
+		{314E047F-7297-F076-E9AC-8DEA76750E94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{314E047F-7297-F076-E9AC-8DEA76750E94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{314E047F-7297-F076-E9AC-8DEA76750E94}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{314E047F-7297-F076-E9AC-8DEA76750E94}.Debug|x64.Build.0 = Debug|Any CPU
+		{314E047F-7297-F076-E9AC-8DEA76750E94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{314E047F-7297-F076-E9AC-8DEA76750E94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{314E047F-7297-F076-E9AC-8DEA76750E94}.Release|x64.ActiveCfg = Release|Any CPU
+		{314E047F-7297-F076-E9AC-8DEA76750E94}.Release|x64.Build.0 = Release|Any CPU
+		{A7270EE0-D1D9-44EC-8E2E-15495FCD8772}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7270EE0-D1D9-44EC-8E2E-15495FCD8772}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7270EE0-D1D9-44EC-8E2E-15495FCD8772}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A7270EE0-D1D9-44EC-8E2E-15495FCD8772}.Debug|x64.Build.0 = Debug|Any CPU
+		{A7270EE0-D1D9-44EC-8E2E-15495FCD8772}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7270EE0-D1D9-44EC-8E2E-15495FCD8772}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7270EE0-D1D9-44EC-8E2E-15495FCD8772}.Release|x64.ActiveCfg = Release|Any CPU
+		{A7270EE0-D1D9-44EC-8E2E-15495FCD8772}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
