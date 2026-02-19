@@ -43,7 +43,6 @@ jobs:
         cp ./README.md ./${{ matrix.os }}
         cp ./SCRIPTS.md ./${{ matrix.os }}
         cp ./LICENSE.txt ./${{ matrix.os }}
-        cp -r ./UndertaleModLib/GameSpecificData/ ./${{ matrix.os }}/GameSpecificData/
     - name: Upload ${{ matrix.os }} GUI
       uses: actions/upload-artifact@v6
       with:
@@ -87,8 +86,8 @@ jobs:
         cp ./README.md ./CLI-${{ matrix.os }}/
         cp ./SCRIPTS.md ./${{ matrix.os }}
         cp ./LICENSE.txt ./CLI-${{ matrix.os }}/
-        cp -r ./UndertaleModLib/GameSpecificData/ ./CLI-${{ matrix.os }}/GameSpecificData/
         cp -r ./UndertaleModTool/Scripts/ ./CLI-${{ matrix.os }}/Scripts/
+        rm ./CLI-${{ matrix.os }}/Underanalyzer.pdb
     - name: Upload ${{ matrix.os }} CLI
       uses: actions/upload-artifact@v6
       with:
