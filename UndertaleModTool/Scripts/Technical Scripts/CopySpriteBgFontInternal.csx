@@ -76,7 +76,7 @@ await Task.Run(() =>
                 nativeBG.Transparent = donorBG.Transparent;
                 nativeBG.Smooth = donorBG.Smooth;
                 nativeBG.Preload = donorBG.Preload;
-                nativeBG.GMS2UnknownAlways2 = donorBG.GMS2UnknownAlways2;
+                nativeBG.GMS2VersionNumber = donorBG.GMS2VersionNumber;
                 nativeBG.GMS2TileWidth = donorBG.GMS2TileWidth;
                 nativeBG.GMS2TileHeight = donorBG.GMS2TileHeight;
                 nativeBG.GMS2OutputBorderX = donorBG.GMS2OutputBorderX;
@@ -84,7 +84,8 @@ await Task.Run(() =>
                 nativeBG.GMS2TileColumns = donorBG.GMS2TileColumns;
                 nativeBG.GMS2ItemsPerTileCount = donorBG.GMS2ItemsPerTileCount;
                 nativeBG.GMS2TileCount = donorBG.GMS2TileCount;
-                nativeBG.GMS2ExportedSpriteIndex = donorBG.GMS2ExportedSpriteIndex;
+                // FIXME: this doesn't properly work due to the cross-asset references required, but usually this doesn't matter...
+                nativeBG.GMS2ExportedSprite = null;
                 nativeBG.GMS2FrameLength = donorBG.GMS2FrameLength;
                 nativeBG.GMS2TileIds = donorBG.GMS2TileIds;
                 DumpBackground(donorBG);

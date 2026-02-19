@@ -15,6 +15,7 @@ using UndertaleModLib;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
+using UndertaleModLib.Project;
 using UndertaleModLib.Scripting;
 
 namespace UndertaleModCli;
@@ -27,6 +28,9 @@ public partial class Program : IScriptInterface
 
     /// <inheritdoc/>
     public UndertaleData Data { get; set; }
+
+    /// <inheritdoc/>
+    public ProjectContext Project { get; set; }
 
     /// <inheritdoc/>
     public string FilePath { get; set; }

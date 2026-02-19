@@ -283,6 +283,7 @@ await Task.Run(() =>
                 GroupID = needAGRP ? audioGroupID : Data.GetBuiltinSoundGroupID()
             };
             Data.Sounds.Add(newSound);
+            Project?.MarkAssetForExport(newSound);
         }
         else if (replaceSoundPropertiesCheck)
         {
@@ -296,11 +297,13 @@ await Task.Run(() =>
             existingSound.AudioFile = finalAudioReference;
             existingSound.AudioGroup = finalGroupReference;
             existingSound.GroupID = needAGRP ? audioGroupID : Data.GetBuiltinSoundGroupID();
+            Project?.MarkAssetForExport(existingSound);
         }
         else
         {
             existingSound.AudioFile = finalAudioReference;
             existingSound.AudioID = audioID;
+            Project?.MarkAssetForExport(existingSound);
         }
     }
 });

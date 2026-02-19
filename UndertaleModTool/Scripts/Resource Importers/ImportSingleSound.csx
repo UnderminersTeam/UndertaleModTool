@@ -216,6 +216,7 @@ if (existingSound is null)
         GroupID = needAGRP ? audioGroupID : Data.GetBuiltinSoundGroupID()
     };
     Data.Sounds.Add(newSound);
+    Project?.MarkAssetForExport(newSound);
     ChangeSelection(newSound);
 }
 else if (replaceSoundPropertiesCheck)
@@ -230,12 +231,14 @@ else if (replaceSoundPropertiesCheck)
     existingSound.AudioFile = finalAudioReference;
     existingSound.AudioGroup = finalGroupReference;
     existingSound.GroupID = needAGRP ? audioGroupID : Data.GetBuiltinSoundGroupID();
+    Project?.MarkAssetForExport(existingSound);
     ChangeSelection(existingSound);
 }
 else
 {
     existingSound.AudioFile = finalAudioReference;
     existingSound.AudioID = audioID;
+    Project?.MarkAssetForExport(existingSound);
     ChangeSelection(existingSound);
 }
     

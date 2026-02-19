@@ -128,7 +128,7 @@ try
                 if (spriteType == SpriteType.Background)
                 {
                     UndertaleBackground background = Data.Backgrounds.ByName(stripped);
-                    if (background != null)
+                    if (background is not null)
                     {
                         background.Texture = texturePageItem;
                     }
@@ -136,13 +136,14 @@ try
                     {
                         // No background found, let's make one
                         UndertaleString backgroundUTString = Data.Strings.MakeString(stripped);
-                        UndertaleBackground newBackground = new UndertaleBackground();
-                        newBackground.Name = backgroundUTString;
-                        newBackground.Transparent = false;
-                        newBackground.Preload = false;
-                        newBackground.Texture = texturePageItem;
-                        Data.Backgrounds.Add(newBackground);
+                        background = new UndertaleBackground();
+                        background.Name = backgroundUTString;
+                        background.Transparent = false;
+                        background.Preload = false;
+                        background.Texture = texturePageItem;
+                        Data.Backgrounds.Add(background);
                     }
+                    Project?.MarkAssetForExport(background);
                 }
                 else if (spriteType == SpriteType.Sprite)
                 {
@@ -248,8 +249,12 @@ try
 
                         newSprite.Textures.Add(texentry);
                         Data.Sprites.Add(newSprite);
+                        Project?.MarkAssetForExport(newSprite);
                         continue;
                     }
+
+                    Project?.MarkAssetForExport(sprite);
+
                     if (frame > sprite.Textures.Count - 1)
                     {
                         while (frame > sprite.Textures.Count - 1)
@@ -258,6 +263,7 @@ try
                         }
                         continue;
                     }
+
                     sprite.Textures[frame] = texentry;
                     sprite.GMS2PlaybackSpeedType = (AnimSpeedType)playback;
                     sprite.GMS2PlaybackSpeed = animSpd;

@@ -144,26 +144,6 @@
 
                 <Separator/>
 
-                <TextBlock TextWrapping="Wrap" Foreground="Red" FontWeight="Bold" Text="Warning: the following options are currently experimental. Usage of any options below is at your own risk, and they may not be compatible in the future."/>
-
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    
-                    <StackPanel Grid.Column="0">
-                        <CheckBox IsChecked="{Binding ProfileModeEnabled}" Content="Enable profile mode" ToolTip="Toggles the 'decompile once and compile many' profile mode. Enabled by default. May need to be disabled for certain operations."/>
-                        <CheckBox IsChecked="{Binding DeleteOldProfileOnSave}" Content="Delete old profile on saving" ToolTip="Deletes the profile obsoleted on saving. Saves on file space at the expense of losing code information for variants. Enabled by default."/>
-                    </StackPanel>
-                    
-                    <StackPanel Grid.Column="1">
-                        <CheckBox IsChecked="{Binding ProfileMessageShown}" Content="Profile mode message shown" ToolTip="On first load, this will show you the profile mode loaded message. If this somehow breaks, you can manually toggle it here."/>
-                    </StackPanel>
-                </Grid>
-
-                <Separator/>
-
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>

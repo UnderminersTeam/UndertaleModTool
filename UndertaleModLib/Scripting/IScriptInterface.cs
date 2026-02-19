@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Underanalyzer.Decompiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
+using UndertaleModLib.Project;
 
 namespace UndertaleModLib.Scripting;
 
@@ -43,6 +44,11 @@ public interface IScriptInterface
     /// The data file.
     /// </summary>
     UndertaleData Data { get; }
+
+    /// <summary>
+    /// Currently-open project context, if one is active, or <see langword="null"/>.
+    /// </summary>
+    ProjectContext Project { get; }
 
     /// <summary>
     /// The file path where <see cref="Data"/> resides.

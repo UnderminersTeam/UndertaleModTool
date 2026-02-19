@@ -1,13 +1,15 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using UndertaleModLib.Project;
+using UndertaleModLib.Project.SerializableAssets;
 
 namespace UndertaleModLib.Models;
 
 /// <summary>
 /// Sound entry in a data file.
 /// </summary>
-public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, IDisposable
+public class UndertaleSound : UndertaleNamedResource, IProjectAsset, INotifyPropertyChanged, IDisposable
 {
     /// <summary>
     /// Audio entry flags a sound entry can use.
@@ -271,4 +273,21 @@ public class UndertaleSound : UndertaleNamedResource, INotifyPropertyChanged, ID
         Type = null;
         File = null;
     }
+
+    /// <inheritdoc/>
+    ISerializableProjectAsset IProjectAsset.GenerateSerializableProjectAsset(ProjectContext projectContext)
+    {
+        SerializableSound serializable = new();
+        serializable.PopulateFromData(projectContext, this);
+        return serializable;
+    }
+
+    /// <inheritdoc/>
+    public string ProjectName => Name?.Content ?? "<unknown name>";
+
+    /// <inheritdoc/>
+    public SerializableAssetType ProjectAssetType => SerializableAssetType.Sound;
+
+    /// <inheritdoc/>
+    public bool ProjectExportable => Name?.Content is not null;
 }

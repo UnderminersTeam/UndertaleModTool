@@ -40,6 +40,11 @@ public sealed class CodeImportGroup
     public bool AutoCreateAssets { get; set; } = true;
 
     /// <summary>
+    /// This action will be called when main-thread operations should occur, and can be changed.
+    /// </summary>
+    public Action<Action> MainThreadAction { get; set; } = static (f) => f();
+
+    /// <summary>
     /// Whether an exception will be thrown if a find and replace operation is a no-op.
     /// </summary>
     /// <remarks>
@@ -76,7 +81,10 @@ public sealed class CodeImportGroup
         Data = data;
         GlobalContext = globalContext ?? new(data);
         DecompileSettings = decompileSettings ?? new DecompileSettings();
-        CompileGroup = new(Data, GlobalContext);
+        CompileGroup = new(Data, GlobalContext)
+        {
+            MainThreadAction = MainThreadAction
+        };
     }
 
     /// <summary>
@@ -485,7 +493,8 @@ public sealed class CodeImportGroup
         {
             CompileGroup = new(Data, GlobalContext)
             {
-                PersistLinkingLookups = true
+                PersistLinkingLookups = true,
+                MainThreadAction = MainThreadAction
             };
             foreach (ICodeImportOperation operation in _queuedOperations)
             {

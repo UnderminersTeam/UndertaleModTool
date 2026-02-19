@@ -113,6 +113,8 @@ await Task.Run(() =>
         // Import the mask.
         (int maskWidth, int maskHeight) = sprite.CalculateMaskDimensions(Data);
         sprite.CollisionMasks[frame].Data = TextureWorker.ReadMaskData(file, maskWidth, maskHeight);
+
+        Project?.MarkAssetForExport(sprite);
     }
 });
 
