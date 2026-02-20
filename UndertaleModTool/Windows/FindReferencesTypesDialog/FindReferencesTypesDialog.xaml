@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UndertaleModTool"
         mc:Ignorable="d"
-        Title="The types of references" Height="555" Width="450" IsVisibleChanged="Window_IsVisibleChanged"
-        WindowStartupLocation="CenterOwner">
+        Title="{x:Static strings:Strings.The_types_of_references}" Height="555" Width="450" IsVisibleChanged="Window_IsVisibleChanged"
+        WindowStartupLocation="CenterOwner" xmlns:strings="clr-namespace:UndertaleModTool.Resources" >
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -15,7 +15,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Label Grid.Row="0" Content="Where to search the references?" HorizontalAlignment="Left" Margin="10,10,0,0" FontSize="22"/>
+        <Label Grid.Row="0" Content="{x:Static strings:Strings.Where_to_search_the_references}" HorizontalAlignment="Left" Margin="10,10,0,0" FontSize="22"/>
         <Rectangle Grid.Row="1" Margin="10,0,20,0" Height="2" Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
 
         <ScrollViewer Grid.Row="2" Margin="10,15,20,0" VerticalScrollBarVisibility="Auto">
@@ -34,10 +34,10 @@
         </ScrollViewer>
         
         <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="10,7,0,0">
-            <local:ButtonDark Content="Select all" Click="SelectAllButton_Click" Height="26" Width="63"/>
-            <local:ButtonDark Content="Deselect all" Margin="5,0,0,0" Click="DeselectAllButton_Click" Height="26" Width="71"/>
+            <local:ButtonDark Content="{x:Static strings:Strings.Select_all}" Click="SelectAllButton_Click" Height="26" Width="63"/>
+            <local:ButtonDark Content="{x:Static strings:Strings.Deselect_all}" Margin="5,0,0,0" Click="DeselectAllButton_Click" Height="26" Width="71"/>
         </StackPanel>
 
-        <local:ButtonDark Grid.Row="4" Content="Search" FontSize="18" Width="134" Height="40" Click="SearchButton_Click" Margin="0,15,0,15"/>
+        <local:ButtonDark Grid.Row="4" Content="{x:Static strings:Strings.Search}" FontSize="18" Width="134" Height="40" Click="SearchButton_Click" Margin="0,15,0,15"/>
     </Grid>
 </Window>

@@ -42,7 +42,7 @@ namespace UndertaleModTool
             foreach (var glyph in copy)
                 font.Glyphs.Add(glyph);
 
-            mainWindow.ShowMessage("The glyphs were sorted successfully.");
+            mainWindow.ShowMessage(UndertaleModTool.Resources.Strings.The_glyphs_were_sorted_successfully);
         }
         private void Button_UpdateRange_Click(object sender, RoutedEventArgs e)
         {
@@ -53,7 +53,7 @@ namespace UndertaleModTool
             font.RangeStart = characters.Min();
             font.RangeEnd = characters.Max();
 
-            mainWindow.ShowMessage("The range was updated successfully.");
+            mainWindow.ShowMessage(UndertaleModTool.Resources.Strings.The_range_was_updated_successfully);
         }
 
         private void Grid_MouseDown(object sender, MouseButtonEventArgs e)
@@ -91,7 +91,7 @@ namespace UndertaleModTool
             ScrollViewer glyphListViewer = MainWindow.FindVisualChild<ScrollViewer>(GlyphsGrid);
             if (glyphListViewer is null)
             {
-                mainWindow.ShowError("Cannot find the glyphs table scroll viewer.");
+                mainWindow.ShowError(UndertaleModTool.Resources.Strings.Cannot_find_the_glyphs_table_scroll);
                 return;
             }
             glyphListViewer.ScrollToVerticalOffset(glyphIndex + 1 - (glyphListViewer.ViewportHeight / 2)); // DataGrid offset is logical
@@ -111,13 +111,13 @@ namespace UndertaleModTool
         {
             if (GlyphsGrid.SelectedItem is not UndertaleFont.Glyph glyph)
             {
-                mainWindow.ShowError("No glyph selected.");
+                mainWindow.ShowError(UndertaleModTool.Resources.Strings.No_glyph_selected);
                 return;
             }
 
             if (DataContext is UndertaleFont font && font.Texture is null)
             {
-                mainWindow.ShowError("The font has no texture.");
+                mainWindow.ShowError(UndertaleModTool.Resources.Strings.The_font_has_no_texture);
                 return;
             }
 
@@ -152,8 +152,7 @@ namespace UndertaleModTool
                 if (font.Glyphs[index].SourceWidth == 0
                 || font.Glyphs[index].SourceHeight == 0)
                 {
-                    mainWindow.ShowWarning("The last glyph has zero size.\n" +
-                                           "You can use the button on the left to fix that.");
+                    mainWindow.ShowWarning(UndertaleModTool.Resources.Strings.The_last_glyph_has_zero_size___You);
                     return;
                 }
             }
@@ -192,7 +191,7 @@ namespace UndertaleModTool
             GlyphsGrid.Visibility = Visibility.Visible;
             GlyphsGrid.IsEnabled = true;
 
-            GlyphsLabel.Text = "Glyphs:";
+            GlyphsLabel.Text = UndertaleModTool.Resources.Strings.Glyphs;
         }
         private void Command_GoBack(object sender, ExecutedRoutedEventArgs e)
         {
@@ -211,7 +210,7 @@ namespace UndertaleModTool
             if (value is not ushort charNum)
             {
                 if (value is not short charNum1)
-                    return "(error)";
+                    return UndertaleModTool.Resources.Strings.error1;
 
                 try
                 {
@@ -219,7 +218,7 @@ namespace UndertaleModTool
                 }
                 catch
                 {
-                    return "(error)";
+                    return UndertaleModTool.Resources.Strings.error1;
                 }
             }
 
@@ -236,7 +235,7 @@ namespace UndertaleModTool
             uint charNum = charStr[0];
             if (charNum > ushort.MaxValue)
             {
-                mainWindow.ShowError("The character code is greater than the maximum (65535)");
+                mainWindow.ShowError(UndertaleModTool.Resources.Strings.The_character_code_is_greater_than);
                 return new ValidationResult(false, null);
             }
 

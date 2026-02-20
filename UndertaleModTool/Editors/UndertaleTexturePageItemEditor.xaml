@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleTexturePageItem}">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleTexturePageItem}" xmlns:strings="clr-namespace:UndertaleModTool.Resources" >
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -30,7 +30,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Source position/size</TextBlock>
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Source_position_size}"></TextBlock>
         <Grid Grid.Row="0" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -44,7 +44,7 @@
             <local:TextBoxDark Grid.Column="3" Margin="3" Text="{Binding SourceHeight}"/>
         </Grid>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Target position/size</TextBlock>
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Target_position_size}"></TextBlock>
         <Grid Grid.Row="1" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -58,7 +58,7 @@
             <local:TextBoxDark Grid.Column="3" Margin="3" Text="{Binding TargetHeight}"/>
         </Grid>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Bounding size</TextBlock>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Bounding_size}"></TextBlock>
         <Grid Grid.Row="2" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -68,11 +68,11 @@
             <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding BoundingHeight}"/>
         </Grid>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Texture</TextBlock>
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Texture}"></TextBlock>
         <local:UndertaleObjectReference Grid.Row="3" Grid.Column="1" Margin="3" ObjectReference="{Binding TexturePage}" ObjectType="{x:Type undertale:UndertaleEmbeddedTexture}"/>
 
         <local:ButtonDark Grid.Row="4" Grid.ColumnSpan="3" Width="230" Margin="3"
-                          Click="FindReferencesButton_Click">Find all references to this page item</local:ButtonDark>
+                          Click="FindReferencesButton_Click" Content="{x:Static strings:Strings.Find_all_references_to_this_page}"></local:ButtonDark>
 
         <Viewbox Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Stretch="Uniform" StretchDirection="DownOnly" Margin="3">
             <Border Background="{StaticResource TransparencyGridBrushBrush}">
@@ -87,8 +87,8 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <local:ButtonDark Grid.Column="0" Content="Import" Click="Import_Click"/>
-            <local:ButtonDark Grid.Column="3" Content="Export" Click="Export_Click"/>
+            <local:ButtonDark Grid.Column="0" Content="{x:Static strings:Strings.Import1}" Click="Import_Click"/>
+            <local:ButtonDark Grid.Column="3" Content="{x:Static strings:Strings.Export}" Click="Export_Click"/>
         </Grid>
 
         <Viewbox Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Stretch="Uniform" StretchDirection="DownOnly"

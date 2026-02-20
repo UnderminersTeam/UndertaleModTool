@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -56,13 +57,13 @@ namespace UndertaleModTool.Windows
                 sourceObjName = sourceObj.GetType().Name;
             this.sourceObjName = sourceObjName;
 
-            Title = $"The references of game asset \"{sourceObjName}\"";
-            label.Text = $"The search results for the game asset\n\"{sourceObjName}\".";
+            Title = String.Format(UndertaleModTool.Resources.Strings.The_references_of_game_asset____0, sourceObjName);
+            label.Text = String.Format(UndertaleModTool.Resources.Strings.The_search_results_for_the_game_asset, sourceObjName);
 
             if (results is null)
                 ResultsTree.Background = new VisualBrush(new Label()
                 {
-                    Content = "No references found.",
+                    Content = UndertaleModTool.Resources.Strings.No_references_found,
                     FontSize = 16
                 }) { Stretch = Stretch.None };
             else
@@ -74,13 +75,13 @@ namespace UndertaleModTool.Windows
 
             this.data = data;
 
-            Title = "The unreferenced game assets";
-            label.Text = "The search results for the unreferenced game assets.";
+            Title = UndertaleModTool.Resources.Strings.The_unreferenced_game_assets;
+            label.Text = UndertaleModTool.Resources.Strings.The_search_results_for_the_unreferenced;
 
             if (results is null)
                 ResultsTree.Background = new VisualBrush(new Label()
                 {
-                    Content = "No unreferenced assets found.",
+                    Content = UndertaleModTool.Resources.Strings.No_unreferenced_assets_found,
                     FontSize = 16
                 })
                 { Stretch = Stretch.None };
@@ -158,7 +159,7 @@ namespace UndertaleModTool.Windows
         {
             if (data.FORM is null)
             {
-                this.ShowError($"The object references are stale - a different game data was loaded.");
+                this.ShowError(UndertaleModTool.Resources.Strings.The_object_references_are_stale);
                 return;
             }
 
@@ -198,7 +199,7 @@ namespace UndertaleModTool.Windows
 
             if (sb.Length == initContent.Length)
             {
-                this.ShowError("No results to export.");
+                this.ShowError(UndertaleModTool.Resources.Strings.No_results_to_export);
                 return;
             }
             sb.Remove(sb.Length - 2, 2);
@@ -224,7 +225,7 @@ namespace UndertaleModTool.Windows
         {
             if (data.FORM is null)
             {
-                this.ShowError($"The object reference is stale - a different game data was loaded.");
+                this.ShowError(UndertaleModTool.Resources.Strings.The_object_reference_is_stale___a);
                 return;
             }
 
@@ -245,7 +246,7 @@ namespace UndertaleModTool.Windows
                 {
                     if (!mainWindow.HasEditorForAsset(inst[^1]))
                     {
-                        this.ShowError("The type of this object reference doesn't have an editor/viewer.");
+                        this.ShowError(UndertaleModTool.Resources.Strings.The_type_of_this_object_reference);
                         return;
                     }
                 }
@@ -254,7 +255,7 @@ namespace UndertaleModTool.Windows
             {
                 if (!mainWindow.HasEditorForAsset(obj))
                 {
-                    this.ShowError("The type of this object reference doesn't have an editor/viewer.");
+                    this.ShowError(UndertaleModTool.Resources.Strings.The_type_of_this_object_reference);
                     return;
                 }
 
@@ -270,7 +271,7 @@ namespace UndertaleModTool.Windows
             foreach (var item in menu.Items)
             {
                 var menuItem = item as MenuItem;
-                if ((menuItem.Header as string) == "Find all references")
+                if ((menuItem.Header as string) == UndertaleModTool.Resources.Strings.Find_all_references)
                 {
                     Type objType = menu.DataContext is object[] inst
                                    ? inst[^1].GetType() : menu.DataContext.GetType();

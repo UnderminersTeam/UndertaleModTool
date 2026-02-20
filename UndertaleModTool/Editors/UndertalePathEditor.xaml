@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertalePath}">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertalePath}" xmlns:strings="clr-namespace:UndertaleModTool.Resources" >
     <UserControl.Resources>
         <local:PointsDisplayConverter x:Key="PointsDisplayConverter" />
         <local:PointListConverter x:Key="PointListConverter" />
@@ -27,19 +27,19 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Name}"></TextBlock>
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Smooth</TextBlock>
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Smooth}"></TextBlock>
         <CheckBox Grid.Row="1" Grid.Column="1" Margin="3" IsChecked="{Binding IsSmooth}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Closed</TextBlock>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Closed}"></TextBlock>
         <CheckBox Grid.Row="2" Grid.Column="1" Margin="3" IsChecked="{Binding IsClosed}"/>
-        
-        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Precision</TextBlock>
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Precision}"></TextBlock>
         <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Precision}"/>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Points</TextBlock>
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Points}"></TextBlock>
         <local:DataGridDark Grid.Row="4" Grid.Column="1" Margin="3" ItemsSource="{Binding Points}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
@@ -58,7 +58,7 @@
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate>
-                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic" Text="{x:Static strings:Strings.Double_click_to_add}"></TextBlock>
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>
@@ -67,21 +67,21 @@
                 </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTemplateColumn Header="X" Width="*">
+                <DataGridTemplateColumn Header="{x:Static strings:Strings.X}" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <local:TextBoxDark Text="{Binding X, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" Margin="20,0,0,0" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Y" Width="*">
+                <DataGridTemplateColumn Header="{x:Static strings:Strings.Y}" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <local:TextBoxDark Text="{Binding Y, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Speed" Width="*">
+                <DataGridTemplateColumn Header="{x:Static strings:Strings.Speed}" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <local:TextBoxDark Text="{Binding Speed, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
@@ -92,7 +92,7 @@
         </local:DataGridDark>
 
         <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2">
-            <TextBlock Foreground="DarkGray" FontStyle="Italic">TODO: The preview doesn't update live, I know, just close and reopen the object for now</TextBlock>
+            <TextBlock Foreground="DarkGray" FontStyle="Italic" Text="{x:Static strings:Strings.TODO__The_preview_doesn_t_update}"></TextBlock>
         </StackPanel>
 
         <Viewbox Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Width="300" Height="300">

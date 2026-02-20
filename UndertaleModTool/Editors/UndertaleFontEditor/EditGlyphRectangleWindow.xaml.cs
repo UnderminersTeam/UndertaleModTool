@@ -61,7 +61,7 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
                                                        && x.Offset == selectedGlyph.Offset);
             if (SelectedGlyph is null)
             {
-                this.ShowError("Cannot find the selected glyph.");
+                this.ShowError(UndertaleModTool.Resources.Strings.Cannot_find_the_selected_glyph);
                 Close();
             }
 
@@ -441,9 +441,7 @@ namespace UndertaleModTool.Editors.UndertaleFontEditor
 
         private void HelpButton_Click(object sender, RoutedEventArgs e)
         {
-            this.ShowMessage("1) Double-click an inactive rectangle to select it.\n" +
-                             "2) You can move the selected rectangle with the arrow keys (held Shift - resize).\n" +
-                             "3) Drag mouse on desired region if it's an empty glyph.", "Help");
+            this.ShowMessage(UndertaleModTool.Resources.Strings.a_1__Double_click_an_inactive_rectangle, UndertaleModTool.Resources.Strings.Help1);
         }
     }
 

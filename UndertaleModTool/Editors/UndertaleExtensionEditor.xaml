@@ -7,7 +7,7 @@
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleExtension}">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleExtension}" xmlns:strings="clr-namespace:UndertaleModTool.Resources" >
     <UserControl.Resources>
         <local:ByteArrayConverter x:Key="byteArrayConverter"/>
         <local:IsVersionAtLeastConverter x:Key="IsVersionAtLeastConverter"/>
@@ -34,22 +34,22 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Name</TextBlock>
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Name}"></TextBlock>
         <local:UndertaleStringReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="Version"
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Version}"
                    Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2023.4}"/>
         <local:UndertaleStringReference Grid.Row="2" Grid.Column="1" Margin="3" ObjectReference="{Binding Version}"
                                         Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2023.4}"/>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Class Name</TextBlock>
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Class_Name}"></TextBlock>
         <local:UndertaleStringReference Grid.Row="3" Grid.Column="1" Margin="3" ObjectReference="{Binding ClassName}"/>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Files</TextBlock>
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Files}"></TextBlock>
         <local:DataGridDark Grid.Row="4" Grid.Column="1" Margin="3" ItemsSource="{Binding Files}"
                             AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
             <DataGrid.Columns>
-                <DataGridTemplateColumn Header="Files" Width="*">
+                <DataGridTemplateColumn Header="{x:Static strings:Strings.Files}" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <local:UndertaleObjectReference Margin="20,0,0,0" ObjectReference="{Binding ., Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ObjectType="{x:Type undertale:UndertaleExtensionFile}" CanRemove="False"/>
@@ -122,20 +122,14 @@
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </local:DataGridDark>
-        <local:ButtonDark Grid.Row="7" Grid.Column="1" Content="Add new extension option" Click="NewOptionButton_Click" Margin="0,0,0,6"
+        <local:ButtonDark Grid.Row="7" Grid.Column="1" Content="{x:Static strings:Strings.Add_new_extension_option}" Click="NewOptionButton_Click" Margin="0,0,0,6"
                           Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2022.6}"/>
 
-        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3" Visibility="{Binding DataContext.IsExtProductIDEligible, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}">Product ID</TextBlock>
+        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3" Visibility="{Binding DataContext.IsExtProductIDEligible, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Text="{x:Static strings:Strings.Product_ID}"></TextBlock>
         <local:TextBoxDark Background="#FF333333" Foreground="#FFFFFFFF" Grid.Row="8" Grid.Column="1" Margin="3" Visibility="{Binding DataContext.IsExtProductIDEligible, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}}" Text="{Binding ProductIdData, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:UndertaleExtensionEditor}}, Mode = TwoWay, Converter={StaticResource byteArrayConverter}}"/>
 
         <StackPanel Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2">
-            <TextBlock Foreground="Red" FontStyle="Italic">
-                THINGS TO NOTE:
-                <LineBreak/>
-                - Keep in mind that .gml files are either not present, or will be empty. (e.g. no functions)
-                  <LineBreak/>
-                  Because they are prebaked into GML scripts. That is completely normal.
-            </TextBlock>
+            <TextBlock Foreground="Red" FontStyle="Italic" Text="{x:Static strings:Strings.THINGS_TO_NOTE__n__Keep_in_mind_that}"></TextBlock>
             <!-- Meaning, it is useless to add your own .gml files :p -->
         </StackPanel>
     </Grid>

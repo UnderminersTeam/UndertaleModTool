@@ -7,8 +7,8 @@
         xmlns:utmt="clr-namespace:UndertaleModTool"
         xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
         mc:Ignorable="d"
-        Title="Edit a font glyph rectangle" Name="editGlyphRectangleWindow" Height="575" Width="800"
-        Loaded="Window_Loaded" IsVisibleChanged="Window_IsVisibleChanged" DataContext="{Binding RelativeSource={RelativeSource Self}}">
+        Title="{x:Static strings:Strings.Edit_a_font_glyph_rectangle}" Name="editGlyphRectangleWindow" Height="575" Width="800"
+        Loaded="Window_Loaded" IsVisibleChanged="Window_IsVisibleChanged" DataContext="{Binding RelativeSource={RelativeSource Self}}" xmlns:strings="clr-namespace:UndertaleModTool.Resources" >
     <Grid>
         <Grid.Resources>
             <utmt:EqualityConverter x:Key="EqualityConverter"/>
@@ -21,7 +21,7 @@
         </Grid.RowDefinitions>
 
         <utmt:ButtonDark Grid.Row="0" Margin="3" FontSize="16" Width="100" Height="26"
-                         Content="Get help" Click="HelpButton_Click" Focusable="False"/>
+                         Content="{x:Static strings:Strings.Get_help}" Click="HelpButton_Click" Focusable="False"/>
 
         <ScrollViewer Name="TextureScroll" Grid.Row="1" Margin="3"
                       HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible"
@@ -178,6 +178,6 @@
         </ScrollViewer>
 
         <utmt:ButtonDark Grid.Row="2" Margin="3,9,3,12" Click="SaveButton_Click" Width="160" Height="50"
-                         FontSize="18">Save changes</utmt:ButtonDark>
+                         FontSize="18" Content="{x:Static strings:Strings.Save_changes}"></utmt:ButtonDark>
     </Grid>
 </Window>

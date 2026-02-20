@@ -7,7 +7,7 @@
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleExtensionFunction}">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleExtensionFunction}" xmlns:strings="clr-namespace:UndertaleModTool.Resources" >
     <UserControl.Resources>
         <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="VarType">
             <ObjectDataProvider.MethodParameters>
@@ -30,23 +30,23 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Name}"></TextBlock>
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">External Name</TextBlock>
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.External_Name}"></TextBlock>
         <local:UndertaleStringReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding ExtName}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">ID</TextBlock>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.ID1}"></TextBlock>
         <local:TextBoxDark Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding ID}"/>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Kind</TextBlock>
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Kind1}"></TextBlock>
         <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Kind}"/>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Return Type</TextBlock>
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Return_Type}"></TextBlock>
         <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource VarType}}" SelectedItem="{Binding RetType}"
                             Grid.Row="4" Grid.Column="1" Margin="3"/>
 
-        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Argument Types</TextBlock>
+        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Argument_Types}"></TextBlock>
         <local:DataGridDark Grid.Row="5" Grid.Column="1" Margin="3" ItemsSource="{Binding Arguments}" x:Name="ArgumentTypesList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
@@ -65,7 +65,7 @@
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate>
-                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic" Text="{x:Static strings:Strings.Double_click_to_add}"></TextBlock>
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>
@@ -85,10 +85,8 @@
         </local:DataGridDark>
 
         <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2">
-            <TextBlock Foreground="Red" FontStyle="Italic">
-                Runner literally doesn't care about the 'Kind' value.
-                <LineBreak/>
-                The 'ID' does matter though, so make sure you don't have any overlaps.
+            <TextBlock Foreground="Red" FontStyle="Italic" Text="{x:Static strings:Strings.Runner_literally_doesn_t_care_about}">
+                
             </TextBlock>
         </StackPanel>
     </Grid>

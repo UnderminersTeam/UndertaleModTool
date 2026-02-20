@@ -6,14 +6,14 @@
         xmlns:local="clr-namespace:UndertaleModTool"
         xmlns:UndertaleModTool="clr-namespace:UndertaleModTool" x:Class="UndertaleModTool.Windows.SearchInCodeWindow"
         mc:Ignorable="d"
-        Title="Search in code" Height="500" Width="800" Closing="Window_Closing" IsVisibleChanged="Window_IsVisibleChanged" WindowStartupLocation="CenterScreen"
-        FocusManager.FocusedElement="{Binding ElementName=SearchTextBox}" DataContext="{Binding Mode=OneWay, RelativeSource={RelativeSource Self}}">
+        Title="{x:Static strings:Strings.Search_in_code}" Height="500" Width="800" Closing="Window_Closing" IsVisibleChanged="Window_IsVisibleChanged" WindowStartupLocation="CenterScreen"
+        FocusManager.FocusedElement="{Binding ElementName=SearchTextBox}" DataContext="{Binding Mode=OneWay, RelativeSource={RelativeSource Self}}" xmlns:strings="clr-namespace:UndertaleModTool.Resources" >
     <Window.Resources>
         <local:ContextMenuDark x:Key="ListViewItemContextMenu">
-            <MenuItem Header="Open" Click="MenuItemOpen_Click"/>
-            <MenuItem Header="Open in new tab" Click="MenuItemOpenInNewTab_Click"/>
-            <MenuItem Header="Copy" Command="Copy"/>
-            <MenuItem Header="Copy all" Click="MenuItemCopyAll_Click"/>
+            <MenuItem Header="{x:Static strings:Strings.Open1}" Click="MenuItemOpen_Click"/>
+            <MenuItem Header="{x:Static strings:Strings.Open_in_new_tab}" Click="MenuItemOpenInNewTab_Click"/>
+            <MenuItem Header="{x:Static strings:Strings.Copy}" Command="Copy"/>
+            <MenuItem Header="{x:Static strings:Strings.Copy_all}" Click="MenuItemCopyAll_Click"/>
         </local:ContextMenuDark>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
     </Window.Resources>
@@ -32,11 +32,11 @@
             </Grid.RowDefinitions>
             <UndertaleModTool:TextBoxDark x:Name="SearchTextBox" Grid.Row="0" TextWrapping="Wrap" AcceptsReturn="True" Height="36" VerticalScrollBarVisibility="Auto" PreviewKeyDown="SearchTextBox_PreviewKeyDown"/>
             <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,5,0,0">
-                <CheckBox Name="CaseSensitiveCheckBox" Content="Case sensitive" Height="15" Margin="0,0,5,0"/>
-                <CheckBox Name="RegexSearchCheckBox" Content="Regex search" Height="15" Margin="0,0,5,0"/>
-                <CheckBox Name="MultilineRegexCheckBox" Content="Multiline regex" Height="15" Margin="0,0,5,0"
+                <CheckBox Name="CaseSensitiveCheckBox" Content="{x:Static strings:Strings.Case_sensitive}" Height="15" Margin="0,0,5,0"/>
+                <CheckBox Name="RegexSearchCheckBox" Content="{x:Static strings:Strings.Regex_search}" Height="15" Margin="0,0,5,0"/>
+                <CheckBox Name="MultilineRegexCheckBox" Content="{x:Static strings:Strings.Multiline_regex}" Height="15" Margin="0,0,5,0"
                           Visibility="{Binding IsChecked, ElementName=RegexSearchCheckBox, Converter={StaticResource BoolToVisConverter}}"/>
-                <CheckBox Name="InAssemblyCheckBox" Content="In assembly" Height="15" Margin="0,0,12,0"/>
+                <CheckBox Name="InAssemblyCheckBox" Content="{x:Static strings:Strings.In_assembly}" Height="15" Margin="0,0,12,0"/>
             </StackPanel>
             <Expander Name="FilterByNameExpander" Grid.Row="2" Margin="0,0,0,6" Header="Filter by code name" IsExpanded="False">
                 <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
@@ -47,7 +47,7 @@
                 </StackPanel>
             </Expander>
 
-            <UndertaleModTool:ButtonDark x:Name="SearchButton" Grid.Row="1" Content="Search" Width="68" Margin="0,5,0,0" FontSize="14"
+            <UndertaleModTool:ButtonDark x:Name="SearchButton" Grid.Row="1" Content="{x:Static strings:Strings.Search1}" Width="68" Margin="0,5,0,0" FontSize="14"
                                          Click="SearchButton_Click" HorizontalAlignment="Right" IsDefault="True"/>
 
             <ListView ItemsSource="{Binding Results}" Name="ResultsListView" Grid.Row="3" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}">

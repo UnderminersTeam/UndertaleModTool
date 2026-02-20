@@ -7,9 +7,9 @@
              xmlns:undertale="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
              xmlns:undertaleModels="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance local:GameEndEditor}">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance local:GameEndEditor}" xmlns:strings="clr-namespace:UndertaleModTool.Resources" >
     <StackPanel>
-        <TextBlock Text="Game End scripts" FontWeight="Bold"/>
+        <TextBlock Text="{x:Static strings:Strings.Game_End_scripts}" FontWeight="Bold"/>
         <Separator/>
         <local:DataGridDark Grid.Row="20" Grid.Column="1" Margin="3" ItemsSource="{Binding GameEnds}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow">
             <DataGrid.Resources>
@@ -29,7 +29,7 @@
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate>
-                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic" Text="{x:Static strings:Strings.Double_click_to_add}"></TextBlock>
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>
