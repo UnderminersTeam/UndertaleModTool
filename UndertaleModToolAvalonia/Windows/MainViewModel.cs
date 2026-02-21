@@ -92,6 +92,8 @@ public partial class MainViewModel
     {
         ServiceProvider = serviceProvider ?? App.Services;
 
+        AudioPlayer.Init(f => Dispatcher.UIThread.Post(f));
+
         Tabs = [
             new TabItemViewModel(new DescriptionViewModel(
                 "Welcome to UndertaleModTool!",

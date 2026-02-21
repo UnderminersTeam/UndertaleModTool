@@ -14,11 +14,25 @@ public partial class UndertaleEmbeddedAudioViewModel : IUndertaleResourceViewMod
     public UndertaleResource Resource => EmbeddedAudio;
     public UndertaleEmbeddedAudio EmbeddedAudio { get; set; }
 
+    AudioPlayer? audioPlayer = null;
+
     public UndertaleEmbeddedAudioViewModel(UndertaleEmbeddedAudio embeddedAudio, IServiceProvider? serviceProvider = null)
     {
         MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
 
         EmbeddedAudio = embeddedAudio;
+    }
+
+    public async void PlayAudio()
+    {
+        audioPlayer?.Stop();
+        audioPlayer = new(EmbeddedAudio.Data);
+    }
+
+    public async void StopAudio()
+    {
+        audioPlayer?.Stop();
+        audioPlayer = null;
     }
 
     public async void ImportAudio()
