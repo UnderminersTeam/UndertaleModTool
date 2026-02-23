@@ -5,12 +5,16 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             xmlns:gif ="http://wpfanimatedgif.codeplex.com"
              mc:Ignorable="d" 
+             Unloaded="UndertaleSoundsEditor_Unloaded"
+             DataContextChanged="UserControl_DataContextChanged"
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleSound}">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="0.75*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -56,6 +60,19 @@
 
         <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Preload (old audio system)</TextBlock>
         <CheckBox Grid.Row="9" Grid.Column="1" Margin="3" IsChecked="{Binding Preload}"/>
+
+        <Image Margin="0,0,50,0" Grid.Column="3" Grid.Row="1" gif:ImageBehavior.AnimatedSource="/Resources/spr_flowey_riseanim.gif"  Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="Flowey"/>
+        <Image Margin="0,-30,37,0" Grid.Column="3" Grid.Row="1" Source="/Resources/spr_bubble_message.png" Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="FloweyBubble"/>
+        <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="SoundsObjectLabel"
+                       ToolTip="This is the ID (index) of this asset. It starts from 0."
+                       ToolTipService.InitialShowDelay="200" Margin="0,-30,37,0" Foreground="Black" Grid.Column="3"
+                       Width="Auto" Grid.Row="1"
+               />
+        <Label Content="ID:" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="FunnySounds"
+                       ToolTip="This is the ID (index) of this asset. It starts from 0."
+                       ToolTipService.InitialShowDelay="200" Margin="0,-30,82,0" Foreground="Black" Grid.Column="3"
+                       Width="Auto" Grid.Row="1"
+               />
 
         <Grid Grid.Row="11" Grid.Column="1" Name="AudioPlayer">
             <Grid.ColumnDefinitions>

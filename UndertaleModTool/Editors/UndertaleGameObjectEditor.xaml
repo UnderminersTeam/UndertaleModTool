@@ -6,7 +6,10 @@
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              xmlns:sys="clr-namespace:System;assembly=mscorlib" 
+             xmlns:gif ="http://wpfanimatedgif.codeplex.com"
              mc:Ignorable="d" 
+             Unloaded="DataUserControl_Unloaded"
+             DataContextChanged="DataUserControl_DataContextChanged"
              d:DesignHeight="800" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleGameObject}">
     <UserControl.Resources>
         <ResourceDictionary>
@@ -186,13 +189,14 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
-            <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
+            <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3,3,80,3" ObjectReference="{Binding Name}"/>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Sprite</TextBlock>
-            <local:UndertaleObjectReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding Sprite}" ObjectType="{x:Type undertale:UndertaleSprite}"/>
+            <local:UndertaleObjectReference Grid.Row="1" Grid.Column="1" Margin="3,3,80,3" ObjectReference="{Binding Sprite}" ObjectType="{x:Type undertale:UndertaleSprite}"/>
 
             <ListView Grid.Row="2" Grid.Column="1" ItemsSource="{Binding Sprite.Textures, Mode=OneWay}" Background="Transparent" BorderThickness="0">
                 <ListView.ItemsPanel>
@@ -213,65 +217,65 @@
 
 
             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Visible</TextBlock>
-            <CheckBox Grid.Row="3" Grid.Column="1" Margin="3" IsChecked="{Binding Visible}"/>
+            <CheckBox Grid.Row="3" Grid.Column="1" Margin="3,3,80,3" IsChecked="{Binding Visible}"/>
 
             <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Solid</TextBlock>
-            <CheckBox Grid.Row="4" Grid.Column="1" Margin="3" IsChecked="{Binding Solid}"/>
+            <CheckBox Grid.Row="4" Grid.Column="1" Margin="3,3,80,3" IsChecked="{Binding Solid}"/>
 
             <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}, Converter={StaticResource IsGMS2Converter}}">Depth</TextBlock>
-            <local:TextBoxDark Grid.Row="5" Grid.Column="1" Margin="3" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}, Converter={StaticResource IsGMS2Converter}}" Text="{Binding Depth}"/>
+            <local:TextBoxDark Grid.Row="5" Grid.Column="1" Margin="3,3,80,3" Visibility="{Binding DataContext.IsGMS2, Mode=OneTime, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}, Converter={StaticResource IsGMS2Converter}}" Text="{Binding Depth}"/>
 
             <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Persistent</TextBlock>
-            <CheckBox Grid.Row="6" Grid.Column="1" Margin="3" IsChecked="{Binding Persistent}"/>
+            <CheckBox Grid.Row="6" Grid.Column="1" Margin="3,3,80,3" IsChecked="{Binding Persistent}"/>
 
             <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Parent</TextBlock>
-            <local:UndertaleObjectReference Grid.Row="7" Grid.Column="1" Margin="3" ObjectReference="{Binding ParentId}" ObjectType="{x:Type undertale:UndertaleGameObject}"/>
+            <local:UndertaleObjectReference Grid.Row="7" Grid.Column="1" Margin="3,3,80,3" ObjectReference="{Binding ParentId}" ObjectType="{x:Type undertale:UndertaleGameObject}"/>
 
             <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Texture mask id</TextBlock>
-            <local:UndertaleObjectReference Grid.Row="8" Grid.Column="1" Margin="3" ObjectReference="{Binding TextureMaskId}" ObjectType="{x:Type undertale:UndertaleSprite}"/>
+            <local:UndertaleObjectReference Grid.Row="8" Grid.Column="1" Margin="3,3,80,3" ObjectReference="{Binding TextureMaskId}" ObjectType="{x:Type undertale:UndertaleSprite}"/>
 
             <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Uses physics</TextBlock>
-            <CheckBox Grid.Row="9" Grid.Column="1" Margin="3" IsChecked="{Binding UsesPhysics}"/>
+            <CheckBox Grid.Row="9" Grid.Column="1" Margin="3,3,80,3" IsChecked="{Binding UsesPhysics}"/>
 
             <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Is sensor</TextBlock>
-            <CheckBox Grid.Row="10" Grid.Column="1" Margin="3" IsChecked="{Binding IsSensor}"/>
+            <CheckBox Grid.Row="10" Grid.Column="1" Margin="3,3,80,3" IsChecked="{Binding IsSensor}"/>
 
             <TextBlock Grid.Row="11" Grid.Column="0" Margin="3">Collision shape</TextBlock>
-            <local:ComboBoxDark Grid.Row="11" Grid.Column="1" Margin="3" ItemsSource="{Binding Source={StaticResource CollisionShapeFlags}}" SelectedItem="{Binding Path=CollisionShape}" />
+            <local:ComboBoxDark Grid.Row="11" Grid.Column="1" Margin="3,3,80,3" ItemsSource="{Binding Source={StaticResource CollisionShapeFlags}}" SelectedItem="{Binding Path=CollisionShape}" />
 
             <Separator Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="2"/>
 
             <TextBlock Grid.Row="13" Grid.Column="0" Margin="3" FontWeight="Bold">Physics</TextBlock>
 
             <TextBlock Grid.Row="14" Grid.Column="0" Margin="3">Density</TextBlock>
-            <local:TextBoxDark Grid.Row="14" Grid.Column="1" Margin="3" Text="{Binding Density}"/>
+            <local:TextBoxDark Grid.Row="14" Grid.Column="1" Margin="3,3,80,3" Text="{Binding Density}"/>
 
             <TextBlock Grid.Row="15" Grid.Column="0" Margin="3">Restitution</TextBlock>
-            <local:TextBoxDark Grid.Row="15" Grid.Column="1" Margin="3" Text="{Binding Restitution}"/>
+            <local:TextBoxDark Grid.Row="15" Grid.Column="1" Margin="3,3,80,3" Text="{Binding Restitution}"/>
 
             <TextBlock Grid.Row="16" Grid.Column="0" Margin="3">Group</TextBlock>
-            <local:TextBoxDark Grid.Row="16" Grid.Column="1" Margin="3" Text="{Binding Group}"/>
+            <local:TextBoxDark Grid.Row="16" Grid.Column="1" Margin="3,3,80,3" Text="{Binding Group}"/>
 
             <TextBlock Grid.Row="17" Grid.Column="0" Margin="3">Linear damping</TextBlock>
-            <local:TextBoxDark Grid.Row="17" Grid.Column="1" Margin="3" Text="{Binding LinearDamping}"/>
+            <local:TextBoxDark Grid.Row="17" Grid.Column="1" Margin="3,3,80,3" Text="{Binding LinearDamping}"/>
 
             <TextBlock Grid.Row="18" Grid.Column="0" Margin="3">Angular damping</TextBlock>
-            <local:TextBoxDark Grid.Row="18" Grid.Column="1" Margin="3" Text="{Binding AngularDamping}"/>
+            <local:TextBoxDark Grid.Row="18" Grid.Column="1" Margin="3,3,80,3" Text="{Binding AngularDamping}"/>
 
             <!--TextBlock Grid.Row="19" Grid.Column="0" Margin="3">Physics shape vertex count</>
             <local:TextBoxDark Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding PhysicsShapeVertexCount}"/-->
 
             <TextBlock Grid.Row="19" Grid.Column="0" Margin="3">Friction</TextBlock>
-            <local:TextBoxDark Grid.Row="19" Grid.Column="1" Margin="3" Text="{Binding Friction}"/>
+            <local:TextBoxDark Grid.Row="19" Grid.Column="1" Margin="3,3,80,3" Text="{Binding Friction}"/>
 
             <TextBlock Grid.Row="20" Grid.Column="0" Margin="3">Is awake</TextBlock>
-            <CheckBox Grid.Row="20" Grid.Column="1" Margin="3" IsChecked="{Binding Awake}"/>
+            <CheckBox Grid.Row="20" Grid.Column="1" Margin="3,3,80,3" IsChecked="{Binding Awake}"/>
 
             <TextBlock Grid.Row="21" Grid.Column="0" Margin="3">Is kinematic</TextBlock>
-            <CheckBox Grid.Row="21" Grid.Column="1" Margin="3" IsChecked="{Binding Kinematic}"/>
+            <CheckBox Grid.Row="21" Grid.Column="1" Margin="3,3,80,3" IsChecked="{Binding Kinematic}"/>
 
             <TextBlock Grid.Row="22" Grid.Column="0" Margin="3">Physics shape vertices</TextBlock>
-            <local:DataGridDark Grid.Row="22" Grid.Column="1" Margin="3" ItemsSource="{Binding PhysicsVertices, Mode=OneWay}"
+            <local:DataGridDark Grid.Row="22" Grid.Column="1" Margin="3,3,80,3" ItemsSource="{Binding PhysicsVertices, Mode=OneWay}"
                                 AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True"
                                 HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray"
                                 HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
@@ -320,6 +324,19 @@
             </local:DataGridDark>
 
             <Separator Grid.Row="23" Grid.Column="0" Grid.ColumnSpan="2"/>
+            
+            <Image Margin="0,-470,15,0" Grid.Column="3" Grid.Row="26" gif:ImageBehavior.AnimatedSource="/Resources/spr_flowey_riseanim.gif"  Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="Flowey"/>
+            <Image Margin="0,-500,2,0" Grid.Column="3" Grid.Row="26" Source="/Resources/spr_bubble_message.png" Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="FloweyBubble"/>
+            <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="GameObjectObjectLabel"
+                       ToolTip="This is the ID (index) of this asset. It starts from 0."
+                       ToolTipService.InitialShowDelay="200" Margin="0,-500,0,0" Foreground="Black" Grid.Column="3"
+                       Width="Auto" Grid.Row="26"
+               />
+            <Label Content="ID:" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="FunnyGameObject"
+                       ToolTip="This is the ID (index) of this asset. It starts from 0."
+                       ToolTipService.InitialShowDelay="200" Margin="0,-500,48,0" Foreground="Black" Grid.Column="3"
+                       Width="Auto" Grid.Row="26"
+               />
         </Grid>
 
         <TextBlock Margin="3" FontWeight="Bold">Events</TextBlock>

@@ -10,6 +10,7 @@ using System.Security.Cryptography;
 using UndertaleModLib.Models;
 using UndertaleModLib.Decompiler;
 using System.Threading.Tasks;
+using System.Text;
 using Underanalyzer.Decompiler;
 
 namespace UndertaleModTool
@@ -200,53 +201,158 @@ namespace UndertaleModTool
                 return;
             }
 
-            try
+            string fileext = Path.GetExtension(filename);
+
+            //this.ShowMessage(filename);
+
+            if (fileext != ".dat") try
             {
                 FileMessageEvent?.Invoke("Calculating MD5 hash...");
 
                 await Task.Run(() =>
                 {
-                    using var md5Instance = MD5.Create();
-                    using var stream = File.OpenRead(filename);
-                    MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
-                    MD5PreviouslyLoaded = MD5CurrentlyLoaded;
-                    ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                    using (var md5Instance = MD5.Create())
+                    {
+                        using (var stream = File.OpenRead(filename))
+                        {
+                            MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
+                            MD5PreviouslyLoaded = MD5CurrentlyLoaded;
+                            remMD5 = MD5PreviouslyLoaded;
+
+                            String Input_text = "";
+                            if (SettingsWindow.ProfileModeEnabled && SettingsWindow.CustomProfileName == true)
+                            {
+                                if (SettingsWindow.RememberProfileName)
+                                {
+                                    var MD5DirName = CurProfileName;
+                                    var MD5DirPath = Path.Combine(ProfilesFolder, MD5DirName);
+                                    var FileDir = "";
+                                    string[] iwishiwasbetteratnames = filename.Split(new char[] { '\\' });
+                                    var directoriesamt = iwishiwasbetteratnames.Length;
+                                    for (var i = 0; i < directoriesamt - 1; i++)
+                                    {
+                                        FileDir += iwishiwasbetteratnames[i] + "\\";
+                                    }
+                                    if (File.Exists(FileDir + "Profiles\\directory.txt"))
+                                    { 
+                                        FileDir += "Profiles\\directory.txt";
+
+                                        var GetThisDir = File.ReadAllText(FileDir);
+
+                                        if (File.Exists(GetThisDir))
+                                            Input_text = File.ReadAllText(GetThisDir);
+                                        else
+                                            Input_text = SimpleTextInput("Loading Profile, please enter a Profile name.", "(Leaving this blank will name the profile with the data's MD5 hash.)", Input_text, true);
+                                        //this.ShowMessage(Input_text);
+                                    }
+                                    else
+                                        Input_text = SimpleTextInput("Loading Profile, please enter a Profile name.", "(Leaving this blank will name the profile with the data's MD5 hash.)", Input_text, true);
+                                }
+                                else
+                                    Input_text = SimpleTextInput("Loading Profile, please enter a Profile name.", "(Leaving this blank will name the profile with the data's MD5 hash.)", Input_text, true);
+                            }
+
+                            if (Input_text == "")
+                            {
+                                ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                                is_string = false;
+                            }
+                            else
+                            {
+                                byte[] idk = Encoding.ASCII.GetBytes(Input_text);
+                                MD5PreviouslyLoaded = idk;
+                                MD5CurrentlyLoaded = idk;
+
+                                ProfileHash = Input_text;
+                                is_string = true;
+                            }
+                            CurProfileName = ProfileHash;
+                            //this.ShowMessage(CurProfileName);
+                            CurrentProfileName = "- Current Profile: " + "\"" + CurProfileName + "\"";
+                        }
+                    }
                 });
+
+                /*await Task.Run(() =>
+                {
+                    using (var md5Instance = MD5.Create())
+                    {
+                        using (var stream = File.OpenRead(filename))
+                        {
+                            MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
+                            MD5PreviouslyLoaded = MD5CurrentlyLoaded;
+                            remMD5 = MD5PreviouslyLoaded;
+
+                            String Input_text = "";
+                            if (SettingsWindow.ProfileModeEnabled && SettingsWindow.CustomProfileName == true)
+                                Input_text = SimpleTextInput("Loading Profile, please enter a Profile name.", "(Leaving this blank will name the profile with the data's MD5 hash.)", Input_text, true);
+                            ProfileHash = Input_text;
+                            CurProfileName = ProfileHash;
+                            if (ProfileHash == "")
+                            {
+                                ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                                CurProfileName = ProfileHash;
+                                is_string = false;
+                            }
+                            else
+                            {
+                                byte[] idk = Encoding.ASCII.GetBytes(Input_text);
+                                MD5PreviouslyLoaded = idk;
+                                MD5CurrentlyLoaded = idk;
+                                ProfileHash = Input_text;
+                                is_string = true;
+                            }
+                            CurrentProfileName = "- Current Profile: " + "\"" + CurProfileName + "\"";
+                            this.ShowMessage(ProfileHash);
+                        }
+                    }
+                });*/
 
                 string profDir = Path.Combine(ProfilesFolder, ProfileHash);
                 string profDirTemp = Path.Combine(profDir, "Temp");
                 string profDirMain = Path.Combine(profDir, "Main");
-
                 Directory.CreateDirectory(ProfilesFolder);
-                if (Directory.Exists(profDir))
-                {
-                    if (!Directory.Exists(profDirTemp) && Directory.Exists(profDirMain))
+                    if (SettingsWindow.ProfileModeEnabled)
                     {
-                        // Get the subdirectories for the specified directory.
-                        DirectoryInfo dir = new DirectoryInfo(profDirMain);
-                        Directory.CreateDirectory(profDirTemp);
-                        // Get the files in the directory and copy them to the new location.
-                        FileInfo[] files = dir.GetFiles();
-                        foreach (FileInfo file in files)
+                        if (Directory.Exists(profDir))
                         {
-                            string tempPath = Path.Combine(profDirTemp, file.Name);
-                            file.CopyTo(tempPath, false);
+                            string[] Files = Directory.GetFiles(profDir + "\\Temp");
+                            if (!Directory.Exists(profDir + "\\Temp"))
+                                Directory.CreateDirectory(profDir + "\\Temp");
+                            for (var i = 0; i < Files.Length; i++)
+                            {
+                                if (File.Exists(Files[i]))
+                                    File.Delete(Files[i]);
+                            }
+                            DirectoryCopy(Path.Combine(profDir, "Main"), Path.Combine(profDir, "Temp"), true);
+                        }
+                        if (!Directory.Exists(profDirTemp) && Directory.Exists(profDirMain))
+                        {
+                            // Get the subdirectories for the specified directory.
+                            DirectoryInfo dir = new DirectoryInfo(profDirMain);
+                            Directory.CreateDirectory(profDirTemp);
+                            // Get the files in the directory and copy them to the new location.
+                            FileInfo[] files = dir.GetFiles();
+                            foreach (FileInfo file in files)
+                            {
+                                string tempPath = Path.Combine(profDirTemp, file.Name);
+                                file.CopyTo(tempPath, false);
+                            }
+                        }
+                        else if (!Directory.Exists(profDirMain) && Directory.Exists(profDirTemp))
+                        {
+                            // Get the subdirectories for the specified directory.
+                            DirectoryInfo dir = new DirectoryInfo(profDirTemp);
+                            Directory.CreateDirectory(profDirMain);
+                            // Get the files in the directory and copy them to the new location.
+                            FileInfo[] files = dir.GetFiles();
+                            foreach (FileInfo file in files)
+                            {
+                                string tempPath = Path.Combine(profDirMain, file.Name);
+                                file.CopyTo(tempPath, false);
+                            }
                         }
                     }
-                    else if (!Directory.Exists(profDirMain) && Directory.Exists(profDirTemp))
-                    {
-                        // Get the subdirectories for the specified directory.
-                        DirectoryInfo dir = new DirectoryInfo(profDirTemp);
-                        Directory.CreateDirectory(profDirMain);
-                        // Get the files in the directory and copy them to the new location.
-                        FileInfo[] files = dir.GetFiles();
-                        foreach (FileInfo file in files)
-                        {
-                            string tempPath = Path.Combine(profDirMain, file.Name);
-                            file.CopyTo(tempPath, false);
-                        }
-                    }
-                }
 
                 // First generation no longer exists, it will be generated on demand while you edit.
                 Directory.CreateDirectory(profDir);
@@ -298,10 +404,29 @@ an issue on GitHub.");
                 return;
             }
 
-            try
-            {
-                FileMessageEvent?.Invoke("Calculating MD5 hash...");
+            string fileext = Path.GetExtension(filename);
 
+            if (fileext != ".dat") try
+            {
+                String Input_text = "";
+                if (SettingsWindow.ProfileModeEnabled == true && SettingsWindow.CustomProfileName == true)
+                {
+                    if (this.ShowQuestion("Do you want to save to the current Profile?") == MessageBoxResult.No)
+                    {
+                        Input_text = SimpleTextInput("Saving Profile, please enter a Profile name.", "(Leaving this blank will name the profile with the data's MD5 hash.)", Input_text, true);
+                    }
+                    else
+                    {
+                        Input_text = CurProfileName;
+                    }
+                }
+                is_string = false;
+                if (Input_text != "")
+                {
+                    is_string = true;
+                    byte[] __name = Encoding.ASCII.GetBytes(CurProfileName);
+                    MD5PreviouslyLoaded = __name;
+                }
                 string deleteIfModeActive = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
                 bool copyProfile = false;
                 await Task.Run(() =>
@@ -311,12 +436,26 @@ an issue on GitHub.");
                     MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
                     if (!BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").Equals(BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", ""), StringComparison.InvariantCultureIgnoreCase))
                     {
-                        copyProfile = true;
+                        using (var stream2 = File.OpenRead(filename))
+                        {
+                            MD5CurrentlyLoaded = md5Instance.ComputeHash(stream2);
+                            if (is_string == true)
+                            {
+                                byte[] idk = Encoding.ASCII.GetBytes(Input_text);
+                                MD5CurrentlyLoaded = idk;
+                            }
+                            if (deleteIfModeActive != BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant())
+                            {
+                                copyProfile = true;
+                            }
+                        }
                     }
                 });
 
                 Directory.CreateDirectory(Path.Combine(ProfilesFolder, ProfileHash, "Main"));
                 Directory.CreateDirectory(Path.Combine(ProfilesFolder, ProfileHash, "Temp"));
+                var Oldname = "";
+
                 string profDir;
                 string MD5DirNameOld;
                 string MD5DirPathOld;
@@ -324,42 +463,99 @@ an issue on GitHub.");
                 string MD5DirPathOldTemp;
                 string MD5DirNameNew;
                 string MD5DirPathNew;
-                if (copyProfile)
+                string MD5DirPathNewTemp;
+
+                if (!SettingsWindow.ProfileModeEnabled || data.IsYYC())
                 {
-                    MD5DirNameOld = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
-                    MD5DirPathOld = Path.Combine(ProfilesFolder, MD5DirNameOld);
-                    MD5DirPathOldMain = Path.Combine(MD5DirPathOld, "Main");
-                    MD5DirPathOldTemp = Path.Combine(MD5DirPathOld, "Temp");
-                    MD5DirNameNew = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
-                    MD5DirPathNew = Path.Combine(ProfilesFolder, MD5DirNameNew);
-                    DirectoryCopy(MD5DirPathOld, MD5DirPathNew, true);
-                    if (Directory.Exists(MD5DirPathOldMain) && Directory.Exists(MD5DirPathOldTemp))
+                    MD5PreviouslyLoaded = MD5CurrentlyLoaded;
+                    if (is_string == true)
                     {
-                        Directory.Delete(MD5DirPathOldTemp, true);
+                        byte[] idk = Encoding.ASCII.GetBytes(CurProfileName);
+                        MD5PreviouslyLoaded = idk;
                     }
-                    DirectoryCopy(MD5DirPathOldMain, MD5DirPathOldTemp, true);
+                    ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                    return;
                 }
-                MD5PreviouslyLoaded = MD5CurrentlyLoaded;
-                // Get the subdirectories for the specified directory.
-                MD5DirNameOld = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
-                MD5DirPathOld = Path.Combine(ProfilesFolder, MD5DirNameOld);
-                MD5DirPathOldMain = Path.Combine(MD5DirPathOld, "Main");
-                MD5DirPathOldTemp = Path.Combine(MD5DirPathOld, "Temp");
-                if ((Directory.Exists(MD5DirPathOldMain)) && (Directory.Exists(MD5DirPathOldTemp)) && copyProfile)
+                else if (SettingsWindow.ProfileModeEnabled)
                 {
-                    Directory.Delete(MD5DirPathOldMain, true);
+                    Directory.CreateDirectory(ProfilesFolder);
+                    bool old_is_string = is_string;
+                    // Get the subdirectories for the specified directory.
+                    if (!is_string)
+                    {
+                        MD5DirNameOld = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                        MD5DirPathOld = Path.Combine(ProfilesFolder, MD5DirNameOld);
+                        MD5DirPathOldMain = Path.Combine(MD5DirPathOld, "Main");
+                        MD5DirPathOldTemp = Path.Combine(MD5DirPathOld, "Temp");
+                    }
+                    else
+                    {
+                        MD5DirNameOld = CurProfileName;
+                        MD5DirPathOld = Path.Combine(ProfilesFolder, MD5DirNameOld);
+                        MD5DirPathOldMain = Path.Combine(MD5DirPathOld, "Main");
+                        MD5DirPathOldTemp = Path.Combine(MD5DirPathOld, "Temp");
+                    }
+                    if ((Directory.Exists(MD5DirPathOldMain)) && (Directory.Exists(MD5DirPathOldTemp)) && copyProfile)
+                    {
+                        Directory.Delete(MD5DirPathOldMain, true);
+                    }
+                    DirectoryCopy(MD5DirPathOldTemp, MD5DirPathOldMain, true);
+                    if (copyProfile)
+                    {
+                        if (!is_string)
+                            MD5DirNameOld = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                        else
+                            MD5DirNameOld = CurProfileName;
+                        MD5DirPathOld = Path.Combine(ProfilesFolder, MD5DirNameOld);
+                        MD5DirPathOldMain = Path.Combine(MD5DirPathOld, "Main");
+                        MD5DirPathOldTemp = Path.Combine(MD5DirPathOld, "Temp");
+                        if (!is_string)
+                            MD5DirNameNew = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
+                        else
+                            MD5DirNameNew = Input_text;
+                        MD5DirPathNew = Path.Combine(ProfilesFolder, MD5DirNameNew);
+                        MD5DirPathNewTemp = Path.Combine(MD5DirPathNew, "Temp");
+                        DirectoryCopy(MD5DirPathOld, MD5DirPathNew, true);
+                        if (Directory.Exists(MD5DirPathOldMain) && Directory.Exists(MD5DirPathOldTemp))
+                        {
+                            Directory.Delete(MD5DirPathOldTemp, true);
+                        }
+                        DirectoryCopy(MD5DirPathOldMain, MD5DirPathOldTemp, true);
+                    }
+                    MD5PreviouslyLoaded = MD5CurrentlyLoaded;
+                    ProfileHash = Input_text;
+                    Oldname = CurProfileName;
+                    CurProfileName = ProfileHash;
+                    if (ProfileHash == "")
+                    {
+                        ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
+                        CurProfileName = ProfileHash;
+                        is_string = false;
+                    }
+                    else
+                    {
+                        byte[] idk = Encoding.ASCII.GetBytes(Input_text);
+                        MD5PreviouslyLoaded = idk;
+                        ProfileHash = Input_text;
+                        is_string = true;
+                    }
+                    CurrentProfileName = "- Current Profile: " + "\"" + CurProfileName + "\"";
+                    profDir = Path.Combine(ProfilesFolder, ProfileHash);
+                    Directory.CreateDirectory(profDir);
+                    Directory.CreateDirectory(Path.Combine(profDir, "Main"));
+                    Directory.CreateDirectory(Path.Combine(profDir, "Temp"));
+                    string[] Files = Directory.GetFiles(profDir + "\\Main");
+                    for (var i = 0; i < Files.Length; i++)
+                    {
+                        File.Delete(Files[i]);
+                    }
+                    DirectoryCopy(Path.Combine(profDir, "Temp"), Path.Combine(profDir, "Main"), true);
+                    this.ShowMessage("Profile saved successfully to " + "\"" + CurProfileName + "\"");
                 }
-                DirectoryCopy(MD5DirPathOldTemp, MD5DirPathOldMain, true);
-
-                ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
-                profDir = Path.Combine(ProfilesFolder, ProfileHash);
-                Directory.CreateDirectory(profDir);
-                Directory.CreateDirectory(Path.Combine(profDir, "Main"));
-                Directory.CreateDirectory(Path.Combine(profDir, "Temp"));
-
                 if (SettingsWindow.DeleteOldProfileOnSave && copyProfile)
                 {
-                    Directory.Delete(Path.Combine(ProfilesFolder, deleteIfModeActive), true);
+                    //this.ShowMessage(Oldname);
+                    Directory.Delete(Path.Combine(ProfilesFolder, Oldname), true);
                 }
             }
             catch (Exception exc)

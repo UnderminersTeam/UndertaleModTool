@@ -5,14 +5,19 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             xmlns:gif ="http://wpfanimatedgif.codeplex.com"
              mc:Ignorable="d" 
+             Unloaded="UndertaleEmbedImageEditor_Unloaded"
+             DataContextChanged="UserControl_DataContextChanged"
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleEmbeddedImage}">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="0.5*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -22,5 +27,18 @@
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Texture</TextBlock>
         <local:UndertaleObjectReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding TextureEntry}" ObjectType="{x:Type undertale:UndertaleTexturePageItem}"/>
+        
+        <Image Margin="0,-20,22,0" Grid.Column="3" Grid.Row="2" gif:ImageBehavior.AnimatedSource="/Resources/spr_flowey_riseanim.gif"  Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="Flowey"/>
+        <Image Margin="0,-50,8,0" Grid.Column="3" Grid.Row="2" Source="/Resources/spr_bubble_message.png" Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="FloweyBubble"/>
+        <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="EmbedImageObjectLabel"
+                       ToolTip="This is the ID (index) of this asset. It starts from 0."
+                       ToolTipService.InitialShowDelay="200" Margin="0,-50,7,0" Foreground="Black" Grid.Column="3"
+                       Width="Auto" Grid.Row="3"
+               />
+        <Label Content="ID:" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="FunnyEmbedImage"
+                       ToolTip="This is the ID (index) of this asset. It starts from 0."
+                       ToolTipService.InitialShowDelay="200" Margin="0,-50,54,0" Foreground="Black" Grid.Column="3"
+                       Width="Auto" Grid.Row="3"
+               />
     </Grid>
 </local:DataUserControl>
