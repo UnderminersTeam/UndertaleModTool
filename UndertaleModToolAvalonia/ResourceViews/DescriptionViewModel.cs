@@ -1,6 +1,6 @@
-﻿namespace UndertaleModToolAvalonia;
+namespace UndertaleModToolAvalonia;
 
-public class DescriptionViewModel
+public class DescriptionViewModel : ITabContent
 {
     public string Heading { get; set; }
     public string Description { get; set; }

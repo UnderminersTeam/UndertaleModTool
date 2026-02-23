@@ -438,6 +438,11 @@ public partial class MainViewModel
         Data = null;
         DataPath = null;
 
+        foreach (TabItemViewModel tab in Tabs)
+        {
+            tab.Content.OnDetached();
+        }
+
         Tabs.Clear();
 
         if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
@@ -686,7 +691,7 @@ public partial class MainViewModel
         if (Data is null)
             return null;
 
-        object? content = item switch
+        ITabContent? content = item switch
         {
             DescriptionViewModel vm => vm,
             "GeneralInfo" => new GeneralInfoViewModel(Data),
@@ -743,6 +748,8 @@ public partial class MainViewModel
     {
         var selected = TabSelected;
         var index = TabSelectedIndex;
+
+        tab.Content.OnDetached();
 
         Tabs.Remove(tab);
 

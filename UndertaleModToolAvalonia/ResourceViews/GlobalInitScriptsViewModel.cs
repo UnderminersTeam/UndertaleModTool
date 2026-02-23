@@ -1,9 +1,9 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia;
 
-public class GlobalInitScriptsViewModel
+public class GlobalInitScriptsViewModel : ITabContent
 {
     public ObservableCollection<UndertaleGlobalInit> GlobalInitScripts { get; set; }
 

@@ -1,12 +1,20 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using PropertyChanged.SourceGenerator;
 
 namespace UndertaleModToolAvalonia;
 
+public interface ITabContent
+{
+    /// <summary>Runs after the tab content is attached to a tab, i.e. when it becomes a tab's content.</summary>
+    void OnAttached() { }
+    /// <summary>Runs before the tab content is detached to a tab, i.e. when it stops being a tab's content.</summary>
+    void OnDetached() { }
+}
+
 public partial class TabItemViewModel
 {
     [Notify]
-    private object _Content = null!;
+    private ITabContent _Content = null!;
     [Notify]
     private bool _IsSelected = false;
 
@@ -15,22 +23,26 @@ public partial class TabItemViewModel
     [Notify]
     private bool _CanGoForward = false;
 
-    private readonly List<object> history = [];
+    private readonly List<ITabContent> history = [];
     private int historyPosition = -1;
 
-    public TabItemViewModel(object content, bool isSelected = false)
+    public TabItemViewModel(ITabContent content, bool isSelected = false)
     {
         Content = content;
         IsSelected = isSelected;
 
         history.Add(Content);
         historyPosition = 0;
+
+        Content.OnAttached();
     }
 
-    public void GoTo(object content)
+    public void GoTo(ITabContent content)
     {
         if (content == Content)
             return;
+
+        Content.OnDetached();
 
         Content = content;
 
@@ -41,23 +53,33 @@ public partial class TabItemViewModel
 
         CanGoBack = true;
         CanGoForward = false;
+
+        Content.OnAttached();
     }
 
     public void GoBack()
     {
+        Content.OnDetached();
+
         historyPosition--;
         Content = history[historyPosition];
 
         CanGoBack = (historyPosition != 0);
         CanGoForward = true;
+
+        Content.OnAttached();
     }
 
     public void GoForward()
     {
+        Content.OnDetached();
+
         historyPosition++;
         Content = history[historyPosition];
 
         CanGoBack = true;
         CanGoForward = (historyPosition != history.Count - 1);
+
+        Content.OnAttached();
     }
 }

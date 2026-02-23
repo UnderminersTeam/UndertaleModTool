@@ -2,7 +2,7 @@ using UndertaleModLib;
 
 namespace UndertaleModToolAvalonia;
 
-interface IUndertaleResourceViewModel
+interface IUndertaleResourceViewModel : ITabContent
 {
     UndertaleResource Resource { get; }
 }

@@ -1,9 +1,9 @@
-﻿using UndertaleModLib;
+using UndertaleModLib;
 using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia;
 
-public class GeneralInfoViewModel
+public class GeneralInfoViewModel : ITabContent
 {
     public UndertaleGeneralInfo GeneralInfo { get; set; }
     public UndertaleOptions Options { get; set; }
