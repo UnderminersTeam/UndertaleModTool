@@ -14,13 +14,13 @@
             </StackPanel>
 
             <StackPanel Orientation="Horizontal">
-                <Button Command="{Binding PlayAudio}">Play audio</Button>
-                <Button Command="{Binding StopAudio}">Stop audio</Button>
+                <Button Command="{Binding ImportAudio}">Import audio</Button>
+                <Button Command="{Binding ExportAudio}">Export audio</Button>
             </StackPanel>
 
             <StackPanel Orientation="Horizontal">
-                <Button Command="{Binding ImportAudio}">Import audio</Button>
-                <Button Command="{Binding ExportAudio}">Export audio</Button>
+                <Button Command="{Binding PlayAudio}">Play audio</Button>
+                <Button Command="{Binding StopAudio}">Stop audio</Button>
             </StackPanel>
         </StackPanel>
     </ScrollViewer>
