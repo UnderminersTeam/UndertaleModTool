@@ -1,0 +1,327 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
+             xmlns:undertale="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
+             xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.MainView"
+             x:DataType="l:MainViewModel"
+             Background="Transparent">
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <l:MainViewModel />
+    </Design.DataContext>
+
+    <UserControl.Resources>
+        <ContextMenu x:Key="ListMenu">
+            <MenuItem Header="_Add" Click="ContextMenu_Add_Click"/>
+        </ContextMenu>
+        <ContextMenu x:Key="SingleMenu">
+            <MenuItem Header="_Open" Click="ContextMenu_Open_Click"/>
+            <MenuItem Header="Open in _new tab" Click="ContextMenu_OpenInNewTab_Click"/>
+        </ContextMenu>
+        <ContextMenu x:Key="ResourceMenu">
+            <MenuItem Header="_Open" Click="ContextMenu_Open_Click"/>
+            <MenuItem Header="Open in _new tab" Click="ContextMenu_OpenInNewTab_Click"/>
+            <MenuItem Header="_Copy name" Click="ContextMenu_CopyName_Click"/>
+            <MenuItem Header="_Swap to position" Click="ContextMenu_Move_Click"/>
+            <MenuItem Header="_Remove" Click="ContextMenu_Remove_Click"/>
+        </ContextMenu>
+        <l:TreeDataGridItemToContextMenuConverter x:Key="TreeDataGridItemToContextMenuConverter"
+                                                  ListMenu="{StaticResource ListMenu}"
+                                                  SingleMenu="{StaticResource SingleMenu}"
+                                                  ResourceMenu="{StaticResource ResourceMenu}"/>
+    </UserControl.Resources>
+
+    <Interaction.Behaviors>
+        <FilesDropBehavior Command="{Binding OpenDroppedFiles}" />
+    </Interaction.Behaviors>
+
+    <DockPanel>
+        <NativeMenuBar DockPanel.Dock="Top" />
+        
+        <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,auto">
+            <TextBox Grid.Column="0" Text="{Binding CommandTextBoxText}" KeyDown="CommandTextBox_KeyDown" />
+            <Label Grid.Column="1" Content="{Binding TabSelectedResourceIdString}"
+                   ToolTip.Tip="This is an ID (index) of the currently open asset, item, or object. It starts from 0."/>
+        </Grid>
+        
+        <Grid ColumnDefinitions="1*,Auto,3*">
+            <Grid Grid.Column="0" Name="LeftPanel" RowDefinitions="Auto,1*">
+                <StackPanel Grid.Row="0">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Command="{Binding TabGoBack}" IsEnabled="{Binding TabSelected.CanGoBack, FallbackValue=False}">←</Button>
+                        <Button Command="{Binding TabGoForward}" IsEnabled="{Binding TabSelected.CanGoForward, FallbackValue=False}">→</Button>
+                    </StackPanel>
+                    <TextBox Name="FilterTextBox" Watermark="Filter by name..." TextChanged="FilterTextBox_TextChanged"/>
+                </StackPanel>
+
+                <TreeDataGrid Name="MainTreeDataGrid" Grid.Row="1" ShowColumnHeaders="False"
+                              DoubleTapped="MainTreeDataGrid_DoubleTapped"
+                              KeyDown="MainTreeDataGrid_KeyDown" >
+                    <TreeDataGrid.Styles>
+                        <Style Selector="TreeDataGridRow TreeDataGridExpanderCell" x:DataType="l:MainViewModel+TreeDataGridItem">
+                            <Setter Property="(Interaction.Behaviors)">
+                                <BehaviorCollectionTemplate>
+                                    <BehaviorCollection>
+                                        <ContextDragBehavior />
+                                    </BehaviorCollection>
+                                </BehaviorCollectionTemplate>
+                            </Setter>
+                            <Setter Property="ContextMenu" Value="{Binding ., Converter={StaticResource TreeDataGridItemToContextMenuConverter}}"/>
+                        </Style>
+                    </TreeDataGrid.Styles>
+                </TreeDataGrid>
+            </Grid>
+            
+            <GridSplitter Grid.Column="1" ResizeDirection="Columns"/>
+
+            <Grid Grid.Column="2" RowDefinitions="Auto,1*">
+                <TabStrip Grid.Row="0"
+                          ItemsSource="{Binding Tabs}"
+                          SelectedItem="{Binding TabSelected}"
+                          SelectedIndex="{Binding TabSelectedIndex}"
+                          PointerReleased="TabControl_PointerReleased"
+                          SelectionChanged="TabControl_SelectionChanged"
+                          Background="Transparent">
+                    <TabStrip.Resources>
+                        <l:TabStripItemDropHandler x:Key="TabStripItemDropHandler" />
+                    </TabStrip.Resources>
+                    <Interaction.Behaviors>
+                        <ContextDropBehavior Handler="{StaticResource TabStripItemDropHandler}" />
+                    </Interaction.Behaviors>
+                    <TabStrip.Styles>
+                        <Style Selector="TabStripItem">
+                            <Setter Property="(Interaction.Behaviors)">
+                                <BehaviorCollectionTemplate>
+                                    <BehaviorCollection>
+                                        <ContextDragBehavior />
+                                    </BehaviorCollection>
+                                </BehaviorCollectionTemplate>
+                            </Setter>
+                            <Setter Property="ContextMenu">
+                                <ContextMenu>
+                                    <MenuItem Header="Select on list" Click="TabMenu_Select_Click"/>
+                                    <MenuItem Header="Close tab" Click="TabMenu_Close_Click" InputGesture="Ctrl+W"/>
+                                    <MenuItem Header="Close all tabs" Click="TabMenu_CloseAll_Click" InputGesture="Ctrl+Shift+W"/>
+                                </ContextMenu>
+                            </Setter>
+                        </Style>
+                    </TabStrip.Styles>
+                    <TabStrip.ItemTemplate>
+                        <DataTemplate DataType="l:TabItemViewModel">
+                            <StackPanel Orientation="Horizontal">
+                                <ContentControl Content="{Binding Content}" Classes="TabItemContentControl" IsHitTestVisible="False">
+                                    <ContentControl.DataTemplates>
+                                        <DataTemplate DataType="l:DescriptionViewModel">
+                                            <TextBlock Text="{Binding Heading}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:GeneralInfoViewModel">
+                                            <TextBlock Text="General info"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:GlobalInitScriptsViewModel">
+                                            <TextBlock Text="Global init scripts"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:GameEndScriptsViewModel">
+                                            <TextBlock Text="Game End scripts"/>
+                                        </DataTemplate>
+                                        <!-- Resources -->
+                                        <DataTemplate DataType="l:UndertaleAudioGroupViewModel">
+                                            <TextBlock Text="{Binding AudioGroup.Name.Content, StringFormat=Audio group - {0}}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleSoundViewModel">
+                                            <TextBlock Text="{Binding Sound.Name.Content, StringFormat=Sound - {0}}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleSpriteViewModel">
+                                            <TextBlock Text="{Binding Sprite.Name.Content, StringFormat=Sprite - {0}}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleBackgroundViewModel">
+                                            <TextBlock Text="{Binding Background.Name.Content, StringFormat=Background - {0}}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:UndertalePathViewModel">
+                                            <TextBlock Text="{Binding Path.Name.Content, StringFormat=Path - {0}}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleScriptViewModel">
+                                            <TextBlock Text="{Binding Script.Name.Content, StringFormat=Script - {0}}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleShaderViewModel">
+                                            <TextBlock Text="{Binding Shader.Name.Content, StringFormat=Shader - {0}}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleFontViewModel">
+                                            <TextBlock Text="{Binding Font.Name.Content, StringFormat=Font - {0}}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleTimelineViewModel">
+                                            <TextBlock Text="{Binding Timeline.Name.Content, StringFormat=Timeline - {0}}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleGameObjectViewModel">
+                                            <TextBlock Text="{Binding GameObject.Name.Content, StringFormat=Game object - {0}}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleRoomViewModel">
+                                            <TextBlock Text="{Binding Room.Name.Content, StringFormat=Room - {0}}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleExtensionViewModel">
+                                            <TextBlock Text="{Binding Extension.Name.Content, StringFormat=Extension - {0}}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleTexturePageItemViewModel">
+                                            <TextBlock Text="{Binding TexturePageItem.Name.Content, StringFormat=Texture page item - {0}}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleCodeViewModel">
+                                            <TextBlock Text="{Binding Code.Name.Content, StringFormat=Code - {0}}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleVariableViewModel">
+                                            <TextBlock Text="{Binding Variable.Name.Content, StringFormat=Variable - {0}}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleFunctionViewModel">
+                                            <TextBlock Text="{Binding Function.Name.Content, StringFormat=Function - {0}}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleCodeLocalsViewModel">
+                                            <TextBlock Text="{Binding CodeLocals.Name.Content, StringFormat=Code locals - {0}}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleStringViewModel">
+                                            <TextBlock Text="{Binding String.Content, StringFormat=String - {0}}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleEmbeddedTextureViewModel">
+                                            <TextBlock Text="{Binding EmbeddedTexture.Name.Content, StringFormat=Embedded texture - {0}}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleEmbeddedAudioViewModel">
+                                            <TextBlock Text="{Binding EmbeddedAudio.Name.Content, StringFormat=Embedded audio - {0}}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleTextureGroupInfoViewModel">
+                                            <TextBlock Text="{Binding TextureGroupInfo.Name.Content, StringFormat=Texture group information - {0}}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleEmbeddedImageViewModel">
+                                            <TextBlock Text="{Binding EmbeddedImage.Name.Content, StringFormat=Embedded image - {0}}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleAnimationCurveViewModel">
+                                            <TextBlock Text="{Binding AnimationCurve.Name.Content, StringFormat=Animation curve - {0}}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleParticleSystemViewModel">
+                                            <TextBlock Text="{Binding ParticleSystem.Name.Content, StringFormat=Particle system - {0}}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleParticleSystemEmitterViewModel">
+                                            <TextBlock Text="{Binding ParticleSystemEmitter.Name.Content, StringFormat=Particle system emitter - {0}}"/>
+                                        </DataTemplate>
+                                    </ContentControl.DataTemplates>
+                                </ContentControl>
+                                <Button Command="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).TabClose}"
+                                        CommandParameter="{Binding .}"
+                                        Classes="TransparentButton">❌</Button>
+                            </StackPanel>
+                        </DataTemplate>
+                    </TabStrip.ItemTemplate>
+                </TabStrip>
+
+                <ItemsControl Grid.Row="1" ItemsSource="{Binding Tabs}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <Panel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="l:TabItemViewModel">
+                            <ContentControl Content="{Binding Content}" IsVisible="{Binding IsSelected}">
+                                <ContentControl.DataTemplates>
+                                    <DataTemplate DataType="l:DescriptionViewModel">
+                                        <StackPanel Classes="PaddedProperties">
+                                            <TextBlock FontWeight="Bold" Text="{Binding Heading}"/>
+                                            <Separator/>
+                                            <TextBlock Text="{Binding Description}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:GeneralInfoViewModel">
+                                        <l:GeneralInfoView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:GlobalInitScriptsViewModel">
+                                        <l:GlobalInitScriptsView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:GameEndScriptsViewModel">
+                                        <l:GameEndScriptsView />
+                                    </DataTemplate>
+                                    <!-- Resources -->
+                                    <DataTemplate DataType="l:UndertaleAudioGroupViewModel">
+                                        <l:UndertaleAudioGroupView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleSoundViewModel">
+                                        <l:UndertaleSoundView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleSpriteViewModel">
+                                        <l:UndertaleSpriteView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleBackgroundViewModel">
+                                        <l:UndertaleBackgroundView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertalePathViewModel">
+                                        <l:UndertalePathView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleScriptViewModel">
+                                        <l:UndertaleScriptView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleShaderViewModel">
+                                        <l:UndertaleShaderView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleFontViewModel">
+                                        <l:UndertaleFontView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleTimelineViewModel">
+                                        <l:UndertaleTimelineView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleGameObjectViewModel">
+                                        <l:UndertaleGameObjectView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleRoomViewModel">
+                                        <l:UndertaleRoomView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleExtensionViewModel">
+                                        <l:UndertaleExtensionView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleTexturePageItemViewModel">
+                                        <l:UndertaleTexturePageItemView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleCodeViewModel">
+                                        <l:UndertaleCodeView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleVariableViewModel">
+                                        <l:UndertaleVariableView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleFunctionViewModel">
+                                        <l:UndertaleFunctionView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleCodeLocalsViewModel">
+                                        <l:UndertaleCodeLocalsView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleStringViewModel">
+                                        <l:UndertaleStringView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleEmbeddedTextureViewModel">
+                                        <l:UndertaleEmbeddedTextureView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleEmbeddedAudioViewModel">
+                                        <l:UndertaleEmbeddedAudioView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleTextureGroupInfoViewModel">
+                                        <l:UndertaleTextureGroupInfoView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleEmbeddedImageViewModel">
+                                        <l:UndertaleEmbeddedImageView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleAnimationCurveViewModel">
+                                        <l:UndertaleAnimationCurveView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleParticleSystemViewModel">
+                                        <l:UndertaleParticleSystemView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleParticleSystemEmitterViewModel">
+                                        <l:UndertaleParticleSystemEmitterView />
+                                    </DataTemplate>
+                                </ContentControl.DataTemplates>
+                            </ContentControl>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+        </Grid>
+    </DockPanel>
+</UserControl>

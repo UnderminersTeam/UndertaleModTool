@@ -1,0 +1,166 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:l="clr-namespace:UndertaleModToolAvalonia"
+        mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="400"
+        x:Class="UndertaleModToolAvalonia.SettingsWindow"
+        x:DataType="l:SettingsViewModel"
+        Title="Settings"
+        Width="700"
+        Height="400"
+        Classes="SettingsWindow">
+    <ScrollViewer>
+        <StackPanel>
+            <TextBlock FontWeight="Bold">Interface</TextBlock>
+            <Separator />
+
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                <Label>Theme:</Label>
+                <ComboBox SelectedIndex="{Binding MainVM.Settings.Theme}">
+                    <ComboBoxItem>System default</ComboBoxItem>
+                    <ComboBoxItem>Light</ComboBoxItem>
+                    <ComboBoxItem>Dark</ComboBoxItem>
+                </ComboBox>
+            </Grid>
+
+            <StackPanel>
+                <CheckBox Content="Open new resource after creating it"
+                          IsChecked="{Binding MainVM.Settings.OpenNewResourceAfterCreatingIt}" />
+                <CheckBox Content="Enable syntax highlighting"
+                          IsChecked="{Binding MainVM.Settings.EnableSyntaxHighlighting}"/>
+                <CheckBox Content="Automatically compile and decompile code on lost focus"
+                          IsChecked="{Binding MainVM.Settings.AutomaticallyCompileAndDecompileCodeOnLostFocus}"/>
+
+                <CheckBox Content="Enable room grid by default"
+                          IsChecked="{Binding MainVM.Settings.EnableRoomGridByDefault}"/>
+
+                <StackPanel Orientation="Horizontal">
+                    <Label>Default room grid size:</Label>
+                    <TextBox Text="{Binding MainVM.Settings.DefaultRoomGridWidth}" />
+                    <TextBox Text="{Binding MainVM.Settings.DefaultRoomGridHeight}" />
+                </StackPanel>
+
+                <CheckBox Content="Enable selection of any layer by default"
+                          IsChecked="{Binding MainVM.Settings.EnableSelectAnyLayerByDefault}"/>
+            </StackPanel>
+
+            <!--
+            TODO: Missing:
+            bool EmptyLineAroundEnums { get; set; } = true;
+            string UnknownEnumName { get; set; } = "UnknownEnum";
+            string UnknownEnumValuePattern { get; set; } = "Value_{0}";
+            string UnknownArgumentNamePattern { get; set; } = "arg{0}";
+            -->
+
+            <TextBlock FontWeight="Bold">GML</TextBlock>
+            <Separator />
+
+            <Grid ColumnDefinitions="1*,1*">
+                <StackPanel Grid.Column="0">
+                    <CheckBox Content="Use CSS hex color literals"
+                              ToolTip.Tip="If enabled, color constants can be formatted in the #RRGGBB hex format."
+                              IsChecked="{Binding MainVM.Settings.DecompileSettings.UseCSSColors}"/>
+
+                    <CheckBox Content="Always use semicolons"
+                              ToolTip.Tip="If enabled, all statements that can have a semicolon after them will."
+                              IsChecked="{Binding MainVM.Settings.DecompileSettings.UseSemicolon}"/>
+
+                    <CheckBox Content="Open block braces on same line"
+                              ToolTip.Tip="If enabled, the curly braces used to open a block will be placed on the same line as the statement it belongs to, rather than placing the brace on its own line."
+                              IsChecked="{Binding MainVM.Settings.DecompileSettings.OpenBlockBraceOnSameLine}"/>
+
+                    <CheckBox Content="Create enum declarations"
+                              ToolTip.Tip="If enabled, enum declarations identified during decompilation will always be printed to decompiled output."
+                              IsChecked="{Binding MainVM.Settings.DecompileSettings.CreateEnumDeclarations}"/>
+
+                    <CheckBox Content="Print warnings"
+                              ToolTip.Tip="If enabled, warnings generated during decompilation will be printed as comments."
+                              IsChecked="{Binding MainVM.Settings.DecompileSettings.PrintWarnings}"/>
+
+                </StackPanel>
+
+                <StackPanel Grid.Column="1">
+                    <Grid ColumnDefinitions="Auto,1*">
+                        <Label Content="Named instance ID prefix:"
+                               ToolTip.Tip="Prefix used for named instance IDs when found by decompiler, and for compilation. Change this value if it conflicts with variable names."/>
+                        <TextBox Grid.Column="1" Text="{Binding MainVM.Settings.InstanceIdPrefix}"/>
+                    </Grid>
+
+                    <!-- TODO: Make this a ComboBox -->
+                    <Grid ColumnDefinitions="Auto,1*">
+                        <Label>Indent string:</Label>
+                        <TextBox Grid.Column="1" Text="{Binding MainVM.Settings.DecompileSettings.IndentString}" />
+                    </Grid>
+
+                    <CheckBox Content="Remove block braces if single line"
+                              ToolTip.Tip="If enabled, blocks that contain a single line will have its braces removed, where possible. For if/else chains, all blocks must be single lines."
+                              IsChecked="{Binding MainVM.Settings.DecompileSettings.RemoveSingleLineBlockBraces}"/>
+
+                    <CheckBox Content="Enum/macro declarations at top of code"
+                              ToolTip.Tip="If enabled, enums and macros will appear at the start (top) of decompiled output, rather than at the end (bottom)."
+                              IsChecked="{Binding MainVM.Settings.DecompileSettings.MacroDeclarationsAtTop}"/>
+
+                    <CheckBox Content="Allow leftover data on VM stack"
+                              ToolTip.Tip="If enabled, data left over on the VM stack will be treated as a warning rather than an error."
+                              IsChecked="{Binding MainVM.Settings.DecompileSettings.AllowLeftoverDataOnStack}"/>
+                </StackPanel>
+            </Grid>
+
+            <TextBlock Text="Add empty lines:"
+                       ToolTip.Tip="Select specific syntax to add empty lines before, after, or around."/>
+
+            <Grid ColumnDefinitions="1*,1*">
+                <StackPanel Grid.Column="0">
+                    <CheckBox Content="Around branch statements"
+                              ToolTip.Tip="If enabled, adds an empty line before and after branch statements."
+                              IsChecked="{Binding MainVM.Settings.DecompileSettings.EmptyLineAroundBranchStatements}"/>
+                    <CheckBox Content="Before switch cases"
+                              ToolTip.Tip="If enabled, adds an empty line before (a chain) of &quot;case&quot; entries in a switch statement."
+                              IsChecked="{Binding MainVM.Settings.DecompileSettings.EmptyLineBeforeSwitchCases}"/>
+                    <CheckBox Content="Around function declarations"
+                              ToolTip.Tip="If enabled, adds an empty line before and after a function declaration, even if it is anonymous."
+                              IsChecked="{Binding MainVM.Settings.DecompileSettings.EmptyLineAroundFunctionDeclarations}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1">
+                    <CheckBox Content="After local variable declarations"
+                              ToolTip.Tip="If enabled, adds an empty line after block-scoped local variable declarations."
+                              IsChecked="{Binding MainVM.Settings.DecompileSettings.EmptyLineAfterBlockLocals}"/>
+                    <CheckBox Content="After switch cases"
+                              ToolTip.Tip="If enabled, adds an empty line after (a chain) of &quot;case&quot; entries in a switch statement."
+                              IsChecked="{Binding MainVM.Settings.DecompileSettings.EmptyLineAfterSwitchCases}"/>
+                    <CheckBox Content="Around static initialization"
+                              ToolTip.Tip="If enabled, adds an empty line before and after static initialization, grouping together consecutive statics if possible."
+                              IsChecked="{Binding MainVM.Settings.DecompileSettings.EmptyLineAroundStaticInitialization}"/>
+                </StackPanel>
+            </Grid>
+
+            <TextBlock Text="Perform cleanups:"
+                       ToolTip.Tip="Select specific cleanup operations for the decompiler to perform. Disabling these may make code more ugly or &quot;incorrect,&quot; but can show underlying logic."/>
+
+            <Grid ColumnDefinitions="1*,1*">
+                <StackPanel Grid.Column="0">
+                    <CheckBox Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Content="Try/catch/finally rewriting"
+                              ToolTip.Tip="If enabled, compiler-generated code and logic for try/catch/finally statements is rewritten to (attempt to) look like the original code."
+                              IsChecked="{Binding MainVM.Settings.DecompileSettings.CleanupTry}"/>
+                    <CheckBox Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Content="Default argument values"
+                              ToolTip.Tip="If enabled, syntax for default named function arguments will be used. Compiler-generated if statements are transformed to do this, maintaining accuracy."
+                              IsChecked="{Binding MainVM.Settings.DecompileSettings.CleanupDefaultArgumentValues}"/>
+                    <CheckBox Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Content="Scope local variable declarations"
+                              ToolTip.Tip="If enabled, local variable declarations will be placed according to their scopes, which are detected based on usage in the code."
+                              IsChecked="{Binding MainVM.Settings.DecompileSettings.CleanupLocalVarDeclarations}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1">
+                    <CheckBox Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Content="Transform else into continue"
+                              ToolTip.Tip="If enabled, certain usages of &quot;else&quot; inside of a loop can be transformed into &quot;continue&quot; statements, which can make code easier to read. This only happens if accuracy can be maintained."
+                              IsChecked="{Binding MainVM.Settings.DecompileSettings.CleanupElseToContinue}"/>
+                    <CheckBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Content="Builtin array variable syntax"
+                              ToolTip.Tip="If enabled, certain builtin globals (such as &quot;view_xview&quot;), when detected to be used without an array accessor, will be printed as such, rather than using compiler-generated syntax."
+                              IsChecked="{Binding MainVM.Settings.DecompileSettings.CleanupBuiltinArrayVariables}"/>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</Window>

@@ -1,0 +1,65 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:UndertaleModToolAvalonia.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:l="clr-namespace:UndertaleModToolAvalonia"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="UndertaleModToolAvalonia.MainWindow"
+        Icon="/Assets/Icon.ico"
+        x:DataType="l:MainViewModel"
+        Title="{Binding Title}"
+        IsEnabled="{Binding IsEnabled}">
+    <NativeMenu.Menu>
+        <NativeMenu>
+            <NativeMenuItem Header="_File">
+                <NativeMenu>
+                    <NativeMenuItem Header="_New" Command="{Binding FileNew}" Gesture="Ctrl+N"/>
+                    <NativeMenuItem Header="_Open" Command="{Binding FileOpen}" Gesture="Ctrl+O"/>
+                    <NativeMenuItem Header="_Save" Command="{Binding FileSave}" Gesture="Ctrl+S"/>
+                    <NativeMenuItem Header="_Close" Command="{Binding FileClose}"/>
+                    <NativeMenuItemSeparator Header="-" />
+                    <NativeMenuItem Header="_Run with runner" Command="{Binding FileRun}"/>
+                    <NativeMenuItemSeparator Header="-" />
+                    <NativeMenuItem Header="S_ettings" Command="{Binding FileSettings}"/>
+                    <NativeMenuItem Header="_Exit" Command="{Binding FileExit}"/>
+                </NativeMenu>
+            </NativeMenuItem>
+            <NativeMenuItem Header="_Import" IsEnabled="False">
+            </NativeMenuItem>
+            <NativeMenuItem Header="_Export" IsEnabled="False">
+            </NativeMenuItem>
+            <NativeMenuItem Header="_Tools">
+                <NativeMenu>
+                    <NativeMenuItem Header="_Search in code" Command="{Binding ToolsSearchInCode}" Gesture="Ctrl+Shift+F"/>
+                    <NativeMenuItem Header="Find unreferenced _assets" IsEnabled="False"/>
+                </NativeMenu>
+            </NativeMenuItem>
+            <NativeMenuItem Header="_Scripts">
+                <NativeMenu>
+                    <NativeMenuItem Header="Run _other script" Command="{Binding ScriptsRunOtherScript}" />
+                </NativeMenu>
+            </NativeMenuItem>
+            <NativeMenuItem Header="_Help">
+                <NativeMenu>
+                    <NativeMenuItem Header="_GitHub" Command="{Binding HelpGitHub}"/>
+                    <NativeMenuItem Header="_About" Command="{Binding HelpAbout}" Gesture="F1"/>
+                </NativeMenu>
+            </NativeMenuItem>
+        </NativeMenu>
+    </NativeMenu.Menu>
+
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Ctrl+N" Command="{Binding FileNew}" />
+        <KeyBinding Gesture="Ctrl+O" Command="{Binding FileOpen}" />
+        <KeyBinding Gesture="Ctrl+S" Command="{Binding FileSave}" />
+        <KeyBinding Gesture="Ctrl+Shift+F" Command="{Binding ToolsSearchInCode}" />
+        <KeyBinding Gesture="F1" Command="{Binding HelpAbout}" />
+        <KeyBinding Gesture="Ctrl+W" Command="{Binding TabCloseSelected}" />
+        <KeyBinding Gesture="Ctrl+Shift+W" Command="{Binding TabCloseAll}" />
+        <KeyBinding Gesture="Ctrl+Shift+Tab" Command="{Binding TabSetToPrevious}" />
+        <KeyBinding Gesture="Ctrl+Tab" Command="{Binding TabSetToNext}" />
+    </Window.KeyBindings>
+
+    <l:MainView />
+</Window>

@@ -1,0 +1,44 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:l="clr-namespace:UndertaleModToolAvalonia"
+        mc:Ignorable="d"
+        x:Class="UndertaleModToolAvalonia.SearchInCodeWindow"
+        x:DataType="l:SearchInCodeViewModel"
+        Title="Search in code"
+        IsEnabled="{Binding IsEnabled}"
+        Width="800"
+        Height="400"
+        Classes="SearchInCodeWindow">
+    <Grid RowDefinitions="Auto,1*,Auto">
+        <StackPanel Grid.Row="0">
+            <TextBox Name="SearchTextTextBox" Text="{Binding SearchText}" AcceptsReturn="True"/>
+            <StackPanel Orientation="Horizontal">
+                <CheckBox IsChecked="{Binding IsCaseSensitive}" Content="Case sensitive" />
+                <CheckBox IsChecked="{Binding IsRegexSearch}" Content="Regex search" />
+                <CheckBox IsChecked="{Binding IsInAssembly}" Content="In assembly" />
+            </StackPanel>
+            <Button Command="{Binding Search}" IsDefault="True" HorizontalAlignment="Right">Search</Button>
+        </StackPanel>
+        <DataGrid Grid.Row="1" Name="ResultsDataGrid" ItemsSource="{Binding Results}" IsReadOnly="True" CanUserResizeColumns="True"
+                  DoubleTapped="DataGrid_DoubleTapped"
+                  PointerReleased="DataGrid_PointerReleased">
+            <DataGrid.Styles>
+                <Style Selector="DataGridRow">
+                    <Setter Property="ContextMenu">
+                        <ContextMenu>
+                            <MenuItem Header="Open" Click="DataGridRow_Open_Click"/>
+                            <MenuItem Header="Open in new tab" Click="DataGridRow_OpenInNewTab_Click"/>
+                        </ContextMenu>
+                    </Setter>
+                </Style>
+            </DataGrid.Styles>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Location" Binding="{Binding Location}" Width="Auto" />
+                <DataGridTextColumn Header="Text" Binding="{Binding Text}" Width="Auto" />
+            </DataGrid.Columns>
+        </DataGrid>
+        <TextBlock Grid.Row="2" Text="{Binding StatusBarText}" Classes="StatusBar"/>
+    </Grid>
+</Window>
