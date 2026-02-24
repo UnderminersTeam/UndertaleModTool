@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using SDL3;
 
@@ -13,8 +14,6 @@ public class AudioPlayer : IDisposable
     IntPtr audio;
     IntPtr track;
 
-    IntPtr dataArray;
-
     readonly Mixer.TrackStoppedCallback trackStoppedCallback;
     GCHandle trackStoppedCallbackHandle;
 
@@ -26,13 +25,20 @@ public class AudioPlayer : IDisposable
 
         // Load audio
         GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-        IntPtr io = SDL.IOFromConstMem(dataHandle.AddrOfPinnedObject(), (nuint)data.Length);
 
-        audio = Mixer.LoadAudioIO(mixer, io, predecode: true, closeio: true);
-        if (audio == IntPtr.Zero)
+        IntPtr io = SDL.IOFromConstMem(dataHandle.AddrOfPinnedObject(), (nuint)data.Length);
+        if (io == IntPtr.Zero)
             throw new InvalidOperationException($"{SDL.GetError()}");
 
+        audio = Mixer.LoadAudioIO(mixer, io, predecode: true, closeio: true);
+
         dataHandle.Free();
+
+        if (audio == IntPtr.Zero)
+        {
+            // TODO: Show some kind of error
+            return;
+        }
 
         // Create track and play
         track = Mixer.CreateTrack(mixer);
@@ -53,6 +59,8 @@ public class AudioPlayer : IDisposable
     {
         if ((SDL.WasInit(SDL.InitFlags.Audio) & SDL.InitFlags.Audio) == 0)
         {
+            SDL.SetHint(SDL.Hints.AppName, Assembly.GetExecutingAssembly().GetName().Name ?? "");
+
             if (!SDL.Init(SDL.InitFlags.Audio))
                 throw new InvalidOperationException($"{SDL.GetError()}");
 
@@ -81,15 +89,11 @@ public class AudioPlayer : IDisposable
         Mixer.DestroyTrack(track);
         Mixer.DestroyAudio(audio);
 
-        if (dataArray != IntPtr.Zero)
-            Marshal.FreeHGlobal(dataArray);
-
         if (trackStoppedCallbackHandle.IsAllocated)
             trackStoppedCallbackHandle.Free();
 
         track = IntPtr.Zero;
         audio = IntPtr.Zero;
-        dataArray = IntPtr.Zero;
 
         GC.SuppressFinalize(this);
     }
