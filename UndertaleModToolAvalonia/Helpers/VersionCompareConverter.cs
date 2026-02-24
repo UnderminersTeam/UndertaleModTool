@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Linq;
 using Avalonia.Data;
@@ -11,9 +11,11 @@ namespace UndertaleModToolAvalonia;
 /// Parameter follows this pattern: [operation][major[.minor[.release[.build]]]]
 /// Operation can be GE (greater or equal) or L (less than).
 /// Usage:
+/// <code>
 /// {Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
 /// Converter={StaticResource VersionCompareConverter},
 /// ConverterParameter=2}
+/// </code>
 /// </summary>
 public class VersionCompareConverter : IValueConverter
 {
@@ -43,9 +45,9 @@ public class VersionCompareConverter : IValueConverter
             {
                 if (versionList[i] != versionCompareList[i])
                     if (operation == "GE")
-                        return versionList[i] > versionCompareList[0];
+                        return versionList[i] > versionCompareList[i];
                     else if (operation == "L")
-                        return versionList[i] < versionCompareList[0];
+                        return versionList[i] < versionCompareList[i];
             }
 
             if (operation == "GE")
