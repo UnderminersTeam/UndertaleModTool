@@ -29,6 +29,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Scaled</TextBlock>
@@ -65,20 +66,49 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
+            <local:ButtonDark Grid.Column="0" Content="Import" Click="Import_Click"/>
+            <local:ButtonDark Grid.Column="2" Content="Export" Click="Export_Click"/>
+        </Grid>
+
+        <!-- Texture Viewer with Resizable Panel and Zoom Controls -->
+        <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Margin="3">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*" MinHeight="200"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.ColumnSpan="3" Margin="3" HorizontalAlignment="Center" Foreground="DarkGray" FontStyle="Italic" TextWrapping="Wrap" TextAlignment="Center">
-                Hint: This image is mouse interactable (3 mouse buttons and mouse wheel).
-            </TextBlock>
-            <ScrollViewer Name="TextureScroll" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" MaxHeight="450"
-                          HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" ScrollChanged="TextureScroll_ScrollChanged">
-                <ScrollViewer.Background>
-                    <DynamicResource ResourceKey="{x:Static SystemColors.MenuBrushKey}"/>
-                </ScrollViewer.Background>
+            <!-- Zoom Controls -->
+            <Grid Grid.Row="0" Margin="0,0,0,5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <local:ButtonDark Grid.Column="0" Content="Zoom In" Margin="0,0,5,0" Padding="8,4" Click="ZoomIn_Click"/>
+                <local:ButtonDark Grid.Column="1" Content="Zoom Out" Margin="0,0,5,0" Padding="8,4" Click="ZoomOut_Click"/>
+                <local:ButtonDark Grid.Column="2" Content="Fit to View" Margin="0,0,5,0" Padding="8,4" Click="FitToView_Click"/>
+                <local:ButtonDark Grid.Column="3" Content="Actual Size" Margin="0,0,10,0" Padding="8,4" Click="ActualSize_Click"/>
+                
+                <TextBlock Grid.Column="4" Text="Zoom:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <local:TextBoxDark Grid.Column="5" x:Name="ZoomTextBox" Width="60" Text="100%" VerticalAlignment="Center" 
+                                   KeyDown="ZoomTextBox_KeyDown" LostFocus="ZoomTextBox_LostFocus" Margin="0,0,5,0"/>
+                
+                <TextBlock Grid.Column="6" Text="Size:" VerticalAlignment="Center" Margin="10,0,5,0"/>
+                <TextBlock Grid.Column="7" x:Name="ImageSizeText" Text="0x0" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            </Grid>
+
+            <!-- Resizable Sprite Viewer -->
+            <ScrollViewer Name="TextureScroll" Grid.Row="2" 
+                          HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" 
+                          ScrollChanged="TextureScroll_ScrollChanged" Background="{DynamicResource {x:Static SystemColors.MenuBrushKey}}">
                 <Viewbox Name="TextureViewbox" Stretch="Uniform" StretchDirection="DownOnly"
                          SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor" MouseWheel="TextureViewbox_MouseWheel">
                     <Border Background="{DynamicResource TransparencyGridBrushBrush}">
@@ -92,9 +122,6 @@
                     </Border>
                 </Viewbox>
             </ScrollViewer>
-
-            <local:ButtonDark Grid.Row="2" Grid.Column="0" Margin="0,2" Content="Import" Click="Import_Click"/>
-            <local:ButtonDark Grid.Row="2" Grid.Column="3" Margin="0,2" Content="Export" Click="Export_Click"/>
         </Grid>
     </Grid>
 </local:DataUserControl>

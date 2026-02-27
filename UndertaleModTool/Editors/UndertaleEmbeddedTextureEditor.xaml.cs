@@ -28,6 +28,7 @@ namespace UndertaleModTool
         private bool isMenuOpen;
         private UndertaleTexturePageItem[] items;
         private UndertaleTexturePageItem hoveredItem;
+        private double currentZoom = 1.0;
 
         /// <summary>
         /// Handle on the texture data where we're listening for updates from.
@@ -64,12 +65,30 @@ namespace UndertaleModTool
             if (texture.TextureData?.Image is null)
             {
                 TexturePageImage.Source = null;
+                UpdateImageSizeDisplay(0, 0);
                 return;
             }
 
             GMImage image = texture.TextureData.Image;
             BitmapSource bitmap = mainWindow.GetBitmapSourceForImage(image);
             TexturePageImage.Source = bitmap;
+            UpdateImageSizeDisplay(image.Width, image.Height);
+        }
+
+        private void UpdateImageSizeDisplay(int width, int height)
+        {
+            if (ImageSizeText != null)
+            {
+                ImageSizeText.Text = $"{width}x{height}";
+            }
+        }
+
+        private void UpdateZoomDisplay()
+        {
+            if (ZoomTextBox != null)
+            {
+                ZoomTextBox.Text = $"{Math.Round(currentZoom * 100)}%";
+            }
         }
 
         private void SwitchDataContext(object sender, DependencyPropertyChangedEventArgs e)
@@ -164,18 +183,28 @@ namespace UndertaleModTool
                 t = new MatrixTransform(Matrix.Identity);
                 top = 0;
                 left = 0;
+                currentZoom = 1.0;
             }
             else
             {
                 t = OverriddenPreviewState.Transform;
                 top = OverriddenPreviewState.Top;
                 left = OverriddenPreviewState.Left;
+                if (t is MatrixTransform mt)
+                {
+                    currentZoom = mt.Matrix.M11;
+                }
+                else
+                {
+                    currentZoom = 1.0;
+                }
             }
 
             TextureViewbox.LayoutTransform = t;
             TextureViewbox.UpdateLayout();
             TextureScroll.ScrollToVerticalOffset(top);
             TextureScroll.ScrollToHorizontalOffset(left);
+            UpdateZoomDisplay();
         }
         private void DataUserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
@@ -193,7 +222,19 @@ namespace UndertaleModTool
         }
         private void DataUserControl_Unloaded(object sender, RoutedEventArgs e)
         {
-            OverriddenPreviewState = default;
+            // Save current zoom state
+            if (TextureViewbox != null && TextureScroll != null)
+            {
+                OverriddenPreviewState = (
+                    TextureViewbox.LayoutTransform,
+                    TextureScroll.HorizontalOffset,
+                    TextureScroll.VerticalOffset
+                );
+            }
+            else
+            {
+                OverriddenPreviewState = default;
+            }
         }
 
         private void Import_Click(object sender, RoutedEventArgs e)
@@ -374,9 +415,117 @@ namespace UndertaleModTool
             if ((matrix.M11 > 0.001 || (matrix.M11 <= 0.001 && scale > 1)) && (matrix.M11 < 1000 || (matrix.M11 >= 1000 && scale < 1)))
             {
                 matrix.ScaleAtPrepend(scale, scale, mousePos.X, mousePos.Y);
+                currentZoom = matrix.M11;
+                UpdateZoomDisplay();
             }
             TextureViewbox.LayoutTransform = new MatrixTransform(matrix);
         }
+
+        #region Zoom Controls
+
+        private void ZoomIn_Click(object sender, RoutedEventArgs e)
+        {
+            ApplyZoom(1.25, true);
+        }
+
+        private void ZoomOut_Click(object sender, RoutedEventArgs e)
+        {
+            ApplyZoom(0.8, true);
+        }
+
+        private void FitToView_Click(object sender, RoutedEventArgs e)
+        {
+            if (TexturePageImage.Source == null) return;
+
+            var scrollViewerSize = new System.Windows.Size(TextureScroll.ViewportWidth, TextureScroll.ViewportHeight);
+            var imageSize = new System.Windows.Size(TexturePageImage.Source.Width, TexturePageImage.Source.Height);
+
+            if (scrollViewerSize.Width <= 0 || scrollViewerSize.Height <= 0) return;
+
+            var scaleX = scrollViewerSize.Width / imageSize.Width;
+            var scaleY = scrollViewerSize.Height / imageSize.Height;
+            var scale = Math.Min(scaleX, scaleY) * 0.95;
+
+            SetZoom(scale);
+        }
+
+        private void ActualSize_Click(object sender, RoutedEventArgs e)
+        {
+            SetZoom(1.0);
+        }
+
+        private void ZoomTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                ApplyZoomFromTextBox();
+                e.Handled = true;
+            }
+        }
+
+        private void ZoomTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            ApplyZoomFromTextBox();
+        }
+
+        private void ApplyZoomFromTextBox()
+        {
+            if (ZoomTextBox == null) return;
+
+            string text = ZoomTextBox.Text.Replace("%", "").Trim();
+            if (double.TryParse(text, out double percentage))
+            {
+                double zoom = Math.Max(0.1, Math.Min(1000, percentage / 100.0));
+                SetZoom(zoom);
+            }
+            else
+            {
+                UpdateZoomDisplay();
+            }
+        }
+
+        private void ApplyZoom(double factor, bool centerOnViewport)
+        {
+            var transform = TextureViewbox.LayoutTransform as MatrixTransform;
+            var matrix = transform.Matrix;
+
+            System.Windows.Point center;
+            if (centerOnViewport)
+            {
+                center = new System.Windows.Point(TextureViewbox.ActualWidth / 2, TextureViewbox.ActualHeight / 2);
+            }
+            else
+            {
+                center = Mouse.GetPosition(TextureViewbox);
+            }
+
+            var newScale = matrix.M11 * factor;
+            if (newScale > 0.001 && newScale < 1000)
+            {
+                matrix.ScaleAtPrepend(factor, factor, center.X, center.Y);
+                currentZoom = newScale;
+                UpdateZoomDisplay();
+                TextureViewbox.LayoutTransform = new MatrixTransform(matrix);
+            }
+        }
+
+        private void SetZoom(double zoom)
+        {
+            zoom = Math.Max(0.001, Math.Min(1000, zoom));
+            
+            var matrix = Matrix.Identity;
+            matrix.Scale(zoom, zoom);
+            
+            currentZoom = zoom;
+            UpdateZoomDisplay();
+            TextureViewbox.LayoutTransform = new MatrixTransform(matrix);
+
+            TextureViewbox.UpdateLayout();
+            TextureScroll.ScrollToHorizontalOffset((TextureScroll.ExtentWidth - TextureScroll.ViewportWidth) / 2);
+            TextureScroll.ScrollToVerticalOffset((TextureScroll.ExtentHeight - TextureScroll.ViewportHeight) / 2);
+        }
+
+        #endregion
     }
 
     public class TextureLoadedWrapper : IMultiValueConverter
