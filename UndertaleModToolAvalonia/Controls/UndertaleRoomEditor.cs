@@ -447,16 +447,7 @@ public class UndertaleRoomEditor : Control
 
     static bool RectContainsPoint(Rect rect, double rotation, Point pivot, Point point)
     {
-        // TODO: Use matrices
-        double rotationRadians = rotation * (Math.PI / 180);
-        double sin = Math.Sin(-rotationRadians);
-        double cos = Math.Cos(-rotationRadians);
-
-        Point newPoint = point - pivot;
-        newPoint = new Point(newPoint.X * cos - newPoint.Y * sin, newPoint.X * sin + newPoint.Y * cos);
-        newPoint += pivot;
-
-        return newPoint.X >= rect.Left && newPoint.X <= rect.Right && newPoint.Y >= rect.Top && newPoint.Y <= rect.Bottom;
+        return rect.Contains(point.Transform(Matrix.CreateRotation(double.DegreesToRadians(rotation), pivot)));
     }
 
     class CustomDrawOperation : ICustomDrawOperation
@@ -576,7 +567,7 @@ public class UndertaleRoomEditor : Control
                     SKRect rect = selectedRoomItem.Selectable.Bounds.ToSKRect();
 
                     canvas.Save();
-                    canvas.RotateDegrees((float)selectedRoomItem.Selectable.Rotation,
+                    canvas.RotateDegrees((float)-selectedRoomItem.Selectable.Rotation,
                         (float)(selectedRoomItem.Selectable.Pivot.X),
                         (float)(selectedRoomItem.Selectable.Pivot.Y));
                     canvas.DrawRect(rect, new SKPaint { Color = selectedColor, StrokeWidth = 2, Style = SKPaintStyle.Stroke });
@@ -588,7 +579,7 @@ public class UndertaleRoomEditor : Control
                     SKRect rect = hoveredRoomItem.Selectable.Bounds.ToSKRect();
 
                     canvas.Save();
-                    canvas.RotateDegrees((float)hoveredRoomItem.Selectable.Rotation,
+                    canvas.RotateDegrees((float)-hoveredRoomItem.Selectable.Rotation,
                             (float)(hoveredRoomItem.Selectable.Pivot.X),
                             (float)(hoveredRoomItem.Selectable.Pivot.Y));
                     canvas.DrawRect(rect, new SKPaint { Color = selectedColor, Style = SKPaintStyle.Stroke });
@@ -756,7 +747,7 @@ public class UndertaleRoomEditor : Control
                             texture.BoundingWidth * roomSprite.ScaleX,
                             texture.BoundingHeight * roomSprite.ScaleY
                         ).Normalize(),
-                        Rotation: roomSprite.OppositeRotation,
+                        Rotation: roomSprite.Rotation,
                         Pivot: new Point(layer.XOffset + roomSprite.X, layer.YOffset + roomSprite.Y),
                         GetProperties: () =>
                         {
@@ -794,7 +785,7 @@ public class UndertaleRoomEditor : Control
                             texture.BoundingWidth * roomGameObject.ScaleX,
                             texture.BoundingHeight * roomGameObject.ScaleY
                         ).Normalize(),
-                        Rotation: roomGameObject.OppositeRotation,
+                        Rotation: roomGameObject.Rotation,
                         Pivot: new Point(
                             roomGameObject.X,
                             roomGameObject.Y),

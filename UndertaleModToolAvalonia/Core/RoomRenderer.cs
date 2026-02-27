@@ -216,7 +216,7 @@ public class RoomRenderer
                     ScaleX: roomGameObject.ScaleX,
                     ScaleY: roomGameObject.ScaleY,
                     Color: roomGameObject.Color,
-                    Rotation: roomGameObject.OppositeRotation,
+                    Rotation: -roomGameObject.Rotation,
                     OriginX: roomGameObject.ObjectDefinition!.Sprite.OriginX,
                     OriginY: roomGameObject.ObjectDefinition!.Sprite.OriginY
                 ));
@@ -250,7 +250,7 @@ public class RoomRenderer
                     ScaleX: roomSprite.ScaleX,
                     ScaleY: roomSprite.ScaleY,
                     Color: roomSprite.Color,
-                    Rotation: roomSprite.OppositeRotation,
+                    Rotation: -roomSprite.Rotation,
                     OriginX: roomSprite.Sprite!.OriginX,
                     OriginY: roomSprite.Sprite!.OriginY
                 ));
