@@ -197,6 +197,23 @@ public class UndertaleRoomTilePicker : Control
             using var lease = leaseFeature.Lease();
             SKCanvas canvas = lease.SkCanvas;
 
+            // Checkered background
+
+            int gridSize = 8;
+            SKPaint gridColor1 = new() { Color = new SKColor(102, 102, 102) };
+            SKPaint gridColor2 = new() { Color = new SKColor(153, 153, 153) };
+
+            canvas.DrawRect(SKRect.Create(0, 0, (float)Bounds.Width, (float)Bounds.Height), gridColor1);
+
+            for (int x = 0; x < Bounds.Width / gridSize; x++)
+                for (int y = 0; y < Bounds.Height / gridSize; y++)
+                {
+                    if ((x + y) % 2 != 0)
+                        canvas.DrawRect(SKRect.Create(x * gridSize, y * gridSize, gridSize, gridSize), gridColor2);
+                }
+
+            // Tiles
+
             var texturePageItem = Background.Texture;
 
             SKImage? image = mainVM.ImageCache.GetCachedImageFromTexturePageItem(texturePageItem);
