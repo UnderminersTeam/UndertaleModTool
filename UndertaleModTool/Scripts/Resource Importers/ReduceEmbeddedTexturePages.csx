@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -28,8 +29,8 @@ foreach (DirectoryInfo di in dir.GetDirectories())
 
 string exportedTexturesFolder = Path.Combine(dir.FullName, "Textures");
 TextureWorker worker = null;
-Dictionary<string, int[]> assetCoordinateDict = new();
-Dictionary<string, string> assetTypeDict = new();
+ConcurrentDictionary<string, int[]> assetCoordinateDict = new();
+ConcurrentDictionary<string, string> assetTypeDict = new();
 using (worker = new())
 {
     Directory.CreateDirectory(exportedTexturesFolder);
@@ -70,8 +71,8 @@ void DumpSprite(UndertaleSprite sprite)
             {
                 UndertaleTexturePageItem tex = sprite.Textures[i].Texture;
                 worker.ExportAsPNG(tex, Path.Combine(exportedTexturesFolder, $"{sprite.Name.Content}_{i}.png"));
-                assetCoordinateDict.Add($"{sprite.Name.Content}_{i}", new int[] { tex.TargetX, tex.TargetY, tex.SourceWidth, tex.SourceHeight, tex.TargetWidth, tex.TargetHeight, tex.BoundingWidth, tex.BoundingHeight });
-                assetTypeDict.Add($"{sprite.Name.Content}_{i}", "spr");
+                assetCoordinateDict.TryAdd($"{sprite.Name.Content}_{i}", new int[] { tex.TargetX, tex.TargetY, tex.SourceWidth, tex.SourceHeight, tex.TargetWidth, tex.TargetHeight, tex.BoundingWidth, tex.BoundingHeight });
+                assetTypeDict.TryAdd($"{sprite.Name.Content}_{i}", "spr");
             }
         }
     }
@@ -87,8 +88,8 @@ void DumpFont(UndertaleFont font)
     {
         UndertaleTexturePageItem tex = font.Texture;
         worker.ExportAsPNG(tex, Path.Combine(exportedTexturesFolder, $"{font.Name.Content}.png"));
-        assetCoordinateDict.Add(font.Name.Content, new int[] { tex.TargetX, tex.TargetY, tex.SourceWidth, tex.SourceHeight, tex.TargetWidth, tex.TargetHeight, tex.BoundingWidth, tex.BoundingHeight });
-        assetTypeDict.Add(font.Name.Content, "fnt");
+        assetCoordinateDict.TryAdd(font.Name.Content, new int[] { tex.TargetX, tex.TargetY, tex.SourceWidth, tex.SourceHeight, tex.TargetWidth, tex.TargetHeight, tex.BoundingWidth, tex.BoundingHeight });
+        assetTypeDict.TryAdd(font.Name.Content, "fnt");
 
         IncrementProgressParallel();
     }
@@ -102,8 +103,8 @@ void DumpBackground(UndertaleBackground background)
     {
         UndertaleTexturePageItem tex = background.Texture;
         worker.ExportAsPNG(tex, Path.Combine(exportedTexturesFolder, $"{background.Name.Content}.png"));
-        assetCoordinateDict.Add(background.Name.Content, new int[] { tex.TargetX, tex.TargetY, tex.SourceWidth, tex.SourceHeight, tex.TargetWidth, tex.TargetHeight, tex.BoundingWidth, tex.BoundingHeight });
-        assetTypeDict.Add(background.Name.Content, "bg");
+        assetCoordinateDict.TryAdd(background.Name.Content, new int[] { tex.TargetX, tex.TargetY, tex.SourceWidth, tex.SourceHeight, tex.TargetWidth, tex.TargetHeight, tex.BoundingWidth, tex.BoundingHeight });
+        assetTypeDict.TryAdd(background.Name.Content, "bg");
         IncrementProgressParallel();
     }
 }

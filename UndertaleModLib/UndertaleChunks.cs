@@ -809,7 +809,7 @@ namespace UndertaleModLib
                 uint tileCount = reader.ReadUInt32();
 
                 // Calculate the theoretical end position given the above info, and compare to the actual end position (with padding).
-                uint theoreticalEndPos = bgPtr + (15 * 4) + (itemsPerTileCount * tileCount * 4);
+                uint theoreticalEndPos = bgPtr + (16 * 4) + (itemsPerTileCount * tileCount * 4);
                 if (nextBgPtr == 0)
                 {
                     // Align to 16 bytes, and compare against chunk end position
