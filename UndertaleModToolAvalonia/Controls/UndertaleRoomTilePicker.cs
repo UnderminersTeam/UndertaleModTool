@@ -38,6 +38,8 @@ public class UndertaleRoomTilePicker : Control
     UndertaleRoom.Layer.LayerTilesData? layerTilesData;
 
     Vector translation;
+    double scaling = 1;
+
     Point translationMoveOffset;
 
     public UndertaleRoomTilePicker()
@@ -83,6 +85,30 @@ public class UndertaleRoomTilePicker : Control
         }
     }
 
+    protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
+    {
+        if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
+        {
+            var pointerPosition = e.GetPosition(this);
+
+            if (e.Delta.Y > 0)
+            {
+                translation *= 2;
+                translation -= pointerPosition;
+                scaling *= 2;
+            }
+            else if (e.Delta.Y < 0)
+            {
+                scaling /= 2;
+                translation += pointerPosition;
+                translation /= 2;
+            }
+
+            translation = new(Math.Round(translation.X), Math.Round(translation.Y));
+            e.Handled = true;
+        }
+    }
+
     public override void Render(DrawingContext context)
     {
         if (layerTilesData?.Background is not null)
@@ -91,10 +117,11 @@ public class UndertaleRoomTilePicker : Control
             {
                 Bounds = new Rect(0, 0, Bounds.Width, Bounds.Height),
                 Translation = translation,
+                Scaling = scaling,
                 Background = layerTilesData.Background,
                 SelectedTileData = SelectedTileData,
                 VisualColumns = TileSetColumns,
-                SelectedColor = this.GetSolidColorBrushResource("SystemControlHighlightAccentBrush").Color.ToSKColor(),
+                SelectedColor = this.GetSolidColorBrushResource("SystemControlHighlightAccentBrush").Color.ToSKColor().WithAlpha(128),
             });
         }
 
@@ -113,6 +140,7 @@ public class UndertaleRoomTilePicker : Control
         UndertaleBackground background = layerTilesData.Background;
 
         point -= translation;
+        point /= scaling;
 
         uint x = (uint)(point.X / background.GMS2TileWidth);
         uint y = (uint)(point.Y / background.GMS2TileHeight);
@@ -145,6 +173,7 @@ public class UndertaleRoomTilePicker : Control
         readonly MainViewModel mainVM = App.Services.GetRequiredService<MainViewModel>();
 
         public required Vector Translation;
+        public required double Scaling;
         public required UndertaleBackground Background;
         public required uint SelectedTileData;
         public required uint VisualColumns = 0;
@@ -201,7 +230,9 @@ public class UndertaleRoomTilePicker : Control
             var tileColumn = 0;
             var destColumn = 0;
 
+            canvas.Save();
             canvas.Translate(Translation.ToSKPoint());
+            canvas.Scale((float)Scaling);
 
             for (uint i = 0; i < tileCount; i++)
             {
@@ -238,8 +269,13 @@ public class UndertaleRoomTilePicker : Control
 
             if (selectedTileId < tileCount)
             {
-                canvas.DrawRect(selectedTileX - 1, selectedTileY - 1, tileW + 1, tileH + 1, new SKPaint() { Style = SKPaintStyle.Stroke, Color = SelectedColor });
+                float s = 1 / (float)Scaling;
+                SKRect rect = SKRect.Create(selectedTileX - s, selectedTileY - s, tileW + s, tileH + s);
+
+                canvas.DrawRect(rect, new SKPaint() { Style = SKPaintStyle.Stroke, Color = SelectedColor });
             }
+
+            canvas.Restore();
         }
     }
 }
