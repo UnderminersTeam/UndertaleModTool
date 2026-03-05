@@ -30,7 +30,8 @@
                                              ShowLineNumbers="True"
                                              WordWrap="True"
                                              Background="#FF282828"
-                                             FontFamily="Consolas,Liberation Mono,Menlo">
+                                             FontFamily="{DynamicResource AvaloniaEditFontFamily}"
+                                             FontSize="{DynamicResource AvaloniaEditFontSize}">
                         <AvaloniaEdit:TextEditor.KeyBindings>
                             <KeyBinding Gesture="Ctrl+K" Command="{Binding CompileAndDecompileGML}" />
                         </AvaloniaEdit:TextEditor.KeyBindings>
@@ -45,7 +46,8 @@
                                              ShowLineNumbers="True"
                                              WordWrap="True"
                                              Background="#FF282828"
-                                             FontFamily="Consolas,Liberation Mono,Menlo">
+                                             FontFamily="{DynamicResource AvaloniaEditFontFamily}"
+                                             FontSize="{DynamicResource AvaloniaEditFontSize}">
                         <AvaloniaEdit:TextEditor.KeyBindings>
                             <KeyBinding Gesture="Ctrl+K" Command="{Binding CompileAndDecompileASM}" />
                         </AvaloniaEdit:TextEditor.KeyBindings>

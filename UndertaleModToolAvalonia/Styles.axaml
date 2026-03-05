@@ -14,6 +14,9 @@
         <x:Double x:Key="TabStripItemMinHeight">28</x:Double>
         <x:Double x:Key="TextControlThemeMinHeight">0</x:Double>
         <x:Double x:Key="TreeViewItemMinHeight">0</x:Double>
+        <!-- Custom resource values -->
+        <FontFamily x:Key="AvaloniaEditFontFamily">monospace,Consolas,Liberation Mono,Menlo</FontFamily>
+        <x:Double x:Key="AvaloniaEditFontSize">12</x:Double>
     </Styles.Resources>
     
     <FluentTheme DensityStyle="Compact"/>
