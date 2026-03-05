@@ -1,0 +1,30 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:l="clr-namespace:UndertaleModToolAvalonia"
+        mc:Ignorable="d"
+        x:Class="UndertaleModToolAvalonia.MessageWindow"
+        x:DataType="l:MessageWindow"
+        DataContext="{Binding $self}"
+        Title="{Binding TitleText}"
+        Width="400"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        Classes="MessageWindow">
+    <Window.KeyBindings>
+        <KeyBinding Command="{Binding Close}" Gesture="Escape" />
+        <KeyBinding Command="{Binding Copy}" Gesture="Ctrl+C" />
+    </Window.KeyBindings>
+    <Grid RowDefinitions="1*,Auto">
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+            <TextBlock Name="MessageTextBlock" Text="{Binding Message}" TextWrapping="Wrap" />
+        </ScrollViewer>
+        <StackPanel Grid.Row="1" Name="ButtonsStackPanel" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Command="{Binding OkClick}" IsVisible="{Binding HasOKButton}" IsDefault="True">OK</Button>
+            <Button Command="{Binding YesClick}" IsVisible="{Binding HasYesButton}" IsDefault="True">Yes</Button>
+            <Button Command="{Binding NoClick}" IsVisible="{Binding HasNoButton}">No</Button>
+            <Button Command="{Binding CancelClick}" IsVisible="{Binding HasCancelButton}">Cancel</Button>
+        </StackPanel>
+    </Grid>
+</Window>
