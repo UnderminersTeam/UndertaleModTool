@@ -547,21 +547,27 @@ public class RoomRenderer
                     uint tileX = tileId % c.TileColumns;
                     uint tileY = tileId / c.TileColumns;
 
-                    float xx = c.SourceX + (tileX * (c.TileW + c.OutputBorderX * 2) + c.OutputBorderY);
-                    float yy = c.SourceY + (tileY * (c.TileH + c.OutputBorderX * 2) + c.OutputBorderY);
+                    float xx = c.SourceX + (tileX * (c.TileW + c.OutputBorderX * 2) + c.OutputBorderX);
+                    float yy = c.SourceY + (tileY * (c.TileH + c.OutputBorderY * 2) + c.OutputBorderY);
 
                     AddQuad(texs, xx, yy, xx + c.TileW, yy + c.TileH, tileOrientation);
                     AddQuad(vertices, posX, posY, posX + c.TileW, posY + c.TileH, 0);
                 }
             }
 
-        SKShader shader = SKShader.CreateImage(c.Image);
+        using SKShader shader = SKShader.CreateImage(c.Image);
 
         Canvas.Save();
         Canvas.Translate(c.X, c.Y);
         SKPoint[] verticesArray = vertices.ToArray();
         SKPoint[] texsArray = texs.ToArray();
-        Canvas.DrawVertices(SKVertexMode.Triangles, verticesArray, texsArray, null, new SKPaint() { Shader = shader });
+
+        using SKPaint paint = new() { Shader = shader };
+
+        using SKVertices verticesCopy = SKVertices.CreateCopy(SKVertexMode.Triangles, verticesArray, texsArray, null);
+
+        Canvas.DrawVertices(verticesCopy, SKBlendMode.Modulate, paint);
+
         Canvas.Restore();
     }
 }
