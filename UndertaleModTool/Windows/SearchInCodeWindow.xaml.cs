@@ -16,6 +16,7 @@ using System.Windows.Input;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
+using Underanalyzer.Decompiler;
 
 namespace UndertaleModTool.Windows
 {
@@ -52,16 +53,16 @@ namespace UndertaleModTool.Windows
         {
             InitializeComponent();
 
-            if (query is not null)
-            {
-                if (query.Length > 256 || query.Count(x => x == '\n') > 16)
-                    return; // Ignore if the query is longer than 256 characters or 16 lines.
+            InAssemblyCheckBox.IsChecked = inAssembly;
 
-                SearchTextBox.Text = query;
-                SearchTextBox.SelectAll();
+            if (query is null) return;
+            if (query.Length > 256 || query.Count(x => x == '\n') > 16) {
+                this.ShowError("Query is too long (Maximum of 256 chars / 16 lines)");
+                return;
             }
 
-            InAssemblyCheckBox.IsChecked = inAssembly;
+            SearchTextBox.Text = query;
+            SearchTextBox.SelectAll();
         }
 
         private async void SearchButton_Click(object sender, RoutedEventArgs e)
@@ -73,7 +74,13 @@ namespace UndertaleModTool.Windows
         {
             // TODO: Allow this be cancelled, probably make loader inside this window itself.
 
-            if (mainWindow.Data == null)
+            if (isSearchInProgress)
+            {
+                this.ShowError("Can't search while another search is in progress.");
+                return;
+            }
+
+            if (mainWindow.Data is null)
             {
                 this.ShowError("No data.win loaded.");
                 return;
@@ -85,16 +92,11 @@ namespace UndertaleModTool.Windows
                 return;
             }
 
-            text = SearchTextBox.Text.Replace("\r\n", "\n");
-
-            if (String.IsNullOrEmpty(text))
-                return;
-
-            if (isSearchInProgress)
-            {
-                this.ShowError("Can't search while another search is in progress.");
+            text = SearchTextBox.Text;
+            if (String.IsNullOrEmpty(text)) {
                 return;
             }
+            text = text.Replace("\r\n", "\n");
 
             isCaseSensitive = CaseSensitiveCheckBox.IsChecked ?? false;
             isRegexSearch = RegexSearchCheckBox.IsChecked ?? false;
@@ -103,23 +105,22 @@ namespace UndertaleModTool.Windows
 
             bool filterByName = FilterByNameExpander.IsExpanded;
             bool nameIsCaseSensitive, nameIsRegex;
-            string name;
 
             IList<UndertaleCode> codeEntriesToSearch = mainWindow.Data.Code;
 
             if (isRegexSearch)
             {
+                RegexOptions options = RegexOptions.Compiled;
+                if (!isCaseSensitive)
+                {
+                    options |= RegexOptions.IgnoreCase;
+                }
+                if (isMultilineRegex)
+                {
+                    options |= RegexOptions.Multiline;
+                }
                 try
                 {
-                    RegexOptions options = RegexOptions.Compiled;
-                    if (!isCaseSensitive)
-                    {
-                        options |= RegexOptions.IgnoreCase;
-                    }
-                    if (isMultilineRegex)
-                    {
-                        options |= RegexOptions.Multiline;
-                    }
                     keywordRegex = new(text, options);
                 }
                 catch (ArgumentException e)
@@ -129,36 +130,39 @@ namespace UndertaleModTool.Windows
                 }
             }
 
-            if (filterByName)
+            if (filterByName && NameFilterTextBox.Text is string name && name != "")
             {
-                name = NameFilterTextBox.Text;
-                if (!String.IsNullOrEmpty(name))
-                {
-                    nameIsCaseSensitive = NameCaseSensitiveCheckBox.IsChecked ?? false;
-                    nameIsRegex = NameRegexSearchCheckBox.IsChecked ?? false;
+                nameIsCaseSensitive = NameCaseSensitiveCheckBox.IsChecked ?? false;
+                nameIsRegex = NameRegexSearchCheckBox.IsChecked ?? false;
 
-                    if (nameIsRegex)
-                    {
-                        try
-                        {
-                            nameRegex = new(name, nameIsCaseSensitive ? RegexOptions.Compiled : RegexOptions.Compiled | RegexOptions.IgnoreCase);
-                            codeEntriesToSearch = mainWindow.Data.Code.Where(c => !String.IsNullOrEmpty(c.Name.Content)
-                                                                                  && nameRegex.IsMatch(c.Name.Content))
-                                                                      .ToList();
-                        }
-                        catch (ArgumentException e)
-                        {
-                            this.ShowError($"Invalid name Regex: {e.Message}");
-                            filterByName = false;
-                        }
+                if (nameIsRegex)
+                {
+                    RegexOptions options = new();
+                    if (!nameIsCaseSensitive) {
+                        options |= RegexOptions.IgnoreCase;
                     }
-                    else
+
+                    try
                     {
-                        var comparison = nameIsCaseSensitive ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase;
-                        codeEntriesToSearch = mainWindow.Data.Code.Where(c => !String.IsNullOrEmpty(c.Name.Content)
-                                                                              && c.Name.Content.Contains(name, comparison))
-                                                                  .ToList();
+                        nameRegex = new(name, options);
                     }
+                    catch (ArgumentException e)
+                    {
+                        this.ShowError($"Invalid name Regex: {e.Message}");
+                    }
+
+                    codeEntriesToSearch = mainWindow.Data.Code
+                        .Where(code => !String.IsNullOrEmpty(code?.Name?.Content))
+                        .Where(code => nameRegex.IsMatch(code.Name.Content))
+                        .ToList();
+                }
+                else
+                {
+                    var cmp = nameIsCaseSensitive ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase;
+                    codeEntriesToSearch = mainWindow.Data.Code
+                        .Where(code => !String.IsNullOrEmpty(code?.Name?.Content))
+                        .Where(code => code.Name.Content.Contains(name, cmp))
+                        .ToList();
                 }
             }
 
@@ -169,7 +173,7 @@ namespace UndertaleModTool.Windows
             }
 
             mainWindow.IsEnabled = false;
-            this.IsEnabled = false;
+            IsEnabled = false;
 
             isSearchInProgress = true;
 
@@ -217,22 +221,42 @@ namespace UndertaleModTool.Windows
 
         private void SearchInUndertaleCode(UndertaleCode code)
         {
-            try
-            {
-                if (code is not null && code.ParentEntry is null)
+            if (code is null) return;
+
+            // Child code entries do not contain any instructions.
+            if (code.ParentEntry is not null) return;
+
+            UndertaleData data = mainWindow.Data;
+
+            // TODO: Look at specific exceptions
+
+            if (isInAssembly) {
+                try
                 {
-                    var codeText = isInAssembly
-                        ? code.Disassemble(mainWindow.Data.Variables, mainWindow.Data.CodeLocals?.For(code), mainWindow.Data.CodeLocals is null)
-                        : TryGetProfileModeGML(code.Name.Content)
-                            ?? new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, mainWindow.Data.ToolInfo.DecompilerSettings).DecompileToString();
+                    string codeText = code.Disassemble(data.Variables, data.CodeLocals?.For(code), data.CodeLocals is null);
                     SearchInCodeText(code.Name.Content, codeText);
                 }
-                
+                catch (Exception)
+                {
+                    failedList.Add(code.Name.Content);
+                }
             }
-            // TODO: Look at specific exceptions
-            catch (Exception)
+            else
             {
-                failedList.Add(code.Name.Content);
+                try
+                {
+
+                    var codeText = TryGetProfileModeGML(code.Name.Content);
+                    if (codeText is null) {
+                        DecompileContext ctx = new(decompileContext, code, data.ToolInfo.DecompilerSettings);
+                        codeText = ctx.DecompileToString();
+                    }
+                    SearchInCodeText(code.Name.Content, codeText);
+                }
+                catch (Exception)
+                {
+                    failedList.Add(code.Name.Content);
+                }
             }
 
             Interlocked.Increment(ref progressCount);
@@ -264,10 +288,10 @@ namespace UndertaleModTool.Windows
             }
             else
             {
-                StringComparison comparisonType = isCaseSensitive ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase;
+                StringComparison cmp = isCaseSensitive ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase;
 
                 int index = 0;
-                while ((index = codeText.IndexOf(text, index, comparisonType)) != -1)
+                while ((index = codeText.IndexOf(text, index, cmp)) != -1)
                 {
                     results.Add(index);
                     index += text.Length;
@@ -321,7 +345,7 @@ namespace UndertaleModTool.Windows
 
         private void SortResults()
         {
-            string[] codeNames = mainWindow.Data.Code.Select(x => x.Name.Content).ToArray();
+            string[] codeNames = mainWindow.Data.Code.Select(c => c.Name.Content).ToArray();
 
             resultsDictSorted = resultsDict.OrderBy(c => Array.IndexOf(codeNames, c.Key));
             failedListSorted = failedList.OrderBy(c => Array.IndexOf(codeNames, c));
@@ -329,14 +353,6 @@ namespace UndertaleModTool.Windows
 
         public void ShowResults()
         {
-            static string GetWordEnding(int quantity, bool isResults)
-            {
-                if (isResults)
-                    return quantity != 1 ? "s" : "";
-                
-                return quantity != 1 ? "ies" : "y";
-            }
-
             var resultsSorted = resultsDictSorted.ToArray();
             var failedSorted = failedListSorted.ToArray();
             foreach (var result in resultsSorted)
@@ -348,10 +364,17 @@ namespace UndertaleModTool.Windows
                 }
             }
 
-            string str = $"{resultCount} result{GetWordEnding(resultCount, true)} found in {resultsSorted.Length} code entr{GetWordEnding(resultsSorted.Length, false)}.";
-            if (failedSorted.Length > 0)
+            int codeEntryCount = resultsSorted.Length;
+            int failedCount = failedSorted.Length;
+
+            string wResults = resultCount == 1 ? "result" : "results";
+            string wEntries = codeEntryCount == 1 ? "entry" : "entries";
+            string wEntriesFailed = failedCount == 1 ? "entry" : "entries";
+
+            string str = $"{resultCount} {wResults} found in {codeEntryCount} code {wEntries}.";
+            if (failedCount > 0)
             {
-                str += $" {failedSorted.Length} code entr{GetWordEnding(failedSorted.Length, false)} with an error.";
+                str += $" {failedCount} code {wEntriesFailed} encountered errors while searching.";
             }
             StatusBarTextBlock.Text = str;
         }
@@ -435,7 +458,7 @@ namespace UndertaleModTool.Windows
             {
                 OpenSelectedListViewItem();
                 e.Handled = true;
-            }   
+            }
         }
 
         private void MenuItemOpen_Click(object sender, RoutedEventArgs e)
