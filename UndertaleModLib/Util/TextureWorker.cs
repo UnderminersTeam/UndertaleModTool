@@ -92,9 +92,9 @@ namespace UndertaleModLib.Util
             IMagickImage<byte> returnImage = croppedImage;
             if (includePadding)
             {
-                returnImage = new MagickImage(MagickColors.Transparent, (uint)exportWidth, (uint)exportHeight);
-                returnImage.Composite(croppedImage, texPageItem.TargetX, texPageItem.TargetY, CompositeOperator.Copy);
-                croppedImage.Dispose();
+                // as far as I know, Extent is faster than creating a new image and using Composite.
+                croppedImage.Extent(new MagickGeometry(-texPageItem.TargetX, -texPageItem.TargetY, (uint)exportWidth, (uint)exportHeight), MagickColors.Transparent);
+                returnImage = croppedImage;
             }
 
             returnImage.Strip();
