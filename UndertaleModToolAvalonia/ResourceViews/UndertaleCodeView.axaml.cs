@@ -1,12 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Reflection;
 using System.Xml;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.LogicalTree;
 using Avalonia.Media;
 using Avalonia.Media.TextFormatting;
 using Avalonia.Platform;
@@ -91,26 +91,6 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
                     GMLTextEditor.TextArea.TextView.ElementGenerators.Remove(gmlNameGenerator);
                     ASMTextEditor.TextArea.TextView.ElementGenerators.Remove(asmNameGenerator);
                 }
-
-                if (this.IsAttachedToVisualTree())
-                {
-                    ProcessLastGoToLocation();
-                }
-                else
-                {
-                    AttachedToLogicalTree += (_, __) =>
-                    {
-                        ProcessLastGoToLocation();
-                    };
-                }
-
-                vm.PropertyChanged += (object? source, PropertyChangedEventArgs e) =>
-                {
-                    if (e.PropertyName == nameof(UndertaleCodeViewModel.LastGoToLocation) && vm.LastGoToLocation is not null)
-                    {
-                        ProcessLastGoToLocation();
-                    }
-                };
 
                 UpdateHighlightingCache();
             }
@@ -238,39 +218,54 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
     {
         if (DataContext is UndertaleCodeViewModel vm)
         {
-            if (vm.LastGoToLocation is not null)
+            if (!vm.IsCodeProcessing)
             {
-                if (!vm.IsCodeProcessing)
+                if (this.IsAttachedToVisualTree())
                 {
-                    GoToLocation(vm.LastGoToLocation.Value);
-                    vm.LastGoToLocation = null;
+                    GoToLastGoToLocation();
+                }
+                else
+                {
+                    void OnAttachedToLogicalTree(object? _, LogicalTreeAttachmentEventArgs __)
+                    {
+                        GoToLastGoToLocation();
+                        AttachedToLogicalTree -= OnAttachedToLogicalTree;
+                    }
+
+                    AttachedToLogicalTree += OnAttachedToLogicalTree;
                 }
             }
         }
     }
 
-    public void GoToLocation((UndertaleCodeViewModel.Tab tab, int line) location)
+    public void GoToLastGoToLocation()
     {
-        if (DataContext is UndertaleCodeViewModel vm)
+        if (DataContext is not UndertaleCodeViewModel vm)
+            return;
+
+        if (vm.LastGoToLocation is not (UndertaleCodeViewModel.Tab tab, int line) location)
+            return;
+
+        vm.SelectedTab = location.Tab;
+
+        TextEditor textEditor = (location.Tab == UndertaleCodeViewModel.Tab.GML) ? GMLTextEditor : ASMTextEditor;
+
+        textEditor.TextArea.Caret.Column = 0;
+        textEditor.TextArea.Caret.Line = location.Line;
+        textEditor.Focus();
+
+        void OnLayoutUpdated(object? _, EventArgs __)
         {
-            vm.SelectedTab = location.tab;
-            AvaloniaEdit.TextEditor textEditor = (location.tab == UndertaleCodeViewModel.Tab.GML) ? GMLTextEditor : ASMTextEditor;
-
-            textEditor.TextArea.Caret.Column = 0;
-            textEditor.TextArea.Caret.Line = location.line;
-            textEditor.Focus();
-
-            EventHandler? func = null;
-            func = (_, __) =>
-            {
-                textEditor.ScrollToLine(location.line);
-                textEditor.LayoutUpdated -= func;
-            };
-            textEditor.LayoutUpdated += func;
-
-            // HACK: I don't know how to check if the layout has updated already here or not, so I just invalidate it to call the above function.
-            textEditor.InvalidateMeasure();
+            textEditor.ScrollToLine(location.Line);
+            textEditor.LayoutUpdated -= OnLayoutUpdated;
         }
+
+        textEditor.LayoutUpdated += OnLayoutUpdated;
+
+        // HACK: I don't know how to check if the layout has updated already here or not, so I just invalidate it to call the above function.
+        textEditor.InvalidateMeasure();
+
+        vm.LastGoToLocation = null;
     }
 
     private void GMLTextEditor_GotFocus(object? sender, GotFocusEventArgs e)

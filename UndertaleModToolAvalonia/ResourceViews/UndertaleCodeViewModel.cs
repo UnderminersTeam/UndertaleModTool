@@ -30,7 +30,7 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
     [Notify]
     private Tab _SelectedTab;
     [Notify]
-    private (Tab, int)? _LastGoToLocation = null;
+    private (Tab Tab, int Line)? _LastGoToLocation = null;
 
     public TextDocument GMLTextDocument { get; set; } = new TextDocument();
     public TextDocument ASMTextDocument { get; set; } = new TextDocument();
