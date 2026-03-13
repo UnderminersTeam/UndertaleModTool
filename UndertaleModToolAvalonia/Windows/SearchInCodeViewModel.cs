@@ -254,7 +254,7 @@ public partial class SearchInCodeViewModel
         var tab = MainVM.TabOpen(searchResult.Code, inNewTab);
         if (tab is not null && tab.Content is UndertaleCodeViewModel vm)
         {
-            vm.LastGoToLocation = (!IsInAssembly ? UndertaleCodeViewModel.Tab.GML : UndertaleCodeViewModel.Tab.ASM, searchResult.LineNumber);
+            vm.GoToLocation(!IsInAssembly ? UndertaleCodeViewModel.Tab.GML : UndertaleCodeViewModel.Tab.ASM, searchResult.LineNumber);
         }
     }
 

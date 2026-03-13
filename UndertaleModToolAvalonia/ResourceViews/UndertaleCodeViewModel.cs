@@ -157,6 +157,11 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
         return true;
     }
 
+    public void GoToLocation(Tab tab, int lineNumber)
+    {
+        LastGoToLocation = (tab, lineNumber);
+    }
+
     void CodeProcessStart()
     {
         loaderWindow = MainVM.View!.LoaderOpen();
@@ -188,6 +193,8 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
         await DecompileToASM();
 
         CodeProcessEnd();
+
+        View?.ProcessLastGoToLocation();
     }
 
     public void CompileAndDecompileGML() => CompileAndDecompileGML(false);

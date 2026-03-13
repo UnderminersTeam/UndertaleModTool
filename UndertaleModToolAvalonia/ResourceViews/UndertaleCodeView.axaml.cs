@@ -240,8 +240,11 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
         {
             if (vm.LastGoToLocation is not null)
             {
-                GoToLocation(vm.LastGoToLocation.Value);
-                vm.LastGoToLocation = null;
+                if (!vm.IsCodeProcessing)
+                {
+                    GoToLocation(vm.LastGoToLocation.Value);
+                    vm.LastGoToLocation = null;
+                }
             }
         }
     }
@@ -827,6 +830,8 @@ public interface IUndertaleCodeView
         View.GMLTextEditor.CaretOffset = Math.Clamp(View.LastCaretOffsets.Item1, 0, View.GMLTextEditor.Text.Length);
         View.ASMTextEditor.CaretOffset = Math.Clamp(View.LastCaretOffsets.Item2, 0, View.ASMTextEditor.Text.Length);
     }
+
+    public void ProcessLastGoToLocation();
 
     public int GMLCaretOffset
     {
