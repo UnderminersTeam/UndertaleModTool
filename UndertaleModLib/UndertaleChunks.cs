@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
@@ -1743,7 +1746,7 @@ namespace UndertaleModLib
         public uint VarCount2 { get; set; }
         public uint MaxLocalVarCount { get; set; }
         public bool DifferentVarCounts { get; set; }
-        public List<UndertaleVariable> List = new List<UndertaleVariable>();
+        public ObservableCollection<UndertaleVariable> List = new ObservableCollection<UndertaleVariable>();
 
         [Obsolete]
         public uint InstanceVarCount { get => VarCount1; set => VarCount1 = value; }
@@ -1793,7 +1796,7 @@ namespace UndertaleModLib
             else
                 varLength = 12;
             List.Clear();
-            List.Capacity = (int)(Length / varLength);
+            //List.Capacity = (int)(Length / varLength);
             while (reader.Position + varLength <= startPosition + Length)
                 List.Add(reader.ReadUndertaleObject<UndertaleVariable>());
         }
