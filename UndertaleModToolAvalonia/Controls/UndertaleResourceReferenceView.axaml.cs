@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -8,6 +9,8 @@ using Avalonia.Xaml.Interactions.DragAndDrop;
 using UndertaleModLib;
 
 namespace UndertaleModToolAvalonia;
+
+using AddFuncType = Func<object?, Task<UndertaleResource?>>;
 
 public partial class UndertaleResourceReferenceView : UserControl
 {
@@ -25,6 +28,22 @@ public partial class UndertaleResourceReferenceView : UserControl
     {
         get { return GetValue(ReferenceTypeProperty); }
         set { SetValue(ReferenceTypeProperty, value); }
+    }
+
+    public static readonly StyledProperty<AddFuncType?> AddFuncProperty = AvaloniaProperty.Register<UndertaleResourceReferenceView, AddFuncType?>(
+        nameof(AddFunc));
+    public AddFuncType? AddFunc
+    {
+        get { return GetValue(AddFuncProperty); }
+        set { SetValue(AddFuncProperty, value); }
+    }
+
+    public static readonly StyledProperty<object?> AddFuncArgumentProperty = AvaloniaProperty.Register<UndertaleResourceReferenceView, object?>(
+        nameof(AddFuncArgument));
+    public object? AddFuncArgument
+    {
+        get { return GetValue(AddFuncArgumentProperty); }
+        set { SetValue(AddFuncArgumentProperty, value); }
     }
 
     public UndertaleResourceReferenceView()
@@ -48,6 +67,16 @@ public partial class UndertaleResourceReferenceView : UserControl
             && ((e.Source as Visual)?.GetTransformedBounds()?.Contains(e.GetPosition(null)) ?? false))
         {
             OpenInNewTab();
+        }
+    }
+
+    public async void Add()
+    {
+        if (AddFunc is not null)
+        {
+            UndertaleResource? reference = await AddFunc(AddFuncArgument);
+            if (reference is not null)
+                Reference = reference;
         }
     }
 

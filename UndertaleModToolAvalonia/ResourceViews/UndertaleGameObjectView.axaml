@@ -214,7 +214,15 @@
                                                         <DataGridTemplateColumn Header="Code" Width="1*">
                                                             <DataGridTemplateColumn.CellTemplate>
                                                                 <DataTemplate DataType="undertalem:UndertaleGameObject+EventAction">
-                                                                    <l:UndertaleResourceReferenceView Reference="{Binding CodeId}" ReferenceType="{x:Type undertalem:UndertaleCode}" />
+                                                                    <l:UndertaleResourceReferenceView Reference="{Binding CodeId}" ReferenceType="{x:Type undertalem:UndertaleCode}"
+                                                                                                      AddFunc="{Binding $parent[l:UndertaleGameObjectView].((l:UndertaleGameObjectViewModel)DataContext).CreateEventActionCode}">
+                                                                        <l:UndertaleResourceReferenceView.AddFuncArgument>
+                                                                            <MultiBinding>
+                                                                                <Binding Path="$parent[l:EditableDataGrid;1].DataContext.EventType" />
+                                                                                <Binding Path="$parent[l:EditableDataGrid;0].DataContext.EventSubtype" />
+                                                                            </MultiBinding>
+                                                                        </l:UndertaleResourceReferenceView.AddFuncArgument>
+                                                                    </l:UndertaleResourceReferenceView>
                                                                 </DataTemplate>
                                                             </DataGridTemplateColumn.CellTemplate>
                                                         </DataGridTemplateColumn>
