@@ -39,7 +39,6 @@ public partial class App : Application
             desktop.MainWindow = new MainWindow
             {
                 DataContext = vm,
-                WindowState = WindowState.Maximized,
             };
         }
 

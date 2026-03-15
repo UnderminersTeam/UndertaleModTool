@@ -25,6 +25,8 @@
             </Grid>
 
             <StackPanel>
+                <CheckBox Content="Start maximized"
+                          IsChecked="{Binding MainVM.Settings.StartMaximized}" />
                 <CheckBox Content="Open new resource after creating it"
                           IsChecked="{Binding MainVM.Settings.OpenNewResourceAfterCreatingIt}" />
                 <CheckBox Content="Enable syntax highlighting"

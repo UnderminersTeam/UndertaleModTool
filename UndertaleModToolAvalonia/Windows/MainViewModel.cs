@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
@@ -40,6 +41,9 @@ public partial class MainViewModel
         (Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?.?.?.?") +
         $"{(Data?.GeneralInfo is not null ? " - " + Data.GeneralInfo.ToString() : "")}" +
         $"{(DataPath is not null ? " [" + DataPath + "]" : "")}";
+
+    [Notify]
+    private WindowState _WindowState = WindowState.Maximized;
 
     [Notify]
     private bool _IsEnabled = true;
@@ -106,6 +110,8 @@ public partial class MainViewModel
     {
         Settings = SettingsFile.Load(ServiceProvider);
         Scripting = new(ServiceProvider);
+
+        WindowState = Settings.StartMaximized ? WindowState.Maximized : WindowState.Normal;
     }
 
     public async void OnLoaded()

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
@@ -125,6 +125,8 @@ public partial class SettingsFile
             };
         }
     }
+
+    public bool StartMaximized { get; set; } = true;
 
     public bool OpenNewResourceAfterCreatingIt { get; set; } = false;
     public bool EnableSyntaxHighlighting { get; set; } = true;

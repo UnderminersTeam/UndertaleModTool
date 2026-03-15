@@ -9,6 +9,7 @@
         Icon="/Assets/Icon.ico"
         x:DataType="l:MainViewModel"
         Title="{Binding Title}"
+        WindowState="{Binding WindowState}"
         IsEnabled="{Binding IsEnabled}">
     <NativeMenu.Menu>
         <NativeMenu>
