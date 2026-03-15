@@ -8,6 +8,21 @@ The most complete tool for modding, decompiling and unpacking Undertale (and oth
 
 > *\* (It fills you with determination.)*
 
+# Quick Start
+
+## Windows
+
+1. **Find** the latest stable release from the [Downloads](#downloads) section below
+2. **Download** the GUI version (e.g. `UndertaleModTool_v0.8.4.1-Windows.zip`)
+3. **Extract** the archive to a folder (do not run from inside the archive!)
+4. **Run** `UndertaleModTool.exe`
+5. **Open** your game's data file (e.g., `data.win`, `game.ios`) via File → Open
+6. **Enjoy modding!**
+
+## MacOS/Linux
+
+Use the CLI version or install GUI via [community installer](https://github.com/YarTom/UndertaleModTool-linux-installer)
+
 # Downloads
 
 Both the latest stable release and the most cutting edge version can be downloaded from the table below!
