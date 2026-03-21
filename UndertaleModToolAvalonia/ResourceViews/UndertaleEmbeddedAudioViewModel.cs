@@ -51,14 +51,10 @@ public partial class UndertaleEmbeddedAudioViewModel : IUndertaleResourceViewMod
         if (files.Count != 1)
             return;
 
-        byte[] bytes;
         using (Stream stream = await files[0].OpenReadAsync())
         {
-            bytes = new byte[stream.Length];
-            await stream.ReadExactlyAsync(bytes);
+            await ImportExport.ImportEmbeddedAudio(EmbeddedAudio, stream);
         }
-
-        EmbeddedAudio.Data = bytes;
     }
 
     public async void ExportAudio()
@@ -74,7 +70,9 @@ public partial class UndertaleEmbeddedAudioViewModel : IUndertaleResourceViewMod
         if (file is null)
             return;
 
-        using Stream stream = await file.OpenWriteAsync();
-        stream.Write(EmbeddedAudio.Data);
+        using (Stream stream = await file.OpenWriteAsync())
+        {
+            await ImportExport.ExportEmbeddedAudio(EmbeddedAudio, stream);
+        }
     }
 }

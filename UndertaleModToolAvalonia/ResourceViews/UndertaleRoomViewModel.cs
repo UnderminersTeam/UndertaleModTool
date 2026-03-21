@@ -387,18 +387,10 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
         if (file is null)
             return;
 
-        using Stream stream = await file.OpenWriteAsync();
-
-        // NOTE: This is a CPU bitmap, unlike the GPU surface used when rendering in the UI.
-        var bitmap = new SKBitmap((int)Room.Width, (int)Room.Height, SKColorType.Bgra8888, SKAlphaType.Unpremul);
-        var canvas = new SKCanvas(bitmap);
-
-        var renderer = new RoomRenderer();
-        renderer.RenderCommands(new RoomRenderer.RenderCommandsBuilder(Room).RenderCommands, canvas);
-
-        var result = bitmap.Encode(stream, SKEncodedImageFormat.Png, 100);
-        if (!result)
-            throw new InvalidOperationException();
+        using (Stream stream = await file.OpenWriteAsync())
+        {
+            await ImportExport.ExportRoomAsPNG(Room, stream);
+        }
     }
 
     private void OnRoomTreeItemsSelectedItemChanged()

@@ -34,19 +34,10 @@ public partial class UndertaleEmbeddedTextureViewModel : IUndertaleResourceViewM
         if (files.Count != 1)
             return;
 
-        byte[] bytes;
         using (Stream stream = await files[0].OpenReadAsync())
         {
-            bytes = new byte[stream.Length];
-            await stream.ReadExactlyAsync(bytes);
+            await ImportExport.ImportEmbeddedTexture(EmbeddedTexture, stream);
         }
-
-        var gmImage = GMImage.FromPng(bytes, verifyHeader: true);
-        gmImage.ConvertToFormat(EmbeddedTexture.TextureData.Image.Format);
-
-        EmbeddedTexture.TextureData.Image = gmImage;
-        EmbeddedTexture.TextureWidth = gmImage.Width;
-        EmbeddedTexture.TextureHeight = gmImage.Height;
     }
 
     public async void ExportImage()
@@ -70,10 +61,10 @@ public partial class UndertaleEmbeddedTextureViewModel : IUndertaleResourceViewM
         if (file is null)
             return;
 
-        using Stream stream = await file.OpenWriteAsync();
-
-        byte[] data = EmbeddedTexture.TextureData.Image.GetData();
-        stream.Write(data);
+        using (Stream stream = await file.OpenWriteAsync())
+        {
+            await ImportExport.ExportEmbeddedTexture(EmbeddedTexture, stream);
+        }
     }
 
     public async void ExportImageAsPNG()
@@ -89,8 +80,9 @@ public partial class UndertaleEmbeddedTextureViewModel : IUndertaleResourceViewM
         if (file is null)
             return;
 
-        using Stream stream = await file.OpenWriteAsync();
-
-        EmbeddedTexture.TextureData.Image.SavePng(stream);
+        using (Stream stream = await file.OpenWriteAsync())
+        {
+            await ImportExport.ExportEmbeddedTextureAsPNG(EmbeddedTexture, stream);
+        }
     }
 }

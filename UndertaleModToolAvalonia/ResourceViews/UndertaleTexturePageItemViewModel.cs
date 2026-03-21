@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Avalonia.Platform.Storage;
 using Microsoft.Extensions.DependencyInjection;
-using SkiaSharp;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 
@@ -33,17 +32,9 @@ public partial class UndertaleTexturePageItemViewModel : IUndertaleResourceViewM
         if (file is null)
             return;
 
-        using Stream stream = await file.OpenWriteAsync();
-
-        var bitmap = new SKBitmap(TexturePageItem.BoundingWidth, TexturePageItem.BoundingHeight, SKColorType.Bgra8888, SKAlphaType.Unpremul);
-        var canvas = new SKCanvas(bitmap);
-
-        var op = new SKImageViewer.CustomDrawOperation();
-        op.Image = TexturePageItem;
-        op.RenderImage(canvas);
-
-        var result = bitmap.Encode(stream, SKEncodedImageFormat.Png, 100);
-        if (!result)
-            throw new InvalidOperationException();
+        using (Stream stream = await file.OpenWriteAsync())
+        {
+            await ImportExport.ExportTexturePageItemAsPNG(TexturePageItem, stream, MainVM);
+        }
     }
 }

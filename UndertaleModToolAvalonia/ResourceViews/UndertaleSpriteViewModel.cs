@@ -102,19 +102,10 @@ public partial class UndertaleSpriteViewModel : IUndertaleResourceViewModel
                 return;
             }
 
-            // TODO: Reuse UndertaleTexturePageItemViewModel.cs code
-            using var stream = await file.OpenWriteAsync();
-
-            var bitmap = new SKBitmap(texture.BoundingWidth, texture.BoundingHeight, SKColorType.Bgra8888, SKAlphaType.Unpremul);
-            var canvas = new SKCanvas(bitmap);
-
-            var op = new SKImageViewer.CustomDrawOperation();
-            op.Image = texture;
-            op.RenderImage(canvas);
-
-            var result = bitmap.Encode(stream, SKEncodedImageFormat.Png, 100);
-            if (!result)
-                throw new InvalidOperationException();
+            using (var stream = await file.OpenWriteAsync())
+            {
+                await ImportExport.ExportTexturePageItemAsPNG(texture, stream, MainVM);
+            }
         }
     }
 
@@ -132,14 +123,10 @@ public partial class UndertaleSpriteViewModel : IUndertaleResourceViewModel
         if (files.Count != 1)
             return;
 
-        using Stream stream = await files[0].OpenReadAsync();
-        byte[] bytes = new byte[stream.Length];
-        await stream.ReadAsync(bytes);
-
-        (int width, int height) = Sprite.CalculateMaskDimensions(MainVM.Data);
-        UndertaleSprite.MaskEntry maskEntry = new(bytes, width, height);
-
-        Sprite.CollisionMasks[Sprite.CollisionMasks.IndexOf(CollisionMasksSelected)] = maskEntry;
+        using (Stream stream = await files[0].OpenReadAsync())
+        {
+            await ImportExport.ImportSpriteCollisionMaskData(Sprite, Sprite.CollisionMasks.IndexOf(CollisionMasksSelected), stream, MainVM);
+        }
     }
 
     public async void ExportCollisionMaskData()
@@ -157,8 +144,10 @@ public partial class UndertaleSpriteViewModel : IUndertaleResourceViewModel
         if (file is null)
             return;
 
-        using Stream stream = await file.OpenWriteAsync();
-        stream.Write(CollisionMasksSelected.Data);
+        using (Stream stream = await file.OpenWriteAsync())
+        {
+            await ImportExport.ExportSpriteCollisionMaskData(Sprite, Sprite.CollisionMasks.IndexOf(CollisionMasksSelected), stream);
+        }
     }
 
     public static UndertaleSprite.TextureEntry CreateTextureEntry() => new();
