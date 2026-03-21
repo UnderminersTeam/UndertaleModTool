@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Avalonia;
+using SDL3;
 
 namespace UndertaleModToolAvalonia.Desktop;
 
@@ -23,6 +24,9 @@ class Program
             Directory.CreateDirectory(localAppData);
 
             File.WriteAllText(Path.Join(localAppData, "CrashLog.txt"), e.ToString());
+
+            // TODO: Figure out a way to actually stop the UI and other threads.
+            SDL.ShowSimpleMessageBox(SDL3.SDL.MessageBoxFlags.Error, "UndertaleModToolAvalonia", $"{e}", 0);
             throw;
         }
     }
