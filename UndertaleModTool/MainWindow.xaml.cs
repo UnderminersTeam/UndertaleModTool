@@ -1227,8 +1227,9 @@ namespace UndertaleModTool
                                 }
                             }
                         }
+                        var isaudgroup = Path.GetExtension(filename) == ".dat";
 
-                        if (this.ShowQuestion("Do you want to save to load Sprite Cache?") == MessageBoxResult.Yes)
+                        if (!isaudgroup && this.ShowQuestion("Do you want to load the Sprite Cache?") == MessageBoxResult.Yes)
                             await LoadSpriteTextures();
 
                         Data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
@@ -1243,7 +1244,7 @@ namespace UndertaleModTool
                         UndertaleCodeEditor.gettext = null;
                         UndertaleCodeEditor.gettextJSON = null;
 
-                        if (Settings.Instance.MakeBackup)
+                        if (!isaudgroup && Settings.Instance.MakeBackup)
                             File.Copy(filename, filename.Replace(".win", ".bck"), true); // successfully loaded. safe to make the backup
                     }
 
