@@ -7,17 +7,32 @@ namespace UndertaleModLib.Models;
 [PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleParticleSystem : UndertaleNamedResource, IDisposable
 {
-    // TODO: Documentation on these values.
+    /// <summary>
+    /// The name of the particle system.
+    /// </summary>
     public UndertaleString Name { get; set; }
 
+    /// <summary>
+    /// The x-coordinate of the origin of the particle system.
+    /// </summary>
     public int OriginX { get; set; }
 
+    /// <summary>
+    /// The y-coordinate of the origin of the particle system.
+    /// </summary>
     public int OriginY { get; set; }
 
-    public int DrawOrder { get; set; }
+    /// <summary>
+    /// The draw order of the particle system, determining whether new particles are drawn on top of or below older particles.
+    /// </summary>
+    public DrawOrderEnum DrawOrder { get; set; }
 
+    // TODO: Documentation on this value
     public bool GlobalSpaceParticles { get; set; }
 
+    /// <summary>
+    /// The Emitters of the particle system
+    /// </summary>
     public UndertaleSimpleResourcesList<UndertaleParticleSystemEmitter, UndertaleChunkPSEM> Emitters { get; set; } = new();
 
     /// <inheritdoc />
@@ -26,7 +41,7 @@ public class UndertaleParticleSystem : UndertaleNamedResource, IDisposable
         writer.WriteUndertaleString(Name);
         writer.Write(OriginX);
         writer.Write(OriginY);
-        writer.Write(DrawOrder);
+        writer.Write((int)DrawOrder);
         if (writer.undertaleData.IsVersionAtLeast(2023, 8))
             writer.Write(GlobalSpaceParticles);
         writer.WriteUndertaleObject(Emitters);
@@ -38,7 +53,7 @@ public class UndertaleParticleSystem : UndertaleNamedResource, IDisposable
         Name = reader.ReadUndertaleString();
         OriginX = reader.ReadInt32();
         OriginY = reader.ReadInt32();
-        DrawOrder = reader.ReadInt32();
+        DrawOrder = (DrawOrderEnum)reader.ReadInt32();
         if (reader.undertaleData.IsVersionAtLeast(2023, 8))
             GlobalSpaceParticles = reader.ReadBoolean();
         Emitters = reader.ReadUndertaleObject<UndertaleSimpleResourcesList<UndertaleParticleSystemEmitter, UndertaleChunkPSEM>>();
@@ -69,6 +84,11 @@ public class UndertaleParticleSystem : UndertaleNamedResource, IDisposable
         Name = null;
         Emitters = null;
     }
+    public enum DrawOrderEnum
+    {
+        NewOnTop,
+        OldOnTop,
+    }
 }
 
 
@@ -88,43 +108,107 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 
-    // TODO: Documentation on these values
-
+    /// <summary>
+    /// The name of the emitter
+    /// </summary>
     public UndertaleString Name { get; set; }
 
-    // 2023.6
+    /// <summary>
+    /// Whether the emitter is enabled. Only in 2023.6
+    /// </summary>
     public bool Enabled { get; set; } = true;
 
+    /// <summary>
+    /// The emit mode of the emitter.
+    /// </summary>
     public EmitMode Mode { get; set; }
 
+    /// <summary>
+    /// The amount of particles to emit.
+    /// </summary>
     public int EmitCount { get; set; } = 1; // Note: technically float in 2023.8
 
     // 2023.8
+    // TODO: document this, always 0?
     public bool EmitRelative { get; set; }
+    /// <summary>
+    /// The minimum delay between particle emissions.
+    /// </summary>
     public float DelayMin { get; set; }
+
+    /// <summary>
+    /// The maximum delay between particle emissions.
+    /// </summary>
     public float DelayMax { get; set; }
+
+    /// <summary>
+    /// The Time unit to use for <see cref="DelayMin"/> and <see cref="DelayMax"/>.
+    /// </summary>
     public TimeUnitEnum DelayUnit { get; set; }
+
+    // TODO: find how interval and delay are different?
+
+    /// <summary>
+    /// The minimum interval between particle emissions.
+    /// </summary>
     public float IntervalMin { get; set; }
+
+    /// <summary>
+    /// The maximum interval between particle emissions.
+    /// </summary>
     public float IntervalMax { get; set; }
+
+    /// <summary>
+    /// The Time unit to use for <see cref="IntervalMin"/> and <see cref="IntervalMax"/>.
+    /// </summary>
     public TimeUnitEnum IntervalUnit { get; set; }
 
+    /// <summary>
+    /// The distribution type of the emitter, determining how they are distributed around the emitter.
+    /// </summary>
     public DistributionEnum Distribution { get; set; }
-
+    
+    /// <summary>
+    /// The shape of the emitter.
+    /// </summary>
     public EmitterShape Shape { get; set; }
 
+    /// <summary>
+    /// The x-coordinate of the emitter.
+    /// </summary>
     public float RegionX { get; set; }
 
+    /// <summary>
+    /// The y-coordinate of the emitter.
+    /// </summary>
     public float RegionY { get; set; }
 
+    /// <summary>
+    /// The width (in pixels) of the emitter.
+    /// </summary>
     public float RegionWidth { get; set; } = 64;
 
+    /// <summary>
+    /// The height (in pixels) of the emitter.
+    /// </summary>
     public float RegionHeight { get; set; } = 64;
 
+    /// <summary>
+    /// The angle of the emitter.
+    /// </summary>
     public float Rotation { get; set; }
 
+    /// <summary>
+    /// The sprite that this emitter uses for its particles.
+    /// </summary>
     public UndertaleSprite Sprite { get => _sprite.Resource; set { _sprite.Resource = value; OnPropertyChanged(); } }
 
+    /// <summary>
+    /// The preset textures for the emitter to use.
+    /// </summary>
     public TextureEnum Texture { get; set; }
+
+    // TODO: finish documenting these values.
 
     public float FrameIndex { get; set; }
 
