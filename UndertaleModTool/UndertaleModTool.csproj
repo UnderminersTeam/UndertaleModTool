@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>net10.0-windows</TargetFramework>
         <RollForward>LatestMajor</RollForward>
@@ -27,6 +27,13 @@
       <None Remove="Resources\tabs_right_button.png" />
       <None Remove="Resources\X_Down.png" />
       <None Remove="X.png" />
+      <None Remove="Resources\spr_bubble_message.png" />
+      <None Remove="Resources\spr_bubble_message_left.png" />
+      <None Remove="Resources\spr_flowey.png" />
+      <None Remove="Resources\spr_flowey_big.png" />
+      <None Remove="Resources\spr_flowey_riseanim.gif" />
+      <None Remove="Resources\spr_flowey_unriseanim.gif" />
+      <None Remove="Resources\spr_flowey_wink.png" />
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="Resources\GML.xshd" />
@@ -35,6 +42,13 @@
         <Resource Include="Resources\tabs_right_button.png" />
         <Resource Include="Resources\X.png" />
         <Resource Include="Resources\X_Down.png" />
+        <Resource Include="Resources\spr_bubble_message.png" />
+        <Resource Include="Resources\spr_bubble_message_left.png" />
+        <Resource Include="Resources\spr_flowey.png" />
+        <Resource Include="Resources\spr_flowey_big.png" />
+        <Resource Include="Resources\spr_flowey_riseanim.gif" />
+        <Resource Include="Resources\spr_flowey_unriseanim.gif" />
+        <Resource Include="Resources\spr_flowey_wink.png" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Underanalyzer\Underanalyzer\Underanalyzer.csproj" />
@@ -90,7 +104,48 @@
         </PackageReference>
         <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
         <PackageReference Include="PropertyChanged.Fody" Version="4.1.0" />
-        <PackageReference Include="Microsoft.Windows.Compatibility" Version="10.0.1" />
+        <PackageReference Include="System.AppContext">
+            <Version>4.3.0</Version>
+        </PackageReference>
+        <PackageReference Include="System.Console">
+            <Version>4.3.1</Version>
+        </PackageReference>
+        <PackageReference Include="System.Diagnostics.FileVersionInfo">
+            <Version>4.3.0</Version>
+        </PackageReference>
+        <PackageReference Include="System.Diagnostics.StackTrace">
+            <Version>4.3.0</Version>
+        </PackageReference>
+        <PackageReference Include="System.IO.Compression">
+            <Version>4.3.0</Version>
+        </PackageReference>
+        <PackageReference Include="System.Runtime.Extensions">
+            <Version>4.3.1</Version>
+        </PackageReference>
+        <PackageReference Include="System.Security.Cryptography.Algorithms">
+            <Version>4.3.1</Version>
+        </PackageReference>
+        <PackageReference Include="System.Security.Cryptography.X509Certificates">
+            <Version>4.3.2</Version>
+        </PackageReference>
+        <PackageReference Include="System.Threading.Tasks.Parallel">
+            <Version>4.3.0</Version>
+        </PackageReference>
+        <PackageReference Include="System.Threading.Thread">
+            <Version>4.3.0</Version>
+        </PackageReference>
+        <PackageReference Include="System.Xml.ReaderWriter">
+            <Version>4.3.1</Version>
+        </PackageReference>
+        <PackageReference Include="System.Xml.XmlDocument">
+            <Version>4.3.0</Version>
+        </PackageReference>
+        <PackageReference Include="System.Xml.XPath.XDocument">
+            <Version>4.3.0</Version>
+        </PackageReference>
+        <PackageReference Include="Microsoft.Windows.Compatibility" Version="9.0.4" />
+        <PackageReference Include="WpfAnimatedGif" Version="2.0.2" />
+        <PackageReference Include="XamlAnimatedGif" Version="2.3.1" />
     </ItemGroup>
     <Target Name="AfterResolveReferences">
         <ItemGroup>
@@ -118,5 +173,27 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </Content>
+    </ItemGroup>
+    <ItemGroup>
+      <Compile Update="Properties\Resource1.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Resource1.resx</DependentUpon>
+      </Compile>
+      <Compile Update="Properties\Resources.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Resources.resx</DependentUpon>
+      </Compile>
+    </ItemGroup>
+    <ItemGroup>
+      <EmbeddedResource Update="Properties\Resource1.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Resource1.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Properties\Resources.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
     </ItemGroup>
 </Project>

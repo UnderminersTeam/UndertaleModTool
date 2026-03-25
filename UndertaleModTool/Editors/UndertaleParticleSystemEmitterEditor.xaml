@@ -6,7 +6,10 @@
                        xmlns:local="clr-namespace:UndertaleModTool"
                        xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
                        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                       xmlns:gif ="http://wpfanimatedgif.codeplex.com"
                        mc:Ignorable="d" 
+                       Unloaded="DataUserControl_Unloaded"
+                       DataContextChanged="DataUserControl_DataContextChanged"
                        d:DesignHeight="4500" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleParticleSystemEmitter}">
     <UserControl.Resources>
         <ResourceDictionary>
@@ -88,7 +91,7 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
-        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
+        <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3,3,80,3" ObjectReference="{Binding Name}"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3"
                    Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter},ConverterParameter=2023.6}"
@@ -97,11 +100,11 @@
                    Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter},ConverterParameter=2023.6}"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Emit mode</TextBlock>
-        <local:ComboBoxDark Grid.Row="2" Grid.Column="1" Margin="3"
+        <local:ComboBoxDark Grid.Row="2" Grid.Column="1" Margin="3,3,80,3"
                             ItemsSource="{Binding Source={StaticResource EmitMode}}" SelectedItem="{Binding Mode}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Emit count</TextBlock>
-        <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding EmitCount}"/>
+        <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3,3,80,3" Text="{Binding EmitCount}"/>
 
         <Grid Grid.Row="4" Grid.ColumnSpan="2" Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter},ConverterParameter=2023.8}">
             <Grid.ColumnDefinitions>
@@ -120,7 +123,7 @@
             <CheckBox Grid.Row="0" Grid.Column="1" Margin="3" IsChecked="{Binding EmitRelative}"/>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Delay min|max</TextBlock>
-            <Grid Grid.Row="1" Grid.Column="1">
+            <Grid Grid.Row="1" Grid.Column="1" Margin="0,22,80,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
@@ -130,11 +133,11 @@
             </Grid>
 
             <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Delay measured in:</TextBlock>
-            <local:ComboBoxDark Grid.Row="2" Grid.Column="1" Margin="3"
+            <local:ComboBoxDark Grid.Row="2" Grid.Column="1" Margin="3,3,80,3"
                     ItemsSource="{Binding Source={StaticResource TimeUnitEnum}}" SelectedItem="{Binding DelayUnit}"/>
 
             <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Interval min|max</TextBlock>
-            <Grid Grid.Row="3" Grid.Column="1">
+            <Grid Grid.Row="3" Grid.Column="1" Margin="0,22,80,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
@@ -144,20 +147,20 @@
             </Grid>
 
             <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Interval measured in:</TextBlock>
-            <local:ComboBoxDark Grid.Row="4" Grid.Column="1" Margin="3"
+            <local:ComboBoxDark Grid.Row="4" Grid.Column="1" Margin="3,3,80,3"
                     ItemsSource="{Binding Source={StaticResource TimeUnitEnum}}" SelectedItem="{Binding IntervalUnit}"/>
         </Grid>
 
         <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Distribution</TextBlock>
-        <local:ComboBoxDark Grid.Row="5" Grid.Column="1" Margin="3"
+        <local:ComboBoxDark Grid.Row="5" Grid.Column="1" Margin="3,3,80,3"
                             ItemsSource="{Binding Source={StaticResource DistributionEnum}}" SelectedItem="{Binding Distribution}"/>
 
         <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Shape</TextBlock>
-        <local:ComboBoxDark Grid.Row="6" Grid.Column="1" Margin="3"
+        <local:ComboBoxDark Grid.Row="6" Grid.Column="1" Margin="3,3,80,3"
                             ItemsSource="{Binding Source={StaticResource EmitterShape}}" SelectedItem="{Binding Shape}"/>
 
         <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Region X|Y|Width|Height</TextBlock>
-        <Grid Grid.Row="7" Grid.Column="1">
+        <Grid Grid.Row="7" Grid.Column="1" Margin="0,0,80,23" Grid.RowSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -171,10 +174,10 @@
         </Grid>
 
         <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Rotation</TextBlock>
-        <local:TextBoxDark Grid.Row="8" Grid.Column="1" Margin="3" Text="{Binding Rotation}"/>
+        <local:TextBoxDark Grid.Row="8" Grid.Column="1" Margin="3,3,80,3" Text="{Binding Rotation}"/>
 
         <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Sprite</TextBlock>
-        <local:UndertaleObjectReference Grid.Row="9" Grid.Column="1" Margin="3" ObjectReference="{Binding Sprite}" ObjectType="{x:Type undertale:UndertaleSprite}"/>
+        <local:UndertaleObjectReference Grid.Row="9" Grid.Column="1" Margin="3,3,80,3" ObjectReference="{Binding Sprite}" ObjectType="{x:Type undertale:UndertaleSprite}"/>
 
         <ListView Grid.Row="10" Grid.Column="1" ItemsSource="{Binding Sprite.Textures, Mode=OneWay}" Background="Transparent" BorderThickness="0">
             <ListView.ItemsPanel>
@@ -194,7 +197,7 @@
         </ListView>
 
         <TextBlock Grid.Row="11" Grid.Column="0" Margin="3">Sprite frame index</TextBlock>
-        <local:TextBoxDark Grid.Row="11" Grid.Column="1" Margin="3" Text="{Binding FrameIndex}"/>
+        <local:TextBoxDark Grid.Row="11" Grid.Column="1" Margin="3,3,80,3" Text="{Binding FrameIndex}"/>
 
         <Grid Grid.Row="12" Grid.ColumnSpan="2" Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter},ConverterParameter=2023.4}">
             <Grid.ColumnDefinitions>
@@ -218,23 +221,23 @@
         </Grid>
 
         <TextBlock Grid.Row="13" Grid.Column="0" Margin="3">Texture</TextBlock>
-        <local:ComboBoxDark Grid.Row="13" Grid.Column="1" Margin="3"
+        <local:ComboBoxDark Grid.Row="13" Grid.Column="1" Margin="3,3,80,3"
                             ItemsSource="{Binding Source={StaticResource TextureEnum}}" SelectedItem="{Binding Texture}"/>
 
         <TextBlock Grid.Row="14" Grid.Column="0" Margin="3">Start color</TextBlock>
-        <local:ColorPicker Grid.Row="14" Grid.Column="2" Margin="3" Color="{Binding StartColor}"/>
+        <local:ColorPicker Grid.Row="14" Grid.Column="1" Margin="3,3,80,3" Color="{Binding StartColor}"/>
 
         <TextBlock Grid.Row="15" Grid.Column="0" Margin="3">Middle color</TextBlock>
-        <local:ColorPicker Grid.Row="15" Grid.Column="2" Margin="3" Color="{Binding MidColor}"/>
+        <local:ColorPicker Grid.Row="15" Grid.Column="1" Margin="3,3,80,3" Color="{Binding MidColor}"/>
 
         <TextBlock Grid.Row="16" Grid.Column="0" Margin="3">End color</TextBlock>
-        <local:ColorPicker Grid.Row="16" Grid.Column="2" Margin="3" Color="{Binding EndColor}"/>
+        <local:ColorPicker Grid.Row="16" Grid.Column="1" Margin="3,3,80,3" Color="{Binding EndColor}"/>
 
         <TextBlock Grid.Row="17" Grid.Column="0" Margin="3">Additive color blend</TextBlock>
-        <CheckBox Grid.Row="17" Grid.Column="1" Margin="3" IsChecked="{Binding AdditiveBlend}"/>
+        <CheckBox Grid.Row="17" Grid.Column="1" Margin="3,3,80,3" IsChecked="{Binding AdditiveBlend}"/>
 
         <TextBlock Grid.Row="18" Grid.Column="0" Margin="3">Lifetime min|max</TextBlock>
-        <Grid Grid.Row="18" Grid.Column="1">
+        <Grid Grid.Row="17" Grid.Column="1" Margin="0,22,80,0" Grid.RowSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -244,7 +247,7 @@
         </Grid>
 
         <TextBlock Grid.Row="19" Grid.Column="0" Margin="3">Scale X|Y</TextBlock>
-        <Grid Grid.Row="19" Grid.Column="1">
+        <Grid Grid.Row="18" Grid.Column="1" Margin="0,23,80,0" Grid.RowSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -260,7 +263,7 @@
         </TextBlock>
 
         <TextBlock Grid.Row="21" Grid.Column="0" Margin="3">Size min</TextBlock>
-        <Grid Grid.Row="21" Grid.Column="1">
+        <Grid Grid.Row="20" Grid.Column="1" Margin="0,53,80,0" Grid.RowSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -270,7 +273,7 @@
         </Grid>
 
         <TextBlock Grid.Row="22" Grid.Column="0" Margin="3">Size max</TextBlock>
-        <Grid Grid.Row="22" Grid.Column="1">
+        <Grid Grid.Row="22" Grid.Column="1" Margin="0,0,80,23" Grid.RowSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -280,7 +283,7 @@
         </Grid>
 
         <TextBlock Grid.Row="23" Grid.Column="0" Margin="3">Size increase</TextBlock>
-        <Grid Grid.Row="23" Grid.Column="1">
+        <Grid Grid.Row="23" Grid.Column="1" Margin="0,0,80,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -290,7 +293,7 @@
         </Grid>
 
         <TextBlock Grid.Row="24" Grid.Column="0" Margin="3">Size wiggle</TextBlock>
-        <Grid Grid.Row="24" Grid.Column="1">
+        <Grid Grid.Row="23" Grid.Column="1" Margin="0,24,80,24" Grid.RowSpan="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -300,7 +303,7 @@
         </Grid>
 
         <TextBlock Grid.Row="25" Grid.Column="0" Margin="3">Speed min|max</TextBlock>
-        <Grid Grid.Row="25" Grid.Column="1">
+        <Grid Grid.Row="24" Grid.Column="1" Margin="0,22,80,23" Grid.RowSpan="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -310,7 +313,7 @@
         </Grid>
 
         <TextBlock Grid.Row="26" Grid.Column="0" Margin="3">Speed increase|wiggle</TextBlock>
-        <Grid Grid.Row="26" Grid.Column="1">
+        <Grid Grid.Row="26" Grid.Column="1" Margin="0,0,80,24" Grid.RowSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -320,7 +323,7 @@
         </Grid>
 
         <TextBlock Grid.Row="27" Grid.Column="0" Margin="3">Gravity force|direction</TextBlock>
-        <Grid Grid.Row="27" Grid.Column="1">
+        <Grid Grid.Row="27" Grid.Column="1" Margin="0,0,80,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -330,7 +333,7 @@
         </Grid>
 
         <TextBlock Grid.Row="28" Grid.Column="0" Margin="3">Direction min|max</TextBlock>
-        <Grid Grid.Row="28" Grid.Column="1">
+        <Grid Grid.Row="27" Grid.Column="1" Margin="0,24,80,0" Grid.RowSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -340,7 +343,7 @@
         </Grid>
 
         <TextBlock Grid.Row="29" Grid.Column="0" Margin="3">Direction increase|wiggle</TextBlock>
-        <Grid Grid.Row="29" Grid.Column="1">
+        <Grid Grid.Row="28" Grid.Column="1" Margin="0,23,80,0" Grid.RowSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -350,7 +353,7 @@
         </Grid>
 
         <TextBlock Grid.Row="30" Grid.Column="0" Margin="3">Orientation min|max</TextBlock>
-        <Grid Grid.Row="30" Grid.Column="1">
+        <Grid Grid.Row="30" Grid.Column="1" Margin="0,0,80,24" Grid.RowSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -360,7 +363,7 @@
         </Grid>
 
         <TextBlock Grid.Row="31" Grid.Column="0" Margin="3">Orientation increase|wiggle</TextBlock>
-        <Grid Grid.Row="31" Grid.Column="1">
+        <Grid Grid.Row="31" Grid.Column="1" Margin="0,0,80,22" Grid.RowSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -370,18 +373,31 @@
         </Grid>
 
         <TextBlock Grid.Row="32" Grid.Column="0" Margin="3">Is orientation relative</TextBlock>
-        <CheckBox Grid.Row="32" Grid.Column="1" Margin="3" IsChecked="{Binding OrientationRelative}"/>
+        <CheckBox Grid.Row="32" Grid.Column="1" Margin="3,3,80,3" IsChecked="{Binding OrientationRelative}"/>
 
         <TextBlock Grid.Row="33" Grid.Column="0" Margin="3">Spawn on death</TextBlock>
-        <local:UndertaleObjectReference Grid.Row="33" Grid.Column="1" Margin="3" ObjectReference="{Binding SpawnOnDeath}" ObjectType="{x:Type undertale:UndertaleParticleSystemEmitter}"/>
+        <local:UndertaleObjectReference Grid.Row="33" Grid.Column="1" Margin="3,3,80,3" ObjectReference="{Binding SpawnOnDeath}" ObjectType="{x:Type undertale:UndertaleParticleSystemEmitter}"/>
 
         <TextBlock Grid.Row="34" Grid.Column="0" Margin="3">Spawn on death count</TextBlock>
-        <local:TextBoxDark Grid.Row="34" Grid.Column="1" Margin="3" Text="{Binding SpawnOnDeathCount}"/>
+        <local:TextBoxDark Grid.Row="34" Grid.Column="1" Margin="3,3,80,3" Text="{Binding SpawnOnDeathCount}"/>
 
         <TextBlock Grid.Row="35" Grid.Column="0" Margin="3">Spawn on update</TextBlock>
-        <local:UndertaleObjectReference Grid.Row="35" Grid.Column="1" Margin="3" ObjectReference="{Binding SpawnOnUpdate}" ObjectType="{x:Type undertale:UndertaleParticleSystemEmitter}"/>
+        <local:UndertaleObjectReference Grid.Row="35" Grid.Column="1" Margin="3,3,80,3" ObjectReference="{Binding SpawnOnUpdate}" ObjectType="{x:Type undertale:UndertaleParticleSystemEmitter}"/>
+
+        <Image Margin="0,-1000,15,0" Grid.Column="3" Grid.Row="99" gif:ImageBehavior.AnimatedSource="/Resources/spr_flowey_riseanim.gif"  Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="Flowey"/>
+        <Image Margin="0,-1030,2,0" Grid.Column="3" Grid.Row="99" Source="/Resources/spr_bubble_message.png" Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="Hand" x:Name="FloweyBubble"/>
+        <Label Content="None" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="ParticleEmitObjectLabel"
+                       ToolTip="This is the ID (index) of this asset. It starts from 0."
+                       ToolTipService.InitialShowDelay="200" Margin="0,-1030,0,0" Foreground="Black" Grid.Column="3"
+                       Width="Auto" Grid.Row="99"
+               />
+        <Label Content="ID:" HorizontalAlignment="Right" VerticalAlignment="Top" x:Name="FunnyParticleEmit"
+                       ToolTip="This is the ID (index) of this asset. It starts from 0."
+                       ToolTipService.InitialShowDelay="200" Margin="0,-1030,48,0" Foreground="Black" Grid.Column="3"
+                       Width="Auto" Grid.Row="99"
+               />
 
         <TextBlock Grid.Row="36" Grid.Column="0" Margin="3">Spawn on update count</TextBlock>
-        <local:TextBoxDark Grid.Row="36" Grid.Column="1" Margin="3" Text="{Binding SpawnOnUpdateCount}"/>
+        <local:TextBoxDark Grid.Row="36" Grid.Column="1" Margin="3,3,80,3" Text="{Binding SpawnOnUpdateCount}"/>
     </Grid>
 </local:DataUserControl>
