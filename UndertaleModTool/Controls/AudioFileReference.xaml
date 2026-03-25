@@ -5,10 +5,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UndertaleModTool"
              mc:Ignorable="d" 
-             d:DesignHeight="20" d:DesignWidth="300">
+             d:DesignHeight="20" d:DesignWidth="300" xmlns:strings="clr-namespace:UndertaleModTool.Resources" >
     <UserControl.Resources>
         <local:ContextMenuDark x:Key="contextMenu">
-            <local:MenuItemDark Header="Open in new tab" Click="OpenInNewTabItem_Click"/>
+            <local:MenuItemDark Header="{x:Static strings:Strings.Open_in_new_tab}" Click="OpenInNewTabItem_Click"/>
         </local:ContextMenuDark>
     </UserControl.Resources>
     <Grid>
@@ -32,7 +32,7 @@
             </TextBox.Style>
         </local:TextBoxDark>
         <local:TextBoxDark Grid.Column="1" x:Name="ObjectText" IsReadOnly="True" Cursor="Arrow" AllowDrop="True"
-                           ToolTip="This is an object reference. Drag and drop an object of matching type from the tree on the left to change it!"
+                           ToolTip="{x:Static strings:Strings.This_is_an_object_reference__Drag}"
                            ToolTipService.InitialShowDelay="250"
                            PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" PreviewMouseDoubleClick="TextBox_MouseDoubleClick" PreviewMouseDown="Details_MouseDown">
             <TextBox.Style>
@@ -60,14 +60,14 @@
                         </DataTrigger>
                         <DataTrigger Binding="{Binding AudioID, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="-1">
                             <DataTrigger.Setters>
-                                <Setter Property="Text" Value="(null)"/>
+                                <Setter Property="Text" Value="{x:Static strings:Strings.null1}"/>
                             </DataTrigger.Setters>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
             </TextBox.Style>
         </local:TextBoxDark>
-        <local:ButtonDark Grid.Column="2" Click="Details_Click" MouseDown="Details_MouseDown" Content=" ... " ToolTip="Open referenced object">
+        <local:ButtonDark Grid.Column="2" Click="Details_Click" MouseDown="Details_MouseDown" Content=" ... " ToolTip="{x:Static strings:Strings.Open_referenced_object}">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Style.Triggers>
@@ -78,7 +78,7 @@
                 </Style>
             </Button.Style>
         </local:ButtonDark>
-        <local:ButtonDark Grid.Column="3" Click="Remove_Click" Content=" X " ToolTip="Remove reference">
+        <local:ButtonDark Grid.Column="3" Click="Remove_Click" Content=" X " ToolTip="{x:Static strings:Strings.Remove_reference}">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Style.Triggers>
