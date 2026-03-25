@@ -121,6 +121,12 @@ namespace UndertaleModLib
             while (reader.Position < reader.Length)
             {
                 lastChunk = reader.ReadChars(4);
+                if (lastChunk.Contains('\0'))
+                {
+                    reader.SubmitWarning($"Invalid chunk name found at {reader.Position - 4:x}. " +
+                        "Data file is most likely corrupt. Attempting partial load.");
+                    break;
+                }
                 reader.AllChunkNames.Add(lastChunk);
                 uint length = reader.ReadUInt32();
                 reader.Position += length;
@@ -129,7 +135,7 @@ namespace UndertaleModLib
             reader.Position = startPos;
 
             // Now, parse the chunks
-            while (reader.Position < startPos + Length)
+            foreach (string chunkName in reader.AllChunkNames)
             {
                 UndertaleChunk chunk = reader.ReadUndertaleChunk();
                 if (chunk is not null)
@@ -162,6 +168,11 @@ namespace UndertaleModLib
             while (reader.Position < reader.Length)
             {
                 string chunkName = reader.ReadChars(4);
+                if (chunkName.Contains('\0')) {
+                    reader.SubmitObjectCountingError(new Exception($"Invalid chunk name found at {reader.Position - 4:x}. " +
+                        "Data file is most likely corrupt. Attempting partial load."));
+                    break;
+                }
                 reader.AllChunkNames.Add(chunkName);
                 uint length = reader.ReadUInt32();
                 reader.Position += length;
@@ -180,16 +191,29 @@ namespace UndertaleModLib
             }
 
             // Read object counts for all chunks
-            while (reader.Position < startPos + Length)
+            foreach (string chunkName in reader.AllChunkNames)
             {
-                (uint count, UndertaleChunk chunk) = reader.CountChunkChildObjects();
-                totalCount += count;
-
-                // Don't register a new chunk for GEN8 specifically
-                if (chunk.Name != "GEN8")
+                long prevPosition = reader.Position;
+                try
                 {
-                    Chunks.Add(chunk.Name, chunk);
-                    ChunksTypeDict.Add(chunk.GetType(), chunk);
+                    (uint count, UndertaleChunk chunk) = reader.CountChunkChildObjects();
+                    totalCount += count;
+
+                    // Don't register a new chunk for GEN8 specifically
+                    if (chunk.Name != "GEN8")
+                    {
+                        Chunks.Add(chunk.Name, chunk);
+                        ChunksTypeDict.Add(chunk.GetType(), chunk);
+                    }
+                }
+                catch (Exception e)
+                {
+                    reader.SubmitObjectCountingError(e);
+                    reader.SwitchReaderType(false);
+                    // Safely jump to next chunk
+                    reader.Position = prevPosition + 4;
+                    uint length = reader.ReadUInt32();
+                    reader.Position += length;
                 }
             }
 
