@@ -6,6 +6,11 @@ using Avalonia.Threading;
 
 namespace UndertaleModToolAvalonia;
 
+/// <summary>
+/// This class allows you to filter and transform an input observable collection, providing an output observable collection, which will be kept in sync with the input.
+/// </summary>
+/// <typeparam name="TInput">Type of item in input collection.</typeparam>
+/// <typeparam name="TOutput">Type of item in output collection.</typeparam>
 public class ObservableCollectionView<TInput, TOutput>
 {
     public class CustomObservableCollection<T> : Collection<T>, INotifyCollectionChanged
@@ -159,21 +164,24 @@ public class ObservableCollectionView<TInput, TOutput>
         // TODO: Binary search
         TInput item = (TInput)e.NewItems![0]!;
 
+        int i = 0;
+
+        // Find where in output to insert item
+        while (i < outputIndexToInputIndexMap.Count && outputIndexToInputIndexMap[i] < e.NewStartingIndex)
+            i++;
+
         if (DoesPassFilter(item))
         {
-            int i = 0;
-
-            // Find where in output to insert item
-            while (i < outputIndexToInputIndexMap.Count && outputIndexToInputIndexMap[i] < e.NewStartingIndex)
-                i++;
-
             Output.Insert(i, TransformItem(item));
             outputIndexToInputIndexMap.Insert(i, e.NewStartingIndex);
             i++;
+        }
 
-            // Increase all indexes after
-            while (i < outputIndexToInputIndexMap.Count)
-                outputIndexToInputIndexMap[i]++;
+        // Increase all indexes after
+        while (i < outputIndexToInputIndexMap.Count)
+        {
+            outputIndexToInputIndexMap[i]++;
+            i++;
         }
     }
 
@@ -231,26 +239,8 @@ public class ObservableCollectionView<TInput, TOutput>
 
     private void OnInputMove(NotifyCollectionChangedEventArgs e)
     {
-        // TODO: Binary search
-        int? moveFrom = null;
-        int? moveTo = null;
-
-        for (int i = 0; i < outputIndexToInputIndexMap.Count; i++)
-        {
-            if (outputIndexToInputIndexMap[i] >= e.NewStartingIndex)
-                moveTo = i;
-            else if (outputIndexToInputIndexMap[i] == e.OldStartingIndex)
-                moveFrom = i;
-
-            if (moveFrom is not null && moveTo is not null)
-                break;
-        }
-
-        if (moveFrom is not null)
-        {
-            moveTo ??= outputIndexToInputIndexMap.Count;
-            Output.Move((int)moveFrom, (int)moveTo);
-        }
+        OnInputRemove(e);
+        OnInputAdd(e);
     }
 
     private void OnInputReset()
