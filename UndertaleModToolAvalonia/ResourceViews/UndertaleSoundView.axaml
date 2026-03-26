@@ -1,0 +1,71 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
+             xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.UndertaleSoundView"
+             x:DataType="l:UndertaleSoundViewModel">
+    <UserControl.Resources>
+        <l:VersionCompareConverter x:Key="VersionCompareConverter" />
+    </UserControl.Resources>
+    
+    <ScrollViewer>
+        <StackPanel Classes="PaddedProperties">
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                <Label>Name</Label>
+                <l:UndertaleStringReferenceView Reference="{Binding Sound.Name}" />
+
+                <Label>Flags</Label>
+                <l:FlagsBoxView Value="{Binding Sound.Flags}" />
+
+                <Label>Type</Label>
+                <l:UndertaleStringReferenceView Reference="{Binding Sound.Type}" />
+
+                <Label>File</Label>
+                <l:UndertaleStringReferenceView Reference="{Binding Sound.File}" />
+
+                <Label>Effects</Label>
+                <TextBox Text="{Binding Sound.Effects}" />
+
+                <Label>Volume</Label>
+                <TextBox Text="{Binding Sound.Volume}" />
+
+                <Label>Pitch</Label>
+                <TextBox Text="{Binding Sound.Pitch}" />
+
+                <Label>Preload (old audio system)</Label>
+                <CheckBox IsChecked="{Binding Sound.Preload}" />
+
+                <Label>Audio group</Label>
+                <l:UndertaleResourceReferenceView Reference="{Binding Sound.AudioGroup}" ReferenceType="undertalem:UndertaleAudioGroup" />
+            </Grid>
+
+            <StackPanel IsVisible="{Binding IsBuiltinAudioGroup}">
+                <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                    <Label>Embedded audio</Label>
+                    <l:UndertaleResourceReferenceView Reference="{Binding Sound.AudioFile}" ReferenceType="undertalem:UndertaleEmbeddedAudio" />
+                </Grid>
+
+                <StackPanel Orientation="Horizontal">
+                    <Button Command="{Binding PlayAudio}">Play audio</Button>
+                    <Button Command="{Binding StopAudio}">Stop audio</Button>
+                </StackPanel>
+            </StackPanel>
+
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" IsVisible="{Binding !IsBuiltinAudioGroup}">
+                <Label>Embedded audio ID on audio group file</Label>
+                <TextBox Text="{Binding Sound.AudioID}" />
+            </Grid>
+
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
+                  IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
+                  Converter={StaticResource VersionCompareConverter},
+                  ConverterParameter=GE2024.6}">
+                <Label>Audio length</Label>
+                <TextBox Text="{Binding Sound.AudioLength}" />
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
