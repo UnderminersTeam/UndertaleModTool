@@ -44,7 +44,7 @@ jobs:
         cp ./SCRIPTS.md ./${{ matrix.os }}
         cp ./LICENSE.txt ./${{ matrix.os }}
     - name: Upload ${{ matrix.os }} GUI
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: GUI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}
         path: ${{ matrix.os }}
@@ -89,7 +89,7 @@ jobs:
         cp -r ./UndertaleModTool/Scripts/ ./CLI-${{ matrix.os }}/Scripts/
         rm ./CLI-${{ matrix.os }}/Underanalyzer.pdb
     - name: Upload ${{ matrix.os }} CLI
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: CLI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}
         path: CLI-${{ matrix.os }}
