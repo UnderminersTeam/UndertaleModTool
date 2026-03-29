@@ -82,5 +82,51 @@ public class ObservableCollectionViewTest
 
         input.Move(3, 1);
         Assert.Equal(output, ["A", "C", "E"]);
+
+        // Add while filtered and passing
+        view.SetFilter(x => x == "B");
+        input.Add("B");
+        Assert.Equal(output, ["B", "B"]);
+
+        // Add while filtered and not passing
+        input.Add("F");
+        Assert.Equal(output, ["B", "B"]);
+
+        view.SetFilter(x => true);
+        Assert.Equal(output, ["A", "B", "C", "D", "E", "B", "F"]);
+
+        // Remove while filtered and passing
+        view.SetFilter(x => x == "B");
+        input.RemoveAt(5);
+        Assert.Equal(output, ["B"]);
+
+        // Remove while filtered and not passing
+        input.Remove("F");
+        Assert.Equal(output, ["B"]);
+
+        view.SetFilter(x => true);
+        Assert.Equal(output, ["A", "B", "C", "D", "E"]);
+
+        // Replace yes old, yes new
+        view.SetFilter(x => x == "B" || x == "b");
+        input[1] = "b";
+        Assert.Equal(output, ["b"]);
+
+        // Replace yes old, no new
+        view.SetFilter(x => x == "b");
+        input[1] = "B";
+        Assert.Equal(output, []);
+
+        // Replace no old, yes new
+        input[1] = "b";
+        Assert.Equal(output, ["b"]);
+
+        // Replace no old, no new
+        view.SetFilter(x => x == "C");
+        input[1] = "B";
+        Assert.Equal(output, ["C"]);
+
+        view.SetFilter(x => true);
+        Assert.Equal(output, ["A", "B", "C", "D", "E"]);
     }
 }

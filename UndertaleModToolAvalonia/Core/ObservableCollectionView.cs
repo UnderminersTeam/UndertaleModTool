@@ -161,14 +161,13 @@ public class ObservableCollectionView<TInput, TOutput>
 
     private void OnInputAdd(NotifyCollectionChangedEventArgs e)
     {
-        // TODO: Binary search
         TInput item = (TInput)e.NewItems![0]!;
 
-        int i = 0;
+        // Find where in output to insert
+        int i = outputIndexToInputIndexMap.BinarySearch(e.NewStartingIndex);
 
-        // Find where in output to insert item
-        while (i < outputIndexToInputIndexMap.Count && outputIndexToInputIndexMap[i] < e.NewStartingIndex)
-            i++;
+        if (i < 0)
+            i = ~i;
 
         if (DoesPassFilter(item))
         {
@@ -187,58 +186,63 @@ public class ObservableCollectionView<TInput, TOutput>
 
     private void OnInputRemove(NotifyCollectionChangedEventArgs e)
     {
-        // TODO: Binary search
-        for (int i = 0; i < outputIndexToInputIndexMap.Count; i++)
+        // Find where in output to remove
+        int i = outputIndexToInputIndexMap.BinarySearch(e.OldStartingIndex);
+        if (i >= 0)
         {
-            if (outputIndexToInputIndexMap[i] == e.OldStartingIndex)
-            {
-                Output.RemoveAt(i);
-                outputIndexToInputIndexMap.RemoveAt(i);
-                i--;
-            }
-            else if (outputIndexToInputIndexMap[i] >= e.OldStartingIndex)
-                outputIndexToInputIndexMap[i]--;
+            Output.RemoveAt(i);
+            outputIndexToInputIndexMap.RemoveAt(i);
+        }
+        else
+        {
+            // If not found, then get index after where it would be
+            i = ~i;
+        }
+
+        // Decrease all indexes after
+        while (i < outputIndexToInputIndexMap.Count)
+        {
+            outputIndexToInputIndexMap[i]--;
+            i++;
         }
     }
 
     private void OnInputReplace(NotifyCollectionChangedEventArgs e)
     {
-        // TODO: Binary search
         TInput item = (TInput)e.NewItems![0]!;
         bool passes = DoesPassFilter(item);
 
-        for (int i = 0; i < outputIndexToInputIndexMap.Count; i++)
+        // Find where item is in output
+        int i = outputIndexToInputIndexMap.BinarySearch(e.OldStartingIndex);
+        if (i >= 0)
         {
+            // If found, replace it if passes, remove it if not
             if (passes)
             {
-                if (outputIndexToInputIndexMap[i] == e.OldStartingIndex)
-                {
-                    Output[i] = TransformItem(item);
-                    break;
-                }
-                else if (outputIndexToInputIndexMap[i] > e.OldStartingIndex)
-                {
-                    Output.Insert(i, TransformItem(item));
-                    outputIndexToInputIndexMap.Insert(i, e.OldStartingIndex);
-                    break;
-                }
+                Output[i] = TransformItem(item);
             }
-            if (!passes)
+            else
             {
-                if (outputIndexToInputIndexMap[i] == e.OldStartingIndex)
-                {
-                    Output.RemoveAt(i);
-                    outputIndexToInputIndexMap.RemoveAt(i);
-                    break;
-                }
-                else if (outputIndexToInputIndexMap[i] > e.OldStartingIndex)
-                    break;
+                Output.RemoveAt(i);
+                outputIndexToInputIndexMap.RemoveAt(i);
+            }
+        }
+        else
+        {
+            // If not found, insert it if it passes
+            i = ~i;
+
+            if (passes)
+            {
+                Output.Insert(i, TransformItem(item));
+                outputIndexToInputIndexMap.Insert(i, e.OldStartingIndex);
             }
         }
     }
 
     private void OnInputMove(NotifyCollectionChangedEventArgs e)
     {
+        // TODO: Actually call Move().
         OnInputRemove(e);
         OnInputAdd(e);
     }
