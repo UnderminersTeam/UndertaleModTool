@@ -44,7 +44,7 @@
         <NativeMenuBar DockPanel.Dock="Top" />
         
         <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,auto">
-            <TextBox Grid.Column="0" Text="{Binding CommandTextBoxText}" KeyDown="CommandTextBox_KeyDown" />
+            <TextBox Grid.Column="0" Name="CommandTextBox" Text="{Binding CommandTextBoxText}" AcceptsReturn="True" />
             <Label Grid.Column="1" Content="{Binding TabSelectedResourceIdString}"
                    ToolTip.Tip="This is an ID (index) of the currently open asset, item, or object. It starts from 0."/>
         </Grid>

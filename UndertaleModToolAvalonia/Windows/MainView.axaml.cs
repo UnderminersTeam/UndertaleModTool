@@ -85,6 +85,7 @@ public partial class MainView : UserControl, IView
         };
 
         MainTreeDataGrid.AddHandler(TreeDataGrid.PointerReleasedEvent, MainTreeDataGrid_PointerReleased_HandledEventsToo, handledEventsToo: true);
+        CommandTextBox.AddHandler(TextBox.KeyDownEvent, CommandTextBox_KeyDown_Tunnel, RoutingStrategies.Tunnel);
     }
 
     private void FilterTextBox_TextChanged(object? sender, TextChangedEventArgs e)
@@ -426,11 +427,12 @@ public partial class MainView : UserControl, IView
         }
     }
 
-    private async void CommandTextBox_KeyDown(object? sender, KeyEventArgs e)
+    private async void CommandTextBox_KeyDown_Tunnel(object? sender, KeyEventArgs e)
     {
         if (DataContext is MainViewModel vm)
-            if (e.Key == Key.Enter)
+            if (e.Key == Key.Enter && !e.KeyModifiers.HasFlag(KeyModifiers.Shift))
             {
+                e.Handled = true;
                 object? result = await vm.Scripting.RunScript(vm.CommandTextBoxText);
                 vm.CommandTextBoxText = result?.ToString() ?? "";
             }
