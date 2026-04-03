@@ -418,9 +418,9 @@ public class RoomRenderer
                     // TODO: Only clip in direction of tiling
                     Canvas.ClipRect(new SKRect(0, 0, c.RoomWidth, c.RoomHeight));
                 }
-                Canvas.Translate(x + c.TargetX, y + c.TargetY);
+                Canvas.Translate(x, y);
                 Canvas.Scale(c.ScaleX, c.ScaleY);
-                Canvas.DrawImage(c.Image, 0, 0, skPaint);
+                Canvas.DrawImage(c.Image, SKRect.Create(c.TargetX, c.TargetY, c.TargetWidth, c.TargetHeight), skPaint);
                 Canvas.Restore();
             }
         }
@@ -449,7 +449,7 @@ public class RoomRenderer
         Canvas.RotateDegrees(c.Rotation);
         Canvas.Scale(c.ScaleX, c.ScaleY);
 
-        Canvas.DrawImage(c.Image, -c.OriginX + c.TargetX, -c.OriginY + c.TargetY, new SKPaint()
+        Canvas.DrawImage(c.Image, SKRect.Create(-c.OriginX + c.TargetX, -c.OriginY + c.TargetY, c.TargetWidth, c.TargetHeight), new SKPaint()
         {
             ColorFilter = SKColorFilter.CreateBlendMode(UndertaleColor.ToColor(c.Color).ToSKColor(), SKBlendMode.Modulate),
         });
@@ -469,7 +469,7 @@ public class RoomRenderer
         Canvas.RotateDegrees(c.Rotation);
         Canvas.Scale(c.ScaleX, c.ScaleY);
 
-        Canvas.DrawImage(c.Image, -c.OriginX + c.TargetX, -c.OriginY + c.TargetY, new SKPaint()
+        Canvas.DrawImage(c.Image, SKRect.Create(-c.OriginX + c.TargetX, -c.OriginY + c.TargetY, c.TargetWidth, c.TargetHeight), new SKPaint()
         {
             ColorFilter = SKColorFilter.CreateBlendMode(UndertaleColor.ToColor(c.Color).ToSKColor(), SKBlendMode.Modulate),
         });

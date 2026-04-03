@@ -202,8 +202,7 @@ public class SKImageViewer : Control
 
                     if (image is not null)
                     {
-                        // TODO: TargetWidth/TargetHeight
-                        canvas.DrawImage(image, texturePageItem.TargetX, texturePageItem.TargetY);
+                        canvas.DrawImage(image, SKRect.Create(texturePageItem.TargetX, texturePageItem.TargetY, texturePageItem.TargetWidth, texturePageItem.TargetHeight));
                     }
                 }
             }
@@ -232,7 +231,7 @@ public class SKImageViewer : Control
                     }
                 }
 
-                SKImage image = SkiaSharp.SKImage.FromPixelCopy(new SKImageInfo(maskEntry.Width, maskEntry.Height, SKColorType.Gray8), pixels);
+                SKImage image = SKImage.FromPixelCopy(new SKImageInfo(maskEntry.Width, maskEntry.Height, SKColorType.Gray8), pixels);
                 canvas.DrawImage(image, 0, 0);
             }
         }

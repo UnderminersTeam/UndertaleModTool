@@ -85,8 +85,7 @@ public static class ImportExport
         if (image is null)
             throw new InvalidOperationException();
 
-        // TODO: TargetWidth/TargetHeight
-        canvas.DrawImage(image, texturePageItem.TargetX, texturePageItem.TargetY);
+        canvas.DrawImage(image, SKRect.Create(texturePageItem.TargetX, texturePageItem.TargetY, texturePageItem.TargetWidth, texturePageItem.TargetHeight));
 
         bool result = bitmap.Encode(stream, SKEncodedImageFormat.Png, 100);
         if (!result)
