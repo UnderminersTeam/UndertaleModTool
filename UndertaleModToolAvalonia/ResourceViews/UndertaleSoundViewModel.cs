@@ -61,6 +61,6 @@ public partial class UndertaleSoundViewModel : IUndertaleResourceViewModel
 
     void UpdateIsBuiltinAudioGroup()
     {
-        IsBuiltinAudioGroup = (MainVM.Data!.AudioGroups.IndexOf(Sound.AudioGroup) == MainVM.Data!.GetBuiltinSoundGroupID());
+        IsBuiltinAudioGroup = Sound.AudioGroup is null || (MainVM.Data!.AudioGroups.IndexOf(Sound.AudioGroup) == MainVM.Data!.GetBuiltinSoundGroupID());
     }
 }

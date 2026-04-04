@@ -48,7 +48,7 @@
                     <l:UndertaleResourceReferenceView Reference="{Binding Sound.AudioFile}" ReferenceType="undertalem:UndertaleEmbeddedAudio" />
                 </Grid>
 
-                <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal" IsEnabled="{Binding !!Sound.AudioFile}">
                     <Button Command="{Binding PlayAudio}">Play audio</Button>
                     <Button Command="{Binding StopAudio}">Stop audio</Button>
                 </StackPanel>
