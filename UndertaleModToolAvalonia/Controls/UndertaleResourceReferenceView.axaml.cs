@@ -70,6 +70,10 @@ public partial class UndertaleResourceReferenceView : UserControl
         }
     }
 
+    private void TextBox_DoubleTapped(object? sender, TappedEventArgs e) {
+        Open();
+    }
+
     public async void Add()
     {
         if (AddFunc is not null)
