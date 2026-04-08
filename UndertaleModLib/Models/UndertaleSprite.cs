@@ -1095,8 +1095,10 @@ public class UndertaleSpineTextureEntry : UndertaleObject, IDisposable
         if (reader.undertaleData.IsVersionAtLeast(2023, 1))
             reader.Position += 4; // "TextureEntryLength"
         else
-            reader.Position += (uint)reader.ReadInt32(); // "TexBlob"
-
+        {
+            var texBlobLength = (uint)reader.ReadInt32(); // "TexBlob"
+            reader.Position += texBlobLength;
+        }
         return 0;
     }
 
