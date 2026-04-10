@@ -200,7 +200,10 @@ public class GlobalDecompileContext : IGameContext
         Builtins ??= (Data.BuiltinList ??= new BuiltinList(Data));
 
         // Initialize code builder if not already done
-        CodeBuilder = new CodeBuilder(this);
+        if (CodeBuilder is null || forceReloadAssets)
+        {
+            CodeBuilder = new CodeBuilder(this);
+        }
 
         // Reload asset lists if necessary
         if (forceReloadAssets || _assetIdLookup is null || _scriptIdLookup is null)

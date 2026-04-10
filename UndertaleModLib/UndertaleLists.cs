@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using UndertaleModLib.Models;
-using UndertaleModLib.Util;
 
 namespace UndertaleModLib
 {
@@ -354,7 +353,7 @@ namespace UndertaleModLib
             // Write all pointers
             foreach (T obj in this)
             {
-                writer.WriteUndertaleObjectPointer<T>(obj);
+                writer.WriteUndertaleObjectPointer(obj);
             }
 
             // Write blobs, if necessary for the given type
@@ -439,7 +438,9 @@ namespace UndertaleModLib
                         if (reader.undertaleData.IsGameMaker2())
                         {
                             if (!reader.undertaleData.IsVersionAtLeast(2024, 11))
+                            {
                                 reader.undertaleData.SetGMS2Version(2024, 11);
+                            }
                         }
                         realCount--;
                     }
@@ -454,7 +455,7 @@ namespace UndertaleModLib
             // Advance to start of first object (particularly, if blobs exist)
             if (realCount > 0)
             {
-                T firstItem = this.First(i => i is not null);
+                T firstItem = this.First(obj => obj is not null);
                 uint pos = reader.GetAddressForUndertaleObject(firstItem);
                 if (reader.AbsPosition != pos)
                 {
@@ -478,8 +479,10 @@ namespace UndertaleModLib
                 {
                     T obj = this[(int)j];
                     if (obj is null)
+                    {
                         continue;
-                    
+                    }
+
                     // Unserialize pre-padding, if this is a type that requires it
                     if (t.IsAssignableTo(typeof(PrePaddedObject)))
                     {
@@ -510,7 +513,7 @@ namespace UndertaleModLib
         public static uint UnserializeChildObjectCount(UndertaleReader reader)
         {
             // Read base object count; short-circuit if there's no objects
-            uint count = reader.ReadUInt32(), pointerCount = count;
+            uint count = reader.ReadUInt32();
             if (count == 0)
             {
                 return 0;
@@ -528,13 +531,17 @@ namespace UndertaleModLib
                     if (reader.undertaleData.IsGameMaker2())
                     {
                         if (!reader.undertaleData.IsVersionAtLeast(2024, 11))
+                        {
                             reader.undertaleData.SetGMS2Version(2024, 11);
+                        }
                     }
                     else
                     {
-                        reader.SubmitWarning("Null pointers found in pointer list on file built with GMS pre-2!");
+                        reader.SubmitWarning("Null pointers found in pointer list on file built with pre-GMS2!");
                     }
-                    i--; count--;
+
+                    i--;
+                    count--;
                     continue;
                 }
                 pointers[i] = pointer;

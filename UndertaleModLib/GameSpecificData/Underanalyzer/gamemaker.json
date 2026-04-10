@@ -543,6 +543,32 @@
         "network_config_websocket_protocol": 5,
         "network_config_enable_multicast": 6,
         "network_config_disable_multicast": 7
+      },
+      "Constant.ExternalCallType": {
+        "dll_cdecl": 0,
+        "dll_stdcall": 1
+      },
+      "Constant.ExternalArgumentType": {
+        "ty_real": 0,
+        "ty_string": 1
+      },
+      "Constant.BuiltInTimeSourceType": {
+        "time_source_global": 0,
+        "time_source_game": 1
+      },
+      "Constant.TimeSourceUnitType": {
+        "time_source_units_seconds": 0,
+        "time_source_units_frames": 1
+      },   
+      "Constant.TimeSourceExpiryType": {
+        "time_source_expire_nearest": 0,
+        "time_source_expire_after": 1
+      },
+      "Constant.TimeSourceStateType": {
+        "time_source_state_initial": 0,
+        "time_source_state_active": 1,
+        "time_source_state_paused": 2,
+        "time_source_state_stopped": 3
       }
     },
     "General": {
@@ -1306,11 +1332,75 @@
       "vertex_colour": [ null, "Constant.Color", null ],
       "vertex_format_add_custom": [ "Constant.VertexType", "Constant.VertexUsage" ],
       "ds_exists": [ null, "Constant.DsType" ],
-      "audio_effect_create": [ "Enum.AudioEffectType" ]
+      "audio_effect_create": [ "Enum.AudioEffectType" ],
+      "external_define": {
+        "MacroType": "Union",
+        "Macros": [
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ],
+          [ null, null, "Constant.ExternalCallType", "Constant.ExternalArgumentType", null, "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType", "Constant.ExternalArgumentType" ]
+        ]
+      },
+      "call_later": {
+        "MacroType": "Union",
+        "Macros": [
+          [ null, "Constant.TimeSourceUnitType", null ],
+          [ null, "Constant.TimeSourceUnitType", null, "Bool" ]
+        ]
+      },
+      "time_source_create": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Constant.BuiltInTimeSourceType", null, "Constant.TimeSourceUnitType", null ],
+          [ "Constant.BuiltInTimeSourceType", null, "Constant.TimeSourceUnitType", null, null ],
+          [ "Constant.BuiltInTimeSourceType", null, "Constant.TimeSourceUnitType", null, null, null ],
+          [ "Constant.BuiltInTimeSourceType", null, "Constant.TimeSourceUnitType", null, null, null, "Constant.TimeSourceExpiryType" ]
+        ]
+      },
+      "time_source_destroy": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Constant.BuiltInTimeSourceType" ],
+          [ "Constant.BuiltInTimeSourceType", "Bool" ]
+        ]
+      },
+      "time_source_start": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_stop": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_pause": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_resume": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_reconfigure": {
+        "MacroType": "Union",
+        "Macros": [
+          [ "Constant.BuiltInTimeSourceType", null, "Constant.TimeSourceUnitType", null ],
+          [ "Constant.BuiltInTimeSourceType", null, "Constant.TimeSourceUnitType", null, null ],
+          [ "Constant.BuiltInTimeSourceType", null, "Constant.TimeSourceUnitType", null, null, null ],
+          [ "Constant.BuiltInTimeSourceType", null, "Constant.TimeSourceUnitType", null, null, null, "Constant.TimeSourceExpiryType" ]
+        ]
+      },
+      "time_source_reset": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_get_children": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_get_parent": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_get_period": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_get_reps_completed": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_get_reps_remaining": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_get_state": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_get_time_remaining": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_get_units": [ "Constant.BuiltInTimeSourceType" ],
+      "time_source_exists": [ "Constant.BuiltInTimeSourceType" ]
     },
     "FunctionReturn": {
       "draw_getpixel": "Constant.Color",
-      "draw_getpixel_ext": "Constant.Color"
+      "draw_getpixel_ext": "Constant.Color",
+      "time_source_get_state": "Constant.TimeSourceStateType",
+      "time_source_get_units": "Constant.TimeSourceUnitType"
     }
   },
   "CodeEntryNames": {

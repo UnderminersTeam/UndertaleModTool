@@ -107,9 +107,10 @@ public class UndertaleBackground : UndertaleNamedResource, IDisposable
     public uint GMS2TileCount { get; set; } = 1024;
 
     /// <summary>
-    /// TODO: Functionality currently unknown. Game Maker Studio 2 only.
+    /// Exported sprite index, if the background's corresponding sprite was marked to still be exported.
+    /// Will be either 0 or -1 (depending on GM version) when the sprite is not exported, which makes this a bit ambiguous.
     /// </summary>
-    public uint GMS2UnknownAlwaysZero { get; set; } = 0;
+    public int GMS2ExportedSpriteIndex { get; set; } = 0;
 
     /// <summary>
     /// The time for each frame in microseconds. Game Maker Studio 2 only.
@@ -120,6 +121,16 @@ public class UndertaleBackground : UndertaleNamedResource, IDisposable
     /// All tile ids of this tileset. Game Maker Studio 2 only.
     /// </summary>
     public List<TileID> GMS2TileIds { get; set; } = new List<TileID>();
+
+    /// <remarks>
+    /// GM 2024.14.1+ only.
+    /// </remarks>
+    public uint GMS2TileSeparationX { get; set; } = 0;
+
+    /// <remarks>
+    /// GM 2024.14.1+ only.
+    /// </remarks>
+    public uint GMS2TileSeparationY { get; set; } = 0;
 
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
@@ -134,12 +145,17 @@ public class UndertaleBackground : UndertaleNamedResource, IDisposable
             writer.Write(GMS2UnknownAlways2);
             writer.Write(GMS2TileWidth);
             writer.Write(GMS2TileHeight);
+            if (writer.undertaleData.IsVersionAtLeast(2024, 14, 1))
+            {
+                writer.Write(GMS2TileSeparationX);
+                writer.Write(GMS2TileSeparationY);
+            }
             writer.Write(GMS2OutputBorderX);
             writer.Write(GMS2OutputBorderY);
             writer.Write(GMS2TileColumns);
             writer.Write(GMS2ItemsPerTileCount);
             writer.Write(GMS2TileCount);
-            writer.Write(GMS2UnknownAlwaysZero);
+            writer.Write(GMS2ExportedSpriteIndex);
             writer.Write(GMS2FrameLength);
             if (GMS2TileIds.Count != GMS2TileCount * GMS2ItemsPerTileCount)
                 throw new UndertaleSerializationException("Bad tile list length, should be tile count * frame count");
@@ -161,12 +177,17 @@ public class UndertaleBackground : UndertaleNamedResource, IDisposable
             GMS2UnknownAlways2 = reader.ReadUInt32();
             GMS2TileWidth = reader.ReadUInt32();
             GMS2TileHeight = reader.ReadUInt32();
+            if (reader.undertaleData.IsVersionAtLeast(2024, 14, 1))
+            {
+                GMS2TileSeparationX = reader.ReadUInt32();
+                GMS2TileSeparationY = reader.ReadUInt32();
+            }
             GMS2OutputBorderX = reader.ReadUInt32();
             GMS2OutputBorderY = reader.ReadUInt32();
             GMS2TileColumns = reader.ReadUInt32();
             GMS2ItemsPerTileCount = reader.ReadUInt32();
             GMS2TileCount = reader.ReadUInt32();
-            GMS2UnknownAlwaysZero = reader.ReadUInt32();
+            GMS2ExportedSpriteIndex = reader.ReadInt32();
             GMS2FrameLength = reader.ReadInt64();
             GMS2TileIds = new List<TileID>((int)GMS2TileCount * (int)GMS2ItemsPerTileCount);
             for (int i = 0; i < GMS2TileCount * GMS2ItemsPerTileCount; i++)

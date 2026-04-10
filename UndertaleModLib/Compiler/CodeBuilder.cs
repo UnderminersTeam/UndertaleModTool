@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Underanalyzer;
 using Underanalyzer.Compiler;
 using Underanalyzer.Compiler.Bytecode;
@@ -16,9 +17,24 @@ internal class CodeBuilder : ICodeBuilder
     // Data being used with this code builder.
     private readonly GlobalDecompileContext _globalContext;
 
+    // Lookup for variables.
+    private readonly Dictionary<(UndertaleString, UndertaleInstruction.InstanceType), UndertaleVariable> _variableLookup;
+
     public CodeBuilder(GlobalDecompileContext globalContext)
     {
         _globalContext = globalContext;
+
+        // Make variable and function lookups (to not rely on O(n) searches)
+        IList<UndertaleVariable> variables = _globalContext.Data.Variables;
+        _variableLookup = new(variables.Count);
+        foreach (UndertaleVariable v in variables)
+        {
+            if (v is null)
+            {
+                continue;
+            }
+            _variableLookup.TryAdd((v.Name, v.InstanceType), v);
+        }
     }
 
     /// <summary>
@@ -262,8 +278,18 @@ internal class CodeBuilder : ICodeBuilder
                 // Register/define non-local variable, and update variable on instruction immediately
                 _globalContext.CurrentCompileGroup.RegisterNonLocalVariable(variableName);
                 UndertaleString nameString = _globalContext.CurrentCompileGroup.MakeString(variableName, out int nameStringId);
-                utInstruction.ValueVariable = _globalContext.Data.Variables.EnsureDefined(
-                    nameString, nameStringId, (UndertaleInstruction.InstanceType)variableInstanceType, isBuiltin, _globalContext.Data);
+                UndertaleInstruction.InstanceType actualInstType = 
+                    _globalContext.Data.Variables.CalculateInstType((UndertaleInstruction.InstanceType)variableInstanceType, isBuiltin, _globalContext.Data);
+                if (_variableLookup.TryGetValue((nameString, actualInstType), out UndertaleVariable existingVariable))
+                {
+                    utInstruction.ValueVariable = existingVariable;
+                }
+                else
+                {
+                    UndertaleVariable newVariable = _globalContext.Data.Variables.Define(nameString, nameStringId, actualInstType, isBuiltin, _globalContext.Data);
+                    _variableLookup.Add((nameString, actualInstType), newVariable);
+                    utInstruction.ValueVariable = newVariable;
+                }
             }
 
             // Update other parts of instruction

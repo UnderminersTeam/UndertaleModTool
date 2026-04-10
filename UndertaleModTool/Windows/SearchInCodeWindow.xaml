@@ -15,6 +15,7 @@
             <MenuItem Header="Copy" Command="Copy"/>
             <MenuItem Header="Copy all" Click="MenuItemCopyAll_Click"/>
         </local:ContextMenuDark>
+        <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
     </Window.Resources>
     <DockPanel>
         <StatusBar DockPanel.Dock="Bottom" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
@@ -33,6 +34,8 @@
             <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,5,0,0">
                 <CheckBox Name="CaseSensitiveCheckBox" Content="Case sensitive" Height="15" Margin="0,0,5,0"/>
                 <CheckBox Name="RegexSearchCheckBox" Content="Regex search" Height="15" Margin="0,0,5,0"/>
+                <CheckBox Name="MultilineRegexCheckBox" Content="Multiline regex" Height="15" Margin="0,0,5,0"
+                          Visibility="{Binding IsChecked, ElementName=RegexSearchCheckBox, Converter={StaticResource BoolToVisConverter}}"/>
                 <CheckBox Name="InAssemblyCheckBox" Content="In assembly" Height="15" Margin="0,0,12,0"/>
             </StackPanel>
             <Expander Name="FilterByNameExpander" Grid.Row="2" Margin="0,0,0,6" Header="Filter by code name" IsExpanded="False">
@@ -62,6 +65,7 @@
                             </Trigger>
                         </Style.Triggers>
                         <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_MouseDoubleClick"/>
+                        <EventSetter Event="PreviewMouseDown" Handler="ListViewItem_PreviewMouseDown"/>
                         <EventSetter Event="KeyDown" Handler="ListViewItem_KeyDown"/>
                         <Setter Property="FontFamily" Value="Consolas"/>
                         <Setter Property="ContextMenu" Value="{StaticResource ListViewItemContextMenu}"/>
