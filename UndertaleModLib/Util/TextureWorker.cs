@@ -95,6 +95,7 @@ namespace UndertaleModLib.Util
             if (includePadding)
             {
                 // Based on a benchmark, Extent is faster than creating a new image and using Composite
+                image.Compose = CompositeOperator.Copy;
                 image.Extent(new MagickGeometry(-texPageItem.TargetX, -texPageItem.TargetY, (uint)exportWidth, (uint)exportHeight), MagickColors.Transparent);
             }
 
