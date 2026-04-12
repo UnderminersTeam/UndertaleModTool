@@ -286,7 +286,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("matrix_stack_clear", 0);
         DefineFunction("matrix_stack_top", 0);
         DefineFunction("matrix_stack_is_empty", 0);
-        if (gms2)
+        if (!gms2)
         {
             DefineFunction("d3d_start", 0);
             DefineFunction("d3d_end", 0);
@@ -374,10 +374,8 @@ public class BuiltinList : IBuiltins
             DefineFunction("d3d_light_define_direction", 5);
             DefineFunction("d3d_light_define_point", 6);
             DefineFunction("d3d_light_enable", 2);
+
             DefineFunction("d3d_set_lighting", 1);
-        }
-        if (!gms2)
-        {
             DefineFunction("action_path_old", 3);
             DefineFunction("action_set_sprite", 2);
             DefineFunction("action_draw_font", 1);
