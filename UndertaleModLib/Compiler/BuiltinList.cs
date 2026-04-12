@@ -3837,11 +3837,10 @@ public class BuiltinList : IBuiltins
         Constants["asset_sprite"] = 1.0;
         Constants["asset_sound"] = 2.0;
         Constants["asset_room"] = 3.0;
-        if (!gms2)
-        {
-            Constants["asset_background"] = 4.0;
+        if (gms2)
             Constants["asset_tiles"] = 9.0;
-        }
+        else
+            Constants["asset_background"] = 4.0;
         Constants["asset_path"] = 5.0;
         Constants["asset_script"] = 6.0;
         Constants["asset_font"] = 7.0;
