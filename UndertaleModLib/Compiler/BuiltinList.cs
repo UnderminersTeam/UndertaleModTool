@@ -985,7 +985,7 @@ public class BuiltinList : IBuiltins
             DefineFunction("texturegroup_get_fonts", 1);
             DefineFunction("texturegroup_get_tilesets", 1);
         }
-        if (gms2_3)
+        if (gms2 || (major == 1 && minor >= 3))
         {
             DefineFunction("draw_enable_swf_aa", 1);
             DefineFunction("draw_set_swf_aa_level", 1);
