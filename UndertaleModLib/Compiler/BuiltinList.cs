@@ -374,7 +374,6 @@ public class BuiltinList : IBuiltins
             DefineFunction("d3d_light_define_direction", 5);
             DefineFunction("d3d_light_define_point", 6);
             DefineFunction("d3d_light_enable", 2);
-
             DefineFunction("d3d_set_lighting", 1);
             DefineFunction("action_path_old", 3);
             DefineFunction("action_set_sprite", 2);
@@ -3375,7 +3374,6 @@ public class BuiltinList : IBuiltins
         Constants["c_orange"] = 4235519.0;
         if (!gms2)
             Constants["bm_complex"] = -1.0;
-
         Constants["bm_normal"] = 0.0;
         Constants["bm_add"] = 1.0;
         Constants["bm_max"] = 2.0;
