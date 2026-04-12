@@ -253,7 +253,7 @@ public class BuiltinList : IBuiltins
         uint build = gen8?.Build ?? 0;
 
         bool gms2 = major >= 2;
-        bool gms2_3 = major > 2 || (major == 2 && minor >= 3);
+        bool gms2_3 = major > 2 || (gms2 && minor >= 3);
 
         // Functions
         Functions = new(4096);
@@ -2304,7 +2304,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("buffer_async_group_begin", 1);
         DefineFunction("buffer_async_group_end", 0);
         DefineFunction("buffer_async_group_option", 2);
-        if (gms2_3 && release >= 1)
+        if (major > 2 || (gms2_3 && release >= 1) || (gms2 && minor > 3))
             DefineFunction("buffer_get_surface", 3);
         else
             DefineFunction("buffer_get_surface", 5);
