@@ -1,0 +1,2579 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Path__GM_2024_14" xml:space="preserve">
+    <value>Path (GM 2024.14+)</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleAudioGroupEditor.xaml document</comment>
+  </data>
+  <data name="Transparent" xml:space="preserve">
+    <value>Transparent</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleBackgroundEditor.xaml document</comment>
+  </data>
+  <data name="Smooth" xml:space="preserve">
+    <value>Smooth</value>
+  </data>
+  <data name="Preload" xml:space="preserve">
+    <value>Preload</value>
+  </data>
+  <data name="Texture" xml:space="preserve">
+    <value>Texture</value>
+  </data>
+  <data name="Unknown_Always_2" xml:space="preserve">
+    <value>Unknown Always 2</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleBackgroundEditor.xaml document</comment>
+  </data>
+  <data name="Tile_Width" xml:space="preserve">
+    <value>Tile Width</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleBackgroundEditor.xaml document</comment>
+  </data>
+  <data name="Tile_Height" xml:space="preserve">
+    <value>Tile Height</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleBackgroundEditor.xaml document</comment>
+  </data>
+  <data name="Tile_Separation_X" xml:space="preserve">
+    <value>Tile Separation X</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleBackgroundEditor.xaml document</comment>
+  </data>
+  <data name="Tile_Separation_Y" xml:space="preserve">
+    <value>Tile Separation Y</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleBackgroundEditor.xaml document</comment>
+  </data>
+  <data name="Output_Border_X" xml:space="preserve">
+    <value>Output Border X</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleBackgroundEditor.xaml document</comment>
+  </data>
+  <data name="Output_Border_Y" xml:space="preserve">
+    <value>Output Border Y</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleBackgroundEditor.xaml document</comment>
+  </data>
+  <data name="Tile_Columns" xml:space="preserve">
+    <value>Tile Columns</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleBackgroundEditor.xaml document</comment>
+  </data>
+  <data name="Items_frames_per_tile" xml:space="preserve">
+    <value>Items/frames per tile</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleBackgroundEditor.xaml document</comment>
+  </data>
+  <data name="Tile_Count" xml:space="preserve">
+    <value>Tile Count</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleBackgroundEditor.xaml document</comment>
+  </data>
+  <data name="Exported_Sprite_Index" xml:space="preserve">
+    <value>Exported Sprite Index</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleBackgroundEditor.xaml document</comment>
+  </data>
+  <data name="Frame_Time__microseconds" xml:space="preserve">
+    <value>Frame Time (microseconds)</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleBackgroundEditor.xaml document</comment>
+  </data>
+  <data name="Tile_IDs" xml:space="preserve">
+    <value>Tile IDs</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleBackgroundEditor.xaml document</comment>
+  </data>
+  <data name="Double_click_to_add" xml:space="preserve">
+    <value>Double click to add</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Hint__You_can_click_on_any_tile_region" xml:space="preserve">
+    <value>Hint: You can click on any tile region below to highlight its ID above.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleBackgroundEditor.xaml document</comment>
+  </data>
+  <data name="Locals_count" xml:space="preserve">
+    <value>Locals count</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleCodeEditor.xaml document</comment>
+  </data>
+  <data name="Arguments_count" xml:space="preserve">
+    <value>Arguments count</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleCodeEditor.xaml document</comment>
+  </data>
+  <data name="Offset" xml:space="preserve">
+    <value>Offset</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleCodeEditor.xaml document</comment>
+  </data>
+  <data name="Parent_entry" xml:space="preserve">
+    <value>Parent entry</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleCodeEditor.xaml document</comment>
+  </data>
+  <data name="Decompiled" xml:space="preserve">
+    <value>Decompiled</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleCodeEditor.xaml document</comment>
+  </data>
+  <data name="Local_variables" xml:space="preserve">
+    <value>Local variables</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleCodeLocalsEditor.xaml document</comment>
+  </data>
+  <data name="Play" xml:space="preserve">
+    <value>Play</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleEmbeddedAudioEditor.xaml document</comment>
+  </data>
+  <data name="Stop1" xml:space="preserve">
+    <value>Stop</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleEmbeddedAudioEditor.xaml document</comment>
+  </data>
+  <data name="Import1" xml:space="preserve">
+    <value>Import</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleEmbeddedAudioEditor.xaml document</comment>
+  </data>
+  <data name="Export" xml:space="preserve">
+    <value>Export</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleEmbeddedAudioEditor.xaml document</comment>
+  </data>
+  <data name="Scaled" xml:space="preserve">
+    <value>Scaled</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleEmbeddedTextureEditor.xaml document</comment>
+  </data>
+  <data name="Generated_mips" xml:space="preserve">
+    <value>Generated mips</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleEmbeddedTextureEditor.xaml document</comment>
+  </data>
+  <data name="Size1" xml:space="preserve">
+    <value>Size</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleEmbeddedTextureEditor.xaml document</comment>
+  </data>
+  <data name="Warning__Texture_failed_to_load" xml:space="preserve">
+    <value>Warning: Texture failed to load!</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleEmbeddedTextureEditor.xaml document</comment>
+  </data>
+  <data name="Hint__This_image_is_mouse_interactable" xml:space="preserve">
+    <value>Hint: This image is mouse interactable (3 mouse buttons and mouse wheel).</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleEmbeddedTextureEditor.xaml document</comment>
+  </data>
+  <data name="Version" xml:space="preserve">
+    <value>Version</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleExtensionEditor.xaml document</comment>
+  </data>
+  <data name="Class_Name" xml:space="preserve">
+    <value>Class Name</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleExtensionEditor.xaml document</comment>
+  </data>
+  <data name="Files" xml:space="preserve">
+    <value>Files</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleExtensionEditor.xaml document</comment>
+  </data>
+  <data name="THINGS_TO_NOTE__n__Keep_in_mind_that" xml:space="preserve">
+    <value>THINGS TO NOTE:
+- Keep in mind that .gml files are either not present, or will be empty. (e.g. no functions)
+  Because they are prebaked into GML scripts. That is completely normal.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleExtensionEditor.xaml document</comment>
+  </data>
+  <data name="Add_new_extension_option" xml:space="preserve">
+    <value>Add new extension option</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleExtensionEditor.xaml document</comment>
+  </data>
+  <data name="Product_ID" xml:space="preserve">
+    <value>Product ID</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleExtensionEditor.xaml document</comment>
+  </data>
+  <data name="FileName" xml:space="preserve">
+    <value>FileName</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleExtensionFileEditor.xaml document</comment>
+  </data>
+  <data name="Cleanup_function_name" xml:space="preserve">
+    <value>Cleanup function name</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleExtensionFileEditor.xaml document</comment>
+  </data>
+  <data name="Init_function_name" xml:space="preserve">
+    <value>Init function name</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleExtensionFileEditor.xaml document</comment>
+  </data>
+  <data name="Kind1" xml:space="preserve">
+    <value>Kind</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleExtensionFileEditor.xaml document</comment>
+  </data>
+  <data name="Functions" xml:space="preserve">
+    <value>Functions</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleExtensionFileEditor.xaml document</comment>
+  </data>
+  <data name="External_Name" xml:space="preserve">
+    <value>External Name</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleExtensionFunctionEditor.xaml document</comment>
+  </data>
+  <data name="ID1" xml:space="preserve">
+    <value>ID</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleExtensionFunctionEditor.xaml document</comment>
+  </data>
+  <data name="Return_Type" xml:space="preserve">
+    <value>Return Type</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleExtensionFunctionEditor.xaml document</comment>
+  </data>
+  <data name="Argument_Types" xml:space="preserve">
+    <value>Argument Types</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleExtensionFunctionEditor.xaml document</comment>
+  </data>
+  <data name="Runner_literally_doesn_t_care_about" xml:space="preserve">
+    <value>Runner literally doesn't care about the 'Kind' value.
+The 'ID' does matter though, so make sure you don't have any overlaps.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleExtensionFunctionEditor.xaml document</comment>
+  </data>
+  <data name="Name_string_ID" xml:space="preserve">
+    <value>Name string ID</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFunctionEditor.xaml document</comment>
+  </data>
+  <data name="Game_End_scripts" xml:space="preserve">
+    <value>Game End scripts</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameEndEditor.xaml document</comment>
+  </data>
+  <data name="Sprite" xml:space="preserve">
+    <value>Sprite</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameObjectEditor.xaml document</comment>
+  </data>
+  <data name="Visible" xml:space="preserve">
+    <value>Visible</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameObjectEditor.xaml document</comment>
+  </data>
+  <data name="Solid" xml:space="preserve">
+    <value>Solid</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameObjectEditor.xaml document</comment>
+  </data>
+  <data name="Depth" xml:space="preserve">
+    <value>Depth</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameObjectEditor.xaml document</comment>
+  </data>
+  <data name="Persistent" xml:space="preserve">
+    <value>Persistent</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameObjectEditor.xaml document</comment>
+  </data>
+  <data name="Parent" xml:space="preserve">
+    <value>Parent</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameObjectEditor.xaml document</comment>
+  </data>
+  <data name="This_is_an_object_reference__Drag" xml:space="preserve">
+    <value>This is an object reference. Drag and drop an object of matching type from the tree on the left to change it!</value>
+    <comment>Used in UndertaleModTool\Controls\AudioFileReference.xaml document</comment>
+  </data>
+  <data name="null1" xml:space="preserve">
+    <value>(null)</value>
+    <comment>Used in UndertaleModTool\Controls\AudioFileReference.xaml document</comment>
+  </data>
+  <data name="Flags" xml:space="preserve">
+    <value>Flags</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Open_in_new_tab" xml:space="preserve">
+    <value>Open in new tab</value>
+    <comment>Used in UndertaleModTool\Controls\AudioFileReference.xaml document</comment>
+  </data>
+  <data name="Open_referenced_object" xml:space="preserve">
+    <value>Open referenced object</value>
+    <comment>Used in UndertaleModTool\Controls\AudioFileReference.xaml document</comment>
+  </data>
+  <data name="Remove_reference" xml:space="preserve">
+    <value>Remove reference</value>
+    <comment>Used in UndertaleModTool\Controls\AudioFileReference.xaml document</comment>
+  </data>
+  <data name="Find_all_references" xml:space="preserve">
+    <value>Find all references</value>
+    <comment>Used in UndertaleModTool\Controls\ResourceListTreeViewItem.xaml document</comment>
+  </data>
+  <data name="Copy_name_to_clipboard" xml:space="preserve">
+    <value>Copy name to clipboard</value>
+    <comment>Used in UndertaleModTool\Controls\ResourceListTreeViewItem.xaml document</comment>
+  </data>
+  <data name="Delete1" xml:space="preserve">
+    <value>Delete</value>
+    <comment>Used in UndertaleModTool\Controls\ResourceListTreeViewItem.xaml document</comment>
+  </data>
+  <data name="Add_in_place__unimplemented" xml:space="preserve">
+    <value>Add in place (unimplemented)</value>
+    <comment>Used in UndertaleModTool\Controls\ResourceListTreeViewItem.xaml document</comment>
+  </data>
+  <data name="Create_new_code_entry" xml:space="preserve">
+    <value>Create new code entry</value>
+    <comment>Used in UndertaleModTool\Controls\UndertaleObjectReference.xaml document</comment>
+  </data>
+  <data name="This_is_an_string_reference__Change" xml:space="preserve">
+    <value>This is an string reference. Change the value here to edit this just this value of all referenced values, or drag and drop another string instance from the tree on the left to change the reference</value>
+    <comment>Used in UndertaleModTool\Controls\UndertaleStringReference.xaml document</comment>
+  </data>
+  <data name="General_info" xml:space="preserve">
+    <value>General info</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Disable_GMS_debugger" xml:space="preserve">
+    <value>Disable GMS debugger</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Bytecode_version" xml:space="preserve">
+    <value>Bytecode version</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Config" xml:space="preserve">
+    <value>Config</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Last_object_ID" xml:space="preserve">
+    <value>Last object ID</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Last_tile_ID" xml:space="preserve">
+    <value>Last tile ID</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Game_ID" xml:space="preserve">
+    <value>Game ID</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="DirectPlay_GUID" xml:space="preserve">
+    <value>DirectPlay GUID</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Default_window_size" xml:space="preserve">
+    <value>Default window size</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="License_MD5" xml:space="preserve">
+    <value>License MD5</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="License_CRC32" xml:space="preserve">
+    <value>License CRC32</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Timestamp" xml:space="preserve">
+    <value>Timestamp</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Display_name" xml:space="preserve">
+    <value>Display name</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Active_targets" xml:space="preserve">
+    <value>Active targets</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Function_classifications" xml:space="preserve">
+    <value>Function classifications</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Steam_AppID" xml:space="preserve">
+    <value>Steam AppID</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Debugger_port" xml:space="preserve">
+    <value>Debugger port</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Room_order" xml:space="preserve">
+    <value>Room order</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="FPS" xml:space="preserve">
+    <value>FPS</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Allow_statistics" xml:space="preserve">
+    <value>Allow statistics</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Game_GUID" xml:space="preserve">
+    <value>Game GUID</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Shader_Extension_Flag" xml:space="preserve">
+    <value>Shader Extension Flag</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Shader_Extension_Version" xml:space="preserve">
+    <value>Shader Extension Version</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Scale" xml:space="preserve">
+    <value>Scale</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Window_color" xml:space="preserve">
+    <value>Window color</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Disassembly" xml:space="preserve">
+    <value>Disassembly</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleCodeEditor.xaml document</comment>
+  </data>
+  <data name="Global_initialization_scripts" xml:space="preserve">
+    <value>Global initialization scripts</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGlobalInitEditor.xaml document</comment>
+  </data>
+  <data name="Origin1" xml:space="preserve">
+    <value>Origin</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEditor.xaml document</comment>
+  </data>
+  <data name="Draw_order" xml:space="preserve">
+    <value>Draw order</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEditor.xaml document</comment>
+  </data>
+  <data name="Emitters" xml:space="preserve">
+    <value>Emitters</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEditor.xaml document</comment>
+  </data>
+  <data name="List" xml:space="preserve">
+    <value>List</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEditor.xaml document</comment>
+  </data>
+  <data name="Distribution" xml:space="preserve">
+    <value>Distribution</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Interval_measured_in" xml:space="preserve">
+    <value>Interval measured in:</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Interval_min_max" xml:space="preserve">
+    <value>Interval min|max</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Delay_measured_in" xml:space="preserve">
+    <value>Delay measured in:</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Emit_relative" xml:space="preserve">
+    <value>Emit relative</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Delay_min_max" xml:space="preserve">
+    <value>Delay min|max</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Emit_count" xml:space="preserve">
+    <value>Emit count</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Enabled" xml:space="preserve">
+    <value>Enabled</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Shape" xml:space="preserve">
+    <value>Shape</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Region_X_Y_Width_Height" xml:space="preserve">
+    <value>Region X|Y|Width|Height</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Rotation" xml:space="preserve">
+    <value>Rotation</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Sprite_frame_index" xml:space="preserve">
+    <value>Sprite frame index</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Animate_sprite" xml:space="preserve">
+    <value>Animate sprite</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Stretch_sprite" xml:space="preserve">
+    <value>Stretch sprite</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Random" xml:space="preserve">
+    <value>Random</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Start_color" xml:space="preserve">
+    <value>Start color</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Middle_color" xml:space="preserve">
+    <value>Middle color</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Additive_color_blend" xml:space="preserve">
+    <value>Additive color blend</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Lifetime_min_max" xml:space="preserve">
+    <value>Lifetime min|max</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Scale_X_Y" xml:space="preserve">
+    <value>Scale X|Y</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Hint__Prior_to_GM_2023_8__these" xml:space="preserve">
+    <value>Hint: Prior to GM 2023.8, these "Size" values were not split by x and y.
+UndertaleModTool represents this by averaging the values.
+For best results, enter the same value in both fields.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Size_min" xml:space="preserve">
+    <value>Size min</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Size_max" xml:space="preserve">
+    <value>Size max</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Size_increase" xml:space="preserve">
+    <value>Size increase</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Size_wiggle" xml:space="preserve">
+    <value>Size wiggle</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Speed_min_max" xml:space="preserve">
+    <value>Speed min|max</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Speed_increase_wiggle" xml:space="preserve">
+    <value>Speed increase|wiggle</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Gravity_force_direction" xml:space="preserve">
+    <value>Gravity force|direction</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Direction_min_max" xml:space="preserve">
+    <value>Direction min|max</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Direction_increase_wiggle" xml:space="preserve">
+    <value>Direction increase|wiggle</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Orientation_min_max" xml:space="preserve">
+    <value>Orientation min|max</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Orientation_increase_wiggle" xml:space="preserve">
+    <value>Orientation increase|wiggle</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Is_orientation_relative" xml:space="preserve">
+    <value>Is orientation relative</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Spawn_on_death" xml:space="preserve">
+    <value>Spawn on death</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Spawn_on_death_count" xml:space="preserve">
+    <value>Spawn on death count</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Spawn_on_update" xml:space="preserve">
+    <value>Spawn on update</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Spawn_on_update_count" xml:space="preserve">
+    <value>Spawn on update count</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Closed" xml:space="preserve">
+    <value>Closed</value>
+    <comment>Used in UndertaleModTool\Editors\UndertalePathEditor.xaml document</comment>
+  </data>
+  <data name="Precision" xml:space="preserve">
+    <value>Precision</value>
+    <comment>Used in UndertaleModTool\Editors\UndertalePathEditor.xaml document</comment>
+  </data>
+  <data name="Points" xml:space="preserve">
+    <value>Points</value>
+    <comment>Used in UndertaleModTool\Editors\UndertalePathEditor.xaml document</comment>
+  </data>
+  <data name="Speed" xml:space="preserve">
+    <value>Speed</value>
+    <comment>Used in UndertaleModTool\Editors\UndertalePathEditor.xaml document</comment>
+  </data>
+  <data name="Y" xml:space="preserve">
+    <value>Y</value>
+    <comment>Used in UndertaleModTool\Editors\UndertalePathEditor.xaml document</comment>
+  </data>
+  <data name="X" xml:space="preserve">
+    <value>X</value>
+    <comment>Used in UndertaleModTool\Editors\UndertalePathEditor.xaml document</comment>
+  </data>
+  <data name="TODO__The_preview_doesn_t_update" xml:space="preserve">
+    <value>TODO: The preview doesn't update live, I know, just close and reopen the object for now</value>
+    <comment>Used in UndertaleModTool\Editors\UndertalePathEditor.xaml document</comment>
+  </data>
+  <data name="Type1" xml:space="preserve">
+    <value>Type</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleShaderEditor.xaml document</comment>
+  </data>
+  <data name="GLSL_ES_vertex_source" xml:space="preserve">
+    <value>GLSL ES vertex source</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleShaderEditor.xaml document</comment>
+  </data>
+  <data name="GLSL_ES_fragment_source" xml:space="preserve">
+    <value>GLSL ES fragment source</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleShaderEditor.xaml document</comment>
+  </data>
+  <data name="GLSL_vertex_source" xml:space="preserve">
+    <value>GLSL vertex source</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleShaderEditor.xaml document</comment>
+  </data>
+  <data name="GLSL_fragment_source" xml:space="preserve">
+    <value>GLSL fragment source</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleShaderEditor.xaml document</comment>
+  </data>
+  <data name="HLSL9_vertex_source" xml:space="preserve">
+    <value>HLSL9 vertex source</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleShaderEditor.xaml document</comment>
+  </data>
+  <data name="HLSL9_fragment_source" xml:space="preserve">
+    <value>HLSL9 fragment source</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleShaderEditor.xaml document</comment>
+  </data>
+  <data name="Vertex_shader_attributes" xml:space="preserve">
+    <value>Vertex shader attributes</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleShaderEditor.xaml document</comment>
+  </data>
+  <data name="Preload__old_audio_system" xml:space="preserve">
+    <value>Preload (old audio system)</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSoundEditor.xaml document</comment>
+  </data>
+  <data name="Audio_file" xml:space="preserve">
+    <value>Audio file</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSoundEditor.xaml document</comment>
+  </data>
+  <data name="Audio_group" xml:space="preserve">
+    <value>Audio group</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSoundEditor.xaml document</comment>
+  </data>
+  <data name="Pitch" xml:space="preserve">
+    <value>Pitch</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSoundEditor.xaml document</comment>
+  </data>
+  <data name="Volume" xml:space="preserve">
+    <value>Volume</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSoundEditor.xaml document</comment>
+  </data>
+  <data name="Effects" xml:space="preserve">
+    <value>Effects</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSoundEditor.xaml document</comment>
+  </data>
+  <data name="File1" xml:space="preserve">
+    <value>File</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSoundEditor.xaml document</comment>
+  </data>
+  <data name="Export_all_frames__or_Spine_data" xml:space="preserve">
+    <value>Export all frames (or Spine data if this is a Spine sprite)</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSpriteEditor.xaml document</comment>
+  </data>
+  <data name="Width" xml:space="preserve">
+    <value>Width:</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSpriteEditor.xaml document</comment>
+  </data>
+  <data name="Height" xml:space="preserve">
+    <value>Height:</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSpriteEditor.xaml document</comment>
+  </data>
+  <data name="Margin" xml:space="preserve">
+    <value>Margin</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSpriteEditor.xaml document</comment>
+  </data>
+  <data name="Left" xml:space="preserve">
+    <value>Left:</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSpriteEditor.xaml document</comment>
+  </data>
+  <data name="Right" xml:space="preserve">
+    <value>Right:</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSpriteEditor.xaml document</comment>
+  </data>
+  <data name="Bottom" xml:space="preserve">
+    <value>Bottom:</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSpriteEditor.xaml document</comment>
+  </data>
+  <data name="Top" xml:space="preserve">
+    <value>Top:</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSpriteEditor.xaml document</comment>
+  </data>
+  <data name="Bounding_box_mode" xml:space="preserve">
+    <value>Bounding box mode</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSpriteEditor.xaml document</comment>
+  </data>
+  <data name="SepMasks" xml:space="preserve">
+    <value>SepMasks</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSpriteEditor.xaml document</comment>
+  </data>
+  <data name="Textures" xml:space="preserve">
+    <value>Textures</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSpriteEditor.xaml document</comment>
+  </data>
+  <data name="Collision_masks" xml:space="preserve">
+    <value>Collision masks</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSpriteEditor.xaml document</comment>
+  </data>
+  <data name="CollisionMask" xml:space="preserve">
+    <value>(CollisionMask)</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSpriteEditor.xaml document</comment>
+  </data>
+  <data name="Invalid_mask_data" xml:space="preserve">
+    <value>Invalid mask data!</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSpriteEditor.xaml document</comment>
+  </data>
+  <data name="Import_mask" xml:space="preserve">
+    <value>Import mask</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSpriteEditor.xaml document</comment>
+  </data>
+  <data name="Export_mask" xml:space="preserve">
+    <value>Export mask</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSpriteEditor.xaml document</comment>
+  </data>
+  <data name="Is_special_type" xml:space="preserve">
+    <value>Is special type?</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSpriteEditor.xaml document</comment>
+  </data>
+  <data name="Playback_speed" xml:space="preserve">
+    <value>Playback speed</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSpriteEditor.xaml document</comment>
+  </data>
+  <data name="Playback_speed_type" xml:space="preserve">
+    <value>Playback speed type</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleSpriteEditor.xaml document</comment>
+  </data>
+  <data name="Emit_mode" xml:space="preserve">
+    <value>Emit mode</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Content" xml:space="preserve">
+    <value>Content</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleStringEditor.xaml document</comment>
+  </data>
+  <data name="Texture_Group" xml:space="preserve">
+    <value>Texture Group</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleTextureGroupInfoEditor.xaml document</comment>
+  </data>
+  <data name="Group_Name" xml:space="preserve">
+    <value>Group Name</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleTextureGroupInfoEditor.xaml document</comment>
+  </data>
+  <data name="Texture_Pages" xml:space="preserve">
+    <value>Texture Pages</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleTextureGroupInfoEditor.xaml document</comment>
+  </data>
+  <data name="Sprites" xml:space="preserve">
+    <value>Sprites</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleTextureGroupInfoEditor.xaml document</comment>
+  </data>
+  <data name="Tilesets" xml:space="preserve">
+    <value>Tilesets</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleTextureGroupInfoEditor.xaml document</comment>
+  </data>
+  <data name="Source_position_size" xml:space="preserve">
+    <value>Source position/size</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleTexturePageItemEditor.xaml document</comment>
+  </data>
+  <data name="Target_position_size" xml:space="preserve">
+    <value>Target position/size</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleTexturePageItemEditor.xaml document</comment>
+  </data>
+  <data name="Bounding_size" xml:space="preserve">
+    <value>Bounding size</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleTexturePageItemEditor.xaml document</comment>
+  </data>
+  <data name="Find_all_references_to_this_page" xml:space="preserve">
+    <value>Find all references to this page item</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleTexturePageItemEditor.xaml document</comment>
+  </data>
+  <data name="Moments" xml:space="preserve">
+    <value>Moments</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleTimelineEditor.xaml document</comment>
+  </data>
+  <data name="Variables" xml:space="preserve">
+    <value>Variables</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleVariableChunkEditor.xaml document</comment>
+  </data>
+  <data name="Instance_global_variable_count" xml:space="preserve">
+    <value>Instance/global variable count</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleVariableChunkEditor.xaml document</comment>
+  </data>
+  <data name="Instance_global_variable_count__again" xml:space="preserve">
+    <value>Instance/global variable count (again)</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleVariableChunkEditor.xaml document</comment>
+  </data>
+  <data name="Max_local_variable_count" xml:space="preserve">
+    <value>Max local variable count</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleVariableChunkEditor.xaml document</comment>
+  </data>
+  <data name="Instance_type" xml:space="preserve">
+    <value>Instance type</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleVariableEditor.xaml document</comment>
+  </data>
+  <data name="VarID" xml:space="preserve">
+    <value>VarID</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleVariableEditor.xaml document</comment>
+  </data>
+  <data name="File" xml:space="preserve">
+    <value>_File</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>_New</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Open" xml:space="preserve">
+    <value>_Open</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>_Save</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Temp_run_game" xml:space="preserve">
+    <value>_Temp run game</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Run_game_under_GMS__debugger" xml:space="preserve">
+    <value>Run game under GMS _debugger</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Run_game_with_other_runner" xml:space="preserve">
+    <value>Run game with other runner</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Generate_o_ffset_map" xml:space="preserve">
+    <value>Generate o_ffset map</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="S_ettings" xml:space="preserve">
+    <value>S_ettings</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>_Close</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Scripts" xml:space="preserve">
+    <value>Scripts</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="loading" xml:space="preserve">
+    <value>(...loading...)</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Find" xml:space="preserve">
+    <value>_Find</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Search_in_code" xml:space="preserve">
+    <value>_Search in code</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Find_unreferenced__assets" xml:space="preserve">
+    <value>Find unreferenced _assets</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="GitHub" xml:space="preserve">
+    <value>_GitHub</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Help" xml:space="preserve">
+    <value>_Help</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="About" xml:space="preserve">
+    <value>_About</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="This_is_an_ID__index__of_the_currently" xml:space="preserve">
+    <value>This is an ID (index) of the currently open asset, item, or object. It starts from 0.</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>None</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Forward" xml:space="preserve">
+    <value>Forward</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Search</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Filter_by_name" xml:space="preserve">
+    <value>Filter by name...</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Add</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Data" xml:space="preserve">
+    <value>Data</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Global_init" xml:space="preserve">
+    <value>Global init</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Audio_groups" xml:space="preserve">
+    <value>Audio groups</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Sounds" xml:space="preserve">
+    <value>Sounds</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Backgrounds__amp__Tile_sets" xml:space="preserve">
+    <value>Backgrounds &amp; Tile sets</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Paths" xml:space="preserve">
+    <value>Paths</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Shaders" xml:space="preserve">
+    <value>Shaders</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Fonts" xml:space="preserve">
+    <value>Fonts</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Timelines" xml:space="preserve">
+    <value>Timelines</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Game_objects" xml:space="preserve">
+    <value>Game objects</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Rooms" xml:space="preserve">
+    <value>Rooms</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Extensions" xml:space="preserve">
+    <value>Extensions</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Texture_page_items" xml:space="preserve">
+    <value>Texture page items</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>Code</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Code_locals" xml:space="preserve">
+    <value>Code locals</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Strings1" xml:space="preserve">
+    <value>Strings</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Embedded_textures" xml:space="preserve">
+    <value>Embedded textures</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Embedded_audio" xml:space="preserve">
+    <value>Embedded audio</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Texture_group_information" xml:space="preserve">
+    <value>Texture group information</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Embedded_images" xml:space="preserve">
+    <value>Embedded images</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Particle_systems" xml:space="preserve">
+    <value>Particle systems</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Particle_system_emitters" xml:space="preserve">
+    <value>Particle system emitters</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="End_color" xml:space="preserve">
+    <value>End color</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleParticleSystemEmitterEditor.xaml document</comment>
+  </data>
+  <data name="Texture_mask_id" xml:space="preserve">
+    <value>Texture mask id</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameObjectEditor.xaml document</comment>
+  </data>
+  <data name="Uses_physics" xml:space="preserve">
+    <value>Uses physics</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameObjectEditor.xaml document</comment>
+  </data>
+  <data name="Is_sensor" xml:space="preserve">
+    <value>Is sensor</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameObjectEditor.xaml document</comment>
+  </data>
+  <data name="Collision_shape" xml:space="preserve">
+    <value>Collision shape</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameObjectEditor.xaml document</comment>
+  </data>
+  <data name="Physics" xml:space="preserve">
+    <value>Physics</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameObjectEditor.xaml document</comment>
+  </data>
+  <data name="Density" xml:space="preserve">
+    <value>Density</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameObjectEditor.xaml document</comment>
+  </data>
+  <data name="Restitution" xml:space="preserve">
+    <value>Restitution</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameObjectEditor.xaml document</comment>
+  </data>
+  <data name="Group" xml:space="preserve">
+    <value>Group</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameObjectEditor.xaml document</comment>
+  </data>
+  <data name="Linear_damping" xml:space="preserve">
+    <value>Linear damping</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameObjectEditor.xaml document</comment>
+  </data>
+  <data name="Angular_damping" xml:space="preserve">
+    <value>Angular damping</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameObjectEditor.xaml document</comment>
+  </data>
+  <data name="Friction" xml:space="preserve">
+    <value>Friction</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameObjectEditor.xaml document</comment>
+  </data>
+  <data name="Is_awake" xml:space="preserve">
+    <value>Is awake</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameObjectEditor.xaml document</comment>
+  </data>
+  <data name="Is_kinematic" xml:space="preserve">
+    <value>Is kinematic</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameObjectEditor.xaml document</comment>
+  </data>
+  <data name="Physics_shape_vertices" xml:space="preserve">
+    <value>Physics shape vertices</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameObjectEditor.xaml document</comment>
+  </data>
+  <data name="Events" xml:space="preserve">
+    <value>Events</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameObjectEditor.xaml document</comment>
+  </data>
+  <data name="Subtype_ID" xml:space="preserve">
+    <value>Subtype ID</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameObjectEditor.xaml document</comment>
+  </data>
+  <data name="n_a" xml:space="preserve">
+    <value>n/a</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameObjectEditor.xaml document</comment>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Actions</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGameObjectEditor.xaml document</comment>
+  </data>
+  <data name="No_game_loaded" xml:space="preserve">
+    <value>No game loaded</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="ScriptsMenu" xml:space="preserve">
+    <value>_Scripts</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml document</comment>
+  </data>
+  <data name="Close_current_tab" xml:space="preserve">
+    <value>Close current tab</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Close_all_tabs" xml:space="preserve">
+    <value>Close all tabs</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Restore_last_closed_tab" xml:space="preserve">
+    <value>Restore last closed tab</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Switch_to_the_next_tab" xml:space="preserve">
+    <value>Switch to the next tab</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Switch_to_the_previous_tab" xml:space="preserve">
+    <value>Switch to the previous tab</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Search_in_code_c1" xml:space="preserve">
+    <value>Search in code</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Welcome_to_UndertaleModTool" xml:space="preserve">
+    <value>Welcome to UndertaleModTool!</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Open_a_data_win_file_to_get_started" xml:space="preserve">
+    <value>Open a data.win file to get started, then double click on the items on the left to view them.</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="First_time_setup__Would_you_like" xml:space="preserve">
+    <value>First-time setup: Would you like to associate GameMaker data files (like .win) with UndertaleModTool?</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="File_associations" xml:space="preserve">
+    <value>File associations</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="UndertaleModToolUpdater_app_didn" xml:space="preserve">
+    <value>UndertaleModToolUpdater app didn't exit.
+Can't delete its temp folder.</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="error_message_is_missing" xml:space="preserve">
+    <value>(error message is missing)</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Warning__you_currently_have_a_project" xml:space="preserve">
+    <value>Warning: you currently have a project open.
+Are you sure you want to make a new project?</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="New_file_created__have_fun_making" xml:space="preserve">
+    <value>New file created, have fun making a game out of nothing
+I TOLD YOU to open a data.win, not create a new file! :P</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Errors_occurred_during_loading__High" xml:space="preserve">
+    <value>Errors occurred during loading. High chance of data loss! Proceed at your own risk.</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="The_changes_in_code_editor_weren" xml:space="preserve">
+    <value>The changes in code editor weren't saved due to some error in "SaveCodeChanges()".</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Save_changes_before_quitting" xml:space="preserve">
+    <value>Save changes before quitting?</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Script_still_runs__Save_anyway__nIt" xml:space="preserve">
+    <value>Script still runs. Save anyway?
+It can corrupt the data file that you'll save.</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Loading1" xml:space="preserve">
+    <value>Loading</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Loading__please_wait" xml:space="preserve">
+    <value>Loading, please wait...</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Double_click_on_the_items_on_the" xml:space="preserve">
+    <value>Double click on the items on the left to view them!</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Loading_warning" xml:space="preserve">
+    <value>Loading warning</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="An_error_occurred_while_trying_to" xml:space="preserve">
+    <value>An error occurred while trying to load:
+{0}</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Load_error" xml:space="preserve">
+    <value>Load error</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Warnings_occurred_during_loading" xml:space="preserve">
+    <value>Warnings occurred during loading. Data loss will likely occur when trying to save!</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Loading_problems" xml:space="preserve">
+    <value>Loading problems</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="This_game_uses_YYC__YoYo_Compiler" xml:space="preserve">
+    <value>This game uses YYC (YoYo Compiler), which means the code is embedded into the game executable. This configuration is currently not fully supported; continue at your own risk.</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="YYC" xml:space="preserve">
+    <value>YYC</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="This_game_is_set_to_run_with_the" xml:space="preserve">
+    <value>This game is set to run with the GameMaker Studio debugger and the normal runtime will simply hang after loading if the debugger is not running. You can turn this off in General Info by checking the "Disable Debugger" box and saving.</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="GMS_Debugger" xml:space="preserve">
+    <value>GMS Debugger</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="This_game_contains_texture_s__with" xml:space="preserve">
+    <value>This game contains texture(s) with unknown or unsupported image formats. These will save/load, but will not display in editors, and many operations will fail regarding them. Proceed with caution.</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Unsupported_textures" xml:space="preserve">
+    <value>Unsupported textures</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Tile_sets" xml:space="preserve">
+    <value>Tile sets</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Backgrounds___Tile_sets" xml:space="preserve">
+    <value>Backgrounds &amp; Tile sets</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Saving" xml:space="preserve">
+    <value>Saving</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Saving__please_wait" xml:space="preserve">
+    <value>Saving, please wait...</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="You_are_saving_the_game_in_GameMaker" xml:space="preserve">
+    <value>You are saving the game in GameMaker Studio debug mode. Unless the debugger is running, the normal runtime will simply hang after loading. You can turn this off in General Info by checking the "Disable Debugger" box and saving.</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Generating_debugger_data" xml:space="preserve">
+    <value>Generating debugger data...</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Item_name_is_null" xml:space="preserve">
+    <value>Item name is null.</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Add_the_new_room_to_the_end_of_the" xml:space="preserve">
+    <value>Add the new room to the end of the room order list?</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Add_to_room_order_list" xml:space="preserve">
+    <value>Add to room order list</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Run__other_script" xml:space="preserve">
+    <value>Run _other script...</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="No_scripts_found" xml:space="preserve">
+    <value>(No scripts found!)</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="The_script_file_doesn_t_exist" xml:space="preserve">
+    <value>The script file doesn't exist.</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Warning___there_is_another_progress" xml:space="preserve">
+    <value>Warning - there is another progress bar updater task running (hangs) in the background.
+Restart the application to prevent some unexpected behavior.</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Stopping_the_progress_bar_updater" xml:space="preserve">
+    <value>Stopping the progress bar updater task is failed.
+It's highly recommended to restart the application.</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Script_error" xml:space="preserve">
+    <value>Script error</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Cannot_select_the_code_editor_mode" xml:space="preserve">
+    <value>Cannot select the code editor mode tab - the instance is not found.</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Script_warning" xml:space="preserve">
+    <value>Script warning</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Script_message" xml:space="preserve">
+    <value>Script message</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Script_Question" xml:space="preserve">
+    <value>Script Question</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Error</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="UndertaleModTool_by_krzys_h_and_the" xml:space="preserve">
+    <value>UndertaleModTool by krzys_h and the Underminers team
+Version {0}</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Check_your_internet_connection" xml:space="preserve">
+    <value>Check your internet connection.</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="UndertaleModTool_is_already_up_to" xml:space="preserve">
+    <value>UndertaleModTool is already up to date.
+Update anyway?</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Downloading" xml:space="preserve">
+    <value>Downloading</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Downloading_new_version" xml:space="preserve">
+    <value>Downloading new version...</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Load_data_win_file_first" xml:space="preserve">
+    <value>Load data.win file first</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Create</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Invalid_name" xml:space="preserve">
+    <value>Invalid name</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Expand_the_list_on_the_left_to_edit" xml:space="preserve">
+    <value>Expand the list on the left to edit items</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="WARNING__Temp_running_the_game_does" xml:space="preserve">
+    <value>WARNING:
+Temp running the game does not permanently 
+save your changes. Please "Save" the game
+to save your changes. Closing UndertaleModTool
+without using the "Save" option can
+result in loss of work.</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Temp_folder_is_null" xml:space="preserve">
+    <value>Temp folder is null.</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Null_game_executable_name_or_location" xml:space="preserve">
+    <value>Null game executable name or location</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Temp_save_failed__cannot_run" xml:space="preserve">
+    <value>Temp save failed, cannot run.</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="The_game_has_the_debugger_enabled" xml:space="preserve">
+    <value>The game has the debugger enabled. Would you like to disable it so the game will run?</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="You_must_save_your_changes_to_run" xml:space="preserve">
+    <value>You must save your changes to run.</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Use_the___Run_game_using_debugger" xml:space="preserve">
+    <value>Use the "Run game using debugger" option to run this game.</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Save_changes_first" xml:space="preserve">
+    <value>Save changes first?</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="The_file_must_be_saved_in_order_to" xml:space="preserve">
+    <value>The file must be saved in order to be run.</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Are_you_sure_that_you_want_to_run" xml:space="preserve">
+    <value>Are you sure that you want to run the game with GMS debugger?
+If you want to enable a debug mode in some game, then you need to use one of the scripts.</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="The_selected_runtime_does_not_support" xml:space="preserve">
+    <value>The selected runtime does not support debugging.</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Run_error" xml:space="preserve">
+    <value>Run error</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Can_t_highlight_the_object___it_s" xml:space="preserve">
+    <value>Can't highlight the object - it's null or isn't an UndertaleResource.</value>
+    <comment>Used in UndertaleModTool\MainWindow.xaml.cs document</comment>
+  </data>
+  <data name="Edit_a_font_glyph_rectangle" xml:space="preserve">
+    <value>Edit a font glyph rectangle</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\EditGlyphRectangleWindow.xaml document</comment>
+  </data>
+  <data name="Save_changes" xml:space="preserve">
+    <value>Save changes</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\EditGlyphRectangleWindow.xaml document</comment>
+  </data>
+  <data name="Get_help" xml:space="preserve">
+    <value>Get help</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\EditGlyphRectangleWindow.xaml document</comment>
+  </data>
+  <data name="Hint__You_can_click_on_any_glyph" xml:space="preserve">
+    <value>Hint: You can click on any glyph here to highlight it in the "Glyphs".</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\UndertaleFontEditor.xaml document</comment>
+  </data>
+  <data name="Line_height" xml:space="preserve">
+    <value>Line height</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\UndertaleFontEditor.xaml document</comment>
+  </data>
+  <data name="Font_size" xml:space="preserve">
+    <value>Font size</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\UndertaleFontEditor.xaml document</comment>
+  </data>
+  <data name="Bold" xml:space="preserve">
+    <value>Bold</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\UndertaleFontEditor.xaml document</comment>
+  </data>
+  <data name="Italic" xml:space="preserve">
+    <value>Italic</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\UndertaleFontEditor.xaml document</comment>
+  </data>
+  <data name="Range" xml:space="preserve">
+    <value>Range</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\UndertaleFontEditor.xaml document</comment>
+  </data>
+  <data name="Charset" xml:space="preserve">
+    <value>Charset</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\UndertaleFontEditor.xaml document</comment>
+  </data>
+  <data name="Anti_Aliasing" xml:space="preserve">
+    <value>Anti Aliasing</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\UndertaleFontEditor.xaml document</comment>
+  </data>
+  <data name="The_glyphs_were_sorted_successfully" xml:space="preserve">
+    <value>The glyphs were sorted successfully.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\UndertaleFontEditor.xaml.cs document</comment>
+  </data>
+  <data name="The_range_was_updated_successfully" xml:space="preserve">
+    <value>The range was updated successfully.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\UndertaleFontEditor.xaml.cs document</comment>
+  </data>
+  <data name="Cannot_find_the_glyphs_table_scroll" xml:space="preserve">
+    <value>Cannot find the glyphs table scroll viewer.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\UndertaleFontEditor.xaml.cs document</comment>
+  </data>
+  <data name="No_glyph_selected" xml:space="preserve">
+    <value>No glyph selected.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\UndertaleFontEditor.xaml.cs document</comment>
+  </data>
+  <data name="The_font_has_no_texture" xml:space="preserve">
+    <value>The font has no texture.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\UndertaleFontEditor.xaml.cs document</comment>
+  </data>
+  <data name="The_last_glyph_has_zero_size___You" xml:space="preserve">
+    <value>The last glyph has zero size.
+You can use the button on the left to fix that.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\UndertaleFontEditor.xaml.cs document</comment>
+  </data>
+  <data name="Glyphs" xml:space="preserve">
+    <value>Glyphs:</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\UndertaleFontEditor.xaml.cs document</comment>
+  </data>
+  <data name="error1" xml:space="preserve">
+    <value>(error)</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\UndertaleFontEditor.xaml.cs document</comment>
+  </data>
+  <data name="The_character_code_is_greater_than" xml:space="preserve">
+    <value>The character code is greater than the maximum (65535)</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\UndertaleFontEditor.xaml.cs document</comment>
+  </data>
+  <data name="drag___drop_a__0" xml:space="preserve">
+    <value>(drag &amp; drop a {0})</value>
+    <comment>Used in UndertaleModTool\Controls\UndertaleObjectReference.xaml.cs document</comment>
+  </data>
+  <data name="empty__0__reference" xml:space="preserve">
+    <value>(empty {0} reference)</value>
+    <comment>Used in UndertaleModTool\Controls\UndertaleObjectReference.xaml.cs document</comment>
+  </data>
+  <data name="Code_entry_for_room_already_exists" xml:space="preserve">
+    <value>Code entry for room already exists; reusing it.</value>
+    <comment>Used in UndertaleModTool\Controls\UndertaleObjectReference.xaml.cs document</comment>
+  </data>
+  <data name="Adding_not_supported_in_this_situation" xml:space="preserve">
+    <value>Adding not supported in this situation.</value>
+    <comment>Used in UndertaleModTool\Controls\UndertaleObjectReference.xaml.cs document</comment>
+  </data>
+  <data name="The_selected_object_is_not_an___UndertaleResource" xml:space="preserve">
+    <value>The selected object is not an "UndertaleResource".</value>
+    <comment>Used in UndertaleModTool\Controls\UndertaleObjectReference.xaml.cs document</comment>
+  </data>
+  <data name="Invalid_color_string" xml:space="preserve">
+    <value>Invalid color string</value>
+    <comment>Used in UndertaleModTool\Controls\ColorPicker.xaml.cs document</comment>
+  </data>
+  <data name="Cannot_find_the_selected_glyph" xml:space="preserve">
+    <value>Cannot find the selected glyph.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\EditGlyphRectangleWindow.xaml.cs document</comment>
+  </data>
+  <data name="a_1__Double_click_an_inactive_rectangle" xml:space="preserve">
+    <value>1) Double-click an inactive rectangle to select it.
+2) You can move the selected rectangle with the arrow keys (held Shift - resize).
+3) Drag mouse on desired region if it's an empty glyph.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\EditGlyphRectangleWindow.xaml.cs document</comment>
+  </data>
+  <data name="Help1" xml:space="preserve">
+    <value>Help</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\EditGlyphRectangleWindow.xaml.cs document</comment>
+  </data>
+  <data name="Copy_object" xml:space="preserve">
+    <value>Copy object</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Delete_object" xml:space="preserve">
+    <value>Delete object</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Copy_tile" xml:space="preserve">
+    <value>Copy tile</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Delete_tile" xml:space="preserve">
+    <value>Delete tile</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Copy_sprite_instance" xml:space="preserve">
+    <value>Copy sprite instance</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Delete_sprite_instance" xml:space="preserve">
+    <value>Delete sprite instance</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Copy_particle_system_instance" xml:space="preserve">
+    <value>Copy particle system instance</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Delete_particle_system_instance" xml:space="preserve">
+    <value>Delete particle system instance</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Backgrounds" xml:space="preserve">
+    <value>Backgrounds</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Delete_background" xml:space="preserve">
+    <value>Delete background</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="no_name" xml:space="preserve">
+    <value>(no name)</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Disable_view" xml:space="preserve">
+    <value>Disable view</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Views" xml:space="preserve">
+    <value>Views</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="View" xml:space="preserve">
+    <value>View</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="New_object_instance" xml:space="preserve">
+    <value>New object instance</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Paste_object_instance" xml:space="preserve">
+    <value>Paste object instance</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Tiles" xml:space="preserve">
+    <value>Tiles</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="New_tile" xml:space="preserve">
+    <value>New tile</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Paste_tile" xml:space="preserve">
+    <value>Paste tile</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Layers" xml:space="preserve">
+    <value>Layers</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="New_Instances_layer" xml:space="preserve">
+    <value>New Instances layer</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="New_Tiles_layer" xml:space="preserve">
+    <value>New Tiles layer</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="New_Background_layer" xml:space="preserve">
+    <value>New Background layer</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="New_Assets_layer" xml:space="preserve">
+    <value>New Assets layer</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Delete_layer" xml:space="preserve">
+    <value>Delete layer</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="New_legacy_tile" xml:space="preserve">
+    <value>New legacy tile</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="New_sprite_instance" xml:space="preserve">
+    <value>New sprite instance</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Paste_asset" xml:space="preserve">
+    <value>Paste asset</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Move_item_up" xml:space="preserve">
+    <value>Move item up (-)</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Move_item_down" xml:space="preserve">
+    <value>Move item down (+)</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Caption" xml:space="preserve">
+    <value>Caption</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Background_color" xml:space="preserve">
+    <value>Background color</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Draw_background_color" xml:space="preserve">
+    <value>Draw background color</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Creation_Code" xml:space="preserve">
+    <value>Creation code</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="World" xml:space="preserve">
+    <value>World</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Top_Left_Right_Bottom" xml:space="preserve">
+    <value>Top/Left/Right/Bottom</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Gravity" xml:space="preserve">
+    <value>Gravity</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Grid_Width" xml:space="preserve">
+    <value>Grid Width</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Grid_Height" xml:space="preserve">
+    <value>Grid Height</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Grid_Thickness" xml:space="preserve">
+    <value>Grid Thickness</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Foreground" xml:space="preserve">
+    <value>Foreground</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Definition" xml:space="preserve">
+    <value>Definition</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Position" xml:space="preserve">
+    <value>Position</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Tiling" xml:space="preserve">
+    <value>Tiling</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Stretch" xml:space="preserve">
+    <value>Stretch</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Horizontal" xml:space="preserve">
+    <value>Horizontal</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Vertical" xml:space="preserve">
+    <value>Vertical</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Pos_size" xml:space="preserve">
+    <value>Pos/size</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Port_pos_size" xml:space="preserve">
+    <value>Port pos/size</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Border" xml:space="preserve">
+    <value>Border</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Follows_object" xml:space="preserve">
+    <value>Follows object</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Instance_ID" xml:space="preserve">
+    <value>Instance ID</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>Color</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Frame_index" xml:space="preserve">
+    <value>Frame index</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Image_speed" xml:space="preserve">
+    <value>Image speed</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Pre_Create_code" xml:space="preserve">
+    <value>Pre Create code</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Source" xml:space="preserve">
+    <value>Source</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Layer_name" xml:space="preserve">
+    <value>Layer name</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Layer_id" xml:space="preserve">
+    <value>Layer id</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Layer_type" xml:space="preserve">
+    <value>Layer type</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Automatically_set_size_to_match_room" xml:space="preserve">
+    <value>Automatically set size to match room size</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Auto" xml:space="preserve">
+    <value>Auto</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Tile_set" xml:space="preserve">
+    <value>Tile set</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Tile_data" xml:space="preserve">
+    <value>Tile data</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Edit</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="First_frame" xml:space="preserve">
+    <value>First frame</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Animation_speed" xml:space="preserve">
+    <value>Animation speed</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Contains_legacy_tiles_and_sprites" xml:space="preserve">
+    <value>Contains legacy tiles and sprites, listed in the tree on the left</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Contains_GameObject_instances__listed" xml:space="preserve">
+    <value>Contains GameObject instances, listed in the tree on the left</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml document</comment>
+  </data>
+  <data name="Game_objects__from_all_layers" xml:space="preserve">
+    <value>Game objects (from all layers)</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml.cs document</comment>
+  </data>
+  <data name="Please_select_an_assets_layer" xml:space="preserve">
+    <value>Please select an assets layer.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml.cs document</comment>
+  </data>
+  <data name="Please_select_an_instance_layer" xml:space="preserve">
+    <value>Please select an instance layer.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml.cs document</comment>
+  </data>
+  <data name="No_empty_room_backgrounds" xml:space="preserve">
+    <value>No empty room backgrounds.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml.cs document</comment>
+  </data>
+  <data name="Please_select_a_layer" xml:space="preserve">
+    <value>Please select a layer.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml.cs document</comment>
+  </data>
+  <data name="Room_is_null" xml:space="preserve">
+    <value>Room is null.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml.cs document</comment>
+  </data>
+  <data name="Warning___the_maximum_layer_depth" xml:space="preserve">
+    <value>Warning - the maximum layer depth is reached.
+You probably should change the depth of the new layer.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml.cs document</comment>
+  </data>
+  <data name="Layers_don_t_support_this_feature" xml:space="preserve">
+    <value>Layers don't support this feature currently, change the layer depths instead.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml.cs document</comment>
+  </data>
+  <data name="Views_don_t_support_this_feature" xml:space="preserve">
+    <value>Views don't support this feature.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml.cs document</comment>
+  </data>
+  <data name="Backgrounds_don_t_support_this_feature" xml:space="preserve">
+    <value>Backgrounds don't support this feature.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml.cs document</comment>
+  </data>
+  <data name="Can_t_change_the_object_position" xml:space="preserve">
+    <value>Can't change the object position - no list for the selected object was found.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml.cs document</comment>
+  </data>
+  <data name="Tile_data_is_empty" xml:space="preserve">
+    <value>Tile data is empty.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml.cs document</comment>
+  </data>
+  <data name="Tile_data_size_can_t_be_zero" xml:space="preserve">
+    <value>Tile data size can't be zero.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml.cs document</comment>
+  </data>
+  <data name="Error___selected_file_line_count" xml:space="preserve">
+    <value>Error - selected file line count doesn't match tile layer height.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml.cs document</comment>
+  </data>
+  <data name="Was_the_data_exported_from___Tiled" xml:space="preserve">
+    <value>Was the data exported from "Tiled"?</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml.cs document</comment>
+  </data>
+  <data name="The_file_has_invalid_data" xml:space="preserve">
+    <value>The file has invalid data.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml.cs document</comment>
+  </data>
+  <data name="Imported_successfully" xml:space="preserve">
+    <value>Imported successfully.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml.cs document</comment>
+  </data>
+  <data name="Instances" xml:space="preserve">
+    <value>Instances</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleRoomEditor\UndertaleRoomEditor.xaml.cs document</comment>
+  </data>
+  <data name="Index" xml:space="preserve">
+    <value>Index</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleCodeLocalsEditor.xaml document</comment>
+  </data>
+  <data name="Color_depth" xml:space="preserve">
+    <value>Color depth</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Resolution" xml:space="preserve">
+    <value>Resolution</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Frequency" xml:space="preserve">
+    <value>Frequency</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Vertex_sync" xml:space="preserve">
+    <value>Vertex sync</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Priority" xml:space="preserve">
+    <value>Priority</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Back_image" xml:space="preserve">
+    <value>Back image</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Front_image" xml:space="preserve">
+    <value>Front image</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Load_image" xml:space="preserve">
+    <value>Load image</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Load_alpha" xml:space="preserve">
+    <value>Load alpha</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Constants" xml:space="preserve">
+    <value>Constants</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>Unknown</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Language_count" xml:space="preserve">
+    <value>Language count</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Entry_count" xml:space="preserve">
+    <value>Entry count</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Note__the_languages_currently_don" xml:space="preserve">
+    <value>Note: the languages currently don't seem used, and so the editor for them has not yet been made.</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Options" xml:space="preserve">
+    <value>Options</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleGeneralInfoEditor.xaml document</comment>
+  </data>
+  <data name="Spine_Sprites" xml:space="preserve">
+    <value>Spine Sprites</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleTextureGroupInfoEditor.xaml document</comment>
+  </data>
+  <data name="Ascender" xml:space="preserve">
+    <value>Ascender</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\UndertaleFontEditor.xaml document</comment>
+  </data>
+  <data name="Ascender_offset" xml:space="preserve">
+    <value>Ascender offset</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\UndertaleFontEditor.xaml document</comment>
+  </data>
+  <data name="SDF_spread_value" xml:space="preserve">
+    <value>SDF spread value</value>
+    <comment>Used in UndertaleModTool\Editors\UndertaleFontEditor\UndertaleFontEditor.xaml document</comment>
+  </data>
+  <data name="The_references_of_game_object__quot" xml:space="preserve">
+    <value>The references of game object ""</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\FindReferencesResults.xaml document</comment>
+  </data>
+  <data name="The_search_results_for_the_game_object" xml:space="preserve">
+    <value>The search results for the game object
+"".</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\FindReferencesResults.xaml document</comment>
+  </data>
+  <data name="Search1" xml:space="preserve">
+    <value>Search</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\FindReferencesResults.xaml document</comment>
+  </data>
+  <data name="Export_results" xml:space="preserve">
+    <value>Export results</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\FindReferencesResults.xaml document</comment>
+  </data>
+  <data name="Note__the_results_may_be_not_100" xml:space="preserve">
+    <value>Note: the results may be not 100% complete.
+Use one of the search scripts in the "Find" menu if necessary.</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\FindReferencesResults.xaml document</comment>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>Done</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\FindReferencesResults.xaml document</comment>
+  </data>
+  <data name="The_references_of_game_asset____0" xml:space="preserve">
+    <value>The references of game asset "{0}"</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\FindReferencesResults.xaml.cs document</comment>
+  </data>
+  <data name="The_search_results_for_the_game_asset" xml:space="preserve">
+    <value>The search results for the game asset
+"{0}".</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\FindReferencesResults.xaml.cs document</comment>
+  </data>
+  <data name="No_references_found" xml:space="preserve">
+    <value>No references found.</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\FindReferencesResults.xaml.cs document</comment>
+  </data>
+  <data name="The_unreferenced_game_assets" xml:space="preserve">
+    <value>The unreferenced game assets</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\FindReferencesResults.xaml.cs document</comment>
+  </data>
+  <data name="The_search_results_for_the_unreferenced" xml:space="preserve">
+    <value>The search results for the unreferenced game assets.</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\FindReferencesResults.xaml.cs document</comment>
+  </data>
+  <data name="No_unreferenced_assets_found" xml:space="preserve">
+    <value>No unreferenced assets found.</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\FindReferencesResults.xaml.cs document</comment>
+  </data>
+  <data name="The_object_references_are_stale" xml:space="preserve">
+    <value>The object references are stale - a different game data was loaded.</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\FindReferencesResults.xaml.cs document</comment>
+  </data>
+  <data name="No_results_to_export" xml:space="preserve">
+    <value>No results to export.</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\FindReferencesResults.xaml.cs document</comment>
+  </data>
+  <data name="The_object_reference_is_stale___a" xml:space="preserve">
+    <value>The object reference is stale - a different game data was loaded.</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\FindReferencesResults.xaml.cs document</comment>
+  </data>
+  <data name="The_type_of_this_object_reference" xml:space="preserve">
+    <value>The type of this object reference doesn't have an editor/viewer.</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\FindReferencesResults.xaml.cs document</comment>
+  </data>
+  <data name="The_types_of_references" xml:space="preserve">
+    <value>The types of references</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\FindReferencesTypesDialog.xaml document</comment>
+  </data>
+  <data name="Where_to_search_the_references" xml:space="preserve">
+    <value>Where to search the references?</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\FindReferencesTypesDialog.xaml document</comment>
+  </data>
+  <data name="Select_all" xml:space="preserve">
+    <value>Select all</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\FindReferencesTypesDialog.xaml document</comment>
+  </data>
+  <data name="Deselect_all" xml:space="preserve">
+    <value>Deselect all</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\FindReferencesTypesDialog.xaml document</comment>
+  </data>
+  <data name="Room_tiles" xml:space="preserve">
+    <value>Room tiles</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\UndertaleResourceReferenceMap.cs document</comment>
+  </data>
+  <data name="Room_sprite_instances" xml:space="preserve">
+    <value>Room sprite instances</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\UndertaleResourceReferenceMap.cs document</comment>
+  </data>
+  <data name="Room_background_layers" xml:space="preserve">
+    <value>Room background layers</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\UndertaleResourceReferenceMap.cs document</comment>
+  </data>
+  <data name="Texture_groups" xml:space="preserve">
+    <value>Texture groups</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\UndertaleResourceReferenceMap.cs document</comment>
+  </data>
+  <data name="oom_backgrounds" xml:space="preserve">
+    <value>oom backgrounds</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\UndertaleResourceReferenceMap.cs document</comment>
+  </data>
+  <data name="Room_tile_layers" xml:space="preserve">
+    <value>Room tile layers</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\UndertaleResourceReferenceMap.cs document</comment>
+  </data>
+  <data name="Code_entries__name_and_contents" xml:space="preserve">
+    <value>Code entries (name and contents)</value>
+    <comment>Used in UndertaleModTool\Windows\FindReferencesTypesDialog\UndertaleResourceReferenceMap.cs document</comment>
+  </data>
+  <data name="Settings___GML_compiler_decompiler" xml:space="preserve">
+    <value>Settings - GML compiler/decompiler</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="General_settings__compiler__amp" xml:space="preserve">
+    <value>General settings (compiler &amp;amp; decompiler)</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Settings_that_apply_to_both_the_compiler" xml:space="preserve">
+    <value>Settings that apply to both the compiler and decompiler, to make editing GML code simpler.</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Use_CSS_hex_color_literals" xml:space="preserve">
+    <value>Use CSS hex color literals</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="If_enabled__color_constants_can_be" xml:space="preserve">
+    <value>If enabled, color constants can be formatted in the #RRGGBB hex format.</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Named_instance_ID_prefix" xml:space="preserve">
+    <value>Named instance ID prefix:</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Prefix_used_for_named_instance_IDs" xml:space="preserve">
+    <value>Prefix used for named instance IDs when found by decompiler, and for compilation. Change this value if it conflicts with variable names.</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Decompiler_settings" xml:space="preserve">
+    <value>Decompiler settings</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Settings_that_solely_apply_to_the" xml:space="preserve">
+    <value>Settings that solely apply to the GML decompiler, and will not affect GML compilation. These do not apply to all scripts.</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Always_use_semicolons" xml:space="preserve">
+    <value>Always use semicolons</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="If_enabled__all_statements_that_can" xml:space="preserve">
+    <value>If enabled, all statements that can have a semicolon after them will.</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Indentation_style" xml:space="preserve">
+    <value>Indentation style:</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Style_of_indentation_to_be_used_when" xml:space="preserve">
+    <value>Style of indentation to be used when printing decompiled code.</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Open_block_braces_on_same_line" xml:space="preserve">
+    <value>Open block braces on same line</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="If_enabled__the_curly_braces_used" xml:space="preserve">
+    <value>If enabled, the curly braces used to open a block will be placed on the same line as the statement it belongs to, rather than placing the brace on its own line.</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Remove_block_braces_if_single_line" xml:space="preserve">
+    <value>Remove block braces if single line</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="If_enabled__blocks_that_contain_a" xml:space="preserve">
+    <value>If enabled, blocks that contain a single line will have its braces removed, where possible. For if/else chains, all blocks must be single lines.</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Create_enum_declarations" xml:space="preserve">
+    <value>Create enum declarations</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="If_enabled__enum_declarations_identified" xml:space="preserve">
+    <value>If enabled, enum declarations identified during decompilation will always be printed to decompiled output.</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Enum_macro_declarations_at_top_of" xml:space="preserve">
+    <value>Enum/macro declarations at top of code</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="If_enabled__enums_and_macros_will" xml:space="preserve">
+    <value>If enabled, enums and macros will appear at the start (top) of decompiled output, rather than at the end (bottom).</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Print_warnings" xml:space="preserve">
+    <value>Print warnings</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="If_enabled__warnings_generated_during" xml:space="preserve">
+    <value>If enabled, warnings generated during decompilation will be printed as comments.</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Allow_leftover_data_on_VM_stack" xml:space="preserve">
+    <value>Allow leftover data on VM stack</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="If_enabled__data_left_over_on_the" xml:space="preserve">
+    <value>If enabled, data left over on the VM stack will be treated as a warning rather than an error.</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Add_empty_lines" xml:space="preserve">
+    <value>Add empty lines:</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Select_specific_syntax_to_add_empty" xml:space="preserve">
+    <value>Select specific syntax to add empty lines before, after, or around.</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Around_branch_statements" xml:space="preserve">
+    <value>Around branch statements</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="If_enabled__adds_an_empty_line_before" xml:space="preserve">
+    <value>If enabled, adds an empty line before and after branch statements.</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="After_local_variable_declarations" xml:space="preserve">
+    <value>After local variable declarations</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="If_enabled__adds_an_empty_line_after" xml:space="preserve">
+    <value>If enabled, adds an empty line after block-scoped local variable declarations.</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Before_switch_cases" xml:space="preserve">
+    <value>Before switch cases</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="If_enabled__adds_an_empty_line_before1" xml:space="preserve">
+    <value>If enabled, adds an empty line before (a chain) of "case" entries in a switch statement.</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="After_switch_cases" xml:space="preserve">
+    <value>After switch cases</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="If_enabled__adds_an_empty_line_after1" xml:space="preserve">
+    <value>If enabled, adds an empty line after (a chain) of "case" entries in a switch statement.</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Around_function_declarations" xml:space="preserve">
+    <value>Around function declarations</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="If_enabled__adds_an_empty_line_before2" xml:space="preserve">
+    <value>If enabled, adds an empty line before and after a function declaration, even if it is anonymous.</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Around_static_initialization" xml:space="preserve">
+    <value>Around static initialization</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="If_enabled__adds_an_empty_line_before3" xml:space="preserve">
+    <value>If enabled, adds an empty line before and after static initialization, grouping together consecutive statics if possible.</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Select_specific_cleanup_operations" xml:space="preserve">
+    <value>Select specific cleanup operations for the decompiler to perform. Disabling these may make code more ugly or "incorrect", but can show underlying logic.</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Perform_cleanups" xml:space="preserve">
+    <value>Perform cleanups:</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Try_catch_finally_rewriting" xml:space="preserve">
+    <value>Try/catch/finally rewriting</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="If_enabled__compiler_generated_code" xml:space="preserve">
+    <value>If enabled, compiler-generated code and logic for try/catch/finally statements is rewritten to (attempt to) look like the original code.</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Transform_else_into_continue" xml:space="preserve">
+    <value>Transform else into continue</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="If_enabled__certain_usages_of__quot" xml:space="preserve">
+    <value>If enabled, certain usages of ”else“ inside of a loop can be transformed into ”continue“ statements, which can make code easier to read. This only happens if accuracy can be maintained.</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Default_argument_values" xml:space="preserve">
+    <value>Default argument values</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="If_enabled__syntax_for_default_named" xml:space="preserve">
+    <value>If enabled, syntax for default named function arguments will be used. Compiler-generated if statements are transformed to do this, maintaining accuracy.</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Builtin_array_variable_syntax" xml:space="preserve">
+    <value>Builtin array variable syntax</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="If_enabled__certain_builtin_globals" xml:space="preserve">
+    <value>If enabled, certain builtin globals (such as "view_xview"), when detected to be used without an array accessor, will be printed as such, rather than using compiler-generated syntax.</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Scope_local_variable_declarations" xml:space="preserve">
+    <value>Scope local variable declarations</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="If_enabled__local_variable_declarations" xml:space="preserve">
+    <value>If enabled, local variable declarations will be placed according to their scopes, which are detected based on usage in the code.</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Restore_to_defaults" xml:space="preserve">
+    <value>Restore to defaults</value>
+    <comment>Used in UndertaleModTool\Windows\GMLSettingsWindow.xaml document</comment>
+  </data>
+  <data name="Please_wait" xml:space="preserve">
+    <value>Please wait...</value>
+    <comment>Used in UndertaleModTool\Windows\LoaderDialog.xaml.cs document</comment>
+  </data>
+  <data name="No_data_win_loaded" xml:space="preserve">
+    <value>No data.win loaded.</value>
+    <comment>Used in UndertaleModTool\Windows\SearchInCodeWindow.xaml.cs document</comment>
+  </data>
+  <data name="Can_t_search_code_in_YYC_game__there" xml:space="preserve">
+    <value>Can't search code in YYC game, there's no code to search.</value>
+    <comment>Used in UndertaleModTool\Windows\SearchInCodeWindow.xaml.cs document</comment>
+  </data>
+  <data name="Can_t_search_while_another_search" xml:space="preserve">
+    <value>Can't search while another search is in progress.</value>
+    <comment>Used in UndertaleModTool\Windows\SearchInCodeWindow.xaml.cs document</comment>
+  </data>
+  <data name="There_are_no_code_entries_that_match" xml:space="preserve">
+    <value>There are no code entries that match the name filter.</value>
+    <comment>Used in UndertaleModTool\Windows\SearchInCodeWindow.xaml.cs document</comment>
+  </data>
+  <data name="Searching" xml:space="preserve">
+    <value>Searching...</value>
+    <comment>Used in UndertaleModTool\Windows\SearchInCodeWindow.xaml.cs document</comment>
+  </data>
+  <data name="Code_entries" xml:space="preserve">
+    <value>Code entries</value>
+    <comment>Used in UndertaleModTool\Windows\SearchInCodeWindow.xaml.cs document</comment>
+  </data>
+  <data name="Generating_result_list" xml:space="preserve">
+    <value>Generating result list...</value>
+    <comment>Used in UndertaleModTool\Windows\SearchInCodeWindow.xaml.cs document</comment>
+  </data>
+  <data name="Can_t_open_results_while_a_search" xml:space="preserve">
+    <value>Can't open results while a search is in progress.</value>
+    <comment>Used in UndertaleModTool\Windows\SearchInCodeWindow.xaml.cs document</comment>
+  </data>
+  <data name="Open1" xml:space="preserve">
+    <value>Open</value>
+    <comment>Used in UndertaleModTool\Windows\SearchInCodeWindow.xaml document</comment>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Copy</value>
+    <comment>Used in UndertaleModTool\Windows\SearchInCodeWindow.xaml document</comment>
+  </data>
+  <data name="Copy_all" xml:space="preserve">
+    <value>Copy all</value>
+    <comment>Used in UndertaleModTool\Windows\SearchInCodeWindow.xaml document</comment>
+  </data>
+  <data name="Case_sensitive" xml:space="preserve">
+    <value>Case sensitive</value>
+    <comment>Used in UndertaleModTool\Windows\SearchInCodeWindow.xaml document</comment>
+  </data>
+  <data name="Regex_search" xml:space="preserve">
+    <value>Regex search</value>
+    <comment>Used in UndertaleModTool\Windows\SearchInCodeWindow.xaml document</comment>
+  </data>
+  <data name="Multiline_regex" xml:space="preserve">
+    <value>Multiline regex</value>
+    <comment>Used in UndertaleModTool\Windows\SearchInCodeWindow.xaml document</comment>
+  </data>
+  <data name="In_assembly" xml:space="preserve">
+    <value>In assembly</value>
+    <comment>Used in UndertaleModTool\Windows\SearchInCodeWindow.xaml document</comment>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Settings</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Required_only_if_you_want_to_use" xml:space="preserve">
+    <value>Required only if you want to use the Studio runner rather than the .exe or run the game under debugger.</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="GameMaker__Studio_1_4_path" xml:space="preserve">
+    <value>GameMaker: Studio 1.4 path:</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Required_only_if_you_want_to_run" xml:space="preserve">
+    <value>Required only if you want to run GMS2 games using the Studio runner rather than the .exe</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="GameMaker_Studio_2_runtimes_path" xml:space="preserve">
+    <value>GameMaker Studio 2 runtimes path:</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Enable_asset_order_swapping" xml:space="preserve">
+    <value>Enable asset order swapping</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Toggles_dragging__amp__dropping_assets" xml:space="preserve">
+    <value>Toggles dragging &amp; dropping assets in the asset tabs to different positions in the list. Disabled by default.</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Automatically_associate_GameMaker" xml:space="preserve">
+    <value>Automatically associate GameMaker data files</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Automatic_file_association__Enabled" xml:space="preserve">
+    <value>Automatic file association. Enabled by default.</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Show__quot_Run_game_under_GMS_debugger" xml:space="preserve">
+    <value>Show "Run game under GMS debugger" file option</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Whether_to_show_the_option_in_the" xml:space="preserve">
+    <value>Whether to show the option in the "File" menu. Disabled by default.</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Remember_last_window_position_and" xml:space="preserve">
+    <value>Remember last window position and size</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Warn_about_saving_before_closing" xml:space="preserve">
+    <value>Warn about saving before closing</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Warn_about_saving_before_closing1" xml:space="preserve">
+    <value>Warn about saving before closing. Enabled by default.</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Warn_about_temp_running" xml:space="preserve">
+    <value>Warn about temp running</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Warn_about_temp_running__Enabled" xml:space="preserve">
+    <value>Warn about temp running. Enabled by default.</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Show_null_entries_in_resource_tree" xml:space="preserve">
+    <value>Show null entries in resource tree</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Whether_to_show_null_entries_in_the" xml:space="preserve">
+    <value>Whether to show null entries in the resource tree, which in GM 2024.11+ games usually were unused assets removed by the compiler. Disabled by default due to limited support in the GUI.</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Enable_dark_mode" xml:space="preserve">
+    <value>Enable dark mode</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Makes_the_program_interface_dark" xml:space="preserve">
+    <value>Makes the program interface dark. Disabled by default.</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Transparency_grid_colors" xml:space="preserve">
+    <value>Transparency grid colors:</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="GML_compiler_decompiler_settings" xml:space="preserve">
+    <value>GML compiler/decompiler settings</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="This_option_globally_overrides_the" xml:space="preserve">
+    <value>This option globally overrides the automatic assignment of a room's grid width based on the most used tile's width in that room.</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="This_option_globally_overrides_the1" xml:space="preserve">
+    <value>This option globally overrides the automatic assignment of a room's grid height based on the most used tile's height in that room.</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Global_grid_width" xml:space="preserve">
+    <value>Global grid width</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Global_grid_height" xml:space="preserve">
+    <value>Global grid height</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="This_option_globally_overrides_the2" xml:space="preserve">
+    <value>This option globally overrides the automatic assignment of a room's grid thickness.</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Global_grid_thickness" xml:space="preserve">
+    <value>Global grid thickness</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Warning__the_following_options_are" xml:space="preserve">
+    <value>Warning: the following options are currently experimental. Usage of any options below is at your own risk, and they may not be compatible in the future.</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Enable_profile_mode" xml:space="preserve">
+    <value>Enable profile mode</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Toggles_the__decompile_once_and_compile" xml:space="preserve">
+    <value>Toggles the 'decompile once and compile many' profile mode. Enabled by default. May need to be disabled for certain operations.</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Delete_old_profile_on_saving" xml:space="preserve">
+    <value>Delete old profile on saving</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Deletes_the_profile_obsoleted_on" xml:space="preserve">
+    <value>Deletes the profile obsoleted on saving. Saves on file space at the expense of losing code information for variants. Enabled by default.</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Profile_mode_message_shown" xml:space="preserve">
+    <value>Profile mode message shown</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="On_first_load__this_will_show_you" xml:space="preserve">
+    <value>On first load, this will show you the profile mode loaded message. If this somehow breaks, you can manually toggle it here.</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Open_application_data_folder" xml:space="preserve">
+    <value>Open application data folder</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+  <data name="Update_app_to_latest_commit" xml:space="preserve">
+    <value>Update app to latest commit</value>
+    <comment>Used in UndertaleModTool\Windows\SettingsWindow.xaml document</comment>
+  </data>
+</root>

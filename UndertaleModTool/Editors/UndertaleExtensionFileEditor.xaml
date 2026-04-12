@@ -7,7 +7,7 @@
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleExtensionFile}">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleExtensionFile}" xmlns:strings="clr-namespace:UndertaleModTool.Resources" >
     <UserControl.Resources>
         <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="ExtensionKind">
             <ObjectDataProvider.MethodParameters>
@@ -28,21 +28,21 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">FileName</TextBlock>
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.FileName}"></TextBlock>
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Filename}"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Cleanup function name</TextBlock>
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Cleanup_function_name}"></TextBlock>
         <local:UndertaleStringReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding CleanupScript}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Init function name</TextBlock>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Init_function_name}"></TextBlock>
         <local:UndertaleStringReference Grid.Row="2" Grid.Column="1" Margin="3" ObjectReference="{Binding InitScript}"/>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Kind</TextBlock>
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Kind1}"></TextBlock>
 
         <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource ExtensionKind}}" SelectedItem="{Binding Kind}"
                         Grid.Row="3" Grid.Column="1" Margin="3"/>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Functions</TextBlock>
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="{x:Static strings:Strings.Functions}"></TextBlock>
         <local:DataGridDark Grid.Row="4" Grid.Column="1" Margin="3" ItemsSource="{Binding Functions}" x:Name="FunctionsList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" AddingNewItem="DataGrid_AddingNewItem" IsSynchronizedWithCurrentItem="True">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
@@ -61,7 +61,7 @@
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate>
-                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic" Text="{x:Static strings:Strings.Double_click_to_add}"></TextBlock>
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>

@@ -6,8 +6,8 @@
         xmlns:utmt="clr-namespace:UndertaleModTool"
         xmlns:local="clr-namespace:UndertaleModTool.Windows"
         mc:Ignorable="d"
-        Title="The references of game object &quot;&quot;" Height="600" Width="450" IsVisibleChanged="Window_IsVisibleChanged"
-        WindowStartupLocation="CenterOwner">
+        Title="{x:Static strings:Strings.The_references_of_game_object__quot}" Height="600" Width="450" IsVisibleChanged="Window_IsVisibleChanged"
+        WindowStartupLocation="CenterOwner" xmlns:strings="clr-namespace:UndertaleModTool.Resources" >
     <Window.Resources>
         <local:ChildInstanceNameConverter x:Key="ChildInstanceNameConverter"/>
         <utmt:StringTitleConverter x:Key="StringTitleConverter"/>
@@ -18,7 +18,7 @@
             <TextBlock Text="{Binding Content, Mode=OneWay, Converter={StaticResource StringTitleConverter}}" />
         </HierarchicalDataTemplate>
         <utmt:ContextMenuDark x:Key="StandaloneTabMenu">
-            <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>
+            <MenuItem Header="{x:Static strings:Strings.Open_in_new_tab}" Click="MenuItem_OpenInNewTab_Click"/>
         </utmt:ContextMenuDark>
     </Window.Resources>
     <Grid>
@@ -30,11 +30,11 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0" Name="label" Text="The search results for the game object&#x0a;&quot;&quot;." HorizontalAlignment="Left" Padding="5" Margin="10,10,0,0"
+        <TextBlock Grid.Row="0" Name="label" Text="{x:Static strings:Strings.The_search_results_for_the_game_object}" HorizontalAlignment="Left" Padding="5" Margin="10,10,0,0"
                    FontSize="22" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="70"/>
         <Rectangle Grid.Row="1" Margin="10,0,20,0" Height="2" Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
 
-        <utmt:TextBoxDark Grid.Row="2" x:Name="SearchBox" ToolTip="Search" TextChanged="SearchBox_TextChanged"
+        <utmt:TextBoxDark Grid.Row="2" x:Name="SearchBox" ToolTip="{x:Static strings:Strings.Search1}" TextChanged="SearchBox_TextChanged"
                           Margin="10,15,20,0" FontSize="14">
             <!-- Source - https://stackoverflow.com/a/7433840/12136394 -->
             <TextBox.Style>
@@ -42,7 +42,7 @@
                     <Style.Resources>
                         <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
                             <VisualBrush.Visual>
-                                <Label Content="Filter by name..." Foreground="Gray" FontSize="14"/>
+                                <Label Content="{x:Static strings:Strings.Filter_by_name}" Foreground="Gray" FontSize="14"/>
                             </VisualBrush.Visual>
                         </VisualBrush>
                     </Style.Resources>
@@ -70,9 +70,9 @@
             </TreeView.Background>
             <TreeView.Resources>
                 <utmt:ContextMenuDark x:Key="UndertaleResourceMenu" Opened="MenuItem_ContextMenuOpened">
-                    <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>
-                    <MenuItem Header="Copy name to clipboard" Click="MenuItem_CopyName_Click"/>
-                    <MenuItem Header="Find all references" Click="MenuItem_FindAllReferences_Click"/>
+                    <MenuItem Header="{x:Static strings:Strings.Open_in_new_tab}" Click="MenuItem_OpenInNewTab_Click"/>
+                    <MenuItem Header="{x:Static strings:Strings.Copy_name_to_clipboard}" Click="MenuItem_CopyName_Click"/>
+                    <MenuItem Header="{x:Static strings:Strings.Find_all_references}" Click="MenuItem_FindAllReferences_Click"/>
                 </utmt:ContextMenuDark>
                 <Style TargetType="TreeViewItem">
                     <Style.Triggers>
@@ -85,11 +85,11 @@
             </TreeView.Resources>
         </TreeView>
 
-        <TextBlock Grid.Row="4" Text="Note: the results may be not 100% complete.&#x0a;Use one of the search scripts in the &quot;Find&quot; menu if necessary."
+        <TextBlock Grid.Row="4" Text="{x:Static strings:Strings.Note__the_results_may_be_not_100}"
                    Margin="10,0,20,0" FontStyle="Italic" Foreground="Gray"/>
 
         <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,20">
-            <utmt:ButtonDark Content="Export results" FontSize="18" Width="144" Height="40" Click="ExportButton_Click" Margin="0,0,10,0">
+            <utmt:ButtonDark Content="{x:Static strings:Strings.Export_results}" FontSize="18" Width="144" Height="40" Click="ExportButton_Click" Margin="0,0,10,0">
                 <Button.Style>
                     <Style TargetType="Button">
                         <Style.Triggers>
@@ -100,7 +100,7 @@
                     </Style>
                 </Button.Style>
             </utmt:ButtonDark>
-            <utmt:ButtonDark Content="Done" FontSize="18" Width="134" Height="40" Click="DoneButton_Click"/>
+            <utmt:ButtonDark Content="{x:Static strings:Strings.Done}" FontSize="18" Width="134" Height="40" Click="DoneButton_Click"/>
         </StackPanel>
     </Grid>
 </Window>

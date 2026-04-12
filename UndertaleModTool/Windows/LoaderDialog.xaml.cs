@@ -30,7 +30,7 @@ namespace UndertaleModTool
         public string Message { get; set; }
         public bool PreventClose { get; set; }
 
-        public string StatusText { get; set; } = "Please wait...";
+        public string StatusText { get; set; } = UndertaleModTool.Resources.Strings.Please_wait;
         public string SavedStatusText { get; set; }
         public double? Maximum
         {
