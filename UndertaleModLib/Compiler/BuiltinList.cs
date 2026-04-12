@@ -140,9 +140,7 @@ public class BuiltinList : IBuiltins
             if (scriptLookup.Contains(name))
                 continue;
             if (Functions.ContainsKey(name))
-            {
                 continue;
-            }
             DefineFunction(name);
         }
     }
