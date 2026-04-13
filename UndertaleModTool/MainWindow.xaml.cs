@@ -1800,6 +1800,7 @@ namespace UndertaleModTool
                             if (Data.IsVersionAtLeast(2024, 13))
                             {
                                 roomResource.Flags |= Data.IsVersionAtLeast(2024, 13) ? UndertaleRoom.RoomEntryFlags.IsGM2024_13 : UndertaleRoom.RoomEntryFlags.IsGMS2;
+                                roomResource.InstanceCreationOrderIDs ??= new();
                             }
                             else
                             {
