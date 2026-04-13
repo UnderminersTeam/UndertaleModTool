@@ -174,11 +174,14 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
         Room.Layers.Remove(layer);
     }
 
-    public void AddGameObjectInstance(Layer? layer = null)
+    public void AddGameObjectInstance(Layer? layer = null, UndertaleGameObject? gameObject = null, int x = 0, int y = 0)
     {
         GameObject instance = new()
         {
             InstanceID = MainVM.Data!.GeneralInfo.LastObj++,
+            ObjectDefinition = gameObject,
+            X = x,
+            Y = y,
         };
         Room.GameObjects.Add(instance);
 
@@ -224,11 +227,14 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
         layer.AssetsData.LegacyTiles.Add(tile);
     }
 
-    public void AddSpriteInstance(Layer layer)
+    public void AddSpriteInstance(Layer layer, UndertaleSprite? sprite = null, int x = 0, int y = 0)
     {
         SpriteInstance spriteInstance = new()
         {
             Name = SpriteInstance.GenerateRandomName(MainVM.Data),
+            Sprite = sprite,
+            X = x,
+            Y = y,
         };
 
         layer.AssetsData.Sprites.Add(spriteInstance);

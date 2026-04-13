@@ -10,7 +10,10 @@ using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Rendering.SceneGraph;
 using Avalonia.Skia;
+using Avalonia.Xaml.Interactions.DragAndDrop;
+using Avalonia.Xaml.Interactivity;
 using SkiaSharp;
+using UndertaleModLib;
 using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia;
@@ -65,6 +68,8 @@ public class UndertaleRoomEditor : Control
     {
         ClipToBounds = true;
         Focusable = true;
+
+        Interaction.SetBehaviors(this, [new ContextDropBehavior() { Handler = new UndertaleReferenceDropHandler() }]);
     }
 
     protected override void OnDataContextChanged(EventArgs e)
@@ -801,6 +806,72 @@ public class UndertaleRoomEditor : Control
                     )
                 ));
             }
+        }
+    }
+
+    public class UndertaleReferenceDropHandler : DropHandlerBase
+    {
+        public override bool Validate(object? sender, DragEventArgs e, object? sourceContext, object? targetContext, object? state)
+        {
+            if (sender is UndertaleRoomEditor editor
+                && sourceContext is MainViewModel.TreeDataGridItem item
+                && item.Value is UndertaleResource resource
+                && targetContext is UndertaleRoomViewModel vm)
+            {
+                if (resource is UndertaleGameObject gameObject)
+                {
+                    return (vm.CategorySelected is "GameObjects"
+                        || vm.CategorySelected is UndertaleRoom.Layer layer && layer.LayerType == UndertaleRoom.LayerType.Instances);
+                }
+                else if (resource is UndertaleSprite sprite)
+                {
+                    return vm.CategorySelected is UndertaleRoom.Layer layer && layer.LayerType == UndertaleRoom.LayerType.Assets;
+                }
+            }
+            return false;
+        }
+        public override bool Execute(object? sender, DragEventArgs e, object? sourceContext, object? targetContext, object? state)
+        {
+            if (sender is UndertaleRoomEditor editor
+                && sourceContext is MainViewModel.TreeDataGridItem item
+                && item.Value is UndertaleResource resource
+                && targetContext is UndertaleRoomViewModel vm)
+            {
+                Point pointerPosition = e.GetPosition(editor);
+                Point pointerPositionInRoom = (pointerPosition - editor.translation) / editor.scaling;
+                int x = (int)pointerPositionInRoom.X;
+                int y = (int)pointerPositionInRoom.Y;
+
+                if (resource is UndertaleGameObject gameObject)
+                {
+                    if (vm.CategorySelected is "GameObjects")
+                    {
+                        vm.AddGameObjectInstance(layer: null, gameObject, x, y);
+                    }
+                    else if (vm.CategorySelected is UndertaleRoom.Layer layer && layer.LayerType == UndertaleRoom.LayerType.Instances)
+                    {
+                        vm.AddGameObjectInstance(layer, gameObject: gameObject, x, y);
+                    }
+                    else
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }
+                else if (resource is UndertaleSprite sprite)
+                {
+                    if (vm.CategorySelected is UndertaleRoom.Layer layer && layer.LayerType == UndertaleRoom.LayerType.Assets)
+                    {
+                        vm.AddSpriteInstance(layer, sprite, x, y);
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            return false;
         }
     }
 }
