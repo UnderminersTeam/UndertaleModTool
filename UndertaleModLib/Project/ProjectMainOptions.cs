@@ -25,6 +25,11 @@ internal sealed class ProjectMainOptions
     public List<string> Flags { get; set; } = [];
 
     /// <summary>
+    /// List of strings to verify in the loaded data file before completing project import.
+    /// </summary>
+    public List<string> VerifyStrings { get; set; } = [];
+
+    /// <summary>
     /// Path to the default data file path to have project assets imported to, or none to disable asset importing during installation.
     /// </summary>
     public PathList AssetsDataFilePath { get; set; } = new();

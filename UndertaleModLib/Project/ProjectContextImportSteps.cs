@@ -1,5 +1,7 @@
-﻿using System.IO;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 
 namespace UndertaleModLib.Project;
@@ -22,6 +24,54 @@ partial class ProjectContext
 
             // Currently, no non-custom flags are supported, so throw an exception.
             throw new ProjectException($"Unsupported project flag \"{flag}\"");
+        }
+    }
+
+    /// <summary>
+    /// Verifies the game version matches, based on known
+    /// </summary>
+    private void VerifyGameVersion()
+    {
+        bool failed = false;
+        if (_mainOptions.VerifyStrings.Count <= 1)
+        {
+            foreach (string expectedString in _mainOptions.VerifyStrings)
+            {
+                bool found = false;
+                foreach (UndertaleString str in Data.Strings)
+                {
+                    if (str.Content == expectedString)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    failed = true;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            HashSet<string> lookup = new(Data.Strings.Count);
+            foreach (UndertaleString str in Data.Strings)
+            {
+                lookup.Add(str.Content);
+            }
+            foreach (string expectedString in _mainOptions.VerifyStrings)
+            {
+                if (!lookup.Contains(expectedString))
+                {
+                    failed = true;
+                    break;
+                }
+            }
+        }
+        if (failed)
+        {
+            throw new ProjectException("Game data is missing expected strings; cannot import. Wrong game version?");
         }
     }
 

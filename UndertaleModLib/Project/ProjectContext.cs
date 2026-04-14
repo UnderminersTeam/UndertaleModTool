@@ -276,6 +276,7 @@ public sealed partial class ProjectContext
         {
             // Use already-loaded assets data file, if provided
             Data = currentData;
+            VerifyGameVersion();
         }
         else if (TryFindFileFromPathList(_mainOptions.AssetsDataFilePath, out string loadDataPath, out string saveDataPath))
         {
@@ -314,6 +315,7 @@ public sealed partial class ProjectContext
                 {
                     // Data should be ready for loading now
                     LoadAssetsDataFile();
+                    VerifyGameVersion();
                 }
                 RunPreAssetImportScripts();
                 LoadProjectAssets();
