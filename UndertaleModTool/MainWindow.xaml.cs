@@ -1189,13 +1189,47 @@ namespace UndertaleModTool
             FilePath = filename;
             OnPropertyChanged("FilePath");
             if (Path.GetDirectoryName(FilePath) != Path.GetDirectoryName(filename))
+            {
                 CloseChildFiles();
+            }
 
             DebugDataDialog.DebugDataMode debugMode = DebugDataDialog.DebugDataMode.NoDebug;
             if (!suppressDebug && Data.GeneralInfo != null && !Data.GeneralInfo.IsDebuggerDisabled)
                 this.ShowWarning("You are saving the game in GameMaker Studio debug mode. Unless the debugger is running, the normal runtime will simply hang after loading. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger");
             Task<bool> t = Task.Run(() =>
             {
+                // Recompile code sources before doing anything, if needed
+                if (Settings.Instance.RecompileAllCodeSourcesOnProjectSave)
+                {
+                    try
+                    {
+                        if (Project is not null)
+                        {
+                            FileMessageEvent?.Invoke("Recompiling GML code, please wait...");
+                            Project.RecompileAllCodeSources();
+                            FileMessageEvent?.Invoke("Saving data file, please wait...");
+                        }
+                    }
+                    catch (ProjectException e)
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            dialog.Hide();
+                            this.ShowError(e.Message, "Recompile error");
+                        });
+                        return false;
+                    }
+                    catch (Exception e)
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            dialog.Hide();
+                            this.ShowError("An error occurred while trying to recompile code sources:\n" + e.Message, "Recompile error");
+                        });
+                        return false;
+                    }
+                }
+
                 bool saveSucceeded = true;
 
                 try

@@ -7,8 +7,10 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Underanalyzer.Decompiler;
+using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
+using UndertaleModLib.Project.SerializableAssets;
 using UndertaleModLib.Util;
 
 namespace UndertaleModLib.Project;
@@ -572,5 +574,41 @@ public sealed partial class ProjectContext
 
         // Clean up saving structures
         _audioGroups = null;
+    }
+
+    /// <summary>
+    /// Recompiles all code entries in the project's data file for which the plaintext source code is known.
+    /// </summary>
+    /// <exception cref="ProjectException">Thrown upon compilation failure.</exception>
+    public void RecompileAllCodeSources()
+    {
+        // Import code
+        CodeImportGroup importGroup = new(Data)
+        {
+            AutoCreateAssets = false,
+            MainThreadAction = MainThreadAction
+        };
+        List<KeyValuePair<UndertaleCode, string>> codeSourcePairs = [.. _codeSources];
+        codeSourcePairs.Sort((a, b) => (a.Key.Name?.Content ?? "").CompareTo(b.Key.Name?.Content ?? ""));
+        foreach ((UndertaleCode code, string source) in codeSourcePairs)
+        {
+            try
+            {
+                // Queue for code replacement
+                importGroup.QueueReplace(code, source);
+            }
+            catch (Exception e)
+            {
+                throw new ProjectException($"Failed to import GML code asset named \"{code.Name?.Content ?? "<unknown name>"}\": {e.Message}", e);
+            }
+        }
+        try
+        {
+            importGroup.Import(true);
+        }
+        catch (Exception e)
+        {
+            throw new ProjectException(e.Message, e);
+        }
     }
 }

@@ -55,6 +55,8 @@ namespace UndertaleModTool
         public WindowPlacementExtensions.WindowPlacement? MainWindowPlacement { get; set; } = null;
         public bool RememberWindowPlacements { get; set; } = false;
 
+        public bool RecompileAllCodeSourcesOnProjectSave { get; set; } = false;
+
         public static Settings Instance { get; private set; }
 
         public static JsonSerializerOptions JsonOptions = new()

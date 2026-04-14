@@ -68,13 +68,14 @@
                         <CheckBox IsChecked="{Binding AssetOrderSwappingEnabled}" Content="Enable asset order swapping" ToolTip="Toggles dragging &amp; dropping assets in the asset tabs to different positions in the list. Disabled by default."/>
                         <CheckBox IsChecked="{Binding AutomaticFileAssociation}" Content="Automatically associate GameMaker data files" ToolTip="Automatic file association. Enabled by default."/>
                         <CheckBox IsChecked="{Binding ShowDebuggerOption}" Content="Show &quot;Run game under GMS debugger&quot; file option" ToolTip="Whether to show the option in the &quot;File&quot; menu. Disabled by default."/>
-                        <CheckBox IsChecked="{Binding RememberWindowPlacements}" Content="Remember last window position and size"/>
+                        <CheckBox IsChecked="{Binding RememberWindowPlacements}" Content="Remember last window position and size" ToolTip="Whether to restore window position and size when launching a new tool instance. Disabled by default."/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="1">
                         <CheckBox IsChecked="{Binding WarnOnClose}" Content="Warn about saving before closing" ToolTip="Warn about saving before closing. Enabled by default."/>
                         <CheckBox IsChecked="{Binding TempRunMessageShow}" Content="Warn about temp running" ToolTip="Warn about temp running. Enabled by default."/>
                         <CheckBox IsChecked="{Binding ShowNullEntriesInResourceTree}" Content="Show null entries in resource tree" ToolTip="Whether to show null entries in the resource tree, which in GM 2024.11+ games usually were unused assets removed by the compiler. Disabled by default due to limited support in the GUI."/>
+                        <CheckBox IsChecked="{Binding RecompileAllCodeSourcesOnProjectSave}" Content="Recompile all source GML when saving a project data file" ToolTip="Whether to recompile all GML source code included in the currently-loaded project, if one is loaded, whenever saving a data file (including temp runs). Disabled by default."/>
                     </StackPanel>
                 </Grid>
 

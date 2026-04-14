@@ -243,6 +243,16 @@ namespace UndertaleModTool
             }
         }
 
+        public static bool RecompileAllCodeSourcesOnProjectSave
+        {
+            get => Settings.Instance.RecompileAllCodeSourcesOnProjectSave;
+            set
+            {
+                Settings.Instance.RecompileAllCodeSourcesOnProjectSave = value;
+                Settings.Save();
+            }
+        }
+
         public static DecompilerSettings DecompilerSettings => Settings.Instance.DecompilerSettings;
 
         public static string InstanceIdPrefix
