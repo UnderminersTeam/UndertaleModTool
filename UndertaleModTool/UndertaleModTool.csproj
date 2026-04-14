@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>net10.0-windows</TargetFramework>
         <RollForward>LatestMajor</RollForward>
@@ -9,7 +9,7 @@
         <DebugType>embedded</DebugType>
         <Platforms>AnyCPU;x64</Platforms>
         <RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
-        <LangVersion>10</LangVersion>
+        <LangVersion>11.0</LangVersion>
         <ApplicationIcon>icon.ico</ApplicationIcon>
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
         <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>

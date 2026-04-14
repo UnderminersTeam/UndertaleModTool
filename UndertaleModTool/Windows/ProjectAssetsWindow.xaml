@@ -12,12 +12,13 @@
         <local:ContextMenuDark x:Key="ListViewItemContextMenu">
             <MenuItem Header="Open" Click="MenuItemOpen_Click"/>
             <MenuItem Header="Open in new tab" Click="MenuItemOpenInNewTab_Click"/>
+            <MenuItem Header="Unmark for export" Click="MenuItemUnmarkForExport_Click"/>
             <!--MenuItem Header="Copy" Command="Copy"/-->
             <!--MenuItem Header="Copy all" Click="MenuItemCopyAll_Click"/-->
         </local:ContextMenuDark>
     </Window.Resources>
     <DockPanel>
-        <Grid Margin="10,10,10,10">
+        <Grid Margin="10,10,10,10" DragOver="Grid_DragOver" Drop="Grid_Drop" AllowDrop="True">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -27,9 +28,9 @@
                 Below is a list of all assets currently waiting to be exported to disk for the current project, once it is next saved.
             </Label>
             <Label Grid.Row="1">
-                To quickly add or remove assets from being part of the project, you can drag and drop assets here, or delete them. (TODO: not implemented)
+                To quickly add or remove assets from being part of the project, you can drag and drop assets here, or delete them.
             </Label>
-            <ListView Grid.Row="2" Margin="0,8,0,0" ItemsSource="{x:Null}" x:Name="AssetsListView" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}">
+            <ListView Grid.Row="2" Margin="0,8,0,0" ItemsSource="{x:Null}" MinHeight="300" x:Name="AssetsListView" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}">
                 <ListView.CommandBindings>
                     <!--CommandBinding Command="Copy" Executed="CopyCommand_Executed"/-->
                 </ListView.CommandBindings>
@@ -56,8 +57,8 @@
                                 <Setter Property="Foreground" Value="Black" />
                             </Style>
                         </GridView.ColumnHeaderContainerStyle>
-                        <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" Width="auto"/>
-                        <GridViewColumn Header="Asset Type" DisplayMemberBinding="{Binding AssetType}" Width="auto"/>
+                        <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" Width="Auto"/>
+                        <GridViewColumn Header="Asset Type" DisplayMemberBinding="{Binding AssetType}" Width="Auto"/>
                     </GridView>
                 </ListView.View>
             </ListView>

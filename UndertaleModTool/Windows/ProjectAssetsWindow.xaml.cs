@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using UndertaleModLib;
 using UndertaleModLib.Project;
 
 namespace UndertaleModTool
@@ -23,7 +24,9 @@ namespace UndertaleModTool
     {
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
 
-        public readonly record struct UnexportedAsset(string Name, string AssetType);
+        private bool _preventUpdateList = false;
+
+        public readonly record struct UnexportedAsset(string Name, string AssetType, IProjectAsset ProjectAsset);
 
         public ProjectAssetsWindow()
         {
@@ -38,10 +41,16 @@ namespace UndertaleModTool
 
         private void UpdateList(object sender, EventArgs e)
         {
+            // If list is temporarily prevented from being updated, don't do anything
+            if (_preventUpdateList)
+            {
+                return;
+            }
+
             // Populate with current project assets
             List<UnexportedAsset> assets = ((ProjectContext)sender)
                 .EnumerateUnexportedAssets()
-                .Select((IProjectAsset asset) => new UnexportedAsset(asset.ProjectName, asset.ProjectAssetType.ToInterfaceName()))
+                .Select((IProjectAsset asset) => new UnexportedAsset(asset.ProjectName, asset.ProjectAssetType.ToInterfaceName(), asset))
                 .ToList();
 
             // Sort assets by type and name
@@ -72,11 +81,37 @@ namespace UndertaleModTool
             }
         }
 
-        void OpenSelectedListViewItem(bool inNewTab = false)
+        private void OpenSelectedListViewItem(bool inNewTab = false)
         {
-            foreach (UnexportedAsset asset in AssetsListView.SelectedItems)
+            if (AssetsListView.SelectedItems is [UnexportedAsset asset, ..])
             {
-                // TODO
+                if (asset.ProjectAsset is not UndertaleObject obj)
+                {
+                    return;
+                }
+
+                if (!mainWindow.HasEditorForAsset(obj))
+                {
+                    this.ShowError("The type of this object doesn't have an editor/viewer.");
+                    return;
+                }
+
+                mainWindow.Focus();
+                mainWindow.ChangeSelection(obj, inNewTab);
+            }
+        }
+
+        private void UnmarkSelectedListViewItemsForExport()
+        {
+            if (mainWindow.Project is ProjectContext projectContext)
+            {
+                _preventUpdateList = true;
+                foreach (UnexportedAsset asset in AssetsListView.SelectedItems)
+                {
+                    projectContext.UnmarkAssetForExport(asset.ProjectAsset);
+                }
+                _preventUpdateList = false;
+                UpdateList(projectContext, null);
             }
         }
 
@@ -92,16 +127,54 @@ namespace UndertaleModTool
                 OpenSelectedListViewItem();
                 e.Handled = true;
             }
+            else if (e.Key == Key.Delete)
+            {
+                UnmarkSelectedListViewItemsForExport();
+                e.Handled = true;
+            }
         }
 
         private void MenuItemOpen_Click(object sender, RoutedEventArgs e)
         {
             OpenSelectedListViewItem();
+            e.Handled = true;
         }
 
         private void MenuItemOpenInNewTab_Click(object sender, RoutedEventArgs e)
         {
             OpenSelectedListViewItem(true);
+            e.Handled = true;
+        }
+
+        private void MenuItemUnmarkForExport_Click(object sender, RoutedEventArgs e)
+        {
+            UnmarkSelectedListViewItemsForExport();
+            e.Handled = true;
+        }
+
+        private void Grid_DragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetData(e.Data.GetFormats()[^1]) is IProjectAsset { ProjectExportable: true })
+            {
+                e.Effects = DragDropEffects.Move;
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+
+            e.Handled = true;
+        }
+
+        private void Grid_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetData(e.Data.GetFormats()[^1]) is IProjectAsset projectAsset)
+            {
+                if (mainWindow.Project is ProjectContext project && project.MarkAssetForExport(projectAsset))
+                {
+                    e.Handled = true;
+                }
+            }
         }
 
         private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
