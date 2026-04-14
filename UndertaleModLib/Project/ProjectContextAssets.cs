@@ -22,6 +22,25 @@ partial class ProjectContext
             throw new InvalidOperationException("Attempting to load project assets with no loaded game data");
         }
 
+        // Load general info and options, if present
+        string generalInfoOptionsPath = Path.Join(MainDirectory, "general-info-options.json");
+        if (File.Exists(generalInfoOptionsPath))
+        {
+            try
+            {
+                using FileStream fs = new(generalInfoOptionsPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                SerializableGeneralInfoOptions generalInfoOptions = JsonSerializer.Deserialize<SerializableGeneralInfoOptions>(fs, JsonOptions);
+                MainThreadAction(() =>
+                {
+                    generalInfoOptions.ImportTo(Data);
+                });
+            }
+            catch (Exception e)
+            {
+                throw new ProjectException($"Failed to load general info and options at \"{Path.GetFileName(generalInfoOptionsPath)}\": {e.Message}", e);
+            }
+        }
+
         // Initialize loading structures
         _audioGroups = new(Data.AudioGroups?.Count ?? 4);
         _streamedSoundFilenames = new(16);

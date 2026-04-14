@@ -10,7 +10,6 @@ using Underanalyzer.Decompiler;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
-using UndertaleModLib.Project.SerializableAssets;
 using UndertaleModLib.Util;
 
 namespace UndertaleModLib.Project;

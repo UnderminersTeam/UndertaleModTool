@@ -772,7 +772,7 @@ public class UndertaleOptions : UndertaleObject, IDisposable
     public uint Frequency { get; set; } = 0;
 
     /// <summary>
-    /// Whether the game uses V-Sync. Used only in Game Maker 8 and earlier.
+    /// Whether the game uses V-Sync.
     /// </summary>
     public uint VertexSync { get; set; } = 0;
 
