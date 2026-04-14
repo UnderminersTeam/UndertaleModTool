@@ -702,6 +702,15 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                 {
                     reader.undertaleData.ShortCircuit = false;
                 }
+
+                // Check for "dup.e", which implies new code generation introduced in GM 2024.14.4
+                if (kind == Opcode.Dup && type1 == DataType.Int16)
+                {
+                    if (!reader.undertaleData.IsVersionAtLeast(2024, 14, 4))
+                    {
+                        reader.undertaleData.SetGMS2Version(2024, 14, 4);
+                    }
+                }
                 break;
             }
 

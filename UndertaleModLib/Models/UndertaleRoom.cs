@@ -298,6 +298,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         writer.WriteUndertaleObjectPointer(Tiles);
         if (writer.undertaleData.IsVersionAtLeast(2024, 13))
         {
+            InstanceCreationOrderIDs ??= new(); // (ensure instance creation order IDs exist, even if empty)
             writer.WriteUndertaleObjectPointer(InstanceCreationOrderIDs);
         }
         writer.Write(World);
