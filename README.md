@@ -12,50 +12,35 @@ The most complete tool for modding, decompiling and unpacking Undertale (and oth
 
 ## Windows
 
-1. **Find** the latest stable release from the [Downloads](#downloads) section below
-2. **Download** the GUI version (e.g. `UndertaleModTool_v0.8.4.1-Windows.zip`)
-3. **Extract** the archive to a folder (do not run from inside the archive!)
-4. **Run** `UndertaleModTool.exe`
-5. **Open** your game's data file (e.g., `data.win`, `game.ios`) via File → Open
-6. **Enjoy modding!**
+1. Find the latest stable (or nightly) release from the [Downloads](#downloads) section below
+2. Download the GUI version (e.g. `UndertaleModTool_v0.8.4.1-Windows.zip`), or the CLI version if you know what you're doing
+3. Extract the ZIP file to a folder (do not run from inside the archive!)
+4. Run `UndertaleModTool.exe` to start the tool
+5. Open your game's data file (e.g. `data.win`, `game.ios`, `game.unx`, etc.) via File → Open
 
-## MacOS/Linux
+## macOS/Linux
 
-Use the CLI version or install GUI via [community installer](https://github.com/YarTom/UndertaleModTool-linux-installer)
+As of writing, there is no official method of running UndertaleModTool's GUI on macOS or Linux. However, there are some options available:
+- Use the CLI (command-line interface) version of the tool. This means there's no graphical interface, but it can be useful for automation and quick tasks.
+- Use a work-in-progress port of the GUI to a cross-platform framework, such as the one [currently available here](https://github.com/UnderminersTeam/UndertaleModTool/pull/2126). As of writing, this port is incomplete, but it has support for many features that are commonly used.
+- Run the tool via [Wine](https://winehq.org). This can be configured manually, or you can use an unofficial, community-maintained installer script such as [this one](https://github.com/YarTom/UndertaleModTool-linux-installer). **The Underminers team is not associated with these projects, so take care to ensure any scripts are safe before running them!**
 
 # Downloads
 
-Both the latest stable release and the most cutting edge version can be downloaded from the table below!
-The nightly releases are more likely to contain issues, but have the most recent features and fixes.
+Both the latest stable and nightly releases can be downloaded from the table below!
+The nightly releases are more likely to have issues, but contain the most recent features and fixes.
 
-| Releases 	| Status 	|
+| Release 	| Link / Status 	|
 |:---:	|----------	|
 | Stable 	| [![Latest Stable Release](https://img.shields.io/github/downloads/UnderminersTeam/UndertaleModTool/latest/total)](https://github.com/UnderminersTeam/UndertaleModTool/releases/latest) |
 | Nightly 	| [![Latest Nightly](https://img.shields.io/github/downloads/UnderminersTeam/UndertaleModTool/nightly/total)](https://github.com/UnderminersTeam/UndertaleModTool/releases/tag/nightly) |
 
-## Versions:
+UndertaleModTool has a few different versions to choose from. The differences are as follows:
 
-### GUI Version (Graphical User Interface)
-- **Windows (64-bit)** only
-- Full graphical interface for convenient data file manipulation
-- All built-in scripts available
-- Recommended for most Windows users
-
-* `Single file` - the tool is only one executable, with all dependencies embedded within it. This does make your folders cleaner, however it also causes some unexpected stability issues.
-* `Non-single file` - all dependencies are not embedded within the executable, but are now located right next to it. Choose this if you don't care about finding the right executable in-between of ~300 DLL files, or if the stability issues from the `Single file` build affect you.
-
-### CLI Version (Command Line Interface)
-- **Cross-platform release** — Windows, Ubuntu, macOS
-- Command-line version without a graphical interface
-- Recommended for task automation
-
-### GUI for macOS and Linux
-
-The official GUI version only supports Windows. **MacOS** and **Linux** users can use UndertaleModTool via [Wine](https://winehq.org). 
-
-Community-maintained auto-installer is available:
-
-**Unofficial Installer for MacOS and Linux:** [UndertaleModTool-installer](https://github.com/YarTom/UndertaleModTool-linux-installer)
+* `GUI` (default) - the tool has a full graphical interface, making data file viewing and manipulation convenient.
+* `CLI` - the tool is accessible only via a command-line interface, which is useful for automation and quick tasks, but is more difficult to use.
+* `Single file` - the tool is only one executable, with all dependencies embedded within it. This makes your folders cleaner, however it can also cause stability issues in certain cases.
+* `Non-single file` (default) - all dependencies are not embedded within the executable, and are now located right next to it. Choose this if you don't care about finding the right executable within ~300 DLL files, or if the stability issues from the `Single file` build affect you.
 
 # Main Features
 
