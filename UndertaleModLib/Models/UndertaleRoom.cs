@@ -47,7 +47,13 @@ public class UndertaleRoom : UndertaleNamedResource, IProjectAsset, INotifyPrope
         /// <summary>
         /// Whether the room was made in GameMaker 2024.13 or above.
         /// </summary>
-        IsGM2024_13 = 262144
+        IsGM2024_13 = 262144,
+
+        /// <summary>
+        /// Obsolete version of <see cref="ClearViewBackground"/>, retained for serialization purposes.
+        /// </summary>
+        [Obsolete("Older name for ClearViewBackground, retained for serialization purposes")]
+        ShowColor = ClearViewBackground
     }
 
     /// <summary>
