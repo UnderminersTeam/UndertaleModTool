@@ -14,4 +14,13 @@ public partial class UndertaleBackgroundViewModel : IUndertaleResourceViewModel
     }
 
     public static UndertaleBackground.TileID CreateTileID() => new();
+
+    public void AutoTileIDs()
+    {
+        Background.GMS2TileIds.Clear();
+
+        for (uint i = 0; i < Background.GMS2TileCount; i++)
+            for (uint j = 0; j < Background.GMS2ItemsPerTileCount; j++)
+                Background.GMS2TileIds.Add(new UndertaleBackground.TileID() { ID = i });
+    }
 }

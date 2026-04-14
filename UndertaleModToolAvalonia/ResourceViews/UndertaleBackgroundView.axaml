@@ -96,6 +96,11 @@
                     </l:EditableDataGrid>
                 </Expander>
             </Grid>
+
+            <Button Command="{Binding AutoTileIDs}"
+                    IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
+                    Converter={StaticResource VersionCompareConverter},
+                    ConverterParameter=GE2}">Auto tile IDs (no animated tiles)</Button>
         
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
                             MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">

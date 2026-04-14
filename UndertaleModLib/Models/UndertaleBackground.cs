@@ -120,7 +120,7 @@ public class UndertaleBackground : UndertaleNamedResource, IDisposable
     /// <summary>
     /// All tile ids of this tileset. Game Maker Studio 2 only.
     /// </summary>
-    public List<TileID> GMS2TileIds { get; set; } = new List<TileID>();
+    public UndertaleObservableList<TileID> GMS2TileIds { get; set; } = new UndertaleObservableList<TileID>();
 
     /// <remarks>
     /// GM 2024.14.1+ only.
@@ -189,7 +189,7 @@ public class UndertaleBackground : UndertaleNamedResource, IDisposable
             GMS2TileCount = reader.ReadUInt32();
             GMS2ExportedSpriteIndex = reader.ReadInt32();
             GMS2FrameLength = reader.ReadInt64();
-            GMS2TileIds = new List<TileID>((int)GMS2TileCount * (int)GMS2ItemsPerTileCount);
+            GMS2TileIds = new((int)GMS2TileCount * (int)GMS2ItemsPerTileCount);
             for (int i = 0; i < GMS2TileCount * GMS2ItemsPerTileCount; i++)
             {
                 TileID id = new TileID();
