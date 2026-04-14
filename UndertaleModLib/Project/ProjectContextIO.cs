@@ -62,8 +62,7 @@ partial class ProjectContext
         foreach (ProjectMainOptions.PathList.PathPair pair in list.Paths)
         {
             // Attempt next path
-            string attemptPath = Path.Join(LoadDirectory, pair.Source);
-            Paths.VerifyWithinDirectory(LoadDirectory, attemptPath);
+            string attemptPath = Paths.JoinVerifyWithinDirectory(LoadDirectory, pair.Source);
             if (!File.Exists(attemptPath))
             {
                 continue;
@@ -71,8 +70,7 @@ partial class ProjectContext
 
             // Successfully found a path!
             sourcePath = attemptPath;
-            destPath = Path.Join(SaveDirectory, pair.Destination);
-            Paths.VerifyWithinDirectory(SaveDirectory, destPath);
+            destPath = Paths.JoinVerifyWithinDirectory(SaveDirectory, pair.Destination);
             return true;
         }
 
@@ -144,8 +142,7 @@ partial class ProjectContext
             relativeAudioGroupPath = $"audiogroup{index}.dat";
         }
         string baseDirectory = fromLoadedDirectory ? LoadDirectory : SaveDirectory;
-        string path = Path.Join(baseDirectory, relativeAudioGroupPath);
-        Paths.VerifyWithinDirectory(baseDirectory, path);
+        string path = Paths.JoinVerifyWithinDirectory(baseDirectory, relativeAudioGroupPath);
         if (File.Exists(path))
         {
             using FileStream stream = new(path, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -191,8 +188,7 @@ partial class ProjectContext
         // Perform copy (and overwrite)
         try
         {
-            string destPath = Path.Join(SaveDirectory, destinationFilename);
-            Paths.VerifyWithinDirectory(SaveDirectory, destPath);
+            string destPath = Paths.JoinVerifyWithinDirectory(SaveDirectory, destinationFilename);
 
             // Backup original destination file status
             string destFullPath = Path.GetFullPath(destPath);

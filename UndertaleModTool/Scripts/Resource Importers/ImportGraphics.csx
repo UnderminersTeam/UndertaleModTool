@@ -26,12 +26,12 @@ bool noMasksForBasicRectangles = Data.IsVersionAtLeast(2022, 9); // TODO: figure
 
 try
 {
-    string packDir = Path.Combine(ExePath, "Packager");
+    string packDir = Path.Join(ExePath, "Packager");
     Directory.CreateDirectory(packDir);
 
     string sourcePath = importFolder;
     string searchPattern = "*.png";
-    string outName = Path.Combine(packDir, "atlas.txt");
+    string outName = Path.Join(packDir, "atlas.txt");
     int textureSize = 2048;
     int PaddingValue = 2;
     bool debug = false;
@@ -50,7 +50,7 @@ try
     int atlasCount = 0;
     foreach (Atlas atlas in packer.Atlasses)
     {
-        string atlasName = Path.Combine(packDir, $"{prefix}{atlasCount:000}.png");
+        string atlasName = Paths.JoinVerifyWithinDirectory(packDir, $"{prefix}{atlasCount:000}.png");
         using MagickImage atlasImage = TextureWorker.ReadBGRAImageFromFile(atlasName);
         IPixelCollection<byte> atlasPixels = atlasImage.GetPixels();
 

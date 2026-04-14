@@ -183,8 +183,7 @@ partial class ProjectContext
                 {
                     relativeAudioGroupPath = $"audiogroup{groupId}.dat";
                 }
-                string fullAudioGroupPath = Path.Join(SaveDirectory, relativeAudioGroupPath);
-                Paths.VerifyWithinDirectory(SaveDirectory, fullAudioGroupPath);
+                string fullAudioGroupPath = Paths.JoinVerifyWithinDirectory(SaveDirectory, relativeAudioGroupPath);
                 FileBackup.BackupFile(fullAudioGroupPath);
                 using FileStream stream = new(fullAudioGroupPath, FileMode.Create, FileAccess.Write);
                 UndertaleIO.Write(stream, group);

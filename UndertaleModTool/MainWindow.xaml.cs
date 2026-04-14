@@ -447,7 +447,7 @@ namespace UndertaleModTool
                         {
                             bool deleted = false;
                             string exMessage = "(error message is missing)";
-                            string tempFolder = Path.Combine(Path.GetTempPath(), "UndertaleModTool");
+                            string tempFolder = Path.Join(Path.GetTempPath(), "UndertaleModTool");
 
                             for (int i = 0; i <= 5; i++)
                             {
@@ -479,18 +479,23 @@ namespace UndertaleModTool
                     var runtime = picker.Pick(FilePath, Data);
                     if (runtime == null)
                         return;
-                    Process.Start(runtime.Path, "-game \"" + FilePath + "\"");
+                    Process.Start(new ProcessStartInfo(runtime.Path, ["-game", FilePath]));
                     Environment.Exit(0);
                 }
                 else if (isLaunch)
                 {
                     string gameExeName = Data?.GeneralInfo?.FileName?.Content;
-                    if (gameExeName == null || FilePath == null)
+                    if (gameExeName is null || FilePath is null)
                     {
                         ScriptError("Null game executable name or location");
                         Environment.Exit(0);
                     }
-                    string gameExePath = Path.Combine(Path.GetDirectoryName(FilePath), gameExeName + ".exe");
+                    string gameExePath = Paths.TryJoinVerifyWithinDirectory(Path.GetDirectoryName(FilePath), gameExeName + ".exe");
+                    if (gameExePath is null)
+                    {
+                        ScriptError("Failed to find valid game executable path; escaped directory");
+                        Environment.Exit(0);
+                    }
                     if (!File.Exists(gameExePath))
                     {
                         ScriptError("Cannot find game executable path, expected: " + gameExePath);
@@ -501,8 +506,7 @@ namespace UndertaleModTool
                         ScriptError("Cannot find data file path, expected: " + FilePath);
                         Environment.Exit(0);
                     }
-                    if (gameExeName != null)
-                        Process.Start(gameExePath, "-game \"" + FilePath + "\" -debugoutput \"" + Path.ChangeExtension(FilePath, ".gamelog.txt") + "\"");
+                    Process.Start(new ProcessStartInfo(gameExePath, ["-game", FilePath, "-debugoutput", Path.ChangeExtension(FilePath, ".gamelog.txt")]));
                     Environment.Exit(0);
                 }
                 else if (args.Length > 2)
@@ -537,7 +541,13 @@ namespace UndertaleModTool
             string key = Guid.NewGuid().ToString();
 
             string dir = Path.GetDirectoryName(FilePath);
-            Process.Start(Environment.ProcessPath, "\"" + Path.Combine(dir, filename) + "\" " + key);
+            string childFilePath = Paths.TryJoinVerifyWithinDirectory(dir, filename);
+            if (childFilePath is null)
+            {
+                ScriptError("Failed to open child data file; escaped directory.");
+                return;
+            }
+            Process.Start(new ProcessStartInfo(Environment.ProcessPath, [childFilePath, key]));
 
             var server = new NamedPipeServerStream(key);
             server.WaitForConnection();
@@ -1927,7 +1937,7 @@ namespace UndertaleModTool
 
         private void RootMenuItem_SubmenuOpened(object sender, RoutedEventArgs e)
         {
-            MenuItem_RunScript_SubmenuOpened(sender, e, Path.Combine(ExePath, "Scripts"));
+            MenuItem_RunScript_SubmenuOpened(sender, e, Path.Join(ExePath, "Scripts"));
         }
 
         private void MenuItem_RunScript_SubmenuOpened(object sender, RoutedEventArgs e, string folderDir)
@@ -2012,7 +2022,7 @@ namespace UndertaleModTool
         {
             string path = (string)(sender as MenuItem).CommandParameter;
             if (!File.Exists(path))
-                path = Path.Combine(Program.GetExecutableDirectory(), path);
+                path = Paths.TryJoinVerifyWithinDirectory(Program.GetExecutableDirectory(), path);
 
             if (File.Exists(path))
                 await RunScript(path);
@@ -2670,7 +2680,7 @@ namespace UndertaleModTool
             }
 
             string configStr = Version.Contains("Git:") ? "Debug" : "Release";
-            bool isSingleFile = !File.Exists(Path.Combine(ExePath, "UndertaleModTool.dll"));
+            bool isSingleFile = !File.Exists(Path.Join(ExePath, "UndertaleModTool.dll"));
             string assemblyLocation = AppDomain.CurrentDomain.GetAssemblies()
                                       .First(x => x.GetName().Name.StartsWith("System.Collections")).Location; // any of currently used assemblies
             bool isBundled = !Regex.Match(assemblyLocation, @"C:\\Program Files( \(x86\))*\\dotnet\\shared\\").Success;
@@ -2709,7 +2719,7 @@ namespace UndertaleModTool
                 return;
             }
 
-            DateTime currDate = File.GetLastWriteTime(Path.Combine(ExePath, "UndertaleModTool.exe"));
+            DateTime currDate = File.GetLastWriteTime(Path.Join(ExePath, "UndertaleModTool.exe"));
             DateTime lastDate = (DateTime)action["updated_at"];
             if (lastDate.Subtract(currDate).TotalMinutes <= 10)
                 if (this.ShowQuestion("UndertaleModTool is already up to date.\nUpdate anyway?") != MessageBoxResult.Yes)
@@ -2763,10 +2773,10 @@ namespace UndertaleModTool
             string baseDownloadUrl = artifact["archive_download_url"].ToString();
             string downloadUrl = baseDownloadUrl.Replace("api.github.com/repos", "nightly.link").Replace("/zip", ".zip");
 
-            string tempFolder = Path.Combine(Path.GetTempPath(), "UndertaleModTool");
+            string tempFolder = Path.Join(Path.GetTempPath(), "UndertaleModTool");
             Directory.CreateDirectory(tempFolder); // We're about to download, so make sure the download dir actually exists
 
-            string downloadOutput = Path.Combine(tempFolder, "Update.zip.zip");
+            string downloadOutput = Path.Join(tempFolder, "Update.zip.zip");
 
             // It's time to download; let's use a cool progress bar
             scriptDialog = new("Downloading", "Downloading new version...")
@@ -2825,17 +2835,17 @@ namespace UndertaleModTool
                     HideProgressBar();
 
                     // Extract ZIP
-                    string updaterFolderTemp = Path.Combine(tempFolder, "Updater");
+                    string updaterFolderTemp = Path.Join(tempFolder, "Updater");
                     bool extractedSuccessfully = false;
                     try
                     {
                         // Unzip double-zipped update
                         ZipFile.ExtractToDirectory(downloadOutput, tempFolder, true);
-                        File.Move(Path.Combine(tempFolder, $"{patchName}.zip"), Path.Combine(tempFolder, "Update.zip"), true);
+                        File.Move(Path.Join(tempFolder, $"{patchName}.zip"), Path.Join(tempFolder, "Update.zip"), true);
                         File.Delete(downloadOutput);
 
-                        string updaterFolder = Path.Combine(ExePath, "Updater");
-                        if (!File.Exists(Path.Combine(updaterFolder, "UndertaleModToolUpdater.exe")))
+                        string updaterFolder = Path.Join(ExePath, "Updater");
+                        if (!File.Exists(Path.Join(updaterFolder, "UndertaleModToolUpdater.exe")))
                         {
                             this.ShowError("Updater not found! Aborting update, report this to the devs!\nLocation checked: " + updaterFolder);
                             return;
@@ -2849,7 +2859,7 @@ namespace UndertaleModTool
                             Directory.CreateDirectory(updaterFolderTemp);
                             foreach (string file in Directory.GetFiles(updaterFolder))
                             {
-                                File.Copy(file, Path.Combine(updaterFolderTemp, Path.GetFileName(file)));
+                                File.Copy(file, Path.Join(updaterFolderTemp, Path.GetFileName(file)));
                             }
                         }
                         catch (Exception ex)
@@ -2857,7 +2867,7 @@ namespace UndertaleModTool
                             this.ShowError($"Can't copy the updater app to the temporary folder.\n{ex}");
                             return;
                         }
-                        File.WriteAllText(Path.Combine(updaterFolderTemp, "actualAppFolder"), ExePath);
+                        File.WriteAllText(Path.Join(updaterFolderTemp, "actualAppFolder"), ExePath);
 
                         extractedSuccessfully = true;
                     }
@@ -2876,7 +2886,7 @@ namespace UndertaleModTool
                         this.ShowMessage("UndertaleModTool will now close to finish the update.");
 
                         // Invoke updater
-                        Process.Start(new ProcessStartInfo(Path.Combine(updaterFolderTemp, "UndertaleModToolUpdater.exe"))
+                        Process.Start(new ProcessStartInfo(Path.Join(updaterFolderTemp, "UndertaleModToolUpdater.exe"))
                         {
                             WorkingDirectory = updaterFolderTemp
                         });
@@ -2926,7 +2936,12 @@ namespace UndertaleModTool
             {
                 // Project is loaded - try to find game EXE in save directory
                 saveDataFilePath = Project.SaveDataPath;
-                gameExePath = Path.Combine(Path.GetDirectoryName(saveDataFilePath), $"{gameExeName}.exe");
+                gameExePath = Paths.TryJoinVerifyWithinDirectory(Path.GetDirectoryName(saveDataFilePath), $"{gameExeName}.exe");
+                if (gameExePath is null)
+                {
+                    ScriptError("Failed to find valid game executable path; escaped directory");
+                    return;
+                }
                 if (!File.Exists(gameExePath))
                 {
                     ScriptError($"Cannot find game executable path, expected to find it at: {gameExePath}");
@@ -2951,7 +2966,12 @@ result in loss of work.");
                 }
 
                 // Try to find game EXE
-                gameExePath = Path.Combine(Path.GetDirectoryName(FilePath), $"{gameExeName}.exe");
+                gameExePath = Paths.TryJoinVerifyWithinDirectory(Path.GetDirectoryName(FilePath), $"{gameExeName}.exe");
+                if (gameExePath is null)
+                {
+                    ScriptError("Failed to find valid game executable path; escaped directory");
+                    return;
+                }
                 if (!File.Exists(gameExePath))
                 {
                     ScriptError($"Cannot find game executable path, expected to find it at: {gameExePath}");
@@ -2963,7 +2983,7 @@ result in loss of work.");
                 int oldSteamValue = Data.GeneralInfo.SteamAppID;
                 Data.GeneralInfo.SteamAppID = 0;
                 Data.GeneralInfo.IsDebuggerDisabled = true;
-                saveDataFilePath = Path.Combine(Path.GetDirectoryName(FilePath), "mod_temprun.temp");
+                saveDataFilePath = Path.Join(Path.GetDirectoryName(FilePath), "mod_temprun.temp");
                 saveSucceeded = await SaveFile(saveDataFilePath, false);
                 Data.GeneralInfo.SteamAppID = oldSteamValue;
                 Data.GeneralInfo.IsDebuggerDisabled = oldDisableDebuggerState;
@@ -2979,7 +2999,7 @@ result in loss of work.");
                 }
                 // TODO: possibly have a setting to add debug output via
                 //          -debugoutput \"{Path.ChangeExtension(saveDataFilePath, ".gamelog.txt")}\"
-                Process.Start(gameExePath, $"-game \"{saveDataFilePath}\"");
+                Process.Start(new ProcessStartInfo(gameExePath, ["-game", saveDataFilePath]));
             }
             else
             {
@@ -3026,8 +3046,10 @@ result in loss of work.");
                 RuntimePicker picker = new RuntimePicker();
                 picker.Owner = this;
                 var runtime = picker.Pick(FilePath, Data);
-                if (runtime != null)
-                    Process.Start(runtime.Path, "-game \"" + FilePath + "\" -debugoutput \"" + Path.ChangeExtension(FilePath, ".gamelog.txt") + "\"");
+                if (runtime is not null)
+                {
+                    Process.Start(new ProcessStartInfo(runtime.Path, ["-game", FilePath, "-debugoutput", Path.ChangeExtension(FilePath, ".gamelog.txt")]));
+                }
             }
         }
 
@@ -3084,7 +3106,7 @@ result in loss of work.");
   </TutorialState>
 </assets>");
 
-                Process.Start(runtime.Path, "-game \"" + FilePath + "\" -debugoutput \"" + Path.ChangeExtension(FilePath, ".gamelog.txt") + "\"");
+                Process.Start(new ProcessStartInfo(runtime.Path, ["-game", FilePath, "-debugoutput", Path.ChangeExtension(FilePath, ".gamelog.txt")]));
                 Process.Start(runtime.DebuggerPath, "-d=\"" + Path.ChangeExtension(FilePath, ".yydebug") + "\" -t=\"127.0.0.1\" -tp=" + Data.GeneralInfo.DebuggerPort + " -p=\"" + tempProject + "\"");
             }
             Data.GeneralInfo.IsDebuggerDisabled = origDbg;
@@ -3887,7 +3909,7 @@ result in loss of work.");
             ProjectContext newProjectContext;
             try
             {
-                newProjectContext = new(Data, FilePath, saveFilePath, Path.Combine(directory, "project.json"), projectName, (f) => Dispatcher.Invoke(f));
+                newProjectContext = new(Data, FilePath, saveFilePath, Path.Join(directory, "project.json"), projectName, (f) => Dispatcher.Invoke(f));
             }
             catch (ProjectException ex)
             {

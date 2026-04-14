@@ -768,9 +768,9 @@ namespace UndertaleModTool
                 string gettextJsonPath = null;
                 if (dataPath is not null)
                 {
-                    gettextJsonPath = Path.Combine(dataPath, "lang", "lang_en.json");
+                    gettextJsonPath = Path.Join(dataPath, "lang", "lang_en.json");
                     if (!File.Exists(gettextJsonPath))
-                        gettextJsonPath = Path.Combine(dataPath, "lang", "lang_en_ch1.json");
+                        gettextJsonPath = Path.Join(dataPath, "lang", "lang_en_ch1.json");
                 }
 
                 var dataa = mainWindow.Data;

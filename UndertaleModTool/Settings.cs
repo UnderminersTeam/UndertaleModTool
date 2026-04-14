@@ -14,7 +14,7 @@ namespace UndertaleModTool
 {
     public class Settings
     {
-        public static string AppDataFolder = Path.Combine(
+        public static readonly string AppDataFolder = Path.Join(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UndertaleModTool");
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace UndertaleModTool
 
             try
             {
-                string path = Path.Combine(AppDataFolder, "settings.json");
+                string path = Path.Join(AppDataFolder, "settings.json");
                 if (!File.Exists(path))
                 {
                     // No settings JSON exists, so make a new one
@@ -133,7 +133,7 @@ namespace UndertaleModTool
             try
             {
                 Directory.CreateDirectory(AppDataFolder);
-                string path = Path.Combine(AppDataFolder, "settings.json");
+                string path = Path.Join(AppDataFolder, "settings.json");
                 byte[] bytes = JsonSerializer.SerializeToUtf8Bytes(Instance, JsonOptions);
                 File.WriteAllBytes(path, bytes);
             }

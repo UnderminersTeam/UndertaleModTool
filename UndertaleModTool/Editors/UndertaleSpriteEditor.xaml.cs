@@ -134,7 +134,7 @@ namespace UndertaleModTool
                 {
                     string dir = Path.GetDirectoryName(dlg.FileName);
                     string name = Path.GetFileNameWithoutExtension(dlg.FileName);
-                    string path = Path.Combine(dir, name);
+                    string path = Path.Join(dir, name);
                     string ext = Path.GetExtension(dlg.FileName);
 
                     if (sprite.SpineTextures.Count > 0)
@@ -148,7 +148,7 @@ namespace UndertaleModTool
                             {
                                 try
                                 {
-                                    File.WriteAllBytes(Path.Combine(path, tex.id + ext), tex.tex.TexBlob);
+                                    File.WriteAllBytes(Paths.JoinVerifyWithinDirectory(path, tex.id + ext), tex.tex.TexBlob);
                                 } 
                                 catch (Exception ex) 
                                 {
@@ -158,8 +158,8 @@ namespace UndertaleModTool
                         }
 
                         // json and atlas
-                        File.WriteAllText(Path.Combine(path, "spine.json"), sprite.SpineJSON);
-                        File.WriteAllText(Path.Combine(path, "spine.atlas"), sprite.SpineAtlas);
+                        File.WriteAllText(Path.Join(path, "spine.json"), sprite.SpineJSON);
+                        File.WriteAllText(Path.Join(path, "spine.atlas"), sprite.SpineAtlas);
                     }
                 }
                 catch (Exception ex)
@@ -197,7 +197,7 @@ namespace UndertaleModTool
                     {
                         string dir = Path.GetDirectoryName(dlg.FileName);
                         string name = Path.GetFileNameWithoutExtension(dlg.FileName);
-                        string path = Path.Combine(dir, name);
+                        string path = Path.Join(dir, name);
                         string ext = Path.GetExtension(dlg.FileName);
 
                         Directory.CreateDirectory(path);
@@ -205,7 +205,7 @@ namespace UndertaleModTool
                         {
                             try
                             {
-                                worker.ExportAsPNG(tex.tex.Texture, Path.Combine(path, sprite.Name.Content + "_" + tex.id + ext), null, includePadding);
+                                worker.ExportAsPNG(tex.tex.Texture, Paths.JoinVerifyWithinDirectory(path, sprite.Name.Content + "_" + tex.id + ext), null, includePadding);
                             }
                             catch (Exception ex)
                             {

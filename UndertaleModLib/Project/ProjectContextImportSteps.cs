@@ -37,8 +37,7 @@ partial class ProjectContext
         _projectJsonPaths ??= [Path.GetFullPath(MainFilePath)];
         foreach (string subProjectRelativePath in _mainOptions.SubProjects)
         {
-            string subProjectPath = Path.Join(MainDirectory, subProjectRelativePath);
-            Paths.VerifyWithinDirectory(MainDirectory, subProjectPath);
+            string subProjectPath = Paths.JoinVerifyWithinDirectory(MainDirectory, subProjectRelativePath);
             if (!_projectJsonPaths.Add(Path.GetFullPath(subProjectPath)))
             {
                 throw new ProjectException("Infinite sub-project recursion detected");
@@ -59,8 +58,7 @@ partial class ProjectContext
         foreach (ProjectMainOptions.PathList.PathPair pair in _mainOptions.ExternalFiles)
         {
             // Make sure external file or directory exists
-            string sourcePath = Path.Join(MainDirectory, pair.Source);
-            Paths.VerifyWithinDirectory(MainDirectory, sourcePath);
+            string sourcePath = Paths.JoinVerifyWithinDirectory(MainDirectory, pair.Source);
             bool isDirectory;
             try
             {
@@ -73,8 +71,7 @@ partial class ProjectContext
             }
 
             // Get destination path
-            string destPath = Path.Join(SaveDirectory, pair.Destination);
-            Paths.VerifyWithinDirectory(SaveDirectory, destPath);
+            string destPath = Paths.JoinVerifyWithinDirectory(SaveDirectory, pair.Destination);
 
             // Create directories if needed
             string destFullPath = Path.GetFullPath(destPath);
@@ -165,8 +162,7 @@ partial class ProjectContext
         foreach (ProjectMainOptions.Patch patch in _mainOptions.Patches)
         {
             // Get path to patch file
-            string fullPatchPath = Path.Join(MainDirectory, patch.PatchPath);
-            Paths.VerifyWithinDirectory(MainDirectory, fullPatchPath);
+            string fullPatchPath = Paths.JoinVerifyWithinDirectory(MainDirectory, patch.PatchPath);
 
             // Try finding valid base/output file paths
             if (!TryFindFileFromPathList(patch.DataFilePath, out string baseFilePath, out string outputFilePath))

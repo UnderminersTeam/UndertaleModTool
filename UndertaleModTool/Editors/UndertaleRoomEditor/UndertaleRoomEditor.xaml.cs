@@ -31,6 +31,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using UndertaleModLib;
 using UndertaleModLib.Models;
+using UndertaleModLib.Util;
 using UndertaleModTool.Editors;
 using static UndertaleModLib.Models.UndertaleRoom;
 
@@ -2132,7 +2133,7 @@ namespace UndertaleModTool
                 sb.AppendLine(String.Join(";", dataRow.Select(x => x.ToString())));
 
             string dataFolder = System.IO.Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath);
-            string filePath = System.IO.Path.Combine(dataFolder, $"{layer.LayerName.Content}_tiledata.csv");
+            string filePath = Paths.JoinVerifyWithinDirectory(dataFolder, $"{layer.LayerName.Content}_tiledata.csv");
 
             try
             {

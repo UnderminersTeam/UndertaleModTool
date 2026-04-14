@@ -41,7 +41,7 @@ void DumpSprite(UndertaleSprite sprite)
         string outputFolder = texFolder;
         if (useSubDirectories)
         {
-            outputFolder = Path.Combine(outputFolder, sprite.Name.Content);
+            outputFolder = Paths.JoinVerifyWithinDirectory(outputFolder, sprite.Name.Content);
             if (sprite.Textures.Count > 0)
             {
                 Directory.CreateDirectory(outputFolder);
@@ -52,7 +52,7 @@ void DumpSprite(UndertaleSprite sprite)
         {
             if (sprite.Textures[i]?.Texture is not null)
             {
-                worker.ExportAsPNG(sprite.Textures[i].Texture, Path.Combine(outputFolder, $"{sprite.Name.Content}_{i}.png"), null, padded);
+                worker.ExportAsPNG(sprite.Textures[i].Texture, Paths.JoinVerifyWithinDirectory(outputFolder, $"{sprite.Name.Content}_{i}.png"), null, padded);
             }
         }
     }

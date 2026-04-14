@@ -196,7 +196,7 @@ namespace UndertaleModTests
 
         protected async Task<object> RunScript(string path)
         {
-            string scriptpath = Path.Combine("../../../UndertaleModTool/Scripts/Builtin Scripts/", path);
+            string scriptpath = Path.Join("../../../UndertaleModTool/Scripts/Builtin Scripts/", path);
             using (var loader = new InteractiveAssemblyLoader())
             {
                 loader.RegisterDependency(typeof(UndertaleObject).GetTypeInfo().Assembly);

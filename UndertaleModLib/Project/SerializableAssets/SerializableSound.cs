@@ -113,16 +113,14 @@ internal sealed class SerializableSound : ISerializableProjectAsset
                 // Add file extension if none already exists (assume OGG)
                 externalFilename += ".ogg";
             }
-            string externalPath = Path.Join(projectContext.LoadDirectory, externalFilename);
-            Paths.VerifyWithinDirectory(projectContext.LoadDirectory, externalPath);
+            string externalPath = Paths.JoinVerifyWithinDirectory(projectContext.LoadDirectory, externalFilename);
 
             // Try to copy that sound to the project
             if (!File.Exists(externalPath))
             {
                 throw new ProjectException($"Failed to find external sound to export with name \"{externalFilename}\"");
             }
-            string destFileName = Path.Join(directory, Path.GetFileName(externalFilename));
-            Paths.VerifyWithinDirectory(directory, destFileName);
+            string destFileName = Paths.JoinVerifyWithinDirectory(directory, Path.GetFileName(externalFilename));
             File.Copy(externalPath, destFileName, true);
         }
         else if (_dataAsset.AudioFile is not null && (_dataAsset.AudioGroup is null || _dataAsset.GroupID == projectContext.Data.GetBuiltinSoundGroupID()))
@@ -134,8 +132,7 @@ internal sealed class SerializableSound : ISerializableProjectAsset
                 ? ".wav" : ".ogg";
 
             // Save data to disk
-            string destFilePath = Path.Join(directory, $"{friendlyName}{extension}");
-            Paths.VerifyWithinDirectory(directory, destFilePath);
+            string destFilePath = Paths.JoinVerifyWithinDirectory(directory, $"{friendlyName}{extension}");
             File.WriteAllBytes(destFilePath, _dataAsset.AudioFile.Data);
         }
         else if (_dataAsset.AudioID != -1)
@@ -155,8 +152,7 @@ internal sealed class SerializableSound : ISerializableProjectAsset
                 ? ".wav" : ".ogg";
 
             // Save data to disk
-            string destFilePath = Path.Join(directory, $"{friendlyName}{extension}");
-            Paths.VerifyWithinDirectory(directory, destFilePath);
+            string destFilePath = Paths.JoinVerifyWithinDirectory(directory, $"{friendlyName}{extension}");
             File.WriteAllBytes(destFilePath, groupData.EmbeddedAudio[audioId].Data);
         }
     }

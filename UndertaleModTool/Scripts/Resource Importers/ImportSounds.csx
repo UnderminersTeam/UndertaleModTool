@@ -1,5 +1,6 @@
 using UndertaleModLib;
 using UndertaleModLib.Models;
+using UndertaleModLib.Util;
 using static UndertaleModLib.Models.UndertaleSound;
 using static UndertaleModLib.UndertaleData;
 using System.Threading.Tasks;
@@ -148,7 +149,7 @@ await Task.Run(() =>
                     {
                         // Create a new audio group file, with the next available index (ignoring custom paths).
                         audioGroupID = Data.AudioGroups.Count;
-                        File.WriteAllBytes(Path.Combine(Path.GetDirectoryName(FilePath), $"audiogroup{audioGroupID}.dat"), Convert.FromBase64String("Rk9STQwAAABBVURPBAAAAAAAAAA="));
+                        File.WriteAllBytes(Paths.JoinVerifyWithinDirectory(Path.GetDirectoryName(FilePath), $"audiogroup{audioGroupID}.dat"), Convert.FromBase64String("Rk9STQwAAABBVURPBAAAAAAAAAA="));
 
                         // Add new entry to the data file.
                         Data.AudioGroups.Add(new UndertaleAudioGroup()
@@ -185,7 +186,7 @@ await Task.Run(() =>
                 {
                     relativeAudioGroupPath = $"audiogroup{audioGroupID}.dat";
                 }
-                string audioGroupPath = Path.Combine(Path.GetDirectoryName(FilePath), relativeAudioGroupPath);
+                string audioGroupPath = Paths.JoinVerifyWithinDirectory(Path.GetDirectoryName(FilePath), relativeAudioGroupPath);
                 using (FileStream audioGroupReadStream = new(audioGroupPath, FileMode.Open, FileAccess.Read))
                 {
                     audioGroupDat = UndertaleIO.Read(audioGroupReadStream);

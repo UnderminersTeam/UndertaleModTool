@@ -19,6 +19,7 @@ using NAudio.Vorbis;
 using NAudio.Wave;
 using UndertaleModLib;
 using UndertaleModLib.Models;
+using UndertaleModLib.Util;
 
 namespace UndertaleModTool
 {
@@ -107,7 +108,7 @@ namespace UndertaleModTool
                         filename = sound.File.Content + ".ogg";
                     else
                         filename = sound.File.Content;
-                    string audioPath = Path.Combine(Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath), filename);
+                    string audioPath = Paths.JoinVerifyWithinDirectory(Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath), filename);
                     if (File.Exists(audioPath))
                     {
                         switch (Path.GetExtension(filename).ToLower())
@@ -159,7 +160,7 @@ namespace UndertaleModTool
                     {
                         relativePath = $"audiogroup{sound.GroupID}.dat";
                     }
-                    string path = Path.Combine(Path.GetDirectoryName(mainWindow.FilePath), relativePath);
+                    string path = Paths.JoinVerifyWithinDirectory(Path.GetDirectoryName(mainWindow.FilePath), relativePath);
                     if (File.Exists(path))
                     {
                         if (loadedPath != path)

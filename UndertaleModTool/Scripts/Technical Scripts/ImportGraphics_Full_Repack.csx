@@ -80,7 +80,7 @@ foreach (string file in dirFiles)
 }
 
 // Get directory path
-DirectoryInfo dir = Directory.CreateDirectory(Path.Combine(ExePath, "Packager"));
+DirectoryInfo dir = Directory.CreateDirectory(Path.Join(ExePath, "Packager"));
 
 // Clear any files if they already exist
 foreach (FileInfo file in dir.GetFiles())
@@ -91,7 +91,7 @@ foreach (DirectoryInfo di in dir.GetDirectories())
 // Start export of all existing textures
 
 int progress = 0;
-string exportedTexturesFolder = Path.Combine(dir.FullName, "Textures");
+string exportedTexturesFolder = Path.Join(dir.FullName, "Textures");
 TextureWorker worker = null;
 Dictionary<string, int[]> assetCoordinateDict = new();
 Dictionary<string, string> assetTypeDict = new();
@@ -134,7 +134,7 @@ void DumpSprite(UndertaleSprite sprite)
             if (sprite.Textures[i]?.Texture != null)
             {
                 UndertaleTexturePageItem tex = sprite.Textures[i].Texture;
-                worker.ExportAsPNG(tex, Path.Combine(exportedTexturesFolder, $"{sprite.Name.Content}_{i}.png"));
+                worker.ExportAsPNG(tex, Paths.JoinVerifyWithinDirectory(exportedTexturesFolder, $"{sprite.Name.Content}_{i}.png"));
                 assetCoordinateDict.Add($"{sprite.Name.Content}_{i}", new int[] { tex.TargetX, tex.TargetY, tex.TargetWidth, tex.TargetHeight, tex.BoundingWidth, tex.BoundingHeight });
                 assetTypeDict.Add($"{sprite.Name.Content}_{i}", "spr");
             }
@@ -151,7 +151,7 @@ void DumpFont(UndertaleFont font)
     if (font.Texture != null)
     {
         UndertaleTexturePageItem tex = font.Texture;
-        worker.ExportAsPNG(tex, Path.Combine(exportedTexturesFolder, $"{font.Name.Content}.png"));
+        worker.ExportAsPNG(tex, Paths.JoinVerifyWithinDirectory(exportedTexturesFolder, $"{font.Name.Content}.png"));
         assetCoordinateDict.Add(font.Name.Content, new int[] { tex.TargetX, tex.TargetY, tex.TargetWidth, tex.TargetHeight, tex.BoundingWidth, tex.BoundingHeight });
         assetTypeDict.Add(font.Name.Content, "fnt");
 
@@ -166,7 +166,7 @@ void DumpBackground(UndertaleBackground background)
     if (background.Texture != null)
     {
         UndertaleTexturePageItem tex = background.Texture;
-        worker.ExportAsPNG(tex, Path.Combine(exportedTexturesFolder, $"{background.Name.Content}.png"));
+        worker.ExportAsPNG(tex, Paths.JoinVerifyWithinDirectory(exportedTexturesFolder, $"{background.Name.Content}.png"));
         assetCoordinateDict.Add(background.Name.Content, new int[] { tex.TargetX, tex.TargetY, tex.TargetWidth, tex.TargetHeight, tex.BoundingWidth, tex.BoundingHeight });
         assetTypeDict.Add(background.Name.Content, "bg");
 
@@ -178,7 +178,7 @@ void DumpBackground(UndertaleBackground background)
 
 string sourcePath = exportedTexturesFolder;
 string searchPattern = "*.png";
-string outName = Path.Combine(dir.FullName, "atlas.txt");
+string outName = Path.Join(dir.FullName, "atlas.txt");
 int textureSize = 2048;
 int PaddingValue = 2;
 bool debug = false;
@@ -188,8 +188,8 @@ DirectoryInfo textureDirectory = new DirectoryInfo(importFolder);
 FileInfo[] files = textureDirectory.GetFiles(searchPattern, SearchOption.AllDirectories);
 foreach (FileInfo file in files)
 {
-    string destFile = Path.Combine(exportedTexturesFolder, file.Name);
-    string sourceFile = Path.Combine(importFolder, file.Name);
+    string destFile = Paths.JoinVerifyWithinDirectory(exportedTexturesFolder, file.Name);
+    string sourceFile = Paths.JoinVerifyWithinDirectory(importFolder, file.Name);
     string stripped = Path.GetFileNameWithoutExtension(sourceFile);
     if (assetCoordinateDict.ContainsKey(stripped))
         assetCoordinateDict.Remove(stripped);
@@ -198,7 +198,7 @@ foreach (FileInfo file in files)
 
 try
 {
-    string[] marginLines = File.ReadAllLines(Path.Combine(importFolder, "margins.txt"));
+    string[] marginLines = File.ReadAllLines(Path.Join(importFolder, "margins.txt"));
     foreach (String str in marginLines)
     {
         string key = str.Substring(0, str.IndexOf(','));

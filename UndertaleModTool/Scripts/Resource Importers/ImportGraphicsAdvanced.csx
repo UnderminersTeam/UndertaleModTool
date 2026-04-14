@@ -54,7 +54,7 @@ HashSet<string> spritesStartAt1 = new HashSet<string>();
 
 string importFolder = CheckValidity();
 
-string packDir = Path.Combine(ExePath, "Packager");
+string packDir = Path.Join(ExePath, "Packager");
 Directory.CreateDirectory(packDir);
 
 bool noMasksForBasicRectangles = Data.IsVersionAtLeast(2022, 9); // TODO: figure out the exact version, but this is pretty close
@@ -62,7 +62,7 @@ bool noMasksForBasicRectangles = Data.IsVersionAtLeast(2022, 9); // TODO: figure
 try
 {
     string sourcePath = importFolder;
-    string outName = Path.Combine(packDir, "atlas.txt");
+    string outName = Path.Join(packDir, "atlas.txt");
     int textureSize = 2048;
     int PaddingValue = 2;
     bool debug = false;
@@ -82,7 +82,7 @@ try
     OffsetResult();
     foreach (Atlas atlas in packer.Atlasses)
     {
-        string atlasName = Path.Combine(packDir, $"{prefix}{atlasCount:000}.png");
+        string atlasName = Paths.JoinVerifyWithinDirectory(packDir, $"{prefix}{atlasCount:000}.png");
         using MagickImage atlasImage = TextureWorker.ReadBGRAImageFromFile(atlasName);
         IPixelCollection<byte> atlasPixels = atlasImage.GetPixels();
 
