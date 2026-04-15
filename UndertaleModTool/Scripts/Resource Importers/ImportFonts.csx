@@ -33,7 +33,7 @@ packer.SaveAtlasses(outName);
 int lastTextPage = Data.EmbeddedTextures.Count - 1;
 int lastTextPageItem = Data.TexturePageItems.Count - 1;
 
-string prefix = outName.Replace(Path.GetExtension(outName), "");
+string prefix = Path.Join(Path.GetDirectoryName(outName), Path.GetFileNameWithoutExtension(outName));
 int atlasCount = 0;
 foreach (Atlas atlas in packer.Atlasses)
 {
@@ -262,7 +262,7 @@ public class Packer
     public void SaveAtlasses(string _Destination)
     {
         int atlasCount = 0;
-        string prefix = _Destination.Replace(Path.GetExtension(_Destination), "");
+        string prefix = Path.Join(Path.GetDirectoryName(_Destination), Path.GetFileNameWithoutExtension(_Destination));
         string descFile = _Destination;
         StreamWriter tw = new StreamWriter(_Destination);
         tw.WriteLine("source_tex, atlas_tex, x, y, width, height");

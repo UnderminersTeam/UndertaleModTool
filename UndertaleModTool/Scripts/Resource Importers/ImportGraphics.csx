@@ -46,11 +46,11 @@ try
     Dictionary<UndertaleSprite, Node> maskNodes = new();
 
     // Import everything into UTMT
-    string prefix = outName.Replace(Path.GetExtension(outName), "");
+    string prefix = Path.Join(Path.GetDirectoryName(outName), Path.GetFileNameWithoutExtension(outName));
     int atlasCount = 0;
     foreach (Atlas atlas in packer.Atlasses)
     {
-        string atlasName = Paths.JoinVerifyWithinDirectory(packDir, $"{prefix}{atlasCount:000}.png");
+        string atlasName = $"{prefix}{atlasCount:000}.png";
         using MagickImage atlasImage = TextureWorker.ReadBGRAImageFromFile(atlasName);
         IPixelCollection<byte> atlasPixels = atlasImage.GetPixels();
 
@@ -422,7 +422,7 @@ public class Packer
     public void SaveAtlasses(string _Destination)
     {
         int atlasCount = 0;
-        string prefix = _Destination.Replace(Path.GetExtension(_Destination), "");
+        string prefix = Path.Join(Path.GetDirectoryName(_Destination), Path.GetFileNameWithoutExtension(_Destination));
         string descFile = _Destination;
 
         StreamWriter tw = new StreamWriter(_Destination);

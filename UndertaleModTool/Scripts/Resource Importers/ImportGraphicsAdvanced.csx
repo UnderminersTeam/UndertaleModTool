@@ -77,12 +77,12 @@ try
     Dictionary<UndertaleSprite, Node> maskNodes = new();
 
     // Import everything into UTMT
-    string prefix = outName.Replace(Path.GetExtension(outName), "");
+    string prefix = Path.Join(Path.GetDirectoryName(outName), Path.GetFileNameWithoutExtension(outName));
     int atlasCount = 0;
     OffsetResult();
     foreach (Atlas atlas in packer.Atlasses)
     {
-        string atlasName = Paths.JoinVerifyWithinDirectory(packDir, $"{prefix}{atlasCount:000}.png");
+        string atlasName = $"{prefix}{atlasCount:000}.png";
         using MagickImage atlasImage = TextureWorker.ReadBGRAImageFromFile(atlasName);
         IPixelCollection<byte> atlasPixels = atlasImage.GetPixels();
 
