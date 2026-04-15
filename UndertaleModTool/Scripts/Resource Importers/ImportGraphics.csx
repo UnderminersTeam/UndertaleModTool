@@ -26,12 +26,12 @@ bool noMasksForBasicRectangles = Data.IsVersionAtLeast(2022, 9); // TODO: figure
 
 try
 {
-    string packDir = Path.Combine(ExePath, "Packager");
+    string packDir = Path.Join(ExePath, "Packager");
     Directory.CreateDirectory(packDir);
 
     string sourcePath = importFolder;
     string searchPattern = "*.png";
-    string outName = Path.Combine(packDir, "atlas.txt");
+    string outName = Path.Join(packDir, "atlas.txt");
     int textureSize = 2048;
     int PaddingValue = 2;
     bool debug = false;
@@ -46,11 +46,11 @@ try
     Dictionary<UndertaleSprite, Node> maskNodes = new();
 
     // Import everything into UTMT
-    string prefix = outName.Replace(Path.GetExtension(outName), "");
+    string prefix = Path.Join(Path.GetDirectoryName(outName), Path.GetFileNameWithoutExtension(outName));
     int atlasCount = 0;
     foreach (Atlas atlas in packer.Atlasses)
     {
-        string atlasName = Path.Combine(packDir, $"{prefix}{atlasCount:000}.png");
+        string atlasName = $"{prefix}{atlasCount:000}.png";
         using MagickImage atlasImage = TextureWorker.ReadBGRAImageFromFile(atlasName);
         IPixelCollection<byte> atlasPixels = atlasImage.GetPixels();
 
@@ -96,7 +96,7 @@ try
                 if (spriteType == SpriteType.Background)
                 {
                     UndertaleBackground background = Data.Backgrounds.ByName(stripped);
-                    if (background != null)
+                    if (background is not null)
                     {
                         background.Texture = texturePageItem;
                     }
@@ -104,13 +104,14 @@ try
                     {
                         // No background found, let's make one
                         UndertaleString backgroundUTString = Data.Strings.MakeString(stripped);
-                        UndertaleBackground newBackground = new();
-                        newBackground.Name = backgroundUTString;
-                        newBackground.Transparent = false;
-                        newBackground.Preload = false;
-                        newBackground.Texture = texturePageItem;
-                        Data.Backgrounds.Add(newBackground);
+                        background = new();
+                        background.Name = backgroundUTString;
+                        background.Transparent = false;
+                        background.Preload = false;
+                        background.Texture = texturePageItem;
+                        Data.Backgrounds.Add(background);
                     }
+                    Project?.MarkAssetForExport(background);
                 }
                 else if (spriteType == SpriteType.Sprite)
                 {
@@ -164,8 +165,11 @@ try
 
                         newSprite.Textures.Add(texentry);
                         Data.Sprites.Add(newSprite);
+                        Project?.MarkAssetForExport(newSprite);
                         continue;
                     }
+
+                    Project?.MarkAssetForExport(sprite);
 
                     if (frame > sprite.Textures.Count - 1)
                     {
@@ -418,7 +422,7 @@ public class Packer
     public void SaveAtlasses(string _Destination)
     {
         int atlasCount = 0;
-        string prefix = _Destination.Replace(Path.GetExtension(_Destination), "");
+        string prefix = Path.Join(Path.GetDirectoryName(_Destination), Path.GetFileNameWithoutExtension(_Destination));
         string descFile = _Destination;
 
         StreamWriter tw = new StreamWriter(_Destination);

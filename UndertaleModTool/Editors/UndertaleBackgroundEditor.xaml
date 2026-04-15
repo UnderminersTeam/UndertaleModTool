@@ -67,8 +67,8 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Unknown Always 2</TextBlock>
-            <local:TextBoxDark Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GMS2UnknownAlways2}"/>
+            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">GMS2 Version Number</TextBlock>
+            <local:TextBoxDark Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding GMS2VersionNumber}"/>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Tile Width</TextBlock>
             <local:TextBoxDark Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding GMS2TileWidth}"/>
@@ -94,21 +94,22 @@
 
             <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Tile Columns</TextBlock>
             <local:TextBoxDark Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding GMS2TileColumns}"/>
-
+            
             <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Items/frames per tile</TextBlock>
             <local:TextBoxDark Grid.Row="8" Grid.Column="1" Margin="3" Text="{Binding GMS2ItemsPerTileCount}"/>
 
             <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Tile Count</TextBlock>
             <local:TextBoxDark Grid.Row="9" Grid.Column="1" Margin="3" Text="{Binding GMS2TileCount}"/>
-
-            <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Exported Sprite Index</TextBlock>
-            <local:TextBoxDark Grid.Row="10" Grid.Column="1" Margin="3" Text="{Binding GMS2ExportedSpriteIndex}"/>
-
+            
+            <TextBlock Grid.Row="10" Grid.Column="0" Margin="3">Exported Sprite (GM 2023.8+)</TextBlock>
+            <local:UndertaleObjectReference Grid.Row="10" Grid.Column="1" Margin="3" ObjectReference="{Binding GMS2ExportedSprite}" ObjectType="{x:Type undertale:UndertaleSprite}"/>
+            
             <TextBlock Grid.Row="11" Grid.Column="0" Margin="3">Frame Time (microseconds)</TextBlock>
             <local:TextBoxDark Grid.Row="11" Grid.Column="1" Margin="3" Text="{Binding GMS2FrameLength}"/>
 
             <TextBlock Grid.Row="12" Grid.Column="0" Margin="3">Tile IDs</TextBlock>
             <local:DataGridDark Grid.Row="12" Grid.Column="1" x:Name="TileIdList" ItemsSource="{Binding GMS2TileIds}" MaxHeight="279" Margin="0,0,0,3" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True"
+                                Loaded="DataGrid_Loaded" Unloaded="DataGrid_Unloaded"
                                 SelectionChanged="DataGrid_SelectionChanged">
                 <DataGrid.Resources>
                     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
@@ -139,7 +140,7 @@
                     <DataGridTemplateColumn Header="ID" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <local:TextBoxDark Margin="20,0,0,0" Text="{Binding ID, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                <local:TextBoxDark Margin="20,0,0,0" Text="{Binding ID, Mode=TwoWay, UpdateSourceTrigger=LostFocus, NotifyOnSourceUpdated=True}" SourceUpdated="TextBoxDark_TileID_SourceUpdated" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

@@ -59,7 +59,7 @@ importGroup.QueueAppend(Data.Code.ByName("gml_Object_obj_time_Create_0"), "windo
 importGroup.Import();
 
 // Load border textures
-string bordersPath = Path.Combine(Path.GetDirectoryName(ScriptPath), "Borders");
+string bordersPath = Path.Join(Path.GetDirectoryName(ScriptPath), "Borders");
 
 Dictionary<string, UndertaleEmbeddedTexture> textures = new();
 if (!Directory.Exists(bordersPath))

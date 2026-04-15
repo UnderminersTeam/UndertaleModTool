@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using UndertaleModLib.Project;
+using UndertaleModLib.Project.SerializableAssets;
 
 namespace UndertaleModLib.Models;
 
@@ -29,11 +31,11 @@ public enum CollisionShapeFlags : uint
 /// <summary>
 /// A game object in a data file.
 /// </summary>
-public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChanged, IDisposable
+public class UndertaleGameObject : UndertaleNamedResource, IProjectAsset, INotifyPropertyChanged, IDisposable
 {
-    public UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _sprite = new();
-    public UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _parentId = new();
-    public UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _textureMaskId = new();
+    private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _sprite = new();
+    private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _parentId = new();
+    private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _textureMaskId = new();
 
     public static readonly int EventTypeCount = Enum.GetValues(typeof(EventType)).Length;
 
@@ -139,7 +141,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// <summary>
     /// The vertices used for a <see cref="CollisionShape"/> of type <see cref="CollisionShapeFlags.Custom"/>.
     /// </summary>
-    public List<UndertalePhysicsVertex> PhysicsVertices { get; set; } = new List<UndertalePhysicsVertex>();
+    public UndertaleObservableList<UndertalePhysicsVertex> PhysicsVertices { get; set; } = new();
 
     #endregion
 
@@ -247,12 +249,12 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         Awake = reader.ReadBoolean();
         Kinematic = reader.ReadBoolean();
         // Needs to be done manually because count is separated
-        PhysicsVertices.Capacity = physicsShapeVertexCount;
+        PhysicsVertices.SetCapacity(physicsShapeVertexCount);
         for (int i = 0; i < physicsShapeVertexCount; i++)
         {
-            UndertalePhysicsVertex v = new UndertalePhysicsVertex();
+            UndertalePhysicsVertex v = new();
             v.Unserialize(reader);
-            PhysicsVertices.Add(v);
+            PhysicsVertices.InternalAdd(v);
         }
         Events = reader.ReadUndertaleObject<UndertalePointerList<UndertalePointerList<Event>>>();
     }
@@ -425,6 +427,24 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         Name = null;
         Events = new();
     }
+
+    /// <inheritdoc/>
+    ISerializableProjectAsset IProjectAsset.GenerateSerializableProjectAsset(ProjectContext projectContext)
+    {
+        SerializableGameObject serializable = new();
+        serializable.PopulateFromData(projectContext, this);
+        return serializable;
+    }
+
+    /// <inheritdoc/>
+    public string ProjectName => Name?.Content ?? "<unknown name>";
+
+    /// <inheritdoc/>
+    public SerializableAssetType ProjectAssetType => SerializableAssetType.GameObject;
+
+    /// <inheritdoc/>
+    public bool ProjectExportable => Name?.Content is not null;
+
 
     /// <summary>
     /// Generic events that an <see cref="UndertaleGameObject"/> uses.

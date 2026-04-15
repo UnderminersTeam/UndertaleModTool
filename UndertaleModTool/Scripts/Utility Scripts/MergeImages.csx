@@ -25,12 +25,12 @@ FileInfo[] filesA = textureDirectoryA.GetFiles("*.png", SearchOption.AllDirector
 foreach (FileInfo fileA in filesA) 
 {
     // If there's no matching file found, abort
-    if (!File.Exists(Path.Combine(importFolderB, fileA.Name)))
+    if (!File.Exists(Paths.JoinVerifyWithinDirectory(importFolderB, fileA.Name)))
         continue;
     
     // Load both images, and calculate dimensions of resulting image
-    using MagickImage imageA = TextureWorker.ReadBGRAImageFromFile(Path.Combine(importFolderA, fileA.Name));
-    using MagickImage imageB = TextureWorker.ReadBGRAImageFromFile(Path.Combine(importFolderB, fileA.Name));
+    using MagickImage imageA = TextureWorker.ReadBGRAImageFromFile(Paths.JoinVerifyWithinDirectory(importFolderA, fileA.Name));
+    using MagickImage imageB = TextureWorker.ReadBGRAImageFromFile(Paths.JoinVerifyWithinDirectory(importFolderB, fileA.Name));
     uint width = imageA.Width + imageB.Width;
     uint height = Math.Max(imageA.Height, imageB.Height);
 
@@ -40,5 +40,5 @@ foreach (FileInfo fileA in filesA)
     outputImage.Composite(imageB, (int)imageA.Width, 0, CompositeOperator.Copy);
 
     // Save image to output folder
-    TextureWorker.SaveImageToFile(outputImage, Path.Combine(exportFolder, fileA.Name));
+    TextureWorker.SaveImageToFile(outputImage, Paths.JoinVerifyWithinDirectory(exportFolder, fileA.Name));
 }

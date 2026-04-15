@@ -69,7 +69,7 @@ await Task.Run(() =>
         {
             int prevframe = frame - 1;
             string prevFrameName = $"{spriteName}_{prevframe}.png";
-            if (!File.Exists(Path.Combine(importFolder, prevFrameName)))
+            if (!File.Exists(Paths.JoinVerifyWithinDirectory(importFolder, prevFrameName)))
             {
                 throw new ScriptException($"{spriteName} is missing image index {prevframe} (failed to find {prevFrameName}).");
             }

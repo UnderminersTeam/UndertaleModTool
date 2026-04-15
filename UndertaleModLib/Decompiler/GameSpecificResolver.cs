@@ -117,7 +117,7 @@ public class GameSpecificResolver
         {
             if (!string.IsNullOrEmpty(UnderanalyzerFilename))
             {
-                string underanalyzerPath = Path.Combine(BaseDirectory, "GameSpecificData", "Underanalyzer", UnderanalyzerFilename);
+                string underanalyzerPath = Path.Join(BaseDirectory, "GameSpecificData", "Underanalyzer", UnderanalyzerFilename);
                 if (File.Exists(underanalyzerPath))
                 {
                     data.GameSpecificRegistry.DeserializeFromJson(File.ReadAllText(underanalyzerPath));
@@ -138,7 +138,7 @@ public class GameSpecificResolver
             _definitions.Clear();
 
             // Scan directory for files, if it exists
-            string dir = Path.Combine(BaseDirectory, "GameSpecificData", "Definitions");
+            string dir = Path.Join(BaseDirectory, "GameSpecificData", "Definitions");
             if (Directory.Exists(dir))
             {
                 foreach (string file in Directory.EnumerateFiles(dir, "*.json", SearchOption.TopDirectoryOnly))
