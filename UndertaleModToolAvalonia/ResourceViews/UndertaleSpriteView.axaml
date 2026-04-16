@@ -1,0 +1,135 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
+             xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.UndertaleSpriteView"
+             x:DataType="l:UndertaleSpriteViewModel">
+    <UserControl.Resources>
+        <l:EnumTypeToValuesConverter x:Key="EnumTypeToValuesConverter" />
+        <l:VersionCompareConverter x:Key="VersionCompareConverter" />
+    </UserControl.Resources>
+
+    <ScrollViewer>
+        <StackPanel Classes="PaddedProperties">
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                <Label>Name</Label>
+                <l:UndertaleStringReferenceView Reference="{Binding Sprite.Name}" />
+
+                <Label>Size W/H</Label>
+                <Grid ColumnDefinitions="1*,1*">
+                    <TextBox Grid.Column="0" Text="{Binding Sprite.Width}" />
+                    <TextBox Grid.Column="1" Text="{Binding Sprite.Height}" />
+                </Grid>
+
+                <Label>Margin Left/Right/Bottom/Top</Label>
+                <Grid ColumnDefinitions="1*,1*,1*,1*">
+                    <TextBox Grid.Column="0" Text="{Binding Sprite.MarginLeft}" />
+                    <TextBox Grid.Column="1" Text="{Binding Sprite.MarginRight}" />
+                    <TextBox Grid.Column="2" Text="{Binding Sprite.MarginBottom}" />
+                    <TextBox Grid.Column="3" Text="{Binding Sprite.MarginTop}" />
+                </Grid>
+
+                <Label>Transparent</Label>
+                <CheckBox IsChecked="{Binding Sprite.Transparent}" />
+
+                <Label>Smooth</Label>
+                <CheckBox IsChecked="{Binding Sprite.Smooth}" />
+
+                <Label>Preload</Label>
+                <CheckBox IsChecked="{Binding Sprite.Preload}" />
+
+                <Label>Bounding box mode</Label>
+                <TextBox Text="{Binding Sprite.BBoxMode}" />
+
+                <Label>Separation mask type</Label>
+                <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleSprite+SepMaskType}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                          SelectedItem="{Binding Sprite.SepMasks}" />
+
+                <Label>Origin X/Y</Label>
+                <Grid ColumnDefinitions="1*,1*">
+                    <TextBox Grid.Column="0" Text="{Binding Sprite.OriginXWrapper}" />
+                    <TextBox Grid.Column="1" Text="{Binding Sprite.OriginYWrapper}" />
+                </Grid>
+
+                <Label>Textures</Label>
+                <l:EditableDataGrid Name="TexturesDataGrid" ItemsSource="{Binding Sprite.Textures}" ItemFactory="{Binding CreateTextureEntry}" HeadersVisibility="None"
+                                    SelectionChanged="{Binding TexturesSelectedChanged}">
+                    <l:EditableDataGrid.Columns>
+                        <DataGridTemplateColumn Header="Texture" Width="1*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="undertalem:UndertaleSprite+TextureEntry">
+                                    <l:UndertaleResourceReferenceView Reference="{Binding Texture}" ReferenceType="undertalem:UndertaleTexturePageItem" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </l:EditableDataGrid.Columns>
+                </l:EditableDataGrid>
+            </Grid>
+            
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
+                          MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
+                <l:SKImageViewer Image="{Binding TexturesSelected.Texture}" />
+            </ScrollViewer>
+
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding ExportAllTexturesAsPNGs}">Export all textures as PNGs</Button>
+            </StackPanel>
+
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                <Label>Collision masks</Label>
+                <l:EditableDataGrid Name="CollisionMasksDataGrid" ItemsSource="{Binding Sprite.CollisionMasks}" ItemFactory="{Binding CreateMaskEntry}" HeadersVisibility="None"
+                                    SelectionChanged="{Binding CollisionMasksSelectedChanged}">
+                    <l:EditableDataGrid.Columns>
+                        <DataGridTemplateColumn Header="Mask" Width="1*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="undertalem:UndertaleSprite+MaskEntry">
+                                    <TextBlock FontStyle="Italic" Text="(Collision mask entry)" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </l:EditableDataGrid.Columns>
+                </l:EditableDataGrid>
+            </Grid>
+
+            <StackPanel IsVisible="{Binding CollisionMasksSelected, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
+                              MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
+                    <l:SKImageViewer Image="{Binding CollisionMasksSelected}" />
+                </ScrollViewer>
+
+                <StackPanel Orientation="Horizontal">
+                    <Button Command="{Binding ImportCollisionMaskData}">Import collision mask data</Button>
+                    <Button Command="{Binding ExportCollisionMaskData}">Export collision mask data</Button>
+                </StackPanel>
+            </StackPanel>
+
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                <Label>Is special type</Label>
+                <CheckBox IsChecked="{Binding Sprite.IsSpecialType}" />
+
+                <Label>Version</Label>
+                <TextBox Text="{Binding Sprite.SVersion}" />
+
+                <Label>Type</Label>
+                <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleSprite+SpriteType}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                          SelectedItem="{Binding Sprite.SSpriteType}" />
+
+            </Grid>
+    
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
+                  IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
+                  Converter={StaticResource VersionCompareConverter},
+                  ConverterParameter=GE2}">
+                <Label>Playback speed</Label>
+                <TextBox Text="{Binding Sprite.GMS2PlaybackSpeed}" />
+
+                <Label>Playback speed type</Label>
+                <ComboBox ItemsSource="{Binding Source={x:Type undertalem:AnimSpeedType}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                          SelectedItem="{Binding Sprite.GMS2PlaybackSpeedType}" />
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
