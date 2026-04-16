@@ -90,6 +90,14 @@ public partial class Program : IScriptInterface
     /// <returns>Result code of the program.</returns>
     public static int Main(string[] args)
     {
+        // Give a friendly message when not running from an actual console, on Windows... (and when no arguments are passed in)
+        if (OperatingSystem.IsWindows() && args.Length == 0 && Console.GetCursorPosition() == (0, 0))
+        {
+            Console.WriteLine("UndertaleModCli is meant to be executed from a command line terminal/console.\nDid you mean to download the GUI version of UndertaleModTool instead?\n\n(Press any key to dismiss this message.)");
+            Console.ReadKey();
+            return EXIT_FAILURE;
+        }
+
         Option<bool> verboseOption = new("-v", "--verbose") { Description = "Detailed logs" };
 
         Argument<FileInfo> dataFileArgument = new("datafile")
