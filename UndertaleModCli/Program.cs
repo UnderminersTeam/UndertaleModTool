@@ -171,10 +171,32 @@ public partial class Program : IScriptInterface
         Option<DirectoryInfo> dumpOutputOption = new("-o", "--output") { Description = "Where to dump data file properties to. Will default to path of the data file" };
         Option<string[]> dumpCodeOption = new("-c", "--code")
         {
-            Description = $"The code files to dump. Ex. gml_Script_init_map gml_Script_reset_map. Specify '{UMT_DUMP_ALL}' to dump all code entries"
+            Description = $"The code files to dump. Ex. gml_Script_init_map gml_Script_reset_map. Specify '{UMT_DUMP_ALL}' to dump all code entries",
+            AllowMultipleArgumentsPerToken = true
         };
         Option<bool> dumpStringsOption = new("-s", "--strings") { Description = "Whether to dump all strings" };
         Option<bool> dumpTexturesOption = new("-t", "--textures") { Description = "Whether to dump all embedded textures" };
+        Option<string[]> dumpSpritesOption = new("--sprites")
+        {
+            Description = $"The sprites to dump as PNGs. Ex. spr_jevil spr_kris. Specify '{UMT_DUMP_ALL}' to dump all sprites",
+            AllowMultipleArgumentsPerToken = true
+        };
+        Option<bool> dumpT3sOption = new("--t3s") { Description = "Emit a .t3s manifest alongside exported sprite PNGs (for tex3ds / devkitPro)" };
+        Option<string[]> dumpSoundsOption = new("--sounds")
+        {
+            Description = $"The sounds to dump as audio files. Ex. snd_laz_c snd_impact. Specify '{UMT_DUMP_ALL}' to dump all sounds",
+            AllowMultipleArgumentsPerToken = true
+        };
+        Option<string[]> dumpObjectsOption = new("--objects")
+        {
+            Description = $"The game objects to dump metadata for (sprite, parent, events). Ex. obj_heart obj_joker. Specify '{UMT_DUMP_ALL}' to dump all objects",
+            AllowMultipleArgumentsPerToken = true
+        };
+        Option<string[]> dumpSpriteInfoOption = new("--sprite-info")
+        {
+            Description = $"The sprites to dump metadata for (name, size, origin, frame count). Ex. spr_jevil spr_kris. Specify '{UMT_DUMP_ALL}' to dump all sprites",
+            AllowMultipleArgumentsPerToken = true
+        };
         Command dumpCommand = new("dump", "Dump certain properties about the game data file")
         {
             dataFileArgument,
@@ -182,7 +204,12 @@ public partial class Program : IScriptInterface
             dumpOutputOption,
             dumpCodeOption,
             dumpStringsOption,
-            dumpTexturesOption
+            dumpTexturesOption,
+            dumpSpritesOption,
+            dumpT3sOption,
+            dumpSoundsOption,
+            dumpObjectsOption,
+            dumpSpriteInfoOption
         };
         dumpCommand.SetAction(parseResult =>
         {
@@ -193,7 +220,12 @@ public partial class Program : IScriptInterface
                 Output = parseResult.GetValue(dumpOutputOption),
                 Code = parseResult.GetValue(dumpCodeOption),
                 Strings = parseResult.GetValue(dumpStringsOption),
-                Textures = parseResult.GetValue(dumpTexturesOption)
+                Textures = parseResult.GetValue(dumpTexturesOption),
+                Sprites = parseResult.GetValue(dumpSpritesOption),
+                T3s = parseResult.GetValue(dumpT3sOption),
+                Sounds = parseResult.GetValue(dumpSoundsOption),
+                Objects = parseResult.GetValue(dumpObjectsOption),
+                SpriteInfo = parseResult.GetValue(dumpSpriteInfoOption)
             });
         });
 
@@ -444,6 +476,22 @@ public partial class Program : IScriptInterface
         // If user wanted to dump embedded textures, dump all of them
         if (options.Textures)
             program.DumpAllTextures();
+
+        // If user wanted to dump sprites, dump them as PNGs (with optional .t3s manifests)
+        if (options.Sprites?.Length > 0)
+            program.DumpSprites(options.Sprites, options.T3s);
+
+        // If user wanted to dump sounds, dump them as audio files
+        if (options.Sounds?.Length > 0)
+            program.DumpSounds(options.Sounds);
+
+        // If user wanted to dump object metadata, dump them as text files
+        if (options.Objects?.Length > 0)
+            program.DumpObjects(options.Objects);
+
+        // If user wanted to dump sprite metadata, dump them as text files
+        if (options.SpriteInfo?.Length > 0)
+            program.DumpSpriteInfo(options.SpriteInfo);
 
         return EXIT_SUCCESS;
     }
@@ -740,6 +788,226 @@ public partial class Program : IScriptInterface
             }
             using FileStream fs = new($"{directory}/{texture.Name.Content}.png", FileMode.Create);
             texture.TextureData.Image.SavePng(fs);
+        }
+    }
+
+    /// <summary>
+    /// Dumps sprites as PNGs, one file per frame. Optionally writes a .t3s manifest for tex3ds.
+    /// </summary>
+    /// <param name="spriteNames">Sprite names to export, or a single-element array containing <see cref="UMT_DUMP_ALL"/>.</param>
+    /// <param name="emitT3s">Whether to write a .t3s manifest alongside the PNGs.</param>
+    private void DumpSprites(string[] spriteNames, bool emitT3s)
+    {
+        string directory = Output.FullName;
+        Directory.CreateDirectory(directory);
+
+        IEnumerable<UndertaleSprite> spritesToDump = spriteNames.Contains(UMT_DUMP_ALL)
+            ? Data.Sprites
+            : Data.Sprites.Where(s => spriteNames.Contains(s.Name.Content));
+
+        using TextureWorker worker = new();
+
+        foreach (UndertaleSprite sprite in spritesToDump)
+        {
+            string name = sprite.Name.Content;
+
+            if (Verbose)
+                Console.WriteLine($"Dumping sprite {name} ({sprite.Textures.Count} frame(s))");
+
+            List<string> frameFiles = new();
+            for (int i = 0; i < sprite.Textures.Count; i++)
+            {
+                UndertaleSprite.TextureEntry entry = sprite.Textures[i];
+                if (entry.Texture is null)
+                {
+                    Console.WriteLine($"  {name} frame {i} has no texture, skipping");
+                    continue;
+                }
+
+                string frameFile = $"{name}_{i}.png";
+                string framePath = Path.Combine(directory, frameFile);
+                worker.ExportAsPNG(entry.Texture, framePath, name);
+                frameFiles.Add(frameFile);
+            }
+
+            if (emitT3s && frameFiles.Count > 0)
+            {
+                string t3sPath = Path.Combine(directory, $"{name}.t3s");
+                using StreamWriter sw = new(t3sPath);
+                if (frameFiles.Count > 1)
+                {
+                    sw.WriteLine("--atlas -f rgba8888");
+                }
+                foreach (string f in frameFiles)
+                {
+                    sw.WriteLine(f);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Dumps sounds as audio files (WAV, OGG, MP3 — whatever format they are stored as internally).
+    /// </summary>
+    /// <param name="soundNames">Sound names to export, or a single-element array containing <see cref="UMT_DUMP_ALL"/>.</param>
+    private void DumpSounds(string[] soundNames)
+    {
+        string directory = $"{Output.FullName}/Sounds/";
+        Directory.CreateDirectory(directory);
+
+        IEnumerable<UndertaleSound> soundsToDump = soundNames.Contains(UMT_DUMP_ALL)
+            ? Data.Sounds
+            : Data.Sounds.Where(s => soundNames.Contains(s.Name.Content));
+
+        foreach (UndertaleSound sound in soundsToDump)
+        {
+            string name = sound.Name.Content;
+
+            if (sound.AudioFile is null)
+            {
+                Console.WriteLine($"  {name} has no embedded audio data (may be external/streamed), skipping");
+                continue;
+            }
+
+            byte[] audioData = sound.AudioFile.Data;
+            if (audioData == null || audioData.Length == 0)
+            {
+                Console.WriteLine($"  {name} has empty audio data, skipping");
+                continue;
+            }
+
+            // Use the sound's Type property for the file extension (e.g. ".ogg", ".wav", ".mp3").
+            // Fall back to ".wav" if no type is specified.
+            string extension = sound.Type?.Content ?? ".wav";
+            if (!extension.StartsWith("."))
+            {
+                extension = "." + extension;
+            }
+
+            string filePath = Path.Combine(directory, $"{name}{extension}");
+
+            if (Verbose)
+            {
+                Console.WriteLine($"Dumping sound {name} ({audioData.Length} bytes) -> {filePath}");
+            }
+
+            File.WriteAllBytes(filePath, audioData);
+        }
+    }
+
+    /// <summary>
+    /// Event type index to name mapping for GameMaker objects.
+    /// </summary>
+    private static readonly string[] EventTypeNames =
+    {
+        "Create", "Destroy", "Alarm", "Step", "Collision",
+        "Keyboard", "Mouse", "Other", "Draw", "KeyPress",
+        "KeyRelease", "CleanUp"
+    };
+
+    /// <summary>
+    /// Dumps game object metadata (sprite, parent, events) as human-readable text files.
+    /// </summary>
+    /// <param name="objectNames">Object names to export, or a single-element array containing <see cref="UMT_DUMP_ALL"/>.</param>
+    private void DumpObjects(string[] objectNames)
+    {
+        string directory = $"{Output.FullName}/Objects/";
+        Directory.CreateDirectory(directory);
+
+        IEnumerable<UndertaleGameObject> objectsToDump = objectNames.Contains(UMT_DUMP_ALL)
+            ? Data.GameObjects
+            : Data.GameObjects.Where(o => objectNames.Contains(o.Name.Content));
+
+        foreach (UndertaleGameObject obj in objectsToDump)
+        {
+            string name = obj.Name.Content;
+            var sb = new System.Text.StringBuilder();
+
+            sb.AppendLine($"Name: {name}");
+
+            // Sprite info
+            if (obj.Sprite is not null)
+            {
+                var spr = obj.Sprite;
+                sb.AppendLine($"Sprite: {spr.Name.Content} ({spr.Width}x{spr.Height}, origin {spr.OriginX},{spr.OriginY}, {spr.Textures.Count} frames)");
+            }
+            else
+            {
+                sb.AppendLine("Sprite: <none>");
+            }
+
+            // Parent
+            if (obj.ParentId is not null)
+            {
+                sb.AppendLine($"Parent: {obj.ParentId.Name.Content}");
+            }
+
+            // Basic properties
+            sb.AppendLine($"Visible: {obj.Visible}");
+            sb.AppendLine($"Solid: {obj.Solid}");
+            sb.AppendLine($"Persistent: {obj.Persistent}");
+            sb.AppendLine($"Depth: {obj.Depth}");
+
+            // Events
+            sb.AppendLine("Events:");
+            for (int eventType = 0; eventType < obj.Events.Count; eventType++)
+            {
+                var eventList = obj.Events[eventType];
+                if (eventList == null)
+                    continue;
+
+                string typeName = eventType < EventTypeNames.Length ? EventTypeNames[eventType] : $"Event{eventType}";
+
+                foreach (var ev in eventList)
+                {
+                    sb.AppendLine($"  {typeName}_{ev.EventSubtype}");
+                }
+            }
+
+            string filePath = Path.Combine(directory, $"{name}.txt");
+
+            if (Verbose)
+            {
+                Console.WriteLine($"Dumping object {name} -> {filePath}");
+            }
+
+            File.WriteAllText(filePath, sb.ToString());
+        }
+    }
+
+    /// <summary>
+    /// Dumps sprite metadata (name, dimensions, origin, frame count) as human-readable text files.
+    /// </summary>
+    /// <param name="spriteNames">Sprite names to export, or a single-element array containing <see cref="UMT_DUMP_ALL"/>.</param>
+    private void DumpSpriteInfo(string[] spriteNames)
+    {
+        string directory = $"{Output.FullName}/Sprites/";
+        Directory.CreateDirectory(directory);
+
+        IEnumerable<UndertaleSprite> spritesToDump = spriteNames.Contains(UMT_DUMP_ALL)
+            ? Data.Sprites
+            : Data.Sprites.Where(s => spriteNames.Contains(s.Name.Content));
+
+        foreach (UndertaleSprite sprite in spritesToDump)
+        {
+            string name = sprite.Name.Content;
+            var sb = new System.Text.StringBuilder();
+
+            sb.AppendLine($"Name: {name}");
+            sb.AppendLine($"Width: {sprite.Width}");
+            sb.AppendLine($"Height: {sprite.Height}");
+            sb.AppendLine($"Origin X: {sprite.OriginX}");
+            sb.AppendLine($"Origin Y: {sprite.OriginY}");
+            sb.AppendLine($"Frame count: {sprite.Textures.Count}");
+
+            string filePath = Path.Combine(directory, $"{name}.txt");
+
+            if (Verbose)
+            {
+                Console.WriteLine($"Dumping sprite info {name} -> {filePath}");
+            }
+
+            File.WriteAllText(filePath, sb.ToString());
         }
     }
 

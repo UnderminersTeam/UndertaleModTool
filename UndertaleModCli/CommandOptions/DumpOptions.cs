@@ -36,4 +36,29 @@ public class DumpOptions
 	/// Determines if embedded textures should get dumped
 	/// </summary>
 	public bool Textures { get; set; }
+
+	/// <summary>
+	/// Names of the sprites to dump. Specify 'all' to dump all sprites.
+	/// </summary>
+	public string[] Sprites { get; set; }
+
+	/// <summary>
+	/// Whether to emit a .t3s manifest alongside exported sprite PNGs (for tex3ds / devkitPro).
+	/// </summary>
+	public bool T3s { get; set; }
+
+	/// <summary>
+	/// Names of the sounds to dump. Specify 'UMT_DUMP_ALL' to dump all sounds.
+	/// </summary>
+	public string[] Sounds { get; set; }
+
+	/// <summary>
+	/// Names of the game objects to dump metadata for. Specify 'UMT_DUMP_ALL' to dump all objects.
+	/// </summary>
+	public string[] Objects { get; set; }
+
+	/// <summary>
+	/// Names of the sprites to dump metadata for. Specify 'UMT_DUMP_ALL' to dump all sprites.
+	/// </summary>
+	public string[] SpriteInfo { get; set; }
 }
