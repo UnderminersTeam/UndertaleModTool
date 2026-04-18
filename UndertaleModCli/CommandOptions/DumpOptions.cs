@@ -56,4 +56,9 @@ public class DumpOptions
 	/// Names of the game objects to dump metadata for. Specify 'UMT_DUMP_ALL' to dump all objects.
 	/// </summary>
 	public string[] Objects { get; set; }
+
+	/// <summary>
+	/// Names of the sprites to dump metadata for. Specify 'UMT_DUMP_ALL' to dump all sprites.
+	/// </summary>
+	public string[] SpriteInfo { get; set; }
 }

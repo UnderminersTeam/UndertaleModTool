@@ -192,6 +192,11 @@ public partial class Program : IScriptInterface
             Description = $"The game objects to dump metadata for (sprite, parent, events). Ex. obj_heart obj_joker. Specify '{UMT_DUMP_ALL}' to dump all objects",
             AllowMultipleArgumentsPerToken = true
         };
+        Option<string[]> dumpSpriteInfoOption = new("--sprite-info")
+        {
+            Description = $"The sprites to dump metadata for (name, size, origin, frame count). Ex. spr_jevil spr_kris. Specify '{UMT_DUMP_ALL}' to dump all sprites",
+            AllowMultipleArgumentsPerToken = true
+        };
         Command dumpCommand = new("dump", "Dump certain properties about the game data file")
         {
             dataFileArgument,
@@ -203,7 +208,8 @@ public partial class Program : IScriptInterface
             dumpSpritesOption,
             dumpT3sOption,
             dumpSoundsOption,
-            dumpObjectsOption
+            dumpObjectsOption,
+            dumpSpriteInfoOption
         };
         dumpCommand.SetAction(parseResult =>
         {
@@ -218,7 +224,8 @@ public partial class Program : IScriptInterface
                 Sprites = parseResult.GetValue(dumpSpritesOption),
                 T3s = parseResult.GetValue(dumpT3sOption),
                 Sounds = parseResult.GetValue(dumpSoundsOption),
-                Objects = parseResult.GetValue(dumpObjectsOption)
+                Objects = parseResult.GetValue(dumpObjectsOption),
+                SpriteInfo = parseResult.GetValue(dumpSpriteInfoOption)
             });
         });
 
@@ -481,6 +488,10 @@ public partial class Program : IScriptInterface
         // If user wanted to dump object metadata, dump them as text files
         if (options.Objects?.Length > 0)
             program.DumpObjects(options.Objects);
+
+        // If user wanted to dump sprite metadata, dump them as text files
+        if (options.SpriteInfo?.Length > 0)
+            program.DumpSpriteInfo(options.SpriteInfo);
 
         return EXIT_SUCCESS;
     }
@@ -958,6 +969,42 @@ public partial class Program : IScriptInterface
             if (Verbose)
             {
                 Console.WriteLine($"Dumping object {name} -> {filePath}");
+            }
+
+            File.WriteAllText(filePath, sb.ToString());
+        }
+    }
+
+    /// <summary>
+    /// Dumps sprite metadata (name, dimensions, origin, frame count) as human-readable text files.
+    /// </summary>
+    /// <param name="spriteNames">Sprite names to export, or a single-element array containing <see cref="UMT_DUMP_ALL"/>.</param>
+    private void DumpSpriteInfo(string[] spriteNames)
+    {
+        string directory = $"{Output.FullName}/Sprites/";
+        Directory.CreateDirectory(directory);
+
+        IEnumerable<UndertaleSprite> spritesToDump = spriteNames.Contains(UMT_DUMP_ALL)
+            ? Data.Sprites
+            : Data.Sprites.Where(s => spriteNames.Contains(s.Name.Content));
+
+        foreach (UndertaleSprite sprite in spritesToDump)
+        {
+            string name = sprite.Name.Content;
+            var sb = new System.Text.StringBuilder();
+
+            sb.AppendLine($"Name: {name}");
+            sb.AppendLine($"Width: {sprite.Width}");
+            sb.AppendLine($"Height: {sprite.Height}");
+            sb.AppendLine($"Origin X: {sprite.OriginX}");
+            sb.AppendLine($"Origin Y: {sprite.OriginY}");
+            sb.AppendLine($"Frame count: {sprite.Textures.Count}");
+
+            string filePath = Path.Combine(directory, $"{name}.txt");
+
+            if (Verbose)
+            {
+                Console.WriteLine($"Dumping sprite info {name} -> {filePath}");
             }
 
             File.WriteAllText(filePath, sb.ToString());
