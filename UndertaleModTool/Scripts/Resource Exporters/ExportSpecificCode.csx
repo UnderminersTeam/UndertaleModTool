@@ -20,7 +20,7 @@ int failed = 0;
 
 string codeFolder = PromptChooseDirectory();
 if (codeFolder == null)
-    throw new ScriptException("The export folder was not set.");
+    throw new ScriptCancelledException("The export folder was not set.");
 Directory.CreateDirectory(Path.Combine(codeFolder, "Code"));
 codeFolder = Path.Combine(codeFolder, "Code");
 

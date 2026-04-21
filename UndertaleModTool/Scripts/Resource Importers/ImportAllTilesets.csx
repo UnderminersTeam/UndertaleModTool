@@ -14,7 +14,7 @@ EnsureDataLoaded();
 string subPath = PromptChooseDirectory();
 if (subPath is null)
 {
-    throw new ScriptException("The import folder was not set.");
+    throw new ScriptCancelledException("The import folder was not set.");
 }
 
 SetProgressBar(null, "Tilesets", 0, Data.Backgrounds.Count);
