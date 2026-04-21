@@ -9,15 +9,15 @@ using ImageMagick;
 
 string importFolderA = PromptChooseDirectory();
 if (importFolderA is null) 
-    throw new ScriptException("The import folder was not set.");
+    throw new ScriptCancelledException("The import folder was not set.");
 
 string importFolderB = PromptChooseDirectory();
 if (importFolderB is null)
-    throw new ScriptException("The import folder was not set.");
+    throw new ScriptCancelledException("The import folder was not set.");
 
 string exportFolder = PromptChooseDirectory();
 if (exportFolder is null) 
-    throw new ScriptException("The export folder was not set.");
+    throw new ScriptCancelledException("The export folder was not set.");
 
 // Loop over all PNG files in folder A
 DirectoryInfo textureDirectoryA = new DirectoryInfo(importFolderA);

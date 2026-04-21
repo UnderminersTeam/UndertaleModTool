@@ -12,13 +12,13 @@ EnsureDataLoaded();
 // Check code directory.
 string importFolder = PromptChooseDirectory();
 if (importFolder == null)
-    throw new ScriptException("The import folder was not set.");
+    throw new ScriptCancelledException("The import folder was not set.");
 
 string[] dirFiles = Directory.GetFiles(importFolder);
 if (dirFiles.Length == 0)
-    throw new ScriptException("The selected folder is empty.");
+    throw new ScriptCancelledException("The selected folder is empty.");
 else if (!dirFiles.Any(x => x.EndsWith(".asm")))
-    throw new ScriptException("The selected folder doesn't contain any ASM file.");
+    throw new ScriptCancelledException("The selected folder doesn't contain any ASM file.");
 
 bool stopOnError = ScriptQuestion("Stop importing on error?");
 

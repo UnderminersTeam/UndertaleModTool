@@ -13,8 +13,10 @@ EnsureDataLoaded();
 
 // At this point, this just imports the sprites.
 string importFolder = PromptChooseDirectory();
-if (importFolder == null)
-    throw new ScriptException("The import folder was not set.");
+if (importFolder is null)
+{
+    throw new ScriptCancelledException("The import folder was not set.");
+}
 
 string[] dirFiles = Directory.GetFiles(importFolder);
 List<(string filename, string strippedFilename, string spriteName, UndertaleSprite sprite, int frame)> images = new();
