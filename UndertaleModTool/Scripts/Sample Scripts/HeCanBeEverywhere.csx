@@ -19,7 +19,8 @@ GlobalDecompileContext globalDecompileContext = new(Data);
 Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = new Underanalyzer.Decompiler.DecompileSettings();
 UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data, globalDecompileContext, decompilerSettings)
 {
-    ThrowOnNoOpFindReplace = true
+    ThrowOnNoOpFindReplace = true,
+    MainThreadAction = MainThreadAction
 };
 
 // spr_joker_main has an offset, so we need to make our own one

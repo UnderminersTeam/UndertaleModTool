@@ -136,7 +136,10 @@ for (var j = 0; j < splitStringsList.Count; j++)
                                 }
                                 try
                                 {
-                                    UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+                                    UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
+                                    {
+                                        MainThreadAction = MainThreadAction
+                                    };
                                     importGroup.QueueReplace(donorACT.CodeId?.Name?.Content, codeToCopy);
                                     importGroup.Import();
                                 }

@@ -250,7 +250,10 @@ if (Data.Code.ByName("gml_Script_SCR_TEXTTYPE") != null)
     SCR_TEXTTYPE += @"else
     script_execute_wrapper(149, 2, 16777215, (x + 20), (y + 20), (view_xview[view_current] + 290), 0, 1, 101, 8, 18)";
 
-    UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+    UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
+    {
+        MainThreadAction = MainThreadAction
+    };
     importGroup.QueueReplace("gml_Script_SCR_TEXTTYPE", SCR_TEXTTYPE);
     importGroup.QueueReplace("gml_Script_array_create_wrapper", @"
     var _arr, i;

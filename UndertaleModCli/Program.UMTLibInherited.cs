@@ -58,6 +58,9 @@ public partial class Program : IScriptInterface
     /// <inheritdoc/>
     public bool IsAppClosed { get; set; }
 
+    /// <inheritdoc/>
+    public Action<Action> MainThreadAction => static (f) => f();
+
     #endregion
 
     #region Inherited UMTLib Methods

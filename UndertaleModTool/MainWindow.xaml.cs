@@ -117,6 +117,8 @@ namespace UndertaleModTool
         public string ExePath { get; private set; } = Program.GetExecutableDirectory();
         public string ScriptErrorType { get; set; } = "";
 
+        public Action<Action> MainThreadAction => (f) => Dispatcher.Invoke(() => f());
+
         public enum SaveResult
         {
             NotSaved,
@@ -2069,7 +2071,7 @@ namespace UndertaleModTool
 
         public void SyncBinding(string resourceType, bool enable)
         {
-            if (resourceType.Contains(',')) //if several types are listed
+            if (resourceType.Contains(',')) // if several types are listed
             {
                 string[] resTypes = resourceType.Replace(" ", "").Split(',');
 
@@ -2077,8 +2079,7 @@ namespace UndertaleModTool
                 {
                     foreach (string resType in resTypes)
                     {
-                        IEnumerable resListCollection = Data[resType];
-                        if (resListCollection is not null)
+                        if (Data[resType] is IEnumerable resListCollection)
                         {
                             BindingOperations.EnableCollectionSynchronization(resListCollection, bindingLock);
 
@@ -2092,7 +2093,10 @@ namespace UndertaleModTool
                     {
                         if (syncBindings.Contains(resType))
                         {
-                            BindingOperations.DisableCollectionSynchronization(Data[resType]);
+                            if (Data[resType] is IEnumerable resListCollection)
+                            {
+                                BindingOperations.DisableCollectionSynchronization(resListCollection);
+                            }
 
                             syncBindings.Remove(resType);
                         }
@@ -2103,8 +2107,7 @@ namespace UndertaleModTool
             {
                 if (enable)
                 {
-                    IEnumerable resListCollection = Data[resourceType];
-                    if (resListCollection is not null)
+                    if (Data[resourceType] is IEnumerable resListCollection)
                     {
                         BindingOperations.EnableCollectionSynchronization(resListCollection, bindingLock);
 
@@ -2113,18 +2116,26 @@ namespace UndertaleModTool
                 }
                 else if (syncBindings.Contains(resourceType))
                 {
-                    BindingOperations.DisableCollectionSynchronization(Data[resourceType]);
+                    if (Data[resourceType] is IEnumerable resListCollection)
+                    {
+                        BindingOperations.DisableCollectionSynchronization(resListCollection);
+                    }
 
                     syncBindings.Remove(resourceType);
                 }
             }
         }
-        public void DisableAllSyncBindings() //disable all sync. bindings
+        public void DisableAllSyncBindings() // disable all sync. bindings
         {
             if (syncBindings.Count <= 0) return;
 
             foreach (string resType in syncBindings)
-                BindingOperations.DisableCollectionSynchronization(Data[resType]);
+            {
+                if (Data[resType] is IEnumerable resListCollection)
+                {
+                    BindingOperations.DisableCollectionSynchronization(resListCollection);
+                }
+            }
 
             syncBindings.Clear();
         }

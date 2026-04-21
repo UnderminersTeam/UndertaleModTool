@@ -121,6 +121,14 @@ public interface IScriptInterface
     bool IsAppClosed { get; }
 
     /// <summary>
+    /// An action that can be called to execute code on the main thread, useful for syncing with a GUI.
+    /// </summary>
+    /// <remarks>
+    /// If this is not required, it may be implemented as a pass-through call to the provided action.
+    /// </remarks>
+    Action<Action> MainThreadAction { get; }
+
+    /// <summary>
     /// Ensures that a valid data file (<see cref="Data"/>) is loaded. An exception should be thrown if it isn't.
     /// </summary>
     void EnsureDataLoaded()

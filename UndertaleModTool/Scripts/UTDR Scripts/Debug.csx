@@ -4,7 +4,8 @@ bool enable = ScriptQuestion("Enable debug mode?\n\n(No = disable debug mode, if
 
 UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
 {
-    ThrowOnNoOpFindReplace = true
+    ThrowOnNoOpFindReplace = true,
+    MainThreadAction = MainThreadAction
 };
 
 string internalName = Data.GeneralInfo.Name.Content;

@@ -12,7 +12,10 @@ if (obj is null)
     Data.GameObjects.Add(obj);
 }
 
-UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
+{
+    MainThreadAction = MainThreadAction
+};
 
 if (Data.GeneralInfo.Name.Content.StartsWith("UNDERTALE")) 
 {

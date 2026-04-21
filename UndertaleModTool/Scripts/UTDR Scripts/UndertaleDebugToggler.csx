@@ -10,7 +10,10 @@ if (internalName != "NXTALE" && !internalName.StartsWith("UNDERTALE"))
     return;
 }
 
-UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
+{
+    MainThreadAction = MainThreadAction
+};
 
 var code = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f1, Data);
 importGroup.QueueReplace(code,

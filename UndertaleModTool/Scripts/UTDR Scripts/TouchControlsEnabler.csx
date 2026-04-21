@@ -133,7 +133,10 @@ int settingsnumx = 0;
 if(currentFont == "fnt_main") {settingsnumx = 477; }
 else if(currentFont == "fnt_mainbig") { settingsnumx = 502; }
 
-UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
+{
+    MainThreadAction = MainThreadAction
+};
 
 string mobileControlsCreate = File.ReadAllText(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Create_0.gml"));
 StringBuilder builder = new StringBuilder(mobileControlsCreate);
