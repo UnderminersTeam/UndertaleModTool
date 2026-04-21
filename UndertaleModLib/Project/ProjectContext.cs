@@ -81,7 +81,7 @@ public sealed partial class ProjectContext
     /// <summary>
     /// This action should be called when main-thread operations need to occur.
     /// </summary>
-    internal Action<Action> MainThreadAction { get; set; } = static (f) => f();
+    public Action<Action> MainThreadAction { get; set; } = static (f) => f();
 
     /// <summary>
     /// Current data context associated with this project, or <see langword="null"/> if none is assigned.
