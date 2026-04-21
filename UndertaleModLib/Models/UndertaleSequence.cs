@@ -861,11 +861,12 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
         /// </summary>
         public sealed class Data : ResourceData<UndertaleSound, UndertaleChunkSOND>
         {
-            public enum SoundMode
+            public enum SoundMode : int
             {
-                PlayOnce,
-                Looping
+                PlayOnce = 0,
+                Looping = 1
             }
+
             /// <summary>
             /// The mode of the audio keyframe.
             /// </summary>
