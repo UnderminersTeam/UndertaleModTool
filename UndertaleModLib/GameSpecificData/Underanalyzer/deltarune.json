@@ -1061,7 +1061,13 @@
           [ null, null, null, null, "Constant.Color", "Constant.Color", "Constant.Color", "Constant.Color", null ]
         ]
       },
-      "gml_Script_scr_battle_sprite_set": [ null, "Asset.Sprite", null, null ]
+      "gml_Script_scr_battle_sprite_set": [ null, "Asset.Sprite", null, null ],
+      "gml_Script_sunkus_kb_check": [ "Constant.VirtualKey" ],
+      "gml_Script_sunkus_kb_check_pressed": [ "Constant.VirtualKey" ],
+      "gml_Script_sunkus_kb_check_released": [ "Constant.VirtualKey" ],
+      "gml_Script_sunkus_kb_check_direct": [ "Constant.VirtualKey" ],
+      "gml_Script_sunkus_kb_clear": [ "Constant.VirtualKey" ],
+      "gml_Script_sunkus_kb_check_pressed_with_repeat": [ "Constant.VirtualKey" ]
     },
     "FunctionReturn": {
       "scr_getbuttonsprite": {

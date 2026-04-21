@@ -67,68 +67,101 @@ public class UndertaleBackground : UndertaleNamedResource, IDisposable
 
 
     /// <summary>
-    /// TODO: Functionality currently unknown. Game Maker Studio 2 only.
+    /// The version of the tileset format.
     /// </summary>
-    public uint GMS2UnknownAlways2 { get; set; } = 2;
+    /// <remarks>
+    /// Added in GameMaker Studio 2.
+    /// </remarks>
+    public uint GMS2TilesetVersion { get; set; } = 2;
 
     /// <summary>
-    /// The width of a tile in this tileset. Game Maker Studio 2 only.
+    /// The width of a tile in this tileset.
     /// </summary>
+    /// <remarks>
+    /// Added in GameMaker Studio 2.
+    /// </remarks>
     public uint GMS2TileWidth { get; set; } = 32;
 
     /// <summary>
-    /// The height of a tile in this. Game Maker Studio 2 only.
+    /// The height of a tile in this tileset.
     /// </summary>
+    /// <remarks>
+    /// Added in GameMaker Studio 2.
+    /// </remarks>
     public uint GMS2TileHeight { get; set; } = 32;
 
     /// <summary>
-    /// The amount of extra empty pixels left and right next to a tile in this tileset. Game Maker Studio 2 only.
+    /// The amount of extra empty pixels left and right next to a tile in this tileset.
     /// </summary>
+    /// <remarks>
+    /// Added in GameMaker Studio 2.
+    /// </remarks>
     public uint GMS2OutputBorderX { get; set; } = 2;
 
     /// <summary>
-    /// The amount of extra empty pixels above and below a tile in this tileset. Game Maker Studio 2 only.
+    /// The amount of extra empty pixels above and below a tile in this tileset.
     /// </summary>
+    /// <remarks>
+    /// Added in GameMaker Studio 2.
+    /// </remarks>
     public uint GMS2OutputBorderY { get; set; } = 2;
 
     /// <summary>
     /// The amount of columns this tileset has.
     /// </summary>
+    /// <remarks>
+    /// Added in GameMaker Studio 2.
+    /// </remarks>
     public uint GMS2TileColumns { get; set; } = 32;
 
     /// <summary>
     /// The number of frames of the tileset animation.
     /// </summary>
+    /// <remarks>
+    /// Added in GameMaker Studio 2.
+    /// </remarks>
     public uint GMS2ItemsPerTileCount { get; set; } = 1;
 
     /// <summary>
     /// The amount of tiles this tileset has.
     /// </summary>
+    /// <remarks>
+    /// Added in GameMaker Studio 2.
+    /// </remarks>
     public uint GMS2TileCount { get; set; } = 1024;
 
     /// <summary>
     /// Exported sprite index, if the background's corresponding sprite was marked to still be exported.
     /// Will be either 0 or -1 (depending on GM version) when the sprite is not exported, which makes this a bit ambiguous.
     /// </summary>
+    /// <remarks>
+    /// Added in GameMaker Studio 2.
+    /// </remarks>
     public int GMS2ExportedSpriteIndex { get; set; } = 0;
 
     /// <summary>
-    /// The time for each frame in microseconds. Game Maker Studio 2 only.
+    /// The time for each frame in microseconds.
     /// </summary>
+    /// <remarks>
+    /// Added in GameMaker Studio 2.
+    /// </remarks>
     public long GMS2FrameLength { get; set; } = 66666;
 
     /// <summary>
-    /// All tile ids of this tileset. Game Maker Studio 2 only.
+    /// All tile ids of this tileset.
     /// </summary>
+    /// <remarks>
+    /// Added in GameMaker Studio 2.
+    /// </remarks>
     public List<TileID> GMS2TileIds { get; set; } = new List<TileID>();
 
     /// <remarks>
-    /// GM 2024.14.1+ only.
+    /// Added in GameMaker 2024.14.1.
     /// </remarks>
     public uint GMS2TileSeparationX { get; set; } = 0;
 
     /// <remarks>
-    /// GM 2024.14.1+ only.
+    /// Added in GameMaker 2024.14.1.
     /// </remarks>
     public uint GMS2TileSeparationY { get; set; } = 0;
 
@@ -142,7 +175,7 @@ public class UndertaleBackground : UndertaleNamedResource, IDisposable
         writer.WriteUndertaleObjectPointer(Texture);
         if (writer.undertaleData.IsGameMaker2())
         {
-            writer.Write(GMS2UnknownAlways2);
+            writer.Write(GMS2TilesetVersion);
             writer.Write(GMS2TileWidth);
             writer.Write(GMS2TileHeight);
             if (writer.undertaleData.IsVersionAtLeast(2024, 14, 1))
@@ -174,7 +207,7 @@ public class UndertaleBackground : UndertaleNamedResource, IDisposable
         Texture = reader.ReadUndertaleObjectPointer<UndertaleTexturePageItem>();
         if (reader.undertaleData.IsGameMaker2())
         {
-            GMS2UnknownAlways2 = reader.ReadUInt32();
+            GMS2TilesetVersion = reader.ReadUInt32();
             GMS2TileWidth = reader.ReadUInt32();
             GMS2TileHeight = reader.ReadUInt32();
             if (reader.undertaleData.IsVersionAtLeast(2024, 14, 1))
