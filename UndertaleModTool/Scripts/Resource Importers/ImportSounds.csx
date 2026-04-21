@@ -23,7 +23,7 @@ if (!usesAGRP)
 string importFolder = PromptChooseDirectory();
 if (importFolder is null)
 {
-    throw new ScriptException("The import folder was not set.");
+    throw new ScriptCancelledException("The import folder was not set.");
 }
 
 string[] dirFiles = Directory.GetFiles(importFolder);

@@ -11,7 +11,7 @@ EnsureDataLoaded();
 string embeddedTexturesPath = PromptChooseDirectory();
 if (embeddedTexturesPath is null)
 {
-    throw new ScriptException("The import folder was not set.");
+    throw new ScriptCancelledException("The import folder was not set.");
 }
 
 string subPath = embeddedTexturesPath;

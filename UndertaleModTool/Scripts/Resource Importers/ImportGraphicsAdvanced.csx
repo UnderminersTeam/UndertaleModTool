@@ -921,12 +921,16 @@ Accepted sprite formats: separate frames starting at 0 or 1 (sprite_N.png), GM-s
 Accepted background formats: single image (bg.png), single-frame GIF (bg.gif).
 Do you want to continue?");
     if (!recursiveCheck)
-        throw new ScriptException("Script cancelled.");
+    {
+        throw new ScriptCancelledException("Script cancelled.");
+    }
 
     // Get import folder
     string importFolder = PromptChooseDirectory();
-    if (importFolder == null)
-        throw new ScriptException("The import folder was not set.");
+    if (importFolder is null)
+    {
+        throw new ScriptCancelledException("The import folder was not set.");
+    }
 
     //Stop the script if there's missing sprite entries or w/e.
     bool hadMessage = false;

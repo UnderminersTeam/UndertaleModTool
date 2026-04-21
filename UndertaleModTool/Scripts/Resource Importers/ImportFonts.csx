@@ -14,8 +14,10 @@ using ImageMagick.Drawing;
 EnsureDataLoaded();
 
 string importFolder = PromptChooseDirectory();
-if (importFolder == null)
-    throw new ScriptException("The import folder was not set.");
+if (importFolder is null)
+{
+    throw new ScriptCancelledException("The import folder was not set.");
+}
 
 string packagerDirPath = Path.Join(ExePath, "Packager");
 string sourcePath = importFolder;

@@ -106,10 +106,22 @@ public partial class Program : IScriptInterface
     /// <inheritdoc/>
     public bool ScriptQuestion(string message)
     {
-        Console.Write($"{message} (Y/N) ");
-        bool isInputYes = Console.ReadKey(false).Key == ConsoleKey.Y;
-        Console.WriteLine();
-        return isInputYes;
+        while (true)
+        {
+            Console.Write($"{message} (Y/N): ");
+            string input = ReadLineWithFallback()?.Trim().ToLower();
+
+            if (string.IsNullOrEmpty(input))
+                Console.WriteLine("Please enter Y or N.");
+
+            if (input == "y" || input == "yes")
+                return true;
+
+            if (input == "n" || input == "no")
+                return false;
+
+            Console.WriteLine("Invalid input. Please enter Y or N.");
+        }
     }
 
     /// <inheritdoc/>
@@ -167,7 +179,7 @@ public partial class Program : IScriptInterface
         }
         else
         {
-            throw new InvalidOperationException("Unable to open the browser on this OS: " +  RuntimeInformation.OSDescription);
+            throw new InvalidOperationException("Unable to open the browser on this OS: " + RuntimeInformation.OSDescription);
         }
 
         p?.Dispose();
@@ -337,14 +349,14 @@ public partial class Program : IScriptInterface
     }
 
     /// <inheritdoc/>
-    public async Task StopProgressBarUpdater() //"async" because "Wait()" blocks UI thread
+    public async Task StopProgressBarUpdater() // "async" because "Wait()" blocks UI thread
     {
         if (cTokenSource is null) return;
 
 
         cTokenSource.Cancel();
 
-        if (await Task.Run(() => !updater.Wait(2000))) //if ProgressUpdater isn't responding
+        if (await Task.Run(() => !updater.Wait(2000))) // if ProgressUpdater isn't responding
             Console.WriteLine("Error - stopping the progress updater task is failed.");
         else
         {
@@ -363,68 +375,107 @@ public partial class Program : IScriptInterface
         Selected = newSelection;
     }
 
-    /// <inheritdoc/>
-    public string PromptChooseDirectory()
+    /// <summary>
+    /// Prompts the user for a path with validation.
+    /// </summary>
+    /// <param name="promptMessage">Message to display when asking for input.</param>
+    /// <param name="whitespaceErrorMessage">Error message when a path is only whitespace.</param>
+    /// <param name="validate">Validation function that returns an error message, or null if valid.</param>
+    /// <returns>The validated path, or null if an empty non-whitespace path is supplied or the console is unavailable.</returns>
+    private static string PromptPath(string promptMessage, string whitespaceErrorMessage, Func<string, string> validate)
     {
         string path;
-        DirectoryInfo directoryInfo;
+        string validationError;
         do
         {
-            Console.WriteLine("Please enter a path (or drag and drop) to a valid directory:");
+            Console.WriteLine(promptMessage);
             Console.Write("Path: ");
-            path = RemoveQuotes(Console.ReadLine());
-            if (string.IsNullOrEmpty(path))
+
+            string input = ReadLineWithFallback();
+            if (string.IsNullOrEmpty(input))
             {
                 return null;
             }
-            directoryInfo = new DirectoryInfo(path);
+
+            path = RemoveQuotes(input);
+
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                Console.WriteLine(whitespaceErrorMessage);
+                validationError = string.Empty;
+                continue;
+            }
+
+            validationError = validate(path);
+
+            if (validationError is not null)
+            {
+                Console.WriteLine(validationError);
+            }
         }
-        while (!directoryInfo.Exists);
+        while (validationError is not null);
 
         return path;
+    }
+
+    /// <inheritdoc/>
+    public string PromptChooseDirectory()
+    {
+        return PromptPath(
+            "Please enter a path (or drag and drop) to a valid directory:",
+            "Error: Path cannot be whitespace. Please enter a valid directory path.",
+            path =>
+            {
+                try
+                {
+                    DirectoryInfo directoryInfo = new(path);
+                    return directoryInfo.Exists ? null : $"Error: Directory '{path}' does not exist. Please try again.";
+                }
+                catch (Exception ex) when (ex is ArgumentException or PathTooLongException or System.Security.SecurityException)
+                {
+                    return $"Error: Invalid path '{path}'. {ex.Message}";
+                }
+            });
     }
 
     /// <inheritdoc/>
     public string PromptLoadFile(string defaultExt, string filter)
     {
-        string path;
-        FileInfo fileInfo;
-        do
-        {
-            Console.WriteLine("Please enter a path (or drag and drop) to a valid file:");
-            Console.Write("Path: ");
-            path = RemoveQuotes(Console.ReadLine());
-            if (string.IsNullOrEmpty(path))
+        return PromptPath(
+            "Please enter a path (or drag and drop) to a valid file:",
+            "Error: Path cannot be whitespace. Please enter a valid file path.",
+            path =>
             {
-                return null;
-            }
-            fileInfo = new FileInfo(path);
-        }
-        while (!fileInfo.Exists);
-
-        return path;
+                try
+                {
+                    FileInfo fileInfo = new(path);
+                    return fileInfo.Exists ? null : $"Error: File '{path}' does not exist. Please try again.";
+                }
+                catch (Exception ex) when (ex is ArgumentException or PathTooLongException or System.Security.SecurityException or NotSupportedException)
+                {
+                    return $"Error: Invalid path '{path}'. {ex.Message}";
+                }
+            });
     }
 
     /// <inheritdoc/>
     public string PromptSaveFile(string defaultExt, string filter)
     {
-        string path;
-        do
-        {
-            Console.WriteLine("Please enter a path (or drag and drop) to save the file:");
-            Console.Write("Path: ");
-            path = RemoveQuotes(Console.ReadLine());
-
-            if (Directory.Exists(path))
+        return PromptPath(
+            "Please enter a path (or drag and drop) to save the file:",
+            "Error: Path cannot be whitespace. Please enter a valid file path.",
+            path =>
             {
-                Console.WriteLine("Error: Directory exists at that path.");
-                path = null; // Ensuring that the loop will work correctly
-                continue;
-            }
-        } 
-        while (string.IsNullOrWhiteSpace(path));
-
-        return path;
+                try
+                {
+                    string fullPath = Path.GetFullPath(path);
+                    return Directory.Exists(fullPath) ? "Error: Directory exists at that path." : null;
+                }
+                catch (Exception ex) when (ex is ArgumentException or PathTooLongException or System.Security.SecurityException or NotSupportedException)
+                {
+                    return $"Error: Invalid path '{path}'. {ex.Message}";
+                }
+            });
     }
 
     /// <inheritdoc/>
@@ -442,8 +493,8 @@ public partial class Program : IScriptInterface
         GlobalDecompileContext decompileContext = context is null ? new(Data) : context;
         try
         {
-            return code != null 
-                ? new DecompileContext(decompileContext, code, settings ?? Data.ToolInfo.DecompilerSettings).DecompileToString() 
+            return code != null
+                ? new DecompileContext(decompileContext, code, settings ?? Data.ToolInfo.DecompilerSettings).DecompileToString()
                 : "";
         }
         catch (Exception e)
@@ -524,7 +575,7 @@ public partial class Program : IScriptInterface
                     else if ((keyInfo.Key == ConsoleKey.Backspace) && (result.Length > 0))
                     {
                         Console.Write(' ');
-                        Console.SetCursorPosition(Console.CursorLeft-1, Console.CursorTop);
+                        Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
                         result = result.Remove(result.Length - 1);
                     }
                     else
@@ -631,7 +682,7 @@ public partial class Program : IScriptInterface
     public void ReassignGUIDs(string guid, uint objectIndex)
     {
         int eventIdx = Convert.ToInt32(EventType.Collision);
-        for (var i = 0; i < Data.GameObjects.Count; i++)
+        for (int i = 0; i < Data.GameObjects.Count; i++)
         {
             UndertaleGameObject obj = Data.GameObjects[i];
             try
@@ -668,9 +719,9 @@ public partial class Program : IScriptInterface
             {
                 string objectIndex = SimpleTextInput("Object could not be found. Please enter it below:",
                     "Object enter box.", "", false).ToLower();
-                for (var i = 0; i < Data.GameObjects.Count; i++)
+                for (int i = 0; i < Data.GameObjects.Count; i++)
                 {
-                    if (Data.GameObjects[i].Name.Content.ToLower() == objectIndex)
+                    if (Data.GameObjects[i].Name.Content.Equals(objectIndex, StringComparison.InvariantCultureIgnoreCase))
                     {
                         objFound = true;
                         objIndex = (uint)i;
@@ -694,9 +745,9 @@ public partial class Program : IScriptInterface
             {
                 string objectIndex = SimpleTextInput("Multiple objects were found. Select only one object below from the set, or, if none below match, some other object name:",
                     "Object enter box.", gameObjectNames, true).ToLower();
-                for (var i = 0; i < Data.GameObjects.Count; i++)
+                for (int i = 0; i < Data.GameObjects.Count; i++)
                 {
-                    if (Data.GameObjects[i].Name.Content.ToLower() == objectIndex)
+                    if (Data.GameObjects[i].Name.Content.Equals(objectIndex, StringComparison.InvariantCultureIgnoreCase))
                     {
                         objFound = true;
                         objIndex = (uint)i;
@@ -746,7 +797,7 @@ public partial class Program : IScriptInterface
     {
         int eventIdx = Convert.ToInt32(EventType.Collision);
         List<uint> possibleValues = new List<uint>();
-        for (var i = 0; i < Data.GameObjects.Count; i++)
+        for (int i = 0; i < Data.GameObjects.Count; i++)
         {
             UndertaleGameObject obj = Data.GameObjects[i];
             try

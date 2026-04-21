@@ -888,18 +888,23 @@ public class UndertaleSequence : UndertaleNamedResource, IProjectAsset, INotifyP
         /// </summary>
         public sealed class Data : ResourceData<UndertaleSound, UndertaleChunkSOND>
         {
+            public enum SoundMode : int
+            {
+                PlayOnce = 0,
+                Looping = 1
+            }
+
             /// <summary>
-            /// Mode for the audio keyframe.
+            /// The mode of the audio keyframe.
             /// </summary>
-            // TODO: what values can this be?
-            public int Mode { get; set; }
+            public SoundMode Mode { get; set; }
 
             /// <inheritdoc />
             public override void Serialize(UndertaleWriter writer)
             {
                 base.Serialize(writer);
                 writer.Write(0);
-                writer.Write(Mode);
+                writer.Write((int)Mode);
             }
 
             /// <inheritdoc />
@@ -908,7 +913,7 @@ public class UndertaleSequence : UndertaleNamedResource, IProjectAsset, INotifyP
                 base.Unserialize(reader);
                 if (reader.ReadUInt32() != 0)
                     throw new IOException("Expected 0 in Audio keyframe");
-                Mode = reader.ReadInt32();
+                Mode = (SoundMode)reader.ReadInt32();
             }
 
             /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>

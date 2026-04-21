@@ -1084,7 +1084,7 @@ namespace UndertaleModTool
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        dialog.Hide();
+                        dialog.TryClose();
                         Data = data;
                         FilePath = filename;
                     });
@@ -1160,7 +1160,7 @@ namespace UndertaleModTool
                         UndertaleCodeEditor.gettextJSON = null;
                     }
 
-                    dialog.Hide();
+                    dialog.TryClose();
                 });
             });
             dialog.ShowDialog();
@@ -1214,7 +1214,7 @@ namespace UndertaleModTool
                     {
                         Dispatcher.Invoke(() =>
                         {
-                            dialog.Hide();
+                            dialog.TryClose();
                             this.ShowError(e.Message, "Recompile error");
                         });
                         return false;
@@ -1223,7 +1223,7 @@ namespace UndertaleModTool
                     {
                         Dispatcher.Invoke(() =>
                         {
-                            dialog.Hide();
+                            dialog.TryClose();
                             this.ShowError("An error occurred while trying to recompile code sources:\n" + e.Message, "Recompile error");
                         });
                         return false;
@@ -1368,7 +1368,7 @@ namespace UndertaleModTool
 
                 Dispatcher.Invoke(() =>
                 {
-                    dialog.Hide();
+                    dialog.TryClose();
                 });
 
                 return saveSucceeded;
@@ -1710,7 +1710,9 @@ namespace UndertaleModTool
                 try
                 {
                     if (!scriptSetupTask.IsCompleted)
+                    {
                         await scriptSetupTask;
+                    }
 
                     ScriptPath = null;
 
@@ -2372,7 +2374,9 @@ namespace UndertaleModTool
             try
             {
                 if (!scriptSetupTask.IsCompleted)
+                {
                     await scriptSetupTask;
+                }
 
                 ScriptPath = path;
 
@@ -3398,7 +3402,7 @@ result in loss of work.");
 
                         Dispatcher.Invoke(() =>
                         {
-                            dialog.Hide();
+                            dialog.TryClose();
                         });
                     });
                     dialog.ShowDialog();

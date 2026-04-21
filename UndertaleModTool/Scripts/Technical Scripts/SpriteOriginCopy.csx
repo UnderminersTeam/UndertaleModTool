@@ -12,8 +12,10 @@ ScriptMessage("Select the file to copy the sprite origins from");
 
 UndertaleData donorData;
 string donorDataPath = PromptLoadFile(null, null);
-if (donorDataPath == null)
-    throw new ScriptException("The donor data path was not set.");
+if (donorDataPath is null)
+{
+    throw new ScriptCancelledException("The donor data path was not set.");
+}
 
 using (var stream = new FileStream(donorDataPath, FileMode.Open, FileAccess.Read))
     donorData = UndertaleIO.Read(stream, (warning, _) => ScriptMessage("A warning occured while trying to load " + donorDataPath + ":\n" + warning));

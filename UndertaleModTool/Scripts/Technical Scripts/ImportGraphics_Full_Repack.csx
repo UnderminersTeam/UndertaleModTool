@@ -20,12 +20,16 @@ If you do not want this to occur, please click ""No"" to cancel the script.
 Then make sure that the sprites you wish to import are in a separate directory with no subdirectories.
 ");
 if (!recursiveCheck)
-    throw new ScriptException("Script cancelled.");
+{
+    throw new ScriptCancelledException("Script cancelled.");
+}
 
 // Get import folder
 string importFolder = PromptChooseDirectory();
-if (importFolder == null)
-    throw new ScriptException("The import folder was not set.");
+if (importFolder is null)
+{
+    throw new ScriptCancelledException("The import folder was not set.");
+}
 
 //Stop the script if there's missing sprite entries or w/e.
 string[] dirFiles = Directory.GetFiles(importFolder, "*.png", SearchOption.AllDirectories);
