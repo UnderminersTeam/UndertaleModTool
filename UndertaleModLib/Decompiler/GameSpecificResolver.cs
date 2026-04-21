@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using UndertaleModLib.Util;
 
 namespace UndertaleModLib.Decompiler;
 
@@ -117,8 +118,9 @@ public class GameSpecificResolver
         {
             if (!string.IsNullOrEmpty(UnderanalyzerFilename))
             {
-                string underanalyzerPath = Path.Join(BaseDirectory, "GameSpecificData", "Underanalyzer", UnderanalyzerFilename);
-                if (File.Exists(underanalyzerPath))
+                string underanalyzerDir = Path.Join(BaseDirectory, "GameSpecificData", "Underanalyzer");
+                string underanalyzerPath = Paths.TryJoinVerifyWithinDirectory(underanalyzerDir, UnderanalyzerFilename);
+                if (underanalyzerPath is not null && File.Exists(underanalyzerPath))
                 {
                     data.GameSpecificRegistry.DeserializeFromJson(File.ReadAllText(underanalyzerPath));
                 }
