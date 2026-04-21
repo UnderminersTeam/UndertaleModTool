@@ -39,7 +39,7 @@ internal sealed class SerializableBackground : ISerializableTextureProjectAsset
     /// </summary>
     public struct TilesetProperties()
     {
-        /// <inheritdoc cref="UndertaleBackground.GMS2VersionNumber"/>
+        /// <inheritdoc cref="UndertaleBackground.GMS2TilesetVersion"/>
         public uint VersionNumber { get; set; }
 
         /// <inheritdoc cref="UndertaleBackground.GMS2TileWidth"/>
@@ -108,7 +108,7 @@ internal sealed class SerializableBackground : ISerializableTextureProjectAsset
         {
             Tileset = new()
             {
-                VersionNumber = bg.GMS2VersionNumber,
+                VersionNumber = bg.GMS2TilesetVersion,
                 TileWidth = bg.GMS2TileWidth,
                 TileHeight = bg.GMS2TileHeight,
                 OutputBorderX = bg.GMS2OutputBorderX,
@@ -170,7 +170,7 @@ internal sealed class SerializableBackground : ISerializableTextureProjectAsset
         // Update GMS2+ properties
         if (projectContext.Data.IsGameMaker2())
         {
-            bg.GMS2VersionNumber = Tileset.VersionNumber;
+            bg.GMS2TilesetVersion = Tileset.VersionNumber;
             bg.GMS2TileWidth = Tileset.TileWidth;
             bg.GMS2TileHeight = Tileset.TileHeight;
             bg.GMS2OutputBorderX = Tileset.OutputBorderX;

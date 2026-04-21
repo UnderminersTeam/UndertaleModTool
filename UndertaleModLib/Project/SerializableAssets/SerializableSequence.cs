@@ -168,7 +168,9 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
         public sealed class AudioKeyframe
         {
             public string SoundAsset { get; set; }
-            public int Mode { get; set; }
+
+            [JsonConverter(typeof(JsonStringEnumConverter))]
+            public UndertaleSequence.AudioKeyframes.Data.SoundMode Mode { get; set; }
         }
     }
 
