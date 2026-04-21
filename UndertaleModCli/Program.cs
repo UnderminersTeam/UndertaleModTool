@@ -907,7 +907,7 @@ public partial class Program : IScriptInterface
 
                 // Link to object's event with a blank code entry
                 UndertaleCode manualCode = UndertaleCode.CreateEmptyEntry(Data, codeEntry);
-                CodeImportGroup.LinkEvent(obj, manualCode, EventType.Collision, eventSubtype);
+                CodeImportGroup.LinkEvent(obj, manualCode, EventType.Collision, eventSubtype, MainThreadAction);
 
                 // Perform code import using manual code entry
                 CodeImportGroup group = new(Data);
