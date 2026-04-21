@@ -88,10 +88,10 @@ public class BuiltinList : IBuiltins
 {
     public Dictionary<string, FunctionInfo> Functions { get; private set; } = null;
     public Dictionary<string, double> Constants { get; private set; } = null;
-    public Dictionary<string, VariableInfo> Globals { get; private set; } = null;
-    public Dictionary<string, VariableInfo> GlobalArrays { get; private set; } = null;
+    public Dictionary<string, VariableInfo> GlobalVars { get; private set; } = null;
+    public Dictionary<string, VariableInfo> GlobalArrayVars { get; private set; } = null;
     public Dictionary<string, VariableInfo> InstanceVars { get; private set; } = null;
-    public Dictionary<string, VariableInfo> InstanceLimitedEvent { get; private set; } = null;
+    public Dictionary<string, VariableInfo> InstanceArrayVars { get; private set; } = null;
 
     public BuiltinList()
     {
@@ -162,17 +162,17 @@ public class BuiltinList : IBuiltins
         {
             return instanceVar;
         }
-        if (Globals.TryGetValue(name, out VariableInfo globalNotArrayVar))
+        if (GlobalVars.TryGetValue(name, out VariableInfo globalVar))
         {
-            return globalNotArrayVar;
+            return globalVar;
         }
-        if (GlobalArrays.TryGetValue(name, out VariableInfo globalArrayVar))
+        if (GlobalArrayVars.TryGetValue(name, out VariableInfo globalArrayVar))
         {
             return globalArrayVar;
         }
-        if (InstanceLimitedEvent.TryGetValue(name, out VariableInfo instanceLimitedVar))
+        if (InstanceArrayVars.TryGetValue(name, out VariableInfo instanceArrayVar))
         {
-            return instanceLimitedVar;
+            return instanceArrayVar;
         }
         return null;
     }
@@ -212,7 +212,7 @@ public class BuiltinList : IBuiltins
     /// </summary>
     private void DefineGlobal(string name, bool canSet)
     {
-        Globals[name] = new VariableInfo(name, canSet);
+        GlobalVars[name] = new VariableInfo(name, canSet);
     }
 
     /// <summary>
@@ -220,7 +220,7 @@ public class BuiltinList : IBuiltins
     /// </summary>
     private void DefineGlobalArray(string name, bool canSet)
     {
-        GlobalArrays[name] = new VariableInfo(name, canSet);
+        GlobalArrayVars[name] = new VariableInfo(name, canSet);
     }
 
     /// <summary>
@@ -228,7 +228,7 @@ public class BuiltinList : IBuiltins
     /// </summary>
     private void DefineGlobalAutoArray(string name, bool canSet)
     {
-        GlobalArrays[name] = new VariableInfo(name, canSet, true, true);
+        GlobalArrayVars[name] = new VariableInfo(name, canSet, true, true);
     }
 
     /// <summary>
@@ -4357,8 +4357,8 @@ public class BuiltinList : IBuiltins
         }
 
         // Moving on to the variables
-        Globals = new(128);
-        GlobalArrays = new(128);
+        GlobalVars = new(128);
+        GlobalArrayVars = new(128);
 
         DefineGlobal("argument_relative", false);
         DefineGlobal("argument_count", false);
@@ -4581,7 +4581,7 @@ public class BuiltinList : IBuiltins
         DefineInstanceVar("phy_collision_points", false);
 
         // There are some of them that are only available in certain physics events
-        InstanceLimitedEvent = new Dictionary<string, VariableInfo>
+        InstanceArrayVars = new Dictionary<string, VariableInfo>
         {
             ["phy_collision_x"] = new VariableInfo("phy_collision_x", false, false, true),
             ["phy_collision_y"] = new VariableInfo("phy_collision_y", false, false, true),
