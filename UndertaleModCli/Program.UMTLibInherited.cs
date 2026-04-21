@@ -105,7 +105,7 @@ public partial class Program : IScriptInterface
         while (true)
         {
             Console.Write($"{message} (Y/N): ");
-            var input = ReadLineWithFallback()?.Trim().ToLower();
+            string input = ReadLineWithFallback()?.Trim().ToLower();
 
             if (string.IsNullOrEmpty(input))
                 Console.WriteLine("Please enter Y or N.");
@@ -345,14 +345,14 @@ public partial class Program : IScriptInterface
     }
 
     /// <inheritdoc/>
-    public async Task StopProgressBarUpdater() //"async" because "Wait()" blocks UI thread
+    public async Task StopProgressBarUpdater() // "async" because "Wait()" blocks UI thread
     {
         if (cTokenSource is null) return;
 
 
         cTokenSource.Cancel();
 
-        if (await Task.Run(() => !updater.Wait(2000))) //if ProgressUpdater isn't responding
+        if (await Task.Run(() => !updater.Wait(2000))) // if ProgressUpdater isn't responding
             Console.WriteLine("Error - stopping the progress updater task is failed.");
         else
         {
@@ -374,11 +374,11 @@ public partial class Program : IScriptInterface
     /// <summary>
     /// Prompts the user for a path with validation.
     /// </summary>
-    /// <param name="promptMessage">Message to display when asking for input</param>
-    /// <param name="emptyErrorMessage">Error message when path is empty</param>
-    /// <param name="validate">Validation function that returns an error message, or null if valid</param>
-    /// <returns>The validated path, or null if console is unavailable</returns>
-    private static string PromptPath(string promptMessage, string emptyErrorMessage, Func<string, string> validate)
+    /// <param name="promptMessage">Message to display when asking for input.</param>
+    /// <param name="whitespaceErrorMessage">Error message when a path is only whitespace.</param>
+    /// <param name="validate">Validation function that returns an error message, or null if valid.</param>
+    /// <returns>The validated path, or null if an empty non-whitespace path is supplied or the console is unavailable.</returns>
+    private static string PromptPath(string promptMessage, string whitespaceErrorMessage, Func<string, string> validate)
     {
         string path;
         string validationError;
@@ -387,25 +387,29 @@ public partial class Program : IScriptInterface
             Console.WriteLine(promptMessage);
             Console.Write("Path: ");
 
-            var input = ReadLineWithFallback();
-            if (input is null)
+            string input = ReadLineWithFallback();
+            if (string.IsNullOrEmpty(input))
+            {
                 return null;
+            }
 
             path = RemoveQuotes(input);
 
             if (string.IsNullOrWhiteSpace(path))
             {
-                Console.WriteLine(emptyErrorMessage);
+                Console.WriteLine(whitespaceErrorMessage);
                 validationError = string.Empty;
                 continue;
             }
 
             validationError = validate(path);
 
-            if (validationError != null)
+            if (validationError is not null)
+            {
                 Console.WriteLine(validationError);
+            }
         }
-        while (validationError != null);
+        while (validationError is not null);
 
         return path;
     }
@@ -415,12 +419,12 @@ public partial class Program : IScriptInterface
     {
         return PromptPath(
             "Please enter a path (or drag and drop) to a valid directory:",
-            "Error: Path cannot be empty. Please enter a valid directory path.",
+            "Error: Path cannot be whitespace. Please enter a valid directory path.",
             path =>
             {
                 try
                 {
-                    var directoryInfo = new DirectoryInfo(path);
+                    DirectoryInfo directoryInfo = new(path);
                     return directoryInfo.Exists ? null : $"Error: Directory '{path}' does not exist. Please try again.";
                 }
                 catch (Exception ex) when (ex is ArgumentException or PathTooLongException or System.Security.SecurityException)
@@ -435,12 +439,12 @@ public partial class Program : IScriptInterface
     {
         return PromptPath(
             "Please enter a path (or drag and drop) to a valid file:",
-            "Error: Path cannot be empty. Please enter a valid file path.",
+            "Error: Path cannot be whitespace. Please enter a valid file path.",
             path =>
             {
                 try
                 {
-                    var fileInfo = new FileInfo(path);
+                    FileInfo fileInfo = new(path);
                     return fileInfo.Exists ? null : $"Error: File '{path}' does not exist. Please try again.";
                 }
                 catch (Exception ex) when (ex is ArgumentException or PathTooLongException or System.Security.SecurityException or NotSupportedException)
@@ -455,7 +459,7 @@ public partial class Program : IScriptInterface
     {
         return PromptPath(
             "Please enter a path (or drag and drop) to save the file:",
-            "Error: Path cannot be empty. Please enter a valid file path.",
+            "Error: Path cannot be whitespace. Please enter a valid file path.",
             path =>
             {
                 try
@@ -674,7 +678,7 @@ public partial class Program : IScriptInterface
     public void ReassignGUIDs(string guid, uint objectIndex)
     {
         int eventIdx = Convert.ToInt32(EventType.Collision);
-        for (var i = 0; i < Data.GameObjects.Count; i++)
+        for (int i = 0; i < Data.GameObjects.Count; i++)
         {
             UndertaleGameObject obj = Data.GameObjects[i];
             try
@@ -711,9 +715,9 @@ public partial class Program : IScriptInterface
             {
                 string objectIndex = SimpleTextInput("Object could not be found. Please enter it below:",
                     "Object enter box.", "", false).ToLower();
-                for (var i = 0; i < Data.GameObjects.Count; i++)
+                for (int i = 0; i < Data.GameObjects.Count; i++)
                 {
-                    if (Data.GameObjects[i].Name.Content.ToLower() == objectIndex)
+                    if (Data.GameObjects[i].Name.Content.Equals(objectIndex, StringComparison.InvariantCultureIgnoreCase))
                     {
                         objFound = true;
                         objIndex = (uint)i;
@@ -737,9 +741,9 @@ public partial class Program : IScriptInterface
             {
                 string objectIndex = SimpleTextInput("Multiple objects were found. Select only one object below from the set, or, if none below match, some other object name:",
                     "Object enter box.", gameObjectNames, true).ToLower();
-                for (var i = 0; i < Data.GameObjects.Count; i++)
+                for (int i = 0; i < Data.GameObjects.Count; i++)
                 {
-                    if (Data.GameObjects[i].Name.Content.ToLower() == objectIndex)
+                    if (Data.GameObjects[i].Name.Content.Equals(objectIndex, StringComparison.InvariantCultureIgnoreCase))
                     {
                         objFound = true;
                         objIndex = (uint)i;
@@ -789,7 +793,7 @@ public partial class Program : IScriptInterface
     {
         int eventIdx = Convert.ToInt32(EventType.Collision);
         List<uint> possibleValues = new List<uint>();
-        for (var i = 0; i < Data.GameObjects.Count; i++)
+        for (int i = 0; i < Data.GameObjects.Count; i++)
         {
             UndertaleGameObject obj = Data.GameObjects[i];
             try

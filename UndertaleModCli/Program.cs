@@ -992,7 +992,7 @@ public partial class Program : IScriptInterface
             ScriptExecutionSuccess = true;
             ScriptErrorMessage = "";
         }
-        catch (ScriptException exc) // Script was cancelled by user
+        catch (ScriptCancelledException exc) // Script was cancelled by user
         {
             ScriptExecutionSuccess = true;
             ScriptCancelled = true;

@@ -1049,7 +1049,7 @@ namespace UndertaleModTool
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        dialog.Hide();
+                        dialog.TryClose();
                         Data = data;
                         FilePath = filename;
                     });
@@ -1126,7 +1126,7 @@ namespace UndertaleModTool
                         UndertaleCodeEditor.gettextJSON = null;
                     }
 
-                    dialog.Hide();
+                    dialog.TryClose();
                 });
             });
             dialog.ShowDialog();
@@ -1302,7 +1302,7 @@ namespace UndertaleModTool
 
                 Dispatcher.Invoke(() =>
                 {
-                    dialog.Hide();
+                    dialog.TryClose();
                 });
             });
             dialog.ShowDialog();
@@ -1632,7 +1632,9 @@ namespace UndertaleModTool
                 try
                 {
                     if (!scriptSetupTask.IsCompleted)
+                    {
                         await scriptSetupTask;
+                    }
 
                     ScriptPath = null;
 
@@ -2419,7 +2421,9 @@ namespace UndertaleModTool
             try
             {
                 if (!scriptSetupTask.IsCompleted)
+                {
                     await scriptSetupTask;
+                }
 
                 ScriptPath = path;
 
@@ -2445,7 +2449,7 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                bool isScriptException = exc.GetType().Name == "ScriptException";
+                bool isScriptException = exc is ScriptException;
                 string excString = string.Empty;
 
                 if (!isScriptException)
@@ -3328,7 +3332,7 @@ result in loss of work.");
 
                         Dispatcher.Invoke(() =>
                         {
-                            dialog.Hide();
+                            dialog.TryClose();
                         });
                     });
                     dialog.ShowDialog();

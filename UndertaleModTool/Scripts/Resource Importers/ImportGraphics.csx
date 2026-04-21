@@ -684,12 +684,16 @@ If an image file is in a folder named ""Backgrounds"", then the image will be im
 Otherwise, the image will be imported as a sprite.
 Do you want to continue?");
     if (!recursiveCheck)
-        throw new ScriptException("Script cancelled.");
+    {
+        throw new ScriptCancelledException("Script cancelled.");
+    }
 
     // Get import folder
     string importFolder = PromptChooseDirectory();
-    if (importFolder == null)
-        throw new ScriptException("The import folder was not set.");
+    if (importFolder is null)
+    {
+        throw new ScriptCancelledException("The import folder was not set.");
+    }
 
     //Stop the script if there's missing sprite entries or w/e.
     bool hadMessage = false;
